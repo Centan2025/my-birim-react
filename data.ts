@@ -16,7 +16,7 @@ export const KEYS = {
 export const languagesData: string[] = ['tr', 'en'];
 
 export const siteSettingsData: SiteSettings = {
-    logoUrl: '/img/birim-logo-1.png',
+    logoUrl: '/img/logo.png',
     headerText: 'BİRİM',
     isHeaderTextVisible: true,
     heroMediaUrl: 'https://picsum.photos/seed/hero/1920/1080',
@@ -46,7 +46,7 @@ export const productsData: Product[] = [
         description: { tr: 'Jean-Marie Massaud tarafından tasarlanan Bristol, birincil şekilleri uyumlu ve ergonomik bir tasarımda birleştiren bir kanepe sistemidir. Saran sırtlıklara sahip yumuşak, konforlu şekiller maksimum konfor sağlar.', en: 'Bristol, designed by Jean-Marie Massaud, is a sofa system that combines primary shapes in a harmonious and ergonomic design. The soft, comfortable shapes, with enveloping backrests, provide maximum comfort.' },
         mainImage: 'https://picsum.photos/seed/bristol-1/800/800',
         alternativeImages: ['https://picsum.photos/seed/bristol-2/800/800', 'https://picsum.photos/seed/bristol-3/800/800'],
-        dimensions: [{ name: { tr: 'Standart', en: 'Standard' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '240cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '95cm' }, { label: { tr: 'Yükseklik', en: 'Height' }, value: '70cm' }] }],
+        dimensions: [{ name: { tr: 'Standart', en: 'Standard' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '240cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '95cm' }, { label: { tr: 'Yükşeklik', en: 'Height' }, value: '70cm' }] }],
         buyable: true,
         price: 150000,
         currency: 'TRY',
@@ -62,7 +62,7 @@ export const productsData: Product[] = [
         description: { tr: 'Husk, göründüğü kadar rahat bir koltuktur. Hirek®\'ten yapılmış sert kabuk, ergonomik profilini vurguluyor gibi görünen bölümlere ayrılmış yumuşak bir minder içerir.', en: 'Husk is an armchair that is as comfortable as it looks. The stiff shell, made of Hirek®, contains a soft cushion divided into portions, which seem to underscore its ergonomic profile.' },
         mainImage: 'https://picsum.photos/seed/husk-1/800/800',
         alternativeImages: ['https://picsum.photos/seed/husk-2/800/800'],
-        dimensions: [{ name: { tr: 'Standart', en: 'Standard' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '84cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '84cm' }, { label: { tr: 'Yükseklik', en: 'Height' }, value: '92cm' }] }],
+        dimensions: [{ name: { tr: 'Standart', en: 'Standard' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '84cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '84cm' }, { label: { tr: 'Yükşeklik', en: 'Height' }, value: '92cm' }] }],
         buyable: false,
         price: 45000,
         currency: 'TRY',
@@ -94,7 +94,7 @@ export const productsData: Product[] = [
       description: { tr: 'Pathos masa koleksiyonu, parlak krom kaplama, siyah boyalı veya bronz nikel boyalı çelik bir çerçeve ve yuvarlak köşeli dikdörtgen veya kare olabilen bir üst tabla ile karakterize edilir.', en: 'The Pathos table collection is characterized by a frame in polished chrome-plated, black painted, or bronzed nickel-painted steel, and a top that can be rectangular or square with rounded corners.' },
       mainImage: 'https://picsum.photos/seed/pathos-1/800/800',
       alternativeImages: ['https://picsum.photos/seed/pathos-2/800/800'],
-      dimensions: [{ name: { tr: 'Standart', en: 'Standard' }, details: [{ label: { tr: 'Çap', en: 'Diameter' }, value: '140cm' }, { label: { tr: 'Yükseklik', en: 'Height' }, value: '73cm' }] }],
+      dimensions: [{ name: { tr: 'Standart', en: 'Standard' }, details: [{ label: { tr: 'Çap', en: 'Diameter' }, value: '140cm' }, { label: { tr: 'Yükşeklik', en: 'Height' }, value: '73cm' }] }],
       buyable: true,
       price: 85000,
       currency: 'TRY',
