@@ -1,3 +1,4 @@
+declare const process: any;
 import React, { useState, useEffect, useMemo } from 'react';
 import { GoogleGenAI } from '@google/genai';
 import {
@@ -96,10 +97,6 @@ export function AdminPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [designers, setDesigners] = useState<Designer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [aboutPageContent, setAboutPageContent] = useState<AboutPageContent | null>(null);
-  const [contactPageContent, setContactPageContent] = useState<ContactPageContent | null>(null);
-  const [homePageContent, setHomePageContent] = useState<HomePageContent | null>(null);
-  const [footerContent, setFooterContent] = useState<FooterContent | null>(null);
   const [languages, setLanguages] = useState<string[]>([]);
   const [news, setNews] = useState<NewsItem[]>([]);
 
@@ -151,13 +148,9 @@ export function AdminPage() {
         setCategories(categoriesData);
         setDesigners(designersData);
         setProducts(productsData);
-        setAboutPageContent(aboutData);
         setAboutPageForm(aboutData);
-        setContactPageContent(contactData);
         setContactPageForm(contactData);
-        setHomePageContent(homeData);
         setHomePageForm(homeData);
-        setFooterContent(footerData);
         setFooterForm(footerData);
         setLanguages(languagesData);
         setNews(newsData);
@@ -341,7 +334,6 @@ export function AdminPage() {
       setMessage({ text: '', type: 'success' });
       try {
           await updateAboutPageContent(aboutPageForm);
-          setAboutPageContent(aboutPageForm);
           setMessage({ text: 'Hakkımızda sayfası başarıyla güncellendi.', type: 'success' });
       } catch (error) {
           setMessage({ text: 'Hakkımızda sayfası kaydedilemedi.', type: 'error' });
@@ -354,7 +346,6 @@ export function AdminPage() {
     setMessage({ text: '', type: 'success' });
     try {
         await updateContactPageContent(contactPageForm);
-        setContactPageContent(contactPageForm);
         setMessage({ text: 'İletişim sayfası başarıyla güncellendi.', type: 'success' });
     } catch (error) {
         setMessage({ text: 'İletişim sayfası kaydedilemedi.', type: 'error' });
@@ -366,7 +357,6 @@ export function AdminPage() {
     if (!homePageForm) return;
     try {
         await updateHomePageContent(homePageForm);
-        setHomePageContent(homePageForm);
         setMessage({ text: 'Anasayfa başarıyla güncellendi.', type: 'success' });
     } catch (error) {
         setMessage({ text: 'Anasayfa kaydedilemedi.', type: 'error' });
@@ -378,7 +368,6 @@ export function AdminPage() {
     if (!footerForm) return;
     try {
         await updateFooterContent(footerForm);
-        setFooterContent(footerForm);
         setMessage({ text: 'Footer başarıyla güncellendi.', type: 'success' });
     } catch (error) {
         setMessage({ text: 'Footer kaydedilemedi.', type: 'error' });
@@ -412,13 +401,18 @@ export function AdminPage() {
             prompt: `a minimalist, modern, vector logo for a high-end furniture company. Prompt: "${logoGenPrompt}". The logo should be on a transparent background.`,
             config: { numberOfImages: 1, outputMimeType: 'image/png', aspectRatio: '1:1' },
         });
-        if (response.generatedImages && response.generatedImages.length > 0) {
-            const base64ImageBytes = response.generatedImages[0].image.imageBytes;
-            const imageUrl = `data:image/png;base64,${base64ImageBytes}`;
+        const imageBytes = response.generatedImages?.[0]?.image?.imageBytes;
+        if (imageBytes) {
+            const imageUrl = `data:image/png;base64,${imageBytes}`;
             setGeneratedLogoUrl(imageUrl);
             setSiteSettingsForm(prev => ({ ...prev, logoUrl: imageUrl }));
-        } else { setMessage({text: 'Could not generate logo. Please try again.', type: 'error'}); }
-    } catch (error) { setMessage({text: 'An error occurred while generating the logo.', type: 'error'}); }
+        } else {
+            setMessage({text: 'Could not generate logo. Please try again.', type: 'error'});
+        }
+    } catch (error) {
+        console.error("Logo generation failed", error);
+        setMessage({text: 'An error occurred while generating the logo.', type: 'error'});
+    }
     setGenerating(false);
   };
   
