@@ -4,6 +4,7 @@ import type { Product, Designer, Category } from '../types';
 import { getProductById, getDesignerById, getCategories, getProductsByCategoryId } from '../services/cms';
 import { useAuth } from '../App';
 import { useTranslation } from '../i18n';
+import { useCart } from '../context/CartContext';
 
 const DownloadIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -38,6 +39,7 @@ export function ProductDetailPage() {
   const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
   const { isLoggedIn } = useAuth();
   const { t, locale } = useTranslation();
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -220,10 +222,7 @@ export function ProductDetailPage() {
                  {product.buyable && (
                       <div className="mt-12 pt-8 border-t border-gray-200">
                           <button
-                              onClick={() => {
-                                  console.log(`Added ${t(product.name)} to cart`);
-                                  alert(t('added_to_cart', t(product.name)));
-                              }}
+                              onClick={() => addToCart(product)}
                               className="group w-20 h-20 flex items-center justify-center bg-gray-900 text-white rounded-full hover:bg-gray-700 transition-all duration-300 ease-in-out transform hover:scale-110 active:scale-100 hover:shadow-lg"
                               aria-label={t('add_to_cart')}
                           >

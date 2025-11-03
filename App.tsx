@@ -17,6 +17,8 @@ import { getFooterContent, getSiteSettings } from './services/cms';
 import type { FooterContent, SiteSettings } from './types';
 import { SiteLogo } from './components/SiteLogo';
 import { I18nProvider, useTranslation } from './i18n';
+import { CartProvider } from './context/CartContext';
+import { CartSidebar } from './components/CartSidebar';
 
 // Helper component to render SVG strings safely
 const DynamicIcon: React.FC<{ svgString: string }> = ({ svgString }) => (
@@ -129,29 +131,32 @@ export default function App() {
   return (
     <AuthProvider>
       <I18nProvider>
-        <HashRouter>
-          <div className="flex flex-col min-h-screen">
-            <ScrollToTop />
-            <Header />
-            <main className="flex-grow">
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/products/:categoryId" element={<ProductsPage />} />
-                <Route path="/product/:productId" element={<ProductDetailPage />} />
-                <Route path="/designers" element={<DesignersPage />} />
-                <Route path="/designer/:designerId" element={<DesignerDetailPage />} />
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/contact" element={<ContactPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/profile" element={<LoginPage />} />
-                <Route path="/news" element={<NewsPage />} />
-                <Route path="/news/:newsId" element={<NewsDetailPage />} />
-                <Route path="/admin" element={<AdminPage />} />
-              </Routes>
-            </main>
-            <Footer />
-          </div>
-        </HashRouter>
+        <CartProvider>
+            <HashRouter>
+            <div className="flex flex-col min-h-screen">
+                <ScrollToTop />
+                <Header />
+                <CartSidebar />
+                <main className="flex-grow">
+                <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/products/:categoryId" element={<ProductsPage />} />
+                    <Route path="/product/:productId" element={<ProductDetailPage />} />
+                    <Route path="/designers" element={<DesignersPage />} />
+                    <Route path="/designer/:designerId" element={<DesignerDetailPage />} />
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/profile" element={<LoginPage />} />
+                    <Route path="/news" element={<NewsPage />} />
+                    <Route path="/news/:newsId" element={<NewsDetailPage />} />
+                    <Route path="/admin" element={<AdminPage />} />
+                </Routes>
+                </main>
+                <Footer />
+            </div>
+            </HashRouter>
+        </CartProvider>
       </I18nProvider>
     </AuthProvider>
   );

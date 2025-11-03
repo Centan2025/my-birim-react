@@ -155,3 +155,8 @@ export interface NewsItem {
     mainImage: string; // Used for the card on the list page
     media: NewsMedia[];
 }
+
+export interface CartItem {
+  product: Product;
+  quantity: number;
+}
