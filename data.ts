@@ -16,7 +16,7 @@ export const KEYS = {
 export const languagesData: string[] = ['tr', 'en'];
 
 export const siteSettingsData: SiteSettings = {
-    logoUrl: '',
+    logoUrl: '/img/Birim_Logo_1.png',
     headerText: 'BİRİM',
     isHeaderTextVisible: true,
     heroMediaUrl: 'https://picsum.photos/seed/hero/1920/1080',
