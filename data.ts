@@ -1,278 +1,278 @@
-import type { SiteSettings, Category, Designer, Product, HomePageContent, AboutPageContent, ContactPageContent, FooterContent, NewsItem } from './types';
+import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem } from './types';
 
 export const KEYS = {
+    LANGUAGES: 'birim_languages',
     SITE_SETTINGS: 'birim_site_settings',
     CATEGORIES: 'birim_categories',
     DESIGNERS: 'birim_designers',
     PRODUCTS: 'birim_products',
-    HOME_PAGE: 'birim_home_page',
     ABOUT_PAGE: 'birim_about_page',
     CONTACT_PAGE: 'birim_contact_page',
+    HOME_PAGE: 'birim_home_page',
     FOOTER: 'birim_footer',
     NEWS: 'birim_news',
-    LANGUAGES: 'birim_languages',
 };
 
-export const languagesData: string[] = ['tr', 'en'];
+const languagesData: string[] = ['tr', 'en', 'de', 'fr', 'es', 'it'];
 
-export const siteSettingsData: SiteSettings = {
-    logoUrl: '',
-    headerText: 'BİRİM',
-    isHeaderTextVisible: true,
-    heroMediaUrl: 'https://picsum.photos/seed/hero/1920/1080',
-    heroMediaType: 'image',
+const siteSettingsData: SiteSettings = {
+    logoUrl: 'https://raw.githubusercontent.com/birim-web/assets/main/logo-light.svg',
+    heroMediaUrl: 'https://raw.githubusercontent.com/birim-web/assets/main/hero-video.mp4',
+    heroMediaType: 'video',
+    headerText: 'Birim',
+    isHeaderTextVisible: false,
 };
 
-export const categoriesData: Category[] = [
-    { id: 'kanepeler', name: { tr: 'Kanepeler', en: 'Sofas' }, subtitle: { tr: 'Koleksiyonumuzdaki en rafine kanepeleri keşfedin.', en: 'Discover the most refined sofas in our collection.' }, heroImage: 'https://picsum.photos/seed/sofas/1920/1080' },
-    { id: 'koltuklar', name: { tr: 'Koltuklar', en: 'Armchairs' }, subtitle: { tr: 'Koleksiyonumuzdaki en rafine koltukları keşfedin.', en: 'Discover the most refined armchairs in our collection.' }, heroImage: 'https://picsum.photos/seed/armchairs/1920/1080' },
-    { id: 'masalar', name: { tr: 'Masalar', en: 'Tables' }, subtitle: { tr: 'Koleksiyonumuzdaki en rafine masaları keşfedin.', en: 'Discover the most refined tables in our collection.' }, heroImage: 'https://picsum.photos/seed/tables/1920/1080' },
-    { id: 'aydinlatma', name: { tr: 'Aydınlatma', en: 'Lighting' }, subtitle: { tr: 'Koleksiyonumuzdaki en rafine aydınlatma ürünlerini keşfedin.', en: 'Discover the most refined lighting products in our collection.' }, heroImage: 'https://picsum.photos/seed/lighting/1920/1080' },
-];
-
-export const designersData: Designer[] = [
-    { id: 'jean-marie-massaud', name: {tr: 'Jean-Marie Massaud', en: 'Jean-Marie Massaud'}, bio: { tr: 'Jean-Marie Massaud, 1966 yılında Toulouse, Fransa\'da doğan bir Fransız mimar, mucit ve tasarımcıdır. Çalışmaları endüstriyel ürünler, mimari projeler, marka geliştirme ve hem seri hem de benzersiz parçaları kapsamaktadır.', en: 'Jean-Marie Massaud is a French architect, inventor and designer. He was born in Toulouse, France in 1966. His work covers industrial products, architectural projects, brand development, and both series and unique pieces.' }, image: 'https://picsum.photos/seed/massaud/400/500' },
-    { id: 'patricia-urquiola', name: {tr: 'Patricia Urquiola', en: 'Patricia Urquiola'}, bio: { tr: 'Patricia Urquiola bir İspanyol mimar ve tasarımcıdır. Eğlenceli ve şiirsel, ancak işlevsel ve teknik olarak sağlam tasarımlarıyla tanınır. Eserleri, New York\'taki MoMA da dahil olmak üzere dünya çapındaki müzelerde sergilenmektedir.', en: 'Patricia Urquiola is a Spanish architect and designer. She is known for her playful and poetic, yet functional and technically sound designs. Her work is exhibited in museums worldwide, including the MoMA in New York.' }, image: 'https://picsum.photos/seed/urquiola/400/500' },
-    { id: 'antonio-citterio', name: {tr: 'Antonio Citterio', en: 'Antonio Citterio'}, bio: { tr: 'Antonio Citterio bir İtalyan mimar ve mobilya tasarımcısıdır. Birçok tanınmış markayla çalışmış ve 1987 ve 1994\'te Compasso d\'Oro da dahil olmak üzere çok sayıda ödül kazanmıştır.', en: 'Antonio Citterio is an Italian architect and furniture designer. He has worked with many renowned brands and has won numerous awards, including the Compasso d\'Oro in 1987 and 1994.' }, image: 'https://picsum.photos/seed/citterio/400/500' },
-];
-
-export const productsData: Product[] = [
+const categoriesData: Category[] = [
     {
-        id: 'bristol-sofa',
-        name: { tr: 'Bristol Kanepe', en: 'Bristol Sofa' },
-        designerId: 'jean-marie-massaud',
-        categoryId: 'kanepeler',
-        year: 2013,
-        description: { tr: 'Jean-Marie Massaud tarafından tasarlanan Bristol, birincil şekilleri uyumlu ve ergonomik bir tasarımda birleştiren bir kanepe sistemidir. Saran sırtlıklara sahip yumuşak, konforlu şekiller maksimum konfor sağlar.', en: 'Bristol, designed by Jean-Marie Massaud, is a sofa system that combines primary shapes in a harmonious and ergonomic design. The soft, comfortable shapes, with enveloping backrests, provide maximum comfort.' },
-        mainImage: 'https://picsum.photos/seed/bristol-1/800/800',
-        alternativeImages: ['https://picsum.photos/seed/bristol-2/800/800', 'https://picsum.photos/seed/bristol-3/800/800'],
-        dimensions: [{ name: { tr: 'Standart', en: 'Standard' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '240cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '95cm' }, { label: { tr: 'Yükseklik', en: 'Height' }, value: '70cm' }] }],
-        buyable: true,
-        price: 150000,
-        currency: 'TRY',
-        materials: [{ name: { tr: 'Kumaş', en: 'Fabric' }, image: 'https://picsum.photos/seed/fabric/100/100' }, { name: { tr: 'Deri', en: 'Leather' }, image: 'https://picsum.photos/seed/leather/100/100' }],
-        exclusiveContent: { images: ['https://picsum.photos/seed/bristol-ex1/800/800'], drawings: [{ name: { tr: 'Teknik Çizim', en: 'Technical Drawing' }, url: '#' }], models3d: [{ name: { tr: '3DS Max Modeli', en: '3DS Max Model' }, url: '#' }] },
+        id: 'kanepeler',
+        name: { tr: 'Kanepeler', en: 'Sofas' },
+        subtitle: { tr: 'Oturma odanız için konfor ve stilin mükemmel birleşimi.', en: 'The perfect combination of comfort and style for your living room.' },
+        heroImage: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&q=80',
     },
     {
-        id: 'husk-armchair',
-        name: { tr: 'Husk Koltuk', en: 'Husk Armchair' },
-        designerId: 'patricia-urquiola',
-        categoryId: 'koltuklar',
-        year: 2011,
-        description: { tr: 'Husk, göründüğü kadar rahat bir koltuktur. Hirek®\'ten yapılmış sert kabuk, ergonomik profilini vurguluyor gibi görünen bölümlere ayrılmış yumuşak bir minder içerir.', en: 'Husk is an armchair that is as comfortable as it looks. The stiff shell, made of Hirek®, contains a soft cushion divided into portions, which seem to underscore its ergonomic profile.' },
-        mainImage: 'https://picsum.photos/seed/husk-1/800/800',
-        alternativeImages: ['https://picsum.photos/seed/husk-2/800/800'],
-        dimensions: [{ name: { tr: 'Standart', en: 'Standard' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '84cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '84cm' }, { label: { tr: 'Yükseklik', en: 'Height' }, value: '92cm' }] }],
-        buyable: false,
-        price: 45000,
-        currency: 'TRY',
-        materials: [{ name: { tr: 'Yün Kumaş', en: 'Wool Fabric' }, image: 'https://picsum.photos/seed/wool/100/100' }, { name: { tr: 'Kadife', en: 'Velvet' }, image: 'https://picsum.photos/seed/velvet/100/100' }],
-        exclusiveContent: { images: [], drawings: [], models3d: [] },
+        id: 'sandalyeler',
+        name: { tr: 'Sandalyeler', en: 'Chairs' },
+        subtitle: { tr: 'Her mekana zarafet katacak ikonik sandalye tasarımları.', en: 'Iconic chair designs to add elegance to any space.' },
+        heroImage: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&q=80',
     },
     {
-        id: 'charles-sofa',
-        name: { tr: 'Charles Kanepe', en: 'Charles Sofa' },
-        designerId: 'antonio-citterio',
-        categoryId: 'kanepeler',
-        year: 1997,
-        description: { tr: 'Uzun süredir en çok satanlar arasında yer alan Charles kanepe, döküm alüminyum ayaklarının temel tasarımıyla vurgulanan hafif görüntüsüyle karakterize edilir. Tasarım dünyasında bir dönüm noktasını temsil eder.', en: 'The Charles sofa, a long-time bestseller, is characterized by its light image accentuated by the essential design of its die-cast aluminium feet. It represents a milestone in the world of design.' },
-        mainImage: 'https://picsum.photos/seed/charles-1/800/800',
-        alternativeImages: [],
-        dimensions: [{ name: { tr: '3 Kişilik', en: '3 Seater' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '230cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '97cm' }] }, { name: { tr: '2 Kişilik', en: '2 Seater' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '180cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '97cm' }] }],
-        buyable: true,
-        price: 120000,
-        currency: 'TRY',
-        materials: [],
-        exclusiveContent: { images: [], drawings: [], models3d: [] },
+        id: 'masalar',
+        name: { tr: 'Masalar', en: 'Tables' },
+        subtitle: { tr: 'Yemek masalarından sehpalara, her ihtiyaca yönelik çözümler.', en: 'From dining tables to coffee tables, solutions for every need.' },
+        heroImage: 'https://images.unsplash.com/photo-1604578762246-41134e37f9cc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&q=80',
     },
     {
-      id: 'pathos-table',
-      name: { tr: 'Pathos Masa', en: 'Pathos Table' },
-      designerId: 'antonio-citterio',
-      categoryId: 'masalar',
-      year: 2013,
-      description: { tr: 'Pathos masa koleksiyonu, parlak krom kaplama, siyah boyalı veya bronz nikel boyalı çelik bir çerçeve ve yuvarlak köşeli dikdörtgen veya kare olabilen bir üst tabla ile karakterize edilir.', en: 'The Pathos table collection is characterized by a frame in polished chrome-plated, black painted, or bronzed nickel-painted steel, and a top that can be rectangular or square with rounded corners.' },
-      mainImage: 'https://picsum.photos/seed/pathos-1/800/800',
-      alternativeImages: ['https://picsum.photos/seed/pathos-2/800/800'],
-      dimensions: [{ name: { tr: 'Standart', en: 'Standard' }, details: [{ label: { tr: 'Çap', en: 'Diameter' }, value: '140cm' }, { label: { tr: 'Yükseklik', en: 'Height' }, value: '73cm' }] }],
-      buyable: true,
-      price: 85000,
-      currency: 'TRY',
-      materials: [{ name: { tr: 'Mermer', en: 'Marble' }, image: 'https://picsum.photos/seed/marble/100/100' }],
-      exclusiveContent: { images: [], drawings: [], models3d: [] },
-    },
-     {
-        id: 'lifesteel-sofa',
-        name: { tr: 'Lifesteel Kanepe', en: 'Lifesteel Sofa' },
-        designerId: 'antonio-citterio',
-        categoryId: 'kanepeler',
-        year: 2006,
-        description: { tr: 'Lifesteel kanepe, yükseltilmiş tabanı ve metal ayakları ile hafif ve havadar bir estetik sunar. Geniş, alçak kolçakları ve cömert kaz tüyü minderleri ile modern konforun bir simgesidir.', en: 'The Lifesteel sofa offers a light and airy aesthetic with its raised base and metal feet. It is a symbol of modern comfort with its wide, low armrests and generous goose-down cushions.' },
-        mainImage: 'https://picsum.photos/seed/lifesteel-1/800/800',
-        alternativeImages: ['https://picsum.photos/seed/lifesteel-2/800/800', 'https://picsum.photos/seed/lifesteel-3/800/800'],
-        dimensions: [
-            { name: { tr: 'Büyük', en: 'Large' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '260cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '105cm' }] },
-            { name: { tr: 'Orta', en: 'Medium' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '200cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '105cm' }] }
-        ],
-        buyable: true,
-        price: 180000,
-        currency: 'TRY',
-        materials: [
-            { name: { tr: 'Nubuk Deri', en: 'Nubuck Leather' }, image: 'https://picsum.photos/seed/nubuck/100/100' },
-            { name: { tr: 'Keten', en: 'Linen' }, image: 'https://picsum.photos/seed/linen/100/100' }
-        ],
-        exclusiveContent: { images: [], drawings: [], models3d: [] },
-    },
-    {
-        id: 'groundpiece-sofa',
-        name: { tr: 'Groundpiece Kanepe', en: 'Groundpiece Sofa' },
-        designerId: 'antonio-citterio',
-        categoryId: 'kanepeler',
-        year: 2001,
-        description: { tr: 'Groundpiece, bir kanepenin ne olabileceği algısını değiştirdi. Alçak ve derin yapısı, rahat ve gayriresmi bir oturma deneyimi sunar. Yenilikçi kolçakları hem depolama alanı hem de sehpa işlevi görebilir.', en: 'Groundpiece changed the perception of what a sofa could be. Its low and deep structure offers a relaxed and informal seating experience. Its innovative armrests can function as both storage and a side table.' },
-        mainImage: 'https://picsum.photos/seed/groundpiece-1/800/800',
-        alternativeImages: ['https://picsum.photos/seed/groundpiece-2/800/800'],
-        dimensions: [{ name: { tr: 'Modüler', en: 'Modular' }, details: [{ label: { tr: 'Modül Genişliği', en: 'Module Width' }, value: '100cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '120cm' }] }],
-        buyable: true,
-        price: 210000,
-        currency: 'TRY',
-        materials: [
-            { name: { tr: 'Pamuklu Kumaş', en: 'Cotton Fabric' }, image: 'https://picsum.photos/seed/cotton/100/100' }
-        ],
-        exclusiveContent: { images: [], drawings: [], models3d: [] },
+        id: 'aydinlatma',
+        name: { tr: 'Aydınlatma', en: 'Lighting' },
+        subtitle: { tr: 'Mekanlarınıza karakter katacak modern aydınlatma elemanları.', en: 'Modern lighting elements to add character to your spaces.' },
+        heroImage: 'https://images.unsplash.com/photo-1540932239986-30128078f3c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&q=80',
     }
 ];
 
-export const homePageContentData: HomePageContent = {
+const designersData: Designer[] = [
+    {
+        id: 'arman-kaya',
+        name: { tr: 'Arman Kaya', en: 'Arman Kaya' },
+        bio: { tr: 'Minimalist yaklaşımı ve doğal malzemelere olan tutkusuyla tanınan Arman Kaya, form ve fonksiyonu bir araya getiren zamansız tasarımlar yaratır. Eserleri, sadeliğin zarafetini yansıtır.', en: 'Known for his minimalist approach and passion for natural materials, Arman Kaya creates timeless designs that unite form and function. His works reflect the elegance of simplicity.' },
+        image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80',
+    },
+    {
+        id: 'leyla-demir',
+        name: { tr: 'Leyla Demir', en: 'Leyla Demir' },
+        bio: { tr: 'Organik formlardan ve doğadan ilham alan Leyla Demir, heykelsi mobilyalarıyla tanınır. Tasarımları, cesur hatları ve yenilikçi malzeme kullanımıyla dikkat çeker.', en: 'Inspired by organic forms and nature, Leyla Demir is known for her sculptural furniture. Her designs stand out with their bold lines and innovative use of materials.' },
+        image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80',
+    },
+    {
+        id: 'studio-forma',
+        name: { tr: 'Studio Forma', en: 'Studio Forma' },
+        bio: { tr: 'İki genç tasarımcının kurduğu Studio Forma, geleneksel zanaatkarlığı modern teknolojiyle birleştiriyor. Kolektif, sürdürülebilirliğe ve işlevselliğe odaklanan modüler ve çok yönlü parçalar yaratıyor.', en: 'Founded by two young designers, Studio Forma combines traditional craftsmanship with modern technology. The collective creates modular and versatile pieces focusing on sustainability and functionality.' },
+        image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80',
+    }
+];
+
+const productsData: Product[] = [
+    {
+        id: 'bulut-kanepe',
+        name: { tr: 'Bulut Kanepe', en: 'Cloud Sofa' },
+        designerId: 'leyla-demir',
+        categoryId: 'kanepeler',
+        year: 2023,
+        description: { tr: 'Yumuşak hatları ve modüler yapısıyla Bulut Kanepe, modern yaşam alanlarına konfor ve esneklik getiriyor. Geniş oturma alanı ve davetkar minderleri ile dinlenmek için mükemmel bir köşe yaratır.', en: 'With its soft lines and modular structure, the Cloud Sofa brings comfort and flexibility to modern living spaces. It creates the perfect corner for relaxation with its wide seating area and inviting cushions.' },
+        mainImage: 'https://picsum.photos/seed/bulut/800/800',
+        alternativeImages: ['https://picsum.photos/seed/bulut-2/800/800', 'https://picsum.photos/seed/bulut-3/800/800', 'https://picsum.photos/seed/bulut-4/800/800', 'https://picsum.photos/seed/bulut-5/800/800'],
+        dimensions: [
+            { name: { tr: 'İkili', en: 'Two-Seater' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '220 cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '105 cm' }, { label: { tr: 'Yükseklik', en: 'Height' }, value: '75 cm' }] },
+            { name: { tr: 'Üçlü', en: 'Three-Seater' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '280 cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '105 cm' }, { label: { tr: 'Yükseklik', en: 'Height' }, value: '75 cm' }] }
+        ],
+        buyable: true,
+        price: 45000,
+        currency: 'TRY',
+        materials: [
+            { name: { tr: 'Keten Kumaş (Bej)', en: 'Linen Fabric (Beige)' }, image: 'https://picsum.photos/seed/linen-beige/100/100' },
+            { name: { tr: 'Kadife (Gri)', en: 'Velvet (Gray)' }, image: 'https://picsum.photos/seed/velvet-gray/100/100' }
+        ],
+        exclusiveContent: { images: ['https://picsum.photos/seed/bulut-ex1/800/800'], drawings: [{ name: { tr: 'Teknik Çizim PDF', en: 'Technical Drawing PDF' }, url: '#' }], models3d: [{ name: { tr: '3Ds Max Modeli', en: '3Ds Max Model' }, url: '#' }] }
+    },
+    {
+        id: 'linea-sandalye',
+        name: { tr: 'Linea Sandalye', en: 'Linea Chair' },
+        designerId: 'arman-kaya',
+        categoryId: 'sandalyeler',
+        year: 2022,
+        description: { tr: 'Linea Sandalye, minimalist estetiği ve ergonomik tasarımı bir araya getiriyor. Masif meşe iskeleti ve deri oturma yüzeyi ile hem dayanıklı hem de şık bir seçenektir.', en: 'The Linea Chair combines minimalist aesthetics with ergonomic design. With its solid oak frame and leather seat, it is both a durable and stylish option.' },
+        mainImage: 'https://picsum.photos/seed/linea/800/800',
+        alternativeImages: ['https://picsum.photos/seed/linea-2/800/800', 'https://picsum.photos/seed/linea-3/800/800'],
+        dimensions: [{ name: 'Tek Boyut', details: [{ label: 'Genişlik', value: '55 cm' }, { label: 'Derinlik', value: '60 cm' }, { label: 'Yükseklik', value: '80 cm' }] }],
+        buyable: true,
+        price: 7500,
+        currency: 'TRY',
+        materials: [
+            { name: { tr: 'Meşe / Siyah Deri', en: 'Oak / Black Leather' }, image: 'https://picsum.photos/seed/oak-black/100/100' },
+            { name: { tr: 'Ceviz / Taba Deri', en: 'Walnut / Tan Leather' }, image: 'https://picsum.photos/seed/walnut-tan/100/100' }
+        ],
+        exclusiveContent: { images: [], drawings: [{ name: { tr: 'Teknik Çizim PDF', en: 'Technical Drawing PDF' }, url: '#' }], models3d: [] }
+    },
+    {
+        id: 'dot-sehpa',
+        name: { tr: 'Dot Sehpa', en: 'Dot Coffee Table' },
+        designerId: 'studio-forma',
+        categoryId: 'masalar',
+        year: 2024,
+        description: { tr: 'Dot Sehpa, modüler tasarımıyla dikkat çeker. Farklı boyut ve renklerdeki üniteleri bir araya getirerek kendi kompozisyonunuzu yaratmanıza olanak tanır. Metal ve lake malzemelerin modern birleşimi.', en: 'The Dot Coffee Table stands out with its modular design. It allows you to create your own composition by combining units of different sizes and colors. A modern combination of metal and lacquer.' },
+        mainImage: 'https://picsum.photos/seed/dot/800/800',
+        alternativeImages: ['https://picsum.photos/seed/dot-2/800/800', 'https://picsum.photos/seed/dot-3/800/800'],
+        dimensions: [
+            { name: { tr: 'Küçük', en: 'Small' }, details: [{ label: { tr: 'Çap', en: 'Diameter' }, value: '60 cm' }, { label: { tr: 'Yükseklik', en: 'Height' }, value: '40 cm' }] },
+            { name: { tr: 'Büyük', en: 'Large' }, details: [{ label: { tr: 'Çap', en: 'Diameter' }, value: '90 cm' }, { label: { tr: 'Yükseklik', en: 'Height' }, value: '35 cm' }] }
+        ],
+        buyable: true,
+        price: 12000,
+        currency: 'TRY',
+        materials: [
+            { name: { tr: 'Siyah Metal / Antrasit Lake', en: 'Black Metal / Anthracite Lacquer' }, image: 'https://picsum.photos/seed/metal-anthracite/100/100' },
+            { name: { tr: 'Pirinç / Beyaz Lake', en: 'Brass / White Lacquer' }, image: 'https://picsum.photos/seed/brass-white/100/100' }
+        ],
+        exclusiveContent: { images: ['https://picsum.photos/seed/dot-ex1/800/800'], drawings: [{ name: { tr: 'Teknik Çizim PDF', en: 'Technical Drawing PDF' }, url: '#' }], models3d: [{ name: { tr: 'SketchUp Modeli', en: 'SketchUp Model' }, url: '#' }] }
+    },
+    {
+        id: 'luna-lamba',
+        name: { tr: 'Luna Lamba', en: 'Luna Lamp' },
+        designerId: 'leyla-demir',
+        categoryId: 'aydinlatma',
+        year: 2021,
+        description: { tr: 'El yapımı cam küresi ve mermer tabanıyla Luna, mekanlara sıcak ve sanatsal bir ışık yayar. Her bir parça, üfleme cam tekniğiyle üretildiği için benzersizdir.', en: 'With its handmade glass sphere and marble base, Luna spreads a warm and artistic light in spaces. Each piece is unique as it is produced with the glass blowing technique.' },
+        mainImage: 'https://picsum.photos/seed/luna/800/800',
+        alternativeImages: [],
+        dimensions: [{ name: 'Tek Boyut', details: [{ label: { tr: 'Çap', en: 'Diameter' }, value: '30 cm' }, { label: { tr: 'Yükseklik', en: 'Height' }, value: '45 cm' }] }],
+        buyable: false,
+        price: 9800,
+        currency: 'TRY',
+        materials: [
+            { name: { tr: 'Beyaz Mermer / Füme Cam', en: 'White Marble / Smoked Glass' }, image: 'https://picsum.photos/seed/marble-smoked/100/100' },
+            { name: { tr: 'Siyah Mermer / Amber Cam', en: 'Black Marble / Amber Glass' }, image: 'https://picsum.photos/seed/marble-amber/100/100' }
+        ],
+        exclusiveContent: { images: [], drawings: [], models3d: [] }
+    }
+];
+
+const homePageContentData: HomePageContent = {
     heroMedia: [
-        { type: 'image', url: 'https://picsum.photos/seed/home-hero-1/1920/1080', title: { tr: 'Zamanın Ötesinde Tasarım', en: 'Timeless Design' }, subtitle: { tr: 'İkonik mobilyalarla yaşam alanlarınızı yeniden şekillendirin.', en: 'Reshape your living spaces with iconic furniture.' }, isButtonVisible: true, buttonText: { tr: 'Koleksiyonu Keşfet', en: 'Discover the Collection' }, buttonLink: '/products/kanepeler' },
-        { type: 'video', url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4', title: { tr: 'Hareketin Zarafeti', en: 'The Elegance of Motion' }, subtitle: { tr: 'Dinamik ve fonksiyonel tasarımlarımızla tanışın.', en: 'Meet our dynamic and functional designs.' }, isButtonVisible: false, buttonText: {tr: '', en: ''}, buttonLink: '' },
-        { type: 'image', url: 'https://picsum.photos/seed/home-hero-2/1920/1080', title: { tr: 'Malzemenin Doğallığı', en: 'The Nature of Materials' }, subtitle: { tr: 'En kaliteli ve doğal malzemelerle üretilen tasarımlar.', en: 'Designs crafted with the finest and most natural materials.' }, isButtonVisible: true, buttonText: { tr: 'Hakkımızda', en: 'About Us' }, buttonLink: '/about' },
-        { type: 'video', url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4', title: { tr: 'Yaratıcılığın Sınırları', en: 'The Limits of Creativity' }, subtitle: { tr: 'Dünyaca ünlü tasarımcıların imzasını taşıyan eserler.', en: 'Works bearing the signature of world-renowned designers.' }, isButtonVisible: false, buttonText: {tr: '', en: ''}, buttonLink: '' },
-        { type: 'image', url: 'https://picsum.photos/seed/home-hero-3/1920/1080', title: { tr: 'Detaydaki Mükemmellik', en: 'Perfection in Detail' }, subtitle: { tr: 'Her bir parçada ustalık ve zanaatkarlığın izleri.', en: 'Traces of mastery and craftsmanship in every single piece.' }, isButtonVisible: true, buttonText: { tr: 'Tasarımcılar', en: 'Designers' }, buttonLink: '/designers' },
+        { type: 'video', url: 'https://raw.githubusercontent.com/birim-web/assets/main/hero-video.mp4', title: { tr: "Zamansız Tasarım, Sonsuz İlham", en: "Timeless Design, Endless Inspiration" }, subtitle: { tr: "Her biri bir hikaye anlatan, özenle seçilmiş mobilya koleksiyonumuzu keşfedin.", en: "Discover our curated furniture collection where every piece tells a story." }, isButtonVisible: true, buttonText: { tr: "Koleksiyonu Keşfet", en: "Explore Collection" }, buttonLink: "/products/kanepeler" },
+        { type: 'image', url: 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&q=80', title: { tr: "Doğadan Gelen Zarafet", en: "Elegance from Nature" }, subtitle: { tr: "Doğal malzemelerle yaşam alanlarınıza sıcaklık katın.", en: "Add warmth to your living spaces with natural materials." }, isButtonVisible: false, buttonText: '', buttonLink: '' },
+        { type: 'youtube', url: 'https://www.youtube.com/watch?v=LXb3EKWsInQ', title: { tr: "Tasarımın Arkasındaki Sanat", en: "The Art Behind the Design" }, subtitle: { tr: "Tasarımcılarımızın ilham verici süreçlerine tanıklık edin.", en: "Witness the inspiring processes of our designers." }, isButtonVisible: true, buttonText: { tr: "Tasarımcılar", en: "Our Designers" }, buttonLink: "/designers" },
     ],
     isHeroTextVisible: true,
-    isLogoVisible: true,
-    featuredProductIds: ['bristol-sofa', 'husk-armchair', 'lifesteel-sofa'],
-    featuredDesignerId: 'antonio-citterio',
+    isLogoVisible: false,
+    featuredProductIds: ['bulut-kanepe', 'linea-sandalye', 'dot-sehpa'],
+    featuredDesignerId: 'arman-kaya',
     inspirationSection: {
-        backgroundImage: 'https://picsum.photos/seed/inspiration/1920/1080',
+        backgroundImage: 'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&q=80',
         title: { tr: 'İlham Veren Mekanlar Yaratın', en: 'Create Inspiring Spaces' },
-        subtitle: { tr: 'Tasarımın gücüyle hayalinizdeki atmosferi oluşturun.', en: 'Create your dream atmosphere with the power of design.' },
-        buttonText: { tr: 'Tasarımcılarımızı Tanıyın', en: 'Meet Our Designers' },
-        buttonLink: '/designers',
-    },
+        subtitle: { tr: 'Tasarım felsefemiz ve mekanlara yaklaşımımız hakkında daha fazlasını öğrenin.', en: 'Learn more about our design philosophy and approach to spaces.' },
+        buttonText: { tr: 'Hakkımızda', en: 'About Us' },
+        buttonLink: '/about'
+    }
 };
 
-export const aboutPageContentData: AboutPageContent = {
-    heroImage: 'https://picsum.photos/seed/about-hero/1920/1080',
-    heroTitle: { tr: 'Hakkımızda', en: 'About Us' },
-    heroSubtitle: { tr: 'Tasarım tutkusunu zanaatkarlıkla birleştiren yarım asırlık bir hikaye.', en: 'A half-century story combining a passion for design with craftsmanship.' },
-    storyTitle: { tr: 'Bizim Hikayemiz', en: 'Our Story' },
-    storyContentP1: { tr: '1973 yılında kurulan Birim, mobilya tasarımına olan tutkusuyla yola çıktı. Amacımız, sadece estetik değil, aynı zamanda fonksiyonel ve zamana meydan okuyan parçalar yaratmaktı.', en: 'Founded in 1973, Birim set out with a passion for furniture design. Our goal was to create pieces that were not only aesthetic but also functional and timeless.' },
-    storyContentP2: { tr: 'Bugün, dünyanın önde gelen tasarımcılarıyla işbirliği yaparak, yenilikçi malzeme ve teknolojileri geleneksel zanaatkarlıkla harmanlıyoruz.', en: 'Today, we collaborate with the world\'s leading designers, blending innovative materials and technologies with traditional craftsmanship.' },
-    storyImage: 'https://picsum.photos/seed/about-story/600/800',
+const aboutPageContentData: AboutPageContent = {
+    heroImage: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&q=80',
+    heroTitle: { tr: 'Tasarımın Gücüne İnanıyoruz', en: 'We Believe in the Power of Design' },
+    heroSubtitle: { tr: 'Estetik, işlevsellik ve kalitenin kesişim noktasında, yaşam alanlarınıza değer katan mobilyalar yaratıyoruz.', en: 'At the intersection of aesthetics, functionality, and quality, we create furniture that adds value to your living spaces.' },
+    storyTitle: { tr: 'Hikayemiz', en: 'Our Story' },
+    storyContentP1: { tr: 'Birim, 2010 yılında mobilya tutkunu bir grup zanaatkar ve tasarımcı tarafından kuruldu. Amacımız, sadece güzel değil, aynı zamanda anlamlı ve kalıcı parçalar yaratmaktı. Geleneksel teknikleri modern bir vizyonla birleştirerek, her bir ürünün bir hikaye anlatmasını hedefledik.', en: 'Birim was founded in 2010 by a group of furniture-loving artisans and designers. Our goal was to create pieces that were not only beautiful but also meaningful and lasting. By combining traditional techniques with a modern vision, we aimed for each product to tell a story.' },
+    storyContentP2: { tr: 'Yıllar içinde, küçük bir atölyeden uluslararası tanınırlığa sahip bir markaya dönüştük. Ancak ilk günkü tutkumuz ve kaliteye olan bağlılığımız hiç değişmedi. Her tasarım, en iyi malzemeler ve usta işçilikle hayata geçirilir.', en: 'Over the years, we have grown from a small workshop to an internationally recognized brand. However, our initial passion and commitment to quality have never changed. Every design is brought to life with the finest materials and master craftsmanship.' },
+    storyImage: 'https://images.unsplash.com/photo-1598971861713-54ad16a7e72e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80',
     isQuoteVisible: true,
-    quoteText: { tr: 'İyi tasarım, iyi iş demektir.', en: 'Good design is good business.' },
-    quoteAuthor: 'Thomas Watson Jr.',
+    quoteText: { tr: 'İyi tasarım, hayatı daha iyi hale getirme sanatıdır.', en: 'Good design is the art of making life better.' },
+    quoteAuthor: 'Arman Kaya',
     valuesTitle: { tr: 'Değerlerimiz', en: 'Our Values' },
     values: [
-        { title: { tr: 'Kalite', en: 'Quality' }, description: { tr: 'Her detayda en yüksek kalite standartlarını hedefleriz.', en: 'We aim for the highest quality standards in every detail.' } },
-        { title: { tr: 'Tasarım Odaklılık', en: 'Design Focus' }, description: { tr: 'Tasarımın gücüne inanır, estetik ve fonksiyonelliği bir araya getiririz.', en: 'We believe in the power of design, bringing together aesthetics and functionality.' } },
-        { title: { tr: 'Zanaatkarlık', en: 'Craftsmanship' }, description: { tr: 'Geleneksel üretim tekniklerine saygı duyar, usta ellerin değerini biliriz.', en: 'We respect traditional production techniques and value the work of master craftsmen.' } },
+        { title: { tr: 'Kalite', en: 'Quality' }, description: { tr: 'En iyi malzemeleri seçer ve ürünlerimizin uzun ömürlü olmasını sağlarız.', en: 'We select the finest materials and ensure our products are long-lasting.' } },
+        { title: { tr: 'Tasarım Odaklılık', en: 'Design Focus' }, description: { tr: 'Estetik ve fonksiyonelliği birleştiren, ilham veren tasarımlar yaratırız.', en: 'We create inspiring designs that combine aesthetics and functionality.' } },
+        { title: { tr: 'Zanaatkarlık', en: 'Craftsmanship' }, description: { tr: 'Usta zanaatkarlarımızın el işçiliğine ve detaylara olan özenine değer veririz.', en: 'We value the handiwork of our master artisans and their attention to detail.' } }
     ]
 };
 
-export const contactPageContentData: ContactPageContent = {
-    title: { tr: 'İletişim', en: 'Contact' },
-    subtitle: { tr: 'Size yardımcı olmak için buradayız. Showroomlarımızı ziyaret edin veya bizimle doğrudan iletişime geçin.', en: 'We are here to help you. Visit our showrooms or contact us directly.' },
+const contactPageContentData: ContactPageContent = {
+    title: { tr: 'Bize Ulaşın', en: 'Contact Us' },
+    subtitle: { tr: 'Sorularınız, iş birlikleri veya sadece bir merhaba demek için buradayız. Mağazalarımızı ziyaret edin veya bizimle iletişime geçin.', en: "We're here for your questions, collaborations, or just to say hello. Visit our stores or get in touch with us." },
     locations: [
-        { type: { tr: 'Mağaza', en: 'Store' }, title: {tr: 'İstanbul Showroom', en: 'Istanbul Showroom'}, address: 'Bağdat Caddesi No: 200, Kadıköy, İstanbul', phone: '+90 216 123 45 67', email: 'istanbul@birim.com', mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3012.792582189033!2d29.05586431541315!3d40.9650399793051!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cac687b1341a03%3A0x9a842f6191b7d8c!2sBa%C4%9Fdat%20Cd.!5e0!3m2!1sen!2str!4v1626876615758!5m2!1sen!2str' },
-        { type: { tr: 'Mağaza', en: 'Store' }, title: {tr: 'Ankara Showroom', en: 'Ankara Showroom'}, address: 'Tunalı Hilmi Caddesi No: 88, Çankaya, Ankara', phone: '+90 312 987 65 43', email: 'ankara@birim.com', mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3060.038481352358!2d32.85734031538019!3d39.918905979426!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14d34fa421941a5d%3A0x8f7d4b4f5e0e0e0a!2sTunal%C4%B1%20Hilmi%20Cd.!5e0!3m2!1sen!2str!4v1626876707314!5m2!1sen!2str' },
-        { type: { tr: 'Fabrika', en: 'Factory' }, title: { tr: 'Üretim Tesisi', en: 'Production Facility' }, address: 'Organize Sanayi Bölgesi, Bursa', phone: '+90 224 111 22 33', mapEmbedUrl: '' },
-    ]
-};
-
-export const footerContentData: FooterContent = {
-    copyrightText: { tr: '© 2024 Birim Mobilya. Tüm hakları saklıdır.', en: '© 2024 Birim Furniture. All rights reserved.' },
-    partnerNames: ['Poliform', 'B&B Italia'],
-    linkColumns: [
         {
-            title: { tr: 'Navigasyon', en: 'Navigation' },
-            links: [
-                { text: { tr: 'Koleksiyon', en: 'Collection' }, url: '/products/kanepeler' },
-                { text: { tr: 'Tasarımcılar', en: 'Designers' }, url: '/designers' },
-                { text: { tr: 'Haberler', en: 'News' }, url: '/news' },
-                { text: { tr: 'Hakkımızda', en: 'About Us' }, url: '/about' },
-                { text: { tr: 'İletişim', en: 'Contact' }, url: '/contact' },
-            ]
+            type: { tr: 'Showroom', en: 'Showroom' },
+            title: { tr: 'İstanbul Showroom', en: 'Istanbul Showroom' },
+            address: 'Bağdat Caddesi No: 123, Kadıköy, İstanbul',
+            phone: '+90 216 123 45 67',
+            email: 'istanbul@birim.com',
+            mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3011.899661339398!2d29.06172231538356!3d40.98348497930335!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cac65597b876c5%3A0x742e1d71c5be1a5!2sBa%C4%9Fdat%20Cd.!5e0!3m2!1sen!2str!4v1678886400000!5m2!1sen!2str'
         },
         {
-            title: { tr: 'Destek', en: 'Support' },
-            links: [
-                { text: { tr: 'SSS', en: 'FAQ' }, url: '#' },
-            ]
+            type: { tr: 'Showroom', en: 'Showroom' },
+            title: { tr: 'Ankara Showroom', en: 'Ankara Showroom' },
+            address: 'Tunalı Hilmi Caddesi No: 89, Çankaya, Ankara',
+            phone: '+90 312 987 65 43',
+            email: 'ankara@birim.com',
+            mapEmbedUrl: ''
+        },
+        {
+            type: { tr: 'Merkez Ofis & Fabrika', en: 'Head Office & Factory' },
+            title: { tr: 'Bursa Üretim Tesisi', en: 'Bursa Production Facility' },
+            address: 'Organize Sanayi Bölgesi, Nilüfer, Bursa',
+            phone: '+90 224 111 22 33',
+            email: 'info@birim.com',
+            mapEmbedUrl: ''
         }
+    ]
+};
+
+const footerContentData: FooterContent = {
+    copyrightText: { tr: `© ${new Date().getFullYear()} Birim Mobilya San. ve Tic. A.Ş. Tüm hakları saklıdır.`, en: `© ${new Date().getFullYear()} Birim Furniture Inc. All rights reserved.` },
+    partnerNames: ["Vitra", "Arçelik", "Paşabahçe"],
+    linkColumns: [
+        { title: { tr: 'Şirket', en: 'Company' }, links: [{ text: { tr: 'Hakkımızda', en: 'About Us' }, url: '/about' }, { text: { tr: 'Kariyer', en: 'Careers' }, url: '#' }, { text: { tr: 'Basın', en: 'Press' }, url: '/news' }] },
+        { title: { tr: 'Destek', en: 'Support' }, links: [{ text: { tr: 'İletişim', en: 'Contact' }, url: '/contact' }, { text: { tr: 'SSS', en: 'FAQ' }, url: '#' }, { text: { tr: 'Garanti', en: 'Warranty' }, url: '#' }] }
     ],
     socialLinks: [
         { name: 'Instagram', url: 'https://instagram.com', svgIcon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>', isEnabled: true },
-        { name: 'Facebook', url: 'https://facebook.com', svgIcon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>', isEnabled: true },
+        { name: 'Pinterest', url: 'https://pinterest.com', svgIcon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>', isEnabled: true },
+        { name: 'Facebook', url: 'https://facebook.com', svgIcon: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>', isEnabled: false }
     ]
 };
 
-export const newsData: NewsItem[] = [
-    { 
-        id: 'milan-design-week-2024', 
-        title: { tr: 'Milano Tasarım Haftası 2024 İzlenimleri', en: 'Milan Design Week 2024 Impressions' }, 
-        date: '15 Haziran 2024', 
-        content: { tr: 'Bu yılki Milano Tasarım Haftası\'nda öne çıkan trendleri ve yeni koleksiyonları sizler için derledik. Sürdürülebilirlik ve doğal malzemeler yine ön plandaydı. Tasarımcılar, geri dönüştürülmüş materyalleri lüks ve yenilikçi parçalara dönüştürerek çevreye duyarlı yaklaşımlarını sergilediler. Özellikle, modüler ve çok fonksiyonlu mobilyaların yükselişi, değişen yaşam alanlarına uyum sağlama ihtiyacını gözler önüne serdi.', en: 'We have compiled the prominent trends and new collections from this year\'s Milan Design Week for you. Sustainability and natural materials were at the forefront again. Designers showcased their environmentally conscious approaches by transforming recycled materials into luxurious and innovative pieces. In particular, the rise of modular and multifunctional furniture highlighted the need to adapt to changing living spaces.' }, 
-        mainImage: 'https://picsum.photos/seed/milan/1200/800',
+const newsData: NewsItem[] = [
+    {
+        id: 'milan-tasarim-haftasi-2024',
+        title: { tr: 'Milano Tasarım Haftası 2024 Notları', en: 'Notes from Milan Design Week 2024' },
+        date: '25 Nisan 2024',
+        content: { tr: 'Bu yılki Milano Tasarım Haftası, sürdürülebilirlik ve teknoloji temalarıyla öne çıktı. Birim olarak, yeni koleksiyonumuzda kullandığımız geri dönüştürülmüş malzemeler ve akıllı mobilya konseptlerimizle büyük ilgi gördük. Özellikle Leyla Demir\'in tasarladığı "Yosun" koltuk, biyobozunur materyaliyle fuarın en çok konuşulan parçalarından biri oldu.', en: 'This year\'s Milan Design Week highlighted themes of sustainability and technology. As Birim, we garnered great interest with the recycled materials used in our new collection and our smart furniture concepts. Especially the "Moss" armchair, designed by Leyla Demir, became one of the most talked-about pieces of the fair with its biodegradable material.' },
+        mainImage: 'https://images.unsplash.com/photo-1621947082343-c25b39e6a0a7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80',
         media: [
-            { type: 'image', url: 'https://picsum.photos/seed/milan-1/1200/800', caption: { tr: 'Sürdürülebilirlik odaklı tasarımlar', en: 'Sustainability-focused designs' } },
-            { type: 'image', url: 'https://picsum.photos/seed/milan-2/1200/800' },
-            { type: 'video', url: 'https://storage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4' },
+            { type: 'image', url: 'https://picsum.photos/seed/milan-1/1200/800', caption: { tr: 'Standımızdan bir görünüm', en: 'A view from our booth' } },
+            { type: 'youtube', url: 'https://www.youtube.com/watch?v=LXb3EKWsInQ', caption: { tr: 'Tasarımcı Leyla Demir ile röportaj', en: 'Interview with designer Leyla Demir' } }
         ]
     },
-    { 
-        id: 'new-collection-urquiola', 
-        title: { tr: 'Patricia Urquiola\'dan Yeni Koleksiyon: "Terra"', en: 'New Collection from Patricia Urquiola: "Terra"' }, 
-        date: '01 Mayıs 2024', 
-        content: { tr: 'Ünlü tasarımcı Patricia Urquiola, doğadan ilham alan yeni koleksiyonu "Terra" ile yine fark yaratıyor. Toprak tonları ve organik formların hakim olduğu koleksiyon, modern yaşam alanlarına sıcaklık ve doğallık katmayı amaçlıyor. Urquiola, bu koleksiyonda zanaatkarlık ve teknolojiyi bir araya getirerek hem estetik hem de fonksiyonel parçalar ortaya koyuyor.', en: 'Famous designer Patricia Urquiola makes a difference again with her new collection "Terra", inspired by nature. The collection, dominated by earth tones and organic forms, aims to add warmth and naturalness to modern living spaces. In this collection, Urquiola combines craftsmanship and technology to create pieces that are both aesthetic and functional.' }, 
-        mainImage: 'https://picsum.photos/seed/urquiola-coll/1200/800',
+    {
+        id: 'yeni-magaza-ankara',
+        title: { tr: 'Yeni Mağazamız Ankara\'da Açıldı', en: 'Our New Store Opened in Ankara' },
+        date: '10 Mart 2024',
+        content: { tr: 'İstanbul\'dan sonra şimdi de başkentteyiz! Ankara\'daki yeni showroomumuz, markamızın en güncel koleksiyonlarını ve sevilen klasiklerini bir araya getiriyor. Mimarisiyle de dikkat çeken mağazamız, sizlere ilham veren bir deneyim sunmak için tasarlandı. Tüm tasarım severleri bekliyoruz.', en: 'After Istanbul, we are now in the capital! Our new showroom in Ankara brings together our brand\'s latest collections and beloved classics. Our store, which also stands out with its architecture, was designed to offer you an inspiring experience. We welcome all design lovers.' },
+        mainImage: 'https://images.unsplash.com/photo-1556740738-b6a63e27c4df?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80',
         media: [
-             { type: 'image', url: 'https://picsum.photos/seed/terra-1/1200/800' },
+            { type: 'image', url: 'https://picsum.photos/seed/ankara-1/1200/800', caption: { tr: 'Açılış gününden', en: 'From the opening day' } },
+            { type: 'image', url: 'https://picsum.photos/seed/ankara-2/1200/800', caption: { tr: 'Mağazanın iç mekanından bir detay', en: 'A detail from the store\'s interior' } }
         ]
-    },
-    { 
-        id: 'new-material-mycelium', 
-        title: { tr: 'Yeni Bir Malzemenin Yükselişi: Miselyum', en: 'The Rise of a New Material: Mycelium' }, 
-        date: '20 Nisan 2024', 
-        content: { tr: 'Tasarım dünyası, mantarların kök ağı olan miselyumun potansiyelini keşfediyor. Bu %100 doğal ve biyolojik olarak parçalanabilen malzeme, hem hafif hem de dayanıklı olmasıyla dikkat çekiyor. Akustik panellerden aydınlatma elemanlarına kadar geniş bir kullanım alanına sahip olan miselyum, mobilya sektöründe sürdürülebilir bir devrim yaratabilir.', en: 'The design world is discovering the potential of mycelium, the root network of fungi. This 100% natural and biodegradable material is notable for being both lightweight and durable. With a wide range of applications from acoustic panels to lighting elements, mycelium could create a sustainable revolution in the furniture industry.' }, 
-        mainImage: 'https://picsum.photos/seed/mycelium/1200/800',
-        media: [
-             { type: 'image', url: 'https://picsum.photos/seed/mycelium-1/1200/800' },
-             { type: 'image', url: 'https://picsum.photos/seed/mycelium-2/1200/800' },
-        ]
-    },
-    { 
-        id: 'design-award-2024', 
-        title: { tr: 'Tasarım Dünyasının Prestijli Ödülü Sahibini Buldu', en: 'Prestigious Design Award Finds Its Winner' }, 
-        date: '05 Mart 2024', 
-        content: { tr: 'Her yıl düzenlenen Uluslararası Tasarım Ödülleri\'nde "Yılın Mobilyası" kategorisinin kazananı, Antonio Citterio tarafından tasarlanan "Lifesteel" kanepe oldu. Jüri, kanepenin zamansız estetiği, modüler yapısı ve üstün konforunu övgüyle karşıladı. Bu ödül, Citterio\'nun tasarım dehasını bir kez daha tescillemiş oldu.', en: 'The "Lifesteel" sofa, designed by Antonio Citterio, was the winner in the "Furniture of the Year" category at the annual International Design Awards. The jury praised the sofa\'s timeless aesthetics, modular structure, and superior comfort. This award once again confirmed Citterio\'s design genius.' }, 
-        mainImage: 'https://picsum.photos/seed/award/1200/800',
-        media: []
     }
 ];
 
-export const initialData = {
+export const initialData: { [key: string]: any } = {
+    [KEYS.LANGUAGES]: languagesData,
     [KEYS.SITE_SETTINGS]: siteSettingsData,
     [KEYS.CATEGORIES]: categoriesData,
     [KEYS.DESIGNERS]: designersData,
     [KEYS.PRODUCTS]: productsData,
-    [KEYS.HOME_PAGE]: homePageContentData,
     [KEYS.ABOUT_PAGE]: aboutPageContentData,
     [KEYS.CONTACT_PAGE]: contactPageContentData,
+    [KEYS.HOME_PAGE]: homePageContentData,
     [KEYS.FOOTER]: footerContentData,
     [KEYS.NEWS]: newsData,
-    [KEYS.LANGUAGES]: languagesData,
 };
