@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const DefaultLogo = (props: React.SVGProps<SVGSVGElement>) => (
     <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-label="Birim Web Logo" {...props}>
@@ -13,15 +13,27 @@ interface SiteLogoProps {
 }
 
 export const SiteLogo: React.FC<SiteLogoProps> = ({ logoUrl, className }) => {
-    if (logoUrl) {
-        return (
-            <img 
-                src={logoUrl} 
-                alt="Birim Web Logo" 
-                className={`${className} object-contain`} 
-            />
-        );
+    const [imgError, setImgError] = useState(false);
+    
+    // Prioritize the URL from props, but fall back to a standard path.
+    const finalLogoUrl = logoUrl || '/img/logo.png';
+
+    useEffect(() => {
+        // Reset error state whenever the logo URL changes
+        setImgError(false);
+    }, [finalLogoUrl]);
+
+    if (imgError || !finalLogoUrl) {
+        // If there's an error loading the image OR if the final URL is somehow empty, show the default SVG.
+        return <DefaultLogo className={className} />;
     }
 
-    return <DefaultLogo className={className} />;
+    return (
+        <img 
+            src={finalLogoUrl} 
+            alt="Birim Web Logo" 
+            className={`${className} object-contain`} 
+            onError={() => setImgError(true)}
+        />
+    );
 };
