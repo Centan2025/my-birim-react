@@ -73,18 +73,5 @@ export default {
   "reset_content_warning": "This action cannot be undone. Clicking this button will delete all changes you've made in the admin panel and revert the site content to its initial state. This is useful for applying updates made in the `data.ts` file.",
   "reset_confirm_message": "This action will delete all changes made in the admin panel and revert the content to its original state. Are you sure?",
   "reset_success_message": "Content has been reset. The page will now reload.",
-  "navigation": "Navigation",
-  "shopping_cart": "Shopping Cart",
-  "item": "Item",
-  "quantity": "Quantity",
-  "price": "Price",
-  "total": "Total",
-  "remove": "Remove",
-  "checkout": "Proceed to Checkout",
-  "cart_empty": "Your cart is empty.",
-  "continue_shopping": "Continue Shopping",
-  "cart": "Cart",
-  "subtotal": "Subtotal",
-  "order_summary": "Order Summary",
-  "locale_code": "en-US"
+  "navigation": "Navigation"
 };

@@ -73,18 +73,5 @@ export default {
   "reset_content_warning": "Bu işlem geri alınamaz. Bu butona basmak, admin panelinde yaptığınız tüm değişiklikleri silecek ve site içeriğini başlangıç durumuna döndürecektir. Bu, özellikle `data.ts` dosyasında yapılan güncellemelerin uygulanması için kullanışlıdır.",
   "reset_confirm_message": "Bu işlem, admin panelinde yaptığınız tüm değişiklikleri silecek ve içeriği ilk haline döndürecektir. Emin misiniz?",
   "reset_success_message": "İçerik sıfırlandı. Sayfa yeniden yüklenecek.",
-  "navigation": "Navigasyon",
-  "shopping_cart": "Alışveriş Sepeti",
-  "item": "Ürün",
-  "quantity": "Miktar",
-  "price": "Fiyat",
-  "total": "Toplam",
-  "remove": "Kaldır",
-  "checkout": "Ödemeye Geç",
-  "cart_empty": "Sepetiniz boş.",
-  "continue_shopping": "Alışverişe Devam Et",
-  "cart": "Sepet",
-  "subtotal": "Ara Toplam",
-  "order_summary": "Sipariş Özeti",
-  "locale_code": "tr-TR"
+  "navigation": "Navigasyon"
 };

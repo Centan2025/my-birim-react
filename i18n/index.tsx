@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, PropsWithChildren, useMemo, useCallback, useEffect } from 'react';
+import { createContext, useState, useContext, PropsWithChildren, useMemo, useCallback, useEffect } from 'react';
 import tr from './locales/tr';
 import en from './locales/en';
 import { LocalizedString } from '../types';

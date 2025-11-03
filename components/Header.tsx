@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import type { Category, SiteSettings, Product, Designer } from '../types';
 import { getCategories, getSiteSettings, getProducts, getDesigners } from '../services/cms';
-import { useAuth, useCart } from '../App';
+import { useAuth } from '../App';
 import { SiteLogo } from './SiteLogo';
 import { useTranslation } from '../i18n';
 
@@ -30,11 +30,6 @@ const CloseIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
 );
 
-const ShoppingBagIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-2z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-);
-
-
 export function Header() {
   const { t, setLocale, locale, supportedLocales } = useTranslation();
   const [categories, setCategories] = useState<Category[]>([]);
@@ -47,7 +42,6 @@ export function Header() {
   const searchButtonRef = useRef<HTMLButtonElement>(null);
 
   const { isLoggedIn } = useAuth();
-  const { cartCount } = useCart();
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
@@ -267,14 +261,6 @@ export function Header() {
                       ))}
                     </div>
                 </div>
-                <NavLink to="/cart" className={`relative ${iconClasses}`}>
-                  <ShoppingBagIcon />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-                      {cartCount}
-                    </span>
-                  )}
-                </NavLink>
                 <NavLink to={isLoggedIn ? "/profile" : "/login"} className={iconClasses}>
                   <UserIcon />
                 </NavLink>

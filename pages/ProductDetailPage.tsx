@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import type { Product, Designer, Category } from '../types';
 import { getProductById, getDesignerById, getCategories, getProductsByCategoryId } from '../services/cms';
-import { useAuth, useCart } from '../App';
+import { useAuth } from '../App';
 import { useTranslation } from '../i18n';
 
 const DownloadIcon = () => (
@@ -25,9 +25,6 @@ const TransparentShoppingBagIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-2z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
 );
 
-const CheckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>;
-
-
 export function ProductDetailPage() {
   const { productId } = useParams<{ productId: string }>();
   const [product, setProduct] = useState<Product | undefined>(undefined);
@@ -40,16 +37,7 @@ export function ProductDetailPage() {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
   const { isLoggedIn } = useAuth();
-  const { addToCart } = useCart();
-  const [justAdded, setJustAdded] = useState(false);
-  const { t } = useTranslation();
-
-  const handleAddToCart = () => {
-      if (!product || justAdded) return;
-      addToCart(product);
-      setJustAdded(true);
-      setTimeout(() => setJustAdded(false), 2000);
-  };
+  const { t, locale } = useTranslation();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -165,6 +153,13 @@ export function ProductDetailPage() {
                 )}
                 
                 <div className="mt-8 space-y-8 border-t pt-8">
+                    {product.buyable && product.price > 0 && (
+                        <div>
+                            <p className="text-3xl font-bold text-gray-900">
+                                {new Intl.NumberFormat(locale, { style: 'currency', currency: product.currency || 'TRY' }).format(product.price)}
+                            </p>
+                        </div>
+                    )}
                     <div>
                         <h2 className="text-xl font-semibold text-gray-800">{t('description')}</h2>
                         <p className="mt-2 text-gray-600 leading-relaxed">{t(product.description)}</p>
@@ -225,12 +220,14 @@ export function ProductDetailPage() {
                  {product.buyable && (
                       <div className="mt-12 pt-8 border-t border-gray-200">
                           <button
-                              onClick={handleAddToCart}
-                              disabled={justAdded}
-                              className={`group w-20 h-20 flex items-center justify-center rounded-full transition-all duration-300 ease-in-out transform hover:scale-110 active:scale-100 hover:shadow-lg ${justAdded ? 'bg-green-500' : 'bg-gray-900 text-white hover:bg-gray-700'}`}
+                              onClick={() => {
+                                  console.log(`Added ${t(product.name)} to cart`);
+                                  alert(t('added_to_cart', t(product.name)));
+                              }}
+                              className="group w-20 h-20 flex items-center justify-center bg-gray-900 text-white rounded-full hover:bg-gray-700 transition-all duration-300 ease-in-out transform hover:scale-110 active:scale-100 hover:shadow-lg"
                               aria-label={t('add_to_cart')}
                           >
-                            {justAdded ? <CheckIcon /> : <TransparentShoppingBagIcon />}
+                              <TransparentShoppingBagIcon />
                           </button>
                       </div>
                   )}

@@ -48,7 +48,7 @@ export const productsData: Product[] = [
         alternativeImages: ['https://picsum.photos/seed/bristol-2/800/800', 'https://picsum.photos/seed/bristol-3/800/800'],
         dimensions: [{ name: { tr: 'Standart', en: 'Standard' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '240cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '95cm' }, { label: { tr: 'Yükseklik', en: 'Height' }, value: '70cm' }] }],
         buyable: true,
-        price: 75000,
+        price: 150000,
         currency: 'TRY',
         materials: [{ name: { tr: 'Kumaş', en: 'Fabric' }, image: 'https://picsum.photos/seed/fabric/100/100' }, { name: { tr: 'Deri', en: 'Leather' }, image: 'https://picsum.photos/seed/leather/100/100' }],
         exclusiveContent: { images: ['https://picsum.photos/seed/bristol-ex1/800/800'], drawings: [{ name: { tr: 'Teknik Çizim', en: 'Technical Drawing' }, url: '#' }], models3d: [{ name: { tr: '3DS Max Modeli', en: '3DS Max Model' }, url: '#' }] },
@@ -64,7 +64,7 @@ export const productsData: Product[] = [
         alternativeImages: ['https://picsum.photos/seed/husk-2/800/800'],
         dimensions: [{ name: { tr: 'Standart', en: 'Standard' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '84cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '84cm' }, { label: { tr: 'Yükseklik', en: 'Height' }, value: '92cm' }] }],
         buyable: false,
-        price: 32000,
+        price: 45000,
         currency: 'TRY',
         materials: [{ name: { tr: 'Yün Kumaş', en: 'Wool Fabric' }, image: 'https://picsum.photos/seed/wool/100/100' }, { name: { tr: 'Kadife', en: 'Velvet' }, image: 'https://picsum.photos/seed/velvet/100/100' }],
         exclusiveContent: { images: [], drawings: [], models3d: [] },
@@ -80,7 +80,7 @@ export const productsData: Product[] = [
         alternativeImages: [],
         dimensions: [{ name: { tr: '3 Kişilik', en: '3 Seater' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '230cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '97cm' }] }, { name: { tr: '2 Kişilik', en: '2 Seater' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '180cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '97cm' }] }],
         buyable: true,
-        price: 85000,
+        price: 120000,
         currency: 'TRY',
         materials: [],
         exclusiveContent: { images: [], drawings: [], models3d: [] },
@@ -96,7 +96,7 @@ export const productsData: Product[] = [
       alternativeImages: ['https://picsum.photos/seed/pathos-2/800/800'],
       dimensions: [{ name: { tr: 'Standart', en: 'Standard' }, details: [{ label: { tr: 'Çap', en: 'Diameter' }, value: '140cm' }, { label: { tr: 'Yükseklik', en: 'Height' }, value: '73cm' }] }],
       buyable: true,
-      price: 48000,
+      price: 85000,
       currency: 'TRY',
       materials: [{ name: { tr: 'Mermer', en: 'Marble' }, image: 'https://picsum.photos/seed/marble/100/100' }],
       exclusiveContent: { images: [], drawings: [], models3d: [] },
@@ -115,7 +115,7 @@ export const productsData: Product[] = [
             { name: { tr: 'Orta', en: 'Medium' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '200cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '105cm' }] }
         ],
         buyable: true,
-        price: 92000,
+        price: 180000,
         currency: 'TRY',
         materials: [
             { name: { tr: 'Nubuk Deri', en: 'Nubuck Leather' }, image: 'https://picsum.photos/seed/nubuck/100/100' },
@@ -134,7 +134,7 @@ export const productsData: Product[] = [
         alternativeImages: ['https://picsum.photos/seed/groundpiece-2/800/800'],
         dimensions: [{ name: { tr: 'Modüler', en: 'Modular' }, details: [{ label: { tr: 'Modül Genişliği', en: 'Module Width' }, value: '100cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '120cm' }] }],
         buyable: true,
-        price: 110000,
+        price: 210000,
         currency: 'TRY',
         materials: [
             { name: { tr: 'Pamuklu Kumaş', en: 'Cotton Fabric' }, image: 'https://picsum.photos/seed/cotton/100/100' }

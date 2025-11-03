@@ -14,170 +14,11 @@ import { NewsPage } from './pages/NewsPage';
 import { NewsDetailPage } from './pages/NewsDetailPage';
 import { AdminPage } from './pages/AdminPage';
 import { getFooterContent, getSiteSettings } from './services/cms';
-import type { FooterContent, SiteSettings, Product } from './types';
+import type { FooterContent, SiteSettings } from './types';
 import { SiteLogo } from './components/SiteLogo';
 import { I18nProvider, useTranslation } from './i18n';
 
-// --- CART IMPLEMENTATION ---
-
-// Cart Types
-interface CartItem extends Product {
-  quantity: number;
-}
-
-interface CartContextType {
-  cartItems: CartItem[];
-  addToCart: (product: Product) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
-  cartCount: number;
-  totalPrice: number;
-}
-
-// Cart Context
-const CartContext = createContext<CartContextType | null>(null);
-
-// useCart Hook
-export function useCart() {
-  const context = useContext(CartContext);
-  if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
-  }
-  return context;
-}
-
-// Cart Provider
-const CartProvider = ({ children }: PropsWithChildren) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
-    try {
-      const localData = localStorage.getItem('birim_cart');
-      return localData ? JSON.parse(localData) : [];
-    } catch (error) {
-      console.error("Failed to parse cart data from localStorage", error);
-      return [];
-    }
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('birim_cart', JSON.stringify(cartItems));
-    } catch (error) {
-      console.error("Failed to save cart data to localStorage", error);
-    }
-  }, [cartItems]);
-
-  const addToCart = (product: Product) => {
-    setCartItems(prevItems => {
-      const existingItem = prevItems.find(item => item.id === product.id);
-      if (existingItem) {
-        return prevItems.map(item =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-        );
-      }
-      return [...prevItems, { ...product, quantity: 1 }];
-    });
-  };
-
-  const removeFromCart = (productId: string) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
-  };
-
-  const updateQuantity = (productId: string, quantity: number) => {
-    setCartItems(prevItems => {
-      if (quantity <= 0) {
-        return prevItems.filter(item => item.id !== productId);
-      }
-      return prevItems.map(item =>
-        item.id === productId ? { ...item, quantity } : item
-      );
-    });
-  };
-
-  const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
-  const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-
-  const value = { cartItems, addToCart, removeFromCart, updateQuantity, cartCount, totalPrice };
-
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
-};
-
-
-const CartPage = () => {
-    const { cartItems, removeFromCart, updateQuantity, totalPrice } = useCart();
-    const { t } = useTranslation();
-
-    const formatCurrency = (amount: number, currency: string) => {
-        return new Intl.NumberFormat(t('locale_code') || 'tr-TR', { style: 'currency', currency: currency }).format(amount);
-    }
-
-    if (cartItems.length === 0) {
-        return (
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16 text-center animate-fade-in-up">
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">{t('shopping_cart')}</h1>
-                <p className="text-gray-600 mb-8">{t('cart_empty')}</p>
-                <Link to="/" className="text-white bg-gray-800 hover:bg-gray-900 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-                    {t('continue_shopping')}
-                </Link>
-            </div>
-        );
-    }
-
-    return (
-        <div className="bg-gray-50 animate-fade-in-up">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
-                <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('shopping_cart')}</h1>
-                <div className="grid lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-2 space-y-4">
-                        {cartItems.map(item => (
-                            <div key={item.id} className="flex items-center bg-white p-4 rounded-lg shadow-sm border">
-                                <img src={item.mainImage} alt={t(item.name)} className="w-24 h-24 object-cover rounded-md" />
-                                <div className="flex-grow ml-4">
-                                    <h2 className="font-semibold text-gray-800">{t(item.name)}</h2>
-                                    <p className="text-sm text-gray-600">{formatCurrency(item.price, item.currency)}</p>
-                                    <button onClick={() => removeFromCart(item.id)} className="text-red-500 hover:text-red-700 text-xs font-semibold mt-1">{t('remove')}</button>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        value={item.quantity}
-                                        onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
-                                        className="w-16 text-center border-gray-300 rounded-md"
-                                        aria-label={t('quantity')}
-                                    />
-                                </div>
-                                <div className="w-24 text-right font-semibold text-gray-800">
-                                    {formatCurrency(item.price * item.quantity, item.currency)}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    <div className="lg:col-span-1">
-                        <div className="bg-white p-6 rounded-lg shadow-sm border sticky top-28">
-                            <h2 className="text-xl font-semibold mb-4 text-gray-800">{t('order_summary')}</h2>
-                            <div className="flex justify-between text-gray-600 mb-2">
-                                <span>{t('subtotal')}</span>
-                                <span>{formatCurrency(totalPrice, cartItems[0]?.currency || 'TRY')}</span>
-                            </div>
-                            <div className="border-t my-4"></div>
-                            <div className="flex justify-between font-bold text-lg text-gray-900 mb-6">
-                                <span>{t('total')}</span>
-                                <span>{formatCurrency(totalPrice, cartItems[0]?.currency || 'TRY')}</span>
-                            </div>
-                            <button className="w-full bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors">
-                                {t('checkout')}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-
-// --- END OF CART IMPLEMENTATION ---
-
+// Helper component to render SVG strings safely
 const DynamicIcon: React.FC<{ svgString: string }> = ({ svgString }) => (
     <div dangerouslySetInnerHTML={{ __html: svgString }} />
 );
@@ -288,32 +129,29 @@ export default function App() {
   return (
     <AuthProvider>
       <I18nProvider>
-        <CartProvider>
-            <HashRouter>
-            <div className="flex flex-col min-h-screen">
-                <ScrollToTop />
-                <Header />
-                <main className="flex-grow">
-                <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/products/:categoryId" element={<ProductsPage />} />
-                    <Route path="/product/:productId" element={<ProductDetailPage />} />
-                    <Route path="/designers" element={<DesignersPage />} />
-                    <Route path="/designer/:designerId" element={<DesignerDetailPage />} />
-                    <Route path="/about" element={<AboutPage />} />
-                    <Route path="/contact" element={<ContactPage />} />
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/profile" element={<LoginPage />} />
-                    <Route path="/news" element={<NewsPage />} />
-                    <Route path="/news/:newsId" element={<NewsDetailPage />} />
-                    <Route path="/admin" element={<AdminPage />} />
-                    <Route path="/cart" element={<CartPage />} />
-                </Routes>
-                </main>
-                <Footer />
-            </div>
-            </HashRouter>
-        </CartProvider>
+        <HashRouter>
+          <div className="flex flex-col min-h-screen">
+            <ScrollToTop />
+            <Header />
+            <main className="flex-grow">
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/products/:categoryId" element={<ProductsPage />} />
+                <Route path="/product/:productId" element={<ProductDetailPage />} />
+                <Route path="/designers" element={<DesignersPage />} />
+                <Route path="/designer/:designerId" element={<DesignerDetailPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/profile" element={<LoginPage />} />
+                <Route path="/news" element={<NewsPage />} />
+                <Route path="/news/:newsId" element={<NewsDetailPage />} />
+                <Route path="/admin" element={<AdminPage />} />
+              </Routes>
+            </main>
+            <Footer />
+          </div>
+        </HashRouter>
       </I18nProvider>
     </AuthProvider>
   );

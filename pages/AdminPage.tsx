@@ -12,7 +12,7 @@ import {
   getLanguages, updateLanguages,
   getNews, addNews, updateNews, deleteNews,
 } from '../services/cms';
-import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, ContactLocation, HomePageContent, HeroMediaItem, FooterContent, SocialLink, FooterLinkColumn, LocalizedString, NewsItem, NewsMedia, ProductDimensionSet, ProductMaterial, ProductDimensionDetail } from '../types';
+import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, ContactLocation, HomePageContent, HeroMediaItem, FooterContent, SocialLink, LocalizedString, NewsItem, NewsMedia, ProductDimensionSet, ProductMaterial, ProductDimensionDetail } from '../types';
 import { useTranslation } from '../i18n';
 
 type AdminTab = 'site' | 'home' | 'categories' | 'designers' | 'products' | 'about' | 'contact' | 'footer' | 'languages' | 'news';
@@ -44,7 +44,7 @@ const createBlankProduct = (): Product => ({
   id: '', name: {}, designerId: '', categoryId: '', year: new Date().getFullYear(),
   description: {}, mainImage: '', alternativeImages: [],
   dimensions: [{ name: {}, details: [{ label: {}, value: '' }] }],
-  buyable: false, materials: [], exclusiveContent: { images: [], drawings: [], models3d: [] }
+  buyable: false, price: 0, currency: 'TRY', materials: [], exclusiveContent: { images: [], drawings: [], models3d: [] }
 });
 const createBlankNews = (): NewsItem => ({ id: '', title: {}, date: '', content: {}, mainImage: '', media: [] });
 
@@ -93,7 +93,6 @@ export function AdminPage() {
   const { t } = useTranslation();
 
   // Data states
-  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [designers, setDesigners] = useState<Designer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -148,7 +147,6 @@ export function AdminPage() {
             getLanguages(),
             getNews(),
         ]);
-        setSiteSettings(settingsData);
         setSiteSettingsForm(settingsData);
         setCategories(categoriesData);
         setDesigners(designersData);
@@ -332,7 +330,7 @@ export function AdminPage() {
     e.preventDefault(); setMessage({ text: '', type: 'success' });
     try {
       await updateSiteSettings(siteSettingsForm);
-      setSiteSettings(siteSettingsForm);
+      setSiteSettingsForm(siteSettingsForm);
       setMessage({ text: 'Settings saved successfully!', type: 'success' });
     } catch (error) { setMessage({ text: 'Failed to save settings.', type: 'error' }); }
   };
@@ -945,7 +943,11 @@ export function AdminPage() {
                         <FormRow label="Tasarımcı"><Select value={productForm.designerId} onChange={e => handleProductFormChange('designerId', e.target.value)} required>{designers.map(d => <option key={d.id} value={d.id}>{t(d.name)}</option>)}</Select></FormRow>
                         <FormRow label="Kategori"><Select value={productForm.categoryId} onChange={e => handleProductFormChange('categoryId', e.target.value)} required>{categories.map(c => <option key={c.id} value={c.id}>{t(c.name)}</option>)}</Select></FormRow>
                     </div>
-                    <FormRow label="Yıl"><Input type="number" value={productForm.year} onChange={e => handleProductFormChange('year', parseInt(e.target.value))} required /></FormRow>
+                     <div className="grid sm:grid-cols-3 gap-4">
+                        <FormRow label="Yıl"><Input type="number" value={productForm.year} onChange={e => handleProductFormChange('year', parseInt(e.target.value))} required /></FormRow>
+                        <FormRow label="Fiyat"><Input type="number" value={productForm.price || 0} onChange={e => handleProductFormChange('price', parseFloat(e.target.value))} required /></FormRow>
+                        <FormRow label="Para Birimi"><Input value={productForm.currency || 'TRY'} onChange={e => handleProductFormChange('currency', e.target.value)} required /></FormRow>
+                    </div>
                     <LocalizedInputComponent label="Açıklama" value={productForm.description} onChange={val => handleProductFormChange('description', val)} languages={visibleLanguages} Component={Textarea} />
                     <FormRow label="Ana Görsel URL"><Input type="text" value={productForm.mainImage} onChange={e => handleProductFormChange('mainImage', e.target.value)} required /></FormRow>
                     <FormRow label="Alternatif Görsel URL'leri (virgülle ayırın)"><Textarea value={productForm.alternativeImages.join(', ')} onChange={e => handleProductFormChange('alternativeImages', e.target.value.split(',').map(s => s.trim()))} /></FormRow>
