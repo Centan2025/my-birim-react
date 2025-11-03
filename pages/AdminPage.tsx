@@ -75,7 +75,7 @@ const LocalizedInputComponent: React.FC<{
                         <span className="w-12 text-xs font-semibold text-gray-500 uppercase bg-gray-100 text-center py-2.5 rounded-l-md border border-r-0 border-gray-300">{lang}</span>
                         <Component
                             value={(typeof value === 'object' && value?.[lang]) || ''}
-                            onChange={(e: React.ChangeEvent<any>) => handleInputChange(lang, e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => handleInputChange(lang, e.target.value)}
                             className="flex-1 rounded-l-none"
                         />
                     </div>
@@ -481,6 +481,7 @@ export function AdminPage() {
     };
     const handleNewsMediaChange = (index: number, field: keyof NewsMedia, value: any) => {
         setNewsForm(prev => {
+            if (!prev) return prev;
             const newMedia = prev.media.map((item, i) => i === index ? { ...item, [field]: value } : item);
             return { ...prev, media: newMedia };
         });
