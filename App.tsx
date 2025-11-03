@@ -1,5 +1,5 @@
 import React, { useState, useContext, createContext, PropsWithChildren, useEffect } from 'react';
-import { HashRouter, Routes, Route, useLocation, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Link } from 'react-router-dom';
 
 import { Header } from './components/Header';
 import { HomePage } from './pages/HomePage';
@@ -132,7 +132,7 @@ export default function App() {
     <AuthProvider>
       <I18nProvider>
         <CartProvider>
-            <HashRouter>
+            <BrowserRouter>
             <div className="flex flex-col min-h-screen">
                 <ScrollToTop />
                 <Header />
@@ -155,7 +155,7 @@ export default function App() {
                 </main>
                 <Footer />
             </div>
-            </HashRouter>
+            </BrowserRouter>
         </CartProvider>
       </I18nProvider>
     </AuthProvider>
