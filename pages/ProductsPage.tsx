@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import type { Product, Category } from '../types';
 import { getProductsByCategoryId, getCategories } from '../services/cms';
