@@ -75,7 +75,7 @@ const LocalizedInputComponent: React.FC<{
                         <span className="w-12 text-xs font-semibold text-gray-500 uppercase bg-gray-100 text-center py-2.5 rounded-l-md border border-r-0 border-gray-300">{lang}</span>
                         <Component
                             value={(typeof value === 'object' && value?.[lang]) || ''}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => handleInputChange(lang, e.target.value)}
+                            onChange={(e: React.ChangeEvent<any>) => handleInputChange(lang, e.target.value)}
                             className="flex-1 rounded-l-none"
                         />
                     </div>
@@ -694,7 +694,7 @@ export function AdminPage() {
                             <div key={index} className="p-4 border rounded-lg bg-gray-50/50 space-y-2">
                                 <div className="flex justify-between items-center">
                                     <h4 className="font-medium">Medya {index + 1}</h4>
-                                    <button type="button" onClick={() => setHomePageForm(prev => ({...prev!, heroMedia: prev!.heroMedia.filter((_, i) => i !== index)}))} className="text-red-500 hover:text-red-700 p-1">Sil</button>
+                                    <button type="button" onClick={() => setHomePageForm(prev => prev ? {...prev, heroMedia: prev.heroMedia.filter((_, i) => i !== index)} : prev)} className="text-red-500 hover:text-red-700 p-1">Sil</button>
                                 </div>
                                 <FormRow label="URL"><Input value={media.url} onChange={e => handleHomePageMediaChange(index, 'url', e.target.value)} /></FormRow>
                                 <FormRow label="Tip">
@@ -715,7 +715,7 @@ export function AdminPage() {
                             </div>
                         ))}
                     </div>
-                    <button type="button" onClick={() => setHomePageForm(prev => ({...prev!, heroMedia: [...prev!.heroMedia, {type: 'image', url: '', title: {}, subtitle: {}, buttonText: {}, buttonLink: '', isButtonVisible: true}]}))} className="mt-4 text-sm font-medium text-gray-800 hover:text-black">+ Medya Ekle</button>
+                    <button type="button" onClick={() => setHomePageForm(prev => prev ? {...prev, heroMedia: [...prev.heroMedia, {type: 'image', url: '', title: {}, subtitle: {}, buttonText: {}, buttonLink: '', isButtonVisible: true}]} : prev)} className="mt-4 text-sm font-medium text-gray-800 hover:text-black">+ Medya Ekle</button>
                 </div>
 
                 <div>
@@ -725,7 +725,7 @@ export function AdminPage() {
                             <input
                                 type="checkbox"
                                 checked={!!homePageForm.isLogoVisible}
-                                onChange={e => setHomePageForm(prev => ({ ...prev!, isLogoVisible: e.target.checked }))}
+                                onChange={e => setHomePageForm(prev => prev ? { ...prev, isLogoVisible: e.target.checked } : prev)}
                             />
                             <span className="text-gray-700">Bannerdaki logoyu göster</span>
                         </label>
@@ -733,7 +733,7 @@ export function AdminPage() {
                             <input
                                 type="checkbox"
                                 checked={!!homePageForm.isHeroTextVisible}
-                                onChange={e => setHomePageForm(prev => ({ ...prev!, isHeroTextVisible: e.target.checked }))}
+                                onChange={e => setHomePageForm(prev => prev ? { ...prev, isHeroTextVisible: e.target.checked } : prev)}
                             />
                             <span className="text-gray-700">Tanıtım yazısını göster</span>
                         </label>
@@ -753,7 +753,7 @@ export function AdminPage() {
                             <label key={p.id} className="flex items-center space-x-2">
                                 <input type="checkbox" checked={homePageForm.featuredProductIds.includes(p.id)} onChange={e => {
                                     const newIds = e.target.checked ? [...homePageForm.featuredProductIds, p.id] : homePageForm.featuredProductIds.filter(id => id !== p.id);
-                                    setHomePageForm(prev => ({...prev!, featuredProductIds: newIds}));
+                                    setHomePageForm(prev => prev ? {...prev, featuredProductIds: newIds} : prev);
                                 }} />
                                 <span className="text-gray-700">{t(p.name)}</span>
                             </label>
@@ -763,18 +763,18 @@ export function AdminPage() {
 
                 <div>
                     <h3 className="text-xl font-semibold mb-4 text-gray-800">Tasarımcı Odağı</h3>
-                    <Select value={homePageForm.featuredDesignerId} onChange={e => setHomePageForm(prev => ({...prev!, featuredDesignerId: e.target.value}))}>
+                    <Select value={homePageForm.featuredDesignerId} onChange={e => setHomePageForm(prev => prev ? {...prev, featuredDesignerId: e.target.value} : prev)}>
                         {designers.map(d => <option key={d.id} value={d.id}>{t(d.name)}</option>)}
                     </Select>
                 </div>
                  <div>
                     <h3 className="text-xl font-semibold mb-4 text-gray-800">İlham Bölümü</h3>
                     <div className="space-y-4 p-4 border rounded-lg bg-gray-50/50">
-                        <FormRow label="Arkaplan Görsel URL"><Input value={homePageForm.inspirationSection.backgroundImage} onChange={e => setHomePageForm(prev => ({...prev!, inspirationSection: {...prev!.inspirationSection, backgroundImage: e.target.value}}))} /></FormRow>
-                        <LocalizedInputComponent label="Başlık" value={homePageForm.inspirationSection.title} onChange={val => setHomePageForm(prev => ({...prev!, inspirationSection: {...prev!.inspirationSection, title: val}}))} languages={visibleLanguages} />
-                        <LocalizedInputComponent label="Alt Başlık" value={homePageForm.inspirationSection.subtitle} onChange={val => setHomePageForm(prev => ({...prev!, inspirationSection: {...prev!.inspirationSection, subtitle: val}}))} languages={visibleLanguages} />
-                        <LocalizedInputComponent label="Buton Metni" value={homePageForm.inspirationSection.buttonText} onChange={val => setHomePageForm(prev => ({...prev!, inspirationSection: {...prev!.inspirationSection, buttonText: val}}))} languages={visibleLanguages} />
-                        <FormRow label="Buton Linki"><Input value={homePageForm.inspirationSection.buttonLink} onChange={e => setHomePageForm(prev => ({...prev!, inspirationSection: {...prev!.inspirationSection, buttonLink: e.target.value}}))} /></FormRow>
+                        <FormRow label="Arkaplan Görsel URL"><Input value={homePageForm.inspirationSection.backgroundImage} onChange={e => setHomePageForm(prev => prev ? {...prev, inspirationSection: {...prev.inspirationSection, backgroundImage: e.target.value}} : prev)} /></FormRow>
+                        <LocalizedInputComponent label="Başlık" value={homePageForm.inspirationSection.title} onChange={val => setHomePageForm(prev => prev ? {...prev, inspirationSection: {...prev.inspirationSection, title: val}} : prev)} languages={visibleLanguages} />
+                        <LocalizedInputComponent label="Alt Başlık" value={homePageForm.inspirationSection.subtitle} onChange={val => setHomePageForm(prev => prev ? {...prev, inspirationSection: {...prev.inspirationSection, subtitle: val}} : prev)} languages={visibleLanguages} />
+                        <LocalizedInputComponent label="Buton Metni" value={homePageForm.inspirationSection.buttonText} onChange={val => setHomePageForm(prev => prev ? {...prev, inspirationSection: {...prev.inspirationSection, buttonText: val}} : prev)} languages={visibleLanguages} />
+                        <FormRow label="Buton Linki"><Input value={homePageForm.inspirationSection.buttonLink} onChange={e => setHomePageForm(prev => prev ? {...prev, inspirationSection: {...prev.inspirationSection, buttonLink: e.target.value}} : prev)} /></FormRow>
                     </div>
                 </div>
                 <button type="submit" className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-900 hover:bg-gray-700">Anasayfayı Kaydet</button>
@@ -787,16 +787,16 @@ export function AdminPage() {
                 <div className="grid md:grid-cols-2 gap-6">
                     <div>
                         <h3 className="text-xl font-semibold mb-4 text-gray-800">Ana Bölüm (Hero)</h3>
-                        <FormRow label="Ana Görsel URL"><Input type="text" value={aboutPageForm.heroImage} onChange={e => setAboutPageForm(prev => ({...prev!, heroImage: e.target.value}))} /></FormRow>
-                        <LocalizedInputComponent label="Ana Başlık" value={aboutPageForm.heroTitle} onChange={val => setAboutPageForm(prev => ({...prev!, heroTitle: val}))} languages={visibleLanguages} />
-                        <LocalizedInputComponent label="Alt Başlık" value={aboutPageForm.heroSubtitle} onChange={val => setAboutPageForm(prev => ({...prev!, heroSubtitle: val}))} languages={visibleLanguages} Component={Textarea} />
+                        <FormRow label="Ana Görsel URL"><Input type="text" value={aboutPageForm.heroImage} onChange={e => setAboutPageForm(prev => prev ? {...prev, heroImage: e.target.value} : prev)} /></FormRow>
+                        <LocalizedInputComponent label="Ana Başlık" value={aboutPageForm.heroTitle} onChange={val => setAboutPageForm(prev => prev ? {...prev, heroTitle: val} : prev)} languages={visibleLanguages} />
+                        <LocalizedInputComponent label="Alt Başlık" value={aboutPageForm.heroSubtitle} onChange={val => setAboutPageForm(prev => prev ? {...prev, heroSubtitle: val} : prev)} languages={visibleLanguages} Component={Textarea} />
                     </div>
                     <div>
                         <h3 className="text-xl font-semibold mb-4 text-gray-800">Hikaye Bölümü</h3>
-                        <LocalizedInputComponent label="Hikaye Başlığı" value={aboutPageForm.storyTitle} onChange={val => setAboutPageForm(prev => ({...prev!, storyTitle: val}))} languages={visibleLanguages} />
-                        <LocalizedInputComponent label="Hikaye İçeriği (Paragraf 1)" value={aboutPageForm.storyContentP1} onChange={val => setAboutPageForm(prev => ({...prev!, storyContentP1: val}))} languages={visibleLanguages} Component={Textarea} />
-                        <LocalizedInputComponent label="Hikaye İçeriği (Paragraf 2)" value={aboutPageForm.storyContentP2} onChange={val => setAboutPageForm(prev => ({...prev!, storyContentP2: val}))} languages={visibleLanguages} Component={Textarea} />
-                        <FormRow label="Hikaye Görseli URL"><Input type="text" value={aboutPageForm.storyImage} onChange={e => setAboutPageForm(prev => ({...prev!, storyImage: e.target.value}))} /></FormRow>
+                        <LocalizedInputComponent label="Hikaye Başlığı" value={aboutPageForm.storyTitle} onChange={val => setAboutPageForm(prev => prev ? {...prev, storyTitle: val} : prev)} languages={visibleLanguages} />
+                        <LocalizedInputComponent label="Hikaye İçeriği (Paragraf 1)" value={aboutPageForm.storyContentP1} onChange={val => setAboutPageForm(prev => prev ? {...prev, storyContentP1: val} : prev)} languages={visibleLanguages} Component={Textarea} />
+                        <LocalizedInputComponent label="Hikaye İçeriği (Paragraf 2)" value={aboutPageForm.storyContentP2} onChange={val => setAboutPageForm(prev => prev ? {...prev, storyContentP2: val} : prev)} languages={visibleLanguages} Component={Textarea} />
+                        <FormRow label="Hikaye Görseli URL"><Input type="text" value={aboutPageForm.storyImage} onChange={e => setAboutPageForm(prev => prev ? {...prev, storyImage: e.target.value} : prev)} /></FormRow>
                     </div>
                     <div>
                         <h3 className="text-xl font-semibold mb-4 text-gray-800">Alıntı Bölümü</h3>
@@ -805,31 +805,31 @@ export function AdminPage() {
                                 <input
                                     type="checkbox"
                                     checked={!!aboutPageForm.isQuoteVisible}
-                                    onChange={e => setAboutPageForm(prev => ({ ...prev!, isQuoteVisible: e.target.checked }))}
+                                    onChange={e => setAboutPageForm(prev => prev ? { ...prev, isQuoteVisible: e.target.checked } : prev)}
                                 />
                                 <span className="text-gray-700">Alıntı Bölümünü Göster</span>
                             </label>
                             {aboutPageForm.isQuoteVisible && (
                                 <>
-                                    <LocalizedInputComponent label="Alıntı Metni" value={aboutPageForm.quoteText} onChange={val => setAboutPageForm(prev => ({...prev!, quoteText: val}))} languages={visibleLanguages} Component={Textarea} />
-                                    <FormRow label="Alıntı Sahibi"><Input type="text" value={aboutPageForm.quoteAuthor} onChange={e => setAboutPageForm(prev => ({...prev!, quoteAuthor: e.target.value}))} /></FormRow>
+                                    <LocalizedInputComponent label="Alıntı Metni" value={aboutPageForm.quoteText} onChange={val => setAboutPageForm(prev => prev ? {...prev, quoteText: val} : prev)} languages={visibleLanguages} Component={Textarea} />
+                                    <FormRow label="Alıntı Sahibi"><Input type="text" value={aboutPageForm.quoteAuthor} onChange={e => setAboutPageForm(prev => prev ? {...prev, quoteAuthor: e.target.value} : prev)} /></FormRow>
                                 </>
                             )}
                         </div>
                     </div>
                     <div>
                       <h3 className="text-xl font-semibold mb-4 text-gray-800">Değerler Bölümü</h3>
-                      <LocalizedInputComponent label="Değerler Başlığı" value={aboutPageForm.valuesTitle} onChange={val => setAboutPageForm(prev => ({...prev!, valuesTitle: val}))} languages={visibleLanguages} />
+                      <LocalizedInputComponent label="Değerler Başlığı" value={aboutPageForm.valuesTitle} onChange={val => setAboutPageForm(prev => prev ? {...prev, valuesTitle: val} : prev)} languages={visibleLanguages} />
                       <div className="space-y-2 mt-4">
                         {aboutPageForm.values.map((value, index) => (
                            <div key={index} className="flex flex-col gap-2 p-2 border rounded bg-gray-50/50">
                               <LocalizedInputComponent label={`Değer ${index+1} Başlığı`} value={value.title} onChange={val => handleAboutValueChange(index, 'title', val)} languages={visibleLanguages} />
                               <LocalizedInputComponent label={`Değer ${index+1} Açıklaması`} value={value.description} onChange={val => handleAboutValueChange(index, 'description', val)} languages={visibleLanguages} />
-                              <button type="button" onClick={() => setAboutPageForm(prev => ({...prev!, values: prev!.values.filter((_, i) => i !== index)}))} className="text-red-500 hover:text-red-700 p-1 self-start text-sm">Değeri Sil</button>
+                              <button type="button" onClick={() => setAboutPageForm(prev => prev ? {...prev, values: prev.values.filter((_, i) => i !== index)} : prev)} className="text-red-500 hover:text-red-700 p-1 self-start text-sm">Değeri Sil</button>
                            </div>
                         ))}
                       </div>
-                      <button type="button" onClick={() => setAboutPageForm(prev => ({...prev!, values: [...prev!.values, { title: {}, description: {} }]}))} className="mt-2 text-sm font-medium text-gray-800 hover:text-black">+ Değer Ekle</button>
+                      <button type="button" onClick={() => setAboutPageForm(prev => prev ? {...prev, values: [...prev.values, { title: {}, description: {} }]} : prev)} className="mt-2 text-sm font-medium text-gray-800 hover:text-black">+ Değer Ekle</button>
                     </div>
                 </div>
                 <button type="submit" className="mt-6 px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-900 hover:bg-gray-700">Hakkımızda Sayfasını Kaydet</button>
@@ -840,8 +840,8 @@ export function AdminPage() {
         return (
             <form onSubmit={handleContactPageSubmit} className="space-y-6">
                 <h3 className="text-xl font-semibold mb-4 text-gray-800">Sayfa Başlıkları</h3>
-                <LocalizedInputComponent label="Ana Başlık" value={contactPageForm.title} onChange={val => setContactPageForm(prev => ({...prev!, title: val}))} languages={visibleLanguages} />
-                <LocalizedInputComponent label="Alt Başlık" value={contactPageForm.subtitle} onChange={val => setContactPageForm(prev => ({...prev!, subtitle: val}))} languages={visibleLanguages} Component={Textarea} />
+                <LocalizedInputComponent label="Ana Başlık" value={contactPageForm.title} onChange={val => setContactPageForm(prev => prev ? {...prev, title: val} : prev)} languages={visibleLanguages} />
+                <LocalizedInputComponent label="Alt Başlık" value={contactPageForm.subtitle} onChange={val => setContactPageForm(prev => prev ? {...prev, subtitle: val} : prev)} languages={visibleLanguages} Component={Textarea} />
 
                 <div className="border-t pt-6">
                     <h3 className="text-xl font-semibold mb-4 text-gray-800">Lokasyonlar</h3>
@@ -850,7 +850,7 @@ export function AdminPage() {
                         <div key={index} className="flex flex-col gap-2 p-4 border rounded bg-gray-50/50">
                             <div className="flex justify-between items-center">
                                 <h4 className="font-medium">Lokasyon {index + 1}</h4>
-                                <button type="button" onClick={() => setContactPageForm(prev => ({...prev!, locations: prev!.locations.filter((_, i) => i !== index)}))} className="text-red-500 hover:text-red-700 p-1 self-center">Sil</button>
+                                <button type="button" onClick={() => setContactPageForm(prev => prev ? {...prev, locations: prev.locations.filter((_, i) => i !== index)} : prev)} className="text-red-500 hover:text-red-700 p-1 self-center">Sil</button>
                             </div>
                             <div className="grid md:grid-cols-2 gap-4">
                                 <LocalizedInputComponent label="Başlık" value={loc.title} onChange={val => handleContactLocationChange(index, 'title', val)} languages={visibleLanguages} />
@@ -865,7 +865,7 @@ export function AdminPage() {
                         </div>
                     ))}
                     </div>
-                    <button type="button" onClick={() => setContactPageForm(prev => ({...prev!, locations: [...prev!.locations, { type: {}, title: {}, address: '', phone: '', mapEmbedUrl: '' }] }))} className="mt-4 text-sm font-medium text-gray-800 hover:text-black">+ Lokasyon Ekle</button>
+                    <button type="button" onClick={() => setContactPageForm(prev => prev ? {...prev, locations: [...prev.locations, { type: {}, title: {}, address: '', phone: '', mapEmbedUrl: '' }] } : prev)} className="mt-4 text-sm font-medium text-gray-800 hover:text-black">+ Lokasyon Ekle</button>
                 </div>
                 <button type="submit" className="mt-6 px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-900 hover:bg-gray-700">İletişim Sayfasını Kaydet</button>
             </form>
@@ -1031,9 +1031,9 @@ export function AdminPage() {
         if (!footerForm) return <div>{t('loading')}...</div>;
         return (
             <form onSubmit={handleFooterSubmit} className="space-y-8">
-                <LocalizedInputComponent label="Telif Hakkı Metni" value={footerForm.copyrightText} onChange={val => setFooterForm(prev => ({...prev!, copyrightText: val}))} languages={visibleLanguages} />
+                <LocalizedInputComponent label="Telif Hakkı Metni" value={footerForm.copyrightText} onChange={val => setFooterForm(prev => prev ? {...prev, copyrightText: val} : prev)} languages={visibleLanguages} />
                 <FormRow label="Partner Marka İsimleri (virgülle ayırın)">
-                    <Input value={footerForm.partnerNames.join(', ')} onChange={e => setFooterForm(prev => ({...prev!, partnerNames: e.target.value.split(',').map(s => s.trim())}))} />
+                    <Input value={footerForm.partnerNames.join(', ')} onChange={e => setFooterForm(prev => prev ? {...prev, partnerNames: e.target.value.split(',').map(s => s.trim())} : prev)} />
                 </FormRow>
 
                 <div>
@@ -1043,7 +1043,7 @@ export function AdminPage() {
                             <div key={index} className="p-4 border rounded-lg bg-gray-50/50 space-y-2">
                                 <div className="flex justify-between items-center">
                                     <h4 className="font-medium">{link.name || `Link ${index + 1}`}</h4>
-                                    <button type="button" onClick={() => setFooterForm(prev => ({...prev!, socialLinks: prev!.socialLinks.filter((_, i) => i !== index)}))} className="text-red-500 hover:text-red-700 p-1">Sil</button>
+                                    <button type="button" onClick={() => setFooterForm(prev => prev ? {...prev, socialLinks: prev.socialLinks.filter((_, i) => i !== index)} : prev)} className="text-red-500 hover:text-red-700 p-1">Sil</button>
                                 </div>
                                 <FormRow label="İsim"><Input value={link.name} onChange={e => handleFooterSocialLinkChange(index, 'name', e.target.value)} /></FormRow>
                                 <FormRow label="URL"><Input value={link.url} onChange={e => handleFooterSocialLinkChange(index, 'url', e.target.value)} /></FormRow>
@@ -1052,7 +1052,7 @@ export function AdminPage() {
                             </div>
                         ))}
                     </div>
-                    <button type="button" onClick={() => setFooterForm(prev => ({...prev!, socialLinks: [...prev!.socialLinks, {name: '', url: '', svgIcon: '', isEnabled: true}]}))} className="mt-4 text-sm font-medium text-gray-800 hover:text-black">+ Sosyal Medya Linki Ekle</button>
+                    <button type="button" onClick={() => setFooterForm(prev => prev ? {...prev, socialLinks: [...prev.socialLinks, {name: '', url: '', svgIcon: '', isEnabled: true}]} : prev)} className="mt-4 text-sm font-medium text-gray-800 hover:text-black">+ Sosyal Medya Linki Ekle</button>
                 </div>
 
                 <button type="submit" className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-900 hover:bg-gray-700">Footer'ı Kaydet</button>
