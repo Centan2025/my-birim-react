@@ -15,12 +15,11 @@ export const KEYS = {
 
 export const languagesData: string[] = ['tr', 'en'];
 
+// FIX: Removed `heroMediaUrl` and `heroMediaType` as they are not defined in the SiteSettings type.
 export const siteSettingsData: SiteSettings = {
     logoUrl: '/img/logo.png',
     headerText: 'BİRİM',
     isHeaderTextVisible: true,
-    heroMediaUrl: 'https://picsum.photos/seed/hero/1920/1080',
-    heroMediaType: 'image',
 };
 
 export const categoriesData: Category[] = [

@@ -1,9 +1,48 @@
 import { initialData, KEYS } from '../data';
-import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem } from '../types';
+import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem, ProductMaterial, ProductDimensionSet, ProductVariant } from '../types';
+import { createClient } from '@sanity/client'
+import groq from 'groq'
+import imageUrlBuilder from '@sanity/image-url'
 
 const SIMULATED_DELAY = 200;
 
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+
+// --- Sanity runtime setup (auto enable if env present) ---
+// Prefer env vars; if missing, fall back to known defaults
+const SANITY_PROJECT_ID = (import.meta as any)?.env?.VITE_SANITY_PROJECT_ID || 'wn3a082f'
+const SANITY_DATASET = (import.meta as any)?.env?.VITE_SANITY_DATASET || 'production'
+const SANITY_API_VERSION = (import.meta as any)?.env?.VITE_SANITY_API_VERSION || '2025-01-01'
+const useSanity = Boolean(SANITY_PROJECT_ID && SANITY_DATASET)
+
+const sanity = useSanity
+  ? createClient({ projectId: SANITY_PROJECT_ID, dataset: SANITY_DATASET, apiVersion: SANITY_API_VERSION, useCdn: true })
+  : null
+
+const urlFor = (source: any) => (useSanity && sanity ? imageUrlBuilder(sanity).image(source) : null)
+
+// --- DEBUG: Print env + toggle once on startup ---
+// @ts-ignore
+if (typeof window !== 'undefined') {
+  // @ts-ignore
+  console.info('SANITY env', {
+    projectId: (import.meta as any)?.env?.VITE_SANITY_PROJECT_ID,
+    dataset: (import.meta as any)?.env?.VITE_SANITY_DATASET,
+    apiVersion: (import.meta as any)?.env?.VITE_SANITY_API_VERSION,
+    useSanity,
+  })
+}
+
+const mapImage = (img: any | undefined): string => {
+  if (!img) return ''
+  const b = urlFor && urlFor(img)
+  try { return b ? b.width(1600).url() : '' } catch { return '' }
+}
+
+const mapImages = (imgs: any[] | undefined): string[] => Array.isArray(imgs) ? imgs.map(i => mapImage(i)).filter(Boolean) : []
+const mapMaterials = (materials: any[] | undefined): ProductMaterial[] => Array.isArray(materials) ? materials.map(m => ({ name: m?.name, image: mapImage(m?.image) })) : []
+const mapDimensionSets = (sets: any[] | undefined): ProductDimensionSet[] => Array.isArray(sets) ? sets.map(s => ({ name: s?.name, details: s?.details || [] })) : []
+const mapVariants = (variants: any[] | undefined): ProductVariant[] => Array.isArray(variants) ? variants.map(v => ({ name: v?.name, sku: v?.sku, price: v?.price, images: mapImages(v?.images) })) : []
 
 let storage: Storage;
 const memoryStore: { [key: string]: string } = {};
@@ -108,6 +147,10 @@ export const updateLanguages = async (languages: string[]): Promise<void> => {
 
 // Site Settings
 export const getSiteSettings = async (): Promise<SiteSettings> => {
+    if (useSanity && sanity) {
+        const q = groq`*[_type == "siteSettings"][0]`
+        return await sanity.fetch(q)
+    }
     await delay(SIMULATED_DELAY);
     return getItem<SiteSettings>(KEYS.SITE_SETTINGS);
 };
@@ -118,6 +161,11 @@ export const updateSiteSettings = async (settings: SiteSettings): Promise<void> 
 
 // Categories
 export const getCategories = async (): Promise<Category[]> => {
+    if (useSanity && sanity) {
+        const query = groq`*[_type == "category"]{ "id": id.current, name, subtitle, heroImage }`
+        const rows = await sanity.fetch(query)
+        return rows.map((r: any) => ({ id: r.id, name: r.name, subtitle: r.subtitle, heroImage: mapImage(r.heroImage) }))
+    }
     await delay(SIMULATED_DELAY);
     return getItem<Category[]>(KEYS.CATEGORIES);
 };
@@ -143,10 +191,20 @@ export const deleteCategory = async (id: string): Promise<void> => {
 
 // Designers
 export const getDesigners = async (): Promise<Designer[]> => {
+    if (useSanity && sanity) {
+        const query = groq`*[_type == "designer"]{ "id": id.current, name, bio, image } | order(name.tr asc)`
+        const rows = await sanity.fetch(query)
+        return rows.map((r: any) => ({ id: r.id, name: r.name, bio: r.bio, image: mapImage(r.image) }))
+    }
     await delay(SIMULATED_DELAY);
     return getItem<Designer[]>(KEYS.DESIGNERS);
 };
 export const getDesignerById = async (id: string): Promise<Designer | undefined> => {
+    if (useSanity && sanity) {
+        const query = groq`*[_type == "designer" && id.current == $id][0]{ "id": id.current, name, bio, image }`
+        const r = await sanity.fetch(query, { id })
+        return r ? { id: r.id, name: r.name, bio: r.bio, image: mapImage(r.image) } : undefined
+    }
     const designers = await getDesigners();
     return designers.find(d => d.id === id);
 }
@@ -172,18 +230,185 @@ export const deleteDesigner = async (id: string): Promise<void> => {
 
 // Products
 export const getProducts = async (): Promise<Product[]> => {
+    if (useSanity && sanity) {
+        const query = groq`*[_type == "product"] | order(year desc){
+          "id": id.current,
+          name,
+          year,
+          description,
+          mainImage,
+          alternativeImages,
+          buyable,
+          price,
+          currency,
+          sku,
+          stockStatus,
+          variants,
+          materials,
+          dimensions,
+          exclusiveContent,
+          designer->{ "designerId": id.current },
+          category->{ "categoryId": id.current },
+        }`
+        const rows = await sanity.fetch(query)
+        return rows.map((r: any) => ({
+          id: r.id,
+          name: r.name,
+          designerId: r.designer?.designerId || '',
+          categoryId: r.category?.categoryId || '',
+          year: r.year,
+          description: r.description,
+          mainImage: mapImage(r.mainImage),
+          alternativeImages: mapImages(r.alternativeImages),
+          dimensions: mapDimensionSets(r.dimensions),
+          buyable: Boolean(r.buyable),
+          price: r.price,
+          currency: r.currency,
+          sku: r.sku,
+          stockStatus: r.stockStatus,
+          variants: mapVariants(r.variants),
+          materials: mapMaterials(r.materials),
+          exclusiveContent: {
+            images: mapImages(r?.exclusiveContent?.images),
+            drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: d?.file?.asset?._ref || d?.file?.asset?._id || '' })),
+            models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({ name: m?.name, url: m?.file?.asset?._ref || m?.file?.asset?._id || '' })),
+          },
+        }))
+    }
     await delay(SIMULATED_DELAY);
     return getItem<Product[]>(KEYS.PRODUCTS);
 };
 export const getProductById = async (id: string): Promise<Product | undefined> => {
+    if (useSanity && sanity) {
+        const query = groq`*[_type == "product" && id.current == $id][0]{
+          "id": id.current,
+          name,
+          year,
+          description,
+          mainImage,
+          alternativeImages,
+          buyable,
+          price,
+          currency,
+          sku,
+          stockStatus,
+          variants,
+          materials,
+          dimensions,
+          exclusiveContent,
+          designer->{ "designerId": id.current },
+          category->{ "categoryId": id.current },
+        }`
+        const r = await sanity.fetch(query, { id })
+        if (!r) return undefined
+        return {
+          id: r.id,
+          name: r.name,
+          designerId: r.designer?.designerId || '',
+          categoryId: r.category?.categoryId || '',
+          year: r.year,
+          description: r.description,
+          mainImage: mapImage(r.mainImage),
+          alternativeImages: mapImages(r.alternativeImages),
+          dimensions: mapDimensionSets(r.dimensions),
+          buyable: Boolean(r.buyable),
+          price: r.price,
+          currency: r.currency,
+          sku: r.sku,
+          stockStatus: r.stockStatus,
+          variants: mapVariants(r.variants),
+          materials: mapMaterials(r.materials),
+          exclusiveContent: {
+            images: mapImages(r?.exclusiveContent?.images),
+            drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: d?.file?.asset?._ref || d?.file?.asset?._id || '' })),
+            models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({ name: m?.name, url: m?.file?.asset?._ref || m?.file?.asset?._id || '' })),
+          },
+        }
+    }
     const products = await getProducts();
     return products.find(p => p.id === id);
 }
 export const getProductsByCategoryId = async (categoryId: string): Promise<Product[]> => {
+    if (useSanity && sanity) {
+        const query = groq`*[_type == "product" && references(*[_type == "category" && id.current == $categoryId]._id)]{
+          "id": id.current,
+          name,
+          year,
+          description,
+          mainImage,
+          alternativeImages,
+          buyable,
+          price,
+          currency,
+          materials,
+          dimensions,
+          designer->{ "designerId": id.current },
+          category->{ "categoryId": id.current },
+        }`
+        const rows = await sanity.fetch(query, { categoryId })
+        return rows.map((r: any) => ({
+          id: r.id,
+          name: r.name,
+          designerId: r.designer?.designerId || '',
+          categoryId: r.category?.categoryId || '',
+          year: r.year,
+          description: r.description,
+          mainImage: mapImage(r.mainImage),
+          alternativeImages: mapImages(r.alternativeImages),
+          dimensions: mapDimensionSets(r.dimensions),
+          buyable: Boolean(r.buyable),
+          price: r.price,
+          currency: r.currency,
+          materials: mapMaterials(r.materials),
+          exclusiveContent: {
+            images: mapImages(r?.exclusiveContent?.images),
+            drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: d?.file?.asset?._ref || d?.file?.asset?._id || '' })),
+            models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({ name: m?.name, url: m?.file?.asset?._ref || m?.file?.asset?._id || '' })),
+          },
+        }))
+    }
     const products = await getProducts();
     return products.filter(p => p.categoryId === categoryId);
 }
 export const getProductsByDesignerId = async (designerId: string): Promise<Product[]> => {
+    if (useSanity && sanity) {
+        const query = groq`*[_type == "product" && references(*[_type == "designer" && id.current == $designerId]._id)]{
+          "id": id.current,
+          name,
+          year,
+          description,
+          mainImage,
+          alternativeImages,
+          buyable,
+          price,
+          currency,
+          materials,
+          dimensions,
+          designer->{ "designerId": id.current },
+          category->{ "categoryId": id.current },
+        }`
+        const rows = await sanity.fetch(query, { designerId })
+        return rows.map((r: any) => ({
+          id: r.id,
+          name: r.name,
+          designerId: r.designer?.designerId || '',
+          categoryId: r.category?.categoryId || '',
+          year: r.year,
+          description: r.description,
+          mainImage: mapImage(r.mainImage),
+          alternativeImages: mapImages(r.alternativeImages),
+          dimensions: mapDimensionSets(r.dimensions),
+          buyable: Boolean(r.buyable),
+          price: r.price,
+          currency: r.currency,
+          materials: mapMaterials(r.materials),
+          exclusiveContent: {
+            images: mapImages(r?.exclusiveContent?.images),
+            drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: d?.file?.asset?._ref || d?.file?.asset?._id || '' })),
+            models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({ name: m?.name, url: m?.file?.asset?._ref || m?.file?.asset?._id || '' })),
+          },
+        }))
+    }
     const products = await getProducts();
     return products.filter(p => p.designerId === designerId);
 }
@@ -209,6 +434,10 @@ export const deleteProduct = async (id: string): Promise<void> => {
 
 // Page Content
 export const getAboutPageContent = async (): Promise<AboutPageContent> => {
+    if (useSanity && sanity) {
+        const q = groq`*[_type == "aboutPage"][0]`
+        return await sanity.fetch(q)
+    }
     await delay(SIMULATED_DELAY);
     return getItem<AboutPageContent>(KEYS.ABOUT_PAGE);
 };
@@ -218,6 +447,10 @@ export const updateAboutPageContent = async (content: AboutPageContent): Promise
 };
 
 export const getContactPageContent = async (): Promise<ContactPageContent> => {
+    if (useSanity && sanity) {
+        const q = groq`*[_type == "contactPage"][0]`
+        return await sanity.fetch(q)
+    }
     await delay(SIMULATED_DELAY);
     return getItem<ContactPageContent>(KEYS.CONTACT_PAGE);
 };
@@ -227,6 +460,10 @@ export const updateContactPageContent = async (content: ContactPageContent): Pro
 };
 
 export const getHomePageContent = async (): Promise<HomePageContent> => {
+    if (useSanity && sanity) {
+        const q = groq`*[_type == "homePage"][0]`
+        return await sanity.fetch(q)
+    }
     await delay(SIMULATED_DELAY);
     return getItem<HomePageContent>(KEYS.HOME_PAGE);
 };
@@ -237,6 +474,10 @@ export const updateHomePageContent = async (content: HomePageContent): Promise<v
 
 // Footer Content
 export const getFooterContent = async (): Promise<FooterContent> => {
+    if (useSanity && sanity) {
+        const q = groq`*[_type == "footer"][0]`
+        return await sanity.fetch(q)
+    }
     await delay(SIMULATED_DELAY);
     return getItem<FooterContent>(KEYS.FOOTER);
 };
@@ -247,10 +488,35 @@ export const updateFooterContent = async (content: FooterContent): Promise<void>
 
 // News
 export const getNews = async (): Promise<NewsItem[]> => {
+    if (useSanity && sanity) {
+        const q = groq`*[_type == "newsItem"] | order(date desc){ "id": id.current, title, date, content, mainImage, media }`
+        const rows = await sanity.fetch(q)
+        return rows.map((r: any) => ({
+          id: r.id,
+          title: r.title,
+          date: r.date,
+          content: r.content,
+          mainImage: mapImage(r.mainImage),
+          media: (r.media || []).map((m: any) => ({ type: m.type, url: m.url || mapImage(m.image), caption: m.caption })),
+        }))
+    }
     await delay(SIMULATED_DELAY);
     return getItem<NewsItem[]>(KEYS.NEWS);
 };
 export const getNewsById = async (id: string): Promise<NewsItem | undefined> => {
+    if (useSanity && sanity) {
+        const q = groq`*[_type == "newsItem" && id.current == $id][0]{ "id": id.current, title, date, content, mainImage, media }`
+        const r = await sanity.fetch(q, { id })
+        if (!r) return undefined
+        return {
+          id: r.id,
+          title: r.title,
+          date: r.date,
+          content: r.content,
+          mainImage: mapImage(r.mainImage),
+          media: (r.media || []).map((m: any) => ({ type: m.type, url: m.url || mapImage(m.image), caption: m.caption })),
+        }
+    }
     const newsItems = await getNews();
     return newsItems.find(n => n.id === id);
 }
@@ -273,3 +539,4 @@ export const deleteNews = async (id: string): Promise<void> => {
     let news = await getNews();
     setItem(KEYS.NEWS, news.filter(n => n.id !== id));
 };
+

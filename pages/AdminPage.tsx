@@ -101,7 +101,7 @@ export function AdminPage() {
   const [news, setNews] = useState<NewsItem[]>([]);
 
   // Form states
-  const [siteSettingsForm, setSiteSettingsForm] = useState<SiteSettings>({ logoUrl: '', heroMediaUrl: '', heroMediaType: 'image', headerText: 'BİRİM', isHeaderTextVisible: true });
+  const [siteSettingsForm, setSiteSettingsForm] = useState<SiteSettings>({ logoUrl: '', headerText: 'BİRİM', isHeaderTextVisible: true });
   const [logoGenPrompt, setLogoGenPrompt] = useState('');
   const [generatedLogoUrl, setGeneratedLogoUrl] = useState('');
   const [generating, setGenerating] = useState(false);
