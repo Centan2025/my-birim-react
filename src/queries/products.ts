@@ -1,5 +1,5 @@
-import {groq} from 'groq'
-import {sanityClient} from '@/lib/sanityClient'
+import groq from 'groq'
+import {sanityClient} from '../lib/sanityClient'
 
 export type ProductCard = {
   _id: string

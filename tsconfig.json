@@ -13,6 +13,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "types": ["vite/client"] ,
 
     /* Linting */
     "strict": true,
@@ -21,6 +22,11 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["."],
-  "exclude": ["vite.config.ts"],
+  "exclude": [
+    "vite.config.ts",
+    "birim-web/**",
+    "birrim-web/**",
+    "birim-web-1/**"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
