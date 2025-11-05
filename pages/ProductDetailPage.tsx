@@ -81,7 +81,8 @@ export function ProductDetailPage() {
   if (!product) return <div className="pt-20 text-center">{t('product_not_found')}</div>;
 
   const altImages = Array.isArray(product.alternativeImages) ? product.alternativeImages : [];
-  const allImages = [product.mainImage, ...altImages];
+  const allImagesRaw = [product.mainImage, ...altImages];
+  const allImages = Array.isArray(allImagesRaw) ? allImagesRaw.filter(Boolean) : [];
   const grouped = Array.isArray((product as any).groupedMaterials) ? (product as any).groupedMaterials : [];
   const safeActiveIndex = Math.min(Math.max(activeMaterialGroup, 0), Math.max(grouped.length - 1, 0));
   const dimImages = Array.isArray(product?.exclusiveContent?.images) ? (product as any).exclusiveContent.images as string[] : [];
@@ -154,7 +155,7 @@ export function ProductDetailPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mt-1 md:mt-2 h-[2px] bg-gray-500/80" />
           <div className="mt-3 grid grid-cols-5 gap-3">
-            {allImages.map((img, idx) => (
+            {(Array.isArray(allImages) ? allImages : []).map((img: string, idx: number) => (
               <button key={idx} onClick={() => changeMainImage(img)} className={`overflow-hidden border-2 transition-all duration-300 ${mainImage === img ? 'border-gray-900 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}>
                 <img src={img} alt={`${t(product.name)} thumbnail ${idx + 1}`} className="w-full h-24 object-cover" />
               </button>
@@ -192,7 +193,7 @@ export function ProductDetailPage() {
               <div>
                 <h2 className="text-xl font-semibold text-gray-800">{t('dimensions')}</h2>
                 <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {dimImages.map((img: string, idx: number) => (
+                  {(Array.isArray(dimImages) ? dimImages : []).map((img: string, idx: number) => (
                     <button key={idx} onClick={() => setDimLightbox(img)} className="group border border-gray-200 hover:border-gray-400 transition p-3 bg-white">
                       <img src={img} alt={`dimension-${idx}`} className="w-full h-40 object-contain" />
                     </button>
@@ -205,12 +206,12 @@ export function ProductDetailPage() {
               <div>
                 <h2 className="text-xl font-semibold text-gray-800">{t('material_alternatives')}</h2>
                 <div className="mt-4 flex flex-wrap gap-3">
-                  {grouped.map((g: any, idx: number) => (
+                  {(Array.isArray(grouped) ? grouped : []).map((g: any, idx: number) => (
                     <button key={idx} onClick={() => setActiveMaterialGroup(idx)} className={`px-3 py-1 rounded-full border backdrop-blur-sm transition-all duration-200 ${activeMaterialGroup===idx ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white/60 text-gray-900 border-gray-300 hover:bg-white'}`}>{t(g.groupTitle)}</button>
                   ))}
                 </div>
                 <div className="mt-6 flex flex-wrap gap-4">
-                  {(grouped[safeActiveIndex]?.materials || []).map((material: any, index: number) => (
+                  {(Array.isArray(grouped[safeActiveIndex]?.materials) ? grouped[safeActiveIndex].materials : []).map((material: any, index: number) => (
                     <div key={index} className="text-center group cursor-pointer" title={t(material.name)}>
                       <img src={material.image} alt={t(material.name)} className="w-20 h-20 object-cover border-2 border-transparent group-hover:border-gray-400 transition" />
                       <p className="mt-2 text-sm text-gray-600 max-w-[80px] break-words">{t(material.name)}</p>
