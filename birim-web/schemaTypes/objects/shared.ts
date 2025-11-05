@@ -1,6 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {localizedString} from './localizedString'
-import MaterialSelectionInput from '../components/MaterialSelectionInput'
+import MaterialSelectionInput from '../../components/MaterialSelectionInput'
 
 export const productDimensionDetail = defineType({
   name: 'productDimensionDetail',
