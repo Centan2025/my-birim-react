@@ -5,10 +5,10 @@ export const deskStructure = (S: StructureBuilder) =>
     .title('İçerik')
     .items([
       S.listItem()
-        .title('Kategoriler')
+        .title('Koleksiyon')
         .child(
           S.documentTypeList('category')
-            .title('Kategoriler')
+            .title('Koleksiyon')
             .child((categoryId) =>
               S.documentList()
                 .title('Ürünler')

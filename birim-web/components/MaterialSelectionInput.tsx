@@ -23,8 +23,17 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
   useEffect(() => {
     setLoading(true)
     client
-      .fetch<GroupDoc[]>(`*[_type == "materialGroup"]{_id, title, books{ title, items }}`)
-      .then((rows) => setGroups(rows || []))
+      .fetch<GroupDoc[]>(`*[_type == "materialGroup"]{_id, title, books{ title, items }, items}`)
+      .then((rows: any[]) => {
+        const normalized = (rows || []).map((r) => ({
+          _id: r._id,
+          title: r.title,
+          books: r.books && r.books.length
+            ? r.books
+            : (r.items && r.items.length ? [{ title: r.title, items: r.items }] : []),
+        }))
+        setGroups(normalized as any)
+      })
       .finally(() => setLoading(false))
   }, [client])
 
@@ -53,7 +62,8 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
 
   const group = groups.find((g)=> g._id === openGroupId)
   const books = group?.books || []
-  const currentBook = books[openBookIndex]
+  const safeIndex = Math.min(Math.max(openBookIndex, 0), Math.max(books.length-1, 0))
+  const currentBook = books[safeIndex]
   const materials = currentBook?.items || []
 
   return (
