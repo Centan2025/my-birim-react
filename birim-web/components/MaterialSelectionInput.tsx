@@ -11,11 +11,10 @@ function genKey() { return `${Date.now().toString(36)}_${Math.random().toString(
 function withKey(items: Material[]): Material[] { return (items || []).map(m => (m && m._key ? m : {...m, _key: genKey()})) }
 function assetId(img: any): string { return img?.asset?._ref || img?._ref || img?._id || img?.asset?._id || '' }
 function materialIdLoose(m: any): string {
-  const k = m?._key || ''
   const ntr = (m?.name?.tr || '').toString().trim()
   const nen = (m?.name?.en || '').toString().trim()
   const aid = assetId(m?.image)
-  return [k, ntr, nen, aid].join('|')
+  return [ntr, nen, aid].join('|')
 }
 
 export default function MaterialSelectionInput(props: ObjectInputProps) {
