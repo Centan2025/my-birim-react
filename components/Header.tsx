@@ -240,6 +240,7 @@ export function Header() {
                       </div>
                   </div>
                   <NavItem to="/designers">{t('designers')}</NavItem>
+                  <NavItem to="/projects">{t('projects') || 'Projeler'}</NavItem>
                   <NavItem to="/news">{t('news')}</NavItem>
                   <NavItem to="/about">{t('about')}</NavItem>
                   <NavItem to="/contact">{t('contact')}</NavItem>
@@ -293,6 +294,7 @@ export function Header() {
             <nav className="flex flex-col space-y-4">
               <NavLink to="/products/kanepeler" className="text-sm font-medium tracking-wider text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('collection')}</NavLink>
               <NavLink to="/designers" className="text-sm font-medium tracking-wider text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('designers')}</NavLink>
+              <NavLink to="/projects" className="text-sm font-medium tracking-wider text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('projects') || 'Projeler'}</NavLink>
               <NavLink to="/news" className="text-sm font-medium tracking-wider text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('news')}</NavLink>
               <NavLink to="/about" className="text-sm font-medium tracking-wider text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('about')}</NavLink>
               <NavLink to="/contact" className="text-sm font-medium tracking-wider text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('contact')}</NavLink>

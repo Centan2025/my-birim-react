@@ -321,3 +321,13 @@ export interface CartItem {
   /** The quantity of the product in the cart. */
   quantity: number;
 }
+
+export interface Project {
+  id: string;
+  title: LocalizedString;
+  cover: string;
+  date?: string;
+  excerpt?: LocalizedString;
+  gallery?: string[];
+  body?: LocalizedString;
+}

@@ -19,6 +19,8 @@ import { SiteLogo } from './components/SiteLogo';
 import { I18nProvider, useTranslation } from './i18n';
 import { CartProvider } from './context/CartContext';
 import { CartSidebar } from './components/CartSidebar';
+import { ProjectsPage } from './pages/ProjectsPage';
+import { ProjectDetailPage } from './pages/ProjectDetailPage';
 
 // Helper component to render SVG strings safely
 const DynamicIcon: React.FC<{ svgString: string }> = ({ svgString }) => (
@@ -144,6 +146,8 @@ export default function App() {
                     <Route path="/product/:productId" element={<ProductDetailPage />} />
                     <Route path="/designers" element={<DesignersPage />} />
                     <Route path="/designer/:designerId" element={<DesignerDetailPage />} />
+                    <Route path="/projects" element={<ProjectsPage />} />
+                    <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
                     <Route path="/about" element={<AboutPage />} />
                     <Route path="/contact" element={<ContactPage />} />
                     <Route path="/login" element={<LoginPage />} />

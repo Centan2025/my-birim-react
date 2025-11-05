@@ -1,5 +1,5 @@
 import { initialData, KEYS } from '../data';
-import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem, ProductMaterial, ProductDimensionSet, ProductVariant } from '../types';
+import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem, ProductMaterial, ProductDimensionSet, ProductVariant, Project } from '../types';
 import { createClient } from '@sanity/client'
 import groq from 'groq'
 import imageUrlBuilder from '@sanity/image-url'
@@ -545,4 +545,23 @@ export const deleteNews = async (id: string): Promise<void> => {
     let news = await getNews();
     setItem(KEYS.NEWS, news.filter(n => n.id !== id));
 };
+
+// Projects
+export const getProjects = async (): Promise<Project[]> => {
+  if (useSanity && sanity) {
+    const q = groq`*[_type=="project"] | order(date desc){ "id": id.current, title, date, cover, excerpt }`
+    const rows = await sanity.fetch(q)
+    return rows.map((r: any) => ({ id: r.id, title: r.title, date: r.date, cover: mapImage(r.cover), excerpt: r.excerpt }))
+  }
+  return []
+}
+export const getProjectById = async (id: string): Promise<Project | undefined> => {
+  if (useSanity && sanity) {
+    const q = groq`*[_type=="project" && id.current==$id][0]{ "id": id.current, title, date, cover, excerpt, body, gallery }`
+    const r = await sanity.fetch(q, { id })
+    if (!r) return undefined
+    return { id: r.id, title: r.title, date: r.date, cover: mapImage(r.cover), excerpt: r.excerpt, body: r.body, gallery: mapImages(r.gallery) }
+  }
+  return undefined
+}
 
