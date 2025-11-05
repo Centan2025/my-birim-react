@@ -42,6 +42,7 @@ export function ProductDetailPage() {
   const { t, locale } = useTranslation();
   const { addToCart } = useCart();
   const [activeMaterialGroup, setActiveMaterialGroup] = useState<number>(0);
+  const [dragStartX, setDragStartX] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -81,9 +82,12 @@ export function ProductDetailPage() {
   if (!product) return <div className="pt-20 text-center">{t('product_not_found')}</div>;
 
   const allImages = [product.mainImage, ...product.alternativeImages];
+  const currentIdx = Math.max(0, allImages.indexOf(mainImage));
 
   const changeMainImage = (img: string) => { if (img === mainImage) return; setPrevImage(mainImage); setMainImage(img); };
-  // Lightbox controls (disabled for now; thumbnails change main image)
+  const heroNext = () => { const next = allImages[(currentIdx + 1) % allImages.length]; changeMainImage(next); };
+  const heroPrev = () => { const prev = allImages[(currentIdx - 1 + allImages.length) % allImages.length]; changeMainImage(prev); };
+
   const closeLightbox = () => setIsLightboxOpen(false);
   const nextImage = () => setLightboxImageIndex((prevIndex) => (prevIndex + 1) % allImages.length);
   const prevImageFn = () => setLightboxImageIndex((prevIndex) => (prevIndex - 1 + allImages.length) % allImages.length);
@@ -92,10 +96,32 @@ export function ProductDetailPage() {
     <>
       {/* FULL-WIDTH HERO IMAGE */}
       <header className="relative w-full">
-        <div className="relative w-full h-[60vh] md:h-[70vh] overflow-hidden">
+        <div
+          className="relative w-full h-[60vh] md:h-[70vh] overflow-hidden"
+          onMouseDown={(e) => setDragStartX(e.clientX)}
+          onMouseUp={(e) => {
+            if (dragStartX === null) return;
+            const delta = e.clientX - dragStartX;
+            if (Math.abs(delta) > 40) {
+              if (delta < 0) heroNext(); else heroPrev();
+            }
+            setDragStartX(null);
+          }}
+        >
           {prevImage && (<img src={prevImage} alt={t(product.name)} className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500" />)}
           <img key={mainImage} src={mainImage} alt={t(product.name)} className="w-full h-full object-cover opacity-0 transition-opacity duration-500" onLoad={(e) => { (e.currentTarget as HTMLImageElement).classList.remove('opacity-0'); }} />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+
+          {/* overlay breadcrumbs top-left */}
+          <nav className="absolute top-4 left-4 text-sm text-white/80">
+            <ol className="list-none p-0 inline-flex items-center gap-2">
+              <li><Link to="/" className="hover:text-white">{t('homepage')}</Link></li>
+              {category && (<><li className="opacity-70">/</li><li><Link to={`/products/${category.id}`} className="hover:text-white">{t(category.name)}</Link></li></>)}
+              <li className="opacity-70">/</li>
+              <li className="text-white">{t(product.name)}</li>
+            </ol>
+          </nav>
+
           <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-white">
             <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg">{t(product.name)}</h1>
             {designer && (
@@ -104,11 +130,15 @@ export function ProductDetailPage() {
               </p>
             )}
           </div>
+
+          {/* hero arrows */}
+          <button onClick={heroPrev} className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/35 hover:bg-black/50 text-white rounded-full w-10 h-10 flex items-center justify-center">‹</button>
+          <button onClick={heroNext} className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/35 hover:bg-black/50 text-white rounded-full w-10 h-10 flex items-center justify-center">›</button>
         </div>
-        {/* Thumbnails under hero */}
+        {/* Divider and Thumbnails under hero */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mt-6 md:mt-8 h-[1px] bg-gray-200/70" />
-          <div className="mt-4 grid grid-cols-5 gap-3">
+          <div className="mt-4 md:mt-6 h-[2px] bg-gray-300/90" />
+          <div className="mt-3 grid grid-cols-5 gap-3">
             {allImages.map((img, idx) => (
               <button key={idx} onClick={() => changeMainImage(img)} className={`overflow-hidden border-2 transition-all duration-300 ${mainImage === img ? 'border-gray-900 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}>
                 <img src={img} alt={`${t(product.name)} thumbnail ${idx + 1}`} className="w-full h-24 object-cover" />
