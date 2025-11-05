@@ -83,7 +83,7 @@ export function ProductDetailPage() {
   const allImages = [product.mainImage, ...product.alternativeImages];
 
   const changeMainImage = (img: string) => { if (img === mainImage) return; setPrevImage(mainImage); setMainImage(img); };
-  const openLightbox = (index: number) => { setLightboxImageIndex(index); setIsLightboxOpen(true); };
+  // Lightbox controls (disabled for now; thumbnails change main image)
   const closeLightbox = () => setIsLightboxOpen(false);
   const nextImage = () => setLightboxImageIndex((prevIndex) => (prevIndex + 1) % allImages.length);
   const prevImageFn = () => setLightboxImageIndex((prevIndex) => (prevIndex - 1 + allImages.length) % allImages.length);
