@@ -82,12 +82,7 @@ export function ProductDetailPage() {
 
   const allImages = [product.mainImage, ...product.alternativeImages];
 
-  const changeMainImage = (img: string) => {
-    if (img === mainImage) return;
-    setPrevImage(mainImage);
-    setMainImage(img);
-  };
-
+  const changeMainImage = (img: string) => { if (img === mainImage) return; setPrevImage(mainImage); setMainImage(img); };
   const openLightbox = (index: number) => { setLightboxImageIndex(index); setIsLightboxOpen(true); };
   const closeLightbox = () => setIsLightboxOpen(false);
   const nextImage = () => setLightboxImageIndex((prevIndex) => (prevIndex + 1) % allImages.length);
@@ -95,162 +90,156 @@ export function ProductDetailPage() {
 
   return (
     <>
-      <div>
-        <div className="bg-gray-50">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
-            <nav className="mb-8 text-sm text-gray-500 animate-fade-in-up" aria-label="Breadcrumb">
-              <ol className="list-none p-0 inline-flex items-center">
-                <li><Link to="/" className="hover:text-gray-800">{t('homepage')}</Link></li>
-                <li className="mx-2 font-light text-gray-400">|</li>
-                {category && (<><li><Link to={`/products/${category.id}`} className="hover:text-gray-800">{t(category.name)}</Link></li><li className="mx-2 font-light text-gray-400">|</li></>)}
-                <li className="font-semibold text-gray-800" aria-current="page">{t(product.name)}</li>
-              </ol>
-            </nav>
+      {/* FULL-WIDTH HERO IMAGE */}
+      <header className="relative w-full">
+        <div className="relative w-full h-[60vh] md:h-[70vh] overflow-hidden">
+          {prevImage && (<img src={prevImage} alt={t(product.name)} className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500" />)}
+          <img key={mainImage} src={mainImage} alt={t(product.name)} className="w-full h-full object-cover opacity-0 transition-opacity duration-500" onLoad={(e) => { (e.currentTarget as HTMLImageElement).classList.remove('opacity-0'); }} />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+          <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-white">
+            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg">{t(product.name)}</h1>
+            {designer && (<p className="mt-2 text-white/80">{t(designer.name)} — {product.year}</p>)}
+          </div>
+        </div>
+        {/* Thumbnails under hero */}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 -mt-8 md:-mt-10">
+          <div className="grid grid-cols-5 gap-3 bg-white/70 backdrop-blur-sm p-3 rounded-md">
+            {allImages.map((img, idx) => (
+              <button key={idx} onClick={() => changeMainImage(img)} className={`overflow-hidden border-2 transition-all duration-300 ${mainImage === img ? 'border-gray-900 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}>
+                <img src={img} alt={`${t(product.name)} thumbnail ${idx + 1}`} className="w-full h-24 object-cover" />
+              </button>
+            ))}
+          </div>
+        </div>
+      </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-              <div className="animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-                <div className="relative mb-4 overflow-hidden bg-gray-100 cursor-zoom-in" onClick={() => openLightbox(allImages.indexOf(mainImage))}>
-                  {prevImage && (
-                    <img src={prevImage} alt={t(product.name)} className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500" />
-                  )}
-                  <img key={mainImage} src={mainImage} alt={t(product.name)} className="relative w-full h-full object-cover opacity-0 transition-opacity duration-500" onLoad={(e) => { (e.currentTarget as HTMLImageElement).classList.remove('opacity-0'); }} />
-                </div>
-                <div className="grid grid-cols-5 gap-3">
-                  {allImages.map((img, idx) => (
-                    <button key={idx} onClick={() => changeMainImage(img)} className={`overflow-hidden border-2 transition-all duration-300 ${mainImage === img ? 'border-gray-900 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}>
-                      <img src={img} alt={`${t(product.name)} thumbnail ${idx + 1}`} className="w-full h-24 object-cover" />
-                    </button>
+      {/* DETAILS BELOW */}
+      <main>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Breadcrumbs */}
+          <nav className="mb-8 text-sm text-gray-500" aria-label="Breadcrumb">
+            <ol className="list-none p-0 inline-flex items-center">
+              <li><Link to="/" className="hover:text-gray-800">{t('homepage')}</Link></li>
+              <li className="mx-2 font-light text-gray-400">|</li>
+              {category && (<><li><Link to={`/products/${category.id}`} className="hover:text-gray-800">{t(category.name)}</Link></li><li className="mx-2 font-light text-gray-400">|</li></>)}
+              <li className="font-semibold text-gray-800" aria-current="page">{t(product.name)}</li>
+            </ol>
+          </nav>
+
+          <section className="space-y-10">
+            {product.buyable && product.price > 0 && (
+              <div><p className="text-3xl font-bold text-gray-900">{new Intl.NumberFormat(locale, { style: 'currency', currency: product.currency || 'TRY' }).format(product.price)}</p></div>
+            )}
+
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">{t('description')}</h2>
+              <p className="mt-2 text-gray-600 leading-relaxed">{t(product.description)}</p>
+            </div>
+
+            {product.dimensions && product.dimensions.length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800">{t('dimensions')}</h2>
+                {product.dimensions.length > 1 && (
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    {product.dimensions.map((dimSet, index) => {
+                      const widthDetail = dimSet.details.find(d => (d.label as any)?.tr === 'Genişlik' || (d.label as any)?.tr === 'Çap' || (d.label as any) === 'Genişlik' || (d.label as any) === 'Çap');
+                      const firstDetail = dimSet.details[0];
+                      const dimensionLabel = widthDetail ? t(widthDetail.value) : firstDetail ? t(firstDetail.value) : `${index+1}`;
+                      return (
+                        <button key={index} onClick={() => setSelectedDimensionIndex(index)} className={`px-3 py-1 rounded-full border backdrop-blur-sm transition-all duration-200 ${selectedDimensionIndex === index ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white/60 text-gray-900 border-gray-300 hover:bg-white'}`}>{dimensionLabel}</button>
+                      );
+                    })}
+                  </div>
+                )}
+                <div className="mt-6 flex flex-wrap gap-x-8 gap-y-4">
+                  {product.dimensions[selectedDimensionIndex].details.map((dim, index) => (
+                    <div key={index}><p className="text-lg font-semibold text-gray-800">{t(dim.value)}</p></div>
                   ))}
                 </div>
               </div>
+            )}
 
-              <div className="flex flex-col animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-                <h1 className="text-4xl md:text-5xl font-extrabold tracking-tighter text-gray-900">{t(product.name)}</h1>
-                {designer && (<p className="text-lg text-gray-500 mt-3"><Link to={`/designer/${designer.id}`} className="text-gray-800 hover:underline font-semibold">{t(designer.name)}</Link> — {product.year}</p>)}
-
-                <div className="mt-8 space-y-8 border-t pt-8">
-                  {product.buyable && product.price > 0 && (
-                    <div><p className="text-3xl font-bold text-gray-900">{new Intl.NumberFormat(locale, { style: 'currency', currency: product.currency || 'TRY' }).format(product.price)}</p></div>
-                  )}
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-800">{t('description')}</h2>
-                    <p className="mt-2 text-gray-600 leading-relaxed">{t(product.description)}</p>
-                  </div>
-
-                  {product.dimensions && product.dimensions.length > 0 && (
-                    <div>
-                      <h2 className="text-xl font-semibold text-gray-800">{t('dimensions')}</h2>
-                      {product.dimensions.length > 1 && (
-                        <div className="mt-4 flex flex-wrap gap-3">
-                          {product.dimensions.map((dimSet, index) => {
-                            const widthDetail = dimSet.details.find(d => (d.label as any)?.tr === 'Genişlik' || (d.label as any)?.tr === 'Çap' || (d.label as any) === 'Genişlik' || (d.label as any) === 'Çap');
-                            const firstDetail = dimSet.details[0];
-                            const dimensionLabel = widthDetail ? t(widthDetail.value) : firstDetail ? t(firstDetail.value) : `${index+1}`;
-                            return (
-                              <button key={index} onClick={() => setSelectedDimensionIndex(index)} className={`px-3 py-1 rounded-full border backdrop-blur-sm transition-all duration-200 ${selectedDimensionIndex === index ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white/60 text-gray-900 border-gray-300 hover:bg-white'}`}>{dimensionLabel}</button>
-                            );
-                          })}
-                        </div>
-                      )}
-                      <div className="mt-6 flex flex-wrap gap-x-8 gap-y-4">
-                        {product.dimensions[selectedDimensionIndex].details.map((dim, index) => (
-                          <div key={index}>
-                            <p className="text-lg font-semibold text-gray-800">{t(dim.value)}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {product.materials && product.groupedMaterials && product.groupedMaterials.length > 0 && (
-                    <div>
-                      <h2 className="text-xl font-semibold text-gray-800">{t('material_alternatives')}</h2>
-                      <div className="mt-4 flex flex-wrap gap-3">
-                        {product.groupedMaterials.map((g, idx) => (
-                          <button key={idx} onClick={() => setActiveMaterialGroup(idx)} className={`px-3 py-1 rounded-full border backdrop-blur-sm transition-all duration-200 ${activeMaterialGroup===idx ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white/60 text-gray-900 border-gray-300 hover:bg-white'}`}>{t(g.groupTitle)}</button>
-                        ))}
-                      </div>
-                      <div className="mt-6 flex flex-wrap gap-4">
-                        {product.groupedMaterials[activeMaterialGroup].materials.map((material, index) => (
-                          <div key={index} className="text-center group cursor-pointer" title={t(material.name)}>
-                            <img src={material.image} alt={t(material.name)} className="w-20 h-20 object-cover border-2 border-transparent group-hover:border-gray-400 transition" />
-                            <p className="mt-2 text-sm text-gray-600 max-w-[80px] break-words">{t(material.name)}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+            {product.materials && product.groupedMaterials && product.groupedMaterials.length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800">{t('material_alternatives')}</h2>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  {product.groupedMaterials.map((g, idx) => (
+                    <button key={idx} onClick={() => setActiveMaterialGroup(idx)} className={`px-3 py-1 rounded-full border backdrop-blur-sm transition-all duration-200 ${activeMaterialGroup===idx ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white/60 text-gray-900 border-gray-300 hover:bg-white'}`}>{t(g.groupTitle)}</button>
+                  ))}
                 </div>
-                {product.buyable && (
-                  <div className="mt-12 pt-8 border-t border-gray-200">
-                    <button onClick={() => addToCart(product)} className="group w-20 h-20 flex items-center justify-center bg-gray-900 text-white rounded-full hover:bg-gray-700 transition-all duration-300 ease-in-out transform hover:scale-110 active:scale-100 hover:shadow-lg" aria-label={t('add_to_cart')}>
-                      <TransparentShoppingBagIcon />
-                    </button>
-                  </div>
-                )}
+                <div className="mt-6 flex flex-wrap gap-4">
+                  {product.groupedMaterials[activeMaterialGroup].materials.map((material, index) => (
+                    <div key={index} className="text-center group cursor-pointer" title={t(material.name)}>
+                      <img src={material.image} alt={t(material.name)} className="w-20 h-20 object-cover border-2 border-transparent group-hover:border-gray-400 transition" />
+                      <p className="mt-2 text-sm text-gray-600 max-w-[80px] break-words">{t(material.name)}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
+
+            {product.buyable && (
+              <div className="pt-6 border-t border-gray-200">
+                <button onClick={() => addToCart(product)} className="group w-20 h-20 flex items-center justify-center bg-gray-900 text-white rounded-full hover:bg-gray-700 transition-all duration-300 ease-in-out transform hover:scale-110 active:scale-100 hover:shadow-lg" aria-label={t('add_to_cart')}>
+                  <TransparentShoppingBagIcon />
+                </button>
+              </div>
+            )}
 
             {isLoggedIn && product.exclusiveContent && (
-              <div className="mt-20 bg-white p-8 sm:p-12 rounded-lg animate-fade-in-up border">
+              <div className="bg-white p-8 sm:p-12 rounded-lg border">
                 <h2 className="text-3xl font-bold text-gray-900 mb-8 border-b pb-4 border-gray-300">{t('exclusive_content')}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                   <div>
                     <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('additional_images')}</h3>
                     <div className="grid grid-cols-2 gap-3">
-                      {product.exclusiveContent.images.map((img, idx) => (
-                        <img key={idx} src={img} alt={`Exclusive ${idx}`} className="w-full object-cover shadow-sm"/>
-                      ))}
+                      {product.exclusiveContent.images.map((img, idx) => (<img key={idx} src={img} alt={`Exclusive ${idx}`} className="w-full object-cover shadow-sm"/>))}
                     </div>
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('technical_drawings')}</h3>
                     <ul className="space-y-3">
-                      {product.exclusiveContent.drawings.map((doc, idx) => (
-                        <li key={idx}><a href={doc.url} download className="text-gray-700 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(doc.name)}</a></li>
-                      ))}
+                      {product.exclusiveContent.drawings.map((doc, idx) => (<li key={idx}><a href={doc.url} download className="text-gray-700 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(doc.name)}</a></li>))}
                     </ul>
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('3d_models')}</h3>
                     <ul className="space-y-3">
-                      {product.exclusiveContent.models3d.map((model, idx) => (
-                        <li key={idx}><a href={model.url} download className="text-gray-700 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(model.name)}</a></li>
-                      ))}
+                      {product.exclusiveContent.models3d.map((model, idx) => (<li key={idx}><a href={model.url} download className="text-gray-700 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(model.name)}</a></li>))}
                     </ul>
                   </div>
                 </div>
               </div>
             )}
-          </div>
-        </div>
 
-        {(prevProduct || nextProduct) && (
-          <nav className="bg-white border-t border-gray-200">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center py-8">
-              <div className="w-1/2 flex justify-start">
-                {prevProduct ? (
-                  <Link to={`/product/${prevProduct.id}`} className="group flex items-center gap-3 text-gray-700 hover:text-gray-900 transition-colors" aria-label={`Previous product: ${t(prevProduct.name)}`}>
-                    <ChevronLeftIcon className="w-8 h-8 transition-transform group-hover:-translate-x-1" />
-                    <div className="text-right"><span className="text-xs uppercase tracking-wider text-gray-500">{t('previous_product')}</span><p className="text-lg font-semibold truncate max-w-[200px]">{t(prevProduct.name)}</p></div>
-                  </Link>
-                ) : (<div />)}
-              </div>
-              <div className="w-1/2 flex justify-end">
-                {nextProduct ? (
-                  <Link to={`/product/${nextProduct.id}`} className="group flex items-center gap-3 text-gray-700 hover:text-gray-900 transition-colors" aria-label={`Next product: ${t(nextProduct.name)}`}>
-                    <div className="text-left"><span className="text-xs uppercase tracking-wider text-gray-500">{t('next_product')}</span><p className="text-lg font-semibold truncate max-w-[200px]">{t(nextProduct.name)}</p></div>
-                    <ChevronRightIcon className="w-8 h-8 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                ) : (<div />)}
-              </div>
-            </div>
-          </nav>
-        )}
-      </div>
+            {(prevProduct || nextProduct) && (
+              <nav className="bg-white border-t border-gray-200">
+                <div className="flex justify-between items-center py-8">
+                  <div className="w-1/2 flex justify-start">
+                    {prevProduct ? (
+                      <Link to={`/product/${prevProduct.id}`} className="group flex items-center gap-3 text-gray-700 hover:text-gray-900 transition-colors" aria-label={`Previous product: ${t(prevProduct.name)}`}>
+                        <ChevronLeftIcon className="w-8 h-8 transition-transform group-hover:-translate-x-1" />
+                        <div className="text-right"><span className="text-xs uppercase tracking-wider text-gray-500">{t('previous_product')}</span><p className="text-lg font-semibold truncate max-w-[200px]">{t(prevProduct.name)}</p></div>
+                      </Link>
+                    ) : (<div />)}
+                  </div>
+                  <div className="w-1/2 flex justify-end">
+                    {nextProduct ? (
+                      <Link to={`/product/${nextProduct.id}`} className="group flex items-center gap-3 text-gray-700 hover:text-gray-900 transition-colors" aria-label={`Next product: ${t(nextProduct.name)}`}>
+                        <div className="text-left"><span className="text-xs uppercase tracking-wider text-gray-500">{t('next_product')}</span><p className="text-lg font-semibold truncate max-w-[200px]">{t(nextProduct.name)}</p></div>
+                        <ChevronRightIcon className="w-8 h-8 transition-transform group-hover:translate-x-1" />
+                      </Link>
+                    ) : (<div />)}
+                  </div>
+                </div>
+              </nav>
+            )}
+          </section>
+        </div>
+      </main>
 
       {isLightboxOpen && (
-        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center animate-fade-in-up" style={{ animationDuration: '0.2s' }}>
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center" style={{ animationDuration: '0.2s' }}>
           <button onClick={closeLightbox} className="absolute top-4 right-4 text-white hover:opacity-75 transition-opacity z-20"><CloseIcon /></button>
           <button onClick={prevImageFn} className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:opacity-75 transition-opacity z-20 bg-black/20 rounded-full p-2"><ChevronLeftIcon /></button>
           <button onClick={nextImage} className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:opacity-75 transition-opacity z-20 bg-black/20 rounded-full p-2"><ChevronRightIcon /></button>
