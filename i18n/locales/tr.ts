@@ -4,6 +4,7 @@ export default {
   "news": "HABERLER",
   "about": "HAKKIMIZDA",
   "contact": "İLETİŞİM",
+  "projects": "PROJELER",
   "search_placeholder": "Ürün, kategori veya tasarımcı arayın...",
   "search_no_results": "\"{0}\" için sonuç bulunamadı.",
   "searching": "Aranıyor...",

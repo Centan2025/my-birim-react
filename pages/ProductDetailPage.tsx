@@ -163,7 +163,6 @@ export function ProductDetailPage() {
                         ))}
                       </div>
                       <div className="mt-5">
-                        <p className="text-sm text-gray-500">{t(product.dimensions[selectedDimensionIndex].details[selectedDetailIndex].label)}</p>
                         <p className="text-2xl font-semibold text-gray-900">{t(product.dimensions[selectedDimensionIndex].details[selectedDetailIndex].value)}</p>
                       </div>
                     </div>
