@@ -7,7 +7,7 @@ import { SiteLogo } from '../components/SiteLogo';
 import { useTranslation } from '../i18n';
 
 const ArrowRight = (props: React.ComponentProps<'svg'>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
 );
 
 const getYouTubeId = (url: string): string | null => {
@@ -74,7 +74,7 @@ export function HomePage() {
     if (!isDragging) return;
     setIsDragging(false);
 
-    const slideCount = content?.heroMedia.length || 1;
+    const slideCount = content?.heroMedia ? content.heroMedia.length : 1;
     if (draggedX < -DRAG_THRESHOLD) {
         setCurrentSlide(prev => (prev + 1) % slideCount);
     } else if (draggedX > DRAG_THRESHOLD) {
@@ -91,15 +91,15 @@ export function HomePage() {
         getSiteSettings(),
         getHomePageContent()
       ]);
-      setContent(homeContent);
-      setSettings(siteSettingsData);
+      setContent(homeContent || null);
+      setSettings(siteSettingsData || null);
       
-      if (homeContent?.featuredProductIds) {
+      if (homeContent?.featuredProductIds && Array.isArray(productsData)) {
         const fProducts = productsData.filter(p => homeContent.featuredProductIds.includes(p.id));
-        setFeaturedProducts(fProducts);
+        setFeaturedProducts(fProducts || []);
       }
 
-      if (homeContent?.featuredDesignerId) {
+      if (homeContent?.featuredDesignerId && Array.isArray(designersData)) {
         const fDesigner = designersData.find(d => d.id === homeContent.featuredDesignerId);
         setFeaturedDesigner(fDesigner || null);
       }
@@ -108,7 +108,7 @@ export function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (!content || content.heroMedia.length <= 1 || isDragging) return;
+    if (!content || !content.heroMedia || content.heroMedia.length <= 1 || isDragging) return;
     const timer = setTimeout(() => {
       setCurrentSlide(prev => (prev + 1) % content.heroMedia.length);
     }, 7000);
@@ -119,7 +119,9 @@ export function HomePage() {
     return <div className="h-screen w-full bg-gray-800" />;
   }
   
-  const slideCount = content.heroMedia.length;
+  const heroMedia = Array.isArray(content.heroMedia) ? content.heroMedia : [];
+  const slideCount = heroMedia.length || 1;
+  const inspiration = content.inspirationSection || { backgroundImage: '', title: '', subtitle: '', buttonText: '', buttonLink: '/' };
 
   return (
     <div className="bg-gray-50 text-gray-800">
@@ -142,7 +144,7 @@ export function HomePage() {
                 transition: isDragging ? 'none' : 'transform 0.6s ease-in-out',
             }}
         >
-            {content.heroMedia.map((media, index) => (
+            {heroMedia.map((media, index) => (
                 <div 
                     key={index} 
                     className="relative h-full shrink-0" 
@@ -170,7 +172,7 @@ export function HomePage() {
                                       <p className="text-lg md:text-xl mb-8" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>{t(media.subtitle)}</p>
                                       {media.isButtonVisible && (
                                         <Link
-                                            to={media.buttonLink}
+                                            to={media.buttonLink || '/'}
                                             className="group inline-flex items-center gap-x-3 text-white font-semibold py-3 px-5 text-lg rounded-lg hover:bg-white/10 transition-colors duration-300"
                                         >
                                             <span className="transition-transform duration-300 ease-out group-hover:-translate-x-1">{t(media.buttonText)}</span>
@@ -188,7 +190,7 @@ export function HomePage() {
         
          {slideCount > 1 && (
             <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex items-center space-x-4">
-                {content.heroMedia.map((_, index) => (
+                {heroMedia.map((_, index) => (
                     <button
                         key={index}
                         onClick={() => setCurrentSlide(index)}
@@ -213,7 +215,7 @@ export function HomePage() {
           <h2 className="text-3xl font-bold text-center mb-4">{t('featured_products')}</h2>
           <p className="text-center text-gray-600 max-w-2xl mx-auto mb-12">{t('featured_products_subtitle')}</p>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-            {featuredProducts.map(p => (
+            {(Array.isArray(featuredProducts) ? featuredProducts : []).map(p => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
@@ -244,16 +246,16 @@ export function HomePage() {
       )}
 
       {/* Inspiration Section */}
-      <section className="relative py-32 bg-gray-800 text-white text-center" style={{ backgroundImage: `url(${content.inspirationSection.backgroundImage})`, backgroundSize: 'cover', backgroundAttachment: 'fixed', backgroundPosition: 'center' }}>
+      <section className="relative py-32 bg-gray-800 text-white text-center" style={{ backgroundImage: `url(${inspiration.backgroundImage})`, backgroundSize: 'cover', backgroundAttachment: 'fixed', backgroundPosition: 'center' }}>
          <div className="absolute inset-0 bg-black/50"></div>
          <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
-            <h2 className="text-4xl font-bold">{t(content.inspirationSection.title)}</h2>
-            <p className="mt-4 text-lg text-gray-200 max-w-2xl mx-auto">{t(content.inspirationSection.subtitle)}</p>
+            <h2 className="text-4xl font-bold">{t(inspiration.title)}</h2>
+            <p className="mt-4 text-lg text-gray-200 max-w-2xl mx-auto">{t(inspiration.subtitle)}</p>
             <Link
-                to={content.inspirationSection.buttonLink}
+                to={inspiration.buttonLink || '/'}
                 className="group mt-8 inline-flex items-center gap-x-3 text-white font-semibold py-3 px-5 text-lg rounded-lg hover:bg-white/10 transition-colors duration-300"
             >
-                <span className="transition-transform duration-300 ease-out group-hover:-translate-x-1">{t(content.inspirationSection.buttonText)}</span>
+                <span className="transition-transform duration-300 ease-out group-hover:-translate-x-1">{t(inspiration.buttonText)}</span>
                 <ArrowRight className="w-5 h-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
             </Link>
          </div>
