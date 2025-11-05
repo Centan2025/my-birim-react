@@ -17,7 +17,6 @@ export const productDimensionSet = defineType({
   title: 'Ürün Ölçü Seti',
   type: 'object',
   fields: [
-    defineField({name: 'name', title: 'Ad', type: 'localizedString'}),
     defineField({
       name: 'details',
       title: 'Detaylar',

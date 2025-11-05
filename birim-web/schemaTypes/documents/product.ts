@@ -26,7 +26,7 @@ export default defineType({
       to: [{type: 'category'}],
     }),
     defineField({name: 'year', title: 'Yıl', type: 'number'}),
-    defineField({name: 'description', title: 'Açıklama', type: 'localizedString'}),
+    defineField({name: 'description', title: 'Açıklama', type: 'localizedText'}),
     defineField({name: 'mainImage', title: 'Ana Görsel', type: 'image', options: {hotspot: true}}),
     defineField({
       name: 'alternativeImages',
@@ -63,6 +63,7 @@ export default defineType({
       of: [{ type: 'productMaterialSelection' }],
       description: 'Bir veya birden fazla grubu seçin ve her gruptan kullanılacak malzemeleri işaretleyin.'
     }),
+    defineField({name: 'showMaterials', title: 'Malzemeleri Göster', type: 'boolean', initialValue: true}),
     defineField({
       name: 'variants',
       title: 'Varyantlar',

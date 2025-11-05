@@ -59,17 +59,20 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
               type="button"
               onClick={() => toggleGroup(g._id)}
               style={{
-                border: '1px solid #e5e7eb',
-                padding: '6px 10px',
+                border: '1px solid rgba(17,24,39,0.15)',
+                padding: '6px 12px',
                 borderRadius: 9999,
-                background: isOpen ? '#111827' : '#fff',
+                background: isOpen ? 'rgba(17,24,39,0.9)' : 'rgba(255,255,255,0.6)',
                 color: isOpen ? '#fff' : '#111827',
+                backdropFilter: 'saturate(180%) blur(6px)',
+                boxShadow: isOpen ? '0 6px 18px rgba(0,0,0,0.15)' : '0 4px 12px rgba(0,0,0,0.08)',
+                transition: 'all .2s ease',
                 cursor: 'pointer',
               }}
             >
               {(g.title?.tr || g.title?.en || 'Grup')}
               {hasSelected ? (
-                <span style={{marginLeft: 8, fontSize: 11, color: isOpen ? '#d1fae5' : '#10b981'}}>●</span>
+                <span style={{marginLeft: 8, fontSize: 11, color: isOpen ? '#a7f3d0' : '#059669'}}>●</span>
               ) : null}
             </button>
           )

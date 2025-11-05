@@ -10,6 +10,7 @@ import footer from './documents/footer'
 import materialGroup from './documents/materialGroup'
 
 import {localizedString} from './objects/localizedString'
+import {localizedText} from './objects/localizedText'
 import {
   productDimensionDetail,
   productDimensionSet,
@@ -39,6 +40,7 @@ export const schemaTypes = [
   materialGroup,
   // objects
   localizedString,
+  localizedText,
   productDimensionDetail,
   productDimensionSet,
   productMaterial,

@@ -14,7 +14,7 @@ export default defineType({
     }),
     defineField({name: 'title', title: 'Başlık', type: 'localizedString', validation: (Rule) => Rule.required()}),
     defineField({name: 'date', title: 'Tarih', type: 'datetime'}),
-    defineField({name: 'content', title: 'İçerik', type: 'localizedString'}),
+    defineField({name: 'content', title: 'İçerik', type: 'localizedText'}),
     defineField({name: 'mainImage', title: 'Kapak Görseli', type: 'image', options: {hotspot: true}}),
     defineField({
       name: 'media',

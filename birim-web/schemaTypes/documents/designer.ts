@@ -13,7 +13,7 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({name: 'name', title: 'Ad', type: 'localizedString', validation: (Rule) => Rule.required()}),
-    defineField({name: 'bio', title: 'Biyografi', type: 'localizedString'}),
+    defineField({name: 'bio', title: 'Biyografi', type: 'localizedText'}),
     defineField({name: 'image', title: 'Görsel', type: 'image', options: {hotspot: true}}),
   ],
   preview: {

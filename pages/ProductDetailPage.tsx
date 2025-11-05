@@ -174,8 +174,9 @@ export function ProductDetailPage() {
                         {product.dimensions.length > 1 && (
                           <div className="mt-4 flex flex-wrap gap-4">
                             {product.dimensions.map((dimSet, index) => {
-                                const widthDetail = dimSet.details.find(d => d.label === 'Genişlik' || d.label === 'Çap');
-                                const dimensionLabel = widthDetail ? t(widthDetail.value) : t(dimSet.name);
+                                const widthDetail = dimSet.details.find(d => (d.label as any)?.tr === 'Genişlik' || (d.label as any)?.tr === 'Çap' || (d.label as any) === 'Genişlik' || (d.label as any) === 'Çap');
+                                const firstDetail = dimSet.details[0];
+                                const dimensionLabel = widthDetail ? t(widthDetail.value) : firstDetail ? t(firstDetail.value) : `${index+1}`;
                                 return (
                                     <button
                                         key={index}
