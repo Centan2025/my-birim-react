@@ -84,7 +84,7 @@ export function ProductDetailPage() {
   const allImages = [product.mainImage, ...altImages];
   const grouped = Array.isArray((product as any).groupedMaterials) ? (product as any).groupedMaterials : [];
   const safeActiveIndex = Math.min(Math.max(activeMaterialGroup, 0), Math.max(grouped.length - 1, 0));
-  const dimImages = (product.exclusiveContent && Array.isArray(product.exclusiveContent.images)) ? product.exclusiveContent.images : [];
+  // dimension images drawn from exclusiveContent.images at render time; no separate const needed
   const currentIdx = Math.max(0, allImages.indexOf(mainImage));
 
   const changeMainImage = (img: string) => { if (img === mainImage) return; setPrevImage(mainImage); setMainImage(img); };
@@ -204,12 +204,12 @@ export function ProductDetailPage() {
               <div>
                 <h2 className="text-xl font-semibold text-gray-800">{t('material_alternatives')}</h2>
                 <div className="mt-4 flex flex-wrap gap-3">
-                  {grouped.map((g, idx) => (
+                  {grouped.map((g: any, idx: number) => (
                     <button key={idx} onClick={() => setActiveMaterialGroup(idx)} className={`px-3 py-1 rounded-full border backdrop-blur-sm transition-all duration-200 ${activeMaterialGroup===idx ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white/60 text-gray-900 border-gray-300 hover:bg-white'}`}>{t(g.groupTitle)}</button>
                   ))}
                 </div>
                 <div className="mt-6 flex flex-wrap gap-4">
-                  {(grouped[safeActiveIndex]?.materials || []).map((material, index) => (
+                  {(grouped[safeActiveIndex]?.materials || []).map((material: any, index: number) => (
                     <div key={index} className="text-center group cursor-pointer" title={t(material.name)}>
                       <img src={material.image} alt={t(material.name)} className="w-20 h-20 object-cover border-2 border-transparent group-hover:border-gray-400 transition" />
                       <p className="mt-2 text-sm text-gray-600 max-w-[80px] break-words">{t(material.name)}</p>
