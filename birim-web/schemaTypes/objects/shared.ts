@@ -36,6 +36,16 @@ export const productMaterial = defineType({
   ],
 })
 
+export const materialSwatchBook = defineType({
+  name: 'materialSwatchBook',
+  title: 'Kartela',
+  type: 'object',
+  fields: [
+    defineField({ name: 'title', title: 'Başlık', type: 'localizedString', validation: (Rule)=> Rule.required() }),
+    defineField({ name: 'items', title: 'Malzemeler', type: 'array', of: [{ type: 'productMaterial' }] })
+  ],
+})
+
 export const productVariant = defineType({
   name: 'productVariant',
   title: 'Product Variant',

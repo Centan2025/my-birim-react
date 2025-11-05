@@ -7,10 +7,10 @@ export default defineType({
   fields: [
     defineField({ name: 'title', title: 'Grup Adı', type: 'localizedString', validation: (Rule) => Rule.required() }),
     defineField({
-      name: 'items',
-      title: 'Malzemeler',
+      name: 'books',
+      title: 'Kartelalar',
       type: 'array',
-      of: [{ type: 'productMaterial' }],
+      of: [{ type: 'materialSwatchBook' }],
     }),
   ],
   preview: {

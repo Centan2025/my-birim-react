@@ -22,7 +22,6 @@ const ICONS: { [key: string]: React.ComponentType } = {
     "Craftsmanship": CraftIcon
 };
 
-
 export function AboutPage() {
   const [content, setContent] = useState<AboutPageContent | null>(null);
   const [loading, setLoading] = useState(true);
@@ -31,32 +30,31 @@ export function AboutPage() {
   useEffect(() => {
     const fetchContent = async () => {
         setLoading(true);
-        const pageContent = await getAboutPageContent();
-        setContent(pageContent);
-        setLoading(false);
+        try {
+          const pageContent = await getAboutPageContent();
+          setContent(pageContent || null);
+        } finally {
+          setLoading(false);
+        }
     };
     fetchContent();
   }, []);
 
-  if (loading || !content) {
-      return <div className="flex items-center justify-center">{t('loading')}...</div>
-  }
+  if (loading) return <div className="pt-24 text-center">{t('loading')}...</div>
+  if (!content) return <div className="pt-24 text-center">{t('loading')}...</div>
 
   const getIconKey = (title: LocalizedString) => {
     if (typeof title === 'string') return title;
-    // The keys in ICONS are Turkish, so we default to the 'tr' version for the key.
-    return title.tr || '';
+    return (title && (title as any).tr) || '';
   };
 
   return (
     <div className="bg-white animate-fade-in-up">
         {/* Hero Section */}
         <div className="relative h-[50vh] bg-gray-800 text-white flex items-center justify-center">
-            <img 
-                src={content.heroImage}
-                alt={t(content.heroTitle)} 
-                className="absolute inset-0 w-full h-full object-cover opacity-40"
-            />
+            {content.heroImage && (
+              <img src={content.heroImage} alt={t(content.heroTitle)} className="absolute inset-0 w-full h-full object-cover opacity-40" />
+            )}
             <div className="relative z-10 text-center px-4">
                 <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter">{t(content.heroTitle)}</h1>
                 <p className="mt-4 text-lg md:text-xl text-gray-200 max-w-3xl mx-auto">{t(content.heroSubtitle)}</p>
@@ -72,15 +70,12 @@ export function AboutPage() {
                     <p>{t(content.storyContentP2)}</p>
                 </div>
                 <div className="md:col-span-2">
-                    <img 
-                        src={content.storyImage}
-                        alt="Detailed craftsmanship" 
-                        className="rounded-lg w-full shadow-lg"
-                    />
+                    {content.storyImage && (
+                      <img src={content.storyImage} alt="story" className="w-full shadow-lg" />
+                    )}
                 </div>
             </div>
             
-            {/* Quote Section */}
             {content.isQuoteVisible && (
                 <div className="my-24 text-center max-w-3xl mx-auto">
                     <blockquote className="text-2xl md:text-4xl font-light text-gray-800 italic border-l-4 border-gray-800 pl-6 md:pl-8">
@@ -90,11 +85,10 @@ export function AboutPage() {
                 </div>
             )}
 
-            {/* Our Values Section */}
-            <div className="bg-gray-50 rounded-lg p-12 my-24">
+            <div className="bg-gray-50 p-12 my-24">
                 <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">{t(content.valuesTitle)}</h2>
                 <div className="grid md:grid-cols-3 gap-12 text-center">
-                    {content.values.map((value, index) => {
+                    {(content.values || []).map((value, index) => {
                        const iconKey = getIconKey(value.title);
                        const IconComponent = ICONS[iconKey] || QualityIcon;
                        return (

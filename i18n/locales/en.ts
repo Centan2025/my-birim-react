@@ -24,7 +24,7 @@ export default {
   "homepage": "Homepage",
   "description": "Description",
   "dimensions": "Dimensions",
-  "material_alternatives": "Material Alternatives",
+  "material_alternatives": "Finishes",
   "add_to_cart": "Add to cart",
   "added_to_cart": "{0} added to cart!",
   "exclusive_content": "Exclusive Content",

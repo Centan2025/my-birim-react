@@ -25,6 +25,7 @@ import {
   footerLinkColumn,
   socialLink,
   contactLocation,
+  materialSwatchBook,
 } from './objects/shared'
 
 export const schemaTypes = [
@@ -46,6 +47,7 @@ export const schemaTypes = [
   productDimensionDetail,
   productDimensionSet,
   productMaterial,
+  materialSwatchBook,
   productMaterialSelection,
   productVariant,
   downloadableItem,

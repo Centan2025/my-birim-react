@@ -24,7 +24,7 @@ export default {
   "homepage": "Anasayfa",
   "description": "Açıklama",
   "dimensions": "Ölçüler",
-  "material_alternatives": "Malzeme Alternatifleri",
+  "material_alternatives": "Bitişler",
   "add_to_cart": "Sepete ekle",
   "added_to_cart": "{0} sepete eklendi!",
   "exclusive_content": "Özel İçerik",
