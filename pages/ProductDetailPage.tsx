@@ -34,26 +34,25 @@ export function ProductDetailPage() {
   const [siblingProducts, setSiblingProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [mainImage, setMainImage] = useState('');
+  const [prevImage, setPrevImage] = useState<string | null>(null);
   const [selectedDimensionIndex, setSelectedDimensionIndex] = useState(0);
-  const [selectedDetailIndex, setSelectedDetailIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
   const { isLoggedIn } = useAuth();
   const { t, locale } = useTranslation();
   const { addToCart } = useCart();
   const [activeMaterialGroup, setActiveMaterialGroup] = useState<number>(0);
-  const [imgSwap, setImgSwap] = useState<'enter'|'leave'|null>(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
       setLoading(true);
       if (productId) {
-        setSelectedDimensionIndex(0); // Reset on product change
-        setSelectedDetailIndex(0);
+        setSelectedDimensionIndex(0);
         const productData = await getProductById(productId);
         setProduct(productData);
         if (productData) {
           setMainImage(productData.mainImage);
+          setPrevImage(null);
           const [designerData, allCategories, productsInCategory] = await Promise.all([
             getDesignerById(productData.designerId),
             getCategories(),
@@ -69,23 +68,10 @@ export function ProductDetailPage() {
     fetchProduct();
   }, [productId]);
 
-  // Slide+fade animation when main image changes
-  useEffect(() => {
-    if (!mainImage) return;
-    setImgSwap('leave');
-    const t1 = setTimeout(() => setImgSwap('enter'), 10);
-    const t2 = setTimeout(() => setImgSwap(null), 260);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, [mainImage]);
-
   const { prevProduct, nextProduct } = useMemo(() => {
-    if (!product || siblingProducts.length < 2) {
-      return { prevProduct: null, nextProduct: null };
-    }
+    if (!product || siblingProducts.length < 2) return { prevProduct: null, nextProduct: null };
     const currentIndex = siblingProducts.findIndex(p => p.id === product.id);
-    if (currentIndex === -1) {
-      return { prevProduct: null, nextProduct: null };
-    }
+    if (currentIndex === -1) return { prevProduct: null, nextProduct: null };
     const prev = currentIndex > 0 ? siblingProducts[currentIndex - 1] : null;
     const next = currentIndex < siblingProducts.length - 1 ? siblingProducts[currentIndex + 1] : null;
     return { prevProduct: prev, nextProduct: next };
@@ -93,12 +79,19 @@ export function ProductDetailPage() {
 
   if (loading) return <div className="pt-20 text-center">{t('loading')}...</div>;
   if (!product) return <div className="pt-20 text-center">{t('product_not_found')}</div>;
+
   const allImages = [product.mainImage, ...product.alternativeImages];
+
+  const changeMainImage = (img: string) => {
+    if (img === mainImage) return;
+    setPrevImage(mainImage);
+    setMainImage(img);
+  };
 
   const openLightbox = (index: number) => { setLightboxImageIndex(index); setIsLightboxOpen(true); };
   const closeLightbox = () => setIsLightboxOpen(false);
-  const nextImage = () => setLightboxImageIndex((i) => (i + 1) % allImages.length);
-  const prevImage = () => setLightboxImageIndex((i) => (i - 1 + allImages.length) % allImages.length);
+  const nextImage = () => setLightboxImageIndex((prevIndex) => (prevIndex + 1) % allImages.length);
+  const prevImageFn = () => setLightboxImageIndex((prevIndex) => (prevIndex - 1 + allImages.length) % allImages.length);
 
   return (
     <>
@@ -116,15 +109,15 @@ export function ProductDetailPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
               <div className="animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-                <div className={`mb-4 overflow-hidden bg-gray-100 cursor-zoom-in rounded-lg`}
-                     onClick={() => openLightbox(allImages.indexOf(mainImage))}>
-                  <img src={mainImage} alt={t(product.name)}
-                       className={`w-full h-full object-cover transition-all duration-300 ease-out ${imgSwap==='leave' ? 'opacity-0 -translate-y-1' : imgSwap==='enter' ? 'opacity-100 translate-y-0' : ''}`} />
+                <div className="relative mb-4 overflow-hidden bg-gray-100 cursor-zoom-in" onClick={() => openLightbox(allImages.indexOf(mainImage))}>
+                  {prevImage && (
+                    <img src={prevImage} alt={t(product.name)} className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500" />
+                  )}
+                  <img key={mainImage} src={mainImage} alt={t(product.name)} className="relative w-full h-full object-cover opacity-0 transition-opacity duration-500" onLoad={(e) => { (e.currentTarget as HTMLImageElement).classList.remove('opacity-0'); }} />
                 </div>
                 <div className="grid grid-cols-5 gap-3">
                   {allImages.map((img, idx) => (
-                    <button key={idx} onClick={() => setMainImage(img)}
-                            className={`overflow-hidden border-2 transition-all duration-300 ${mainImage===img ? 'border-gray-900 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}>
+                    <button key={idx} onClick={() => changeMainImage(img)} className={`overflow-hidden border-2 transition-all duration-300 ${mainImage === img ? 'border-gray-900 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}>
                       <img src={img} alt={`${t(product.name)} thumbnail ${idx + 1}`} className="w-full h-24 object-cover" />
                     </button>
                   ))}
@@ -134,7 +127,7 @@ export function ProductDetailPage() {
               <div className="flex flex-col animate-fade-in-up" style={{ animationDelay: '200ms' }}>
                 <h1 className="text-4xl md:text-5xl font-extrabold tracking-tighter text-gray-900">{t(product.name)}</h1>
                 {designer && (<p className="text-lg text-gray-500 mt-3"><Link to={`/designer/${designer.id}`} className="text-gray-800 hover:underline font-semibold">{t(designer.name)}</Link> — {product.year}</p>)}
-                
+
                 <div className="mt-8 space-y-8 border-t pt-8">
                   {product.buyable && product.price > 0 && (
                     <div><p className="text-3xl font-bold text-gray-900">{new Intl.NumberFormat(locale, { style: 'currency', currency: product.currency || 'TRY' }).format(product.price)}</p></div>
@@ -147,42 +140,40 @@ export function ProductDetailPage() {
                   {product.dimensions && product.dimensions.length > 0 && (
                     <div>
                       <h2 className="text-xl font-semibold text-gray-800">{t('dimensions')}</h2>
-                        {product.dimensions.length > 1 && (
-                          <div className="mt-4 flex flex-wrap gap-2">
-                            {product.dimensions.map((_, index) => (
-                              <button key={index} onClick={() => { setSelectedDimensionIndex(index); setSelectedDetailIndex(0); }}
-                                className={`px-3 py-1 rounded-full border transition-all duration-200 ${selectedDimensionIndex===index ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white/50 text-gray-900 border-gray-300 hover:bg-white/80'}`}>{index+1}</button>
-                            ))}
+                      {product.dimensions.length > 1 && (
+                        <div className="mt-4 flex flex-wrap gap-3">
+                          {product.dimensions.map((dimSet, index) => {
+                            const widthDetail = dimSet.details.find(d => (d.label as any)?.tr === 'Genişlik' || (d.label as any)?.tr === 'Çap' || (d.label as any) === 'Genişlik' || (d.label as any) === 'Çap');
+                            const firstDetail = dimSet.details[0];
+                            const dimensionLabel = widthDetail ? t(widthDetail.value) : firstDetail ? t(firstDetail.value) : `${index+1}`;
+                            return (
+                              <button key={index} onClick={() => setSelectedDimensionIndex(index)} className={`px-3 py-1 rounded-full border backdrop-blur-sm transition-all duration-200 ${selectedDimensionIndex === index ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white/60 text-gray-900 border-gray-300 hover:bg-white'}`}>{dimensionLabel}</button>
+                            );
+                          })}
+                        </div>
+                      )}
+                      <div className="mt-6 flex flex-wrap gap-x-8 gap-y-4">
+                        {product.dimensions[selectedDimensionIndex].details.map((dim, index) => (
+                          <div key={index}>
+                            <p className="text-lg font-semibold text-gray-800">{t(dim.value)}</p>
                           </div>
-                        )}
-                      {/* Detail chips */}
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {product.dimensions[selectedDimensionIndex].details.map((d, i) => (
-                          <button key={i} onClick={() => setSelectedDetailIndex(i)}
-                            className={`px-3 py-1 rounded-full border transition-all duration-150 text-sm ${selectedDetailIndex===i ? 'bg-gray-900 text-white border-gray-900' : 'bg-white/50 text-gray-900 border-gray-300 hover:bg-white/80'}`}>{t(d.label)}</button>
                         ))}
-                      </div>
-                      <div className="mt-5">
-                        <p className="text-2xl font-semibold text-gray-900">{t(product.dimensions[selectedDimensionIndex].details[selectedDetailIndex].value)}</p>
                       </div>
                     </div>
                   )}
 
-                  {product.materials && product.materials.length > 0 && product.groupedMaterials && product.groupedMaterials.length > 0 && (
+                  {product.materials && product.groupedMaterials && product.groupedMaterials.length > 0 && (
                     <div>
                       <h2 className="text-xl font-semibold text-gray-800">{t('material_alternatives')}</h2>
                       <div className="mt-4 flex flex-wrap gap-3">
                         {product.groupedMaterials.map((g, idx) => (
-                          <button key={idx} onClick={() => setActiveMaterialGroup(idx)}
-                            className={`px-3 py-1 rounded-full border backdrop-blur-sm transition-all duration-200 ${activeMaterialGroup===idx ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white/60 text-gray-900 border-gray-300 hover:bg-white'}`}>{t(g.groupTitle)}</button>
+                          <button key={idx} onClick={() => setActiveMaterialGroup(idx)} className={`px-3 py-1 rounded-full border backdrop-blur-sm transition-all duration-200 ${activeMaterialGroup===idx ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white/60 text-gray-900 border-gray-300 hover:bg-white'}`}>{t(g.groupTitle)}</button>
                         ))}
                       </div>
                       <div className="mt-6 flex flex-wrap gap-4">
                         {product.groupedMaterials[activeMaterialGroup].materials.map((material, index) => (
                           <div key={index} className="text-center group cursor-pointer" title={t(material.name)}>
-                            <div className="relative w-20 h-20 rounded-full overflow-hidden border border-gray-200 shadow-sm bg-white/70">
-                              <img src={material.image} alt={t(material.name)} className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105" />
-                            </div>
+                            <img src={material.image} alt={t(material.name)} className="w-20 h-20 object-cover border-2 border-transparent group-hover:border-gray-400 transition" />
                             <p className="mt-2 text-sm text-gray-600 max-w-[80px] break-words">{t(material.name)}</p>
                           </div>
                         ))}
@@ -199,83 +190,59 @@ export function ProductDetailPage() {
                 )}
               </div>
             </div>
-            
+
             {isLoggedIn && product.exclusiveContent && (
-                <div className="mt-20 bg-white p-8 sm:p-12 rounded-lg animate-fade-in-up border">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-8 border-b pb-4 border-gray-300">{t('exclusive_content')}</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                        <div>
-                            <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('additional_images')}</h3>
-                            <div className="grid grid-cols-2 gap-3">
-                            {product.exclusiveContent.images.map((img, idx) => (
-                                <img key={idx} src={img} alt={`Exclusive ${idx}`} className="rounded-lg w-full object-cover shadow-sm"/>
-                            ))}
-                            </div>
-                        </div>
-                        <div>
-                            <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('technical_drawings')}</h3>
-                            <ul className="space-y-3">
-                            {product.exclusiveContent.drawings.map((doc, idx) => (
-                                <li key={idx}>
-                                    <a href={doc.url} download className="text-gray-700 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(doc.name)}</a>
-                                </li>
-                            ))}
-                            </ul>
-                        </div>
-                        <div>
-                            <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('3d_models')}</h3>
-                             <ul className="space-y-3">
-                            {product.exclusiveContent.models3d.map((model, idx) => (
-                                <li key={idx}>
-                                    <a href={model.url} download className="text-gray-700 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(model.name)}</a>
-                                </li>
-                            ))}
-                            </ul>
-                        </div>
+              <div className="mt-20 bg-white p-8 sm:p-12 rounded-lg animate-fade-in-up border">
+                <h2 className="text-3xl font-bold text-gray-900 mb-8 border-b pb-4 border-gray-300">{t('exclusive_content')}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('additional_images')}</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      {product.exclusiveContent.images.map((img, idx) => (
+                        <img key={idx} src={img} alt={`Exclusive ${idx}`} className="w-full object-cover shadow-sm"/>
+                      ))}
                     </div>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('technical_drawings')}</h3>
+                    <ul className="space-y-3">
+                      {product.exclusiveContent.drawings.map((doc, idx) => (
+                        <li key={idx}><a href={doc.url} download className="text-gray-700 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(doc.name)}</a></li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('3d_models')}</h3>
+                    <ul className="space-y-3">
+                      {product.exclusiveContent.models3d.map((model, idx) => (
+                        <li key={idx}><a href={model.url} download className="text-gray-700 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(model.name)}</a></li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Product Navigation */}
         {(prevProduct || nextProduct) && (
           <nav className="bg-white border-t border-gray-200">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center py-8">
               <div className="w-1/2 flex justify-start">
                 {prevProduct ? (
-                  <Link 
-                    to={`/product/${prevProduct.id}`} 
-                    className="group flex items-center gap-3 text-gray-700 hover:text-gray-900 transition-colors"
-                    aria-label={`Previous product: ${t(prevProduct.name)}`}
-                  >
+                  <Link to={`/product/${prevProduct.id}`} className="group flex items-center gap-3 text-gray-700 hover:text-gray-900 transition-colors" aria-label={`Previous product: ${t(prevProduct.name)}`}>
                     <ChevronLeftIcon className="w-8 h-8 transition-transform group-hover:-translate-x-1" />
-                    <div className="text-right">
-                        <span className="text-xs uppercase tracking-wider text-gray-500">{t('previous_product')}</span>
-                        <p className="text-lg font-semibold truncate max-w-[200px]">{t(prevProduct.name)}</p>
-                    </div>
+                    <div className="text-right"><span className="text-xs uppercase tracking-wider text-gray-500">{t('previous_product')}</span><p className="text-lg font-semibold truncate max-w-[200px]">{t(prevProduct.name)}</p></div>
                   </Link>
-                ) : (
-                  <div /> 
-                )}
+                ) : (<div />)}
               </div>
-
               <div className="w-1/2 flex justify-end">
                 {nextProduct ? (
-                   <Link 
-                    to={`/product/${nextProduct.id}`} 
-                    className="group flex items-center gap-3 text-gray-700 hover:text-gray-900 transition-colors"
-                    aria-label={`Next product: ${t(nextProduct.name)}`}
-                   >
-                     <div className="text-left">
-                        <span className="text-xs uppercase tracking-wider text-gray-500">{t('next_product')}</span>
-                        <p className="text-lg font-semibold truncate max-w-[200px]">{t(nextProduct.name)}</p>
-                    </div>
-                     <ChevronRightIcon className="w-8 h-8 transition-transform group-hover:translate-x-1" />
+                  <Link to={`/product/${nextProduct.id}`} className="group flex items-center gap-3 text-gray-700 hover:text-gray-900 transition-colors" aria-label={`Next product: ${t(nextProduct.name)}`}>
+                    <div className="text-left"><span className="text-xs uppercase tracking-wider text-gray-500">{t('next_product')}</span><p className="text-lg font-semibold truncate max-w-[200px]">{t(nextProduct.name)}</p></div>
+                    <ChevronRightIcon className="w-8 h-8 transition-transform group-hover:translate-x-1" />
                   </Link>
-                ) : (
-                  <div />
-                )}
+                ) : (<div />)}
               </div>
             </div>
           </nav>
@@ -284,18 +251,10 @@ export function ProductDetailPage() {
 
       {isLightboxOpen && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center animate-fade-in-up" style={{ animationDuration: '0.2s' }}>
-          <button onClick={closeLightbox} className="absolute top-4 right-4 text-white hover:opacity-75 transition-opacity z-20">
-            <CloseIcon />
-          </button>
-          <button onClick={prevImage} className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:opacity-75 transition-opacity z-20 bg-black/20 rounded-full p-2">
-            <ChevronLeftIcon />
-          </button>
-          <button onClick={nextImage} className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:opacity-75 transition-opacity z-20 bg-black/20 rounded-full p-2">
-            <ChevronRightIcon />
-          </button>
-          <div className="max-w-screen-lg max-h-[90vh] w-full p-4">
-             <img src={allImages[lightboxImageIndex]} alt="Enlarged product view" className="w-full h-full object-contain" />
-          </div>
+          <button onClick={closeLightbox} className="absolute top-4 right-4 text-white hover:opacity-75 transition-opacity z-20"><CloseIcon /></button>
+          <button onClick={prevImageFn} className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:opacity-75 transition-opacity z-20 bg-black/20 rounded-full p-2"><ChevronLeftIcon /></button>
+          <button onClick={nextImage} className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:opacity-75 transition-opacity z-20 bg-black/20 rounded-full p-2"><ChevronRightIcon /></button>
+          <div className="max-w-screen-lg max-h-[90vh] w-full p-4"><img src={allImages[lightboxImageIndex]} alt="Enlarged product view" className="w-full h-full object-contain" /></div>
         </div>
       )}
     </>
