@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo, useState} from 'react'
 import type {ObjectInputProps} from 'sanity'
-import {useClient, set, unset} from 'sanity'
+import {useClient, set, unset, setIfMissing} from 'sanity'
 import imageUrlBuilder from '@sanity/image-url'
 
 type Material = {_key?: string; name?: any; image?: any}
@@ -53,6 +53,13 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
     const existingRef = (value as any)?.group?._ref
     if (existingRef && !selectedGroupId) setSelectedGroupId(existingRef)
   }, [value, selectedGroupId])
+
+  useEffect(() => {
+    // Ensure object has materials array so set([...], ['materials']) patches apply
+    if (!value || !(value as any).materials) {
+      onChange(setIfMissing({ materials: [] }))
+    }
+  }, [value, onChange])
 
   if (!groups.length && !loading) return renderDefault(props)
 
