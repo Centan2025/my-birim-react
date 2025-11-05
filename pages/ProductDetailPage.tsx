@@ -122,6 +122,18 @@ export function ProductDetailPage() {
             </ol>
           </nav>
 
+          {/* overlay prev/next just under the menu (breadcrumbs) */}
+          {(prevProduct || nextProduct) && (
+            <div className="absolute top-12 left-4 flex items-center gap-2 text-white/90">
+              {prevProduct && (
+                <Link to={`/product/${prevProduct.id}`} className="px-2 py-1 bg-black/35 hover:bg-black/50 rounded text-sm">‹ {t(prevProduct.name)}</Link>
+              )}
+              {nextProduct && (
+                <Link to={`/product/${nextProduct.id}`} className="px-2 py-1 bg-black/35 hover:bg-black/50 rounded text-sm">{t(nextProduct.name)} ›</Link>
+              )}
+            </div>
+          )}
+
           <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-white">
             <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg">{t(product.name)}</h1>
             {designer && (
@@ -137,7 +149,7 @@ export function ProductDetailPage() {
         </div>
         {/* Divider and Thumbnails under hero */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mt-4 md:mt-6 h-[2px] bg-gray-300/90" />
+          <div className="mt-2 md:mt-4 h-[2px] bg-gray-400/90" />
           <div className="mt-3 grid grid-cols-5 gap-3">
             {allImages.map((img, idx) => (
               <button key={idx} onClick={() => changeMainImage(img)} className={`overflow-hidden border-2 transition-all duration-300 ${mainImage === img ? 'border-gray-900 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}>
@@ -167,7 +179,8 @@ export function ProductDetailPage() {
             )}
 
             <div>
-              <p className="text-gray-600 leading-relaxed">{t(product.description)}</p>
+              <h2 className="text-2xl md:text-4xl font-extrabold text-gray-900">{t(product.name)}</h2>
+              <p className="mt-3 text-gray-600 leading-relaxed max-w-2xl">{t(product.description)}</p>
             </div>
 
             {product.dimensions && product.dimensions.length > 0 && (
@@ -246,28 +259,7 @@ export function ProductDetailPage() {
               </div>
             )}
 
-            {(prevProduct || nextProduct) && (
-              <nav className="bg-white border-t border-gray-200">
-                <div className="flex justify-between items-center py-8">
-                  <div className="w-1/2 flex justify-start">
-                    {prevProduct ? (
-                      <Link to={`/product/${prevProduct.id}`} className="group flex items-center gap-3 text-gray-700 hover:text-gray-900 transition-colors" aria-label={`Previous product: ${t(prevProduct.name)}`}>
-                        <ChevronLeftIcon className="w-8 h-8 transition-transform group-hover:-translate-x-1" />
-                        <div className="text-right"><span className="text-xs uppercase tracking-wider text-gray-500">{t('previous_product')}</span><p className="text-lg font-semibold truncate max-w-[200px]">{t(prevProduct.name)}</p></div>
-                      </Link>
-                    ) : (<div />)}
-                  </div>
-                  <div className="w-1/2 flex justify-end">
-                    {nextProduct ? (
-                      <Link to={`/product/${nextProduct.id}`} className="group flex items-center gap-3 text-gray-700 hover:text-gray-900 transition-colors" aria-label={`Next product: ${t(nextProduct.name)}`}>
-                        <div className="text-left"><span className="text-xs uppercase tracking-wider text-gray-500">{t('next_product')}</span><p className="text-lg font-semibold truncate max-w-[200px]">{t(nextProduct.name)}</p></div>
-                        <ChevronRightIcon className="w-8 h-8 transition-transform group-hover:translate-x-1" />
-                      </Link>
-                    ) : (<div />)}
-                  </div>
-                </div>
-              </nav>
-            )}
+            {/* bottom prev/next removed; now overlay under menu */}
           </section>
         </div>
       </main>
