@@ -118,12 +118,13 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
                     onChange={(e) => {
                       let nextArr = [...(selectedMaterials || [])]
                       if (e.target.checked) {
-                        nextArr.push({ ...(m as any), _key: genKey() })
+                        const toAdd: any = { _type: 'productMaterial', name: m?.name, image: m?.image, _key: genKey() }
+                        nextArr.push(toAdd)
                         nextArr = withKey(nextArr)
                       } else {
                         nextArr = nextArr.filter((x)=> materialIdLoose(x) !== id)
                       }
-                      onChange({ type: 'set', path: ['materials'], value: nextArr })
+                      onChange(set(nextArr, ['materials']))
                     }}
                   />
                   {m?.image ? (
