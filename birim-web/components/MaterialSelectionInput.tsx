@@ -123,7 +123,7 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
                       } else {
                         nextArr = nextArr.filter((x)=> materialIdLoose(x) !== id)
                       }
-                      onChange(set(nextArr, ['materials']))
+                      onChange({ type: 'set', path: ['materials'], value: nextArr })
                     }}
                   />
                   {m?.image ? (
