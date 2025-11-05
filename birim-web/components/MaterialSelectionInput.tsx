@@ -43,9 +43,12 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
   const openGroup = (id: string) => {
     setOpenGroupId(id)
     setOpenBookIndex(0)
-    if (!value?.group?._ref || value.group._ref !== id) {
-      onChange(set({group: {_type: 'reference', _ref: id}, materials: []}))
-    }
+    const refObj = { _type: 'reference', _ref: id } as any
+    const currentKey = (value as any)?._key
+    const nextObj: any = { ...(value || {}), group: refObj }
+    if (!Array.isArray(nextObj.materials)) nextObj.materials = []
+    if (currentKey) nextObj._key = currentKey
+    onChange(set(nextObj))
   }
 
   const group = groups.find((g)=> g._id === openGroupId)
