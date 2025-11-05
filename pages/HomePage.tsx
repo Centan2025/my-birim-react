@@ -126,88 +126,91 @@ export function HomePage() {
   return (
     <div className="bg-gray-50 text-gray-800">
       {/* Hero Section */}
-      <div 
-        className="relative h-screen w-full overflow-hidden cursor-grab active:cursor-grabbing"
-        onMouseDown={handleDragStart}
-        onMouseMove={handleDragMove}
-        onMouseUp={handleDragEnd}
-        onMouseLeave={handleDragEnd}
-        onTouchStart={handleDragStart}
-        onTouchMove={handleDragMove}
-        onTouchEnd={handleDragEnd}
-      >
+      {heroMedia.length > 0 ? (
         <div 
-            className="flex h-full"
-            style={{
-                width: `${slideCount * 100}%`,
-                transform: `translateX(calc(-${currentSlide * (100 / slideCount)}% + ${draggedX}px))`,
-                transition: isDragging ? 'none' : 'transform 0.6s ease-in-out',
-            }}
+          className="relative h-screen w-full overflow-hidden cursor-grab active:cursor-grabbing"
+          onMouseDown={handleDragStart}
+          onMouseMove={handleDragMove}
+          onMouseUp={handleDragEnd}
+          onMouseLeave={handleDragEnd}
+          onTouchStart={handleDragStart}
+          onTouchMove={handleDragMove}
+          onTouchEnd={handleDragEnd}
         >
-            {heroMedia.map((media, index) => (
-                <div 
-                    key={index} 
-                    className="relative h-full shrink-0" 
-                    style={{ width: `${100 / slideCount}%`}}
-                >
-                    {media.type === 'video' ? (
-                         <video className="absolute inset-0 w-full h-full object-cover" autoPlay loop muted playsInline src={media.url} key={media.url} />
-                    ) : media.type === 'youtube' ? (
-                         <YouTubeBackground url={media.url} />
-                    ) : (
-                        <div className="absolute inset-0 w-full h-full bg-cover bg-center" style={{ backgroundImage: `url('${media.url}')` }}/>
-                    )}
-                    <div className="absolute inset-0 bg-black/50 z-10"></div>
-                     <div className={`relative z-20 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center ${content.isHeroTextVisible && content.isLogoVisible ? 'justify-center md:justify-start' : 'justify-center'}`}>
-                        <div className={`flex flex-col md:flex-row items-center text-white gap-12 md:gap-16 ${content.isHeroTextVisible || content.isLogoVisible ? 'max-w-4xl' : ''} text-center ${content.isLogoVisible ? 'md:text-left' : 'md:text-center'}`}>
-                            {content.isLogoVisible && (
-                                <div className="animate-fade-in-down flex-shrink-0">
-                                    <SiteLogo logoUrl={settings?.logoUrl} className="w-[360px] h-[360px]" />
-                                </div>
-                            )}
-                            {content.isHeroTextVisible && (
-                                <div className="relative w-full">
-                                    <div className="animate-fade-in-up">
-                                      <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4" style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}>{t(media.title)}</h1>
-                                      <p className="text-lg md:text-xl mb-8" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>{t(media.subtitle)}</p>
-                                      {media.isButtonVisible && (
-                                        <Link
-                                            to={media.buttonLink || '/'}
-                                            className="group inline-flex items-center gap-x-3 text-white font-semibold py-3 px-5 text-lg rounded-lg hover:bg-white/10 transition-colors duration-300"
-                                        >
-                                            <span className="transition-transform duration-300 ease-out group-hover:-translate-x-1">{t(media.buttonText)}</span>
-                                            <ArrowRight className="w-5 h-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
-                                        </Link>
-                                      )}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            ))}
+          <div 
+              className="flex h-full"
+              style={{
+                  width: `${slideCount * 100}%`,
+                  transform: `translateX(calc(-${currentSlide * (100 / slideCount)}% + ${draggedX}px))`,
+                  transition: isDragging ? 'none' : 'transform 0.6s ease-in-out',
+              }}
+          >
+              {heroMedia.map((media, index) => (
+                  <div 
+                      key={index} 
+                      className="relative h-full shrink-0" 
+                      style={{ width: `${100 / slideCount}%`}}
+                  >
+                      {media.type === 'video' ? (
+                           <video className="absolute inset-0 w-full h-full object-cover" autoPlay loop muted playsInline src={media.url} key={media.url} />
+                      ) : media.type === 'youtube' ? (
+                           <YouTubeBackground url={media.url} />
+                      ) : (
+                          <div className="absolute inset-0 w-full h-full bg-cover bg-center" style={{ backgroundImage: `url('${media.url}')` }}/>
+                      )}
+                      <div className="absolute inset-0 bg-black/50 z-10"></div>
+                       <div className={`relative z-20 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center ${content.isHeroTextVisible && content.isLogoVisible ? 'justify-center md:justify-start' : 'justify-center'}`}>
+                          <div className={`flex flex-col md:flex-row items-center text-white gap-12 md:gap-16 ${content.isHeroTextVisible || content.isLogoVisible ? 'max-w-4xl' : ''} text-center ${content.isLogoVisible ? 'md:text-left' : 'md:text-center'}`}>
+                              {content.isLogoVisible && (
+                                  <div className="animate-fade-in-down flex-shrink-0">
+                                      <SiteLogo logoUrl={settings?.logoUrl} className="w-[360px] h-[360px]" />
+                                  </div>
+                              )}
+                              {content.isHeroTextVisible && (
+                                  <div className="relative w-full">
+                                      <div className="animate-fade-in-up">
+                                        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4" style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}>{t(media.title)}</h1>
+                                        <p className="text-lg md:text-xl mb-8" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>{t(media.subtitle)}</p>
+                                        {media.isButtonVisible && (
+                                          <Link
+                                              to={media.buttonLink || '/'}
+                                              className="group inline-flex items-center gap-x-3 text-white font-semibold py-3 px-5 text-lg rounded-lg hover:bg-white/10 transition-colors duration-300"
+                                          >
+                                              <span className="transition-transform duration-300 ease-out group-hover:-translate-x-1">{t(media.buttonText)}</span>
+                                              <ArrowRight className="w-5 h-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+                                          </Link>
+                                        )}
+                                      </div>
+                                  </div>
+                              )}
+                          </div>
+                      </div>
+                  </div>
+              ))}
+          </div>
+          {slideCount > 1 && (
+              <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex items-center space-x-4">
+                  {heroMedia.map((_, index) => (
+                      <button
+                          key={index}
+                          onClick={() => setCurrentSlide(index)}
+                          className={`relative rounded-full h-2 transition-all duration-500 ease-in-out group ${index === currentSlide ? 'w-12 bg-white/50' : 'w-2 bg-white/30 hover:bg-white/50'}`}
+                          aria-label={`Go to slide ${index + 1}`}
+                      >
+                          {index === currentSlide && (
+                              <div
+                                  key={`${currentSlide}-${index}`}
+                                  className="absolute top-0 left-0 h-full rounded-full bg-white animate-fill-line"
+                              ></div>
+                          )}
+                      </button>
+                  ))}
+              </div>
+           )}
         </div>
-        
-         {slideCount > 1 && (
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex items-center space-x-4">
-                {heroMedia.map((_, index) => (
-                    <button
-                        key={index}
-                        onClick={() => setCurrentSlide(index)}
-                        className={`relative rounded-full h-2 transition-all duration-500 ease-in-out group ${index === currentSlide ? 'w-12 bg-white/50' : 'w-2 bg-white/30 hover:bg-white/50'}`}
-                        aria-label={`Go to slide ${index + 1}`}
-                    >
-                        {index === currentSlide && (
-                            <div
-                                key={`${currentSlide}-${index}`}
-                                className="absolute top-0 left-0 h-full rounded-full bg-white animate-fill-line"
-                            ></div>
-                        )}
-                    </button>
-                ))}
-            </div>
-         )}
-      </div>
+      ) : (
+        <div className="relative h-[50vh] w-full bg-gray-800" />
+      )}
 
       {/* Featured Products Section */}
       <section id="featured" className="py-20 bg-gray-50">
