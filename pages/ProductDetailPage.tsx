@@ -36,11 +36,12 @@ export function ProductDetailPage() {
   const [mainImage, setMainImage] = useState('');
   const [selectedDimensionIndex, setSelectedDimensionIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-  const [activeMaterialGroup, setActiveMaterialGroup] = useState<number>(0);
   const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
   const { isLoggedIn } = useAuth();
   const { t, locale } = useTranslation();
   const { addToCart } = useCart();
+  const [activeMaterialGroup, setActiveMaterialGroup] = useState<number>(0);
+  const [imgSwap, setImgSwap] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -65,6 +66,14 @@ export function ProductDetailPage() {
     };
     fetchProduct();
   }, [productId]);
+
+  // Fast, modern animation when main image changes
+  useEffect(() => {
+    if (!mainImage) return;
+    setImgSwap(true);
+    const to = setTimeout(() => setImgSwap(false), 250);
+    return () => clearTimeout(to);
+  }, [mainImage]);
 
   const { prevProduct, nextProduct } = useMemo(() => {
     if (!product || siblingProducts.length < 2) {
@@ -131,14 +140,14 @@ export function ProductDetailPage() {
               {/* Image Gallery */}
               <div className="animate-fade-in-up" style={{ animationDelay: '100ms' }}>
                 <div className="aspect-w-1 aspect-h-1 mb-4 overflow-hidden bg-gray-100 cursor-zoom-in" onClick={() => openLightbox(allImages.indexOf(mainImage))}>
-                  <img src={mainImage} alt={t(product.name)} className="w-full h-full object-cover" />
+                  <img src={mainImage} alt={t(product.name)} className={`w-full h-full object-cover transition-all duration-300 ease-out ${imgSwap ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`} />
                 </div>
                 <div className="grid grid-cols-5 gap-3">
                   {allImages.map((img, idx) => (
                     <button
                       key={idx}
                       onClick={() => setMainImage(img)}
-                      className={`overflow-hidden border-2 transition-all duration-700 ${mainImage === img ? 'border-gray-900 shadow-md' : 'border-transparent opacity-70 hover:opacity-100'}`}
+                      className={`overflow-hidden border-2 transition-all duration-300 ${mainImage === img ? 'border-gray-900 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}
                     >
                       <img src={img} alt={`${t(product.name)} thumbnail ${idx + 1}`} className="w-full h-24 object-cover" />
                     </button>
@@ -172,7 +181,7 @@ export function ProductDetailPage() {
                       <div>
                         <h2 className="text-xl font-semibold text-gray-800">{t('dimensions')}</h2>
                         {product.dimensions.length > 1 && (
-                          <div className="mt-4 flex flex-wrap gap-4">
+                          <div className="mt-4 flex flex-wrap gap-3">
                             {product.dimensions.map((dimSet, index) => {
                                 const widthDetail = dimSet.details.find(d => (d.label as any)?.tr === 'Genişlik' || (d.label as any)?.tr === 'Çap' || (d.label as any) === 'Genişlik' || (d.label as any) === 'Çap');
                                 const firstDetail = dimSet.details[0];
@@ -181,16 +190,13 @@ export function ProductDetailPage() {
                                     <button
                                         key={index}
                                         onClick={() => setSelectedDimensionIndex(index)}
-                                        className={`relative py-2 px-2 text-sm font-medium transition-colors duration-300 focus:outline-none ${
+                                        className={`px-3 py-1 rounded-full border backdrop-blur-sm transition-all duration-200 ${
                                             selectedDimensionIndex === index
-                                                ? 'text-gray-900'
-                                                : 'text-gray-500 hover:text-gray-800'
+                                                ? 'bg-gray-900 text-white border-gray-900 shadow-md'
+                                                : 'bg-white/60 text-gray-900 border-gray-300 hover:bg-white'
                                         }`}
                                     >
                                         {dimensionLabel}
-                                        <span className={`absolute bottom-0 left-0 block w-full h-[1.5px] bg-gray-900 transform transition-transform duration-300 ease-out ${
-                                            selectedDimensionIndex === index ? 'scale-x-100' : 'scale-x-0'
-                                        }`} style={{ transformOrigin: 'center' }}></span>
                                     </button>
                                 );
                             })}
@@ -207,41 +213,28 @@ export function ProductDetailPage() {
                       </div>
                     )}
 
-                    {product.materials && product.materials.length > 0 && (
+                    {product.materials && product.materials.length > 0 && product.groupedMaterials && product.groupedMaterials.length > 0 && (
                         <div>
                             <h2 className="text-xl font-semibold text-gray-800">{t('material_alternatives')}</h2>
-                            {product.groupedMaterials && product.groupedMaterials.length > 0 ? (
-                              <>
-                                <div className="mt-4 flex flex-wrap gap-3">
-                                  {product.groupedMaterials.map((g, idx) => (
-                                    <button
-                                      key={idx}
-                                      onClick={() => setActiveMaterialGroup(idx)}
-                                      className={`px-3 py-1 rounded-full border ${activeMaterialGroup===idx ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-900 border-gray-300'} transition`}
-                                    >
-                                      {t(g.groupTitle)}
-                                    </button>
-                                  ))}
+                            <div className="mt-4 flex flex-wrap gap-3">
+                              {product.groupedMaterials.map((g, idx) => (
+                                <button
+                                  key={idx}
+                                  onClick={() => setActiveMaterialGroup(idx)}
+                                  className={`px-3 py-1 rounded-full border backdrop-blur-sm transition-all duration-200 ${activeMaterialGroup===idx ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white/60 text-gray-900 border-gray-300 hover:bg-white'}`}
+                                >
+                                  {t(g.groupTitle)}
+                                </button>
+                              ))}
+                            </div>
+                            <div className="mt-6 flex flex-wrap gap-4">
+                              {product.groupedMaterials[activeMaterialGroup].materials.map((material, index) => (
+                                <div key={index} className="text-center group cursor-pointer" title={t(material.name)}>
+                                  <img src={material.image} alt={t(material.name)} className="w-20 h-20 rounded-full object-cover border-2 border-transparent group-hover:border-gray-400 transition" />
+                                  <p className="mt-2 text-sm text-gray-600 max-w-[80px] break-words">{t(material.name)}</p>
                                 </div>
-                                <div className="mt-6 flex flex-wrap gap-4">
-                                  {product.groupedMaterials[activeMaterialGroup].materials.map((material, index) => (
-                                    <div key={index} className="text-center group cursor-pointer" title={t(material.name)}>
-                                      <img src={material.image} alt={t(material.name)} className="w-20 h-20 rounded-full object-cover border-2 border-transparent group-hover:border-gray-400 transition" />
-                                      <p className="mt-2 text-sm text-gray-600 max-w-[80px] break-words">{t(material.name)}</p>
-                                    </div>
-                                  ))}
-                                </div>
-                              </>
-                            ) : (
-                              <div className="mt-4 flex flex-wrap gap-4">
-                                {product.materials.map((material, index) => (
-                                  <div key={index} className="text-center group cursor-pointer" title={t(material.name)}>
-                                    <img src={material.image} alt={t(material.name)} className="w-20 h-20 rounded-full object-cover border-2 border-transparent group-hover:border-gray-400 transition" />
-                                    <p className="mt-2 text-sm text-gray-600 max-w-[80px] break-words">{t(material.name)}</p>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                              ))}
+                            </div>
                         </div>
                     )}
                 </div>
