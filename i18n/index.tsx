@@ -98,9 +98,7 @@ export const I18nProvider = ({ children }: PropsWithChildren) => {
     supportedLocales
   }), [locale, t, supportedLocales]);
 
-  if (loading) {
-      return null;
-  }
+  // Uygulamanın beyaz ekrana düşmemesi için loading sırasında da render etmeye devam et
 
   return (
     <I18nContext.Provider value={value}>

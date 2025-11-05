@@ -86,16 +86,16 @@ const Footer = () => {
                             <SiteLogo logoUrl={settings.logoUrl} className="h-4 w-auto" />
                         </div>
                         <div className="mt-4 flex items-center space-x-6">
-                            {content.partnerNames.map(name => (
+                            {(content.partnerNames || []).map(name => (
                                 <span key={name} className="font-semibold text-gray-300 opacity-70">{name}</span>
                             ))}
                         </div>
                     </div>
-                    {content.linkColumns.map(column => (
+                    {(content.linkColumns || []).map(column => (
                         <div key={t(column.title)} className="w-full sm:w-auto text-sm">
                             <h4 className="font-semibold text-white uppercase tracking-wider mb-4">{t(column.title)}</h4>
                             <ul>
-                                {column.links.map(link => (
+                                {(column.links || []).map(link => (
                                     <li key={t(link.text)} className="mt-2">
                                         <Link to={link.url} className="hover:text-white hover:underline transition-colors">{t(link.text)}</Link>
                                     </li>
@@ -106,7 +106,7 @@ const Footer = () => {
                     <div className="w-full sm:w-auto text-sm">
                         <h4 className="font-semibold text-white uppercase tracking-wider mb-4">{t('follow_us')}</h4>
                         <div className="flex space-x-4">
-                            {content.socialLinks.filter(link => link.isEnabled).map(link => (
+                            {(content.socialLinks || []).filter(link => link.isEnabled).map(link => (
                                 <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-transform duration-200 transform hover:scale-125">
                                     <DynamicIcon svgString={link.svgIcon} />
                                 </a>
