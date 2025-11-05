@@ -35,19 +35,21 @@ export function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [mainImage, setMainImage] = useState('');
   const [selectedDimensionIndex, setSelectedDimensionIndex] = useState(0);
+  const [selectedDetailIndex, setSelectedDetailIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
   const { isLoggedIn } = useAuth();
   const { t, locale } = useTranslation();
   const { addToCart } = useCart();
   const [activeMaterialGroup, setActiveMaterialGroup] = useState<number>(0);
-  const [imgSwap, setImgSwap] = useState(false);
+  const [imgSwap, setImgSwap] = useState<'enter'|'leave'|null>(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
       setLoading(true);
       if (productId) {
         setSelectedDimensionIndex(0); // Reset on product change
+        setSelectedDetailIndex(0);
         const productData = await getProductById(productId);
         setProduct(productData);
         if (productData) {
@@ -67,12 +69,13 @@ export function ProductDetailPage() {
     fetchProduct();
   }, [productId]);
 
-  // Fast, modern animation when main image changes
+  // Slide+fade animation when main image changes
   useEffect(() => {
     if (!mainImage) return;
-    setImgSwap(true);
-    const to = setTimeout(() => setImgSwap(false), 250);
-    return () => clearTimeout(to);
+    setImgSwap('leave');
+    const t1 = setTimeout(() => setImgSwap('enter'), 10);
+    const t2 = setTimeout(() => setImgSwap(null), 260);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [mainImage]);
 
   const { prevProduct, nextProduct } = useMemo(() => {
@@ -88,167 +91,113 @@ export function ProductDetailPage() {
     return { prevProduct: prev, nextProduct: next };
   }, [product, siblingProducts]);
 
-
-  if (loading) {
-    return <div className="pt-20 text-center">{t('loading')}...</div>;
-  }
-
-  if (!product) {
-    return <div className="pt-20 text-center">{t('product_not_found')}</div>;
-  }
-  
+  if (loading) return <div className="pt-20 text-center">{t('loading')}...</div>;
+  if (!product) return <div className="pt-20 text-center">{t('product_not_found')}</div>;
   const allImages = [product.mainImage, ...product.alternativeImages];
 
-  const openLightbox = (index: number) => {
-    setLightboxImageIndex(index);
-    setIsLightboxOpen(true);
-  };
-  
+  const openLightbox = (index: number) => { setLightboxImageIndex(index); setIsLightboxOpen(true); };
   const closeLightbox = () => setIsLightboxOpen(false);
-
-  const nextImage = () => {
-    setLightboxImageIndex((prevIndex) => (prevIndex + 1) % allImages.length);
-  };
-
-  const prevImage = () => {
-    setLightboxImageIndex((prevIndex) => (prevIndex - 1 + allImages.length) % allImages.length);
-  };
-
+  const nextImage = () => setLightboxImageIndex((i) => (i + 1) % allImages.length);
+  const prevImage = () => setLightboxImageIndex((i) => (i - 1 + allImages.length) % allImages.length);
 
   return (
     <>
       <div>
         <div className="bg-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
-            
-            {/* Breadcrumbs */}
             <nav className="mb-8 text-sm text-gray-500 animate-fade-in-up" aria-label="Breadcrumb">
               <ol className="list-none p-0 inline-flex items-center">
                 <li><Link to="/" className="hover:text-gray-800">{t('homepage')}</Link></li>
                 <li className="mx-2 font-light text-gray-400">|</li>
-                {category && (
-                  <>
-                    <li><Link to={`/products/${category.id}`} className="hover:text-gray-800">{t(category.name)}</Link></li>
-                    <li className="mx-2 font-light text-gray-400">|</li>
-                  </>
-                )}
+                {category && (<><li><Link to={`/products/${category.id}`} className="hover:text-gray-800">{t(category.name)}</Link></li><li className="mx-2 font-light text-gray-400">|</li></>)}
                 <li className="font-semibold text-gray-800" aria-current="page">{t(product.name)}</li>
               </ol>
             </nav>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-              {/* Image Gallery */}
               <div className="animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-                <div className="aspect-w-1 aspect-h-1 mb-4 overflow-hidden bg-gray-100 cursor-zoom-in" onClick={() => openLightbox(allImages.indexOf(mainImage))}>
-                  <img src={mainImage} alt={t(product.name)} className={`w-full h-full object-cover transition-all duration-300 ease-out ${imgSwap ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`} />
+                <div className={`aspect-w-1 aspect-h-1 mb-4 overflow-hidden bg-gray-100 cursor-zoom-in relative`}
+                     onClick={() => openLightbox(allImages.indexOf(mainImage))}>
+                  <img src={mainImage} alt={t(product.name)}
+                       className={`w-full h-full object-cover absolute inset-0 transition-all duration-250 ease-out ${imgSwap==='leave' ? 'opacity-0 -translate-x-2' : imgSwap==='enter' ? 'opacity-100 translate-x-0' : ''}`} />
                 </div>
                 <div className="grid grid-cols-5 gap-3">
                   {allImages.map((img, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setMainImage(img)}
-                      className={`overflow-hidden border-2 transition-all duration-300 ${mainImage === img ? 'border-gray-900 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}
-                    >
+                    <button key={idx} onClick={() => setMainImage(img)}
+                            className={`overflow-hidden border-2 transition-all duration-300 ${mainImage===img ? 'border-gray-900 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}>
                       <img src={img} alt={`${t(product.name)} thumbnail ${idx + 1}`} className="w-full h-24 object-cover" />
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Product Info */}
               <div className="flex flex-col animate-fade-in-up" style={{ animationDelay: '200ms' }}>
                 <h1 className="text-4xl md:text-5xl font-extrabold tracking-tighter text-gray-900">{t(product.name)}</h1>
-                {designer && (
-                  <p className="text-lg text-gray-500 mt-3">
-                    <Link to={`/designer/${designer.id}`} className="text-gray-800 hover:underline font-semibold">{t(designer.name)}</Link> — {product.year}
-                  </p>
-                )}
+                {designer && (<p className="text-lg text-gray-500 mt-3"><Link to={`/designer/${designer.id}`} className="text-gray-800 hover:underline font-semibold">{t(designer.name)}</Link> — {product.year}</p>)}
                 
                 <div className="mt-8 space-y-8 border-t pt-8">
-                    {product.buyable && product.price > 0 && (
-                        <div>
-                            <p className="text-3xl font-bold text-gray-900">
-                                {new Intl.NumberFormat(locale, { style: 'currency', currency: product.currency || 'TRY' }).format(product.price)}
-                            </p>
-                        </div>
-                    )}
+                  {product.buyable && product.price > 0 && (
+                    <div><p className="text-3xl font-bold text-gray-900">{new Intl.NumberFormat(locale, { style: 'currency', currency: product.currency || 'TRY' }).format(product.price)}</p></div>
+                  )}
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-800">{t('description')}</h2>
+                    <p className="mt-2 text-gray-600 leading-relaxed">{t(product.description)}</p>
+                  </div>
+
+                  {product.dimensions && product.dimensions.length > 0 && (
                     <div>
-                        <h2 className="text-xl font-semibold text-gray-800">{t('description')}</h2>
-                        <p className="mt-2 text-gray-600 leading-relaxed">{t(product.description)}</p>
-                    </div>
-                    
-                    {product.dimensions && product.dimensions.length > 0 && (
-                      <div>
-                        <h2 className="text-xl font-semibold text-gray-800">{t('dimensions')}</h2>
-                        {product.dimensions.length > 1 && (
-                          <div className="mt-4 flex flex-wrap gap-3">
-                            {product.dimensions.map((dimSet, index) => {
-                                const widthDetail = dimSet.details.find(d => (d.label as any)?.tr === 'Genişlik' || (d.label as any)?.tr === 'Çap' || (d.label as any) === 'Genişlik' || (d.label as any) === 'Çap');
-                                const firstDetail = dimSet.details[0];
-                                const dimensionLabel = widthDetail ? t(widthDetail.value) : firstDetail ? t(firstDetail.value) : `${index+1}`;
-                                return (
-                                    <button
-                                        key={index}
-                                        onClick={() => setSelectedDimensionIndex(index)}
-                                        className={`px-3 py-1 rounded-full border backdrop-blur-sm transition-all duration-200 ${
-                                            selectedDimensionIndex === index
-                                                ? 'bg-gray-900 text-white border-gray-900 shadow-md'
-                                                : 'bg-white/60 text-gray-900 border-gray-300 hover:bg-white'
-                                        }`}
-                                    >
-                                        {dimensionLabel}
-                                    </button>
-                                );
-                            })}
-                          </div>
-                        )}
-                        <div className="mt-6 flex flex-wrap gap-x-8 gap-y-4">
-                          {product.dimensions[selectedDimensionIndex].details.map((dim, index) => (
-                            <div key={index}>
-                              <p className="text-sm text-gray-500">{t(dim.label)}</p>
-                              <p className="text-lg font-semibold text-gray-800">{t(dim.value)}</p>
-                            </div>
+                      <h2 className="text-xl font-semibold text-gray-800">{t('dimensions')}</h2>
+                      {product.dimensions.length > 1 && (
+                        <div className="mt-4 flex flex-wrap gap-3">
+                          {product.dimensions.map((_, index) => (
+                            <button key={index} onClick={() => { setSelectedDimensionIndex(index); setSelectedDetailIndex(0); }}
+                              className={`px-3 py-1 rounded-full border backdrop-blur-sm transition-all duration-200 ${selectedDimensionIndex===index ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white/60 text-gray-900 border-gray-300 hover:bg-white'}`}>{index+1}</button>
                           ))}
                         </div>
+                      )}
+                      {/* Detail chips */}
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {product.dimensions[selectedDimensionIndex].details.map((d, i) => (
+                          <button key={i} onClick={() => setSelectedDetailIndex(i)}
+                            className={`px-2 py-1 rounded-lg border transition-all duration-150 text-sm ${selectedDetailIndex===i ? 'bg-gray-900 text-white border-gray-900' : 'bg-white/70 text-gray-900 border-gray-300 hover:bg-white'}`}>{t(d.label)}</button>
+                        ))}
                       </div>
-                    )}
-
-                    {product.materials && product.materials.length > 0 && product.groupedMaterials && product.groupedMaterials.length > 0 && (
-                        <div>
-                            <h2 className="text-xl font-semibold text-gray-800">{t('material_alternatives')}</h2>
-                            <div className="mt-4 flex flex-wrap gap-3">
-                              {product.groupedMaterials.map((g, idx) => (
-                                <button
-                                  key={idx}
-                                  onClick={() => setActiveMaterialGroup(idx)}
-                                  className={`px-3 py-1 rounded-full border backdrop-blur-sm transition-all duration-200 ${activeMaterialGroup===idx ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white/60 text-gray-900 border-gray-300 hover:bg-white'}`}
-                                >
-                                  {t(g.groupTitle)}
-                                </button>
-                              ))}
-                            </div>
-                            <div className="mt-6 flex flex-wrap gap-4">
-                              {product.groupedMaterials[activeMaterialGroup].materials.map((material, index) => (
-                                <div key={index} className="text-center group cursor-pointer" title={t(material.name)}>
-                                  <img src={material.image} alt={t(material.name)} className="w-20 h-20 rounded-full object-cover border-2 border-transparent group-hover:border-gray-400 transition" />
-                                  <p className="mt-2 text-sm text-gray-600 max-w-[80px] break-words">{t(material.name)}</p>
-                                </div>
-                              ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-                 {product.buyable && (
-                      <div className="mt-12 pt-8 border-t border-gray-200">
-                          <button
-                              onClick={() => addToCart(product)}
-                              className="group w-20 h-20 flex items-center justify-center bg-gray-900 text-white rounded-full hover:bg-gray-700 transition-all duration-300 ease-in-out transform hover:scale-110 active:scale-100 hover:shadow-lg"
-                              aria-label={t('add_to_cart')}
-                          >
-                              <TransparentShoppingBagIcon />
-                          </button>
+                      <div className="mt-5">
+                        <p className="text-sm text-gray-500">{t('dimensions')}</p>
+                        <p className="text-2xl font-semibold text-gray-900">{t(product.dimensions[selectedDimensionIndex].details[selectedDetailIndex].value)}</p>
                       </div>
+                    </div>
                   )}
+
+                  {product.materials && product.materials.length > 0 && product.groupedMaterials && product.groupedMaterials.length > 0 && (
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-800">{t('material_alternatives')}</h2>
+                      <div className="mt-4 flex flex-wrap gap-3">
+                        {product.groupedMaterials.map((g, idx) => (
+                          <button key={idx} onClick={() => setActiveMaterialGroup(idx)}
+                            className={`px-3 py-1 rounded-full border backdrop-blur-sm transition-all duration-200 ${activeMaterialGroup===idx ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white/60 text-gray-900 border-gray-300 hover:bg-white'}`}>{t(g.groupTitle)}</button>
+                        ))}
+                      </div>
+                      <div className="mt-6 flex flex-wrap gap-4">
+                        {product.groupedMaterials[activeMaterialGroup].materials.map((material, index) => (
+                          <div key={index} className="text-center group cursor-pointer" title={t(material.name)}>
+                            <div className="relative w-20 h-20 rounded-full overflow-hidden border border-gray-200 shadow-sm bg-white/70">
+                              <img src={material.image} alt={t(material.name)} className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105" />
+                            </div>
+                            <p className="mt-2 text-sm text-gray-600 max-w-[80px] break-words">{t(material.name)}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {product.buyable && (
+                  <div className="mt-12 pt-8 border-t border-gray-200">
+                    <button onClick={() => addToCart(product)} className="group w-20 h-20 flex items-center justify-center bg-gray-900 text-white rounded-full hover:bg-gray-700 transition-all duration-300 ease-in-out transform hover:scale-110 active:scale-100 hover:shadow-lg" aria-label={t('add_to_cart')}>
+                      <TransparentShoppingBagIcon />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
             
