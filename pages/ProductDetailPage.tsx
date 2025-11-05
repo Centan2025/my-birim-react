@@ -84,6 +84,7 @@ export function ProductDetailPage() {
   const allImages = [product.mainImage, ...altImages];
   const grouped = Array.isArray((product as any).groupedMaterials) ? (product as any).groupedMaterials : [];
   const safeActiveIndex = Math.min(Math.max(activeMaterialGroup, 0), Math.max(grouped.length - 1, 0));
+  const dimImages = Array.isArray(product?.exclusiveContent?.images) ? (product as any).exclusiveContent.images as string[] : [];
   // dimension images drawn from exclusiveContent.images at render time; no separate const needed
   const currentIdx = Math.max(0, allImages.indexOf(mainImage));
 
@@ -187,11 +188,11 @@ export function ProductDetailPage() {
             </div>
 
             {/* Dimensions as small drawings (thumbnails) */}
-            {product.exclusiveContent && product.exclusiveContent.images && product.exclusiveContent.images.length > 0 && (
+            {dimImages.length > 0 && (
               <div>
                 <h2 className="text-xl font-semibold text-gray-800">{t('dimensions')}</h2>
                 <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {product.exclusiveContent.images.map((img, idx) => (
+                  {dimImages.map((img: string, idx: number) => (
                     <button key={idx} onClick={() => setDimLightbox(img)} className="group border border-gray-200 hover:border-gray-400 transition p-3 bg-white">
                       <img src={img} alt={`dimension-${idx}`} className="w-full h-40 object-contain" />
                     </button>
