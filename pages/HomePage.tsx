@@ -213,17 +213,19 @@ export function HomePage() {
       )}
 
       {/* Featured Products Section */}
-      <section id="featured" className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
-          <h2 className="text-3xl font-bold text-center mb-4">{t('featured_products')}</h2>
-          <p className="text-center text-gray-600 max-w-2xl mx-auto mb-12">{t('featured_products_subtitle')}</p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-            {(Array.isArray(featuredProducts) ? featuredProducts : []).map(p => (
-              <ProductCard key={p.id} product={p} />
-            ))}
+      {Array.isArray(featuredProducts) && featuredProducts.length > 0 && (
+        <section id="featured" className="py-20 bg-gray-50">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
+            <h2 className="text-3xl font-bold text-center mb-4">{t('featured_products')}</h2>
+            <p className="text-center text-gray-600 max-w-2xl mx-auto mb-12">{t('featured_products_subtitle')}</p>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+              {featuredProducts.map(p => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Designer Spotlight */}
       {featuredDesigner && (
@@ -249,20 +251,24 @@ export function HomePage() {
       )}
 
       {/* Inspiration Section */}
-      <section className="relative py-32 bg-gray-800 text-white text-center" style={{ backgroundImage: `url(${inspiration.backgroundImage})`, backgroundSize: 'cover', backgroundAttachment: 'fixed', backgroundPosition: 'center' }}>
-         <div className="absolute inset-0 bg-black/50"></div>
-         <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
-            <h2 className="text-4xl font-bold">{t(inspiration.title)}</h2>
-            <p className="mt-4 text-lg text-gray-200 max-w-2xl mx-auto">{t(inspiration.subtitle)}</p>
-            <Link
-                to={inspiration.buttonLink || '/'}
-                className="group mt-8 inline-flex items-center gap-x-3 text-white font-semibold py-3 px-5 text-lg rounded-lg hover:bg-white/10 transition-colors duration-300"
-            >
-                <span className="transition-transform duration-300 ease-out group-hover:-translate-x-1">{t(inspiration.buttonText)}</span>
-                <ArrowRight className="w-5 h-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
-            </Link>
-         </div>
-      </section>
+      {inspiration && (inspiration.backgroundImage || inspiration.title || inspiration.subtitle) && (
+        <section className="relative py-32 bg-gray-800 text-white text-center" style={{ backgroundImage: `url(${inspiration.backgroundImage})`, backgroundSize: 'cover', backgroundAttachment: 'fixed', backgroundPosition: 'center' }}>
+           <div className="absolute inset-0 bg-black/50"></div>
+           <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
+              <h2 className="text-4xl font-bold">{t(inspiration.title)}</h2>
+              <p className="mt-4 text-lg text-gray-200 max-w-2xl mx-auto">{t(inspiration.subtitle)}</p>
+              {inspiration.buttonText && (
+                <Link
+                    to={inspiration.buttonLink || '/'}
+                    className="group mt-8 inline-flex items-center gap-x-3 text-white font-semibold py-3 px-5 text-lg rounded-lg hover:bg-white/10 transition-colors duration-300"
+                >
+                    <span className="transition-transform duration-300 ease-out group-hover:-translate-x-1">{t(inspiration.buttonText)}</span>
+                    <ArrowRight className="w-5 h-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+                </Link>
+              )}
+           </div>
+        </section>
+      )}
     </div>
   );
 }
