@@ -23,7 +23,7 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
   useEffect(() => {
     setLoading(true)
     client
-      .fetch<GroupDoc[]>(`*[_type == "materialGroup"]{_id, title, books{ title, items }, items}`)
+      .fetch<GroupDoc[]>(`*[_type == "materialGroup"]{_id, title, books[]{ title, items[]->{ name, image } }, items[]->{ name, image }}`)
       .then((rows: any[]) => {
         const normalized = (rows || []).map((r) => ({
           _id: r._id,
