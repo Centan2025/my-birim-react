@@ -35,7 +35,6 @@ export function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [mainImage, setMainImage] = useState('');
   const [prevImage, setPrevImage] = useState<string | null>(null);
-  const [selectedDimensionIndex, setSelectedDimensionIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
   const { isLoggedIn } = useAuth();
@@ -49,7 +48,6 @@ export function ProductDetailPage() {
     const fetchProduct = async () => {
       setLoading(true);
       if (productId) {
-        setSelectedDimensionIndex(0);
         const productData = await getProductById(productId);
         setProduct(productData);
         if (productData) {
