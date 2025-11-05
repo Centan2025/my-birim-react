@@ -7,9 +7,14 @@ type Material = {_key?: string; name?: any; image?: any}
 type Book = { title?: any; items?: Material[] }
 type GroupDoc = {_id: string; title?: any; books?: Book[]}
 
+function genKey() { return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}` }
 function withKey(items: Material[]): Material[] {
-  const gen = () => `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`
-  return (items || []).map((m) => (m && m._key ? m : {...m, _key: gen()}))
+  return (items || []).map((m) => (m && m._key ? m : {...m, _key: genKey()}))
+}
+function materialId(m: any): string {
+  const n = (m?.name?.tr || m?.name?.en || '').toString().trim()
+  const img = m?.image?.asset?._ref || m?.image?._id || ''
+  return `${n}|${img}`
 }
 
 export default function MaterialSelectionInput(props: ObjectInputProps) {
@@ -23,7 +28,7 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
   useEffect(() => {
     setLoading(true)
     client
-      .fetch<GroupDoc[]>(`*[_type == "materialGroup"]{_id, title, books[]{ title, items[]->{ name, image } }, items[]->{ name, image }}`)
+      .fetch<GroupDoc[]>(`*[_type == "materialGroup"]{_id, title, books[]{ title, items[]->{ name, image{asset} } }, items[]->{ name, image{asset} }}`)
       .then((rows: any[]) => {
         const normalized = (rows || []).map((r) => ({
           _id: r._id,
@@ -46,16 +51,14 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
   }
 
   useEffect(() => {
-    // initialize from existing value
     const existingRef = (value as any)?.group?._ref
-    if (existingRef && !selectedGroupId) {
-      setSelectedGroupId(existingRef)
-    }
+    if (existingRef && !selectedGroupId) setSelectedGroupId(existingRef)
   }, [value, selectedGroupId])
 
   if (!groups.length && !loading) return renderDefault(props)
 
   const selectedMaterials: Material[] = (value as any)?.materials || []
+  const selectedIds = new Set((selectedMaterials || []).map((m)=> materialId(m)))
   const group = groups.find((g)=> g._id === selectedGroupId)
   const books = group?.books || []
   const book = books[Math.min(Math.max(selectedBookIndex,0), Math.max(books.length-1, 0))]
@@ -63,7 +66,6 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
 
   return (
     <div style={{display: 'grid', gap: 10}}>
-      {/* 1) Group select */}
       <label style={{fontSize: 12, color: '#666'}}>Malzeme Grubu</label>
       <select
         value={selectedGroupId || ''}
@@ -89,14 +91,10 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
         ))}
       </select>
 
-      {/* 2) Book select */}
       {selectedGroupId && (
         <>
           <label style={{fontSize: 12, color: '#666'}}>Kartela</label>
-          <select
-            value={String(selectedBookIndex)}
-            onChange={(e)=> setSelectedBookIndex(Number(e.target.value))}
-          >
+          <select value={String(selectedBookIndex)} onChange={(e)=> setSelectedBookIndex(Number(e.target.value))}>
             {books.map((b, i)=> (
               <option key={i} value={i}>{b.title?.tr || b.title?.en || `Kartela ${i+1}`}</option>
             ))}
@@ -104,24 +102,33 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
         </>
       )}
 
-      {/* 3) Materials checklist */}
       {selectedGroupId && (
         materials.length === 0 ? (
           <div style={{fontSize: 12, color: '#999'}}>Bu kartelada malzeme yok.</div>
         ) : (
           <div style={{display: 'grid', gap: 8}}>
             {materials.map((m, idx) => {
-              const isChecked = Boolean(selectedMaterials.find((x: any) => x?.name?.tr === m?.name?.tr && x?.name?.en === m?.name?.en))
+              const id = materialId(m)
+              const isChecked = selectedIds.has(id)
               return (
                 <label key={idx} style={{display: 'flex', alignItems: 'center', gap: 10, padding: 6, border: '1px solid #e5e7eb'}}>
-                  <input type="checkbox" checked={isChecked} onChange={(e) => {
-                      const next = new Set(selectedMaterials.map((x: any) => JSON.stringify(x)))
-                      const key = JSON.stringify(m)
-                      if (e.target.checked) next.add(key); else next.delete(key)
-                      const nextArr = Array.from(next).map((s) => JSON.parse(s))
-                      onChange(set(withKey(nextArr), ['materials']))
-                    }} />
-                  {m?.image ? (<img src={urlFor(m.image)} alt={m?.name?.tr || m?.name?.en || 'Material'} style={{width: 36, height: 36, objectFit: 'cover', border: '1px solid #e5e7eb'}} />) : null}
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={(e) => {
+                      let nextArr = [...(selectedMaterials || [])]
+                      if (e.target.checked) {
+                        nextArr.push({ ...(m as any), _key: genKey() })
+                        nextArr = withKey(nextArr)
+                      } else {
+                        nextArr = nextArr.filter((x)=> materialId(x) !== id)
+                      }
+                      onChange(set(nextArr, ['materials']))
+                    }}
+                  />
+                  {m?.image ? (
+                    <img src={urlFor(m.image)} alt={m?.name?.tr || m?.name?.en || 'Material'} style={{width: 36, height: 36, objectFit: 'cover', border: '1px solid #e5e7eb'}} />
+                  ) : null}
                   <span style={{fontSize: 13}}>{m?.name?.tr || m?.name?.en || 'Malzeme'}</span>
                 </label>
               )
