@@ -36,6 +36,7 @@ export function ProductDetailPage() {
   const [mainImage, setMainImage] = useState('');
   const [selectedDimensionIndex, setSelectedDimensionIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [activeMaterialGroup, setActiveMaterialGroup] = useState<number>(0);
   const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
   const { isLoggedIn } = useAuth();
   const { t, locale } = useTranslation();
@@ -208,14 +209,38 @@ export function ProductDetailPage() {
                     {product.materials && product.materials.length > 0 && (
                         <div>
                             <h2 className="text-xl font-semibold text-gray-800">{t('material_alternatives')}</h2>
-                            <div className="mt-4 flex flex-wrap gap-4">
-                                {product.materials.map((material, index) => (
+                            {product.groupedMaterials && product.groupedMaterials.length > 0 ? (
+                              <>
+                                <div className="mt-4 flex flex-wrap gap-3">
+                                  {product.groupedMaterials.map((g, idx) => (
+                                    <button
+                                      key={idx}
+                                      onClick={() => setActiveMaterialGroup(idx)}
+                                      className={`px-3 py-1 rounded-full border ${activeMaterialGroup===idx ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-900 border-gray-300'} transition`}
+                                    >
+                                      {t(g.groupTitle)}
+                                    </button>
+                                  ))}
+                                </div>
+                                <div className="mt-6 flex flex-wrap gap-4">
+                                  {product.groupedMaterials[activeMaterialGroup].materials.map((material, index) => (
                                     <div key={index} className="text-center group cursor-pointer" title={t(material.name)}>
-                                        <img src={material.image} alt={t(material.name)} className="w-20 h-20 rounded-full object-cover border-2 border-transparent group-hover:border-gray-400 transition" />
-                                        <p className="mt-2 text-sm text-gray-600 max-w-[80px] break-words">{t(material.name)}</p>
+                                      <img src={material.image} alt={t(material.name)} className="w-20 h-20 rounded-full object-cover border-2 border-transparent group-hover:border-gray-400 transition" />
+                                      <p className="mt-2 text-sm text-gray-600 max-w-[80px] break-words">{t(material.name)}</p>
                                     </div>
+                                  ))}
+                                </div>
+                              </>
+                            ) : (
+                              <div className="mt-4 flex flex-wrap gap-4">
+                                {product.materials.map((material, index) => (
+                                  <div key={index} className="text-center group cursor-pointer" title={t(material.name)}>
+                                    <img src={material.image} alt={t(material.name)} className="w-20 h-20 rounded-full object-cover border-2 border-transparent group-hover:border-gray-400 transition" />
+                                    <p className="mt-2 text-sm text-gray-600 max-w-[80px] break-words">{t(material.name)}</p>
+                                  </div>
                                 ))}
-                            </div>
+                              </div>
+                            )}
                         </div>
                     )}
                 </div>

@@ -244,7 +244,7 @@ export const getProducts = async (): Promise<Product[]> => {
           sku,
           stockStatus,
           variants,
-          materialSelections[]{ materials },
+          materialSelections[]{ group->{title}, materials },
           dimensions,
           exclusiveContent,
           designer->{ "designerId": id.current },
@@ -268,6 +268,9 @@ export const getProducts = async (): Promise<Product[]> => {
           stockStatus: r.stockStatus,
           variants: mapVariants(r.variants),
           materials: mapMaterials((r.materialSelections || []).flatMap((s: any) => s?.materials || [])),
+          groupedMaterials: (r.materialSelections || [])
+            .map((s: any) => ({ groupTitle: s?.group?.title, materials: mapMaterials(s?.materials) }))
+            .filter((g: any) => g.materials.length > 0),
           exclusiveContent: {
             images: mapImages(r?.exclusiveContent?.images),
             drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: d?.file?.asset?._ref || d?.file?.asset?._id || '' })),
@@ -293,7 +296,7 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           sku,
           stockStatus,
           variants,
-          materialSelections[]{ materials },
+          materialSelections[]{ group->{title}, materials },
           dimensions,
           exclusiveContent,
           designer->{ "designerId": id.current },
@@ -318,6 +321,9 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           stockStatus: r.stockStatus,
           variants: mapVariants(r.variants),
           materials: mapMaterials((r.materialSelections || []).flatMap((s: any) => s?.materials || [])),
+          groupedMaterials: (r.materialSelections || [])
+            .map((s: any) => ({ groupTitle: s?.group?.title, materials: mapMaterials(s?.materials) }))
+            .filter((g: any) => g.materials.length > 0),
           exclusiveContent: {
             images: mapImages(r?.exclusiveContent?.images),
             drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: d?.file?.asset?._ref || d?.file?.asset?._id || '' })),

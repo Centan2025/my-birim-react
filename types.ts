@@ -50,6 +50,14 @@ export interface Designer {
 }
 
 /**
+ * Grouped materials by a material group
+ */
+export interface ProductMaterialsGroup {
+  groupTitle: LocalizedString;
+  materials: ProductMaterial[];
+}
+
+/**
  * Represents a single product.
  */
 export interface Product {
@@ -85,6 +93,8 @@ export interface Product {
   variants?: ProductVariant[];
   /** Array of available materials for the product. */
   materials: ProductMaterial[];
+  /** Materials grouped by material group (for UI). */
+  groupedMaterials?: ProductMaterialsGroup[];
   /** Content accessible only to logged-in users. */
   exclusiveContent: ExclusiveContent;
 }
