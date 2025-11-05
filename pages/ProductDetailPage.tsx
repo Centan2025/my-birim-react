@@ -43,6 +43,7 @@ export function ProductDetailPage() {
   const { addToCart } = useCart();
   const [activeMaterialGroup, setActiveMaterialGroup] = useState<number>(0);
   const [dragStartX, setDragStartX] = useState<number | null>(null);
+  const [dimLightbox, setDimLightbox] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -122,7 +123,6 @@ export function ProductDetailPage() {
             </ol>
           </nav>
 
-          {/* overlay prev/next just under the menu (breadcrumbs) */}
           {(prevProduct || nextProduct) && (
             <div className="absolute top-12 left-4 flex items-center gap-2 text-white/90">
               {prevProduct && (
@@ -149,7 +149,7 @@ export function ProductDetailPage() {
         </div>
         {/* Divider and Thumbnails under hero */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mt-2 md:mt-4 h-[2px] bg-gray-400/90" />
+          <div className="mt-1 md:mt-2 h-[2px] bg-gray-500/80" />
           <div className="mt-3 grid grid-cols-5 gap-3">
             {allImages.map((img, idx) => (
               <button key={idx} onClick={() => changeMainImage(img)} className={`overflow-hidden border-2 transition-all duration-300 ${mainImage === img ? 'border-gray-900 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}>
@@ -157,6 +157,7 @@ export function ProductDetailPage() {
               </button>
             ))}
           </div>
+          <div className="mt-3 h-px bg-gray-200/80" />
         </div>
       </header>
 
@@ -183,24 +184,15 @@ export function ProductDetailPage() {
               <p className="mt-3 text-gray-600 leading-relaxed max-w-2xl">{t(product.description)}</p>
             </div>
 
-            {product.dimensions && product.dimensions.length > 0 && (
+            {/* Dimensions as small drawings (thumbnails) */}
+            {product.exclusiveContent && product.exclusiveContent.images && product.exclusiveContent.images.length > 0 && (
               <div>
                 <h2 className="text-xl font-semibold text-gray-800">{t('dimensions')}</h2>
-                {product.dimensions.length > 1 && (
-                  <div className="mt-4 flex flex-wrap gap-3">
-                    {product.dimensions.map((dimSet, index) => {
-                      const widthDetail = dimSet.details.find(d => (d.label as any)?.tr === 'Genişlik' || (d.label as any)?.tr === 'Çap' || (d.label as any) === 'Genişlik' || (d.label as any) === 'Çap');
-                      const firstDetail = dimSet.details[0];
-                      const dimensionLabel = widthDetail ? t(widthDetail.value) : firstDetail ? t(firstDetail.value) : `${index+1}`;
-                      return (
-                        <button key={index} onClick={() => setSelectedDimensionIndex(index)} className={`px-3 py-1 rounded-full border backdrop-blur-sm transition-all duration-200 ${selectedDimensionIndex === index ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white/60 text-gray-900 border-gray-300 hover:bg-white'}`}>{dimensionLabel}</button>
-                      );
-                    })}
-                  </div>
-                )}
-                <div className="mt-6 flex flex-wrap gap-x-8 gap-y-4">
-                  {product.dimensions[selectedDimensionIndex].details.map((dim, index) => (
-                    <div key={index}><p className="text-lg font-semibold text-gray-800">{t(dim.value)}</p></div>
+                <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {product.exclusiveContent.images.map((img, idx) => (
+                    <button key={idx} onClick={() => setDimLightbox(img)} className="group border border-gray-200 hover:border-gray-400 transition p-3 bg-white">
+                      <img src={img} alt={`dimension-${idx}`} className="w-full h-40 object-contain" />
+                    </button>
                   ))}
                 </div>
               </div>
@@ -270,6 +262,15 @@ export function ProductDetailPage() {
           <button onClick={prevImageFn} className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:opacity-75 transition-opacity z-20 bg-black/20 rounded-full p-2"><ChevronLeftIcon /></button>
           <button onClick={nextImage} className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:opacity-75 transition-opacity z-20 bg-black/20 rounded-full p-2"><ChevronRightIcon /></button>
           <div className="max-w-screen-lg max-h-[90vh] w-full p-4"><img src={allImages[lightboxImageIndex]} alt="Enlarged product view" className="w-full h-full object-contain" /></div>
+        </div>
+      )}
+
+      {dimLightbox && (
+        <div className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center">
+          <button onClick={() => setDimLightbox(null)} className="absolute top-4 right-4 text-white hover:opacity-75 transition-opacity z-20"><CloseIcon /></button>
+          <div className="max-w-screen-lg max-h-[90vh] w-full p-4">
+            <img src={dimLightbox} alt="dimension-large" className="w-full h-full object-contain" />
+          </div>
         </div>
       )}
     </>
