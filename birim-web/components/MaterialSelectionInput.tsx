@@ -17,8 +17,8 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
   const client = useClient({apiVersion: '2025-01-01'})
   const [groups, setGroups] = useState<GroupDoc[]>([])
   const [loading, setLoading] = useState(false)
-  const [openGroupId, setOpenGroupId] = useState<string | undefined>(undefined)
-  const [openBookIndex, setOpenBookIndex] = useState<number>(0)
+  const [selectedGroupId, setSelectedGroupId] = useState<string | undefined>(undefined)
+  const [selectedBookIndex, setSelectedBookIndex] = useState<number>(0)
 
   useEffect(() => {
     setLoading(true)
@@ -45,58 +45,67 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
     try { return builder.image(img).width(48).height(48).fit('crop').url() } catch { return '' }
   }
 
+  useEffect(() => {
+    // initialize from existing value
+    const existingRef = (value as any)?.group?._ref
+    if (existingRef && !selectedGroupId) {
+      setSelectedGroupId(existingRef)
+    }
+  }, [value, selectedGroupId])
+
   if (!groups.length && !loading) return renderDefault(props)
 
-  const selectedMaterials: Material[] = value?.materials || []
-
-  const openGroup = (id: string) => {
-    setOpenGroupId(id)
-    setOpenBookIndex(0)
-    const refObj = { _type: 'reference', _ref: id } as any
-    const currentKey = (value as any)?._key
-    const nextObj: any = { ...(value || {}), group: refObj }
-    if (!Array.isArray(nextObj.materials)) nextObj.materials = []
-    if (currentKey) nextObj._key = currentKey
-    onChange(set(nextObj))
-  }
-
-  const group = groups.find((g)=> g._id === openGroupId)
+  const selectedMaterials: Material[] = (value as any)?.materials || []
+  const group = groups.find((g)=> g._id === selectedGroupId)
   const books = group?.books || []
-  const safeIndex = Math.min(Math.max(openBookIndex, 0), Math.max(books.length-1, 0))
-  const currentBook = books[safeIndex]
-  const materials = currentBook?.items || []
+  const book = books[Math.min(Math.max(selectedBookIndex,0), Math.max(books.length-1, 0))]
+  const materials = book?.items || []
 
   return (
     <div style={{display: 'grid', gap: 10}}>
-      {/* Groups */}
-      <div style={{display: 'flex', gap: 8, flexWrap: 'wrap'}}>
-        {groups.map((g) => {
-          const isOpen = openGroupId === g._id
-          const hasSelected = selectedMaterials.length > 0 && value?.group?._ref === g._id
-          return (
-            <button key={g._id} type="button" onClick={() => openGroup(g._id)}
-              style={{ border: '1px solid rgba(17,24,39,0.15)', padding: '6px 12px', borderRadius: 9999, background: isOpen ? 'rgba(17,24,39,0.9)' : 'rgba(255,255,255,0.6)', color: isOpen ? '#fff' : '#111827', backdropFilter: 'saturate(180%) blur(6px)', boxShadow: isOpen ? '0 6px 18px rgba(0,0,0,0.15)' : '0 4px 12px rgba(0,0,0,0.08)', transition: 'all .2s ease', cursor: 'pointer' }}>
-              {(g.title?.tr || g.title?.en || 'Grup')}
-              {hasSelected ? (<span style={{marginLeft: 8, fontSize: 11, color: isOpen ? '#a7f3d0' : '#059669'}}>●</span>) : null}
-            </button>
-          )
-        })}
-      </div>
+      {/* 1) Group select */}
+      <label style={{fontSize: 12, color: '#666'}}>Malzeme Grubu</label>
+      <select
+        value={selectedGroupId || ''}
+        onChange={(e)=>{
+          const gid = e.target.value || undefined
+          setSelectedGroupId(gid)
+          setSelectedBookIndex(0)
+          if (gid) {
+            const refObj = { _type: 'reference', _ref: gid } as any
+            const currentKey = (value as any)?._key
+            const nextObj: any = { ...(value || {}), group: refObj }
+            if (!Array.isArray(nextObj.materials)) nextObj.materials = []
+            if (currentKey) nextObj._key = currentKey
+            onChange(set(nextObj))
+          } else {
+            onChange(unset())
+          }
+        }}
+      >
+        <option value="">Grup seçin…</option>
+        {groups.map((g)=> (
+          <option key={g._id} value={g._id}>{g.title?.tr || g.title?.en || 'Grup'}</option>
+        ))}
+      </select>
 
-      {/* Books */}
-      {openGroupId && books.length>0 && (
-        <div style={{display: 'flex', gap: 10, flexWrap: 'wrap'}}>
-          {books.map((b, i)=> (
-            <button key={i} type="button" onClick={()=> setOpenBookIndex(i)}
-              style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid rgba(17,24,39,0.15)', background: openBookIndex===i ? 'rgba(17,24,39,0.9)' : 'rgba(255,255,255,0.6)', color: openBookIndex===i ? '#fff' : '#111827', transition: 'all .2s ease' }}>
-              {b.title?.tr || b.title?.en || `Kartela ${i+1}`}
-            </button>
-          ))}
-        </div>
+      {/* 2) Book select */}
+      {selectedGroupId && (
+        <>
+          <label style={{fontSize: 12, color: '#666'}}>Kartela</label>
+          <select
+            value={String(selectedBookIndex)}
+            onChange={(e)=> setSelectedBookIndex(Number(e.target.value))}
+          >
+            {books.map((b, i)=> (
+              <option key={i} value={i}>{b.title?.tr || b.title?.en || `Kartela ${i+1}`}</option>
+            ))}
+          </select>
+        </>
       )}
 
-      {/* Materials */}
-      {openGroupId ? (
+      {/* 3) Materials checklist */}
+      {selectedGroupId && (
         materials.length === 0 ? (
           <div style={{fontSize: 12, color: '#999'}}>Bu kartelada malzeme yok.</div>
         ) : (
@@ -119,8 +128,6 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
             })}
           </div>
         )
-      ) : (
-        <div style={{fontSize: 12, color: '#6b7280'}}>Bir malzeme grubu seçin.</div>
       )}
     </div>
   )
