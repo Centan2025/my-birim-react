@@ -98,11 +98,16 @@ export function ProductDetailPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
           <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-white">
             <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg">{t(product.name)}</h1>
-            {designer && (<p className="mt-2 text-white/80">{t(designer.name)} — {product.year}</p>)}
+            {designer && (
+              <p className="mt-2 text-white/80">
+                <Link to={`/designer/${designer.id}`} className="underline hover:text-white">{t(designer.name)}</Link> — {product.year}
+              </p>
+            )}
           </div>
         </div>
         {/* Thumbnails under hero */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 -mt-8 md:-mt-10">
+          <div className="h-px bg-gray-300 mb-3" />
           <div className="grid grid-cols-5 gap-3 bg-white/70 backdrop-blur-sm p-3 rounded-md">
             {allImages.map((img, idx) => (
               <button key={idx} onClick={() => changeMainImage(img)} className={`overflow-hidden border-2 transition-all duration-300 ${mainImage === img ? 'border-gray-900 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}>
@@ -132,8 +137,7 @@ export function ProductDetailPage() {
             )}
 
             <div>
-              <h2 className="text-xl font-semibold text-gray-800">{t('description')}</h2>
-              <p className="mt-2 text-gray-600 leading-relaxed">{t(product.description)}</p>
+              <p className="text-gray-600 leading-relaxed">{t(product.description)}</p>
             </div>
 
             {product.dimensions && product.dimensions.length > 0 && (
