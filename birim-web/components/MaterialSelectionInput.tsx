@@ -8,13 +8,14 @@ type Book = { title?: any; items?: Material[] }
 type GroupDoc = {_id: string; title?: any; books?: Book[]}
 
 function genKey() { return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}` }
-function withKey(items: Material[]): Material[] {
-  return (items || []).map((m) => (m && m._key ? m : {...m, _key: genKey()}))
-}
-function materialId(m: any): string {
-  const n = (m?.name?.tr || m?.name?.en || '').toString().trim()
-  const img = m?.image?.asset?._ref || m?.image?._id || ''
-  return `${n}|${img}`
+function withKey(items: Material[]): Material[] { return (items || []).map(m => (m && m._key ? m : {...m, _key: genKey()})) }
+function assetId(img: any): string { return img?.asset?._ref || img?._ref || img?._id || img?.asset?._id || '' }
+function materialIdLoose(m: any): string {
+  const k = m?._key || ''
+  const ntr = (m?.name?.tr || '').toString().trim()
+  const nen = (m?.name?.en || '').toString().trim()
+  const aid = assetId(m?.image)
+  return [k, ntr, nen, aid].join('|')
 }
 
 export default function MaterialSelectionInput(props: ObjectInputProps) {
@@ -28,7 +29,7 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
   useEffect(() => {
     setLoading(true)
     client
-      .fetch<GroupDoc[]>(`*[_type == "materialGroup"]{_id, title, books[]{ title, items[]->{ name, image{asset} } }, items[]->{ name, image{asset} }}`)
+      .fetch<GroupDoc[]>(`*[_type == "materialGroup"]{_id, title, books[]{ title, items[]{ _key, name, image{asset} } }, items[]{ _key, name, image{asset} }}`)
       .then((rows: any[]) => {
         const normalized = (rows || []).map((r) => ({
           _id: r._id,
@@ -46,9 +47,7 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
     const cfg = (client as any).config?.() || {}
     return imageUrlBuilder({projectId: cfg.projectId, dataset: cfg.dataset})
   }, [client])
-  const urlFor = (img: any) => {
-    try { return builder.image(img).width(48).height(48).fit('crop').url() } catch { return '' }
-  }
+  const urlFor = (img: any) => { try { return builder.image(img).width(48).height(48).fit('crop').url() } catch { return '' } }
 
   useEffect(() => {
     const existingRef = (value as any)?.group?._ref
@@ -58,7 +57,7 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
   if (!groups.length && !loading) return renderDefault(props)
 
   const selectedMaterials: Material[] = (value as any)?.materials || []
-  const selectedIds = new Set((selectedMaterials || []).map((m)=> materialId(m)))
+  const selectedIds = new Set((selectedMaterials || []).map((m)=> materialIdLoose(m)))
   const group = groups.find((g)=> g._id === selectedGroupId)
   const books = group?.books || []
   const book = books[Math.min(Math.max(selectedBookIndex,0), Math.max(books.length-1, 0))]
@@ -108,10 +107,11 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
         ) : (
           <div style={{display: 'grid', gap: 8}}>
             {materials.map((m, idx) => {
-              const id = materialId(m)
+              const id = materialIdLoose(m)
               const isChecked = selectedIds.has(id)
+              const labelTxt = (m?.name?.tr || m?.name?.en || `Malzeme ${idx+1}`)
               return (
-                <label key={idx} style={{display: 'flex', alignItems: 'center', gap: 10, padding: 6, border: '1px solid #e5e7eb'}}>
+                <label key={m?._key || idx} style={{display: 'flex', alignItems: 'center', gap: 10, padding: 6, border: '1px solid #e5e7eb'}}>
                   <input
                     type="checkbox"
                     checked={isChecked}
@@ -121,15 +121,15 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
                         nextArr.push({ ...(m as any), _key: genKey() })
                         nextArr = withKey(nextArr)
                       } else {
-                        nextArr = nextArr.filter((x)=> materialId(x) !== id)
+                        nextArr = nextArr.filter((x)=> materialIdLoose(x) !== id)
                       }
                       onChange(set(nextArr, ['materials']))
                     }}
                   />
                   {m?.image ? (
-                    <img src={urlFor(m.image)} alt={m?.name?.tr || m?.name?.en || 'Material'} style={{width: 36, height: 36, objectFit: 'cover', border: '1px solid #e5e7eb'}} />
+                    <img src={urlFor(m.image)} alt={labelTxt} style={{width: 36, height: 36, objectFit: 'cover', border: '1px solid #e5e7eb'}} />
                   ) : null}
-                  <span style={{fontSize: 13}}>{m?.name?.tr || m?.name?.en || 'Malzeme'}</span>
+                  <span style={{fontSize: 13}}>{labelTxt}</span>
                 </label>
               )
             })}
