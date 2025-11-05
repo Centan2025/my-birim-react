@@ -116,10 +116,10 @@ export function ProductDetailPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
               <div className="animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-                <div className={`aspect-w-1 aspect-h-1 mb-4 overflow-hidden bg-gray-100 cursor-zoom-in relative`}
+                <div className={`mb-4 overflow-hidden bg-gray-100 cursor-zoom-in rounded-lg`}
                      onClick={() => openLightbox(allImages.indexOf(mainImage))}>
                   <img src={mainImage} alt={t(product.name)}
-                       className={`w-full h-full object-cover absolute inset-0 transition-all duration-250 ease-out ${imgSwap==='leave' ? 'opacity-0 -translate-x-2' : imgSwap==='enter' ? 'opacity-100 translate-x-0' : ''}`} />
+                       className={`w-full h-full object-cover transition-all duration-300 ease-out ${imgSwap==='leave' ? 'opacity-0 -translate-y-1' : imgSwap==='enter' ? 'opacity-100 translate-y-0' : ''}`} />
                 </div>
                 <div className="grid grid-cols-5 gap-3">
                   {allImages.map((img, idx) => (
@@ -147,23 +147,23 @@ export function ProductDetailPage() {
                   {product.dimensions && product.dimensions.length > 0 && (
                     <div>
                       <h2 className="text-xl font-semibold text-gray-800">{t('dimensions')}</h2>
-                      {product.dimensions.length > 1 && (
-                        <div className="mt-4 flex flex-wrap gap-3">
-                          {product.dimensions.map((_, index) => (
-                            <button key={index} onClick={() => { setSelectedDimensionIndex(index); setSelectedDetailIndex(0); }}
-                              className={`px-3 py-1 rounded-full border backdrop-blur-sm transition-all duration-200 ${selectedDimensionIndex===index ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white/60 text-gray-900 border-gray-300 hover:bg-white'}`}>{index+1}</button>
-                          ))}
-                        </div>
-                      )}
+                        {product.dimensions.length > 1 && (
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            {product.dimensions.map((_, index) => (
+                              <button key={index} onClick={() => { setSelectedDimensionIndex(index); setSelectedDetailIndex(0); }}
+                                className={`px-3 py-1 rounded-full border transition-all duration-200 ${selectedDimensionIndex===index ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white/50 text-gray-900 border-gray-300 hover:bg-white/80'}`}>{index+1}</button>
+                            ))}
+                          </div>
+                        )}
                       {/* Detail chips */}
                       <div className="mt-4 flex flex-wrap gap-2">
                         {product.dimensions[selectedDimensionIndex].details.map((d, i) => (
                           <button key={i} onClick={() => setSelectedDetailIndex(i)}
-                            className={`px-2 py-1 rounded-lg border transition-all duration-150 text-sm ${selectedDetailIndex===i ? 'bg-gray-900 text-white border-gray-900' : 'bg-white/70 text-gray-900 border-gray-300 hover:bg-white'}`}>{t(d.label)}</button>
+                            className={`px-3 py-1 rounded-full border transition-all duration-150 text-sm ${selectedDetailIndex===i ? 'bg-gray-900 text-white border-gray-900' : 'bg-white/50 text-gray-900 border-gray-300 hover:bg-white/80'}`}>{t(d.label)}</button>
                         ))}
                       </div>
                       <div className="mt-5">
-                        <p className="text-sm text-gray-500">{t('dimensions')}</p>
+                        <p className="text-sm text-gray-500">{t(product.dimensions[selectedDimensionIndex].details[selectedDetailIndex].label)}</p>
                         <p className="text-2xl font-semibold text-gray-900">{t(product.dimensions[selectedDimensionIndex].details[selectedDetailIndex].value)}</p>
                       </div>
                     </div>
