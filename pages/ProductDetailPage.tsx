@@ -106,9 +106,9 @@ export function ProductDetailPage() {
           </div>
         </div>
         {/* Thumbnails under hero */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 -mt-8 md:-mt-10">
-          <div className="h-px bg-gray-300 mb-3" />
-          <div className="grid grid-cols-5 gap-3 bg-white/70 backdrop-blur-sm p-3 rounded-md">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mt-6 md:mt-8 h-[1px] bg-gray-200/70" />
+          <div className="mt-4 grid grid-cols-5 gap-3">
             {allImages.map((img, idx) => (
               <button key={idx} onClick={() => changeMainImage(img)} className={`overflow-hidden border-2 transition-all duration-300 ${mainImage === img ? 'border-gray-900 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}>
                 <img src={img} alt={`${t(product.name)} thumbnail ${idx + 1}`} className="w-full h-24 object-cover" />
