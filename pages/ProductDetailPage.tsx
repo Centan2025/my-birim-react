@@ -80,7 +80,8 @@ export function ProductDetailPage() {
   if (loading) return <div className="pt-20 text-center">{t('loading')}...</div>;
   if (!product) return <div className="pt-20 text-center">{t('product_not_found')}</div>;
 
-  const allImages = [product.mainImage, ...product.alternativeImages];
+  const altImages = Array.isArray(product.alternativeImages) ? product.alternativeImages : [];
+  const allImages = [product.mainImage, ...altImages];
   const currentIdx = Math.max(0, allImages.indexOf(mainImage));
 
   const changeMainImage = (img: string) => { if (img === mainImage) return; setPrevImage(mainImage); setMainImage(img); };
