@@ -1,6 +1,6 @@
-import S from 'sanity/desk'
+import type {StructureBuilder} from 'sanity/structure'
 
-export default () =>
+export const deskStructure = (S: StructureBuilder) =>
   S.list()
     .title('İçerik')
     .items([
@@ -9,7 +9,7 @@ export default () =>
         .child(
           S.documentTypeList('category')
             .title('Kategoriler')
-            .child(categoryId =>
+            .child((categoryId) =>
               S.documentList()
                 .title('Ürünler')
                 .filter('_type == "product" && references($catId)')
