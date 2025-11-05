@@ -2,21 +2,21 @@ import {defineField, defineType} from 'sanity'
 
 export default defineType({
   name: 'contactPage',
-  title: 'Contact Page',
+  title: 'İletişim',
   type: 'document',
   fields: [
-    defineField({name: 'title', title: 'Title', type: 'localizedString'}),
-    defineField({name: 'subtitle', title: 'Subtitle', type: 'localizedString'}),
+    defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
+    defineField({name: 'subtitle', title: 'Alt Başlık', type: 'localizedString'}),
     defineField({
       name: 'locations',
-      title: 'Locations',
+      title: 'Lokasyonlar',
       type: 'array',
       of: [{type: 'contactLocation'}],
     }),
   ],
   preview: {
     prepare() {
-      return {title: 'Contact Page'}
+      return {title: 'İletişim'}
     },
   },
 })

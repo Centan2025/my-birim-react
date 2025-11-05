@@ -2,7 +2,7 @@ import {defineField, defineType} from 'sanity'
 
 export default defineType({
   name: 'designer',
-  title: 'Designer',
+  title: 'Tasarımcı',
   type: 'document',
   fields: [
     defineField({
@@ -12,14 +12,14 @@ export default defineType({
       options: {source: (doc) => doc.name?.tr || doc.name?.en, maxLength: 96},
       validation: (Rule) => Rule.required(),
     }),
-    defineField({name: 'name', title: 'Name', type: 'localizedString', validation: (Rule) => Rule.required()}),
-    defineField({name: 'bio', title: 'Bio', type: 'localizedString'}),
-    defineField({name: 'image', title: 'Image', type: 'image', options: {hotspot: true}}),
+    defineField({name: 'name', title: 'Ad', type: 'localizedString', validation: (Rule) => Rule.required()}),
+    defineField({name: 'bio', title: 'Biyografi', type: 'localizedString'}),
+    defineField({name: 'image', title: 'Görsel', type: 'image', options: {hotspot: true}}),
   ],
   preview: {
     select: {title: 'name.tr', media: 'image'},
     prepare({title, media}) {
-      return {title: title || 'Designer', media}
+      return {title: title || 'Tasarımcı', media}
     },
   },
 })

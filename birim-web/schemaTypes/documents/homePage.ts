@@ -2,45 +2,45 @@ import {defineField, defineType} from 'sanity'
 
 export default defineType({
   name: 'homePage',
-  title: 'Home Page',
+  title: 'Ana Sayfa',
   type: 'document',
   fields: [
     defineField({
       name: 'heroMedia',
-      title: 'Hero Media',
+      title: 'Hero Medya',
       type: 'array',
       of: [{type: 'heroMediaItem'}],
     }),
-    defineField({name: 'isHeroTextVisible', title: 'Show Hero Text', type: 'boolean'}),
-    defineField({name: 'isLogoVisible', title: 'Show Logo', type: 'boolean'}),
+    defineField({name: 'isHeroTextVisible', title: 'Hero Metnini Göster', type: 'boolean'}),
+    defineField({name: 'isLogoVisible', title: 'Logoyu Göster', type: 'boolean'}),
     defineField({
       name: 'featuredProducts',
-      title: 'Featured Products',
+      title: 'Öne Çıkan Ürünler',
       type: 'array',
       of: [{type: 'reference', to: [{type: 'product'}]}],
     }),
     defineField({
       name: 'featuredDesigner',
-      title: 'Featured Designer',
+      title: 'Öne Çıkan Tasarımcı',
       type: 'reference',
       to: [{type: 'designer'}],
     }),
     defineField({
       name: 'inspirationSection',
-      title: 'Inspiration Section',
+      title: 'İlham Bölümü',
       type: 'object',
       fields: [
-        defineField({name: 'backgroundImage', title: 'Background Image', type: 'image', options: {hotspot: true}}),
-        defineField({name: 'title', title: 'Title', type: 'localizedString'}),
-        defineField({name: 'subtitle', title: 'Subtitle', type: 'localizedString'}),
-        defineField({name: 'buttonText', title: 'Button Text', type: 'localizedString'}),
-        defineField({name: 'buttonLink', title: 'Button Link', type: 'string'}),
+        defineField({name: 'backgroundImage', title: 'Arka Plan Görseli', type: 'image', options: {hotspot: true}}),
+        defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
+        defineField({name: 'subtitle', title: 'Alt Başlık', type: 'localizedString'}),
+        defineField({name: 'buttonText', title: 'Buton Metni', type: 'localizedString'}),
+        defineField({name: 'buttonLink', title: 'Buton Bağlantısı', type: 'string'}),
       ],
     }),
   ],
   preview: {
     prepare() {
-      return {title: 'Home Page'}
+      return {title: 'Ana Sayfa'}
     },
   },
 })

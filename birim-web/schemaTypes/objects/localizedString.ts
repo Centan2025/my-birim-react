@@ -2,7 +2,7 @@ import {defineField, defineType} from 'sanity'
 
 export const localizedString = defineType({
   name: 'localizedString',
-  title: 'Localized String',
+  title: 'Çok Dilli Metin',
   type: 'object',
   fields: [
     defineField({

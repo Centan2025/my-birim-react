@@ -7,12 +7,14 @@ import homePage from './documents/homePage'
 import aboutPage from './documents/aboutPage'
 import contactPage from './documents/contactPage'
 import footer from './documents/footer'
+import materialGroup from './documents/materialGroup'
 
 import {localizedString} from './objects/localizedString'
 import {
   productDimensionDetail,
   productDimensionSet,
   productMaterial,
+  productMaterialSelection,
   productVariant,
   downloadableItem,
   exclusiveContent,
@@ -34,11 +36,13 @@ export const schemaTypes = [
   aboutPage,
   contactPage,
   footer,
+  materialGroup,
   // objects
   localizedString,
   productDimensionDetail,
   productDimensionSet,
   productMaterial,
+  productMaterialSelection,
   productVariant,
   downloadableItem,
   exclusiveContent,

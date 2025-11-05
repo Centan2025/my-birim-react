@@ -2,7 +2,7 @@ import {defineField, defineType} from 'sanity'
 
 export default defineType({
   name: 'product',
-  title: 'Product',
+  title: 'Ürün',
   type: 'document',
   fields: [
     defineField({
@@ -12,68 +12,69 @@ export default defineType({
       options: {source: (doc) => doc.name?.tr || doc.name?.en, maxLength: 96},
       validation: (Rule) => Rule.required(),
     }),
-    defineField({name: 'name', title: 'Name', type: 'localizedString', validation: (Rule) => Rule.required()}),
+    defineField({name: 'name', title: 'Ad', type: 'localizedString', validation: (Rule) => Rule.required()}),
     defineField({
       name: 'designer',
-      title: 'Designer',
+      title: 'Tasarımcı',
       type: 'reference',
       to: [{type: 'designer'}],
     }),
     defineField({
       name: 'category',
-      title: 'Category',
+      title: 'Kategori',
       type: 'reference',
       to: [{type: 'category'}],
     }),
-    defineField({name: 'year', title: 'Year', type: 'number'}),
-    defineField({name: 'description', title: 'Description', type: 'localizedString'}),
-    defineField({name: 'mainImage', title: 'Main Image', type: 'image', options: {hotspot: true}}),
+    defineField({name: 'year', title: 'Yıl', type: 'number'}),
+    defineField({name: 'description', title: 'Açıklama', type: 'localizedString'}),
+    defineField({name: 'mainImage', title: 'Ana Görsel', type: 'image', options: {hotspot: true}}),
     defineField({
       name: 'alternativeImages',
-      title: 'Alternative Images',
+      title: 'Alternatif Görseller',
       type: 'array',
       of: [{type: 'image', options: {hotspot: true}}],
     }),
     defineField({
       name: 'dimensions',
-      title: 'Dimensions',
+      title: 'Ölçüler',
       type: 'array',
       of: [{type: 'productDimensionSet'}],
     }),
-    defineField({name: 'buyable', title: 'Buyable', type: 'boolean'}),
-    defineField({name: 'price', title: 'Price', type: 'number'}),
-    defineField({name: 'currency', title: 'Currency', type: 'string'}),
-    defineField({name: 'sku', title: 'SKU', type: 'string'}),
+    defineField({name: 'buyable', title: 'Satın Alınabilir', type: 'boolean'}),
+    defineField({name: 'price', title: 'Fiyat', type: 'number'}),
+    defineField({name: 'currency', title: 'Para Birimi', type: 'string'}),
+    defineField({name: 'sku', title: 'Stok Kodu (SKU)', type: 'string'}),
     defineField({
       name: 'stockStatus',
-      title: 'Stock Status',
+      title: 'Stok Durumu',
       type: 'string',
       options: {
         list: [
-          {title: 'In Stock', value: 'in_stock'},
-          {title: 'Out of Stock', value: 'out_of_stock'},
+          {title: 'Stokta', value: 'in_stock'},
+          {title: 'Stok Dışı', value: 'out_of_stock'},
           {title: 'Preorder', value: 'preorder'},
         ],
       },
     }),
     defineField({
-      name: 'materials',
-      title: 'Materials',
+      name: 'materialSelections',
+      title: 'Malzeme Seçimleri',
       type: 'array',
-      of: [{type: 'productMaterial'}],
+      of: [{ type: 'productMaterialSelection' }],
+      description: 'Bir veya birden fazla grubu seçin ve her gruptan kullanılacak malzemeleri işaretleyin.'
     }),
     defineField({
       name: 'variants',
-      title: 'Variants',
+      title: 'Varyantlar',
       type: 'array',
       of: [{type: 'productVariant'}],
     }),
-    defineField({name: 'exclusiveContent', title: 'Exclusive Content', type: 'exclusiveContent'}),
+    defineField({name: 'exclusiveContent', title: 'Özel İçerik', type: 'exclusiveContent'}),
   ],
   preview: {
     select: {title: 'name.tr', media: 'mainImage'},
     prepare({title, media}) {
-      return {title: title || 'Product', media}
+      return {title: title || 'Ürün', media}
     },
   },
 })
