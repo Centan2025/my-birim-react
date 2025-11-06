@@ -26,6 +26,16 @@ export const productDimensionSet = defineType({
   ],
 })
 
+export const productDimensionImage = defineType({
+  name: 'productDimensionImage',
+  title: 'Ölçü Görseli',
+  type: 'object',
+  fields: [
+    defineField({name: 'image', title: 'Görsel', type: 'image', options: {hotspot: true}, validation: (Rule) => Rule.required()}),
+    defineField({name: 'title', title: 'Başlık', type: 'localizedString', description: 'Görselin altında görünecek başlık'}),
+  ],
+})
+
 export const productMaterial = defineType({
   name: 'productMaterial',
   title: 'Ürün Malzemesi',

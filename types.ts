@@ -50,11 +50,20 @@ export interface Designer {
 }
 
 /**
+ * Materials grouped by swatch book (kartela)
+ */
+export interface ProductMaterialsBook {
+  bookTitle: LocalizedString;
+  materials: ProductMaterial[];
+}
+
+/**
  * Grouped materials by a material group
  */
 export interface ProductMaterialsGroup {
   groupTitle: LocalizedString;
-  materials: ProductMaterial[];
+  books: ProductMaterialsBook[];
+  materials: ProductMaterial[]; // All materials in the group (for backward compatibility)
 }
 
 /**
@@ -77,8 +86,8 @@ export interface Product {
   mainImage: string;
   /** Array of URLs for alternative product images. */
   alternativeImages: string[];
-  /** Dimension drawings/images shown before materials. */
-  dimensionImages?: string[];
+  /** Dimension drawings/images shown before materials. Each has an image and a title. */
+  dimensionImages?: { image: string; title?: LocalizedString }[];
   /** Indicates if the product can be purchased directly. */
   buyable: boolean;
   /** Price of the product. */

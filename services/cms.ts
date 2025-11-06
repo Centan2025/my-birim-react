@@ -1,5 +1,5 @@
 import { initialData, KEYS } from '../data';
-import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem, ProductMaterial, ProductVariant, Project } from '../types';
+import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem, ProductMaterial, ProductVariant, Project, LocalizedString } from '../types';
 import { createClient } from '@sanity/client'
 import groq from 'groq'
 import imageUrlBuilder from '@sanity/image-url'
@@ -41,11 +41,51 @@ const mapImage = (img: any | undefined): string => {
 
 const mapImages = (imgs: any[] | undefined): string[] => Array.isArray(imgs) ? imgs.map(i => mapImage(i)).filter(Boolean) : []
 const mapMaterials = (materials: any[] | undefined): ProductMaterial[] => Array.isArray(materials) ? materials.map(m => ({ name: m?.name, image: mapImage(m?.image) })) : []
+const mapDimensionImages = (dimImgs: any[] | undefined): { image: string; title?: LocalizedString }[] => {
+  if (!Array.isArray(dimImgs)) return []
+  return dimImgs.map((di: any) => ({
+    image: mapImage(di?.image),
+    title: di?.title,
+  })).filter((di: any) => di.image) // sadece görseli olanları tut
+}
+const mapGroupedMaterials = (materialSelections: any[]): any[] => {
+  return (materialSelections || [])
+    .map((s: any) => {
+      const selectedMaterials = mapMaterials(s?.materials || [])
+      // Create a set of selected material keys for faster lookup
+      const selectedKeys = new Set(selectedMaterials.map((sm: any) => `${sm.image}|${JSON.stringify(sm.name)}`))
+      
+      const groupBooks = (s?.group?.books || []).map((book: any) => {
+        const bookMaterials = mapMaterials(book?.items || [])
+        // Filter to only show materials that are selected for this product
+        const selectedBookMaterials = bookMaterials.filter((bm: any) => 
+          selectedKeys.has(`${bm.image}|${JSON.stringify(bm.name)}`)
+        )
+        return {
+          bookTitle: book?.title,
+          materials: selectedBookMaterials
+        }
+      }).filter((b: any) => b.materials.length > 0)
+      
+      return {
+        groupTitle: s?.group?.title,
+        books: groupBooks,
+        materials: selectedMaterials
+      }
+    })
+    .filter((g: any) => g.materials.length > 0)
+}
 // Ürünlerde ölçü alanını boşlayarak normalize et
 const normalizeProduct = (p: Product): Product => ({
   ...p,
   // legacy cleanups
-  dimensionImages: Array.isArray((p as any).dimensionImages) ? (p as any).dimensionImages : [],
+  dimensionImages: Array.isArray((p as any).dimensionImages) 
+    ? (p as any).dimensionImages.map((di: any) => 
+        typeof di === 'string' 
+          ? { image: di } // eski string array formatı için backward compatibility
+          : di
+      )
+    : [],
 })
 const mapVariants = (variants: any[] | undefined): ProductVariant[] => Array.isArray(variants) ? variants.map(v => ({ name: v?.name, sku: v?.sku, price: v?.price, images: mapImages(v?.images) })) : []
 
@@ -249,8 +289,8 @@ export const getProducts = async (): Promise<Product[]> => {
           sku,
           stockStatus,
           variants,
-          materialSelections[]{ group->{title}, materials },
-          dimensionImages,
+          materialSelections[]{ group->{title, books[]{title, items[]{name, image}}}, materials },
+          dimensionImages[]{ image, title },
           exclusiveContent,
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
@@ -265,7 +305,7 @@ export const getProducts = async (): Promise<Product[]> => {
           description: r.description,
           mainImage: mapImage(r.mainImage),
           alternativeImages: mapImages(r.alternativeImages),
-          dimensionImages: mapImages(r?.dimensionImages),
+          dimensionImages: mapDimensionImages(r?.dimensionImages),
           buyable: Boolean(r.buyable),
           price: r.price,
           currency: r.currency,
@@ -273,9 +313,7 @@ export const getProducts = async (): Promise<Product[]> => {
           stockStatus: r.stockStatus,
           variants: mapVariants(r.variants),
           materials: mapMaterials((r.materialSelections || []).flatMap((s: any) => s?.materials || [])),
-          groupedMaterials: (r.materialSelections || [])
-            .map((s: any) => ({ groupTitle: s?.group?.title, materials: mapMaterials(s?.materials) }))
-            .filter((g: any) => g.materials.length > 0),
+          groupedMaterials: mapGroupedMaterials(r.materialSelections),
           exclusiveContent: {
             images: mapImages(r?.exclusiveContent?.images),
             drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: d?.file?.asset?._ref || d?.file?.asset?._id || '' })),
@@ -301,8 +339,8 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           sku,
           stockStatus,
           variants,
-          materialSelections[]{ group->{title}, materials },
-          dimensionImages,
+          materialSelections[]{ group->{title, books[]{title, items[]{name, image}}}, materials },
+          dimensionImages[]{ image, title },
           exclusiveContent,
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
@@ -318,7 +356,7 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           description: r.description,
           mainImage: mapImage(r.mainImage),
           alternativeImages: mapImages(r.alternativeImages),
-          dimensionImages: mapImages(r?.dimensionImages),
+          dimensionImages: mapDimensionImages(r?.dimensionImages),
           buyable: Boolean(r.buyable),
           price: r.price,
           currency: r.currency,
@@ -326,9 +364,7 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           stockStatus: r.stockStatus,
           variants: mapVariants(r.variants),
           materials: mapMaterials((r.materialSelections || []).flatMap((s: any) => s?.materials || [])),
-          groupedMaterials: (r.materialSelections || [])
-            .map((s: any) => ({ groupTitle: s?.group?.title, materials: mapMaterials(s?.materials) }))
-            .filter((g: any) => g.materials.length > 0),
+          groupedMaterials: mapGroupedMaterials(r.materialSelections),
           exclusiveContent: {
             images: mapImages(r?.exclusiveContent?.images),
             drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: d?.file?.asset?._ref || d?.file?.asset?._id || '' })),
@@ -352,7 +388,7 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
           price,
           currency,
           materialSelections[]{ materials },
-          dimensionImages,
+          dimensionImages[]{ image, title },
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
         }`
@@ -366,7 +402,7 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
           description: r.description,
           mainImage: mapImage(r.mainImage),
           alternativeImages: mapImages(r.alternativeImages),
-          dimensionImages: mapImages(r?.dimensionImages),
+          dimensionImages: mapDimensionImages(r?.dimensionImages),
           buyable: Boolean(r.buyable),
           price: r.price,
           currency: r.currency,
@@ -394,7 +430,7 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
           price,
           currency,
           materialSelections[]{ materials },
-          dimensionImages,
+          dimensionImages[]{ image, title },
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
         }`
@@ -408,7 +444,7 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
           description: r.description,
           mainImage: mapImage(r.mainImage),
           alternativeImages: mapImages(r.alternativeImages),
-          dimensionImages: mapImages(r?.dimensionImages),
+          dimensionImages: mapDimensionImages(r?.dimensionImages),
           buyable: Boolean(r.buyable),
           price: r.price,
           currency: r.currency,

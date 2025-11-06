@@ -946,23 +946,6 @@ export function AdminPage() {
                         <button type="button" onClick={() => addProductArrayItem<ProductMaterial, 'materials'>('materials', { name: {}, image: '' })} className="text-sm font-medium text-gray-800 hover:text-black">+ Malzeme Ekle</button>
                     </div>
 
-                    <div className="space-y-2 border-t pt-4">
-                        <h4 className="font-semibold text-gray-800">Özel İçerik - Ölçüler</h4>
-                        <div className="space-y-2">
-                          {(productForm.dimensionImages || []).map((url, index) => (
-                            <div key={index} className="flex gap-2 items-end p-2 border rounded-md bg-gray-50/50">
-                              <FormRow label={`Ölçü Görsel URL #${index+1}`} className="flex-1"><Input value={url} onChange={e => {
-                                const next = [...(productForm.dimensionImages || [])];
-                                next[index] = e.target.value;
-                                handleProductFormChange('dimensionImages', next);
-                              }} /></FormRow>
-                              <button type="button" onClick={() => handleProductFormChange('dimensionImages', (productForm.dimensionImages || []).filter((_, i) => i !== index))} className="text-red-500 hover:text-red-700 p-1 mb-2">Sil</button>
-                            </div>
-                          ))}
-                          <button type="button" onClick={() => handleProductFormChange('dimensionImages', [...(productForm.dimensionImages || []), ''])} className="text-sm font-medium text-gray-800 hover:text-black">+ Ölçü Görsel Ekle</button>
-                        </div>
-                    </div>
-
                     <FormRow label="Satın Alınabilir mi?"><input type="checkbox" checked={productForm.buyable} onChange={e => handleProductFormChange('buyable', e.target.checked)} className="h-4 w-4" /></FormRow>
                     
                     <div className="flex gap-4">

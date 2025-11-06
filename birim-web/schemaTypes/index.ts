@@ -15,6 +15,7 @@ import {localizedText} from './objects/localizedText'
 import {
   productDimensionDetail,
   productDimensionSet,
+  productDimensionImage,
   productMaterial,
   productMaterialSelection,
   productVariant,
@@ -46,6 +47,7 @@ export const schemaTypes = [
   localizedText,
   productDimensionDetail,
   productDimensionSet,
+  productDimensionImage,
   productMaterial,
   materialSwatchBook,
   productMaterialSelection,

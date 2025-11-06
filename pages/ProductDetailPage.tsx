@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import type { Product, Designer, Category } from '../types';
+import type { Product, Designer, Category, LocalizedString } from '../types';
 import { getProductById, getDesignerById, getCategories, getProductsByCategoryId } from '../services/cms';
 import { useAuth } from '../App';
 import { useTranslation } from '../i18n';
@@ -41,8 +41,22 @@ export function ProductDetailPage() {
   const { t, locale } = useTranslation();
   const { addToCart } = useCart();
   const [activeMaterialGroup, setActiveMaterialGroup] = useState<number>(0);
-  const [dragStartX, setDragStartX] = useState<number | null>(null);
+  const [activeBookIndex, setActiveBookIndex] = useState<number>(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartX, setDragStartX] = useState<number>(0);
+  const [draggedX, setDraggedX] = useState<number>(0);
+  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+  const DRAG_THRESHOLD = 50; // pixels
   const [dimLightbox, setDimLightbox] = useState<string | null>(null);
+  // Thumbnails horizontal drag/scroll
+  const thumbRef = useRef<HTMLDivElement | null>(null);
+  const [thumbDragStartX, setThumbDragStartX] = useState<number | null>(null);
+  const [thumbScrollStart, setThumbScrollStart] = useState<number>(0);
+
+  // Grup değiştiğinde kartela indexini sıfırla
+  useEffect(() => {
+    setActiveBookIndex(0);
+  }, [activeMaterialGroup]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -51,7 +65,10 @@ export function ProductDetailPage() {
         const productData = await getProductById(productId);
         setProduct(productData);
         if (productData) {
-          setMainImage(productData.mainImage);
+          const altImgs = Array.isArray(productData.alternativeImages) ? productData.alternativeImages : [];
+          const allImgs = [productData.mainImage, ...altImgs].filter(Boolean);
+          setMainImage(allImgs[0] || '');
+          setCurrentImageIndex(0);
           setPrevImage(null);
           const [designerData, allCategories, productsInCategory] = await Promise.all([
             getDesignerById(productData.designerId),
@@ -77,43 +94,160 @@ export function ProductDetailPage() {
     return { prevProduct: prev, nextProduct: next };
   }, [product, siblingProducts]);
 
+  // Aynı groupTitle'a sahip grupları tek bir sekme altında birleştir - erken return'lerden önce
+  const grouped = useMemo(() => {
+    if (!product) return [];
+    return Array.isArray((product as any).groupedMaterials) ? (product as any).groupedMaterials : [];
+  }, [product]);
+
+  const mergedGroups = useMemo(() => {
+    const map = new Map<string, any>();
+    (grouped || []).forEach((g: any) => {
+      const key = JSON.stringify(g.groupTitle || '');
+      if (!map.has(key)) {
+        map.set(key, {
+          groupTitle: g.groupTitle,
+          books: Array.isArray(g.books) ? [...g.books] : [],
+          materials: Array.isArray(g.materials) ? [...g.materials] : [],
+        });
+      } else {
+        const agg = map.get(key);
+        // kitapları başlıklarına göre birleştir
+        const byTitle = new Map<string, any>();
+        [...(agg.books || []), ...(g.books || [])].forEach((b: any) => {
+          const bKey = JSON.stringify(b.bookTitle || '');
+          if (!byTitle.has(bKey)) byTitle.set(bKey, { bookTitle: b.bookTitle, materials: [] });
+          const entry = byTitle.get(bKey);
+          entry.materials = [...entry.materials, ...(Array.isArray(b.materials) ? b.materials : [])];
+        });
+        agg.books = Array.from(byTitle.values());
+        agg.materials = [...(agg.materials || []), ...(Array.isArray(g.materials) ? g.materials : [])];
+        map.set(key, agg);
+      }
+    });
+    return Array.from(map.values());
+  }, [grouped]);
+
+  // Görsel ve grup hesaplamaları (erken return'lerden önce)
+  const altImages = Array.isArray(product?.alternativeImages) ? (product as any).alternativeImages : [];
+  const allImagesRaw = [product?.mainImage, ...altImages];
+  const allImages = Array.isArray(allImagesRaw) ? allImagesRaw.filter(Boolean) : [];
+
+  const safeActiveIndex = Math.min(Math.max(activeMaterialGroup, 0), Math.max(mergedGroups.length - 1, 0));
+  const activeGroup = Array.isArray(mergedGroups) ? mergedGroups[safeActiveIndex] : undefined;
+  const books = Array.isArray((activeGroup as any)?.books) ? (activeGroup as any).books : [];
+  const dimImages = Array.isArray(product?.dimensionImages) ? (product as any).dimensionImages.filter((di: any) => di?.image) : [];
+  const slideCount = allImages.length || 1;
+
+  // HomePage hero medya mantığına benzer drag sistemi
+  const handleHeroDragStart = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    if (e.target instanceof HTMLElement && e.target.closest('a, button')) {
+      return;
+    }
+    setIsDragging(true);
+    const startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    setDragStartX(startX);
+    setDraggedX(0);
+    e.preventDefault();
+  };
+
+  const handleHeroDragMove = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    const currentX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    setDraggedX(currentX - dragStartX);
+  };
+
+  const handleHeroDragEnd = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+
+    if (draggedX < -DRAG_THRESHOLD) {
+      setCurrentImageIndex(prev => (prev + 1) % slideCount);
+    } else if (draggedX > DRAG_THRESHOLD) {
+      setCurrentImageIndex(prev => (prev - 1 + slideCount) % slideCount);
+    }
+    setDraggedX(0);
+  };
+
+  // currentImageIndex değiştiğinde mainImage'i güncelle (erken return'lerden önce)
+  useEffect(() => {
+    if (allImages.length > 0 && currentImageIndex < allImages.length) {
+      const newImage = allImages[currentImageIndex];
+      if (newImage && newImage !== mainImage) {
+        setPrevImage(mainImage);
+        setMainImage(newImage);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentImageIndex, allImages.length]);
+
   if (loading) return <div className="pt-20 text-center">{t('loading')}...</div>;
   if (!product) return <div className="pt-20 text-center">{t('product_not_found')}</div>;
 
-  const altImages = Array.isArray(product.alternativeImages) ? product.alternativeImages : [];
-  const allImagesRaw = [product.mainImage, ...altImages];
-  const allImages = Array.isArray(allImagesRaw) ? allImagesRaw.filter(Boolean) : [];
-  const grouped = Array.isArray((product as any).groupedMaterials) ? (product as any).groupedMaterials : [];
-  const safeActiveIndex = Math.min(Math.max(activeMaterialGroup, 0), Math.max(grouped.length - 1, 0));
-  const dimImages = Array.isArray(product?.dimensionImages) ? product.dimensionImages.filter(Boolean) as string[] : [];
-  const currentIdx = Math.max(0, allImages.indexOf(mainImage));
-
-  const changeMainImage = (img: string) => { if (img === mainImage) return; setPrevImage(mainImage); setMainImage(img); };
-  const heroNext = () => { const next = allImages[(currentIdx + 1) % allImages.length]; changeMainImage(next); };
-  const heroPrev = () => { const prev = allImages[(currentIdx - 1 + allImages.length) % allImages.length]; changeMainImage(prev); };
+  const changeMainImage = (img: string) => {
+    const idx = allImages.indexOf(img);
+    if (idx !== -1 && idx !== currentImageIndex) {
+      setCurrentImageIndex(idx);
+    }
+  };
+  const heroNext = () => { setCurrentImageIndex(prev => (prev + 1) % slideCount); };
+  const heroPrev = () => { setCurrentImageIndex(prev => (prev - 1 + slideCount) % slideCount); };
 
   const closeLightbox = () => setIsLightboxOpen(false);
+  const openLightbox = () => {
+    setLightboxImageIndex(currentImageIndex);
+    setIsLightboxOpen(true);
+  };
   const nextImage = () => setLightboxImageIndex((prevIndex) => (prevIndex + 1) % allImages.length);
   const prevImageFn = () => setLightboxImageIndex((prevIndex) => (prevIndex - 1 + allImages.length) % allImages.length);
 
   return (
     <>
+      {/* Local style for hiding scrollbar */}
+      <style>
+        {`
+          .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+          .hide-scrollbar::-webkit-scrollbar { display: none; }
+        `}
+      </style>
       {/* FULL-WIDTH HERO IMAGE */}
       <header className="relative w-full">
         <div
-          className="relative w-full h-[60vh] md:h-[70vh] overflow-hidden"
-          onMouseDown={(e) => setDragStartX(e.clientX)}
-          onMouseUp={(e) => {
-            if (dragStartX === null) return;
-            const delta = e.clientX - dragStartX;
-            if (Math.abs(delta) > 40) {
-              if (delta < 0) heroNext(); else heroPrev();
-            }
-            setDragStartX(null);
-          }}
+          className="relative w-full h-[60vh] md:h-[70vh] overflow-hidden cursor-grab active:cursor-grabbing"
+          onMouseDown={handleHeroDragStart}
+          onMouseMove={handleHeroDragMove}
+          onMouseUp={handleHeroDragEnd}
+          onMouseLeave={handleHeroDragEnd}
+          onTouchStart={handleHeroDragStart}
+          onTouchMove={handleHeroDragMove}
+          onTouchEnd={handleHeroDragEnd}
         >
-          {prevImage && (<img src={prevImage} alt={t(product.name)} className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500" />)}
-          <img key={mainImage} src={mainImage} alt={t(product.name)} className="w-full h-full object-cover opacity-0 transition-opacity duration-500" onLoad={(e) => { (e.currentTarget as HTMLImageElement).classList.remove('opacity-0'); }} />
+          <div
+            className="flex h-full transition-transform duration-300 ease-out"
+            style={{
+              width: `${slideCount * 100}%`,
+              transform: `translateX(calc(-${currentImageIndex * (100 / slideCount)}% + ${draggedX}px))`,
+            }}
+          >
+            {allImages.map((img, index) => (
+              <div
+                key={index}
+                className="relative h-full shrink-0 cursor-pointer"
+                style={{ width: `${100 / slideCount}%` }}
+                onClick={(e) => {
+                  if (!isDragging && draggedX === 0) {
+                    openLightbox();
+                  }
+                }}
+              >
+                <img
+                  src={img}
+                  alt={`${t(product.name)} ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
 
           {/* overlay breadcrumbs top-left */}
@@ -152,15 +286,46 @@ export function ProductDetailPage() {
         </div>
         {/* Divider and Thumbnails under hero */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mt-1 md:mt-2 h-[2px] bg-gray-500/80" />
-          <div className="mt-3 grid grid-cols-5 gap-3">
-            {(Array.isArray(allImages) ? allImages : []).map((img: string, idx: number) => (
-              <button key={idx} onClick={() => changeMainImage(img)} className={`overflow-hidden border-2 transition-all duration-300 ${mainImage === img ? 'border-gray-900 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}>
-                <img src={img} alt={`${t(product.name)} thumbnail ${idx + 1}`} className="w-full h-24 object-cover" />
-              </button>
-            ))}
+          <div className="mt-1 md:mt-2 h-[2px] bg-gray-300" />
+          {/* Hide scrollbar with custom class; enable drag scroll */}
+          <div className="relative mt-3 select-none">
+            <div
+              ref={thumbRef}
+              className="hide-scrollbar overflow-x-auto cursor-grab active:cursor-grabbing"
+              onMouseDown={(e) => { setThumbDragStartX(e.clientX); setThumbScrollStart(thumbRef.current ? thumbRef.current.scrollLeft : 0); }}
+              onMouseLeave={() => { setThumbDragStartX(null); }}
+              onMouseUp={() => { setThumbDragStartX(null); }}
+              onMouseMove={(e) => {
+                if (thumbDragStartX === null || !thumbRef.current) return;
+                const delta = e.clientX - thumbDragStartX;
+                thumbRef.current.scrollLeft = thumbScrollStart - delta;
+              }}
+            >
+              <div className="flex gap-3 min-w-max pb-2">
+                {(Array.isArray(allImages) ? allImages : []).map((img: string, idx: number) => (
+                  <button key={idx} onClick={() => changeMainImage(img)} className={`flex-shrink-0 w-24 h-24 overflow-hidden border-2 transition-all duration-300 ${mainImage === img ? 'border-gray-400 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}>
+                    <img src={img} alt={`${t(product.name)} thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Scroll buttons */}
+            <button
+              aria-label="scroll-left"
+              onClick={() => { if (thumbRef.current) thumbRef.current.scrollBy({ left: -240, behavior: 'smooth' }); }}
+              className="absolute left-0 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-800 shadow px-2 py-2"
+            >
+              ‹
+            </button>
+            <button
+              aria-label="scroll-right"
+              onClick={() => { if (thumbRef.current) thumbRef.current.scrollBy({ left: 240, behavior: 'smooth' }); }}
+              className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-800 shadow px-2 py-2"
+            >
+              ›
+            </button>
           </div>
-          <div className="mt-3 h-px bg-gray-200/80" />
+          <div className="mt-3 h-px bg-gray-300" />
         </div>
       </header>
 
@@ -183,26 +348,118 @@ export function ProductDetailPage() {
             )}
 
             <div>
-              <h2 className="text-2xl md:text-4xl font-extrabold text-gray-900">{t(product.name)}</h2>
+              <h2 className="text-2xl md:text-4xl font-medium text-gray-700">{t(product.name)}</h2>
               <p className="mt-3 text-gray-600 leading-relaxed max-w-2xl">{t(product.description)}</p>
             </div>
 
+            {/* Dimensions as small drawings (thumbnails) - MOVED BEFORE MATERIALS */}
+            {dimImages.length > 0 && (
+              <div>
+                <h2 className="text-xl font-medium text-gray-700 mb-4">{t('dimensions')}</h2>
+                <div className="mb-3 h-px bg-gray-300" />
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {dimImages.map((dimImg: { image: string; title?: LocalizedString }, idx: number) => (
+                    <button 
+                      key={idx} 
+                      onClick={() => setDimLightbox(dimImg.image)} 
+                      className="group border border-gray-200 hover:border-gray-400 hover:shadow-lg transition-all duration-200 p-3 bg-white rounded-lg flex flex-col"
+                    >
+                      <img 
+                        src={dimImg.image} 
+                        alt={dimImg.title ? t(dimImg.title) : `${t('dimensions')} ${idx + 1}`} 
+                        className="w-full h-40 object-contain group-hover:scale-105 transition-transform duration-200" 
+                      />
+                      {dimImg.title && (
+                        <p className="mt-3 text-sm text-gray-700 text-center font-medium">
+                          {t(dimImg.title)}
+                        </p>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-3 h-px bg-gray-300" />
+              </div>
+            )}
+
             {product.materials && grouped.length > 0 && (
               <div>
-                <h2 className="text-xl font-semibold text-gray-800">{t('material_alternatives')}</h2>
-                <div className="mt-4 flex flex-wrap gap-3">
-                  {(Array.isArray(grouped) ? grouped : []).map((g: any, idx: number) => (
-                    <button key={idx} onClick={() => setActiveMaterialGroup(idx)} className={`px-3 py-1 rounded-full border backdrop-blur-sm transition-all duration-200 ${activeMaterialGroup===idx ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white/60 text-gray-900 border-gray-300 hover:bg-white'}`}>{t(g.groupTitle)}</button>
+                <h2 className="text-xl font-medium text-gray-700 mb-4">{t('material_alternatives')}</h2>
+                
+                {/* Group tabs - similar to image design */}
+                <div className="flex flex-wrap gap-0 border-b border-gray-200 mb-6 bg-gray-50">
+                  {(Array.isArray(mergedGroups) ? mergedGroups : []).map((g: any, idx: number) => (
+                    <button 
+                      key={idx} 
+                      onClick={() => setActiveMaterialGroup(idx)} 
+                      className={`px-5 py-3 text-sm font-medium transition-all duration-200 border-b-2 rounded-none ${
+                        activeMaterialGroup === idx 
+                          ? 'bg-white text-gray-800 border-gray-500' 
+                          : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
+                      }`}
+                    >
+                      {t(g.groupTitle)}
+                    </button>
                   ))}
                 </div>
-                <div className="mt-6 flex flex-wrap gap-4">
-                  {(Array.isArray(grouped[safeActiveIndex]?.materials) ? grouped[safeActiveIndex].materials : []).map((material: any, index: number) => (
-                    <div key={index} className="text-center group cursor-pointer" title={t(material.name)}>
-                      <img src={material.image} alt={t(material.name)} className="w-20 h-20 object-cover border-2 border-transparent group-hover:border-gray-400 transition" />
-                      <p className="mt-2 text-sm text-gray-600 max-w-[80px] break-words">{t(material.name)}</p>
+
+                {/* Swatch books (kartelalar) yatay sekmeler */}
+                {books.length > 0 ? (
+                  <>
+                    <div className="flex flex-wrap gap-0 border-b border-gray-200 mb-6">
+                      {books.map((book: any, idx: number) => (
+                        <button
+                          key={idx}
+                          onClick={() => setActiveBookIndex(idx)}
+                          className={`px-4 py-2 text-sm font-medium transition-all duration-200 border-b-2 rounded-none ${
+                            activeBookIndex === idx
+                              ? 'bg-white text-gray-800 border-gray-500'
+                              : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
+                          }`}
+                        >
+                          {t(book.bookTitle)}
+                        </button>
+                      ))}
                     </div>
-                  ))}
-                </div>
+
+                    {/* Seçili kartelaya ait malzemeler */}
+                    <div className="mb-3 h-px bg-gray-300" />
+                    <div className="flex flex-wrap gap-6">
+                      {(Array.isArray(books[activeBookIndex]?.materials) ? books[activeBookIndex].materials : []).map((material: any, index: number) => (
+                        <div key={index} className="text-center group cursor-pointer" title={t(material.name)}>
+                          <img
+                            src={material.image}
+                            alt={t(material.name)}
+                            className="w-28 h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md rounded-sm"
+                          />
+                          <p className="mt-3 text-sm text-gray-700 font-medium max-w-[120px] break-words">
+                            {t(material.name)}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-3 h-px bg-gray-300" />
+                  </>
+                ) : (
+                  /* Fallback: if no books, show materials directly */
+                  <>
+                  <div className="mb-3 h-px bg-gray-300" />
+                  <div className="flex flex-wrap gap-6">
+                    {(Array.isArray(grouped[safeActiveIndex]?.materials) ? grouped[safeActiveIndex].materials : []).map((material: any, index: number) => (
+                      <div key={index} className="text-center group cursor-pointer" title={t(material.name)}>
+                        <img 
+                          src={material.image} 
+                          alt={t(material.name)} 
+                          className="w-28 h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md rounded-sm" 
+                        />
+                        <p className="mt-3 text-sm text-gray-700 font-medium max-w-[120px] break-words">
+                          {t(material.name)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-3 h-px bg-gray-100" />
+                  </>
+                )}
               </div>
             )}
 
@@ -214,44 +471,28 @@ export function ProductDetailPage() {
               </div>
             )}
 
-            {isLoggedIn && (product.exclusiveContent || dimImages.length > 0) && (
+            {isLoggedIn && product.exclusiveContent && (
               <div className="bg-white p-8 sm:p-12 rounded-lg border">
                 <h2 className="text-3xl font-bold text-gray-900 mb-8 border-b pb-4 border-gray-300">{t('exclusive_content')}</h2>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
-                  {dimImages.length > 0 && (
-                    <div>
-                      <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('dimensions')}</h3>
-                      <div className="grid grid-cols-2 gap-3">
-                        {dimImages.map((img, idx) => (
-                          <button key={idx} onClick={() => setDimLightbox(img)} className="group border border-gray-200 hover:border-gray-400 transition p-2 bg-white">
-                            <img src={img} alt={`dimension-${idx}`} className="w-full h-32 object-contain" />
-                          </button>
-                        ))}
-                      </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('additional_images')}</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      {product.exclusiveContent.images.map((img, idx) => (<img key={idx} src={img} alt={`Exclusive ${idx}`} className="w-full object-cover shadow-sm"/>))}
                     </div>
-                  )}
-                  {product.exclusiveContent && (
-                    <>
-                      <div>
-                        <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('additional_images')}</h3>
-                        <div className="grid grid-cols-2 gap-3">
-                          {product.exclusiveContent.images.map((img, idx) => (<img key={idx} src={img} alt={`Exclusive ${idx}`} className="w-full object-cover shadow-sm"/>))}
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('technical_drawings')}</h3>
-                        <ul className="space-y-3">
-                          {product.exclusiveContent.drawings.map((doc, idx) => (<li key={idx}><a href={doc.url} download className="text-gray-700 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(doc.name)}</a></li>))}
-                        </ul>
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('3d_models')}</h3>
-                        <ul className="space-y-3">
-                          {product.exclusiveContent.models3d.map((model, idx) => (<li key={idx}><a href={model.url} download className="text-gray-700 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(model.name)}</a></li>))}
-                        </ul>
-                      </div>
-                    </>
-                  )}
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('technical_drawings')}</h3>
+                    <ul className="space-y-3">
+                      {product.exclusiveContent.drawings.map((doc, idx) => (<li key={idx}><a href={doc.url} download className="text-gray-700 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(doc.name)}</a></li>))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('3d_models')}</h3>
+                    <ul className="space-y-3">
+                      {product.exclusiveContent.models3d.map((model, idx) => (<li key={idx}><a href={model.url} download className="text-gray-700 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(model.name)}</a></li>))}
+                    </ul>
+                  </div>
                 </div>
               </div>
             )}
