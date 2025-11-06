@@ -1,5 +1,5 @@
 import { initialData, KEYS } from '../data';
-import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem, ProductMaterial, ProductDimensionSet, ProductVariant, Project } from '../types';
+import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem, ProductMaterial, ProductVariant, Project } from '../types';
 import { createClient } from '@sanity/client'
 import groq from 'groq'
 import imageUrlBuilder from '@sanity/image-url'
@@ -41,7 +41,12 @@ const mapImage = (img: any | undefined): string => {
 
 const mapImages = (imgs: any[] | undefined): string[] => Array.isArray(imgs) ? imgs.map(i => mapImage(i)).filter(Boolean) : []
 const mapMaterials = (materials: any[] | undefined): ProductMaterial[] => Array.isArray(materials) ? materials.map(m => ({ name: m?.name, image: mapImage(m?.image) })) : []
-const mapDimensionSets = (sets: any[] | undefined): ProductDimensionSet[] => Array.isArray(sets) ? sets.map(s => ({ name: s?.name, details: s?.details || [] })) : []
+// Ürünlerde ölçü alanını boşlayarak normalize et
+const normalizeProduct = (p: Product): Product => ({
+  ...p,
+  // legacy cleanups
+  dimensionImages: Array.isArray((p as any).dimensionImages) ? (p as any).dimensionImages : [],
+})
 const mapVariants = (variants: any[] | undefined): ProductVariant[] => Array.isArray(variants) ? variants.map(v => ({ name: v?.name, sku: v?.sku, price: v?.price, images: mapImages(v?.images) })) : []
 
 let storage: Storage;
@@ -245,13 +250,13 @@ export const getProducts = async (): Promise<Product[]> => {
           stockStatus,
           variants,
           materialSelections[]{ group->{title}, materials },
-          dimensions,
+          dimensionImages,
           exclusiveContent,
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
         }`
         const rows = await sanity.fetch(query)
-        return rows.map((r: any) => ({
+        return rows.map((r: any) => normalizeProduct({
           id: r.id,
           name: r.name,
           designerId: r.designer?.designerId || '',
@@ -260,7 +265,7 @@ export const getProducts = async (): Promise<Product[]> => {
           description: r.description,
           mainImage: mapImage(r.mainImage),
           alternativeImages: mapImages(r.alternativeImages),
-          dimensions: mapDimensionSets(r.dimensions),
+          dimensionImages: mapImages(r?.dimensionImages),
           buyable: Boolean(r.buyable),
           price: r.price,
           currency: r.currency,
@@ -279,7 +284,7 @@ export const getProducts = async (): Promise<Product[]> => {
         }))
     }
     await delay(SIMULATED_DELAY);
-    return getItem<Product[]>(KEYS.PRODUCTS);
+    return getItem<Product[]>(KEYS.PRODUCTS).map(normalizeProduct);
 };
 export const getProductById = async (id: string): Promise<Product | undefined> => {
     if (useSanity && sanity) {
@@ -297,14 +302,14 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           stockStatus,
           variants,
           materialSelections[]{ group->{title}, materials },
-          dimensions,
+          dimensionImages,
           exclusiveContent,
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
         }`
         const r = await sanity.fetch(query, { id })
         if (!r) return undefined
-        return {
+        return normalizeProduct({
           id: r.id,
           name: r.name,
           designerId: r.designer?.designerId || '',
@@ -313,7 +318,7 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           description: r.description,
           mainImage: mapImage(r.mainImage),
           alternativeImages: mapImages(r.alternativeImages),
-          dimensions: mapDimensionSets(r.dimensions),
+          dimensionImages: mapImages(r?.dimensionImages),
           buyable: Boolean(r.buyable),
           price: r.price,
           currency: r.currency,
@@ -329,7 +334,7 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
             drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: d?.file?.asset?._ref || d?.file?.asset?._id || '' })),
             models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({ name: m?.name, url: m?.file?.asset?._ref || m?.file?.asset?._id || '' })),
           },
-        }
+        })
     }
     const products = await getProducts();
     return products.find(p => p.id === id);
@@ -347,12 +352,12 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
           price,
           currency,
           materialSelections[]{ materials },
-          dimensions,
+          dimensionImages,
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
         }`
         const rows = await sanity.fetch(query, { categoryId })
-        return rows.map((r: any) => ({
+        return rows.map((r: any) => normalizeProduct({
           id: r.id,
           name: r.name,
           designerId: r.designer?.designerId || '',
@@ -361,7 +366,7 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
           description: r.description,
           mainImage: mapImage(r.mainImage),
           alternativeImages: mapImages(r.alternativeImages),
-          dimensions: mapDimensionSets(r.dimensions),
+          dimensionImages: mapImages(r?.dimensionImages),
           buyable: Boolean(r.buyable),
           price: r.price,
           currency: r.currency,
@@ -389,12 +394,12 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
           price,
           currency,
           materialSelections[]{ materials },
-          dimensions,
+          dimensionImages,
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
         }`
         const rows = await sanity.fetch(query, { designerId })
-        return rows.map((r: any) => ({
+        return rows.map((r: any) => normalizeProduct({
           id: r.id,
           name: r.name,
           designerId: r.designer?.designerId || '',
@@ -403,7 +408,7 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
           description: r.description,
           mainImage: mapImage(r.mainImage),
           alternativeImages: mapImages(r.alternativeImages),
-          dimensions: mapDimensionSets(r.dimensions),
+          dimensionImages: mapImages(r?.dimensionImages),
           buyable: Boolean(r.buyable),
           price: r.price,
           currency: r.currency,

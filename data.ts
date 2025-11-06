@@ -45,11 +45,14 @@ export const productsData: Product[] = [
         description: { tr: 'Jean-Marie Massaud tarafından tasarlanan Bristol, birincil şekilleri uyumlu ve ergonomik bir tasarımda birleştiren bir kanepe sistemidir. Saran sırtlıklara sahip yumuşak, konforlu şekiller maksimum konfor sağlar.', en: 'Bristol, designed by Jean-Marie Massaud, is a sofa system that combines primary shapes in a harmonious and ergonomic design. The soft, comfortable shapes, with enveloping backrests, provide maximum comfort.' },
         mainImage: 'https://picsum.photos/seed/bristol-1/800/800',
         alternativeImages: ['https://picsum.photos/seed/bristol-2/800/800', 'https://picsum.photos/seed/bristol-3/800/800'],
-        dimensions: [{ name: { tr: 'Standart', en: 'Standard' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '240cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '95cm' }, { label: { tr: 'Yükşeklik', en: 'Height' }, value: '70cm' }] }],
         buyable: true,
         price: 150000,
         currency: 'TRY',
         materials: [{ name: { tr: 'Kumaş', en: 'Fabric' }, image: 'https://picsum.photos/seed/fabric/100/100' }, { name: { tr: 'Deri', en: 'Leather' }, image: 'https://picsum.photos/seed/leather/100/100' }],
+        dimensionImages: [
+            'https://picsum.photos/seed/bristol-dim-1/800/600',
+            'https://picsum.photos/seed/bristol-dim-2/800/600'
+        ],
         exclusiveContent: { images: ['https://picsum.photos/seed/bristol-ex1/800/800'], drawings: [{ name: { tr: 'Teknik Çizim', en: 'Technical Drawing' }, url: '#' }], models3d: [{ name: { tr: '3DS Max Modeli', en: '3DS Max Model' }, url: '#' }] },
     },
     {
@@ -61,7 +64,6 @@ export const productsData: Product[] = [
         description: { tr: 'Husk, göründüğü kadar rahat bir koltuktur. Hirek®\'ten yapılmış sert kabuk, ergonomik profilini vurguluyor gibi görünen bölümlere ayrılmış yumuşak bir minder içerir.', en: 'Husk is an armchair that is as comfortable as it looks. The stiff shell, made of Hirek®, contains a soft cushion divided into portions, which seem to underscore its ergonomic profile.' },
         mainImage: 'https://picsum.photos/seed/husk-1/800/800',
         alternativeImages: ['https://picsum.photos/seed/husk-2/800/800'],
-        dimensions: [{ name: { tr: 'Standart', en: 'Standard' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '84cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '84cm' }, { label: { tr: 'Yükşeklik', en: 'Height' }, value: '92cm' }] }],
         buyable: false,
         price: 45000,
         currency: 'TRY',
@@ -77,7 +79,6 @@ export const productsData: Product[] = [
         description: { tr: 'Uzun süredir en çok satanlar arasında yer alan Charles kanepe, döküm alüminyum ayaklarının temel tasarımıyla vurgulanan hafif görüntüsüyle karakterize edilir. Tasarım dünyasında bir dönüm noktasını temsil eder.', en: 'The Charles sofa, a long-time bestseller, is characterized by its light image accentuated by the essential design of its die-cast aluminium feet. It represents a milestone in the world of design.' },
         mainImage: 'https://picsum.photos/seed/charles-1/800/800',
         alternativeImages: [],
-        dimensions: [{ name: { tr: '3 Kişilik', en: '3 Seater' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '230cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '97cm' }] }, { name: { tr: '2 Kişilik', en: '2 Seater' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '180cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '97cm' }] }],
         buyable: true,
         price: 120000,
         currency: 'TRY',
@@ -93,7 +94,6 @@ export const productsData: Product[] = [
       description: { tr: 'Pathos masa koleksiyonu, parlak krom kaplama, siyah boyalı veya bronz nikel boyalı çelik bir çerçeve ve yuvarlak köşeli dikdörtgen veya kare olabilen bir üst tabla ile karakterize edilir.', en: 'The Pathos table collection is characterized by a frame in polished chrome-plated, black painted, or bronzed nickel-painted steel, and a top that can be rectangular or square with rounded corners.' },
       mainImage: 'https://picsum.photos/seed/pathos-1/800/800',
       alternativeImages: ['https://picsum.photos/seed/pathos-2/800/800'],
-      dimensions: [{ name: { tr: 'Standart', en: 'Standard' }, details: [{ label: { tr: 'Çap', en: 'Diameter' }, value: '140cm' }, { label: { tr: 'Yükşeklik', en: 'Height' }, value: '73cm' }] }],
       buyable: true,
       price: 85000,
       currency: 'TRY',
@@ -109,10 +109,6 @@ export const productsData: Product[] = [
         description: { tr: 'Lifesteel kanepe, yükseltilmiş tabanı ve metal ayakları ile hafif ve havadar bir estetik sunar. Geniş, alçak kolçakları ve cömert kaz tüyü minderleri ile modern konforun bir simgesidir.', en: 'The Lifesteel sofa offers a light and airy aesthetic with its raised base and metal feet. It is a symbol of modern comfort with its wide, low armrests and generous goose-down cushions.' },
         mainImage: 'https://picsum.photos/seed/lifesteel-1/800/800',
         alternativeImages: ['https://picsum.photos/seed/lifesteel-2/800/800', 'https://picsum.photos/seed/lifesteel-3/800/800'],
-        dimensions: [
-            { name: { tr: 'Büyük', en: 'Large' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '260cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '105cm' }] },
-            { name: { tr: 'Orta', en: 'Medium' }, details: [{ label: { tr: 'Genişlik', en: 'Width' }, value: '200cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '105cm' }] }
-        ],
         buyable: true,
         price: 180000,
         currency: 'TRY',
@@ -131,7 +127,6 @@ export const productsData: Product[] = [
         description: { tr: 'Groundpiece, bir kanepenin ne olabileceği algısını değiştirdi. Alçak ve derin yapısı, rahat ve gayriresmi bir oturma deneyimi sunar. Yenilikçi kolçakları hem depolama alanı hem de sehpa işlevi görebilir.', en: 'Groundpiece changed the perception of what a sofa could be. Its low and deep structure offers a relaxed and informal seating experience. Its innovative armrests can function as both storage and a side table.' },
         mainImage: 'https://picsum.photos/seed/groundpiece-1/800/800',
         alternativeImages: ['https://picsum.photos/seed/groundpiece-2/800/800'],
-        dimensions: [{ name: { tr: 'Modüler', en: 'Modular' }, details: [{ label: { tr: 'Modül Genişliği', en: 'Module Width' }, value: '100cm' }, { label: { tr: 'Derinlik', en: 'Depth' }, value: '120cm' }] }],
         buyable: true,
         price: 210000,
         currency: 'TRY',

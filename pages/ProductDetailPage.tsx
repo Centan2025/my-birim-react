@@ -85,8 +85,7 @@ export function ProductDetailPage() {
   const allImages = Array.isArray(allImagesRaw) ? allImagesRaw.filter(Boolean) : [];
   const grouped = Array.isArray((product as any).groupedMaterials) ? (product as any).groupedMaterials : [];
   const safeActiveIndex = Math.min(Math.max(activeMaterialGroup, 0), Math.max(grouped.length - 1, 0));
-  const dimImages = Array.isArray(product?.exclusiveContent?.images) ? (product as any).exclusiveContent.images as string[] : [];
-  // dimension images drawn from exclusiveContent.images at render time; no separate const needed
+  const dimImages = Array.isArray(product?.dimensionImages) ? product.dimensionImages.filter(Boolean) as string[] : [];
   const currentIdx = Math.max(0, allImages.indexOf(mainImage));
 
   const changeMainImage = (img: string) => { if (img === mainImage) return; setPrevImage(mainImage); setMainImage(img); };
@@ -188,20 +187,6 @@ export function ProductDetailPage() {
               <p className="mt-3 text-gray-600 leading-relaxed max-w-2xl">{t(product.description)}</p>
             </div>
 
-            {/* Dimensions as small drawings (thumbnails) */}
-            {dimImages.length > 0 && (
-              <div>
-                <h2 className="text-xl font-semibold text-gray-800">{t('dimensions')}</h2>
-                <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {(Array.isArray(dimImages) ? dimImages : []).map((img: string, idx: number) => (
-                    <button key={idx} onClick={() => setDimLightbox(img)} className="group border border-gray-200 hover:border-gray-400 transition p-3 bg-white">
-                      <img src={img} alt={`dimension-${idx}`} className="w-full h-40 object-contain" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {product.materials && grouped.length > 0 && (
               <div>
                 <h2 className="text-xl font-semibold text-gray-800">{t('material_alternatives')}</h2>
@@ -229,28 +214,44 @@ export function ProductDetailPage() {
               </div>
             )}
 
-            {isLoggedIn && product.exclusiveContent && (
+            {isLoggedIn && (product.exclusiveContent || dimImages.length > 0) && (
               <div className="bg-white p-8 sm:p-12 rounded-lg border">
                 <h2 className="text-3xl font-bold text-gray-900 mb-8 border-b pb-4 border-gray-300">{t('exclusive_content')}</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                  <div>
-                    <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('additional_images')}</h3>
-                    <div className="grid grid-cols-2 gap-3">
-                      {product.exclusiveContent.images.map((img, idx) => (<img key={idx} src={img} alt={`Exclusive ${idx}`} className="w-full object-cover shadow-sm"/>))}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+                  {dimImages.length > 0 && (
+                    <div>
+                      <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('dimensions')}</h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        {dimImages.map((img, idx) => (
+                          <button key={idx} onClick={() => setDimLightbox(img)} className="group border border-gray-200 hover:border-gray-400 transition p-2 bg-white">
+                            <img src={img} alt={`dimension-${idx}`} className="w-full h-32 object-contain" />
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('technical_drawings')}</h3>
-                    <ul className="space-y-3">
-                      {product.exclusiveContent.drawings.map((doc, idx) => (<li key={idx}><a href={doc.url} download className="text-gray-700 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(doc.name)}</a></li>))}
-                    </ul>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('3d_models')}</h3>
-                    <ul className="space-y-3">
-                      {product.exclusiveContent.models3d.map((model, idx) => (<li key={idx}><a href={model.url} download className="text-gray-700 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(model.name)}</a></li>))}
-                    </ul>
-                  </div>
+                  )}
+                  {product.exclusiveContent && (
+                    <>
+                      <div>
+                        <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('additional_images')}</h3>
+                        <div className="grid grid-cols-2 gap-3">
+                          {product.exclusiveContent.images.map((img, idx) => (<img key={idx} src={img} alt={`Exclusive ${idx}`} className="w-full object-cover shadow-sm"/>))}
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('technical_drawings')}</h3>
+                        <ul className="space-y-3">
+                          {product.exclusiveContent.drawings.map((doc, idx) => (<li key={idx}><a href={doc.url} download className="text-gray-700 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(doc.name)}</a></li>))}
+                        </ul>
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('3d_models')}</h3>
+                        <ul className="space-y-3">
+                          {product.exclusiveContent.models3d.map((model, idx) => (<li key={idx}><a href={model.url} download className="text-gray-700 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(model.name)}</a></li>))}
+                        </ul>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             )}

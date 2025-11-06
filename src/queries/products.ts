@@ -28,7 +28,6 @@ export async function fetchProductBySlug(slug: string) {
     images,
     price,
     materials,
-    dimensions,
     description,
     designer->{_id, name, slug, photo},
     categories[]->{ _id, title, slug }

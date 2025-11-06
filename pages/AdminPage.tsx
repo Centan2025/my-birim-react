@@ -13,7 +13,7 @@ import {
   getLanguages, updateLanguages,
   getNews, addNews, updateNews, deleteNews,
 } from '../services/cms';
-import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, ContactLocation, HomePageContent, HeroMediaItem, FooterContent, SocialLink, LocalizedString, NewsItem, NewsMedia, ProductDimensionSet, ProductMaterial, ProductDimensionDetail } from '../types';
+import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, ContactLocation, HomePageContent, HeroMediaItem, FooterContent, SocialLink, LocalizedString, NewsItem, NewsMedia, ProductMaterial } from '../types';
 import { useTranslation } from '../i18n';
 
 type AdminTab = 'site' | 'home' | 'categories' | 'designers' | 'products' | 'about' | 'contact' | 'footer' | 'languages' | 'news';
@@ -44,7 +44,7 @@ const Select = (props: React.ComponentProps<'select'>) => (
 const createBlankProduct = (): Product => ({
   id: '', name: {}, designerId: '', categoryId: '', year: new Date().getFullYear(),
   description: {}, mainImage: '', alternativeImages: [],
-  dimensions: [{ name: {}, details: [{ label: {}, value: '' }] }],
+  dimensionImages: [],
   buyable: false, price: 0, currency: 'TRY', materials: [], exclusiveContent: { images: [], drawings: [], models3d: [] }
 });
 const createBlankNews = (): NewsItem => ({ id: '', title: {}, date: '', content: {}, mainImage: '', media: [] });
@@ -492,38 +492,7 @@ export function AdminPage() {
     const removeProductArrayItem = <K extends keyof Product>(arrayField: K, index: number) => {
         setProductForm(prev => ({ ...prev, [arrayField]: (prev[arrayField] as any[]).filter((_, i) => i !== index) }));
     };
-    const handleDimensionDetailChange = (dimIndex: number, detailIndex: number, field: keyof ProductDimensionDetail, value: any) => {
-        setProductForm(prev => {
-            const newDimensions = prev.dimensions.map((dim, dIdx) => {
-                if (dIdx !== dimIndex) return dim;
-                const newDetails = dim.details.map((detail, detailIdx) => {
-                    if (detailIdx !== detailIndex) return detail;
-                    return { ...detail, [field]: value };
-                });
-                return { ...dim, details: newDetails };
-            });
-            return { ...prev, dimensions: newDimensions };
-        });
-    };
-    const addDimensionDetail = (dimIndex: number) => {
-        setProductForm(prev => {
-            const newDimensions = prev.dimensions.map((dim, i) => {
-                if (i !== dimIndex) return dim;
-                return { ...dim, details: [...dim.details, { label: {}, value: '' }] };
-            });
-            return { ...prev, dimensions: newDimensions };
-        });
-    };
-    const removeDimensionDetail = (dimIndex: number, detailIndex: number) => {
-        setProductForm(prev => {
-            const newDimensions = prev.dimensions.map((dim, i) => {
-                if (i !== dimIndex) return dim;
-                const newDetails = dim.details.filter((_, dIdx) => dIdx !== detailIndex);
-                return { ...dim, details: newDetails };
-            });
-            return { ...prev, dimensions: newDimensions };
-        });
-    };
+    
 
   const handleResetContent = () => {
     if (window.confirm(t('reset_confirm_message'))) {
@@ -946,26 +915,23 @@ export function AdminPage() {
                     <LocalizedInputComponent label="Açıklama" value={productForm.description} onChange={val => handleProductFormChange('description', val)} languages={visibleLanguages} Component={Textarea} />
                     <FormRow label="Ana Görsel URL"><Input type="text" value={productForm.mainImage} onChange={e => handleProductFormChange('mainImage', e.target.value)} required /></FormRow>
                     <FormRow label="Alternatif Görsel URL'leri (virgülle ayırın)"><Textarea value={productForm.alternativeImages.join(', ')} onChange={e => handleProductFormChange('alternativeImages', e.target.value.split(',').map(s => s.trim()))} /></FormRow>
-                    
+
                     <div className="space-y-2 border-t pt-4">
                       <h4 className="font-semibold text-gray-800">Ölçüler</h4>
-                      {productForm.dimensions.map((dim, dimIndex) => (
-                          <div key={dimIndex} className="p-3 border rounded-md space-y-2 bg-gray-50/50">
-                            <div className="flex justify-between items-center mb-2">
-                              <LocalizedInputComponent label="Ölçü Seti Adı (örn: 3 Kişilik)" value={dim.name} onChange={val => handleProductArrayItemChange<ProductDimensionSet, 'dimensions', 'name'>('dimensions', dimIndex, 'name', val)} languages={visibleLanguages} />
-                              <button type="button" onClick={() => removeProductArrayItem('dimensions', dimIndex)} className="text-red-500 hover:text-red-700 ml-2 p-1">Seti Sil</button>
-                            </div>
-                            {dim.details.map((detail, detailIndex) => (
-                              <div key={detailIndex} className="flex gap-2 items-end pl-4">
-                                <LocalizedInputComponent label="Etiket (örn: Genişlik)" value={detail.label} onChange={val => handleDimensionDetailChange(dimIndex, detailIndex, 'label', val)} languages={visibleLanguages} />
-                                <FormRow label="Değer (örn: 240cm)"><Input value={detail.value} onChange={e => handleDimensionDetailChange(dimIndex, detailIndex, 'value', e.target.value)} /></FormRow>
-                                <button type="button" onClick={() => removeDimensionDetail(dimIndex, detailIndex)} className="text-red-500 hover:text-red-700 p-1 mb-2">x</button>
-                              </div>
-                            ))}
-                            <button type="button" onClick={() => addDimensionDetail(dimIndex)} className="text-sm text-gray-600 hover:text-gray-900 pl-4">+ Detay Ekle</button>
+                      <p className="text-sm text-gray-600 mb-2">Ölçü görselleri ekleyin. Bu görseller ürün detay sayfasında malzemelerden önce gözükecek.</p>
+                      <div className="space-y-2">
+                        {(productForm.dimensionImages || []).map((url, index) => (
+                          <div key={index} className="flex gap-2 items-end p-2 border rounded-md bg-gray-50/50">
+                            <FormRow label={`Ölçü Görsel URL #${index+1}`} className="flex-1"><Input value={url} onChange={e => {
+                              const next = [...(productForm.dimensionImages || [])];
+                              next[index] = e.target.value;
+                              handleProductFormChange('dimensionImages', next);
+                            }} /></FormRow>
+                            <button type="button" onClick={() => handleProductFormChange('dimensionImages', (productForm.dimensionImages || []).filter((_, i) => i !== index))} className="text-red-500 hover:text-red-700 p-1 mb-2">Sil</button>
                           </div>
-                      ))}
-                      <button type="button" onClick={() => addProductArrayItem<ProductDimensionSet, 'dimensions'>('dimensions', { name: {}, details: [{ label: {}, value: ''}]})} className="text-sm font-medium text-gray-800 hover:text-black">+ Ölçü Seti Ekle</button>
+                        ))}
+                        <button type="button" onClick={() => handleProductFormChange('dimensionImages', [...(productForm.dimensionImages || []), ''])} className="text-sm font-medium text-gray-800 hover:text-black">+ Ölçü Görsel Ekle</button>
+                      </div>
                     </div>
 
                     <div className="space-y-2 border-t pt-4">
@@ -978,6 +944,23 @@ export function AdminPage() {
                             </div>
                         ))}
                         <button type="button" onClick={() => addProductArrayItem<ProductMaterial, 'materials'>('materials', { name: {}, image: '' })} className="text-sm font-medium text-gray-800 hover:text-black">+ Malzeme Ekle</button>
+                    </div>
+
+                    <div className="space-y-2 border-t pt-4">
+                        <h4 className="font-semibold text-gray-800">Özel İçerik - Ölçüler</h4>
+                        <div className="space-y-2">
+                          {(productForm.dimensionImages || []).map((url, index) => (
+                            <div key={index} className="flex gap-2 items-end p-2 border rounded-md bg-gray-50/50">
+                              <FormRow label={`Ölçü Görsel URL #${index+1}`} className="flex-1"><Input value={url} onChange={e => {
+                                const next = [...(productForm.dimensionImages || [])];
+                                next[index] = e.target.value;
+                                handleProductFormChange('dimensionImages', next);
+                              }} /></FormRow>
+                              <button type="button" onClick={() => handleProductFormChange('dimensionImages', (productForm.dimensionImages || []).filter((_, i) => i !== index))} className="text-red-500 hover:text-red-700 p-1 mb-2">Sil</button>
+                            </div>
+                          ))}
+                          <button type="button" onClick={() => handleProductFormChange('dimensionImages', [...(productForm.dimensionImages || []), ''])} className="text-sm font-medium text-gray-800 hover:text-black">+ Ölçü Görsel Ekle</button>
+                        </div>
                     </div>
 
                     <FormRow label="Satın Alınabilir mi?"><input type="checkbox" checked={productForm.buyable} onChange={e => handleProductFormChange('buyable', e.target.checked)} className="h-4 w-4" /></FormRow>

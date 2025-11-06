@@ -77,8 +77,8 @@ export interface Product {
   mainImage: string;
   /** Array of URLs for alternative product images. */
   alternativeImages: string[];
-  /** Array of available dimension sets for the product (e.g., '2-seater', '3-seater'). */
-  dimensions: ProductDimensionSet[];
+  /** Dimension drawings/images shown before materials. */
+  dimensionImages?: string[];
   /** Indicates if the product can be purchased directly. */
   buyable: boolean;
   /** Price of the product. */
@@ -101,25 +101,6 @@ export interface Product {
 
 // --- Product Sub-types ---
 
-/**
- * A specific detail of a product's dimensions (e.g., 'Width', 'Height').
- */
-export interface ProductDimensionDetail {
-  /** Localized label for the dimension (e.g., { tr: 'Genişlik', en: 'Width' }). */
-  label: LocalizedString;
-  /** Value of the dimension (e.g., '240cm'). */
-  value: string;
-}
-
-/**
- * A set of dimensions for a product variant (e.g., 'Standard', 'Large').
- */
-export interface ProductDimensionSet {
-  /** Localized name of the dimension set. */
-  name: LocalizedString;
-  /** Array of specific dimension details for this set. */
-  details: ProductDimensionDetail[];
-}
 
 /**
  * Represents a material option for a product.
