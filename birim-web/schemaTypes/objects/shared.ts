@@ -125,7 +125,22 @@ export const heroMediaItem = defineType({
       ]},
       initialValue: 'image',
     }),
-    defineField({name: 'url', title: 'URL', type: 'url'}),
+    // For image type, allow direct image upload
+    defineField({
+      name: 'image',
+      title: 'Görsel',
+      type: 'image',
+      options: { hotspot: true },
+      hidden: ({parent}) => parent?.type !== 'image',
+    }),
+    // For video/youtube or external image, allow URL
+    defineField({
+      name: 'url',
+      title: 'URL',
+      type: 'url',
+      hidden: ({parent}) => parent?.type === 'image',
+      description: 'Video ya da YouTube için gerekli. Image seçtiyseniz üstteki Görsel alanını kullanın.'
+    }),
     defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
     defineField({name: 'subtitle', title: 'Alt Başlık', type: 'localizedString'}),
     defineField({name: 'isButtonVisible', title: 'Butonu Göster', type: 'boolean'}),

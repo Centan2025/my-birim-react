@@ -29,10 +29,11 @@ export default defineType({
     defineField({name: 'description', title: 'Açıklama', type: 'localizedText'}),
     defineField({name: 'mainImage', title: 'Ana Görsel', type: 'image', options: {hotspot: true}}),
     defineField({
-      name: 'alternativeImages',
-      title: 'Alternatif Görseller',
+      name: 'alternativeMedia',
+      title: 'Alternatif Medya (Görsel/Video/YouTube)',
       type: 'array',
-      of: [{type: 'image', options: {hotspot: true}}],
+      of: [{ type: 'heroMediaItem' }],
+      description: 'Ana görselin altındaki bantta gösterilecek görsel/video/YouTube ögeleri'
     }),
     defineField({
       name: 'media',
@@ -41,6 +42,7 @@ export default defineType({
       of: [{ type: 'heroMediaItem' }],
       description: 'Ürün detay üst görseli için görüntü, video dosyası ya da YouTube bağlantısı ekleyin. Eğer boş bırakılırsa Ana/Alternatif Görseller kullanılır.'
     }),
+    defineField({ name: 'showMediaPanels', title: 'Ana Medya Panellerini Göster', type: 'boolean', initialValue: true }),
     defineField({
       name: 'dimensionImages',
       title: 'Ölçü Görselleri',

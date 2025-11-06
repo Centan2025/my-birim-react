@@ -65,10 +65,23 @@ export function ProductDetailPage() {
         const productData = await getProductById(productId);
         setProduct(productData);
         if (productData) {
-          const altImgs = Array.isArray(productData.alternativeImages) ? productData.alternativeImages : [];
-          const allImgs = [productData.mainImage, ...altImgs].filter(Boolean);
-          setMainImage(allImgs[0] || '');
-          setCurrentImageIndex(0);
+          // İlk görünmesini istediğimiz medya: alternatifMedia varsa onun ilk öğesi; yoksa eski alternatif görseller
+          const altMediaArr: any[] = Array.isArray((productData as any).alternativeMedia) ? (productData as any).alternativeMedia : [];
+          if (altMediaArr.length > 0) {
+            setCurrentImageIndex(0);
+            const first = altMediaArr[0];
+            if (first?.type === 'image' && first?.url) {
+              setMainImage(first.url);
+            } else {
+              // video/youtube ise mainImage'i dokunmadan bırakıyoruz; slider yine doğru render eder
+              setMainImage(productData.mainImage || '');
+            }
+          } else {
+            const altImgs = Array.isArray(productData.alternativeImages) ? productData.alternativeImages : [];
+            const allImgs = [productData.mainImage, ...altImgs].filter(Boolean);
+            setMainImage(allImgs[0] || '');
+            setCurrentImageIndex(0);
+          }
           setPrevImage(null);
           const [designerData, allCategories, productsInCategory] = await Promise.all([
             getDesignerById(productData.designerId),
@@ -128,16 +141,20 @@ export function ProductDetailPage() {
     return Array.from(map.values());
   }, [grouped]);
 
-  // Görsel ve grup hesaplamaları (erken return'lerden önce)
-  const altImages = Array.isArray(product?.alternativeImages) ? (product as any).alternativeImages : [];
-  const allImagesRaw = [product?.mainImage, ...altImages];
-  const allImages = Array.isArray(allImagesRaw) ? allImagesRaw.filter(Boolean) : [];
+  // Görsel/Video/YouTube bant medyası (erken return'lerden önce)
+  const rawAltMedia: any[] = Array.isArray((product as any)?.alternativeMedia) ? (product as any).alternativeMedia : [];
+  const fallbackImages = (() => {
+    const ai = Array.isArray((product as any)?.alternativeImages) ? (product as any).alternativeImages : [];
+    const arw = [product?.mainImage, ...ai];
+    return Array.isArray(arw) ? arw.filter(Boolean).map((u: string) => ({ type: 'image' as const, url: u })) : [];
+  })();
+  const bandMedia: { type: 'image' | 'video' | 'youtube'; url: string }[] = rawAltMedia.length ? rawAltMedia : fallbackImages;
 
   const safeActiveIndex = Math.min(Math.max(activeMaterialGroup, 0), Math.max(mergedGroups.length - 1, 0));
   const activeGroup = Array.isArray(mergedGroups) ? mergedGroups[safeActiveIndex] : undefined;
   const books = Array.isArray((activeGroup as any)?.books) ? (activeGroup as any).books : [];
   const dimImages = Array.isArray(product?.dimensionImages) ? (product as any).dimensionImages.filter((di: any) => di?.image) : [];
-  const slideCount = allImages.length || 1;
+  const slideCount = bandMedia.length || 1;
 
   // HomePage hero medya mantığına benzer drag sistemi
   const handleHeroDragStart = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
@@ -171,21 +188,22 @@ export function ProductDetailPage() {
 
   // currentImageIndex değiştiğinde mainImage'i güncelle (erken return'lerden önce)
   useEffect(() => {
-    if (allImages.length > 0 && currentImageIndex < allImages.length) {
-      const newImage = allImages[currentImageIndex];
+    if (bandMedia.length > 0 && currentImageIndex < bandMedia.length) {
+      const current = bandMedia[currentImageIndex];
+      const newImage = current?.type === 'image' ? current.url : mainImage;
       if (newImage && newImage !== mainImage) {
         setPrevImage(mainImage);
         setMainImage(newImage);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentImageIndex, allImages.length]);
+  }, [currentImageIndex, bandMedia.length]);
 
   if (loading) return <div className="pt-20 text-center">{t('loading')}...</div>;
   if (!product) return <div className="pt-20 text-center">{t('product_not_found')}</div>;
 
   const changeMainImage = (img: string) => {
-    const idx = allImages.indexOf(img);
+    const idx = bandMedia.findIndex(m => m.type === 'image' && m.url === img);
     if (idx !== -1 && idx !== currentImageIndex) {
       setCurrentImageIndex(idx);
     }
@@ -198,8 +216,37 @@ export function ProductDetailPage() {
     setLightboxImageIndex(currentImageIndex);
     setIsLightboxOpen(true);
   };
-  const nextImage = () => setLightboxImageIndex((prevIndex) => (prevIndex + 1) % allImages.length);
-  const prevImageFn = () => setLightboxImageIndex((prevIndex) => (prevIndex - 1 + allImages.length) % allImages.length);
+  const nextImage = () => setLightboxImageIndex((prevIndex) => (prevIndex + 1) % (bandMedia.length || 1));
+  const prevImageFn = () => setLightboxImageIndex((prevIndex) => (prevIndex - 1 + (bandMedia.length || 1)) % (bandMedia.length || 1));
+
+  // YouTube helpers
+  const getYouTubeId = (url: string): string | null => {
+    if (!url) return null;
+    const regExp = /^.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return match && match[1] && match[1].length === 11 ? match[1] : null;
+  };
+  const toYouTubeEmbed = (url: string, { autoplay = true }: { autoplay?: boolean } = {}): string => {
+    const id = getYouTubeId(url);
+    if (!id) return url;
+    const params = new URLSearchParams({
+      autoplay: autoplay ? '1' : '0',
+      mute: '1',
+      playsinline: '1',
+      controls: '0',
+      modestbranding: '1',
+      rel: '0',
+      showinfo: '0',
+      enablejsapi: '1',
+      loop: '1',
+      playlist: id
+    }).toString();
+    return `https://www.youtube.com/embed/${id}?${params}`;
+  };
+  const youTubeThumb = (url: string): string => {
+    const id = getYouTubeId(url);
+    return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : '';
+  };
 
   return (
     <>
@@ -210,6 +257,8 @@ export function ProductDetailPage() {
           .hide-scrollbar::-webkit-scrollbar { display: none; }
         `}
       </style>
+      {/* helpers */}
+      {(() => null)()}
       {/* FULL-WIDTH HERO IMAGE */}
       <header className="relative w-full">
         <div
@@ -229,7 +278,7 @@ export function ProductDetailPage() {
               transform: `translateX(calc(-${currentImageIndex * (100 / slideCount)}% + ${draggedX}px))`,
             }}
           >
-            {allImages.map((img, index) => (
+            {bandMedia.map((m, index) => (
               <div
                 key={index}
                 className="relative h-full shrink-0 cursor-pointer"
@@ -240,11 +289,13 @@ export function ProductDetailPage() {
                   }
                 }}
               >
-                <img
-                  src={img}
-                  alt={`${t(product.name)} ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
+                {m.type === 'image' ? (
+                  <img src={m.url} alt={`${t(product.name)} ${index + 1}`} className="w-full h-full object-cover" />
+                ) : m.type === 'video' ? (
+                  <video src={m.url} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+                ) : (
+                  <iframe className="w-full h-full" title="youtube-player" src={toYouTubeEmbed(m.url, { autoplay: true })} allow="autoplay; encrypted-media" allowFullScreen frameBorder="0" />
+                )}
               </div>
             ))}
           </div>
@@ -302,9 +353,15 @@ export function ProductDetailPage() {
               }}
             >
               <div className="flex gap-3 min-w-max pb-2">
-                {(Array.isArray(allImages) ? allImages : []).map((img: string, idx: number) => (
-                  <button key={idx} onClick={() => changeMainImage(img)} className={`flex-shrink-0 w-24 h-24 overflow-hidden border-2 transition-all duration-300 ${mainImage === img ? 'border-gray-400 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}>
-                    <img src={img} alt={`${t(product.name)} thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                {bandMedia.map((m, idx) => (
+                  <button key={idx} onClick={() => setCurrentImageIndex(idx)} className={`flex-shrink-0 w-24 h-24 overflow-hidden border-2 transition-all duration-300 ${currentImageIndex === idx ? 'border-gray-400 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}>
+                    {m.type === 'image' ? (
+                      <img src={m.url} alt={`${t(product.name)} thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                    ) : m.type === 'video' ? (
+                      <div className="relative w-full h-full bg-black/70 text-white flex items-center justify-center text-xs">VIDEO</div>
+                    ) : (
+                      <img src={youTubeThumb(m.url)} alt={`youtube thumb ${idx + 1}`} className="w-full h-full object-cover" />
+                    )}
                   </button>
                 ))}
               </div>
@@ -499,6 +556,27 @@ export function ProductDetailPage() {
 
             {/* bottom prev/next removed; now overlay under menu */}
           </section>
+          {Array.isArray((product as any)?.media) && (product as any).media.length > 0 && (product as any).showMediaPanels !== false && (
+            <section className="mt-12">
+              <h2 className="text-xl font-medium text-gray-700 mb-4">{t('additional_images')}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {(product as any).media.map((m: any, idx: number) => (
+                  <div key={idx} className="border rounded bg-white shadow-sm overflow-hidden">
+                    <div className="aspect-video bg-gray-100 flex items-center justify-center">
+                      {m.type === 'image' ? (
+                        <img src={m.url} alt={`media-${idx}`} className="w-full h-full object-cover" />
+                      ) : m.type === 'video' ? (
+                        <video src={m.url} controls className="w-full h-full object-cover" />
+                      ) : (
+                        <iframe className="w-full h-full" src={m.url} allow="autoplay; encrypted-media" allowFullScreen />
+                      )}
+                    </div>
+                    <div className="px-4 py-3 text-sm text-gray-600">{m.type.toUpperCase()}</div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </main>
 
@@ -507,7 +585,15 @@ export function ProductDetailPage() {
           <button onClick={closeLightbox} className="absolute top-4 right-4 text-white hover:opacity-75 transition-opacity z-20"><CloseIcon /></button>
           <button onClick={prevImageFn} className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:opacity-75 transition-opacity z-20 bg-black/20 rounded-full p-2"><ChevronLeftIcon /></button>
           <button onClick={nextImage} className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:opacity-75 transition-opacity z-20 bg-black/20 rounded-full p-2"><ChevronRightIcon /></button>
-          <div className="max-w-screen-lg max-h-[90vh] w-full p-4"><img src={allImages[lightboxImageIndex]} alt="Enlarged product view" className="w-full h-full object-contain" /></div>
+          <div className="max-w-screen-lg max-h-[90vh] w-full p-4">
+            {bandMedia[lightboxImageIndex]?.type === 'image' ? (
+              <img src={bandMedia[lightboxImageIndex].url} alt="Enlarged product view" className="w-full h-full object-contain" />
+            ) : bandMedia[lightboxImageIndex]?.type === 'video' ? (
+              <video src={bandMedia[lightboxImageIndex].url} autoPlay muted loop playsInline className="w-full h-full object-contain" />
+            ) : (
+              <iframe className="w-full h-full" title="youtube-player" src={toYouTubeEmbed(bandMedia[lightboxImageIndex]?.url || '', { autoplay: true })} allow="autoplay; encrypted-media" allowFullScreen frameBorder="0" />
+            )}
+          </div>
         </div>
       )}
 

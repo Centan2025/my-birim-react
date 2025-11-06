@@ -85,9 +85,13 @@ export interface Product {
   /** URL for the main display image of the product. */
   mainImage: string;
   /** Array of URLs for alternative product images. */
-  alternativeImages: string[];
+  alternativeImages: string[]; // legacy
+  /** Mixed alternative media for the band under hero. */
+  alternativeMedia?: { type: 'image' | 'video' | 'youtube'; url: string }[];
   /** Optional rich media for hero: image/video/youtube */
   media?: { type: 'image' | 'video' | 'youtube'; url: string }[];
+  /** Toggle for showing media panels at bottom. */
+  showMediaPanels?: boolean;
   /** Dimension drawings/images shown before materials. Each has an image and a title. */
   dimensionImages?: { image: string; title?: LocalizedString }[];
   /** Indicates if the product can be purchased directly. */
