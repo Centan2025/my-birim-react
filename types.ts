@@ -86,6 +86,8 @@ export interface Product {
   mainImage: string;
   /** Array of URLs for alternative product images. */
   alternativeImages: string[];
+  /** Optional rich media for hero: image/video/youtube */
+  media?: { type: 'image' | 'video' | 'youtube'; url: string }[];
   /** Dimension drawings/images shown before materials. Each has an image and a title. */
   dimensionImages?: { image: string; title?: LocalizedString }[];
   /** Indicates if the product can be purchased directly. */

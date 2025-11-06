@@ -40,6 +40,13 @@ const mapImage = (img: any | undefined): string => {
 }
 
 const mapImages = (imgs: any[] | undefined): string[] => Array.isArray(imgs) ? imgs.map(i => mapImage(i)).filter(Boolean) : []
+const mapProductMedia = (row: any): { type: 'image'|'video'|'youtube'; url: string }[] => {
+  const mediaArr = Array.isArray(row?.media) ? row.media : []
+  const fromMedia = mediaArr.map((m: any) => ({ type: m?.type, url: m?.url })).filter((m: any) => m.type && m.url)
+  if (fromMedia.length > 0) return fromMedia
+  const imgs = mapImages([row?.mainImage, ...(row?.alternativeImages || [])])
+  return imgs.map((u: string) => ({ type: 'image', url: u }))
+}
 const mapMaterials = (materials: any[] | undefined): ProductMaterial[] => Array.isArray(materials) ? materials.map(m => ({ name: m?.name, image: mapImage(m?.image) })) : []
 const mapDimensionImages = (dimImgs: any[] | undefined): { image: string; title?: LocalizedString }[] => {
   if (!Array.isArray(dimImgs)) return []
@@ -305,6 +312,7 @@ export const getProducts = async (): Promise<Product[]> => {
           description: r.description,
           mainImage: mapImage(r.mainImage),
           alternativeImages: mapImages(r.alternativeImages),
+          media: mapProductMedia(r),
           dimensionImages: mapDimensionImages(r?.dimensionImages),
           buyable: Boolean(r.buyable),
           price: r.price,
@@ -356,6 +364,7 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           description: r.description,
           mainImage: mapImage(r.mainImage),
           alternativeImages: mapImages(r.alternativeImages),
+          media: mapProductMedia(r),
           dimensionImages: mapDimensionImages(r?.dimensionImages),
           buyable: Boolean(r.buyable),
           price: r.price,

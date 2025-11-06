@@ -35,6 +35,13 @@ export default defineType({
       of: [{type: 'image', options: {hotspot: true}}],
     }),
     defineField({
+      name: 'media',
+      title: 'Ana Medya (Görsel/Video/YouTube)',
+      type: 'array',
+      of: [{ type: 'heroMediaItem' }],
+      description: 'Ürün detay üst görseli için görüntü, video dosyası ya da YouTube bağlantısı ekleyin. Eğer boş bırakılırsa Ana/Alternatif Görseller kullanılır.'
+    }),
+    defineField({
       name: 'dimensionImages',
       title: 'Ölçü Görselleri',
       type: 'array',
