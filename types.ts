@@ -186,7 +186,7 @@ export interface ContentBlock {
     /** URL for video or YouTube (for video/youtube types) */
     url?: string;
     /** Description text */
-    description?: LocalizedText;
+    description?: LocalizedString;
     /** Link text */
     linkText?: LocalizedString;
     /** Link URL */

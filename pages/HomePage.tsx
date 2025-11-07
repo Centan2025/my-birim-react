@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getProducts, getDesigners, getSiteSettings, getHomePageContent } from '../services/cms';
-import type { Product, Designer, SiteSettings, HomePageContent, ContentBlock } from '../types';
+import type { Product, Designer, SiteSettings, HomePageContent } from '../types';
 import { ProductCard } from '../components/ProductCard';
 import { SiteLogo } from '../components/SiteLogo';
 import { useTranslation } from '../i18n';

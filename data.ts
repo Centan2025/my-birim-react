@@ -50,8 +50,8 @@ export const productsData: Product[] = [
         currency: 'TRY',
         materials: [{ name: { tr: 'Kumaş', en: 'Fabric' }, image: 'https://picsum.photos/seed/fabric/100/100' }, { name: { tr: 'Deri', en: 'Leather' }, image: 'https://picsum.photos/seed/leather/100/100' }],
         dimensionImages: [
-            'https://picsum.photos/seed/bristol-dim-1/800/600',
-            'https://picsum.photos/seed/bristol-dim-2/800/600'
+            { image: 'https://picsum.photos/seed/bristol-dim-1/800/600' },
+            { image: 'https://picsum.photos/seed/bristol-dim-2/800/600' }
         ],
         exclusiveContent: { images: ['https://picsum.photos/seed/bristol-ex1/800/800'], drawings: [{ name: { tr: 'Teknik Çizim', en: 'Technical Drawing' }, url: '#' }], models3d: [{ name: { tr: '3DS Max Modeli', en: '3DS Max Model' }, url: '#' }] },
     },

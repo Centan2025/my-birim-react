@@ -34,7 +34,6 @@ export function ProductDetailPage() {
   const [siblingProducts, setSiblingProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [mainImage, setMainImage] = useState('');
-  const [prevImage, setPrevImage] = useState<string | null>(null);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
   const [lightboxSource, setLightboxSource] = useState<'band' | 'panel'>('band');
@@ -87,7 +86,6 @@ export function ProductDetailPage() {
             setMainImage(allImgs[0] || '');
             setCurrentImageIndex(0);
           }
-          setPrevImage(null);
           const [designerData, allCategories, productsInCategory] = await Promise.all([
             getDesignerById(productData.designerId),
             getCategories(),
@@ -213,7 +211,6 @@ export function ProductDetailPage() {
       const current = bandMedia[currentImageIndex];
       const newImage = current?.type === 'image' ? current.url : mainImage;
       if (newImage && newImage !== mainImage) {
-        setPrevImage(mainImage);
         setMainImage(newImage);
       }
     }
@@ -239,12 +236,6 @@ export function ProductDetailPage() {
   if (loading) return <div className="pt-20 text-center">{t('loading')}...</div>;
   if (!product) return <div className="pt-20 text-center">{t('product_not_found')}</div>;
 
-  const changeMainImage = (img: string) => {
-    const idx = bandMedia.findIndex(m => m.type === 'image' && m.url === img);
-    if (idx !== -1 && idx !== currentImageIndex) {
-      setCurrentImageIndex(idx);
-    }
-  };
   const heroNext = () => { setCurrentImageIndex(prev => (prev + 1) % slideCount); };
   const heroPrev = () => { setCurrentImageIndex(prev => (prev - 1 + slideCount) % slideCount); };
 
@@ -379,7 +370,7 @@ export function ProductDetailPage() {
                 key={index}
                 className="relative h-full shrink-0 cursor-pointer"
                 style={{ width: `${100 / slideCount}%` }}
-                onClick={(e) => {
+                onClick={() => {
                   if (!isDragging && draggedX === 0) {
                     openLightbox();
                   }
