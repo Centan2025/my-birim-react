@@ -56,16 +56,16 @@ export function AboutPage() {
               <img src={content.heroImage} alt={t(content.heroTitle)} className="absolute inset-0 w-full h-full object-cover opacity-40" />
             )}
             <div className="relative z-10 text-center px-4">
-                <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter">{t(content.heroTitle)}</h1>
-                <p className="mt-4 text-lg md:text-xl text-gray-200 max-w-3xl mx-auto">{t(content.heroSubtitle)}</p>
+                <h1 className="text-4xl md:text-6xl font-light tracking-tighter">{t(content.heroTitle)}</h1>
+                <p className="mt-4 text-lg md:text-xl text-gray-200 max-w-3xl mx-auto font-light">{t(content.heroSubtitle)}</p>
             </div>
         </div>
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
             {/* Our Story Section */}
             <div className="max-w-4xl mx-auto grid md:grid-cols-5 gap-12 items-center">
-                <div className="md:col-span-3 prose prose-lg text-gray-700 max-w-none">
-                    <h2 className="text-3xl font-bold text-gray-900">{t(content.storyTitle)}</h2>
+                <div className="md:col-span-3 prose prose-lg text-gray-500 max-w-none font-light">
+                    <h2 className="text-3xl font-light text-gray-600">{t(content.storyTitle)}</h2>
                     <p>{t(content.storyContentP1)}</p>
                     <p>{t(content.storyContentP2)}</p>
                 </div>
@@ -78,15 +78,15 @@ export function AboutPage() {
             
             {content.isQuoteVisible && (
                 <div className="my-24 text-center max-w-3xl mx-auto">
-                    <blockquote className="text-2xl md:text-4xl font-light text-gray-800 italic border-l-4 border-gray-800 pl-6 md:pl-8">
+                    <blockquote className="text-2xl md:text-4xl font-light text-gray-600 italic border-l-4 border-gray-600 pl-6 md:pl-8">
                         "{t(content.quoteText)}"
                     </blockquote>
-                    <p className="mt-6 text-lg font-semibold text-gray-700">{content.quoteAuthor}</p>
+                    <p className="mt-6 text-lg font-light text-gray-500">{content.quoteAuthor}</p>
                 </div>
             )}
 
-            <div className="bg-gray-50 p-12 my-24">
-                <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">{t(content.valuesTitle)}</h2>
+            <div className="bg-gray-100 p-12 my-24">
+                <h2 className="text-3xl font-light text-gray-600 text-center mb-12">{t(content.valuesTitle)}</h2>
                 <div className="grid md:grid-cols-3 gap-12 text-center">
                     {(content.values || []).map((value, index) => {
                        const iconKey = getIconKey(value.title);
@@ -96,8 +96,8 @@ export function AboutPage() {
                             <div className="flex justify-center">
                                 <ValuesIcon><IconComponent /></ValuesIcon>
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-800">{t(value.title)}</h3>
-                            <p className="mt-2 text-gray-600">{t(value.description)}</p>
+                            <h3 className="text-xl font-light text-gray-500">{t(value.title)}</h3>
+                            <p className="mt-2 text-gray-500 font-light">{t(value.description)}</p>
                          </div>
                        );
                     })}

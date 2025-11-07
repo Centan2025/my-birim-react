@@ -9,7 +9,7 @@ export default defineType({
       name: 'id',
       title: 'ID (Slug)',
       type: 'slug',
-      options: {source: (doc) => doc.name?.tr || doc.name?.en, maxLength: 96},
+      options: {source: (doc: any) => doc?.name?.tr || doc?.name?.en, maxLength: 96},
       validation: (Rule) => Rule.required(),
     }),
     defineField({name: 'name', title: 'Ad', type: 'localizedString', validation: (Rule) => Rule.required()}),
@@ -32,15 +32,21 @@ export default defineType({
       name: 'alternativeMedia',
       title: 'Alternatif Medya (Görsel/Video/YouTube)',
       type: 'array',
-      of: [{ type: 'heroMediaItem' }],
+      of: [{ type: 'productSimpleMediaItem' }],
       description: 'Ana görselin altındaki bantta gösterilecek görsel/video/YouTube ögeleri'
     }),
     defineField({
       name: 'media',
-      title: 'Ana Medya (Görsel/Video/YouTube)',
+      title: 'Alt Medya (Görsel/Video/YouTube)',
       type: 'array',
-      of: [{ type: 'heroMediaItem' }],
-      description: 'Ürün detay üst görseli için görüntü, video dosyası ya da YouTube bağlantısı ekleyin. Eğer boş bırakılırsa Ana/Alternatif Görseller kullanılır.'
+      of: [{ type: 'productPanelMediaItem' }],
+      description: 'Sayfa altındaki medya panelleri. Görüntü, video veya YouTube bağlantısı ekleyin.'
+    }),
+    defineField({
+      name: 'mediaSectionTitle',
+      title: 'Alt Medya Başlığı',
+      type: 'localizedString',
+      description: 'Alt Medya bölüm başlığı (boş bırakılırsa varsayılan çeviri kullanılır)'
     }),
     defineField({ name: 'showMediaPanels', title: 'Ana Medya Panellerini Göster', type: 'boolean', initialValue: true }),
     defineField({

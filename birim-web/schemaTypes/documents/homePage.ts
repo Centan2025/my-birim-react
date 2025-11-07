@@ -26,6 +26,13 @@ export default defineType({
       to: [{type: 'designer'}],
     }),
     defineField({
+      name: 'contentBlocks',
+      title: 'İçerik Blokları',
+      type: 'array',
+      of: [{type: 'contentBlock'}],
+      description: 'Hero bölümünün altında görünecek içerik blokları',
+    }),
+    defineField({
       name: 'inspirationSection',
       title: 'İlham Bölümü',
       type: 'object',

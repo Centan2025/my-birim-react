@@ -11,6 +11,15 @@ const getYouTubeId = (url: string): string | null => {
     return (match && match[2].length === 11) ? match[2] : null;
 };
 
+const formatDate = (dateString: string): string => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}.${month}.${year}`;
+};
+
 const MediaComponent: React.FC<{ media: NewsMedia }> = ({ media }) => {
     const { t } = useTranslation();
 
@@ -25,6 +34,21 @@ const MediaComponent: React.FC<{ media: NewsMedia }> = ({ media }) => {
             );
         }
         if (media.type === 'video') {
+            // Video dosyası mı yoksa URL mi kontrol et
+            const isVideoFile = media.url && (media.url.includes('.mp4') || media.url.includes('.webm') || media.url.includes('.mov') || media.url.includes('cdn.sanity.io/files'))
+            if (isVideoFile) {
+                return (
+                    <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16:9 Aspect Ratio */ }}>
+                        <video 
+                            src={media.url} 
+                            className="absolute top-0 left-0 w-full h-full object-cover"
+                            controls
+                            playsInline
+                        />
+                    </div>
+                );
+            }
+            // URL ise iframe kullan (harici video servisleri için)
             return (
                 <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16:9 Aspect Ratio */ }}>
                     <iframe 
@@ -97,7 +121,7 @@ export function NewsDetailPage() {
     // between different news items as distinct components, automatically resetting state.
     return (
         <div key={newsId} className="bg-white animate-fade-in-up">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-0">
                 <div className="max-w-4xl mx-auto">
                     <nav className="mb-8 text-sm text-gray-500" aria-label="Breadcrumb">
                         <ol className="list-none p-0 inline-flex items-center">
@@ -108,20 +132,36 @@ export function NewsDetailPage() {
                     </nav>
 
                     <article>
-                        <header className="mb-12 text-center">
-                            <p className="text-gray-500 mb-2">{item.date}</p>
-                            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900">{t(item.title)}</h1>
-                        </header>
-
+                        <div className="mb-6">
+                            <p className="text-sm text-gray-500 mb-3 font-light">{formatDate(item.date)}</p>
+                            <div className="h-px bg-gray-300"></div>
+                        </div>
+                        
                         <img 
                             src={item.mainImage} 
                             alt={t(item.title)}
-                            className="w-full h-auto object-cover shadow-lg mb-12"
+                            className="w-full h-auto object-cover mb-6"
                         />
-
-                        <div className="prose prose-lg lg:prose-xl text-gray-700 max-w-none mx-auto">
-                            <p>{t(item.content)}</p>
+                    </article>
+                </div>
+            </div>
+            
+            <div className="bg-gray-100 w-full pt-6 pb-8">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="max-w-4xl mx-auto">
+                        <h1 className="text-3xl md:text-4xl font-light tracking-tight text-gray-600 mb-4">{t(item.title)}</h1>
+                        <div className="flex items-center min-h-[200px]">
+                            <div className="prose prose-lg lg:prose-xl text-gray-700 max-w-none w-full [&>p:first-child]:mt-0 [&>p:last-child]:mb-0">
+                                <p className="font-light">{t(item.content)}</p>
+                            </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+                <div className="max-w-4xl mx-auto">
+                    <article>
 
                         <div className="mt-12">
                             {item.media.map((media, index) => (

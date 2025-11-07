@@ -56,7 +56,7 @@ export function ProductsPage() {
   }
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-gray-100">
       {/* Category Hero Image */}
       <div className="relative h-[450px] animate-fade-in-down">
         <div className="absolute inset-0">
@@ -69,10 +69,10 @@ export function ProductsPage() {
         </div>
         <div className="relative h-full flex items-center justify-center text-center text-white pt-20">
           <div>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tighter" style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}>
+            <h1 className="text-4xl md:text-6xl font-light tracking-tighter" style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}>
               {t(category?.name) || t('products')}
             </h1>
-            <p className="mt-4 text-lg max-w-2xl mx-auto" style={{textShadow: '0 1px 3px rgba(0,0,0,0.5)'}}>
+            <p className="mt-4 text-lg max-w-2xl mx-auto font-light" style={{textShadow: '0 1px 3px rgba(0,0,0,0.5)'}}>
               {category ? t(category.subtitle) : t('products_page_subtitle')}
             </p>
           </div>
@@ -85,7 +85,7 @@ export function ProductsPage() {
           <div className="relative">
             <button 
               onClick={() => setIsSortOpen(!isSortOpen)}
-              className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-transform duration-300 transform hover:-translate-y-1 hover:scale-105"
+              className="flex items-center gap-2 text-sm font-light text-gray-500 hover:text-gray-600 transition-transform duration-300 transform hover:-translate-y-1 hover:scale-105"
             >
               <span>{t('sort')}</span>
               <ChevronDownIcon />
@@ -104,7 +104,7 @@ export function ProductsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 animate-fade-in-up">
             {sortedProducts.map((product, index) => (
               <div key={product.id} style={{ animationDelay: `${index * 100}ms` }} className="animate-fade-in-up">
-                <ProductCard product={product} />
+                <ProductCard product={product} variant="light" />
               </div>
             ))}
           </div>

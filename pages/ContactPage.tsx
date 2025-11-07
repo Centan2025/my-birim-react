@@ -22,19 +22,19 @@ const LocationCard: React.FC<{
   return (
     <div
       onClick={onSelect}
-      className={`p-4 rounded-lg cursor-pointer transition-all duration-300 ${isSelected ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
+      className={`p-4 rounded-lg cursor-pointer transition-all duration-300 ${isSelected ? 'bg-gray-200' : 'hover:bg-gray-100'}`}
     >
-      <h3 className="text-xl font-semibold text-gray-900">{t(location.title)}</h3>
-      <p className="mt-2 text-gray-600 flex items-start gap-2">
+      <h3 className="text-xl font-light text-gray-500">{t(location.title)}</h3>
+      <p className="mt-2 text-gray-500 flex items-start gap-2 font-light">
         <MapPinIcon className="mt-1 flex-shrink-0 text-gray-400" />
         <span>{location.address}</span>
       </p>
-      <p className="mt-1 text-gray-600 flex items-center gap-2">
+      <p className="mt-1 text-gray-500 flex items-center gap-2 font-light">
         <PhoneIcon className="flex-shrink-0 text-gray-400" />
         <span>{location.phone}</span>
       </p>
       {location.email && (
-        <p className="mt-1 text-gray-600 flex items-center gap-2">
+        <p className="mt-1 text-gray-500 flex items-center gap-2 font-light">
           <MailIcon className="flex-shrink-0 text-gray-400" />
           <span>{location.email}</span>
         </p>
@@ -84,11 +84,11 @@ export function ContactPage() {
   }
   
   return (
-    <div className="bg-gray-50 animate-fade-in-up">
+    <div className="bg-gray-100 animate-fade-in-up">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900">{t(content.title)}</h1>
-          <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">{t(content.subtitle)}</p>
+          <h1 className="text-4xl md:text-5xl font-light text-gray-600">{t(content.title)}</h1>
+          <p className="mt-4 text-lg text-gray-500 max-w-3xl mx-auto font-light">{t(content.subtitle)}</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-12">
@@ -96,7 +96,7 @@ export function ContactPage() {
              {/* FIX: Refactored to use Object.keys to avoid potential type inference issues with Object.entries in some TypeScript environments. */}
              {Object.keys(locationGroups).map((type) => (
               <div key={type}>
-                <h2 className="text-2xl font-semibold text-gray-800 mb-6">{type}</h2>
+                <h2 className="text-2xl font-light text-gray-600 mb-6">{type}</h2>
                 <div className="space-y-4">
                   {locationGroups[type].map((loc, index) => <LocationCard 
                     key={index} 
@@ -123,7 +123,7 @@ export function ContactPage() {
                 key={selectedLocation.mapEmbedUrl}
               ></iframe>
             ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500">
+                <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500">
                     <p>{t('map_not_available')}</p>
                 </div>
             )}

@@ -133,19 +133,130 @@ export const heroMediaItem = defineType({
       options: { hotspot: true },
       hidden: ({parent}) => parent?.type !== 'image',
     }),
+    // For video, allow file upload
+    defineField({
+      name: 'videoFile',
+      title: 'Video Dosyası',
+      type: 'file',
+      options: {
+        accept: 'video/*',
+      },
+      hidden: ({parent}) => parent?.type !== 'video',
+      description: 'Video dosyasını sürükle-bırak ile yükleyin',
+    }),
     // For video/youtube or external image, allow URL
     defineField({
       name: 'url',
-      title: 'URL',
+      title: 'Video URL (veya YouTube URL)',
       type: 'url',
-      hidden: ({parent}) => parent?.type === 'image',
-      description: 'Video ya da YouTube için gerekli. Image seçtiyseniz üstteki Görsel alanını kullanın.'
+      hidden: ({parent}) => parent?.type === 'image' || (parent?.type === 'video' && parent?.videoFile),
+      description: 'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.'
     }),
     defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
     defineField({name: 'subtitle', title: 'Alt Başlık', type: 'localizedString'}),
     defineField({name: 'isButtonVisible', title: 'Butonu Göster', type: 'boolean'}),
     defineField({name: 'buttonText', title: 'Buton Metni', type: 'localizedString'}),
     defineField({name: 'buttonLink', title: 'Buton Bağlantısı', type: 'string'}),
+  ],
+})
+
+// Simpler media item for Alternative Media on product detail
+export const productSimpleMediaItem = defineType({
+  name: 'productSimpleMediaItem',
+  title: 'Basit Medya Öğesi',
+  type: 'object',
+  fields: [
+    defineField({
+      name: 'type',
+      title: 'Tür',
+      type: 'string',
+      options: { list: [
+        { title: 'Image', value: 'image' },
+        { title: 'Video', value: 'video' },
+        { title: 'YouTube', value: 'youtube' },
+      ]},
+      initialValue: 'image',
+    }),
+    defineField({
+      name: 'image',
+      title: 'Görsel',
+      type: 'image',
+      options: { hotspot: true },
+      hidden: ({ parent }) => parent?.type !== 'image',
+    }),
+    defineField({
+      name: 'videoFile',
+      title: 'Video Dosyası',
+      type: 'file',
+      options: {
+        accept: 'video/*',
+      },
+      hidden: ({ parent }) => parent?.type !== 'video',
+      description: 'Video dosyasını sürükle-bırak ile yükleyin',
+    }),
+    defineField({
+      name: 'url',
+      title: 'Video URL (veya YouTube URL)',
+      type: 'url',
+      hidden: ({ parent }) => parent?.type === 'image' || (parent?.type === 'video' && parent?.videoFile),
+      description: 'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.',
+    }),
+  ],
+})
+
+// Panel medyası (Alt Medya): sadece başlık, görüntü/video/YouTube
+export const productPanelMediaItem = defineType({
+  name: 'productPanelMediaItem',
+  title: 'Panel Medya Öğesi',
+  type: 'object',
+  fields: [
+    defineField({
+      name: 'type',
+      title: 'Tür',
+      type: 'string',
+      options: { list: [
+        { title: 'Image', value: 'image' },
+        { title: 'Video', value: 'video' },
+        { title: 'YouTube', value: 'youtube' },
+      ]},
+      initialValue: 'image',
+    }),
+    defineField({
+      name: 'image',
+      title: 'Görsel',
+      type: 'image',
+      options: { hotspot: true },
+      hidden: ({ parent }) => parent?.type !== 'image',
+    }),
+    defineField({
+      name: 'videoFile',
+      title: 'Video Dosyası',
+      type: 'file',
+      options: {
+        accept: 'video/*',
+      },
+      hidden: ({ parent }) => parent?.type !== 'video',
+      description: 'Video dosyasını sürükle-bırak ile yükleyin',
+    }),
+    defineField({
+      name: 'url',
+      title: 'Video URL (veya YouTube URL)',
+      type: 'url',
+      hidden: ({ parent }) => parent?.type === 'image' || (parent?.type === 'video' && parent?.videoFile),
+      description: 'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.',
+    }),
+    defineField({ name: 'title', title: 'Başlık', type: 'localizedString' }),
+  ],
+})
+
+export const footerPartner = defineType({
+  name: 'footerPartner',
+  title: 'Footer Partner',
+  type: 'object',
+  fields: [
+    defineField({name: 'name', title: 'İsim', type: 'localizedString', description: 'Logo yoksa gösterilecek metin'}),
+    defineField({name: 'logo', title: 'Logo', type: 'image', options: { hotspot: true }}),
+    defineField({name: 'url', title: 'Link URL', type: 'url'}),
   ],
 })
 
@@ -222,6 +333,87 @@ export const productMaterialSelection = defineType({
       type: 'array',
       of: [{ type: 'productMaterial' }],
       description: 'Seçilen gruptan bu ürün için kullanılacak malzemeler',
+    }),
+  ],
+})
+
+export const contentBlock = defineType({
+  name: 'contentBlock',
+  title: 'İçerik Bloğu',
+  type: 'object',
+  fields: [
+    defineField({
+      name: 'mediaType',
+      title: 'Medya Türü',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Görsel', value: 'image'},
+          {title: 'Video', value: 'video'},
+          {title: 'YouTube', value: 'youtube'},
+        ],
+      },
+      initialValue: 'image',
+    }),
+    defineField({
+      name: 'image',
+      title: 'Görsel',
+      type: 'image',
+      options: { hotspot: true },
+      hidden: ({parent}) => parent?.mediaType !== 'image',
+    }),
+    defineField({
+      name: 'videoFile',
+      title: 'Video Dosyası',
+      type: 'file',
+      options: {
+        accept: 'video/*',
+      },
+      hidden: ({parent}) => parent?.mediaType !== 'video',
+      description: 'Video dosyasını sürükle-bırak ile yükleyin',
+    }),
+    defineField({
+      name: 'url',
+      title: 'Video URL (veya YouTube URL)',
+      type: 'url',
+      hidden: ({parent}) => parent?.mediaType === 'image' || (parent?.mediaType === 'video' && parent?.videoFile),
+      description: 'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.',
+    }),
+    defineField({
+      name: 'description',
+      title: 'Açıklama Metni',
+      type: 'localizedText',
+    }),
+    defineField({
+      name: 'linkText',
+      title: 'Link Metni',
+      type: 'localizedString',
+    }),
+    defineField({
+      name: 'linkUrl',
+      title: 'Link URL',
+      type: 'string',
+    }),
+    defineField({
+      name: 'position',
+      title: 'Konum',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Sol', value: 'left'},
+          {title: 'Sağ', value: 'right'},
+          {title: 'Orta', value: 'center'},
+          {title: 'Tam Genişlik', value: 'full'},
+        ],
+      },
+      initialValue: 'center',
+    }),
+    defineField({
+      name: 'order',
+      title: 'Sıra',
+      type: 'number',
+      description: 'Hero bölümünden sonra görünecek sıra (düşük sayı önce görünür)',
+      initialValue: 0,
     }),
   ],
 })

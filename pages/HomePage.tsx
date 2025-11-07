@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getProducts, getDesigners, getSiteSettings, getHomePageContent } from '../services/cms';
-import type { Product, Designer, SiteSettings, HomePageContent } from '../types';
+import type { Product, Designer, SiteSettings, HomePageContent, ContentBlock } from '../types';
 import { ProductCard } from '../components/ProductCard';
 import { SiteLogo } from '../components/SiteLogo';
 import { useTranslation } from '../i18n';
@@ -124,7 +124,7 @@ export function HomePage() {
   const inspiration = content.inspirationSection || { backgroundImage: '', title: '', subtitle: '', buttonText: '', buttonLink: '/' };
 
   return (
-    <div className="bg-gray-50 text-gray-800">
+    <div className="bg-gray-100 text-gray-800">
       {/* Hero Section */}
       {heroMedia.length > 0 ? (
         <div 
@@ -212,15 +212,106 @@ export function HomePage() {
         <div className="relative h-[50vh] w-full bg-gray-800" />
       )}
 
+      {/* Content Blocks Section */}
+      {content?.contentBlocks && content.contentBlocks.length > 0 && (() => {
+        const sortedBlocks = [...content.contentBlocks].sort((a, b) => (a.order || 0) - (b.order || 0));
+        return (
+          <>
+            {sortedBlocks.map((block, index) => {
+              const getMediaUrl = () => {
+                if (block.mediaType === 'image' && block.image) {
+                  return block.image;
+                }
+                return block.url || '';
+              };
+
+              const mediaUrl = getMediaUrl();
+              const isFullWidth = block.position === 'full';
+              const isLeft = block.position === 'left';
+              const isRight = block.position === 'right';
+              const isCenter = block.position === 'center';
+
+              return (
+                <section key={index} className={`py-20 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
+                  {isFullWidth ? (
+                    <div className="w-full">
+                      {block.mediaType === 'youtube' ? (
+                        <YouTubeBackground url={mediaUrl} />
+                      ) : block.mediaType === 'video' ? (
+                        <video className="w-full h-auto" autoPlay loop muted playsInline src={mediaUrl} />
+                      ) : (
+                        <img src={mediaUrl} alt="" className="w-full h-auto object-cover" />
+                      )}
+                      {block.description && (
+                        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                          <div className="prose max-w-none text-center">
+                            <p className="text-lg text-gray-700">{t(block.description)}</p>
+                          </div>
+                          {block.linkText && block.linkUrl && (
+                            <div className="text-center mt-6">
+                              <Link
+                                to={block.linkUrl}
+                                className="group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 px-5 text-lg rounded-lg hover:bg-gray-900/10 transition-colors duration-300"
+                              >
+                                <span className="transition-transform duration-300 ease-out group-hover:-translate-x-1">{t(block.linkText)}</span>
+                                <ArrowRight className="w-5 h-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+                              </Link>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                      <div className={`flex flex-col ${isLeft ? 'md:flex-row' : isRight ? 'md:flex-row-reverse' : 'md:flex-row items-center'} gap-12`}>
+                        <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'}`}>
+                          {block.mediaType === 'youtube' ? (
+                            <div className="relative w-full aspect-video">
+                              <YouTubeBackground url={mediaUrl} />
+                            </div>
+                          ) : block.mediaType === 'video' ? (
+                            <video className="w-full h-auto rounded-lg" autoPlay loop muted playsInline src={mediaUrl} />
+                          ) : (
+                            <img src={mediaUrl} alt="" className="w-full h-auto rounded-lg object-cover" />
+                          )}
+                        </div>
+                        {block.description && (
+                          <div className={`w-full ${isCenter ? 'md:w-full text-center' : 'md:w-1/2'}`}>
+                            <div className="prose max-w-none">
+                              <p className="text-lg text-gray-700">{t(block.description)}</p>
+                            </div>
+                            {block.linkText && block.linkUrl && (
+                              <div className={`mt-6 ${isCenter ? 'text-center' : ''}`}>
+                                <Link
+                                  to={block.linkUrl}
+                                  className="group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 px-5 text-lg rounded-lg hover:bg-gray-900/10 transition-colors duration-300"
+                                >
+                                  <span className="transition-transform duration-300 ease-out group-hover:-translate-x-1">{t(block.linkText)}</span>
+                                  <ArrowRight className="w-5 h-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+                                </Link>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </section>
+              );
+            })}
+          </>
+        );
+      })()}
+
       {/* Featured Products Section */}
       {Array.isArray(featuredProducts) && featuredProducts.length > 0 && (
-        <section id="featured" className="py-20 bg-gray-50">
+        <section id="featured" className="py-20 bg-gray-100">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
-            <h2 className="text-3xl font-bold text-center mb-4">{t('featured_products')}</h2>
-            <p className="text-center text-gray-600 max-w-2xl mx-auto mb-12">{t('featured_products_subtitle')}</p>
+            <h2 className="text-3xl font-light text-gray-600 text-center mb-4">{t('featured_products')}</h2>
+            <p className="text-center text-gray-500 max-w-2xl mx-auto mb-12 font-light">{t('featured_products_subtitle')}</p>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
               {featuredProducts.map(p => (
-                <ProductCard key={p.id} product={p} />
+                <ProductCard key={p.id} product={p} variant="light" />
               ))}
             </div>
           </div>
@@ -235,9 +326,9 @@ export function HomePage() {
                   <img src={featuredDesigner.image} alt={t(featuredDesigner.name)} className="shadow-xl w-full object-cover" />
               </div>
               <div className="w-full md:w-1/2 text-center md:text-left">
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-gray-500">{t('designer_spotlight')}</h3>
-                  <h2 className="text-4xl font-bold text-gray-900 mt-2">{t(featuredDesigner.name)}</h2>
-                  <p className="mt-4 text-gray-600 leading-relaxed">{t(featuredDesigner.bio).substring(0, 200)}...</p>
+                  <h3 className="text-sm font-light uppercase tracking-widest text-gray-500">{t('designer_spotlight')}</h3>
+                  <h2 className="text-4xl font-light text-gray-600 mt-2">{t(featuredDesigner.name)}</h2>
+                  <p className="mt-4 text-gray-500 leading-relaxed font-light">{t(featuredDesigner.bio).substring(0, 200)}...</p>
                    <Link
                     to={`/designer/${featuredDesigner.id}`}
                     className="group mt-8 inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 px-5 text-lg rounded-lg hover:bg-gray-900/10 transition-colors duration-300"
@@ -255,8 +346,8 @@ export function HomePage() {
         <section className="relative py-32 bg-gray-800 text-white text-center" style={{ backgroundImage: `url(${inspiration.backgroundImage})`, backgroundSize: 'cover', backgroundAttachment: 'fixed', backgroundPosition: 'center' }}>
            <div className="absolute inset-0 bg-black/50"></div>
            <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
-              <h2 className="text-4xl font-bold">{t(inspiration.title)}</h2>
-              <p className="mt-4 text-lg text-gray-200 max-w-2xl mx-auto">{t(inspiration.subtitle)}</p>
+              <h2 className="text-4xl font-light">{t(inspiration.title)}</h2>
+              <p className="mt-4 text-lg text-gray-200 max-w-2xl mx-auto font-light">{t(inspiration.subtitle)}</p>
               {inspiration.buttonText && (
                 <Link
                     to={inspiration.buttonLink || '/'}

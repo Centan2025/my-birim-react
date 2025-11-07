@@ -23,9 +23,6 @@ const SearchIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
 );
 
-const GlobeIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-);
 
 const CloseIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -45,6 +42,10 @@ export function Header() {
   const productsTimeoutRef = useRef<number | null>(null);
   const searchPanelRef = useRef<HTMLDivElement>(null);
   const searchButtonRef = useRef<HTMLButtonElement>(null);
+  const headerContainerRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+  const productsButtonRef = useRef<HTMLDivElement>(null);
+  const [submenuOffset, setSubmenuOffset] = useState(0);
 
   const { isLoggedIn } = useAuth();
   const { cartCount, toggleCart } = useCart();
@@ -91,6 +92,29 @@ export function Header() {
   useEffect(() => {
     getCategories().then(setCategories);
   }, []);
+
+  // Keep submenu aligned under the PRODUCTS button
+  const updateSubmenuOffset = useCallback(() => {
+    const btn = productsButtonRef.current;
+    const headerEl = headerContainerRef.current;
+    if (!btn || !headerEl) return;
+    const btnRect = btn.getBoundingClientRect();
+    const headerRect = headerEl.getBoundingClientRect();
+    const offset = Math.max(0, Math.round(btnRect.left - headerRect.left));
+    setSubmenuOffset(offset);
+  }, []);
+
+  useEffect(() => {
+    if (isProductsOpen) {
+      updateSubmenuOffset();
+    }
+  }, [isProductsOpen, updateSubmenuOffset, locale]);
+
+  useEffect(() => {
+    const onResize = () => updateSubmenuOffset();
+    window.addEventListener('resize', onResize, { passive: true });
+    return () => window.removeEventListener('resize', onResize);
+  }, [updateSubmenuOffset]);
 
   // Fetch all data for search when the search modal is opened for the first time.
   useEffect(() => {
@@ -162,6 +186,7 @@ export function Header() {
   const handleProductsEnter = () => {
     if (productsTimeoutRef.current) {
       clearTimeout(productsTimeoutRef.current);
+      productsTimeoutRef.current = null;
     }
     setIsProductsOpen(true);
   };
@@ -169,27 +194,26 @@ export function Header() {
   const handleProductsLeave = () => {
     productsTimeoutRef.current = window.setTimeout(() => {
       setIsProductsOpen(false);
+      productsTimeoutRef.current = null;
     }, 200);
   };
+
+  const handleCloseProducts = () => {
+    if (productsTimeoutRef.current) {
+      clearTimeout(productsTimeoutRef.current);
+      productsTimeoutRef.current = null;
+    }
+    setIsProductsOpen(false);
+  };
   
-  const navLinkClasses = 'text-sm font-medium tracking-wider text-gray-200 hover:text-white transition-colors duration-300';
+  const navLinkClasses = 'text-sm font-medium tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300';
   const activeLinkClasses = { color: 'white', textShadow: '0 0 5px rgba(255,255,255,0.5)', opacity: 1 };
   const iconClasses = 'text-white hover:text-gray-200 transition-all duration-300 transform hover:scale-125';
   
-  const getLanguageName = (code: string) => {
-    const names: { [key: string]: string } = {
-        'tr': 'Türkçe',
-        'en': 'English',
-        'de': 'Deutsch',
-        'fr': 'Français',
-        'es': 'Español',
-        'it': 'Italiano'
-    };
-    return names[code] || code.toUpperCase();
-  };
+  
 
-  const NavItem: React.FC<{ to: string; children: React.ReactNode }> = ({ to, children }) => (
-    <NavLink to={to} className={`relative group py-2 ${navLinkClasses}`} style={({ isActive }) => (isActive ? activeLinkClasses : undefined)}>
+  const NavItem: React.FC<{ to: string; children: React.ReactNode; onMouseEnter?: () => void; onClick?: () => void }> = ({ to, children, onMouseEnter, onClick }) => (
+    <NavLink to={to} onMouseEnter={onMouseEnter} onClick={onClick} className={`relative group py-2 ${navLinkClasses}`} style={({ isActive }) => (isActive ? activeLinkClasses : undefined)}>
       <span className="inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
           {children}
       </span>
@@ -200,13 +224,16 @@ export function Header() {
   return (
     <>
       <header className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full'}`}>
-        <div className="transition-all duration-300 border-b bg-black/60 backdrop-blur-lg border-white/10">
-          <nav className="px-2 sm:px-4 lg:px-6">
+        <div
+          className={`bg-black/60 backdrop-blur-lg overflow-hidden border-b border-white/10 transition-all duration-700 ease-in-out ${isProductsOpen ? 'max-h-[20rem]' : 'max-h-[6rem]'}`}
+          ref={headerContainerRef}
+        >
+          <nav className="px-2 sm:px-4 lg:px-6" ref={navRef}>
             <div className="relative flex h-24 items-center justify-between">
               <div className="flex items-center gap-x-12">
                 <div className="flex items-center">
                   <Link to="/" className="flex items-center gap-3 text-white transition-colors">
-                    <SiteLogo logoUrl={settings?.logoUrl} className="w-48 h-7" />
+                    <SiteLogo logoUrl={settings?.logoUrl} className="w-40 h-6" />
                     {settings?.isHeaderTextVisible && (
                       <span className="text-2xl font-bold tracking-wider">{settings.headerText}</span>
                     )}
@@ -214,36 +241,29 @@ export function Header() {
                 </div>
 
                 <div className="hidden lg:flex lg:items-center lg:space-x-8">
-                  <div
+                  <div 
+                    ref={productsButtonRef}
                     className="relative"
                     onMouseEnter={handleProductsEnter}
                     onMouseLeave={handleProductsLeave}
                   >
-                    <button className={`group flex items-center space-x-1 py-2 ${navLinkClasses}`}>
-                        <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
-                            {t('collection')}
-                            <span className="absolute -bottom-2 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
+                    <Link 
+                      to="/products"
+                      className={`group flex items-center space-x-1 py-2 ${navLinkClasses}`}
+                      onClick={() => setIsProductsOpen(false)}
+                    >
+                        <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase">
+                            {t('products')}
+                            <span className={`absolute -bottom-2 left-0 w-full h-[2px] bg-white transition-transform duration-300 ease-out origin-center ${isProductsOpen ? 'scale-x-0 opacity-0' : 'transform scale-x-0 group-hover:scale-x-100'}`}></span>
                         </span>
                         <ChevronDownIcon />
-                    </button>
-                    <div className={`absolute top-full left-0 mt-2 w-56 rounded-md shadow-lg bg-black/60 backdrop-blur-lg ring-1 ring-white/10 py-1 transition-all duration-300 ease-out ${isProductsOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}`}>
-                        {categories.map((category) => (
-                          <NavLink
-                            key={category.id}
-                            to={`/products/${category.id}`}
-                            className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
-                            onClick={() => setIsProductsOpen(false)}
-                          >
-                            {t(category.name)}
-                          </NavLink>
-                        ))}
-                      </div>
+                    </Link>
                   </div>
-                  <NavItem to="/designers">{t('designers')}</NavItem>
-                  <NavItem to="/projects">{t('projects') || 'Projeler'}</NavItem>
-                  <NavItem to="/news">{t('news')}</NavItem>
-                  <NavItem to="/about">{t('about')}</NavItem>
-                  <NavItem to="/contact">{t('contact')}</NavItem>
+                  <NavItem to="/designers" onMouseEnter={handleCloseProducts} onClick={handleCloseProducts}>{t('designers')}</NavItem>
+                  <NavItem to="/projects" onMouseEnter={handleCloseProducts} onClick={handleCloseProducts}>{t('projects') || 'Projeler'}</NavItem>
+                  <NavItem to="/news" onMouseEnter={handleCloseProducts} onClick={handleCloseProducts}>{t('news')}</NavItem>
+                  <NavItem to="/about" onMouseEnter={handleCloseProducts} onClick={handleCloseProducts}>{t('about')}</NavItem>
+                  <NavItem to="/contact" onMouseEnter={handleCloseProducts} onClick={handleCloseProducts}>{t('contact')}</NavItem>
                 </div>
               </div>
 
@@ -251,22 +271,30 @@ export function Header() {
                 <button ref={searchButtonRef} onClick={() => isSearchOpen ? closeSearch() : setIsSearchOpen(true)} className={iconClasses}>
                     {isSearchOpen ? <CloseIcon /> : <SearchIcon />}
                 </button>
-                <div className="relative">
-                   <button onClick={() => setIsLangOpen(!isLangOpen)} className={iconClasses}>
-                      <GlobeIcon />
-                  </button>
-                  <div className={`absolute top-full right-0 mt-2 w-40 rounded-md shadow-lg bg-black/60 backdrop-blur-lg ring-1 ring-white/10 py-1 transition-all duration-300 ease-out ${isLangOpen ? 'opacity-100 translate-y-0 animate-fade-in-down' : 'opacity-0 -translate-y-2 pointer-events-none'}`} style={{ animationDuration: '0.2s' }}>
-                      {supportedLocales.map((langCode) => (
-                        <a
-                          key={langCode}
-                          href="#"
-                          className={`block px-4 py-2 text-sm ${locale === langCode ? 'font-bold text-white bg-gray-700' : 'text-gray-300 hover:bg-gray-700 hover:text-white'}`}
-                          onClick={(e) => { e.preventDefault(); setLocale(langCode); setIsLangOpen(false); }}
-                        >
-                          {getLanguageName(langCode)}
-                        </a>
-                      ))}
-                    </div>
+                <div className="hidden md:flex items-center gap-1">
+                  {supportedLocales.map((langCode) => {
+                    const isActive = locale === langCode;
+                    return (
+                      <button
+                        key={langCode}
+                        onClick={() => setLocale(langCode)}
+                        aria-pressed={isActive}
+                        className={`group relative px-2.5 py-0.5 text-xs uppercase tracking-[0.2em] transition-colors duration-200 ${
+                          isActive
+                            ? 'text-white font-bold'
+                            : 'text-gray-400/90 hover:text-white font-thin'
+                        }`}
+                        style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
+                      >
+                        <span className="relative inline-block">
+                          {langCode.toUpperCase()}
+                          <span className={`absolute -bottom-1 left-0 w-full h-[2px] bg-white transition-transform duration-300 ease-out origin-center ${
+                            isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                          }`}></span>
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
                 <NavLink to={isLoggedIn ? "/profile" : "/login"} className={iconClasses}>
                   <UserIcon />
@@ -287,20 +315,45 @@ export function Header() {
               </div>
             </div>
           </nav>
+          {/* Ürün kategorileri paneli - header içinde genişleyip daralır */}
+          <div 
+            className={`hidden lg:block transition-all duration-500 ease-in-out -mt-2 ${isProductsOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'}`}
+            onMouseEnter={handleProductsEnter}
+            onMouseLeave={handleProductsLeave}
+          > 
+            <div className="pt-1 pb-3" style={{ paddingLeft: submenuOffset }}>
+              <div className="flex flex-wrap gap-4">
+                {categories.map((category) => (
+                  <NavLink
+                    key={category.id}
+                    to={`/products/${category.id}`}
+                    className="group relative px-1 py-1 text-sm uppercase text-gray-200 hover:text-white transition-colors duration-300"
+                    onClick={() => setIsProductsOpen(false)}
+                  >
+                    <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
+                      {t(category.name)}
+                      <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
+                    </span>
+                  </NavLink>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
 
         {isMobileMenuOpen && (
           <div className="lg:hidden bg-white/95 backdrop-blur-md container mx-auto px-10 py-4 rounded-b-lg shadow-lg">
             <nav className="flex flex-col space-y-4">
-              <NavLink to="/products/kanepeler" className="text-sm font-medium tracking-wider text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('collection')}</NavLink>
-              <NavLink to="/designers" className="text-sm font-medium tracking-wider text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('designers')}</NavLink>
-              <NavLink to="/projects" className="text-sm font-medium tracking-wider text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('projects') || 'Projeler'}</NavLink>
-              <NavLink to="/news" className="text-sm font-medium tracking-wider text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('news')}</NavLink>
-              <NavLink to="/about" className="text-sm font-medium tracking-wider text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('about')}</NavLink>
-              <NavLink to="/contact" className="text-sm font-medium tracking-wider text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('contact')}</NavLink>
+              <NavLink to="/products/kanepeler" className="text-sm font-medium tracking-wider uppercase text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('products')}</NavLink>
+              <NavLink to="/designers" className="text-sm font-medium tracking-wider uppercase text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('designers')}</NavLink>
+              <NavLink to="/projects" className="text-sm font-medium tracking-wider uppercase text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('projects') || 'Projeler'}</NavLink>
+              <NavLink to="/news" className="text-sm font-medium tracking-wider uppercase text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('news')}</NavLink>
+              <NavLink to="/about" className="text-sm font-medium tracking-wider uppercase text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('about')}</NavLink>
+              <NavLink to="/contact" className="text-sm font-medium tracking-wider uppercase text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('contact')}</NavLink>
             </nav>
           </div>
         )}
+        {/* Desktop genişleyen ürün paneli kaldırıldı; içerik header içinde render ediliyor */}
       </header>
       
       <div

@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom';
 import type { Product } from '../types';
 import { useTranslation } from '../i18n';
 
-export const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
+export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'light' }> = ({ product, variant = 'default' }) => {
   const { t } = useTranslation();
+  const isLight = variant === 'light';
   return (
     <Link to={`/product/${product.id}`} className="group block">
       <div className="relative overflow-hidden aspect-square">
@@ -16,8 +17,8 @@ export const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       </div>
       <div className="mt-4 overflow-hidden">
         <div className="transition-transform duration-300 ease-in-out group-hover:-translate-y-1">
-            <h3 className="text-lg font-semibold text-gray-800 group-hover:text-black">{t(product.name)}</h3>
-            <p className="text-sm text-gray-500 mt-1">{product.year}</p>
+            <h3 className={`text-lg ${isLight ? 'font-light text-gray-600 group-hover:text-gray-700' : 'font-semibold text-gray-800 group-hover:text-black'}`}>{t(product.name)}</h3>
+            <p className={`text-sm mt-1 ${isLight ? 'text-gray-500' : 'text-gray-500'}`}>{product.year}</p>
         </div>
       </div>
     </Link>

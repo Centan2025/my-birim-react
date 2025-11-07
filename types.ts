@@ -89,7 +89,9 @@ export interface Product {
   /** Mixed alternative media for the band under hero. */
   alternativeMedia?: { type: 'image' | 'video' | 'youtube'; url: string }[];
   /** Optional rich media for hero: image/video/youtube */
-  media?: { type: 'image' | 'video' | 'youtube'; url: string }[];
+  media?: { type: 'image' | 'video' | 'youtube'; url: string; title?: LocalizedString }[];
+  /** Custom title for the bottom media section */
+  mediaSectionTitle?: LocalizedString;
   /** Toggle for showing media panels at bottom. */
   showMediaPanels?: boolean;
   /** Dimension drawings/images shown before materials. Each has an image and a title. */
@@ -174,6 +176,28 @@ export interface HeroMediaItem {
 }
 
 /**
+ * Defines a content block that can be displayed on the homepage.
+ */
+export interface ContentBlock {
+    /** Type of media: image, video, or youtube */
+    mediaType: 'image' | 'video' | 'youtube';
+    /** Image asset (for image type) */
+    image?: string;
+    /** URL for video or YouTube (for video/youtube types) */
+    url?: string;
+    /** Description text */
+    description?: LocalizedText;
+    /** Link text */
+    linkText?: LocalizedString;
+    /** Link URL */
+    linkUrl?: string;
+    /** Position: left, right, center, or full */
+    position: 'left' | 'right' | 'center' | 'full';
+    /** Order for sorting blocks */
+    order?: number;
+}
+
+/**
  * Defines the content structure for the Home page.
  */
 export interface HomePageContent {
@@ -187,6 +211,8 @@ export interface HomePageContent {
     featuredProductIds: string[];
     /** The ID of the designer to be spotlighted on the homepage. */
     featuredDesignerId: string;
+    /** Content blocks displayed after hero section */
+    contentBlocks?: ContentBlock[];
     /** Content for the 'Inspiration' section. */
     inspirationSection: {
         backgroundImage: string;
@@ -297,11 +323,21 @@ export interface SocialLink {
 }
 
 /**
+ * Defines a footer partner.
+ */
+export interface FooterPartner {
+    name: LocalizedString;
+    logo?: string;
+    url?: string;
+}
+
+/**
  * Defines the content structure for the site footer.
  */
 export interface FooterContent {
     copyrightText: LocalizedString;
-    partnerNames: string[];
+    partners?: FooterPartner[];
+    partnerNames?: string[]; // Legacy support
     linkColumns: FooterLinkColumn[];
     socialLinks: SocialLink[];
 }
@@ -322,8 +358,8 @@ export interface Project {
   id: string;
   title: LocalizedString;
   cover: string;
-  date?: string;
+  date?: LocalizedString;
   excerpt?: LocalizedString;
-  gallery?: string[];
+  media?: { type: 'image' | 'video' | 'youtube'; url: string; image?: string }[];
   body?: LocalizedString;
 }

@@ -40,12 +40,29 @@ const mapImage = (img: any | undefined): string => {
 }
 
 const mapImages = (imgs: any[] | undefined): string[] => Array.isArray(imgs) ? imgs.map(i => mapImage(i)).filter(Boolean) : []
-const mapProductMedia = (row: any): { type: 'image'|'video'|'youtube'; url: string }[] => {
+const mapProductMedia = (row: any): { type: 'image'|'video'|'youtube'; url: string; title?: any }[] => {
   const mediaArr = Array.isArray(row?.media) ? row.media : []
   const fromMedia = mediaArr.map((m: any) => {
     const type = m?.type
-    const url = type === 'image' && m?.image ? mapImage(m.image) : m?.url
-    return { type, url }
+    let url = ''
+    if (type === 'image' && m?.image) {
+      url = mapImage(m.image)
+    } else if (type === 'video' && m?.videoFile?.asset?.url) {
+      // Video dosyası yüklendiyse asset URL'ini kullan
+      url = m.videoFile.asset.url
+    } else if (type === 'video' && m?.videoFile?.asset?._id) {
+      // Asset ID varsa URL'yi oluştur
+      const fileId = m.videoFile.asset._id.replace('file-', '')
+      url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+    } else if (type === 'video' && m?.videoFile?.asset?._ref) {
+      // Asset referansı varsa URL'yi oluştur
+      const fileId = m.videoFile.asset._ref.replace('file-', '')
+      url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+    } else {
+      url = m?.url || ''
+    }
+    const title = m?.title
+    return { type, url, title }
   }).filter((m: any) => m.type && m.url)
   if (fromMedia.length > 0) return fromMedia
   const imgs = mapImages([row?.mainImage, ...(row?.alternativeImages || [])])
@@ -56,7 +73,23 @@ const mapAlternativeMedia = (row: any): { type: 'image'|'video'|'youtube'; url: 
   const alt = Array.isArray(row?.alternativeMedia) ? row.alternativeMedia : []
   if (alt.length) return alt.map((m: any) => {
     const type = m?.type
-    const url = type === 'image' && m?.image ? mapImage(m.image) : m?.url
+    let url = ''
+    if (type === 'image' && m?.image) {
+      url = mapImage(m.image)
+    } else if (type === 'video' && m?.videoFile?.asset?.url) {
+      // Video dosyası yüklendiyse asset URL'ini kullan
+      url = m.videoFile.asset.url
+    } else if (type === 'video' && m?.videoFile?.asset?._id) {
+      // Asset ID varsa URL'yi oluştur
+      const fileId = m.videoFile.asset._id.replace('file-', '')
+      url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+    } else if (type === 'video' && m?.videoFile?.asset?._ref) {
+      // Asset referansı varsa URL'yi oluştur
+      const fileId = m.videoFile.asset._ref.replace('file-', '')
+      url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+    } else {
+      url = m?.url || ''
+    }
     return { type, url }
   }).filter((m: any) => m.type && m.url)
   // fallback to legacy alternativeImages
@@ -305,8 +338,9 @@ export const getProducts = async (): Promise<Product[]> => {
           description,
           mainImage,
           alternativeImages,
-          alternativeMedia[]{ type, url, image },
-          media[]{ type, url, image },
+          alternativeMedia[]{ type, url, image, videoFile{asset->{url, _ref, _id}} },
+          media[]{ type, url, image, title, videoFile{asset->{url, _ref, _id}} },
+          mediaSectionTitle,
           showMediaPanels,
           buyable,
           price,
@@ -342,6 +376,7 @@ export const getProducts = async (): Promise<Product[]> => {
           variants: mapVariants(r.variants),
           materials: mapMaterials((r.materialSelections || []).flatMap((s: any) => s?.materials || [])),
           groupedMaterials: mapGroupedMaterials(r.materialSelections),
+          mediaSectionTitle: r?.mediaSectionTitle,
           exclusiveContent: {
             images: mapImages(r?.exclusiveContent?.images),
             drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: d?.file?.asset?._ref || d?.file?.asset?._id || '' })),
@@ -361,8 +396,9 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           description,
           mainImage,
           alternativeImages,
-          alternativeMedia[]{ type, url, image },
-          media[]{ type, url, image },
+          alternativeMedia[]{ type, url, image, videoFile{asset->{url, _ref, _id}} },
+          media[]{ type, url, image, title, videoFile{asset->{url, _ref, _id}} },
+          mediaSectionTitle,
           showMediaPanels,
           buyable,
           price,
@@ -399,6 +435,7 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           variants: mapVariants(r.variants),
           materials: mapMaterials((r.materialSelections || []).flatMap((s: any) => s?.materials || [])),
           groupedMaterials: mapGroupedMaterials(r.materialSelections),
+          mediaSectionTitle: r?.mediaSectionTitle,
           exclusiveContent: {
             images: mapImages(r?.exclusiveContent?.images),
             drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: d?.file?.asset?._ref || d?.file?.asset?._id || '' })),
@@ -418,8 +455,9 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
           description,
           mainImage,
           alternativeImages,
-          alternativeMedia[]{ type, url, image },
-          media[]{ type, url, image },
+          alternativeMedia[]{ type, url, image, videoFile{asset->{url, _ref, _id}} },
+          media[]{ type, url, image, title, videoFile{asset->{url, _ref, _id}} },
+          mediaSectionTitle,
           showMediaPanels,
           buyable,
           price,
@@ -466,8 +504,9 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
           description,
           mainImage,
           alternativeImages,
-          alternativeMedia[]{ type, url, image },
-          media[]{ type, url, image },
+          alternativeMedia[]{ type, url, image, videoFile{asset->{url, _ref, _id}} },
+          media[]{ type, url, image, title, videoFile{asset->{url, _ref, _id}} },
+          mediaSectionTitle,
           showMediaPanels,
           buyable,
           price,
@@ -554,8 +593,70 @@ export const updateContactPageContent = async (content: ContactPageContent): Pro
 
 export const getHomePageContent = async (): Promise<HomePageContent> => {
     if (useSanity && sanity) {
-        const q = groq`*[_type == "homePage"][0]`
-        return await sanity.fetch(q)
+        const q = groq`*[_type == "homePage"][0]{
+            ...,
+            heroMedia[]{
+                ...,
+                image{
+                    asset->{url}
+                },
+                videoFile{
+                    asset->{url, _ref, _id}
+                }
+            },
+            contentBlocks[]{
+                ...,
+                image{
+                    asset->{url}
+                },
+                videoFile{
+                    asset->{url, _ref, _id}
+                }
+            },
+            inspirationSection{
+                ...,
+                backgroundImage
+            }
+        }`
+        const data = await sanity.fetch(q);
+        if (data?.heroMedia) {
+            data.heroMedia = data.heroMedia.map((m: any) => {
+                let url = m.url
+                if (m.type === 'image' && m.image?.asset?.url) {
+                    url = m.image.asset.url
+                } else if (m.type === 'video' && m.videoFile?.asset?.url) {
+                    url = m.videoFile.asset.url
+                } else if (m.type === 'video' && m.videoFile?.asset?._id) {
+                    const fileId = m.videoFile.asset._id.replace('file-', '')
+                    url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+                } else if (m.type === 'video' && m.videoFile?.asset?._ref) {
+                    const fileId = m.videoFile.asset._ref.replace('file-', '')
+                    url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+                }
+                return { ...m, url }
+            });
+        }
+        if (data?.contentBlocks) {
+            data.contentBlocks = data.contentBlocks.map((b: any) => {
+                let url = b.url
+                if (b.mediaType === 'image' && b.image?.asset?.url) {
+                    return { ...b, image: b.image.asset.url, url: undefined }
+                } else if (b.mediaType === 'video' && b.videoFile?.asset?.url) {
+                    url = b.videoFile.asset.url
+                } else if (b.mediaType === 'video' && b.videoFile?.asset?._id) {
+                    const fileId = b.videoFile.asset._id.replace('file-', '')
+                    url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+                } else if (b.mediaType === 'video' && b.videoFile?.asset?._ref) {
+                    const fileId = b.videoFile.asset._ref.replace('file-', '')
+                    url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+                }
+                return { ...b, image: undefined, url }
+            });
+        }
+        if (data?.inspirationSection) {
+            data.inspirationSection.backgroundImage = mapImage(data.inspirationSection.backgroundImage);
+        }
+        return data;
     }
     await delay(SIMULATED_DELAY);
     return getItem<HomePageContent>(KEYS.HOME_PAGE);
@@ -568,8 +669,21 @@ export const updateHomePageContent = async (content: HomePageContent): Promise<v
 // Footer Content
 export const getFooterContent = async (): Promise<FooterContent> => {
     if (useSanity && sanity) {
-        const q = groq`*[_type == "footer"][0]`
-        return await sanity.fetch(q)
+        const q = groq`*[_type == "footer"][0]{
+            ...,
+            partners[]{
+                ...,
+                logo
+            }
+        }`
+        const data = await sanity.fetch(q);
+        if (data?.partners) {
+            data.partners = data.partners.map((p: any) => ({
+                ...p,
+                logo: mapImage(p.logo)
+            }));
+        }
+        return data;
     }
     await delay(SIMULATED_DELAY);
     return getItem<FooterContent>(KEYS.FOOTER);
@@ -582,7 +696,20 @@ export const updateFooterContent = async (content: FooterContent): Promise<void>
 // News
 export const getNews = async (): Promise<NewsItem[]> => {
     if (useSanity && sanity) {
-        const q = groq`*[_type == "newsItem"] | order(date desc){ "id": id.current, title, date, content, mainImage, media }`
+        const q = groq`*[_type == "newsItem"] | order(date desc){ 
+          "id": id.current, 
+          title, 
+          date, 
+          content, 
+          mainImage, 
+          media[]{
+            type,
+            url,
+            caption,
+            image{asset->{url}},
+            videoFile{asset->{url, _ref, _id}}
+          }
+        }`
         const rows = await sanity.fetch(q)
         return rows.map((r: any) => ({
           id: r.id,
@@ -590,7 +717,21 @@ export const getNews = async (): Promise<NewsItem[]> => {
           date: r.date,
           content: r.content,
           mainImage: mapImage(r.mainImage),
-          media: (r.media || []).map((m: any) => ({ type: m.type, url: m.url || mapImage(m.image), caption: m.caption })),
+          media: (r.media || []).map((m: any) => {
+            let url = m.url
+            if (m.type === 'image' && m.image?.asset?.url) {
+              url = m.image.asset.url
+            } else if (m.type === 'video' && m.videoFile?.asset?.url) {
+              url = m.videoFile.asset.url
+            } else if (m.type === 'video' && m.videoFile?.asset?._id) {
+              const fileId = m.videoFile.asset._id.replace('file-', '')
+              url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+            } else if (m.type === 'video' && m.videoFile?.asset?._ref) {
+              const fileId = m.videoFile.asset._ref.replace('file-', '')
+              url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+            }
+            return { type: m.type, url, caption: m.caption }
+          }).filter((m: any) => m.url),
         }))
     }
     await delay(SIMULATED_DELAY);
@@ -598,7 +739,20 @@ export const getNews = async (): Promise<NewsItem[]> => {
 };
 export const getNewsById = async (id: string): Promise<NewsItem | undefined> => {
     if (useSanity && sanity) {
-        const q = groq`*[_type == "newsItem" && id.current == $id][0]{ "id": id.current, title, date, content, mainImage, media }`
+        const q = groq`*[_type == "newsItem" && id.current == $id][0]{ 
+          "id": id.current, 
+          title, 
+          date, 
+          content, 
+          mainImage, 
+          media[]{
+            type,
+            url,
+            caption,
+            image{asset->{url}},
+            videoFile{asset->{url, _ref, _id}}
+          }
+        }`
         const r = await sanity.fetch(q, { id })
         if (!r) return undefined
         return {
@@ -607,7 +761,21 @@ export const getNewsById = async (id: string): Promise<NewsItem | undefined> => 
           date: r.date,
           content: r.content,
           mainImage: mapImage(r.mainImage),
-          media: (r.media || []).map((m: any) => ({ type: m.type, url: m.url || mapImage(m.image), caption: m.caption })),
+          media: (r.media || []).map((m: any) => {
+            let url = m.url
+            if (m.type === 'image' && m.image?.asset?.url) {
+              url = m.image.asset.url
+            } else if (m.type === 'video' && m.videoFile?.asset?.url) {
+              url = m.videoFile.asset.url
+            } else if (m.type === 'video' && m.videoFile?.asset?._id) {
+              const fileId = m.videoFile.asset._id.replace('file-', '')
+              url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+            } else if (m.type === 'video' && m.videoFile?.asset?._ref) {
+              const fileId = m.videoFile.asset._ref.replace('file-', '')
+              url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+            }
+            return { type: m.type, url, caption: m.caption }
+          }).filter((m: any) => m.url),
         }
     }
     const newsItems = await getNews();
@@ -636,7 +804,7 @@ export const deleteNews = async (id: string): Promise<void> => {
 // Projects
 export const getProjects = async (): Promise<Project[]> => {
   if (useSanity && sanity) {
-    const q = groq`*[_type=="project"] | order(date desc){ "id": id.current, title, date, cover, excerpt }`
+    const q = groq`*[_type=="project"] | order(_createdAt desc){ "id": id.current, title, date, cover, excerpt }`
     const rows = await sanity.fetch(q)
     return rows.map((r: any) => ({ id: r.id, title: r.title, date: r.date, cover: mapImage(r.cover), excerpt: r.excerpt }))
   }
@@ -644,10 +812,51 @@ export const getProjects = async (): Promise<Project[]> => {
 }
 export const getProjectById = async (id: string): Promise<Project | undefined> => {
   if (useSanity && sanity) {
-    const q = groq`*[_type=="project" && id.current==$id][0]{ "id": id.current, title, date, cover, excerpt, body, gallery }`
+    const q = groq`*[_type=="project" && id.current==$id][0]{ 
+      "id": id.current, 
+      title, 
+      date, 
+      cover, 
+      excerpt, 
+      body, 
+      media[]{
+        type,
+        url,
+        image,
+        videoFile{asset->{url, _ref, _id}}
+      }
+    }`
     const r = await sanity.fetch(q, { id })
     if (!r) return undefined
-    return { id: r.id, title: r.title, date: r.date, cover: mapImage(r.cover), excerpt: r.excerpt, body: r.body, gallery: mapImages(r.gallery) }
+    
+    const media = (r.media || []).map((m: any) => {
+      const type = m?.type || 'image'
+      let url = ''
+      if (type === 'image' && m?.image) {
+        url = mapImage(m.image)
+      } else if (type === 'video' && m?.videoFile?.asset?.url) {
+        url = m.videoFile.asset.url
+      } else if (type === 'video' && m?.videoFile?.asset?._id) {
+        const fileId = m.videoFile.asset._id.replace('file-', '')
+        url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+      } else if (type === 'video' && m?.videoFile?.asset?._ref) {
+        const fileId = m.videoFile.asset._ref.replace('file-', '')
+        url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+      } else {
+        url = m?.url || ''
+      }
+      return { type, url, image: type === 'image' ? url : undefined }
+    }).filter((m: any) => m.url)
+    
+    return { 
+      id: r.id, 
+      title: r.title, 
+      date: r.date, 
+      cover: mapImage(r.cover), 
+      excerpt: r.excerpt, 
+      body: r.body, 
+      media: media.length > 0 ? media : undefined
+    }
   }
   return undefined
 }

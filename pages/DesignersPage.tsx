@@ -9,16 +9,16 @@ import { useTranslation } from '../i18n';
 const DesignerCard: React.FC<{ designer: Designer }> = ({ designer }) => {
   const { t } = useTranslation();
   return (
-    <Link to={`/designer/${designer.id}`} className="group block text-center">
-      <div className="overflow-hidden bg-white">
+    <Link to={`/designer/${designer.id}`} className="group flex flex-col h-full text-center">
+      <div className="overflow-hidden bg-white aspect-[3/4]">
         <img
           src={designer.image}
           alt={t(designer.name)}
           className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 filter grayscale"
         />
       </div>
-      <div className="mt-4">
-        <h3 className="text-xl font-semibold text-gray-800 group-hover:text-black">{t(designer.name)}</h3>
+      <div className="mt-4 min-h-[2.5rem] flex items-center justify-center">
+        <h3 className="text-xl font-light text-gray-500 group-hover:text-gray-600">{t(designer.name)}</h3>
       </div>
     </Link>
   );
@@ -46,13 +46,14 @@ export function DesignersPage() {
   }
 
   return (
-    <div className="bg-gray-50 animate-fade-in-up">
+    <div className="bg-gray-100 animate-fade-in-up">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-12 text-center">
-          {t('designers')}
-        </h1>
+        <div className="text-center mb-12">
+          <h1 className="text-3xl md:text-4xl font-light text-gray-600">{t('designers')}</h1>
+          <div className="h-px bg-gray-300 mt-4 w-full"></div>
+        </div>
         {designers.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8 items-stretch">
             {designers.map((designer) => (
               <DesignerCard key={designer.id} designer={designer} />
             ))}

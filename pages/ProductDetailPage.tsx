@@ -37,6 +37,10 @@ export function ProductDetailPage() {
   const [prevImage, setPrevImage] = useState<string | null>(null);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
+  const [lightboxSource, setLightboxSource] = useState<'band' | 'panel'>('band');
+  const youTubePlayerRef = useRef<HTMLIFrameElement | null>(null);
+  const [ytPlaying, setYtPlaying] = useState<boolean>(false);
+  const [ytIframeLoaded, setYtIframeLoaded] = useState<boolean>(false);
   const { isLoggedIn } = useAuth();
   const { t, locale } = useTranslation();
   const { addToCart } = useCart();
@@ -47,7 +51,8 @@ export function ProductDetailPage() {
   const [draggedX, setDraggedX] = useState<number>(0);
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const DRAG_THRESHOLD = 50; // pixels
-  const [dimLightbox, setDimLightbox] = useState<string | null>(null);
+  const [dimLightbox, setDimLightbox] = useState<{ images: { image: string; title?: LocalizedString }[]; currentIndex: number } | null>(null);
+  const [materialLightbox, setMaterialLightbox] = useState<{ images: { image: string; name: string }[]; currentIndex: number } | null>(null);
   // Thumbnails horizontal drag/scroll
   const thumbRef = useRef<HTMLDivElement | null>(null);
   const [thumbDragStartX, setThumbDragStartX] = useState<number | null>(null);
@@ -148,7 +153,23 @@ export function ProductDetailPage() {
     const arw = [product?.mainImage, ...ai];
     return Array.isArray(arw) ? arw.filter(Boolean).map((u: string) => ({ type: 'image' as const, url: u })) : [];
   })();
-  const bandMedia: { type: 'image' | 'video' | 'youtube'; url: string }[] = rawAltMedia.length ? rawAltMedia : fallbackImages;
+  // Bant medyası: alternatif medya varsa, ana görseli en başa ekle
+  const bandMedia: { type: 'image' | 'video' | 'youtube'; url: string }[] = (() => {
+    if (rawAltMedia.length) {
+      const head: any[] = product?.mainImage ? [{ type: 'image', url: product.mainImage }] : [];
+      const merged = [...head, ...rawAltMedia];
+      // tekilleştir (aynı url tekrar etmesin)
+      const seen = new Set<string>();
+      return merged.filter((m: any) => {
+        const key = `${m.type}:${m.url || (m.image && 'image')}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+    return fallbackImages;
+  })();
+  const firstImageIndex = useMemo(() => bandMedia.findIndex((m) => m.type === 'image'), [bandMedia]);
 
   const safeActiveIndex = Math.min(Math.max(activeMaterialGroup, 0), Math.max(mergedGroups.length - 1, 0));
   const activeGroup = Array.isArray(mergedGroups) ? mergedGroups[safeActiveIndex] : undefined;
@@ -199,6 +220,22 @@ export function ProductDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentImageIndex, bandMedia.length]);
 
+  // Ürün ilk yüklendiğinde ilk gösterilecek medyayı mümkünse görsel yap
+  useEffect(() => {
+    if (bandMedia.length > 0) {
+      // Ana görsel bantta ilk sırada; değilse ilk görsel index'ine git
+      const mainIdx = bandMedia.findIndex((m) => m.type === 'image' && m.url === product?.mainImage);
+      const idx = mainIdx >= 0 ? mainIdx : (firstImageIndex >= 0 ? firstImageIndex : 0);
+      setCurrentImageIndex(idx);
+      // mainImage'i anında güncelle (özellikle video ilkse boş kalmasın)
+      const current = bandMedia[idx];
+      if (current?.type === 'image' && current.url && current.url !== mainImage) {
+        setMainImage(current.url);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bandMedia.length]);
+
   if (loading) return <div className="pt-20 text-center">{t('loading')}...</div>;
   if (!product) return <div className="pt-20 text-center">{t('product_not_found')}</div>;
 
@@ -211,13 +248,69 @@ export function ProductDetailPage() {
   const heroNext = () => { setCurrentImageIndex(prev => (prev + 1) % slideCount); };
   const heroPrev = () => { setCurrentImageIndex(prev => (prev - 1 + slideCount) % slideCount); };
 
-  const closeLightbox = () => setIsLightboxOpen(false);
+  const closeLightbox = () => {
+    setIsLightboxOpen(false);
+    // YouTube iframe'i sıfırla
+    setYtIframeLoaded(false);
+    setYtPlaying(false);
+  };
   const openLightbox = () => {
+    setLightboxSource('band');
     setLightboxImageIndex(currentImageIndex);
+    // Aktif medya YouTube ise direkt oynat
+    const item = bandMedia[currentImageIndex];
+    if (item && item.type === 'youtube') {
+      setYtIframeLoaded(true);
+      setYtPlaying(true);
+    } else {
+      setYtIframeLoaded(false);
+      setYtPlaying(false);
+    }
     setIsLightboxOpen(true);
   };
-  const nextImage = () => setLightboxImageIndex((prevIndex) => (prevIndex + 1) % (bandMedia.length || 1));
-  const prevImageFn = () => setLightboxImageIndex((prevIndex) => (prevIndex - 1 + (bandMedia.length || 1)) % (bandMedia.length || 1));
+  const openPanelLightbox = (index: number) => {
+    setLightboxSource('panel');
+    setLightboxImageIndex(index);
+    const panels = (product as any)?.media || [];
+    const item = panels[index];
+    if (item && item.type === 'youtube') {
+      setYtIframeLoaded(true);
+      setYtPlaying(true);
+    } else {
+      setYtIframeLoaded(false);
+      setYtPlaying(false);
+    }
+    setIsLightboxOpen(true);
+  };
+  const currentLightboxItems = lightboxSource === 'panel' ? (Array.isArray((product as any)?.media) ? (product as any).media : []) : bandMedia;
+  const nextImage = () => {
+    setLightboxImageIndex((prevIndex) => {
+      const nextIdx = (prevIndex + 1) % (currentLightboxItems.length || 1);
+      const target = currentLightboxItems[nextIdx];
+      if (target?.type === 'youtube') {
+        setYtIframeLoaded(true);
+        setYtPlaying(true);
+      } else {
+        setYtIframeLoaded(false);
+        setYtPlaying(false);
+      }
+      return nextIdx;
+    });
+  };
+  const prevImageFn = () => {
+    setLightboxImageIndex((prevIndex) => {
+      const nextIdx = (prevIndex - 1 + (currentLightboxItems.length || 1)) % (currentLightboxItems.length || 1);
+      const target = currentLightboxItems[nextIdx];
+      if (target?.type === 'youtube') {
+        setYtIframeLoaded(true);
+        setYtPlaying(true);
+      } else {
+        setYtIframeLoaded(false);
+        setYtPlaying(false);
+      }
+      return nextIdx;
+    });
+  };
 
   // YouTube helpers
   const getYouTubeId = (url: string): string | null => {
@@ -238,10 +331,13 @@ export function ProductDetailPage() {
       rel: '0',
       showinfo: '0',
       enablejsapi: '1',
+      iv_load_policy: '3',
+      fs: '0',
+      disablekb: '1',
       loop: '1',
       playlist: id
     }).toString();
-    return `https://www.youtube.com/embed/${id}?${params}`;
+    return `https://www.youtube-nocookie.com/embed/${id}?${params}`;
   };
   const youTubeThumb = (url: string): string => {
     const id = getYouTubeId(url);
@@ -337,9 +433,10 @@ export function ProductDetailPage() {
         </div>
         {/* Divider and Thumbnails under hero */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mt-1 md:mt-2 h-[2px] bg-gray-300" />
+          {/* Üst/alt çizgileri tek yerde tanımla: aynı renk/kalınlık */}
+          <div className="mt-1 md:mt-2 border-y border-gray-300 py-3">
           {/* Hide scrollbar with custom class; enable drag scroll */}
-          <div className="relative mt-3 select-none">
+          <div className="relative select-none">
             <div
               ref={thumbRef}
               className="hide-scrollbar overflow-x-auto cursor-grab active:cursor-grabbing"
@@ -354,13 +451,20 @@ export function ProductDetailPage() {
             >
               <div className="flex gap-3 min-w-max pb-2">
                 {bandMedia.map((m, idx) => (
-                  <button key={idx} onClick={() => setCurrentImageIndex(idx)} className={`flex-shrink-0 w-24 h-24 overflow-hidden border-2 transition-all duration-300 ${currentImageIndex === idx ? 'border-gray-400 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}>
+                  <button key={idx} onClick={() => setCurrentImageIndex(idx)} className={`relative flex-shrink-0 w-24 h-24 overflow-hidden border-2 transition-all duration-300 ${currentImageIndex === idx ? 'border-gray-400 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}>
                     {m.type === 'image' ? (
                       <img src={m.url} alt={`${t(product.name)} thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
                     ) : m.type === 'video' ? (
-                      <div className="relative w-full h-full bg-black/70 text-white flex items-center justify-center text-xs">VIDEO</div>
+                      <div className="w-full h-full bg-black/60" />
                     ) : (
                       <img src={youTubeThumb(m.url)} alt={`youtube thumb ${idx + 1}`} className="w-full h-full object-cover" />
+                    )}
+                    {(m.type === 'video' || m.type === 'youtube') && (
+                      <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                        <span className="bg-white/85 text-gray-900 rounded-full w-10 h-10 flex items-center justify-center shadow">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 ml-0.5"><path d="M8 5v14l11-7z"/></svg>
+                        </span>
+                      </span>
                     )}
                   </button>
                 ))}
@@ -382,12 +486,12 @@ export function ProductDetailPage() {
               ›
             </button>
           </div>
-          <div className="mt-3 h-px bg-gray-300" />
+          </div>
         </div>
       </header>
 
       {/* DETAILS BELOW */}
-      <main>
+      <main className="bg-gray-100">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Breadcrumbs */}
           <nav className="mb-8 text-sm text-gray-500" aria-label="Breadcrumb">
@@ -395,55 +499,55 @@ export function ProductDetailPage() {
               <li><Link to="/" className="hover:text-gray-800">{t('homepage')}</Link></li>
               <li className="mx-2 font-light text-gray-400">|</li>
               {category && (<><li><Link to={`/products/${category.id}`} className="hover:text-gray-800">{t(category.name)}</Link></li><li className="mx-2 font-light text-gray-400">|</li></>)}
-              <li className="font-semibold text-gray-800" aria-current="page">{t(product.name)}</li>
+              <li className="font-light text-gray-500" aria-current="page">{t(product.name)}</li>
             </ol>
           </nav>
 
           <section className="space-y-10">
             {product.buyable && product.price > 0 && (
-              <div><p className="text-3xl font-bold text-gray-900">{new Intl.NumberFormat(locale, { style: 'currency', currency: product.currency || 'TRY' }).format(product.price)}</p></div>
+              <div><p className="text-3xl font-light text-gray-600">{new Intl.NumberFormat(locale, { style: 'currency', currency: product.currency || 'TRY' }).format(product.price)}</p></div>
             )}
 
             <div>
-              <h2 className="text-2xl md:text-4xl font-medium text-gray-700">{t(product.name)}</h2>
-              <p className="mt-3 text-gray-600 leading-relaxed max-w-2xl">{t(product.description)}</p>
+              <h2 className="text-2xl md:text-4xl font-light text-gray-600">{t(product.name)}</h2>
+              <p className="mt-3 text-gray-500 leading-relaxed max-w-2xl font-light">{t(product.description)}</p>
             </div>
 
             {/* Dimensions as small drawings (thumbnails) - MOVED BEFORE MATERIALS */}
             {dimImages.length > 0 && (
-              <div>
-                <h2 className="text-xl font-medium text-gray-700 mb-4">{t('dimensions')}</h2>
-                <div className="mb-3 h-px bg-gray-300" />
+              <div className="pb-4">
+                <h2 className="text-xl font-light text-gray-600">{t('dimensions')}</h2>
+                <div className="h-px bg-gray-300 my-4" />
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                   {dimImages.map((dimImg: { image: string; title?: LocalizedString }, idx: number) => (
-                    <button 
-                      key={idx} 
-                      onClick={() => setDimLightbox(dimImg.image)} 
-                      className="group border border-gray-200 hover:border-gray-400 hover:shadow-lg transition-all duration-200 p-3 bg-white rounded-lg flex flex-col"
-                    >
-                      <img 
-                        src={dimImg.image} 
-                        alt={dimImg.title ? t(dimImg.title) : `${t('dimensions')} ${idx + 1}`} 
-                        className="w-full h-40 object-contain group-hover:scale-105 transition-transform duration-200" 
-                      />
+                    <div key={idx} className="flex flex-col items-center">
+                      <button 
+                        onClick={() => setDimLightbox({ images: dimImages, currentIndex: idx })} 
+                        className="group border border-gray-200 transition-transform duration-200 p-3 bg-white rounded-none"
+                      >
+                        <img 
+                          src={dimImg.image} 
+                          alt={dimImg.title ? t(dimImg.title) : `${t('dimensions')} ${idx + 1}`} 
+                          className="w-full h-40 object-contain group-hover:scale-105 transition-transform duration-200" 
+                        />
+                      </button>
                       {dimImg.title && (
-                        <p className="mt-3 text-sm text-gray-700 text-center font-medium">
+                        <p className="mt-2 text-sm text-gray-600 text-center font-medium">
                           {t(dimImg.title)}
                         </p>
                       )}
-                    </button>
+                    </div>
                   ))}
                 </div>
-                <div className="mt-3 h-px bg-gray-300" />
               </div>
             )}
 
             {product.materials && grouped.length > 0 && (
-              <div>
-                <h2 className="text-xl font-medium text-gray-700 mb-4">{t('material_alternatives')}</h2>
+              <div className="pb-4">
+                <h2 className="text-xl font-light text-gray-600 mb-4">{t('material_alternatives')}</h2>
                 
                 {/* Group tabs - similar to image design */}
-                <div className="flex flex-wrap gap-0 border-b border-gray-200 mb-6 bg-gray-50">
+                <div className="flex flex-wrap gap-0 border-b border-gray-200 mb-6 bg-gray-200">
                   {(Array.isArray(mergedGroups) ? mergedGroups : []).map((g: any, idx: number) => (
                     <button 
                       key={idx} 
@@ -479,16 +583,18 @@ export function ProductDetailPage() {
                     </div>
 
                     {/* Seçili kartelaya ait malzemeler */}
-                    <div className="mb-3 h-px bg-gray-300" />
                     <div className="flex flex-wrap gap-6">
                       {(Array.isArray(books[activeBookIndex]?.materials) ? books[activeBookIndex].materials : []).map((material: any, index: number) => (
-                        <div key={index} className="text-center group cursor-pointer" title={t(material.name)}>
+                        <div key={index} className="text-center group cursor-pointer" title={t(material.name)} onClick={() => {
+                          const allMaterials = Array.isArray(books[activeBookIndex]?.materials) ? books[activeBookIndex].materials : [];
+                          setMaterialLightbox({ images: allMaterials.map((m: any) => ({ image: m.image, name: t(m.name) })), currentIndex: index });
+                        }}>
                           <img
                             src={material.image}
                             alt={t(material.name)}
                             className="w-28 h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md rounded-sm"
                           />
-                          <p className="mt-3 text-sm text-gray-700 font-medium max-w-[120px] break-words">
+                      <p className="mt-3 text-sm text-gray-600 font-medium max-w-[120px] break-words">
                             {t(material.name)}
                           </p>
                         </div>
@@ -499,22 +605,24 @@ export function ProductDetailPage() {
                 ) : (
                   /* Fallback: if no books, show materials directly */
                   <>
-                  <div className="mb-3 h-px bg-gray-300" />
                   <div className="flex flex-wrap gap-6">
                     {(Array.isArray(grouped[safeActiveIndex]?.materials) ? grouped[safeActiveIndex].materials : []).map((material: any, index: number) => (
-                      <div key={index} className="text-center group cursor-pointer" title={t(material.name)}>
+                      <div key={index} className="text-center group cursor-pointer" title={t(material.name)} onClick={() => {
+                        const allMaterials = Array.isArray(grouped[safeActiveIndex]?.materials) ? grouped[safeActiveIndex].materials : [];
+                        setMaterialLightbox({ images: allMaterials.map((m: any) => ({ image: m.image, name: t(m.name) })), currentIndex: index });
+                      }}>
                         <img 
                           src={material.image} 
                           alt={t(material.name)} 
                           className="w-28 h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md rounded-sm" 
                         />
-                        <p className="mt-3 text-sm text-gray-700 font-medium max-w-[120px] break-words">
+                        <p className="mt-3 text-sm text-gray-600 font-medium max-w-[120px] break-words">
                           {t(material.name)}
                         </p>
                       </div>
                     ))}
                   </div>
-                  <div className="mt-3 h-px bg-gray-100" />
+                  <div className="mt-3 h-px bg-gray-200" />
                   </>
                 )}
               </div>
@@ -530,24 +638,24 @@ export function ProductDetailPage() {
 
             {isLoggedIn && product.exclusiveContent && (
               <div className="bg-white p-8 sm:p-12 rounded-lg border">
-                <h2 className="text-3xl font-bold text-gray-900 mb-8 border-b pb-4 border-gray-300">{t('exclusive_content')}</h2>
+                <h2 className="text-3xl font-light text-gray-600 mb-8 border-b pb-4 border-gray-300">{t('exclusive_content')}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                   <div>
-                    <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('additional_images')}</h3>
+                    <h3 className="text-xl font-light mb-4 text-gray-500">{t('additional_images')}</h3>
                     <div className="grid grid-cols-2 gap-3">
                       {product.exclusiveContent.images.map((img, idx) => (<img key={idx} src={img} alt={`Exclusive ${idx}`} className="w-full object-cover shadow-sm"/>))}
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('technical_drawings')}</h3>
+                    <h3 className="text-xl font-light mb-4 text-gray-500">{t('technical_drawings')}</h3>
                     <ul className="space-y-3">
-                      {product.exclusiveContent.drawings.map((doc, idx) => (<li key={idx}><a href={doc.url} download className="text-gray-700 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(doc.name)}</a></li>))}
+                      {product.exclusiveContent.drawings.map((doc, idx) => (<li key={idx}><a href={doc.url} download className="text-gray-600 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(doc.name)}</a></li>))}
                     </ul>
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold mb-4 text-gray-800">{t('3d_models')}</h3>
+                    <h3 className="text-xl font-light mb-4 text-gray-500">{t('3d_models')}</h3>
                     <ul className="space-y-3">
-                      {product.exclusiveContent.models3d.map((model, idx) => (<li key={idx}><a href={model.url} download className="text-gray-700 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(model.name)}</a></li>))}
+                      {product.exclusiveContent.models3d.map((model, idx) => (<li key={idx}><a href={model.url} download className="text-gray-600 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(model.name)}</a></li>))}
                     </ul>
                   </div>
                 </div>
@@ -558,20 +666,27 @@ export function ProductDetailPage() {
           </section>
           {Array.isArray((product as any)?.media) && (product as any).media.length > 0 && (product as any).showMediaPanels !== false && (
             <section className="mt-12">
-              <h2 className="text-xl font-medium text-gray-700 mb-4">{t('additional_images')}</h2>
+                <h2 className="text-xl font-light text-gray-600 mb-4">{(product as any)?.mediaSectionTitle ? t((product as any).mediaSectionTitle) : t('alt_media')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {(product as any).media.map((m: any, idx: number) => (
-                  <div key={idx} className="border rounded bg-white shadow-sm overflow-hidden">
-                    <div className="aspect-video bg-gray-100 flex items-center justify-center">
+                  <div key={idx} className="overflow-hidden">
+                    <button onClick={() => openPanelLightbox(idx)} className="relative w-full aspect-video bg-gray-200 flex items-center justify-center">
                       {m.type === 'image' ? (
                         <img src={m.url} alt={`media-${idx}`} className="w-full h-full object-cover" />
                       ) : m.type === 'video' ? (
-                        <video src={m.url} controls className="w-full h-full object-cover" />
+                        <div className="w-full h-full bg-gray-300" />
                       ) : (
-                        <iframe className="w-full h-full" src={m.url} allow="autoplay; encrypted-media" allowFullScreen />
+                        <img src={youTubeThumb(m.url)} alt={`youtube thumb ${idx + 1}`} className="w-full h-full object-cover" />
                       )}
-                    </div>
-                    <div className="px-4 py-3 text-sm text-gray-600">{m.type.toUpperCase()}</div>
+                      {(m.type === 'video' || m.type === 'youtube') && (
+                        <span className="pointer-events-none absolute bottom-2 right-2">
+                          <span className="bg-white/85 text-gray-900 rounded-full w-10 h-10 flex items-center justify-center shadow">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 ml-0.5"><path d="M8 5v14l11-7z"/></svg>
+                          </span>
+                        </span>
+                      )}
+                    </button>
+                    {m.title && (<div className="px-1 pt-2 text-sm text-gray-600">{t(m.title)}</div>)}
                   </div>
                 ))}
               </div>
@@ -585,23 +700,154 @@ export function ProductDetailPage() {
           <button onClick={closeLightbox} className="absolute top-4 right-4 text-white hover:opacity-75 transition-opacity z-20"><CloseIcon /></button>
           <button onClick={prevImageFn} className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:opacity-75 transition-opacity z-20 bg-black/20 rounded-full p-2"><ChevronLeftIcon /></button>
           <button onClick={nextImage} className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:opacity-75 transition-opacity z-20 bg-black/20 rounded-full p-2"><ChevronRightIcon /></button>
-          <div className="max-w-screen-lg max-h-[90vh] w-full p-4">
-            {bandMedia[lightboxImageIndex]?.type === 'image' ? (
-              <img src={bandMedia[lightboxImageIndex].url} alt="Enlarged product view" className="w-full h-full object-contain" />
-            ) : bandMedia[lightboxImageIndex]?.type === 'video' ? (
-              <video src={bandMedia[lightboxImageIndex].url} autoPlay muted loop playsInline className="w-full h-full object-contain" />
+          <div className="w-screen max-w-screen-2xl h-[80vh] p-2">
+            {currentLightboxItems[lightboxImageIndex]?.type === 'image' ? (
+              <img src={currentLightboxItems[lightboxImageIndex].url} alt="Enlarged product view" className="w-full h-full object-contain" />
+            ) : currentLightboxItems[lightboxImageIndex]?.type === 'video' ? (
+              <video src={currentLightboxItems[lightboxImageIndex].url} autoPlay muted loop playsInline className="w-full h-full object-contain" />
             ) : (
-              <iframe className="w-full h-full" title="youtube-player" src={toYouTubeEmbed(bandMedia[lightboxImageIndex]?.url || '', { autoplay: true })} allow="autoplay; encrypted-media" allowFullScreen frameBorder="0" />
+              <div className="relative w-full h-full">
+                {/* Başlangıçta sadece thumbnail göster (üstteki alternatif medya bandı mantığı) */}
+                {!ytIframeLoaded ? (
+                  <>
+                    <img src={youTubeThumb(currentLightboxItems[lightboxImageIndex]?.url || '')} alt="youtube-poster" className="w-full h-full object-contain" />
+                    <button onClick={() => {
+                      setYtIframeLoaded(true);
+                      setYtPlaying(true);
+                    }} className="absolute inset-0 flex items-center justify-center z-20">
+                      <span className="bg-white/85 text-gray-900 rounded-full w-20 h-20 flex items-center justify-center shadow hover:bg-white transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 ml-1"><path d="M8 5v14l11-7z"/></svg>
+                      </span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {/* Iframe yüklendikten sonra göster */}
+                    <iframe ref={youTubePlayerRef as any} className="w-full h-full pointer-events-none" title="youtube-player" src={toYouTubeEmbed(currentLightboxItems[lightboxImageIndex]?.url || '', { autoplay: true })} allow="autoplay; encrypted-media" allowFullScreen frameBorder="0" />
+                    <button onClick={() => {
+                      const next = !ytPlaying;
+                      try { youTubePlayerRef.current?.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: next ? 'playVideo' : 'pauseVideo', args: [] }), '*'); } catch {}
+                      setYtPlaying(next);
+                    }} className="absolute bottom-4 right-4 z-20 bg-white/85 text-gray-900 rounded-full w-12 h-12 flex items-center justify-center shadow hover:bg-white">
+                      {ytPlaying ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 ml-0.5"><path d="M8 5v14l11-7z"/></svg>
+                      )}
+                    </button>
+                  </>
+                )}
+              </div>
             )}
           </div>
         </div>
       )}
 
-      {dimLightbox && (
-        <div className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center">
-          <button onClick={() => setDimLightbox(null)} className="absolute top-4 right-4 text-white hover:opacity-75 transition-opacity z-20"><CloseIcon /></button>
-          <div className="max-w-screen-lg max-h-[90vh] w-full p-4">
-            <img src={dimLightbox} alt="dimension-large" className="w-full h-full object-contain" />
+      {/* Dimension Images Modal */}
+      {dimLightbox && dimLightbox.images.length > 0 && (
+        <div className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setDimLightbox(null)}>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 max-w-4xl w-full max-h-[90vh] overflow-auto relative" onClick={(e) => e.stopPropagation()}>
+            <button 
+              onClick={() => setDimLightbox(null)} 
+              className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 transition-colors z-20 p-2 hover:bg-gray-100 rounded-full"
+              aria-label="Close"
+            >
+              <CloseIcon />
+            </button>
+            <div className="p-8 relative">
+              {dimLightbox.images.length > 1 && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDimLightbox({
+                        ...dimLightbox,
+                        currentIndex: (dimLightbox.currentIndex - 1 + dimLightbox.images.length) % dimLightbox.images.length
+                      });
+                    }}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-2 rounded-full shadow-md transition-all z-10"
+                    aria-label="Previous"
+                  >
+                    <ChevronLeftIcon className="w-6 h-6" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDimLightbox({
+                        ...dimLightbox,
+                        currentIndex: (dimLightbox.currentIndex + 1) % dimLightbox.images.length
+                      });
+                    }}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-2 rounded-full shadow-md transition-all z-10"
+                    aria-label="Next"
+                  >
+                    <ChevronRightIcon className="w-6 h-6" />
+                  </button>
+                </>
+              )}
+              <img 
+                src={dimLightbox.images[dimLightbox.currentIndex].image} 
+                alt={dimLightbox.images[dimLightbox.currentIndex].title ? t(dimLightbox.images[dimLightbox.currentIndex].title!) : "Technical Drawing"} 
+                className="w-full h-auto object-contain" 
+              />
+              {dimLightbox.images.length > 1 && (
+                <div className="mt-4 text-center text-sm text-gray-500">
+                  {dimLightbox.currentIndex + 1} / {dimLightbox.images.length}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Material Images Modal */}
+      {materialLightbox && materialLightbox.images.length > 0 && (
+        <div className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center p-1" onClick={() => setMaterialLightbox(null)}>
+          <div className="bg-white border border-gray-300 max-w-2xl w-full max-h-[98vh] overflow-hidden relative" onClick={(e) => e.stopPropagation()}>
+            <button 
+              onClick={() => setMaterialLightbox(null)} 
+              className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 transition-colors z-20 p-1 hover:bg-gray-100 rounded-full"
+              aria-label="Close"
+            >
+              <CloseIcon />
+            </button>
+            <div className="relative">
+              {materialLightbox.images.length > 1 && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setMaterialLightbox({
+                        ...materialLightbox,
+                        currentIndex: (materialLightbox.currentIndex - 1 + materialLightbox.images.length) % materialLightbox.images.length
+                      });
+                    }}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-1.5 rounded-full shadow-md transition-all z-10"
+                    aria-label="Previous"
+                  >
+                    <ChevronLeftIcon className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setMaterialLightbox({
+                        ...materialLightbox,
+                        currentIndex: (materialLightbox.currentIndex + 1) % materialLightbox.images.length
+                      });
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-1.5 rounded-full shadow-md transition-all z-10"
+                    aria-label="Next"
+                  >
+                    <ChevronRightIcon className="w-5 h-5" />
+                  </button>
+                </>
+              )}
+              <img 
+                src={materialLightbox.images[materialLightbox.currentIndex].image} 
+                alt={materialLightbox.images[materialLightbox.currentIndex].name} 
+                className="w-full h-auto object-contain" 
+              />
+            </div>
           </div>
         </div>
       )}
