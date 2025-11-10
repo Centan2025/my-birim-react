@@ -68,7 +68,7 @@ const Footer = () => {
     const [content, setContent] = useState<FooterContent | null>(null);
     const [settings, setSettings] = useState<SiteSettings | null>(null);
     const [email, setEmail] = useState('');
-    const { t } = useTranslation();
+    const { t, setLocale, locale, supportedLocales } = useTranslation();
 
     useEffect(() => {
         Promise.all([getFooterContent(), getSiteSettings()]).then(([footerData, settingsData]) => {
@@ -82,7 +82,87 @@ const Footer = () => {
     return (
         <footer className="bg-gray-800 text-gray-400">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                <div className="flex flex-wrap items-start gap-8 lg:gap-16">
+                {/* Mobil düzen */}
+                <div className="lg:hidden flex flex-col items-center space-y-6">
+                    {/* Logo - ortada üstte */}
+                    <div className="text-white">
+                        <SiteLogo logoUrl={settings.logoUrl} className="h-6 w-auto mx-auto" />
+                    </div>
+                    
+                    {/* Menü düğmeleri - alt alta ortada */}
+                    <nav className="flex flex-col items-center space-y-3">
+                        <Link to="/products" className="text-sm uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200">
+                            {t('products')}
+                        </Link>
+                        <Link to="/designers" className="text-sm uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200">
+                            {t('designers')}
+                        </Link>
+                        <Link to="/projects" className="text-sm uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200">
+                            {t('projects') || 'Projeler'}
+                        </Link>
+                        <Link to="/news" className="text-sm uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200">
+                            {t('news')}
+                        </Link>
+                        <Link to="/about" className="text-sm uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200">
+                            {t('about')}
+                        </Link>
+                        <Link to="/contact" className="text-sm uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200">
+                            {t('contact')}
+                        </Link>
+                    </nav>
+                    
+                    {/* İnce çizgi */}
+                    <div className="w-full border-t border-gray-700"></div>
+                    
+                    {/* Dil seçenekleri */}
+                    <div className="flex items-center gap-3">
+                        {supportedLocales.map((langCode) => {
+                            const isActive = locale === langCode;
+                            return (
+                                <button
+                                    key={langCode}
+                                    onClick={() => setLocale(langCode)}
+                                    className={`text-xs uppercase tracking-wider transition-colors duration-200 ${
+                                        isActive
+                                            ? 'text-white font-bold'
+                                            : 'text-gray-400 hover:text-white font-thin'
+                                    }`}
+                                >
+                                    {langCode.toUpperCase()}
+                                </button>
+                            );
+                        })}
+                    </div>
+                    
+                    {/* İnce çizgi */}
+                    <div className="w-full border-t border-gray-700"></div>
+                    
+                    {/* Partnerler */}
+                    <div className="flex items-center justify-center flex-wrap gap-6">
+                        {(content.partners || content.partnerNames || []).map((partner, index) => {
+                            const partnerName = typeof partner === 'string' ? partner : t(partner.name);
+                            const partnerLogo = typeof partner === 'object' ? partner.logo : undefined;
+                            const partnerUrl = typeof partner === 'object' ? partner.url : undefined;
+                            
+                            const partnerContent = partnerLogo ? (
+                                <img src={partnerLogo} alt={partnerName} className="h-8 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-200" />
+                            ) : (
+                                <span className="font-semibold text-gray-300 opacity-70 hover:opacity-100 transition-opacity duration-200">{partnerName}</span>
+                            );
+                            
+                            return partnerUrl ? (
+                                <a key={index} href={partnerUrl} target="_blank" rel="noopener noreferrer" className="group">
+                                    {partnerContent}
+                                </a>
+                            ) : (
+                                <span key={index}>{partnerContent}</span>
+                            );
+                        })}
+                    </div>
+                </div>
+                
+                {/* Desktop düzen */}
+                <div className="hidden lg:flex flex-wrap items-start gap-8 lg:gap-16">
                     {/* Sol taraf: Logo ve partner yazıları (sola hizalı) */}
                     <div className="w-full lg:w-auto">
                         <div className="text-white mb-4">
@@ -154,9 +234,9 @@ const Footer = () => {
                     </div>
                 </div>
                 {/* Sosyal medya linkleri ve email formu - aynı üst hizasında */}
-                <div className="mt-8 flex flex-wrap items-start gap-8 lg:gap-16">
+                <div className="mt-8 flex flex-col lg:flex-row flex-wrap items-center lg:items-start justify-center lg:justify-start gap-8 lg:gap-16">
                     {/* Sosyal medya linkleri */}
-                    <div className="w-full lg:w-auto flex space-x-6">
+                    <div className="w-full lg:w-auto flex justify-center lg:justify-start space-x-6">
                         {(content.socialLinks || []).filter(link => link.isEnabled).map(link => (
                             <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-opacity duration-200 opacity-70 hover:opacity-100">
                                 <div className="w-3 h-3">
@@ -165,8 +245,8 @@ const Footer = () => {
                             </a>
                         ))}
                     </div>
-                    {/* Email abonelik formu - sağa yaslı, menü düğmeleri ile aynı sağ hizada */}
-                    <div className="flex-1 flex justify-end">
+                    {/* Email abonelik formu - ortada mobilde, sağa yaslı desktop'ta */}
+                    <div className="w-full lg:flex-1 flex justify-center lg:justify-end">
                         <form 
                         onSubmit={(e) => {
                             e.preventDefault();

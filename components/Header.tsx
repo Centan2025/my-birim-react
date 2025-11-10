@@ -45,6 +45,8 @@ export function Header() {
   const headerContainerRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const productsButtonRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
   const [submenuOffset, setSubmenuOffset] = useState(0);
 
   const { isLoggedIn } = useAuth();
@@ -168,6 +170,7 @@ export function Header() {
   
     useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // Search panel için
       if (
         isSearchOpen &&
         searchPanelRef.current && !searchPanelRef.current.contains(event.target as Node) &&
@@ -175,12 +178,23 @@ export function Header() {
       ) {
         closeSearch();
       }
+      
+      // Mobil menü için
+      if (
+        isMobileMenuOpen &&
+        mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node) &&
+        mobileMenuButtonRef.current && !mobileMenuButtonRef.current.contains(event.target as Node)
+      ) {
+        setIsMobileMenuOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside as any);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside as any);
     };
-  }, [isSearchOpen, closeSearch]);
+  }, [isSearchOpen, isMobileMenuOpen, closeSearch]);
 
 
   const handleProductsEnter = () => {
@@ -225,7 +239,7 @@ export function Header() {
     <>
       <header className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full'}`}>
         <div
-          className={`bg-black/60 backdrop-blur-lg overflow-hidden border-b border-white/10 transition-all duration-700 ease-in-out ${isProductsOpen ? 'max-h-[20rem]' : 'max-h-[6rem]'}`}
+          className={`bg-black/60 backdrop-blur-lg overflow-hidden border-b border-white/10 transition-all duration-700 ease-in-out ${isProductsOpen ? 'max-h-[20rem]' : isMobileMenuOpen ? 'max-h-[30rem]' : 'max-h-[6rem]'}`}
           ref={headerContainerRef}
         >
           <nav className="px-2 sm:px-4 lg:px-6" ref={navRef}>
@@ -233,9 +247,9 @@ export function Header() {
               <div className="flex items-center gap-x-12">
                 <div className="flex items-center">
                   <Link to="/" className="flex items-center gap-3 text-white transition-colors">
-                    <SiteLogo logoUrl={settings?.logoUrl} className="w-40 h-6" />
+                    <SiteLogo logoUrl={settings?.logoUrl} className="w-24 md:w-40 h-4 md:h-6" />
                     {settings?.isHeaderTextVisible && (
-                      <span className="text-2xl font-bold tracking-wider">{settings.headerText}</span>
+                      <span className="text-xl md:text-2xl font-bold tracking-wider">{settings.headerText}</span>
                     )}
                   </Link>
                 </div>
@@ -308,7 +322,7 @@ export function Header() {
                   )}
                 </button>
                 <div className="lg:hidden">
-                  <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className={iconClasses}>
+                  <button ref={mobileMenuButtonRef} onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className={iconClasses}>
                     <MenuIcon />
                   </button>
                 </div>
@@ -339,20 +353,20 @@ export function Header() {
               </div>
             </div>
           </div>
+          {/* Mobil menü - header içinde açılır */}
+          {isMobileMenuOpen && (
+            <div ref={mobileMenuRef} className="lg:hidden border-t border-white/10">
+              <nav className="px-2 sm:px-4 lg:px-6 py-4 flex flex-col space-y-4">
+                <NavLink to="/products" className="text-sm font-medium tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('products')}</NavLink>
+                <NavLink to="/designers" className="text-sm font-medium tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('designers')}</NavLink>
+                <NavLink to="/projects" className="text-sm font-medium tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('projects') || 'Projeler'}</NavLink>
+                <NavLink to="/news" className="text-sm font-medium tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('news')}</NavLink>
+                <NavLink to="/about" className="text-sm font-medium tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('about')}</NavLink>
+                <NavLink to="/contact" className="text-sm font-medium tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('contact')}</NavLink>
+              </nav>
+            </div>
+          )}
         </div>
-
-        {isMobileMenuOpen && (
-          <div className="lg:hidden bg-white/95 backdrop-blur-md container mx-auto px-10 py-4 rounded-b-lg shadow-lg">
-            <nav className="flex flex-col space-y-4">
-              <NavLink to="/products/kanepeler" className="text-sm font-medium tracking-wider uppercase text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('products')}</NavLink>
-              <NavLink to="/designers" className="text-sm font-medium tracking-wider uppercase text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('designers')}</NavLink>
-              <NavLink to="/projects" className="text-sm font-medium tracking-wider uppercase text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('projects') || 'Projeler'}</NavLink>
-              <NavLink to="/news" className="text-sm font-medium tracking-wider uppercase text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('news')}</NavLink>
-              <NavLink to="/about" className="text-sm font-medium tracking-wider uppercase text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('about')}</NavLink>
-              <NavLink to="/contact" className="text-sm font-medium tracking-wider uppercase text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>{t('contact')}</NavLink>
-            </nav>
-          </div>
-        )}
         {/* Desktop genişleyen ürün paneli kaldırıldı; içerik header içinde render ediliyor */}
       </header>
       
