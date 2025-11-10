@@ -29,6 +29,7 @@ import {
   footerLink,
   footerLinkColumn,
   socialLink,
+  legalLink,
   contactLocation,
   materialSwatchBook,
 } from './objects/shared'
@@ -66,5 +67,6 @@ export const schemaTypes = [
   footerLink,
   footerLinkColumn,
   socialLink,
+  legalLink,
   contactLocation,
 ]

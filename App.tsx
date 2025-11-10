@@ -13,7 +13,6 @@ import { ContactPage } from './pages/ContactPage';
 import { LoginPage } from './pages/LoginPage';
 import { NewsPage } from './pages/NewsPage';
 import { NewsDetailPage } from './pages/NewsDetailPage';
-import { AdminPage } from './pages/AdminPage';
 import { getFooterContent, getSiteSettings } from './services/cms';
 import type { FooterContent, SiteSettings } from './types';
 import { SiteLogo } from './components/SiteLogo';
@@ -274,13 +273,15 @@ const Footer = () => {
                 </div>
                 <div className="mt-16 border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-xs">
                     <p>{t(content.copyrightText)}</p>
-                    <div className="flex flex-wrap justify-start gap-x-4 gap-y-2">
-                        <a href="#" className="hover:text-white hover:underline transition-colors duration-200">Company Data</a>
-                        <a href="#" className="hover:text-white hover:underline transition-colors duration-200">Privacy Policy</a>
-                        <a href="#" className="hover:text-white hover:underline transition-colors duration-200">Cookie Policy</a>
-                        <a href="#" className="hover:text-white hover:underline transition-colors duration-200">Legals</a>
-                        <Link to="/admin" className="hover:text-white hover:underline transition-colors duration-200">{t('admin_panel')}</Link>
-                    </div>
+                    {(content.legalLinks && content.legalLinks.length > 0) && (
+                        <div className="flex flex-wrap justify-start gap-x-4 gap-y-2">
+                            {content.legalLinks.filter(link => link.isVisible).map((link, index) => (
+                                <a key={index} href={link.url} className="hover:text-white hover:underline transition-colors duration-200">
+                                    {t(link.text)}
+                                </a>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </footer>
@@ -313,7 +314,6 @@ export default function App() {
                     <Route path="/profile" element={<LoginPage />} />
                     <Route path="/news" element={<NewsPage />} />
                     <Route path="/news/:newsId" element={<NewsDetailPage />} />
-                    <Route path="/admin" element={<AdminPage />} />
                 </Routes>
                 </main>
                 <Footer />

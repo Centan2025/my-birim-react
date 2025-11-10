@@ -729,7 +729,8 @@ export const getFooterContent = async (): Promise<FooterContent> => {
             partners[]{
                 ...,
                 logo
-            }
+            },
+            legalLinks[]
         }`
         const data = await sanity.fetch(q);
         if (data?.partners) {
@@ -738,10 +739,19 @@ export const getFooterContent = async (): Promise<FooterContent> => {
                 logo: mapImage(p.logo)
             }));
         }
+        // Ensure legalLinks is always an array
+        if (!Array.isArray(data?.legalLinks)) {
+            data.legalLinks = [];
+        }
         return data;
     }
     await delay(SIMULATED_DELAY);
-    return getItem<FooterContent>(KEYS.FOOTER);
+    const data = getItem<FooterContent>(KEYS.FOOTER);
+    // Ensure legalLinks is always an array
+    if (data && !Array.isArray(data.legalLinks)) {
+        data.legalLinks = [];
+    }
+    return data;
 };
 export const updateFooterContent = async (content: FooterContent): Promise<void> => {
     await delay(SIMULATED_DELAY);

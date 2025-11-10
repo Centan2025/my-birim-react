@@ -297,6 +297,17 @@ export const socialLink = defineType({
   ],
 })
 
+export const legalLink = defineType({
+  name: 'legalLink',
+  title: 'Yasal Bağlantı',
+  type: 'object',
+  fields: [
+    defineField({name: 'text', title: 'Metin', type: 'localizedString'}),
+    defineField({name: 'url', title: 'URL', type: 'url'}),
+    defineField({name: 'isVisible', title: 'Görünür', type: 'boolean', initialValue: true}),
+  ],
+})
+
 export const contactLocation = defineType({
   name: 'contactLocation',
   title: 'İletişim Lokasyonu',

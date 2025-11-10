@@ -33,6 +33,13 @@ export default defineType({
       type: 'array',
       of: [{type: 'socialLink'}],
     }),
+    defineField({
+      name: 'legalLinks',
+      title: 'Yasal Bağlantılar',
+      type: 'array',
+      of: [{type: 'legalLink'}],
+      description: 'Şirket Bilgileri, Gizlilik Politikası, Çerez Politikası, Yasal Bilgiler gibi linkler',
+    }),
   ],
   preview: {
     prepare() {

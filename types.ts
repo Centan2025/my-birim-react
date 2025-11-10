@@ -334,6 +334,15 @@ export interface FooterPartner {
 }
 
 /**
+ * Represents a legal link in the footer.
+ */
+export interface LegalLink {
+    text: LocalizedString;
+    url: string;
+    isVisible: boolean;
+}
+
+/**
  * Defines the content structure for the site footer.
  */
 export interface FooterContent {
@@ -342,6 +351,7 @@ export interface FooterContent {
     partnerNames?: string[]; // Legacy support
     linkColumns: FooterLinkColumn[];
     socialLinks: SocialLink[];
+    legalLinks?: LegalLink[];
 }
 
 // --- Application-Specific Models ---

@@ -556,7 +556,7 @@ export function ProductDetailPage() {
                 <h2 className="text-xl font-light text-gray-600 mb-4">{t('material_alternatives')}</h2>
                 
                 {/* Group tabs - similar to image design */}
-                <div className="flex flex-wrap gap-0 border-b border-gray-200 mb-6 bg-gray-200">
+                <div className="flex flex-wrap gap-0 border-t border-b border-gray-400 mb-6 bg-gray-200">
                   {(Array.isArray(mergedGroups) ? mergedGroups : []).map((g: any, idx: number) => (
                     <button 
                       key={idx} 
@@ -609,7 +609,6 @@ export function ProductDetailPage() {
                         </div>
                       ))}
                     </div>
-                    <div className="mt-3 h-px bg-gray-300" />
                   </>
                 ) : (
                   /* Fallback: if no books, show materials directly */
@@ -631,7 +630,6 @@ export function ProductDetailPage() {
                       </div>
                     ))}
                   </div>
-                  <div className="mt-3 h-px bg-gray-200" />
                   </>
                 )}
               </div>
@@ -639,7 +637,7 @@ export function ProductDetailPage() {
 
             {/* Designer section after materials */}
             {designer && (
-              <section className="mt-10 bg-gray-200 text-gray-600">
+              <section className="mt-10 bg-gray-200 text-gray-600 border-t border-b border-gray-400">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
                   <h2 className="text-xl font-thin text-gray-600 mb-6">{t('designer')}</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
