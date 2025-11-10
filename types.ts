@@ -17,6 +17,8 @@ export interface SiteSettings {
   headerText: string;
   /** Toggles the visibility of the header text. */
   isHeaderTextVisible: boolean;
+  /** Toggles bottom Prev/Next navigation on product detail page. */
+  showProductPrevNext?: boolean;
 }
 
 // --- Core Data Models ---

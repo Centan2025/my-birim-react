@@ -220,7 +220,7 @@ export function Header() {
     setIsProductsOpen(false);
   };
   
-  const navLinkClasses = 'text-sm font-medium tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300';
+  const navLinkClasses = 'text-sm font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300';
   const activeLinkClasses = { color: 'white', textShadow: '0 0 5px rgba(255,255,255,0.5)', opacity: 1 };
   const iconClasses = 'text-white hover:text-gray-200 transition-all duration-300 transform hover:scale-125';
   
@@ -341,7 +341,7 @@ export function Header() {
                   <NavLink
                     key={category.id}
                     to={`/products/${category.id}`}
-                    className="group relative px-1 py-1 text-sm uppercase text-gray-200 hover:text-white transition-colors duration-300"
+                    className="group relative px-1 py-1 text-sm font-semibold uppercase text-gray-200 hover:text-white transition-colors duration-300"
                     onClick={() => setIsProductsOpen(false)}
                   >
                     <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
@@ -357,12 +357,12 @@ export function Header() {
           {isMobileMenuOpen && (
             <div ref={mobileMenuRef} className="lg:hidden border-t border-white/10">
               <nav className="px-2 sm:px-4 lg:px-6 py-4 flex flex-col space-y-4">
-                <NavLink to="/products" className="text-sm font-medium tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('products')}</NavLink>
-                <NavLink to="/designers" className="text-sm font-medium tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('designers')}</NavLink>
-                <NavLink to="/projects" className="text-sm font-medium tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('projects') || 'Projeler'}</NavLink>
-                <NavLink to="/news" className="text-sm font-medium tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('news')}</NavLink>
-                <NavLink to="/about" className="text-sm font-medium tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('about')}</NavLink>
-                <NavLink to="/contact" className="text-sm font-medium tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('contact')}</NavLink>
+                <NavLink to="/products" className="text-sm font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('products')}</NavLink>
+                <NavLink to="/designers" className="text-sm font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('designers')}</NavLink>
+                <NavLink to="/projects" className="text-sm font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('projects') || 'Projeler'}</NavLink>
+                <NavLink to="/news" className="text-sm font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('news')}</NavLink>
+                <NavLink to="/about" className="text-sm font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('about')}</NavLink>
+                <NavLink to="/contact" className="text-sm font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('contact')}</NavLink>
               </nav>
             </div>
           )}

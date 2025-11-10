@@ -85,28 +85,28 @@ const Footer = () => {
                 {/* Mobil düzen */}
                 <div className="lg:hidden flex flex-col items-center space-y-6">
                     {/* Logo - ortada üstte */}
-                    <div className="text-white">
+                    <div className="text-white -mt-4">
                         <SiteLogo logoUrl={settings.logoUrl} className="h-6 w-auto mx-auto" />
                     </div>
                     
                     {/* Menü düğmeleri - alt alta ortada */}
                     <nav className="flex flex-col items-center space-y-3">
-                        <Link to="/products" className="text-sm uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200">
+                        <Link to="/products" className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200">
                             {t('products')}
                         </Link>
-                        <Link to="/designers" className="text-sm uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200">
+                        <Link to="/designers" className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200">
                             {t('designers')}
                         </Link>
-                        <Link to="/projects" className="text-sm uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200">
+                        <Link to="/projects" className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200">
                             {t('projects') || 'Projeler'}
                         </Link>
-                        <Link to="/news" className="text-sm uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200">
+                        <Link to="/news" className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200">
                             {t('news')}
                         </Link>
-                        <Link to="/about" className="text-sm uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200">
+                        <Link to="/about" className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200">
                             {t('about')}
                         </Link>
-                        <Link to="/contact" className="text-sm uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200">
+                        <Link to="/contact" className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200">
                             {t('contact')}
                         </Link>
                     </nav>
@@ -193,7 +193,7 @@ const Footer = () => {
                     
                     {/* Orta: Menü düğmeleri (sağa hizalı üstte) */}
                     <div className="flex-1 flex justify-end">
-                        <nav className="flex flex-wrap gap-x-6 gap-y-3 text-sm uppercase tracking-wider text-gray-300 items-center justify-end">
+                        <nav className="flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold uppercase tracking-wider text-gray-300 items-center justify-end">
                             <Link to="/products" className="group relative hover:text-white">
                                 <span className="relative inline-block">
                                     {t('products')}

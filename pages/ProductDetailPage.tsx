@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import type { Product, Designer, Category, LocalizedString } from '../types';
-import { getProductById, getDesignerById, getCategories, getProductsByCategoryId } from '../services/cms';
+import { getProductById, getDesignerById, getCategories, getProductsByCategoryId, getSiteSettings } from '../services/cms';
 import { useAuth } from '../App';
 import { useTranslation } from '../i18n';
 import { useCart } from '../context/CartContext';
@@ -26,8 +26,21 @@ const TransparentShoppingBagIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-2z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
 );
 
+const MinimalChevronLeft = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="m15 18-6-6 6-6"/>
+  </svg>
+);
+
+const MinimalChevronRight = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="m9 18 6-6-6-6"/>
+  </svg>
+);
+
 export function ProductDetailPage() {
   const { productId } = useParams<{ productId: string }>();
+  const [siteSettings, setSiteSettings] = useState<{ showProductPrevNext?: boolean } | null>(null);
   const [product, setProduct] = useState<Product | undefined>(undefined);
   const [designer, setDesigner] = useState<Designer | undefined>(undefined);
   const [category, setCategory] = useState<Category | undefined>(undefined);
@@ -101,6 +114,9 @@ export function ProductDetailPage() {
     fetchProduct();
   }, [productId]);
 
+  useEffect(() => {
+    getSiteSettings().then(setSiteSettings);
+  }, []);
   const { prevProduct, nextProduct } = useMemo(() => {
     if (!product || siblingProducts.length < 2) return { prevProduct: null, nextProduct: null };
     const currentIndex = siblingProducts.findIndex(p => p.id === product.id);
@@ -109,6 +125,8 @@ export function ProductDetailPage() {
     const next = currentIndex < siblingProducts.length - 1 ? siblingProducts[currentIndex + 1] : null;
     return { prevProduct: prev, nextProduct: next };
   }, [product, siblingProducts]);
+  // Bottom prev/next visibility from CMS settings
+  const showBottomPrevNext = Boolean(siteSettings?.showProductPrevNext);
 
   // Aynı groupTitle'a sahip grupları tek bir sekme altında birleştir - erken return'lerden önce
   const grouped = useMemo(() => {
@@ -619,6 +637,36 @@ export function ProductDetailPage() {
               </div>
             )}
 
+            {/* Designer section after materials */}
+            {designer && (
+              <section className="mt-10 bg-gray-200 text-gray-600">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+                  <h2 className="text-xl font-thin text-gray-600 mb-6">{t('designer')}</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                    <div className="w-full">
+                      <img
+                        src={designer.image}
+                        alt={t(designer.name)}
+                        className="w-full h-auto object-cover"
+                      />
+                    </div>
+                    <div className="w-full">
+                      <h3 className="text-2xl font-thin text-gray-600">{t(designer.name)}</h3>
+                      <p className="mt-4 text-gray-500 font-light leading-relaxed">
+                        {t(designer.bio).slice(0, 400)}{t(designer.bio).length > 400 ? '…' : ''}
+                      </p>
+                      <Link
+                        to={`/designer/${designer.id}`}
+                        className="inline-block mt-6 text-gray-600 font-light underline underline-offset-4 hover:text-gray-800"
+                      >
+                        {t('discover_the_designer')}
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
             {product.buyable && (
               <div className="pt-6 border-t border-gray-200">
                 <button onClick={() => addToCart(product)} className="group w-20 h-20 flex items-center justify-center bg-gray-900 text-white rounded-full hover:bg-gray-700 transition-all duration-300 ease-in-out transform hover:scale-110 active:scale-100 hover:shadow-lg" aria-label={t('add_to_cart')}>
@@ -685,6 +733,38 @@ export function ProductDetailPage() {
           )}
         </div>
       </main>
+
+      {/* Bottom Prev / Next controls (toggle with ?showNav=1) */}
+      {showBottomPrevNext && (prevProduct || nextProduct) && (
+        <div className="bg-white border-t border-gray-200">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1">
+                {prevProduct ? (
+                  <Link
+                    to={`/product/${prevProduct.id}`}
+                    className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
+                    aria-label="Previous product"
+                  >
+                    <MinimalChevronLeft className="w-12 h-12 md:w-16 md:h-16" />
+                  </Link>
+                ) : <span />}
+              </div>
+              <div className="flex-1 text-right">
+                {nextProduct ? (
+                  <Link
+                    to={`/product/${nextProduct.id}`}
+                    className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
+                    aria-label="Next product"
+                  >
+                    <MinimalChevronRight className="w-12 h-12 md:w-16 md:h-16" />
+                  </Link>
+                ) : <span />}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isLightboxOpen && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center" style={{ animationDuration: '0.2s' }}>
@@ -781,11 +861,6 @@ export function ProductDetailPage() {
                 alt={dimLightbox.images[dimLightbox.currentIndex].title ? t(dimLightbox.images[dimLightbox.currentIndex].title!) : "Technical Drawing"} 
                 className="w-full h-auto object-contain" 
               />
-              {dimLightbox.images.length > 1 && (
-                <div className="mt-4 text-center text-sm text-gray-500">
-                  {dimLightbox.currentIndex + 1} / {dimLightbox.images.length}
-                </div>
-              )}
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { initialData, KEYS } from '../data';
+import { initialData, KEYS, aboutPageContentData } from '../data';
 import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem, ProductMaterial, ProductVariant, Project, LocalizedString } from '../types';
 import { createClient } from '@sanity/client'
 import groq from 'groq'
@@ -248,11 +248,28 @@ export const updateLanguages = async (languages: string[]): Promise<void> => {
 // Site Settings
 export const getSiteSettings = async (): Promise<SiteSettings> => {
     if (useSanity && sanity) {
-        const q = groq`*[_type == "siteSettings"][0]`
-        return await sanity.fetch(q)
+        const q = groq`*[_type == "siteSettings"][0]{
+            ...,
+            logo
+        }`
+        const s = await sanity.fetch(q)
+        // Backward compatible defaults
+        return {
+            logoUrl: s?.logo ? mapImage(s.logo) : (s?.logoUrl || ''),
+            headerText: s?.headerText ?? 'BİRİM',
+            isHeaderTextVisible: Boolean(s?.isHeaderTextVisible ?? true),
+            showProductPrevNext: Boolean(s?.showProductPrevNext ?? false),
+        }
     }
     await delay(SIMULATED_DELAY);
-    return getItem<SiteSettings>(KEYS.SITE_SETTINGS);
+    const s = getItem<SiteSettings>(KEYS.SITE_SETTINGS);
+    // Ensure all fields are present with defaults
+    return {
+        logoUrl: s?.logoUrl || '',
+        headerText: s?.headerText ?? 'BİRİM',
+        isHeaderTextVisible: Boolean(s?.isHeaderTextVisible ?? true),
+        showProductPrevNext: Boolean(s?.showProductPrevNext ?? false),
+    };
 };
 export const updateSiteSettings = async (settings: SiteSettings): Promise<void> => {
     await delay(SIMULATED_DELAY);
@@ -567,11 +584,40 @@ export const deleteProduct = async (id: string): Promise<void> => {
 // Page Content
 export const getAboutPageContent = async (): Promise<AboutPageContent> => {
     if (useSanity && sanity) {
-        const q = groq`*[_type == "aboutPage"][0]`
-        return await sanity.fetch(q)
+        const q = groq`*[_type == "aboutPage"][0]{
+            ...,
+            heroImage,
+            storyImage
+        }`
+        const data = await sanity.fetch(q);
+        if (data) {
+            // Normalize images
+            if (data.heroImage) {
+                data.heroImage = mapImage(data.heroImage);
+            }
+            if (data.storyImage) {
+                data.storyImage = mapImage(data.storyImage);
+            }
+            // Ensure values is always an array
+            if (!Array.isArray(data.values)) {
+                data.values = [];
+            }
+            return data;
+        }
     }
     await delay(SIMULATED_DELAY);
-    return getItem<AboutPageContent>(KEYS.ABOUT_PAGE);
+    const data = getItem<AboutPageContent>(KEYS.ABOUT_PAGE);
+    // Ensure values is always an array
+    if (data && !Array.isArray(data.values)) {
+        data.values = [];
+    }
+    // Return data or fallback to default from initialData
+    if (data) {
+        return data;
+    }
+    // If no data exists, return default from initialData
+    const defaultData = initialData[KEYS.ABOUT_PAGE] as AboutPageContent;
+    return defaultData || aboutPageContentData;
 };
 export const updateAboutPageContent = async (content: AboutPageContent): Promise<void> => {
     await delay(SIMULATED_DELAY);

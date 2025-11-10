@@ -27,19 +27,40 @@ const FormRow: React.FC<{ label: string; children: React.ReactNode; className?: 
 );
 
 // Helper component for input fields
-const Input = (props: React.ComponentProps<'input'>) => (
-    <input {...props} className={`block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-gray-500 focus:border-gray-500 disabled:bg-gray-100 ${props.className}`} />
-);
+const Input = (props: React.ComponentProps<'input'>) => {
+    // Ensure value is never null - convert to empty string
+    const safeProps = {
+        ...props,
+        value: props.value ?? '',
+    };
+    return (
+        <input {...safeProps} className={`block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-gray-500 focus:border-gray-500 disabled:bg-gray-100 ${props.className || ''}`} />
+    );
+};
 
 // Helper component for textareas
-const Textarea = (props: React.ComponentProps<'textarea'>) => (
-    <textarea {...props} rows={4} className={`block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-gray-500 focus:border-gray-500 ${props.className}`} />
-);
+const Textarea = (props: React.ComponentProps<'textarea'>) => {
+    // Ensure value is never null - convert to empty string
+    const safeProps = {
+        ...props,
+        value: props.value ?? '',
+    };
+    return (
+        <textarea {...safeProps} rows={4} className={`block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-gray-500 focus:border-gray-500 ${props.className || ''}`} />
+    );
+};
 
 // Helper component for selects
-const Select = (props: React.ComponentProps<'select'>) => (
-    <select {...props} className={`block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-gray-500 focus:border-gray-500 ${props.className}`} />
-);
+const Select = (props: React.ComponentProps<'select'>) => {
+    // Ensure value is never null - convert to empty string
+    const safeProps = {
+        ...props,
+        value: props.value ?? '',
+    };
+    return (
+        <select {...safeProps} className={`block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-gray-500 focus:border-gray-500 ${props.className || ''}`} />
+    );
+};
 
 const createBlankProduct = (): Product => ({
   id: '', name: {}, designerId: '', categoryId: '', year: new Date().getFullYear(),
@@ -101,7 +122,7 @@ export function AdminPage() {
   const [news, setNews] = useState<NewsItem[]>([]);
 
   // Form states
-  const [siteSettingsForm, setSiteSettingsForm] = useState<SiteSettings>({ logoUrl: '', headerText: 'BİRİM', isHeaderTextVisible: true });
+  const [siteSettingsForm, setSiteSettingsForm] = useState<SiteSettings>({ logoUrl: '', headerText: 'BİRİM', isHeaderTextVisible: true, showProductPrevNext: false });
   const [logoGenPrompt, setLogoGenPrompt] = useState('');
   const [generatedLogoUrl, setGeneratedLogoUrl] = useState('');
   const [generating, setGenerating] = useState(false);
@@ -144,7 +165,7 @@ export function AdminPage() {
             getLanguages(),
             getNews(),
         ]);
-        setSiteSettingsForm(settingsData);
+        setSiteSettingsForm({ ...settingsData, showProductPrevNext: settingsData.showProductPrevNext ?? false });
         setCategories(categoriesData);
         setDesigners(designersData);
         setProducts(productsData);
@@ -626,6 +647,18 @@ export function AdminPage() {
                 />
                 <label htmlFor="showHeadertext" className="ml-2 block text-sm text-gray-700">
                   Header yanındaki yazıyı göster
+                </label>
+              </div>
+              <div className="flex items-center mt-4">
+                <input
+                  type="checkbox"
+                  id="showPrevNext"
+                  checked={!!siteSettingsForm.showProductPrevNext}
+                  onChange={(e) => setSiteSettingsForm({ ...siteSettingsForm, showProductPrevNext: e.target.checked })}
+                  className="h-4 w-4 text-gray-600 border-gray-300 rounded focus:ring-gray-500"
+                />
+                <label htmlFor="showPrevNext" className="ml-2 block text-sm text-gray-700">
+                  Ürün detayında alt Önceki/Sonraki düğmeleri
                 </label>
               </div>
           </div>

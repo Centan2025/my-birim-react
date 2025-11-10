@@ -20,6 +20,7 @@ export const siteSettingsData: SiteSettings = {
     logoUrl: '/img/logo.png',
     headerText: 'BİRİM',
     isHeaderTextVisible: true,
+    showProductPrevNext: false,
 };
 
 export const categoriesData: Category[] = [
