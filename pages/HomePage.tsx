@@ -27,10 +27,10 @@ const YouTubeBackground: React.FC<{ url: string }> = ({ url }) => {
         );
     }
     return (
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden max-w-full">
             <iframe
-                className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto transform -translate-x-1/2 -translate-y-1/2"
-                style={{ pointerEvents: 'none' }}
+                className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto max-w-full transform -translate-x-1/2 -translate-y-1/2"
+                style={{ pointerEvents: 'none', maxWidth: '100%' }}
                 src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&autohide=1&modestbranding=1`}
                 frameBorder="0"
                 allow="autoplay; encrypted-media"
@@ -128,7 +128,7 @@ export function HomePage() {
       {/* Hero Section */}
       {heroMedia.length > 0 ? (
         <div 
-          className="relative h-screen w-full overflow-hidden cursor-grab active:cursor-grabbing"
+          className="relative h-screen w-full overflow-hidden cursor-grab active:cursor-grabbing max-w-full"
           onMouseDown={handleDragStart}
           onMouseMove={handleDragMove}
           onMouseUp={handleDragEnd}
@@ -152,11 +152,11 @@ export function HomePage() {
                       style={{ width: `${100 / slideCount}%`}}
                   >
                       {media.type === 'video' ? (
-                           <video className="absolute inset-0 w-full h-full object-cover" autoPlay loop muted playsInline src={media.url} key={media.url} />
+                           <video className="absolute inset-0 w-full h-full object-cover max-w-full" autoPlay loop muted playsInline src={media.url} key={media.url} />
                       ) : media.type === 'youtube' ? (
                            <YouTubeBackground url={media.url} />
                       ) : (
-                          <div className="absolute inset-0 w-full h-full bg-cover bg-center" style={{ backgroundImage: `url('${media.url}')` }}/>
+                          <div className="absolute inset-0 w-full h-full bg-cover bg-center max-w-full" style={{ backgroundImage: `url('${media.url}')` }}/>
                       )}
                       <div className="absolute inset-0 bg-black/50 z-10"></div>
                        <div className={`relative z-20 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center ${content.isHeroTextVisible && content.isLogoVisible ? 'justify-center md:justify-start' : 'justify-center'}`}>
@@ -234,13 +234,15 @@ export function HomePage() {
               return (
                 <section key={index} className={`py-20 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
                   {isFullWidth ? (
-                    <div className="w-full">
+                    <div className="w-full overflow-hidden">
                       {block.mediaType === 'youtube' ? (
-                        <YouTubeBackground url={mediaUrl} />
+                        <div className="relative w-full aspect-video overflow-hidden">
+                          <YouTubeBackground url={mediaUrl} />
+                        </div>
                       ) : block.mediaType === 'video' ? (
-                        <video className="w-full h-auto" autoPlay loop muted playsInline src={mediaUrl} />
+                        <video className="w-full h-auto max-w-full" autoPlay loop muted playsInline src={mediaUrl} />
                       ) : (
-                        <img src={mediaUrl} alt="" className="w-full h-auto object-cover" />
+                        <img src={mediaUrl} alt="" className="w-full h-auto object-cover max-w-full" />
                       )}
                       {block.description && (
                         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -264,15 +266,15 @@ export function HomePage() {
                   ) : (
                     <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                       <div className={`flex flex-col ${isLeft ? 'md:flex-row' : isRight ? 'md:flex-row-reverse' : 'md:flex-row items-center'} gap-12`}>
-                        <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'}`}>
+                        <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'} overflow-hidden`}>
                           {block.mediaType === 'youtube' ? (
-                            <div className="relative w-full aspect-video">
+                            <div className="relative w-full aspect-video overflow-hidden">
                               <YouTubeBackground url={mediaUrl} />
                             </div>
                           ) : block.mediaType === 'video' ? (
-                            <video className="w-full h-auto rounded-lg" autoPlay loop muted playsInline src={mediaUrl} />
+                            <video className="w-full h-auto rounded-lg max-w-full" autoPlay loop muted playsInline src={mediaUrl} />
                           ) : (
-                            <img src={mediaUrl} alt="" className="w-full h-auto rounded-lg object-cover" />
+                            <img src={mediaUrl} alt="" className="w-full h-auto rounded-lg object-cover max-w-full" />
                           )}
                         </div>
                         {block.description && (
@@ -322,8 +324,8 @@ export function HomePage() {
       {featuredDesigner && (
         <section className="py-20 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center gap-12 animate-fade-in-up">
-              <div className="w-full md:w-1/2">
-                  <img src={featuredDesigner.image} alt={t(featuredDesigner.name)} className="shadow-xl w-full object-cover" />
+              <div className="w-full md:w-1/2 overflow-hidden">
+                  <img src={featuredDesigner.image} alt={t(featuredDesigner.name)} className="shadow-xl w-full object-cover max-w-full" />
               </div>
               <div className="w-full md:w-1/2 text-center md:text-left">
                   <h3 className="text-sm font-light uppercase tracking-widest text-gray-500">{t('designer_spotlight')}</h3>
