@@ -29,8 +29,16 @@ const YouTubeBackground: React.FC<{ url: string }> = ({ url }) => {
     return (
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden max-w-full">
             <iframe
-                className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto max-w-full transform -translate-x-1/2 -translate-y-1/2"
-                style={{ pointerEvents: 'none', maxWidth: '100%' }}
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                style={{ 
+                    pointerEvents: 'none',
+                    width: '100%',
+                    height: '100%',
+                    maxWidth: '100%',
+                    maxHeight: '100%',
+                    minWidth: '100%',
+                    minHeight: '100%'
+                }}
                 src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&autohide=1&modestbranding=1`}
                 frameBorder="0"
                 allow="autoplay; encrypted-media"
@@ -152,11 +160,11 @@ export function HomePage() {
                       style={{ width: `${100 / slideCount}%`}}
                   >
                       {media.type === 'video' ? (
-                           <video className="absolute inset-0 w-full h-full object-cover max-w-full" autoPlay loop muted playsInline src={media.url} key={media.url} />
+                           <video className="absolute inset-0 w-full h-full object-contain md:object-cover max-w-full max-h-full" autoPlay loop muted playsInline src={media.url} key={media.url} />
                       ) : media.type === 'youtube' ? (
                            <YouTubeBackground url={media.url} />
                       ) : (
-                          <div className="absolute inset-0 w-full h-full bg-cover bg-center max-w-full" style={{ backgroundImage: `url('${media.url}')` }}/>
+                          <div className="absolute inset-0 w-full h-full bg-contain md:bg-cover bg-center bg-no-repeat max-w-full" style={{ backgroundImage: `url('${media.url}')` }}/>
                       )}
                       <div className="absolute inset-0 bg-black/50 z-10"></div>
                        <div className={`relative z-20 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center ${content.isHeroTextVisible && content.isLogoVisible ? 'justify-center md:justify-start' : 'justify-center'}`}>
@@ -240,9 +248,9 @@ export function HomePage() {
                           <YouTubeBackground url={mediaUrl} />
                         </div>
                       ) : block.mediaType === 'video' ? (
-                        <video className="w-full h-auto max-w-full" autoPlay loop muted playsInline src={mediaUrl} />
+                        <video className="w-full h-auto max-w-full object-contain md:object-cover" autoPlay loop muted playsInline src={mediaUrl} />
                       ) : (
-                        <img src={mediaUrl} alt="" className="w-full h-auto object-cover max-w-full" />
+                        <img src={mediaUrl} alt="" className="w-full h-auto object-contain md:object-cover max-w-full block" />
                       )}
                       {block.description && (
                         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -272,9 +280,9 @@ export function HomePage() {
                               <YouTubeBackground url={mediaUrl} />
                             </div>
                           ) : block.mediaType === 'video' ? (
-                            <video className="w-full h-auto rounded-lg max-w-full" autoPlay loop muted playsInline src={mediaUrl} />
+                            <video className="w-full h-auto rounded-lg max-w-full object-contain md:object-cover" autoPlay loop muted playsInline src={mediaUrl} />
                           ) : (
-                            <img src={mediaUrl} alt="" className="w-full h-auto rounded-lg object-cover max-w-full" />
+                            <img src={mediaUrl} alt="" className="w-full h-auto rounded-lg object-contain md:object-cover max-w-full block" />
                           )}
                         </div>
                         {block.description && (
@@ -345,7 +353,7 @@ export function HomePage() {
 
       {/* Inspiration Section */}
       {inspiration && (inspiration.backgroundImage || inspiration.title || inspiration.subtitle) && (
-        <section className="relative py-32 bg-gray-800 text-white text-center" style={{ backgroundImage: `url(${inspiration.backgroundImage})`, backgroundSize: 'cover', backgroundAttachment: 'fixed', backgroundPosition: 'center' }}>
+        <section className="relative py-32 bg-gray-800 text-white text-center" style={{ backgroundImage: `url(${inspiration.backgroundImage})`, backgroundSize: 'cover', backgroundAttachment: 'fixed', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
            <div className="absolute inset-0 bg-black/50"></div>
            <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
               <h2 className="text-4xl font-light">{t(inspiration.title)}</h2>
