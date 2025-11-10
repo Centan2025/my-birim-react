@@ -715,8 +715,9 @@ export function AdminPage() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-h-60 overflow-y-auto border p-4 rounded-md">
                         {filteredFeaturedProducts.map(p => (
                             <label key={p.id} className="flex items-center space-x-2">
-                                <input type="checkbox" checked={homePageForm.featuredProductIds.includes(p.id)} onChange={e => {
-                                    const newIds = e.target.checked ? [...homePageForm.featuredProductIds, p.id] : homePageForm.featuredProductIds.filter(id => id !== p.id);
+                                <input type="checkbox" checked={homePageForm?.featuredProductIds?.includes(p.id) || false} onChange={e => {
+                                    const currentIds = homePageForm?.featuredProductIds || [];
+                                    const newIds = e.target.checked ? [...currentIds, p.id] : currentIds.filter(id => id !== p.id);
                                     setHomePageForm(prev => prev ? {...prev, featuredProductIds: newIds} : prev);
                                 }} />
                                 <span className="text-gray-700">{t(p.name)}</span>

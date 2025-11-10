@@ -27,18 +27,10 @@ const YouTubeBackground: React.FC<{ url: string }> = ({ url }) => {
         );
     }
     return (
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden max-w-full">
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
             <iframe
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-                style={{ 
-                    pointerEvents: 'none',
-                    width: '100%',
-                    height: '100%',
-                    maxWidth: '100%',
-                    maxHeight: '100%',
-                    minWidth: '100%',
-                    minHeight: '100%'
-                }}
+                className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto transform -translate-x-1/2 -translate-y-1/2"
+                style={{ pointerEvents: 'none' }}
                 src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&autohide=1&modestbranding=1`}
                 frameBorder="0"
                 allow="autoplay; encrypted-media"
@@ -102,7 +94,7 @@ export function HomePage() {
       setContent(homeContent || null);
       setSettings(siteSettingsData || null);
       
-      if (homeContent?.featuredProductIds && Array.isArray(productsData)) {
+      if (homeContent?.featuredProductIds && Array.isArray(homeContent.featuredProductIds) && Array.isArray(productsData)) {
         const fProducts = productsData.filter(p => homeContent.featuredProductIds.includes(p.id));
         setFeaturedProducts(fProducts || []);
       }
@@ -136,7 +128,7 @@ export function HomePage() {
       {/* Hero Section */}
       {heroMedia.length > 0 ? (
         <div 
-          className="relative h-screen w-full overflow-hidden cursor-grab active:cursor-grabbing max-w-full"
+          className="relative h-screen w-full overflow-hidden cursor-grab active:cursor-grabbing"
           onMouseDown={handleDragStart}
           onMouseMove={handleDragMove}
           onMouseUp={handleDragEnd}
@@ -160,11 +152,11 @@ export function HomePage() {
                       style={{ width: `${100 / slideCount}%`}}
                   >
                       {media.type === 'video' ? (
-                           <video className="absolute inset-0 w-full h-full object-contain md:object-cover max-w-full max-h-full" autoPlay loop muted playsInline src={media.url} key={media.url} />
+                           <video className="absolute inset-0 w-full h-full object-cover" autoPlay loop muted playsInline src={media.url} key={media.url} />
                       ) : media.type === 'youtube' ? (
                            <YouTubeBackground url={media.url} />
                       ) : (
-                          <div className="absolute inset-0 w-full h-full bg-contain md:bg-cover bg-center bg-no-repeat max-w-full" style={{ backgroundImage: `url('${media.url}')` }}/>
+                          <div className="absolute inset-0 w-full h-full bg-cover bg-center" style={{ backgroundImage: `url('${media.url}')` }}/>
                       )}
                       <div className="absolute inset-0 bg-black/50 z-10"></div>
                        <div className={`relative z-20 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center ${content.isHeroTextVisible && content.isLogoVisible ? 'justify-center md:justify-start' : 'justify-center'}`}>

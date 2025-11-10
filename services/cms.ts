@@ -656,10 +656,19 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
         if (data?.inspirationSection) {
             data.inspirationSection.backgroundImage = mapImage(data.inspirationSection.backgroundImage);
         }
+        // Ensure featuredProductIds is always an array
+        if (!Array.isArray(data?.featuredProductIds)) {
+            data.featuredProductIds = [];
+        }
         return data;
     }
     await delay(SIMULATED_DELAY);
-    return getItem<HomePageContent>(KEYS.HOME_PAGE);
+    const data = getItem<HomePageContent>(KEYS.HOME_PAGE);
+    // Ensure featuredProductIds is always an array
+    if (data && !Array.isArray(data.featuredProductIds)) {
+        data.featuredProductIds = [];
+    }
+    return data;
 };
 export const updateHomePageContent = async (content: HomePageContent): Promise<void> => {
     await delay(SIMULATED_DELAY);
