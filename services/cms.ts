@@ -1,5 +1,5 @@
 import { initialData, KEYS, aboutPageContentData } from '../data';
-import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem, ProductMaterial, ProductVariant, Project, LocalizedString } from '../types';
+import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem, ProductMaterial, ProductVariant, Project, LocalizedString, User } from '../types';
 import { createClient } from '@sanity/client'
 import groq from 'groq'
 import imageUrlBuilder from '@sanity/image-url'
@@ -8,15 +8,30 @@ const SIMULATED_DELAY = 200;
 
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
+// Email'leri tekilleştirmek için normalize et (trim + lowercase)
+const normalizeEmail = (value: string): string => (value || '').trim().toLowerCase();
+
 // --- Sanity runtime setup (auto enable if env present) ---
 // Prefer env vars; if missing, fall back to known defaults
-const SANITY_PROJECT_ID = (import.meta as any)?.env?.VITE_SANITY_PROJECT_ID || 'wn3a082f'
-const SANITY_DATASET = (import.meta as any)?.env?.VITE_SANITY_DATASET || 'production'
-const SANITY_API_VERSION = (import.meta as any)?.env?.VITE_SANITY_API_VERSION || '2025-01-01'
+const SANITY_PROJECT_ID = import.meta.env.VITE_SANITY_PROJECT_ID || 'wn3a082f'
+const SANITY_DATASET = import.meta.env.VITE_SANITY_DATASET || 'production'
+const SANITY_API_VERSION = import.meta.env.VITE_SANITY_API_VERSION || '2025-01-01'
 const useSanity = Boolean(SANITY_PROJECT_ID && SANITY_DATASET)
 
 const sanity = useSanity
   ? createClient({ projectId: SANITY_PROJECT_ID, dataset: SANITY_DATASET, apiVersion: SANITY_API_VERSION, useCdn: true })
+  : null
+
+// Mutations için authenticated client (token varsa)
+const SANITY_TOKEN = import.meta.env.VITE_SANITY_TOKEN || ''
+const sanityMutations = useSanity && SANITY_TOKEN
+  ? createClient({ 
+      projectId: SANITY_PROJECT_ID, 
+      dataset: SANITY_DATASET, 
+      apiVersion: SANITY_API_VERSION, 
+      useCdn: false,
+      token: SANITY_TOKEN
+    })
   : null
 
 const urlFor = (source: any) => (useSanity && sanity ? imageUrlBuilder(sanity).image(source) : null)
@@ -24,13 +39,34 @@ const urlFor = (source: any) => (useSanity && sanity ? imageUrlBuilder(sanity).i
 // --- DEBUG: Print env + toggle once on startup ---
 // @ts-ignore
 if (typeof window !== 'undefined') {
-  // @ts-ignore
+  const envToken = import.meta.env.VITE_SANITY_TOKEN;
+  const hasToken = Boolean(SANITY_TOKEN && SANITY_TOKEN.trim().length > 0);
   console.info('SANITY env', {
-    projectId: (import.meta as any)?.env?.VITE_SANITY_PROJECT_ID,
-    dataset: (import.meta as any)?.env?.VITE_SANITY_DATASET,
-    apiVersion: (import.meta as any)?.env?.VITE_SANITY_API_VERSION,
+    projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
+    dataset: import.meta.env.VITE_SANITY_DATASET,
+    apiVersion: import.meta.env.VITE_SANITY_API_VERSION,
     useSanity,
-  })
+    envTokenExists: Boolean(envToken),
+    envTokenLength: envToken ? envToken.length : 0,
+    envTokenPreview: envToken ? envToken.substring(0, 20) + '...' : 'yok',
+    hasToken: hasToken,
+    tokenLength: SANITY_TOKEN ? SANITY_TOKEN.length : 0,
+    mutationsEnabled: Boolean(sanityMutations),
+    allEnvKeys: Object.keys(import.meta.env).filter(k => k.startsWith('VITE_')),
+  });
+  
+  if (useSanity && !hasToken) {
+    console.warn('⚠️ Sanity token yapılandırılmamış! Üye kayıtları CMS\'de görünmeyecektir. .env.local dosyasına VITE_SANITY_TOKEN ekleyin ve uygulamayı yeniden başlatın.');
+    console.warn('Token kontrolü:', {
+      envToken: envToken ? 'var' : 'yok',
+      SANITY_TOKEN: SANITY_TOKEN ? 'var' : 'yok',
+      sanityMutations: sanityMutations ? 'var' : 'yok'
+    });
+  } else if (useSanity && hasToken && !sanityMutations) {
+    console.error('❌ Sanity token mevcut ama mutations client oluşturulamadı!');
+  } else if (useSanity && sanityMutations) {
+    console.info('✅ Sanity mutations aktif - üye kayıtları CMS\'ye kaydedilecek');
+  }
 }
 
 const mapImage = (img: any | undefined): string => {
@@ -259,6 +295,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
             headerText: s?.headerText ?? 'BİRİM',
             isHeaderTextVisible: Boolean(s?.isHeaderTextVisible ?? true),
             showProductPrevNext: Boolean(s?.showProductPrevNext ?? false),
+            showCartButton: Boolean(s?.showCartButton ?? true),
         }
     }
     await delay(SIMULATED_DELAY);
@@ -269,6 +306,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
         headerText: s?.headerText ?? 'BİRİM',
         isHeaderTextVisible: Boolean(s?.isHeaderTextVisible ?? true),
         showProductPrevNext: Boolean(s?.showProductPrevNext ?? false),
+        showCartButton: Boolean(s?.showCartButton ?? true),
     };
 };
 export const updateSiteSettings = async (settings: SiteSettings): Promise<void> => {
@@ -925,4 +963,427 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
   }
   return undefined
 }
+
+// Simple hash function (for production, use bcrypt or similar)
+const hashPassword = async (password: string): Promise<string> => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+};
+
+// Users
+// Email subscriber (password olmadan)
+export const subscribeEmail = async (email: string): Promise<User> => {
+  const normEmail = normalizeEmail(email);
+  if (!normEmail) {
+    throw new Error('Geçerli bir e-posta adresi girin');
+  }
+  // Her durumda önce local storage içinde kontrol et (hızlı ve tutarlı deneyim)
+  {
+    const existingLocal = (getItem<User[]>(KEYS.USERS || 'birim_users') || [])
+      .find(u => normalizeEmail(u.email) === normEmail);
+    if (existingLocal) {
+      throw new Error('Bu e-posta adresi zaten aboneliğe kayıtlı');
+    }
+  }
+  if (useSanity && sanity) {
+    // Check if user already exists
+    const existingUser = await sanity.fetch(
+      groq`*[_type == "user" && lower(email) == $email][0]`,
+      { email: normEmail }
+    );
+    if (existingUser) {
+      // Sanity'de zaten varsa abonelik tekrarı olmasın
+      throw new Error('Bu e-posta adresi zaten aboneliğe kayıtlı');
+    }
+    
+    // Create email subscriber (password olmadan)
+    // Email aboneliği için token yoksa local storage'a kaydet (daha esnek)
+    if (!sanityMutations) {
+      console.warn('Sanity token yapılandırılmamış. Email aboneliği local storage\'a kaydediliyor. CMS\'de görünmesi için .env dosyasına VITE_SANITY_TOKEN ekleyin.');
+      // Local storage'a kaydet ve devam et
+      await delay(SIMULATED_DELAY);
+      const users = getItem<User[]>(KEYS.USERS || 'birim_users') || [];
+      // Üstte kontrol edilse de yarış koşulları için tekrar kontrol
+      const exists = users.find(u => normalizeEmail(u.email) === normEmail);
+      if (exists) throw new Error('Bu e-posta adresi zaten aboneliğe kayıtlı');
+      
+      const newUser: User = {
+        _id: `user_${Date.now()}`,
+        email: normEmail,
+        name: '',
+        company: '',
+        profession: '',
+        userType: 'email_subscriber',
+        isActive: true,
+        createdAt: new Date().toISOString(),
+      };
+      
+      setItem(KEYS.USERS || 'birim_users', [...users, newUser]);
+      return newUser;
+    }
+    
+    try {
+      console.log('Sanity\'ye email subscriber oluşturuluyor...', email);
+      console.log('Token kontrolü:', sanityMutations ? 'Token mevcut' : 'Token yok');
+      
+      const user = await sanityMutations.create({
+        _type: 'user',
+        email: normEmail,
+        password: '', // Email subscriber için password yok
+        name: '',
+        company: '',
+        profession: '',
+        userType: 'email_subscriber',
+        isActive: true,
+        createdAt: new Date().toISOString(),
+      });
+      
+      console.log('Sanity\'de email subscriber başarıyla oluşturuldu:', user._id);
+      console.log('Oluşturulan kullanıcı:', user);
+      return {
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+        company: user.company,
+        profession: user.profession,
+        userType: user.userType,
+        isActive: user.isActive,
+        createdAt: user.createdAt || user._createdAt,
+      };
+    } catch (error: any) {
+      // Sanity hatası varsa hatayı fırlat
+      console.error('Sanity mutation hatası:', error);
+      console.error('Hata detayları:', {
+        message: error.message,
+        statusCode: error.statusCode,
+        responseBody: error.responseBody,
+      });
+      
+      let errorMessage = 'E-posta aboneliği yapılırken bir hata oluştu. Lütfen tekrar deneyin.';
+      
+      if (error.message?.includes('permission') || error.statusCode === 403) {
+        errorMessage = 'İZİN HATASI: Sanity token\'ınızın "Editor" veya "Admin" yetkisi olduğundan emin olun.';
+      } else if (error.message?.includes('duplicate') || error.message?.includes('already exists')) {
+        errorMessage = 'Bu e-posta adresi zaten kayıtlı.';
+      } else if (error.message) {
+        errorMessage = `Sanity hatası: ${error.message}`;
+      }
+      
+      throw new Error(errorMessage);
+    }
+  }
+  
+  // Local storage fallback - sadece Sanity kullanılmıyorsa
+  if (!useSanity || !sanity) {
+    await delay(SIMULATED_DELAY);
+    const users = getItem<User[]>(KEYS.USERS || 'birim_users') || [];
+    const existingUser = users.find(u => normalizeEmail(u.email) === normEmail);
+    if (existingUser) throw new Error('Bu e-posta adresi zaten aboneliğe kayıtlı');
+    
+    const newUser: User = {
+      _id: `user_${Date.now()}`,
+      email: normEmail,
+      name: '',
+      company: '',
+      profession: '',
+      userType: 'email_subscriber',
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    };
+    
+    setItem(KEYS.USERS || 'birim_users', [...users, newUser]);
+    return newUser;
+  }
+  
+  // Sanity kullanılıyorsa ama buraya gelmemeli (yukarıda hata fırlatılmalı)
+  throw new Error('Üye kaydı yapılamadı. Lütfen tekrar deneyin.');
+};
+
+// Full member registration (password ile)
+export const registerUser = async (email: string, password: string, name?: string, company?: string, profession?: string): Promise<User> => {
+  const normEmail = normalizeEmail(email);
+  if (!normEmail) {
+    throw new Error('Geçerli bir e-posta adresi girin');
+  }
+  if (useSanity && sanity) {
+    // Check if user already exists
+    const existingUser = await sanity.fetch(
+      groq`*[_type == "user" && lower(email) == $email][0]`,
+      { email: normEmail }
+    );
+    if (existingUser) {
+      // Eğer email_subscriber ise, full_member'a yükselt
+      if (existingUser.userType === 'email_subscriber') {
+        const passwordHash = await hashPassword(password);
+        // Mutations için authenticated client kullan, yoksa hata fırlat
+        if (!sanityMutations) {
+          throw new Error('Sanity token yapılandırılmamış. Lütfen .env dosyasına VITE_SANITY_TOKEN ekleyin. Üye bilgileri CMS\'de görünmeyecektir.');
+        }
+        
+        try {
+          console.log('Sanity\'de email subscriber full_member\'a yükseltiliyor...', existingUser._id);
+          const updatedUser = await sanityMutations.patch(existingUser._id).set({
+            password: passwordHash,
+            name: name || '',
+            company: company || '',
+            profession: profession || '',
+            userType: 'full_member',
+          }).commit();
+          
+          console.log('Sanity\'de kullanıcı başarıyla güncellendi:', updatedUser._id);
+          return {
+            _id: updatedUser._id,
+            email: updatedUser.email,
+            name: updatedUser.name,
+            company: updatedUser.company,
+            profession: updatedUser.profession,
+            userType: updatedUser.userType,
+            isActive: updatedUser.isActive,
+            createdAt: updatedUser.createdAt || updatedUser._createdAt,
+          };
+        } catch (error: any) {
+          // Sanity hatası varsa hatayı fırlat (local storage'a düşme)
+          console.error('Sanity mutation hatası:', error);
+          let errorMessage = 'Üye kaydı güncellenirken bir hata oluştu. Lütfen tekrar deneyin.';
+          
+          if (error.message?.includes('permission')) {
+            errorMessage = 'İZİN HATASI: Sanity token\'ınızın "Editor" veya "Admin" yetkisi olduğundan emin olun. Üye bilgileri CMS\'de görünmeyecektir.';
+          } else if (error.message) {
+            errorMessage = `Sanity hatası: ${error.message}`;
+          }
+          
+          throw new Error(errorMessage);
+        }
+      } else {
+        throw new Error('Bu e-posta adresi zaten kayıtlı');
+      }
+    }
+    
+    // Hash password
+    const passwordHash = await hashPassword(password);
+    
+    // Create full member
+    // Mutations için authenticated client kullan, yoksa hata fırlat
+    if (!sanityMutations) {
+      throw new Error('Sanity token yapılandırılmamış. Lütfen proje kök dizininde .env dosyası oluşturup VITE_SANITY_TOKEN=your_token_here ekleyin. Token\'ı https://sanity.io/manage adresinden alabilirsiniz. Token\'ın "Editor" veya "Admin" yetkisi olmalıdır.');
+    }
+    
+    try {
+      console.log('Sanity\'ye full member oluşturuluyor...', email);
+      const user = await sanityMutations.create({
+        _type: 'user',
+        email: normEmail,
+        password: passwordHash,
+        name: name || '',
+        company: company || '',
+        profession: profession || '',
+        userType: 'full_member',
+        isActive: true,
+        createdAt: new Date().toISOString(),
+      });
+      
+      console.log('Sanity\'de full member başarıyla oluşturuldu:', user._id);
+      return {
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+        company: user.company,
+        profession: user.profession,
+        userType: user.userType,
+        isActive: user.isActive,
+        createdAt: user.createdAt || user._createdAt,
+      };
+    } catch (error: any) {
+      // Sanity hatası varsa hatayı fırlat (local storage'a düşme)
+      console.error('Sanity mutation hatası:', error);
+      let errorMessage = 'Üye kaydı yapılırken bir hata oluştu. Lütfen tekrar deneyin.';
+      
+      if (error.message?.includes('permission')) {
+        errorMessage = 'İZİN HATASI: Sanity token\'ınızın "Editor" veya "Admin" yetkisi olduğundan emin olun. Üye bilgileri CMS\'de görünmeyecektir.';
+      } else if (error.message) {
+        errorMessage = `Sanity hatası: ${error.message}`;
+      }
+      
+      throw new Error(errorMessage);
+    }
+  }
+  
+  // Local storage fallback - sadece Sanity kullanılmıyorsa
+  if (!useSanity || !sanity) {
+    await delay(SIMULATED_DELAY);
+    const users = getItem<User[]>(KEYS.USERS || 'birim_users') || [];
+    const existingUser = users.find(u => normalizeEmail(u.email) === normEmail);
+    if (existingUser) {
+      if (existingUser.userType === 'email_subscriber') {
+        // Email subscriber'ı full member'a yükselt
+        const passwordHash = await hashPassword(password);
+        const userPasswords = getItem<{ [email: string]: string }>('birim_user_passwords') || {};
+        userPasswords[normEmail] = passwordHash;
+        setItem('birim_user_passwords', userPasswords);
+        
+        const updatedUser: User = {
+          ...existingUser,
+          name: name || '',
+          company: company || '',
+          profession: profession || '',
+          userType: 'full_member',
+        };
+        setItem(KEYS.USERS || 'birim_users', users.map(u => normalizeEmail(u.email) === normEmail ? updatedUser : u));
+        return updatedUser;
+      }
+      throw new Error('Bu e-posta adresi zaten kayıtlı');
+    }
+    
+    const passwordHash = await hashPassword(password);
+    const newUser: User = {
+      _id: `user_${Date.now()}`,
+      email: normEmail,
+      name: name || '',
+      company: company || '',
+      profession: profession || '',
+      userType: 'full_member',
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    };
+    
+    // Store password hash separately (in real app, don't store in localStorage)
+    const userPasswords = getItem<{ [email: string]: string }>('birim_user_passwords') || {};
+    userPasswords[normEmail] = passwordHash;
+    setItem('birim_user_passwords', userPasswords);
+    
+    setItem(KEYS.USERS || 'birim_users', [...users, newUser]);
+    return newUser;
+  }
+  
+  // Sanity kullanılıyorsa ama buraya gelmemeli (yukarıda hata fırlatılmalı)
+  throw new Error('Üye kaydı yapılamadı. Lütfen tekrar deneyin.');
+};
+
+export const loginUser = async (email: string, password: string): Promise<User | null> => {
+  const normEmail = normalizeEmail(email);
+  if (useSanity && sanity) {
+    const passwordHash = await hashPassword(password);
+    const user = await sanity.fetch(
+      groq`*[_type == "user" && lower(email) == $email && password == $passwordHash && isActive == true][0]{
+        _id,
+        email,
+        name,
+        company,
+        profession,
+        userType,
+        isActive,
+        createdAt
+      }`,
+      { email: normEmail, passwordHash }
+    );
+    
+    if (!user) {
+      return null;
+    }
+    
+    return {
+      _id: user._id,
+      email: user.email,
+      name: user.name,
+      company: user.company,
+      profession: user.profession,
+      userType: user.userType,
+      isActive: user.isActive,
+      createdAt: user.createdAt || user._createdAt,
+    };
+  }
+  
+  // Local storage fallback
+  await delay(SIMULATED_DELAY);
+  const users = getItem<User[]>(KEYS.USERS || 'birim_users') || [];
+  const userPasswords = getItem<{ [email: string]: string }>('birim_user_passwords') || {};
+  const passwordHash = await hashPassword(password);
+  
+  const user = users.find(u => normalizeEmail(u.email) === normEmail && u.isActive);
+  if (!user || userPasswords[normEmail] !== passwordHash) {
+    return null;
+  }
+  
+  return user;
+};
+
+export const getUserByEmail = async (email: string): Promise<User | null> => {
+  const normEmail = normalizeEmail(email);
+  if (useSanity && sanity) {
+    const user = await sanity.fetch(
+      groq`*[_type == "user" && lower(email) == $email][0]{
+        _id,
+        email,
+        name,
+        company,
+        profession,
+        userType,
+        isActive,
+        createdAt
+      }`,
+      { email: normEmail }
+    );
+    
+    if (!user) {
+      return null;
+    }
+    
+    return {
+      _id: user._id,
+      email: user.email,
+      name: user.name,
+      company: user.company,
+      profession: user.profession,
+      userType: user.userType,
+      isActive: user.isActive,
+      createdAt: user.createdAt || user._createdAt,
+    };
+  }
+  
+  await delay(SIMULATED_DELAY);
+  const users = getItem<User[]>(KEYS.USERS || 'birim_users') || [];
+  const user = users.find(u => normalizeEmail(u.email) === normEmail);
+  return user || null;
+};
+
+export const getUserById = async (id: string): Promise<User | null> => {
+  if (useSanity && sanity) {
+    const user = await sanity.fetch(
+      groq`*[_type == "user" && _id == $id][0]{
+        _id,
+        email,
+        name,
+        company,
+        profession,
+        userType,
+        isActive,
+        createdAt
+      }`,
+      { id }
+    );
+    
+    if (!user) {
+      return null;
+    }
+    
+    return {
+      _id: user._id,
+      email: user.email,
+      name: user.name,
+      company: user.company,
+      profession: user.profession,
+      userType: user.userType,
+      isActive: user.isActive,
+      createdAt: user.createdAt || user._createdAt,
+    };
+  }
+  
+  await delay(SIMULATED_DELAY);
+  const users = getItem<User[]>(KEYS.USERS || 'birim_users') || [];
+  const user = users.find(u => u._id === id);
+  return user || null;
+};
 

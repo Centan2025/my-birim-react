@@ -1,20 +1,54 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Birim Web
 
-# Run and deploy your AI Studio app
+## Kurulum
 
-This contains everything you need to run your app locally.
+1. Bağımlılıkları yükleyin:
+   ```bash
+   npm install
+   ```
 
-View your app in AI Studio: https://ai.studio/apps/drive/1NXfuNTPODntdNw8lC_C9pQXtdrbHvV0d
+2. Sanity Token Yapılandırması:
+   
+   Üye kayıtlarının CMS'de görünmesi için Sanity token'ı yapılandırmanız gerekmektedir.
+   
+   a. Proje kök dizininde `.env` dosyası oluşturun:
+   ```bash
+   # Windows'ta
+   type nul > .env
+   
+   # Linux/Mac'te
+   touch .env
+   ```
+   
+   b. `.env` dosyasına aşağıdaki satırları ekleyin:
+   ```env
+   VITE_SANITY_PROJECT_ID=wn3a082f
+   VITE_SANITY_DATASET=production
+   VITE_SANITY_API_VERSION=2025-01-01
+   VITE_SANITY_TOKEN=your_sanity_token_here
+   ```
+   
+   c. Sanity token'ınızı alın:
+   - https://sanity.io/manage adresine gidin
+   - Projenizi seçin (wn3a082f)
+   - "API" sekmesine gidin
+   - "Add API token" butonuna tıklayın
+   - Token'a bir isim verin (örn: "Web App Token")
+   - **"Editor" veya "Admin" yetkisi seçin** (önemli!)
+   - Token'ı kopyalayın ve `.env` dosyasındaki `VITE_SANITY_TOKEN` değerine yapıştırın
+   
+   d. Uygulamayı yeniden başlatın:
+   ```bash
+   npm run dev
+   ```
 
-## Run Locally
+3. Uygulamayı çalıştırın:
+   ```bash
+   npm run dev
+   ```
 
-**Prerequisites:**  Node.js
+## Önemli Notlar
 
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+- Sanity token'ı olmadan üye kayıtları sadece local storage'da saklanır ve CMS'de görünmez
+- Token'ın "Editor" veya "Admin" yetkisi olmalıdır, aksi halde üye kayıtları yapılamaz
+- `.env` dosyasını git'e commit etmeyin (`.gitignore`'da olmalı)

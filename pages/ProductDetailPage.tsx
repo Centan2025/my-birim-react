@@ -53,7 +53,7 @@ export function ProductDetailPage() {
   const youTubePlayerRef = useRef<HTMLIFrameElement | null>(null);
   const [ytPlaying, setYtPlaying] = useState<boolean>(false);
   const [ytIframeLoaded, setYtIframeLoaded] = useState<boolean>(false);
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth();
   const { t, locale } = useTranslation();
   const { addToCart } = useCart();
   const [activeMaterialGroup, setActiveMaterialGroup] = useState<number>(0);
@@ -673,29 +673,69 @@ export function ProductDetailPage() {
               </div>
             )}
 
-            {isLoggedIn && product.exclusiveContent && (
+            {product.exclusiveContent && (
               <div className="bg-white p-8 sm:p-12 rounded-lg border">
-                <h2 className="text-3xl font-light text-gray-600 mb-8 border-b pb-4 border-gray-300">{t('exclusive_content')}</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                  <div>
-                    <h3 className="text-xl font-light mb-4 text-gray-500">{t('additional_images')}</h3>
-                    <div className="grid grid-cols-2 gap-3">
-                      {product.exclusiveContent.images.map((img, idx) => (<img key={idx} src={img} alt={`Exclusive ${idx}`} className="w-full object-cover shadow-sm"/>))}
+                <h2 className="text-3xl font-light text-gray-600 mb-8 border-b pb-4 border-gray-300">{t('exclusive_content') || 'Özel İçerik'}</h2>
+                {isLoggedIn && user?.userType === 'full_member' ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                    <div>
+                      <h3 className="text-xl font-light mb-4 text-gray-500">{t('additional_images') || 'Ek Görseller'}</h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        {product.exclusiveContent.images && product.exclusiveContent.images.length > 0 ? (
+                          product.exclusiveContent.images.map((img, idx) => (<img key={idx} src={img} alt={`Exclusive ${idx}`} className="w-full object-cover shadow-sm"/>))
+                        ) : (
+                          <p className="text-gray-400 text-sm">Ek görsel bulunmuyor</p>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-light mb-4 text-gray-500">{t('technical_drawings') || 'Teknik Çizimler'}</h3>
+                      <ul className="space-y-3">
+                        {product.exclusiveContent.drawings && product.exclusiveContent.drawings.length > 0 ? (
+                          product.exclusiveContent.drawings.map((doc, idx) => (
+                            <li key={idx}>
+                              <a href={doc.url} download className="text-gray-600 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5">
+                                <DownloadIcon/> {t(doc.name)}
+                              </a>
+                            </li>
+                          ))
+                        ) : (
+                          <li className="text-gray-400 text-sm">Teknik çizim bulunmuyor</li>
+                        )}
+                      </ul>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-light mb-4 text-gray-500">{t('3d_models') || '3D Modeller'}</h3>
+                      <ul className="space-y-3">
+                        {product.exclusiveContent.models3d && product.exclusiveContent.models3d.length > 0 ? (
+                          product.exclusiveContent.models3d.map((model, idx) => (
+                            <li key={idx}>
+                              <a href={model.url} download className="text-gray-600 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5">
+                                <DownloadIcon/> {t(model.name)}
+                              </a>
+                            </li>
+                          ))
+                        ) : (
+                          <li className="text-gray-400 text-sm">3D model bulunmuyor</li>
+                        )}
+                      </ul>
                     </div>
                   </div>
-                  <div>
-                    <h3 className="text-xl font-light mb-4 text-gray-500">{t('technical_drawings')}</h3>
-                    <ul className="space-y-3">
-                      {product.exclusiveContent.drawings.map((doc, idx) => (<li key={idx}><a href={doc.url} download className="text-gray-600 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(doc.name)}</a></li>))}
-                    </ul>
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-gray-600 mb-6 text-lg">
+                      {isLoggedIn && user?.userType === 'email_subscriber' 
+                        ? 'Bu ürünün özel içeriklerine (teknik çizimler, 3D modeller, ek görseller) erişmek için tam üye olmanız gerekiyor. Tam üye olmak için lütfen giriş yapın ve hesabınızı yükseltin.'
+                        : 'Bu ürünün özel içeriklerine (teknik çizimler, 3D modeller, ek görseller) erişmek için tam üye olmanız gerekiyor.'}
+                    </p>
+                    <Link
+                      to="/login"
+                      className="inline-block bg-gray-900 text-white font-semibold py-3 px-8 rounded-lg hover:bg-gray-700 transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110 active:scale-100 hover:shadow-lg"
+                    >
+                      {isLoggedIn && user?.userType === 'email_subscriber' ? 'Tam Üye Ol' : 'Üye Ol / Giriş Yap'}
+                    </Link>
                   </div>
-                  <div>
-                    <h3 className="text-xl font-light mb-4 text-gray-500">{t('3d_models')}</h3>
-                    <ul className="space-y-3">
-                      {product.exclusiveContent.models3d.map((model, idx) => (<li key={idx}><a href={model.url} download className="text-gray-600 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5"><DownloadIcon/> {t(model.name)}</a></li>))}
-                    </ul>
-                  </div>
-                </div>
+                )}
               </div>
             )}
 

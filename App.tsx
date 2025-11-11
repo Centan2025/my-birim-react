@@ -11,10 +11,11 @@ import { DesignerDetailPage } from './pages/DesignerDetailPage';
 import { AboutPage } from './pages/AboutPage';
 import { ContactPage } from './pages/ContactPage';
 import { LoginPage } from './pages/LoginPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { NewsPage } from './pages/NewsPage';
 import { NewsDetailPage } from './pages/NewsDetailPage';
-import { getFooterContent, getSiteSettings } from './services/cms';
-import type { FooterContent, SiteSettings } from './types';
+import { getFooterContent, getSiteSettings, subscribeEmail } from './services/cms';
+import type { FooterContent, SiteSettings, User } from './types';
 import { SiteLogo } from './components/SiteLogo';
 import { I18nProvider, useTranslation } from './i18n';
 import { CartProvider } from './context/CartContext';
@@ -29,7 +30,8 @@ const DynamicIcon: React.FC<{ svgString: string }> = ({ svgString }) => (
 
 interface AuthContextType {
   isLoggedIn: boolean;
-  login: () => void;
+  user: User | null;
+  login: (user: User) => void;
   logout: () => void;
 }
 
@@ -44,11 +46,37 @@ export function useAuth() {
 }
 
 const AuthProvider = ({ children }: PropsWithChildren) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const login = () => setIsLoggedIn(true);
-  const logout = () => setIsLoggedIn(false);
+  const [user, setUser] = useState<User | null>(null);
+  
+  // Load user from localStorage on mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem('birim_user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error('Failed to parse stored user', e);
+        localStorage.removeItem('birim_user');
+      }
+    }
+  }, []);
 
-  const value = { isLoggedIn, login, logout };
+  const login = (userData: User) => {
+    setUser(userData);
+    localStorage.setItem('birim_user', JSON.stringify(userData));
+  };
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('birim_user');
+  };
+
+  const value = { 
+    isLoggedIn: !!user, 
+    user,
+    login, 
+    logout 
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
@@ -247,11 +275,25 @@ const Footer = () => {
                     {/* Email abonelik formu - ortada mobilde, sağa yaslı desktop'ta */}
                     <div className="w-full lg:flex-1 flex justify-center lg:justify-end">
                         <form 
-                        onSubmit={(e) => {
+                        onSubmit={async (e) => {
                             e.preventDefault();
-                            // Email gönderme işlemi burada yapılacak
-                            console.log('Email:', email);
-                            setEmail('');
+                            if (email) {
+                                try {
+                                    const result = await subscribeEmail(email);
+                                    console.log('Email aboneliği sonucu:', result);
+                                    alert('E-posta aboneliğiniz başarıyla oluşturuldu!');
+                                    setEmail('');
+                                } catch (err: any) {
+                                    console.error('Email aboneliği hatası:', err);
+                                    // Özel durum: Local storage'a kaydedildi ama CMS'de görünmüyor
+                                    if (err.message === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
+                                        alert('E-posta aboneliğiniz kaydedildi!\n\nNot: CMS\'de görünmesi için .env dosyasına VITE_SANITY_TOKEN ekleyin. Detaylar: README.md');
+                                        setEmail('');
+                                    } else {
+                                        alert(err.message || 'Bir hata oluştu. Lütfen console\'u kontrol edin.');
+                                    }
+                                }
+                            }
                         }}
                         className="flex items-center gap-2"
                     >
@@ -311,7 +353,7 @@ export default function App() {
                     <Route path="/about" element={<AboutPage />} />
                     <Route path="/contact" element={<ContactPage />} />
                     <Route path="/login" element={<LoginPage />} />
-                    <Route path="/profile" element={<LoginPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/news" element={<NewsPage />} />
                     <Route path="/news/:newsId" element={<NewsDetailPage />} />
                 </Routes>

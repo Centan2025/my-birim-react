@@ -19,6 +19,8 @@ export interface SiteSettings {
   isHeaderTextVisible: boolean;
   /** Toggles bottom Prev/Next navigation on product detail page. */
   showProductPrevNext?: boolean;
+  /** Toggles the visibility of the cart button in the header. */
+  showCartButton?: boolean;
 }
 
 // --- Core Data Models ---
@@ -49,6 +51,30 @@ export interface Designer {
   bio: LocalizedString;
   /** URL for the designer's portrait or representative image. */
   image: string;
+}
+
+/**
+ * Represents a registered user/member.
+ */
+export type UserType = 'email_subscriber' | 'full_member';
+
+export interface User {
+  /** Unique identifier for the user (Sanity _id). */
+  _id: string;
+  /** User's email address (unique identifier). */
+  email: string;
+  /** User's full name. */
+  name?: string;
+  /** User's company name. */
+  company?: string;
+  /** User's profession. */
+  profession?: string;
+  /** Type of user: email subscriber or full member. */
+  userType?: UserType;
+  /** Whether the user account is active. */
+  isActive: boolean;
+  /** Registration date. */
+  createdAt: string;
 }
 
 /**

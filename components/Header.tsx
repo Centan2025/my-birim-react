@@ -42,6 +42,7 @@ export function Header() {
   const productsTimeoutRef = useRef<number | null>(null);
   const searchPanelRef = useRef<HTMLDivElement>(null);
   const searchButtonRef = useRef<HTMLButtonElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const headerContainerRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const productsButtonRef = useRef<HTMLDivElement>(null);
@@ -117,6 +118,16 @@ export function Header() {
     window.addEventListener('resize', onResize, { passive: true });
     return () => window.removeEventListener('resize', onResize);
   }, [updateSubmenuOffset]);
+
+  // Focus search input when search panel opens
+  useEffect(() => {
+    if (isSearchOpen && searchInputRef.current) {
+      // Small delay to ensure the panel is visible
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
+    }
+  }, [isSearchOpen]);
 
   // Fetch all data for search when the search modal is opened for the first time.
   useEffect(() => {
@@ -293,12 +304,12 @@ export function Header() {
                         key={langCode}
                         onClick={() => setLocale(langCode)}
                         aria-pressed={isActive}
-                        className={`group relative px-2.5 py-0.5 text-xs uppercase tracking-[0.2em] transition-colors duration-200 ${
+                        className={`group relative px-2.5 py-0.5 text-xs uppercase tracking-[0.3em] transition-colors duration-200 ${
                           isActive
-                            ? 'text-white font-bold'
-                            : 'text-gray-400/90 hover:text-white font-thin'
+                            ? 'text-white font-extralight'
+                            : 'text-gray-400/90 hover:text-white font-extralight'
                         }`}
-                        style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
+                        style={{ fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.35em' }}
                       >
                         <span className="relative inline-block">
                           {langCode.toUpperCase()}
@@ -313,14 +324,16 @@ export function Header() {
                 <NavLink to={isLoggedIn ? "/profile" : "/login"} className={iconClasses}>
                   <UserIcon />
                 </NavLink>
-                <button onClick={toggleCart} className={`relative ${iconClasses}`}>
-                  <ShoppingBagIcon />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-                      {cartCount}
-                    </span>
-                  )}
-                </button>
+                {settings?.showCartButton !== false && (
+                  <button onClick={toggleCart} className={`relative ${iconClasses}`}>
+                    <ShoppingBagIcon />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-1 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                        {cartCount}
+                      </span>
+                    )}
+                  </button>
+                )}
                 <div className="lg:hidden">
                   <button ref={mobileMenuButtonRef} onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className={iconClasses}>
                     <MenuIcon />
@@ -377,10 +390,10 @@ export function Header() {
         <div className="container mx-auto px-6 py-8">
             <div className="w-full max-w-3xl mx-auto">
                 <input
+                    ref={searchInputRef}
                     type="search"
-                    placeholder={t('search_placeholder')}
+                    placeholder={''}
                     className="w-full bg-transparent text-white text-2xl placeholder-gray-400 border-b border-gray-500 focus:border-white outline-none transition-colors duration-300 pb-3"
-                    autoFocus
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />

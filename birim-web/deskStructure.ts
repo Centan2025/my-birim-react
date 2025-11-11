@@ -48,6 +48,8 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
   return S.list()
     .title('İçerik')
     .items([
+      S.documentTypeListItem('siteSettings').title('Site Ayarları'),
+      S.documentTypeListItem('homePage').title('Ana Sayfa'),
       S.listItem()
         .title('Ürünler')
         .child(
@@ -55,17 +57,41 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
             .title('Ürünler')
             .items(categoryItems)
         ),
-      S.divider(),
       S.documentTypeListItem('designer').title('Tasarımcılar'),
       S.documentTypeListItem('project').title('Projeler'),
       S.documentTypeListItem('newsItem').title('Haberler'),
-      S.divider(),
-      S.documentTypeListItem('materialGroup').title('Malzeme Grupları'),
-      S.divider(),
-      S.documentTypeListItem('siteSettings').title('Site Ayarları'),
-      S.documentTypeListItem('homePage').title('Ana Sayfa'),
       S.documentTypeListItem('aboutPage').title('Hakkımızda'),
       S.documentTypeListItem('contactPage').title('İletişim'),
       S.documentTypeListItem('footer').title('Altbilgi'),
+      S.documentTypeListItem('materialGroup').title('Malzeme Grupları'),
+      // Üyeler
+      S.listItem()
+        .title('Üyeler')
+        .child(
+          S.list()
+            .title('Üyeler')
+            .items([
+              S.listItem()
+                .title('E-posta Aboneleri')
+                .child(
+                  S.documentList()
+                    .title('E-posta Aboneleri')
+                    .schemaType('user')
+                    .filter('_type == "user" && userType == $t')
+                    .params({ t: 'email_subscriber' })
+                ),
+              S.listItem()
+                .title('Tam Üyeler')
+                .child(
+                  S.documentList()
+                    .title('Tam Üyeler')
+                    .schemaType('user')
+                    .filter('_type == "user" && userType == $t')
+                    .params({ t: 'full_member' })
+                ),
+              S.divider(),
+              S.documentTypeListItem('user').title('Tüm Üyeler'),
+            ])
+        ),
     ])
 }

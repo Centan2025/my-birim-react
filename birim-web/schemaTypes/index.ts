@@ -9,6 +9,7 @@ import contactPage from './documents/contactPage'
 import footer from './documents/footer'
 import materialGroup from './documents/materialGroup'
 import project from './documents/project'
+import user from './documents/user'
 
 import {localizedString} from './objects/localizedString'
 import {localizedText} from './objects/localizedText'
@@ -47,6 +48,7 @@ export const schemaTypes = [
   footer,
   materialGroup,
   project,
+  user,
   // objects
   localizedString,
   localizedText,
