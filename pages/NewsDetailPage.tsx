@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getNewsById } from '../services/cms';
+import { getNewsById, getNews } from '../services/cms';
 import type { NewsItem, NewsMedia } from '../types';
 import { useTranslation } from '../i18n';
+import { useSiteSettings } from '../App';
 
 const getYouTubeId = (url: string): string | null => {
     if (!url) return null;
@@ -22,6 +23,8 @@ const formatDate = (dateString: string): string => {
 
 const MediaComponent: React.FC<{ media: NewsMedia }> = ({ media }) => {
     const { t } = useTranslation();
+    const { settings } = useSiteSettings();
+    const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none';
 
     const renderMedia = () => {
         if (media.type === 'image') {
@@ -29,7 +32,7 @@ const MediaComponent: React.FC<{ media: NewsMedia }> = ({ media }) => {
                 <img 
                     src={media.url} 
                     alt={t(media.caption) || ''} 
-                    className="w-full h-auto object-cover"
+                    className={`w-full h-auto object-cover ${imageBorderClass}`}
                 />
             );
         }
@@ -41,7 +44,7 @@ const MediaComponent: React.FC<{ media: NewsMedia }> = ({ media }) => {
                     <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16:9 Aspect Ratio */ }}>
                         <video 
                             src={media.url} 
-                            className="absolute top-0 left-0 w-full h-full object-cover"
+                            className={`absolute top-0 left-0 w-full h-full object-cover ${imageBorderClass}`}
                             controls
                             playsInline
                         />
@@ -57,7 +60,7 @@ const MediaComponent: React.FC<{ media: NewsMedia }> = ({ media }) => {
                         frameBorder="0" 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                         allowFullScreen
-                        className="absolute top-0 left-0 w-full h-full"
+                        className={`absolute top-0 left-0 w-full h-full ${imageBorderClass}`}
                     ></iframe>
                 </div>
             );
@@ -89,25 +92,51 @@ const MediaComponent: React.FC<{ media: NewsMedia }> = ({ media }) => {
     );
 };
 
+const MinimalChevronLeft = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="m15 18-6-6 6-6"/>
+  </svg>
+);
+
+const MinimalChevronRight = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="m9 18 6-6-6-6"/>
+  </svg>
+);
+
 export function NewsDetailPage() {
     const { newsId } = useParams<{ newsId: string }>();
     const [item, setItem] = useState<NewsItem | undefined>(undefined);
+    const [allNews, setAllNews] = useState<NewsItem[]>([]);
     const [loading, setLoading] = useState(true);
     const { t } = useTranslation();
+    const { settings } = useSiteSettings();
+    const showBottomPrevNext = Boolean(settings?.showProductPrevNext);
 
     useEffect(() => {
         const fetchNews = async () => {
             // Reset state before fetching to prevent showing stale data
             setItem(undefined);
             setLoading(true);
-            if (newsId) {
-                const newsItem = await getNewsById(newsId);
-                setItem(newsItem);
-            }
+            const [newsItem, newsList] = await Promise.all([
+                newsId ? getNewsById(newsId) : Promise.resolve(undefined),
+                getNews()
+            ]);
+            setItem(newsItem);
+            setAllNews(newsList);
             setLoading(false);
         };
         fetchNews();
     }, [newsId]);
+    
+    const { prevNews, nextNews } = useMemo(() => {
+        if (!item || allNews.length < 2) return { prevNews: null, nextNews: null };
+        const currentIndex = allNews.findIndex(n => n.id === item.id);
+        if (currentIndex === -1) return { prevNews: null, nextNews: null };
+        const prev = currentIndex > 0 ? allNews[currentIndex - 1] : null;
+        const next = currentIndex < allNews.length - 1 ? allNews[currentIndex + 1] : null;
+        return { prevNews: prev, nextNews: next };
+    }, [item, allNews]);
 
     if (loading) {
         return <div className="pt-28 text-center">{t('loading')}...</div>;
@@ -140,7 +169,7 @@ export function NewsDetailPage() {
                         <img 
                             src={item.mainImage} 
                             alt={t(item.title)}
-                            className="w-full h-auto object-cover mb-6"
+                            className={`w-full h-auto object-cover mb-6 ${settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'}`}
                         />
                     </article>
                 </div>
@@ -171,6 +200,38 @@ export function NewsDetailPage() {
                     </article>
                 </div>
             </div>
+            
+            {/* Bottom Prev / Next controls */}
+            {showBottomPrevNext && (prevNews || nextNews) && (
+                <div className="bg-white border-t border-gray-200">
+                    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                        <div className="flex items-center justify-between gap-4">
+                            <div className="flex-1">
+                                {prevNews ? (
+                                    <Link
+                                        to={`/news/${prevNews.id}`}
+                                        className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
+                                        aria-label="Previous news"
+                                    >
+                                        <MinimalChevronLeft className="w-12 h-12 md:w-16 md:h-16" />
+                                    </Link>
+                                ) : <span />}
+                            </div>
+                            <div className="flex-1 text-right">
+                                {nextNews ? (
+                                    <Link
+                                        to={`/news/${nextNews.id}`}
+                                        className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
+                                        aria-label="Next news"
+                                    >
+                                        <MinimalChevronRight className="w-12 h-12 md:w-16 md:h-16" />
+                                    </Link>
+                                ) : <span />}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

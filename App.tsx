@@ -14,6 +14,7 @@ import { LoginPage } from './pages/LoginPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { NewsPage } from './pages/NewsPage';
 import { NewsDetailPage } from './pages/NewsDetailPage';
+import CookiesPage from './pages/CookiesPage';
 import { getFooterContent, getSiteSettings, subscribeEmail } from './services/cms';
 import type { FooterContent, SiteSettings, User } from './types';
 import { SiteLogo } from './components/SiteLogo';
@@ -22,6 +23,7 @@ import { CartProvider } from './context/CartContext';
 import { CartSidebar } from './components/CartSidebar';
 import { ProjectsPage } from './pages/ProjectsPage';
 import { ProjectDetailPage } from './pages/ProjectDetailPage';
+import CookieBanner from './components/CookieBanner';
 
 // Helper component to render SVG strings safely
 const DynamicIcon: React.FC<{ svgString: string }> = ({ svgString }) => (
@@ -44,6 +46,37 @@ export function useAuth() {
   }
   return context;
 }
+
+interface SiteSettingsContextType {
+  settings: SiteSettings | null;
+}
+
+const SiteSettingsContext = createContext<SiteSettingsContextType | null>(null);
+
+export function useSiteSettings() {
+  const context = useContext(SiteSettingsContext);
+  if (!context) {
+    throw new Error('useSiteSettings must be used within a SiteSettingsProvider');
+  }
+  return context;
+}
+
+const SiteSettingsProvider = ({ children }: PropsWithChildren) => {
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
+
+  useEffect(() => {
+    getSiteSettings().then(setSettings);
+  }, []);
+
+  useEffect(() => {
+    // Update browser tab title if provided from settings; fallback to current title
+    if (settings?.topBannerText && typeof settings.topBannerText === 'string' && settings.topBannerText.trim()) {
+      document.title = settings.topBannerText.trim();
+    }
+  }, [settings?.topBannerText]);
+
+  return <SiteSettingsContext.Provider value={{ settings }}>{children}</SiteSettingsContext.Provider>;
+};
 
 const AuthProvider = ({ children }: PropsWithChildren) => {
   const [user, setUser] = useState<User | null>(null);
@@ -89,6 +122,17 @@ const ScrollToTop = () => {
   }, [pathname]);
 
   return null;
+};
+
+const TopBanner = () => {
+  const { settings } = useSiteSettings();
+  const text = settings?.topBannerText?.trim();
+  if (!text) return null;
+  return (
+    <div className="bg-gray-900 text-gray-200 text-xs md:text-sm px-4 sm:px-6 lg:px-8 py-2 border-b border-white/10">
+      <div className="container mx-auto">{text}</div>
+    </div>
+  );
 };
 
 const Footer = () => {
@@ -295,20 +339,20 @@ const Footer = () => {
                                 }
                             }
                         }}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-1 border-b border-white pb-0.5 w-full max-w-sm"
                     >
                         <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="E-posta adresiniz"
-                            className="px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-sm text-white placeholder-gray-400 focus:outline-none focus:border-white focus:bg-gray-700 transition-all duration-200 text-sm min-w-[200px]"
+                            placeholder={t('email_placeholder')}
+                            className="flex-1 min-w-0 py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 transition-all duration-200 text-[11px] min-w-[140px] md:min-w-[180px]"
                         />
                         <button
                             type="submit"
-                            className="px-5 py-2 bg-transparent border border-white/30 text-white rounded-sm hover:bg-white/10 hover:border-white/50 transition-all duration-200 text-xs font-light uppercase tracking-wider"
+                            className="px-0 py-1 bg-transparent border-0 text-gray-400 hover:text-white transition-colors duration-200 text-xs font-light uppercase tracking-wider"
                         >
-                            Abone Ol
+                            {t('subscribe')}
                         </button>
                     </form>
                     </div>
@@ -317,11 +361,35 @@ const Footer = () => {
                     <p>{t(content.copyrightText)}</p>
                     {(content.legalLinks && content.legalLinks.length > 0) && (
                         <div className="flex flex-wrap justify-start gap-x-4 gap-y-2">
-                            {content.legalLinks.filter(link => link.isVisible).map((link, index) => (
-                                <a key={index} href={link.url} className="hover:text-white hover:underline transition-colors duration-200">
-                                    {t(link.text)}
-                                </a>
-                            ))}
+                            {content.legalLinks.filter(link => link?.isVisible).map((link, index) => {
+                                const url = typeof link?.url === 'string' ? link.url : '';
+                                if (!url) {
+                                    return (
+                                        <span key={index} className="opacity-80 select-none">{t(link.text)}</span>
+                                    );
+                                }
+                                const isHttp = /^https?:\/\//.test(url);
+                                const isInternalLink = url.startsWith('/') && !url.startsWith('//') && !isHttp;
+                                return isInternalLink ? (
+                                    <Link
+                                        key={index}
+                                        to={url}
+                                        className="text-gray-500 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
+                                    >
+                                        {t(link.text)}
+                                    </Link>
+                                ) : (
+                                    <a
+                                        key={index}
+                                        href={url}
+                                        className="text-gray-500 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
+                                        target={isHttp ? '_blank' : undefined}
+                                        rel={isHttp ? 'noopener noreferrer' : undefined}
+                                    >
+                                        {t(link.text)}
+                                    </a>
+                                );
+                            })}
                         </div>
                     )}
                 </div>
@@ -335,12 +403,14 @@ export default function App() {
     <AuthProvider>
       <I18nProvider>
         <CartProvider>
+          <SiteSettingsProvider>
             <HashRouter>
             <div className="flex flex-col min-h-screen">
                 <ScrollToTop />
                 <Header />
                 <CartSidebar />
                 <main className="flex-grow">
+                <TopBanner />
                 <Routes>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/products" element={<CategoriesPage />} />
@@ -356,11 +426,14 @@ export default function App() {
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/news" element={<NewsPage />} />
                     <Route path="/news/:newsId" element={<NewsDetailPage />} />
+                    <Route path="/cookies" element={<CookiesPage />} />
                 </Routes>
                 </main>
+                <CookieBanner />
                 <Footer />
             </div>
             </HashRouter>
+          </SiteSettingsProvider>
         </CartProvider>
       </I18nProvider>
     </AuthProvider>

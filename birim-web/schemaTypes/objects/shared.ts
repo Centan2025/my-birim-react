@@ -303,7 +303,13 @@ export const legalLink = defineType({
   type: 'object',
   fields: [
     defineField({name: 'text', title: 'Metin', type: 'localizedString'}),
-    defineField({name: 'url', title: 'URL', type: 'url'}),
+    defineField({
+      name: 'url', 
+      title: 'URL', 
+      type: 'string',
+      description: 'İç link için: /cookies, /about gibi. Dış link için: https://example.com gibi tam URL.',
+      validation: (Rule) => Rule.required()
+    }),
     defineField({name: 'isVisible', title: 'Görünür', type: 'boolean', initialValue: true}),
   ],
 })

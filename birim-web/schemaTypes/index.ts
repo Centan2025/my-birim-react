@@ -10,9 +10,12 @@ import footer from './documents/footer'
 import materialGroup from './documents/materialGroup'
 import project from './documents/project'
 import user from './documents/user'
+import cookiesPolicy from './documents/cookiesPolicy'
+import translations from './documents/translations'
 
 import {localizedString} from './objects/localizedString'
 import {localizedText} from './objects/localizedText'
+import {localizedPortableText} from './objects/localizedPortableText'
 import {
   productDimensionDetail,
   productDimensionSet,
@@ -49,9 +52,12 @@ export const schemaTypes = [
   materialGroup,
   project,
   user,
+  cookiesPolicy,
+  translations,
   // objects
   localizedString,
   localizedText,
+  localizedPortableText,
   productDimensionDetail,
   productDimensionSet,
   productDimensionImage,

@@ -2,17 +2,20 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import type { Product } from '../types';
 import { useTranslation } from '../i18n';
+import { useSiteSettings } from '../App';
 
 export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'light' }> = ({ product, variant = 'default' }) => {
   const { t } = useTranslation();
+  const { settings } = useSiteSettings();
+  const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none';
   const isLight = variant === 'light';
   return (
     <Link to={`/product/${product.id}`} className="group block">
-      <div className="relative overflow-hidden aspect-square">
+      <div className={`relative overflow-hidden aspect-square ${imageBorderClass}`}>
         <img
           src={product.mainImage}
           alt={t(product.name)}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${imageBorderClass}`}
         />
       </div>
       <div className="mt-4 overflow-hidden">

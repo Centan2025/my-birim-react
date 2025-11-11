@@ -1,5 +1,5 @@
 import { initialData, KEYS, aboutPageContentData } from '../data';
-import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem, ProductMaterial, ProductVariant, Project, LocalizedString, User, UserType } from '../types';
+import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem, ProductMaterial, ProductVariant, Project, LocalizedString, User, UserType, CookiesPolicy } from '../types';
 import { createClient } from '@sanity/client'
 import groq from 'groq'
 import imageUrlBuilder from '@sanity/image-url'
@@ -11,12 +11,33 @@ const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 // Email'leri tekilleştirmek için normalize et (trim + lowercase)
 const normalizeEmail = (value: string): string => (value || '').trim().toLowerCase();
 
+// Build Sanity file CDN URL from asset {_id|_ref|url}
+const toFileUrl = (asset: any): string => {
+  if (!asset) return ''
+  if (asset.url) return asset.url
+  const raw = String(asset._id || asset._ref || '')
+  if (!raw) return ''
+  // file-<assetId>-<ext>
+  const cleaned = raw.replace(/^file-/, '')
+  const [assetId, ext] = cleaned.split('-')
+  if (!assetId) return ''
+  const postfix = ext ? `.${ext}` : ''
+  return `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${assetId}${postfix}`
+}
+
 // --- Sanity runtime setup (auto enable if env present) ---
 // Prefer env vars; if missing, fall back to known defaults
 const SANITY_PROJECT_ID = import.meta.env.VITE_SANITY_PROJECT_ID || 'wn3a082f'
 const SANITY_DATASET = import.meta.env.VITE_SANITY_DATASET || 'production'
 const SANITY_API_VERSION = import.meta.env.VITE_SANITY_API_VERSION || '2025-01-01'
 const useSanity = Boolean(SANITY_PROJECT_ID && SANITY_DATASET)
+
+// Prod'da varsayılan davranış: local fallback kapalı.
+// İstenirse açıkça VITE_ENABLE_LOCAL_FALLBACK=true ile etkinleştirilebilir.
+const defaultEnableFallback = import.meta.env.PROD ? 'false' : 'true'
+const ENABLE_LOCAL_FALLBACK = String(
+  (import.meta as any).env?.VITE_ENABLE_LOCAL_FALLBACK ?? defaultEnableFallback
+).toLowerCase() !== 'false'
 
 const sanity = useSanity
   ? createClient({ projectId: SANITY_PROJECT_ID, dataset: SANITY_DATASET, apiVersion: SANITY_API_VERSION, useCdn: true })
@@ -52,16 +73,20 @@ if (typeof window !== 'undefined') {
     hasToken: hasToken,
     tokenLength: SANITY_TOKEN ? SANITY_TOKEN.length : 0,
     mutationsEnabled: Boolean(sanityMutations),
+    enableLocalFallback: ENABLE_LOCAL_FALLBACK,
+    envMode: import.meta.env.PROD ? 'production' : 'development',
     allEnvKeys: Object.keys(import.meta.env).filter(k => k.startsWith('VITE_')),
   });
   
-  if (useSanity && !hasToken) {
-    console.warn('⚠️ Sanity token yapılandırılmamış! Üye kayıtları CMS\'de görünmeyecektir. .env.local dosyasına VITE_SANITY_TOKEN ekleyin ve uygulamayı yeniden başlatın.');
+  if (useSanity && !hasToken && ENABLE_LOCAL_FALLBACK) {
+    console.warn('⚠️ Sanity token yapılandırılmamış! Local fallback AÇIK. Abonelikler geçici olarak localStorage\'a kaydedilecek.');
     console.warn('Token kontrolü:', {
       envToken: envToken ? 'var' : 'yok',
       SANITY_TOKEN: SANITY_TOKEN ? 'var' : 'yok',
       sanityMutations: sanityMutations ? 'var' : 'yok'
     });
+  } else if (useSanity && !hasToken && !ENABLE_LOCAL_FALLBACK) {
+    console.error('❌ Sanity token yok ve local fallback DEVRE DIŞI. Yazma işlemleri hata verecek.');
   } else if (useSanity && hasToken && !sanityMutations) {
     console.error('❌ Sanity token mevcut ama mutations client oluşturulamadı!');
   } else if (useSanity && sanityMutations) {
@@ -271,10 +296,76 @@ const setItem = <T>(key: string, data: T): void => {
     }
 };
 
+// Translations
+export const getTranslations = async (): Promise<Record<string, Record<string, string>>> => {
+    if (useSanity && sanity) {
+        try {
+            // Sadece published dokümanları çek (draft'ları hariç tut)
+            // CDN cache'i bypass etmek için ayrı bir client kullan (useCdn: false)
+            // En güncel olanı önce getir, aynı dilde birden fazla kayıt varsa en güncel olan kazansın
+            const q = groq`*[_type == "uiTranslations" && !(_id in path("drafts.**"))] | order(_updatedAt desc){ language, strings }`
+            // Çeviriler için CDN cache'i bypass et (anlık güncellemeler için)
+            const noCacheClient = createClient({ 
+                projectId: SANITY_PROJECT_ID, 
+                dataset: SANITY_DATASET, 
+                apiVersion: SANITY_API_VERSION, 
+                useCdn: false 
+            })
+            const results = await noCacheClient.fetch(q)
+            const translationsMap: Record<string, Record<string, string>> = {}
+            if (Array.isArray(results)) {
+                results.forEach((item: any) => {
+                    if (item.language && item.strings) {
+                        const normalized: Record<string, string> = { ...item.strings }
+                        // Şema alanı 'models_3d' ise, frontend anahtarı '3d_models' bekliyor -> eşle
+                        if (normalized.models_3d && !normalized['3d_models']) {
+                            normalized['3d_models'] = normalized.models_3d
+                        }
+                        // Aynı dil daha önce eklenmişse atla (ilk gelen en günceldir)
+                        if (!translationsMap[item.language]) {
+                            translationsMap[item.language] = normalized
+                        }
+                    }
+                })
+            }
+            return translationsMap
+        } catch (error) {
+            console.error('Failed to fetch translations from Sanity', error)
+            return {}
+        }
+    }
+    return {}
+}
+
 // Languages
 export const getLanguages = async (): Promise<string[]> => {
+    if (useSanity && sanity) {
+        try {
+            const langs = await sanity.fetch(groq`*[_type=="siteSettings"][0].languages`);
+            const base = ['tr', 'en'];
+            if (Array.isArray(langs)) {
+                // Support both legacy [string] and new [{code, visible}]
+                const normalized = langs.map((l: any) => {
+                    if (typeof l === 'string') return { code: l, visible: true };
+                    const code = String(l?.code || '').toLowerCase();
+                    const visible = l?.visible !== false;
+                    return { code, visible };
+                }).filter((l: any) => l.code);
+                const visibleCodes = normalized.filter((l: any) => l.visible).map((l: any) => l.code);
+                const merged = [...base, ...visibleCodes];
+                return Array.from(new Set(merged));
+            }
+            // if not array, fall back to base
+            return base;
+        } catch (e) {
+            console.warn('Failed to fetch languages from Sanity, falling back to local storage.', e);
+        }
+    }
     await delay(SIMULATED_DELAY);
-    return getItem<string[]>(KEYS.LANGUAGES);
+    const fromLocal = getItem<string[]>(KEYS.LANGUAGES);
+    const base = ['tr', 'en'];
+    const merged = Array.isArray(fromLocal) && fromLocal.length > 0 ? [...base, ...fromLocal] : base;
+    return Array.from(new Set(merged));
 };
 export const updateLanguages = async (languages: string[]): Promise<void> => {
     await delay(SIMULATED_DELAY);
@@ -292,10 +383,12 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
         // Backward compatible defaults
         return {
             logoUrl: s?.logo ? mapImage(s.logo) : (s?.logoUrl || ''),
-            headerText: s?.headerText ?? 'BİRİM',
-            isHeaderTextVisible: Boolean(s?.isHeaderTextVisible ?? true),
+            topBannerText: s?.topBannerText || '',
             showProductPrevNext: Boolean(s?.showProductPrevNext ?? false),
             showCartButton: Boolean(s?.showCartButton ?? true),
+            imageBorderStyle: (s?.imageBorderStyle === 'rounded' || s?.imageBorderStyle === 'square') ? s.imageBorderStyle : 'square',
+            isLanguageSwitcherVisible: s?.isLanguageSwitcherVisible !== false,
+            languages: Array.isArray(s?.languages) ? s.languages : undefined,
         }
     }
     await delay(SIMULATED_DELAY);
@@ -303,10 +396,10 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
     // Ensure all fields are present with defaults
     return {
         logoUrl: s?.logoUrl || '',
-        headerText: s?.headerText ?? 'BİRİM',
-        isHeaderTextVisible: Boolean(s?.isHeaderTextVisible ?? true),
+        topBannerText: s?.topBannerText || '',
         showProductPrevNext: Boolean(s?.showProductPrevNext ?? false),
         showCartButton: Boolean(s?.showCartButton ?? true),
+        imageBorderStyle: (s?.imageBorderStyle === 'rounded' || s?.imageBorderStyle === 'square') ? s.imageBorderStyle : 'square',
     };
 };
 export const updateSiteSettings = async (settings: SiteSettings): Promise<void> => {
@@ -434,8 +527,8 @@ export const getProducts = async (): Promise<Product[]> => {
           mediaSectionTitle: r?.mediaSectionTitle,
           exclusiveContent: {
             images: mapImages(r?.exclusiveContent?.images),
-            drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: d?.file?.asset?._ref || d?.file?.asset?._id || '' })),
-            models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({ name: m?.name, url: m?.file?.asset?._ref || m?.file?.asset?._id || '' })),
+            drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: toFileUrl(d?.file?.asset) })),
+            models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({ name: m?.name, url: toFileUrl(m?.file?.asset) })),
           },
         }))
     }
@@ -493,8 +586,8 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           mediaSectionTitle: r?.mediaSectionTitle,
           exclusiveContent: {
             images: mapImages(r?.exclusiveContent?.images),
-            drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: d?.file?.asset?._ref || d?.file?.asset?._id || '' })),
-            models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({ name: m?.name, url: m?.file?.asset?._ref || m?.file?.asset?._id || '' })),
+            drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: toFileUrl(d?.file?.asset) })),
+            models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({ name: m?.name, url: toFileUrl(m?.file?.asset) })),
           },
         })
     }
@@ -542,8 +635,8 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
           materials: mapMaterials((r.materialSelections || []).flatMap((s: any) => s?.materials || [])),
           exclusiveContent: {
             images: mapImages(r?.exclusiveContent?.images),
-            drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: d?.file?.asset?._ref || d?.file?.asset?._id || '' })),
-            models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({ name: m?.name, url: m?.file?.asset?._ref || m?.file?.asset?._id || '' })),
+            drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: toFileUrl(d?.file?.asset) })),
+            models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({ name: m?.name, url: toFileUrl(m?.file?.asset) })),
           },
         }))
     }
@@ -591,8 +684,8 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
           materials: mapMaterials((r.materialSelections || []).flatMap((s: any) => s?.materials || [])),
           exclusiveContent: {
             images: mapImages(r?.exclusiveContent?.images),
-            drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: d?.file?.asset?._ref || d?.file?.asset?._id || '' })),
-            models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({ name: m?.name, url: m?.file?.asset?._ref || m?.file?.asset?._id || '' })),
+            drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: toFileUrl(d?.file?.asset) })),
+            models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({ name: m?.name, url: toFileUrl(m?.file?.asset) })),
           },
         }))
     }
@@ -796,6 +889,16 @@ export const updateFooterContent = async (content: FooterContent): Promise<void>
     setItem(KEYS.FOOTER, content);
 };
 
+// Cookies Policy
+export const getCookiesPolicy = async (): Promise<CookiesPolicy | null> => {
+    if (useSanity && sanity) {
+        const q = groq`*[_type == "cookiesPolicy"][0]{ title, content, updatedAt }`;
+        const data = await sanity.fetch(q);
+        return data || null;
+    }
+    await delay(SIMULATED_DELAY);
+    return null;
+};
 // News
 export const getNews = async (): Promise<NewsItem[]> => {
     if (useSanity && sanity) {
@@ -980,8 +1083,8 @@ export const subscribeEmail = async (email: string): Promise<User> => {
   if (!normEmail) {
     throw new Error('Geçerli bir e-posta adresi girin');
   }
-  // Her durumda önce local storage içinde kontrol et (hızlı ve tutarlı deneyim)
-  {
+  // Eğer Sanity mutations aktif DEĞİLSE, local storage'ta tekrarı engelle
+  if (!(useSanity && sanity && sanityMutations)) {
     const existingLocal = (getItem<User[]>(KEYS.USERS || 'birim_users') || [])
       .find(u => normalizeEmail(u.email) === normEmail);
     if (existingLocal) {
@@ -1002,6 +1105,9 @@ export const subscribeEmail = async (email: string): Promise<User> => {
     // Create email subscriber (password olmadan)
     // Email aboneliği için token yoksa local storage'a kaydet (daha esnek)
     if (!sanityMutations) {
+      if (!ENABLE_LOCAL_FALLBACK) {
+        throw new Error('Sunucuya yazma kapalı: Sanity token yok ve local fallback devre dışı. Lütfen VITE_SANITY_TOKEN ekleyin.');
+      }
       console.warn('Sanity token yapılandırılmamış. Email aboneliği local storage\'a kaydediliyor. CMS\'de görünmesi için .env dosyasına VITE_SANITY_TOKEN ekleyin.');
       // Local storage'a kaydet ve devam et
       await delay(SIMULATED_DELAY);
@@ -1078,6 +1184,9 @@ export const subscribeEmail = async (email: string): Promise<User> => {
   
   // Local storage fallback - sadece Sanity kullanılmıyorsa
   if (!useSanity || !sanity) {
+    if (!ENABLE_LOCAL_FALLBACK) {
+      throw new Error('Sunucuya yazma kapalı: Sanity yapılandırılmamış ve local fallback devre dışı.');
+    }
     await delay(SIMULATED_DELAY);
     const users = getItem<User[]>(KEYS.USERS || 'birim_users') || [];
     const existingUser = users.find(u => normalizeEmail(u.email) === normEmail);
@@ -1120,6 +1229,9 @@ export const registerUser = async (email: string, password: string, name?: strin
         const passwordHash = await hashPassword(password);
         // Mutations için authenticated client kullan, yoksa hata fırlat
         if (!sanityMutations) {
+          if (!ENABLE_LOCAL_FALLBACK) {
+            throw new Error('Sunucuya yazma kapalı: Sanity token yok ve local fallback devre dışı. Lütfen VITE_SANITY_TOKEN ekleyin.');
+          }
           throw new Error('Sanity token yapılandırılmamış. Lütfen .env dosyasına VITE_SANITY_TOKEN ekleyin. Üye bilgileri CMS\'de görünmeyecektir.');
         }
         
@@ -1168,6 +1280,9 @@ export const registerUser = async (email: string, password: string, name?: strin
     // Create full member
     // Mutations için authenticated client kullan, yoksa hata fırlat
     if (!sanityMutations) {
+      if (!ENABLE_LOCAL_FALLBACK) {
+        throw new Error('Sunucuya yazma kapalı: Sanity token yok ve local fallback devre dışı. Lütfen VITE_SANITY_TOKEN ekleyin.');
+      }
       throw new Error('Sanity token yapılandırılmamış. Lütfen proje kök dizininde .env dosyası oluşturup VITE_SANITY_TOKEN=your_token_here ekleyin. Token\'ı https://sanity.io/manage adresinden alabilirsiniz. Token\'ın "Editor" veya "Admin" yetkisi olmalıdır.');
     }
     
@@ -1213,6 +1328,9 @@ export const registerUser = async (email: string, password: string, name?: strin
   
   // Local storage fallback - sadece Sanity kullanılmıyorsa
   if (!useSanity || !sanity) {
+    if (!ENABLE_LOCAL_FALLBACK) {
+      throw new Error('Sunucuya yazma kapalı: Sanity yapılandırılmamış ve local fallback devre dışı.');
+    }
     await delay(SIMULATED_DELAY);
     const users = getItem<User[]>(KEYS.USERS || 'birim_users') || [];
     const existingUser = users.find(u => normalizeEmail(u.email) === normEmail);

@@ -1,5 +1,7 @@
 export default {
   "collection": "KOLEKSİYON",
+  "subscribe": "ABONE OL",
+  "email_placeholder": "E-posta adresiniz",
   "designers": "TASARIMCILAR",
   "news": "HABERLER",
   "about": "HAKKIMIZDA",

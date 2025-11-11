@@ -4,8 +4,18 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
   const {getClient} = context
   const client = getClient({apiVersion: '2024-01-01'})
   
-  // Async işlemi burada yapıyoruz
+  // Async işlemleri burada yapıyoruz
   const categories = await client.fetch('*[_type == "category"] | order(name.tr asc)')
+  const cookiesPolicy = await client.fetch('*[_type == "cookiesPolicy"][0]')
+  const siteSettingsDoc = await client.fetch('*[_type == "siteSettings"][0]')
+  const homePage = await client.fetch('*[_type == "homePage"][0]')
+  const aboutPage = await client.fetch('*[_type == "aboutPage"][0]')
+  const contactPage = await client.fetch('*[_type == "contactPage"][0]')
+  // Ensure we always use published ids (strip drafts.)
+  const pubId = (id?: string): string => {
+    if (!id || typeof id !== 'string') return ''
+    return id.replace(/^drafts\./, '')
+  }
   
   // Kategoriler için items oluşturuyoruz
   const categoryItems = [
@@ -17,10 +27,11 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
           .schemaType('category')
       ),
     S.divider(),
-    ...categories.map((category: any) =>
-      S.listItem()
+    ...categories.map((category: any) => {
+      const cleanId = pubId(category._id)
+      return S.listItem()
         .title(category.name?.tr || category.name?.en || 'Kategori')
-        .id(category._id)
+        .id(cleanId)
         .child(
           S.list()
             .title('Kategori Detayı')
@@ -30,7 +41,7 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
                 .child(
                   S.document()
                     .schemaType('category')
-                    .id(category._id)
+                    .id(cleanId)
                 ),
               S.listItem()
                 .title('Modeller')
@@ -38,18 +49,40 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
                   S.documentList()
                     .title('Modeller')
                     .filter('_type == "product" && references($catId)')
-                    .params({ catId: category._id })
+                    .params({ catId: cleanId })
+                    .apiVersion('2024-01-01')
                 ),
             ])
         )
-    ),
+    }),
   ]
   
   return S.list()
     .title('İçerik')
     .items([
-      S.documentTypeListItem('siteSettings').title('Site Ayarları'),
-      S.documentTypeListItem('homePage').title('Ana Sayfa'),
+      S.listItem()
+        .title('Site Ayarları')
+        .child(
+          siteSettingsDoc?._id
+            ? S.document().schemaType('siteSettings').id(pubId(siteSettingsDoc._id))
+            : S.document().schemaType('siteSettings')
+        ),
+      S.listItem()
+        .title('UI Çevirileri')
+        .child(
+          S.document()
+            .schemaType('uiTranslations')
+        ),
+      S.listItem()
+        .title('Ana Sayfa')
+        .child(
+          homePage?._id
+            ? S.document()
+                .schemaType('homePage')
+                .id(pubId(homePage._id) || 'homePage') // mevcut belgeyi doğrudan aç
+            : S.document()
+                .schemaType('homePage') // belge yoksa yeni oluştur
+        ),
       S.listItem()
         .title('Ürünler')
         .child(
@@ -60,9 +93,51 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
       S.documentTypeListItem('designer').title('Tasarımcılar'),
       S.documentTypeListItem('project').title('Projeler'),
       S.documentTypeListItem('newsItem').title('Haberler'),
-      S.documentTypeListItem('aboutPage').title('Hakkımızda'),
-      S.documentTypeListItem('contactPage').title('İletişim'),
-      S.documentTypeListItem('footer').title('Altbilgi'),
+      S.listItem()
+        .title('Hakkımızda')
+        .child(
+          aboutPage?._id
+            ? S.document()
+                .schemaType('aboutPage')
+                .id(pubId(aboutPage._id) || 'aboutPage') // mevcut belgeyi doğrudan aç
+            : S.document()
+                .schemaType('aboutPage') // belge yoksa yeni oluştur
+        ),
+      S.listItem()
+        .title('İletişim')
+        .child(
+          contactPage?._id
+            ? S.document()
+                .schemaType('contactPage')
+                .id(pubId(contactPage._id) || 'contactPage') // mevcut belgeyi doğrudan aç
+            : S.document()
+                .schemaType('contactPage') // belge yoksa yeni oluştur
+        ),
+      S.listItem()
+        .title('Altbilgi')
+        .child(
+          S.list()
+            .title('Altbilgi')
+            .items([
+              S.listItem()
+                .title('Genel Ayarlar')
+                .child(
+                  S.document()
+                    .schemaType('footer')
+                    .id('footer') // tekil belge olarak doğrudan aç
+                ),
+              S.listItem()
+                .title('Çerez Politikası')
+                .child(
+                  cookiesPolicy?._id
+                    ? S.document()
+                        .schemaType('cookiesPolicy')
+                        .id(pubId(cookiesPolicy._id) || 'cookiesPolicy') // mevcut belgeyi doğrudan aç
+                    : S.document()
+                        .schemaType('cookiesPolicy') // belge yoksa yeni oluştur
+                ),
+            ])
+        ),
       S.documentTypeListItem('materialGroup').title('Malzeme Grupları'),
       // Üyeler
       S.listItem()
@@ -79,6 +154,7 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
                     .schemaType('user')
                     .filter('_type == "user" && userType == $t')
                     .params({ t: 'email_subscriber' })
+                    .apiVersion('2024-01-01')
                 ),
               S.listItem()
                 .title('Tam Üyeler')
@@ -88,6 +164,7 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
                     .schemaType('user')
                     .filter('_type == "user" && userType == $t')
                     .params({ t: 'full_member' })
+                    .apiVersion('2024-01-01')
                 ),
               S.divider(),
               S.documentTypeListItem('user').title('Tüm Üyeler'),

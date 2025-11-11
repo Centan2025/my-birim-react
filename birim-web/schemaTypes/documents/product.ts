@@ -48,7 +48,7 @@ export default defineType({
       type: 'localizedString',
       description: 'Alt Medya bölüm başlığı (boş bırakılırsa varsayılan çeviri kullanılır)'
     }),
-    defineField({ name: 'showMediaPanels', title: 'Ana Medya Panellerini Göster', type: 'boolean', initialValue: true }),
+    defineField({ name: 'showMediaPanels', title: 'Alt Medya Panellerini Göster', type: 'boolean', initialValue: true }),
     defineField({
       name: 'dimensionImages',
       title: 'Ölçü Görselleri',

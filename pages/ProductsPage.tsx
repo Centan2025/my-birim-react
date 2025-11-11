@@ -4,6 +4,7 @@ import type { Product, Category } from '../types';
 import { getProductsByCategoryId, getCategories } from '../services/cms';
 import { ProductCard } from '../components/ProductCard';
 import { useTranslation } from '../i18n';
+import { useSiteSettings } from '../App';
 
 const ChevronDownIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
@@ -17,6 +18,8 @@ export function ProductsPage() {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [sortBy, setSortBy] = useState('year-desc'); // Default sort by newest
   const { t } = useTranslation();
+  const { settings } = useSiteSettings();
+  const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none';
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -62,8 +65,8 @@ export function ProductsPage() {
         <div className="absolute inset-0">
           <img 
             src={category?.heroImage || 'https://picsum.photos/seed/default/1920/1080'} // Fallback image
-            alt={t(category?.name) || t('collection')}
-            className="w-full h-full object-cover"
+            alt={t(category?.name) || t('products')}
+            className={`w-full h-full object-cover ${imageBorderClass}`}
           />
           <div className="absolute inset-0 bg-black/40"></div>
         </div>

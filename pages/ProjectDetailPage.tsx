@@ -1,8 +1,9 @@
-import {useEffect, useState} from 'react'
-import { useParams } from 'react-router-dom'
-import { getProjectById } from '../services/cms'
+import {useEffect, useState, useMemo} from 'react'
+import { useParams, Link } from 'react-router-dom'
+import { getProjectById, getProjects } from '../services/cms'
 import type { Project } from '../types'
 import { useTranslation } from '../i18n'
+import { useSiteSettings } from '../App'
 
 const getYouTubeId = (url: string): string | null => {
   if (!url) return null;
@@ -16,15 +17,52 @@ const youTubeThumb = (url: string): string => {
   return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : '';
 };
 
+const MinimalChevronLeft = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="m15 18-6-6 6-6"/>
+  </svg>
+);
+
+const MinimalChevronRight = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="m9 18 6-6-6-6"/>
+  </svg>
+);
+
 export function ProjectDetailPage(){
   const { projectId } = useParams<{projectId: string}>()
   const [project,setProject] = useState<Project|undefined>(undefined)
+  const [allProjects, setAllProjects] = useState<Project[]>([])
   const [loading,setLoading] = useState(true)
   const { t } = useTranslation()
+  const { settings } = useSiteSettings()
+  const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
+  const showBottomPrevNext = Boolean(settings?.showProductPrevNext)
   const [idx,setIdx] = useState(0)
   const [anim,setAnim] = useState<'enter'|'leave'|null>(null)
-  useEffect(()=>{ if(projectId){ getProjectById(projectId).then((p)=>{ setProject(p); setLoading(false) })}},[projectId])
+  
+  useEffect(()=>{ 
+    const fetchData = async () => {
+      const [projectData, projectsList] = await Promise.all([
+        projectId ? getProjectById(projectId) : Promise.resolve(undefined),
+        getProjects()
+      ])
+      setProject(projectData)
+      setAllProjects(projectsList)
+      setLoading(false)
+    }
+    fetchData()
+  },[projectId])
   useEffect(()=>{ if(!project) return; setAnim('leave'); const a=setTimeout(()=>setAnim('enter'),10); const b=setTimeout(()=>setAnim(null),260); return ()=>{clearTimeout(a);clearTimeout(b)} },[idx, project])
+  // Prev/Next must be declared before any early returns to keep hooks order stable
+  const { prevProject, nextProject } = useMemo(() => {
+    if (!project || allProjects.length < 2) return { prevProject: null, nextProject: null };
+    const currentIndex = allProjects.findIndex(p => p.id === project.id);
+    if (currentIndex === -1) return { prevProject: null, nextProject: null };
+    const prev = currentIndex > 0 ? allProjects[currentIndex - 1] : null;
+    const next = currentIndex < allProjects.length - 1 ? allProjects[currentIndex + 1] : null;
+    return { prevProject: prev, nextProject: next };
+  }, [project, allProjects]);
   if (loading) return <div className="pt-20 text-center">{t('loading')}...</div>
   if (!project) return <div className="pt-20 text-center">Proje bulunamadı</div>
   
@@ -34,6 +72,7 @@ export function ProjectDetailPage(){
   const curr = allMedia[idx]
   const next = ()=> setIdx(i=> allMedia.length? (i+1)%allMedia.length : 0)
   const prev = ()=> setIdx(i=> allMedia.length? (i-1+allMedia.length)%allMedia.length : 0)
+  
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
       <div className="mb-8">
@@ -45,17 +84,17 @@ export function ProjectDetailPage(){
         )}
         <div className="h-px bg-gray-300 mt-4"></div>
       </div>
-      {project.cover && !curr && <img src={project.cover} alt={t(project.title)} className="mt-10 w-full h-auto object-contain" />}
+      {project.cover && !curr && <img src={project.cover} alt={t(project.title)} className={`mt-10 w-full h-auto object-contain ${imageBorderClass}`} />}
       {curr && (
         <div className="mt-10 relative">
           {curr.type === 'image' && (
-            <img src={curr.url} alt="project" className={`w-full h-auto object-contain transition-all duration-250 ${anim==='leave' ? 'opacity-0 -translate-y-1' : anim==='enter' ? 'opacity-100 translate-y-0' : ''}`} />
+            <img src={curr.url} alt="project" className={`w-full h-auto object-contain transition-all duration-250 ${imageBorderClass} ${anim==='leave' ? 'opacity-0 -translate-y-1' : anim==='enter' ? 'opacity-100 translate-y-0' : ''}`} />
           )}
           {curr.type === 'video' && (
             <div className={`w-full transition-all duration-250 ${anim==='leave' ? 'opacity-0 -translate-y-1' : anim==='enter' ? 'opacity-100 translate-y-0' : ''}`} style={{ paddingTop: '56.25%' }}>
               <video 
                 src={curr.url} 
-                className="absolute top-0 left-0 w-full h-full object-contain"
+                className={`absolute top-0 left-0 w-full h-full object-contain ${imageBorderClass}`}
                 controls
                 playsInline
               />
@@ -118,6 +157,38 @@ export function ProjectDetailPage(){
               )}
             </button>
           ))}
+        </div>
+      )}
+      
+      {/* Bottom Prev / Next controls */}
+      {showBottomPrevNext && (prevProject || nextProject) && (
+        <div className="bg-white border-t border-gray-200">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1">
+                {prevProject ? (
+                  <Link
+                    to={`/projects/${prevProject.id}`}
+                    className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
+                    aria-label="Previous project"
+                  >
+                    <MinimalChevronLeft className="w-12 h-12 md:w-16 md:h-16" />
+                  </Link>
+                ) : <span />}
+              </div>
+              <div className="flex-1 text-right">
+                {nextProject ? (
+                  <Link
+                    to={`/projects/${nextProject.id}`}
+                    className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
+                    aria-label="Next project"
+                  >
+                    <MinimalChevronRight className="w-12 h-12 md:w-16 md:h-16" />
+                  </Link>
+                ) : <span />}
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

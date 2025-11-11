@@ -4,6 +4,7 @@ import type { Designer, Product } from '../types';
 import { getDesignerById, getProductsByDesignerId } from '../services/cms';
 import { ProductCard } from '../components/ProductCard';
 import { useTranslation } from '../i18n';
+import { useSiteSettings } from '../App';
 
 export function DesignerDetailPage() {
   const { designerId } = useParams<{ designerId: string }>();
@@ -11,6 +12,8 @@ export function DesignerDetailPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const { t } = useTranslation();
+  const { settings } = useSiteSettings();
+  const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none';
 
   useEffect(() => {
     const fetchDesigner = async () => {
@@ -41,7 +44,7 @@ export function DesignerDetailPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
         <div className="flex flex-col md:flex-row-reverse items-center md:items-start gap-8 md:gap-16 mb-12">
             <div className="flex-shrink-0">
-                <img src={designer.image} alt={t(designer.name)} className="w-80 h-96 md:w-96 md:h-[32rem] object-cover shadow-lg filter grayscale" />
+                <img src={designer.image} alt={t(designer.name)} className={`w-80 h-96 md:w-96 md:h-[32rem] object-cover shadow-lg filter grayscale ${imageBorderClass}`} />
             </div>
             <div className="text-left w-full">
                 <div className="max-w-2xl">

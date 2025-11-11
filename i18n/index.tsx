@@ -2,11 +2,12 @@ import { createContext, useState, useContext, PropsWithChildren, useMemo, useCal
 import tr from './locales/tr';
 import en from './locales/en';
 import { LocalizedString } from '../types';
-import { getLanguages } from '../services/cms';
+import { getLanguages, getTranslations } from '../services/cms';
 
 export type Locale = string;
 
-const translations: Record<string, any> = { tr, en };
+// Base translations from files (fallback)
+const baseTranslations: Record<string, any> = { tr, en };
 
 interface II18nContext {
   locale: Locale;
@@ -34,16 +35,23 @@ export const I18nProvider = ({ children }: PropsWithChildren) => {
   const [supportedLocales, setSupportedLocales] = useState<string[]>([]);
   const [locale, setLocaleState] = useState<Locale>('tr');
   const [loading, setLoading] = useState(true);
+  const [cmsTranslations, setCmsTranslations] = useState<Record<string, Record<string, string>>>({});
 
   useEffect(() => {
-    const fetchLocales = async () => {
+    const fetchLocalesAndTranslations = async () => {
         try {
-            const langs = await getLanguages();
+            const [langs, translations] = await Promise.all([
+                getLanguages(),
+                getTranslations()
+            ]);
+            // Store CMS translations in state
+            setCmsTranslations(translations);
+            
             const validLangs = langs && langs.length > 0 ? langs : ['tr', 'en'];
             setSupportedLocales(validLangs);
             setLocaleState(getInitialLocale(validLangs));
         } catch (error) {
-            console.error("Failed to fetch languages, using defaults.", error);
+            console.error("Failed to fetch languages/translations, using defaults.", error);
             const defaultLangs = ['tr', 'en'];
             setSupportedLocales(defaultLangs);
             setLocaleState(getInitialLocale(defaultLangs));
@@ -51,7 +59,7 @@ export const I18nProvider = ({ children }: PropsWithChildren) => {
             setLoading(false);
         }
     };
-    fetchLocales();
+    fetchLocalesAndTranslations();
   }, []);
   
   useEffect(() => {
@@ -68,8 +76,10 @@ export const I18nProvider = ({ children }: PropsWithChildren) => {
 
   const t = useCallback((keyOrObject: string | LocalizedString | undefined, ...args: any[]): string => {
     if (typeof keyOrObject === 'string') {
-      const translationSet = translations[locale] || translations.tr;
-      let translation = translationSet[keyOrObject] || keyOrObject;
+      // Try CMS translations first, then fallback to base translations
+      const cmsTranslation = cmsTranslations[locale]?.[keyOrObject];
+      const baseTranslation = baseTranslations[locale]?.[keyOrObject] || baseTranslations.tr?.[keyOrObject];
+      let translation = cmsTranslation || baseTranslation || keyOrObject;
       if (args.length > 0) {
         args.forEach((arg, index) => {
           translation = translation.replace(`{${index}}`, arg);
@@ -89,14 +99,14 @@ export const I18nProvider = ({ children }: PropsWithChildren) => {
     }
 
     return '';
-  }, [locale]);
+  }, [locale, cmsTranslations]);
 
   const value = useMemo(() => ({
     locale,
     setLocale,
     t,
     supportedLocales
-  }), [locale, t, supportedLocales]);
+  }), [locale, t, supportedLocales, cmsTranslations]);
 
   // Uygulamanın beyaz ekrana düşmemesi için loading sırasında da render etmeye devam et
 

@@ -5,6 +5,7 @@ import type { Product, Designer, SiteSettings, HomePageContent } from '../types'
 import { ProductCard } from '../components/ProductCard';
 import { SiteLogo } from '../components/SiteLogo';
 import { useTranslation } from '../i18n';
+import { useSiteSettings } from '../App';
 
 const ArrowRight = (props: React.ComponentProps<'svg'>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
@@ -47,6 +48,8 @@ export function HomePage() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const { t } = useTranslation();
+  const { settings: siteSettings } = useSiteSettings();
+  const imageBorderClass = siteSettings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none';
 
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartX, setDragStartX] = useState(0);
@@ -272,9 +275,9 @@ export function HomePage() {
                               <YouTubeBackground url={mediaUrl} />
                             </div>
                           ) : block.mediaType === 'video' ? (
-                            <video className="w-full h-auto rounded-lg max-w-full object-contain md:object-cover" autoPlay loop muted playsInline src={mediaUrl} />
+                            <video className={`w-full h-auto ${imageBorderClass} max-w-full object-contain md:object-cover`} autoPlay loop muted playsInline src={mediaUrl} />
                           ) : (
-                            <img src={mediaUrl} alt="" className="w-full h-auto rounded-lg object-contain md:object-cover max-w-full block" />
+                            <img src={mediaUrl} alt="" className={`w-full h-auto ${imageBorderClass} object-contain md:object-cover max-w-full block`} />
                           )}
                         </div>
                         {block.description && (

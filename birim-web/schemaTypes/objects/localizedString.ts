@@ -15,6 +15,11 @@ export const localizedString = defineType({
       title: 'English',
       type: 'string',
     }),
+    defineField({
+      name: 'it',
+      title: 'Italiano',
+      type: 'string',
+    }),
   ],
 })
 

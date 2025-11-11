@@ -13,14 +13,18 @@ export type LocalizedString = { [key: string]: string; } | string;
 export interface SiteSettings {
   /** URL for the site logo. Can be a path or a data URI. */
   logoUrl: string;
-  /** Text displayed in the header, often next to the logo. */
-  headerText: string;
-  /** Toggles the visibility of the header text. */
-  isHeaderTextVisible: boolean;
+  /** Optional short text displayed at the very top of the page. */
+  topBannerText?: string;
+  /** Whether the language switcher is visible in the header. */
+  isLanguageSwitcherVisible?: boolean;
+  /** Supported language codes, e.g., ['tr','en'] */
+  languages?: string[];
   /** Toggles bottom Prev/Next navigation on product detail page. */
   showProductPrevNext?: boolean;
   /** Toggles the visibility of the cart button in the header. */
   showCartButton?: boolean;
+  /** Border style for images and videos: 'square' or 'rounded' */
+  imageBorderStyle?: 'square' | 'rounded';
 }
 
 // --- Core Data Models ---
@@ -378,6 +382,12 @@ export interface FooterContent {
     linkColumns: FooterLinkColumn[];
     socialLinks: SocialLink[];
     legalLinks?: LegalLink[];
+}
+
+export interface CookiesPolicy {
+  title: LocalizedString;
+  content: { tr?: any[]; en?: any[] };
+  updatedAt?: string;
 }
 
 // --- Application-Specific Models ---

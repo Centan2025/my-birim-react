@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { NewsItem } from '../types';
 import { getNews } from '../services/cms';
 import { useTranslation } from '../i18n';
+import { useSiteSettings } from '../App';
 
 const formatDate = (dateString: string): string => {
   if (!dateString) return '';
@@ -15,13 +16,15 @@ const formatDate = (dateString: string): string => {
 
 const NewsCard: React.FC<{ item: NewsItem }> = ({ item }) => {
   const { t } = useTranslation();
+  const { settings } = useSiteSettings();
+  const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none';
   
   return (
-    <Link to={`/news/${item.id}`} className="group block relative overflow-hidden shadow-lg transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl aspect-[4/5]">
+    <Link to={`/news/${item.id}`} className={`group block relative overflow-hidden shadow-lg transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl aspect-[4/5] ${imageBorderClass}`}>
       <img 
         src={item.mainImage} 
         alt={t(item.title)} 
-        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+        className={`absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${imageBorderClass}`}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
       <div className="absolute bottom-0 left-0 p-6 text-white">

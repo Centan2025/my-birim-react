@@ -3,11 +3,14 @@ import { Link } from 'react-router-dom';
 import type { Category } from '../types';
 import { getCategories } from '../services/cms';
 import { useTranslation } from '../i18n';
+import { useSiteSettings } from '../App';
 
 export function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const { t } = useTranslation();
+  const { settings } = useSiteSettings();
+  const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none';
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -32,7 +35,7 @@ export function CategoriesPage() {
           <img 
             src="https://picsum.photos/seed/categories-hero/1920/1080"
             alt={t('products')}
-            className="w-full h-full object-cover"
+            className={`w-full h-full object-cover ${imageBorderClass}`}
           />
           <div className="absolute inset-0 bg-black/40"></div>
         </div>
@@ -58,11 +61,11 @@ export function CategoriesPage() {
                 to={`/products/${category.id}`}
                 className="group block overflow-hidden transition-all duration-300"
               >
-                <div className="relative h-[600px] overflow-hidden">
+                <div className={`relative h-[600px] overflow-hidden ${imageBorderClass}`}>
                   <img
                     src={category.heroImage}
                     alt={t(category.name)}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${imageBorderClass}`}
                   />
                   <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-300"></div>
                   <div className="absolute inset-0 flex items-center justify-center">

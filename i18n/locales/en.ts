@@ -1,5 +1,7 @@
 export default {
   "collection": "Collection",
+  "subscribe": "SUBSCRIBE",
+  "email_placeholder": "Your e-mail address",
   "designers": "Designers",
   "news": "News",
   "about": "About Us",

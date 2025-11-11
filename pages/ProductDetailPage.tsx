@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import type { Product, Designer, Category, LocalizedString } from '../types';
 import { getProductById, getDesignerById, getCategories, getProductsByCategoryId, getSiteSettings } from '../services/cms';
-import { useAuth } from '../App';
+import { useAuth, useSiteSettings } from '../App';
 import { useTranslation } from '../i18n';
 import { useCart } from '../context/CartContext';
 
@@ -40,6 +40,7 @@ const MinimalChevronRight = (props: React.SVGProps<SVGSVGElement>) => (
 
 export function ProductDetailPage() {
   const { productId } = useParams<{ productId: string }>();
+  const navigate = useNavigate();
   const [siteSettings, setSiteSettings] = useState<{ showProductPrevNext?: boolean } | null>(null);
   const [product, setProduct] = useState<Product | undefined>(undefined);
   const [designer, setDesigner] = useState<Designer | undefined>(undefined);
@@ -56,6 +57,8 @@ export function ProductDetailPage() {
   const { isLoggedIn, user } = useAuth();
   const { t, locale } = useTranslation();
   const { addToCart } = useCart();
+  const { settings: appSettings } = useSiteSettings();
+  const imageBorderClass = appSettings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none';
   const [activeMaterialGroup, setActiveMaterialGroup] = useState<number>(0);
   const [activeBookIndex, setActiveBookIndex] = useState<number>(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -395,9 +398,9 @@ export function ProductDetailPage() {
                 }}
               >
                 {m.type === 'image' ? (
-                  <img src={m.url} alt={`${t(product.name)} ${index + 1}`} className="w-full h-full object-cover" />
+                  <img src={m.url} alt={`${t(product.name)} ${index + 1}`} className={`w-full h-full object-cover ${imageBorderClass}`} />
                 ) : m.type === 'video' ? (
-                  <video src={m.url} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+                  <video src={m.url} className={`w-full h-full object-cover ${imageBorderClass}`} autoPlay muted loop playsInline />
                 ) : (
                   <iframe className="w-full h-full" title="youtube-player" src={toYouTubeEmbed(m.url, { autoplay: true })} allow="autoplay; encrypted-media" allowFullScreen frameBorder="0" />
                 )}
@@ -462,11 +465,11 @@ export function ProductDetailPage() {
                 {bandMedia.map((m, idx) => (
                   <button key={idx} onClick={() => setCurrentImageIndex(idx)} className={`relative flex-shrink-0 w-24 h-24 overflow-hidden border-2 transition-all duration-300 ${currentImageIndex === idx ? 'border-gray-400 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}>
                     {m.type === 'image' ? (
-                      <img src={m.url} alt={`${t(product.name)} thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                      <img src={m.url} alt={`${t(product.name)} thumbnail ${idx + 1}`} className={`w-full h-full object-cover ${imageBorderClass}`} />
                     ) : m.type === 'video' ? (
-                      <div className="w-full h-full bg-black/60" />
+                      <div className={`w-full h-full bg-black/60 ${imageBorderClass}`} />
                     ) : (
-                      <img src={youTubeThumb(m.url)} alt={`youtube thumb ${idx + 1}`} className="w-full h-full object-cover" />
+                      <img src={youTubeThumb(m.url)} alt={`youtube thumb ${idx + 1}`} className={`w-full h-full object-cover ${imageBorderClass}`} />
                     )}
                     {(m.type === 'video' || m.type === 'youtube') && (
                       <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -537,7 +540,7 @@ export function ProductDetailPage() {
                         <img 
                           src={dimImg.image} 
                           alt={dimImg.title ? t(dimImg.title) : `${t('dimensions')} ${idx + 1}`} 
-                          className="w-full h-40 object-contain group-hover:scale-105 transition-transform duration-200" 
+                          className={`w-full h-40 object-contain group-hover:scale-105 transition-transform duration-200 ${imageBorderClass}`} 
                         />
                       </button>
                       {dimImg.title && (
@@ -561,7 +564,7 @@ export function ProductDetailPage() {
                     <button 
                       key={idx} 
                       onClick={() => setActiveMaterialGroup(idx)} 
-                      className={`px-5 py-3 text-sm font-medium transition-all duration-200 border-b-2 rounded-none ${
+                      className={`px-5 py-3 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${
                         activeMaterialGroup === idx 
                           ? 'bg-white text-gray-800 border-gray-500' 
                           : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
@@ -580,7 +583,7 @@ export function ProductDetailPage() {
                         <button
                           key={idx}
                           onClick={() => setActiveBookIndex(idx)}
-                          className={`px-4 py-2 text-sm font-medium transition-all duration-200 border-b-2 rounded-none ${
+                          className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${
                             activeBookIndex === idx
                               ? 'bg-white text-gray-800 border-gray-500'
                               : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
@@ -601,9 +604,9 @@ export function ProductDetailPage() {
                           <img
                             src={material.image}
                             alt={t(material.name)}
-                            className="w-28 h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md rounded-sm"
+                            className={`w-28 h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md ${imageBorderClass}`}
                           />
-                      <p className="mt-3 text-sm text-gray-600 font-medium max-w-[120px] break-words">
+                      <p className="mt-3 text-xs md:text-sm text-gray-600 font-thin tracking-wider max-w-[120px] break-words">
                             {t(material.name)}
                           </p>
                         </div>
@@ -622,9 +625,9 @@ export function ProductDetailPage() {
                         <img 
                           src={material.image} 
                           alt={t(material.name)} 
-                          className="w-28 h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md rounded-sm" 
+                          className={`w-28 h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md ${imageBorderClass}`} 
                         />
-                        <p className="mt-3 text-sm text-gray-600 font-medium max-w-[120px] break-words">
+                        <p className="mt-3 text-xs md:text-sm text-gray-600 font-thin tracking-wider max-w-[120px] break-words">
                           {t(material.name)}
                         </p>
                       </div>
@@ -638,8 +641,8 @@ export function ProductDetailPage() {
             {/* Designer section after materials */}
             {designer && (
               <section className="mt-10 bg-gray-200 text-gray-600 border-t border-b border-gray-400">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                  <h2 className="text-xl font-thin text-gray-600 mb-6">{t('designer')}</h2>
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-10">
+                  <h2 className="text-xl font-thin text-gray-600 mb-4">{t('designer')}</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                     <div className="w-full">
                       <img
@@ -674,68 +677,76 @@ export function ProductDetailPage() {
             )}
 
             {product.exclusiveContent && (
-              <div className="bg-white p-8 sm:p-12 rounded-lg border">
-                <h2 className="text-3xl font-light text-gray-600 mb-8 border-b pb-4 border-gray-300">{t('exclusive_content') || 'Özel İçerik'}</h2>
-                {isLoggedIn && user?.userType === 'full_member' ? (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                    <div>
-                      <h3 className="text-xl font-light mb-4 text-gray-500">{t('additional_images') || 'Ek Görseller'}</h3>
-                      <div className="grid grid-cols-2 gap-3">
-                        {product.exclusiveContent.images && product.exclusiveContent.images.length > 0 ? (
-                          product.exclusiveContent.images.map((img, idx) => (<img key={idx} src={img} alt={`Exclusive ${idx}`} className="w-full object-cover shadow-sm"/>))
-                        ) : (
-                          <p className="text-gray-400 text-sm">Ek görsel bulunmuyor</p>
-                        )}
+              <div className="relative rounded-none border border-gray-200 bg-white/70 backdrop-blur p-6 sm:p-8 pb-10">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl md:text-3xl font-light text-gray-700">İndirilebilir Dosyalar</h2>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="rounded-none border border-gray-200 bg-white p-4">
+                    <div className="text-xs uppercase tracking-wider text-gray-500 mb-3">{t('additional_images') || 'Ek Görseller'}</div>
+                    {product.exclusiveContent.images && product.exclusiveContent.images.length > 0 ? (
+                      <div className="grid grid-cols-2 gap-2">
+                        {product.exclusiveContent.images.map((img, idx) => (
+                          <img key={idx} src={img} alt={`exclusive-${idx}`} className={`w-full aspect-video object-cover ${imageBorderClass}`} />
+                        ))}
                       </div>
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-light mb-4 text-gray-500">{t('technical_drawings') || 'Teknik Çizimler'}</h3>
-                      <ul className="space-y-3">
-                        {product.exclusiveContent.drawings && product.exclusiveContent.drawings.length > 0 ? (
-                          product.exclusiveContent.drawings.map((doc, idx) => (
-                            <li key={idx}>
-                              <a href={doc.url} download className="text-gray-600 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5">
-                                <DownloadIcon/> {t(doc.name)}
-                              </a>
-                            </li>
-                          ))
-                        ) : (
-                          <li className="text-gray-400 text-sm">Teknik çizim bulunmuyor</li>
-                        )}
-                      </ul>
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-light mb-4 text-gray-500">{t('3d_models') || '3D Modeller'}</h3>
-                      <ul className="space-y-3">
-                        {product.exclusiveContent.models3d && product.exclusiveContent.models3d.length > 0 ? (
-                          product.exclusiveContent.models3d.map((model, idx) => (
-                            <li key={idx}>
-                              <a href={model.url} download className="text-gray-600 hover:text-gray-900 inline-flex items-center gap-3 transition-transform duration-200 transform hover:translate-x-1.5">
-                                <DownloadIcon/> {t(model.name)}
-                              </a>
-                            </li>
-                          ))
-                        ) : (
-                          <li className="text-gray-400 text-sm">3D model bulunmuyor</li>
-                        )}
-                      </ul>
-                    </div>
+                    ) : (
+                      <p className="text-gray-400 text-sm">Ek görsel bulunmuyor</p>
+                    )}
                   </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <p className="text-gray-600 mb-6 text-lg">
-                      {isLoggedIn && user?.userType === 'email_subscriber' 
-                        ? 'Bu ürünün özel içeriklerine (teknik çizimler, 3D modeller, ek görseller) erişmek için tam üye olmanız gerekiyor. Tam üye olmak için lütfen giriş yapın ve hesabınızı yükseltin.'
-                        : 'Bu ürünün özel içeriklerine (teknik çizimler, 3D modeller, ek görseller) erişmek için tam üye olmanız gerekiyor.'}
-                    </p>
-                    <Link
-                      to="/login"
-                      className="inline-block bg-gray-900 text-white font-semibold py-3 px-8 rounded-lg hover:bg-gray-700 transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110 active:scale-100 hover:shadow-lg"
-                    >
-                      {isLoggedIn && user?.userType === 'email_subscriber' ? 'Tam Üye Ol' : 'Üye Ol / Giriş Yap'}
-                    </Link>
+                  <div className="rounded-none border border-gray-200 bg-white p-4">
+                    <div className="text-xs uppercase tracking-wider text-gray-500 mb-3">{t('technical_drawings') || 'Teknik Çizimler'}</div>
+                    {product.exclusiveContent.drawings && product.exclusiveContent.drawings.length > 0 ? (
+                      <ul className="space-y-2">
+                        {product.exclusiveContent.drawings.map((doc, idx) => (
+                          <li key={idx} className="group">
+                            <a
+                              href={doc.url}
+                              download
+                              onClick={(e) => {
+                                const canDownload = isLoggedIn && user?.userType === 'full_member';
+                                if (!canDownload) { e.preventDefault(); navigate('/login'); }
+                              }}
+                              className="flex items-center gap-2 px-3 py-2 rounded-none border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 transition-colors"
+                            >
+                              <span className="shrink-0 text-gray-600 group-hover:text-gray-900"><DownloadIcon /></span>
+                              <span className="text-sm text-gray-700 group-hover:text-gray-900">{t(doc.name)}</span>
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-gray-400 text-sm">Teknik çizim bulunmuyor</p>
+                    )}
                   </div>
-                )}
+                  <div className="rounded-none border border-gray-200 bg-white p-4">
+                    <div className="text-xs uppercase tracking-wider text-gray-500 mb-3">{t('3d_models') || '3D Modeller'}</div>
+                    {product.exclusiveContent.models3d && product.exclusiveContent.models3d.length > 0 ? (
+                      <ul className="space-y-2">
+                        {product.exclusiveContent.models3d.map((model, idx) => (
+                          <li key={idx} className="group">
+                            <a
+                              href={model.url}
+                              download
+                              onClick={(e) => {
+                                const canDownload = isLoggedIn && user?.userType === 'full_member';
+                                if (!canDownload) { e.preventDefault(); navigate('/login'); }
+                              }}
+                              className="flex items-center gap-2 px-3 py-2 rounded-none border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 transition-colors"
+                            >
+                              <span className="shrink-0 text-gray-600 group-hover:text-gray-900"><DownloadIcon /></span>
+                              <span className="text-sm text-gray-700 group-hover:text-gray-900">{t(model.name)}</span>
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-gray-400 text-sm">3D model bulunmuyor</p>
+                    )}
+                  </div>
+                </div>
+                {/* Alt çizgi: kartın tam alt kenarında, kenarlara kadar */}
+                <div className="absolute left-0 right-0 bottom-0 h-px bg-gray-300" />
               </div>
             )}
 
@@ -743,17 +754,21 @@ export function ProductDetailPage() {
           </section>
           {Array.isArray((product as any)?.media) && (product as any).media.length > 0 && (product as any).showMediaPanels !== false && (
             <section className="mt-12">
-                <h2 className="text-xl font-light text-gray-600 mb-4">{(product as any)?.mediaSectionTitle ? t((product as any).mediaSectionTitle) : t('alt_media')}</h2>
+                <h2 className="text-xl font-light text-gray-600 mb-4">
+                  {(product as any)?.mediaSectionTitle && String((product as any).mediaSectionTitle).trim().length > 0
+                    ? t((product as any).mediaSectionTitle)
+                    : 'Projeler'}
+                </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {(product as any).media.map((m: any, idx: number) => (
                   <div key={idx} className="overflow-hidden">
                     <button onClick={() => openPanelLightbox(idx)} className="relative w-full aspect-video bg-gray-200 flex items-center justify-center">
                       {m.type === 'image' ? (
-                        <img src={m.url} alt={`media-${idx}`} className="w-full h-full object-cover" />
+                        <img src={m.url} alt={`media-${idx}`} className={`w-full h-full object-cover ${imageBorderClass}`} />
                       ) : m.type === 'video' ? (
-                        <div className="w-full h-full bg-gray-300" />
+                        <div className={`w-full h-full bg-gray-300 ${imageBorderClass}`} />
                       ) : (
-                        <img src={youTubeThumb(m.url)} alt={`youtube thumb ${idx + 1}`} className="w-full h-full object-cover" />
+                        <img src={youTubeThumb(m.url)} alt={`youtube thumb ${idx + 1}`} className={`w-full h-full object-cover ${imageBorderClass}`} />
                       )}
                       {(m.type === 'video' || m.type === 'youtube') && (
                         <span className="pointer-events-none absolute bottom-2 right-2">

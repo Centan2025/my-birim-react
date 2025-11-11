@@ -3,17 +3,20 @@ import { Link } from 'react-router-dom'
 import { getProjects } from '../services/cms'
 import type { Project } from '../types'
 import { useTranslation } from '../i18n'
+import { useSiteSettings } from '../App'
 
 const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
   const { t } = useTranslation();
+  const { settings } = useSiteSettings();
+  const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none';
   return (
     <Link to={`/projects/${project.id}`} className="group flex flex-col h-full text-center">
-      <div className="overflow-hidden bg-white aspect-[16/10]">
+      <div className={`overflow-hidden bg-white aspect-[16/10] ${imageBorderClass}`}>
         {project.cover && (
           <img
             src={project.cover}
             alt={t(project.title)}
-            className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
+            className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${imageBorderClass}`}
           />
         )}
       </div>

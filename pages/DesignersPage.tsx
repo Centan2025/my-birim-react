@@ -5,16 +5,19 @@ import { Link } from 'react-router-dom';
 import type { Designer } from '../types';
 import { getDesigners } from '../services/cms';
 import { useTranslation } from '../i18n';
+import { useSiteSettings } from '../App';
 
 const DesignerCard: React.FC<{ designer: Designer }> = ({ designer }) => {
   const { t } = useTranslation();
+  const { settings } = useSiteSettings();
+  const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none';
   return (
     <Link to={`/designer/${designer.id}`} className="group flex flex-col h-full text-center">
-      <div className="overflow-hidden bg-white aspect-[3/4]">
+      <div className={`overflow-hidden bg-white aspect-[3/4] ${imageBorderClass}`}>
         <img
           src={designer.image}
           alt={t(designer.name)}
-          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 filter grayscale"
+          className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 filter grayscale ${imageBorderClass}`}
         />
       </div>
       <div className="mt-4 min-h-[2.5rem] flex items-center justify-center">

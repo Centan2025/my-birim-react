@@ -259,9 +259,6 @@ export function Header() {
                 <div className="flex items-center">
                   <Link to="/" className="flex items-center gap-3 text-white transition-colors">
                     <SiteLogo logoUrl={settings?.logoUrl} className="w-24 md:w-40 h-4 md:h-6" />
-                    {settings?.isHeaderTextVisible && (
-                      <span className="text-xl md:text-2xl font-bold tracking-wider">{settings.headerText}</span>
-                    )}
                   </Link>
                 </div>
 
@@ -296,7 +293,8 @@ export function Header() {
                 <button ref={searchButtonRef} onClick={() => isSearchOpen ? closeSearch() : setIsSearchOpen(true)} className={iconClasses}>
                     {isSearchOpen ? <CloseIcon /> : <SearchIcon />}
                 </button>
-                <div className="hidden md:flex items-center gap-1">
+                {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
+                <div className="hidden md:flex items-center gap-0">
                   {supportedLocales.map((langCode) => {
                     const isActive = locale === langCode;
                     return (
@@ -304,12 +302,12 @@ export function Header() {
                         key={langCode}
                         onClick={() => setLocale(langCode)}
                         aria-pressed={isActive}
-                        className={`group relative px-2.5 py-0.5 text-xs uppercase tracking-[0.3em] transition-colors duration-200 ${
+                        className={`group relative px-1 py-1 text-[0.8rem] uppercase tracking-[0.25em] transition-colors duration-200 ${
                           isActive
                             ? 'text-white font-extralight'
                             : 'text-gray-400/90 hover:text-white font-extralight'
                         }`}
-                        style={{ fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.35em' }}
+                        style={{ fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.25em' }}
                       >
                         <span className="relative inline-block">
                           {langCode.toUpperCase()}
@@ -321,6 +319,7 @@ export function Header() {
                     );
                   })}
                 </div>
+                )}
                 <NavLink to={isLoggedIn ? "/profile" : "/login"} className={iconClasses}>
                   <UserIcon />
                 </NavLink>
@@ -392,7 +391,7 @@ export function Header() {
                 <input
                     ref={searchInputRef}
                     type="search"
-                    placeholder={''}
+                    placeholder={t('search_placeholder')}
                     className="w-full bg-transparent text-white text-2xl placeholder-gray-400 border-b border-gray-500 focus:border-white outline-none transition-colors duration-300 pb-3"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
