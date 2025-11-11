@@ -255,7 +255,7 @@ export function Header() {
         >
           <nav className="px-2 sm:px-4 lg:px-6" ref={navRef}>
             <div className="relative flex h-24 items-center justify-between">
-              <div className="flex items-center gap-x-12">
+              <div className="flex items-center gap-x-16 lg:gap-x-20">
                 <div className="flex items-center">
                   <Link to="/" className="flex items-center gap-3 text-white transition-colors">
                     <SiteLogo logoUrl={settings?.logoUrl} className="w-24 md:w-40 h-4 md:h-6" />
@@ -369,13 +369,13 @@ export function Header() {
           {/* Mobil menü - header içinde açılır */}
           {isMobileMenuOpen && (
             <div ref={mobileMenuRef} className="lg:hidden border-t border-white/10">
-              <nav className="px-2 sm:px-4 lg:px-6 py-4 flex flex-col space-y-4">
-                <NavLink to="/products" className="text-sm font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('products')}</NavLink>
-                <NavLink to="/designers" className="text-sm font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('designers')}</NavLink>
-                <NavLink to="/projects" className="text-sm font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('projects') || 'Projeler'}</NavLink>
-                <NavLink to="/news" className="text-sm font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('news')}</NavLink>
-                <NavLink to="/about" className="text-sm font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('about')}</NavLink>
-                <NavLink to="/contact" className="text-sm font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('contact')}</NavLink>
+              <nav className="px-4 sm:px-5 lg:px-6 pt-6 pb-6 flex flex-col space-y-6">
+                <NavLink to="/products" className="text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('products')}</NavLink>
+                <NavLink to="/designers" className="text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('designers')}</NavLink>
+                <NavLink to="/projects" className="text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('projects') || 'Projeler'}</NavLink>
+                <NavLink to="/news" className="text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('news')}</NavLink>
+                <NavLink to="/about" className="text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('about')}</NavLink>
+                <NavLink to="/contact" className="text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('contact')}</NavLink>
               </nav>
             </div>
           )}
