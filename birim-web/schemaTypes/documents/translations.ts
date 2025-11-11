@@ -5,16 +5,6 @@ export default defineType({
   name: 'uiTranslations',
   title: 'UI Çevirileri',
   type: 'document',
-  fieldsets: [
-    { name: 'nav', title: 'Navigasyon' },
-    { name: 'search', title: 'Arama' },
-    { name: 'auth', title: 'Giriş/Çıkış' },
-    { name: 'labels', title: 'Etiketler' },
-    { name: 'product', title: 'Ürün Detay' },
-    { name: 'designer', title: 'Tasarımcı' },
-    { name: 'news', title: 'Haberler' },
-    { name: 'misc', title: 'Diğer' },
-  ],
   fields: [
     defineField({
       name: 'language',
@@ -39,27 +29,37 @@ export default defineType({
       components: {
         input: UiTranslationsStringsInput
       },
+      fieldsets: [
+        { name: 'nav', title: 'Navigasyon' },
+        { name: 'search', title: 'Arama' },
+        { name: 'auth', title: 'Giriş/Çıkış' },
+        { name: 'labels', title: 'Etiketler' },
+        { name: 'product', title: 'Ürün Detay' },
+        { name: 'designer', title: 'Tasarımcı' },
+        { name: 'news', title: 'Haberler' },
+        { name: 'misc', title: 'Diğer' },
+      ],
       fields: [
-        // Navigasyon
-        defineField({name: 'subscribe', title: 'Abone Ol', type: 'string', fieldset: 'nav'}),
-        defineField({name: 'email_placeholder', title: 'E-posta Placeholder', type: 'string', fieldset: 'nav'}),
+        // Navigasyon (menü sırasına göre)
+        defineField({name: 'products', title: 'Ürünler', type: 'string', fieldset: 'nav'}),
         defineField({name: 'designers', title: 'Tasarımcılar', type: 'string', fieldset: 'nav'}),
+        defineField({name: 'projects', title: 'Projeler', type: 'string', fieldset: 'nav'}),
         defineField({name: 'news', title: 'Haberler', type: 'string', fieldset: 'nav'}),
         defineField({name: 'about', title: 'Hakkımızda', type: 'string', fieldset: 'nav'}),
         defineField({name: 'contact', title: 'İletişim', type: 'string', fieldset: 'nav'}),
-        defineField({name: 'projects', title: 'Projeler', type: 'string', fieldset: 'nav'}),
+        defineField({name: 'subscribe', title: 'Abone Ol', type: 'string', fieldset: 'nav'}),
+        defineField({name: 'email_placeholder', title: 'E-posta Placeholder', type: 'string', fieldset: 'nav'}),
         // Arama
         defineField({name: 'search_placeholder', title: 'Arama Placeholder', type: 'string', fieldset: 'search'}),
         defineField({name: 'search_no_results', title: 'Arama Sonuç Bulunamadı', type: 'string', fieldset: 'search'}),
         defineField({name: 'searching', title: 'Aranıyor', type: 'string', fieldset: 'search'}),
         // Etiketler
-        defineField({name: 'products', title: 'Ürünler', type: 'string', fieldset: 'labels'}),
         defineField({name: 'categories', title: 'Kategoriler', type: 'string', fieldset: 'labels'}),
         defineField({name: 'designer', title: 'Tasarımcı', type: 'string', fieldset: 'labels'}),
         defineField({name: 'category', title: 'Kategori', type: 'string', fieldset: 'labels'}),
         defineField({name: 'homepage', title: 'Anasayfa', type: 'string', fieldset: 'labels'}),
-        defineField({name: 'featured_products', title: 'Öne Çıkan Ürünler', type: 'string'}),
-        defineField({name: 'featured_products_subtitle', title: 'Öne Çıkan Ürünler Alt Başlık', type: 'text'}),
+        defineField({name: 'featured_products', title: 'Öne Çıkan Ürünler', type: 'string', fieldset: 'labels'}),
+        defineField({name: 'featured_products_subtitle', title: 'Öne Çıkan Ürünler Alt Başlık', type: 'text', fieldset: 'labels'}),
         defineField({name: 'designer_spotlight', title: 'Tasarımcı Odağı', type: 'string', fieldset: 'labels'}),
         defineField({name: 'discover_the_designer', title: 'Tasarımcıyı Keşfet', type: 'string', fieldset: 'labels'}),
         defineField({name: 'sort', title: 'Sırala', type: 'string', fieldset: 'labels'}),
@@ -71,8 +71,8 @@ export default defineType({
         defineField({name: 'description', title: 'Açıklama', type: 'string', fieldset: 'product'}),
         defineField({name: 'dimensions', title: 'Ölçüler', type: 'string', fieldset: 'product'}),
         defineField({name: 'material_alternatives', title: 'Malzeme Alternatifleri', type: 'string', fieldset: 'product'}),
-        defineField({name: 'add_to_cart', title: 'Sepete Ekle', type: 'string'}),
-        defineField({name: 'added_to_cart', title: 'Sepete Eklendi', type: 'string'}),
+        defineField({name: 'add_to_cart', title: 'Sepete Ekle', type: 'string', fieldset: 'product'}),
+        defineField({name: 'added_to_cart', title: 'Sepete Eklendi', type: 'string', fieldset: 'product'}),
         defineField({name: 'exclusive_content', title: 'Özel İçerik', type: 'string', fieldset: 'product'}),
         defineField({name: 'additional_images', title: 'Ek Görseller', type: 'string', fieldset: 'product'}),
         defineField({name: 'technical_drawings', title: 'Teknik Çizimler', type: 'string', fieldset: 'product'}),
