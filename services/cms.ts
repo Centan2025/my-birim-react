@@ -1,5 +1,5 @@
 import { initialData, KEYS, aboutPageContentData } from '../data';
-import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem, ProductMaterial, ProductVariant, Project, LocalizedString, User } from '../types';
+import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem, ProductMaterial, ProductVariant, Project, LocalizedString, User, UserType } from '../types';
 import { createClient } from '@sanity/client'
 import groq from 'groq'
 import imageUrlBuilder from '@sanity/image-url'
@@ -1049,7 +1049,7 @@ export const subscribeEmail = async (email: string): Promise<User> => {
         name: user.name,
         company: user.company,
         profession: user.profession,
-        userType: user.userType,
+        userType: user.userType as UserType,
         isActive: user.isActive,
         createdAt: user.createdAt || user._createdAt,
       };
@@ -1140,7 +1140,7 @@ export const registerUser = async (email: string, password: string, name?: strin
             name: updatedUser.name,
             company: updatedUser.company,
             profession: updatedUser.profession,
-            userType: updatedUser.userType,
+            userType: updatedUser.userType as UserType,
             isActive: updatedUser.isActive,
             createdAt: updatedUser.createdAt || updatedUser._createdAt,
           };
@@ -1192,7 +1192,7 @@ export const registerUser = async (email: string, password: string, name?: strin
         name: user.name,
         company: user.company,
         profession: user.profession,
-        userType: user.userType,
+        userType: user.userType as UserType,
         isActive: user.isActive,
         createdAt: user.createdAt || user._createdAt,
       };
@@ -1290,7 +1290,7 @@ export const loginUser = async (email: string, password: string): Promise<User |
       name: user.name,
       company: user.company,
       profession: user.profession,
-      userType: user.userType,
+      userType: user.userType as UserType,
       isActive: user.isActive,
       createdAt: user.createdAt || user._createdAt,
     };
@@ -1337,7 +1337,7 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
       name: user.name,
       company: user.company,
       profession: user.profession,
-      userType: user.userType,
+      userType: user.userType as UserType,
       isActive: user.isActive,
       createdAt: user.createdAt || user._createdAt,
     };
