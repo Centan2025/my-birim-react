@@ -19,8 +19,6 @@ export const languagesData: string[] = ['tr', 'en'];
 // FIX: Removed `heroMediaUrl` and `heroMediaType` as they are not defined in the SiteSettings type.
 export const siteSettingsData: SiteSettings = {
     logoUrl: '/img/logo.png',
-    headerText: 'BİRİM',
-    isHeaderTextVisible: true,
     showProductPrevNext: false,
 };
 
