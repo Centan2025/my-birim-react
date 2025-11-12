@@ -94,6 +94,110 @@ export function HomePage() {
     return 0;
   });
   const DRAG_THRESHOLD = 50; // pixels
+  const heroContainerRef = useRef<HTMLDivElement>(null);
+  const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const innerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Touch event'ler için non-passive listener'lar ekle
+  useEffect(() => {
+    const container = heroContainerRef.current;
+    if (!container) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.target instanceof HTMLElement && e.target.closest('a, button')) {
+        return;
+      }
+      setIsDragging(true);
+      const startX = e.touches[0].clientX;
+      setDragStartX(startX);
+      setDraggedX(0);
+      e.preventDefault(); // Non-passive listener olduğu için preventDefault çalışır
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isDragging) return;
+      const currentX = e.touches[0].clientX;
+      setDraggedX(currentX - dragStartX);
+      e.preventDefault(); // Non-passive listener olduğu için preventDefault çalışır
+    };
+
+    const handleTouchEnd = () => {
+      if (!isDragging) return;
+      setIsDragging(false);
+
+      const slideCount = content?.heroMedia ? content.heroMedia.length : 1;
+      if (slideCount <= 1) {
+        setDraggedX(0);
+        return;
+      }
+
+      if (draggedX < -DRAG_THRESHOLD) {
+        const nextSlide = currentSlide + 1;
+        if (nextSlide >= slideCount) {
+          if (transitionTimeoutRef.current) {
+            clearTimeout(transitionTimeoutRef.current);
+          }
+          if (innerTimeoutRef.current) {
+            clearTimeout(innerTimeoutRef.current);
+          }
+          setCurrentSlide(nextSlide);
+          transitionTimeoutRef.current = setTimeout(() => {
+            setIsTransitioning(true);
+            requestAnimationFrame(() => {
+              setCurrentSlide(0);
+              requestAnimationFrame(() => {
+                innerTimeoutRef.current = setTimeout(() => {
+                  setIsTransitioning(false);
+                  transitionTimeoutRef.current = null;
+                  innerTimeoutRef.current = null;
+                }, 16);
+              });
+            });
+          }, 600);
+        } else {
+          setCurrentSlide(nextSlide);
+        }
+      } else if (draggedX > DRAG_THRESHOLD) {
+        const prevSlide = currentSlide - 1;
+        if (prevSlide < 0) {
+          if (transitionTimeoutRef.current) {
+            clearTimeout(transitionTimeoutRef.current);
+          }
+          if (innerTimeoutRef.current) {
+            clearTimeout(innerTimeoutRef.current);
+          }
+          setCurrentSlide(prevSlide);
+          transitionTimeoutRef.current = setTimeout(() => {
+            setIsTransitioning(true);
+            requestAnimationFrame(() => {
+              setCurrentSlide(slideCount - 1);
+              requestAnimationFrame(() => {
+                innerTimeoutRef.current = setTimeout(() => {
+                  setIsTransitioning(false);
+                  transitionTimeoutRef.current = null;
+                  innerTimeoutRef.current = null;
+                }, 16);
+              });
+            });
+          }, 600);
+        } else {
+          setCurrentSlide(prevSlide);
+        }
+      }
+      setDraggedX(0);
+    };
+
+    // Non-passive listener'lar ekle (passive: false)
+    container.addEventListener('touchstart', handleTouchStart, { passive: false });
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    container.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isDragging, dragStartX, draggedX, currentSlide, content]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -165,6 +269,8 @@ export function HomePage() {
             slide.style.setProperty('width', `${vw}px`, 'important');
             slide.style.setProperty('max-width', `${vw}px`, 'important');
             slide.style.setProperty('min-width', `${vw}px`, 'important');
+            slide.style.setProperty('height', '100vh', 'important');
+            slide.style.setProperty('min-height', '100vh', 'important');
             const afterWidth = window.getComputedStyle(slide).width;
             console.log(`Slide ${index} - Before: ${beforeWidth}, After: ${afterWidth}, Inline: ${slide.style.width}, Viewport: ${vw}px`);
           }
@@ -179,6 +285,8 @@ export function HomePage() {
             video.style.setProperty('width', `${viewportWidth}px`, 'important');
             video.style.setProperty('max-width', `${viewportWidth}px`, 'important');
             video.style.setProperty('min-width', `${viewportWidth}px`, 'important');
+            video.style.setProperty('height', '100vh', 'important');
+            video.style.setProperty('min-height', '100vh', 'important');
             video.style.setProperty('left', '0', 'important');
             video.style.setProperty('right', '0', 'important');
             video.style.setProperty('margin-left', '0', 'important');
@@ -186,6 +294,8 @@ export function HomePage() {
             video.style.setProperty('padding-left', '0', 'important');
             video.style.setProperty('padding-right', '0', 'important');
             video.style.setProperty('position', 'absolute', 'important');
+            video.style.setProperty('object-fit', 'cover', 'important');
+            video.style.setProperty('object-position', 'left top', 'important');
             const afterWidth = window.getComputedStyle(video).width;
             const afterParentWidth = video.parentElement ? window.getComputedStyle(video.parentElement).width : 'N/A';
             console.log(`Video ${index}:`);
@@ -204,6 +314,8 @@ export function HomePage() {
             img.style.setProperty('width', `${viewportWidth}px`, 'important');
             img.style.setProperty('max-width', `${viewportWidth}px`, 'important');
             img.style.setProperty('min-width', `${viewportWidth}px`, 'important');
+            img.style.setProperty('height', '100vh', 'important');
+            img.style.setProperty('min-height', '100vh', 'important');
             img.style.setProperty('left', '0', 'important');
             img.style.setProperty('right', '0', 'important');
             img.style.setProperty('margin-left', '0', 'important');
@@ -211,6 +323,8 @@ export function HomePage() {
             img.style.setProperty('padding-left', '0', 'important');
             img.style.setProperty('padding-right', '0', 'important');
             img.style.setProperty('position', 'absolute', 'important');
+            img.style.setProperty('background-size', 'cover', 'important');
+            img.style.setProperty('background-position', 'left top', 'important');
             const afterWidth = window.getComputedStyle(img).width;
             console.log(`Image ${index} - Before: ${beforeWidth}, After: ${afterWidth}, Inline: ${img.style.width}, Viewport: ${viewportWidth}px`);
           }
@@ -225,13 +339,17 @@ export function HomePage() {
   useEffect(() => {
     // Content yüklendikten sonra video elementlerine ve parent container'lara style ekle
     // Bu useEffect, content yüklendikten ve element'ler DOM'a eklendikten sonra çalışır
-    if (isMobile && content?.heroMedia) {
-      console.log('=== CONTENT LOADED EFFECT ===');
-      console.log('isMobile:', isMobile, 'content.heroMedia.length:', content.heroMedia.length);
-       // Element'lerin DOM'a eklenmesini beklemek için biraz daha uzun bir timeout kullan
-       const timer = setTimeout(() => {
-         // Tüm parent container'ları debug et
-        console.log('=== DEBUG PARENT CONTAINERS ===');
+    if (!isMobile || !content?.heroMedia) return;
+    
+    console.log('=== CONTENT LOADED EFFECT ===');
+    console.log('isMobile:', isMobile, 'content.heroMedia.length:', content.heroMedia.length);
+     
+    // Element'lerin DOM'a eklenmesini beklemek için recursive bir kontrol yap
+    const timeoutIds: ReturnType<typeof setTimeout>[] = [];
+    
+    const applyStyles = () => {
+      // Tüm parent container'ları debug et
+      console.log('=== DEBUG PARENT CONTAINERS ===');
         const main = document.querySelector('main');
         if (main) {
           const mainComputed = window.getComputedStyle(main);
@@ -339,6 +457,8 @@ export function HomePage() {
             slide.style.setProperty('width', `${vw}px`, 'important');
             slide.style.setProperty('max-width', `${vw}px`, 'important');
             slide.style.setProperty('min-width', `${vw}px`, 'important');
+            slide.style.setProperty('height', '100vh', 'important');
+            slide.style.setProperty('min-height', '100vh', 'important');
             slide.style.setProperty('left', '0', 'important');
             slide.style.setProperty('margin-left', '0', 'important');
             slide.style.setProperty('padding-left', '0', 'important');
@@ -393,16 +513,17 @@ export function HomePage() {
             console.log(`  - Video natural size: ${videoNaturalWidth}x${videoNaturalHeight}`);
             
             // Video element genişliğini viewport genişliğine eşitle
-            // object-fit: cover ve object-position: left center ile sol tarafı göster
+            // object-fit: cover ve object-position: left top ile sol üstten başla
             console.log(`  - Using viewport width for video: ${viewportWidth}px`);
             
             // Video element genişliğini viewport genişliğine eşitle
             video.style.setProperty('width', `${viewportWidth}px`, 'important');
             video.style.setProperty('max-width', `${viewportWidth}px`, 'important');
             video.style.setProperty('min-width', `${viewportWidth}px`, 'important');
-            video.style.setProperty('height', '100%', 'important');
+            video.style.setProperty('height', '100vh', 'important');
+            video.style.setProperty('min-height', '100vh', 'important');
             video.style.setProperty('left', '0', 'important');
-            video.style.setProperty('right', 'auto', 'important');
+            video.style.setProperty('right', '0', 'important');
             video.style.setProperty('margin-left', '0', 'important');
             video.style.setProperty('margin-right', '0', 'important');
             video.style.setProperty('padding-left', '0', 'important');
@@ -410,7 +531,7 @@ export function HomePage() {
             video.style.setProperty('position', 'absolute', 'important');
             video.style.setProperty('transform', 'none', 'important');
             video.style.setProperty('object-fit', 'cover', 'important');
-            video.style.setProperty('object-position', 'left center', 'important');
+            video.style.setProperty('object-position', 'left top', 'important');
             video.style.setProperty('top', '0', 'important');
             video.style.setProperty('bottom', '0', 'important');
             
@@ -468,14 +589,16 @@ export function HomePage() {
             const beforeBgPosition = computed.backgroundPosition;
             
             // Background image element genişliğini viewport genişliğine eşitle
-            // background-size: cover ve background-position: left center ile sol tarafı göster
+            // background-size: cover ve background-position: left top ile sol üstten başla
             console.log(`  - Using viewport width for image: ${viewportWidth}px`);
             
             img.style.setProperty('width', `${viewportWidth}px`, 'important');
             img.style.setProperty('max-width', `${viewportWidth}px`, 'important');
             img.style.setProperty('min-width', `${viewportWidth}px`, 'important');
+            img.style.setProperty('height', '100vh', 'important');
+            img.style.setProperty('min-height', '100vh', 'important');
             img.style.setProperty('left', '0', 'important');
-            img.style.setProperty('right', 'auto', 'important');
+            img.style.setProperty('right', '0', 'important');
             img.style.setProperty('margin-left', '0', 'important');
             img.style.setProperty('margin-right', '0', 'important');
             img.style.setProperty('padding-left', '0', 'important');
@@ -483,7 +606,7 @@ export function HomePage() {
             img.style.setProperty('position', 'absolute', 'important');
             img.style.setProperty('transform', 'none', 'important');
             img.style.setProperty('background-size', 'cover', 'important');
-            img.style.setProperty('background-position', 'left center', 'important');
+            img.style.setProperty('background-position', 'left top', 'important');
             img.style.setProperty('background-repeat', 'no-repeat', 'important');
             
             // Force reflow
@@ -541,9 +664,35 @@ export function HomePage() {
             console.log(`  - Inline style width: ${iframe.style.width}`);
           }
         });
-      }, 300); // Element'lerin DOM'a eklenmesi için daha uzun bir timeout
-      return () => clearTimeout(timer);
-    }
+    };
+    
+    const checkAndApplyStyles = (attempts = 0) => {
+      const maxAttempts = 10;
+      const slides = document.querySelectorAll('.hero-slide-mobile');
+      
+      if (slides.length === 0 && attempts < maxAttempts) {
+        // Element'ler henüz render edilmemiş, tekrar dene
+        const timeoutId = setTimeout(() => checkAndApplyStyles(attempts + 1), 100);
+        timeoutIds.push(timeoutId);
+        return;
+      }
+      
+      if (slides.length === 0) {
+        console.warn('Hero slides not found after', maxAttempts, 'attempts');
+        return;
+      }
+      
+      console.log('Found', slides.length, 'slides, applying styles...');
+      applyStyles();
+    };
+    
+    // İlk kontrolü başlat
+    checkAndApplyStyles();
+    
+    // Cleanup fonksiyonu
+    return () => {
+      timeoutIds.forEach(id => clearTimeout(id));
+    };
   }, [isMobile, content, viewportWidth]); // viewportWidth'i de dependency'ye ekle
 
   const handleDragStart = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
@@ -554,13 +703,20 @@ export function HomePage() {
     const startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     setDragStartX(startX);
     setDraggedX(0);
-    e.preventDefault();
+    // preventDefault sadece mouse event'lerde çalışır, touch event'ler için useEffect'te non-passive listener kullanıyoruz
+    if (!('touches' in e)) {
+      e.preventDefault();
+    }
   };
 
   const handleDragMove = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     if (!isDragging) return;
     const currentX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     setDraggedX(currentX - dragStartX);
+    // preventDefault sadece mouse event'lerde çalışır, touch event'ler için useEffect'te non-passive listener kullanıyoruz
+    if (!('touches' in e)) {
+      e.preventDefault();
+    }
   };
 
   const handleDragEnd = () => {
@@ -680,8 +836,6 @@ export function HomePage() {
 
   // Klonlardan gerçek slide'a geçiş kontrolü için state
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const innerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Cleanup timeout'ları component unmount olduğunda
   useEffect(() => {
@@ -758,14 +912,12 @@ export function HomePage() {
       {/* Hero Section */}
       {heroMedia.length > 0 ? (
         <div 
+          ref={heroContainerRef}
           className={`relative h-screen md:h-screen overflow-hidden cursor-grab active:cursor-grabbing`}
           onMouseDown={handleDragStart}
           onMouseMove={handleDragMove}
           onMouseUp={handleDragEnd}
           onMouseLeave={handleDragEnd}
-          onTouchStart={handleDragStart}
-          onTouchMove={handleDragMove}
-          onTouchEnd={handleDragEnd}
           style={{
             padding: 0,
             scrollbarWidth: 'none',
@@ -859,6 +1011,8 @@ export function HomePage() {
                 width: 100vw !important;
                 min-width: 100vw !important;
                 max-width: 100vw !important;
+                height: 100vh !important;
+                min-height: 100vh !important;
                 flex-shrink: 0 !important;
                 flex-grow: 0 !important;
                 flex-basis: 100vw !important;
@@ -893,16 +1047,16 @@ export function HomePage() {
                 width: 100vw !important;
                 min-width: 100vw !important;
                 max-width: 100vw !important;
-                height: 100% !important;
-                max-height: 100% !important;
+                height: 100vh !important;
+                min-height: 100vh !important;
                 left: 0 !important;
-                right: auto !important;
+                right: 0 !important;
                 margin-left: 0 !important;
                 margin-right: 0 !important;
                 padding-left: 0 !important;
                 padding-right: 0 !important;
                 object-fit: cover !important;
-                object-position: left center !important;
+                object-position: left top !important;
                 position: absolute !important;
                 top: 0 !important;
                 bottom: 0 !important;
@@ -920,16 +1074,16 @@ export function HomePage() {
                 width: 100vw !important;
                 min-width: 100vw !important;
                 max-width: 100vw !important;
-                height: 100% !important;
-                max-height: 100% !important;
+                height: 100vh !important;
+                min-height: 100vh !important;
                 left: 0 !important;
-                right: auto !important;
+                right: 0 !important;
                 margin-left: 0 !important;
                 margin-right: 0 !important;
                 padding-left: 0 !important;
                 padding-right: 0 !important;
                 background-size: cover !important;
-                background-position: left center !important;
+                background-position: left top !important;
                 background-repeat: no-repeat !important;
                 background-attachment: scroll !important;
                 position: absolute !important;
@@ -956,7 +1110,8 @@ export function HomePage() {
                 width: 100vw !important;
                 max-width: 100vw !important;
                 min-width: 100vw !important;
-                height: 100% !important;
+                height: 100vh !important;
+                min-height: 100vh !important;
                 left: 0 !important;
                 right: 0 !important;
                 margin-left: 0 !important;
@@ -996,7 +1151,7 @@ export function HomePage() {
                 return (
                   <div 
                       key={`${isClone ? 'clone-' : ''}${realIndex}-${index}`}
-                      className="relative h-full flex-shrink-0"
+                      className={`relative h-full flex-shrink-0 ${isMobile ? 'hero-slide-mobile' : ''}`}
                       style={{
                         width: `${100 / totalSlides}%`,
                         minWidth: `${100 / totalSlides}%`,
