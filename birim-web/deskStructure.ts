@@ -7,6 +7,9 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
   // Async işlemleri burada yapıyoruz
   const categories = await client.fetch('*[_type == "category"] | order(name.tr asc)')
   const cookiesPolicy = await client.fetch('*[_type == "cookiesPolicy"][0]')
+  const privacyPolicy = await client.fetch('*[_type == "privacyPolicy"][0]')
+  const termsOfService = await client.fetch('*[_type == "termsOfService"][0]')
+  const kvkkPolicy = await client.fetch('*[_type == "kvkkPolicy"][0]')
   const siteSettingsDoc = await client.fetch('*[_type == "siteSettings"][0]')
   const homePage = await client.fetch('*[_type == "homePage"][0]')
   const aboutPage = await client.fetch('*[_type == "aboutPage"][0]')
@@ -129,12 +132,30 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
               S.listItem()
                 .title('Çerez Politikası')
                 .child(
-                  cookiesPolicy?._id
-                    ? S.document()
-                        .schemaType('cookiesPolicy')
-                        .id(pubId(cookiesPolicy._id) || 'cookiesPolicy') // mevcut belgeyi doğrudan aç
-                    : S.document()
-                        .schemaType('cookiesPolicy') // belge yoksa yeni oluştur
+                  S.document()
+                    .schemaType('cookiesPolicy')
+                    .id('cookiesPolicy')
+                ),
+              S.listItem()
+                .title('Gizlilik Politikası')
+                .child(
+                  S.document()
+                    .schemaType('privacyPolicy')
+                    .id('privacyPolicy')
+                ),
+              S.listItem()
+                .title('Kullanım Şartları')
+                .child(
+                  S.document()
+                    .schemaType('termsOfService')
+                    .id('termsOfService')
+                ),
+              S.listItem()
+                .title('KVKK Aydınlatma Metni')
+                .child(
+                  S.document()
+                    .schemaType('kvkkPolicy')
+                    .id('kvkkPolicy')
                 ),
             ])
         ),

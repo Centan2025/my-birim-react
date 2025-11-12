@@ -1,5 +1,5 @@
 import { initialData, KEYS, aboutPageContentData } from '../data';
-import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem, ProductMaterial, ProductVariant, Project, LocalizedString, User, UserType, CookiesPolicy } from '../types';
+import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem, ProductMaterial, ProductVariant, Project, LocalizedString, User, UserType, CookiesPolicy, PrivacyPolicy, TermsOfService, KvkkPolicy } from '../types';
 import { createClient } from '@sanity/client'
 import groq from 'groq'
 import imageUrlBuilder from '@sanity/image-url'
@@ -893,6 +893,39 @@ export const updateFooterContent = async (content: FooterContent): Promise<void>
 export const getCookiesPolicy = async (): Promise<CookiesPolicy | null> => {
     if (useSanity && sanity) {
         const q = groq`*[_type == "cookiesPolicy"][0]{ title, content, updatedAt }`;
+        const data = await sanity.fetch(q);
+        return data || null;
+    }
+    await delay(SIMULATED_DELAY);
+    return null;
+};
+
+// Privacy Policy
+export const getPrivacyPolicy = async (): Promise<PrivacyPolicy | null> => {
+    if (useSanity && sanity) {
+        const q = groq`*[_type == "privacyPolicy"][0]{ title, content, updatedAt }`;
+        const data = await sanity.fetch(q);
+        return data || null;
+    }
+    await delay(SIMULATED_DELAY);
+    return null;
+};
+
+// Terms of Service
+export const getTermsOfService = async (): Promise<TermsOfService | null> => {
+    if (useSanity && sanity) {
+        const q = groq`*[_type == "termsOfService"][0]{ title, content, updatedAt }`;
+        const data = await sanity.fetch(q);
+        return data || null;
+    }
+    await delay(SIMULATED_DELAY);
+    return null;
+};
+
+// KVKK Policy
+export const getKvkkPolicy = async (): Promise<KvkkPolicy | null> => {
+    if (useSanity && sanity) {
+        const q = groq`*[_type == "kvkkPolicy"][0]{ title, content, updatedAt }`;
         const data = await sanity.fetch(q);
         return data || null;
     }

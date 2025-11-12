@@ -45,6 +45,7 @@ export default {
   "invalid_credentials": "Geçersiz e-posta veya şifre.",
   "already_logged_in": "Zaten giriş yaptınız.",
   "logout": "Çıkış Yap",
+  "subscribe_prompt": "Güncel kalmak için abone olun",
   "news_title": "Haberler",
   "news_subtitle": "Tasarım dünyasından en son gelişmeler, hikayeler ve duyurular.",
   "no_news": "Şu anda gösterilecek haber bulunmamaktadır.",

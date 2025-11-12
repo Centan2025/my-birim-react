@@ -1,8 +1,8 @@
 import {defineField, defineType} from 'sanity'
 
 export default defineType({
-  name: 'cookiesPolicy',
-  title: 'Çerez Politikası',
+  name: 'privacyPolicy',
+  title: 'Gizlilik Politikası',
   type: 'document',
   __experimental_actions: [
     // 'create', // Singleton olduğu için create'i kaldırıyoruz
@@ -16,7 +16,7 @@ export default defineType({
       title: 'Başlık', 
       type: 'localizedString', 
       validation: Rule => Rule.required(),
-      initialValue: { tr: 'Çerez Politikası', en: 'Cookie Policy' }
+      initialValue: { tr: 'Gizlilik Politikası', en: 'Privacy Policy' }
     }),
     defineField({name: 'content', title: 'İçerik', type: 'localizedPortableText', validation: Rule => Rule.required()}),
     defineField({name: 'updatedAt', title: 'Güncellenme Tarihi', type: 'datetime', initialValue: () => new Date().toISOString()}),
@@ -24,9 +24,8 @@ export default defineType({
   preview: {
     select: {title: 'title.tr'},
     prepare({title}) {
-      return {title: title || 'Çerez Politikası'}
+      return {title: title || 'Gizlilik Politikası'}
     },
   },
 })
-
 

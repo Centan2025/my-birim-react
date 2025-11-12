@@ -11,6 +11,9 @@ import materialGroup from './documents/materialGroup'
 import project from './documents/project'
 import user from './documents/user'
 import cookiesPolicy from './documents/cookiesPolicy'
+import privacyPolicy from './documents/privacyPolicy'
+import termsOfService from './documents/termsOfService'
+import kvkkPolicy from './documents/kvkkPolicy'
 import translations from './documents/translations'
 
 import {localizedString} from './objects/localizedString'
@@ -53,6 +56,9 @@ export const schemaTypes = [
   project,
   user,
   cookiesPolicy,
+  privacyPolicy,
+  termsOfService,
+  kvkkPolicy,
   translations,
   // objects
   localizedString,

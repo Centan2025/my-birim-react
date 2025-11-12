@@ -254,14 +254,16 @@ export function Header() {
           ref={headerContainerRef}
         >
           <nav className="px-2 sm:px-4 lg:px-6" ref={navRef}>
-            <div className="relative flex h-24 items-center justify-between">
-              <div className="flex items-center gap-x-16 lg:gap-x-20">
-                <div className="flex items-center">
+            <div className="relative flex h-24 items-center">
+              {/* Sol taraf - Menü düğmeleri (desktop) ve Logo (mobil) */}
+              <div className="flex-1 flex items-center">
+                {/* Mobil Logo - Solda */}
+                <div className="lg:hidden flex items-center">
                   <Link to="/" className="flex items-center gap-3 text-white transition-colors">
-                    <SiteLogo logoUrl={settings?.logoUrl} className="w-24 md:w-40 h-4 md:h-6" />
+                    <SiteLogo logoUrl={settings?.logoUrl} className="w-32 h-6" />
                   </Link>
                 </div>
-
+                {/* Desktop Menü */}
                 <div className="hidden lg:flex lg:items-center lg:space-x-8">
                   <div 
                     ref={productsButtonRef}
@@ -289,7 +291,15 @@ export function Header() {
                 </div>
               </div>
 
-              <div className="flex items-center space-x-4">
+              {/* Orta - Logo (Desktop) */}
+              <div className="hidden lg:block absolute left-1/2 transform -translate-x-1/2 flex items-center">
+                <Link to="/" className="flex items-center gap-3 text-white transition-colors">
+                  <SiteLogo logoUrl={settings?.logoUrl} className="w-32 md:w-72 h-6 md:h-10" />
+                </Link>
+              </div>
+
+              {/* Sağ taraf - İkonlar */}
+              <div className="flex-1 flex items-center justify-end space-x-4">
                 <button ref={searchButtonRef} onClick={() => isSearchOpen ? closeSearch() : setIsSearchOpen(true)} className={iconClasses}>
                     {isSearchOpen ? <CloseIcon /> : <SearchIcon />}
                 </button>
@@ -369,6 +379,37 @@ export function Header() {
           {isMobileMenuOpen && (
             <div ref={mobileMenuRef} className="lg:hidden border-t border-white/10">
               <nav className="px-4 sm:px-5 lg:px-6 pt-6 pb-6 flex flex-col space-y-6">
+                {/* Dil seçenekleri - Menü öğelerinin üstünde */}
+                {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
+                  <div className="relative w-full min-h-[2.5rem]">
+                    <div className="flex items-start justify-start gap-1 -mt-1.5">
+                      {supportedLocales.map((langCode) => {
+                        const isActive = locale === langCode;
+                        return (
+                          <button
+                            key={langCode}
+                            onClick={() => {
+                              setLocale(langCode);
+                              setIsMobileMenuOpen(false);
+                            }}
+                            aria-pressed={isActive}
+                            className={`group relative px-1.5 py-0.5 text-xs uppercase tracking-[0.2em] transition-colors duration-200 ${
+                              isActive
+                                ? 'text-white font-extralight'
+                                : 'text-gray-400/90 hover:text-white font-extralight'
+                            }`}
+                            style={{ fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.2em' }}
+                          >
+                            <span className="relative inline-block">
+                              {langCode.toUpperCase()}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="absolute left-[-1rem] right-[-1rem] sm:left-[-1.25rem] sm:right-[-1.25rem] lg:left-[-1.5rem] lg:right-[-1.5rem] bottom-2 h-[1px] bg-white/10"></div>
+                  </div>
+                )}
                 <NavLink to="/products" className="text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('products')}</NavLink>
                 <NavLink to="/designers" className="text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('designers')}</NavLink>
                 <NavLink to="/projects" className="text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('projects') || 'Projeler'}</NavLink>
@@ -397,6 +438,7 @@ export function Header() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
 
+                {searchQuery.length > 0 && (
                 <div className="mt-6 max-h-[50vh] overflow-y-auto pr-2">
                   {isSearching && <p className="text-center text-gray-300">{t('searching')}</p>}
                   
@@ -458,6 +500,7 @@ export function Header() {
                     </div>
                   )}
                 </div>
+                )}
             </div>
         </div>
       </div>

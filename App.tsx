@@ -15,6 +15,9 @@ import { ProfilePage } from './pages/ProfilePage';
 import { NewsPage } from './pages/NewsPage';
 import { NewsDetailPage } from './pages/NewsDetailPage';
 import CookiesPage from './pages/CookiesPage';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
+import KvkkPage from './pages/KvkkPage';
 import { getFooterContent, getSiteSettings, subscribeEmail } from './services/cms';
 import type { FooterContent, SiteSettings, User } from './types';
 import { SiteLogo } from './components/SiteLogo';
@@ -209,7 +212,7 @@ const Footer = () => {
                     <div className="w-full border-t border-gray-700"></div>
                     
                     {/* Partnerler */}
-                    <div className="flex items-center justify-center flex-wrap gap-6">
+                    <div className="flex items-center justify-center flex-wrap gap-6 mb-0">
                         {(content.partners || content.partnerNames || []).map((partner, index) => {
                             const partnerName = typeof partner === 'string' ? partner : t(partner.name);
                             const partnerLogo = typeof partner === 'object' ? partner.logo : undefined;
@@ -229,6 +232,52 @@ const Footer = () => {
                                 <span key={index}>{partnerContent}</span>
                             );
                         })}
+                    </div>
+                    
+                    {/* Email abonelik formu - mobilde en altta ortalanmış */}
+                    <div className="w-full flex justify-center !mt-16 lg:!mt-8">
+                        <form 
+                        onSubmit={async (e) => {
+                            e.preventDefault();
+                            if (email) {
+                                try {
+                                    const result = await subscribeEmail(email);
+                                    console.log('Email aboneliği sonucu:', result);
+                                    alert('E-posta aboneliğiniz başarıyla oluşturuldu!');
+                                    setEmail('');
+                                } catch (err: any) {
+                                    console.error('Email aboneliği hatası:', err);
+                                    // Özel durum: Local storage'a kaydedildi ama CMS'de görünmüyor
+                                    if (err.message === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
+                                        alert('E-posta aboneliğiniz kaydedildi!\n\nNot: CMS\'de görünmesi için .env dosyasına VITE_SANITY_TOKEN ekleyin. Detaylar: README.md');
+                                        setEmail('');
+                                    } else {
+                                        alert(err.message || 'Bir hata oluştu. Lütfen console\'u kontrol edin.');
+                                    }
+                                }
+                            }
+                        }}
+                        className="flex flex-col items-center justify-center w-full"
+                    >
+                        <p className="text-sm text-gray-300 mb-4 text-center">{t('subscribe_prompt')}</p>
+                        <div className="flex items-center justify-center border-b border-white pb-0.5 w-full max-w-[280px] mx-auto">
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder={t('email_placeholder')}
+                                className="w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 transition-all duration-200 text-[11px] text-center"
+                            />
+                        </div>
+                        <div className="w-full flex justify-center mt-6">
+                            <button
+                                type="submit"
+                                className="px-0 py-1 bg-transparent border-0 text-gray-400 hover:text-white transition-colors duration-200 text-xs font-light uppercase tracking-wider"
+                            >
+                                {t('subscribe')}
+                            </button>
+                        </div>
+                    </form>
                     </div>
                 </div>
                 
@@ -316,8 +365,8 @@ const Footer = () => {
                             </a>
                         ))}
                     </div>
-                    {/* Email abonelik formu - ortada mobilde, sağa yaslı desktop'ta */}
-                    <div className="w-full lg:flex-1 flex justify-center lg:justify-end">
+                    {/* Email abonelik formu - sadece desktop'ta */}
+                    <div className="hidden lg:flex lg:flex-1 lg:justify-end">
                         <form 
                         onSubmit={async (e) => {
                             e.preventDefault();
@@ -339,28 +388,36 @@ const Footer = () => {
                                 }
                             }
                         }}
-                        className="flex items-center gap-1 border-b border-white pb-0.5 w-full max-w-sm"
+                        className="lg:flex lg:flex-row lg:items-end lg:justify-end lg:gap-2 lg:w-full lg:max-w-none flex-col items-center justify-center w-full"
                     >
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder={t('email_placeholder')}
-                            className="flex-1 min-w-0 py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 transition-all duration-200 text-[11px] min-w-[140px] md:min-w-[180px]"
-                        />
-                        <button
-                            type="submit"
-                            className="px-0 py-1 bg-transparent border-0 text-gray-400 hover:text-white transition-colors duration-200 text-xs font-light uppercase tracking-wider"
-                        >
-                            {t('subscribe')}
-                        </button>
+                        <div className="flex flex-col w-full max-w-[280px] mx-auto lg:max-w-none lg:mx-0 lg:w-auto lg:items-end lg:flex-1 lg:relative">
+                            <div className="flex items-center w-full lg:w-1/4 lg:ml-auto lg:relative lg:pb-0.5">
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder={t('email_placeholder')}
+                                    className="w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 transition-all duration-200 text-[11px] text-center lg:text-left"
+                                />
+                                {/* Çizgi - input'un sol başından button'ın sağ sonuna kadar */}
+                                <div className="hidden lg:block absolute bottom-0 left-0 border-b border-white" style={{width: 'calc(100% + 0.5rem + 4.8rem)'}}></div>
+                            </div>
+                        </div>
+                        <div className="w-full flex justify-center mt-2 lg:mt-0 lg:w-auto lg:flex-shrink-0 lg:ml-2 lg:relative">
+                            <button
+                                type="submit"
+                                className="px-0 py-1 bg-transparent border-0 text-gray-400 hover:text-white transition-colors duration-200 text-xs font-light uppercase tracking-wider"
+                            >
+                                {t('subscribe')}
+                            </button>
+                        </div>
                     </form>
                     </div>
                 </div>
-                <div className="mt-16 border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-xs">
-                    <p>{t(content.copyrightText)}</p>
+                <div className="mt-8 lg:mt-16 border-t border-gray-700 pt-8 flex flex-col md:flex-row md:justify-between md:items-start gap-6 text-xs">
+                    <p className="md:flex-shrink-0 text-center md:text-left">{t(content.copyrightText)}</p>
                     {(content.legalLinks && content.legalLinks.length > 0) && (
-                        <div className="flex flex-wrap justify-start gap-x-4 gap-y-2">
+                        <div className="flex flex-col md:flex-row md:items-center md:gap-x-4 items-center gap-2">
                             {content.legalLinks.filter(link => link?.isVisible).map((link, index) => {
                                 const url = typeof link?.url === 'string' ? link.url : '';
                                 if (!url) {
@@ -409,7 +466,7 @@ export default function App() {
                 <ScrollToTop />
                 <Header />
                 <CartSidebar />
-                <main className="flex-grow">
+                <main className="flex-grow" style={{ overflowX: 'hidden' }}>
                 <TopBanner />
                 <Routes>
                     <Route path="/" element={<HomePage />} />
@@ -427,6 +484,9 @@ export default function App() {
                     <Route path="/news" element={<NewsPage />} />
                     <Route path="/news/:newsId" element={<NewsDetailPage />} />
                     <Route path="/cookies" element={<CookiesPage />} />
+                    <Route path="/privacy" element={<PrivacyPage />} />
+                    <Route path="/terms" element={<TermsPage />} />
+                    <Route path="/kvkk" element={<KvkkPage />} />
                 </Routes>
                 </main>
                 <CookieBanner />

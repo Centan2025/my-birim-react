@@ -42,6 +42,7 @@
   "invalid_credentials": "Invalid email or password.",
   "already_logged_in": "You are already logged in.",
   "logout": "Logout",
+  "subscribe_prompt": "Subscribe to stay updated",
   "news_title": "News",
   "news_subtitle": "The latest developments, stories, and announcements from the world of design.",
   "no_news": "There are currently no news items to display.",

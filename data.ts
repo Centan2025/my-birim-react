@@ -214,8 +214,10 @@ export const footerContentData: FooterContent = {
     ],
     legalLinks: [
         { text: { tr: 'Şirket Bilgileri', en: 'Company Data' }, url: '#', isVisible: true },
-        { text: { tr: 'Gizlilik Politikası', en: 'Privacy Policy' }, url: '#', isVisible: true },
-        { text: { tr: 'Çerez Politikası', en: 'Cookie Policy' }, url: '#', isVisible: true },
+        { text: { tr: 'Gizlilik Politikası', en: 'Privacy Policy' }, url: '/privacy', isVisible: true },
+        { text: { tr: 'Çerez Politikası', en: 'Cookie Policy' }, url: '/cookies', isVisible: true },
+        { text: { tr: 'Kullanım Şartları', en: 'Terms of Service' }, url: '/terms', isVisible: true },
+        { text: { tr: 'KVKK Aydınlatma Metni', en: 'KVKK Disclosure' }, url: '/kvkk', isVisible: true },
         { text: { tr: 'Yasal Bilgiler', en: 'Legals' }, url: '#', isVisible: true },
     ]
 };

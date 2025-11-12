@@ -390,6 +390,24 @@ export interface CookiesPolicy {
   updatedAt?: string;
 }
 
+export interface PrivacyPolicy {
+  title: LocalizedString;
+  content: { tr?: any[]; en?: any[] };
+  updatedAt?: string;
+}
+
+export interface TermsOfService {
+  title: LocalizedString;
+  content: { tr?: any[]; en?: any[] };
+  updatedAt?: string;
+}
+
+export interface KvkkPolicy {
+  title: LocalizedString;
+  content: { tr?: any[]; en?: any[] };
+  updatedAt?: string;
+}
+
 // --- Application-Specific Models ---
 
 /**
