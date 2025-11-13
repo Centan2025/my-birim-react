@@ -56,7 +56,6 @@ export function ProductDetailPage() {
   const [lightboxSource, setLightboxSource] = useState<'band' | 'panel'>('band');
   const youTubePlayerRef = useRef<HTMLIFrameElement | null>(null);
   const [ytPlaying, setYtPlaying] = useState<boolean>(false);
-  const [ytIframeLoaded, setYtIframeLoaded] = useState<boolean>(false);
   const { isLoggedIn, user } = useAuth();
   const { t, locale } = useTranslation();
   const { addToCart } = useCart();
@@ -267,7 +266,6 @@ export function ProductDetailPage() {
   const closeLightbox = () => {
     setIsLightboxOpen(false);
     // YouTube iframe'i sıfırla
-    setYtIframeLoaded(false);
     setYtPlaying(false);
   };
   const openLightbox = () => {
@@ -276,10 +274,8 @@ export function ProductDetailPage() {
     // Aktif medya YouTube ise direkt oynat
     const item = bandMedia[currentImageIndex];
     if (item && item.type === 'youtube') {
-      setYtIframeLoaded(true);
       setYtPlaying(true);
     } else {
-      setYtIframeLoaded(false);
       setYtPlaying(false);
     }
     setIsLightboxOpen(true);
@@ -290,10 +286,8 @@ export function ProductDetailPage() {
     const panels = (product as any)?.media || [];
     const item = panels[index];
     if (item && item.type === 'youtube') {
-      setYtIframeLoaded(true);
       setYtPlaying(true);
     } else {
-      setYtIframeLoaded(false);
       setYtPlaying(false);
     }
     setIsLightboxOpen(true);
@@ -304,10 +298,8 @@ export function ProductDetailPage() {
       const nextIdx = (prevIndex + 1) % (currentLightboxItems.length || 1);
       const target = currentLightboxItems[nextIdx];
       if (target?.type === 'youtube') {
-        setYtIframeLoaded(true);
         setYtPlaying(true);
       } else {
-        setYtIframeLoaded(false);
         setYtPlaying(false);
       }
       return nextIdx;
@@ -318,10 +310,8 @@ export function ProductDetailPage() {
       const nextIdx = (prevIndex - 1 + (currentLightboxItems.length || 1)) % (currentLightboxItems.length || 1);
       const target = currentLightboxItems[nextIdx];
       if (target?.type === 'youtube') {
-        setYtIframeLoaded(true);
         setYtPlaying(true);
       } else {
-        setYtIframeLoaded(false);
         setYtPlaying(false);
       }
       return nextIdx;
