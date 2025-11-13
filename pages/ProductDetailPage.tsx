@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import type { Product, Designer, Category, LocalizedString } from '../types';
+// FIX: Imported SiteSettings type to correctly type component state.
+import type { Product, Designer, Category, LocalizedString, SiteSettings } from '../types';
 import { getProductById, getDesignerById, getCategories, getProductsByCategoryId, getSiteSettings } from '../services/cms';
-import { useAuth, useSiteSettings } from '../App';
+// FIX: Removed non-existent `useSiteSettings` import. `useAuth` is sufficient.
+import { useAuth } from '../App';
 import { useTranslation } from '../i18n';
 import { useCart } from '../context/CartContext';
 
@@ -41,7 +43,8 @@ const MinimalChevronRight = (props: React.SVGProps<SVGSVGElement>) => (
 export function ProductDetailPage() {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
-  const [siteSettings, setSiteSettings] = useState<{ showProductPrevNext?: boolean } | null>(null);
+  // FIX: Changed siteSettings state to use the correct SiteSettings type, resolving a type mismatch with the `getSiteSettings` service function.
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [product, setProduct] = useState<Product | undefined>(undefined);
   const [designer, setDesigner] = useState<Designer | undefined>(undefined);
   const [category, setCategory] = useState<Category | undefined>(undefined);
@@ -57,8 +60,8 @@ export function ProductDetailPage() {
   const { isLoggedIn, user } = useAuth();
   const { t, locale } = useTranslation();
   const { addToCart } = useCart();
-  const { settings: appSettings } = useSiteSettings();
-  const imageBorderClass = appSettings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none';
+  // FIX: Removed usage of non-existent `useSiteSettings` hook and now use the local `siteSettings` state.
+  const imageBorderClass = siteSettings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none';
   const [activeMaterialGroup, setActiveMaterialGroup] = useState<number>(0);
   const [activeBookIndex, setActiveBookIndex] = useState<number>(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -193,7 +196,8 @@ export function ProductDetailPage() {
   const safeActiveIndex = Math.min(Math.max(activeMaterialGroup, 0), Math.max(mergedGroups.length - 1, 0));
   const activeGroup = Array.isArray(mergedGroups) ? mergedGroups[safeActiveIndex] : undefined;
   const books = Array.isArray((activeGroup as any)?.books) ? (activeGroup as any).books : [];
-  const dimImages = Array.isArray(product?.dimensionImages) ? (product as any).dimensionImages.filter((di: any) => di?.image) : [];
+  // FIX: Safely access `dimensionImages` (now added to Product type) and provide a fallback array to prevent errors when it's undefined.
+  const dimImages = product?.dimensionImages?.filter((di) => di?.image) ?? [];
   const slideCount = bandMedia.length || 1;
 
   // HomePage hero medya mantığına benzer drag sistemi
@@ -340,7 +344,7 @@ export function ProductDetailPage() {
       playsinline: '1',
       controls: controls ? '1' : '0',
       modestbranding: '1',
-      rel: '0', // Bu satır, alakasız videoları engellemek için kritik
+      rel: '0',
       enablejsapi: '1',
       iv_load_policy: '3',
       fs: '0',
@@ -401,7 +405,7 @@ export function ProductDetailPage() {
                 ) : m.type === 'video' ? (
                   <video src={m.url} className={`w-full h-full object-contain ${imageBorderClass}`} autoPlay muted loop playsInline />
                 ) : (
-                  <iframe className="w-full h-full" title="youtube-player" src={toYouTubeEmbed(m.url, { autoplay: true })} allow="autoplay; encrypted-media" allowFullScreen frameBorder="0" />
+                  <iframe className="w-full h-full" title="youtube-player" src={toYouTubeEmbed(m.url, { autoplay: true })} allow="autoplay; encrypted-media; fullscreen" frameBorder="0" />
                 )}
               </div>
             ))}
@@ -818,30 +822,14 @@ export function ProductDetailPage() {
             ) : currentLightboxItems[lightboxImageIndex]?.type === 'video' ? (
               <video src={currentLightboxItems[lightboxImageIndex].url} autoPlay muted loop playsInline className="w-full h-full object-contain" />
             ) : (
-              <div className="relative w-full h-full">
-                {/* Başlangıçta sadece thumbnail göster (üstteki alternatif medya bandı mantığı) */}
-                {!ytIframeLoaded ? (
-                  <>
-                    <img src={youTubeThumb(currentLightboxItems[lightboxImageIndex]?.url || '')} alt="youtube-poster" className="w-full h-full object-contain" />
-                    <button onClick={() => {
-                      setYtIframeLoaded(true);
-                      setYtPlaying(true);
-                    }} className="absolute inset-0 flex items-center justify-center z-20">
-                      <span className="bg-white/85 text-gray-900 rounded-full w-20 h-20 flex items-center justify-center shadow hover:bg-white transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 h-10 ml-1"><path d="M8 5v14l11-7z"/></svg>
-                      </span>
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    {/* Iframe yüklendikten sonra göster */}
+                <div className="relative w-full h-full">
+                    {/* Doğrudan iframe'i göster, ortadaki büyük play butonu kaldırıldı */}
                     <iframe 
                       ref={youTubePlayerRef as any} 
                       className="w-full h-full pointer-events-auto" 
                       title="youtube-player" 
                       src={toYouTubeEmbed(currentLightboxItems[lightboxImageIndex]?.url || '', { autoplay: true, controls: false })} 
                       allow="autoplay; encrypted-media; fullscreen" 
-                      allowFullScreen 
                       frameBorder="0"
                       style={{ pointerEvents: 'auto' }}
                     />
@@ -856,9 +844,7 @@ export function ProductDetailPage() {
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 ml-0.5"><path d="M8 5v14l11-7z"/></svg>
                       )}
                     </button>
-                  </>
-                )}
-              </div>
+                </div>
             )}
             {/* Medya bilgileri overlay - sadece panel medyaları için göster */}
             {lightboxSource === 'panel' && currentLightboxItems[lightboxImageIndex] && (() => {

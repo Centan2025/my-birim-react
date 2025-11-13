@@ -116,7 +116,7 @@ export function ContactPage() {
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
-                allowFullScreen={true}
+                allow="fullscreen"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 title={`${t(selectedLocation.title)}`}

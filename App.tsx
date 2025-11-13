@@ -263,7 +263,10 @@ const Footer = () => {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder={t('email_placeholder')}
-                                className="w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 transition-all duration-200 text-[11px] text-center"
+                                className="w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[11px] text-center"
+                                style={{ outline: 'none', boxShadow: 'none' }}
+                                onFocus={(e) => e.target.style.outline = 'none'}
+                                onBlur={(e) => e.target.style.outline = 'none'}
                             />
                         </div>
                         <div className="w-full flex justify-center mt-6">

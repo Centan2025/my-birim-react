@@ -704,7 +704,7 @@ export function Header() {
                             ? 'text-white font-extralight'
                             : 'text-gray-400/90 hover:text-white font-extralight'
                         }`}
-                        style={{ fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.25em' }}
+                        style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.25em' }}
                       >
                         <span className="relative inline-block">
                           {langCode.toUpperCase()}
@@ -784,7 +784,7 @@ export function Header() {
                               ? 'text-white font-extralight'
                               : 'text-gray-400/90 hover:text-white font-extralight'
                           }`}
-                          style={{ fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.2em' }}
+                          style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.2em' }}
                         >
                           <span className="relative inline-block">
                             {langCode.toUpperCase()}

@@ -60,8 +60,7 @@ const YouTubeBackground: React.FC<{ url: string; isMobile?: boolean }> = ({ url,
                 }}
                 src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&autohide=1&modestbranding=1&rel=0`}
                 frameBorder="0"
-                allow="autoplay; encrypted-media"
-                allowFullScreen
+                allow="autoplay; encrypted-media; fullscreen"
             ></iframe>
         </div>
     );
