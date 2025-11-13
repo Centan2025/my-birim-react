@@ -57,7 +57,7 @@ export function Header() {
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const [headerHeight, setHeaderHeight] = useState(96); // 6rem = 96px
+  const [headerHeight, setHeaderHeight] = useState(48); // 3rem = 48px (mobil için varsayılan)
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [heroBrightness, setHeroBrightness] = useState<number | null>(null);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
@@ -634,7 +634,7 @@ export function Header() {
     <>
       <header className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full'}`}>
         <div
-          className={`overflow-hidden transition-all duration-700 ease-in-out ${isProductsOpen ? 'max-h-[20rem]' : isMobileMenuOpen ? 'max-h-[30rem]' : 'max-h-[6rem]'} ${isMobile && headerOpacity <= 0 ? '' : 'backdrop-blur-lg border-b border-white/10'}`}
+          className={`overflow-hidden transition-all duration-700 ease-in-out ${isProductsOpen ? 'max-h-[20rem]' : isMobileMenuOpen ? 'max-h-[30rem]' : isMobile ? 'max-h-[3rem]' : 'max-h-[6rem]'} ${isMobile && headerOpacity <= 0 ? '' : 'backdrop-blur-lg border-b border-white/10'}`}
           style={{
             backgroundColor: isMobile && headerOpacity <= 0 ? 'transparent' : `rgba(0, 0, 0, ${headerOpacity})`,
             transition: 'background-color 0.2s ease-out, max-height 0.7s ease-in-out',
@@ -646,13 +646,13 @@ export function Header() {
           ref={headerContainerRef}
         >
           <nav className="px-2 sm:px-4 lg:px-6" ref={navRef}>
-            <div className="relative flex h-24 items-center">
+            <div className="relative flex h-12 lg:h-24 items-center">
               {/* Sol taraf - Menü düğmeleri (desktop) ve Logo (mobil) */}
               <div className="flex-1 flex items-center">
                 {/* Mobil Logo - Solda */}
                 <div className="lg:hidden flex items-center">
-                  <Link to="/" className="flex items-center gap-3 text-white transition-colors">
-                    <SiteLogo logoUrl={settings?.logoUrl} className="w-32 h-6" />
+                  <Link to="/" className="flex items-center gap-1.5 text-white transition-colors">
+                    <SiteLogo logoUrl={settings?.logoUrl} className="w-24 h-4" />
                   </Link>
                 </div>
                 {/* Desktop Menü */}
