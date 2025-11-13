@@ -214,7 +214,6 @@ export function HomePage() {
          // Page container'ı bul ve viewport genişliğine göre ayarla
          const pageContainer = document.querySelector('.hero-page-container-mobile');
          if (pageContainer instanceof HTMLElement) {
-           const beforePageWidth = window.getComputedStyle(pageContainer).width;
            pageContainer.style.setProperty('width', `${vw}px`, 'important');
            pageContainer.style.setProperty('max-width', `${vw}px`, 'important');
            pageContainer.style.setProperty('margin-left', '0', 'important');
@@ -227,7 +226,6 @@ export function HomePage() {
          // Hero container'ı bul ve viewport genişliğine göre ayarla
          const heroContainer = document.querySelector('.hero-main-container-mobile');
          if (heroContainer instanceof HTMLElement) {
-           const beforeContainerWidth = window.getComputedStyle(heroContainer).width;
            heroContainer.style.setProperty('width', `${vw}px`, 'important');
            heroContainer.style.setProperty('max-width', `${vw}px`, 'important');
            heroContainer.style.setProperty('min-width', `${vw}px`, 'important');
@@ -244,7 +242,6 @@ export function HomePage() {
          if (heroScrollContainer instanceof HTMLElement) {
            const slideCount = heroScrollContainer.children.length || 1;
            const containerWidth = `${slideCount * vw}px`;
-           const beforeScrollWidth = window.getComputedStyle(heroScrollContainer).width;
            heroScrollContainer.style.setProperty('width', containerWidth, 'important');
            heroScrollContainer.style.setProperty('min-width', containerWidth, 'important');
            heroScrollContainer.style.setProperty('max-width', containerWidth, 'important');
