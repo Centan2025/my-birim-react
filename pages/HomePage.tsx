@@ -93,8 +93,10 @@ export function HomePage() {
     }
     return 0;
   });
+  const [heroHeight, setHeroHeight] = useState<number | null>(null);
   const DRAG_THRESHOLD = 50; // pixels
   const heroContainerRef = useRef<HTMLDivElement>(null);
+  const currentMediaRef = useRef<HTMLVideoElement | HTMLImageElement | null>(null);
   const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const innerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -294,8 +296,8 @@ export function HomePage() {
             video.style.setProperty('padding-left', '0', 'important');
             video.style.setProperty('padding-right', '0', 'important');
             video.style.setProperty('position', 'absolute', 'important');
-            video.style.setProperty('object-fit', 'cover', 'important');
-            video.style.setProperty('object-position', 'left top', 'important');
+            video.style.setProperty('object-fit', 'contain', 'important');
+            video.style.setProperty('object-position', 'top', 'important');
             const afterWidth = window.getComputedStyle(video).width;
             const afterParentWidth = video.parentElement ? window.getComputedStyle(video.parentElement).width : 'N/A';
             console.log(`Video ${index}:`);
@@ -306,10 +308,10 @@ export function HomePage() {
         });
         
         // Görsel elementlerine de style ekle
-        const images = document.querySelectorAll('.hero-slide-mobile > div[style*="backgroundImage"], .hero-slide-mobile > div[style*="background-image"]');
+        const images = document.querySelectorAll('.hero-slide-mobile img');
         console.log('Found images:', images.length);
         images.forEach((img, index) => {
-          if (img instanceof HTMLElement) {
+          if (img instanceof HTMLImageElement) {
             const beforeWidth = window.getComputedStyle(img).width;
             img.style.setProperty('width', `${viewportWidth}px`, 'important');
             img.style.setProperty('max-width', `${viewportWidth}px`, 'important');
@@ -323,8 +325,8 @@ export function HomePage() {
             img.style.setProperty('padding-left', '0', 'important');
             img.style.setProperty('padding-right', '0', 'important');
             img.style.setProperty('position', 'absolute', 'important');
-            img.style.setProperty('background-size', 'cover', 'important');
-            img.style.setProperty('background-position', 'left top', 'important');
+            img.style.setProperty('object-fit', 'contain', 'important');
+            img.style.setProperty('object-position', 'top', 'important');
             const afterWidth = window.getComputedStyle(img).width;
             console.log(`Image ${index} - Before: ${beforeWidth}, After: ${afterWidth}, Inline: ${img.style.width}, Viewport: ${viewportWidth}px`);
           }
@@ -530,8 +532,8 @@ export function HomePage() {
             video.style.setProperty('padding-right', '0', 'important');
             video.style.setProperty('position', 'absolute', 'important');
             video.style.setProperty('transform', 'none', 'important');
-            video.style.setProperty('object-fit', 'cover', 'important');
-            video.style.setProperty('object-position', 'left top', 'important');
+            video.style.setProperty('object-fit', 'contain', 'important');
+            video.style.setProperty('object-position', 'top', 'important');
             video.style.setProperty('top', '0', 'important');
             video.style.setProperty('bottom', '0', 'important');
             
@@ -577,19 +579,19 @@ export function HomePage() {
         });
         
         // Görsel elementlerine de style ekle
-        const images = document.querySelectorAll('.hero-slide-mobile > div[style*="backgroundImage"], .hero-slide-mobile > div[style*="background-image"]');
+        const images = document.querySelectorAll('.hero-slide-mobile img');
         console.log('Content effect - Found images:', images.length);
         images.forEach((img, index) => {
-          if (img instanceof HTMLElement) {
+          if (img instanceof HTMLImageElement) {
             const computed = window.getComputedStyle(img);
             const rect = img.getBoundingClientRect();
             const beforeWidth = computed.width;
             const beforeLeft = computed.left;
             const beforeTransform = computed.transform;
-            const beforeBgPosition = computed.backgroundPosition;
+            const beforeObjectPosition = computed.objectPosition;
             
-            // Background image element genişliğini viewport genişliğine eşitle
-            // background-size: cover ve background-position: left top ile sol üstten başla
+            // Image element genişliğini viewport genişliğine eşitle
+            // object-fit: contain ve object-position: top ile üstten hizala
             console.log(`  - Using viewport width for image: ${viewportWidth}px`);
             
             img.style.setProperty('width', `${viewportWidth}px`, 'important');
@@ -605,9 +607,8 @@ export function HomePage() {
             img.style.setProperty('padding-right', '0', 'important');
             img.style.setProperty('position', 'absolute', 'important');
             img.style.setProperty('transform', 'none', 'important');
-            img.style.setProperty('background-size', 'cover', 'important');
-            img.style.setProperty('background-position', 'left top', 'important');
-            img.style.setProperty('background-repeat', 'no-repeat', 'important');
+            img.style.setProperty('object-fit', 'contain', 'important');
+            img.style.setProperty('object-position', 'top', 'important');
             
             // Force reflow
             img.offsetHeight;
@@ -623,13 +624,13 @@ export function HomePage() {
             console.log(`  - Computed width: ${beforeWidth}`);
             console.log(`  - Computed left: ${beforeLeft}`);
             console.log(`  - Transform: ${beforeTransform}`);
-            console.log(`  - Background position: ${beforeBgPosition}`);
+            console.log(`  - Object position: ${beforeObjectPosition}`);
             console.log(`  - Bounding rect: left=${rect.left}, width=${rect.width}, right=${rect.right}`);
             console.log(`Image AFTER:`);
             console.log(`  - Computed width: ${afterWidth}`);
             console.log(`  - Computed left: ${afterLeft}`);
             console.log(`  - Transform: ${afterComputed.transform}`);
-            console.log(`  - Background position: ${afterComputed.backgroundPosition}`);
+            console.log(`  - Object position: ${afterComputed.objectPosition}`);
             console.log(`  - Bounding rect: left=${afterRect.left}, width=${afterRect.width}, right=${afterRect.right}`);
             console.log(`  - Inline style width: ${img.style.width}`);
             
@@ -880,6 +881,107 @@ export function HomePage() {
     }
   }, [currentSlide, content, isDragging, isTransitioning]);
 
+  // Mobilde Hero container yüksekliğini medyanın gerçek boyutuna göre ayarla
+  useEffect(() => {
+    if (!isMobile || !content?.heroMedia) return;
+    
+    const updateHeroHeight = () => {
+      const heroContainer = heroContainerRef.current;
+      if (!heroContainer) return;
+      
+      // Normalize edilmiş slide index'ini bul
+      const slideCount = content.heroMedia.length || 1;
+      const normalizedSlide = currentSlide < 0 ? slideCount - 1 : (currentSlide >= slideCount ? 0 : currentSlide);
+      
+      // Klonlar dahil gerçek slide index'ini bul
+      const clonedMedia = slideCount > 1 ? [
+        content.heroMedia[content.heroMedia.length - 1],
+        ...content.heroMedia,
+        content.heroMedia[0]
+      ] : content.heroMedia;
+      const totalSlides = clonedMedia.length;
+      const realIndex = normalizedSlide + 1; // +1 çünkü ilk klon var
+      
+      // Aktif slide'ı bul
+      const slides = heroContainer.querySelectorAll('.hero-slide-mobile');
+      const activeSlide = slides[realIndex] as HTMLElement;
+      if (!activeSlide) return;
+      
+      // Medya elementini bul (video veya img)
+      const mediaElement = activeSlide.querySelector('video, img') as HTMLVideoElement | HTMLImageElement;
+      if (!mediaElement) return;
+      
+      const updateHeight = () => {
+        // Önce container genişliğini al
+        const containerWidth = viewportWidth || window.innerWidth || heroContainer.getBoundingClientRect().width;
+        
+        // Medyanın aspect ratio'sunu kullanarak yüksekliği hesapla
+        let calculatedHeight = 0;
+        
+        if (mediaElement instanceof HTMLVideoElement) {
+          if (mediaElement.videoWidth > 0 && mediaElement.videoHeight > 0) {
+            const aspectRatio = mediaElement.videoWidth / mediaElement.videoHeight;
+            calculatedHeight = containerWidth / aspectRatio;
+          }
+        } else if (mediaElement instanceof HTMLImageElement) {
+          if (mediaElement.naturalWidth > 0 && mediaElement.naturalHeight > 0) {
+            const aspectRatio = mediaElement.naturalWidth / mediaElement.naturalHeight;
+            calculatedHeight = containerWidth / aspectRatio;
+          }
+        }
+        
+        // Eğer hesaplama başarısız olduysa, render edilmiş yüksekliği ölç
+        if (calculatedHeight <= 0) {
+          const mediaRect = mediaElement.getBoundingClientRect();
+          if (mediaRect.height > 0) {
+            calculatedHeight = mediaRect.height;
+          }
+        }
+        
+        if (calculatedHeight > 0) {
+          setHeroHeight(calculatedHeight);
+          // Container yüksekliğini de ayarla
+          if (heroContainer) {
+            heroContainer.style.height = `${calculatedHeight}px`;
+            heroContainer.style.minHeight = `${calculatedHeight}px`;
+            heroContainer.style.maxHeight = `${calculatedHeight}px`;
+          }
+          // Slide container'ının yüksekliğini de ayarla
+          if (activeSlide) {
+            activeSlide.style.height = `${calculatedHeight}px`;
+            activeSlide.style.minHeight = `${calculatedHeight}px`;
+          }
+        }
+      };
+      
+      // Medya yüklenene kadar bekle
+      if (mediaElement instanceof HTMLVideoElement) {
+        if (mediaElement.readyState >= 2) { // HAVE_CURRENT_DATA
+          setTimeout(updateHeight, 50);
+        } else {
+          mediaElement.addEventListener('loadedmetadata', () => {
+            setTimeout(updateHeight, 50);
+          }, { once: true });
+          mediaElement.addEventListener('loadeddata', () => {
+            setTimeout(updateHeight, 50);
+          }, { once: true });
+        }
+      } else if (mediaElement instanceof HTMLImageElement) {
+        if (mediaElement.complete && mediaElement.naturalHeight > 0) {
+          setTimeout(updateHeight, 50);
+        } else {
+          mediaElement.addEventListener('load', () => {
+            setTimeout(updateHeight, 50);
+          }, { once: true });
+        }
+      }
+    };
+    
+    // Slide değiştiğinde veya viewport genişliği değiştiğinde güncelle
+    const timeoutId = setTimeout(updateHeroHeight, 100);
+    return () => clearTimeout(timeoutId);
+  }, [isMobile, content, currentSlide, viewportWidth]);
+
   if (!content || !settings) {
     return <div className="h-screen w-full bg-gray-800" />;
   }
@@ -913,7 +1015,7 @@ export function HomePage() {
       {heroMedia.length > 0 ? (
         <div 
           ref={heroContainerRef}
-          className={`relative h-screen md:h-screen overflow-hidden cursor-grab active:cursor-grabbing`}
+          className={`relative ${isMobile ? '' : 'h-screen'} md:h-screen overflow-hidden cursor-grab active:cursor-grabbing`}
           onMouseDown={handleDragStart}
           onMouseMove={handleDragMove}
           onMouseUp={handleDragEnd}
@@ -926,6 +1028,7 @@ export function HomePage() {
             scrollBehavior: 'auto',
             WebkitOverflowScrolling: 'auto',
             boxSizing: 'border-box',
+            ...(isMobile && heroHeight ? { height: `${heroHeight}px`, minHeight: `${heroHeight}px`, maxHeight: `${heroHeight}px` } : {}),
           } as React.CSSProperties}
         >
           <style>{`
@@ -933,6 +1036,24 @@ export function HomePage() {
               display: none;
             }
             @media (max-width: 1023px) {
+              .inspiration-section-mobile {
+                width: 100vw !important;
+                max-width: 100vw !important;
+                margin-left: calc(-50vw + 50%) !important;
+                margin-right: calc(-50vw + 50%) !important;
+                left: 0 !important;
+                right: 0 !important;
+                position: relative !important;
+                box-sizing: border-box !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                overflow: hidden !important;
+              }
+              .inspiration-section-mobile[style*="backgroundImage"] {
+                background-size: 100vw auto !important;
+                background-position: left center !important;
+                background-repeat: no-repeat !important;
+              }
               body {
                 overflow-x: hidden !important;
                 margin: 0 !important;
@@ -1011,8 +1132,8 @@ export function HomePage() {
                 width: 100vw !important;
                 min-width: 100vw !important;
                 max-width: 100vw !important;
-                height: 100vh !important;
-                min-height: 100vh !important;
+                height: auto !important;
+                min-height: auto !important;
                 flex-shrink: 0 !important;
                 flex-grow: 0 !important;
                 flex-basis: 100vw !important;
@@ -1040,26 +1161,25 @@ export function HomePage() {
               .hero-slide-mobile > video,
               .hero-slide-mobile > video[style],
               .hero-slide-mobile video.w-full.h-full,
-              .hero-slide-mobile video.object-cover,
+              .hero-slide-mobile video.object-contain,
               .hero-slide-mobile video.absolute,
               .hero-slide-mobile video.inset-0 {
                 display: block !important;
                 width: 100vw !important;
                 min-width: 100vw !important;
                 max-width: 100vw !important;
-                height: 100vh !important;
-                min-height: 100vh !important;
+                height: auto !important;
+                min-height: auto !important;
                 left: 0 !important;
                 right: 0 !important;
                 margin-left: 0 !important;
                 margin-right: 0 !important;
                 padding-left: 0 !important;
                 padding-right: 0 !important;
-                object-fit: cover !important;
-                object-position: left top !important;
-                position: absolute !important;
+                object-fit: contain !important;
+                object-position: top !important;
+                position: relative !important;
                 top: 0 !important;
-                bottom: 0 !important;
                 transform: none !important;
                 box-sizing: border-box !important;
               }
@@ -1069,26 +1189,23 @@ export function HomePage() {
               .hero-slide-mobile .w-full {
                 width: 100vw !important;
               }
-              .hero-slide-mobile > div[style*="backgroundImage"],
-              .hero-slide-mobile > div[style*="background-image"] {
+              .hero-slide-mobile img,
+              .hero-slide-mobile img[style] {
                 width: 100vw !important;
                 min-width: 100vw !important;
                 max-width: 100vw !important;
-                height: 100vh !important;
-                min-height: 100vh !important;
+                height: auto !important;
+                min-height: auto !important;
                 left: 0 !important;
                 right: 0 !important;
                 margin-left: 0 !important;
                 margin-right: 0 !important;
                 padding-left: 0 !important;
                 padding-right: 0 !important;
-                background-size: cover !important;
-                background-position: left top !important;
-                background-repeat: no-repeat !important;
-                background-attachment: scroll !important;
-                position: absolute !important;
+                object-fit: contain !important;
+                object-position: top !important;
+                position: relative !important;
                 top: 0 !important;
-                bottom: 0 !important;
                 transform: none !important;
                 box-sizing: border-box !important;
               }
@@ -1151,7 +1268,7 @@ export function HomePage() {
                 return (
                   <div 
                       key={`${isClone ? 'clone-' : ''}${realIndex}-${index}`}
-                      className={`relative h-full flex-shrink-0 ${isMobile ? 'hero-slide-mobile' : ''}`}
+                      className={`relative ${isMobile ? '' : 'h-full'} flex-shrink-0 ${isMobile ? 'hero-slide-mobile' : ''}`}
                       style={{
                         width: `${100 / totalSlides}%`,
                         minWidth: `${100 / totalSlides}%`,
@@ -1165,11 +1282,12 @@ export function HomePage() {
                         boxSizing: 'border-box',
                         overflow: 'hidden',
                         position: 'relative',
+                        ...(isMobile && heroHeight ? { height: `${heroHeight}px`, minHeight: `${heroHeight}px` } : (!isMobile ? { height: '100%', minHeight: '100%' } : {})),
                       }}
                   >
                       {media.type === 'video' ? (
                            <video 
-                               className="absolute inset-0 w-full h-full object-cover"
+                               className={`${isMobile ? 'relative' : 'absolute'} top-0 left-0 w-full ${isMobile ? 'h-auto' : 'h-full'} ${isMobile ? 'object-contain object-top' : 'object-cover'}`}
                                autoPlay 
                                loop 
                                muted 
@@ -1180,20 +1298,14 @@ export function HomePage() {
                       ) : media.type === 'youtube' ? (
                            <YouTubeBackground url={media.url} isMobile={isMobile} />
                       ) : (
-                          <div 
-                              className="absolute inset-0 w-full h-full bg-cover bg-center"
-                              style={{
-                                backgroundImage: `url('${media.url}')`, 
-                                width: '100%', 
-                                height: '100%', 
-                                backgroundSize: 'cover', 
-                                backgroundPosition: 'center center',
-                                backgroundRepeat: 'no-repeat',
-                              }}
+                          <img 
+                              src={media.url} 
+                              alt={t(media.title)} 
+                              className={`${isMobile ? 'relative' : 'absolute'} top-0 left-0 w-full ${isMobile ? 'h-auto' : 'h-full'} ${isMobile ? 'object-contain object-top' : 'object-cover'}`}
                           />
                       )}
                       <div className="absolute inset-0 bg-black/50 z-10"></div>
-                       <div className={`relative z-20 ${isMobile ? 'w-full px-4' : 'container mx-auto px-4 sm:px-6 lg:px-8'} h-full flex items-center ${content.isHeroTextVisible && content.isLogoVisible ? 'justify-center md:justify-start' : 'justify-center'}`}>
+                       <div className={`absolute z-20 ${isMobile ? 'w-full px-4' : 'container mx-auto px-4 sm:px-6 lg:px-8'} h-full flex items-center ${content.isHeroTextVisible && content.isLogoVisible ? 'justify-center md:justify-start' : 'justify-center'}`} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
                           <div className={`flex flex-col md:flex-row items-center text-white gap-12 md:gap-16 ${content.isHeroTextVisible || content.isLogoVisible ? 'max-w-4xl' : ''} text-center ${content.isLogoVisible ? 'md:text-left' : 'md:text-center'}`}>
                               {content.isLogoVisible && (
                                   <div className="animate-fade-in-down flex-shrink-0">
@@ -1203,8 +1315,8 @@ export function HomePage() {
                               {content.isHeroTextVisible && (
                                   <div className="relative w-full">
                                       <div className="animate-fade-in-up">
-                                        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4" style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}>{t(media.title)}</h1>
-                                        <p className="text-lg md:text-xl mb-8" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>{t(media.subtitle)}</p>
+                                        <h1 className="text-4xl md:text-5xl font-light tracking-tight mb-4 leading-relaxed" style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}>{t(media.title)}</h1>
+                                        <p className="text-lg md:text-xl mb-8 leading-relaxed" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>{t(media.subtitle)}</p>
                                         {media.isButtonVisible && (
                                           <Link
                                               to={media.buttonLink || '/'}
@@ -1224,7 +1336,7 @@ export function HomePage() {
               })}
           </div>
           {slideCount > 1 && (
-              <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex items-center space-x-4">
+              <div className={`${isMobile ? 'absolute' : 'absolute'} ${isMobile ? 'bottom-4' : 'bottom-10'} left-1/2 -translate-x-1/2 z-30 flex items-center space-x-4`} style={isMobile ? { position: 'absolute', bottom: '16px' } : {}}>
                   {heroMedia.map((_, index) => {
                     // currentSlide'ı normalize et (klonlar hariç)
                     const normalizedSlide = currentSlide < 0 ? slideCount - 1 : (currentSlide >= slideCount ? 0 : currentSlide);
@@ -1251,7 +1363,7 @@ export function HomePage() {
         <div className="relative h-[50vh] w-full bg-gray-800" />
       )}
 
-      {/* Content Blocks Section - Hidden on mobile */}
+      {/* Content Blocks Section */}
       {content?.contentBlocks && content.contentBlocks.length > 0 && (() => {
         const sortedBlocks = [...content.contentBlocks].sort((a, b) => (a.order || 0) - (b.order || 0));
         return (
@@ -1271,7 +1383,7 @@ export function HomePage() {
               const isCenter = block.position === 'center';
 
               return (
-                <section key={index} className={`hidden md:block py-20 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
+                <section key={index} className={`py-20 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
                   {isFullWidth ? (
                     <div className="w-full overflow-hidden">
                       {block.mediaType === 'youtube' ? (
@@ -1279,14 +1391,14 @@ export function HomePage() {
                           <YouTubeBackground url={mediaUrl} />
                         </div>
                       ) : block.mediaType === 'video' ? (
-                        <video className="w-full h-auto max-w-full object-contain md:object-cover" autoPlay loop muted playsInline src={mediaUrl} />
+                        <video className={`w-full h-auto max-w-full ${isMobile ? 'object-contain' : 'object-cover'}`} autoPlay loop muted playsInline src={mediaUrl} />
                       ) : (
-                        <img src={mediaUrl} alt="" className="w-full h-auto object-contain md:object-cover max-w-full block" />
+                        <img src={mediaUrl} alt="" className={`w-full h-auto ${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`} />
                       )}
                       {block.description && (
                         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
                           <div className="prose max-w-none text-center">
-                            <p className="text-lg text-gray-700">{t(block.description)}</p>
+                            <p className="text-lg text-gray-700 font-light leading-relaxed">{t(block.description)}</p>
                           </div>
                           {block.linkText && block.linkUrl && (
                             <div className="text-center mt-6">
@@ -1311,15 +1423,15 @@ export function HomePage() {
                               <YouTubeBackground url={mediaUrl} />
                             </div>
                           ) : block.mediaType === 'video' ? (
-                            <video className={`w-full h-auto ${imageBorderClass} max-w-full object-contain md:object-cover`} autoPlay loop muted playsInline src={mediaUrl} />
+                            <video className={`w-full h-auto ${imageBorderClass} max-w-full ${isMobile ? 'object-contain' : 'object-cover'}`} autoPlay loop muted playsInline src={mediaUrl} />
                           ) : (
-                            <img src={mediaUrl} alt="" className={`w-full h-auto ${imageBorderClass} object-contain md:object-cover max-w-full block`} />
+                            <img src={mediaUrl} alt="" className={`w-full h-auto ${imageBorderClass} ${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`} />
                           )}
                         </div>
                         {block.description && (
                           <div className={`w-full ${isCenter ? 'md:w-full text-center' : 'md:w-1/2'}`}>
                             <div className="prose max-w-none">
-                              <p className="text-lg text-gray-700">{t(block.description)}</p>
+                              <p className="text-lg text-gray-700 font-light leading-relaxed">{t(block.description)}</p>
                             </div>
                             {block.linkText && block.linkUrl && (
                               <div className={`mt-6 ${isCenter ? 'text-center' : ''}`}>
@@ -1348,8 +1460,8 @@ export function HomePage() {
       {Array.isArray(featuredProducts) && featuredProducts.length > 0 && (
         <section id="featured" className="py-20 bg-gray-100">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
-            <h2 className="text-3xl font-light text-gray-600 text-center mb-4">{t('featured_products')}</h2>
-            <p className="text-center text-gray-500 max-w-2xl mx-auto mb-12 font-light">{t('featured_products_subtitle')}</p>
+            <h2 className="text-3xl font-light text-gray-600 text-center mb-4 leading-relaxed">{t('featured_products')}</h2>
+            <p className="text-center text-gray-500 max-w-2xl mx-auto mb-12 font-light leading-relaxed">{t('featured_products_subtitle')}</p>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
               {featuredProducts.map(p => (
                 <ProductCard key={p.id} product={p} variant="light" />
@@ -1368,8 +1480,8 @@ export function HomePage() {
               </div>
               <div className="w-full md:w-1/2 text-center md:text-left">
                   <h3 className="text-sm font-light uppercase tracking-widest text-gray-500">{t('designer_spotlight')}</h3>
-                  <h2 className="text-4xl font-light text-gray-600 mt-2">{t(featuredDesigner.name)}</h2>
-                  <p className="mt-4 text-gray-500 leading-relaxed font-light">{t(featuredDesigner.bio).substring(0, 200)}...</p>
+                  <h2 className="text-4xl font-light text-gray-600 mt-2 leading-relaxed">{t(featuredDesigner.name)}</h2>
+                  <p className="mt-4 text-gray-500 leading-loose font-light">{t(featuredDesigner.bio).substring(0, 200)}...</p>
                    <Link
                     to={`/designer/${featuredDesigner.id}`}
                     className="group mt-8 inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 px-5 text-lg rounded-lg hover:bg-gray-900/10 transition-colors duration-300"
@@ -1384,11 +1496,20 @@ export function HomePage() {
 
       {/* Inspiration Section */}
       {inspiration && (inspiration.backgroundImage || inspiration.title || inspiration.subtitle) && (
-        <section className="relative py-32 bg-gray-800 text-white text-center" style={{ backgroundImage: `url(${inspiration.backgroundImage})`, backgroundSize: 'cover', backgroundAttachment: 'fixed', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+        <section 
+          className="relative py-32 bg-gray-800 text-white text-center inspiration-section-mobile"
+          style={{ 
+            backgroundImage: `url(${inspiration.backgroundImage})`, 
+            backgroundSize: isMobile ? '100vw auto' : 'cover', 
+            backgroundAttachment: 'fixed', 
+            backgroundPosition: isMobile ? 'left center' : 'center center', 
+            backgroundRepeat: 'no-repeat',
+          }}
+        >
            <div className="absolute inset-0 bg-black/50"></div>
            <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
-              <h2 className="text-4xl font-light">{t(inspiration.title)}</h2>
-              <p className="mt-4 text-lg text-gray-200 max-w-2xl mx-auto font-light">{t(inspiration.subtitle)}</p>
+              <h2 className="text-4xl font-light leading-relaxed">{t(inspiration.title)}</h2>
+              <p className="mt-4 text-lg text-gray-200 max-w-2xl mx-auto font-light leading-relaxed">{t(inspiration.subtitle)}</p>
               {inspiration.buttonText && (
                 <Link
                     to={inspiration.buttonLink || '/'}
