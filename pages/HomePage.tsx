@@ -73,6 +73,7 @@ export function HomePage() {
   const [featuredDesigner, setFeaturedDesigner] = useState<Designer | null>(null);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [inspirationImageHeight, setInspirationImageHeight] = useState<number | null>(null);
   const { t } = useTranslation();
   const { settings: siteSettings } = useSiteSettings();
   const imageBorderClass = siteSettings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none';
@@ -751,6 +752,32 @@ export function HomePage() {
     return () => clearTimeout(timeoutId);
   }, [isMobile, content, currentSlide, viewportWidth]);
 
+  // İlham görselinin yüksekliğini hesapla - hook'lar early return'den önce olmalı
+  useEffect(() => {
+    const inspiration = content?.inspirationSection;
+    if (!inspiration?.backgroundImage) {
+      setInspirationImageHeight(null);
+      return;
+    }
+
+    const img = new Image();
+    img.onload = () => {
+      if (isMobile) {
+        // Mobilde görsel genişliği viewport genişliğine eşit, yüksekliği orantılı
+        const vw = document.documentElement.clientWidth || window.innerWidth;
+        const aspectRatio = img.height / img.width;
+        setInspirationImageHeight(vw * aspectRatio);
+      } else {
+        // Desktop'ta görsel cover olarak kullanılıyor, minimum yükseklik ayarla
+        setInspirationImageHeight(Math.max(img.height, 400));
+      }
+    };
+    img.onerror = () => {
+      setInspirationImageHeight(null);
+    };
+    img.src = inspiration.backgroundImage;
+  }, [content?.inspirationSection?.backgroundImage, isMobile]);
+
   if (!content || !settings) {
     return <div className="h-screen w-full bg-gray-800" />;
   }
@@ -1277,6 +1304,7 @@ export function HomePage() {
             backgroundAttachment: 'fixed', 
             backgroundPosition: isMobile ? 'left center' : 'center center', 
             backgroundRepeat: 'no-repeat',
+            minHeight: inspirationImageHeight && inspiration.backgroundImage ? `${inspirationImageHeight}px` : undefined,
           }}
         >
            <div className="absolute inset-0 bg-black/50"></div>
