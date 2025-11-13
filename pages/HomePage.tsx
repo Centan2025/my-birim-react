@@ -96,7 +96,6 @@ export function HomePage() {
   const [heroHeight, setHeroHeight] = useState<number | null>(null);
   const DRAG_THRESHOLD = 50; // pixels
   const heroContainerRef = useRef<HTMLDivElement>(null);
-  const currentMediaRef = useRef<HTMLVideoElement | HTMLImageElement | null>(null);
   const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const innerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -899,7 +898,6 @@ export function HomePage() {
         ...content.heroMedia,
         content.heroMedia[0]
       ] : content.heroMedia;
-      const totalSlides = clonedMedia.length;
       const realIndex = normalizedSlide + 1; // +1 çünkü ilk klon var
       
       // Aktif slide'ı bul
