@@ -432,6 +432,33 @@ export const contentBlock = defineType({
       description: 'Hero bölümünden sonra görünecek sıra (düşük sayı önce görünür)',
       initialValue: 0,
     }),
+    defineField({
+      name: 'backgroundColor',
+      title: 'Arka Plan Rengi',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Beyaz', value: 'white'},
+          {title: 'Gri', value: 'gray'},
+        ],
+      },
+      initialValue: 'white',
+      description: 'İçerik bloğunun arka plan rengi (varsayılan: Beyaz)',
+    }),
+    defineField({
+      name: 'textAlignment',
+      title: 'Yazı Hizalaması',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Sol', value: 'left'},
+          {title: 'Orta', value: 'center'},
+          {title: 'Sağ', value: 'right'},
+        ],
+      },
+      initialValue: 'left',
+      description: 'Yazıların hizalaması (varsayılan: Sol)',
+    }),
   ],
 })
 

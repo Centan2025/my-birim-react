@@ -5,7 +5,8 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
   const client = getClient({apiVersion: '2024-01-01'})
   
   // Async işlemleri burada yapıyoruz
-  const categories = await client.fetch('*[_type == "category"] | order(name.tr asc)')
+  // Sadece published kategorileri al (draft'ları hariç tut)
+  const allCategories = await client.fetch('*[_type == "category"] | order(name.tr asc)')
   const cookiesPolicy = await client.fetch('*[_type == "cookiesPolicy"][0]')
   const privacyPolicy = await client.fetch('*[_type == "privacyPolicy"][0]')
   const termsOfService = await client.fetch('*[_type == "termsOfService"][0]')
@@ -19,6 +20,17 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
     if (!id || typeof id !== 'string') return ''
     return id.replace(/^drafts\./, '')
   }
+  
+  // Duplicate ID'leri önlemek için: sadece published kategorileri al ve unique ID'leri takip et
+  const seenIds = new Set<string>()
+  const categories = allCategories.filter((category: any) => {
+    const cleanId = pubId(category._id)
+    // Draft'ları atla ve duplicate ID'leri filtrele
+    if (category._id.startsWith('drafts.')) return false
+    if (seenIds.has(cleanId)) return false
+    seenIds.add(cleanId)
+    return true
+  })
   
   // Kategoriler için items oluşturuyoruz
   const categoryItems = [

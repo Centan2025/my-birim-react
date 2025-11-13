@@ -132,7 +132,7 @@ const TopBanner = () => {
   const text = settings?.topBannerText?.trim();
   if (!text) return null;
   return (
-    <div className="bg-gray-900 text-gray-200 text-xs md:text-sm px-4 sm:px-6 lg:px-8 py-2 border-b border-white/10">
+    <div className="hidden md:block bg-gray-900 text-gray-200 text-xs md:text-sm px-4 sm:px-6 lg:px-8 py-2 border-b border-white/10">
       <div className="container mx-auto">{text}</div>
     </div>
   );

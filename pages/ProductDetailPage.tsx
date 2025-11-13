@@ -389,7 +389,7 @@ export function ProductDetailPage() {
             {bandMedia.map((m, index) => (
               <div
                 key={index}
-                className="relative h-full shrink-0 cursor-pointer"
+                className="relative h-full shrink-0 cursor-pointer bg-white flex items-center justify-center"
                 style={{ width: `${100 / slideCount}%` }}
                 onClick={() => {
                   if (!isDragging && draggedX === 0) {
@@ -398,9 +398,9 @@ export function ProductDetailPage() {
                 }}
               >
                 {m.type === 'image' ? (
-                  <img src={m.url} alt={`${t(product.name)} ${index + 1}`} className={`w-full h-full object-cover ${imageBorderClass}`} />
+                  <img src={m.url} alt={`${t(product.name)} ${index + 1}`} className={`w-full h-full object-contain ${imageBorderClass}`} />
                 ) : m.type === 'video' ? (
-                  <video src={m.url} className={`w-full h-full object-cover ${imageBorderClass}`} autoPlay muted loop playsInline />
+                  <video src={m.url} className={`w-full h-full object-contain ${imageBorderClass}`} autoPlay muted loop playsInline />
                 ) : (
                   <iframe className="w-full h-full" title="youtube-player" src={toYouTubeEmbed(m.url, { autoplay: true })} allow="autoplay; encrypted-media" allowFullScreen frameBorder="0" />
                 )}

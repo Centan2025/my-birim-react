@@ -66,8 +66,14 @@ export function ProjectDetailPage(){
   if (loading) return <div className="pt-20 text-center">{t('loading')}...</div>
   if (!project) return <div className="pt-20 text-center">Proje bulunamadı</div>
   
-  // Use only media array (images and videos)
-  const allMedia = (project.media || []).map((m) => ({ type: m.type, url: m.url, image: m.image || (m.type === 'image' ? m.url : undefined) }))
+  // Use cover image + media array (images and videos)
+  const mediaArray = (project.media || []).map((m) => ({ type: m.type, url: m.url, image: m.image || (m.type === 'image' ? m.url : undefined) }))
+  // Cover görselini başa ekle (eğer varsa ve media array'inde yoksa)
+  const coverMedia = project.cover ? [{ type: 'image' as const, url: project.cover, image: project.cover }] : []
+  // Cover'ı media array'inin başına ekle, ancak aynı URL'den varsa tekrar ekleme
+  const existingUrls = new Set(mediaArray.map(m => m.url))
+  const coverToAdd = coverMedia.filter(m => !existingUrls.has(m.url))
+  const allMedia = [...coverToAdd, ...mediaArray]
   
   const curr = allMedia[idx]
   const next = ()=> setIdx(i=> allMedia.length? (i+1)%allMedia.length : 0)

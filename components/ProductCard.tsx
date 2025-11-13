@@ -10,12 +10,12 @@ export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'li
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none';
   const isLight = variant === 'light';
   return (
-    <Link to={`/product/${product.id}`} className="group block">
-      <div className={`relative overflow-hidden aspect-square ${imageBorderClass}`}>
+    <Link to={`/product/${product.id}`} className="group block w-full">
+      <div className={`relative overflow-hidden aspect-square ${imageBorderClass} w-full bg-white flex items-center justify-center`}>
         <img
           src={product.mainImage}
           alt={t(product.name)}
-          className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${imageBorderClass}`}
+          className={`w-full h-full object-contain transition-transform duration-700 group-hover:scale-105 ${imageBorderClass}`}
         />
       </div>
       <div className="mt-4 overflow-hidden">

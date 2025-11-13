@@ -211,6 +211,8 @@ export interface HeroMediaItem {
  * Defines a content block that can be displayed on the homepage.
  */
 export interface ContentBlock {
+  backgroundColor?: 'white' | 'gray';
+  textAlignment?: 'left' | 'center' | 'right';
     /** Type of media: image, video, or youtube */
     mediaType: 'image' | 'video' | 'youtube';
     /** Image asset (for image type) */

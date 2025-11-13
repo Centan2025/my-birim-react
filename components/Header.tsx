@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import type { Category, SiteSettings, Product, Designer } from '../types';
 import { getCategories, getSiteSettings, getProducts, getDesigners } from '../services/cms';
 import { useAuth } from '../App';
@@ -34,6 +34,7 @@ const ShoppingBagIcon = () => (
 
 export function Header() {
   const { t, setLocale, locale, supportedLocales } = useTranslation();
+  const location = useLocation();
   const [categories, setCategories] = useState<Category[]>([]);
   const [isProductsOpen, setIsProductsOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
@@ -52,9 +53,15 @@ export function Header() {
 
   const { isLoggedIn } = useAuth();
   const { cartCount, toggleCart } = useCart();
+  const [headerOpacity, setHeaderOpacity] = useState(0);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(96); // 6rem = 96px
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [heroBrightness, setHeroBrightness] = useState<number | null>(null);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const currentRouteRef = useRef<string>(location.pathname);
 
   // Search states
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,29 +79,410 @@ export function Header() {
     getSiteSettings().then(setSettings);
   }, []);
 
+  // Route değiştiğinde brightness'i sıfırla ve header opacity'yi ayarla (sayfa geçişlerinde hemen güncelle)
+  useEffect(() => {
+    // Route değiştiğini ref'e kaydet
+    currentRouteRef.current = location.pathname;
+    
+    // Sayfa değiştiğinde brightness'i hemen sıfırla
+    setHeroBrightness(null);
+    // Scroll pozisyonunu sıfırla (ScrollToTop component'i bunu yapıyor ama biz de garantilemek için)
+    setLastScrollY(0);
+    // Header opacity'yi hemen 0 yap (route değiştiğinde)
+    if (isMobile) {
+      setHeaderOpacity(0);
+    }
+    
+    // Sayfa geçişlerinde scroll pozisyonunu kontrol et
+    // ScrollToTop component'i scroll'u 0'a ayarlıyor ama biraz gecikme olabilir
+    // Bu yüzden kısa bir gecikme ile kontrol ediyoruz
+    const checkScroll = () => {
+      // Route değiştiyse işlemi durdur
+      if (currentRouteRef.current !== location.pathname) {
+        return;
+      }
+      
+      const currentScrollY = window.scrollY;
+      if (isMobile && currentScrollY === 0) {
+        // Sayfa en üstteyse ve brightness henüz hesaplanmadıysa, header'ı şeffaf yap
+        setHeaderOpacity(0);
+      }
+    };
+    // Hemen kontrol et
+    checkScroll();
+    // ScrollToTop'un çalışması için kısa bir gecikme ile tekrar kontrol et
+    const timeoutId = setTimeout(checkScroll, 50);
+    return () => clearTimeout(timeoutId);
+  }, [location.pathname, isMobile]);
+
+  // Sayfanın üst kısmındaki görselin parlaklığını kontrol et (mobilde, tüm sayfalarda)
+  useEffect(() => {
+    if (!isMobile || window.scrollY > 0) {
+      setHeroBrightness(null);
+      return;
+    }
+
+    // Route değiştiğinde brightness'i sıfırla ve hesaplamayı durdur
+    const currentPath = location.pathname;
+    let isCancelled = false;
+
+    const checkTopImageBrightness = () => {
+      // Route değiştiyse hesaplamayı durdur
+      if (location.pathname !== currentPath) {
+        isCancelled = true;
+        return;
+      }
+      
+      // Scroll pozisyonu değiştiyse (artık 0 değilse) durdur
+      if (window.scrollY > 0) {
+        setHeroBrightness(null);
+        return;
+      }
+      // Sayfanın en üst kısmındaki görseli bul (viewport'un üst kısmı)
+      // Önce hero section'ı kontrol et
+      let activeMedia: HTMLImageElement | HTMLVideoElement | null = null;
+      
+      // 1. Hero section'daki görseli kontrol et
+      const heroContainer = document.querySelector('.hero-scroll-container');
+      if (heroContainer) {
+        const slides = heroContainer.querySelectorAll('.hero-slide-mobile, [class*="hero-slide"]');
+        for (const slide of Array.from(slides)) {
+          const img = slide.querySelector('img') as HTMLImageElement;
+          const video = slide.querySelector('video') as HTMLVideoElement;
+          
+          if (img && img.complete) {
+            activeMedia = img;
+            break;
+          } else if (video && video.readyState >= 2) {
+            activeMedia = video;
+            break;
+          }
+        }
+      }
+
+      // 2. Hero section yoksa, main element'in ilk görselini bul
+      if (!activeMedia) {
+        const main = document.querySelector('main');
+        if (main) {
+          // Main'in ilk section veya div'ini bul
+          const firstSection = main.querySelector('section, div, img, video') as HTMLElement;
+          if (firstSection) {
+            // İlk img veya video'yu bul
+            const img = firstSection.querySelector('img') as HTMLImageElement;
+            const video = firstSection.querySelector('video') as HTMLVideoElement;
+            
+            if (img && img.complete && img.offsetTop < 500) { // Viewport'un üst kısmında
+              activeMedia = img;
+            } else if (video && video.readyState >= 2 && video.offsetTop < 500) {
+              activeMedia = video;
+            }
+          }
+        }
+      }
+
+      // 3. Hala bulamadıysak, viewport'un üst kısmındaki tüm img/video'ları kontrol et
+      if (!activeMedia) {
+        const allImages = document.querySelectorAll('img, video');
+        for (const media of Array.from(allImages)) {
+          const rect = media.getBoundingClientRect();
+          // Viewport'un üst 500px'inde olan ve yüklenmiş görseli bul
+          if (rect.top >= 0 && rect.top < 500 && rect.left >= 0 && rect.left < window.innerWidth) {
+            if (media instanceof HTMLImageElement && media.complete) {
+              activeMedia = media;
+              break;
+            } else if (media instanceof HTMLVideoElement && media.readyState >= 2) {
+              activeMedia = media;
+              break;
+            }
+          }
+        }
+      }
+
+      if (!activeMedia) {
+        if (!isCancelled) {
+          setHeroBrightness(null);
+        }
+        return;
+      }
+
+      // Route değiştiyse hesaplamayı durdur
+      if (location.pathname !== currentPath || isCancelled) {
+        return;
+      }
+
+      // Cross-origin kontrolü - CORS hatasını önlemek için
+      const isCrossOrigin = activeMedia instanceof HTMLImageElement && 
+        activeMedia.crossOrigin !== null && 
+        activeMedia.crossOrigin !== 'anonymous' &&
+        activeMedia.crossOrigin !== 'use-credentials';
+      
+      // Canvas kullanarak görselin parlaklığını hesapla
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      canvas.width = Math.min(activeMedia.width || activeMedia.offsetWidth || 100, 200);
+      canvas.height = Math.min(activeMedia.height || activeMedia.offsetHeight || 100, 200);
+
+      try {
+        ctx.drawImage(activeMedia, 0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+
+        // Route değiştiyse hesaplamayı durdur (async işlem sırasında)
+        if (location.pathname !== currentPath || isCancelled) {
+          return;
+        }
+
+        // Ortalama parlaklığı hesapla
+        let totalBrightness = 0;
+        let pixelCount = 0;
+
+        // Her 10. pikseli örnekle (performans için)
+        const sampleRate = 10;
+        for (let i = 0; i < data.length; i += 4 * sampleRate) {
+          // Route değiştiyse hesaplamayı durdur
+          if (location.pathname !== currentPath || isCancelled) {
+            return;
+          }
+          
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          // Luminance formülü: 0.299*R + 0.587*G + 0.114*B
+          const brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+          totalBrightness += brightness;
+          pixelCount++;
+        }
+
+        // Route değiştiyse sonucu kaydetme
+        if (location.pathname !== currentPath || isCancelled) {
+          return;
+        }
+
+        if (pixelCount > 0) {
+          const avgBrightness = totalBrightness / pixelCount;
+          setHeroBrightness(avgBrightness);
+        } else {
+          setHeroBrightness(null);
+        }
+      } catch (e) {
+        // Route değiştiyse hata işleme yapma
+        if (location.pathname !== currentPath || isCancelled) {
+          return;
+        }
+        
+        // CORS hatası veya başka bir hata - sessizce handle et
+        // Cross-origin görseller için brightness hesaplanamaz, bu normal
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        if (e instanceof DOMException || errorMessage.includes('tainted') || errorMessage.includes('SecurityError') || errorMessage.includes('cross-origin')) {
+          setHeroBrightness(null);
+        } else {
+          // Beklenmeyen hatalar için sadece development'ta log
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Top image brightness calculation failed:', e);
+          }
+          setHeroBrightness(null);
+        }
+      }
+    };
+
+    // Görsel yüklendikten sonra kontrol et - sayfa geçişlerinde daha hızlı
+    // Route değiştiğinde hemen kontrol et (sayfa geçişlerinde)
+    const immediateTimeoutId = setTimeout(checkTopImageBrightness, 100);
+    const timeoutId = setTimeout(checkTopImageBrightness, 500);
+    const intervalId = setInterval(checkTopImageBrightness, 2000); // Her 2 saniyede bir kontrol et
+
+    return () => {
+      clearTimeout(immediateTimeoutId);
+      clearTimeout(timeoutId);
+      clearInterval(intervalId);
+    };
+  }, [isMobile, location.pathname]);
+
+  // Mobil kontrolü
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => {
         const currentScrollY = window.scrollY;
-        if (currentScrollY > lastScrollY && currentScrollY > 100) {
-            setIsHeaderVisible(false); // Scrolling down
-        } else {
-            setIsHeaderVisible(true); // Scrolling up
+        const currentPath = currentRouteRef.current;
+
+        // Route değiştiyse işlemi durdur
+        if (currentPath !== location.pathname) {
+          return;
         }
-        setLastScrollY(currentScrollY);
+
+        // Mobilde: Özel davranış
+        if (isMobile) {
+          // Mobil menü açıksa opacity'yi artır
+          if (isMobileMenuOpen) {
+            setHeaderOpacity(0.9);
+            setIsHeaderVisible(true);
+          } else if (isSearchOpen) {
+            // Arama açıldığında arama paneli ile aynı opacity (0.8) - scroll'da değişmesin
+            setHeaderOpacity(0.8);
+            setIsHeaderVisible(true);
+          } else {
+            // Mobilde: Sayfa en üstteyken (scrollY = 0) şeffaflığı ayarla
+            if (currentScrollY === 0) {
+              // Route değiştiyse brightness kullanma
+              if (currentPath !== location.pathname) {
+                setHeaderOpacity(0);
+                setIsHeaderVisible(true);
+              } else if (heroBrightness !== null) {
+                // Route değiştiyse brightness kullanma (double check)
+                if (currentPath !== location.pathname) {
+                  setHeaderOpacity(0);
+                  setIsHeaderVisible(true);
+                } else if (heroBrightness > 0.4) {
+                  // Görsel beyaza yakın, header'ı daha görünür yap
+                  // Brightness 0.4'ten fazlaysa opacity artır, max 0.9
+                  // Daha agresif: 0.4'ten başlayarak opacity artır
+                  const adjustedOpacity = Math.min(0.9, 0.3 + (heroBrightness - 0.4) * 1.5);
+                  setHeaderOpacity(adjustedOpacity);
+                } else {
+                  // Görsel koyu, header tamamen şeffaf
+                  setHeaderOpacity(0);
+                }
+              } else {
+                // Brightness hesaplanamadı (CORS vb.) veya henüz hesaplanmadı (route değişti)
+                // Varsayılan olarak şeffaf bırak - brightness hesaplanınca güncellenecek
+                setHeaderOpacity(0);
+              }
+              setIsHeaderVisible(true); // Sayfa en üstteyken menü görünür
+            } else {
+              // Scroll yapıldıkça opacity artıyor
+              const maxScroll = 200;
+              const opacity = Math.min(0.9, (currentScrollY / maxScroll) * 0.9);
+              setHeaderOpacity(opacity);
+
+              // Yukarı kaydırırken (scroll down) menüyü gizle
+              if (currentScrollY > lastScrollY && currentScrollY > 30) {
+                setIsHeaderVisible(false); // Scrolling down - menüyü gizle
+              } else if (currentScrollY < lastScrollY) {
+                setIsHeaderVisible(true); // Scrolling up - menüyü göster
+              }
+            }
+          }
+          setLastScrollY(currentScrollY);
+        } else {
+          // Desktop: Scroll yapınca menüyü gizle/göster
+          // Arama açıkken header'ı gizleme
+          if (!isSearchOpen) {
+            // Sayfa en üstteyken header görünür
+            if (currentScrollY <= 0) {
+              setIsHeaderVisible(true);
+            } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+              setIsHeaderVisible(false); // Scrolling down - menüyü gizle
+            } else if (currentScrollY < lastScrollY) {
+              setIsHeaderVisible(true); // Scrolling up - menüyü göster
+            }
+            // currentScrollY === lastScrollY durumunda değişiklik yok
+          } else {
+            // Arama açıkken header görünür kalmalı
+            setIsHeaderVisible(true);
+          }
+          
+          setLastScrollY(currentScrollY);
+
+          const maxScroll = 200;
+          let opacity = 0.2;
+          
+          if (currentScrollY > 0) {
+            opacity = Math.min(0.9, 0.2 + (currentScrollY / maxScroll) * 0.7);
+          }
+          
+          setHeaderOpacity(opacity);
+        }
 
         // Close any open menus on scroll
-        if (isLangOpen) setIsLangOpen(false);
-        if (isProductsOpen) setIsProductsOpen(false);
-        if (isSearchOpen) closeSearch();
+        const scrollDelta = Math.abs(currentScrollY - lastScrollY);
+        if (scrollDelta > 3) { // En az 3px scroll yapıldıysa
+          if (isMobile) {
+            // Mobilde: Scroll timeout'u temizle ve yeni bir tane başlat
+            if (scrollTimeoutRef.current) {
+              clearTimeout(scrollTimeoutRef.current);
+            }
+            
+            // Hemen kapat (gecikme yok)
+            if (isLangOpen) setIsLangOpen(false);
+            if (isProductsOpen) setIsProductsOpen(false);
+            if (isSearchOpen) closeSearch();
+            if (isMobileMenuOpen) setIsMobileMenuOpen(false);
+          } else {
+            // Desktop'ta: Arama açıksa kapat
+            if (isSearchOpen) closeSearch();
+            if (isLangOpen) setIsLangOpen(false);
+            if (isProductsOpen) setIsProductsOpen(false);
+          }
+        }
     };
 
+    // İlk yüklemede şeffaflığı ayarla
+    handleScroll();
+    
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY, isLangOpen, isProductsOpen, isSearchOpen, closeSearch]);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [isMobile, lastScrollY, isLangOpen, isProductsOpen, isSearchOpen, closeSearch, isMobileMenuOpen, heroBrightness, isHeaderVisible, location.pathname]);
+
+  // Mobil menü açıldığında/kapandığında opacity'yi güncelle
+  useEffect(() => {
+    if (isMobile) {
+      if (isMobileMenuOpen) {
+        setHeaderOpacity(0.9);
+        setIsHeaderVisible(true);
+      } else if (isSearchOpen) {
+        // Arama açıldığında arama paneli ile aynı opacity (0.8)
+        setHeaderOpacity(0.8);
+        setIsHeaderVisible(true);
+      } else {
+        // Menü ve arama kapalıysa, scroll handler opacity'yi ayarlayacak
+        // Bu effect sadece menü/arama açıkken opacity'yi override eder
+        // Scroll handler zaten route değiştiğinde opacity'yi 0 yapıyor
+      }
+    }
+  }, [isMobile, isMobileMenuOpen, isSearchOpen, location.pathname]);
 
   useEffect(() => {
     getCategories().then(setCategories);
   }, []);
+
+  // Header yüksekliğini güncelle
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      if (headerContainerRef.current) {
+        const height = headerContainerRef.current.offsetHeight;
+        setHeaderHeight(height);
+      }
+    };
+    
+    updateHeaderHeight();
+    
+    // Header yüksekliği değiştiğinde güncelle (menü açıldığında/kapandığında)
+    const observer = new ResizeObserver(updateHeaderHeight);
+    if (headerContainerRef.current) {
+      observer.observe(headerContainerRef.current);
+    }
+    
+    return () => {
+      if (headerContainerRef.current) {
+        observer.unobserve(headerContainerRef.current);
+      }
+    };
+  }, [isMobileMenuOpen, isProductsOpen]);
 
   // Keep submenu aligned under the PRODUCTS button
   const updateSubmenuOffset = useCallback(() => {
@@ -180,30 +568,32 @@ export function Header() {
   }, [searchQuery, allData, t]);
   
     useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      // Search panel için
-      if (
-        isSearchOpen &&
-        searchPanelRef.current && !searchPanelRef.current.contains(event.target as Node) &&
-        searchButtonRef.current && !searchButtonRef.current.contains(event.target as Node)
-      ) {
-        closeSearch();
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node;
+      
+      // Search panel için - sadece mouse event'lerde çalış (touch'da sorun yaratıyor)
+      if (event.type === 'mousedown' && isSearchOpen) {
+        if (
+          searchPanelRef.current && !searchPanelRef.current.contains(target) &&
+          searchButtonRef.current && !searchButtonRef.current.contains(target)
+        ) {
+          closeSearch();
+        }
       }
       
       // Mobil menü için
       if (
         isMobileMenuOpen &&
-        mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node) &&
-        mobileMenuButtonRef.current && !mobileMenuButtonRef.current.contains(event.target as Node)
+        mobileMenuRef.current && !mobileMenuRef.current.contains(target) &&
+        mobileMenuButtonRef.current && !mobileMenuButtonRef.current.contains(target)
       ) {
         setIsMobileMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('touchstart', handleClickOutside as any);
+    // Touch event'i kaldırdık - arama paneli için sorun yaratıyordu
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside as any);
     };
   }, [isSearchOpen, isMobileMenuOpen, closeSearch]);
 
@@ -250,7 +640,15 @@ export function Header() {
     <>
       <header className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full'}`}>
         <div
-          className={`bg-black/60 backdrop-blur-lg overflow-hidden border-b border-white/10 transition-all duration-700 ease-in-out ${isProductsOpen ? 'max-h-[20rem]' : isMobileMenuOpen ? 'max-h-[30rem]' : 'max-h-[6rem]'}`}
+          className={`overflow-hidden transition-all duration-700 ease-in-out ${isProductsOpen ? 'max-h-[20rem]' : isMobileMenuOpen ? 'max-h-[30rem]' : 'max-h-[6rem]'} ${isMobile && headerOpacity <= 0 ? '' : 'backdrop-blur-lg border-b border-white/10'}`}
+          style={{
+            backgroundColor: isMobile && headerOpacity <= 0 ? 'transparent' : `rgba(0, 0, 0, ${headerOpacity})`,
+            transition: 'background-color 0.2s ease-out, max-height 0.7s ease-in-out',
+            backdropFilter: isMobile && headerOpacity <= 0 ? 'none' : 'blur(16px)',
+            WebkitBackdropFilter: isMobile && headerOpacity <= 0 ? 'none' : 'blur(16px)',
+            borderBottom: isMobile && headerOpacity <= 0 ? 'none' : undefined,
+            pointerEvents: 'auto',
+          }}
           ref={headerContainerRef}
         >
           <nav className="px-2 sm:px-4 lg:px-6" ref={navRef}>
@@ -353,7 +751,7 @@ export function Header() {
           </nav>
           {/* Ürün kategorileri paneli - header içinde genişleyip daralır */}
           <div 
-            className={`hidden lg:block transition-all duration-500 ease-in-out -mt-2 ${isProductsOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'}`}
+            className={`hidden lg:block transition-all duration-500 ease-in-out ${isProductsOpen ? 'opacity-100 translate-y-0 max-h-[20rem]' : 'opacity-0 -translate-y-2 max-h-0 overflow-hidden'}`}
             onMouseEnter={handleProductsEnter}
             onMouseLeave={handleProductsLeave}
           > 
@@ -425,15 +823,18 @@ export function Header() {
       
       <div
         ref={searchPanelRef}
-        className={`fixed top-24 left-0 right-0 z-40 bg-black/80 backdrop-blur-lg border-b border-white/10 shadow-2xl transition-all duration-300 ease-out ${isSearchOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}
+        className={`fixed left-0 right-0 z-[100] bg-black/80 backdrop-blur-lg border-b border-white/10 shadow-2xl transition-all duration-300 ease-out ${isSearchOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-4 pointer-events-none'}`}
+        style={{
+          top: isHeaderVisible ? `${headerHeight}px` : '0px',
+        }}
       >
         <div className="container mx-auto px-6 py-8">
             <div className="w-full max-w-3xl mx-auto">
                 <input
                     ref={searchInputRef}
                     type="search"
-                    placeholder={t('search_placeholder')}
-                    className="w-full bg-transparent text-white text-2xl placeholder-gray-400 border-b border-gray-500 focus:border-white outline-none transition-colors duration-300 pb-3"
+                    placeholder=""
+                    className="w-full bg-transparent text-white text-2xl border-b border-gray-500 focus:border-white outline-none transition-colors duration-300 pb-3"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />

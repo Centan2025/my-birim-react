@@ -1375,8 +1375,12 @@ export function HomePage() {
               const isRight = block.position === 'right';
               const isCenter = block.position === 'center';
 
+              const backgroundColor = block.backgroundColor === 'gray' ? 'bg-gray-100' : 'bg-white';
+              const textAlign = block.textAlignment || 'left';
+              const textAlignClass = textAlign === 'center' ? 'text-center' : textAlign === 'right' ? 'text-right' : 'text-left';
+              
               return (
-                <section key={index} className={`py-20 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
+                <section key={index} className={`${index === 0 ? 'pt-0 pb-0' : index === 1 ? 'pt-0 pb-20' : 'py-20'} ${backgroundColor}`}>
                   {isFullWidth ? (
                     <div className="w-full overflow-hidden">
                       {block.mediaType === 'youtube' ? (
@@ -1390,11 +1394,11 @@ export function HomePage() {
                       )}
                       {block.description && (
                         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                          <div className="prose max-w-none text-center">
+                          <div className={`prose max-w-none ${textAlignClass}`}>
                             <p className="text-lg text-gray-700 font-light leading-relaxed">{t(block.description)}</p>
                           </div>
                           {block.linkText && block.linkUrl && (
-                            <div className="text-center mt-6">
+                            <div className={`mt-6 ${textAlignClass}`}>
                               <Link
                                 to={block.linkUrl}
                                 className="group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 px-5 text-lg rounded-lg hover:bg-gray-900/10 transition-colors duration-300"
@@ -1422,12 +1426,12 @@ export function HomePage() {
                           )}
                         </div>
                         {block.description && (
-                          <div className={`w-full ${isCenter ? 'md:w-full text-center' : 'md:w-1/2'}`}>
-                            <div className="prose max-w-none">
+                          <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'}`}>
+                            <div className={`prose max-w-none ${textAlignClass}`}>
                               <p className="text-lg text-gray-700 font-light leading-relaxed">{t(block.description)}</p>
                             </div>
                             {block.linkText && block.linkUrl && (
-                              <div className={`mt-6 ${isCenter ? 'text-center' : ''}`}>
+                              <div className={`mt-6 ${textAlignClass}`}>
                                 <Link
                                   to={block.linkUrl}
                                   className="group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 px-5 text-lg rounded-lg hover:bg-gray-900/10 transition-colors duration-300"

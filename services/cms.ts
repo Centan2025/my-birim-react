@@ -125,9 +125,8 @@ const mapProductMedia = (row: any): { type: 'image'|'video'|'youtube'; url: stri
     const title = m?.title
     return { type, url, title }
   }).filter((m: any) => m.type && m.url)
-  if (fromMedia.length > 0) return fromMedia
-  const imgs = mapImages([row?.mainImage, ...(row?.alternativeImages || [])])
-  return imgs.map((u: string) => ({ type: 'image', url: u }))
+  // Fallback kaldırıldı: Eğer hiç medya eklenmemişse boş array döndür
+  return fromMedia
 }
 
 const mapAlternativeMedia = (row: any): { type: 'image'|'video'|'youtube'; url: string }[] => {
