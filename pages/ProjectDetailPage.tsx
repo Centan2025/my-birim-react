@@ -109,7 +109,7 @@ export function ProjectDetailPage(){
           {curr.type === 'youtube' && (
             <div className={`w-full transition-all duration-250 ${anim==='leave' ? 'opacity-0 -translate-y-1' : anim==='enter' ? 'opacity-100 translate-y-0' : ''}`} style={{ paddingTop: '56.25%' }}>
               <iframe
-                src={`https://www.youtube.com/embed/${getYouTubeId(curr.url)}`}
+                src={`https://www.youtube.com/embed/${getYouTubeId(curr.url)}?rel=0`}
                 title="YouTube video player"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

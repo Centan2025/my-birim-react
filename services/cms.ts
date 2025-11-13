@@ -1,5 +1,5 @@
 import { initialData, KEYS, aboutPageContentData } from '../data';
-import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem, ProductMaterial, ProductVariant, Project, LocalizedString, User, UserType, CookiesPolicy, PrivacyPolicy, TermsOfService, KvkkPolicy } from '../types';
+import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem, ProductMaterial, Project, LocalizedString, User, UserType, CookiesPolicy, PrivacyPolicy, TermsOfService, KvkkPolicy } from '../types';
 import { createClient } from '@sanity/client'
 import groq from 'groq'
 import imageUrlBuilder from '@sanity/image-url'
@@ -57,42 +57,6 @@ const sanityMutations = useSanity && SANITY_TOKEN
 
 const urlFor = (source: any) => (useSanity && sanity ? imageUrlBuilder(sanity).image(source) : null)
 
-// --- DEBUG: Print env + toggle once on startup ---
-// @ts-ignore
-if (typeof window !== 'undefined') {
-  const envToken = import.meta.env.VITE_SANITY_TOKEN;
-  const hasToken = Boolean(SANITY_TOKEN && SANITY_TOKEN.trim().length > 0);
-  console.info('SANITY env', {
-    projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
-    dataset: import.meta.env.VITE_SANITY_DATASET,
-    apiVersion: import.meta.env.VITE_SANITY_API_VERSION,
-    useSanity,
-    envTokenExists: Boolean(envToken),
-    envTokenLength: envToken ? envToken.length : 0,
-    envTokenPreview: envToken ? envToken.substring(0, 20) + '...' : 'yok',
-    hasToken: hasToken,
-    tokenLength: SANITY_TOKEN ? SANITY_TOKEN.length : 0,
-    mutationsEnabled: Boolean(sanityMutations),
-    enableLocalFallback: ENABLE_LOCAL_FALLBACK,
-    envMode: import.meta.env.PROD ? 'production' : 'development',
-    allEnvKeys: Object.keys(import.meta.env).filter(k => k.startsWith('VITE_')),
-  });
-  
-  if (useSanity && !hasToken && ENABLE_LOCAL_FALLBACK) {
-    console.warn('⚠️ Sanity token yapılandırılmamış! Local fallback AÇIK. Abonelikler geçici olarak localStorage\'a kaydedilecek.');
-    console.warn('Token kontrolü:', {
-      envToken: envToken ? 'var' : 'yok',
-      SANITY_TOKEN: SANITY_TOKEN ? 'var' : 'yok',
-      sanityMutations: sanityMutations ? 'var' : 'yok'
-    });
-  } else if (useSanity && !hasToken && !ENABLE_LOCAL_FALLBACK) {
-    console.error('❌ Sanity token yok ve local fallback DEVRE DIŞI. Yazma işlemleri hata verecek.');
-  } else if (useSanity && hasToken && !sanityMutations) {
-    console.error('❌ Sanity token mevcut ama mutations client oluşturulamadı!');
-  } else if (useSanity && sanityMutations) {
-    console.info('✅ Sanity mutations aktif - üye kayıtları CMS\'ye kaydedilecek');
-  }
-}
 
 const mapImage = (img: any | undefined): string => {
   if (!img) return ''
@@ -101,7 +65,7 @@ const mapImage = (img: any | undefined): string => {
 }
 
 const mapImages = (imgs: any[] | undefined): string[] => Array.isArray(imgs) ? imgs.map(i => mapImage(i)).filter(Boolean) : []
-const mapProductMedia = (row: any): { type: 'image'|'video'|'youtube'; url: string; title?: any }[] => {
+const mapProductMedia = (row: any): { type: 'image'|'video'|'youtube'; url: string; title?: any; description?: any; link?: string; linkText?: any }[] => {
   const mediaArr = Array.isArray(row?.media) ? row.media : []
   const fromMedia = mediaArr.map((m: any) => {
     const type = m?.type
@@ -123,7 +87,10 @@ const mapProductMedia = (row: any): { type: 'image'|'video'|'youtube'; url: stri
       url = m?.url || ''
     }
     const title = m?.title
-    return { type, url, title }
+    const description = m?.description
+    const link = m?.link
+    const linkText = m?.linkText
+    return { type, url, title, description, link, linkText }
   }).filter((m: any) => m.type && m.url)
   // Fallback kaldırıldı: Eğer hiç medya eklenmemişse boş array döndür
   return fromMedia
@@ -202,7 +169,6 @@ const normalizeProduct = (p: Product): Product => ({
       )
     : [],
 })
-const mapVariants = (variants: any[] | undefined): ProductVariant[] => Array.isArray(variants) ? variants.map(v => ({ name: v?.name, sku: v?.sku, price: v?.price, images: mapImages(v?.images) })) : []
 
 let storage: Storage;
 const memoryStore: { [key: string]: string } = {};
@@ -213,7 +179,6 @@ try {
   localStorage.removeItem('__storage_test__');
   storage = localStorage;
 } catch (e) {
-  console.warn("LocalStorage is not available. Using in-memory store. Changes will not be persisted across sessions.");
   storage = {
     getItem: (key: string) => memoryStore[key] || null,
     setItem: (key: string, value: string) => { memoryStore[key] = value; },
@@ -239,7 +204,7 @@ const initializeData = () => {
             try {
                 storage.setItem(key, JSON.stringify(data));
             } catch(e) {
-                console.error(`Failed to initialize data for key "${key}" in storage.`, e);
+                // Failed to initialize
             }
         }
     });
@@ -255,13 +220,11 @@ const getItem = <T>(key: string): T => {
         initializeData(); // Re-initialize if a key is missing
         const reloadedData = storage.getItem(key);
         if (!reloadedData) {
-            console.error(`No data found for key ${key} even after re-initialization. Falling back to initialData from code.`);
             return initialData[key as keyof typeof initialData] as T;
         }
          try {
             return JSON.parse(reloadedData);
         } catch (e) {
-            console.error(`Failed to parse reloaded data for key ${key}. Falling back to initialData from code.`, e);
             return initialData[key as keyof typeof initialData] as T;
         }
     }
@@ -269,18 +232,15 @@ const getItem = <T>(key: string): T => {
     try {
         return JSON.parse(data);
     } catch (e) {
-        console.warn(`Corrupted data found for key ${key}. Resetting to default.`, e);
         storage.removeItem(key);
         initializeData();
         const reloadedData = storage.getItem(key);
          if (!reloadedData) {
-            console.error(`No data found for key ${key} after reset. Falling back to initialData from code.`);
             return initialData[key as keyof typeof initialData] as T;
         }
         try {
             return JSON.parse(reloadedData);
         } catch (parseError) {
-             console.error(`Failed to parse reloaded data for key ${key} after reset. Falling back to initialData from code.`, parseError);
             return initialData[key as keyof typeof initialData] as T;
         }
     }
@@ -290,7 +250,6 @@ const setItem = <T>(key: string, data: T): void => {
     try {
         storage.setItem(key, JSON.stringify(data));
     } catch(e) {
-        console.error(`Failed to set item in storage for key: ${key}. Changes may not be saved.`, e);
         alert("Warning: Could not save changes. Your browser's storage might be full or disabled.");
     }
 };
@@ -328,8 +287,8 @@ export const getTranslations = async (): Promise<Record<string, Record<string, s
                 })
             }
             return translationsMap
-        } catch (error) {
-            console.error('Failed to fetch translations from Sanity', error)
+            } catch (error) {
+                // Failed to fetch translations
             return {}
         }
     }
@@ -357,7 +316,7 @@ export const getLanguages = async (): Promise<string[]> => {
             // if not array, fall back to base
             return base;
         } catch (e) {
-            console.warn('Failed to fetch languages from Sanity, falling back to local storage.', e);
+            // Failed to fetch languages
         }
     }
     await delay(SIMULATED_DELAY);
@@ -486,15 +445,15 @@ export const getProducts = async (): Promise<Product[]> => {
           mainImage,
           alternativeImages,
           alternativeMedia[]{ type, url, image, videoFile{asset->{url, _ref, _id}} },
-          media[]{ type, url, image, title, videoFile{asset->{url, _ref, _id}} },
+          media[]{ type, url, image, title, description, link, linkText, videoFile{asset->{url, _ref, _id}} },
           mediaSectionTitle,
+          mediaSectionText,
           showMediaPanels,
           buyable,
           price,
           currency,
           sku,
           stockStatus,
-          variants,
           materialSelections[]{ group->{title, books[]{title, items[]{name, image}}}, materials },
           dimensionImages[]{ image, title },
           exclusiveContent,
@@ -520,10 +479,10 @@ export const getProducts = async (): Promise<Product[]> => {
           currency: r.currency,
           sku: r.sku,
           stockStatus: r.stockStatus,
-          variants: mapVariants(r.variants),
           materials: mapMaterials((r.materialSelections || []).flatMap((s: any) => s?.materials || [])),
           groupedMaterials: mapGroupedMaterials(r.materialSelections),
           mediaSectionTitle: r?.mediaSectionTitle,
+          mediaSectionText: r?.mediaSectionText,
           exclusiveContent: {
             images: mapImages(r?.exclusiveContent?.images),
             drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: toFileUrl(d?.file?.asset) })),
@@ -544,15 +503,15 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           mainImage,
           alternativeImages,
           alternativeMedia[]{ type, url, image, videoFile{asset->{url, _ref, _id}} },
-          media[]{ type, url, image, title, videoFile{asset->{url, _ref, _id}} },
+          media[]{ type, url, image, title, description, link, linkText, videoFile{asset->{url, _ref, _id}} },
           mediaSectionTitle,
+          mediaSectionText,
           showMediaPanels,
           buyable,
           price,
           currency,
           sku,
           stockStatus,
-          variants,
           materialSelections[]{ group->{title, books[]{title, items[]{name, image}}}, materials },
           dimensionImages[]{ image, title },
           exclusiveContent,
@@ -579,10 +538,10 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           currency: r.currency,
           sku: r.sku,
           stockStatus: r.stockStatus,
-          variants: mapVariants(r.variants),
           materials: mapMaterials((r.materialSelections || []).flatMap((s: any) => s?.materials || [])),
           groupedMaterials: mapGroupedMaterials(r.materialSelections),
           mediaSectionTitle: r?.mediaSectionTitle,
+          mediaSectionText: r?.mediaSectionText,
           exclusiveContent: {
             images: mapImages(r?.exclusiveContent?.images),
             drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: toFileUrl(d?.file?.asset) })),
@@ -603,8 +562,9 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
           mainImage,
           alternativeImages,
           alternativeMedia[]{ type, url, image, videoFile{asset->{url, _ref, _id}} },
-          media[]{ type, url, image, title, videoFile{asset->{url, _ref, _id}} },
+          media[]{ type, url, image, title, description, link, linkText, videoFile{asset->{url, _ref, _id}} },
           mediaSectionTitle,
+          mediaSectionText,
           showMediaPanels,
           buyable,
           price,
@@ -632,6 +592,8 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
           price: r.price,
           currency: r.currency,
           materials: mapMaterials((r.materialSelections || []).flatMap((s: any) => s?.materials || [])),
+          mediaSectionTitle: r?.mediaSectionTitle,
+          mediaSectionText: r?.mediaSectionText,
           exclusiveContent: {
             images: mapImages(r?.exclusiveContent?.images),
             drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: toFileUrl(d?.file?.asset) })),
@@ -652,8 +614,9 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
           mainImage,
           alternativeImages,
           alternativeMedia[]{ type, url, image, videoFile{asset->{url, _ref, _id}} },
-          media[]{ type, url, image, title, videoFile{asset->{url, _ref, _id}} },
+          media[]{ type, url, image, title, description, link, linkText, videoFile{asset->{url, _ref, _id}} },
           mediaSectionTitle,
+          mediaSectionText,
           showMediaPanels,
           buyable,
           price,
@@ -681,6 +644,8 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
           price: r.price,
           currency: r.currency,
           materials: mapMaterials((r.materialSelections || []).flatMap((s: any) => s?.materials || [])),
+          mediaSectionTitle: r?.mediaSectionTitle,
+          mediaSectionText: r?.mediaSectionText,
           exclusiveContent: {
             images: mapImages(r?.exclusiveContent?.images),
             drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: toFileUrl(d?.file?.asset) })),
@@ -1140,7 +1105,6 @@ export const subscribeEmail = async (email: string): Promise<User> => {
       if (!ENABLE_LOCAL_FALLBACK) {
         throw new Error('Sunucuya yazma kapalı: Sanity token yok ve local fallback devre dışı. Lütfen VITE_SANITY_TOKEN ekleyin.');
       }
-      console.warn('Sanity token yapılandırılmamış. Email aboneliği local storage\'a kaydediliyor. CMS\'de görünmesi için .env dosyasına VITE_SANITY_TOKEN ekleyin.');
       // Local storage'a kaydet ve devam et
       await delay(SIMULATED_DELAY);
       const users = getItem<User[]>(KEYS.USERS || 'birim_users') || [];
@@ -1164,9 +1128,6 @@ export const subscribeEmail = async (email: string): Promise<User> => {
     }
     
     try {
-      console.log('Sanity\'ye email subscriber oluşturuluyor...', email);
-      console.log('Token kontrolü:', sanityMutations ? 'Token mevcut' : 'Token yok');
-      
       const user = await sanityMutations.create({
         _type: 'user',
         email: normEmail,
@@ -1179,8 +1140,6 @@ export const subscribeEmail = async (email: string): Promise<User> => {
         createdAt: new Date().toISOString(),
       });
       
-      console.log('Sanity\'de email subscriber başarıyla oluşturuldu:', user._id);
-      console.log('Oluşturulan kullanıcı:', user);
       return {
         _id: user._id,
         email: user.email,
@@ -1193,13 +1152,6 @@ export const subscribeEmail = async (email: string): Promise<User> => {
       };
     } catch (error: any) {
       // Sanity hatası varsa hatayı fırlat
-      console.error('Sanity mutation hatası:', error);
-      console.error('Hata detayları:', {
-        message: error.message,
-        statusCode: error.statusCode,
-        responseBody: error.responseBody,
-      });
-      
       let errorMessage = 'E-posta aboneliği yapılırken bir hata oluştu. Lütfen tekrar deneyin.';
       
       if (error.message?.includes('permission') || error.statusCode === 403) {
@@ -1268,7 +1220,6 @@ export const registerUser = async (email: string, password: string, name?: strin
         }
         
         try {
-          console.log('Sanity\'de email subscriber full_member\'a yükseltiliyor...', existingUser._id);
           const updatedUser = await sanityMutations.patch(existingUser._id).set({
             password: passwordHash,
             name: name || '',
@@ -1277,7 +1228,6 @@ export const registerUser = async (email: string, password: string, name?: strin
             userType: 'full_member',
           }).commit();
           
-          console.log('Sanity\'de kullanıcı başarıyla güncellendi:', updatedUser._id);
           return {
             _id: updatedUser._id,
             email: updatedUser.email,
@@ -1290,7 +1240,6 @@ export const registerUser = async (email: string, password: string, name?: strin
           };
         } catch (error: any) {
           // Sanity hatası varsa hatayı fırlat (local storage'a düşme)
-          console.error('Sanity mutation hatası:', error);
           let errorMessage = 'Üye kaydı güncellenirken bir hata oluştu. Lütfen tekrar deneyin.';
           
           if (error.message?.includes('permission')) {
@@ -1319,7 +1268,6 @@ export const registerUser = async (email: string, password: string, name?: strin
     }
     
     try {
-      console.log('Sanity\'ye full member oluşturuluyor...', email);
       const user = await sanityMutations.create({
         _type: 'user',
         email: normEmail,
@@ -1332,7 +1280,6 @@ export const registerUser = async (email: string, password: string, name?: strin
         createdAt: new Date().toISOString(),
       });
       
-      console.log('Sanity\'de full member başarıyla oluşturuldu:', user._id);
       return {
         _id: user._id,
         email: user.email,
@@ -1345,7 +1292,6 @@ export const registerUser = async (email: string, password: string, name?: strin
       };
     } catch (error: any) {
       // Sanity hatası varsa hatayı fırlat (local storage'a düşme)
-      console.error('Sanity mutation hatası:', error);
       let errorMessage = 'Üye kaydı yapılırken bir hata oluştu. Lütfen tekrar deneyin.';
       
       if (error.message?.includes('permission')) {

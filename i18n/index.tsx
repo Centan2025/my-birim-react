@@ -51,7 +51,6 @@ export const I18nProvider = ({ children }: PropsWithChildren) => {
             setSupportedLocales(validLangs);
             setLocaleState(getInitialLocale(validLangs));
         } catch (error) {
-            console.error("Failed to fetch languages/translations, using defaults.", error);
             const defaultLangs = ['tr', 'en'];
             setSupportedLocales(defaultLangs);
             setLocaleState(getInitialLocale(defaultLangs));

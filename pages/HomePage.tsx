@@ -58,7 +58,7 @@ const YouTubeBackground: React.FC<{ url: string; isMobile?: boolean }> = ({ url,
                     transform: 'none',
                   } : {})
                 }}
-                src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&autohide=1&modestbranding=1`}
+                src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&autohide=1&modestbranding=1&rel=0`}
                 frameBorder="0"
                 allow="autoplay; encrypted-media"
                 allowFullScreen
@@ -207,9 +207,6 @@ export function HomePage() {
       const vw = document.documentElement.clientWidth || window.innerWidth;
       setIsMobile(mobile);
       setViewportWidth(vw);
-      // Debug için console'a yazdır
-      console.log('=== MOBILE CHECK ===');
-      console.log('isMobile:', mobile, 'window.innerWidth:', vw);
       
       // Mobilde video elementlerine ve parent container'lara direkt style ekle
       // Not: Element'ler henüz render edilmemiş olabilir, bu yüzden content yüklendikten sonraki useEffect'te de kontrol ediliyor
@@ -225,8 +222,6 @@ export function HomePage() {
            pageContainer.style.setProperty('padding-left', '0', 'important');
            pageContainer.style.setProperty('padding-right', '0', 'important');
            pageContainer.style.setProperty('overflow-x', 'hidden', 'important');
-           const afterPageWidth = window.getComputedStyle(pageContainer).width;
-           console.log(`Page container - Before: ${beforePageWidth}, After: ${afterPageWidth}, Viewport: ${vw}px`);
          }
          
          // Hero container'ı bul ve viewport genişliğine göre ayarla
@@ -242,8 +237,6 @@ export function HomePage() {
            heroContainer.style.setProperty('padding-right', '0', 'important');
            heroContainer.style.setProperty('left', '0', 'important');
            heroContainer.style.setProperty('right', '0', 'important');
-           const afterContainerWidth = window.getComputedStyle(heroContainer).width;
-           console.log(`Hero container - Before: ${beforeContainerWidth}, After: ${afterContainerWidth}, Viewport: ${vw}px`);
          }
          
          // Hero scroll container'ı bul ve genişliğini slide sayısına göre ayarla
@@ -257,32 +250,23 @@ export function HomePage() {
            heroScrollContainer.style.setProperty('max-width', containerWidth, 'important');
            heroScrollContainer.style.setProperty('overflow-x', 'visible', 'important');
            heroScrollContainer.style.setProperty('overflow-y', 'hidden', 'important');
-           const afterScrollWidth = window.getComputedStyle(heroScrollContainer).width;
-           console.log(`Hero scroll container - Before: ${beforeScrollWidth}, After: ${afterScrollWidth}, Target: ${containerWidth}, Viewport: ${vw}px, SlideCount: ${slideCount}`);
          }
         
         // Parent container'ları da viewport genişliğine göre ayarla
         const slides = document.querySelectorAll('.hero-slide-mobile');
-        console.log('Found slides:', slides.length);
-        slides.forEach((slide, index) => {
+        slides.forEach((slide) => {
           if (slide instanceof HTMLElement) {
-            const beforeWidth = window.getComputedStyle(slide).width;
             slide.style.setProperty('width', `${vw}px`, 'important');
             slide.style.setProperty('max-width', `${vw}px`, 'important');
             slide.style.setProperty('min-width', `${vw}px`, 'important');
             slide.style.setProperty('height', '100vh', 'important');
             slide.style.setProperty('min-height', '100vh', 'important');
-            const afterWidth = window.getComputedStyle(slide).width;
-            console.log(`Slide ${index} - Before: ${beforeWidth}, After: ${afterWidth}, Inline: ${slide.style.width}, Viewport: ${vw}px`);
           }
         });
         
         const videos = document.querySelectorAll('.hero-slide-mobile video');
-        console.log('Found videos:', videos.length);
-        videos.forEach((video, index) => {
+        videos.forEach((video) => {
           if (video instanceof HTMLVideoElement) {
-            const beforeWidth = window.getComputedStyle(video).width;
-            const beforeParentWidth = video.parentElement ? window.getComputedStyle(video.parentElement).width : 'N/A';
             video.style.setProperty('width', `${viewportWidth}px`, 'important');
             video.style.setProperty('max-width', `${viewportWidth}px`, 'important');
             video.style.setProperty('min-width', `${viewportWidth}px`, 'important');
@@ -297,21 +281,13 @@ export function HomePage() {
             video.style.setProperty('position', 'absolute', 'important');
             video.style.setProperty('object-fit', 'contain', 'important');
             video.style.setProperty('object-position', 'top', 'important');
-            const afterWidth = window.getComputedStyle(video).width;
-            const afterParentWidth = video.parentElement ? window.getComputedStyle(video.parentElement).width : 'N/A';
-            console.log(`Video ${index}:`);
-            console.log(`  - Parent width - Before: ${beforeParentWidth}, After: ${afterParentWidth}`);
-            console.log(`  - Video width - Before: ${beforeWidth}, After: ${afterWidth}, Inline: ${video.style.width}, Viewport: ${viewportWidth}px`);
-            console.log(`  - Video computed: width=${window.getComputedStyle(video).width}, maxWidth=${window.getComputedStyle(video).maxWidth}, minWidth=${window.getComputedStyle(video).minWidth}`);
           }
         });
         
         // Görsel elementlerine de style ekle
         const images = document.querySelectorAll('.hero-slide-mobile img');
-        console.log('Found images:', images.length);
-        images.forEach((img, index) => {
+        images.forEach((img) => {
           if (img instanceof HTMLImageElement) {
-            const beforeWidth = window.getComputedStyle(img).width;
             img.style.setProperty('width', `${viewportWidth}px`, 'important');
             img.style.setProperty('max-width', `${viewportWidth}px`, 'important');
             img.style.setProperty('min-width', `${viewportWidth}px`, 'important');
@@ -326,8 +302,6 @@ export function HomePage() {
             img.style.setProperty('position', 'absolute', 'important');
             img.style.setProperty('object-fit', 'contain', 'important');
             img.style.setProperty('object-position', 'top', 'important');
-            const afterWidth = window.getComputedStyle(img).width;
-            console.log(`Image ${index} - Before: ${beforeWidth}, After: ${afterWidth}, Inline: ${img.style.width}, Viewport: ${viewportWidth}px`);
           }
         });
       }
@@ -341,40 +315,15 @@ export function HomePage() {
     // Content yüklendikten sonra video elementlerine ve parent container'lara style ekle
     // Bu useEffect, content yüklendikten ve element'ler DOM'a eklendikten sonra çalışır
     if (!isMobile || !content?.heroMedia) return;
-    
-    console.log('=== CONTENT LOADED EFFECT ===');
-    console.log('isMobile:', isMobile, 'content.heroMedia.length:', content.heroMedia.length);
      
     // Element'lerin DOM'a eklenmesini beklemek için recursive bir kontrol yap
     const timeoutIds: ReturnType<typeof setTimeout>[] = [];
     
     const applyStyles = () => {
-      // Tüm parent container'ları debug et
-      console.log('=== DEBUG PARENT CONTAINERS ===');
-        const main = document.querySelector('main');
-        if (main) {
-          const mainComputed = window.getComputedStyle(main);
-          const mainRect = main.getBoundingClientRect();
-          console.log(`Main container: width=${mainComputed.width}, left=${mainComputed.left}, margin=${mainComputed.marginLeft}/${mainComputed.marginRight}, padding=${mainComputed.paddingLeft}/${mainComputed.paddingRight}`);
-          console.log(`Main bounding rect: left=${mainRect.left}, width=${mainRect.width}`);
-        }
-        const root = document.getElementById('root');
-        if (root) {
-          const rootComputed = window.getComputedStyle(root);
-          const rootRect = root.getBoundingClientRect();
-          console.log(`Root container: width=${rootComputed.width}, left=${rootComputed.left}, margin=${rootComputed.marginLeft}/${rootComputed.marginRight}, padding=${rootComputed.paddingLeft}/${rootComputed.paddingRight}`);
-          console.log(`Root bounding rect: left=${rootRect.left}, width=${rootRect.width}`);
-        }
-        
         // Page container'ı bul ve viewport genişliğine göre ayarla
          const pageContainer = document.querySelector('.hero-page-container-mobile');
          if (pageContainer instanceof HTMLElement) {
            const vw = document.documentElement.clientWidth || window.innerWidth;
-           const computed = window.getComputedStyle(pageContainer);
-           const rect = pageContainer.getBoundingClientRect();
-           const beforePageWidth = computed.width;
-           console.log(`Page container BEFORE: width=${beforePageWidth}, left=${computed.left}, margin=${computed.marginLeft}/${computed.marginRight}, padding=${computed.paddingLeft}/${computed.paddingRight}`);
-           console.log(`Page container bounding rect: left=${rect.left}, width=${rect.width}`);
            
            pageContainer.style.setProperty('width', `${vw}px`, 'important');
            pageContainer.style.setProperty('max-width', `${vw}px`, 'important');
@@ -388,23 +337,12 @@ export function HomePage() {
            
            // Force reflow
            pageContainer.offsetHeight;
-           
-           const afterComputed = window.getComputedStyle(pageContainer);
-           const afterRect = pageContainer.getBoundingClientRect();
-           const afterPageWidth = afterComputed.width;
-           console.log(`Page container AFTER: width=${afterPageWidth}, left=${afterComputed.left}, margin=${afterComputed.marginLeft}/${afterComputed.marginRight}, padding=${afterComputed.paddingLeft}/${afterComputed.paddingRight}`);
-           console.log(`Page container bounding rect: left=${afterRect.left}, width=${afterRect.width}`);
          }
          
          // Hero container'ı bul ve viewport genişliğine göre ayarla
          const heroContainer = document.querySelector('.hero-main-container-mobile');
          if (heroContainer instanceof HTMLElement) {
            const vw = document.documentElement.clientWidth || window.innerWidth;
-           const computed = window.getComputedStyle(heroContainer);
-           const rect = heroContainer.getBoundingClientRect();
-           const beforeContainerWidth = computed.width;
-           console.log(`Hero container BEFORE: width=${beforeContainerWidth}, left=${computed.left}, margin=${computed.marginLeft}/${computed.marginRight}, padding=${computed.paddingLeft}/${computed.paddingRight}`);
-           console.log(`Hero container bounding rect: left=${rect.left}, width=${rect.width}`);
            
            heroContainer.style.setProperty('width', `${vw}px`, 'important');
            heroContainer.style.setProperty('max-width', `${vw}px`, 'important');
@@ -419,12 +357,6 @@ export function HomePage() {
            
            // Force reflow
            heroContainer.offsetHeight;
-           
-           const afterComputed = window.getComputedStyle(heroContainer);
-           const afterRect = heroContainer.getBoundingClientRect();
-           const afterContainerWidth = afterComputed.width;
-           console.log(`Hero container AFTER: width=${afterContainerWidth}, left=${afterComputed.left}, margin=${afterComputed.marginLeft}/${afterComputed.marginRight}, padding=${afterComputed.paddingLeft}/${afterComputed.paddingRight}`);
-           console.log(`Hero container bounding rect: left=${afterRect.left}, width=${afterRect.width}`);
          }
          
          // Hero scroll container'ı bul ve genişliğini slide sayısına göre ayarla
@@ -433,27 +365,18 @@ export function HomePage() {
            const slideCount = heroScrollContainer.children.length || content?.heroMedia?.length || 1;
            const vw = document.documentElement.clientWidth || window.innerWidth;
            const containerWidth = `${slideCount * vw}px`;
-           const beforeScrollWidth = window.getComputedStyle(heroScrollContainer).width;
            heroScrollContainer.style.setProperty('width', containerWidth, 'important');
            heroScrollContainer.style.setProperty('min-width', containerWidth, 'important');
            heroScrollContainer.style.setProperty('max-width', containerWidth, 'important');
            heroScrollContainer.style.setProperty('overflow-x', 'visible', 'important');
            heroScrollContainer.style.setProperty('overflow-y', 'hidden', 'important');
-           const afterScrollWidth = window.getComputedStyle(heroScrollContainer).width;
-           console.log(`Content effect - Hero scroll container - Before: ${beforeScrollWidth}, After: ${afterScrollWidth}, Target: ${containerWidth}, Viewport: ${vw}px, SlideCount: ${slideCount}`);
          }
         
         // Parent container'ları da viewport genişliğine göre ayarla
         const slides = document.querySelectorAll('.hero-slide-mobile');
-        console.log('Content effect - Found slides:', slides.length);
         const vw = document.documentElement.clientWidth || window.innerWidth;
-        slides.forEach((slide, index) => {
+        slides.forEach((slide) => {
           if (slide instanceof HTMLElement) {
-            const computed = window.getComputedStyle(slide);
-            const rect = slide.getBoundingClientRect();
-            const beforeWidth = computed.width;
-            const beforeLeft = computed.left;
-            
             // Viewport genişliğini px olarak kullan
             slide.style.setProperty('width', `${vw}px`, 'important');
             slide.style.setProperty('max-width', `${vw}px`, 'important');
@@ -466,57 +389,13 @@ export function HomePage() {
             
             // Force reflow
             slide.offsetHeight;
-            
-            const afterComputed = window.getComputedStyle(slide);
-            const afterRect = slide.getBoundingClientRect();
-            const afterWidth = afterComputed.width;
-            const afterLeft = afterComputed.left;
-            
-            console.log(`=== DEBUG SLIDE ${index} ===`);
-            console.log(`Viewport width: ${viewportWidth}px`);
-            console.log(`Slide BEFORE:`);
-            console.log(`  - Computed width: ${beforeWidth}`);
-            console.log(`  - Computed left: ${beforeLeft}`);
-            console.log(`  - Bounding rect: left=${rect.left}, width=${rect.width}, right=${rect.right}`);
-            console.log(`Slide AFTER:`);
-            console.log(`  - Computed width: ${afterWidth}`);
-            console.log(`  - Computed left: ${afterLeft}`);
-            console.log(`  - Bounding rect: left=${afterRect.left}, width=${afterRect.width}, right=${afterRect.right}`);
-            console.log(`  - Inline style width: ${slide.style.width}`);
-            
-            // Parent container'ın parent'ını da kontrol et
-            const parent = slide.parentElement;
-            if (parent) {
-              const parentComputed = window.getComputedStyle(parent);
-              const parentRect = parent.getBoundingClientRect();
-              console.log(`  - Parent: ${parent.className || parent.tagName}`);
-              console.log(`    Width: ${parentComputed.width}, Left: ${parentComputed.left}`);
-              console.log(`    Bounding rect: left=${parentRect.left}, width=${parentRect.width}`);
-            }
           }
         });
         
         // Video elementlerine style ekle
         const videos = document.querySelectorAll('.hero-slide-mobile video');
-        console.log('Content effect - Found videos:', videos.length);
-        videos.forEach((video, index) => {
+        videos.forEach((video) => {
           if (video instanceof HTMLVideoElement) {
-            const computed = window.getComputedStyle(video);
-            const rect = video.getBoundingClientRect();
-            const beforeWidth = computed.width;
-            const beforeParentWidth = video.parentElement ? window.getComputedStyle(video.parentElement).width : 'N/A';
-            const beforeLeft = computed.left;
-            const beforeTransform = computed.transform;
-            
-            // Video'nun gerçek genişliğini kontrol et
-            const videoNaturalWidth = video.videoWidth || 0;
-            const videoNaturalHeight = video.videoHeight || 0;
-            console.log(`  - Video natural size: ${videoNaturalWidth}x${videoNaturalHeight}`);
-            
-            // Video element genişliğini viewport genişliğine eşitle
-            // object-fit: cover ve object-position: left top ile sol üstten başla
-            console.log(`  - Using viewport width for video: ${viewportWidth}px`);
-            
             // Video element genişliğini viewport genişliğine eşitle
             video.style.setProperty('width', `${viewportWidth}px`, 'important');
             video.style.setProperty('max-width', `${viewportWidth}px`, 'important');
@@ -538,61 +417,14 @@ export function HomePage() {
             
             // Force reflow
             video.offsetHeight;
-            
-            const afterComputed = window.getComputedStyle(video);
-            const afterRect = video.getBoundingClientRect();
-            const afterWidth = afterComputed.width;
-            const afterLeft = afterComputed.left;
-            const afterParentWidth = video.parentElement ? window.getComputedStyle(video.parentElement).width : 'N/A';
-            
-            console.log(`=== DEBUG VIDEO ${index} ===`);
-            console.log(`Viewport width: ${viewportWidth}px`);
-            console.log(`Video BEFORE:`);
-            console.log(`  - Computed width: ${beforeWidth}`);
-            console.log(`  - Computed left: ${beforeLeft}`);
-            console.log(`  - Transform: ${beforeTransform}`);
-            console.log(`  - Bounding rect: left=${rect.left}, width=${rect.width}, right=${rect.right}`);
-            console.log(`  - Parent width: ${beforeParentWidth}`);
-            console.log(`Video AFTER:`);
-            console.log(`  - Computed width: ${afterWidth}`);
-            console.log(`  - Computed left: ${afterLeft}`);
-            console.log(`  - Transform: ${afterComputed.transform}`);
-            console.log(`  - Bounding rect: left=${afterRect.left}, width=${afterRect.width}, right=${afterRect.right}`);
-            console.log(`  - Parent width: ${afterParentWidth}`);
-            console.log(`  - Inline style width: ${video.style.width}`);
-            console.log(`  - Object position: ${afterComputed.objectPosition}`);
-            
-            // Parent chain debug
-            let current = video.parentElement;
-            let level = 0;
-            while (current && level < 5) {
-              const parentComputed = window.getComputedStyle(current);
-              const parentRect = current.getBoundingClientRect();
-              console.log(`  - Parent level ${level}: ${current.className || current.tagName}`);
-              console.log(`    Width: ${parentComputed.width}, Left: ${parentComputed.left}, Margin: ${parentComputed.marginLeft}/${parentComputed.marginRight}, Padding: ${parentComputed.paddingLeft}/${parentComputed.paddingRight}`);
-              console.log(`    Bounding rect: left=${parentRect.left}, width=${parentRect.width}`);
-              current = current.parentElement;
-              level++;
-            }
           }
         });
         
         // Görsel elementlerine de style ekle
         const images = document.querySelectorAll('.hero-slide-mobile img');
-        console.log('Content effect - Found images:', images.length);
-        images.forEach((img, index) => {
+        images.forEach((img) => {
           if (img instanceof HTMLImageElement) {
-            const computed = window.getComputedStyle(img);
-            const rect = img.getBoundingClientRect();
-            const beforeWidth = computed.width;
-            const beforeLeft = computed.left;
-            const beforeTransform = computed.transform;
-            const beforeObjectPosition = computed.objectPosition;
-            
             // Image element genişliğini viewport genişliğine eşitle
-            // object-fit: contain ve object-position: top ile üstten hizala
-            console.log(`  - Using viewport width for image: ${viewportWidth}px`);
-            
             img.style.setProperty('width', `${viewportWidth}px`, 'important');
             img.style.setProperty('max-width', `${viewportWidth}px`, 'important');
             img.style.setProperty('min-width', `${viewportWidth}px`, 'important');
@@ -611,57 +443,6 @@ export function HomePage() {
             
             // Force reflow
             img.offsetHeight;
-            
-            const afterComputed = window.getComputedStyle(img);
-            const afterRect = img.getBoundingClientRect();
-            const afterWidth = afterComputed.width;
-            const afterLeft = afterComputed.left;
-            
-            console.log(`=== DEBUG IMAGE ${index} ===`);
-            console.log(`Viewport width: ${viewportWidth}px`);
-            console.log(`Image BEFORE:`);
-            console.log(`  - Computed width: ${beforeWidth}`);
-            console.log(`  - Computed left: ${beforeLeft}`);
-            console.log(`  - Transform: ${beforeTransform}`);
-            console.log(`  - Object position: ${beforeObjectPosition}`);
-            console.log(`  - Bounding rect: left=${rect.left}, width=${rect.width}, right=${rect.right}`);
-            console.log(`Image AFTER:`);
-            console.log(`  - Computed width: ${afterWidth}`);
-            console.log(`  - Computed left: ${afterLeft}`);
-            console.log(`  - Transform: ${afterComputed.transform}`);
-            console.log(`  - Object position: ${afterComputed.objectPosition}`);
-            console.log(`  - Bounding rect: left=${afterRect.left}, width=${afterRect.width}, right=${afterRect.right}`);
-            console.log(`  - Inline style width: ${img.style.width}`);
-            
-            // Parent chain debug
-            let current = img.parentElement;
-            let level = 0;
-            while (current && level < 5) {
-              const parentComputed = window.getComputedStyle(current);
-              const parentRect = current.getBoundingClientRect();
-              console.log(`  - Parent level ${level}: ${current.className || current.tagName}`);
-              console.log(`    Width: ${parentComputed.width}, Left: ${parentComputed.left}, Margin: ${parentComputed.marginLeft}/${parentComputed.marginRight}, Padding: ${parentComputed.paddingLeft}/${parentComputed.paddingRight}`);
-              console.log(`    Bounding rect: left=${parentRect.left}, width=${parentRect.width}`);
-              current = current.parentElement;
-              level++;
-            }
-          }
-        });
-        
-        // YouTube iframe'leri için de debug
-        const iframes = document.querySelectorAll('.hero-slide-mobile iframe');
-        console.log('Content effect - Found iframes:', iframes.length);
-        iframes.forEach((iframe, index) => {
-          if (iframe instanceof HTMLIFrameElement) {
-            const computed = window.getComputedStyle(iframe);
-            const rect = iframe.getBoundingClientRect();
-            console.log(`=== DEBUG IFRAME ${index} ===`);
-            console.log(`Viewport width: ${viewportWidth}px`);
-            console.log(`  - Computed width: ${computed.width}`);
-            console.log(`  - Computed left: ${computed.left}`);
-            console.log(`  - Transform: ${computed.transform}`);
-            console.log(`  - Bounding rect: left=${rect.left}, width=${rect.width}, right=${rect.right}`);
-            console.log(`  - Inline style width: ${iframe.style.width}`);
           }
         });
     };
@@ -678,11 +459,9 @@ export function HomePage() {
       }
       
       if (slides.length === 0) {
-        console.warn('Hero slides not found after', maxAttempts, 'attempts');
         return;
       }
       
-      console.log('Found', slides.length, 'slides, applying styles...');
       applyStyles();
     };
     
@@ -1308,15 +1087,15 @@ export function HomePage() {
                               {content.isHeroTextVisible && (
                                   <div className="relative w-full">
                                       <div className="animate-fade-in-up">
-                                        <h1 className="text-4xl md:text-5xl font-light tracking-tight mb-4 leading-relaxed" style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}>{t(media.title)}</h1>
-                                        <p className="text-lg md:text-xl mb-8 leading-relaxed" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>{t(media.subtitle)}</p>
+                                        <h1 className="text-2xl md:text-5xl font-light tracking-tight mb-4 leading-relaxed" style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}>{t(media.title)}</h1>
+                                        <p className="text-sm md:text-xl mb-8 leading-relaxed" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>{t(media.subtitle)}</p>
                                         {media.isButtonVisible && (
                                           <Link
                                               to={media.buttonLink || '/'}
-                                              className="group inline-flex items-center gap-x-3 text-white font-semibold py-3 px-5 text-lg rounded-lg hover:bg-white/10 transition-colors duration-300"
+                                              className="group inline-flex items-center gap-x-3 text-white font-semibold py-2 px-4 text-sm md:text-lg rounded-lg hover:bg-white/10 transition-colors duration-300"
                                           >
                                               <span className="transition-transform duration-300 ease-out group-hover:-translate-x-1">{t(media.buttonText)}</span>
-                                              <ArrowRight className="w-5 h-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+                                              <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
                                           </Link>
                                         )}
                                       </div>
@@ -1494,7 +1273,7 @@ export function HomePage() {
       {/* Inspiration Section */}
       {inspiration && (inspiration.backgroundImage || inspiration.title || inspiration.subtitle) && (
         <section 
-          className="relative py-32 bg-gray-800 text-white text-center inspiration-section-mobile"
+          className="relative py-16 md:py-32 bg-gray-800 text-white text-center inspiration-section-mobile"
           style={{ 
             backgroundImage: `url(${inspiration.backgroundImage})`, 
             backgroundSize: isMobile ? '100vw auto' : 'cover', 

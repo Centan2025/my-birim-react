@@ -331,21 +331,20 @@ export function ProductDetailPage() {
     const match = url.match(regExp);
     return match && match[1] && match[1].length === 11 ? match[1] : null;
   };
-  const toYouTubeEmbed = (url: string, { autoplay = true }: { autoplay?: boolean } = {}): string => {
+  const toYouTubeEmbed = (url: string, { autoplay = true, controls = false }: { autoplay?: boolean; controls?: boolean } = {}): string => {
     const id = getYouTubeId(url);
     if (!id) return url;
     const params = new URLSearchParams({
       autoplay: autoplay ? '1' : '0',
       mute: '1',
       playsinline: '1',
-      controls: '0',
+      controls: controls ? '1' : '0',
       modestbranding: '1',
-      rel: '0',
-      showinfo: '0',
+      rel: '0', // Bu satır, alakasız videoları engellemek için kritik
       enablejsapi: '1',
       iv_load_policy: '3',
       fs: '0',
-      disablekb: '1',
+      disablekb: controls ? '0' : '1',
       loop: '1',
       playlist: id
     }).toString();
@@ -418,17 +417,6 @@ export function ProductDetailPage() {
               <li className="text-white">{t(product.name)}</li>
             </ol>
           </nav>
-
-          {(prevProduct || nextProduct) && (
-            <div className="absolute top-12 left-4 flex items-center gap-2 text-white/90">
-              {prevProduct && (
-                <Link to={`/product/${prevProduct.id}`} className="px-2 py-1 bg-black/35 hover:bg-black/50 rounded text-sm">‹ {t(prevProduct.name)}</Link>
-              )}
-              {nextProduct && (
-                <Link to={`/product/${nextProduct.id}`} className="px-2 py-1 bg-black/35 hover:bg-black/50 rounded text-sm">{t(nextProduct.name)} ›</Link>
-              )}
-            </div>
-          )}
 
           <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-white">
             <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg">{t(product.name)}</h1>
@@ -821,10 +809,10 @@ export function ProductDetailPage() {
 
       {isLightboxOpen && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center" style={{ animationDuration: '0.2s' }}>
-          <button onClick={closeLightbox} className="absolute top-4 right-4 text-white hover:opacity-75 transition-opacity z-20"><CloseIcon /></button>
           <button onClick={prevImageFn} className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:opacity-75 transition-opacity z-20 bg-black/20 rounded-full p-2"><ChevronLeftIcon /></button>
           <button onClick={nextImage} className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:opacity-75 transition-opacity z-20 bg-black/20 rounded-full p-2"><ChevronRightIcon /></button>
-          <div className="w-screen max-w-screen-2xl h-[80vh] p-2">
+          <div className="relative w-screen max-w-screen-2xl h-[80vh] p-2 overflow-hidden">
+            <button onClick={closeLightbox} className="absolute top-2 right-2 text-white hover:opacity-75 transition-opacity z-[80] bg-black/50 rounded-full p-2"><CloseIcon /></button>
             {currentLightboxItems[lightboxImageIndex]?.type === 'image' ? (
               <img src={currentLightboxItems[lightboxImageIndex].url} alt="Enlarged product view" className="w-full h-full object-contain" />
             ) : currentLightboxItems[lightboxImageIndex]?.type === 'video' ? (
@@ -847,12 +835,21 @@ export function ProductDetailPage() {
                 ) : (
                   <>
                     {/* Iframe yüklendikten sonra göster */}
-                    <iframe ref={youTubePlayerRef as any} className="w-full h-full pointer-events-none" title="youtube-player" src={toYouTubeEmbed(currentLightboxItems[lightboxImageIndex]?.url || '', { autoplay: true })} allow="autoplay; encrypted-media" allowFullScreen frameBorder="0" />
+                    <iframe 
+                      ref={youTubePlayerRef as any} 
+                      className="w-full h-full pointer-events-auto" 
+                      title="youtube-player" 
+                      src={toYouTubeEmbed(currentLightboxItems[lightboxImageIndex]?.url || '', { autoplay: true, controls: false })} 
+                      allow="autoplay; encrypted-media; fullscreen" 
+                      allowFullScreen 
+                      frameBorder="0"
+                      style={{ pointerEvents: 'auto' }}
+                    />
                     <button onClick={() => {
                       const next = !ytPlaying;
                       try { youTubePlayerRef.current?.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: next ? 'playVideo' : 'pauseVideo', args: [] }), '*'); } catch {}
                       setYtPlaying(next);
-                    }} className="absolute bottom-4 right-4 z-20 bg-white/85 text-gray-900 rounded-full w-12 h-12 flex items-center justify-center shadow hover:bg-white">
+                    }} className="absolute bottom-4 right-4 z-[60] bg-white/85 text-gray-900 rounded-full w-12 h-12 flex items-center justify-center shadow hover:bg-white pointer-events-auto">
                       {ytPlaying ? (
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
                       ) : (
@@ -863,6 +860,68 @@ export function ProductDetailPage() {
                 )}
               </div>
             )}
+            {/* Medya bilgileri overlay - sadece panel medyaları için göster */}
+            {lightboxSource === 'panel' && currentLightboxItems[lightboxImageIndex] && (() => {
+              const currentItem = currentLightboxItems[lightboxImageIndex];
+              
+              const linkUrl = currentItem?.link ? String(currentItem.link).trim() : '';
+              const linkText = currentItem?.linkText;
+              const hasLink = linkUrl.length > 0;
+              const hasLinkText = linkText && (typeof linkText === 'string' || (typeof linkText === 'object' && Object.keys(linkText).length > 0));
+              
+              return (
+                <div className="absolute bottom-2 left-2 max-w-md p-6 text-white z-[70] pointer-events-auto">
+                  {currentItem.title && (
+                    <h3 className="text-xl font-light mb-2">{t(currentItem.title)}</h3>
+                  )}
+                  {currentItem.description && (
+                    <p className="text-sm text-white/90 leading-relaxed mb-3">{t(currentItem.description)}</p>
+                  )}
+                  {hasLink && hasLinkText && (() => {
+                    const isExternal = linkUrl.startsWith('http://') || linkUrl.startsWith('https://') || linkUrl.startsWith('//');
+                    
+                    const linkContent = (
+                      <span className="inline-flex items-center gap-2 text-white/90 hover:text-white font-light transition-all duration-300 cursor-pointer group">
+                        <span className="relative">
+                          <span className="underline underline-offset-4 decoration-white/20 group-hover:decoration-white/50 transition-all duration-300">{t(linkText)}</span>
+                          <span className="absolute bottom-0 left-0 w-0 h-px bg-white/50 group-hover:w-full transition-all duration-300"></span>
+                        </span>
+                        {isExternal && (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-300">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                          </svg>
+                        )}
+                      </span>
+                    );
+
+                    return isExternal ? (
+                      <a
+                        href={linkUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                      >
+                        {linkContent}
+                      </a>
+                    ) : (
+                      <Link
+                        to={linkUrl}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          closeLightbox();
+                        }}
+                      >
+                        {linkContent}
+                      </Link>
+                    );
+                  })()}
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}

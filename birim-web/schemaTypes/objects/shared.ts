@@ -56,23 +56,6 @@ export const materialSwatchBook = defineType({
   ],
 })
 
-export const productVariant = defineType({
-  name: 'productVariant',
-  title: 'Product Variant',
-  type: 'object',
-  fields: [
-    defineField({name: 'name', title: 'Name', type: 'localizedString'}),
-    defineField({name: 'sku', title: 'SKU', type: 'string'}),
-    defineField({name: 'price', title: 'Price', type: 'number'}),
-    defineField({
-      name: 'images',
-      title: 'Images',
-      type: 'array',
-      of: [{type: 'image', options: {hotspot: true}}],
-    }),
-  ],
-})
-
 export const downloadableItem = defineType({
   name: 'downloadableItem',
   title: 'İndirilebilir Öğe',
@@ -246,6 +229,24 @@ export const productPanelMediaItem = defineType({
       description: 'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.',
     }),
     defineField({ name: 'title', title: 'Başlık', type: 'localizedString' }),
+    defineField({ 
+      name: 'description', 
+      title: 'Açıklama', 
+      type: 'localizedText',
+      description: 'Bu medya öğesi için açıklama metni'
+    }),
+    defineField({ 
+      name: 'link', 
+      title: 'Link URL', 
+      type: 'string',
+      description: 'Bu medya öğesi için link URL\'si (isteğe bağlı)'
+    }),
+    defineField({ 
+      name: 'linkText', 
+      title: 'Link Metni', 
+      type: 'localizedString',
+      description: 'Link için gösterilecek metin (link URL doluysa gösterilir)'
+    }),
   ],
 })
 

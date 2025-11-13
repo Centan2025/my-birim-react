@@ -121,9 +121,18 @@ export interface Product {
   /** Mixed alternative media for the band under hero. */
   alternativeMedia?: { type: 'image' | 'video' | 'youtube'; url: string }[];
   /** Optional rich media for hero: image/video/youtube */
-  media?: { type: 'image' | 'video' | 'youtube'; url: string; title?: LocalizedString }[];
+  media?: { 
+    type: 'image' | 'video' | 'youtube'; 
+    url: string; 
+    title?: LocalizedString;
+    description?: LocalizedString;
+    link?: string;
+    linkText?: LocalizedString;
+  }[];
   /** Custom title for the bottom media section */
   mediaSectionTitle?: LocalizedString;
+  /** Custom text/description for the bottom media section */
+  mediaSectionText?: LocalizedString;
   /** Toggle for showing media panels at bottom. */
   showMediaPanels?: boolean;
   /** Dimension drawings/images shown before materials. Each has an image and a title. */
@@ -138,8 +147,6 @@ export interface Product {
   sku?: string;
   /** Stock status for purchase flow. */
   stockStatus?: 'in_stock' | 'out_of_stock' | 'preorder';
-  /** Optional product variants. */
-  variants?: ProductVariant[];
   /** Array of available materials for the product. */
   materials: ProductMaterial[];
   /** Materials grouped by material group (for UI). */
@@ -161,16 +168,6 @@ export interface ProductMaterial {
   image: string;
 }
 
-export interface ProductVariant {
-  /** Localized variant name (e.g., Color/Size set). */
-  name: LocalizedString;
-  /** Variant SKU if distinct. */
-  sku?: string;
-  /** Variant-specific price override. */
-  price?: number;
-  /** Variant images. */
-  images: string[];
-}
 
 /**
  * Defines the structure for exclusive, members-only product content.

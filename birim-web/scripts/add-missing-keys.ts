@@ -15,6 +15,5 @@ async function run() {
     tx.patch(d._id, {set: {materialSelections: selections}})
   }
   if (docs.length) await tx.commit()
-  console.log(`Düzeltildi: ${docs.length} ürün`)
 }
-run().catch((e)=>{console.error(e);process.exit(1)})
+run().catch((e)=>{process.exit(1)})

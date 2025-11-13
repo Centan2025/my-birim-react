@@ -57,7 +57,7 @@ export function Header() {
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const [headerHeight, setHeaderHeight] = useState(48); // 3rem = 48px (mobil için varsayılan)
+  const [headerHeight, setHeaderHeight] = useState(56); // 3.5rem = 56px (mobil için varsayılan)
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [heroBrightness, setHeroBrightness] = useState<number | null>(null);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
@@ -272,10 +272,6 @@ export function Header() {
         if (e instanceof DOMException || errorMessage.includes('tainted') || errorMessage.includes('SecurityError') || errorMessage.includes('cross-origin')) {
           setHeroBrightness(null);
         } else {
-          // Beklenmeyen hatalar için sadece development'ta log
-          if (import.meta.env.DEV) {
-            console.warn('Top image brightness calculation failed:', e);
-          }
           setHeroBrightness(null);
         }
       }
@@ -518,8 +514,7 @@ export function Header() {
       Promise.all([getProducts(), getDesigners(), getCategories()]).then(([products, designers, categories]) => {
         setAllData({ products, designers, categories });
         setIsSearching(false);
-      }).catch(err => {
-        console.error("Failed to load search data", err);
+      }).catch(() => {
         setIsSearching(false);
       });
     }
@@ -626,7 +621,7 @@ export function Header() {
       <span className="inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
           {children}
       </span>
-      <span className="absolute bottom-0 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
+      <span className="absolute bottom-0 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
     </NavLink>
   );
 
@@ -634,7 +629,7 @@ export function Header() {
     <>
       <header className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full'}`}>
         <div
-          className={`overflow-hidden transition-all duration-700 ease-in-out ${isProductsOpen ? 'max-h-[20rem]' : isMobileMenuOpen ? 'max-h-[30rem]' : isMobile ? 'max-h-[3rem]' : 'max-h-[6rem]'} ${isMobile && headerOpacity <= 0 ? '' : 'backdrop-blur-lg border-b border-white/10'}`}
+          className={`overflow-hidden transition-all duration-700 ease-in-out ${isProductsOpen ? 'max-h-[20rem]' : isMobileMenuOpen ? 'max-h-[40rem]' : isMobile ? 'max-h-[3.5rem]' : 'max-h-[6rem]'} ${isMobile && headerOpacity <= 0 ? '' : 'backdrop-blur-lg border-b border-white/10'}`}
           style={{
             backgroundColor: isMobile && headerOpacity <= 0 ? 'transparent' : `rgba(0, 0, 0, ${headerOpacity})`,
             transition: 'background-color 0.2s ease-out, max-height 0.7s ease-in-out',
@@ -646,13 +641,13 @@ export function Header() {
           ref={headerContainerRef}
         >
           <nav className="px-2 sm:px-4 lg:px-6" ref={navRef}>
-            <div className="relative flex h-12 lg:h-24 items-center">
+            <div className="relative flex h-14 lg:h-24 items-center">
               {/* Sol taraf - Menü düğmeleri (desktop) ve Logo (mobil) */}
               <div className="flex-1 flex items-center">
                 {/* Mobil Logo - Solda */}
                 <div className="lg:hidden flex items-center">
                   <Link to="/" className="flex items-center gap-1.5 text-white transition-colors">
-                    <SiteLogo logoUrl={settings?.logoUrl} className="w-24 h-4" />
+                    <SiteLogo logoUrl={settings?.logoUrl} className="w-32 h-5" />
                   </Link>
                 </div>
                 {/* Desktop Menü */}
@@ -670,7 +665,7 @@ export function Header() {
                     >
                         <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase">
                             {t('products')}
-                            <span className={`absolute -bottom-2 left-0 w-full h-[2px] bg-white transition-transform duration-300 ease-out origin-center ${isProductsOpen ? 'scale-x-0 opacity-0' : 'transform scale-x-0 group-hover:scale-x-100'}`}></span>
+                            <span className={`absolute -bottom-2 left-0 w-full h-[3px] bg-white transition-transform duration-300 ease-out origin-center ${isProductsOpen ? 'scale-x-0 opacity-0' : 'transform scale-x-0 group-hover:scale-x-100'}`}></span>
                         </span>
                         <ChevronDownIcon />
                     </Link>
@@ -713,7 +708,7 @@ export function Header() {
                       >
                         <span className="relative inline-block">
                           {langCode.toUpperCase()}
-                          <span className={`absolute -bottom-1 left-0 w-full h-[2px] bg-white transition-transform duration-300 ease-out origin-center ${
+                          <span className={`absolute -bottom-1 left-0 w-full h-[3px] bg-white transition-transform duration-300 ease-out origin-center ${
                             isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
                           }`}></span>
                         </span>
@@ -735,8 +730,8 @@ export function Header() {
                     )}
                   </button>
                 )}
-                <div className="lg:hidden">
-                  <button ref={mobileMenuButtonRef} onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className={iconClasses}>
+                <div className="lg:hidden flex items-center">
+                  <button ref={mobileMenuButtonRef} onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className={`${iconClasses} flex items-center justify-center`}>
                     <MenuIcon />
                   </button>
                 </div>
@@ -760,7 +755,7 @@ export function Header() {
                   >
                     <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
                       {t(category.name)}
-                      <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
+                      <span className="absolute -bottom-1 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
                     </span>
                   </NavLink>
                 ))}
@@ -770,45 +765,46 @@ export function Header() {
           {/* Mobil menü - header içinde açılır */}
           {isMobileMenuOpen && (
             <div ref={mobileMenuRef} className="lg:hidden border-t border-white/10">
-              <nav className="px-4 sm:px-5 lg:px-6 pt-6 pb-6 flex flex-col space-y-6">
-                {/* Dil seçenekleri - Menü öğelerinin üstünde */}
-                {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
-                  <div className="relative w-full min-h-[2.5rem]">
-                    <div className="flex items-start justify-start gap-1 -mt-1.5">
-                      {supportedLocales.map((langCode) => {
-                        const isActive = locale === langCode;
-                        return (
-                          <button
-                            key={langCode}
-                            onClick={() => {
-                              setLocale(langCode);
-                              setIsMobileMenuOpen(false);
-                            }}
-                            aria-pressed={isActive}
-                            className={`group relative px-1.5 py-0.5 text-xs uppercase tracking-[0.2em] transition-colors duration-200 ${
-                              isActive
-                                ? 'text-white font-extralight'
-                                : 'text-gray-400/90 hover:text-white font-extralight'
-                            }`}
-                            style={{ fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.2em' }}
-                          >
-                            <span className="relative inline-block">
-                              {langCode.toUpperCase()}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <div className="absolute left-[-1rem] right-[-1rem] sm:left-[-1.25rem] sm:right-[-1.25rem] lg:left-[-1.5rem] lg:right-[-1.5rem] bottom-2 h-[1px] bg-white/10"></div>
+              {/* Dil seçenekleri - Menü öğelerinin üstünde */}
+              {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
+                <div className="relative w-full">
+                  <div className="flex items-center justify-start gap-1 bg-black/50 px-4 sm:px-5 lg:px-6 py-3 min-h-[3rem] border-b border-white/10">
+                    {supportedLocales.map((langCode) => {
+                      const isActive = locale === langCode;
+                      return (
+                        <button
+                          key={langCode}
+                          onClick={() => {
+                            setLocale(langCode);
+                            setIsMobileMenuOpen(false);
+                          }}
+                          aria-pressed={isActive}
+                          className={`group relative px-1.5 py-0.5 text-xs uppercase tracking-[0.2em] transition-colors duration-200 ${
+                            isActive
+                              ? 'text-white font-extralight'
+                              : 'text-gray-400/90 hover:text-white font-extralight'
+                          }`}
+                          style={{ fontFamily: 'system-ui, -apple-system, sans-serif', letterSpacing: '0.2em' }}
+                        >
+                          <span className="relative inline-block">
+                            {langCode.toUpperCase()}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
-                )}
-                <NavLink to="/products" className="text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('products')}</NavLink>
-                <NavLink to="/designers" className="text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('designers')}</NavLink>
-                <NavLink to="/projects" className="text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('projects') || 'Projeler'}</NavLink>
-                <NavLink to="/news" className="text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('news')}</NavLink>
-                <NavLink to="/about" className="text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('about')}</NavLink>
-                <NavLink to="/contact" className="text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('contact')}</NavLink>
-              </nav>
+                </div>
+              )}
+               <nav className="px-4 sm:px-5 lg:px-6 pt-2 pb-2 flex flex-col">
+                 <div className="flex flex-col">
+                   <NavLink to="/products" className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10" onClick={() => setIsMobileMenuOpen(false)}>{t('products')}</NavLink>
+                   <NavLink to="/designers" className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10" onClick={() => setIsMobileMenuOpen(false)}>{t('designers')}</NavLink>
+                   <NavLink to="/projects" className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10" onClick={() => setIsMobileMenuOpen(false)}>{t('projects') || 'Projeler'}</NavLink>
+                   <NavLink to="/news" className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10" onClick={() => setIsMobileMenuOpen(false)}>{t('news')}</NavLink>
+                   <NavLink to="/about" className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10" onClick={() => setIsMobileMenuOpen(false)}>{t('about')}</NavLink>
+                   <NavLink to="/contact" className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300" onClick={() => setIsMobileMenuOpen(false)}>{t('contact')}</NavLink>
+                 </div>
+               </nav>
             </div>
           )}
         </div>

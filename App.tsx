@@ -91,7 +91,6 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       try {
         setUser(JSON.parse(storedUser));
       } catch (e) {
-        console.error('Failed to parse stored user', e);
         localStorage.removeItem('birim_user');
       }
     }
@@ -241,12 +240,10 @@ const Footer = () => {
                             e.preventDefault();
                             if (email) {
                                 try {
-                                    const result = await subscribeEmail(email);
-                                    console.log('Email aboneliği sonucu:', result);
+                                    await subscribeEmail(email);
                                     alert('E-posta aboneliğiniz başarıyla oluşturuldu!');
                                     setEmail('');
                                 } catch (err: any) {
-                                    console.error('Email aboneliği hatası:', err);
                                     // Özel durum: Local storage'a kaydedildi ama CMS'de görünmüyor
                                     if (err.message === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
                                         alert('E-posta aboneliğiniz kaydedildi!\n\nNot: CMS\'de görünmesi için .env dosyasına VITE_SANITY_TOKEN ekleyin. Detaylar: README.md');
@@ -372,12 +369,10 @@ const Footer = () => {
                             e.preventDefault();
                             if (email) {
                                 try {
-                                    const result = await subscribeEmail(email);
-                                    console.log('Email aboneliği sonucu:', result);
+                                    await subscribeEmail(email);
                                     alert('E-posta aboneliğiniz başarıyla oluşturuldu!');
                                     setEmail('');
                                 } catch (err: any) {
-                                    console.error('Email aboneliği hatası:', err);
                                     // Özel durum: Local storage'a kaydedildi ama CMS'de görünmüyor
                                     if (err.message === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
                                         alert('E-posta aboneliğiniz kaydedildi!\n\nNot: CMS\'de görünmesi için .env dosyasına VITE_SANITY_TOKEN ekleyin. Detaylar: README.md');
@@ -461,7 +456,7 @@ export default function App() {
       <I18nProvider>
         <CartProvider>
           <SiteSettingsProvider>
-            <HashRouter>
+            <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <div className="flex flex-col min-h-screen">
                 <ScrollToTop />
                 <Header />

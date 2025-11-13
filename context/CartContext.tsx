@@ -35,7 +35,6 @@ export const CartProvider = ({ children }: PropsWithChildren) => {
         setCartItems(JSON.parse(storedCart));
       }
     } catch (e) {
-      console.error("Failed to parse cart from localStorage", e);
       localStorage.removeItem('birim_cart');
     }
   }, []);

@@ -71,7 +71,7 @@ const MediaComponent: React.FC<{ media: NewsMedia }> = ({ media }) => {
             return (
                  <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16:9 Aspect Ratio */ }}>
                     <iframe
-                        src={`https://www.youtube.com/embed/${videoId}`}
+                        src={`https://www.youtube.com/embed/${videoId}?rel=0`}
                         title={t(media.caption) || 'YouTube video player'}
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
