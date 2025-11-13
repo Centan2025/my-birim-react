@@ -893,11 +893,6 @@ export function HomePage() {
       const normalizedSlide = currentSlide < 0 ? slideCount - 1 : (currentSlide >= slideCount ? 0 : currentSlide);
       
       // Klonlar dahil gerçek slide index'ini bul
-      const clonedMedia = slideCount > 1 ? [
-        content.heroMedia[content.heroMedia.length - 1],
-        ...content.heroMedia,
-        content.heroMedia[0]
-      ] : content.heroMedia;
       const realIndex = normalizedSlide + 1; // +1 çünkü ilk klon var
       
       // Aktif slide'ı bul
