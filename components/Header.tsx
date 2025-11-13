@@ -210,12 +210,6 @@ export function Header() {
         return;
       }
 
-      // Cross-origin kontrolü - CORS hatasını önlemek için
-      const isCrossOrigin = activeMedia instanceof HTMLImageElement && 
-        activeMedia.crossOrigin !== null && 
-        activeMedia.crossOrigin !== 'anonymous' &&
-        activeMedia.crossOrigin !== 'use-credentials';
-      
       // Canvas kullanarak görselin parlaklığını hesapla
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
@@ -279,7 +273,7 @@ export function Header() {
           setHeroBrightness(null);
         } else {
           // Beklenmeyen hatalar için sadece development'ta log
-          if (process.env.NODE_ENV === 'development') {
+          if (import.meta.env.DEV) {
             console.warn('Top image brightness calculation failed:', e);
           }
           setHeroBrightness(null);
