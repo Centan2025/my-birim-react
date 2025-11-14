@@ -35,6 +35,15 @@ import { OptimizedImage } from '../components/OptimizedImage';
   loading="eager"
   className="w-full"
 />
+
+// Art Direction: Farklı ekranlar için farklı görseller
+<OptimizedImage
+  src={imageUrl} // Fallback (mobil versiyonu yoksa kullanılır)
+  srcMobile={mobileImageUrl} // Mobil için görsel (max-width: 768px)
+  srcDesktop={desktopImageUrl} // Desktop için görsel (min-width: 769px)
+  alt="Açıklama"
+  className="w-full h-auto"
+/>
 ```
 
 ### 2. Sanity Image URL Optimizasyonu
@@ -93,6 +102,18 @@ import { OptimizedVideo } from '../components/OptimizedVideo';
   playsInline
   preload="auto"
 />
+
+// Art Direction: Farklı ekranlar için farklı videolar
+<OptimizedVideo
+  src={videoUrl} // Fallback (mobil versiyonu yoksa kullanılır)
+  srcMobile={mobileVideoUrl} // Mobil için video (max-width: 768px)
+  srcDesktop={desktopVideoUrl} // Desktop için video (min-width: 769px)
+  poster={posterImageUrl} // Fallback poster
+  posterMobile={mobilePosterUrl} // Mobil için poster
+  posterDesktop={desktopPosterUrl} // Desktop için poster
+  className="w-full"
+  controls
+/>
 ```
 
 ### 2. Video Optimizasyon İpuçları
@@ -102,23 +123,70 @@ import { OptimizedVideo } from '../components/OptimizedVideo';
 - **Format**: MP4 formatı kullanın (en iyi tarayıcı desteği)
 - **Compression**: Videoları yüklemeden önce sıkıştırın (HandBrake, FFmpeg)
 
+## 🎨 Art Direction (Farklı Ekranlar İçin Farklı Medya)
+
+Art Direction özelliği, farklı ekran boyutları için farklı medya dosyaları kullanmanıza olanak tanır. Bu özellik özellikle mobil ve desktop için farklı kompozisyonlar gerektiğinde kullanışlıdır.
+
+### Nasıl Çalışır?
+
+- **Mobil için medya varsa**: Mobil cihazlarda (max-width: 768px) mobil versiyonu gösterilir
+- **Desktop için medya varsa**: Desktop cihazlarda (min-width: 769px) desktop versiyonu gösterilir
+- **Fallback**: Eğer mobil versiyonu yoksa, desktop versiyonu kullanılır. O da yoksa `src` prop'u kullanılır
+
+### Görseller İçin Art Direction
+
+```tsx
+<OptimizedImage
+  src={defaultImage} // Fallback
+  srcMobile={mobileImage} // Mobil için (opsiyonel)
+  srcDesktop={desktopImage} // Desktop için (opsiyonel)
+  alt="Açıklama"
+  className="w-full"
+/>
+```
+
+### Videolar İçin Art Direction
+
+```tsx
+<OptimizedVideo
+  src={defaultVideo} // Fallback
+  srcMobile={mobileVideo} // Mobil için (opsiyonel)
+  srcDesktop={desktopVideo} // Desktop için (opsiyonel)
+  poster={defaultPoster} // Fallback poster
+  posterMobile={mobilePoster} // Mobil için poster (opsiyonel)
+  posterDesktop={desktopPoster} // Desktop için poster (opsiyonel)
+  className="w-full"
+  controls
+/>
+```
+
+### Art Direction Kullanım Senaryoları
+
+1. **Hero Section**: Mobilde dikey, desktop'ta yatay kompozisyon
+2. **Product Images**: Mobilde yakın çekim, desktop'ta geniş açı
+3. **Video Backgrounds**: Mobilde daha kısa/düşük kaliteli, desktop'ta yüksek kaliteli
+4. **Banner Images**: Mobilde farklı crop, desktop'ta tam görsel
+
 ## 🚀 Best Practices
 
 ### Görseller İçin:
 
 1. **Lazy Loading**: Above-the-fold dışındaki tüm görseller için `loading="lazy"` kullanın
 2. **Responsive Images**: `srcset` ve `sizes` attribute'larını kullanın
-3. **WebP Format**: Modern tarayıcılar için WebP, eski tarayıcılar için otomatik fallback
-4. **Kalite**: %80-85 kalite genellikle yeterlidir (görsel kalite kaybı minimal)
-5. **Boyut**: Görselleri görüntülenecek boyuttan daha büyük yüklemeyin
+3. **Art Direction**: Farklı ekranlar için farklı görseller kullanın (`srcMobile`, `srcDesktop`)
+4. **WebP Format**: Modern tarayıcılar için WebP, eski tarayıcılar için otomatik fallback
+5. **Kalite**: %80-85 kalite genellikle yeterlidir (görsel kalite kaybı minimal)
+6. **Boyut**: Görselleri görüntülenecek boyuttan daha büyük yüklemeyin
 
 ### Videolar İçin:
 
 1. **Poster Images**: Her video için poster image ekleyin
-2. **Preload Control**: Sadece görünür videolar için preload yapın
-3. **Compression**: Videoları yüklemeden önce optimize edin
-4. **Format**: MP4 (H.264 codec) en iyi uyumluluk için
-5. **Multiple Qualities**: Farklı kalitelerde video sunun (adaptive streaming)
+2. **Art Direction**: Farklı ekranlar için farklı videolar kullanın (`srcMobile`, `srcDesktop`)
+3. **Poster Art Direction**: Farklı ekranlar için farklı poster'lar kullanın (`posterMobile`, `posterDesktop`)
+4. **Preload Control**: Sadece görünür videolar için preload yapın
+5. **Compression**: Videoları yüklemeden önce optimize edin
+6. **Format**: MP4 (H.264 codec) en iyi uyumluluk için
+7. **Multiple Qualities**: Farklı kalitelerde video sunun (adaptive streaming)
 
 ## 📊 Performans Metrikleri
 
@@ -170,6 +238,37 @@ https://cdn.sanity.io/images/{project}/{dataset}/{imageId}-{width}x{height}.{for
 ```tsx
 <OptimizedVideo
   src={backgroundVideo}
+  autoPlay
+  loop
+  muted
+  playsInline
+  preload="auto"
+  className="absolute inset-0 w-full h-full object-cover"
+/>
+```
+
+### Art Direction ile Hero Section
+```tsx
+<OptimizedImage
+  src={heroImage} // Fallback
+  srcMobile={heroImageMobile} // Mobil için özel kompozisyon
+  srcDesktop={heroImageDesktop} // Desktop için özel kompozisyon
+  alt="Hero"
+  loading="eager"
+  className="w-full h-screen object-cover"
+  quality={90}
+/>
+```
+
+### Art Direction ile Video Hero
+```tsx
+<OptimizedVideo
+  src={heroVideo} // Fallback
+  srcMobile={heroVideoMobile} // Mobil için daha kısa/düşük kaliteli
+  srcDesktop={heroVideoDesktop} // Desktop için yüksek kaliteli
+  poster={heroPoster}
+  posterMobile={heroPosterMobile}
+  posterDesktop={heroPosterDesktop}
   autoPlay
   loop
   muted

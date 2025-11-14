@@ -37,7 +37,27 @@ export default defineType({
       title: 'İlham Bölümü',
       type: 'object',
       fields: [
-        defineField({name: 'backgroundImage', title: 'Arka Plan Görseli', type: 'image', options: {hotspot: true}}),
+        defineField({
+          name: 'backgroundImage',
+          title: 'Arka Plan Görseli (Tüm Cihazlar)',
+          type: 'image',
+          options: {hotspot: true},
+          description: 'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+        }),
+        defineField({
+          name: 'backgroundImageMobile',
+          title: 'Arka Plan Görseli (Mobil)',
+          type: 'image',
+          options: {hotspot: true},
+          description: 'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+        }),
+        defineField({
+          name: 'backgroundImageDesktop',
+          title: 'Arka Plan Görseli (Desktop)',
+          type: 'image',
+          options: {hotspot: true},
+          description: 'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+        }),
         defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
         defineField({name: 'subtitle', title: 'Alt Başlık', type: 'localizedString'}),
         defineField({name: 'buttonText', title: 'Buton Metni', type: 'localizedString'}),

@@ -91,70 +91,117 @@ const mapImage = (img: any | undefined, options?: {
 }
 
 const mapImages = (imgs: any[] | undefined): string[] => Array.isArray(imgs) ? imgs.map(i => mapImage(i)).filter(Boolean) : []
-const mapProductMedia = (row: any): { type: 'image'|'video'|'youtube'; url: string; title?: any; description?: any; link?: string; linkText?: any }[] => {
+// Helper: Medya URL'ini map et (mobil/desktop desteği ile)
+const mapMediaUrl = (m: any, isMobile?: boolean, isDesktop?: boolean): string => {
+  const type = m?.type
+  let url = ''
+  
+  if (type === 'image') {
+    // Art Direction: Önce mobil/desktop'a özel görseli kontrol et
+    if (isMobile && m?.imageMobile) {
+      url = mapImage(m.imageMobile)
+    } else if (isDesktop && m?.imageDesktop) {
+      url = mapImage(m.imageDesktop)
+    } else if (m?.image) {
+      url = mapImage(m.image)
+    }
+  } else if (type === 'video') {
+    // Art Direction: Önce mobil/desktop'a özel videoyu kontrol et
+    if (isMobile && m?.videoFileMobile?.asset) {
+      if (m.videoFileMobile.asset.url) {
+        url = m.videoFileMobile.asset.url
+      } else if (m.videoFileMobile.asset._id) {
+        const fileId = m.videoFileMobile.asset._id.replace('file-', '')
+        url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+      } else if (m.videoFileMobile.asset._ref) {
+        const fileId = m.videoFileMobile.asset._ref.replace('file-', '')
+        url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+      }
+    } else if (isDesktop && m?.videoFileDesktop?.asset) {
+      if (m.videoFileDesktop.asset.url) {
+        url = m.videoFileDesktop.asset.url
+      } else if (m.videoFileDesktop.asset._id) {
+        const fileId = m.videoFileDesktop.asset._id.replace('file-', '')
+        url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+      } else if (m.videoFileDesktop.asset._ref) {
+        const fileId = m.videoFileDesktop.asset._ref.replace('file-', '')
+        url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+      }
+    } else if (m?.videoFile?.asset?.url) {
+      url = m.videoFile.asset.url
+    } else if (m?.videoFile?.asset?._id) {
+      const fileId = m.videoFile.asset._id.replace('file-', '')
+      url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+    } else if (m?.videoFile?.asset?._ref) {
+      const fileId = m.videoFile.asset._ref.replace('file-', '')
+      url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+    }
+  } else {
+    url = m?.url || ''
+  }
+  
+  return url
+}
+
+const mapProductMedia = (row: any): { type: 'image'|'video'|'youtube'; url: string; urlMobile?: string; urlDesktop?: string; title?: any; description?: any; link?: string; linkText?: any }[] => {
   const mediaArr = Array.isArray(row?.media) ? row.media : []
   const fromMedia = mediaArr.map((m: any) => {
     const type = m?.type
-    let url = ''
-    if (type === 'image' && m?.image) {
-      url = mapImage(m.image)
-    } else if (type === 'video' && m?.videoFile?.asset?.url) {
-      // Video dosyası yüklendiyse asset URL'ini kullan
-      url = m.videoFile.asset.url
-    } else if (type === 'video' && m?.videoFile?.asset?._id) {
-      // Asset ID varsa URL'yi oluştur
-      const fileId = m.videoFile.asset._id.replace('file-', '')
-      url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
-    } else if (type === 'video' && m?.videoFile?.asset?._ref) {
-      // Asset referansı varsa URL'yi oluştur
-      const fileId = m.videoFile.asset._ref.replace('file-', '')
-      url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
-    } else {
-      url = m?.url || ''
-    }
+    const url = mapMediaUrl(m) // Varsayılan URL
+    const urlMobile = mapMediaUrl(m, true, false) // Mobil URL (varsa)
+    const urlDesktop = mapMediaUrl(m, false, true) // Desktop URL (varsa)
+    
     const title = m?.title
     const description = m?.description
     const link = m?.link
     const linkText = m?.linkText
-    return { type, url, title, description, link, linkText }
+    
+    // Sadece urlMobile veya urlDesktop varsa ekle
+    const result: any = { type, url, title, description, link, linkText }
+    if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
+    if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
+    
+    return result
   }).filter((m: any) => m.type && m.url)
   // Fallback kaldırıldı: Eğer hiç medya eklenmemişse boş array döndür
   return fromMedia
 }
 
-const mapAlternativeMedia = (row: any): { type: 'image'|'video'|'youtube'; url: string }[] => {
+const mapAlternativeMedia = (row: any): { type: 'image'|'video'|'youtube'; url: string; urlMobile?: string; urlDesktop?: string }[] => {
   const alt = Array.isArray(row?.alternativeMedia) ? row.alternativeMedia : []
   if (alt.length) return alt.map((m: any) => {
     const type = m?.type
-    let url = ''
-    if (type === 'image' && m?.image) {
-      url = mapImage(m.image)
-    } else if (type === 'video' && m?.videoFile?.asset?.url) {
-      // Video dosyası yüklendiyse asset URL'ini kullan
-      url = m.videoFile.asset.url
-    } else if (type === 'video' && m?.videoFile?.asset?._id) {
-      // Asset ID varsa URL'yi oluştur
-      const fileId = m.videoFile.asset._id.replace('file-', '')
-      url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
-    } else if (type === 'video' && m?.videoFile?.asset?._ref) {
-      // Asset referansı varsa URL'yi oluştur
-      const fileId = m.videoFile.asset._ref.replace('file-', '')
-      url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
-    } else {
-      url = m?.url || ''
-    }
-    return { type, url }
+    const url = mapMediaUrl(m) // Varsayılan URL
+    const urlMobile = mapMediaUrl(m, true, false) // Mobil URL (varsa)
+    const urlDesktop = mapMediaUrl(m, false, true) // Desktop URL (varsa)
+    
+    // Sadece urlMobile veya urlDesktop varsa ekle
+    const result: any = { type, url }
+    if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
+    if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
+    
+    return result
   }).filter((m: any) => m.type && m.url)
   // fallback to legacy alternativeImages
   return mapImages(row?.alternativeImages).map((u: string) => ({ type: 'image', url: u }))
 }
 const mapMaterials = (materials: any[] | undefined): ProductMaterial[] => Array.isArray(materials) ? materials.map(m => ({ name: m?.name, image: mapImage(m?.image) })) : []
-const mapDimensionImages = (dimImgs: any[] | undefined): { image: string; title?: LocalizedString }[] => {
+const mapDimensionImages = (dimImgs: any[] | undefined): { image: string; imageMobile?: string; imageDesktop?: string; title?: LocalizedString }[] => {
   if (!Array.isArray(dimImgs)) return []
-  return dimImgs.map((di: any) => ({
-    image: mapImage(di?.image),
-    title: di?.title,
-  })).filter((di: any) => di.image) // sadece görseli olanları tut
+  return dimImgs.map((di: any) => {
+    const image = mapImage(di?.image)
+    const imageMobile = di?.imageMobile ? mapImage(di.imageMobile) : undefined
+    const imageDesktop = di?.imageDesktop ? mapImage(di.imageDesktop) : undefined
+    
+    const result: any = {
+      image,
+      title: di?.title,
+    }
+    if (imageMobile && imageMobile !== image) result.imageMobile = imageMobile
+    if (imageDesktop && imageDesktop !== image) result.imageDesktop = imageDesktop
+    
+    return result
+  }).filter((di: any) => di.image) // sadece görseli olanları tut
 }
 const mapGroupedMaterials = (materialSelections: any[]): any[] => {
   return (materialSelections || [])
@@ -424,18 +471,41 @@ export const deleteCategory = async (id: string): Promise<void> => {
 // Designers
 export const getDesigners = async (): Promise<Designer[]> => {
     if (useSanity && sanity) {
-        const query = groq`*[_type == "designer"]{ "id": id.current, name, bio, image } | order(name.tr asc)`
+        const query = groq`*[_type == "designer"]{ "id": id.current, name, bio, image, imageMobile, imageDesktop } | order(name.tr asc)`
         const rows = await sanity.fetch(query)
-        return rows.map((r: any) => ({ id: r.id, name: r.name, bio: r.bio, image: mapImage(r.image) }))
+        return rows.map((r: any) => {
+          const image = mapImage(r.image)
+          const imageMobile = r.imageMobile ? mapImage(r.imageMobile) : undefined
+          const imageDesktop = r.imageDesktop ? mapImage(r.imageDesktop) : undefined
+          return { 
+            id: r.id, 
+            name: r.name, 
+            bio: r.bio, 
+            image,
+            imageMobile: imageMobile && imageMobile !== image ? imageMobile : undefined,
+            imageDesktop: imageDesktop && imageDesktop !== image ? imageDesktop : undefined,
+          }
+        })
     }
     await delay(SIMULATED_DELAY);
     return getItem<Designer[]>(KEYS.DESIGNERS);
 };
 export const getDesignerById = async (id: string): Promise<Designer | undefined> => {
     if (useSanity && sanity) {
-        const query = groq`*[_type == "designer" && id.current == $id][0]{ "id": id.current, name, bio, image }`
+        const query = groq`*[_type == "designer" && id.current == $id][0]{ "id": id.current, name, bio, image, imageMobile, imageDesktop }`
         const r = await sanity.fetch(query, { id })
-        return r ? { id: r.id, name: r.name, bio: r.bio, image: mapImage(r.image) } : undefined
+        if (!r) return undefined
+        const image = mapImage(r.image)
+        const imageMobile = r.imageMobile ? mapImage(r.imageMobile) : undefined
+        const imageDesktop = r.imageDesktop ? mapImage(r.imageDesktop) : undefined
+        return { 
+          id: r.id, 
+          name: r.name, 
+          bio: r.bio, 
+          image,
+          imageMobile: imageMobile && imageMobile !== image ? imageMobile : undefined,
+          imageDesktop: imageDesktop && imageDesktop !== image ? imageDesktop : undefined,
+        }
     }
     const designers = await getDesigners();
     return designers.find(d => d.id === id);
@@ -469,9 +539,11 @@ export const getProducts = async (): Promise<Product[]> => {
           year,
           description,
           mainImage,
+          mainImageMobile,
+          mainImageDesktop,
           alternativeImages,
-          alternativeMedia[]{ type, url, image, videoFile{asset->{url, _ref, _id}} },
-          media[]{ type, url, image, title, description, link, linkText, videoFile{asset->{url, _ref, _id}} },
+          alternativeMedia[]{ type, url, image, imageMobile, imageDesktop, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
+          media[]{ type, url, image, imageMobile, imageDesktop, title, description, link, linkText, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
           mediaSectionTitle,
           mediaSectionText,
           showMediaPanels,
@@ -481,7 +553,7 @@ export const getProducts = async (): Promise<Product[]> => {
           sku,
           stockStatus,
           materialSelections[]{ group->{title, books[]{title, items[]{name, image}}}, materials },
-          dimensionImages[]{ image, title },
+          dimensionImages[]{ image, imageMobile, imageDesktop, title },
           exclusiveContent,
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
@@ -494,7 +566,17 @@ export const getProducts = async (): Promise<Product[]> => {
           categoryId: r.category?.categoryId || '',
           year: r.year,
           description: r.description,
-          mainImage: mapImage(r.mainImage),
+          mainImage: (() => {
+            const img = mapImage(r.mainImage)
+            const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
+            const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
+            // Art Direction için object döndür
+            return { 
+              url: img,
+              urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
+              urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
+            }
+          })(),
           alternativeImages: mapImages(r.alternativeImages),
           alternativeMedia: mapAlternativeMedia(r),
           media: mapProductMedia(r),
@@ -527,9 +609,11 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           year,
           description,
           mainImage,
+          mainImageMobile,
+          mainImageDesktop,
           alternativeImages,
-          alternativeMedia[]{ type, url, image, videoFile{asset->{url, _ref, _id}} },
-          media[]{ type, url, image, title, description, link, linkText, videoFile{asset->{url, _ref, _id}} },
+          alternativeMedia[]{ type, url, image, imageMobile, imageDesktop, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
+          media[]{ type, url, image, imageMobile, imageDesktop, title, description, link, linkText, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
           mediaSectionTitle,
           mediaSectionText,
           showMediaPanels,
@@ -539,7 +623,7 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           sku,
           stockStatus,
           materialSelections[]{ group->{title, books[]{title, items[]{name, image}}}, materials },
-          dimensionImages[]{ image, title },
+          dimensionImages[]{ image, imageMobile, imageDesktop, title },
           exclusiveContent,
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
@@ -553,7 +637,17 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           categoryId: r.category?.categoryId || '',
           year: r.year,
           description: r.description,
-          mainImage: mapImage(r.mainImage),
+          mainImage: (() => {
+            const img = mapImage(r.mainImage)
+            const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
+            const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
+            // Art Direction için object döndür
+            return { 
+              url: img,
+              urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
+              urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
+            }
+          })(),
           alternativeImages: mapImages(r.alternativeImages),
           alternativeMedia: mapAlternativeMedia(r),
           media: mapProductMedia(r),
@@ -586,9 +680,11 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
           year,
           description,
           mainImage,
+          mainImageMobile,
+          mainImageDesktop,
           alternativeImages,
-          alternativeMedia[]{ type, url, image, videoFile{asset->{url, _ref, _id}} },
-          media[]{ type, url, image, title, description, link, linkText, videoFile{asset->{url, _ref, _id}} },
+          alternativeMedia[]{ type, url, image, imageMobile, imageDesktop, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
+          media[]{ type, url, image, imageMobile, imageDesktop, title, description, link, linkText, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
           mediaSectionTitle,
           mediaSectionText,
           showMediaPanels,
@@ -596,7 +692,7 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
           price,
           currency,
           materialSelections[]{ materials },
-          dimensionImages[]{ image, title },
+          dimensionImages[]{ image, imageMobile, imageDesktop, title },
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
         }`
@@ -608,7 +704,17 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
           categoryId: r.category?.categoryId || '',
           year: r.year,
           description: r.description,
-          mainImage: mapImage(r.mainImage),
+          mainImage: (() => {
+            const img = mapImage(r.mainImage)
+            const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
+            const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
+            // Art Direction için object döndür
+            return { 
+              url: img,
+              urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
+              urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
+            }
+          })(),
           alternativeImages: mapImages(r.alternativeImages),
           alternativeMedia: mapAlternativeMedia(r),
           media: mapProductMedia(r),
@@ -638,9 +744,11 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
           year,
           description,
           mainImage,
+          mainImageMobile,
+          mainImageDesktop,
           alternativeImages,
-          alternativeMedia[]{ type, url, image, videoFile{asset->{url, _ref, _id}} },
-          media[]{ type, url, image, title, description, link, linkText, videoFile{asset->{url, _ref, _id}} },
+          alternativeMedia[]{ type, url, image, imageMobile, imageDesktop, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
+          media[]{ type, url, image, imageMobile, imageDesktop, title, description, link, linkText, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
           mediaSectionTitle,
           mediaSectionText,
           showMediaPanels,
@@ -648,7 +756,7 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
           price,
           currency,
           materialSelections[]{ materials },
-          dimensionImages[]{ image, title },
+          dimensionImages[]{ image, imageMobile, imageDesktop, title },
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
         }`
@@ -660,7 +768,17 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
           categoryId: r.category?.categoryId || '',
           year: r.year,
           description: r.description,
-          mainImage: mapImage(r.mainImage),
+          mainImage: (() => {
+            const img = mapImage(r.mainImage)
+            const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
+            const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
+            // Art Direction için object döndür
+            return { 
+              url: img,
+              urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
+              urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
+            }
+          })(),
           alternativeImages: mapImages(r.alternativeImages),
           alternativeMedia: mapAlternativeMedia(r),
           media: mapProductMedia(r),
@@ -806,7 +924,19 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
                 image{
                     asset->{url}
                 },
+                imageMobile{
+                    asset->{url}
+                },
+                imageDesktop{
+                    asset->{url}
+                },
                 videoFile{
+                    asset->{url, _ref, _id}
+                },
+                videoFileMobile{
+                    asset->{url, _ref, _id}
+                },
+                videoFileDesktop{
                     asset->{url, _ref, _id}
                 }
             },
@@ -821,25 +951,23 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             },
             inspirationSection{
                 ...,
-                backgroundImage
+                backgroundImage,
+                backgroundImageMobile,
+                backgroundImageDesktop
             }
         }`
         const data = await sanity.fetch(q);
         if (data?.heroMedia) {
             data.heroMedia = data.heroMedia.map((m: any) => {
-                let url = m.url
-                if (m.type === 'image' && m.image?.asset?.url) {
-                    url = m.image.asset.url
-                } else if (m.type === 'video' && m.videoFile?.asset?.url) {
-                    url = m.videoFile.asset.url
-                } else if (m.type === 'video' && m.videoFile?.asset?._id) {
-                    const fileId = m.videoFile.asset._id.replace('file-', '')
-                    url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
-                } else if (m.type === 'video' && m.videoFile?.asset?._ref) {
-                    const fileId = m.videoFile.asset._ref.replace('file-', '')
-                    url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
-                }
-                return { ...m, url }
+                const url = mapMediaUrl(m)
+                const urlMobile = mapMediaUrl(m, true, false)
+                const urlDesktop = mapMediaUrl(m, false, true)
+                
+                const result: any = { ...m, url }
+                if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
+                if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
+                
+                return result
             });
         }
         if (data?.contentBlocks) {
@@ -860,7 +988,14 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             });
         }
         if (data?.inspirationSection) {
-            data.inspirationSection.backgroundImage = mapImage(data.inspirationSection.backgroundImage);
+            const bgImg = mapImage(data.inspirationSection.backgroundImage)
+            const bgImgMobile = data.inspirationSection.backgroundImageMobile ? mapImage(data.inspirationSection.backgroundImageMobile) : undefined
+            const bgImgDesktop = data.inspirationSection.backgroundImageDesktop ? mapImage(data.inspirationSection.backgroundImageDesktop) : undefined
+            data.inspirationSection.backgroundImage = {
+              url: bgImg,
+              urlMobile: bgImgMobile && bgImgMobile !== bgImg ? bgImgMobile : undefined,
+              urlDesktop: bgImgDesktop && bgImgDesktop !== bgImg ? bgImgDesktop : undefined,
+            }
         }
         // Ensure featuredProductIds is always an array
         if (!Array.isArray(data?.featuredProductIds)) {
@@ -969,13 +1104,19 @@ export const getNews = async (): Promise<NewsItem[]> => {
           title, 
           date, 
           content, 
-          mainImage, 
+          mainImage,
+          mainImageMobile,
+          mainImageDesktop, 
           media[]{
             type,
             url,
             caption,
             image{asset->{url}},
-            videoFile{asset->{url, _ref, _id}}
+            imageMobile{asset->{url}},
+            imageDesktop{asset->{url}},
+            videoFile{asset->{url, _ref, _id}},
+            videoFileMobile{asset->{url, _ref, _id}},
+            videoFileDesktop{asset->{url, _ref, _id}}
           }
         }`
         const rows = await sanity.fetch(q)
@@ -984,21 +1125,27 @@ export const getNews = async (): Promise<NewsItem[]> => {
           title: r.title,
           date: r.date,
           content: r.content,
-          mainImage: mapImage(r.mainImage),
-          media: (r.media || []).map((m: any) => {
-            let url = m.url
-            if (m.type === 'image' && m.image?.asset?.url) {
-              url = m.image.asset.url
-            } else if (m.type === 'video' && m.videoFile?.asset?.url) {
-              url = m.videoFile.asset.url
-            } else if (m.type === 'video' && m.videoFile?.asset?._id) {
-              const fileId = m.videoFile.asset._id.replace('file-', '')
-              url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
-            } else if (m.type === 'video' && m.videoFile?.asset?._ref) {
-              const fileId = m.videoFile.asset._ref.replace('file-', '')
-              url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+          mainImage: (() => {
+            const img = mapImage(r.mainImage)
+            const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
+            const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
+            // Art Direction için object döndür
+            return { 
+              url: img,
+              urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
+              urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
             }
-            return { type: m.type, url, caption: m.caption }
+          })(),
+          media: (r.media || []).map((m: any) => {
+            const url = mapMediaUrl(m)
+            const urlMobile = mapMediaUrl(m, true, false)
+            const urlDesktop = mapMediaUrl(m, false, true)
+            
+            const result: any = { type: m.type, url, caption: m.caption }
+            if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
+            if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
+            
+            return result
           }).filter((m: any) => m.url),
         }))
     }
@@ -1012,13 +1159,19 @@ export const getNewsById = async (id: string): Promise<NewsItem | undefined> => 
           title, 
           date, 
           content, 
-          mainImage, 
+          mainImage,
+          mainImageMobile,
+          mainImageDesktop, 
           media[]{
             type,
             url,
             caption,
             image{asset->{url}},
-            videoFile{asset->{url, _ref, _id}}
+            imageMobile{asset->{url}},
+            imageDesktop{asset->{url}},
+            videoFile{asset->{url, _ref, _id}},
+            videoFileMobile{asset->{url, _ref, _id}},
+            videoFileDesktop{asset->{url, _ref, _id}}
           }
         }`
         const r = await sanity.fetch(q, { id })
@@ -1028,21 +1181,27 @@ export const getNewsById = async (id: string): Promise<NewsItem | undefined> => 
           title: r.title,
           date: r.date,
           content: r.content,
-          mainImage: mapImage(r.mainImage),
-          media: (r.media || []).map((m: any) => {
-            let url = m.url
-            if (m.type === 'image' && m.image?.asset?.url) {
-              url = m.image.asset.url
-            } else if (m.type === 'video' && m.videoFile?.asset?.url) {
-              url = m.videoFile.asset.url
-            } else if (m.type === 'video' && m.videoFile?.asset?._id) {
-              const fileId = m.videoFile.asset._id.replace('file-', '')
-              url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
-            } else if (m.type === 'video' && m.videoFile?.asset?._ref) {
-              const fileId = m.videoFile.asset._ref.replace('file-', '')
-              url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+          mainImage: (() => {
+            const img = mapImage(r.mainImage)
+            const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
+            const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
+            // Art Direction için object döndür
+            return { 
+              url: img,
+              urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
+              urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
             }
-            return { type: m.type, url, caption: m.caption }
+          })(),
+          media: (r.media || []).map((m: any) => {
+            const url = mapMediaUrl(m)
+            const urlMobile = mapMediaUrl(m, true, false)
+            const urlDesktop = mapMediaUrl(m, false, true)
+            
+            const result: any = { type: m.type, url, caption: m.caption }
+            if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
+            if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
+            
+            return result
           }).filter((m: any) => m.url),
         }
     }
@@ -1072,9 +1231,24 @@ export const deleteNews = async (id: string): Promise<void> => {
 // Projects
 export const getProjects = async (): Promise<Project[]> => {
   if (useSanity && sanity) {
-    const q = groq`*[_type=="project"] | order(_createdAt desc){ "id": id.current, title, date, cover, excerpt }`
+    const q = groq`*[_type=="project"] | order(_createdAt desc){ "id": id.current, title, date, cover, coverMobile, coverDesktop, excerpt }`
     const rows = await sanity.fetch(q)
-    return rows.map((r: any) => ({ id: r.id, title: r.title, date: r.date, cover: mapImage(r.cover), excerpt: r.excerpt }))
+    return rows.map((r: any) => {
+      const cover = mapImage(r.cover)
+      const coverMobile = r.coverMobile ? mapImage(r.coverMobile) : undefined
+      const coverDesktop = r.coverDesktop ? mapImage(r.coverDesktop) : undefined
+      return { 
+        id: r.id, 
+        title: r.title, 
+        date: r.date, 
+        cover: {
+          url: cover,
+          urlMobile: coverMobile && coverMobile !== cover ? coverMobile : undefined,
+          urlDesktop: coverDesktop && coverDesktop !== cover ? coverDesktop : undefined,
+        },
+        excerpt: r.excerpt 
+      }
+    })
   }
   return []
 }
@@ -1085,13 +1259,19 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
       title, 
       date, 
       cover, 
+      coverMobile,
+      coverDesktop,
       excerpt, 
       body, 
       media[]{
         type,
         url,
         image,
-        videoFile{asset->{url, _ref, _id}}
+        imageMobile,
+        imageDesktop,
+        videoFile{asset->{url, _ref, _id}},
+        videoFileMobile{asset->{url, _ref, _id}},
+        videoFileDesktop{asset->{url, _ref, _id}}
       }
     }`
     const r = await sanity.fetch(q, { id })
@@ -1099,28 +1279,31 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
     
     const media = (r.media || []).map((m: any) => {
       const type = m?.type || 'image'
-      let url = ''
-      if (type === 'image' && m?.image) {
-        url = mapImage(m.image)
-      } else if (type === 'video' && m?.videoFile?.asset?.url) {
-        url = m.videoFile.asset.url
-      } else if (type === 'video' && m?.videoFile?.asset?._id) {
-        const fileId = m.videoFile.asset._id.replace('file-', '')
-        url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
-      } else if (type === 'video' && m?.videoFile?.asset?._ref) {
-        const fileId = m.videoFile.asset._ref.replace('file-', '')
-        url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
-      } else {
-        url = m?.url || ''
-      }
-      return { type, url, image: type === 'image' ? url : undefined }
+      const url = mapMediaUrl(m)
+      const urlMobile = mapMediaUrl(m, true, false)
+      const urlDesktop = mapMediaUrl(m, false, true)
+      
+      const result: any = { type, url, image: type === 'image' ? url : undefined }
+      if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
+      if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
+      
+      return result
     }).filter((m: any) => m.url)
     
     return { 
       id: r.id, 
       title: r.title, 
       date: r.date, 
-      cover: mapImage(r.cover), 
+      cover: (() => {
+        const cover = mapImage(r.cover)
+        const coverMobile = r.coverMobile ? mapImage(r.coverMobile) : undefined
+        const coverDesktop = r.coverDesktop ? mapImage(r.coverDesktop) : undefined
+        return {
+          url: cover,
+          urlMobile: coverMobile && coverMobile !== cover ? coverMobile : undefined,
+          urlDesktop: coverDesktop && coverDesktop !== cover ? coverDesktop : undefined,
+        }
+      })(), 
       excerpt: r.excerpt, 
       body: r.body, 
       media: media.length > 0 ? media : undefined

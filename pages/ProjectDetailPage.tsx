@@ -68,10 +68,15 @@ export function ProjectDetailPage(){
   if (loading) return <div className="pt-20 text-center">{t('loading')}...</div>
   if (!project) return <div className="pt-20 text-center">Proje bulunamadı</div>
   
+  // Helper: cover string veya object olabilir
+  const coverUrl = project.cover ? (typeof project.cover === 'string' ? project.cover : project.cover.url) : '';
+  const coverMobile = project.cover && typeof project.cover === 'object' ? project.cover.urlMobile : undefined;
+  const coverDesktop = project.cover && typeof project.cover === 'object' ? project.cover.urlDesktop : undefined;
+  
   // Use cover image + media array (images and videos)
   const mediaArray = (project.media || []).map((m) => ({ type: m.type, url: m.url, image: m.image || (m.type === 'image' ? m.url : undefined) }))
   // Cover görselini başa ekle (eğer varsa ve media array'inde yoksa)
-  const coverMedia = project.cover ? [{ type: 'image' as const, url: project.cover, image: project.cover }] : []
+  const coverMedia = coverUrl ? [{ type: 'image' as const, url: coverUrl, urlMobile: coverMobile, urlDesktop: coverDesktop, image: coverUrl }] : []
   // Cover'ı media array'inin başına ekle, ancak aynı URL'den varsa tekrar ekleme
   const existingUrls = new Set(mediaArray.map(m => m.url))
   const coverToAdd = coverMedia.filter(m => !existingUrls.has(m.url))
@@ -92,9 +97,11 @@ export function ProjectDetailPage(){
         )}
         <div className="h-px bg-gray-300 mt-4"></div>
       </div>
-      {project.cover && !curr && (
+      {coverUrl && !curr && (
         <OptimizedImage
-          src={project.cover}
+          src={coverUrl}
+          srcMobile={coverMobile}
+          srcDesktop={coverDesktop}
           alt={t(project.title)}
           className={`mt-10 w-full h-auto object-contain ${imageBorderClass}`}
           loading="eager"
@@ -106,6 +113,8 @@ export function ProjectDetailPage(){
           {curr.type === 'image' && (
             <OptimizedImage
               src={curr.url}
+              srcMobile={curr.urlMobile}
+              srcDesktop={curr.urlDesktop}
               alt="project"
               className={`w-full h-auto object-contain transition-all duration-250 ${imageBorderClass} ${anim==='leave' ? 'opacity-0 -translate-y-1' : anim==='enter' ? 'opacity-100 translate-y-0' : ''}`}
               loading="eager"
@@ -116,6 +125,8 @@ export function ProjectDetailPage(){
             <div className={`w-full transition-all duration-250 ${anim==='leave' ? 'opacity-0 -translate-y-1' : anim==='enter' ? 'opacity-100 translate-y-0' : ''}`} style={{ paddingTop: '56.25%' }}>
               <OptimizedVideo
                 src={curr.url}
+                srcMobile={curr.urlMobile}
+                srcDesktop={curr.urlDesktop}
                 className={`absolute top-0 left-0 w-full h-full object-contain ${imageBorderClass}`}
                 controls
                 playsInline

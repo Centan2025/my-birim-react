@@ -23,7 +23,9 @@ const NewsCard: React.FC<{ item: NewsItem }> = ({ item }) => {
   return (
     <Link to={`/news/${item.id}`} className={`group block relative overflow-hidden shadow-lg transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl aspect-[4/5] ${imageBorderClass}`}>
       <OptimizedImage
-        src={item.mainImage}
+        src={typeof item.mainImage === 'string' ? item.mainImage : item.mainImage?.url || ''}
+        srcMobile={typeof item.mainImage === 'object' ? item.mainImage.urlMobile : undefined}
+        srcDesktop={typeof item.mainImage === 'object' ? item.mainImage.urlDesktop : undefined}
         alt={t(item.title)}
         className={`absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${imageBorderClass}`}
         loading="lazy"

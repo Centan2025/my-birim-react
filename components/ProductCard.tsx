@@ -10,11 +10,19 @@ export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'li
   const { settings } = useSiteSettings();
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none';
   const isLight = variant === 'light';
+  
+  // Helper: mainImage string veya object olabilir
+  const mainImageUrl = typeof product.mainImage === 'string' ? product.mainImage : product.mainImage?.url || '';
+  const mainImageMobile = typeof product.mainImage === 'object' ? product.mainImage.urlMobile : undefined;
+  const mainImageDesktop = typeof product.mainImage === 'object' ? product.mainImage.urlDesktop : undefined;
+  
   return (
     <Link to={`/product/${product.id}`} className="group block w-full">
       <div className={`relative overflow-hidden aspect-square ${imageBorderClass} w-full bg-white flex items-center justify-center`}>
         <OptimizedImage
-          src={product.mainImage}
+          src={mainImageUrl}
+          srcMobile={mainImageMobile}
+          srcDesktop={mainImageDesktop}
           alt={t(product.name)}
           className={`w-full h-full object-contain transition-transform duration-700 group-hover:scale-105 ${imageBorderClass}`}
           loading="lazy"

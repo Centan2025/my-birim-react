@@ -54,7 +54,11 @@ export interface Designer {
   /** Localized biography of the designer. */
   bio: LocalizedString;
   /** URL for the designer's portrait or representative image. */
-  image: string;
+  image: string | { url: string; urlMobile?: string; urlDesktop?: string };
+  /** Art Direction: Mobil için görsel URL (opsiyonel) */
+  imageMobile?: string;
+  /** Art Direction: Desktop için görsel URL (opsiyonel) */
+  imageDesktop?: string;
 }
 
 /**
@@ -115,15 +119,22 @@ export interface Product {
   /** Localized detailed description of the product. */
   description: LocalizedString;
   /** URL for the main display image of the product. */
-  mainImage: string;
+  mainImage: string | { url: string; urlMobile?: string; urlDesktop?: string };
   /** Array of URLs for alternative product images. */
   alternativeImages: string[]; // legacy
   /** Mixed alternative media for the band under hero. */
-  alternativeMedia?: { type: 'image' | 'video' | 'youtube'; url: string }[];
+  alternativeMedia?: { 
+    type: 'image' | 'video' | 'youtube'; 
+    url: string;
+    urlMobile?: string; // Art Direction: Mobil için URL
+    urlDesktop?: string; // Art Direction: Desktop için URL
+  }[];
   /** Optional rich media for hero: image/video/youtube */
   media?: { 
     type: 'image' | 'video' | 'youtube'; 
     url: string; 
+    urlMobile?: string; // Art Direction: Mobil için URL
+    urlDesktop?: string; // Art Direction: Desktop için URL
     title?: LocalizedString;
     description?: LocalizedString;
     link?: string;
@@ -136,7 +147,7 @@ export interface Product {
   /** Toggle for showing media panels at bottom. */
   showMediaPanels?: boolean;
   /** Dimension drawings/images shown before materials. Each has an image and a title. */
-  dimensionImages?: { image: string; title?: LocalizedString }[];
+  dimensionImages?: { image: string; imageMobile?: string; imageDesktop?: string; title?: LocalizedString }[];
   /** Indicates if the product can be purchased directly. */
   buyable: boolean;
   /** Price of the product. */
@@ -192,6 +203,10 @@ export interface HeroMediaItem {
     type: 'image' | 'video' | 'youtube';
     /** URL for the image, video file, or YouTube link. */
     url: string;
+    /** Art Direction: Mobil için URL (opsiyonel) */
+    urlMobile?: string;
+    /** Art Direction: Desktop için URL (opsiyonel) */
+    urlDesktop?: string;
     /** Localized title text displayed over the media. */
     title: LocalizedString;
     /** Localized subtitle text displayed over the media. */
@@ -246,7 +261,7 @@ export interface HomePageContent {
     contentBlocks?: ContentBlock[];
     /** Content for the 'Inspiration' section. */
     inspirationSection: {
-        backgroundImage: string;
+        backgroundImage: string | { url: string; urlMobile?: string; urlDesktop?: string };
         title: LocalizedString;
         subtitle: LocalizedString;
         buttonText: LocalizedString;
@@ -332,7 +347,7 @@ export interface NewsItem {
     /** Localized main content/body of the news item. */
     content: LocalizedString;
     /** URL for the main image used on the news list page card. */
-    mainImage: string;
+    mainImage: string | { url: string; urlMobile?: string; urlDesktop?: string };
     /** Array of media items (images, videos) within the article. */
     media: NewsMedia[];
 }
@@ -345,6 +360,10 @@ export interface NewsMedia {
     type: 'image' | 'video' | 'youtube';
     /** URL of the media asset. */
     url: string;
+    /** Art Direction: Mobil için URL (opsiyonel) */
+    urlMobile?: string;
+    /** Art Direction: Desktop için URL (opsiyonel) */
+    urlDesktop?: string;
     /** Optional localized caption for the media. */
     caption?: LocalizedString;
 }
@@ -448,9 +467,15 @@ export interface CartItem {
 export interface Project {
   id: string;
   title: LocalizedString;
-  cover: string;
+  cover: string | { url: string; urlMobile?: string; urlDesktop?: string };
   date?: LocalizedString;
   excerpt?: LocalizedString;
-  media?: { type: 'image' | 'video' | 'youtube'; url: string; image?: string }[];
+  media?: { 
+    type: 'image' | 'video' | 'youtube'; 
+    url: string; 
+    urlMobile?: string; // Art Direction: Mobil için URL
+    urlDesktop?: string; // Art Direction: Desktop için URL
+    image?: string;
+  }[];
   body?: LocalizedString;
 }

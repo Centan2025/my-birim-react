@@ -33,6 +33,8 @@ const MediaComponent: React.FC<{ media: NewsMedia }> = ({ media }) => {
             return (
                 <OptimizedImage
                     src={media.url}
+                    srcMobile={media.urlMobile}
+                    srcDesktop={media.urlDesktop}
                     alt={t(media.caption) || ''}
                     className={`w-full h-auto object-cover ${imageBorderClass}`}
                     loading="lazy"
@@ -48,6 +50,8 @@ const MediaComponent: React.FC<{ media: NewsMedia }> = ({ media }) => {
                     <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16:9 Aspect Ratio */ }}>
                         <OptimizedVideo
                             src={media.url}
+                            srcMobile={media.urlMobile}
+                            srcDesktop={media.urlDesktop}
                             className={`absolute top-0 left-0 w-full h-full object-cover ${imageBorderClass}`}
                             controls
                             playsInline
@@ -171,7 +175,9 @@ export function NewsDetailPage() {
                         </div>
                         
                         <OptimizedImage
-                            src={item.mainImage}
+                            src={typeof item.mainImage === 'string' ? item.mainImage : item.mainImage?.url || ''}
+                            srcMobile={typeof item.mainImage === 'object' ? item.mainImage.urlMobile : undefined}
+                            srcDesktop={typeof item.mainImage === 'object' ? item.mainImage.urlDesktop : undefined}
                             alt={t(item.title)}
                             className={`w-full h-auto object-cover mb-6 ${settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'}`}
                             loading="eager"

@@ -27,7 +27,27 @@ export default defineType({
     }),
     defineField({name: 'year', title: 'Yıl', type: 'number'}),
     defineField({name: 'description', title: 'Açıklama', type: 'localizedText'}),
-    defineField({name: 'mainImage', title: 'Ana Görsel', type: 'image', options: {hotspot: true}}),
+    defineField({
+      name: 'mainImage',
+      title: 'Ana Görsel (Tüm Cihazlar)',
+      type: 'image',
+      options: {hotspot: true},
+      description: 'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+    }),
+    defineField({
+      name: 'mainImageMobile',
+      title: 'Ana Görsel (Mobil)',
+      type: 'image',
+      options: {hotspot: true},
+      description: 'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+    }),
+    defineField({
+      name: 'mainImageDesktop',
+      title: 'Ana Görsel (Desktop)',
+      type: 'image',
+      options: {hotspot: true},
+      description: 'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+    }),
     defineField({
       name: 'alternativeMedia',
       title: 'Alternatif Medya (Görsel/Video/YouTube)',

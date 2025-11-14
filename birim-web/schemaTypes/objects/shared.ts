@@ -31,7 +31,28 @@ export const productDimensionImage = defineType({
   title: 'Ölçü Görseli',
   type: 'object',
   fields: [
-    defineField({name: 'image', title: 'Görsel', type: 'image', options: {hotspot: true}, validation: (Rule) => Rule.required()}),
+    defineField({
+      name: 'image',
+      title: 'Görsel (Tüm Cihazlar)',
+      type: 'image',
+      options: {hotspot: true},
+      validation: (Rule) => Rule.required(),
+      description: 'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+    }),
+    defineField({
+      name: 'imageMobile',
+      title: 'Görsel (Mobil)',
+      type: 'image',
+      options: {hotspot: true},
+      description: 'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+    }),
+    defineField({
+      name: 'imageDesktop',
+      title: 'Görsel (Desktop)',
+      type: 'image',
+      options: {hotspot: true},
+      description: 'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+    }),
     defineField({name: 'title', title: 'Başlık', type: 'localizedString', description: 'Görselin altında görünecek başlık'}),
   ],
 })
@@ -111,21 +132,62 @@ export const heroMediaItem = defineType({
     // For image type, allow direct image upload
     defineField({
       name: 'image',
-      title: 'Görsel',
+      title: 'Görsel (Tüm Cihazlar)',
       type: 'image',
       options: { hotspot: true },
       hidden: ({parent}) => parent?.type !== 'image',
+      description: 'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+    }),
+    // Art Direction: Mobil için görsel
+    defineField({
+      name: 'imageMobile',
+      title: 'Görsel (Mobil)',
+      type: 'image',
+      options: { hotspot: true },
+      hidden: ({parent}) => parent?.type !== 'image',
+      description: 'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+    }),
+    // Art Direction: Desktop için görsel
+    defineField({
+      name: 'imageDesktop',
+      title: 'Görsel (Desktop)',
+      type: 'image',
+      options: { hotspot: true },
+      hidden: ({parent}) => parent?.type !== 'image',
+      description: 'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
     }),
     // For video, allow file upload
     defineField({
       name: 'videoFile',
-      title: 'Video Dosyası',
+      title: 'Video Dosyası (Tüm Cihazlar)',
       type: 'file',
       options: {
         accept: 'video/*',
       },
       hidden: ({parent}) => parent?.type !== 'video',
-      description: 'Video dosyasını sürükle-bırak ile yükleyin',
+      description: 'Tüm cihazlar için varsayılan video. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+    }),
+    // Art Direction: Mobil için video
+    defineField({
+      name: 'videoFileMobile',
+      title: 'Video Dosyası (Mobil)',
+      type: 'file',
+      options: {
+        accept: 'video/*',
+      },
+      hidden: ({parent}) => parent?.type !== 'video',
+      description: 'Mobil cihazlar için özel video (opsiyonel). Yoksa varsayılan video kullanılır.',
+    }),
+    // Art Direction: Desktop için video
+    defineField({
+      name: 'videoFileDesktop',
+      title: 'Video Dosyası (Desktop)',
+      type: 'file',
+      options: {
+        accept: 'video/*',
+      },
+      hidden: ({parent}) => parent?.type !== 'video',
+      description: 'Desktop cihazlar için özel video (opsiyonel). Yoksa varsayılan video kullanılır.',
     }),
     // For video/youtube or external image, allow URL
     defineField({
@@ -162,20 +224,57 @@ export const productSimpleMediaItem = defineType({
     }),
     defineField({
       name: 'image',
-      title: 'Görsel',
+      title: 'Görsel (Tüm Cihazlar)',
       type: 'image',
       options: { hotspot: true },
       hidden: ({ parent }) => parent?.type !== 'image',
+      description: 'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+    }),
+    defineField({
+      name: 'imageMobile',
+      title: 'Görsel (Mobil)',
+      type: 'image',
+      options: { hotspot: true },
+      hidden: ({ parent }) => parent?.type !== 'image',
+      description: 'Mobil cihazlar için özel görsel (opsiyonel).',
+    }),
+    defineField({
+      name: 'imageDesktop',
+      title: 'Görsel (Desktop)',
+      type: 'image',
+      options: { hotspot: true },
+      hidden: ({ parent }) => parent?.type !== 'image',
+      description: 'Desktop cihazlar için özel görsel (opsiyonel).',
     }),
     defineField({
       name: 'videoFile',
-      title: 'Video Dosyası',
+      title: 'Video Dosyası (Tüm Cihazlar)',
       type: 'file',
       options: {
         accept: 'video/*',
       },
       hidden: ({ parent }) => parent?.type !== 'video',
-      description: 'Video dosyasını sürükle-bırak ile yükleyin',
+      description: 'Tüm cihazlar için varsayılan video. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+    }),
+    defineField({
+      name: 'videoFileMobile',
+      title: 'Video Dosyası (Mobil)',
+      type: 'file',
+      options: {
+        accept: 'video/*',
+      },
+      hidden: ({ parent }) => parent?.type !== 'video',
+      description: 'Mobil cihazlar için özel video (opsiyonel).',
+    }),
+    defineField({
+      name: 'videoFileDesktop',
+      title: 'Video Dosyası (Desktop)',
+      type: 'file',
+      options: {
+        accept: 'video/*',
+      },
+      hidden: ({ parent }) => parent?.type !== 'video',
+      description: 'Desktop cihazlar için özel video (opsiyonel).',
     }),
     defineField({
       name: 'url',
@@ -206,20 +305,57 @@ export const productPanelMediaItem = defineType({
     }),
     defineField({
       name: 'image',
-      title: 'Görsel',
+      title: 'Görsel (Tüm Cihazlar)',
       type: 'image',
       options: { hotspot: true },
       hidden: ({ parent }) => parent?.type !== 'image',
+      description: 'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+    }),
+    defineField({
+      name: 'imageMobile',
+      title: 'Görsel (Mobil)',
+      type: 'image',
+      options: { hotspot: true },
+      hidden: ({ parent }) => parent?.type !== 'image',
+      description: 'Mobil cihazlar için özel görsel (opsiyonel).',
+    }),
+    defineField({
+      name: 'imageDesktop',
+      title: 'Görsel (Desktop)',
+      type: 'image',
+      options: { hotspot: true },
+      hidden: ({ parent }) => parent?.type !== 'image',
+      description: 'Desktop cihazlar için özel görsel (opsiyonel).',
     }),
     defineField({
       name: 'videoFile',
-      title: 'Video Dosyası',
+      title: 'Video Dosyası (Tüm Cihazlar)',
       type: 'file',
       options: {
         accept: 'video/*',
       },
       hidden: ({ parent }) => parent?.type !== 'video',
-      description: 'Video dosyasını sürükle-bırak ile yükleyin',
+      description: 'Tüm cihazlar için varsayılan video. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+    }),
+    defineField({
+      name: 'videoFileMobile',
+      title: 'Video Dosyası (Mobil)',
+      type: 'file',
+      options: {
+        accept: 'video/*',
+      },
+      hidden: ({ parent }) => parent?.type !== 'video',
+      description: 'Mobil cihazlar için özel video (opsiyonel).',
+    }),
+    defineField({
+      name: 'videoFileDesktop',
+      title: 'Video Dosyası (Desktop)',
+      type: 'file',
+      options: {
+        accept: 'video/*',
+      },
+      hidden: ({ parent }) => parent?.type !== 'video',
+      description: 'Desktop cihazlar için özel video (opsiyonel).',
     }),
     defineField({
       name: 'url',
@@ -333,20 +469,57 @@ export const contactLocationMedia = defineType({
     }),
     defineField({
       name: 'image',
-      title: 'Görsel',
+      title: 'Görsel (Tüm Cihazlar)',
       type: 'image',
       options: { hotspot: true },
       hidden: ({parent}) => parent?.type !== 'image',
+      description: 'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+    }),
+    defineField({
+      name: 'imageMobile',
+      title: 'Görsel (Mobil)',
+      type: 'image',
+      options: { hotspot: true },
+      hidden: ({parent}) => parent?.type !== 'image',
+      description: 'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+    }),
+    defineField({
+      name: 'imageDesktop',
+      title: 'Görsel (Desktop)',
+      type: 'image',
+      options: { hotspot: true },
+      hidden: ({parent}) => parent?.type !== 'image',
+      description: 'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
     }),
     defineField({
       name: 'videoFile',
-      title: 'Video Dosyası',
+      title: 'Video Dosyası (Tüm Cihazlar)',
       type: 'file',
       options: {
         accept: 'video/*',
       },
       hidden: ({parent}) => parent?.type !== 'video',
-      description: 'Video dosyasını sürükle-bırak ile yükleyin',
+      description: 'Tüm cihazlar için varsayılan video. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+    }),
+    defineField({
+      name: 'videoFileMobile',
+      title: 'Video Dosyası (Mobil)',
+      type: 'file',
+      options: {
+        accept: 'video/*',
+      },
+      hidden: ({parent}) => parent?.type !== 'video',
+      description: 'Mobil cihazlar için özel video (opsiyonel). Yoksa varsayılan video kullanılır.',
+    }),
+    defineField({
+      name: 'videoFileDesktop',
+      title: 'Video Dosyası (Desktop)',
+      type: 'file',
+      options: {
+        accept: 'video/*',
+      },
+      hidden: ({parent}) => parent?.type !== 'video',
+      description: 'Desktop cihazlar için özel video (opsiyonel). Yoksa varsayılan video kullanılır.',
     }),
     defineField({
       name: 'url',
@@ -446,20 +619,57 @@ export const contentBlock = defineType({
     }),
     defineField({
       name: 'image',
-      title: 'Görsel',
+      title: 'Görsel (Tüm Cihazlar)',
       type: 'image',
       options: { hotspot: true },
       hidden: ({parent}) => parent?.mediaType !== 'image',
+      description: 'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+    }),
+    defineField({
+      name: 'imageMobile',
+      title: 'Görsel (Mobil)',
+      type: 'image',
+      options: { hotspot: true },
+      hidden: ({parent}) => parent?.mediaType !== 'image',
+      description: 'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+    }),
+    defineField({
+      name: 'imageDesktop',
+      title: 'Görsel (Desktop)',
+      type: 'image',
+      options: { hotspot: true },
+      hidden: ({parent}) => parent?.mediaType !== 'image',
+      description: 'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
     }),
     defineField({
       name: 'videoFile',
-      title: 'Video Dosyası',
+      title: 'Video Dosyası (Tüm Cihazlar)',
       type: 'file',
       options: {
         accept: 'video/*',
       },
       hidden: ({parent}) => parent?.mediaType !== 'video',
-      description: 'Video dosyasını sürükle-bırak ile yükleyin',
+      description: 'Tüm cihazlar için varsayılan video. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+    }),
+    defineField({
+      name: 'videoFileMobile',
+      title: 'Video Dosyası (Mobil)',
+      type: 'file',
+      options: {
+        accept: 'video/*',
+      },
+      hidden: ({parent}) => parent?.mediaType !== 'video',
+      description: 'Mobil cihazlar için özel video (opsiyonel). Yoksa varsayılan video kullanılır.',
+    }),
+    defineField({
+      name: 'videoFileDesktop',
+      title: 'Video Dosyası (Desktop)',
+      type: 'file',
+      options: {
+        accept: 'video/*',
+      },
+      hidden: ({parent}) => parent?.mediaType !== 'video',
+      description: 'Desktop cihazlar için özel video (opsiyonel). Yoksa varsayılan video kullanılır.',
     }),
     defineField({
       name: 'url',

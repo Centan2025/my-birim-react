@@ -605,7 +605,9 @@ export function HomePage() {
 
   // İlham görselinin yüksekliğini hesapla (mobilde)
   useEffect(() => {
-    if (!isMobile || !content?.inspirationSection?.backgroundImage) {
+    const bgImg = content?.inspirationSection?.backgroundImage;
+    const bgImgUrl = bgImg ? (typeof bgImg === 'string' ? bgImg : bgImg.url) : '';
+    if (!isMobile || !bgImgUrl) {
       setInspirationImageHeight(null);
       return;
     }
@@ -622,7 +624,7 @@ export function HomePage() {
     img.onerror = () => {
       setInspirationImageHeight(null);
     };
-    img.src = content.inspirationSection.backgroundImage;
+    img.src = bgImgUrl;
   }, [isMobile, content?.inspirationSection?.backgroundImage, viewportWidth]);
 
   useEffect(() => {
@@ -778,7 +780,9 @@ export function HomePage() {
   // İlham görselinin yüksekliğini hesapla - hook'lar early return'den önce olmalı
   useEffect(() => {
     const inspiration = content?.inspirationSection;
-    if (!inspiration?.backgroundImage) {
+    const bgImg = inspiration?.backgroundImage;
+    const bgImgUrl = bgImg ? (typeof bgImg === 'string' ? bgImg : bgImg.url) : '';
+    if (!bgImgUrl) {
       setInspirationImageHeight(null);
       return;
     }
@@ -798,7 +802,7 @@ export function HomePage() {
     img.onerror = () => {
       setInspirationImageHeight(null);
     };
-    img.src = inspiration.backgroundImage;
+    img.src = bgImgUrl;
   }, [content?.inspirationSection?.backgroundImage, isMobile]);
 
   if (!content || !settings) {
@@ -808,6 +812,17 @@ export function HomePage() {
   const heroMedia = Array.isArray(content.heroMedia) ? content.heroMedia : [];
   const slideCount = heroMedia.length || 1;
   const inspiration = content.inspirationSection || { backgroundImage: '', title: '', subtitle: '', buttonText: '', buttonLink: '/' };
+  
+  // Helper: backgroundImage string veya object olabilir
+  const bgImageUrl = inspiration.backgroundImage 
+    ? (typeof inspiration.backgroundImage === 'string' ? inspiration.backgroundImage : inspiration.backgroundImage.url) 
+    : '';
+  const bgImageMobile = inspiration.backgroundImage && typeof inspiration.backgroundImage === 'object' 
+    ? inspiration.backgroundImage.urlMobile 
+    : undefined;
+  const bgImageDesktop = inspiration.backgroundImage && typeof inspiration.backgroundImage === 'object' 
+    ? inspiration.backgroundImage.urlDesktop 
+    : undefined;
   
   // Infinite carousel için klonlanmış slide'lar
   // Son slide'ı başa, ilk slide'ı sona ekle
@@ -1107,6 +1122,8 @@ export function HomePage() {
                       {media.type === 'video' ? (
                            <OptimizedVideo
                                src={media.url}
+                               srcMobile={media.urlMobile}
+                               srcDesktop={media.urlDesktop}
                                className={`${isMobile ? 'relative' : 'absolute'} top-0 left-0 w-full ${isMobile ? 'h-auto' : 'h-full'} ${isMobile ? 'object-contain object-top' : 'object-cover'}`}
                                autoPlay
                                loop
@@ -1120,6 +1137,8 @@ export function HomePage() {
                       ) : (
                           <OptimizedImage
                               src={media.url}
+                              srcMobile={media.urlMobile}
+                              srcDesktop={media.urlDesktop}
                               alt={t(media.title)}
                               className={`${isMobile ? 'relative' : 'absolute'} top-0 left-0 w-full ${isMobile ? 'h-auto' : 'h-full'} ${isMobile ? 'object-contain object-top' : 'object-cover'}`}
                               loading="eager"
@@ -1333,7 +1352,9 @@ export function HomePage() {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center gap-12 animate-fade-in-up">
               <div className="w-full md:w-1/2 overflow-hidden">
                   <OptimizedImage
-                    src={featuredDesigner.image}
+                    src={typeof featuredDesigner.image === 'string' ? featuredDesigner.image : featuredDesigner.image?.url || ''}
+                    srcMobile={typeof featuredDesigner.image === 'object' ? featuredDesigner.image.urlMobile : featuredDesigner.imageMobile}
+                    srcDesktop={typeof featuredDesigner.image === 'object' ? featuredDesigner.image.urlDesktop : featuredDesigner.imageDesktop}
                     alt={t(featuredDesigner.name)}
                     className="shadow-xl w-full object-cover max-w-full"
                     loading="lazy"
@@ -1361,15 +1382,15 @@ export function HomePage() {
         <section 
           className="relative py-16 md:py-32 bg-gray-800 text-white text-center inspiration-section-mobile"
           style={{ 
-            backgroundImage: `url(${inspiration.backgroundImage})`, 
+            backgroundImage: `url(${isMobile && bgImageMobile ? bgImageMobile : (bgImageDesktop || bgImageUrl)})`, 
             backgroundSize: isMobile ? '100vw auto' : 'cover', 
             backgroundAttachment: 'fixed', 
             backgroundPosition: isMobile ? 'left center' : 'center center', 
             backgroundRepeat: 'no-repeat',
-            ...(isMobile && inspirationImageHeight && inspiration.backgroundImage 
+            ...(isMobile && inspirationImageHeight && bgImageUrl 
               ? { height: `${inspirationImageHeight}px`, minHeight: `${inspirationImageHeight}px`, paddingTop: 0, paddingBottom: 0 }
               : {}),
-            ...(!isMobile && inspirationImageHeight && inspiration.backgroundImage 
+            ...(!isMobile && inspirationImageHeight && bgImageUrl 
               ? { minHeight: `${inspirationImageHeight}px` }
               : {}),
           }}

@@ -11,6 +11,11 @@ interface OptimizedVideoProps {
   playsInline?: boolean;
   loading?: 'lazy' | 'eager';
   preload?: 'none' | 'metadata' | 'auto';
+  // Art Direction: Farklı ekranlar için farklı videolar
+  srcMobile?: string; // Mobil için video (varsa)
+  srcDesktop?: string; // Desktop için video (varsa)
+  posterMobile?: string; // Mobil için poster (varsa)
+  posterDesktop?: string; // Desktop için poster (varsa)
   onLoad?: () => void;
   onError?: () => void;
 }
@@ -33,6 +38,10 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
   playsInline = true,
   loading = 'lazy',
   preload = 'none', // Varsayılan olarak preload yok (performans için)
+  srcMobile,
+  srcDesktop,
+  posterMobile,
+  posterDesktop,
   onLoad,
   onError,
 }) => {
@@ -73,6 +82,49 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       return () => observer.disconnect();
     }
   }, [loading, preload]);
+
+  // Art Direction: srcMobile veya srcDesktop varsa kullan, yoksa src'i kullan
+  const mobileSrc = srcMobile || src;
+  const desktopSrc = srcDesktop || src;
+  const useArtDirection = Boolean(srcMobile || srcDesktop);
+
+  // Poster için de Art Direction desteği
+  const getPosterForScreen = (): string | undefined => {
+    if (typeof window !== 'undefined') {
+      const isMobile = window.innerWidth <= 768;
+      if (isMobile && posterMobile) return posterMobile;
+      if (!isMobile && posterDesktop) return posterDesktop;
+    }
+    return poster;
+  };
+
+  // Video src'i için ekran boyutuna göre seç
+  const getVideoSrc = (): string => {
+    if (typeof window !== 'undefined') {
+      const isMobile = window.innerWidth <= 768;
+      if (isMobile && srcMobile) return mobileSrc;
+      if (!isMobile && srcDesktop) return desktopSrc;
+    }
+    return src;
+  };
+
+  // Poster'ı dinamik olarak güncelle
+  React.useEffect(() => {
+    if (videoRef.current && (posterMobile || posterDesktop)) {
+      const updatePoster = () => {
+        if (videoRef.current) {
+          const newPoster = getPosterForScreen();
+          if (newPoster) {
+            videoRef.current.poster = newPoster;
+          }
+        }
+      };
+      
+      updatePoster();
+      window.addEventListener('resize', updatePoster);
+      return () => window.removeEventListener('resize', updatePoster);
+    }
+  }, [posterMobile, posterDesktop, poster]);
   
   if (hasError) {
     return (
@@ -81,7 +133,37 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       </div>
     );
   }
-  
+
+  // Art Direction kullanılıyorsa, video src'i dinamik olarak ayarla
+  if (useArtDirection) {
+    return (
+      <video
+        ref={videoRef}
+        src={getVideoSrc()}
+        poster={getPosterForScreen()}
+        autoPlay={autoPlay}
+        loop={loop}
+        muted={muted}
+        controls={controls}
+        playsInline={playsInline}
+        preload={preload}
+        className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ${className}`}
+        onLoadedData={handleLoadedData}
+        onError={handleError}
+      >
+        {/* Mobil için video source */}
+        {srcMobile && (
+          <source src={mobileSrc} media="(max-width: 768px)" />
+        )}
+        {/* Desktop için video source */}
+        {srcDesktop && (
+          <source src={desktopSrc} media="(min-width: 769px)" />
+        )}
+      </video>
+    );
+  }
+
+  // Normal kullanım (Art Direction yok)
   return (
     <video
       ref={videoRef}

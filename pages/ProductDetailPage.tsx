@@ -98,11 +98,13 @@ export function ProductDetailPage() {
               setMainImage(first.url);
             } else {
               // video/youtube ise mainImage'i dokunmadan bırakıyoruz; slider yine doğru render eder
-              setMainImage(productData.mainImage || '');
+              const mainImgUrl = typeof productData.mainImage === 'string' ? productData.mainImage : productData.mainImage?.url || '';
+              setMainImage(mainImgUrl);
             }
           } else {
             const altImgs = Array.isArray(productData.alternativeImages) ? productData.alternativeImages : [];
-            const allImgs = [productData.mainImage, ...altImgs].filter(Boolean);
+            const mainImgUrl = typeof productData.mainImage === 'string' ? productData.mainImage : productData.mainImage?.url || '';
+            const allImgs = [mainImgUrl, ...altImgs].filter(Boolean);
             setMainImage(allImgs[0] || '');
             setCurrentImageIndex(0);
           }
@@ -171,15 +173,20 @@ export function ProductDetailPage() {
 
   // Görsel/Video/YouTube bant medyası (erken return'lerden önce)
   const rawAltMedia: any[] = Array.isArray((product as any)?.alternativeMedia) ? (product as any).alternativeMedia : [];
+  // Helper: mainImage string veya object olabilir
+  const mainImageUrl = product?.mainImage ? (typeof product.mainImage === 'string' ? product.mainImage : product.mainImage.url) : '';
+  const mainImageMobile = product?.mainImage && typeof product.mainImage === 'object' ? product.mainImage.urlMobile : undefined;
+  const mainImageDesktop = product?.mainImage && typeof product.mainImage === 'object' ? product.mainImage.urlDesktop : undefined;
+  
   const fallbackImages = (() => {
     const ai = Array.isArray((product as any)?.alternativeImages) ? (product as any).alternativeImages : [];
-    const arw = [product?.mainImage, ...ai];
+    const arw = [mainImageUrl, ...ai];
     return Array.isArray(arw) ? arw.filter(Boolean).map((u: string) => ({ type: 'image' as const, url: u })) : [];
   })();
   // Bant medyası: alternatif medya varsa, ana görseli en başa ekle
-  const bandMedia: { type: 'image' | 'video' | 'youtube'; url: string }[] = (() => {
+  const bandMedia: { type: 'image' | 'video' | 'youtube'; url: string; urlMobile?: string; urlDesktop?: string }[] = (() => {
     if (rawAltMedia.length) {
-      const head: any[] = product?.mainImage ? [{ type: 'image', url: product.mainImage }] : [];
+      const head: any[] = mainImageUrl ? [{ type: 'image', url: mainImageUrl, urlMobile: mainImageMobile, urlDesktop: mainImageDesktop }] : [];
       const merged = [...head, ...rawAltMedia];
       // tekilleştir (aynı url tekrar etmesin)
       const seen = new Set<string>();
@@ -247,7 +254,7 @@ export function ProductDetailPage() {
   useEffect(() => {
     if (bandMedia.length > 0) {
       // Ana görsel bantta ilk sırada; değilse ilk görsel index'ine git
-      const mainIdx = bandMedia.findIndex((m) => m.type === 'image' && m.url === product?.mainImage);
+      const mainIdx = bandMedia.findIndex((m) => m.type === 'image' && m.url === mainImageUrl);
       const idx = mainIdx >= 0 ? mainIdx : (firstImageIndex >= 0 ? firstImageIndex : 0);
       setCurrentImageIndex(idx);
       // mainImage'i anında güncelle (özellikle video ilkse boş kalmasın)
@@ -395,6 +402,8 @@ export function ProductDetailPage() {
                 {m.type === 'image' ? (
                   <OptimizedImage
                     src={m.url}
+                    srcMobile={m.urlMobile}
+                    srcDesktop={m.urlDesktop}
                     alt={`${t(product.name)} ${index + 1}`}
                     className={`w-full h-full object-contain ${imageBorderClass}`}
                     loading="eager"
@@ -403,6 +412,8 @@ export function ProductDetailPage() {
                 ) : m.type === 'video' ? (
                   <OptimizedVideo
                     src={m.url}
+                    srcMobile={m.urlMobile}
+                    srcDesktop={m.urlDesktop}
                     className={`w-full h-full object-contain ${imageBorderClass}`}
                     autoPlay
                     muted
@@ -542,7 +553,7 @@ export function ProductDetailPage() {
                 <h2 className="text-xl font-light text-gray-600">{t('dimensions')}</h2>
                 <div className="h-px bg-gray-300 my-4" />
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {dimImages.map((dimImg: { image: string; title?: LocalizedString }, idx: number) => (
+                  {dimImages.map((dimImg: { image: string; imageMobile?: string; imageDesktop?: string; title?: LocalizedString }, idx: number) => (
                     <div key={idx} className="flex flex-col items-center">
                       <button 
                         onClick={() => setDimLightbox({ images: dimImages, currentIndex: idx })} 
@@ -550,6 +561,8 @@ export function ProductDetailPage() {
                       >
                         <OptimizedImage
                           src={dimImg.image}
+                          srcMobile={dimImg.imageMobile}
+                          srcDesktop={dimImg.imageDesktop}
                           alt={dimImg.title ? t(dimImg.title) : `${t('dimensions')} ${idx + 1}`}
                           className={`w-full h-40 object-contain group-hover:scale-105 transition-transform duration-200 ${imageBorderClass}`}
                           loading="lazy"
@@ -663,7 +676,9 @@ export function ProductDetailPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                     <div className="w-full">
                       <OptimizedImage
-                        src={designer.image}
+                        src={typeof designer.image === 'string' ? designer.image : designer.image?.url || ''}
+                        srcMobile={typeof designer.image === 'object' ? designer.image.urlMobile : designer.imageMobile}
+                        srcDesktop={typeof designer.image === 'object' ? designer.image.urlDesktop : designer.imageDesktop}
                         alt={t(designer.name)}
                         className="w-full h-auto object-cover"
                         loading="lazy"

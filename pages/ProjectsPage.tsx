@@ -15,7 +15,9 @@ const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
       <div className={`overflow-hidden bg-white aspect-[16/10] ${imageBorderClass}`}>
         {project.cover && (
           <OptimizedImage
-            src={project.cover}
+            src={typeof project.cover === 'string' ? project.cover : project.cover?.url || ''}
+            srcMobile={typeof project.cover === 'object' ? project.cover.urlMobile : undefined}
+            srcDesktop={typeof project.cover === 'object' ? project.cover.urlDesktop : undefined}
             alt={t(project.title)}
             className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${imageBorderClass}`}
             loading="lazy"

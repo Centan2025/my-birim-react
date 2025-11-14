@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import type { Designer } from '../types';
 import { getDesigners } from '../services/cms';
+import { OptimizedImage } from '../components/OptimizedImage';
 import { useTranslation } from '../i18n';
 import { useSiteSettings } from '../App';
 
@@ -14,10 +15,14 @@ const DesignerCard: React.FC<{ designer: Designer }> = ({ designer }) => {
   return (
     <Link to={`/designer/${designer.id}`} className="group flex flex-col h-full text-center">
       <div className={`overflow-hidden bg-white aspect-[3/4] ${imageBorderClass}`}>
-        <img
-          src={designer.image}
+        <OptimizedImage
+          src={typeof designer.image === 'string' ? designer.image : designer.image?.url || ''}
+          srcMobile={typeof designer.image === 'object' ? designer.image.urlMobile : designer.imageMobile}
+          srcDesktop={typeof designer.image === 'object' ? designer.image.urlDesktop : designer.imageDesktop}
           alt={t(designer.name)}
           className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 filter grayscale ${imageBorderClass}`}
+          loading="lazy"
+          quality={85}
         />
       </div>
       <div className="mt-4 min-h-[2.5rem] flex items-center justify-center">

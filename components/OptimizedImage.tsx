@@ -11,6 +11,9 @@ interface OptimizedImageProps {
   format?: 'webp' | 'jpg' | 'png';
   sizes?: string;
   srcSet?: string;
+  // Art Direction: Farklı ekranlar için farklı görseller
+  srcMobile?: string; // Mobil için görsel (varsa)
+  srcDesktop?: string; // Desktop için görsel (varsa)
   onLoad?: () => void;
   onError?: () => void;
 }
@@ -33,6 +36,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   format = 'webp',
   sizes,
   srcSet,
+  srcMobile,
+  srcDesktop,
   onLoad,
   onError,
 }) => {
@@ -73,17 +78,22 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     return url;
   };
   
+  // Art Direction: srcMobile veya srcDesktop varsa kullan, yoksa src'i kullan
+  const mobileSrc = srcMobile || src;
+  const desktopSrc = srcDesktop || src;
+  const optimizedMobileSrc = getOptimizedUrl(mobileSrc);
+  const optimizedDesktopSrc = getOptimizedUrl(desktopSrc);
   const optimizedSrc = getOptimizedUrl(src);
   
   // Responsive srcset oluştur
-  const generateSrcSet = (): string => {
+  const generateSrcSet = (baseUrl: string): string => {
     if (srcSet) return srcSet;
     
-    if (src.includes('cdn.sanity.io/images')) {
+    if (baseUrl.includes('cdn.sanity.io/images')) {
       const sizes = [400, 800, 1200, 1600, 2000];
       return sizes
         .map((w) => {
-          const url = getOptimizedUrl(src);
+          const url = getOptimizedUrl(baseUrl);
           const urlObj = new URL(url);
           urlObj.searchParams.set('w', w.toString());
           return `${urlObj.toString()} ${w}w`;
@@ -94,9 +104,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     return '';
   };
   
-  const responsiveSrcSet = generateSrcSet();
+  const responsiveSrcSet = generateSrcSet(src);
   const defaultSizes = sizes || '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 1200px';
-  
+
+  // Art Direction kullanılıyor mu? (srcMobile veya srcDesktop varsa)
+  const useArtDirection = Boolean(srcMobile || srcDesktop);
+
   if (hasError) {
     return (
       <div className={`bg-gray-200 flex items-center justify-center ${className}`} style={{ width, height }}>
@@ -104,7 +117,54 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       </div>
     );
   }
-  
+
+  // Art Direction ile picture elementi kullan
+  if (useArtDirection) {
+    return (
+      <div className={`relative ${className}`} style={{ width, height }}>
+        {!isLoaded && (
+          <img
+            src={placeholder}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover blur-sm"
+            aria-hidden="true"
+          />
+        )}
+        <picture>
+          {/* Mobil için görsel (max-width: 768px) */}
+          {srcMobile && (
+            <source
+              media="(max-width: 768px)"
+              srcSet={generateSrcSet(mobileSrc) || optimizedMobileSrc}
+              sizes={defaultSizes}
+            />
+          )}
+          {/* Desktop için görsel (min-width: 769px) */}
+          {srcDesktop && (
+            <source
+              media="(min-width: 769px)"
+              srcSet={generateSrcSet(desktopSrc) || optimizedDesktopSrc}
+              sizes={defaultSizes}
+            />
+          )}
+          {/* Fallback: Eğer mobil versiyonu yoksa desktop'u kullan, o da yoksa src'i kullan */}
+          <img
+            src={srcMobile ? optimizedMobileSrc : (srcDesktop ? optimizedDesktopSrc : optimizedSrc)}
+            alt={alt}
+            width={width}
+            height={height}
+            loading={loading}
+            className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ${className}`}
+            onLoad={handleLoad}
+            onError={handleError}
+            decoding="async"
+          />
+        </picture>
+      </div>
+    );
+  }
+
+  // Normal kullanım (Art Direction yok)
   return (
     <div className={`relative ${className}`} style={{ width, height }}>
       {!isLoaded && (
