@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { getContactPageContent } from '../services/cms';
 import type { ContactPageContent, ContactLocation, ContactLocationMedia } from '../types';
+import { OptimizedImage } from '../components/OptimizedImage';
+import { OptimizedVideo } from '../components/OptimizedVideo';
 import { useTranslation } from '../i18n';
 
 const getYouTubeId = (url: string): string | null => {
@@ -115,17 +117,21 @@ const MediaModal: React.FC<{
             frameBorder="0"
           />
         ) : media.type === 'video' ? (
-          <video
+          <OptimizedVideo
             src={getMediaUrl()}
             controls
             autoPlay
             className="w-full h-full max-w-7xl max-h-[90vh] object-contain"
+            preload="auto"
+            loading="eager"
           />
         ) : (
-          <img
+          <OptimizedImage
             src={getMediaUrl()}
             alt=""
             className="w-full h-full max-w-7xl max-h-[90vh] object-contain"
+            loading="eager"
+            quality={95}
           />
         )}
       </div>
@@ -295,11 +301,23 @@ export function ContactPage() {
                       className="relative flex-shrink-0 w-24 h-24 overflow-hidden border-2 border-transparent opacity-80 hover:opacity-100 hover:scale-105 transition-all duration-300"
                     >
                       {m.type === 'image' ? (
-                        <img src={m.url} alt={`Media ${idx + 1}`} className="w-full h-full object-cover" />
+                        <OptimizedImage
+                          src={m.url}
+                          alt={`Media ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          quality={75}
+                        />
                       ) : m.type === 'video' ? (
                         <div className="w-full h-full bg-black/60" />
                       ) : (
-                        <img src={youTubeThumb(m.url || '')} alt={`youtube thumb ${idx + 1}`} className="w-full h-full object-cover" />
+                        <OptimizedImage
+                          src={youTubeThumb(m.url || '')}
+                          alt={`youtube thumb ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          quality={75}
+                        />
                       )}
                       {(m.type === 'video' || m.type === 'youtube') && (
                         <span className="pointer-events-none absolute inset-0 flex items-center justify-center">

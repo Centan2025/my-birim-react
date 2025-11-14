@@ -5,6 +5,8 @@ import type { Product, Designer, Category, LocalizedString, SiteSettings } from 
 import { getProductById, getDesignerById, getCategories, getProductsByCategoryId, getSiteSettings } from '../services/cms';
 // FIX: Removed non-existent `useSiteSettings` import. `useAuth` is sufficient.
 import { useAuth } from '../App';
+import { OptimizedImage } from '../components/OptimizedImage';
+import { OptimizedVideo } from '../components/OptimizedVideo';
 import { useTranslation } from '../i18n';
 import { useCart } from '../context/CartContext';
 
@@ -391,9 +393,24 @@ export function ProductDetailPage() {
                 }}
               >
                 {m.type === 'image' ? (
-                  <img src={m.url} alt={`${t(product.name)} ${index + 1}`} className={`w-full h-full object-contain ${imageBorderClass}`} />
+                  <OptimizedImage
+                    src={m.url}
+                    alt={`${t(product.name)} ${index + 1}`}
+                    className={`w-full h-full object-contain ${imageBorderClass}`}
+                    loading="eager"
+                    quality={90}
+                  />
                 ) : m.type === 'video' ? (
-                  <video src={m.url} className={`w-full h-full object-contain ${imageBorderClass}`} autoPlay muted loop playsInline />
+                  <OptimizedVideo
+                    src={m.url}
+                    className={`w-full h-full object-contain ${imageBorderClass}`}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                    loading="eager"
+                  />
                 ) : (
                   <iframe className="w-full h-full" title="youtube-player" src={toYouTubeEmbed(m.url, { autoplay: true })} allow="autoplay; encrypted-media; fullscreen" frameBorder="0" />
                 )}
@@ -447,11 +464,23 @@ export function ProductDetailPage() {
                 {bandMedia.map((m, idx) => (
                   <button key={idx} onClick={() => setCurrentImageIndex(idx)} className={`relative flex-shrink-0 w-24 h-24 overflow-hidden border-2 transition-all duration-300 ${currentImageIndex === idx ? 'border-gray-400 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}>
                     {m.type === 'image' ? (
-                      <img src={m.url} alt={`${t(product.name)} thumbnail ${idx + 1}`} className={`w-full h-full object-cover ${imageBorderClass}`} />
+                      <OptimizedImage
+                        src={m.url}
+                        alt={`${t(product.name)} thumbnail ${idx + 1}`}
+                        className={`w-full h-full object-cover ${imageBorderClass}`}
+                        loading="lazy"
+                        quality={75}
+                      />
                     ) : m.type === 'video' ? (
                       <div className={`w-full h-full bg-black/60 ${imageBorderClass}`} />
                     ) : (
-                      <img src={youTubeThumb(m.url)} alt={`youtube thumb ${idx + 1}`} className={`w-full h-full object-cover ${imageBorderClass}`} />
+                      <OptimizedImage
+                        src={youTubeThumb(m.url)}
+                        alt={`youtube thumb ${idx + 1}`}
+                        className={`w-full h-full object-cover ${imageBorderClass}`}
+                        loading="lazy"
+                        quality={75}
+                      />
                     )}
                     {(m.type === 'video' || m.type === 'youtube') && (
                       <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -519,10 +548,12 @@ export function ProductDetailPage() {
                         onClick={() => setDimLightbox({ images: dimImages, currentIndex: idx })} 
                         className="group border border-gray-200 transition-transform duration-200 p-3 bg-white rounded-none"
                       >
-                        <img 
-                          src={dimImg.image} 
-                          alt={dimImg.title ? t(dimImg.title) : `${t('dimensions')} ${idx + 1}`} 
-                          className={`w-full h-40 object-contain group-hover:scale-105 transition-transform duration-200 ${imageBorderClass}`} 
+                        <OptimizedImage
+                          src={dimImg.image}
+                          alt={dimImg.title ? t(dimImg.title) : `${t('dimensions')} ${idx + 1}`}
+                          className={`w-full h-40 object-contain group-hover:scale-105 transition-transform duration-200 ${imageBorderClass}`}
+                          loading="lazy"
+                          quality={85}
                         />
                       </button>
                       {dimImg.title && (
@@ -583,10 +614,12 @@ export function ProductDetailPage() {
                           const allMaterials = Array.isArray(books[activeBookIndex]?.materials) ? books[activeBookIndex].materials : [];
                           setMaterialLightbox({ images: allMaterials.map((m: any) => ({ image: m.image, name: t(m.name) })), currentIndex: index });
                         }}>
-                          <img
+                          <OptimizedImage
                             src={material.image}
                             alt={t(material.name)}
                             className={`w-28 h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md ${imageBorderClass}`}
+                            loading="lazy"
+                            quality={80}
                           />
                       <p className="mt-3 text-xs md:text-sm text-gray-600 font-thin tracking-wider max-w-[120px] break-words">
                             {t(material.name)}
@@ -604,10 +637,12 @@ export function ProductDetailPage() {
                         const allMaterials = Array.isArray(grouped[safeActiveIndex]?.materials) ? grouped[safeActiveIndex].materials : [];
                         setMaterialLightbox({ images: allMaterials.map((m: any) => ({ image: m.image, name: t(m.name) })), currentIndex: index });
                       }}>
-                        <img 
-                          src={material.image} 
-                          alt={t(material.name)} 
-                          className={`w-28 h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md ${imageBorderClass}`} 
+                        <OptimizedImage
+                          src={material.image}
+                          alt={t(material.name)}
+                          className={`w-28 h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md ${imageBorderClass}`}
+                          loading="lazy"
+                          quality={80}
                         />
                         <p className="mt-3 text-xs md:text-sm text-gray-600 font-thin tracking-wider max-w-[120px] break-words">
                           {t(material.name)}
@@ -627,10 +662,12 @@ export function ProductDetailPage() {
                   <h2 className="text-xl font-thin text-gray-600 mb-4">{t('designer')}</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                     <div className="w-full">
-                      <img
+                      <OptimizedImage
                         src={designer.image}
                         alt={t(designer.name)}
                         className="w-full h-auto object-cover"
+                        loading="lazy"
+                        quality={85}
                       />
                     </div>
                     <div className="w-full">
@@ -669,7 +706,14 @@ export function ProductDetailPage() {
                     {product.exclusiveContent.images && product.exclusiveContent.images.length > 0 ? (
                       <div className="grid grid-cols-2 gap-2">
                         {product.exclusiveContent.images.map((img, idx) => (
-                          <img key={idx} src={img} alt={`exclusive-${idx}`} className={`w-full aspect-video object-cover ${imageBorderClass}`} />
+                          <OptimizedImage
+                            key={idx}
+                            src={img}
+                            alt={`exclusive-${idx}`}
+                            className={`w-full aspect-video object-cover ${imageBorderClass}`}
+                            loading="lazy"
+                            quality={85}
+                          />
                         ))}
                       </div>
                     ) : (
@@ -746,11 +790,23 @@ export function ProductDetailPage() {
                   <div key={idx} className="overflow-hidden">
                     <button onClick={() => openPanelLightbox(idx)} className="relative w-full aspect-video bg-gray-200 flex items-center justify-center">
                       {m.type === 'image' ? (
-                        <img src={m.url} alt={`media-${idx}`} className={`w-full h-full object-cover ${imageBorderClass}`} />
+                        <OptimizedImage
+                          src={m.url}
+                          alt={`media-${idx}`}
+                          className={`w-full h-full object-cover ${imageBorderClass}`}
+                          loading="lazy"
+                          quality={85}
+                        />
                       ) : m.type === 'video' ? (
                         <div className={`w-full h-full bg-gray-300 ${imageBorderClass}`} />
                       ) : (
-                        <img src={youTubeThumb(m.url)} alt={`youtube thumb ${idx + 1}`} className={`w-full h-full object-cover ${imageBorderClass}`} />
+                        <OptimizedImage
+                          src={youTubeThumb(m.url)}
+                          alt={`youtube thumb ${idx + 1}`}
+                          className={`w-full h-full object-cover ${imageBorderClass}`}
+                          loading="lazy"
+                          quality={75}
+                        />
                       )}
                       {(m.type === 'video' || m.type === 'youtube') && (
                         <span className="pointer-events-none absolute bottom-2 right-2">
@@ -808,9 +864,24 @@ export function ProductDetailPage() {
           <div className="relative w-screen max-w-screen-2xl h-[80vh] p-2 overflow-hidden">
             <button onClick={closeLightbox} className="absolute top-2 right-2 text-white hover:opacity-75 transition-opacity z-[80] bg-black/50 rounded-full p-2"><CloseIcon /></button>
             {currentLightboxItems[lightboxImageIndex]?.type === 'image' ? (
-              <img src={currentLightboxItems[lightboxImageIndex].url} alt="Enlarged product view" className="w-full h-full object-contain" />
+              <OptimizedImage
+                src={currentLightboxItems[lightboxImageIndex].url}
+                alt="Enlarged product view"
+                className="w-full h-full object-contain"
+                loading="eager"
+                quality={95}
+              />
             ) : currentLightboxItems[lightboxImageIndex]?.type === 'video' ? (
-              <video src={currentLightboxItems[lightboxImageIndex].url} autoPlay muted loop playsInline className="w-full h-full object-contain" />
+              <OptimizedVideo
+                src={currentLightboxItems[lightboxImageIndex].url}
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="w-full h-full object-contain"
+                preload="auto"
+                loading="eager"
+              />
             ) : (
                 <div className="relative w-full h-full">
                     {/* Doğrudan iframe'i göster, ortadaki büyük play butonu kaldırıldı */}
@@ -944,10 +1015,12 @@ export function ProductDetailPage() {
                   </button>
                 </>
               )}
-              <img 
-                src={dimLightbox.images[dimLightbox.currentIndex].image} 
-                alt={dimLightbox.images[dimLightbox.currentIndex].title ? t(dimLightbox.images[dimLightbox.currentIndex].title!) : "Technical Drawing"} 
-                className="w-full h-auto object-contain" 
+              <OptimizedImage
+                src={dimLightbox.images[dimLightbox.currentIndex].image}
+                alt={dimLightbox.images[dimLightbox.currentIndex].title ? t(dimLightbox.images[dimLightbox.currentIndex].title!) : "Technical Drawing"}
+                className="w-full h-auto object-contain"
+                loading="eager"
+                quality={95}
               />
             </div>
           </div>
@@ -996,10 +1069,12 @@ export function ProductDetailPage() {
                   </button>
                 </>
               )}
-              <img 
-                src={materialLightbox.images[materialLightbox.currentIndex].image} 
-                alt={materialLightbox.images[materialLightbox.currentIndex].name} 
-                className="w-full h-auto object-contain" 
+              <OptimizedImage
+                src={materialLightbox.images[materialLightbox.currentIndex].image}
+                alt={materialLightbox.images[materialLightbox.currentIndex].name}
+                className="w-full h-auto object-contain"
+                loading="eager"
+                quality={95}
               />
             </div>
           </div>

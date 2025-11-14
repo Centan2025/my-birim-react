@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getNewsById, getNews } from '../services/cms';
 import type { NewsItem, NewsMedia } from '../types';
+import { OptimizedImage } from '../components/OptimizedImage';
+import { OptimizedVideo } from '../components/OptimizedVideo';
 import { useTranslation } from '../i18n';
 import { useSiteSettings } from '../App';
 
@@ -29,10 +31,12 @@ const MediaComponent: React.FC<{ media: NewsMedia }> = ({ media }) => {
     const renderMedia = () => {
         if (media.type === 'image') {
             return (
-                <img 
-                    src={media.url} 
-                    alt={t(media.caption) || ''} 
+                <OptimizedImage
+                    src={media.url}
+                    alt={t(media.caption) || ''}
                     className={`w-full h-auto object-cover ${imageBorderClass}`}
+                    loading="lazy"
+                    quality={85}
                 />
             );
         }
@@ -42,11 +46,13 @@ const MediaComponent: React.FC<{ media: NewsMedia }> = ({ media }) => {
             if (isVideoFile) {
                 return (
                     <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16:9 Aspect Ratio */ }}>
-                        <video 
-                            src={media.url} 
+                        <OptimizedVideo
+                            src={media.url}
                             className={`absolute top-0 left-0 w-full h-full object-cover ${imageBorderClass}`}
                             controls
                             playsInline
+                            preload="metadata"
+                            loading="lazy"
                         />
                     </div>
                 );
@@ -164,10 +170,12 @@ export function NewsDetailPage() {
                             <div className="h-px bg-gray-300"></div>
                         </div>
                         
-                        <img 
-                            src={item.mainImage} 
+                        <OptimizedImage
+                            src={item.mainImage}
                             alt={t(item.title)}
                             className={`w-full h-auto object-cover mb-6 ${settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'}`}
+                            loading="eager"
+                            quality={90}
                         />
                     </article>
                 </div>

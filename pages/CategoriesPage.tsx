@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import type { Category } from '../types';
 import { getCategories } from '../services/cms';
+import { OptimizedImage } from '../components/OptimizedImage';
 import { useTranslation } from '../i18n';
 import { useSiteSettings } from '../App';
 
@@ -32,10 +33,12 @@ export function CategoriesPage() {
       {/* Hero Section */}
       <div className="relative h-[500px] animate-fade-in-down">
         <div className="absolute inset-0">
-          <img 
+          <OptimizedImage
             src="https://picsum.photos/seed/categories-hero/1920/1080"
             alt={t('products')}
             className={`w-full h-full object-cover ${imageBorderClass}`}
+            loading="eager"
+            quality={90}
           />
           <div className="absolute inset-0 bg-black/40"></div>
         </div>
@@ -62,10 +65,12 @@ export function CategoriesPage() {
                 className="group block overflow-hidden transition-all duration-300"
               >
                 <div className={`relative h-[600px] overflow-hidden ${imageBorderClass}`}>
-                  <img
+                  <OptimizedImage
                     src={category.heroImage}
                     alt={t(category.name)}
                     className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${imageBorderClass}`}
+                    loading="lazy"
+                    quality={85}
                   />
                   <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-300"></div>
                   <div className="absolute inset-0 flex items-center justify-center">

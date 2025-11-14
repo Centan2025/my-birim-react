@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import type { Product, Category } from '../types';
 import { getProductsByCategoryId, getCategories } from '../services/cms';
 import { ProductCard } from '../components/ProductCard';
+import { OptimizedImage } from '../components/OptimizedImage';
 import { useTranslation } from '../i18n';
 import { useSiteSettings } from '../App';
 
@@ -63,10 +64,12 @@ export function ProductsPage() {
       {/* Category Hero Image */}
       <div className="relative h-[450px] animate-fade-in-down">
         <div className="absolute inset-0">
-          <img 
-            src={category?.heroImage || 'https://picsum.photos/seed/default/1920/1080'} // Fallback image
+          <OptimizedImage
+            src={category?.heroImage || 'https://picsum.photos/seed/default/1920/1080'}
             alt={t(category?.name) || t('products')}
             className={`w-full h-full object-cover ${imageBorderClass}`}
+            loading="eager"
+            quality={90}
           />
           <div className="absolute inset-0 bg-black/40"></div>
         </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import type { Product } from '../types';
+import { OptimizedImage } from './OptimizedImage';
 import { useTranslation } from '../i18n';
 import { useSiteSettings } from '../App';
 
@@ -12,10 +13,12 @@ export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'li
   return (
     <Link to={`/product/${product.id}`} className="group block w-full">
       <div className={`relative overflow-hidden aspect-square ${imageBorderClass} w-full bg-white flex items-center justify-center`}>
-        <img
+        <OptimizedImage
           src={product.mainImage}
           alt={t(product.name)}
           className={`w-full h-full object-contain transition-transform duration-700 group-hover:scale-105 ${imageBorderClass}`}
+          loading="lazy"
+          quality={85}
         />
       </div>
       <div className="mt-4 overflow-hidden">

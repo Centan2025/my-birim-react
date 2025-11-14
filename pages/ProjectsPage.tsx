@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react'
 import { Link } from 'react-router-dom'
 import { getProjects } from '../services/cms'
 import type { Project } from '../types'
+import { OptimizedImage } from '../components/OptimizedImage'
 import { useTranslation } from '../i18n'
 import { useSiteSettings } from '../App'
 
@@ -13,10 +14,12 @@ const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
     <Link to={`/projects/${project.id}`} className="group flex flex-col h-full text-center">
       <div className={`overflow-hidden bg-white aspect-[16/10] ${imageBorderClass}`}>
         {project.cover && (
-          <img
+          <OptimizedImage
             src={project.cover}
             alt={t(project.title)}
             className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${imageBorderClass}`}
+            loading="lazy"
+            quality={85}
           />
         )}
       </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, PropsWithChildren } from 'react';
 import { getAboutPageContent } from '../services/cms';
 import type { AboutPageContent, LocalizedString } from '../types';
+import { OptimizedImage } from '../components/OptimizedImage';
 import { useTranslation } from '../i18n';
 
 const ValuesIcon: React.FC<PropsWithChildren> = ({ children }) => (
@@ -53,7 +54,13 @@ export function AboutPage() {
         {/* Hero Section */}
         <div className="relative h-[50vh] bg-gray-800 text-white flex items-center justify-center">
             {content.heroImage && (
-              <img src={content.heroImage} alt={t(content.heroTitle)} className="absolute inset-0 w-full h-full object-cover opacity-40" />
+              <OptimizedImage
+                src={content.heroImage}
+                alt={t(content.heroTitle)}
+                className="absolute inset-0 w-full h-full object-cover opacity-40"
+                loading="eager"
+                quality={90}
+              />
             )}
             <div className="relative z-10 text-center px-4">
                 <h1 className="text-4xl md:text-6xl font-light tracking-tighter">{t(content.heroTitle)}</h1>
@@ -71,7 +78,13 @@ export function AboutPage() {
                 </div>
                 <div className="md:col-span-2">
                     {content.storyImage && (
-                      <img src={content.storyImage} alt="story" className="w-full shadow-lg" />
+                      <OptimizedImage
+                        src={content.storyImage}
+                        alt="story"
+                        className="w-full shadow-lg"
+                        loading="lazy"
+                        quality={85}
+                      />
                     )}
                 </div>
             </div>

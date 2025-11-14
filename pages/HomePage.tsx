@@ -4,6 +4,8 @@ import { getProducts, getDesigners, getSiteSettings, getHomePageContent } from '
 import type { Product, Designer, SiteSettings, HomePageContent } from '../types';
 import { ProductCard } from '../components/ProductCard';
 import { SiteLogo } from '../components/SiteLogo';
+import { OptimizedImage } from '../components/OptimizedImage';
+import { OptimizedVideo } from '../components/OptimizedVideo';
 import { useTranslation } from '../i18n';
 import { useSiteSettings } from '../App';
 
@@ -614,7 +616,8 @@ export function HomePage() {
       // Görselin genişliği viewport genişliğine eşit olacak, yüksekliği orantılı olarak hesapla
       const aspectRatio = img.height / img.width;
       const calculatedHeight = viewportWidth * aspectRatio;
-      setInspirationImageHeight(calculatedHeight);
+      // Bölüm yüksekliğini görsel yüksekliğinden %10 daha az yap
+      setInspirationImageHeight(calculatedHeight * 0.9);
     };
     img.onerror = () => {
       setInspirationImageHeight(null);
@@ -1102,22 +1105,25 @@ export function HomePage() {
                       }}
                   >
                       {media.type === 'video' ? (
-                           <video 
+                           <OptimizedVideo
+                               src={media.url}
                                className={`${isMobile ? 'relative' : 'absolute'} top-0 left-0 w-full ${isMobile ? 'h-auto' : 'h-full'} ${isMobile ? 'object-contain object-top' : 'object-cover'}`}
-                               autoPlay 
-                               loop 
-                               muted 
-                               playsInline 
-                               src={media.url} 
-                               key={media.url}
+                               autoPlay
+                               loop
+                               muted
+                               playsInline
+                               preload="auto"
+                               loading="eager"
                            />
                       ) : media.type === 'youtube' ? (
                            <YouTubeBackground url={media.url} isMobile={isMobile} />
                       ) : (
-                          <img 
-                              src={media.url} 
-                              alt={t(media.title)} 
+                          <OptimizedImage
+                              src={media.url}
+                              alt={t(media.title)}
                               className={`${isMobile ? 'relative' : 'absolute'} top-0 left-0 w-full ${isMobile ? 'h-auto' : 'h-full'} ${isMobile ? 'object-contain object-top' : 'object-cover'}`}
+                              loading="eager"
+                              quality={90}
                           />
                       )}
                       <div className="absolute inset-0 bg-black/50 z-10"></div>
@@ -1211,9 +1217,24 @@ export function HomePage() {
                           <YouTubeBackground url={mediaUrl} />
                         </div>
                       ) : block.mediaType === 'video' ? (
-                        <video className={`w-full h-auto max-w-full ${isMobile ? 'object-contain' : 'object-cover'}`} autoPlay loop muted playsInline src={mediaUrl} />
+                        <OptimizedVideo
+                          src={mediaUrl}
+                          className={`w-full h-auto max-w-full ${isMobile ? 'object-contain' : 'object-cover'}`}
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          preload="auto"
+                          loading="lazy"
+                        />
                       ) : (
-                        <img src={mediaUrl} alt="" className={`w-full h-auto ${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`} />
+                        <OptimizedImage
+                          src={mediaUrl}
+                          alt=""
+                          className={`w-full h-auto ${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`}
+                          loading="lazy"
+                          quality={85}
+                        />
                       )}
                       {block.description && (
                         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -1243,9 +1264,24 @@ export function HomePage() {
                               <YouTubeBackground url={mediaUrl} />
                             </div>
                           ) : block.mediaType === 'video' ? (
-                            <video className={`w-full h-auto ${imageBorderClass} max-w-full ${isMobile ? 'object-contain' : 'object-cover'}`} autoPlay loop muted playsInline src={mediaUrl} />
+                            <OptimizedVideo
+                              src={mediaUrl}
+                              className={`w-full h-auto ${imageBorderClass} max-w-full ${isMobile ? 'object-contain' : 'object-cover'}`}
+                              autoPlay
+                              loop
+                              muted
+                              playsInline
+                              preload="auto"
+                              loading="lazy"
+                            />
                           ) : (
-                            <img src={mediaUrl} alt="" className={`w-full h-auto ${imageBorderClass} ${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`} />
+                            <OptimizedImage
+                              src={mediaUrl}
+                              alt=""
+                              className={`w-full h-auto ${imageBorderClass} ${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`}
+                              loading="lazy"
+                              quality={85}
+                            />
                           )}
                         </div>
                         {block.description && (
@@ -1296,7 +1332,13 @@ export function HomePage() {
         <section className="py-20 bg-white">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center gap-12 animate-fade-in-up">
               <div className="w-full md:w-1/2 overflow-hidden">
-                  <img src={featuredDesigner.image} alt={t(featuredDesigner.name)} className="shadow-xl w-full object-cover max-w-full" />
+                  <OptimizedImage
+                    src={featuredDesigner.image}
+                    alt={t(featuredDesigner.name)}
+                    className="shadow-xl w-full object-cover max-w-full"
+                    loading="lazy"
+                    quality={85}
+                  />
               </div>
               <div className="w-full md:w-1/2 text-center md:text-left">
                   <h3 className="text-sm font-light uppercase tracking-widest text-gray-500">{t('designer_spotlight')}</h3>

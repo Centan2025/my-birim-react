@@ -2,6 +2,8 @@ import {useEffect, useState, useMemo} from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { getProjectById, getProjects } from '../services/cms'
 import type { Project } from '../types'
+import { OptimizedImage } from '../components/OptimizedImage'
+import { OptimizedVideo } from '../components/OptimizedVideo'
 import { useTranslation } from '../i18n'
 import { useSiteSettings } from '../App'
 
@@ -90,19 +92,35 @@ export function ProjectDetailPage(){
         )}
         <div className="h-px bg-gray-300 mt-4"></div>
       </div>
-      {project.cover && !curr && <img src={project.cover} alt={t(project.title)} className={`mt-10 w-full h-auto object-contain ${imageBorderClass}`} />}
+      {project.cover && !curr && (
+        <OptimizedImage
+          src={project.cover}
+          alt={t(project.title)}
+          className={`mt-10 w-full h-auto object-contain ${imageBorderClass}`}
+          loading="eager"
+          quality={90}
+        />
+      )}
       {curr && (
         <div className="mt-10 relative">
           {curr.type === 'image' && (
-            <img src={curr.url} alt="project" className={`w-full h-auto object-contain transition-all duration-250 ${imageBorderClass} ${anim==='leave' ? 'opacity-0 -translate-y-1' : anim==='enter' ? 'opacity-100 translate-y-0' : ''}`} />
+            <OptimizedImage
+              src={curr.url}
+              alt="project"
+              className={`w-full h-auto object-contain transition-all duration-250 ${imageBorderClass} ${anim==='leave' ? 'opacity-0 -translate-y-1' : anim==='enter' ? 'opacity-100 translate-y-0' : ''}`}
+              loading="eager"
+              quality={90}
+            />
           )}
           {curr.type === 'video' && (
             <div className={`w-full transition-all duration-250 ${anim==='leave' ? 'opacity-0 -translate-y-1' : anim==='enter' ? 'opacity-100 translate-y-0' : ''}`} style={{ paddingTop: '56.25%' }}>
-              <video 
-                src={curr.url} 
+              <OptimizedVideo
+                src={curr.url}
                 className={`absolute top-0 left-0 w-full h-full object-contain ${imageBorderClass}`}
                 controls
                 playsInline
+                preload="metadata"
+                loading="eager"
               />
             </div>
           )}
@@ -142,11 +160,22 @@ export function ProjectDetailPage(){
           {allMedia.map((m,i)=>(
             <button key={i} onClick={()=>setIdx(i)} className={`border ${i===idx?'border-gray-900':'border-transparent hover:border-gray-400'}`}>
               {m.type === 'image' && (
-                <img src={m.url} alt={`thumb-${i}`} className="w-full aspect-square object-contain bg-gray-50" />
+                <OptimizedImage
+                  src={m.url}
+                  alt={`thumb-${i}`}
+                  className="w-full aspect-square object-contain bg-gray-50"
+                  loading="lazy"
+                  quality={75}
+                />
               )}
               {m.type === 'video' && (
                 <div className="w-full aspect-square bg-gray-50 flex items-center justify-center relative">
-                  <video src={m.url} className="w-full h-full object-contain" />
+                  <OptimizedVideo
+                    src={m.url}
+                    className="w-full h-full object-contain"
+                    preload="none"
+                    loading="lazy"
+                  />
                   <span className="absolute bottom-1 right-1 bg-white/85 text-gray-900 rounded-full w-6 h-6 flex items-center justify-center shadow text-xs">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 ml-0.5"><path d="M8 5v14l11-7z"/></svg>
                   </span>
@@ -154,7 +183,13 @@ export function ProjectDetailPage(){
               )}
               {m.type === 'youtube' && (
                 <div className="w-full aspect-square bg-gray-50 relative">
-                  <img src={youTubeThumb(m.url)} alt={`youtube thumb ${i + 1}`} className="w-full h-full object-cover" />
+                  <OptimizedImage
+                    src={youTubeThumb(m.url)}
+                    alt={`youtube thumb ${i + 1}`}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                    quality={75}
+                  />
                   <span className="absolute bottom-1 right-1 bg-white/85 text-gray-900 rounded-full w-6 h-6 flex items-center justify-center shadow text-xs">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 ml-0.5"><path d="M8 5v14l11-7z"/></svg>
                   </span>
