@@ -772,8 +772,8 @@ export function HomePage() {
       // Görselin genişliği viewport genişliğine eşit olacak, yüksekliği orantılı olarak hesapla
       const aspectRatio = img.height / img.width;
       const calculatedHeight = viewportWidth * aspectRatio;
-      // Bölüm yüksekliğini görsel yüksekliğinden %10 daha az yap
-      setInspirationImageHeight(calculatedHeight * 0.9);
+      // Bölüm yüksekliğini görsel yüksekliğinden %20 daha az yap
+      setInspirationImageHeight(calculatedHeight * 0.8);
     };
     img.onerror = () => {
       setInspirationImageHeight(null);
@@ -993,7 +993,9 @@ export function HomePage() {
         // Mobilde görsel genişliği viewport genişliğine eşit, yüksekliği orantılı
         const vw = document.documentElement.clientWidth || window.innerWidth;
         const aspectRatio = img.height / img.width;
-        setInspirationImageHeight(vw * aspectRatio);
+        const calculatedHeight = vw * aspectRatio;
+        // Bölüm yüksekliğini görsel yüksekliğinden %20 daha az yap
+        setInspirationImageHeight(calculatedHeight * 0.8);
       } else {
         // Desktop'ta görsel cover olarak kullanılıyor, minimum yükseklik ayarla
         setInspirationImageHeight(Math.max(img.height, 400));

@@ -158,9 +158,9 @@ const Footer = () => {
                 {/* Mobil düzen */}
                 <div className="lg:hidden flex flex-col items-center space-y-6">
                     {/* Logo - ortada üstte */}
-                    <div className="text-white -mt-4">
+                    <Link to="/" className="text-white -mt-4">
                         <SiteLogo logoUrl={settings.logoUrl} className="h-6 w-auto mx-auto" />
-                    </div>
+                    </Link>
                     
                     {/* Menü düğmeleri - alt alta ortada */}
                     <nav className="flex flex-col items-center space-y-3">

@@ -768,7 +768,7 @@ export function Header() {
               {/* Dil seçenekleri - Menü öğelerinin üstünde */}
               {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
                 <div className="relative w-full">
-                  <div className="flex items-center justify-start gap-1 bg-black/50 px-4 sm:px-5 lg:px-6 py-3 min-h-[3rem] border-b border-white/10">
+                  <div className="flex items-center justify-start gap-1 bg-black/50 px-4 sm:px-5 lg:px-6 pt-3 pb-2 min-h-[3rem] border-b border-white/10">
                     {supportedLocales.map((langCode) => {
                       const isActive = locale === langCode;
                       return (
@@ -795,9 +795,9 @@ export function Header() {
                   </div>
                 </div>
               )}
-               <nav className="px-4 sm:px-5 lg:px-6 pt-2 pb-2 flex flex-col">
+               <nav className="px-4 sm:px-5 lg:px-6 pb-2 flex flex-col">
                  <div className="flex flex-col">
-                   <NavLink to="/products" className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10" onClick={() => setIsMobileMenuOpen(false)}>{t('products')}</NavLink>
+                   <NavLink to="/products" className="flex items-center min-h-[3rem] pt-0 pb-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10" onClick={() => setIsMobileMenuOpen(false)}>{t('products')}</NavLink>
                    <NavLink to="/designers" className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10" onClick={() => setIsMobileMenuOpen(false)}>{t('designers')}</NavLink>
                    <NavLink to="/projects" className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10" onClick={() => setIsMobileMenuOpen(false)}>{t('projects') || 'Projeler'}</NavLink>
                    <NavLink to="/news" className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10" onClick={() => setIsMobileMenuOpen(false)}>{t('news')}</NavLink>
