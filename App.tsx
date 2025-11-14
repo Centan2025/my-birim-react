@@ -27,6 +27,7 @@ import { CartSidebar } from './components/CartSidebar';
 import { ProjectsPage } from './pages/ProjectsPage';
 import { ProjectDetailPage } from './pages/ProjectDetailPage';
 import CookieBanner from './components/CookieBanner';
+import { ComingSoonPage } from './pages/ComingSoonPage';
 
 // Helper component to render SVG strings safely
 const DynamicIcon: React.FC<{ svgString: string }> = ({ svgString }) => (
@@ -462,44 +463,82 @@ const Footer = () => {
     );
 };
 
+// Maintenance mode kontrolünü provider içinde yapmak için ayrı component
+const AppContent = () => {
+  // Maintenance mode kontrolü - öncelikle CMS'den, yoksa environment variable'dan
+  // Development modunda (dev server) maintenance mode devre dışı
+  // Production'da aktif olabilir, ancak ?bypass=secret ile bypass edilebilir
+  const { settings } = useSiteSettings();
+  const maintenanceModeFromCMS = settings?.maintenanceMode ?? false;
+  const maintenanceModeFromEnv = import.meta.env.VITE_MAINTENANCE_MODE === 'true';
+  const maintenanceModeEnabled = maintenanceModeFromCMS || maintenanceModeFromEnv;
+  
+  const isProduction = import.meta.env.PROD;
+  const bypassSecret = import.meta.env.VITE_MAINTENANCE_BYPASS_SECRET || 'dev-bypass-2024';
+  
+  // HashRouter'da query parameter hem hash'ten önce hem de hash içinde olabilir
+  const searchParams = new URLSearchParams(window.location.search);
+  const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+  const bypassParam = searchParams.get('bypass') || hashParams.get('bypass');
+  
+  // Maintenance mode sadece production'da ve bypass yoksa aktif
+  const isMaintenanceMode = isProduction && maintenanceModeEnabled && bypassParam !== bypassSecret;
+
+  return (
+    <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <div className="flex flex-col min-h-screen">
+        <ScrollToTop />
+        {isMaintenanceMode ? (
+          // Maintenance mode aktifse sadece ComingSoonPage göster
+          <main className="flex-grow" style={{ overflowX: 'hidden' }}>
+            <Routes>
+              <Route path="*" element={<ComingSoonPage />} />
+            </Routes>
+          </main>
+        ) : (
+          // Normal mod - tüm sayfalar
+          <>
+            <Header />
+            <CartSidebar />
+            <main className="flex-grow" style={{ overflowX: 'hidden' }}>
+            <TopBanner />
+            <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/products" element={<CategoriesPage />} />
+                <Route path="/products/:categoryId" element={<ProductsPage />} />
+                <Route path="/product/:productId" element={<ProductDetailPage />} />
+                <Route path="/designers" element={<DesignersPage />} />
+                <Route path="/designer/:designerId" element={<DesignerDetailPage />} />
+                <Route path="/projects" element={<ProjectsPage />} />
+                <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/news" element={<NewsPage />} />
+                <Route path="/news/:newsId" element={<NewsDetailPage />} />
+                <Route path="/cookies" element={<CookiesPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
+                <Route path="/terms" element={<TermsPage />} />
+                <Route path="/kvkk" element={<KvkkPage />} />
+            </Routes>
+            </main>
+            <CookieBanner />
+            <Footer />
+          </>
+        )}
+      </div>
+    </HashRouter>
+  );
+};
+
 export default function App() {
   return (
     <AuthProvider>
       <I18nProvider>
         <CartProvider>
           <SiteSettingsProvider>
-            <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <div className="flex flex-col min-h-screen">
-                <ScrollToTop />
-                <Header />
-                <CartSidebar />
-                <main className="flex-grow" style={{ overflowX: 'hidden' }}>
-                <TopBanner />
-                <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/products" element={<CategoriesPage />} />
-                    <Route path="/products/:categoryId" element={<ProductsPage />} />
-                    <Route path="/product/:productId" element={<ProductDetailPage />} />
-                    <Route path="/designers" element={<DesignersPage />} />
-                    <Route path="/designer/:designerId" element={<DesignerDetailPage />} />
-                    <Route path="/projects" element={<ProjectsPage />} />
-                    <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
-                    <Route path="/about" element={<AboutPage />} />
-                    <Route path="/contact" element={<ContactPage />} />
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/profile" element={<ProfilePage />} />
-                    <Route path="/news" element={<NewsPage />} />
-                    <Route path="/news/:newsId" element={<NewsDetailPage />} />
-                    <Route path="/cookies" element={<CookiesPage />} />
-                    <Route path="/privacy" element={<PrivacyPage />} />
-                    <Route path="/terms" element={<TermsPage />} />
-                    <Route path="/kvkk" element={<KvkkPage />} />
-                </Routes>
-                </main>
-                <CookieBanner />
-                <Footer />
-            </div>
-            </HashRouter>
+            <AppContent />
           </SiteSettingsProvider>
         </CartProvider>
       </I18nProvider>

@@ -420,6 +420,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
             imageBorderStyle: (s?.imageBorderStyle === 'rounded' || s?.imageBorderStyle === 'square') ? s.imageBorderStyle : 'square',
             isLanguageSwitcherVisible: s?.isLanguageSwitcherVisible !== false,
             languages: Array.isArray(s?.languages) ? s.languages : undefined,
+            maintenanceMode: Boolean(s?.maintenanceMode ?? false),
         }
     }
     await delay(SIMULATED_DELAY);
@@ -431,6 +432,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
         showProductPrevNext: Boolean(s?.showProductPrevNext ?? false),
         showCartButton: Boolean(s?.showCartButton ?? true),
         imageBorderStyle: (s?.imageBorderStyle === 'rounded' || s?.imageBorderStyle === 'square') ? s.imageBorderStyle : 'square',
+        maintenanceMode: Boolean(s?.maintenanceMode ?? false),
     };
 };
 export const updateSiteSettings = async (settings: SiteSettings): Promise<void> => {

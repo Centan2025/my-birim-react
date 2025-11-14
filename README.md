@@ -47,6 +47,89 @@
    npm run dev
    ```
 
+## Geçici "Yakında" Sayfası (Maintenance Mode)
+
+Sayfa tam olana kadar geçici bir "Yakında" sayfası göstermek için:
+
+### Önemli: Development vs Production
+
+- **Development modunda (`npm run dev`)**: Maintenance mode **otomatik olarak devre dışıdır**. Tüm sayfalara normal şekilde erişebilirsiniz.
+- **Production modunda**: Maintenance mode aktif olabilir.
+
+### Maintenance Mode'u Aktif Etmek (Önerilen: CMS'den)
+
+**En kolay yöntem - Sanity CMS'den:**
+
+1. Sanity Studio'ya gidin (`birim-web` klasöründe `npm run dev` ile çalıştırın)
+2. **Site Ayarları** (Site Settings) dokümanını açın
+3. **"Bakım Modu (Yakında Sayfası)"** seçeneğini aktif edin
+4. Değişiklikleri kaydedin ve publish edin
+5. Web sitesi otomatik olarak güncellenecektir (CDN cache süresi içinde)
+
+**Alternatif: Environment Variable (Vercel'de):**
+
+1. Vercel dashboard'unuza gidin
+2. Projenizi seçin
+3. Settings > Environment Variables bölümüne gidin
+4. Yeni bir variable ekleyin:
+   - **Name:** `VITE_MAINTENANCE_MODE`
+   - **Value:** `true`
+5. Deploy'u yeniden yapın
+
+**Not:** CMS'den kontrol etmek daha pratiktir çünkü deploy gerektirmez. Her iki yöntem de çalışır, CMS önceliklidir.
+
+### Production'da Bypass Etmek (Sayfalara Erişim)
+
+Maintenance mode aktifken production'da sayfalara erişmek için:
+
+1. **Secret bypass key ekleyin (opsiyonel, güvenlik için):**
+   - Vercel'de yeni bir environment variable ekleyin:
+     - **Name:** `VITE_MAINTENANCE_BYPASS_SECRET`
+     - **Value:** Kendi belirlediğiniz bir secret (örn: `my-secret-key-2024`)
+   
+2. **URL'ye query parameter ekleyin:**
+   
+   HashRouter kullanıldığı için iki yöntem var:
+   
+   **Yöntem 1 - Hash'ten önce (önerilen):**
+   ```
+   https://yourdomain.com/?bypass=my-secret-key-2024
+   ```
+   
+   **Yöntem 2 - Hash içinde:**
+   ```
+   https://yourdomain.com/#/products?bypass=my-secret-key-2024
+   ```
+   
+   Her iki yöntem de çalışır. İstediğiniz sayfaya gidebilirsiniz:
+   ```
+   https://yourdomain.com/?bypass=my-secret-key-2024#/products
+   https://yourdomain.com/?bypass=my-secret-key-2024#/designers
+   https://yourdomain.com/?bypass=my-secret-key-2024#/about
+   ```
+
+3. **Secret belirlemezseniz:**
+   - Varsayılan secret: `dev-bypass-2024`
+   - URL: `https://yourdomain.com/?bypass=dev-bypass-2024`
+
+### Normal Sayfaya Dönmek
+
+**CMS'den (Önerilen):**
+1. Sanity Studio'da **Site Ayarları** dokümanını açın
+2. **"Bakım Modu (Yakında Sayfası)"** seçeneğini kapatın
+3. Değişiklikleri kaydedin ve publish edin
+
+**Veya Environment Variable'dan:**
+- Vercel'de `VITE_MAINTENANCE_MODE` environment variable'ını silin veya `false` olarak güncelleyin
+- Yeniden deploy edin
+
+### Notlar
+
+- Maintenance mode **sadece production'da** çalışır
+- Development'ta (`npm run dev`) her zaman tüm sayfalara erişebilirsiniz
+- Production'da bypass secret ile sayfalara erişebilirsiniz
+- Maintenance mode aktifken normal kullanıcılar sadece "Yakında" sayfasını görür
+
 ## Önemli Notlar
 
 - Sanity token'ı olmadan üye kayıtları sadece local storage'da saklanır ve CMS'de görünmez

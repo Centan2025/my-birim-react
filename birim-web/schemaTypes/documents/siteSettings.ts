@@ -11,6 +11,13 @@ export default defineType({
     defineField({name: 'showCartButton', title: "Header'da Sepet Düğmesini Göster", type: 'boolean', initialValue: true}),
     defineField({name: 'isLanguageSwitcherVisible', title: 'Dil Değiştirici Gözüksün', type: 'boolean', initialValue: true}),
     defineField({
+      name: 'maintenanceMode',
+      title: 'Bakım Modu (Yakında Sayfası)',
+      type: 'boolean',
+      initialValue: false,
+      description: 'Aktif edildiğinde ziyaretçiler sadece "Yakında" sayfasını görür. Development modunda otomatik olarak devre dışıdır.'
+    }),
+    defineField({
       name: 'imageBorderStyle',
       title: 'Görsel ve Video Kenar Stili',
       type: 'string',

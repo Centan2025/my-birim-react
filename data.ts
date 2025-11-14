@@ -20,6 +20,7 @@ export const languagesData: string[] = ['tr', 'en'];
 export const siteSettingsData: SiteSettings = {
     logoUrl: '/img/logo.png',
     showProductPrevNext: false,
+    maintenanceMode: false,
 };
 
 export const categoriesData: Category[] = [

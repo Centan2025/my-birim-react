@@ -25,6 +25,8 @@ export interface SiteSettings {
   showCartButton?: boolean;
   /** Border style for images and videos: 'square' or 'rounded' */
   imageBorderStyle?: 'square' | 'rounded';
+  /** Enables maintenance mode - shows "Coming Soon" page to visitors */
+  maintenanceMode?: boolean;
 }
 
 // --- Core Data Models ---

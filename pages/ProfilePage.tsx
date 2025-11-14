@@ -16,7 +16,7 @@ export function ProfilePage() {
           <p className="text-gray-600 mb-6">Bu sayfaya erişmek için üye olmanız gerekiyor.</p>
           <Link
             to="/login"
-            className="bg-gray-800 text-white font-semibold py-2 px-6 rounded-lg hover:bg-gray-700 transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110 active:scale-100 hover:shadow-lg"
+            className="bg-gray-800 text-white font-semibold py-2 px-6 rounded-none hover:bg-gray-700 transition-colors duration-200"
           >
             Giriş Yap
           </Link>
@@ -34,7 +34,7 @@ export function ProfilePage() {
     <div className="bg-gray-50 min-h-screen py-20">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow-md p-8">
+          <div className="bg-white border border-gray-200 rounded-none p-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-8">Üye Paneli</h1>
             
             <div className="space-y-6">
@@ -83,7 +83,7 @@ export function ProfilePage() {
                 </p>
                 <Link
                   to="/products"
-                  className="inline-block bg-gray-800 text-white font-semibold py-2 px-6 rounded-lg hover:bg-gray-700 transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110 active:scale-100 hover:shadow-lg"
+                  className="inline-block bg-gray-800 text-white font-semibold py-2 px-6 rounded-none hover:bg-gray-700 transition-colors duration-200"
                 >
                   Ürünleri Görüntüle
                 </Link>
@@ -92,7 +92,7 @@ export function ProfilePage() {
               <div>
                 <button
                   onClick={handleLogout}
-                  className="bg-red-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-red-700 transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110 active:scale-100 hover:shadow-lg"
+                  className="bg-red-600 text-white font-semibold py-2 px-6 rounded-none hover:bg-red-700 transition-colors duration-200"
                 >
                   {t('logout') || 'Çıkış Yap'}
                 </button>

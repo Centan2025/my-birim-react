@@ -83,13 +83,13 @@ export function LoginPage() {
                   <div className="flex gap-4 justify-center">
                     <Link
                       to="/profile"
-                      className="bg-gray-800 text-white font-semibold py-2 px-6 rounded-lg hover:bg-gray-700 transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110 active:scale-100 hover:shadow-lg"
+                      className="bg-gray-800 text-white font-semibold py-2 px-6 rounded-none hover:bg-gray-700 transition-colors duration-200"
                     >
                       Üye Paneli
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-gray-500 transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110 active:scale-100 hover:shadow-lg"
+                      className="bg-gray-600 text-white font-semibold py-2 px-6 rounded-none hover:bg-gray-500 transition-colors duration-200"
                     >
                       {t('logout') || 'Çıkış Yap'}
                     </button>
@@ -100,7 +100,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
@@ -113,7 +113,7 @@ export function LoginPage() {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        <div className="bg-white border border-gray-200 rounded-none overflow-hidden">
           {/* Tabs */}
           <div className="flex border-b border-gray-200 bg-gray-50">
             <button
@@ -171,7 +171,7 @@ export function LoginPage() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400"
                       placeholder="ornek@email.com"
                     />
                   </div>
@@ -187,19 +187,19 @@ export function LoginPage() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400"
                       placeholder="••••••••"
                     />
                   </div>
                 </div>
 
                 {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm whitespace-pre-wrap">
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-none text-sm whitespace-pre-wrap">
                     {error}
                   </div>
                 )}
                 {success && (
-                  <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+                  <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-none text-sm">
                     {success}
                   </div>
                 )}
@@ -207,7 +207,7 @@ export function LoginPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-900"
+                  className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-none text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-900"
                 >
                   {isLoading ? (
                     <>
@@ -236,7 +236,7 @@ export function LoginPage() {
                       autoComplete="name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400"
                       placeholder="Adınız Soyadınız"
                     />
                   </div>
@@ -252,7 +252,7 @@ export function LoginPage() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400"
                       placeholder="ornek@email.com"
                     />
                   </div>
@@ -268,7 +268,7 @@ export function LoginPage() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400"
                       placeholder="••••••••"
                     />
                   </div>
@@ -283,7 +283,7 @@ export function LoginPage() {
                       autoComplete="organization"
                       value={company}
                       onChange={(e) => setCompany(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400"
                       placeholder="Firma Adı"
                     />
                   </div>
@@ -298,19 +298,19 @@ export function LoginPage() {
                       autoComplete="job-title"
                       value={profession}
                       onChange={(e) => setProfession(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400"
                       placeholder="Mesleğiniz"
                     />
                   </div>
                 </div>
 
                 {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm whitespace-pre-wrap">
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-none text-sm whitespace-pre-wrap">
                     {error}
                   </div>
                 )}
                 {success && (
-                  <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+                  <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-none text-sm">
                     {success}
                   </div>
                 )}
@@ -318,7 +318,7 @@ export function LoginPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-900"
+                  className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-none text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-900"
                 >
                   {isLoading ? (
                     <>
