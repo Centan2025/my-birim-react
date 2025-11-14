@@ -199,6 +199,20 @@ export const heroMediaItem = defineType({
     }),
     defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
     defineField({name: 'subtitle', title: 'Alt Başlık', type: 'localizedString'}),
+    defineField({
+      name: 'textPosition',
+      title: 'Metin Konumu',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Merkez', value: 'center'},
+          {title: 'Sol', value: 'left'},
+          {title: 'Sağ', value: 'right'},
+        ],
+      },
+      initialValue: 'center',
+      description: 'Metinlerin hero medya üzerindeki konumu',
+    }),
     defineField({name: 'isButtonVisible', title: 'Butonu Göster', type: 'boolean'}),
     defineField({name: 'buttonText', title: 'Buton Metni', type: 'localizedString'}),
     defineField({name: 'buttonLink', title: 'Buton Bağlantısı', type: 'string'}),

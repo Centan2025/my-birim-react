@@ -11,20 +11,14 @@ export default defineType({
       type: 'array',
       of: [{type: 'heroMediaItem'}],
     }),
+    defineField({
+      name: 'heroAutoPlay',
+      title: 'Hero Medya Otomatik Geçiş',
+      type: 'boolean',
+      description: 'Hero medyanın otomatik olarak geçiş yapmasını sağlar',
+      initialValue: true,
+    }),
     defineField({name: 'isHeroTextVisible', title: 'Hero Metnini Göster', type: 'boolean'}),
-    defineField({name: 'isLogoVisible', title: 'Logoyu Göster', type: 'boolean'}),
-    defineField({
-      name: 'featuredProducts',
-      title: 'Öne Çıkan Ürünler',
-      type: 'array',
-      of: [{type: 'reference', to: [{type: 'product'}]}],
-    }),
-    defineField({
-      name: 'featuredDesigner',
-      title: 'Öne Çıkan Tasarımcı',
-      type: 'reference',
-      to: [{type: 'designer'}],
-    }),
     defineField({
       name: 'contentBlocks',
       title: 'İçerik Blokları',

@@ -209,6 +209,8 @@ export interface HeroMediaItem {
     urlDesktop?: string;
     /** Localized title text displayed over the media. */
     title: LocalizedString;
+    /** Metin konumu: center, left, right (default: center) */
+    textPosition?: 'center' | 'left' | 'right';
     /** Localized subtitle text displayed over the media. */
     subtitle: LocalizedString;
     /** Toggles visibility of the call-to-action button. */
@@ -249,6 +251,8 @@ export interface ContentBlock {
 export interface HomePageContent {
     /** An array of media items for the hero slider. */
     heroMedia: HeroMediaItem[];
+    /** Toggles automatic slide transition for hero media. */
+    heroAutoPlay?: boolean;
     /** Toggles the visibility of the hero text overlay. */
     isHeroTextVisible: boolean;
     /** Toggles the visibility of the logo in the hero section. */

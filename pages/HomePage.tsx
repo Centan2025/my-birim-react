@@ -1,16 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { getProducts, getDesigners, getSiteSettings, getHomePageContent } from '../services/cms';
-import type { Product, Designer, SiteSettings, HomePageContent } from '../types';
-import { ProductCard } from '../components/ProductCard';
-import { SiteLogo } from '../components/SiteLogo';
+import { getSiteSettings, getHomePageContent } from '../services/cms';
+import type { SiteSettings, HomePageContent } from '../types';
 import { OptimizedImage } from '../components/OptimizedImage';
 import { OptimizedVideo } from '../components/OptimizedVideo';
 import { useTranslation } from '../i18n';
 import { useSiteSettings } from '../App';
 
 const ArrowRight = (props: React.ComponentProps<'svg'>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M5 12h14"/></svg>
 );
 
 const getYouTubeId = (url: string): string | null => {
@@ -33,32 +31,35 @@ const YouTubeBackground: React.FC<{ url: string; isMobile?: boolean }> = ({ url,
         <div 
             className="absolute top-0 left-0 w-full h-full overflow-hidden"
             style={{
-                width: isMobile ? '100vw' : '100%',
-                maxWidth: isMobile ? '100vw' : '100%',
-                left: isMobile ? 0 : undefined,
-                right: isMobile ? 0 : undefined,
-                margin: 0,
-                padding: 0,
+                width: '100%',
+                height: '100%',
                 position: 'absolute',
                 top: 0,
+                left: 0,
+                right: 0,
                 bottom: 0,
-                marginLeft: isMobile ? 0 : undefined,
-                marginRight: isMobile ? 0 : undefined,
+                margin: 0,
+                padding: 0,
             }}
         >
             <iframe
-                className={isMobile ? "absolute top-0 left-0 w-full h-full" : "absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto transform -translate-x-1/2 -translate-y-1/2"}
+                className="absolute top-0 left-0 w-full h-full"
                 style={{ 
                   pointerEvents: 'none',
+                  width: '100%',
+                  height: '100%',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  border: 'none',
                   ...(isMobile ? {
-                    width: '100vw',
-                    height: '100%',
-                    maxWidth: '100vw',
-                    minWidth: '100vw',
-                    left: 0,
-                    right: 0,
-                    transform: 'none',
-                  } : {})
+                    minWidth: '100%',
+                    maxWidth: '100%',
+                  } : {
+                    minWidth: '100%',
+                    minHeight: '100%',
+                    objectFit: 'cover',
+                  })
                 }}
                 src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&autohide=1&modestbranding=1&rel=0`}
                 frameBorder="0"
@@ -70,8 +71,6 @@ const YouTubeBackground: React.FC<{ url: string; isMobile?: boolean }> = ({ url,
 
 export function HomePage() {
   const [content, setContent] = useState<HomePageContent | null>(null);
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-  const [featuredDesigner, setFeaturedDesigner] = useState<Designer | null>(null);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [inspirationImageHeight, setInspirationImageHeight] = useState<number | null>(null);
@@ -100,6 +99,7 @@ export function HomePage() {
   const heroContainerRef = useRef<HTMLDivElement>(null);
   const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const innerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoPlayIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Touch event'ler için non-passive listener'lar ekle
   useEffect(() => {
@@ -591,6 +591,28 @@ export function HomePage() {
           img.style.removeProperty('transform');
         }
       });
+      
+      // Iframe elementlerinin (YouTube) style'larını temizle ve desktop style'larını uygula
+      const iframes = document.querySelectorAll('.hero-slide-mobile iframe, .hero-scroll-container iframe');
+      iframes.forEach((iframe) => {
+        if (iframe instanceof HTMLIFrameElement) {
+          iframe.style.setProperty('width', '100%', 'important');
+          iframe.style.setProperty('max-width', '100%', 'important');
+          iframe.style.setProperty('min-width', '100%', 'important');
+          iframe.style.setProperty('height', '100%', 'important');
+          iframe.style.setProperty('min-height', '100%', 'important');
+          iframe.style.setProperty('position', 'absolute', 'important');
+          iframe.style.setProperty('top', '0', 'important');
+          iframe.style.setProperty('left', '0', 'important');
+          iframe.style.removeProperty('right');
+          iframe.style.removeProperty('margin-left');
+          iframe.style.removeProperty('margin-right');
+          iframe.style.removeProperty('padding-left');
+          iframe.style.removeProperty('padding-right');
+          iframe.style.removeProperty('transform');
+          iframe.style.setProperty('border', 'none', 'important');
+        }
+      });
     };
     
     // İlk uygulama
@@ -725,24 +747,12 @@ export function HomePage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const [productsData, designersData, siteSettingsData, homeContent] = await Promise.all([
-        getProducts(),
-        getDesigners(),
+      const [siteSettingsData, homeContent] = await Promise.all([
         getSiteSettings(),
         getHomePageContent()
       ]);
       setContent(homeContent || null);
       setSettings(siteSettingsData || null);
-      
-      if (homeContent?.featuredProductIds && Array.isArray(homeContent.featuredProductIds) && Array.isArray(productsData)) {
-        const fProducts = productsData.filter(p => homeContent.featuredProductIds.includes(p.id));
-        setFeaturedProducts(fProducts || []);
-      }
-
-      if (homeContent?.featuredDesignerId && Array.isArray(designersData)) {
-        const fDesigner = designersData.find(d => d.id === homeContent.featuredDesignerId);
-        setFeaturedDesigner(fDesigner || null);
-      }
     };
     fetchData();
   }, []);
@@ -771,14 +781,6 @@ export function HomePage() {
     img.src = bgImgUrl;
   }, [isMobile, content?.inspirationSection?.backgroundImage, viewportWidth]);
 
-  useEffect(() => {
-    if (!content || !content.heroMedia || content.heroMedia.length <= 1 || isDragging) return;
-    const timer = setTimeout(() => {
-      // Otomatik olarak sonraki slide'a geç (klonlara geçiş yapabilir, useEffect düzeltecek)
-      setCurrentSlide(prev => prev + 1);
-    }, 7000);
-    return () => clearTimeout(timer);
-  }, [currentSlide, content, isDragging]);
 
   // Klonlardan gerçek slide'a geçiş kontrolü için state
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -792,8 +794,62 @@ export function HomePage() {
       if (innerTimeoutRef.current) {
         clearTimeout(innerTimeoutRef.current);
       }
+      if (autoPlayIntervalRef.current) {
+        clearInterval(autoPlayIntervalRef.current);
+      }
     };
   }, []);
+
+  // Otomatik geçiş için interval
+  useEffect(() => {
+    // Önceki interval'ı temizle
+    if (autoPlayIntervalRef.current) {
+      clearInterval(autoPlayIntervalRef.current);
+      autoPlayIntervalRef.current = null;
+    }
+
+    // Otomatik geçiş kapalıysa veya içerik yoksa çık
+    if (!content?.heroMedia || content.heroMedia.length <= 1) {
+      return;
+    }
+    
+    // Sadece açıkça true olduğunda çalış (false veya undefined ise çalışma)
+    if (content.heroAutoPlay !== true) {
+      return;
+    }
+
+    // Sürükleme veya geçiş yapılıyorsa bekle
+    if (isDragging || isTransitioning) return;
+    // Otomatik geçiş interval'ını başlat (5 saniyede bir)
+    autoPlayIntervalRef.current = setInterval(() => {
+      if (isDragging || isTransitioning) return;
+      if (content?.heroAutoPlay !== true) {
+        // Eğer otomatik geçiş kapatıldıysa interval'ı durdur
+        if (autoPlayIntervalRef.current) {
+          clearInterval(autoPlayIntervalRef.current);
+          autoPlayIntervalRef.current = null;
+        }
+        return;
+      }
+      
+      const slideCount = content.heroMedia.length;
+      setCurrentSlide((prev) => {
+        const next = prev + 1;
+        if (next >= slideCount) {
+          // Son slide'dan ilk slide'a geç
+          return 0;
+        }
+        return next;
+      });
+    }, 5000); // 5 saniye
+
+    return () => {
+      if (autoPlayIntervalRef.current) {
+        clearInterval(autoPlayIntervalRef.current);
+        autoPlayIntervalRef.current = null;
+      }
+    };
+  }, [content?.heroMedia, content?.heroAutoPlay, isDragging, isTransitioning]);
 
   // Klonlardan gerçek slide'a geçiş kontrolü - sadece otomatik geçiş için (drag değil)
   useEffect(() => {
@@ -1059,10 +1115,12 @@ export function HomePage() {
               .hero-slide-mobile video,
               .hero-slide-mobile img,
               .hero-scroll-container video,
-              .hero-scroll-container img {
+              .hero-scroll-container img,
+              .hero-slide-mobile iframe,
+              .hero-scroll-container iframe {
                 width: 100% !important;
                 max-width: 100% !important;
-                min-width: auto !important;
+                min-width: 100% !important;
                 height: 100% !important;
                 min-height: 100% !important;
                 object-fit: cover !important;
@@ -1074,6 +1132,7 @@ export function HomePage() {
                 padding-left: 0 !important;
                 padding-right: 0 !important;
                 transform: none !important;
+                border: none !important;
               }
             }
             @media (max-width: 1023px) {
@@ -1353,13 +1412,17 @@ export function HomePage() {
                           />
                       )}
                       <div className="absolute inset-0 bg-black/50 z-10"></div>
-                       <div className={`absolute z-20 ${isMobile ? 'w-full px-4' : 'container mx-auto px-4 sm:px-6 lg:px-8'} h-full flex items-center ${content.isHeroTextVisible && content.isLogoVisible ? 'justify-center md:justify-start' : 'justify-center'}`} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-                          <div className={`flex flex-col md:flex-row items-center text-white gap-12 md:gap-16 ${content.isHeroTextVisible || content.isLogoVisible ? 'max-w-4xl' : ''} text-center ${content.isLogoVisible ? 'md:text-left' : 'md:text-center'}`}>
-                              {content.isLogoVisible && (
-                                  <div className="animate-fade-in-down flex-shrink-0">
-                                      <SiteLogo logoUrl={settings?.logoUrl} className="w-[360px] h-[360px]" />
-                                  </div>
-                              )}
+                       {(() => {
+                         const textPosition = media.textPosition || 'center';
+                         const justifyClass = textPosition === 'left' ? 'justify-center md:justify-start' : 
+                                            textPosition === 'right' ? 'justify-center md:justify-end' : 
+                                            'justify-center';
+                         const textAlignClass = textPosition === 'left' ? 'text-center md:text-left' : 
+                                              textPosition === 'right' ? 'text-center md:text-right' : 
+                                              'text-center';
+                         return (
+                           <div className={`absolute z-20 ${isMobile ? 'w-full px-4' : 'container mx-auto px-4 sm:px-6 lg:px-8'} h-full flex items-center ${justifyClass}`} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+                              <div className={`flex flex-col md:flex-row items-center text-white gap-12 md:gap-16 ${content.isHeroTextVisible ? 'max-w-4xl' : ''} ${textAlignClass}`}>
                               {content.isHeroTextVisible && (
                                   <div className="relative w-full">
                                       <div className="animate-fade-in-up">
@@ -1368,17 +1431,21 @@ export function HomePage() {
                                         {media.isButtonVisible && (
                                           <Link
                                               to={media.buttonLink || '/'}
-                                              className="group inline-flex items-center gap-x-3 text-white font-semibold py-2 px-4 text-xs md:text-lg rounded-lg hover:bg-white/10 transition-colors duration-300"
+                                              className="group inline-flex items-center gap-x-3 text-white font-semibold py-2 pl-0 pr-4 text-xs md:text-lg rounded-lg"
                                           >
-                                              <span className="transition-transform duration-300 ease-out group-hover:-translate-x-1">{t(media.buttonText)}</span>
-                                              <ArrowRight className="w-3 h-3 md:w-5 md:h-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+                                              <span className="inline-flex items-center gap-x-3 border-b border-transparent group-hover:border-white pb-1 transition-all duration-300 ease-out">
+                                                  <span className="group-hover:text-gray-200">{t(media.buttonText)}</span>
+                                                  <ArrowRight className="w-4 h-4 md:w-6 md:h-6" />
+                                              </span>
                                           </Link>
                                         )}
                                       </div>
                                   </div>
                               )}
                           </div>
-                      </div>
+                       </div>
+                       );
+                       })()}
                   </div>
                 );
               })}
@@ -1471,10 +1538,12 @@ export function HomePage() {
                             <div className={`mt-6 ${textAlignClass}`}>
                               <Link
                                 to={block.linkUrl}
-                                className="group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 px-5 text-sm md:text-lg rounded-lg hover:bg-gray-900/10 transition-colors duration-300"
+                                className="group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
                               >
-                                <span className="transition-transform duration-300 ease-out group-hover:-translate-x-1">{t(block.linkText)}</span>
-                                <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+                                <span className="inline-flex items-center gap-x-3 border-b border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
+                                  <span className="group-hover:text-gray-500">{t(block.linkText)}</span>
+                                  <ArrowRight className="w-5 h-5 md:w-6 md:h-6" />
+                                </span>
                               </Link>
                             </div>
                           )}
@@ -1519,10 +1588,12 @@ export function HomePage() {
                               <div className={`mt-6 ${textAlignClass}`}>
                                 <Link
                                   to={block.linkUrl}
-                                  className="group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 px-5 text-sm md:text-lg rounded-lg hover:bg-gray-900/10 transition-colors duration-300"
+                                  className="group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
                                 >
-                                  <span className="transition-transform duration-300 ease-out group-hover:-translate-x-1">{t(block.linkText)}</span>
-                                  <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+                                  <span className="inline-flex items-center gap-x-3 border-b border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
+                                    <span className="group-hover:text-gray-500">{t(block.linkText)}</span>
+                                    <ArrowRight className="w-5 h-5 md:w-6 md:h-6" />
+                                  </span>
                                 </Link>
                               </div>
                             )}
@@ -1538,51 +1609,6 @@ export function HomePage() {
         );
       })()}
 
-      {/* Featured Products Section */}
-      {Array.isArray(featuredProducts) && featuredProducts.length > 0 && (
-        <section id="featured" className="py-20 bg-gray-100">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
-            <h2 className="text-3xl font-light text-gray-600 text-center mb-4 leading-relaxed">{t('featured_products')}</h2>
-            <p className="text-center text-gray-500 max-w-2xl mx-auto mb-12 font-light leading-relaxed">{t('featured_products_subtitle')}</p>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-              {featuredProducts.map(p => (
-                <ProductCard key={p.id} product={p} variant="light" />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Designer Spotlight */}
-      {featuredDesigner && (
-        <section className="py-20 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center gap-12 animate-fade-in-up">
-              <div className="w-full md:w-1/2 overflow-hidden">
-                  <OptimizedImage
-                    src={typeof featuredDesigner.image === 'string' ? featuredDesigner.image : featuredDesigner.image?.url || ''}
-                    srcMobile={typeof featuredDesigner.image === 'object' ? featuredDesigner.image.urlMobile : featuredDesigner.imageMobile}
-                    srcDesktop={typeof featuredDesigner.image === 'object' ? featuredDesigner.image.urlDesktop : featuredDesigner.imageDesktop}
-                    alt={t(featuredDesigner.name)}
-                    className="shadow-xl w-full object-cover max-w-full"
-                    loading="lazy"
-                    quality={85}
-                  />
-              </div>
-              <div className="w-full md:w-1/2 text-center md:text-left">
-                  <h3 className="text-sm font-light uppercase tracking-widest text-gray-500">{t('designer_spotlight')}</h3>
-                  <h2 className="text-4xl font-light text-gray-600 mt-2 leading-relaxed">{t(featuredDesigner.name)}</h2>
-                  <p className="mt-4 text-gray-500 leading-loose font-light">{t(featuredDesigner.bio).substring(0, 200)}...</p>
-                   <Link
-                    to={`/designer/${featuredDesigner.id}`}
-                    className="group mt-8 inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 px-5 text-lg rounded-lg hover:bg-gray-900/10 transition-colors duration-300"
-                  >
-                    <span className="transition-transform duration-300 ease-out group-hover:-translate-x-1">{t('discover_the_designer')}</span>
-                    <ArrowRight className="w-5 h-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
-                  </Link>
-              </div>
-          </div>
-        </section>
-      )}
 
       {/* Inspiration Section */}
       {inspiration && (inspiration.backgroundImage || inspiration.title || inspiration.subtitle) && (
@@ -1609,10 +1635,12 @@ export function HomePage() {
               {inspiration.buttonText && (
                 <Link
                     to={inspiration.buttonLink || '/'}
-                    className="group mt-8 inline-flex items-center gap-x-3 text-white font-semibold py-3 px-5 text-lg rounded-lg hover:bg-white/10 transition-colors duration-300"
+                    className="group mt-8 inline-flex items-center gap-x-3 text-white font-semibold py-3 pl-0 pr-5 text-lg rounded-lg"
                 >
-                    <span className="transition-transform duration-300 ease-out group-hover:-translate-x-1">{t(inspiration.buttonText)}</span>
-                    <ArrowRight className="w-5 h-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+                    <span className="inline-flex items-center gap-x-3 border-b border-transparent group-hover:border-white pb-1 transition-all duration-300 ease-out">
+                      <span className="group-hover:text-gray-200">{t(inspiration.buttonText)}</span>
+                      <ArrowRight className="w-6 h-6" />
+                    </span>
                 </Link>
               )}
            </div>

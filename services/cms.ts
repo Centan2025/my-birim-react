@@ -872,9 +872,7 @@ export const getContactPageContent = async (): Promise<ContactPageContent> => {
                 media[]{
                     type,
                     url,
-                    image{
-                        asset->{url}
-                    },
+                    image,
                     videoFile{
                         asset->{url, _ref, _id}
                     }
@@ -887,8 +885,8 @@ export const getContactPageContent = async (): Promise<ContactPageContent> => {
                 if (loc.media && Array.isArray(loc.media)) {
                     const processedMedia = loc.media.map((mediaItem: any) => {
                         let mediaUrl = mediaItem.url;
-                        if (mediaItem.type === 'image' && mediaItem.image?.asset?.url) {
-                            mediaUrl = mediaItem.image.asset.url;
+                        if (mediaItem.type === 'image' && mediaItem.image) {
+                            mediaUrl = mapImage(mediaItem.image);
                         } else if (mediaItem.type === 'video' && mediaItem.videoFile?.asset?.url) {
                             mediaUrl = mediaItem.videoFile.asset.url;
                         } else if (mediaItem.type === 'video' && mediaItem.videoFile?.asset?._id) {
@@ -919,17 +917,12 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
     if (useSanity && sanity) {
         const q = groq`*[_type == "homePage"][0]{
             ...,
+            heroAutoPlay,
             heroMedia[]{
                 ...,
-                image{
-                    asset->{url}
-                },
-                imageMobile{
-                    asset->{url}
-                },
-                imageDesktop{
-                    asset->{url}
-                },
+                image,
+                imageMobile,
+                imageDesktop,
                 videoFile{
                     asset->{url, _ref, _id}
                 },
@@ -942,9 +935,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             },
             contentBlocks[]{
                 ...,
-                image{
-                    asset->{url}
-                },
+                image,
                 videoFile{
                     asset->{url, _ref, _id}
                 }
@@ -973,8 +964,8 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
         if (data?.contentBlocks) {
             data.contentBlocks = data.contentBlocks.map((b: any) => {
                 let url = b.url
-                if (b.mediaType === 'image' && b.image?.asset?.url) {
-                    return { ...b, image: b.image.asset.url, url: undefined }
+                if (b.mediaType === 'image' && b.image) {
+                    return { ...b, image: mapImage(b.image), url: undefined }
                 } else if (b.mediaType === 'video' && b.videoFile?.asset?.url) {
                     url = b.videoFile.asset.url
                 } else if (b.mediaType === 'video' && b.videoFile?.asset?._id) {
@@ -1111,9 +1102,9 @@ export const getNews = async (): Promise<NewsItem[]> => {
             type,
             url,
             caption,
-            image{asset->{url}},
-            imageMobile{asset->{url}},
-            imageDesktop{asset->{url}},
+            image,
+            imageMobile,
+            imageDesktop,
             videoFile{asset->{url, _ref, _id}},
             videoFileMobile{asset->{url, _ref, _id}},
             videoFileDesktop{asset->{url, _ref, _id}}
@@ -1166,9 +1157,9 @@ export const getNewsById = async (id: string): Promise<NewsItem | undefined> => 
             type,
             url,
             caption,
-            image{asset->{url}},
-            imageMobile{asset->{url}},
-            imageDesktop{asset->{url}},
+            image,
+            imageMobile,
+            imageDesktop,
             videoFile{asset->{url, _ref, _id}},
             videoFileMobile{asset->{url, _ref, _id}},
             videoFileDesktop{asset->{url, _ref, _id}}
