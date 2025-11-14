@@ -59,42 +59,6 @@ const sanityMutations = useSanity && SANITY_TOKEN
 
 const urlFor = (source: any) => (useSanity && sanity ? imageUrlBuilder(sanity).image(source) : null)
 
-// Optimize edilmiş görsel URL'i oluştur
-const getOptimizedImageUrl = (source: any, options: {
-  width?: number;
-  height?: number;
-  quality?: number;
-  format?: 'webp' | 'jpg' | 'png';
-  fit?: 'clip' | 'crop' | 'fill' | 'fillmax' | 'max' | 'scale' | 'min';
-} = {}): string => {
-  if (!source) return '';
-  if (typeof source === 'string') return source;
-  if (source.url) return source.url;
-  
-  const builder = urlFor && urlFor(source);
-  if (!builder) return '';
-  
-  const {
-    width,
-    height,
-    quality = 85,
-    format = 'webp',
-    fit = 'max',
-  } = options;
-  
-  let imageBuilder = builder;
-  
-  if (width) imageBuilder = imageBuilder.width(width);
-  if (height) imageBuilder = imageBuilder.height(height);
-  
-  return imageBuilder
-    .quality(quality)
-    .format(format)
-    .fit(fit)
-    .auto('format')
-    .url() || '';
-};
-
 const mapImage = (img: any | undefined, options?: {
   width?: number;
   height?: number;

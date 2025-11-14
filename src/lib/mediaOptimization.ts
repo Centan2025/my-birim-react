@@ -14,7 +14,7 @@ export const getOptimizedImageUrl = (
     width?: number;
     height?: number;
     quality?: number;
-    format?: 'webp' | 'jpg' | 'png' | 'avif';
+    format?: 'webp' | 'jpg' | 'png';
     fit?: 'clip' | 'crop' | 'fill' | 'fillmax' | 'max' | 'scale' | 'min';
     auto?: 'format';
   } = {}
@@ -48,6 +48,7 @@ export const getOptimizedImageUrl = (
   }
   
   // Format ve kalite ayarla
+  // Sanity ImageFormat tipi sadece 'webp', 'jpg', 'png' destekleniyor
   imageBuilder = imageBuilder
     .quality(quality)
     .format(format)

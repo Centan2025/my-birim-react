@@ -302,7 +302,7 @@ export function ContactPage() {
                     >
                       {m.type === 'image' ? (
                         <OptimizedImage
-                          src={m.url}
+                          src={m.url || ''}
                           alt={`Media ${idx + 1}`}
                           className="w-full h-full object-cover"
                           loading="lazy"
