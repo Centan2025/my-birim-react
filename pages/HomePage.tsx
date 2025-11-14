@@ -601,6 +601,27 @@ export function HomePage() {
     fetchData();
   }, []);
 
+  // İlham görselinin yüksekliğini hesapla (mobilde)
+  useEffect(() => {
+    if (!isMobile || !content?.inspirationSection?.backgroundImage) {
+      setInspirationImageHeight(null);
+      return;
+    }
+
+    const img = new Image();
+    img.onload = () => {
+      const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+      // Görselin genişliği viewport genişliğine eşit olacak, yüksekliği orantılı olarak hesapla
+      const aspectRatio = img.height / img.width;
+      const calculatedHeight = viewportWidth * aspectRatio;
+      setInspirationImageHeight(calculatedHeight);
+    };
+    img.onerror = () => {
+      setInspirationImageHeight(null);
+    };
+    img.src = content.inspirationSection.backgroundImage;
+  }, [isMobile, content?.inspirationSection?.backgroundImage, viewportWidth]);
+
   useEffect(() => {
     if (!content || !content.heroMedia || content.heroMedia.length <= 1 || isDragging) return;
     const timer = setTimeout(() => {
@@ -1303,7 +1324,12 @@ export function HomePage() {
             backgroundAttachment: 'fixed', 
             backgroundPosition: isMobile ? 'left center' : 'center center', 
             backgroundRepeat: 'no-repeat',
-            minHeight: inspirationImageHeight && inspiration.backgroundImage ? `${inspirationImageHeight}px` : undefined,
+            ...(isMobile && inspirationImageHeight && inspiration.backgroundImage 
+              ? { height: `${inspirationImageHeight}px`, minHeight: `${inspirationImageHeight}px`, paddingTop: 0, paddingBottom: 0 }
+              : {}),
+            ...(!isMobile && inspirationImageHeight && inspiration.backgroundImage 
+              ? { minHeight: `${inspirationImageHeight}px` }
+              : {}),
           }}
         >
            <div className="absolute inset-0 bg-black/50"></div>
