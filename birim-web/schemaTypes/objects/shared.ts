@@ -315,6 +315,49 @@ export const legalLink = defineType({
   ],
 })
 
+export const contactLocationMedia = defineType({
+  name: 'contactLocationMedia',
+  title: 'Lokasyon Medyası',
+  type: 'object',
+  fields: [
+    defineField({
+      name: 'type',
+      title: 'Tür',
+      type: 'string',
+      options: {list: [
+        {title: 'Image', value: 'image'},
+        {title: 'Video', value: 'video'},
+        {title: 'YouTube', value: 'youtube'},
+      ]},
+      initialValue: 'image',
+    }),
+    defineField({
+      name: 'image',
+      title: 'Görsel',
+      type: 'image',
+      options: { hotspot: true },
+      hidden: ({parent}) => parent?.type !== 'image',
+    }),
+    defineField({
+      name: 'videoFile',
+      title: 'Video Dosyası',
+      type: 'file',
+      options: {
+        accept: 'video/*',
+      },
+      hidden: ({parent}) => parent?.type !== 'video',
+      description: 'Video dosyasını sürükle-bırak ile yükleyin',
+    }),
+    defineField({
+      name: 'url',
+      title: 'Video URL (veya YouTube URL)',
+      type: 'url',
+      hidden: ({parent}) => parent?.type === 'image' || (parent?.type === 'video' && parent?.videoFile),
+      description: 'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.'
+    }),
+  ],
+})
+
 export const contactLocation = defineType({
   name: 'contactLocation',
   title: 'İletişim Lokasyonu',
@@ -325,7 +368,35 @@ export const contactLocation = defineType({
     defineField({name: 'address', title: 'Adres', type: 'string'}),
     defineField({name: 'phone', title: 'Telefon', type: 'string'}),
     defineField({name: 'email', title: 'E-posta', type: 'string'}),
-    defineField({name: 'mapEmbedUrl', title: 'Harita Embed URL', type: 'url'}),
+    defineField({
+      name: 'mapEmbedUrl', 
+      title: 'Harita URL', 
+      type: 'string',
+      description: 'Google Maps linkini veya embed URL\'sini yapıştırın. Normal link otomatik olarak embed formatına çevrilecektir.',
+      validation: (Rule) => Rule.optional().custom((value: string | undefined) => {
+        if (!value) return true; // Optional field
+        // Accept both regular Google Maps URLs and embed URLs
+        const isGoogleMapsUrl = /google\.com\/maps/.test(value) || /maps\.google\.com/.test(value);
+        if (!isGoogleMapsUrl) {
+          return 'Lütfen geçerli bir Google Maps linki girin';
+        }
+        return true;
+      })
+    }),
+    defineField({
+      name: 'media',
+      title: 'Medyalar',
+      type: 'array',
+      of: [{type: 'contactLocationMedia'}],
+      description: 'Lokasyon için bant şeklinde gösterilecek medyalar',
+    }),
+    defineField({
+      name: 'isMediaVisible',
+      title: 'Medyaları Göster',
+      type: 'boolean',
+      initialValue: false,
+      description: 'Medyaların görünür olup olmayacağını kontrol eder',
+    }),
   ],
 })
 

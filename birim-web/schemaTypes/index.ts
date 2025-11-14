@@ -37,6 +37,7 @@ import {
   socialLink,
   legalLink,
   contactLocation,
+  contactLocationMedia,
   materialSwatchBook,
 } from './objects/shared'
 
@@ -81,4 +82,5 @@ export const schemaTypes = [
   socialLink,
   legalLink,
   contactLocation,
+  contactLocationMedia,
 ]

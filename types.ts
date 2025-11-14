@@ -273,6 +273,30 @@ export interface AboutPageContent {
 }
 
 /**
+ * Represents media for a contact location.
+ */
+export interface ContactLocationMedia {
+    type: 'image' | 'video' | 'youtube';
+    image?: {
+        asset?: {
+            _ref?: string;
+            _type?: string;
+            url?: string;
+        };
+        _type?: string;
+    };
+    videoFile?: {
+        asset?: {
+            _ref?: string;
+            _type?: string;
+            url?: string;
+        };
+        _type?: string;
+    };
+    url?: string;
+}
+
+/**
  * Represents a physical location for the company (e.g., showroom, factory).
  */
 export interface ContactLocation {
@@ -282,6 +306,8 @@ export interface ContactLocation {
     phone: string;
     email?: string;
     mapEmbedUrl?: string;
+    media?: ContactLocationMedia[];
+    isMediaVisible?: boolean;
 }
 
 /**

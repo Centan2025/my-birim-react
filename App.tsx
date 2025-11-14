@@ -395,7 +395,16 @@ const Footer = () => {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder={t('email_placeholder')}
-                                    className="w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 transition-all duration-200 text-[11px] text-center lg:text-left"
+                                    className="w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[11px] text-center lg:text-left"
+                                    style={{ outline: 'none', boxShadow: 'none' }}
+                                    onFocus={(e) => {
+                                        e.target.style.outline = 'none';
+                                        e.target.style.boxShadow = 'none';
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.style.outline = 'none';
+                                        e.target.style.boxShadow = 'none';
+                                    }}
                                 />
                                 {/* Çizgi - input'un sol başından button'ın sağ sonuna kadar */}
                                 <div className="hidden lg:block absolute bottom-0 left-0 border-b border-white" style={{width: 'calc(100% + 0.5rem + 4.8rem)'}}></div>

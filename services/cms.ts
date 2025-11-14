@@ -721,8 +721,47 @@ export const updateAboutPageContent = async (content: AboutPageContent): Promise
 
 export const getContactPageContent = async (): Promise<ContactPageContent> => {
     if (useSanity && sanity) {
-        const q = groq`*[_type == "contactPage"][0]`
-        return await sanity.fetch(q)
+        const q = groq`*[_type == "contactPage"][0]{
+            ...,
+            locations[]{
+                ...,
+                media[]{
+                    type,
+                    url,
+                    image{
+                        asset->{url}
+                    },
+                    videoFile{
+                        asset->{url, _ref, _id}
+                    }
+                }
+            }
+        }`
+        const data = await sanity.fetch(q);
+        if (data?.locations) {
+            data.locations = data.locations.map((loc: any) => {
+                if (loc.media && Array.isArray(loc.media)) {
+                    const processedMedia = loc.media.map((mediaItem: any) => {
+                        let mediaUrl = mediaItem.url;
+                        if (mediaItem.type === 'image' && mediaItem.image?.asset?.url) {
+                            mediaUrl = mediaItem.image.asset.url;
+                        } else if (mediaItem.type === 'video' && mediaItem.videoFile?.asset?.url) {
+                            mediaUrl = mediaItem.videoFile.asset.url;
+                        } else if (mediaItem.type === 'video' && mediaItem.videoFile?.asset?._id) {
+                            const fileId = mediaItem.videoFile.asset._id.replace('file-', '');
+                            mediaUrl = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`;
+                        } else if (mediaItem.type === 'video' && mediaItem.videoFile?.asset?._ref) {
+                            const fileId = mediaItem.videoFile.asset._ref.replace('file-', '');
+                            mediaUrl = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`;
+                        }
+                        return { ...mediaItem, url: mediaUrl };
+                    }).filter((m: any) => m.url); // URL'si olmayan medyaları filtrele
+                    return { ...loc, media: processedMedia };
+                }
+                return loc;
+            });
+        }
+        return data;
     }
     await delay(SIMULATED_DELAY);
     return getItem<ContactPageContent>(KEYS.CONTACT_PAGE);
