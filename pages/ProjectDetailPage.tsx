@@ -74,7 +74,13 @@ export function ProjectDetailPage(){
   const coverDesktop = project.cover && typeof project.cover === 'object' ? project.cover.urlDesktop : undefined;
   
   // Use cover image + media array (images and videos)
-  const mediaArray = (project.media || []).map((m) => ({ type: m.type, url: m.url, image: m.image || (m.type === 'image' ? m.url : undefined) }))
+  const mediaArray = (project.media || []).map((m) => ({ 
+    type: m.type, 
+    url: m.url, 
+    urlMobile: m.urlMobile,
+    urlDesktop: m.urlDesktop,
+    image: m.image || (m.type === 'image' ? m.url : undefined) 
+  }))
   // Cover görselini başa ekle (eğer varsa ve media array'inde yoksa)
   const coverMedia = coverUrl ? [{ type: 'image' as const, url: coverUrl, urlMobile: coverMobile, urlDesktop: coverDesktop, image: coverUrl }] : []
   // Cover'ı media array'inin başına ekle, ancak aynı URL'den varsa tekrar ekleme

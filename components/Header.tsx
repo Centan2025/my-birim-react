@@ -845,7 +845,7 @@ export function Header() {
                             const designerName = t(allData?.designers.find(d => d.id === product.designerId)?.name);
                             return (
                                <Link key={product.id} to={`/product/${product.id}`} onClick={closeSearch} className="flex items-center p-3 hover:bg-white/10 rounded-md transition-colors duration-200">
-                                  <img src={product.mainImage} alt={t(product.name)} className="w-12 h-12 object-cover rounded-md mr-4 flex-shrink-0" />
+                                  <img src={typeof product.mainImage === 'string' ? product.mainImage : product.mainImage?.url || ''} alt={t(product.name)} className="w-12 h-12 object-cover rounded-md mr-4 flex-shrink-0" />
                                   <div>
                                     <p className="font-semibold text-white">{t(product.name)}</p>
                                     {designerName && <p className="text-sm text-gray-400">{designerName}</p>}
@@ -880,7 +880,7 @@ export function Header() {
                       <div className="space-y-2">
                         {searchResults.designers.map(designer => (
                            <Link key={designer.id} to={`/designer/${designer.id}`} onClick={closeSearch} className="flex items-center p-3 hover:bg-white/10 rounded-md transition-colors duration-200">
-                              <img src={designer.image} alt={t(designer.name)} className="w-12 h-12 object-cover rounded-full mr-4 flex-shrink-0" />
+                              <img src={typeof designer.image === 'string' ? designer.image : designer.image?.url || ''} alt={t(designer.name)} className="w-12 h-12 object-cover rounded-full mr-4 flex-shrink-0" />
                               <div>
                                 <p className="font-semibold text-white">{t(designer.name)}</p>
                                 <p className="text-sm text-gray-400">{t('designer')}</p>

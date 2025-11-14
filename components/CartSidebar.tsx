@@ -46,7 +46,7 @@ export function CartSidebar() {
                             <div className="flex-grow overflow-y-auto p-6 space-y-4">
                                 {cartItems.map(item => (
                                     <div key={item.product.id} className="flex items-start gap-4">
-                                        <img src={item.product.mainImage} alt={t(item.product.name)} className="w-20 h-20 object-cover rounded-md flex-shrink-0" />
+                                        <img src={typeof item.product.mainImage === 'string' ? item.product.mainImage : item.product.mainImage?.url || ''} alt={t(item.product.name)} className="w-20 h-20 object-cover rounded-md flex-shrink-0" />
                                         <div className="flex-grow">
                                             <Link to={`/product/${item.product.id}`} onClick={toggleCart} className="font-semibold text-gray-800 hover:underline">{t(item.product.name)}</Link>
                                             <p className="text-sm text-gray-600">{new Intl.NumberFormat(locale, { style: 'currency', currency: item.product.currency || 'TRY' }).format(item.product.price)}</p>
