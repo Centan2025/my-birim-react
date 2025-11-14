@@ -473,6 +473,150 @@ export function HomePage() {
     };
   }, [isMobile, content, viewportWidth]); // viewportWidth'i de dependency'ye ekle
 
+  // Desktop'a geçildiğinde mobil style'ları temizle ve desktop style'larını uygula
+  // Ayrıca resize event'inde de çalışsın
+  useEffect(() => {
+    if (isMobile) return; // Mobildeyse hiçbir şey yapma
+    
+    const applyDesktopStyles = () => {
+      // Tüm mobil style'ları temizle ve desktop style'larını uygula
+      const pageContainer = document.querySelector('.hero-page-container-mobile');
+      if (pageContainer instanceof HTMLElement) {
+        pageContainer.style.setProperty('width', '100%', 'important');
+        pageContainer.style.setProperty('max-width', '100%', 'important');
+        pageContainer.style.removeProperty('margin-left');
+        pageContainer.style.removeProperty('margin-right');
+        pageContainer.style.removeProperty('padding-left');
+        pageContainer.style.removeProperty('padding-right');
+        pageContainer.style.removeProperty('overflow-x');
+        pageContainer.style.removeProperty('left');
+      }
+      
+      const heroContainer = heroContainerRef.current;
+      if (heroContainer) {
+        // Desktop için açıkça style'ları set et
+        heroContainer.style.setProperty('width', '100%', 'important');
+        heroContainer.style.setProperty('max-width', '100%', 'important');
+        heroContainer.style.setProperty('min-width', 'auto', 'important');
+        heroContainer.style.removeProperty('margin-left');
+        heroContainer.style.removeProperty('margin-right');
+        heroContainer.style.removeProperty('padding-left');
+        heroContainer.style.removeProperty('padding-right');
+        heroContainer.style.removeProperty('left');
+        heroContainer.style.removeProperty('right');
+        heroContainer.style.setProperty('overflow', 'hidden', 'important');
+      }
+      
+      const heroScrollContainer = document.querySelector('.hero-scroll-container');
+      if (heroScrollContainer instanceof HTMLElement) {
+        // Desktop için genişliği yüzde olarak set et
+        // Klonlar dahil toplam slide sayısını al
+        const totalSlides = heroScrollContainer.children.length;
+        const slideCount = content?.heroMedia?.length || 1;
+        // Klonlar dahil toplam slide sayısını kullan
+        const actualSlideCount = totalSlides > 0 ? totalSlides : slideCount;
+        heroScrollContainer.style.setProperty('width', `${actualSlideCount * 100}%`, 'important');
+        heroScrollContainer.style.setProperty('min-width', `${actualSlideCount * 100}%`, 'important');
+        heroScrollContainer.style.setProperty('max-width', `${actualSlideCount * 100}%`, 'important');
+        heroScrollContainer.style.removeProperty('margin-left');
+        heroScrollContainer.style.removeProperty('margin-right');
+        heroScrollContainer.style.setProperty('overflow', 'visible', 'important');
+      }
+      
+      // Slide'ların style'larını temizle ve desktop style'larını uygula
+      const slides = document.querySelectorAll('.hero-slide-mobile, .hero-scroll-container > div');
+      const heroScrollContainerForSlides = document.querySelector('.hero-scroll-container');
+      const totalSlidesForSlides = heroScrollContainerForSlides?.children.length || content?.heroMedia?.length || 1;
+      const slideCountForSlides = content?.heroMedia?.length || 1;
+      // Klonlar dahil toplam slide sayısını hesapla
+      const actualSlideCountForSlides = totalSlidesForSlides > slideCountForSlides && slideCountForSlides > 1 ? totalSlidesForSlides : (totalSlidesForSlides > 0 ? totalSlidesForSlides : slideCountForSlides);
+      
+      slides.forEach((slide) => {
+        if (slide instanceof HTMLElement) {
+          // Desktop için yüzde genişlik kullan
+          slide.style.setProperty('width', `${100 / actualSlideCountForSlides}%`, 'important');
+          slide.style.setProperty('max-width', `${100 / actualSlideCountForSlides}%`, 'important');
+          slide.style.setProperty('min-width', `${100 / actualSlideCountForSlides}%`, 'important');
+          slide.style.removeProperty('height');
+          slide.style.removeProperty('min-height');
+          slide.style.removeProperty('left');
+          slide.style.removeProperty('margin-left');
+          slide.style.removeProperty('padding-left');
+        }
+      });
+      
+      // Video elementlerinin style'larını temizle ve desktop style'larını uygula
+      const videos = document.querySelectorAll('.hero-slide-mobile video, .hero-scroll-container video');
+      videos.forEach((video) => {
+        if (video instanceof HTMLVideoElement) {
+          video.style.setProperty('width', '100%', 'important');
+          video.style.setProperty('max-width', '100%', 'important');
+          video.style.setProperty('min-width', 'auto', 'important');
+          video.style.setProperty('height', '100%', 'important');
+          video.style.setProperty('min-height', '100%', 'important');
+          video.style.removeProperty('left');
+          video.style.removeProperty('right');
+          video.style.removeProperty('margin-left');
+          video.style.removeProperty('margin-right');
+          video.style.removeProperty('padding-left');
+          video.style.removeProperty('padding-right');
+          video.style.setProperty('object-fit', 'cover', 'important');
+          video.style.removeProperty('object-position');
+          video.style.setProperty('position', 'absolute', 'important');
+          video.style.setProperty('top', '0', 'important');
+          video.style.setProperty('bottom', '0', 'important');
+          video.style.removeProperty('transform');
+        }
+      });
+      
+      // Image elementlerinin style'larını temizle ve desktop style'larını uygula
+      const images = document.querySelectorAll('.hero-slide-mobile img, .hero-scroll-container img');
+      images.forEach((img) => {
+        if (img instanceof HTMLImageElement) {
+          img.style.setProperty('width', '100%', 'important');
+          img.style.setProperty('max-width', '100%', 'important');
+          img.style.setProperty('min-width', 'auto', 'important');
+          img.style.setProperty('height', '100%', 'important');
+          img.style.setProperty('min-height', '100%', 'important');
+          img.style.setProperty('position', 'absolute', 'important');
+          img.style.setProperty('top', '0', 'important');
+          img.style.setProperty('left', '0', 'important');
+          img.style.removeProperty('right');
+          img.style.removeProperty('margin-left');
+          img.style.removeProperty('margin-right');
+          img.style.removeProperty('padding-left');
+          img.style.removeProperty('padding-right');
+          img.style.setProperty('object-fit', 'cover', 'important');
+          img.style.removeProperty('object-position');
+          img.style.removeProperty('transform');
+        }
+      });
+    };
+    
+    // İlk uygulama
+    const timeoutId = setTimeout(applyDesktopStyles, 100);
+    
+    // Resize event'inde de uygula
+    let resizeTimeoutId: ReturnType<typeof setTimeout> | null = null;
+    const handleResize = () => {
+      // Window genişliğine göre kontrol et (closure sorununu önlemek için)
+      const windowWidth = window.innerWidth;
+      if (windowWidth >= 1024) {
+        // Debounce ile uygula (performans için)
+        if (resizeTimeoutId) clearTimeout(resizeTimeoutId);
+        resizeTimeoutId = setTimeout(applyDesktopStyles, 150);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      if (resizeTimeoutId) clearTimeout(resizeTimeoutId);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [isMobile, content]);
+
   const handleDragStart = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     if (e.target instanceof HTMLElement && e.target.closest('a, button')) {
         return;
@@ -839,6 +983,9 @@ export function HomePage() {
   // +1 çünkü ilk klon var
   const getTransform = () => {
     if (slideCount <= 1) return 'translateX(0%)';
+    // Hem mobil hem desktop'ta yüzde bazlı hesaplama kullan
+    // Her slide hero scroll container'ın %100 / totalSlides genişliğinde
+    // Transform: -(currentSlide + 1) * (100 / totalSlides)%
     const translateX = -(currentSlide + 1) * (100 / totalSlides);
     return `translateX(calc(${translateX}% + ${draggedX}px))`;
   };
@@ -856,18 +1003,78 @@ export function HomePage() {
           onMouseLeave={handleDragEnd}
           style={{
             padding: 0,
+            margin: 0,
+            width: '100%',
+            maxWidth: '100%',
+            overflow: 'hidden',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
             scrollSnapType: 'none',
             scrollBehavior: 'auto',
             WebkitOverflowScrolling: 'auto',
             boxSizing: 'border-box',
+            position: 'relative',
             ...(isMobile && heroHeight ? { height: `${heroHeight}px`, minHeight: `${heroHeight}px`, maxHeight: `${heroHeight}px` } : {}),
           } as React.CSSProperties}
         >
           <style>{`
             .hero-scroll-container::-webkit-scrollbar {
               display: none;
+            }
+            /* Desktop override - mobil style'ları geçersiz kıl */
+            @media (min-width: 1024px) {
+              .hero-page-container-mobile {
+                width: 100% !important;
+                max-width: 100% !important;
+                overflow: hidden !important;
+              }
+              /* Hero container - parent */
+              div[class*="relative"][class*="h-screen"] {
+                width: 100% !important;
+                max-width: 100% !important;
+                overflow: hidden !important;
+                position: relative !important;
+              }
+              .hero-scroll-container {
+                width: auto !important;
+                min-width: auto !important;
+                max-width: none !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                padding: 0 !important;
+                overflow: visible !important;
+                position: relative !important;
+                display: flex !important;
+                flex-wrap: nowrap !important;
+              }
+              .hero-slide-mobile,
+              .hero-scroll-container > div {
+                /* Inline style'daki genişlik değerini koru, CSS override etmesin */
+                height: 100% !important;
+                margin-left: 0 !important;
+                padding-left: 0 !important;
+                flex-shrink: 0 !important;
+                flex-grow: 0 !important;
+              }
+              .hero-slide-mobile video,
+              .hero-slide-mobile img,
+              .hero-scroll-container video,
+              .hero-scroll-container img {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: auto !important;
+                height: 100% !important;
+                min-height: 100% !important;
+                object-fit: cover !important;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                transform: none !important;
+              }
             }
             @media (max-width: 1023px) {
               .inspiration-section-mobile {

@@ -641,9 +641,9 @@ export function Header() {
           ref={headerContainerRef}
         >
           <nav className="px-2 sm:px-4 lg:px-6" ref={navRef}>
-            <div className="relative flex h-14 lg:h-24 items-center">
+            <div className="relative flex h-14 lg:h-24 items-center lg:grid lg:grid-cols-[1fr_auto_1fr]">
               {/* Sol taraf - Menü düğmeleri (desktop) ve Logo (mobil) */}
-              <div className="flex-1 flex items-center">
+              <div className="flex flex-1 items-center lg:justify-start">
                 {/* Mobil Logo - Solda */}
                 <div className="lg:hidden flex items-center">
                   <Link to="/" className="flex items-center gap-1.5 text-white transition-colors">
@@ -679,14 +679,14 @@ export function Header() {
               </div>
 
               {/* Orta - Logo (Desktop) */}
-              <div className="hidden lg:block absolute left-1/2 transform -translate-x-1/2 flex items-center">
+              <div className="hidden lg:flex items-center justify-center">
                 <Link to="/" className="flex items-center gap-3 text-white transition-colors">
                   <SiteLogo logoUrl={settings?.logoUrl} className="w-32 md:w-72 h-6 md:h-10" />
                 </Link>
               </div>
 
               {/* Sağ taraf - İkonlar */}
-              <div className="flex-1 flex items-center justify-end space-x-4">
+              <div className="flex flex-1 items-center justify-end space-x-4 lg:justify-end">
                 <button ref={searchButtonRef} onClick={() => isSearchOpen ? closeSearch() : setIsSearchOpen(true)} className={iconClasses}>
                     {isSearchOpen ? <CloseIcon /> : <SearchIcon />}
                 </button>
