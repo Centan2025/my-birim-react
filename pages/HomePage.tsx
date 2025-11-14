@@ -1197,16 +1197,16 @@ export function HomePage() {
                       {block.description && (
                         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
                           <div className={`prose max-w-none ${textAlignClass}`}>
-                            <p className="text-lg text-gray-700 font-light leading-relaxed">{t(block.description)}</p>
+                            <p className="text-sm md:text-lg text-gray-700 font-light leading-relaxed">{t(block.description)}</p>
                           </div>
                           {block.linkText && block.linkUrl && (
                             <div className={`mt-6 ${textAlignClass}`}>
                               <Link
                                 to={block.linkUrl}
-                                className="group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 px-5 text-lg rounded-lg hover:bg-gray-900/10 transition-colors duration-300"
+                                className="group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 px-5 text-sm md:text-lg rounded-lg hover:bg-gray-900/10 transition-colors duration-300"
                               >
                                 <span className="transition-transform duration-300 ease-out group-hover:-translate-x-1">{t(block.linkText)}</span>
-                                <ArrowRight className="w-5 h-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+                                <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
                               </Link>
                             </div>
                           )}
@@ -1230,16 +1230,16 @@ export function HomePage() {
                         {block.description && (
                           <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'}`}>
                             <div className={`prose max-w-none ${textAlignClass}`}>
-                              <p className="text-lg text-gray-700 font-light leading-relaxed">{t(block.description)}</p>
+                              <p className="text-sm md:text-lg text-gray-700 font-light leading-relaxed">{t(block.description)}</p>
                             </div>
                             {block.linkText && block.linkUrl && (
                               <div className={`mt-6 ${textAlignClass}`}>
                                 <Link
                                   to={block.linkUrl}
-                                  className="group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 px-5 text-lg rounded-lg hover:bg-gray-900/10 transition-colors duration-300"
+                                  className="group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 px-5 text-sm md:text-lg rounded-lg hover:bg-gray-900/10 transition-colors duration-300"
                                 >
                                   <span className="transition-transform duration-300 ease-out group-hover:-translate-x-1">{t(block.linkText)}</span>
-                                  <ArrowRight className="w-5 h-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+                                  <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
                                 </Link>
                               </div>
                             )}
