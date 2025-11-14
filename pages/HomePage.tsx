@@ -1110,15 +1110,15 @@ export function HomePage() {
                               {content.isHeroTextVisible && (
                                   <div className="relative w-full">
                                       <div className="animate-fade-in-up">
-                                        <h1 className="text-2xl md:text-5xl font-light tracking-tight mb-4 leading-relaxed" style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}>{t(media.title)}</h1>
-                                        <p className="text-sm md:text-xl mb-8 leading-relaxed" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>{t(media.subtitle)}</p>
+                                        <h1 className="text-xl md:text-5xl font-light tracking-tight mb-4 leading-relaxed" style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}>{t(media.title)}</h1>
+                                        <p className="text-xs md:text-xl mb-8 leading-relaxed" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>{t(media.subtitle)}</p>
                                         {media.isButtonVisible && (
                                           <Link
                                               to={media.buttonLink || '/'}
-                                              className="group inline-flex items-center gap-x-3 text-white font-semibold py-2 px-4 text-sm md:text-lg rounded-lg hover:bg-white/10 transition-colors duration-300"
+                                              className="group inline-flex items-center gap-x-3 text-white font-semibold py-2 px-4 text-xs md:text-lg rounded-lg hover:bg-white/10 transition-colors duration-300"
                                           >
                                               <span className="transition-transform duration-300 ease-out group-hover:-translate-x-1">{t(media.buttonText)}</span>
-                                              <ArrowRight className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+                                              <ArrowRight className="w-3 h-3 md:w-5 md:h-5 transition-transform duration-300 ease-out group-hover:translate-x-1" />
                                           </Link>
                                         )}
                                       </div>
