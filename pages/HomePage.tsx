@@ -1631,7 +1631,7 @@ export function HomePage() {
           }}
         >
            <div className="absolute inset-0 bg-black/50"></div>
-           <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up">
+           <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up max-w-4xl">
               <h2 className="text-4xl font-light leading-relaxed">{t(inspiration.title)}</h2>
               <p className="mt-4 text-lg text-gray-200 max-w-2xl mx-auto font-light leading-relaxed">{t(inspiration.subtitle)}</p>
               {inspiration.buttonText && (
