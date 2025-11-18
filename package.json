@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "import-media": "cd tools/media-importer && npm install && npm run import --"
   },
   "dependencies": {
     "@fontsource/zalando-sans-semiexpanded": "^5.2.1",

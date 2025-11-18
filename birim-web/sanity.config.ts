@@ -3,6 +3,8 @@ import {structureTool} from 'sanity/structure'
 import {visionTool} from '@sanity/vision'
 import {schemaTypes} from './schemaTypes'
 import {deskStructure} from './deskStructure'
+import {excelImportTool} from './tools/excelImport'
+import {mediaImportTool} from './tools/mediaImport'
 
 export default defineConfig({
   name: 'default',
@@ -11,7 +13,12 @@ export default defineConfig({
   projectId: 'wn3a082f',
   dataset: 'production',
 
-  plugins: [structureTool({ structure: deskStructure }), visionTool()],
+  plugins: [
+    structureTool({ structure: deskStructure }),
+    visionTool(),
+    excelImportTool(),
+    mediaImportTool(),
+  ],
 
   schema: {
     types: schemaTypes,

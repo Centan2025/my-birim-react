@@ -118,6 +118,8 @@ export interface Product {
   categoryId: string;
   /** The year the product was designed or released. */
   year: number;
+  /** Indicates if the product should be visible on the website. */
+  isPublished?: boolean;
   /** Localized detailed description of the product. */
   description: LocalizedString;
   /** URL for the main display image of the product. */

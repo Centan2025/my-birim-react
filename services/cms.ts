@@ -535,10 +535,11 @@ export const deleteDesigner = async (id: string): Promise<void> => {
 // Products
 export const getProducts = async (): Promise<Product[]> => {
     if (useSanity && sanity) {
-        const query = groq`*[_type == "product"] | order(year desc){
+        const query = groq`*[_type == "product" && (!defined(isPublished) || isPublished == true)] | order(year desc){
           "id": id.current,
           name,
           year,
+          isPublished,
           description,
           mainImage,
           mainImageMobile,
@@ -567,6 +568,7 @@ export const getProducts = async (): Promise<Product[]> => {
           designerId: r.designer?.designerId || '',
           categoryId: r.category?.categoryId || '',
           year: r.year,
+          isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
           description: r.description,
           mainImage: (() => {
             const img = mapImage(r.mainImage)
@@ -609,6 +611,7 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           "id": id.current,
           name,
           year,
+          isPublished,
           description,
           mainImage,
           mainImageMobile,
@@ -638,6 +641,7 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           designerId: r.designer?.designerId || '',
           categoryId: r.category?.categoryId || '',
           year: r.year,
+          isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
           description: r.description,
           mainImage: (() => {
             const img = mapImage(r.mainImage)
@@ -676,10 +680,11 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
 }
 export const getProductsByCategoryId = async (categoryId: string): Promise<Product[]> => {
     if (useSanity && sanity) {
-        const query = groq`*[_type == "product" && references(*[_type == "category" && id.current == $categoryId]._id)]{
+        const query = groq`*[_type == "product" && references(*[_type == "category" && id.current == $categoryId]._id) && (!defined(isPublished) || isPublished == true)]{
           "id": id.current,
           name,
           year,
+          isPublished,
           description,
           mainImage,
           mainImageMobile,
@@ -705,6 +710,7 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
           designerId: r.designer?.designerId || '',
           categoryId: r.category?.categoryId || '',
           year: r.year,
+          isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
           description: r.description,
           mainImage: (() => {
             const img = mapImage(r.mainImage)
@@ -740,10 +746,11 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
 }
 export const getProductsByDesignerId = async (designerId: string): Promise<Product[]> => {
     if (useSanity && sanity) {
-        const query = groq`*[_type == "product" && references(*[_type == "designer" && id.current == $designerId]._id)]{
+        const query = groq`*[_type == "product" && references(*[_type == "designer" && id.current == $designerId]._id) && (!defined(isPublished) || isPublished == true)]{
           "id": id.current,
           name,
           year,
+          isPublished,
           description,
           mainImage,
           mainImageMobile,
@@ -769,6 +776,7 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
           designerId: r.designer?.designerId || '',
           categoryId: r.category?.categoryId || '',
           year: r.year,
+          isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
           description: r.description,
           mainImage: (() => {
             const img = mapImage(r.mainImage)

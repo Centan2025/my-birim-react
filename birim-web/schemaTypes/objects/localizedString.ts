@@ -1,9 +1,13 @@
 import {defineField, defineType} from 'sanity'
+import LocalizedStringInput from '../../components/LocalizedStringInput'
 
 export const localizedString = defineType({
   name: 'localizedString',
   title: 'Çok Dilli Metin',
   type: 'object',
+  components: {
+    input: LocalizedStringInput,
+  },
   fields: [
     defineField({
       name: 'tr',

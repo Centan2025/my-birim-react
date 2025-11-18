@@ -1,12 +1,12 @@
 import type {StructureBuilder} from 'sanity/structure'
+import {orderableDocumentListDeskItem} from '@sanity/orderable-document-list'
+import {CategoryProductsView} from './components/CategoryProductsView'
 
 export const deskStructure = async (S: StructureBuilder, context: any) => {
   const {getClient} = context
   const client = getClient({apiVersion: '2024-01-01'})
   
   // Async işlemleri burada yapıyoruz
-  // Sadece published kategorileri al (draft'ları hariç tut)
-  const allCategories = await client.fetch('*[_type == "category"] | order(name.tr asc)')
   const cookiesPolicy = await client.fetch('*[_type == "cookiesPolicy"][0]')
   const privacyPolicy = await client.fetch('*[_type == "privacyPolicy"][0]')
   const termsOfService = await client.fetch('*[_type == "termsOfService"][0]')
@@ -21,56 +21,6 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
     return id.replace(/^drafts\./, '')
   }
   
-  // Duplicate ID'leri önlemek için: sadece published kategorileri al ve unique ID'leri takip et
-  const seenIds = new Set<string>()
-  const categories = allCategories.filter((category: any) => {
-    const cleanId = pubId(category._id)
-    // Draft'ları atla ve duplicate ID'leri filtrele
-    if (category._id.startsWith('drafts.')) return false
-    if (seenIds.has(cleanId)) return false
-    seenIds.add(cleanId)
-    return true
-  })
-  
-  // Kategoriler için items oluşturuyoruz
-  const categoryItems = [
-    S.listItem()
-      .title('Yeni Kategori Ekle')
-      .icon(() => '➕')
-      .child(
-        S.document()
-          .schemaType('category')
-      ),
-    S.divider(),
-    ...categories.map((category: any) => {
-      const cleanId = pubId(category._id)
-      return S.listItem()
-        .title(category.name?.tr || category.name?.en || 'Kategori')
-        .id(cleanId)
-        .child(
-          S.list()
-            .title('Kategori Detayı')
-            .items([
-              S.listItem()
-                .title('Düzenle')
-                .child(
-                  S.document()
-                    .schemaType('category')
-                    .id(cleanId)
-                ),
-              S.listItem()
-                .title('Modeller')
-                .child(
-                  S.documentList()
-                    .title('Modeller')
-                    .filter('_type == "product" && references($catId)')
-                    .params({ catId: cleanId })
-                    .apiVersion('2024-01-01')
-                ),
-            ])
-        )
-    }),
-  ]
   
   return S.list()
     .title('İçerik')
@@ -102,10 +52,36 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
         .title('Ürünler')
         .child(
           S.list()
-            .title('Ürünler')
-            .items(categoryItems)
+            .title('Ürün Yönetimi')
+            .items([
+              S.listItem()
+                .title('Kategoriler')
+                .schemaType('category')
+                .child(
+                  S.documentTypeList('category')
+                    .title('Kategoriler (Sürükle-Bırak ile Sırala)')
+                    .filter('_type == "category"')
+                    .defaultOrdering([{field: 'orderRank', direction: 'asc'}])
+                    .child((categoryId) => 
+                      S.document()
+                        .schemaType('category')
+                        .documentId(categoryId)
+                        .views([
+                          S.view.form().title('Düzenle').icon(() => '✏️'),
+                          S.view.component(CategoryProductsView).title('Modeller').icon(() => '📦')
+                        ])
+                    )
+                ),
+              S.divider(),
+              S.documentTypeListItem('product').title('Tüm Modeller'),
+            ])
         ),
-      S.documentTypeListItem('designer').title('Tasarımcılar'),
+      orderableDocumentListDeskItem({
+        type: 'designer',
+        title: 'Tasarımcılar',
+        S,
+        context,
+      }),
       S.documentTypeListItem('project').title('Projeler'),
       S.documentTypeListItem('newsItem').title('Haberler'),
       S.listItem()

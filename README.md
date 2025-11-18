@@ -130,6 +130,89 @@ Maintenance mode aktifken production'da sayfalara erişmek için:
 - Production'da bypass secret ile sayfalara erişebilirsiniz
 - Maintenance mode aktifken normal kullanıcılar sadece "Yakında" sayfasını görür
 
+## Medya İçe Aktarma Aracı
+
+Ürün ve tasarımcı görsellerinizi kolayca yükleyin! **3 farklı yöntem:**
+
+### 🎨 Yöntem 1: Sanity Studio'da Sürükle-Bırak (ÖNERİLEN)
+
+**En kolay ve hızlı yöntem!** Sanity Studio içinde grafik arayüzle:
+
+1. Sanity Studio'yu başlatın:
+   ```bash
+   cd birim-web
+   npm run dev
+   ```
+
+2. Tarayıcıda http://localhost:3333 açın
+
+3. Sol menüden **"Medya İçe Aktar"** sekmesine tıklayın
+
+4. **İki seçenek:**
+   - 📁 **"Klasör Seç"** butonu ile medya klasörünüzü seçin
+   - 🖱️ Veya klasörü direkt **sürükle-bırak** alanına bırakın
+
+5. İşlem otomatik başlar, ilerlemeyı izleyin!
+
+**Avantajları:**
+- ✅ Grafik arayüz - kod bilgisi gerektirmez
+- ✅ Sürükle-bırak desteği
+- ✅ Canlı ilerleme takibi
+- ✅ Hata mesajları ekranda
+- ✅ Kurulum gerektirmez
+
+Detaylar: `birim-web/tools/mediaImport/README.md`
+
+---
+
+### 💻 Yöntem 2: Komut Satırı (Terminal)
+
+**JSON dosyaları oluşturmak için:**
+```bash
+npm run import-media -- --source "F:\Medya" --mode json
+```
+
+**Direkt Sanity CMS'e yüklemek için:**
+```bash
+SANITY_TOKEN=your_token npm run import-media -- --source "F:\Medya" --mode sanity
+```
+
+Detaylar: `tools/media-importer/KULLANIM.md`
+
+---
+
+### 📂 Beklenen Klasör Yapısı
+
+```
+Medya-Klasörü/
+├── ürünler/
+│   └── 01 - KANEPELER/
+│       └── 01 - 0203 - SU/
+│           ├── su_kapak.jpg          ← Ana kapak (zorunlu)
+│           ├── su_kapak_mobil.jpg    ← Mobil kapak (opsiyonel)
+│           └── su_detay_1.jpg        ← Alternatif görseller
+└── tasarımcılar/
+    └── Ahmet Yılmaz/
+        ├── profil.jpg               ← Genel profil
+        └── profil_mobil.jpg         ← Mobil profil (opsiyonel)
+```
+
+### ✨ Özellikler
+
+- ✅ **Sürükle-bırak** ve klasör seçimi (Sanity Studio'da)
+- ✅ **Canlı ilerleme** takibi
+- ✅ Kategori ve model adlarını otomatik çıkarır
+- ✅ `_kapak` ve `_kapak_mobil` görselleri otomatik tanır
+- ✅ Görselleri Sanity asset'lere otomatik yükler
+- ✅ Türkçe karakter desteği
+- ✅ Detaylı hata ve uyarı raporları
+
+### 📚 Dokümantasyon
+
+- **Sanity Studio (Grafik Arayüz):** `birim-web/tools/mediaImport/README.md`
+- **Komut Satırı:** `tools/media-importer/KULLANIM.md`
+- **Hızlı Başlangıç:** `tools/media-importer/HIZLI_BASLANGIC.md`
+
 ## Önemli Notlar
 
 - Sanity token'ı olmadan üye kayıtları sadece local storage'da saklanır ve CMS'de görünmez

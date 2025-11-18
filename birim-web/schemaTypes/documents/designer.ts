@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import {orderRankField} from '@sanity/orderable-document-list'
 
 export default defineType({
   name: 'designer',
@@ -12,6 +13,7 @@ export default defineType({
       options: {source: (doc) => doc.name?.tr || doc.name?.en, maxLength: 96},
       validation: (Rule) => Rule.required(),
     }),
+    orderRankField({type: 'designer'}),
     defineField({name: 'name', title: 'Ad', type: 'localizedString', validation: (Rule) => Rule.required()}),
     defineField({name: 'bio', title: 'Biyografi', type: 'localizedText'}),
     defineField({

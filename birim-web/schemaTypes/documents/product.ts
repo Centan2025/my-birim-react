@@ -26,6 +26,13 @@ export default defineType({
       to: [{type: 'category'}],
     }),
     defineField({name: 'year', title: 'Yıl', type: 'number'}),
+    defineField({
+      name: 'isPublished',
+      title: 'Yayında Göster',
+      type: 'boolean',
+      initialValue: true,
+      description: 'Bu ürünün web sitesinde görünüp görünmeyeceğini belirler. Kapalıysa ürün listede görünmez.',
+    }),
     defineField({name: 'description', title: 'Açıklama', type: 'localizedText'}),
     defineField({
       name: 'mainImage',
