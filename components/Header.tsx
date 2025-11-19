@@ -859,10 +859,8 @@ export function Header() {
                         // Ana görsel yoksa alternativeMedia'dan al
                         if (!tempImageUrl && product.alternativeMedia && product.alternativeMedia.length > 0) {
                           const firstAlt = product.alternativeMedia[0];
-                          if (firstAlt.type === 'image' && firstAlt.image) {
-                            tempImageUrl = typeof firstAlt.image === 'string' 
-                              ? firstAlt.image 
-                              : firstAlt.image?.url;
+                          if (firstAlt.type === 'image' && firstAlt.url) {
+                            tempImageUrl = firstAlt.url;
                           }
                         }
                         
