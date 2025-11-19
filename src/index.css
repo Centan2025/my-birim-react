@@ -5,11 +5,13 @@ html {
 }
 
 body {
-  font-family: 'Zalando Sans SemiExpanded', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
-  font-family: 'Zalando Sans SemiExpanded', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 @keyframes fade-in-down {
