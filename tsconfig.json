@@ -26,7 +26,10 @@
     "vite.config.ts",
     "birim-web/**",
     "birrim-web/**",
-    "birim-web-1/**"
+    "birim-web-1/**",
+    "data/products/**/metadata.ts",
+    "services/cms.example.ts",
+    "tools/media-importer/**"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
