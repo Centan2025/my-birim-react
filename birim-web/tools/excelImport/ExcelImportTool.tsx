@@ -459,6 +459,136 @@ export function ExcelImportTool() {
     }
   }
 
+  // MALZEMELE sayfasını işle
+  const processMaterialsSheet = async (worksheet: XLSX.WorkSheet): Promise<{
+    successCount: number
+    errorCount: number
+    skippedCount: number
+  }> => {
+    const data = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ''}) as any[][]
+
+    if (data.length < 2) {
+      addLog('MALZEMELE sayfası en az 2 satır içermelidir (başlık + veri)', 'warning')
+      return {successCount: 0, errorCount: 0, skippedCount: 0}
+    }
+
+    // İlk satırı başlık olarak atla
+    const rows = data.slice(1)
+    let successCount = 0
+    let errorCount = 0
+    let skippedCount = 0
+
+    addLog(`MALZEMELE sayfası: Toplam ${rows.length} satır bulundu`, 'info')
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i]
+
+      // A sütunu kontrolü: "SON" varsa dur
+      const columnA = String(row[0] || '').trim()
+      if (columnA.toUpperCase() === 'SON') {
+        addLog('MALZEMELE: "SON" değeri bulundu, işlem durduruldu', 'warning')
+        break
+      }
+
+      // A sütunu kontrolü: "-" varsa atla
+      if (columnA === '-') {
+        skippedCount++
+        continue
+      }
+
+      // Sütunları al
+      const columnB = String(row[1] || '').trim() // MALZEME GRUBU
+      const columnC = String(row[2] || '').trim() // KARTELA
+
+      // MALZEME GRUBU kontrolü
+      if (!columnB) {
+        addLog(`MALZEMELE Satır ${i + 2}: MALZEME GRUBU boş, atlanıyor`, 'error')
+        errorCount++
+        continue
+      }
+
+      // KARTELA kontrolü
+      if (!columnC) {
+        addLog(`MALZEMELE Satır ${i + 2}: KARTELA boş, atlanıyor`, 'error')
+        errorCount++
+        continue
+      }
+
+      try {
+        // MALZEME GRUBU var mı kontrol et
+        const existingGroup = await client.fetch(
+          `*[_type == "materialGroup" && (title.tr == $groupName || title.en == $groupName)][0]`,
+          {groupName: columnB.trim()}
+        )
+
+        let groupId: string
+
+        if (existingGroup) {
+          addLog(`Malzeme Grubu bulundu: ${columnB}`, 'info')
+          groupId = existingGroup._id
+
+          // KARTELA var mı kontrol et
+          const existingBook = existingGroup.books?.find(
+            (book: any) => book.title?.tr === columnC.trim() || book.title?.en === columnC.trim()
+          )
+
+          if (existingBook) {
+            addLog(`MALZEMELE Satır ${i + 2}: KARTELA "${columnC}" zaten var, atlanıyor`, 'warning')
+            skippedCount++
+            continue
+          }
+
+          // KARTELA yoksa, gruba ekle
+          addLog(`Malzeme Grubuna yeni kartela ekleniyor: ${columnC}`, 'info')
+          
+          const newBook = {
+            _type: 'materialSwatchBook',
+            title: {
+              tr: columnC.trim(),
+              en: columnC.trim(),
+            },
+            items: [],
+          }
+
+          const updatedBooks = [...(existingGroup.books || []), newBook]
+
+          await client.patch(existingGroup._id).set({books: updatedBooks}).commit()
+          addLog(`Kartela eklendi: ${columnC} (Grup: ${columnB})`, 'success')
+          successCount++
+        } else {
+          // Yeni MALZEME GRUBU oluştur
+          addLog(`Yeni Malzeme Grubu oluşturuluyor: ${columnB}`, 'info')
+
+          const newGroup = await client.create({
+            _type: 'materialGroup',
+            title: {
+              tr: columnB.trim(),
+              en: columnB.trim(),
+            },
+            books: [
+              {
+                _type: 'materialSwatchBook',
+                title: {
+                  tr: columnC.trim(),
+                  en: columnC.trim(),
+                },
+                items: [],
+              },
+            ],
+          })
+
+          addLog(`Malzeme Grubu ve Kartela oluşturuldu: ${columnB} / ${columnC}`, 'success')
+          successCount++
+        }
+      } catch (error: any) {
+        addLog(`MALZEMELE Satır ${i + 2}: Hata - ${error.message}`, 'error')
+        errorCount++
+      }
+    }
+
+    return {successCount, errorCount, skippedCount}
+  }
+
   // TASARIMCILAR sayfasını işle
   const processDesignersSheet = async (worksheet: XLSX.WorkSheet): Promise<{
     successCount: number
@@ -579,6 +709,24 @@ export function ExcelImportTool() {
 
       // Excel'deki tasarımcı isimlerini tutacak Set
       const designersInExcel = new Set<string>()
+
+      // MALZEMELE sayfasını kontrol et ve işle
+      const materialsSheetName = workbook.SheetNames.find(
+        (name) => name.toUpperCase().includes('MALZEMELE')
+      )
+
+      let materialsResult = {successCount: 0, errorCount: 0, skippedCount: 0}
+      if (materialsSheetName) {
+        addLog(`MALZEMELE sayfası bulundu: ${materialsSheetName}`, 'info')
+        const materialsWorksheet = workbook.Sheets[materialsSheetName]
+        materialsResult = await processMaterialsSheet(materialsWorksheet)
+        addLog(
+          `MALZEMELE işlemi tamamlandı! Başarılı: ${materialsResult.successCount}, Hata: ${materialsResult.errorCount}, Atlandı: ${materialsResult.skippedCount}`,
+          'success'
+        )
+      } else {
+        addLog('⚠️ MALZEMELE sayfası bulunamadı, atlanıyor', 'warning')
+      }
 
       // TASARIMCILAR sayfasını kontrol et ve işle
       const designersSheetName = workbook.SheetNames.find(
@@ -796,14 +944,15 @@ export function ExcelImportTool() {
       }
 
       // Toplam sonuçları göster
-      const totalSuccess = designersResult.successCount + productsResult.successCount
-      const totalError = designersResult.errorCount + productsResult.errorCount
-      const totalSkipped = designersResult.skippedCount + productsResult.skippedCount
+      const totalSuccess = materialsResult.successCount + designersResult.successCount + productsResult.successCount
+      const totalError = materialsResult.errorCount + designersResult.errorCount + productsResult.errorCount
+      const totalSkipped = materialsResult.skippedCount + designersResult.skippedCount + productsResult.skippedCount
 
       setStatus({
         success: totalError === 0,
         message: `İşlem tamamlandı! Toplam Başarılı: ${totalSuccess}, Toplam Hata: ${totalError}, Toplam Atlandı: ${totalSkipped}`,
         details: [
+          `MALZEMELE - Başarılı: ${materialsResult.successCount}, Hata: ${materialsResult.errorCount}, Atlandı: ${materialsResult.skippedCount}`,
           `TASARIMCILAR - Başarılı: ${designersResult.successCount}, Hata: ${designersResult.errorCount}, Atlandı: ${designersResult.skippedCount}`,
           `ÜRÜNLER - Başarılı: ${productsResult.successCount}, Hata: ${productsResult.errorCount}, Atlandı: ${productsResult.skippedCount}`,
         ],
@@ -1025,10 +1174,18 @@ export function ExcelImportTool() {
         <h3 style={{marginTop: 0, color: '#1976d2'}}>ℹ️ Excel Formatı ve Önemli Kurallar</h3>
         <ul style={{marginBottom: 0, color: '#1976d2', lineHeight: '1.8'}}>
           <li>
-            <strong>TASARIMCILAR Sayfası:</strong> Önce işlenir ve CMS'e eklenir/güncellenir.
+            <strong>MALZEMELE Sayfası:</strong> Malzeme grupları ve kartelalarını ekler.
+            <ul style={{marginTop: '0.5rem'}}>
+              <li>A Sütunu: LİSTEYE EKLE - "-" işareti yoksa ekler, "SON" varsa durur</li>
+              <li>B Sütunu: MALZEME GRUBU - Grup yoksa oluşturulur</li>
+              <li>C Sütunu: KARTELA - Grupta yoksa eklenir</li>
+            </ul>
           </li>
           <li>
-            <strong>ÜRÜNLER Sayfası:</strong> Daha sonra işlenir.
+            <strong>TASARIMCILAR Sayfası:</strong> Tasarımcılar eklenir/güncellenir.
+          </li>
+          <li>
+            <strong>ÜRÜNLER Sayfası:</strong> Son olarak işlenir.
             <ul style={{marginTop: '0.5rem'}}>
               <li>Ürünlerin tasarımcıları <strong>MUTLAKA CMS'de mevcut olmalıdır</strong></li>
               <li>Tasarımcı CMS'de yoksa → ⚠️ Uyarı verilir ve <strong>ürün eklenmez</strong></li>
@@ -1036,7 +1193,7 @@ export function ExcelImportTool() {
             </ul>
           </li>
           <li><strong>Kategoriler:</strong> Otomatik olarak oluşturulur (sorun değil).</li>
-          <li><strong>Öneri:</strong> Önce tüm tasarımcıları Excel'e ekleyin ve yükleyin, sonra ürünleri yükleyin.</li>
+          <li><strong>Öneri:</strong> Sırayla MALZEMELE → TASARIMCILAR → ÜRÜNLER şeklinde yükleyin.</li>
         </ul>
       </div>
 
