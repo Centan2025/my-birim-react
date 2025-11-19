@@ -54,13 +54,35 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
           S.list()
             .title('Ürün Yönetimi')
             .items([
-              // Kategoriler - Sürükle-bırak ile sıralanabilir
+              // Kategorileri Sırala - Sürükle-bırak özelliği
               orderableDocumentListDeskItem({
                 type: 'category',
-                title: 'Kategoriler',
+                title: 'Kategorileri Sırala (Sürükle-Bırak)',
                 S,
                 context,
+                icon: () => '↕️',
               }),
+              // Kategorileri Düzenle - Modeller görünümü ile
+              S.listItem()
+                .title('Kategorileri Düzenle')
+                .icon(() => '📂')
+                .schemaType('category')
+                .child(
+                  S.documentList()
+                    .title('Kategoriler')
+                    .schemaType('category')
+                    .filter('_type == "category"')
+                    .defaultOrdering([{field: 'orderRank', direction: 'asc'}])
+                    .child((categoryId) => 
+                      S.document()
+                        .schemaType('category')
+                        .documentId(categoryId)
+                        .views([
+                          S.view.form().title('Düzenle').icon(() => '✏️'),
+                          S.view.component(CategoryProductsView).title('Modeller').icon(() => '📦')
+                        ])
+                    )
+                ),
               S.divider(),
               S.documentTypeListItem('product').title('Tüm Modeller'),
             ])
