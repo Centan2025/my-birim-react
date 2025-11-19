@@ -1,6 +1,7 @@
 import type {StructureBuilder} from 'sanity/structure'
 import {orderableDocumentListDeskItem} from '@sanity/orderable-document-list'
 import {CategoryProductsView} from './components/CategoryProductsView'
+import {OrderCategoriesView} from './components/OrderCategoriesView'
 
 export const deskStructure = async (S: StructureBuilder, context: any) => {
   const {getClient} = context
@@ -54,34 +55,44 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
           S.list()
             .title('Ürün Yönetimi')
             .items([
-              // Kategorileri Sırala - Sürükle-bırak özelliği
-              orderableDocumentListDeskItem({
-                type: 'category',
-                title: 'Kategorileri Sırala (Sürükle-Bırak)',
-                S,
-                context,
-                icon: () => '↕️',
-              }),
-              // Kategorileri Düzenle - Modeller görünümü ile
+              // Kategoriler
               S.listItem()
-                .title('Kategorileri Düzenle')
+                .title('Kategoriler')
                 .icon(() => '📂')
-                .schemaType('category')
                 .child(
-                  S.documentList()
+                  S.list()
                     .title('Kategoriler')
-                    .schemaType('category')
-                    .filter('_type == "category"')
-                    .defaultOrdering([{field: 'orderRank', direction: 'asc'}])
-                    .child((categoryId) => 
-                      S.document()
+                    .items([
+                      // Sıralama butonu
+                      S.listItem()
+                        .title('↕️ Sıralamayı Düzenle')
+                        .icon(() => '🔄')
+                        .child(
+                          S.component(OrderCategoriesView)
+                            .title('Kategori Sıralaması')
+                        ),
+                      S.divider(),
+                      // Tüm kategoriler listesi
+                      S.listItem()
+                        .title('📋 Tüm Kategoriler')
                         .schemaType('category')
-                        .documentId(categoryId)
-                        .views([
-                          S.view.form().title('Düzenle').icon(() => '✏️'),
-                          S.view.component(CategoryProductsView).title('Modeller').icon(() => '📦')
-                        ])
-                    )
+                        .child(
+                          S.documentList()
+                            .title('Tüm Kategoriler')
+                            .schemaType('category')
+                            .filter('_type == "category"')
+                            .defaultOrdering([{field: 'orderRank', direction: 'asc'}])
+                            .child((categoryId) => 
+                              S.document()
+                                .schemaType('category')
+                                .documentId(categoryId)
+                                .views([
+                                  S.view.form().title('Düzenle').icon(() => '✏️'),
+                                  S.view.component(CategoryProductsView).title('Modeller').icon(() => '📦')
+                                ])
+                            )
+                        ),
+                    ])
                 ),
               S.divider(),
               S.documentTypeListItem('product').title('Tüm Modeller'),
