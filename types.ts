@@ -43,6 +43,8 @@ export interface Category {
   subtitle: LocalizedString;
   /** URL for the hero image displayed on the category page. */
   heroImage: string;
+  /** URL for the menu image displayed in the products dropdown menu. */
+  menuImage?: string;
 }
 
 /**

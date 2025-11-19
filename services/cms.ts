@@ -443,9 +443,15 @@ export const updateSiteSettings = async (settings: SiteSettings): Promise<void> 
 // Categories
 export const getCategories = async (): Promise<Category[]> => {
     if (useSanity && sanity) {
-        const query = groq`*[_type == "category"]{ "id": id.current, name, subtitle, heroImage }`
+        const query = groq`*[_type == "category"]{ "id": id.current, name, subtitle, heroImage, menuImage }`
         const rows = await sanity.fetch(query)
-        return rows.map((r: any) => ({ id: r.id, name: r.name, subtitle: r.subtitle, heroImage: mapImage(r.heroImage) }))
+        return rows.map((r: any) => ({ 
+            id: r.id, 
+            name: r.name, 
+            subtitle: r.subtitle, 
+            heroImage: mapImage(r.heroImage),
+            menuImage: mapImage(r.menuImage)
+        }))
     }
     await delay(SIMULATED_DELAY);
     return getItem<Category[]>(KEYS.CATEGORIES);

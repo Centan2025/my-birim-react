@@ -504,7 +504,8 @@ const AppContent = () => {
             <TopBanner />
             <Routes>
                 <Route path="/" element={<HomePage />} />
-                <Route path="/products" element={<CategoriesPage />} />
+                <Route path="/categories" element={<CategoriesPage />} />
+                <Route path="/products" element={<ProductsPage />} />
                 <Route path="/products/:categoryId" element={<ProductsPage />} />
                 <Route path="/product/:productId" element={<ProductDetailPage />} />
                 <Route path="/designers" element={<DesignersPage />} />

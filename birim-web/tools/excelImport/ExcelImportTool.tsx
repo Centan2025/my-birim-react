@@ -822,11 +822,11 @@ export function ExcelImportTool() {
   }
 
   const deleteAllProducts = async () => {
-    if (!confirm('TÜM ÜRÜNLERİ SİLMEK İSTEDİĞİNİZDEN EMİN MİSİNİZ?\n\nBu işlem geri alınamaz!')) {
+    if (!confirm('TÜM ÜRÜNLERİ VE KATEGORİLERİ SİLMEK İSTEDİĞİNİZDEN EMİN MİSİNİZ?\n\nÖnce tüm ürünler, sonra tüm kategoriler silinecek.\n\nBu işlem geri alınamaz!')) {
       return
     }
 
-    if (!confirm('LÜTFEN TEKRAR ONAYLAYIN: Tüm ürünler kalıcı olarak silinecek!')) {
+    if (!confirm('LÜTFEN TEKRAR ONAYLAYIN: Tüm ürünler ve kategoriler kalıcı olarak silinecek!')) {
       return
     }
 
@@ -873,17 +873,53 @@ export function ExcelImportTool() {
         setProgress(Math.round(((i + 1) / totalProducts) * 100))
       }
 
+      addLog(`Ürün silme işlemi tamamlandı! ${deletedCount} ürün silindi`, 'success')
+
+      // Şimdi tüm kategorileri sil
+      addLog('Tüm kategoriler siliniyor...', 'info')
+      const allCategories = await client.fetch(`*[_type == "category"]{_id, "id": id.current, name}`)
+      const totalCategories = allCategories.length
+
+      if (totalCategories === 0) {
+        addLog('Silinecek kategori bulunamadı', 'warning')
+      } else {
+        addLog(`Toplam ${totalCategories} kategori bulundu`, 'info')
+
+        let deletedCategoriesCount = 0
+        let categoryErrorCount = 0
+
+        // Her kategoriyi sil
+        for (let i = 0; i < allCategories.length; i++) {
+          const category = allCategories[i]
+          const categoryName = category.name?.tr || category.name?.en || category.id || 'Bilinmeyen'
+
+          try {
+            await client.delete(category._id)
+            deletedCategoriesCount++
+            addLog(`Kategori silindi: ${categoryName} (${category.id})`, 'success')
+          } catch (error: any) {
+            categoryErrorCount++
+            addLog(`Kategori silinemedi: ${categoryName} - ${error.message}`, 'error')
+          }
+        }
+
+        addLog(`Kategori silme işlemi tamamlandı! ${deletedCategoriesCount} kategori silindi`, 'success')
+        errorCount += categoryErrorCount
+      }
+
       setStatus({
         success: errorCount === 0,
-        message: `Silme işlemi tamamlandı! Silinen: ${deletedCount}, Hata: ${errorCount}`,
+        message: `Silme işlemi tamamlandı! Ürünler: ${deletedCount}, Kategoriler: ${totalCategories > 0 ? allCategories.length : 0}, Hata: ${errorCount}`,
         details: [
-          `Toplam: ${totalProducts} ürün`,
-          `Başarıyla silinen: ${deletedCount} ürün`,
-          `Hata: ${errorCount} ürün`,
+          `Toplam ürün: ${totalProducts}`,
+          `Başarıyla silinen ürün: ${deletedCount}`,
+          `Toplam kategori: ${totalCategories}`,
+          `Başarıyla silinen kategori: ${totalCategories > 0 ? allCategories.length - (errorCount - (totalProducts - deletedCount)) : 0}`,
+          `Toplam hata: ${errorCount}`,
         ],
       })
 
-      addLog(`Silme işlemi tamamlandı! ${deletedCount} ürün silindi`, 'success')
+      addLog(`Tüm işlemler tamamlandı!`, 'success')
     } catch (error: any) {
       addLog(`Hata: ${error.message}`, 'error')
       setStatus({
@@ -1011,7 +1047,7 @@ export function ExcelImportTool() {
         </p>
         <div style={{display: 'flex', gap: '0.5rem', flexWrap: 'wrap'}}>
           <DangerButton onClick={deleteAllProducts} disabled={isDeleting || isProcessing}>
-            {isDeleting ? 'Siliniyor...' : 'TÜM ÜRÜNLERİ SİL'}
+            {isDeleting ? 'Siliniyor...' : 'TÜM ÜRÜNLERİ VE KATEGORİLERİ SİL'}
           </DangerButton>
           <DangerButton onClick={deleteAllDesigners} disabled={isDeleting || isProcessing}>
             {isDeleting ? 'Siliniyor...' : 'TÜM TASARIMCILARI SİL'}

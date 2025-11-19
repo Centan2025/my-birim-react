@@ -40,6 +40,8 @@ export function Header() {
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hoveredCategoryId, setHoveredCategoryId] = useState<string | null>(null);
+  const [categoryProducts, setCategoryProducts] = useState<Map<string, Product[]>>(new Map());
   const productsTimeoutRef = useRef<number | null>(null);
   const searchPanelRef = useRef<HTMLDivElement>(null);
   const searchButtonRef = useRef<HTMLButtonElement>(null);
@@ -450,6 +452,31 @@ export function Header() {
     getCategories().then(setCategories);
   }, []);
 
+  // Hover edilen kategorinin ürünlerini yükle (eğer menuImage yoksa)
+  useEffect(() => {
+    if (!hoveredCategoryId) return;
+    const category = categories.find(c => c.id === hoveredCategoryId);
+    if (!category) return;
+    
+    // menuImage varsa ürün çekmeye gerek yok
+    if (category.menuImage) return;
+    
+    // Ürünler zaten yüklendiyse tekrar çekme
+    if (categoryProducts.has(category.id)) return;
+    
+    // Kategorinin ürünlerini çek
+    getProducts().then(allProducts => {
+      const filtered = allProducts.filter(p => p.categoryId === category.id);
+      setCategoryProducts(prev => {
+        const newMap = new Map(prev);
+        newMap.set(category.id, filtered);
+        return newMap;
+      });
+    }).catch(err => {
+      console.error(`❌ [Header] Kategori "${category.id}" için ürünler yüklenirken hata:`, err);
+    });
+  }, [hoveredCategoryId, categories, categoryProducts]);
+
   // Header yüksekliğini güncelle
   useEffect(() => {
     const updateHeaderHeight = () => {
@@ -627,11 +654,30 @@ export function Header() {
 
   return (
     <>
+      <style>
+        {`
+          .hide-scrollbar::-webkit-scrollbar { display: none; }
+          .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+          
+          @keyframes crossFade {
+            0% {
+              opacity: 0;
+            }
+            100% {
+              opacity: 1;
+            }
+          }
+          
+          .image-transition {
+            transition: opacity 0.5s ease-in-out;
+          }
+        `}
+      </style>
       <header className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full'}`}>
         <div
-          className={`overflow-hidden transition-all duration-700 ease-in-out ${isProductsOpen ? 'max-h-[20rem]' : isMobileMenuOpen ? 'max-h-[40rem]' : isMobile ? 'max-h-[3.5rem]' : 'max-h-[6rem]'} ${isMobile && headerOpacity <= 0 ? '' : 'backdrop-blur-lg border-b border-white/10'}`}
+          className={`overflow-hidden transition-all duration-700 ease-in-out ${isProductsOpen ? 'max-h-[900px]' : isMobileMenuOpen ? 'max-h-[40rem]' : isMobile ? 'max-h-[3.5rem]' : 'max-h-[6rem]'} ${isMobile && headerOpacity <= 0 ? '' : 'backdrop-blur-lg border-b border-white/10'}`}
           style={{
-            backgroundColor: isMobile && headerOpacity <= 0 ? 'transparent' : `rgba(0, 0, 0, ${headerOpacity})`,
+            backgroundColor: isMobile && headerOpacity <= 0 ? 'transparent' : `rgba(0, 0, 0, ${Math.max(headerOpacity, 0.85)})`,
             transition: 'background-color 0.2s ease-out, max-height 0.7s ease-in-out',
             backdropFilter: isMobile && headerOpacity <= 0 ? 'none' : 'blur(16px)',
             WebkitBackdropFilter: isMobile && headerOpacity <= 0 ? 'none' : 'blur(16px)',
@@ -659,7 +705,7 @@ export function Header() {
                     onMouseLeave={handleProductsLeave}
                   >
                     <Link 
-                      to="/products"
+                      to="/categories"
                       className={`group flex items-center space-x-1 py-2 ${navLinkClasses}`}
                       onClick={() => setIsProductsOpen(false)}
                     >
@@ -740,25 +786,114 @@ export function Header() {
           </nav>
           {/* Ürün kategorileri paneli - header içinde genişleyip daralır */}
           <div 
-            className={`hidden lg:block transition-all duration-500 ease-in-out ${isProductsOpen ? 'opacity-100 translate-y-0 max-h-[20rem]' : 'opacity-0 -translate-y-2 max-h-0 overflow-hidden'}`}
+            className={`hidden lg:block transition-all duration-500 ease-in-out ${isProductsOpen ? 'opacity-100 translate-y-0 max-h-[800px]' : 'opacity-0 -translate-y-2 max-h-0 overflow-hidden'}`}
             onMouseEnter={handleProductsEnter}
             onMouseLeave={handleProductsLeave}
           > 
-            <div className="pt-1 pb-3" style={{ paddingLeft: submenuOffset }}>
-              <div className="flex flex-wrap gap-4">
-                {categories.map((category) => (
-                  <NavLink
-                    key={category.id}
-                    to={`/products/${category.id}`}
-                    className="group relative px-1 py-1 text-sm font-semibold uppercase text-gray-200 hover:text-white transition-colors duration-300"
-                    onClick={() => setIsProductsOpen(false)}
-                  >
-                    <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
-                      {t(category.name)}
-                      <span className="absolute -bottom-1 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
-                    </span>
-                  </NavLink>
-                ))}
+            {/* Beyaz çizgi */}
+            <div className="border-t-2 border-white/80 mx-4 mt-3" style={{ marginLeft: submenuOffset }}></div>
+            
+            <div className="pt-8 pb-3 grid grid-cols-[auto_1fr] gap-24" style={{ paddingLeft: submenuOffset, paddingRight: '5rem' }}>
+              {/* Sol taraf - Kategoriler */}
+              <div className="overflow-y-auto hide-scrollbar pr-6 pl-4">
+                <div className="flex flex-col gap-3">
+                  {categories.map((category) => (
+                    <NavLink
+                      key={category.id}
+                      to={`/products/${category.id}`}
+                      className="group relative px-1 py-2 text-sm font-semibold uppercase text-gray-200 hover:text-white transition-colors duration-300"
+                      onClick={() => setIsProductsOpen(false)}
+                      onMouseEnter={() => setHoveredCategoryId(category.id)}
+                    >
+                      <span className="relative inline-block transition-transform duration-300 ease-out group-hover:translate-x-1">
+                        {t(category.name)}
+                        <span className="absolute -bottom-1 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-left"></span>
+                      </span>
+                    </NavLink>
+                  ))}
+                  
+                  {/* Tüm Ürünler butonu - liste altına */}
+                  <div className="pt-3 mt-3 border-t-2 border-white/50">
+                    <NavLink
+                      to="/products"
+                      className="group relative px-1 py-2 text-sm font-bold uppercase text-white hover:text-gray-200 transition-colors duration-300"
+                      onClick={() => setIsProductsOpen(false)}
+                    >
+                      <span className="relative inline-block transition-transform duration-300 ease-out group-hover:translate-x-1">
+                        {t('view_all')}
+                        <span className="absolute -bottom-1 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-left"></span>
+                      </span>
+                    </NavLink>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Sağ taraf - Görsel */}
+              <div className="relative w-[600px] self-stretch bg-white/5 overflow-hidden">
+                {(() => {
+                  const hoveredCategory = categories.find(c => c.id === hoveredCategoryId);
+                  
+                  // Hover edilmediyse boş alan göster
+                  if (!hoveredCategory) {
+                    return null;
+                  }
+                  
+                  let imageUrl = '';
+                  let imageClass = 'w-full h-full object-cover';
+                  
+                  // Önce menuImage'i kontrol et
+                  if (hoveredCategory.menuImage) {
+                    imageUrl = hoveredCategory.menuImage;
+                  } else {
+                    // menuImage yoksa ilk ürün görselini göster
+                    const products = categoryProducts.get(hoveredCategory.id);
+                    
+                    if (products && products.length > 0) {
+                      // Görseli olan ilk ürünü bul
+                      for (const product of products) {
+                        // Ana görseli kontrol et
+                        let tempImageUrl = typeof product.mainImage === 'string' 
+                          ? product.mainImage 
+                          : product.mainImage?.url;
+                        
+                        // Ana görsel yoksa alternativeMedia'dan al
+                        if (!tempImageUrl && product.alternativeMedia && product.alternativeMedia.length > 0) {
+                          const firstAlt = product.alternativeMedia[0];
+                          if (firstAlt.type === 'image' && firstAlt.image) {
+                            tempImageUrl = typeof firstAlt.image === 'string' 
+                              ? firstAlt.image 
+                              : firstAlt.image?.url;
+                          }
+                        }
+                        
+                        if (tempImageUrl && tempImageUrl.trim() !== '') {
+                          imageUrl = tempImageUrl;
+                          imageClass = 'max-w-full max-h-full object-contain';
+                          break;
+                        }
+                      }
+                    }
+                  }
+                  
+                  // Görsel bulunduysa göster
+                  if (imageUrl) {
+                    return (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <img 
+                          key={hoveredCategory.id}
+                          src={imageUrl} 
+                          alt={t(hoveredCategory.name)}
+                          className={`${imageClass} image-transition`}
+                          style={{
+                            animation: 'crossFade 0.5s ease-in-out'
+                          }}
+                        />
+                      </div>
+                    );
+                  }
+                  
+                  return null;
+                })()}
               </div>
             </div>
           </div>
@@ -797,7 +932,7 @@ export function Header() {
               )}
                <nav className="px-4 sm:px-5 lg:px-6 pb-2 flex flex-col">
                  <div className="flex flex-col">
-                   <NavLink to="/products" className="flex items-center min-h-[3rem] pt-0 pb-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10" onClick={() => setIsMobileMenuOpen(false)}>{t('products')}</NavLink>
+                   <NavLink to="/categories" className="flex items-center min-h-[3rem] pt-0 pb-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10" onClick={() => setIsMobileMenuOpen(false)}>{t('products')}</NavLink>
                    <NavLink to="/designers" className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10" onClick={() => setIsMobileMenuOpen(false)}>{t('designers')}</NavLink>
                    <NavLink to="/projects" className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10" onClick={() => setIsMobileMenuOpen(false)}>{t('projects') || 'Projeler'}</NavLink>
                    <NavLink to="/news" className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10" onClick={() => setIsMobileMenuOpen(false)}>{t('news')}</NavLink>

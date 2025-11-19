@@ -24,7 +24,7 @@ export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'li
           srcMobile={mainImageMobile}
           srcDesktop={mainImageDesktop}
           alt={t(product.name)}
-          className={`w-full h-full object-contain transition-transform duration-700 group-hover:scale-105 ${imageBorderClass}`}
+          className={`w-full h-full object-contain transition-transform duration-500 ease-out group-hover:scale-[1.03] ${imageBorderClass}`}
           loading="lazy"
           quality={85}
         />

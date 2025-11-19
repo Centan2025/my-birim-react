@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import type { Product, Category } from '../types';
-import { getProductsByCategoryId, getCategories } from '../services/cms';
+import { getProductsByCategoryId, getCategories, getProducts } from '../services/cms';
 import { ProductCard } from '../components/ProductCard';
 import { OptimizedImage } from '../components/OptimizedImage';
 import { useTranslation } from '../i18n';
@@ -26,12 +26,18 @@ export function ProductsPage() {
     const fetchProducts = async () => {
       setLoading(true);
       if (categoryId) {
+        // Belirli bir kategori için ürünleri getir
         const [productList, allCategories] = await Promise.all([
             getProductsByCategoryId(categoryId),
             getCategories()
         ]);
         setProducts(productList);
         setCategory(allCategories.find(c => c.id === categoryId));
+      } else {
+        // Kategori yoksa tüm ürünleri getir
+        const allProducts = await getProducts();
+        setProducts(allProducts);
+        setCategory(undefined);
       }
       setLoading(false);
     };
@@ -76,10 +82,10 @@ export function ProductsPage() {
         <div className="relative h-full flex items-center justify-center text-center text-white pt-20">
           <div>
             <h1 className="text-4xl md:text-6xl font-light tracking-tighter" style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}>
-              {t(category?.name) || t('products')}
+              {category ? t(category.name) : t('all_products')}
             </h1>
             <p className="mt-4 text-lg max-w-2xl mx-auto font-light" style={{textShadow: '0 1px 3px rgba(0,0,0,0.5)'}}>
-              {category ? t(category.subtitle) : t('products_page_subtitle')}
+              {category ? t(category.subtitle) : t('all_products_subtitle')}
             </p>
           </div>
         </div>

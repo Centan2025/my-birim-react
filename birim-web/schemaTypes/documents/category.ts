@@ -17,6 +17,13 @@ export default defineType({
     defineField({name: 'name', title: 'Ad', type: 'localizedString', validation: (Rule) => Rule.required()}),
     defineField({name: 'subtitle', title: 'Alt Başlık', type: 'localizedString'}),
     defineField({name: 'heroImage', title: 'Kapak Görseli', type: 'image', options: {hotspot: true}}),
+    defineField({
+      name: 'menuImage',
+      title: 'Menü Görseli',
+      type: 'image',
+      description: 'Ürünler menüsünde gösterilecek görsel (yatay dikdörtgen format önerilir)',
+      options: {hotspot: true}
+    }),
   ],
   preview: {
     select: {title: 'name.tr', media: 'heroImage'},
