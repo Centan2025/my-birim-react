@@ -459,7 +459,7 @@ export function ExcelImportTool() {
     }
   }
 
-  // MALZEMELE sayfasını işle
+  // MALZEMELER sayfasını işle
   const processMaterialsSheet = async (worksheet: XLSX.WorkSheet): Promise<{
     successCount: number
     errorCount: number
@@ -468,7 +468,7 @@ export function ExcelImportTool() {
     const data = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ''}) as any[][]
 
     if (data.length < 2) {
-      addLog('MALZEMELE sayfası en az 2 satır içermelidir (başlık + veri)', 'warning')
+      addLog('MALZEMELER sayfası en az 2 satır içermelidir (başlık + veri)', 'warning')
       return {successCount: 0, errorCount: 0, skippedCount: 0}
     }
 
@@ -478,7 +478,7 @@ export function ExcelImportTool() {
     let errorCount = 0
     let skippedCount = 0
 
-    addLog(`MALZEMELE sayfası: Toplam ${rows.length} satır bulundu`, 'info')
+    addLog(`MALZEMELER sayfası: Toplam ${rows.length} satır bulundu`, 'info')
 
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i]
@@ -486,7 +486,7 @@ export function ExcelImportTool() {
       // A sütunu kontrolü: "SON" varsa dur
       const columnA = String(row[0] || '').trim()
       if (columnA.toUpperCase() === 'SON') {
-        addLog('MALZEMELE: "SON" değeri bulundu, işlem durduruldu', 'warning')
+        addLog('MALZEMELER: "SON" değeri bulundu, işlem durduruldu', 'warning')
         break
       }
 
@@ -502,14 +502,14 @@ export function ExcelImportTool() {
 
       // MALZEME GRUBU kontrolü
       if (!columnB) {
-        addLog(`MALZEMELE Satır ${i + 2}: MALZEME GRUBU boş, atlanıyor`, 'error')
+        addLog(`MALZEMELER Satır ${i + 2}: MALZEME GRUBU boş, atlanıyor`, 'error')
         errorCount++
         continue
       }
 
       // KARTELA kontrolü
       if (!columnC) {
-        addLog(`MALZEMELE Satır ${i + 2}: KARTELA boş, atlanıyor`, 'error')
+        addLog(`MALZEMELER Satır ${i + 2}: KARTELA boş, atlanıyor`, 'error')
         errorCount++
         continue
       }
@@ -533,7 +533,7 @@ export function ExcelImportTool() {
           )
 
           if (existingBook) {
-            addLog(`MALZEMELE Satır ${i + 2}: KARTELA "${columnC}" zaten var, atlanıyor`, 'warning')
+            addLog(`MALZEMELER Satır ${i + 2}: KARTELA "${columnC}" zaten var, atlanıyor`, 'warning')
             skippedCount++
             continue
           }
@@ -581,7 +581,7 @@ export function ExcelImportTool() {
           successCount++
         }
       } catch (error: any) {
-        addLog(`MALZEMELE Satır ${i + 2}: Hata - ${error.message}`, 'error')
+        addLog(`MALZEMELER Satır ${i + 2}: Hata - ${error.message}`, 'error')
         errorCount++
       }
     }
@@ -710,22 +710,22 @@ export function ExcelImportTool() {
       // Excel'deki tasarımcı isimlerini tutacak Set
       const designersInExcel = new Set<string>()
 
-      // MALZEMELE sayfasını kontrol et ve işle
+      // MALZEMELER sayfasını kontrol et ve işle
       const materialsSheetName = workbook.SheetNames.find(
-        (name) => name.toUpperCase().includes('MALZEMELE')
+        (name) => name.toUpperCase().includes('MALZEMELER')
       )
 
       let materialsResult = {successCount: 0, errorCount: 0, skippedCount: 0}
       if (materialsSheetName) {
-        addLog(`MALZEMELE sayfası bulundu: ${materialsSheetName}`, 'info')
+        addLog(`MALZEMELER sayfası bulundu: ${materialsSheetName}`, 'info')
         const materialsWorksheet = workbook.Sheets[materialsSheetName]
         materialsResult = await processMaterialsSheet(materialsWorksheet)
         addLog(
-          `MALZEMELE işlemi tamamlandı! Başarılı: ${materialsResult.successCount}, Hata: ${materialsResult.errorCount}, Atlandı: ${materialsResult.skippedCount}`,
+          `MALZEMELER işlemi tamamlandı! Başarılı: ${materialsResult.successCount}, Hata: ${materialsResult.errorCount}, Atlandı: ${materialsResult.skippedCount}`,
           'success'
         )
       } else {
-        addLog('⚠️ MALZEMELE sayfası bulunamadı, atlanıyor', 'warning')
+        addLog('⚠️ MALZEMELER sayfası bulunamadı, atlanıyor', 'warning')
       }
 
       // TASARIMCILAR sayfasını kontrol et ve işle
@@ -952,7 +952,7 @@ export function ExcelImportTool() {
         success: totalError === 0,
         message: `İşlem tamamlandı! Toplam Başarılı: ${totalSuccess}, Toplam Hata: ${totalError}, Toplam Atlandı: ${totalSkipped}`,
         details: [
-          `MALZEMELE - Başarılı: ${materialsResult.successCount}, Hata: ${materialsResult.errorCount}, Atlandı: ${materialsResult.skippedCount}`,
+          `MALZEMELER - Başarılı: ${materialsResult.successCount}, Hata: ${materialsResult.errorCount}, Atlandı: ${materialsResult.skippedCount}`,
           `TASARIMCILAR - Başarılı: ${designersResult.successCount}, Hata: ${designersResult.errorCount}, Atlandı: ${designersResult.skippedCount}`,
           `ÜRÜNLER - Başarılı: ${productsResult.successCount}, Hata: ${productsResult.errorCount}, Atlandı: ${productsResult.skippedCount}`,
         ],
@@ -1174,7 +1174,7 @@ export function ExcelImportTool() {
         <h3 style={{marginTop: 0, color: '#1976d2'}}>ℹ️ Excel Formatı ve Önemli Kurallar</h3>
         <ul style={{marginBottom: 0, color: '#1976d2', lineHeight: '1.8'}}>
           <li>
-            <strong>MALZEMELE Sayfası:</strong> Malzeme grupları ve kartelalarını ekler.
+            <strong>MALZEMELER Sayfası:</strong> Malzeme grupları ve kartelalarını ekler.
             <ul style={{marginTop: '0.5rem'}}>
               <li>A Sütunu: LİSTEYE EKLE - "-" işareti yoksa ekler, "SON" varsa durur</li>
               <li>B Sütunu: MALZEME GRUBU - Grup yoksa oluşturulur</li>
@@ -1193,7 +1193,7 @@ export function ExcelImportTool() {
             </ul>
           </li>
           <li><strong>Kategoriler:</strong> Otomatik olarak oluşturulur (sorun değil).</li>
-          <li><strong>Öneri:</strong> Sırayla MALZEMELE → TASARIMCILAR → ÜRÜNLER şeklinde yükleyin.</li>
+          <li><strong>Öneri:</strong> Sırayla MALZEMELER → TASARIMCILAR → ÜRÜNLER şeklinde yükleyin.</li>
         </ul>
       </div>
 
