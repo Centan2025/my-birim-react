@@ -87,3 +87,4 @@ Bu durumda görseller `public/products/` altında tutulabilir.
 ```
 
 
+

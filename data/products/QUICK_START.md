@@ -122,3 +122,4 @@ export default yeniUrun;
 - Manuel güncelleme gerektirir
 
 
+

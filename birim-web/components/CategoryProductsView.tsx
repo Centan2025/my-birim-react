@@ -11,12 +11,16 @@ export function CategoryProductsView(props: any) {
   const router = useRouter()
   
   useEffect(() => {
-    const query = `*[_type == "product" && references($categoryId)] | order(name.tr asc) {
+    // Draft ve published versiyonlar için ID'leri hazırla
+    const cleanId = categoryId.replace('drafts.', '')
+    const draftId = `drafts.${cleanId}`
+    
+    const query = `*[_type == "product" && (category._ref == $categoryId || category._ref == $draftId || category._ref == $cleanId)] | order(name.tr asc) {
       _id,
       name,
       "imageUrl": mainImage.asset->url
     }`
-    client.fetch(query, {categoryId}).then((data: any) => {
+    client.fetch(query, {categoryId, draftId, cleanId}).then((data: any) => {
       setProducts(data)
       setLoading(false)
     }).catch((err: any) => {
@@ -134,4 +138,5 @@ export function CategoryProductsView(props: any) {
     </Card>
   )
 }
+
 

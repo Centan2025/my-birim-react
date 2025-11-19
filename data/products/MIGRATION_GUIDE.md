@@ -92,3 +92,4 @@ Eğer tamamen CMS'den bağımsız olmak istiyorsanız:
 ⚠️ **Dinamik İçerik**: Gerçek zamanlı güncellemeler için uygun değil
 
 
+

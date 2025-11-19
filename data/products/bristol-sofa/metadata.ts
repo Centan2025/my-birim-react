@@ -90,3 +90,4 @@ const bristolSofa: Product = {
 export default bristolSofa;
 
 
+

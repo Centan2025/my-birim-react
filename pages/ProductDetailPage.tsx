@@ -680,7 +680,7 @@ export function ProductDetailPage() {
                         srcMobile={typeof designer.image === 'object' ? designer.image.urlMobile : designer.imageMobile}
                         srcDesktop={typeof designer.image === 'object' ? designer.image.urlDesktop : designer.imageDesktop}
                         alt={t(designer.name)}
-                        className="w-full h-auto object-cover"
+                        className="w-full h-auto object-cover filter grayscale"
                         loading="lazy"
                         quality={85}
                       />

@@ -20,13 +20,13 @@ const DesignerCard: React.FC<{ designer: Designer }> = ({ designer }) => {
           srcMobile={typeof designer.image === 'object' ? designer.image.urlMobile : designer.imageMobile}
           srcDesktop={typeof designer.image === 'object' ? designer.image.urlDesktop : designer.imageDesktop}
           alt={t(designer.name)}
-          className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 filter grayscale ${imageBorderClass}`}
+          className={`w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 filter grayscale ${imageBorderClass}`}
           loading="lazy"
           quality={85}
         />
       </div>
       <div className="mt-4 min-h-[2.5rem] flex items-center justify-center">
-        <h3 className="text-xl font-light text-gray-500 group-hover:text-gray-600">{t(designer.name)}</h3>
+        <h3 className="text-xl font-light text-gray-500 transition-colors duration-300 group-hover:text-gray-600">{t(designer.name)}</h3>
       </div>
     </Link>
   );

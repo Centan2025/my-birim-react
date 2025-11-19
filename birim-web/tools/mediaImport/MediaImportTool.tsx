@@ -228,11 +228,51 @@ export default function MediaImportTool() {
     })
     
     const existingDesigners = await client.fetch(`*[_type == "designer"]{ _id, "slug": id.current, name }`)
-    const existingProducts = await client.fetch(`*[_type == "product"]{ _id, "slug": id.current, name }`)
+    const existingProducts = await client.fetch(`*[_type == "product"]{ 
+      _id, 
+      "slug": id.current, 
+      name,
+      "categorySlug": category->id.current,
+      "categoryName": category->name
+    }`)
+    
+    // Kategorileri de çek ve logla
+    const existingCategories = await client.fetch(`*[_type == "category"]{ 
+      _id, 
+      "slug": id.current, 
+      name 
+    }`)
     
     console.log('📋 Mevcut kayıtlar:', {
       tasarımcılar: existingDesigners.length,
-      ürünler: existingProducts.length
+      ürünler: existingProducts.length,
+      kategoriler: existingCategories.length
+    })
+    
+    console.log('📂 CMS\'deki Kategoriler:')
+    existingCategories.forEach((cat: any) => {
+      console.log(`   - slug: "${cat.slug}" | ad: "${cat.name?.tr || cat.name?.en}"`)
+    })
+    
+    // Kategori adından slug'a dönüşüm haritası oluştur
+    const categoryNameToSlug = new Map<string, string>()
+    existingCategories.forEach((cat: any) => {
+      const nameTr = cat.name?.tr || ''
+      const nameEn = cat.name?.en || ''
+      if (nameTr) {
+        // Hem normalize edilmiş hem de orijinal adı kaydet
+        categoryNameToSlug.set(normalizeText(nameTr), cat.slug)
+        categoryNameToSlug.set(nameTr.toLowerCase(), cat.slug)
+      }
+      if (nameEn) {
+        categoryNameToSlug.set(normalizeText(nameEn), cat.slug)
+        categoryNameToSlug.set(nameEn.toLowerCase(), cat.slug)
+      }
+    })
+    
+    console.log('🗺️ Kategori eşleme haritası:')
+    categoryNameToSlug.forEach((slug, name) => {
+      console.log(`   "${name}" -> "${slug}"`)
     })
     
     // 1. Tasarımcı görsellerini yükle (sadece görsel, kayıt oluşturmadan)
@@ -279,23 +319,62 @@ export default function MediaImportTool() {
       setProgress([...newProgress])
       
       try {
-        // Mevcut ürünü bul
-        const productSlug = `${product.categoryId}-${product.modelId}`
-        const existing = existingProducts.find((p: any) => 
-          p.slug === productSlug ||
-          p.name?.tr?.toLowerCase() === product.modelName.toLowerCase() ||
-          p.name?.en?.toLowerCase() === product.modelName.toLowerCase()
-        )
+        // Kategori adını CMS'deki slug'a çevir
+        const normalizedCategoryName = normalizeText(product.categoryName)
+        const actualCategorySlug = categoryNameToSlug.get(normalizedCategoryName) || 
+                                   categoryNameToSlug.get(product.categoryName.toLowerCase()) ||
+                                   product.categoryId
+        
+        console.log(`   🔍 ${product.categoryName}: "${product.categoryId}" -> "${actualCategorySlug}"`)
+        
+        // Mevcut ürünü bul - Kategori ve model adı birlikte kontrol edilmeli
+        const productSlug = `${actualCategorySlug}-${product.modelId}`
+        const existing = existingProducts.find((p: any) => {
+          // Önce slug ile kontrol et (en güvenilir)
+          if (p.slug === productSlug) return true
+          
+          // Slug yoksa, kategori + model adı ile kontrol et
+          // Türkçe karakterler için normalize edilmiş karşılaştırma
+          const normalizeForComparison = (str: string) => {
+            return slugify(str).replace(/-/g, '')
+          }
+          
+          const normalizedProductName = normalizeForComparison(product.modelName)
+          const modelNameMatch = 
+            normalizeForComparison(p.name?.tr || '') === normalizedProductName ||
+            normalizeForComparison(p.name?.en || '') === normalizedProductName
+          
+          const categoryMatch = p.categorySlug === actualCategorySlug
+          
+          // HEM model adı HEM kategori eşleşmeli
+          return modelNameMatch && categoryMatch
+        })
         
         if (existing) {
+          console.log(`   🎯 Eşleşme bulundu: ${existing.name?.tr} (Kategori: ${existing.categoryName?.tr})`)
           await updateProductImages(client, existing._id, product)
           item.status = 'success'
           item.message = 'Görseller güncellendi'
         } else {
+          console.log(`   ❌ Bulunamadı: ${product.categoryName}/${product.modelName}`)
+          console.log(`   🔍 Aranan slug: "${productSlug}"`)
+          console.log(`   🔍 Aranan categoryId: "${product.categoryId}", modelId: "${product.modelId}"`)
+          console.log(`   📊 CMS'deki benzer ürünler:`)
+          existingProducts
+            .filter((p: any) => {
+              const normalizeForComparison = (str: string) => slugify(str).replace(/-/g, '')
+              const normalizedProductName = normalizeForComparison(product.modelName)
+              return normalizeForComparison(p.name?.tr || '') === normalizedProductName ||
+                     normalizeForComparison(p.name?.en || '') === normalizedProductName
+            })
+            .forEach((p: any) => {
+              console.log(`      - "${p.name?.tr}" | slug: "${p.slug}" | kategori: "${p.categorySlug}"`)
+            })
           item.status = 'error'
-          item.message = 'CMS\'de bulunamadı - önce manuel oluşturun'
+          item.message = `CMS'de bulunamadı (${product.categoryName}/${product.modelName}) - önce manuel oluşturun`
         }
       } catch (error: any) {
+        console.error(`   ❌ Hata: ${product.categoryName}/${product.modelName}`, error)
         item.status = 'error'
         item.message = error.message
       }
@@ -427,11 +506,43 @@ export default function MediaImportTool() {
           </Card>
         )}
 
-        {/* Progress */}
+        {/* Sadece Hatalar */}
+        {progress.filter(p => p.status === 'error').length > 0 && (
+          <Card padding={3} tone="critical" radius={2} style={{ maxHeight: '300px', overflow: 'auto' }}>
+            <Stack space={2}>
+              <Flex align="center" gap={2}>
+                <WarningOutlineIcon style={{ color: 'red' }} />
+                <Text size={2} weight="bold" style={{ color: 'red' }}>
+                  ❌ Hatalar ({progress.filter(p => p.status === 'error').length})
+                </Text>
+              </Flex>
+              {progress.filter(p => p.status === 'error').map((item, idx) => (
+                <Card key={idx} padding={2} tone="default" radius={2}>
+                  <Stack space={1}>
+                    <Text size={1} weight="semibold">
+                      {item.type === 'category' && '📂'}
+                      {item.type === 'designer' && '👤'}
+                      {item.type === 'product' && '📦'}
+                      {' '}
+                      {item.name}
+                    </Text>
+                    {item.message && (
+                      <Text size={1} muted style={{ wordBreak: 'break-word' }}>
+                        {item.message}
+                      </Text>
+                    )}
+                  </Stack>
+                </Card>
+              ))}
+            </Stack>
+          </Card>
+        )}
+
+        {/* Tüm İşlemler */}
         {progress.length > 0 && (
           <Card padding={3} tone="transparent" radius={2} style={{ maxHeight: '400px', overflow: 'auto' }}>
             <Stack space={2}>
-              <Text size={1} weight="semibold">⏳ İşlem Durumu:</Text>
+              <Text size={1} weight="semibold">⏳ Tüm İşlemler:</Text>
               {progress.map((item, idx) => (
                 <Flex key={idx} align="center" gap={2}>
                   <Box>
@@ -497,9 +608,13 @@ export default function MediaImportTool() {
 
 function slugify(text: string): string {
   const turkishMap: Record<string, string> = {
-    'ç': 'c', 'Ç': 'C', 'ğ': 'g', 'Ğ': 'G',
-    'ı': 'i', 'İ': 'I', 'ö': 'o', 'Ö': 'O',
-    'ş': 's', 'Ş': 'S', 'ü': 'u', 'Ü': 'U',
+    'ç': 'c', 'Ç': 'c', 
+    'ğ': 'g', 'Ğ': 'g',
+    'ı': 'i', 'I': 'i',  // Türkçe noktasız I -> i
+    'İ': 'i', 'i': 'i',  // Türkçe noktalı İ -> i
+    'ö': 'o', 'Ö': 'o',
+    'ş': 's', 'Ş': 's', 
+    'ü': 'u', 'Ü': 'u',
   }
   let result = text
   Object.entries(turkishMap).forEach(([tr, en]) => {
@@ -510,6 +625,11 @@ function slugify(text: string): string {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-+|-+$/g, '')
+}
+
+// Karşılaştırma için normalize et (tireler ve boşluklar olmadan)
+function normalizeText(text: string): string {
+  return slugify(text).replace(/-/g, '').replace(/\s+/g, '')
 }
 
 function isImageFile(filename: string): boolean {
@@ -555,36 +675,146 @@ function createFileList(files: File[]): FileList {
 // ============================================================================
 
 /**
+ * Tasarımcı için mevcut görselleri kontrol et
+ */
+async function checkExistingDesignerAssets(client: any, designerId: string) {
+  const designer = await client.fetch(`*[_id == $designerId][0]{
+    image{asset->{_id, originalFilename, sha1hash}},
+    imageMobile{asset->{_id, originalFilename, sha1hash}}
+  }`, { designerId })
+  
+  const existingHashes = new Set<string>()
+  const existingFilenames = new Set<string>()
+  
+  if (designer?.image?.asset) {
+    if (designer.image.asset.sha1hash) existingHashes.add(designer.image.asset.sha1hash)
+    if (designer.image.asset.originalFilename) existingFilenames.add(designer.image.asset.originalFilename)
+  }
+  if (designer?.imageMobile?.asset) {
+    if (designer.imageMobile.asset.sha1hash) existingHashes.add(designer.imageMobile.asset.sha1hash)
+    if (designer.imageMobile.asset.originalFilename) existingFilenames.add(designer.imageMobile.asset.originalFilename)
+  }
+  
+  return { existingHashes, existingFilenames }
+}
+
+/**
  * Sadece tasarımcı görsellerini günceller (yeni kayıt oluşturmaz)
  */
 async function updateDesignerImages(client: any, designerId: string, designer: { id: string; name: string; files: File[] }) {
+  // Mevcut görselleri kontrol et
+  const { existingHashes, existingFilenames } = await checkExistingDesignerAssets(client, designerId)
+  
   const generalImage = designer.files.find(f => !f.name.toLowerCase().includes('_mobil'))
   const mobileImage = designer.files.find(f => f.name.toLowerCase().includes('_mobil'))
 
   const updates: any = {}
 
   if (generalImage) {
-    console.log(`   📤 Genel görsel yükleniyor: ${generalImage.name}`)
-    const asset = await client.assets.upload('image', generalImage)
-    updates.image = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+    const alreadyExists = await isAssetAlreadyUploaded(client, generalImage, existingHashes, existingFilenames)
+    if (!alreadyExists) {
+      console.log(`   📤 Genel görsel yükleniyor: ${generalImage.name}`)
+      const asset = await client.assets.upload('image', generalImage)
+      updates.image = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+    }
   }
 
   if (mobileImage) {
-    console.log(`   📱 Mobil görsel yükleniyor: ${mobileImage.name}`)
-    const asset = await client.assets.upload('image', mobileImage)
-    updates.imageMobile = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+    const alreadyExists = await isAssetAlreadyUploaded(client, mobileImage, existingHashes, existingFilenames)
+    if (!alreadyExists) {
+      console.log(`   📱 Mobil görsel yükleniyor: ${mobileImage.name}`)
+      const asset = await client.assets.upload('image', mobileImage)
+      updates.imageMobile = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+    }
   }
 
   // Sadece görselleri güncelle
   if (Object.keys(updates).length > 0) {
     await client.patch(designerId).set(updates).commit()
+    console.log(`   ✅ ${Object.keys(updates).length} alan güncellendi`)
+  } else {
+    console.log(`   ℹ️ Tüm görseller zaten mevcut, güncelleme yapılmadı`)
   }
+}
+
+/**
+ * Sanity'deki mevcut görselleri kontrol et
+ */
+async function checkExistingAssets(client: any, productId: string) {
+  const product = await client.fetch(`*[_id == $productId][0]{
+    mainImage{asset->{_id, originalFilename, sha1hash}},
+    mainImageMobile{asset->{_id, originalFilename, sha1hash}},
+    alternativeMedia[]{
+      ...,
+      image{asset->{_id, originalFilename, sha1hash}}
+    }
+  }`, { productId })
+  
+  const existingHashes = new Set<string>()
+  const existingFilenames = new Set<string>()
+  
+  if (product?.mainImage?.asset) {
+    if (product.mainImage.asset.sha1hash) existingHashes.add(product.mainImage.asset.sha1hash)
+    if (product.mainImage.asset.originalFilename) existingFilenames.add(product.mainImage.asset.originalFilename)
+  }
+  if (product?.mainImageMobile?.asset) {
+    if (product.mainImageMobile.asset.sha1hash) existingHashes.add(product.mainImageMobile.asset.sha1hash)
+    if (product.mainImageMobile.asset.originalFilename) existingFilenames.add(product.mainImageMobile.asset.originalFilename)
+  }
+  if (product?.alternativeMedia) {
+    product.alternativeMedia.forEach((item: any) => {
+      if (item?.image?.asset) {
+        if (item.image.asset.sha1hash) existingHashes.add(item.image.asset.sha1hash)
+        if (item.image.asset.originalFilename) existingFilenames.add(item.image.asset.originalFilename)
+      }
+    })
+  }
+  
+  return { existingHashes, existingFilenames }
+}
+
+/**
+ * Dosya hash'ini hesapla
+ */
+async function getFileHash(file: File): Promise<string> {
+  const buffer = await file.arrayBuffer()
+  const hashBuffer = await crypto.subtle.digest('SHA-1', buffer)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+/**
+ * Görselin daha önce yüklenip yüklenmediğini kontrol et
+ */
+async function isAssetAlreadyUploaded(
+  client: any, 
+  file: File, 
+  existingHashes: Set<string>, 
+  existingFilenames: Set<string>
+): Promise<boolean> {
+  // Önce dosya adına bak (hızlı kontrol)
+  if (existingFilenames.has(file.name)) {
+    console.log(`   ⏭️ Atlandı (zaten var): ${file.name}`)
+    return true
+  }
+  
+  // Hash hesapla ve kontrol et (daha güvenilir)
+  const hash = await getFileHash(file)
+  if (existingHashes.has(hash)) {
+    console.log(`   ⏭️ Atlandı (hash eşleşti): ${file.name}`)
+    return true
+  }
+  
+  return false
 }
 
 /**
  * Sadece ürün görsellerini günceller (yeni kayıt oluşturmaz)
  */
 async function updateProductImages(client: any, productId: string, product: any) {
+  // Mevcut görselleri kontrol et
+  const { existingHashes, existingFilenames } = await checkExistingAssets(client, productId)
+  
   const coverMain = product.files.find((f: File) => f.name.toLowerCase().includes('_kapak') && !f.name.toLowerCase().includes('_mobil'))
   const coverMobile = product.files.find((f: File) => f.name.toLowerCase().includes('_kapak_mobil'))
   const regularImages = product.files.filter((f: File) => 
@@ -595,46 +825,78 @@ async function updateProductImages(client: any, productId: string, product: any)
 
   // Ana kapak görseli
   if (coverMain) {
-    console.log(`   📸 Ana kapak yükleniyor: ${coverMain.name}`)
-    const asset = await client.assets.upload('image', coverMain)
-    updates.mainImage = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+    const alreadyExists = await isAssetAlreadyUploaded(client, coverMain, existingHashes, existingFilenames)
+    if (!alreadyExists) {
+      console.log(`   📸 Ana kapak yükleniyor: ${coverMain.name}`)
+      const asset = await client.assets.upload('image', coverMain)
+      updates.mainImage = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+      existingHashes.add(asset.sha1hash)
+      existingFilenames.add(asset.originalFilename)
+    }
   } else if (regularImages.length > 0) {
-    console.log(`   ⚠️ Kapak yok, ilk görsel kullanılıyor: ${regularImages[0].name}`)
-    const asset = await client.assets.upload('image', regularImages[0])
-    updates.mainImage = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+    const alreadyExists = await isAssetAlreadyUploaded(client, regularImages[0], existingHashes, existingFilenames)
+    if (!alreadyExists) {
+      console.log(`   ⚠️ Kapak yok, ilk görsel kullanılıyor: ${regularImages[0].name}`)
+      const asset = await client.assets.upload('image', regularImages[0])
+      updates.mainImage = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+      existingHashes.add(asset.sha1hash)
+      existingFilenames.add(asset.originalFilename)
+    }
   }
 
   // Mobil kapak görseli
   if (coverMobile) {
-    console.log(`   📱 Mobil kapak yükleniyor: ${coverMobile.name}`)
-    const asset = await client.assets.upload('image', coverMobile)
-    updates.mainImageMobile = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+    const alreadyExists = await isAssetAlreadyUploaded(client, coverMobile, existingHashes, existingFilenames)
+    if (!alreadyExists) {
+      console.log(`   📱 Mobil kapak yükleniyor: ${coverMobile.name}`)
+      const asset = await client.assets.upload('image', coverMobile)
+      updates.mainImageMobile = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+      existingHashes.add(asset.sha1hash)
+      existingFilenames.add(asset.originalFilename)
+    }
   }
 
-  // Alternatif görseller
-  const alternativeAssets = []
+  // Alternatif görseller (productSimpleMediaItem formatında)
+  const alternativeMediaItems = []
   const imagesToUpload = coverMain ? regularImages : regularImages.slice(1)
   
   if (imagesToUpload.length > 0) {
-    console.log(`   🖼️ ${imagesToUpload.length} alternatif görsel yükleniyor...`)
+    console.log(`   🖼️ ${imagesToUpload.length} alternatif görsel kontrol ediliyor...`)
   }
   
   for (const img of imagesToUpload) {
     try {
-      const asset = await client.assets.upload('image', img)
-      alternativeAssets.push({ _type: 'image', asset: { _type: 'reference', _ref: asset._id } })
+      const alreadyExists = await isAssetAlreadyUploaded(client, img, existingHashes, existingFilenames)
+      if (!alreadyExists) {
+        console.log(`   ✅ Yükleniyor: ${img.name}`)
+        const asset = await client.assets.upload('image', img)
+        alternativeMediaItems.push({
+          _type: 'productSimpleMediaItem',
+          _key: asset._id,
+          type: 'image',
+          image: { 
+            _type: 'image', 
+            asset: { _type: 'reference', _ref: asset._id } 
+          }
+        })
+        existingHashes.add(asset.sha1hash)
+        existingFilenames.add(asset.originalFilename)
+      }
     } catch (error) {
-      console.error(`   ❌ Görsel yüklenemedi: ${img.name}`)
+      console.error(`   ❌ Görsel yüklenemedi: ${img.name}`, error)
     }
   }
 
-  if (alternativeAssets.length > 0) {
-    updates.alternativeImages = alternativeAssets
+  if (alternativeMediaItems.length > 0) {
+    updates.alternativeMedia = alternativeMediaItems
   }
 
   // Sadece görselleri güncelle
   if (Object.keys(updates).length > 0) {
     await client.patch(productId).set(updates).commit()
+    console.log(`   ✅ ${Object.keys(updates).length} alan güncellendi`)
+  } else {
+    console.log(`   ℹ️ Tüm görseller zaten mevcut, güncelleme yapılmadı`)
   }
 }
 
