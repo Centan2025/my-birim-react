@@ -266,9 +266,9 @@ export function ExcelImportTool() {
     const trimmedName = designerName.trim()
 
     try {
-      // Mevcut tasarımcıyı AD ile bul (name.tr veya name.en)
+      // Mevcut tasarımcıyı AD ile bul (name.tr veya name.en) - büyük/küçük harf duyarsız
       const existingDesigner = await client.fetch(
-        `*[_type == "designer" && (name.tr == $name || name.en == $name)][0]`,
+        `*[_type == "designer" && (lower(name.tr) == lower($name) || lower(name.en) == lower($name))][0]`,
         {name: trimmedName}
       )
 
@@ -472,8 +472,8 @@ export function ExcelImportTool() {
       return {successCount: 0, errorCount: 0, skippedCount: 0}
     }
 
-    // İlk satırı başlık olarak atla
-    const rows = data.slice(1)
+    // İlk 2 satırı başlık olarak atla (kullanıcı isteği)
+    const rows = data.slice(2)
     let successCount = 0
     let errorCount = 0
     let skippedCount = 0
@@ -515,9 +515,9 @@ export function ExcelImportTool() {
       }
 
       try {
-        // MALZEME GRUBU var mı kontrol et
+        // MALZEME GRUBU var mı kontrol et (büyük/küçük harf duyarsız)
         const existingGroup = await client.fetch(
-          `*[_type == "materialGroup" && (title.tr == $groupName || title.en == $groupName)][0]`,
+          `*[_type == "materialGroup" && (lower(title.tr) == lower($groupName) || lower(title.en) == lower($groupName))][0]`,
           {groupName: columnB.trim()}
         )
 
@@ -527,9 +527,11 @@ export function ExcelImportTool() {
           addLog(`Malzeme Grubu bulundu: ${columnB}`, 'info')
           groupId = existingGroup._id
 
-          // KARTELA var mı kontrol et
+          // KARTELA var mı kontrol et (büyük/küçük harf duyarsız)
           const existingBook = existingGroup.books?.find(
-            (book: any) => book.title?.tr === columnC.trim() || book.title?.en === columnC.trim()
+            (book: any) => 
+              book.title?.tr?.toLowerCase() === columnC.trim().toLowerCase() || 
+              book.title?.en?.toLowerCase() === columnC.trim().toLowerCase()
           )
 
           if (existingBook) {
@@ -602,8 +604,8 @@ export function ExcelImportTool() {
       return {successCount: 0, errorCount: 0, skippedCount: 0}
     }
 
-    // İlk satırı başlık olarak atla
-    const rows = data.slice(1)
+    // İlk 2 satırı başlık olarak atla (kullanıcı isteği)
+    const rows = data.slice(2)
     let successCount = 0
     let errorCount = 0
     let skippedCount = 0
@@ -662,9 +664,9 @@ export function ExcelImportTool() {
           )
         }
       } else {
-        // Yeni tasarımcı, AD kontrolü yap
+        // Yeni tasarımcı, AD kontrolü yap (büyük/küçük harf duyarsız)
         const existingByName = await client.fetch(
-          `*[_type == "designer" && (name.tr == $name || name.en == $name)][0]`,
+          `*[_type == "designer" && (lower(name.tr) == lower($name) || lower(name.en) == lower($name))][0]`,
           {name: columnC.trim()}
         )
         if (existingByName) {
@@ -741,7 +743,7 @@ export function ExcelImportTool() {
         // Tasarımcı isimlerini topla
         const designersData = XLSX.utils.sheet_to_json(designersWorksheet, {header: 1, defval: ''}) as any[][]
         if (designersData.length > 1) {
-          const designersRows = designersData.slice(1)
+          const designersRows = designersData.slice(2) // İlk 2 satır başlık
           for (const row of designersRows) {
             const columnA = String(row[0] || '').trim()
             const columnC = String(row[2] || '').trim() // TASARIMCI ADI
@@ -785,8 +787,8 @@ export function ExcelImportTool() {
         if (data.length < 2) {
           addLog('ÜRÜNLER sayfası en az 2 satır içermelidir (başlık + veri)', 'warning')
         } else {
-          // İlk satırı başlık olarak atla
-          const rows = data.slice(1)
+          // İlk 2 satırı başlık olarak atla (kullanıcı isteği)
+          const rows = data.slice(2)
           let processedCount = 0
           let successCount = 0
           let errorCount = 0
@@ -856,9 +858,9 @@ export function ExcelImportTool() {
                 )
               }
             } else {
-              // Yeni ürün, AD kontrolü yap
+              // Yeni ürün, AD kontrolü yap (büyük/küçük harf duyarsız)
               const existingByName = await client.fetch(
-                `*[_type == "product" && (name.tr == $name || name.en == $name)][0]`,
+                `*[_type == "product" && (lower(name.tr) == lower($name) || lower(name.en) == lower($name))][0]`,
                 {name: columnD.trim()}
               )
               if (existingByName) {
