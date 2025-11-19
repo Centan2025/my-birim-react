@@ -42,6 +42,8 @@ export default defineType({
       fields: [
         // Navigasyon (menü sırasına göre)
         defineField({name: 'products', title: 'Ürünler', type: 'string', fieldset: 'nav'}),
+        defineField({name: 'all_products', title: 'Tüm Ürünler', type: 'string', fieldset: 'nav'}),
+        defineField({name: 'view_all', title: 'Tüm Modeller / Hepsini Gör', type: 'string', fieldset: 'nav'}),
         defineField({name: 'designers', title: 'Tasarımcılar', type: 'string', fieldset: 'nav'}),
         defineField({name: 'projects', title: 'Projeler', type: 'string', fieldset: 'nav'}),
         defineField({name: 'news', title: 'Haberler', type: 'string', fieldset: 'nav'}),
@@ -58,6 +60,7 @@ export default defineType({
         defineField({name: 'designer', title: 'Tasarımcı', type: 'string', fieldset: 'labels'}),
         defineField({name: 'category', title: 'Kategori', type: 'string', fieldset: 'labels'}),
         defineField({name: 'homepage', title: 'Anasayfa', type: 'string', fieldset: 'labels'}),
+        defineField({name: 'all_products_subtitle', title: 'Tüm Ürünler Alt Başlık', type: 'text', fieldset: 'labels'}),
         defineField({name: 'featured_products', title: 'Öne Çıkan Ürünler', type: 'string', fieldset: 'labels'}),
         defineField({name: 'featured_products_subtitle', title: 'Öne Çıkan Ürünler Alt Başlık', type: 'text', fieldset: 'labels'}),
         defineField({name: 'designer_spotlight', title: 'Tasarımcı Odağı', type: 'string', fieldset: 'labels'}),

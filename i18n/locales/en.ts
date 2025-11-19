@@ -13,7 +13,7 @@ export default {
   "products": "Products",
   "all_products": "All Products",
   "all_products_subtitle": "Discover all designs in our collection.",
-  "view_all": "View All",
+  "view_all": "ALL MODELS",
   "categories": "Categories",
   "designer": "Designer",
   "category": "Category",
