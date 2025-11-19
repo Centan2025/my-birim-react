@@ -4,7 +4,7 @@ import { UploadIcon, FolderIcon, CheckmarkIcon, WarningOutlineIcon } from '@sani
 import { useClient } from 'sanity'
 
 interface ProgressItem {
-  type: 'category' | 'designer' | 'product'
+  type: 'category' | 'designer' | 'product' | 'materialGroup' | 'materialBook'
   name: string
   status: 'pending' | 'uploading' | 'success' | 'error'
   message?: string
@@ -24,6 +24,13 @@ interface ParsedData {
     modelName: string
     files: File[]
   }>
+  materialGroups: Array<{
+    groupName: string
+    books: Array<{
+      bookName: string
+      files: File[]
+    }>
+  }>
 }
 
 export default function MediaImportTool() {
@@ -39,6 +46,7 @@ export default function MediaImportTool() {
     const categories = new Map<string, string>()
     const designerMap = new Map<string, File[]>()
     const productMap = new Map<string, File[]>()
+    const materialGroupMap = new Map<string, Map<string, File[]>>()
 
     Array.from(files).forEach(file => {
       const path = file.webkitRelativePath || file.name
@@ -127,6 +135,37 @@ export default function MediaImportTool() {
         }
         designerMap.get(designerName)!.push(file)
       }
+      
+      // malzemeler/grup-adı/kartela-adı/görsel.jpg (büyük/küçük harf duyarsız)
+      const malzemeIndex = parts.findIndex(p => {
+        const lower = p?.toLowerCase() || ''
+        return lower === 'malzemeler' || lower === 'malzeme'
+      })
+      
+      if (malzemeIndex !== -1 && parts.length >= malzemeIndex + 4 && isImageFile(file.name)) {
+        const groupName = parts[malzemeIndex + 1]
+        const bookName = parts[malzemeIndex + 2]
+        
+        if (!materialGroupMap.has(groupName)) {
+          materialGroupMap.set(groupName, new Map())
+        }
+        
+        const groupBooks = materialGroupMap.get(groupName)!
+        if (!groupBooks.has(bookName)) {
+          groupBooks.set(bookName, [])
+        }
+        
+        groupBooks.get(bookName)!.push(file)
+        
+        // Debug: İlk malzeme bulunduğunda
+        if (materialGroupMap.size === 1 && groupBooks.size === 1 && groupBooks.get(bookName)!.length === 1) {
+          console.log('🎨 İlk malzeme bulundu!', {
+            groupName,
+            bookName,
+            dosya: file.name
+          })
+        }
+      }
     })
 
     // Map'leri dizilere çevir
@@ -147,7 +186,15 @@ export default function MediaImportTool() {
       }
     })
 
-    return { categories, designers, products }
+    const materialGroups = Array.from(materialGroupMap.entries()).map(([groupName, booksMap]) => ({
+      groupName,
+      books: Array.from(booksMap.entries()).map(([bookName, files]) => ({
+        bookName,
+        files: files.filter(f => isImageFile(f.name))
+      }))
+    }))
+
+    return { categories, designers, products, materialGroups }
   }, [])
 
   // Dosya yükleme handler'ı
@@ -167,14 +214,22 @@ export default function MediaImportTool() {
         kategoriler: data.categories.size,
         tasarımcılar: data.designers.length,
         ürünler: data.products.length,
+        malzemeGrupları: data.materialGroups.length,
         tasarımcı_detay: data.designers.map(d => ({ isim: d.name, dosya: d.files.length })),
-        ürün_detay: data.products.map(p => ({ isim: p.modelName, dosya: p.files.length }))
+        ürün_detay: data.products.map(p => ({ isim: p.modelName, dosya: p.files.length })),
+        malzeme_detay: data.materialGroups.map(g => ({ 
+          grup: g.groupName, 
+          kartelaSayısı: g.books.length,
+          toplamGörsel: g.books.reduce((sum, b) => sum + b.files.length, 0)
+        }))
       })
       
       // İstatistikler
       const totalImages = 
         data.designers.reduce((sum, d) => sum + d.files.length, 0) +
-        data.products.reduce((sum, p) => sum + p.files.length, 0)
+        data.products.reduce((sum, p) => sum + p.files.length, 0) +
+        data.materialGroups.reduce((sum, g) => 
+          sum + g.books.reduce((bookSum, b) => bookSum + b.files.length, 0), 0)
       
       setStats({
         categories: data.categories.size,
@@ -194,14 +249,22 @@ export default function MediaImportTool() {
         return
       }
 
+      const materialSummary = data.materialGroups.length > 0 
+        ? `, ${data.materialGroups.length} malzeme grubu` 
+        : ''
+      
       toast.push({
         status: 'info',
         title: 'Tarama tamamlandı',
-        description: `${data.categories.size} kategori, ${data.designers.length} tasarımcı, ${data.products.length} ürün bulundu`
+        description: `${data.categories.size} kategori, ${data.designers.length} tasarımcı, ${data.products.length} ürün${materialSummary} bulundu`
       })
 
       // Yükleme başlasın mı diye sor
-      if (confirm(`${data.categories.size} kategori, ${data.designers.length} tasarımcı ve ${data.products.length} ürün yüklenecek. Devam edilsin mi?`)) {
+      const confirmMsg = data.materialGroups.length > 0
+        ? `${data.categories.size} kategori, ${data.designers.length} tasarımcı, ${data.products.length} ürün ve ${data.materialGroups.length} malzeme grubu yüklenecek. Devam edilsin mi?`
+        : `${data.categories.size} kategori, ${data.designers.length} tasarımcı ve ${data.products.length} ürün yüklenecek. Devam edilsin mi?`
+      
+      if (confirm(confirmMsg)) {
         await uploadToSanity(data)
       }
     } catch (error: any) {
@@ -381,6 +444,145 @@ export default function MediaImportTool() {
       setProgress([...newProgress])
     }
 
+    // Malzeme Grupları - CMS'deki mevcut grupları ve kartelaları bul ve eşleştir
+    if (data.materialGroups.length > 0) {
+      toast.push({
+        status: 'info',
+        title: 'Malzeme grupları kontrol ediliyor...',
+        description: 'CMS\'deki malzeme grupları sorgulanıyor'
+      })
+      
+      const existingMaterialGroups = await client.fetch(`*[_type == "materialGroup"]{ 
+        _id, 
+        title,
+        books[]{ title, items }
+      }`)
+      
+      for (const materialGroup of data.materialGroups) {
+        const item: ProgressItem = {
+          type: 'materialGroup',
+          name: `${materialGroup.groupName}`,
+          status: 'uploading'
+        }
+        newProgress.push(item)
+        setProgress([...newProgress])
+        
+        try {
+          // Grup adını normalize et ve karşılaştır
+          const normalizedInputGroupName = normalizeText(materialGroup.groupName)
+          
+          const matchingGroup = existingMaterialGroups.find((g: any) => {
+            const titleTr = normalizeText(g.title?.tr || '')
+            const titleEn = normalizeText(g.title?.en || '')
+            return titleTr === normalizedInputGroupName || titleEn === normalizedInputGroupName
+          })
+          
+          if (!matchingGroup) {
+            item.status = 'error'
+            item.message = `CMS'de bu malzeme grubu bulunamadı - önce manuel oluşturun`
+            console.log(`   ❌ Grup bulunamadı: ${materialGroup.groupName}`)
+            setProgress([...newProgress])
+            continue
+          }
+          
+          console.log(`   🎨 Grup bulundu: ${matchingGroup.title?.tr}`)
+          
+          // Her kartela için
+          for (const book of materialGroup.books) {
+            const bookItem: ProgressItem = {
+              type: 'materialBook',
+              name: `${materialGroup.groupName} > ${book.bookName}`,
+              status: 'uploading'
+            }
+            newProgress.push(bookItem)
+            setProgress([...newProgress])
+            
+            try {
+              // Kartela adını normalize et ve karşılaştır
+              const normalizedInputBookName = normalizeText(book.bookName)
+              
+              const matchingBookIndex = (matchingGroup.books || []).findIndex((b: any) => {
+                const titleTr = normalizeText(b.title?.tr || '')
+                const titleEn = normalizeText(b.title?.en || '')
+                return titleTr === normalizedInputBookName || titleEn === normalizedInputBookName
+              })
+              
+              if (matchingBookIndex === -1) {
+                bookItem.status = 'error'
+                bookItem.message = `CMS'de bu kartela bulunamadı - önce manuel oluşturun`
+                console.log(`   ❌ Kartela bulunamadı: ${book.bookName}`)
+                setProgress([...newProgress])
+                continue
+              }
+              
+              console.log(`   📚 Kartela bulundu: ${matchingGroup.books[matchingBookIndex].title?.tr}`)
+              
+              // Görselleri kartelaya ekle
+              const existingItems = matchingGroup.books[matchingBookIndex].items || []
+              const newItems = [...existingItems]
+              
+              let uploadedCount = 0
+              for (const file of book.files) {
+                try {
+                  console.log(`   📸 Görsel yükleniyor: ${file.name}`)
+                  const asset = await client.assets.upload('image', file)
+                  
+                  // Dosya adından malzeme adını çıkar (uzantısız)
+                  const materialName = file.name.replace(/\.[^/.]+$/, '')
+                  
+                  newItems.push({
+                    _type: 'productMaterial',
+                    _key: `material-${Date.now()}-${Math.random()}`,
+                    name: { tr: materialName, en: materialName },
+                    image: {
+                      _type: 'image',
+                      asset: {
+                        _type: 'reference',
+                        _ref: asset._id
+                      }
+                    }
+                  })
+                  uploadedCount++
+                } catch (err: any) {
+                  console.error(`   ❌ Görsel yüklenemedi: ${file.name}`, err)
+                }
+              }
+              
+              // Kartelayı güncelle
+              if (uploadedCount > 0) {
+                const updatedBooks = [...(matchingGroup.books || [])]
+                updatedBooks[matchingBookIndex] = {
+                  ...updatedBooks[matchingBookIndex],
+                  items: newItems
+                }
+                
+                await client.patch(matchingGroup._id).set({ books: updatedBooks }).commit()
+                bookItem.status = 'success'
+                bookItem.message = `${uploadedCount} görsel eklendi`
+                console.log(`   ✅ ${uploadedCount} görsel kartelaya eklendi`)
+              } else {
+                bookItem.status = 'error'
+                bookItem.message = 'Hiçbir görsel yüklenemedi'
+              }
+            } catch (error: any) {
+              console.error(`   ❌ Kartela hatası: ${book.bookName}`, error)
+              bookItem.status = 'error'
+              bookItem.message = error.message
+            }
+            setProgress([...newProgress])
+          }
+          
+          item.status = 'success'
+          item.message = `${materialGroup.books.length} kartela işlendi`
+        } catch (error: any) {
+          console.error(`   ❌ Grup hatası: ${materialGroup.groupName}`, error)
+          item.status = 'error'
+          item.message = error.message
+        }
+        setProgress([...newProgress])
+      }
+    }
+
     const successCount = newProgress.filter(p => p.status === 'success').length
     const errorCount = newProgress.filter(p => p.status === 'error').length
     
@@ -523,6 +725,8 @@ export default function MediaImportTool() {
                       {item.type === 'category' && '📂'}
                       {item.type === 'designer' && '👤'}
                       {item.type === 'product' && '📦'}
+                      {item.type === 'materialGroup' && '🎨'}
+                      {item.type === 'materialBook' && '📚'}
                       {' '}
                       {item.name}
                     </Text>
@@ -554,6 +758,8 @@ export default function MediaImportTool() {
                     {item.type === 'category' && '📂'}
                     {item.type === 'designer' && '👤'}
                     {item.type === 'product' && '📦'}
+                    {item.type === 'materialGroup' && '🎨'}
+                    {item.type === 'materialBook' && '📚'}
                     {' '}
                     {item.name}
                     {item.message && ` - ${item.message}`}
@@ -569,10 +775,10 @@ export default function MediaImportTool() {
           <Stack space={2}>
             <Text size={1} weight="semibold">⚠️ ÖNEMLİ:</Text>
             <Text size={1}>
-              Bu araç <strong>sadece görselleri yükler</strong>. Tasarımcılar ve ürünler CMS'de önceden oluşturulmuş olmalı!
+              Bu araç <strong>sadece görselleri yükler</strong>. Tasarımcılar, ürünler, malzeme grupları ve kartelalar CMS'de önceden oluşturulmuş olmalı!
             </Text>
             <Text size={0} muted>
-              1️⃣ Önce CMS'de tasarımcı/ürün oluşturun<br />
+              1️⃣ Önce CMS'de tasarımcı/ürün/malzeme grubu/kartela oluşturun<br />
               2️⃣ Sonra bu araçla görsellerini yükleyin
             </Text>
           </Stack>
@@ -588,12 +794,17 @@ export default function MediaImportTool() {
 │       └── 01 - SU/
 │           ├── su_kapak.jpg
 │           └── su_1.jpg
-└── tasarımcılar/ (veya TASARIMCILAR)
-    └── Ahmet Yılmaz/
-        └── profil.jpg`}
+├── tasarımcılar/ (veya TASARIMCILAR)
+│   └── Ahmet Yılmaz/
+│       └── profil.jpg
+└── MALZEMELER/
+    └── KUMAŞ/
+        └── KARTELA-1/
+            ├── malzeme1.jpg
+            └── malzeme2.jpg`}
             </Text>
             <Text size={0} muted>
-              ℹ️ Klasör/tasarımcı isimleri CMS'deki isimlerle eşleşmeli
+              ℹ️ Klasör/tasarımcı/malzeme grup/kartela isimleri CMS'deki isimlerle eşleşmeli
             </Text>
           </Stack>
         </Card>
