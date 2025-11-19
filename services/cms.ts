@@ -1,10 +1,39 @@
-import { initialData, KEYS, aboutPageContentData } from '../data';
 import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem, ProductMaterial, Project, LocalizedString, User, UserType, CookiesPolicy, PrivacyPolicy, TermsOfService, KvkkPolicy } from '../types';
 import { createClient } from '@sanity/client'
 import groq from 'groq'
 import imageUrlBuilder from '@sanity/image-url'
 
 const SIMULATED_DELAY = 200;
+
+// Local storage keys (fallback için)
+const KEYS = {
+    SITE_SETTINGS: 'birim_site_settings',
+    CATEGORIES: 'birim_categories',
+    DESIGNERS: 'birim_designers',
+    PRODUCTS: 'birim_products',
+    USERS: 'birim_users',
+    HOME_PAGE: 'birim_home_page',
+    ABOUT_PAGE: 'birim_about_page',
+    CONTACT_PAGE: 'birim_contact_page',
+    FOOTER: 'birim_footer',
+    NEWS: 'birim_news',
+    LANGUAGES: 'birim_languages',
+};
+
+// Empty fallback data (artık Sanity kullanıyoruz)
+const initialData: any = {
+    [KEYS.SITE_SETTINGS]: {},
+    [KEYS.CATEGORIES]: [],
+    [KEYS.DESIGNERS]: [],
+    [KEYS.PRODUCTS]: [],
+    [KEYS.USERS]: [],
+    [KEYS.HOME_PAGE]: {},
+    [KEYS.ABOUT_PAGE]: {},
+    [KEYS.CONTACT_PAGE]: {},
+    [KEYS.FOOTER]: {},
+    [KEYS.NEWS]: [],
+    [KEYS.LANGUAGES]: ['tr', 'en'],
+};
 
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
@@ -872,7 +901,7 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
     }
     // If no data exists, return default from initialData
     const defaultData = initialData[KEYS.ABOUT_PAGE] as AboutPageContent;
-    return defaultData || aboutPageContentData;
+    return defaultData || {} as AboutPageContent;
 };
 export const updateAboutPageContent = async (content: AboutPageContent): Promise<void> => {
     await delay(SIMULATED_DELAY);
