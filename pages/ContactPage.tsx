@@ -72,24 +72,64 @@ const MailIcon = (props: React.ComponentProps<'svg'>) => (
 
 const MediaModal: React.FC<{
   media: ContactLocationMedia;
+  allMedia: ContactLocationMedia[];
+  currentIndex: number;
   isOpen: boolean;
   onClose: () => void;
-}> = ({ media, isOpen, onClose }) => {
+  onNext: () => void;
+  onPrevious: () => void;
+}> = ({ media, allMedia, currentIndex, isOpen, onClose, onNext, onPrevious }) => {
   if (!isOpen || !media) return null;
 
-  const getMediaUrl = () => {
-    if (media.type === 'image' && media.url) {
-      return media.url;
+  const [isFading, setIsFading] = React.useState(false);
+  const [displayMedia, setDisplayMedia] = React.useState(media);
+
+  const getMediaUrl = (m: ContactLocationMedia) => {
+    if (m.type === 'image' && m.url) {
+      return m.url;
     }
-    if (media.type === 'video' && media.url) {
-      return media.url;
+    if (m.type === 'video' && m.url) {
+      return m.url;
     }
-    if (media.type === 'youtube' && media.url) {
-      const videoId = getYouTubeId(media.url);
-      return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1` : media.url;
+    if (m.type === 'youtube' && m.url) {
+      const videoId = getYouTubeId(m.url);
+      return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1` : m.url;
     }
     return '';
   };
+
+  const hasNext = currentIndex < allMedia.length - 1;
+  const hasPrevious = currentIndex > 0;
+
+  // Handle media change with fade animation
+  React.useEffect(() => {
+    if (media !== displayMedia) {
+      setIsFading(true);
+      const timer = setTimeout(() => {
+        setDisplayMedia(media);
+        setIsFading(false);
+      }, 200); // Half of transition duration
+      return () => clearTimeout(timer);
+    }
+  }, [media, displayMedia]);
+
+  // Keyboard navigation
+  React.useEffect(() => {
+    if (!isOpen) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight' && hasNext) {
+        onNext();
+      } else if (e.key === 'ArrowLeft' && hasPrevious) {
+        onPrevious();
+      } else if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, hasNext, hasPrevious, onNext, onPrevious, onClose]);
 
   return (
     <div
@@ -103,37 +143,77 @@ const MediaModal: React.FC<{
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 md:top-4 md:right-4 text-white hover:text-gray-300 transition-colors text-4xl font-light bg-black/70 rounded-full w-12 h-12 flex items-center justify-center hover:bg-black/90 shadow-lg"
+          className="absolute top-4 right-4 md:top-4 md:right-4 text-white hover:text-gray-300 transition-colors text-4xl font-light bg-black/70 w-12 h-12 flex items-center justify-center hover:bg-black/90 shadow-lg"
           aria-label="Close"
           style={{ zIndex: 101, top: '80px' }}
         >
           ×
         </button>
-        {media.type === 'youtube' ? (
-          <iframe
-            src={getMediaUrl()}
-            className="w-full h-full max-w-7xl max-h-[90vh]"
-            allow="autoplay; encrypted-media; fullscreen"
-            frameBorder="0"
-          />
-        ) : media.type === 'video' ? (
-          <OptimizedVideo
-            src={getMediaUrl()}
-            controls
-            autoPlay
-            className="w-full h-full max-w-7xl max-h-[90vh] object-contain"
-            preload="auto"
-            loading="eager"
-          />
-        ) : (
-          <OptimizedImage
-            src={getMediaUrl()}
-            alt=""
-            className="w-full h-full max-w-7xl max-h-[90vh] object-contain"
-            loading="eager"
-            quality={95}
-          />
+        
+        {/* Previous button */}
+        {hasPrevious && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onPrevious();
+            }}
+            className="absolute left-4 text-white hover:text-gray-300 transition-colors text-4xl font-light bg-black/70 w-12 h-12 flex items-center justify-center hover:bg-black/90 shadow-lg"
+            aria-label="Previous"
+            style={{ zIndex: 101 }}
+          >
+            ‹
+          </button>
         )}
+        
+        {/* Next button */}
+        {hasNext && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onNext();
+            }}
+            className="absolute right-4 text-white hover:text-gray-300 transition-colors text-4xl font-light bg-black/70 w-12 h-12 flex items-center justify-center hover:bg-black/90 shadow-lg"
+            aria-label="Next"
+            style={{ zIndex: 101 }}
+          >
+            ›
+          </button>
+        )}
+
+        <div 
+          className={`w-full h-full max-w-7xl max-h-[90vh] transition-opacity duration-[400ms] ${
+            isFading ? 'opacity-0' : 'opacity-100'
+          }`}
+        >
+          {displayMedia.type === 'youtube' ? (
+            <iframe
+              key={`youtube-${currentIndex}`}
+              src={getMediaUrl(displayMedia)}
+              className="w-full h-full"
+              allow="autoplay; encrypted-media; fullscreen"
+              frameBorder="0"
+            />
+          ) : displayMedia.type === 'video' ? (
+            <OptimizedVideo
+              key={`video-${currentIndex}`}
+              src={getMediaUrl(displayMedia)}
+              controls
+              autoPlay
+              className="w-full h-full object-contain"
+              preload="auto"
+              loading="eager"
+            />
+          ) : (
+            <OptimizedImage
+              key={`image-${currentIndex}`}
+              src={getMediaUrl(displayMedia)}
+              alt=""
+              className="w-full h-full object-contain"
+              loading="eager"
+              quality={95}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
@@ -149,7 +229,7 @@ const LocationCard: React.FC<{
   return (
     <div
       onClick={onSelect}
-      className={`p-4 rounded-lg cursor-pointer transition-all duration-300 ${isSelected ? 'bg-gray-200' : 'hover:bg-gray-100'}`}
+      className={`p-4 cursor-pointer transition-all duration-300 ${isSelected ? 'bg-gray-200' : 'hover:bg-gray-100'}`}
     >
       <h3 className="text-xl font-light text-gray-500">{t(location.title)}</h3>
       <p className="mt-2 text-gray-500 flex items-start gap-2 font-light">
@@ -176,6 +256,7 @@ export function ContactPage() {
   const [loading, setLoading] = useState(true);
   const [selectedLocation, setSelectedLocation] = useState<ContactLocation | null>(null);
   const [selectedMedia, setSelectedMedia] = useState<ContactLocationMedia | null>(null);
+  const [selectedMediaIndex, setSelectedMediaIndex] = useState<number>(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const thumbRef = useRef<HTMLDivElement | null>(null);
   const [thumbDragStartX, setThumbDragStartX] = useState<number | null>(null);
@@ -232,7 +313,7 @@ export function ContactPage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-12">
-          <div className="bg-white p-6 rounded-lg shadow-sm border space-y-8 overflow-y-auto max-h-[600px]">
+          <div className="bg-white p-6 shadow-sm border space-y-8 overflow-y-auto max-h-[600px]">
              {/* FIX: Refactored to use Object.keys to avoid potential type inference issues with Object.entries in some TypeScript environments. */}
              {Object.keys(locationGroups).map((type) => (
               <div key={type}>
@@ -249,7 +330,7 @@ export function ContactPage() {
             ))}
           </div>
           
-          <div className="bg-white rounded-lg shadow-sm border overflow-hidden min-h-[400px] md:min-h-0 sticky top-28 h-[600px]">
+          <div className="bg-white shadow-sm border overflow-hidden min-h-[400px] md:min-h-0 sticky top-28 h-[600px]">
             {selectedLocation?.mapEmbedUrl ? (
               <iframe
                 src={convertGoogleMapsUrlToEmbed(selectedLocation.mapEmbedUrl)}
@@ -296,6 +377,7 @@ export function ContactPage() {
                       key={idx}
                       onClick={() => {
                         setSelectedMedia(m);
+                        setSelectedMediaIndex(idx);
                         setIsModalOpen(true);
                       }}
                       className="relative flex-shrink-0 w-24 h-24 overflow-hidden border-2 border-transparent opacity-80 hover:opacity-100 hover:scale-105 transition-all duration-300"
@@ -321,7 +403,7 @@ export function ContactPage() {
                       )}
                       {(m.type === 'video' || m.type === 'youtube') && (
                         <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                          <span className="bg-white/85 text-gray-900 rounded-full w-10 h-10 flex items-center justify-center shadow">
+                          <span className="bg-white/85 text-gray-900 w-10 h-10 flex items-center justify-center shadow">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 ml-0.5"><path d="M8 5v14l11-7z"/></svg>
                           </span>
                         </span>
@@ -356,10 +438,27 @@ export function ContactPage() {
       {selectedMedia && (
         <MediaModal
           media={selectedMedia}
+          allMedia={selectedLocationMedia}
+          currentIndex={selectedMediaIndex}
           isOpen={isModalOpen}
           onClose={() => {
             setIsModalOpen(false);
             setSelectedMedia(null);
+            setSelectedMediaIndex(0);
+          }}
+          onNext={() => {
+            if (selectedMediaIndex < selectedLocationMedia.length - 1) {
+              const nextIndex = selectedMediaIndex + 1;
+              setSelectedMediaIndex(nextIndex);
+              setSelectedMedia(selectedLocationMedia[nextIndex]);
+            }
+          }}
+          onPrevious={() => {
+            if (selectedMediaIndex > 0) {
+              const prevIndex = selectedMediaIndex - 1;
+              setSelectedMediaIndex(prevIndex);
+              setSelectedMedia(selectedLocationMedia[prevIndex]);
+            }
           }}
         />
       )}

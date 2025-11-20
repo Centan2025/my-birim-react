@@ -52,15 +52,17 @@ export function AboutPage() {
   return (
     <div className="bg-white animate-fade-in-up">
         {/* Hero Section */}
-        <div className="relative h-[50vh] bg-gray-800 text-white flex items-center justify-center">
+        <div className="relative h-[50vh] bg-gray-800 text-white flex items-center justify-center overflow-hidden">
             {content.heroImage && (
-              <OptimizedImage
-                src={content.heroImage}
-                alt={t(content.heroTitle)}
-                className="absolute inset-0 w-full h-full object-cover opacity-40"
-                loading="eager"
-                quality={90}
-              />
+              <div className="absolute inset-0 w-full h-full">
+                <OptimizedImage
+                  src={content.heroImage}
+                  alt={t(content.heroTitle)}
+                  className="w-full h-full object-cover opacity-40"
+                  loading="eager"
+                  quality={90}
+                />
+              </div>
             )}
             <div className="relative z-10 text-center px-4">
                 <h1 className="text-4xl md:text-6xl font-light tracking-tighter">{t(content.heroTitle)}</h1>
