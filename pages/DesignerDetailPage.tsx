@@ -41,7 +41,7 @@ export function DesignerDetailPage() {
   }
 
   return (
-    <div className="bg-gray-100 animate-fade-in-up">
+    <div className="bg-gray-100 animate-fade-in-up-subtle">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
         <div className="flex flex-col md:flex-row-reverse items-center md:items-start gap-8 md:gap-16 mb-12">
             <div className="flex-shrink-0">

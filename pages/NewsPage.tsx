@@ -27,7 +27,7 @@ const NewsCard: React.FC<{ item: NewsItem }> = ({ item }) => {
         srcMobile={typeof item.mainImage === 'object' ? item.mainImage.urlMobile : undefined}
         srcDesktop={typeof item.mainImage === 'object' ? item.mainImage.urlDesktop : undefined}
         alt={t(item.title)}
-        className={`absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${imageBorderClass}`}
+        className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-[1.03] ${imageBorderClass}`}
         loading="lazy"
         quality={85}
       />
@@ -61,7 +61,7 @@ export function NewsPage() {
   }
   
   return (
-    <div className="bg-gray-100 animate-fade-in-up">
+    <div className="bg-gray-100 animate-fade-in-up-subtle">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-light text-gray-600 uppercase">{t('news_title')}</h1>
@@ -71,7 +71,7 @@ export function NewsPage() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
           {news.length > 0 ? (
             news.map((item, index) => (
-              <div key={item.id} style={{ animationDelay: `${index * 100}ms` }} className="animate-fade-in-up">
+              <div key={item.id} style={{ animationDelay: `${index * 100}ms` }} className="animate-fade-in-up-subtle">
                   <NewsCard item={item} />
               </div>
             ))

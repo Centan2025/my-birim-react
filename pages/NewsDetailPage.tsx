@@ -157,7 +157,7 @@ export function NewsDetailPage() {
     // By adding a `key` prop here, we ensure that React treats navigations
     // between different news items as distinct components, automatically resetting state.
     return (
-        <div key={newsId} className="bg-white animate-fade-in-up">
+        <div key={newsId} className="bg-white animate-fade-in-up-subtle">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-0">
                 <div className="max-w-4xl mx-auto">
                     <nav className="mb-8 text-sm text-gray-500" aria-label="Breadcrumb">

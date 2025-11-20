@@ -305,7 +305,7 @@ export function ContactPage() {
   }
   
   return (
-    <div className="bg-gray-100 animate-fade-in-up">
+    <div className="bg-gray-100 animate-fade-in-up-subtle">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-light text-gray-600">{t(content.title)}</h1>
@@ -313,7 +313,7 @@ export function ContactPage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-12">
-          <div className="bg-white p-6 shadow-sm border space-y-8 overflow-y-auto max-h-[600px]">
+          <div className="bg-white p-6 shadow-sm border border-gray-300 space-y-8 overflow-y-auto max-h-[600px]">
              {/* FIX: Refactored to use Object.keys to avoid potential type inference issues with Object.entries in some TypeScript environments. */}
              {Object.keys(locationGroups).map((type) => (
               <div key={type}>
@@ -330,7 +330,7 @@ export function ContactPage() {
             ))}
           </div>
           
-          <div className="bg-white shadow-sm border overflow-hidden min-h-[400px] md:min-h-0 sticky top-28 h-[600px]">
+          <div className="bg-white shadow-sm border border-gray-300 overflow-hidden min-h-[400px] md:min-h-0 sticky top-28 h-[600px]">
             {selectedLocation?.mapEmbedUrl ? (
               <iframe
                 src={convertGoogleMapsUrlToEmbed(selectedLocation.mapEmbedUrl)}

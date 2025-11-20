@@ -50,7 +50,7 @@ export function AboutPage() {
   };
 
   return (
-    <div className="bg-white animate-fade-in-up">
+    <div className="bg-white animate-fade-in-up-subtle">
         {/* Hero Section */}
         <div className="relative h-[50vh] bg-gray-800 text-white flex items-center justify-center overflow-hidden">
             {content.heroImage && (

@@ -19,7 +19,7 @@ const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
             srcMobile={typeof project.cover === 'object' ? project.cover.urlMobile : undefined}
             srcDesktop={typeof project.cover === 'object' ? project.cover.urlDesktop : undefined}
             alt={t(project.title)}
-            className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${imageBorderClass}`}
+            className={`w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-[1.03] ${imageBorderClass}`}
             loading="lazy"
             quality={85}
           />
@@ -43,7 +43,7 @@ export function ProjectsPage(){
   }
 
   return (
-    <div className="bg-gray-100 animate-fade-in-up">
+    <div className="bg-gray-100 animate-fade-in-up-subtle">
       <div className="w-full max-w-[95vw] mx-auto px-2 sm:px-4 lg:px-6 pt-28 pb-16">
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600">{t('projects')||'Projeler'}</h1>

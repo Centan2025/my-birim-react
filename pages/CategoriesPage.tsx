@@ -68,7 +68,7 @@ export function CategoriesPage() {
                   <OptimizedImage
                     src={category.heroImage}
                     alt={t(category.name)}
-                    className={`w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] ${imageBorderClass}`}
+                    className={`w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-[1.03] ${imageBorderClass}`}
                     loading="lazy"
                     quality={85}
                   />

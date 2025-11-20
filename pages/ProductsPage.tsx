@@ -113,15 +113,15 @@ export function ProductsPage() {
         
         {/* Product Grid */}
         {sortedProducts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 animate-fade-in-up">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 animate-fade-in-up-subtle">
             {sortedProducts.map((product, index) => (
-              <div key={product.id} style={{ animationDelay: `${index * 100}ms` }} className="animate-fade-in-up">
+              <div key={product.id} style={{ animationDelay: `${index * 100}ms` }} className="animate-fade-in-up-subtle">
                 <ProductCard product={product} variant="light" />
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-600 animate-fade-in-up text-center">{t('no_products_in_category')}</p>
+          <p className="text-gray-600 animate-fade-in-up-subtle text-center">{t('no_products_in_category')}</p>
         )}
       </div>
     </div>

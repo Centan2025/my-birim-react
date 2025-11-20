@@ -1427,7 +1427,7 @@ export function HomePage() {
                               <div className={`flex flex-col md:flex-row items-center text-white gap-12 md:gap-16 ${content.isHeroTextVisible ? 'max-w-4xl' : ''} ${textAlignClass}`}>
                               {content.isHeroTextVisible && (
                                   <div className="relative w-full">
-                                      <div className="animate-fade-in-up">
+                                      <div className="animate-fade-in-up-subtle">
                                         <h1 className="text-base md:text-5xl font-light tracking-tight mb-4 leading-relaxed" style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}>{t(media.title)}</h1>
                                         <p className="text-[10px] md:text-xl mb-8 leading-relaxed" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>{t(media.subtitle)}</p>
                                         {media.isButtonVisible && (
@@ -1631,7 +1631,7 @@ export function HomePage() {
           }}
         >
            <div className="absolute inset-0 bg-black/50"></div>
-           <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up max-w-4xl">
+           <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up-subtle max-w-4xl">
               <h2 className="text-4xl font-light leading-relaxed">{t(inspiration.title)}</h2>
               <p className="mt-4 text-lg text-gray-200 max-w-2xl mx-auto font-light leading-relaxed">{t(inspiration.subtitle)}</p>
               {inspiration.buttonText && (

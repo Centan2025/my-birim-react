@@ -564,7 +564,7 @@ export function ProductDetailPage() {
                           srcMobile={dimImg.imageMobile}
                           srcDesktop={dimImg.imageDesktop}
                           alt={dimImg.title ? t(dimImg.title) : `${t('dimensions')} ${idx + 1}`}
-                          className={`w-full h-40 object-contain group-hover:scale-105 transition-transform duration-200 ${imageBorderClass}`}
+                          className={`w-full h-40 object-contain group-hover:scale-[1.03] transition-transform duration-700 ease-in-out ${imageBorderClass}`}
                           loading="lazy"
                           quality={85}
                         />

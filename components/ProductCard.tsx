@@ -24,13 +24,13 @@ export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'li
           srcMobile={mainImageMobile}
           srcDesktop={mainImageDesktop}
           alt={t(product.name)}
-          className={`w-full h-full object-contain transition-transform duration-500 ease-out group-hover:scale-[1.03] ${imageBorderClass}`}
+          className={`w-full h-full object-contain transition-transform duration-700 ease-in-out group-hover:scale-[1.03] ${imageBorderClass}`}
           loading="lazy"
           quality={85}
         />
       </div>
       <div className="mt-4 overflow-hidden">
-        <div className="transition-transform duration-300 ease-in-out group-hover:-translate-y-1">
+        <div className="transition-transform duration-700 ease-in-out group-hover:-translate-y-1">
             <h3 className={`text-lg ${isLight ? 'font-light text-gray-600 group-hover:text-gray-700' : 'font-semibold text-gray-800 group-hover:text-black'}`}>{t(product.name)}</h3>
             <p className={`text-sm mt-1 ${isLight ? 'text-gray-500' : 'text-gray-500'}`}>{product.year}</p>
         </div>

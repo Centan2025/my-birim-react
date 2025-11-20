@@ -10,7 +10,7 @@ export function ProfilePage() {
 
   if (!auth.isLoggedIn || !auth.user) {
     return (
-      <div className="bg-gray-50 flex items-center justify-center animate-fade-in-up py-20">
+      <div className="bg-gray-50 flex items-center justify-center animate-fade-in-up-subtle py-20">
         <div className="text-center p-8">
           <h1 className="text-2xl font-semibold mb-4">Giriş Yapmanız Gerekiyor</h1>
           <p className="text-gray-600 mb-6">Bu sayfaya erişmek için üye olmanız gerekiyor.</p>

@@ -20,13 +20,13 @@ const DesignerCard: React.FC<{ designer: Designer }> = ({ designer }) => {
           srcMobile={typeof designer.image === 'object' ? designer.image.urlMobile : designer.imageMobile}
           srcDesktop={typeof designer.image === 'object' ? designer.image.urlDesktop : designer.imageDesktop}
           alt={t(designer.name)}
-          className={`w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 filter grayscale ${imageBorderClass}`}
+          className={`w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-[1.03] filter grayscale ${imageBorderClass}`}
           loading="lazy"
           quality={85}
         />
       </div>
       <div className="mt-4 min-h-[2.5rem] flex items-center justify-center">
-        <h3 className="text-xl font-light text-gray-500 transition-colors duration-300 group-hover:text-gray-600">{t(designer.name)}</h3>
+        <h3 className="text-xl font-light text-gray-500 transition-colors duration-700 ease-in-out group-hover:text-gray-600">{t(designer.name)}</h3>
       </div>
     </Link>
   );
@@ -54,7 +54,7 @@ export function DesignersPage() {
   }
 
   return (
-    <div className="bg-gray-100 animate-fade-in-up">
+    <div className="bg-gray-100 animate-fade-in-up-subtle">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600">{t('designers')}</h1>

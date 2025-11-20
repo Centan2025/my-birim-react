@@ -35,6 +35,15 @@ body {
   animation: fade-in-up 0.8s ease-out forwards;
 }
 
+.animate-fade-in-up-subtle {
+  animation: fade-in-up-subtle 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes fade-in-up-subtle {
+  0% { opacity: 0; transform: translateY(15px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes fill-line {
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
