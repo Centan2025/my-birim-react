@@ -44,7 +44,7 @@ export function CategoriesPage() {
         </div>
         <div className="relative h-full flex items-center justify-center text-center text-white pt-20">
           <div>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tighter" style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}>
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase" style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}>
               {t('products')}
             </h1>
             <p className="mt-4 text-lg max-w-2xl mx-auto" style={{textShadow: '0 1px 3px rgba(0,0,0,0.5)'}}>

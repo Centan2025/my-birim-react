@@ -637,20 +637,32 @@ export function Header() {
     setIsProductsOpen(false);
   };
   
-  const navLinkClasses = 'text-sm font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300';
+  const navLinkClasses = 'tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 header-nav-item';
   const activeLinkClasses = { color: 'white', textShadow: '0 0 5px rgba(255,255,255,0.5)', opacity: 1 };
   const iconClasses = 'text-white hover:text-gray-200 transition-all duration-300 transform hover:scale-125';
   
   
-
-  const NavItem: React.FC<{ to: string; children: React.ReactNode; onMouseEnter?: () => void; onClick?: () => void }> = ({ to, children, onMouseEnter, onClick }) => (
-    <NavLink to={to} onMouseEnter={onMouseEnter} onClick={onClick} className={`relative group py-2 ${navLinkClasses}`} style={({ isActive }) => (isActive ? activeLinkClasses : undefined)}>
-      <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
-          {children}
-          <span className="absolute -bottom-2 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
-      </span>
-    </NavLink>
-  );
+  
+  const NavItem: React.FC<{ to: string; children: React.ReactNode; onMouseEnter?: () => void; onClick?: () => void }> = ({ to, children, onMouseEnter, onClick }) => {
+    const baseStyle = { fontSize: '0.875rem', fontWeight: 600, letterSpacing: '0.05em', fontFamily: 'inherit', lineHeight: '1.25rem' };
+    return (
+      <NavLink 
+        to={to} 
+        onMouseEnter={onMouseEnter} 
+        onClick={onClick} 
+        className={`relative group py-2 ${navLinkClasses}`} 
+        style={({ isActive }) => ({ ...(isActive ? activeLinkClasses : {}), ...baseStyle })}
+      >
+        <span 
+          className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase header-nav-text" 
+          style={baseStyle}
+        >
+            {children}
+            <span className="absolute -bottom-2 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
+        </span>
+      </NavLink>
+    );
+  };
 
   return (
     <>
@@ -670,6 +682,50 @@ export function Header() {
           
           .image-transition {
             transition: opacity 0.5s ease-in-out;
+          }
+          
+          /* Tüm header menü öğelerini kesinlikle aynı boyutta yap */
+          header nav .header-nav-item,
+          header nav .header-nav-item.active,
+          header nav a.header-nav-item,
+          header nav a.header-nav-item.active,
+          header nav a[href*="/designers"],
+          header nav a[href*="/projects"],
+          header nav a[href*="/news"],
+          header nav a[href*="/about"],
+          header nav a[href*="/contact"],
+          header nav a[href*="/categories"] {
+            font-size: 0.875rem !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.05em !important;
+          }
+          
+          header nav .header-nav-text,
+          header nav .header-nav-item .header-nav-text,
+          header nav .header-nav-item.active .header-nav-text,
+          header nav a.header-nav-item span.header-nav-text,
+          header nav a.header-nav-item.active span.header-nav-text,
+          header nav a[href*="/designers"] span,
+          header nav a[href*="/projects"] span,
+          header nav a[href*="/news"] span,
+          header nav a[href*="/about"] span,
+          header nav a[href*="/contact"] span,
+          header nav a[href*="/categories"] span {
+            font-size: 0.875rem !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.05em !important;
+            line-height: 1.25rem !important;
+            display: inline-block !important;
+          }
+          
+          /* React Router active state override */
+          header nav a[class*="active"] span,
+          header nav a.active span,
+          header nav a[aria-current="page"] span {
+            font-size: 0.875rem !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.05em !important;
+            line-height: 1.25rem !important;
           }
         `}
       </style>
@@ -708,8 +764,9 @@ export function Header() {
                       to="/categories"
                       className={`group flex items-center space-x-1 py-2 ${navLinkClasses}`}
                       onClick={() => setIsProductsOpen(false)}
+                      style={{ fontSize: '0.875rem', fontWeight: 600, letterSpacing: '0.05em', fontFamily: 'inherit', lineHeight: '1.25rem' }}
                     >
-                        <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase">
+                        <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase header-nav-text" style={{ fontSize: '0.875rem', fontWeight: 600, letterSpacing: '0.05em', fontFamily: 'inherit', lineHeight: '1.25rem' }}>
                             {t('products')}
                             <span className={`absolute -bottom-2 left-0 w-full h-[3px] bg-white transition-transform duration-300 ease-out origin-center ${isProductsOpen ? 'scale-x-0 opacity-0' : 'transform scale-x-0 group-hover:scale-x-100'}`}></span>
                         </span>
@@ -791,7 +848,7 @@ export function Header() {
             onMouseLeave={handleProductsLeave}
           > 
             {/* Beyaz çizgi */}
-            <div className="border-t-2 border-white/80 mx-4 mt-3" style={{ marginLeft: submenuOffset }}></div>
+            <div className="border-t border-white/80 mx-4 mt-3" style={{ marginLeft: submenuOffset }}></div>
             
             <div className="pt-8 pb-3 grid grid-cols-[auto_1fr] gap-24" style={{ paddingLeft: submenuOffset, paddingRight: '5rem' }}>
               {/* Sol taraf - Kategoriler */}
@@ -805,7 +862,7 @@ export function Header() {
                       onClick={() => setIsProductsOpen(false)}
                       onMouseEnter={() => setHoveredCategoryId(category.id)}
                     >
-                      <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
+                      <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase">
                         {t(category.name)}
                         <span className="absolute -bottom-2 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
                       </span>
@@ -882,14 +939,14 @@ export function Header() {
             </div>
             
             {/* Tüm Modeller butonu - boydan boya çizgi ile */}
-            <div className="border-t-2 border-white/80 mx-4 mt-3" style={{ marginLeft: submenuOffset }}></div>
+            <div className="border-t border-white/80 mx-4 mt-3" style={{ marginLeft: submenuOffset }}></div>
             <div className="pt-3 pb-3" style={{ paddingLeft: submenuOffset, paddingRight: '5rem' }}>
               <NavLink
                 to="/products"
                 className="group relative inline-block px-1 py-2 text-sm font-bold uppercase text-white hover:text-gray-200 transition-colors duration-300"
                 onClick={() => setIsProductsOpen(false)}
               >
-                <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
+                <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase">
                   {t('view_all')}
                   <span className="absolute -bottom-2 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
                 </span>
@@ -931,7 +988,7 @@ export function Header() {
               )}
                <nav className="px-4 sm:px-5 lg:px-6 pb-2 flex flex-col">
                  <div className="flex flex-col">
-                   <NavLink to="/categories" className="flex items-center min-h-[3rem] pt-0 pb-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10" onClick={() => setIsMobileMenuOpen(false)}>{t('products')}</NavLink>
+                   <NavLink to="/categories" className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10" onClick={() => setIsMobileMenuOpen(false)}>{t('products')}</NavLink>
                    <NavLink to="/designers" className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10" onClick={() => setIsMobileMenuOpen(false)}>{t('designers')}</NavLink>
                    <NavLink to="/projects" className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10" onClick={() => setIsMobileMenuOpen(false)}>{t('projects') || 'Projeler'}</NavLink>
                    <NavLink to="/news" className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10" onClick={() => setIsMobileMenuOpen(false)}>{t('news')}</NavLink>
