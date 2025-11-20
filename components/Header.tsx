@@ -811,20 +811,6 @@ export function Header() {
                       </span>
                     </NavLink>
                   ))}
-                  
-                  {/* Tüm Ürünler butonu - liste altına */}
-                  <div className="pt-3 mt-3 border-t-2 border-white/50">
-                    <NavLink
-                      to="/products"
-                      className="group relative px-1 py-2 text-sm font-bold uppercase text-white hover:text-gray-200 transition-colors duration-300"
-                      onClick={() => setIsProductsOpen(false)}
-                    >
-                      <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
-                        {t('view_all')}
-                        <span className="absolute -bottom-2 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
-                      </span>
-                    </NavLink>
-                  </div>
                 </div>
               </div>
               
@@ -893,6 +879,21 @@ export function Header() {
                   return null;
                 })()}
               </div>
+            </div>
+            
+            {/* Tüm Modeller butonu - boydan boya çizgi ile */}
+            <div className="border-t-2 border-white/80 mx-4 mt-3" style={{ marginLeft: submenuOffset }}></div>
+            <div className="pt-3 pb-3" style={{ paddingLeft: submenuOffset, paddingRight: '5rem' }}>
+              <NavLink
+                to="/products"
+                className="group relative inline-block px-1 py-2 text-sm font-bold uppercase text-white hover:text-gray-200 transition-colors duration-300"
+                onClick={() => setIsProductsOpen(false)}
+              >
+                <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
+                  {t('view_all')}
+                  <span className="absolute -bottom-2 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
+                </span>
+              </NavLink>
             </div>
           </div>
           {/* Mobil menü - header içinde açılır */}
