@@ -647,7 +647,7 @@ export function Header() {
     <NavLink to={to} onMouseEnter={onMouseEnter} onClick={onClick} className={`relative group py-2 ${navLinkClasses}`} style={({ isActive }) => (isActive ? activeLinkClasses : undefined)}>
       <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
           {children}
-          <span className="absolute bottom-0 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
+          <span className="absolute -bottom-1 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
       </span>
     </NavLink>
   );
@@ -711,7 +711,7 @@ export function Header() {
                     >
                         <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase">
                             {t('products')}
-                            <span className={`absolute bottom-0 left-0 w-full h-[3px] bg-white transition-transform duration-300 ease-out origin-center ${isProductsOpen ? 'scale-x-0 opacity-0' : 'transform scale-x-0 group-hover:scale-x-100'}`}></span>
+                            <span className={`absolute -bottom-1 left-0 w-full h-[3px] bg-white transition-transform duration-300 ease-out origin-center ${isProductsOpen ? 'scale-x-0 opacity-0' : 'transform scale-x-0 group-hover:scale-x-100'}`}></span>
                         </span>
                         <ChevronDownIcon />
                     </Link>
@@ -754,7 +754,7 @@ export function Header() {
                       >
                         <span className="relative inline-block">
                           {langCode.toUpperCase()}
-                          <span className={`absolute bottom-0 left-0 w-full h-[3px] bg-white transition-transform duration-300 ease-out origin-center ${
+                          <span className={`absolute -bottom-1 left-0 w-full h-[3px] bg-white transition-transform duration-300 ease-out origin-center ${
                             isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
                           }`}></span>
                         </span>
@@ -807,7 +807,7 @@ export function Header() {
                     >
                       <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
                         {t(category.name)}
-                        <span className="absolute bottom-0 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
+                        <span className="absolute -bottom-1 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
                       </span>
                     </NavLink>
                   ))}
@@ -821,7 +821,7 @@ export function Header() {
                     >
                       <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
                         {t('view_all')}
-                        <span className="absolute bottom-0 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
+                        <span className="absolute -bottom-1 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
                       </span>
                     </NavLink>
                   </div>
