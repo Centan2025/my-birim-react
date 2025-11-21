@@ -8,10 +8,16 @@ interface ProgressItem {
   name: string
   status: 'pending' | 'uploading' | 'success' | 'error'
   message?: string
+  details?: string
 }
 
 interface ParsedData {
   categories: Map<string, string>
+  categoryMedia: Array<{
+    categoryId: string
+    categoryName: string
+    files: File[]
+  }>
   designers: Array<{
     id: string
     name: string
@@ -23,6 +29,7 @@ interface ParsedData {
     modelId: string
     modelName: string
     files: File[]
+    dimensionFiles: File[] // ÖLÇÜLER klasöründeki dosyalar
   }>
   materialGroups: Array<{
     groupName: string
@@ -38,6 +45,35 @@ interface ParsedData {
   }>
 }
 
+interface PreviewData {
+  categories: number
+  designers: number
+  products: number
+  projects: number
+  materialGroups: number
+  totalFiles: number
+  fileDetails: Array<{
+    path: string
+    type: string
+    size: number
+    target: string
+  }>
+}
+
+interface SummaryData {
+  uploaded: number
+  updated: number
+  deleted: number
+  skipped: number
+  errors: number
+  details: Array<{
+    type: string
+    name: string
+    action: 'uploaded' | 'updated' | 'deleted' | 'skipped' | 'error'
+    message?: string
+  }>
+}
+
 export default function MediaImportTool() {
   const client = useClient({ apiVersion: '2025-01-01' })
   const toast = useToast()
@@ -49,8 +85,9 @@ export default function MediaImportTool() {
   // Klasör yapısını parse et
   const parseDirectory = useCallback((files: FileList): ParsedData => {
     const categories = new Map<string, string>()
+    const categoryMediaMap = new Map<string, File[]>()
     const designerMap = new Map<string, File[]>()
-    const productMap = new Map<string, File[]>()
+    const productMap = new Map<string, { files: File[]; dimensionFiles: File[] }>()
     const materialGroupMap = new Map<string, Map<string, File[]>>()
     const projectMap = new Map<string, File[]>()
 
@@ -92,12 +129,27 @@ export default function MediaImportTool() {
         const categoryFolder = parts[urunIndex + 1]
         const modelFolder = parts[urunIndex + 2]
         
+        // ÖLÇÜLER klasörünü kontrol et (ürünler/kategori/model/ÖLÇÜLER/dosya.jpg)
+        // ÖLÇÜLER klasörü model klasöründen hemen sonra olmalı (index: urunIndex + 3)
+        const olcuFolderIndex = urunIndex + 3
+        const olcuFolderName = parts[olcuFolderIndex]?.toLowerCase() || ''
+        const isOlcuFolder = olcuFolderName.includes('olcu') || olcuFolderName.includes('ölçü')
+        
+        // ÖLÇÜLER klasöründeki dosyalar ayrı işlenecek
+        // Dosya yolu: ürünler/kategori/model/ÖLÇÜLER/dosya.jpg (5 parça)
+        const isDimensionFile = isOlcuFolder && parts.length >= urunIndex + 5
+        
         // Debug: İlk eşleşme
-        if (productMap.size === 0) {
-          console.log('✅ İlk ürün bulundu!', {
+        if (productMap.size === 0 || (isDimensionFile && productMap.size > 0)) {
+          console.log('✅ Ürün dosyası bulundu!', {
             categoryFolder,
             modelFolder,
-            dosya: file.name
+            dosya: file.name,
+            olcuFolderName: parts[olcuFolderIndex],
+            isOlcuFolder,
+            isDimensionFile,
+            partsLength: parts.length,
+            requiredLength: urunIndex + 5
           })
         }
         
@@ -113,9 +165,15 @@ export default function MediaImportTool() {
         
         const productKey = `${categoryId}/${modelId}`
         if (!productMap.has(productKey)) {
-          productMap.set(productKey, [])
+          productMap.set(productKey, { files: [], dimensionFiles: [] })
         }
-        productMap.get(productKey)!.push(file)
+        
+        const productData = productMap.get(productKey)!
+        if (isDimensionFile) {
+          productData.dimensionFiles.push(file)
+        } else {
+          productData.files.push(file)
+        }
       }
       
       // tasarımcılar/tasarımcı-adı/görsel.jpg (büyük/küçük harf duyarsız, Türkçe karakter destekli)
@@ -195,6 +253,33 @@ export default function MediaImportTool() {
           })
         }
       }
+      
+      // kategoriler/kategori-adı/görsel.jpg (büyük/küçük harf duyarsız, Türkçe karakter destekli)
+      const kategoriIndex = parts.findIndex(p => {
+        const lower = p?.toLowerCase() || ''
+        return lower.includes('kategori') || lower.includes('category')
+      })
+      
+      if (kategoriIndex !== -1 && parts.length >= kategoriIndex + 3 && isMediaFile(file.name)) {
+        const categoryFolder = parts[kategoriIndex + 1]
+        const categoryName = categoryFolder.split(' - ').pop()?.trim() || categoryFolder
+        const categoryId = slugify(categoryName)
+        
+        categories.set(categoryId, categoryName)
+        
+        if (!categoryMediaMap.has(categoryId)) {
+          categoryMediaMap.set(categoryId, [])
+        }
+        categoryMediaMap.get(categoryId)!.push(file)
+        
+        // Debug: İlk kategori medyası bulunduğunda
+        if (categoryMediaMap.size === 1 && categoryMediaMap.get(categoryId)!.length === 1) {
+          console.log('📂 İlk kategori medyası bulundu!', {
+            categoryName,
+            dosya: file.name
+          })
+        }
+      }
     })
 
     // Map'leri dizilere çevir
@@ -204,14 +289,15 @@ export default function MediaImportTool() {
       files: files.filter(f => isMediaFile(f.name)) // Görsel ve video dosyaları
     }))
 
-    const products = Array.from(productMap.entries()).map(([key, files]) => {
+    const products = Array.from(productMap.entries()).map(([key, productData]) => {
       const [categoryId, modelId] = key.split('/')
       return {
         categoryId,
         categoryName: categories.get(categoryId) || categoryId,
         modelId,
         modelName: modelId.toUpperCase(),
-        files: files.filter(f => isMediaFile(f.name)) // Görsel ve video dosyaları
+        files: productData.files.filter(f => isMediaFile(f.name)), // Görsel ve video dosyaları
+        dimensionFiles: productData.dimensionFiles.filter(f => isMediaFile(f.name)) // ÖLÇÜLER klasöründeki dosyalar
       }
     })
 
@@ -229,7 +315,13 @@ export default function MediaImportTool() {
       files: files.filter(f => isMediaFile(f.name)) // Görsel ve video dosyaları
     }))
 
-    return { categories, designers, products, materialGroups, projects }
+    const categoryMedia = Array.from(categoryMediaMap.entries()).map(([categoryId, files]) => ({
+      categoryId,
+      categoryName: categories.get(categoryId) || categoryId,
+      files: files.filter(f => isMediaFile(f.name)) // Görsel ve video dosyaları
+    }))
+
+    return { categories, categoryMedia, designers, products, materialGroups, projects }
   }, [])
 
   // Dosya yükleme handler'ı
@@ -261,6 +353,7 @@ export default function MediaImportTool() {
       
       // İstatistikler (görsel + video)
       const totalMedia = 
+        data.categoryMedia.reduce((sum, c) => sum + c.files.length, 0) +
         data.designers.reduce((sum, d) => sum + d.files.length, 0) +
         data.products.reduce((sum, p) => sum + p.files.length, 0) +
         data.projects.reduce((sum, p) => sum + p.files.length, 0) +
@@ -268,7 +361,7 @@ export default function MediaImportTool() {
           sum + g.books.reduce((bookSum, b) => bookSum + b.files.length, 0), 0)
       
       setStats({
-        categories: data.categories.size,
+        categories: data.categoryMedia.length,
         designers: data.designers.length,
         products: data.products.length,
         projects: data.projects.length,
@@ -292,16 +385,19 @@ export default function MediaImportTool() {
       const projectSummary = data.projects.length > 0 
         ? `, ${data.projects.length} proje` 
         : ''
+      const categorySummary = data.categoryMedia.length > 0
+        ? `, ${data.categoryMedia.length} kategori medyası`
+        : ''
       
       toast.push({
         status: 'info',
         title: 'Tarama tamamlandı',
-        description: `${data.categories.size} kategori, ${data.designers.length} tasarımcı, ${data.products.length} ürün${projectSummary}${materialSummary} bulundu`
+        description: `${data.categoryMedia.length} kategori medyası, ${data.designers.length} tasarımcı, ${data.products.length} ürün${projectSummary}${materialSummary} bulundu`
       })
 
       // Yükleme başlasın mı diye sor
       const parts: string[] = []
-      if (data.categories.size > 0) parts.push(`${data.categories.size} kategori`)
+      if (data.categoryMedia.length > 0) parts.push(`${data.categoryMedia.length} kategori medyası`)
       if (data.designers.length > 0) parts.push(`${data.designers.length} tasarımcı`)
       if (data.products.length > 0) parts.push(`${data.products.length} ürün`)
       if (data.projects.length > 0) parts.push(`${data.projects.length} proje`)
@@ -382,6 +478,52 @@ export default function MediaImportTool() {
     categoryNameToSlug.forEach((slug, name) => {
       console.log(`   "${name}" -> "${slug}"`)
     })
+    
+    // 0. Kategori görsellerini yükle
+    if (data.categoryMedia.length > 0) {
+      toast.push({
+        status: 'info',
+        title: 'Kategori görselleri yükleniyor...',
+        description: `${data.categoryMedia.length} kategori için görseller kontrol ediliyor`
+      })
+      
+      for (const categoryMedia of data.categoryMedia) {
+        const item: ProgressItem = {
+          type: 'category',
+          name: categoryMedia.categoryName,
+          status: 'uploading'
+        }
+        newProgress.push(item)
+        setProgress([...newProgress])
+        
+        try {
+          // Kategori adını CMS'deki slug'a çevir
+          const normalizedCategoryName = normalizeText(categoryMedia.categoryName)
+          const actualCategorySlug = categoryNameToSlug.get(normalizedCategoryName) || 
+                                     categoryNameToSlug.get(categoryMedia.categoryName.toLowerCase()) ||
+                                     categoryMedia.categoryId
+          
+          const matchingCategory = existingCategories.find((c: any) => 
+            c.slug === actualCategorySlug ||
+            normalizeText(c.name?.tr || '') === normalizedCategoryName ||
+            normalizeText(c.name?.en || '') === normalizedCategoryName
+          )
+          
+          if (matchingCategory) {
+            await updateCategoryImages(client, matchingCategory._id, categoryMedia)
+            item.status = 'success'
+            item.message = 'Görseller güncellendi'
+          } else {
+            item.status = 'error'
+            item.message = `CMS'de bulunamadı (${categoryMedia.categoryName}) - önce manuel oluşturun`
+          }
+        } catch (error: any) {
+          item.status = 'error'
+          item.message = error.message
+        }
+        setProgress([...newProgress])
+      }
+    }
     
     // 1. Tasarımcı görsellerini yükle (sadece görsel, kayıt oluşturmadan)
     for (const designer of data.designers) {
@@ -742,8 +884,12 @@ export default function MediaImportTool() {
           <Text size={3} weight="bold">
             📦 Medya İçe Aktarma
           </Text>
-          <Text size={1} muted style={{ marginTop: '0.5rem' }}>
-            Ürün, tasarımcı ve proje görsellerinizi sürükle-bırak yapın veya klasör seçin
+          <Text size={1} muted style={{ marginTop: '0.5rem', lineHeight: '1.6' }}>
+            Bu araç, ürün, tasarımcı, proje ve malzeme görsellerinizi CMS'e yüklemek için kullanılır. 
+            Medya klasörünüzü sürükle-bırak yapabilir veya "Klasör Seç" butonu ile seçebilirsiniz. 
+            <strong>ÖNEMLİ:</strong> Bu araç sadece görselleri yükler; tasarımcılar, ürünler, projeler ve malzeme grupları 
+            CMS'de önceden oluşturulmuş olmalıdır. Klasör yapınızın doğru formatta olması gerekmektedir 
+            (örnek yapı aşağıda gösterilmiştir).
           </Text>
         </Box>
 
@@ -877,16 +1023,22 @@ export default function MediaImportTool() {
         )}
 
         {/* Yardım */}
-        <Card padding={3} tone="caution" radius={2}>
-          <Stack space={2}>
-            <Text size={1} weight="semibold">⚠️ ÖNEMLİ:</Text>
-            <Text size={1}>
-              Bu araç <strong>sadece görselleri yükler</strong>. Tasarımcılar, ürünler, malzeme grupları ve kartelalar CMS'de önceden oluşturulmuş olmalı!
+        <Card padding={4} tone="caution" radius={2}>
+          <Stack space={3}>
+            <Text size={2} weight="bold">⚠️ ÖNEMLİ:</Text>
+            <Text size={1} style={{ lineHeight: '1.6' }}>
+              Bu araç <strong>sadece görselleri yükler</strong>. Tasarımcılar, ürünler, projeler, malzeme grupları ve kartelalar CMS'de önceden oluşturulmuş olmalıdır!
             </Text>
-            <Text size={0} muted>
-              1️⃣ Önce CMS'de tasarımcı/ürün/malzeme grubu/kartela oluşturun<br />
-              2️⃣ Sonra bu araçla görsellerini yükleyin
-            </Text>
+            <Box padding={2} style={{ backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: '4px' }}>
+              <Stack space={2}>
+                <Text size={1} weight="semibold">Kullanım Adımları:</Text>
+                <Text size={1} style={{ lineHeight: '1.6' }}>
+                  1️⃣ Önce CMS'de tasarımcı/ürün/proje/malzeme grubu/kartela oluşturun<br />
+                  2️⃣ Sonra bu araçla görsellerini yükleyin<br />
+                  3️⃣ Klasör yapınızın doğru formatta olduğundan emin olun
+                </Text>
+              </Stack>
+            </Box>
           </Stack>
         </Card>
         
@@ -1006,7 +1158,8 @@ function createFileList(files: File[]): FileList {
 async function checkExistingDesignerAssets(client: any, designerId: string) {
   const designer = await client.fetch(`*[_id == $designerId][0]{
     image{asset->{_id, originalFilename, sha1hash}},
-    imageMobile{asset->{_id, originalFilename, sha1hash}}
+    imageMobile{asset->{_id, originalFilename, sha1hash}},
+    imageDesktop{asset->{_id, originalFilename, sha1hash}}
   }`, { designerId })
   
   const existingHashes = new Set<string>()
@@ -1020,6 +1173,10 @@ async function checkExistingDesignerAssets(client: any, designerId: string) {
     if (designer.imageMobile.asset.sha1hash) existingHashes.add(designer.imageMobile.asset.sha1hash)
     if (designer.imageMobile.asset.originalFilename) existingFilenames.add(designer.imageMobile.asset.originalFilename)
   }
+  if (designer?.imageDesktop?.asset) {
+    if (designer.imageDesktop.asset.sha1hash) existingHashes.add(designer.imageDesktop.asset.sha1hash)
+    if (designer.imageDesktop.asset.originalFilename) existingFilenames.add(designer.imageDesktop.asset.originalFilename)
+  }
   
   return { existingHashes, existingFilenames }
 }
@@ -1031,8 +1188,17 @@ async function updateDesignerImages(client: any, designerId: string, designer: {
   // Mevcut görselleri kontrol et
   const { existingHashes, existingFilenames } = await checkExistingDesignerAssets(client, designerId)
   
-  const generalImage = designer.files.find(f => !f.name.toLowerCase().includes('_mobil'))
-  const mobileImage = designer.files.find(f => f.name.toLowerCase().includes('_mobil'))
+  const generalImage = designer.files.find(f => 
+    !f.name.toLowerCase().includes('_mobil') && 
+    !f.name.toLowerCase().includes('_desktop')
+  )
+  const mobileImage = designer.files.find(f => 
+    f.name.toLowerCase().includes('_mobil') && 
+    !f.name.toLowerCase().includes('_desktop')
+  )
+  const desktopImage = designer.files.find(f => 
+    f.name.toLowerCase().includes('_desktop')
+  )
 
   const updates: any = {}
 
@@ -1042,6 +1208,8 @@ async function updateDesignerImages(client: any, designerId: string, designer: {
       console.log(`   📤 Genel görsel yükleniyor: ${generalImage.name}`)
       const asset = await client.assets.upload('image', generalImage)
       updates.image = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+      existingHashes.add(asset.sha1hash)
+      existingFilenames.add(asset.originalFilename)
     }
   }
 
@@ -1051,6 +1219,19 @@ async function updateDesignerImages(client: any, designerId: string, designer: {
       console.log(`   📱 Mobil görsel yükleniyor: ${mobileImage.name}`)
       const asset = await client.assets.upload('image', mobileImage)
       updates.imageMobile = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+      existingHashes.add(asset.sha1hash)
+      existingFilenames.add(asset.originalFilename)
+    }
+  }
+
+  if (desktopImage) {
+    const alreadyExists = await isAssetAlreadyUploaded(client, desktopImage, existingHashes, existingFilenames)
+    if (!alreadyExists) {
+      console.log(`   💻 Desktop görsel yükleniyor: ${desktopImage.name}`)
+      const asset = await client.assets.upload('image', desktopImage)
+      updates.imageDesktop = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+      existingHashes.add(asset.sha1hash)
+      existingFilenames.add(asset.originalFilename)
     }
   }
 
@@ -1070,11 +1251,31 @@ async function checkExistingAssets(client: any, productId: string) {
   const product = await client.fetch(`*[_id == $productId][0]{
     mainImage{asset->{_id, originalFilename, sha1hash}},
     mainImageMobile{asset->{_id, originalFilename, sha1hash}},
+    mainImageDesktop{asset->{_id, originalFilename, sha1hash}},
+    dimensionImages[]{
+      image{asset->{_id, originalFilename, sha1hash}},
+      imageMobile{asset->{_id, originalFilename, sha1hash}},
+      imageDesktop{asset->{_id, originalFilename, sha1hash}}
+    },
+    media[]{
+      ...,
+      type,
+      image{asset->{_id, originalFilename, sha1hash}},
+      imageMobile{asset->{_id, originalFilename, sha1hash}},
+      imageDesktop{asset->{_id, originalFilename, sha1hash}},
+      videoFile{asset->{_id, originalFilename, sha1hash}},
+      videoFileMobile{asset->{_id, originalFilename, sha1hash}},
+      videoFileDesktop{asset->{_id, originalFilename, sha1hash}}
+    },
     alternativeMedia[]{
       ...,
       type,
       image{asset->{_id, originalFilename, sha1hash}},
-      videoFile{asset->{_id, originalFilename, sha1hash}}
+      imageMobile{asset->{_id, originalFilename, sha1hash}},
+      imageDesktop{asset->{_id, originalFilename, sha1hash}},
+      videoFile{asset->{_id, originalFilename, sha1hash}},
+      videoFileMobile{asset->{_id, originalFilename, sha1hash}},
+      videoFileDesktop{asset->{_id, originalFilename, sha1hash}}
     }
   }`, { productId })
   
@@ -1088,6 +1289,62 @@ async function checkExistingAssets(client: any, productId: string) {
   if (product?.mainImageMobile?.asset) {
     if (product.mainImageMobile.asset.sha1hash) existingHashes.add(product.mainImageMobile.asset.sha1hash)
     if (product.mainImageMobile.asset.originalFilename) existingFilenames.add(product.mainImageMobile.asset.originalFilename)
+  }
+  if (product?.mainImageDesktop?.asset) {
+    if (product.mainImageDesktop.asset.sha1hash) existingHashes.add(product.mainImageDesktop.asset.sha1hash)
+    if (product.mainImageDesktop.asset.originalFilename) existingFilenames.add(product.mainImageDesktop.asset.originalFilename)
+  }
+  
+  // Mevcut dimensionImages array'ini koru
+  const existingDimensionImages: any[] = []
+  if (product?.dimensionImages) {
+    product.dimensionImages.forEach((item: any) => {
+      if (item?.image?.asset) {
+        if (item.image.asset.sha1hash) existingHashes.add(item.image.asset.sha1hash)
+        if (item.image.asset.originalFilename) existingFilenames.add(item.image.asset.originalFilename)
+      }
+      if (item?.imageMobile?.asset) {
+        if (item.imageMobile.asset.sha1hash) existingHashes.add(item.imageMobile.asset.sha1hash)
+        if (item.imageMobile.asset.originalFilename) existingFilenames.add(item.imageMobile.asset.originalFilename)
+      }
+      if (item?.imageDesktop?.asset) {
+        if (item.imageDesktop.asset.sha1hash) existingHashes.add(item.imageDesktop.asset.sha1hash)
+        if (item.imageDesktop.asset.originalFilename) existingFilenames.add(item.imageDesktop.asset.originalFilename)
+      }
+      existingDimensionImages.push(item)
+    })
+  }
+  
+  // Mevcut media (alt medya panelleri) array'ini koru
+  const existingMedia: any[] = []
+  if (product?.media) {
+    product.media.forEach((item: any) => {
+      if (item?.image?.asset) {
+        if (item.image.asset.sha1hash) existingHashes.add(item.image.asset.sha1hash)
+        if (item.image.asset.originalFilename) existingFilenames.add(item.image.asset.originalFilename)
+      }
+      if (item?.imageMobile?.asset) {
+        if (item.imageMobile.asset.sha1hash) existingHashes.add(item.imageMobile.asset.sha1hash)
+        if (item.imageMobile.asset.originalFilename) existingFilenames.add(item.imageMobile.asset.originalFilename)
+      }
+      if (item?.imageDesktop?.asset) {
+        if (item.imageDesktop.asset.sha1hash) existingHashes.add(item.imageDesktop.asset.sha1hash)
+        if (item.imageDesktop.asset.originalFilename) existingFilenames.add(item.imageDesktop.asset.originalFilename)
+      }
+      if (item?.videoFile?.asset) {
+        if (item.videoFile.asset.sha1hash) existingHashes.add(item.videoFile.asset.sha1hash)
+        if (item.videoFile.asset.originalFilename) existingFilenames.add(item.videoFile.asset.originalFilename)
+      }
+      if (item?.videoFileMobile?.asset) {
+        if (item.videoFileMobile.asset.sha1hash) existingHashes.add(item.videoFileMobile.asset.sha1hash)
+        if (item.videoFileMobile.asset.originalFilename) existingFilenames.add(item.videoFileMobile.asset.originalFilename)
+      }
+      if (item?.videoFileDesktop?.asset) {
+        if (item.videoFileDesktop.asset.sha1hash) existingHashes.add(item.videoFileDesktop.asset.sha1hash)
+        if (item.videoFileDesktop.asset.originalFilename) existingFilenames.add(item.videoFileDesktop.asset.originalFilename)
+      }
+      existingMedia.push(item)
+    })
   }
   
   // Mevcut alternativeMedia array'ini koru (hem görsel hem video)
@@ -1104,12 +1361,28 @@ async function checkExistingAssets(client: any, productId: string) {
       if (item?.videoFile?.asset) {
         if (item.videoFile.asset.sha1hash) existingHashes.add(item.videoFile.asset.sha1hash)
         if (item.videoFile.asset.originalFilename) existingFilenames.add(item.videoFile.asset.originalFilename)
-        existingAlternativeMedia.push(item)
       }
+      if (item?.imageMobile?.asset) {
+        if (item.imageMobile.asset.sha1hash) existingHashes.add(item.imageMobile.asset.sha1hash)
+        if (item.imageMobile.asset.originalFilename) existingFilenames.add(item.imageMobile.asset.originalFilename)
+      }
+      if (item?.imageDesktop?.asset) {
+        if (item.imageDesktop.asset.sha1hash) existingHashes.add(item.imageDesktop.asset.sha1hash)
+        if (item.imageDesktop.asset.originalFilename) existingFilenames.add(item.imageDesktop.asset.originalFilename)
+      }
+      if (item?.videoFileMobile?.asset) {
+        if (item.videoFileMobile.asset.sha1hash) existingHashes.add(item.videoFileMobile.asset.sha1hash)
+        if (item.videoFileMobile.asset.originalFilename) existingFilenames.add(item.videoFileMobile.asset.originalFilename)
+      }
+      if (item?.videoFileDesktop?.asset) {
+        if (item.videoFileDesktop.asset.sha1hash) existingHashes.add(item.videoFileDesktop.asset.sha1hash)
+        if (item.videoFileDesktop.asset.originalFilename) existingFilenames.add(item.videoFileDesktop.asset.originalFilename)
+      }
+      existingAlternativeMedia.push(item)
     })
   }
   
-  return { existingHashes, existingFilenames, existingAlternativeMedia }
+  return { existingHashes, existingFilenames, existingAlternativeMedia, existingDimensionImages, existingMedia }
 }
 
 /**
@@ -1155,21 +1428,37 @@ async function isAssetAlreadyUploaded(
  */
 async function updateProductImages(client: any, productId: string, product: any) {
   // Mevcut görselleri kontrol et (mevcut alternativeMedia'yı da al)
-  const { existingHashes, existingFilenames, existingAlternativeMedia } = await checkExistingAssets(client, productId)
+  const { existingHashes, existingFilenames, existingAlternativeMedia, existingDimensionImages, existingMedia } = await checkExistingAssets(client, productId)
   
   // Kapak görselleri sadece görsel olabilir (video olamaz)
   const coverMain = product.files.find((f: File) => 
     isImageFile(f.name) && 
     f.name.toLowerCase().includes('_kapak') && 
-    !f.name.toLowerCase().includes('_mobil')
+    !f.name.toLowerCase().includes('_mobil') &&
+    !f.name.toLowerCase().includes('_desktop')
   )
   const coverMobile = product.files.find((f: File) => 
     isImageFile(f.name) && 
-    f.name.toLowerCase().includes('_kapak_mobil')
+    f.name.toLowerCase().includes('_kapak_mobil') &&
+    !f.name.toLowerCase().includes('_desktop')
   )
-  // Alternatif medya: hem görsel hem video olabilir
+  const coverDesktop = product.files.find((f: File) => 
+    isImageFile(f.name) && 
+    f.name.toLowerCase().includes('_kapak_desktop')
+  )
+  
+  // Ölçü görselleri: ÖLÇÜLER klasöründeki dosyalar
+  const dimensionImages = product.dimensionFiles || []
+  
+  // Alt medya panelleri: _panel etiketi ile
+  const panelMedia = product.files.filter((f: File) => 
+    f.name.toLowerCase().includes('_panel')
+  )
+  
+  // Alternatif medya: hem görsel hem video olabilir (_kapak, _panel içermemeli)
   const regularMedia = product.files.filter((f: File) => 
-    !f.name.toLowerCase().includes('_kapak')
+    !f.name.toLowerCase().includes('_kapak') &&
+    !f.name.toLowerCase().includes('_panel')
   )
 
   const updates: any = {}
@@ -1240,6 +1529,30 @@ async function updateProductImages(client: any, productId: string, product: any)
     // Klasörde mobil kapak yok - CMS'deki mobil kapak görselini sil (eşitleme)
     console.log(`   🗑️ Klasörde mobil kapak yok, CMS'deki mobil kapak siliniyor (eşitleme)`)
     updates.mainImageMobile = null
+    hasChanges = true
+  }
+
+  // Desktop kapak görseli - Eşitleme mantığı
+  if (coverDesktop) {
+    // Klasörde desktop kapak var - hash kontrolü yap
+    const coverDesktopHash = await getFileHash(coverDesktop)
+    const existingDesktopHash = Array.from(existingHashes).find(h => h === coverDesktopHash)
+    
+    if (!existingDesktopHash) {
+      // Klasörde var ama CMS'de yok veya farklı - güncelle
+      console.log(`   💻 Desktop kapak güncelleniyor: ${coverDesktop.name}`)
+      const asset = await client.assets.upload('image', coverDesktop)
+      updates.mainImageDesktop = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+      existingHashes.add(asset.sha1hash)
+      existingFilenames.add(asset.originalFilename)
+      hasChanges = true
+    } else {
+      console.log(`   ✓ Desktop kapak zaten eşleşiyor: ${coverDesktop.name}`)
+    }
+  } else {
+    // Klasörde desktop kapak yok - CMS'deki desktop kapak görselini sil (eşitleme)
+    console.log(`   🗑️ Klasörde desktop kapak yok, CMS'deki desktop kapak siliniyor (eşitleme)`)
+    updates.mainImageDesktop = null
     hasChanges = true
   }
 
@@ -1380,7 +1693,235 @@ async function updateProductImages(client: any, productId: string, product: any)
   updates.alternativeMedia = syncedAlternativeMedia
   
   // ============================================
-  // 3. GÜNCELLEMELERİ UYGULA
+  // 3. ÖLÇÜ GÖRSELLERİNİ EŞİTLE
+  // ============================================
+  
+  if (dimensionImages.length > 0) {
+    console.log(`   📐 ${dimensionImages.length} ölçü görseli işleniyor (ÖLÇÜLER klasöründen)...`)
+    
+    // Ölçü görsellerini grupla (numara ile veya dosya adından)
+    const dimensionGroups = new Map<number, { main?: File; mobile?: File; desktop?: File }>()
+    
+    for (const file of dimensionImages) {
+      const name = file.name.toLowerCase()
+      // Dosya adından numara çıkar (olcu_1.jpg, olcu1.jpg, 1.jpg, vs.)
+      let match = name.match(/[_-]?(\d+)/)
+      let index = match ? parseInt(match[1]) : 1
+      
+      // Eğer numara bulunamazsa, dosya adının sonundaki numarayı kullan
+      if (!match) {
+        match = name.match(/(\d+)(?:\.[^.]+)?$/)
+        index = match ? parseInt(match[1]) : 1
+      }
+      
+      // Eğer hala numara bulunamazsa, sıralı numara ver
+      if (!match && dimensionGroups.size > 0) {
+        index = Math.max(...Array.from(dimensionGroups.keys())) + 1
+      }
+      
+      if (!dimensionGroups.has(index)) {
+        dimensionGroups.set(index, {})
+      }
+      
+      const group = dimensionGroups.get(index)!
+      if (name.includes('_mobil') && !name.includes('_desktop')) {
+        group.mobile = file
+      } else if (name.includes('_desktop')) {
+        group.desktop = file
+      } else {
+        group.main = file
+      }
+    }
+    
+    const syncedDimensionImages: any[] = []
+    
+    for (const [index, group] of dimensionGroups.entries()) {
+      const dimItem: any = {
+        _type: 'productDimensionImage',
+        _key: `dimension-${index}-${Date.now()}`,
+      }
+      
+      if (group.main) {
+        const hash = await getFileHash(group.main)
+        const existing = existingDimensionImages.find((item: any) => 
+          item?.image?.asset?.sha1hash === hash
+        )
+        
+        if (existing) {
+          syncedDimensionImages.push(existing)
+          console.log(`   ✓ Ölçü görseli korundu: ${group.main.name}`)
+        } else {
+          const asset = await client.assets.upload('image', group.main)
+          dimItem.image = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+          existingHashes.add(asset.sha1hash)
+          existingFilenames.add(asset.originalFilename)
+          hasChanges = true
+          console.log(`   ✅ Ölçü görseli yüklendi: ${group.main.name}`)
+        }
+      }
+      
+      if (group.mobile) {
+        const hash = await getFileHash(group.mobile)
+        const existing = existingDimensionImages.find((item: any) => 
+          item?.imageMobile?.asset?.sha1hash === hash
+        )
+        
+        if (!existing || !dimItem.image) {
+          const asset = await client.assets.upload('image', group.mobile)
+          dimItem.imageMobile = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+          existingHashes.add(asset.sha1hash)
+          existingFilenames.add(asset.originalFilename)
+          hasChanges = true
+          console.log(`   ✅ Mobil ölçü görseli yüklendi: ${group.mobile.name}`)
+        } else if (existing?.imageMobile) {
+          dimItem.imageMobile = existing.imageMobile
+        }
+      }
+      
+      if (group.desktop) {
+        const hash = await getFileHash(group.desktop)
+        const existing = existingDimensionImages.find((item: any) => 
+          item?.imageDesktop?.asset?.sha1hash === hash
+        )
+        
+        if (!existing || !dimItem.image) {
+          const asset = await client.assets.upload('image', group.desktop)
+          dimItem.imageDesktop = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+          existingHashes.add(asset.sha1hash)
+          existingFilenames.add(asset.originalFilename)
+          hasChanges = true
+          console.log(`   ✅ Desktop ölçü görseli yüklendi: ${group.desktop.name}`)
+        } else if (existing?.imageDesktop) {
+          dimItem.imageDesktop = existing.imageDesktop
+        }
+      }
+      
+      if (dimItem.image) {
+        syncedDimensionImages.push(dimItem)
+      }
+    }
+    
+    updates.dimensionImages = syncedDimensionImages
+    console.log(`   ✅ ${syncedDimensionImages.length} ölçü görseli eşitlendi`)
+  } else {
+    // Klasörde ölçü görseli yok - CMS'deki ölçü görsellerini sil (eşitleme)
+    if (existingDimensionImages.length > 0) {
+      console.log(`   🗑️ Klasörde ölçü görseli yok, CMS'deki ölçü görselleri siliniyor (eşitleme)`)
+      updates.dimensionImages = []
+      hasChanges = true
+    }
+  }
+  
+  // ============================================
+  // 4. ALT MEDYA PANELLERİNİ EŞİTLE
+  // ============================================
+  
+  if (panelMedia.length > 0) {
+    console.log(`   🎬 ${panelMedia.length} alt medya paneli işleniyor...`)
+    
+    // Alt medya panellerini grupla (numara ile)
+    const panelGroups = new Map<number, Array<{ file: File; isVideo: boolean; isMobile: boolean; isDesktop: boolean }>>()
+    
+    for (const file of panelMedia) {
+      const name = file.name.toLowerCase()
+      const match = name.match(/_panel[_-]?(\d+)/)
+      const index = match ? parseInt(match[1]) : 1
+      
+      if (!panelGroups.has(index)) {
+        panelGroups.set(index, [])
+      }
+      
+      const isVideo = isVideoFile(file.name)
+      const isMobile = name.includes('_mobil') && !name.includes('_desktop')
+      const isDesktop = name.includes('_desktop')
+      
+      panelGroups.get(index)!.push({ file, isVideo, isMobile, isDesktop })
+    }
+    
+    const syncedMedia: any[] = []
+    
+    for (const [index, files] of panelGroups.entries()) {
+      // Her panel için ana görsel/video bul
+      const mainFile = files.find(f => !f.isMobile && !f.isDesktop)
+      
+      if (mainFile) {
+        const hash = await getFileHash(mainFile.file)
+        const existing = existingMedia.find((item: any) => {
+          if (mainFile.isVideo) {
+            return item?.videoFile?.asset?.sha1hash === hash
+          } else {
+            return item?.image?.asset?.sha1hash === hash
+          }
+        })
+        
+        if (existing) {
+          syncedMedia.push(existing)
+          console.log(`   ✓ Alt medya paneli korundu: ${mainFile.file.name}`)
+        } else {
+          const panelItem: any = {
+            _type: 'productPanelMediaItem',
+            _key: `panel-${index}-${Date.now()}`,
+            type: mainFile.isVideo ? 'video' : 'image',
+          }
+          
+          if (mainFile.isVideo) {
+            const asset = await client.assets.upload('file', mainFile.file)
+            panelItem.videoFile = { _type: 'file', asset: { _type: 'reference', _ref: asset._id } }
+            existingHashes.add(asset.sha1hash)
+            existingFilenames.add(asset.originalFilename)
+          } else {
+            const asset = await client.assets.upload('image', mainFile.file)
+            panelItem.image = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+            existingHashes.add(asset.sha1hash)
+            existingFilenames.add(asset.originalFilename)
+          }
+          
+          // Mobil ve desktop versiyonları
+          const mobileFile = files.find(f => f.isMobile && f.isVideo === mainFile.isVideo)
+          const desktopFile = files.find(f => f.isDesktop && f.isVideo === mainFile.isVideo)
+          
+          if (mobileFile) {
+            if (mainFile.isVideo) {
+              const asset = await client.assets.upload('file', mobileFile.file)
+              panelItem.videoFileMobile = { _type: 'file', asset: { _type: 'reference', _ref: asset._id } }
+            } else {
+              const asset = await client.assets.upload('image', mobileFile.file)
+              panelItem.imageMobile = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+            }
+            hasChanges = true
+          }
+          
+          if (desktopFile) {
+            if (mainFile.isVideo) {
+              const asset = await client.assets.upload('file', desktopFile.file)
+              panelItem.videoFileDesktop = { _type: 'file', asset: { _type: 'reference', _ref: asset._id } }
+            } else {
+              const asset = await client.assets.upload('image', desktopFile.file)
+              panelItem.imageDesktop = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+            }
+            hasChanges = true
+          }
+          
+          syncedMedia.push(panelItem)
+          hasChanges = true
+          console.log(`   ✅ Alt medya paneli yüklendi: ${mainFile.file.name}`)
+        }
+      }
+    }
+    
+    updates.media = syncedMedia
+    console.log(`   ✅ ${syncedMedia.length} alt medya paneli eşitlendi`)
+  } else {
+    // Klasörde alt medya paneli yok - CMS'deki alt medya panellerini sil (eşitleme)
+    if (existingMedia.length > 0) {
+      console.log(`   🗑️ Klasörde alt medya paneli yok, CMS'deki alt medya panelleri siliniyor (eşitleme)`)
+      updates.media = []
+      hasChanges = true
+    }
+  }
+  
+  // ============================================
+  // 5. GÜNCELLEMELERİ UYGULA
   // ============================================
   
   if (hasChanges || syncedAlternativeMedia.length !== existingAlternativeMedia.length) {
@@ -1466,7 +2007,19 @@ async function updateProjectMedia(client: any, projectId: string, project: any) 
   
   // Kapak görseli bul (_kapak.***) - sadece görsel dosyalar
   const coverFile = project.files.find((f: File) => 
-    isImageFile(f.name) && f.name.toLowerCase().includes('_kapak')
+    isImageFile(f.name) && 
+    f.name.toLowerCase().includes('_kapak') &&
+    !f.name.toLowerCase().includes('_mobil') &&
+    !f.name.toLowerCase().includes('_desktop')
+  )
+  const coverMobileFile = project.files.find((f: File) => 
+    isImageFile(f.name) && 
+    f.name.toLowerCase().includes('_kapak_mobil') &&
+    !f.name.toLowerCase().includes('_desktop')
+  )
+  const coverDesktopFile = project.files.find((f: File) => 
+    isImageFile(f.name) && 
+    f.name.toLowerCase().includes('_kapak_desktop')
   )
   
   console.log(`   🔍 Proje medya analizi: ${project.files.length} dosya bulundu`)
@@ -1537,6 +2090,54 @@ async function updateProjectMedia(client: any, projectId: string, project: any) 
       console.log(`   🗑️ Klasörde görsel yok, CMS'deki kapak siliniyor (eşitleme)`)
       console.log(`   📄 Mevcut dosyalar: ${project.files.map(f => `${f.name} (${isImageFile(f.name) ? 'görsel' : isVideoFile(f.name) ? 'video' : 'diğer'})`).join(', ')}`)
       updates.cover = null
+      hasChanges = true
+    }
+  }
+
+  // Mobil kapak görseli eşitleme
+  if (coverMobileFile) {
+    const coverMobileHash = await getFileHash(coverMobileFile)
+    const existingCoverMobileHash = Array.from(existingHashes).find(h => h === coverMobileHash)
+    
+    if (!existingCoverMobileHash) {
+      console.log(`   📱 Mobil kapak görseli güncelleniyor: ${coverMobileFile.name}`)
+      const asset = await client.assets.upload('image', coverMobileFile)
+      updates.coverMobile = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+      existingHashes.add(asset.sha1hash)
+      existingFilenames.add(asset.originalFilename)
+      hasChanges = true
+    } else {
+      console.log(`   ✓ Mobil kapak görseli zaten eşleşiyor: ${coverMobileFile.name}`)
+    }
+  } else {
+    // Klasörde mobil kapak yok - CMS'deki mobil kapak görselini sil (eşitleme)
+    if (projectData?.coverMobile) {
+      console.log(`   🗑️ Klasörde mobil kapak yok, CMS'deki mobil kapak siliniyor (eşitleme)`)
+      updates.coverMobile = null
+      hasChanges = true
+    }
+  }
+
+  // Desktop kapak görseli eşitleme
+  if (coverDesktopFile) {
+    const coverDesktopHash = await getFileHash(coverDesktopFile)
+    const existingCoverDesktopHash = Array.from(existingHashes).find(h => h === coverDesktopHash)
+    
+    if (!existingCoverDesktopHash) {
+      console.log(`   💻 Desktop kapak görseli güncelleniyor: ${coverDesktopFile.name}`)
+      const asset = await client.assets.upload('image', coverDesktopFile)
+      updates.coverDesktop = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+      existingHashes.add(asset.sha1hash)
+      existingFilenames.add(asset.originalFilename)
+      hasChanges = true
+    } else {
+      console.log(`   ✓ Desktop kapak görseli zaten eşleşiyor: ${coverDesktopFile.name}`)
+    }
+  } else {
+    // Klasörde desktop kapak yok - CMS'deki desktop kapak görselini sil (eşitleme)
+    if (projectData?.coverDesktop) {
+      console.log(`   🗑️ Klasörde desktop kapak yok, CMS'deki desktop kapak siliniyor (eşitleme)`)
+      updates.coverDesktop = null
       hasChanges = true
     }
   }
@@ -1663,6 +2264,102 @@ async function updateProjectMedia(client: any, projectId: string, project: any) 
     console.log(`   ✅ Eşitleme tamamlandı: ${summary} (Toplam: ${syncedMedia.length} medya)`)
   } else {
     console.log(`   ℹ️ Eşitleme gerekmedi, tüm medya zaten eşleşiyor`)
+  }
+}
+
+/**
+ * Kategori görsellerini klasörle eşitler (sync)
+ * - heroImage: hero.jpg veya kapak.jpg gibi dosyalar
+ * - menuImage: menu.jpg veya menü.jpg gibi dosyalar
+ */
+async function updateCategoryImages(client: any, categoryId: string, categoryMedia: { categoryId: string; categoryName: string; files: File[] }) {
+  const categoryData = await client.fetch(`*[_id == $categoryId][0]{
+    heroImage{asset->{_id, originalFilename, sha1hash}},
+    menuImage{asset->{_id, originalFilename, sha1hash}}
+  }`, { categoryId })
+  
+  const existingHashes = new Set<string>()
+  const existingFilenames = new Set<string>()
+  
+  if (categoryData?.heroImage?.asset?.sha1hash) {
+    existingHashes.add(categoryData.heroImage.asset.sha1hash)
+    if (categoryData.heroImage.asset.originalFilename) {
+      existingFilenames.add(categoryData.heroImage.asset.originalFilename)
+    }
+  }
+  if (categoryData?.menuImage?.asset?.sha1hash) {
+    existingHashes.add(categoryData.menuImage.asset.sha1hash)
+    if (categoryData.menuImage.asset.originalFilename) {
+      existingFilenames.add(categoryData.menuImage.asset.originalFilename)
+    }
+  }
+  
+  const updates: any = {}
+  let hasChanges = false
+  
+  // Hero görseli bul (hero.jpg, kapak.jpg veya ilk görsel)
+  const heroFile = categoryMedia.files.find((f: File) => {
+    const name = f.name.toLowerCase()
+    return isImageFile(f.name) && (name.includes('hero') || name.includes('kapak'))
+  }) || categoryMedia.files.find((f: File) => isImageFile(f.name))
+  
+  // Menü görseli bul (menu.jpg, menü.jpg)
+  const menuFile = categoryMedia.files.find((f: File) => {
+    const name = f.name.toLowerCase()
+    return isImageFile(f.name) && (name.includes('menu') || name.includes('menü'))
+  })
+  
+  if (heroFile) {
+    const hash = await getFileHash(heroFile)
+    const existingHash = Array.from(existingHashes).find(h => h === hash)
+    
+    if (!existingHash) {
+      console.log(`   📸 Hero görseli yükleniyor: ${heroFile.name}`)
+      const asset = await client.assets.upload('image', heroFile)
+      updates.heroImage = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+      existingHashes.add(asset.sha1hash)
+      existingFilenames.add(asset.originalFilename)
+      hasChanges = true
+    } else {
+      console.log(`   ✓ Hero görseli zaten eşleşiyor: ${heroFile.name}`)
+    }
+  } else {
+    // Klasörde hero görseli yok - CMS'deki hero görselini sil (eşitleme)
+    if (categoryData?.heroImage) {
+      console.log(`   🗑️ Klasörde hero görseli yok, CMS'deki hero görseli siliniyor (eşitleme)`)
+      updates.heroImage = null
+      hasChanges = true
+    }
+  }
+  
+  if (menuFile) {
+    const hash = await getFileHash(menuFile)
+    const existingHash = Array.from(existingHashes).find(h => h === hash)
+    
+    if (!existingHash) {
+      console.log(`   🎨 Menü görseli yükleniyor: ${menuFile.name}`)
+      const asset = await client.assets.upload('image', menuFile)
+      updates.menuImage = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+      existingHashes.add(asset.sha1hash)
+      existingFilenames.add(asset.originalFilename)
+      hasChanges = true
+    } else {
+      console.log(`   ✓ Menü görseli zaten eşleşiyor: ${menuFile.name}`)
+    }
+  } else {
+    // Klasörde menü görseli yok - CMS'deki menü görselini sil (eşitleme)
+    if (categoryData?.menuImage) {
+      console.log(`   🗑️ Klasörde menü görseli yok, CMS'deki menü görseli siliniyor (eşitleme)`)
+      updates.menuImage = null
+      hasChanges = true
+    }
+  }
+  
+  if (hasChanges) {
+    await client.patch(categoryId).set(updates).commit()
+    console.log(`   ✅ Kategori görselleri güncellendi`)
+  } else {
+    console.log(`   ℹ️ Kategori görselleri zaten güncel`)
   }
 }
 
