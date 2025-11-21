@@ -4,7 +4,7 @@ import { UploadIcon, FolderIcon, CheckmarkIcon, WarningOutlineIcon } from '@sani
 import { useClient } from 'sanity'
 
 interface ProgressItem {
-  type: 'category' | 'designer' | 'product' | 'materialGroup' | 'materialBook'
+  type: 'category' | 'designer' | 'product' | 'project' | 'materialGroup' | 'materialBook'
   name: string
   status: 'pending' | 'uploading' | 'success' | 'error'
   message?: string
@@ -31,6 +31,11 @@ interface ParsedData {
       files: File[]
     }>
   }>
+  projects: Array<{
+    projectId: string
+    projectName: string
+    files: File[]
+  }>
 }
 
 export default function MediaImportTool() {
@@ -39,7 +44,7 @@ export default function MediaImportTool() {
   const [isDragging, setIsDragging] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [progress, setProgress] = useState<ProgressItem[]>([])
-  const [stats, setStats] = useState({ categories: 0, designers: 0, products: 0, images: 0 })
+  const [stats, setStats] = useState({ categories: 0, designers: 0, products: 0, projects: 0, images: 0 })
 
   // Klasör yapısını parse et
   const parseDirectory = useCallback((files: FileList): ParsedData => {
@@ -47,6 +52,7 @@ export default function MediaImportTool() {
     const designerMap = new Map<string, File[]>()
     const productMap = new Map<string, File[]>()
     const materialGroupMap = new Map<string, Map<string, File[]>>()
+    const projectMap = new Map<string, File[]>()
 
     Array.from(files).forEach(file => {
       const path = file.webkitRelativePath || file.name
@@ -142,7 +148,7 @@ export default function MediaImportTool() {
         return lower === 'malzemeler' || lower === 'malzeme'
       })
       
-      if (malzemeIndex !== -1 && parts.length >= malzemeIndex + 4 && isImageFile(file.name)) {
+      if (malzemeIndex !== -1 && parts.length >= malzemeIndex + 4 && isMediaFile(file.name)) {
         const groupName = parts[malzemeIndex + 1]
         const bookName = parts[malzemeIndex + 2]
         
@@ -166,13 +172,36 @@ export default function MediaImportTool() {
           })
         }
       }
+      
+      // projeler/proje-adı/görsel.jpg (büyük/küçük harf duyarsız, Türkçe karakter destekli)
+      const projeIndex = parts.findIndex(p => {
+        const lower = p?.toLowerCase() || ''
+        return lower.includes('proje') || lower.includes('project')
+      })
+      
+      if (projeIndex !== -1 && parts.length >= projeIndex + 3 && isMediaFile(file.name)) {
+        const projectFolder = parts[projeIndex + 1]
+        
+        if (!projectMap.has(projectFolder)) {
+          projectMap.set(projectFolder, [])
+        }
+        projectMap.get(projectFolder)!.push(file)
+        
+        // Debug: İlk proje bulunduğunda
+        if (projectMap.size === 1 && projectMap.get(projectFolder)!.length === 1) {
+          console.log('📁 İlk proje bulundu!', {
+            projectFolder,
+            dosya: file.name
+          })
+        }
+      }
     })
 
     // Map'leri dizilere çevir
     const designers = Array.from(designerMap.entries()).map(([name, files]) => ({
       id: slugify(name),
       name,
-      files: files.filter(f => isImageFile(f.name))
+      files: files.filter(f => isMediaFile(f.name)) // Görsel ve video dosyaları
     }))
 
     const products = Array.from(productMap.entries()).map(([key, files]) => {
@@ -182,7 +211,7 @@ export default function MediaImportTool() {
         categoryName: categories.get(categoryId) || categoryId,
         modelId,
         modelName: modelId.toUpperCase(),
-        files: files.filter(f => isImageFile(f.name))
+        files: files.filter(f => isMediaFile(f.name)) // Görsel ve video dosyaları
       }
     })
 
@@ -190,11 +219,17 @@ export default function MediaImportTool() {
       groupName,
       books: Array.from(booksMap.entries()).map(([bookName, files]) => ({
         bookName,
-        files: files.filter(f => isImageFile(f.name))
+        files: files.filter(f => isMediaFile(f.name)) // Görsel ve video dosyaları
       }))
     }))
 
-    return { categories, designers, products, materialGroups }
+    const projects = Array.from(projectMap.entries()).map(([projectFolder, files]) => ({
+      projectId: slugify(projectFolder),
+      projectName: projectFolder,
+      files: files.filter(f => isMediaFile(f.name)) // Görsel ve video dosyaları
+    }))
+
+    return { categories, designers, products, materialGroups, projects }
   }, [])
 
   // Dosya yükleme handler'ı
@@ -224,10 +259,11 @@ export default function MediaImportTool() {
         }))
       })
       
-      // İstatistikler
-      const totalImages = 
+      // İstatistikler (görsel + video)
+      const totalMedia = 
         data.designers.reduce((sum, d) => sum + d.files.length, 0) +
         data.products.reduce((sum, p) => sum + p.files.length, 0) +
+        data.projects.reduce((sum, p) => sum + p.files.length, 0) +
         data.materialGroups.reduce((sum, g) => 
           sum + g.books.reduce((bookSum, b) => bookSum + b.files.length, 0), 0)
       
@@ -235,15 +271,16 @@ export default function MediaImportTool() {
         categories: data.categories.size,
         designers: data.designers.length,
         products: data.products.length,
-        images: totalImages
+        projects: data.projects.length,
+        images: totalMedia // Görsel + video toplamı
       })
 
-      // Uyarı: Görsel bulunamadıysa
-      if (totalImages === 0) {
+      // Uyarı: Medya bulunamadıysa
+      if (totalMedia === 0) {
         toast.push({
           status: 'warning',
-          title: '⚠️ Görsel bulunamadı!',
-          description: 'Klasörlerin içinde .jpg, .png gibi görsel dosyaları yok. Lütfen görselleri ekleyip tekrar deneyin.'
+          title: '⚠️ Medya bulunamadı!',
+          description: 'Klasörlerin içinde .jpg, .png, .mp4 gibi görsel veya video dosyaları yok. Lütfen medya dosyalarını ekleyip tekrar deneyin.'
         })
         setIsProcessing(false)
         return
@@ -252,17 +289,25 @@ export default function MediaImportTool() {
       const materialSummary = data.materialGroups.length > 0 
         ? `, ${data.materialGroups.length} malzeme grubu` 
         : ''
+      const projectSummary = data.projects.length > 0 
+        ? `, ${data.projects.length} proje` 
+        : ''
       
       toast.push({
         status: 'info',
         title: 'Tarama tamamlandı',
-        description: `${data.categories.size} kategori, ${data.designers.length} tasarımcı, ${data.products.length} ürün${materialSummary} bulundu`
+        description: `${data.categories.size} kategori, ${data.designers.length} tasarımcı, ${data.products.length} ürün${projectSummary}${materialSummary} bulundu`
       })
 
       // Yükleme başlasın mı diye sor
-      const confirmMsg = data.materialGroups.length > 0
-        ? `${data.categories.size} kategori, ${data.designers.length} tasarımcı, ${data.products.length} ürün ve ${data.materialGroups.length} malzeme grubu yüklenecek. Devam edilsin mi?`
-        : `${data.categories.size} kategori, ${data.designers.length} tasarımcı ve ${data.products.length} ürün yüklenecek. Devam edilsin mi?`
+      const parts: string[] = []
+      if (data.categories.size > 0) parts.push(`${data.categories.size} kategori`)
+      if (data.designers.length > 0) parts.push(`${data.designers.length} tasarımcı`)
+      if (data.products.length > 0) parts.push(`${data.products.length} ürün`)
+      if (data.projects.length > 0) parts.push(`${data.projects.length} proje`)
+      if (data.materialGroups.length > 0) parts.push(`${data.materialGroups.length} malzeme grubu`)
+      
+      const confirmMsg = `${parts.join(', ')} yüklenecek. Devam edilsin mi?`
       
       if (confirm(confirmMsg)) {
         await uploadToSanity(data)
@@ -583,6 +628,64 @@ export default function MediaImportTool() {
       }
     }
 
+    // 4. Proje görsellerini eşitle
+    if (data.projects.length > 0) {
+      toast.push({
+        status: 'info',
+        title: 'Projeler kontrol ediliyor...',
+        description: 'CMS\'deki projeler sorgulanıyor'
+      })
+      
+      const existingProjects = await client.fetch(`*[_type == "project"]{ 
+        _id, 
+        "slug": id.current, 
+        "titleTr": title.tr,
+        "titleEn": title.en
+      }`)
+      
+      for (const project of data.projects) {
+        const item: ProgressItem = {
+          type: 'project',
+          name: project.projectName,
+          status: 'uploading'
+        }
+        newProgress.push(item)
+        setProgress([...newProgress])
+        
+        try {
+          // Proje adını normalize et ve karşılaştır
+          const normalizedProjectName = normalizeText(project.projectName)
+          
+          const matchingProject = existingProjects.find((p: any) => {
+            const titleTr = normalizeText(p.titleTr || '')
+            const titleEn = normalizeText(p.titleEn || '')
+            return titleTr === normalizedProjectName || titleEn === normalizedProjectName || p.slug === project.projectId
+          })
+          
+          if (!matchingProject) {
+            item.status = 'error'
+            item.message = `CMS'de bu proje bulunamadı - önce manuel oluşturun`
+            console.log(`   ❌ Proje bulunamadı: ${project.projectName}`)
+            setProgress([...newProgress])
+            continue
+          }
+          
+          console.log(`   📁 Proje bulundu: ${matchingProject.titleTr || matchingProject.titleEn}`)
+          
+          // Proje medyasını eşitle
+          await updateProjectMedia(client, matchingProject._id, project)
+          
+          item.status = 'success'
+          item.message = 'Medya eşitlendi'
+        } catch (error: any) {
+          console.error(`   ❌ Proje hatası: ${project.projectName}`, error)
+          item.status = 'error'
+          item.message = error.message
+        }
+        setProgress([...newProgress])
+      }
+    }
+
     const successCount = newProgress.filter(p => p.status === 'success').length
     const errorCount = newProgress.filter(p => p.status === 'error').length
     
@@ -640,7 +743,7 @@ export default function MediaImportTool() {
             📦 Medya İçe Aktarma
           </Text>
           <Text size={1} muted style={{ marginTop: '0.5rem' }}>
-            Ürün ve tasarımcı görsellerinizi sürükle-bırak yapın veya klasör seçin
+            Ürün, tasarımcı ve proje görsellerinizi sürükle-bırak yapın veya klasör seçin
           </Text>
         </Box>
 
@@ -702,7 +805,8 @@ export default function MediaImportTool() {
                 <Text size={1}>📂 {stats.categories} Kategori</Text>
                 <Text size={1}>👤 {stats.designers} Tasarımcı</Text>
                 <Text size={1}>📦 {stats.products} Ürün</Text>
-                <Text size={1}>🖼️ {stats.images} Görsel</Text>
+                <Text size={1}>📁 {stats.projects} Proje</Text>
+                <Text size={1}>🖼️ {stats.images} Medya (Görsel + Video)</Text>
               </Flex>
             </Stack>
           </Card>
@@ -725,6 +829,7 @@ export default function MediaImportTool() {
                       {item.type === 'category' && '📂'}
                       {item.type === 'designer' && '👤'}
                       {item.type === 'product' && '📦'}
+                      {item.type === 'project' && '📁'}
                       {item.type === 'materialGroup' && '🎨'}
                       {item.type === 'materialBook' && '📚'}
                       {' '}
@@ -758,6 +863,7 @@ export default function MediaImportTool() {
                     {item.type === 'category' && '📂'}
                     {item.type === 'designer' && '👤'}
                     {item.type === 'product' && '📦'}
+                    {item.type === 'project' && '📁'}
                     {item.type === 'materialGroup' && '🎨'}
                     {item.type === 'materialBook' && '📚'}
                     {' '}
@@ -846,6 +952,15 @@ function normalizeText(text: string): string {
 function isImageFile(filename: string): boolean {
   const ext = filename.split('.').pop()?.toLowerCase()
   return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'].includes(ext || '')
+}
+
+function isVideoFile(filename: string): boolean {
+  const ext = filename.split('.').pop()?.toLowerCase()
+  return ['mp4', 'webm', 'mov', 'avi', 'mkv', 'm4v'].includes(ext || '')
+}
+
+function isMediaFile(filename: string): boolean {
+  return isImageFile(filename) || isVideoFile(filename)
 }
 
 async function readDirectory(entry: any): Promise<File[]> {
@@ -957,7 +1072,9 @@ async function checkExistingAssets(client: any, productId: string) {
     mainImageMobile{asset->{_id, originalFilename, sha1hash}},
     alternativeMedia[]{
       ...,
-      image{asset->{_id, originalFilename, sha1hash}}
+      type,
+      image{asset->{_id, originalFilename, sha1hash}},
+      videoFile{asset->{_id, originalFilename, sha1hash}}
     }
   }`, { productId })
   
@@ -972,16 +1089,27 @@ async function checkExistingAssets(client: any, productId: string) {
     if (product.mainImageMobile.asset.sha1hash) existingHashes.add(product.mainImageMobile.asset.sha1hash)
     if (product.mainImageMobile.asset.originalFilename) existingFilenames.add(product.mainImageMobile.asset.originalFilename)
   }
+  
+  // Mevcut alternativeMedia array'ini koru (hem görsel hem video)
+  const existingAlternativeMedia: any[] = []
   if (product?.alternativeMedia) {
     product.alternativeMedia.forEach((item: any) => {
+      // Görsel medya
       if (item?.image?.asset) {
         if (item.image.asset.sha1hash) existingHashes.add(item.image.asset.sha1hash)
         if (item.image.asset.originalFilename) existingFilenames.add(item.image.asset.originalFilename)
+        existingAlternativeMedia.push(item)
+      }
+      // Video medya
+      if (item?.videoFile?.asset) {
+        if (item.videoFile.asset.sha1hash) existingHashes.add(item.videoFile.asset.sha1hash)
+        if (item.videoFile.asset.originalFilename) existingFilenames.add(item.videoFile.asset.originalFilename)
+        existingAlternativeMedia.push(item)
       }
     })
   }
   
-  return { existingHashes, existingFilenames }
+  return { existingHashes, existingFilenames, existingAlternativeMedia }
 }
 
 /**
@@ -1020,94 +1148,521 @@ async function isAssetAlreadyUploaded(
 }
 
 /**
- * Sadece ürün görsellerini günceller (yeni kayıt oluşturmaz)
+ * Ürün görsellerini klasörle eşitler (sync)
+ * - Klasörde olmayan CMS görsellerini siler
+ * - CMS'de olmayan klasör görsellerini ekler
+ * - Her ikisinde de olan görselleri korur
  */
 async function updateProductImages(client: any, productId: string, product: any) {
-  // Mevcut görselleri kontrol et
-  const { existingHashes, existingFilenames } = await checkExistingAssets(client, productId)
+  // Mevcut görselleri kontrol et (mevcut alternativeMedia'yı da al)
+  const { existingHashes, existingFilenames, existingAlternativeMedia } = await checkExistingAssets(client, productId)
   
-  const coverMain = product.files.find((f: File) => f.name.toLowerCase().includes('_kapak') && !f.name.toLowerCase().includes('_mobil'))
-  const coverMobile = product.files.find((f: File) => f.name.toLowerCase().includes('_kapak_mobil'))
-  const regularImages = product.files.filter((f: File) => 
+  // Kapak görselleri sadece görsel olabilir (video olamaz)
+  const coverMain = product.files.find((f: File) => 
+    isImageFile(f.name) && 
+    f.name.toLowerCase().includes('_kapak') && 
+    !f.name.toLowerCase().includes('_mobil')
+  )
+  const coverMobile = product.files.find((f: File) => 
+    isImageFile(f.name) && 
+    f.name.toLowerCase().includes('_kapak_mobil')
+  )
+  // Alternatif medya: hem görsel hem video olabilir
+  const regularMedia = product.files.filter((f: File) => 
     !f.name.toLowerCase().includes('_kapak')
   )
 
   const updates: any = {}
+  let hasChanges = false
 
-  // Ana kapak görseli
+  // ============================================
+  // 1. KAPAK GÖRSELLERİNİ EŞİTLE
+  // ============================================
+  
+  // Ana kapak görseli - Eşitleme mantığı
   if (coverMain) {
-    const alreadyExists = await isAssetAlreadyUploaded(client, coverMain, existingHashes, existingFilenames)
-    if (!alreadyExists) {
-      console.log(`   📸 Ana kapak yükleniyor: ${coverMain.name}`)
+    // Klasörde kapak var - hash kontrolü yap
+    const coverMainHash = await getFileHash(coverMain)
+    const existingMainHash = Array.from(existingHashes).find(h => h === coverMainHash)
+    
+    if (!existingMainHash) {
+      // Klasörde var ama CMS'de yok veya farklı - güncelle
+      console.log(`   📸 Ana kapak güncelleniyor: ${coverMain.name}`)
       const asset = await client.assets.upload('image', coverMain)
       updates.mainImage = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
       existingHashes.add(asset.sha1hash)
       existingFilenames.add(asset.originalFilename)
+      hasChanges = true
+    } else {
+      console.log(`   ✓ Ana kapak zaten eşleşiyor: ${coverMain.name}`)
     }
-  } else if (regularImages.length > 0) {
-    const alreadyExists = await isAssetAlreadyUploaded(client, regularImages[0], existingHashes, existingFilenames)
-    if (!alreadyExists) {
-      console.log(`   ⚠️ Kapak yok, ilk görsel kullanılıyor: ${regularImages[0].name}`)
-      const asset = await client.assets.upload('image', regularImages[0])
-      updates.mainImage = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
-      existingHashes.add(asset.sha1hash)
-      existingFilenames.add(asset.originalFilename)
+  } else {
+    // Kapak görseli yok - ilk görseli (video değil) kapak olarak kullan
+    const firstImage = regularMedia.find(f => isImageFile(f.name))
+    if (firstImage) {
+      const firstImageHash = await getFileHash(firstImage)
+      const existingMainHash = Array.from(existingHashes).find(h => h === firstImageHash)
+      
+      if (!existingMainHash) {
+        console.log(`   ⚠️ Kapak yok, ilk görsel kapak olarak kullanılıyor: ${firstImage.name}`)
+        const asset = await client.assets.upload('image', firstImage)
+        updates.mainImage = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+        existingHashes.add(asset.sha1hash)
+        existingFilenames.add(asset.originalFilename)
+        hasChanges = true
+      }
+    } else {
+      // Klasörde hiç görsel yok - CMS'deki kapak görselini sil (eşitleme)
+      console.log(`   🗑️ Klasörde görsel yok, CMS'deki kapak siliniyor (eşitleme)`)
+      updates.mainImage = null
+      hasChanges = true
     }
   }
 
-  // Mobil kapak görseli
+  // Mobil kapak görseli - Eşitleme mantığı
   if (coverMobile) {
-    const alreadyExists = await isAssetAlreadyUploaded(client, coverMobile, existingHashes, existingFilenames)
-    if (!alreadyExists) {
-      console.log(`   📱 Mobil kapak yükleniyor: ${coverMobile.name}`)
+    // Klasörde mobil kapak var - hash kontrolü yap
+    const coverMobileHash = await getFileHash(coverMobile)
+    const existingMobileHash = Array.from(existingHashes).find(h => h === coverMobileHash)
+    
+    if (!existingMobileHash) {
+      // Klasörde var ama CMS'de yok veya farklı - güncelle
+      console.log(`   📱 Mobil kapak güncelleniyor: ${coverMobile.name}`)
       const asset = await client.assets.upload('image', coverMobile)
       updates.mainImageMobile = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
       existingHashes.add(asset.sha1hash)
       existingFilenames.add(asset.originalFilename)
+      hasChanges = true
+    } else {
+      console.log(`   ✓ Mobil kapak zaten eşleşiyor: ${coverMobile.name}`)
     }
+  } else {
+    // Klasörde mobil kapak yok - CMS'deki mobil kapak görselini sil (eşitleme)
+    console.log(`   🗑️ Klasörde mobil kapak yok, CMS'deki mobil kapak siliniyor (eşitleme)`)
+    updates.mainImageMobile = null
+    hasChanges = true
   }
 
-  // Alternatif görseller (productSimpleMediaItem formatında)
-  const alternativeMediaItems = []
-  const imagesToUpload = coverMain ? regularImages : regularImages.slice(1)
+  // ============================================
+  // 2. ALTERNATİF MEDYAYI EŞİTLE (Görsel + Video)
+  // ============================================
   
-  if (imagesToUpload.length > 0) {
-    console.log(`   🖼️ ${imagesToUpload.length} alternatif görsel kontrol ediliyor...`)
+  // Klasördeki alternatif medyayı hash'le eşleştir
+  // NOT: Kapak görseli olarak kullanılan görseli alternatif medyadan çıkar
+  let mediaToSync: File[] = []
+  if (coverMain) {
+    // Kapak görseli varsa, tüm regularMedia'yı kullan
+    mediaToSync = regularMedia
+  } else {
+    // Kapak yoksa, ilk görsel kapak olarak kullanıldı, alternatif medyadan çıkar
+    const firstImage = regularMedia.find(f => isImageFile(f.name))
+    if (firstImage) {
+      mediaToSync = regularMedia.filter(f => f !== firstImage)
+    } else {
+      mediaToSync = regularMedia
+    }
   }
   
-  for (const img of imagesToUpload) {
+  const folderMediaHashes = new Set<string>()
+  const folderMediaMap = new Map<string, { file: File; isVideo: boolean }>() // hash -> {file, isVideo}
+  
+  console.log(`   🖼️ ${mediaToSync.length} klasör medyası hash'leniyor...`)
+  for (const media of mediaToSync) {
     try {
-      const alreadyExists = await isAssetAlreadyUploaded(client, img, existingHashes, existingFilenames)
-      if (!alreadyExists) {
-        console.log(`   ✅ Yükleniyor: ${img.name}`)
-        const asset = await client.assets.upload('image', img)
-        alternativeMediaItems.push({
-          _type: 'productSimpleMediaItem',
-          _key: asset._id,
-          type: 'image',
-          image: { 
-            _type: 'image', 
-            asset: { _type: 'reference', _ref: asset._id } 
-          }
-        })
+      const hash = await getFileHash(media)
+      folderMediaHashes.add(hash)
+      folderMediaMap.set(hash, { file: media, isVideo: isVideoFile(media.name) })
+    } catch (error) {
+      console.error(`   ❌ Hash hesaplanamadı: ${media.name}`, error)
+    }
+  }
+  
+  // CMS'deki medyanın hash'lerini topla (hem görsel hem video)
+  // NOT: Kapak görsellerinin hash'lerini alternatif medyadan çıkar
+  const cmsMediaHashes = new Set<string>()
+  const cmsMediaMap = new Map<string, any>() // hash -> mediaItem
+  
+  // Mevcut kapak görsellerinin hash'lerini al (bunlar alternatif medyada olmamalı)
+  const coverHashes = new Set<string>()
+  const productData = await client.fetch(`*[_id == $productId][0]{
+    mainImage{asset->{sha1hash}},
+    mainImageMobile{asset->{sha1hash}}
+  }`, { productId })
+  
+  if (productData?.mainImage?.asset?.sha1hash) {
+    coverHashes.add(productData.mainImage.asset.sha1hash)
+  }
+  if (productData?.mainImageMobile?.asset?.sha1hash) {
+    coverHashes.add(productData.mainImageMobile.asset.sha1hash)
+  }
+  
+  // Alternatif medyayı topla (kapak görselleri hariç, hem görsel hem video)
+  for (const mediaItem of existingAlternativeMedia) {
+    let hash: string | null = null
+    // Görsel medya
+    if (mediaItem?.image?.asset?.sha1hash) {
+      hash = mediaItem.image.asset.sha1hash
+    }
+    // Video medya
+    if (mediaItem?.videoFile?.asset?.sha1hash) {
+      hash = mediaItem.videoFile.asset.sha1hash
+    }
+    
+    if (hash && !coverHashes.has(hash)) {
+      // Kapak görseli değilse alternatif medyaya ekle
+      cmsMediaHashes.add(hash)
+      cmsMediaMap.set(hash, mediaItem)
+    }
+  }
+  
+  const imageCount = Array.from(folderMediaMap.values()).filter(m => !m.isVideo).length
+  const videoCount = Array.from(folderMediaMap.values()).filter(m => m.isVideo).length
+  console.log(`   📊 Klasör: ${imageCount} görsel, ${videoCount} video | CMS: ${cmsMediaHashes.size} medya`)
+  
+  // Eşitleme: Klasördeki medyayla CMS'deki medyayı birleştir
+  const syncedAlternativeMedia: any[] = []
+  
+  // 1. Klasördeki medyayı ekle (CMS'de yoksa yükle, varsa koru)
+  for (const [hash, mediaInfo] of folderMediaMap.entries()) {
+    const { file, isVideo } = mediaInfo
+    
+    if (cmsMediaHashes.has(hash)) {
+      // Her ikisinde de var - koru
+      const existingItem = cmsMediaMap.get(hash)
+      syncedAlternativeMedia.push(existingItem)
+      console.log(`   ✓ Korundu: ${file.name} (${isVideo ? 'video' : 'görsel'})`)
+    } else {
+      // Klasörde var ama CMS'de yok - ekle
+      try {
+        if (isVideo) {
+          console.log(`   ✅ Video yükleniyor: ${file.name}`)
+          const asset = await client.assets.upload('file', file) // Video için 'file' tipi
+          syncedAlternativeMedia.push({
+            _type: 'productSimpleMediaItem',
+            _key: asset._id,
+            type: 'video',
+            videoFile: {
+              _type: 'file',
+              asset: {
+                _type: 'reference',
+                _ref: asset._id
+              }
+            }
+          })
+        } else {
+          console.log(`   ✅ Görsel yükleniyor: ${file.name}`)
+          const asset = await client.assets.upload('image', file)
+          syncedAlternativeMedia.push({
+            _type: 'productSimpleMediaItem',
+            _key: asset._id,
+            type: 'image',
+            image: { 
+              _type: 'image', 
+              asset: { _type: 'reference', _ref: asset._id } 
+            }
+          })
+        }
+        hasChanges = true
+      } catch (error) {
+        console.error(`   ❌ Yüklenemedi: ${file.name}`, error)
+      }
+    }
+  }
+  
+  // 2. CMS'de olan ama klasörde olmayan medyayı say (silinecek)
+  const toDelete = Array.from(cmsMediaHashes).filter(hash => !folderMediaHashes.has(hash))
+  if (toDelete.length > 0) {
+    console.log(`   🗑️ ${toDelete.length} medya klasörde yok, CMS'den siliniyor`)
+    hasChanges = true
+  }
+  
+  // Sonuç: Sadece klasördeki görseller kalacak (eşitleme tamamlandı)
+  updates.alternativeMedia = syncedAlternativeMedia
+  
+  // ============================================
+  // 3. GÜNCELLEMELERİ UYGULA
+  // ============================================
+  
+  if (hasChanges || syncedAlternativeMedia.length !== existingAlternativeMedia.length) {
+    await client.patch(productId).set(updates).commit()
+    const added = syncedAlternativeMedia.length - (existingAlternativeMedia.length - toDelete.length)
+    const deleted = toDelete.length
+    const addedText = added > 0 ? `+${added} eklendi` : ''
+    const deletedText = deleted > 0 ? `-${deleted} silindi` : ''
+    const summary = [addedText, deletedText].filter(Boolean).join(' ')
+    console.log(`   ✅ Eşitleme tamamlandı: ${summary} (Toplam: ${syncedAlternativeMedia.length} medya)`)
+  } else {
+    console.log(`   ℹ️ Eşitleme gerekmedi, tüm medya zaten eşleşiyor`)
+  }
+}
+
+/**
+ * Proje medyasını klasörle eşitler (sync)
+ * - Klasörde olmayan CMS medyasını siler
+ * - CMS'de olmayan klasör medyasını ekler
+ * - Her ikisinde de olan medyayı korur
+ * - _kapak.*** dosyası kapak medyası olur
+ */
+async function updateProjectMedia(client: any, projectId: string, project: any) {
+  // Mevcut medyayı kontrol et
+  const projectData = await client.fetch(`*[_id == $projectId][0]{
+    cover{asset->{_id, originalFilename, sha1hash}},
+    coverMobile{asset->{_id, originalFilename, sha1hash}},
+    coverDesktop{asset->{_id, originalFilename, sha1hash}},
+    media[]{
+      ...,
+      type,
+      image{asset->{_id, originalFilename, sha1hash}},
+      imageMobile{asset->{_id, originalFilename, sha1hash}},
+      imageDesktop{asset->{_id, originalFilename, sha1hash}},
+      videoFile{asset->{_id, originalFilename, sha1hash}},
+      videoFileMobile{asset->{_id, originalFilename, sha1hash}},
+      videoFileDesktop{asset->{_id, originalFilename, sha1hash}}
+    }
+  }`, { projectId })
+  
+  const existingHashes = new Set<string>()
+  const existingFilenames = new Set<string>()
+  const existingMedia: any[] = []
+  
+  // Kapak görsellerini hash'le
+  if (projectData?.cover?.asset?.sha1hash) {
+    existingHashes.add(projectData.cover.asset.sha1hash)
+    if (projectData.cover.asset.originalFilename) {
+      existingFilenames.add(projectData.cover.asset.originalFilename)
+    }
+  }
+  if (projectData?.coverMobile?.asset?.sha1hash) {
+    existingHashes.add(projectData.coverMobile.asset.sha1hash)
+  }
+  if (projectData?.coverDesktop?.asset?.sha1hash) {
+    existingHashes.add(projectData.coverDesktop.asset.sha1hash)
+  }
+  
+  // Mevcut medyayı topla
+  if (projectData?.media) {
+    for (const mediaItem of projectData.media) {
+      // Görsel medya
+      if (mediaItem?.image?.asset?.sha1hash) {
+        existingHashes.add(mediaItem.image.asset.sha1hash)
+        if (mediaItem.image.asset.originalFilename) {
+          existingFilenames.add(mediaItem.image.asset.originalFilename)
+        }
+        existingMedia.push(mediaItem)
+      }
+      // Video medya
+      if (mediaItem?.videoFile?.asset?.sha1hash) {
+        existingHashes.add(mediaItem.videoFile.asset.sha1hash)
+        if (mediaItem.videoFile.asset.originalFilename) {
+          existingFilenames.add(mediaItem.videoFile.asset.originalFilename)
+        }
+        existingMedia.push(mediaItem)
+      }
+    }
+  }
+  
+  const updates: any = {}
+  let hasChanges = false
+  
+  // Kapak görseli bul (_kapak.***) - sadece görsel dosyalar
+  const coverFile = project.files.find((f: File) => 
+    isImageFile(f.name) && f.name.toLowerCase().includes('_kapak')
+  )
+  
+  console.log(`   🔍 Proje medya analizi: ${project.files.length} dosya bulundu`)
+  if (coverFile) {
+    console.log(`   📸 Kapak dosyası bulundu: ${coverFile.name}`)
+  } else {
+    console.log(`   ⚠️ Kapak dosyası bulunamadı, ilk görsel aranıyor...`)
+  }
+  
+  // Diğer medya dosyalarını önce tanımla (kapak hariç)
+  let otherMedia: File[] = []
+  if (coverFile) {
+    // Kapak görseli varsa, sadece _kapak içermeyen dosyaları kullan
+    otherMedia = project.files.filter((f: File) => 
+      !f.name.toLowerCase().includes('_kapak')
+    )
+  } else {
+    // Kapak yoksa, tüm dosyaları kullan (kapak seçimi yapılacak)
+    otherMedia = project.files
+  }
+  
+  // Kapak görseli eşitleme
+  if (coverFile) {
+    const coverHash = await getFileHash(coverFile)
+    const existingCoverHash = Array.from(existingHashes).find(h => h === coverHash)
+    
+    if (!existingCoverHash) {
+      console.log(`   📸 Kapak görseli güncelleniyor: ${coverFile.name}`)
+      const asset = await client.assets.upload('image', coverFile)
+      updates.cover = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
+      existingHashes.add(asset.sha1hash)
+      existingFilenames.add(asset.originalFilename)
+      hasChanges = true
+    } else {
+      console.log(`   ✓ Kapak görseli zaten eşleşiyor: ${coverFile.name}`)
+    }
+  } else {
+    // Kapak görseli yok - ilk görseli (video değil) kapak olarak kullan
+    // Önce tüm dosyalardan görsel dosyaları bul
+    const allImages = project.files.filter(f => isImageFile(f.name))
+    
+    console.log(`   🔍 Görsel dosyalar: ${allImages.length} adet (${allImages.map(f => f.name).join(', ')})`)
+    
+    if (allImages.length > 0) {
+      const firstImage = allImages[0]
+      console.log(`   📸 İlk görsel seçildi: ${firstImage.name}`)
+      
+      const firstImageHash = await getFileHash(firstImage)
+      const existingCoverHash = Array.from(existingHashes).find(h => h === firstImageHash)
+      
+      if (!existingCoverHash) {
+        console.log(`   ⚠️ Kapak yok, ilk görsel kapak olarak kullanılıyor: ${firstImage.name}`)
+        const asset = await client.assets.upload('image', firstImage)
+        updates.cover = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } }
         existingHashes.add(asset.sha1hash)
         existingFilenames.add(asset.originalFilename)
+        hasChanges = true
+      } else {
+        console.log(`   ✓ İlk görsel zaten kapak olarak kullanılıyor: ${firstImage.name}`)
+        // Mevcut kapak görseli zaten bu görsel, güncelleme yapmaya gerek yok
       }
-    } catch (error) {
-      console.error(`   ❌ Görsel yüklenemedi: ${img.name}`, error)
+      
+      // İlk görseli alternatif medyadan çıkar
+      otherMedia = otherMedia.filter(f => f !== firstImage)
+      console.log(`   📋 Alternatif medya için ${otherMedia.length} dosya kaldı`)
+    } else {
+      // Klasörde hiç görsel yok - CMS'deki kapak görselini sil (eşitleme)
+      console.log(`   🗑️ Klasörde görsel yok, CMS'deki kapak siliniyor (eşitleme)`)
+      console.log(`   📄 Mevcut dosyalar: ${project.files.map(f => `${f.name} (${isImageFile(f.name) ? 'görsel' : isVideoFile(f.name) ? 'video' : 'diğer'})`).join(', ')}`)
+      updates.cover = null
+      hasChanges = true
     }
   }
-
-  if (alternativeMediaItems.length > 0) {
-    updates.alternativeMedia = alternativeMediaItems
+  
+  // Klasördeki medyayı hash'le
+  const folderMediaHashes = new Set<string>()
+  const folderMediaMap = new Map<string, { file: File; isVideo: boolean }>()
+  
+  console.log(`   🖼️ ${otherMedia.length} klasör medyası hash'leniyor...`)
+  for (const media of otherMedia) {
+    try {
+      const hash = await getFileHash(media)
+      folderMediaHashes.add(hash)
+      folderMediaMap.set(hash, { file: media, isVideo: isVideoFile(media.name) })
+    } catch (error) {
+      console.error(`   ❌ Hash hesaplanamadı: ${media.name}`, error)
+    }
   }
-
-  // Sadece görselleri güncelle
-  if (Object.keys(updates).length > 0) {
-    await client.patch(productId).set(updates).commit()
-    console.log(`   ✅ ${Object.keys(updates).length} alan güncellendi`)
+  
+  // CMS'deki medyanın hash'lerini topla (kapak hariç)
+  const cmsMediaHashes = new Set<string>()
+  const cmsMediaMap = new Map<string, any>()
+  
+  // Kapak hash'lerini çıkar
+  const coverHashes = new Set<string>()
+  if (projectData?.cover?.asset?.sha1hash) {
+    coverHashes.add(projectData.cover.asset.sha1hash)
+  }
+  if (projectData?.coverMobile?.asset?.sha1hash) {
+    coverHashes.add(projectData.coverMobile.asset.sha1hash)
+  }
+  if (projectData?.coverDesktop?.asset?.sha1hash) {
+    coverHashes.add(projectData.coverDesktop.asset.sha1hash)
+  }
+  
+  // Alternatif medyayı topla (kapak görselleri hariç)
+  for (const mediaItem of existingMedia) {
+    let hash: string | null = null
+    if (mediaItem?.image?.asset?.sha1hash) {
+      hash = mediaItem.image.asset.sha1hash
+    }
+    if (mediaItem?.videoFile?.asset?.sha1hash) {
+      hash = mediaItem.videoFile.asset.sha1hash
+    }
+    
+    if (hash && !coverHashes.has(hash)) {
+      cmsMediaHashes.add(hash)
+      cmsMediaMap.set(hash, mediaItem)
+    }
+  }
+  
+  const imageCount = Array.from(folderMediaMap.values()).filter(m => !m.isVideo).length
+  const videoCount = Array.from(folderMediaMap.values()).filter(m => m.isVideo).length
+  console.log(`   📊 Klasör: ${imageCount} görsel, ${videoCount} video | CMS: ${cmsMediaHashes.size} medya`)
+  
+  // Eşitleme: Klasördeki medyayla CMS'deki medyayı birleştir
+  const syncedMedia: any[] = []
+  
+  // 1. Klasördeki medyayı ekle (CMS'de yoksa yükle, varsa koru)
+  for (const [hash, mediaInfo] of folderMediaMap.entries()) {
+    const { file, isVideo } = mediaInfo
+    
+    if (cmsMediaHashes.has(hash)) {
+      // Her ikisinde de var - koru
+      const existingItem = cmsMediaMap.get(hash)
+      syncedMedia.push(existingItem)
+      console.log(`   ✓ Korundu: ${file.name} (${isVideo ? 'video' : 'görsel'})`)
+    } else {
+      // Klasörde var ama CMS'de yok - ekle
+      try {
+        if (isVideo) {
+          console.log(`   ✅ Video yükleniyor: ${file.name}`)
+          const asset = await client.assets.upload('file', file)
+          syncedMedia.push({
+            _type: 'object',
+            _key: asset._id,
+            type: 'video',
+            videoFile: {
+              _type: 'file',
+              asset: {
+                _type: 'reference',
+                _ref: asset._id
+              }
+            }
+          })
+        } else {
+          console.log(`   ✅ Görsel yükleniyor: ${file.name}`)
+          const asset = await client.assets.upload('image', file)
+          syncedMedia.push({
+            _type: 'object',
+            _key: asset._id,
+            type: 'image',
+            image: { 
+              _type: 'image', 
+              asset: { _type: 'reference', _ref: asset._id } 
+            }
+          })
+        }
+        hasChanges = true
+      } catch (error) {
+        console.error(`   ❌ Yüklenemedi: ${file.name}`, error)
+      }
+    }
+  }
+  
+  // 2. CMS'de olan ama klasörde olmayan medyayı say (silinecek)
+  const toDelete = Array.from(cmsMediaHashes).filter(hash => !folderMediaHashes.has(hash))
+  if (toDelete.length > 0) {
+    console.log(`   🗑️ ${toDelete.length} medya klasörde yok, CMS'den siliniyor`)
+    hasChanges = true
+  }
+  
+  // Sonuç: Sadece klasördeki medya kalacak (eşitleme tamamlandı)
+  updates.media = syncedMedia
+  
+  // Güncellemeleri uygula
+  if (hasChanges || syncedMedia.length !== existingMedia.length) {
+    await client.patch(projectId).set(updates).commit()
+    const added = syncedMedia.length - (existingMedia.length - toDelete.length)
+    const deleted = toDelete.length
+    const addedText = added > 0 ? `+${added} eklendi` : ''
+    const deletedText = deleted > 0 ? `-${deleted} silindi` : ''
+    const summary = [addedText, deletedText].filter(Boolean).join(' ')
+    console.log(`   ✅ Eşitleme tamamlandı: ${summary} (Toplam: ${syncedMedia.length} medya)`)
   } else {
-    console.log(`   ℹ️ Tüm görseller zaten mevcut, güncelleme yapılmadı`)
+    console.log(`   ℹ️ Eşitleme gerekmedi, tüm medya zaten eşleşiyor`)
   }
 }
 

@@ -54,9 +54,25 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     onLoad?.();
   };
   
-  const handleError = () => {
-    setHasError(true);
-    onError?.();
+  const handleError = (e?: React.SyntheticEvent<HTMLVideoElement, Event>) => {
+    // ERR_CACHE_OPERATION_NOT_SUPPORTED gibi cache hatalarını görmezden gel
+    // Bu hatalar genellikle tarayıcı cache mekanizmasından kaynaklanır ve video yine de yüklenebilir
+    const videoElement = e?.currentTarget;
+    if (videoElement?.error) {
+      const error = videoElement.error;
+      // Sadece gerçek yükleme hatalarını yakala
+      // MEDIA_ERR_SRC_NOT_SUPPORTED: Video formatı desteklenmiyor veya URL geçersiz
+      if (error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
+        setHasError(true);
+        onError?.();
+        return;
+      }
+      // Diğer hatalar (cache, network vb.) için sessizce devam et
+      // Video yine de yüklenmeye çalışacak veya zaten yüklenmiş olabilir
+      return;
+    }
+    // Error event'i geldi ama error objesi yoksa, muhtemelen cache hatası
+    // Bu durumda video yine de çalışabilir, bu yüzden görmezden gel
   };
   
   // Intersection Observer ile lazy loading
@@ -134,6 +150,33 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     );
   }
 
+  // Video yükleme durumunu kontrol et
+  React.useEffect(() => {
+    if (videoRef.current) {
+      const video = videoRef.current;
+      
+      // Video zaten yüklenmişse (cache'den gelmiş olabilir)
+      if (video.readyState >= 2) {
+        setIsLoaded(true);
+      }
+      
+      // Video yüklendiğinde kontrol et
+      const checkLoaded = () => {
+        if (video.readyState >= 2) {
+          setIsLoaded(true);
+        }
+      };
+      
+      video.addEventListener('loadeddata', checkLoaded);
+      video.addEventListener('canplay', checkLoaded);
+      
+      return () => {
+        video.removeEventListener('loadeddata', checkLoaded);
+        video.removeEventListener('canplay', checkLoaded);
+      };
+    }
+  }, [src, srcMobile, srcDesktop]);
+
   // Art Direction kullanılıyorsa, video src'i dinamik olarak ayarla
   if (useArtDirection) {
     return (
@@ -150,6 +193,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
         className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ${className}`}
         onLoadedData={handleLoadedData}
         onError={handleError}
+        onCanPlay={handleLoadedData}
       >
         {/* Mobil için video source */}
         {srcMobile && (
@@ -178,6 +222,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ${className}`}
       onLoadedData={handleLoadedData}
       onError={handleError}
+      onCanPlay={handleLoadedData}
     />
   );
 };

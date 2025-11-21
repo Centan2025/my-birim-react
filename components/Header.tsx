@@ -316,11 +316,11 @@ export function Header() {
         if (isMobile) {
           // Mobil menü açıksa opacity'yi artır
           if (isMobileMenuOpen) {
-            setHeaderOpacity(0.9);
+            setHeaderOpacity(0.75);
             setIsHeaderVisible(true);
           } else if (isSearchOpen) {
-            // Arama açıldığında arama paneli ile aynı opacity (0.8) - scroll'da değişmesin
-            setHeaderOpacity(0.8);
+            // Arama açıldığında arama paneli ile aynı opacity (0.7) - scroll'da değişmesin
+            setHeaderOpacity(0.7);
             setIsHeaderVisible(true);
           } else {
             // Mobilde: Sayfa en üstteyken (scrollY = 0) şeffaflığı ayarla
@@ -336,9 +336,9 @@ export function Header() {
                   setIsHeaderVisible(true);
                 } else if (heroBrightness > 0.4) {
                   // Görsel beyaza yakın, header'ı daha görünür yap
-                  // Brightness 0.4'ten fazlaysa opacity artır, max 0.9
+                  // Brightness 0.4'ten fazlaysa opacity artır, max 0.75
                   // Daha agresif: 0.4'ten başlayarak opacity artır
-                  const adjustedOpacity = Math.min(0.9, 0.3 + (heroBrightness - 0.4) * 1.5);
+                  const adjustedOpacity = Math.min(0.75, 0.2 + (heroBrightness - 0.4) * 1.2);
                   setHeaderOpacity(adjustedOpacity);
                 } else {
                   // Görsel koyu, header tamamen şeffaf
@@ -353,7 +353,7 @@ export function Header() {
             } else {
               // Scroll yapıldıkça opacity artıyor
               const maxScroll = 200;
-              const opacity = Math.min(0.9, (currentScrollY / maxScroll) * 0.9);
+              const opacity = Math.min(0.75, (currentScrollY / maxScroll) * 0.75);
               setHeaderOpacity(opacity);
 
               // Yukarı kaydırırken (scroll down) menüyü gizle
@@ -386,10 +386,10 @@ export function Header() {
           setLastScrollY(currentScrollY);
 
           const maxScroll = 200;
-          let opacity = 0.2;
+          let opacity = 0.1;
           
           if (currentScrollY > 0) {
-            opacity = Math.min(0.9, 0.2 + (currentScrollY / maxScroll) * 0.7);
+            opacity = Math.min(0.75, 0.1 + (currentScrollY / maxScroll) * 0.65);
           }
           
           setHeaderOpacity(opacity);
@@ -434,11 +434,11 @@ export function Header() {
   useEffect(() => {
     if (isMobile) {
       if (isMobileMenuOpen) {
-        setHeaderOpacity(0.9);
+        setHeaderOpacity(0.75);
         setIsHeaderVisible(true);
       } else if (isSearchOpen) {
-        // Arama açıldığında arama paneli ile aynı opacity (0.8)
-        setHeaderOpacity(0.8);
+        // Arama açıldığında arama paneli ile aynı opacity (0.7)
+        setHeaderOpacity(0.7);
         setIsHeaderVisible(true);
       } else {
         // Menü ve arama kapalıysa, scroll handler opacity'yi ayarlayacak
@@ -658,7 +658,7 @@ export function Header() {
           style={baseStyle}
         >
             {children}
-            <span className="absolute -bottom-2 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
+            <span className="absolute -bottom-1 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
         </span>
       </NavLink>
     );
@@ -733,7 +733,7 @@ export function Header() {
         <div
           className={`overflow-hidden transition-all duration-700 ease-in-out ${isProductsOpen ? 'max-h-[900px]' : isMobileMenuOpen ? 'max-h-[40rem]' : isMobile ? 'max-h-[3.5rem]' : 'max-h-[6rem]'} ${isMobile && headerOpacity <= 0 ? '' : 'backdrop-blur-lg border-b border-white/10'}`}
           style={{
-            backgroundColor: isMobile && headerOpacity <= 0 ? 'transparent' : `rgba(0, 0, 0, ${Math.max(headerOpacity, 0.85)})`,
+            backgroundColor: isMobile && headerOpacity <= 0 ? 'transparent' : `rgba(0, 0, 0, ${Math.max(headerOpacity, 0.6)})`,
             transition: 'background-color 0.2s ease-out, max-height 0.7s ease-in-out',
             backdropFilter: isMobile && headerOpacity <= 0 ? 'none' : 'blur(16px)',
             WebkitBackdropFilter: isMobile && headerOpacity <= 0 ? 'none' : 'blur(16px)',
@@ -768,7 +768,7 @@ export function Header() {
                     >
                         <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase header-nav-text" style={{ fontSize: '0.875rem', fontWeight: 600, letterSpacing: '0.05em', fontFamily: 'inherit', lineHeight: '1.25rem' }}>
                             {t('products')}
-                            <span className={`absolute -bottom-2 left-0 w-full h-[3px] bg-white transition-transform duration-300 ease-out origin-center ${isProductsOpen ? 'scale-x-0 opacity-0' : 'transform scale-x-0 group-hover:scale-x-100'}`}></span>
+                            <span className={`absolute -bottom-1 left-0 w-full h-[3px] bg-white transition-transform duration-300 ease-out origin-center ${isProductsOpen ? 'scale-x-0 opacity-0' : 'transform scale-x-0 group-hover:scale-x-100'}`}></span>
                         </span>
                         <ChevronDownIcon />
                     </Link>
@@ -811,7 +811,7 @@ export function Header() {
                       >
                         <span className="relative inline-block">
                           {langCode.toUpperCase()}
-                          <span className={`absolute -bottom-2 left-0 w-full h-[3px] bg-white transition-transform duration-300 ease-out origin-center ${
+                          <span className={`absolute -bottom-1 left-0 w-full h-[3px] bg-white transition-transform duration-300 ease-out origin-center ${
                             isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
                           }`}></span>
                         </span>
@@ -864,7 +864,7 @@ export function Header() {
                     >
                       <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase">
                         {t(category.name)}
-                        <span className="absolute -bottom-2 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
+                        <span className="absolute -bottom-1 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
                       </span>
                     </NavLink>
                   ))}
@@ -948,7 +948,7 @@ export function Header() {
               >
                 <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase">
                   {t('view_all')}
-                  <span className="absolute -bottom-2 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
+                  <span className="absolute -bottom-1 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
                 </span>
               </NavLink>
             </div>

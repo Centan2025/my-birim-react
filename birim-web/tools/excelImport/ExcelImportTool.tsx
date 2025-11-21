@@ -384,6 +384,67 @@ export function ExcelImportTool() {
     }
   }
 
+  // Proje ekle veya güncelle
+  const upsertProject = async (
+    projectId: string,
+    projectName: string,
+    locationAndDate: string,
+    excerptTr: string,
+    excerptEn: string
+  ): Promise<boolean> => {
+    try {
+      const projectSlug = createSlug(projectId)
+
+      // Mevcut projeyi kontrol et
+      const existingProject = await client.fetch(
+        `*[_type == "project" && id.current == $slug][0]`,
+        {slug: projectSlug}
+      )
+
+      const projectData: any = {
+        _type: 'project',
+        id: {
+          _type: 'slug',
+          current: projectSlug,
+        },
+        title: {
+          tr: projectName.trim(),
+          en: projectName.trim(),
+        },
+      }
+
+      if (locationAndDate) {
+        projectData.date = {
+          tr: locationAndDate.trim(),
+          en: locationAndDate.trim(),
+        }
+      }
+
+      if (excerptTr || excerptEn) {
+        projectData.excerpt = {}
+        if (excerptTr) projectData.excerpt.tr = excerptTr.trim()
+        if (excerptEn) projectData.excerpt.en = excerptEn.trim()
+      }
+
+      if (existingProject) {
+        // Güncelle
+        addLog(`Proje güncelleniyor: ${projectName} (ID: ${projectId})`, 'info')
+        await client.patch(existingProject._id).set(projectData).commit()
+        addLog(`Proje güncellendi: ${projectName}`, 'success')
+      } else {
+        // Yeni proje oluştur
+        addLog(`Yeni proje oluşturuluyor: ${projectName} (ID: ${projectId})`, 'info')
+        await client.create(projectData)
+        addLog(`Proje oluşturuldu: ${projectName}`, 'success')
+      }
+
+      return true
+    } catch (error: any) {
+      addLog(`Proje işleme hatası (${projectName}): ${error.message}`, 'error')
+      return false
+    }
+  }
+
   // Ürün ekle veya güncelle
   const upsertProduct = async (
     productId: string,
@@ -591,6 +652,106 @@ export function ExcelImportTool() {
     return {successCount, errorCount, skippedCount}
   }
 
+  // PROJELER sayfasını işle
+  const processProjectsSheet = async (worksheet: XLSX.WorkSheet): Promise<{
+    successCount: number
+    errorCount: number
+    skippedCount: number
+  }> => {
+    const data = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ''}) as any[][]
+
+    if (data.length < 2) {
+      addLog('PROJELER sayfası en az 2 satır içermelidir (başlık + veri)', 'warning')
+      return {successCount: 0, errorCount: 0, skippedCount: 0}
+    }
+
+    // İlk satırdan sonra yukarıdan aşağıya oku
+    const rows = data.slice(1)
+    let successCount = 0
+    let errorCount = 0
+    let skippedCount = 0
+
+    addLog(`PROJELER sayfası: Toplam ${rows.length} satır bulundu`, 'info')
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i]
+
+      // A sütunu kontrolü: "SON" varsa dur
+      const columnA = String(row[0] || '').trim()
+      if (columnA.toUpperCase() === 'SON') {
+        addLog('PROJELER: "SON" değeri bulundu, işlem durduruldu', 'warning')
+        break
+      }
+
+      // A sütunu kontrolü: "-" varsa atla
+      if (columnA === '-') {
+        skippedCount++
+        continue
+      }
+
+      // Sütunları al
+      const columnB = String(row[1] || '').trim() // ID
+      const columnC = String(row[2] || '').trim() // PROJE ADI
+      const columnD = String(row[3] || '').trim() // YER + TARİH
+      const columnE = String(row[4] || '').trim() // AÇIKLAMA TÜRKÇE
+      const columnF = String(row[5] || '').trim() // AÇIKLAMA İNGİLİZCE
+
+      // ID kontrolü
+      if (!columnB) {
+        addLog(`PROJELER Satır ${i + 2}: ID boş, atlanıyor`, 'error')
+        errorCount++
+        continue
+      }
+
+      // PROJE ADI kontrolü
+      if (!columnC) {
+        addLog(`PROJELER Satır ${i + 2}: PROJE ADI boş, atlanıyor`, 'error')
+        errorCount++
+        continue
+      }
+
+      // ID kontrolü: Aynı ID var mı?
+      const projectSlug = createSlug(columnB)
+      const existingProject = await client.fetch(
+        `*[_type == "project" && id.current == $slug][0]`,
+        {slug: projectSlug}
+      )
+
+      if (existingProject) {
+        const existingName = existingProject.title?.tr || existingProject.title?.en || ''
+        if (existingName !== columnC) {
+          addLog(
+            `PROJELER Satır ${i + 2}: ID "${columnB}" zaten var, ancak AD farklı. Mevcut: "${existingName}", Yeni: "${columnC}". Güncellenecek.`,
+            'warning'
+          )
+        }
+      } else {
+        // Yeni proje, AD kontrolü yap (büyük/küçük harf duyarsız)
+        const existingByName = await client.fetch(
+          `*[_type == "project" && (lower(title.tr) == lower($name) || lower(title.en) == lower($name))][0]`,
+          {name: columnC.trim()}
+        )
+        if (existingByName) {
+          addLog(
+            `PROJELER Satır ${i + 2}: AD "${columnC}" zaten başka bir projede kullanılıyor (ID: ${existingByName.id?.current}). Yine de devam ediliyor.`,
+            'warning'
+          )
+        }
+      }
+
+      // Projeyi ekle/güncelle
+      const success = await upsertProject(columnB, columnC, columnD, columnE, columnF)
+
+      if (success) {
+        successCount++
+      } else {
+        errorCount++
+      }
+    }
+
+    return {successCount, errorCount, skippedCount}
+  }
+
   // TASARIMCILAR sayfasını işle
   const processDesignersSheet = async (worksheet: XLSX.WorkSheet): Promise<{
     successCount: number
@@ -773,6 +934,24 @@ export function ExcelImportTool() {
         addLog('⚠️ Eğer bir ürünün tasarımcısı CMS\'de yoksa, ürün eklenmeyecek ve uyarı verilecek!', 'warning')
       }
 
+      // PROJELER sayfasını kontrol et ve işle
+      const projectsSheetName = workbook.SheetNames.find(
+        (name) => name.toUpperCase().includes('PROJELER') || name.toUpperCase().includes('PROJECT')
+      )
+
+      let projectsResult = {successCount: 0, errorCount: 0, skippedCount: 0}
+      if (projectsSheetName) {
+        addLog(`PROJELER sayfası bulundu: ${projectsSheetName}`, 'info')
+        const projectsWorksheet = workbook.Sheets[projectsSheetName]
+        projectsResult = await processProjectsSheet(projectsWorksheet)
+        addLog(
+          `PROJELER işlemi tamamlandı! Başarılı: ${projectsResult.successCount}, Hata: ${projectsResult.errorCount}, Atlandı: ${projectsResult.skippedCount}`,
+          'success'
+        )
+      } else {
+        addLog('⚠️ PROJELER sayfası bulunamadı, atlanıyor', 'warning')
+      }
+
       // ÜRÜNLER sayfasını kontrol et ve işle (mevcut kod)
       const productsSheetName = workbook.SheetNames.find(
         (name) => name.toUpperCase().includes('ÜRÜNLER') || name.toUpperCase().includes('PRODUCT')
@@ -946,9 +1125,9 @@ export function ExcelImportTool() {
       }
 
       // Toplam sonuçları göster
-      const totalSuccess = materialsResult.successCount + designersResult.successCount + productsResult.successCount
-      const totalError = materialsResult.errorCount + designersResult.errorCount + productsResult.errorCount
-      const totalSkipped = materialsResult.skippedCount + designersResult.skippedCount + productsResult.skippedCount
+      const totalSuccess = materialsResult.successCount + designersResult.successCount + projectsResult.successCount + productsResult.successCount
+      const totalError = materialsResult.errorCount + designersResult.errorCount + projectsResult.errorCount + productsResult.errorCount
+      const totalSkipped = materialsResult.skippedCount + designersResult.skippedCount + projectsResult.skippedCount + productsResult.skippedCount
 
       setStatus({
         success: totalError === 0,
@@ -956,6 +1135,7 @@ export function ExcelImportTool() {
         details: [
           `MALZEMELER - Başarılı: ${materialsResult.successCount}, Hata: ${materialsResult.errorCount}, Atlandı: ${materialsResult.skippedCount}`,
           `TASARIMCILAR - Başarılı: ${designersResult.successCount}, Hata: ${designersResult.errorCount}, Atlandı: ${designersResult.skippedCount}`,
+          `PROJELER - Başarılı: ${projectsResult.successCount}, Hata: ${projectsResult.errorCount}, Atlandı: ${projectsResult.skippedCount}`,
           `ÜRÜNLER - Başarılı: ${productsResult.successCount}, Hata: ${productsResult.errorCount}, Atlandı: ${productsResult.skippedCount}`,
         ],
       })
@@ -1185,6 +1365,17 @@ export function ExcelImportTool() {
           </li>
           <li>
             <strong>TASARIMCILAR Sayfası:</strong> Tasarımcılar eklenir/güncellenir.
+          </li>
+          <li>
+            <strong>PROJELER Sayfası:</strong> Projeler eklenir/güncellenir.
+            <ul style={{marginTop: '0.5rem'}}>
+              <li>A Sütunu: LİSTEYE EKLE - "-" işareti yoksa ekler, "SON" varsa durur</li>
+              <li>B Sütunu: ID - Proje ID'si (kontrol edilir, aynısı varsa güncellenir)</li>
+              <li>C Sütunu: PROJE ADI - Proje başlığı</li>
+              <li>D Sütunu: YER + TARİH - Yer ve tarih bilgisi</li>
+              <li>E Sütunu: AÇIKLAMA TÜRKÇE - Kısa açıklama Türkçe</li>
+              <li>F Sütunu: AÇIKLAMA İNGİLİZCE - Kısa açıklama İngilizce</li>
+            </ul>
           </li>
           <li>
             <strong>ÜRÜNLER Sayfası:</strong> Son olarak işlenir.
