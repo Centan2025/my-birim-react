@@ -65,7 +65,7 @@ export function AboutPage() {
               </div>
             )}
             <div className="relative z-10 text-center px-4">
-                <h1 className="text-4xl md:text-6xl font-light tracking-tighter">{t(content.heroTitle)}</h1>
+                <h1 className="text-4xl md:text-6xl font-light tracking-tighter uppercase">{t(content.heroTitle)}</h1>
                 <p className="mt-4 text-lg md:text-xl text-gray-200 max-w-3xl mx-auto font-light">{t(content.heroSubtitle)}</p>
             </div>
         </div>

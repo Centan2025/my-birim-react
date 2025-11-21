@@ -81,9 +81,6 @@ const MediaModal: React.FC<{
 }> = ({ media, allMedia, currentIndex, isOpen, onClose, onNext, onPrevious }) => {
   if (!isOpen || !media) return null;
 
-  const [isFading, setIsFading] = React.useState(false);
-  const [displayMedia, setDisplayMedia] = React.useState(media);
-
   const getMediaUrl = (m: ContactLocationMedia) => {
     if (m.type === 'image' && m.url) {
       return m.url;
@@ -100,18 +97,7 @@ const MediaModal: React.FC<{
 
   const hasNext = currentIndex < allMedia.length - 1;
   const hasPrevious = currentIndex > 0;
-
-  // Handle media change with fade animation
-  React.useEffect(() => {
-    if (media !== displayMedia) {
-      setIsFading(true);
-      const timer = setTimeout(() => {
-        setDisplayMedia(media);
-        setIsFading(false);
-      }, 200); // Half of transition duration
-      return () => clearTimeout(timer);
-    }
-  }, [media, displayMedia]);
+  const slideCount = allMedia.length || 1;
 
   // Keyboard navigation
   React.useEffect(() => {
@@ -143,11 +129,14 @@ const MediaModal: React.FC<{
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 md:top-4 md:right-4 text-white hover:text-gray-300 transition-colors text-4xl font-light bg-black/70 w-12 h-12 flex items-center justify-center hover:bg-black/90 shadow-lg"
+          className="absolute top-4 right-4 md:top-4 md:right-4 text-white hover:text-gray-300 transition-colors bg-black/70 w-10 h-10 flex items-center justify-center hover:bg-black/90 shadow-lg rounded-full"
           aria-label="Close"
           style={{ zIndex: 101, top: '80px' }}
         >
-          ×
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
         </button>
         
         {/* Previous button */}
@@ -157,11 +146,13 @@ const MediaModal: React.FC<{
               e.stopPropagation();
               onPrevious();
             }}
-            className="absolute left-4 text-white hover:text-gray-300 transition-colors text-4xl font-light bg-black/70 w-12 h-12 flex items-center justify-center hover:bg-black/90 shadow-lg"
+            className="absolute left-4 text-white hover:text-gray-300 transition-colors bg-black/70 w-10 h-10 flex items-center justify-center hover:bg-black/90 shadow-lg rounded-full"
             aria-label="Previous"
             style={{ zIndex: 101 }}
           >
-            ‹
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
           </button>
         )}
         
@@ -172,47 +163,58 @@ const MediaModal: React.FC<{
               e.stopPropagation();
               onNext();
             }}
-            className="absolute right-4 text-white hover:text-gray-300 transition-colors text-4xl font-light bg-black/70 w-12 h-12 flex items-center justify-center hover:bg-black/90 shadow-lg"
+            className="absolute right-4 text-white hover:text-gray-300 transition-colors bg-black/70 w-10 h-10 flex items-center justify-center hover:bg-black/90 shadow-lg rounded-full"
             aria-label="Next"
             style={{ zIndex: 101 }}
           >
-            ›
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
           </button>
         )}
 
-        <div 
-          className={`w-full h-full max-w-7xl max-h-[90vh] transition-opacity duration-[400ms] ${
-            isFading ? 'opacity-0' : 'opacity-100'
-          }`}
-        >
-          {displayMedia.type === 'youtube' ? (
-            <iframe
-              key={`youtube-${currentIndex}`}
-              src={getMediaUrl(displayMedia)}
-              className="w-full h-full"
-              allow="autoplay; encrypted-media; fullscreen"
-              frameBorder="0"
-            />
-          ) : displayMedia.type === 'video' ? (
-            <OptimizedVideo
-              key={`video-${currentIndex}`}
-              src={getMediaUrl(displayMedia)}
-              controls
-              autoPlay
-              className="w-full h-full object-contain"
-              preload="auto"
-              loading="eager"
-            />
-          ) : (
-            <OptimizedImage
-              key={`image-${currentIndex}`}
-              src={getMediaUrl(displayMedia)}
-              alt=""
-              className="w-full h-full object-contain"
-              loading="eager"
-              quality={95}
-            />
-          )}
+        <div className="relative w-full h-full max-w-7xl max-h-[90vh] overflow-hidden">
+          <div
+            className="flex h-full transition-transform duration-300 ease-out"
+            style={{
+              width: `${slideCount * 100}%`,
+              transform: `translateX(calc(-${currentIndex * (100 / slideCount)}%))`,
+            }}
+          >
+            {allMedia.map((m, index) => (
+              <div
+                key={index}
+                className="relative h-full shrink-0 flex items-center justify-center"
+                style={{ width: `${100 / slideCount}%` }}
+              >
+                {m.type === 'youtube' ? (
+                  <iframe
+                    src={getMediaUrl(m)}
+                    className="w-full h-full"
+                    allow="autoplay; encrypted-media; fullscreen"
+                    frameBorder="0"
+                  />
+                ) : m.type === 'video' ? (
+                  <OptimizedVideo
+                    src={getMediaUrl(m)}
+                    controls
+                    autoPlay
+                    className="w-full h-full object-contain"
+                    preload="auto"
+                    loading="eager"
+                  />
+                ) : (
+                  <OptimizedImage
+                    src={getMediaUrl(m)}
+                    alt=""
+                    className="w-full h-full object-contain"
+                    loading="eager"
+                    quality={95}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -308,7 +310,8 @@ export function ContactPage() {
     <div className="bg-gray-100 animate-fade-in-up-subtle">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-light text-gray-600">{t(content.title)}</h1>
+          <h1 className="text-3xl md:text-4xl font-light text-gray-600 uppercase">{t('contact')}</h1>
+          <div className="h-px bg-gray-300 mt-4 w-full"></div>
           <p className="mt-4 text-lg text-gray-500 max-w-3xl mx-auto font-light">{t(content.subtitle)}</p>
         </div>
 
@@ -317,7 +320,8 @@ export function ContactPage() {
              {/* FIX: Refactored to use Object.keys to avoid potential type inference issues with Object.entries in some TypeScript environments. */}
              {Object.keys(locationGroups).map((type) => (
               <div key={type}>
-                <h2 className="text-2xl font-light text-gray-600 mb-6">{type}</h2>
+                <h2 className="text-2xl font-light text-gray-600 mb-2">{type}</h2>
+                <div className="h-px bg-gray-300 mb-6 w-full"></div>
                 <div className="space-y-4">
                   {locationGroups[type].map((loc, index) => <LocationCard 
                     key={index} 

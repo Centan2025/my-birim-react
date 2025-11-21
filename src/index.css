@@ -54,6 +54,36 @@ body {
   animation: fill-line 7s linear;
 }
 
+/* Tüm header menü öğelerinin aynı font boyutunda olmasını garanti et */
+.header-nav-item,
+.header-nav-item.active,
+header nav a.header-nav-item,
+header nav a.header-nav-item.active {
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+}
+
+.header-nav-text,
+header nav a.header-nav-item span.header-nav-text,
+header nav a.header-nav-item.active span.header-nav-text,
+header nav a.header-nav-item .header-nav-text {
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  line-height: 1.25rem !important;
+  display: inline-block !important;
+}
+
+/* React Router NavLink active state override */
+header nav a[class*="active"] .header-nav-text,
+header nav a.active .header-nav-text {
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  line-height: 1.25rem !important;
+}
+
 @media (max-width: 1023px) {
   body {
     overflow-x: hidden !important;

@@ -81,8 +81,8 @@ export function ProductsPage() {
         </div>
         <div className="relative h-full flex items-center justify-center text-center text-white pt-20">
           <div>
-            <h1 className="text-4xl md:text-6xl font-light tracking-tighter" style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}>
-              {category ? t(category.name) : t('all_products')}
+            <h1 className="text-4xl md:text-6xl font-light tracking-tighter uppercase" style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}>
+              {category ? t(category.name) : t('view_all')}
             </h1>
             <p className="mt-4 text-lg max-w-2xl mx-auto font-light" style={{textShadow: '0 1px 3px rgba(0,0,0,0.5)'}}>
               {category ? t(category.subtitle) : t('all_products_subtitle')}
