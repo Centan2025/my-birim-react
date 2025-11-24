@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState} from 'react'
 import {useNavigate, Link} from 'react-router-dom'
 import {useAuth} from '../App'
 import {useTranslation} from '../i18n'
@@ -8,7 +8,6 @@ import {
   validateLoginForm,
   validateRegisterForm,
   getPasswordStrength,
-  type ValidationResult,
 } from '../src/lib/formValidation'
 
 export function LoginPage() {
@@ -246,21 +245,21 @@ export function LoginPage() {
                       value={email}
                       onChange={e => {
                         setEmail(e.target.value)
-                        if (validationErrors.email) {
+                        if (validationErrors['email']) {
                           setValidationErrors(prev => {
                             const newErrors = {...prev}
-                            delete newErrors.email
+                            delete newErrors['email']
                             return newErrors
                           })
                         }
                       }}
                       className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${
-                        validationErrors.email ? 'border-red-500' : 'border-gray-300'
+                        validationErrors['email'] ? 'border-red-500' : 'border-gray-300'
                       }`}
                       placeholder="ornek@email.com"
                     />
-                    {validationErrors.email && (
-                      <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
+                    {validationErrors['email'] && (
+                      <p className="mt-1 text-sm text-red-600">{validationErrors['email']}</p>
                     )}
                   </div>
                   <div>
@@ -279,21 +278,21 @@ export function LoginPage() {
                       value={password}
                       onChange={e => {
                         setPassword(e.target.value)
-                        if (validationErrors.password) {
+                        if (validationErrors['password']) {
                           setValidationErrors(prev => {
                             const newErrors = {...prev}
-                            delete newErrors.password
+                            delete newErrors['password']
                             return newErrors
                           })
                         }
                       }}
                       className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${
-                        validationErrors.password ? 'border-red-500' : 'border-gray-300'
+                        validationErrors['password'] ? 'border-red-500' : 'border-gray-300'
                       }`}
                       placeholder="••••••••"
                     />
-                    {validationErrors.password && (
-                      <p className="mt-1 text-sm text-red-600">{validationErrors.password}</p>
+                    {validationErrors['password'] && (
+                      <p className="mt-1 text-sm text-red-600">{validationErrors['password']}</p>
                     )}
                   </div>
                 </div>
@@ -358,21 +357,21 @@ export function LoginPage() {
                       value={name}
                       onChange={e => {
                         setName(e.target.value)
-                        if (validationErrors.name) {
+                        if (validationErrors['name']) {
                           setValidationErrors(prev => {
                             const newErrors = {...prev}
-                            delete newErrors.name
+                            delete newErrors['name']
                             return newErrors
                           })
                         }
                       }}
                       className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${
-                        validationErrors.name ? 'border-red-500' : 'border-gray-300'
+                        validationErrors['name'] ? 'border-red-500' : 'border-gray-300'
                       }`}
                       placeholder="Adınız Soyadınız"
                     />
-                    {validationErrors.name && (
-                      <p className="mt-1 text-sm text-red-600">{validationErrors.name}</p>
+                    {validationErrors['name'] && (
+                      <p className="mt-1 text-sm text-red-600">{validationErrors['name']}</p>
                     )}
                   </div>
                   <div>
@@ -391,21 +390,21 @@ export function LoginPage() {
                       value={email}
                       onChange={e => {
                         setEmail(e.target.value)
-                        if (validationErrors.email) {
+                        if (validationErrors['email']) {
                           setValidationErrors(prev => {
                             const newErrors = {...prev}
-                            delete newErrors.email
+                            delete newErrors['email']
                             return newErrors
                           })
                         }
                       }}
                       className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${
-                        validationErrors.email ? 'border-red-500' : 'border-gray-300'
+                        validationErrors['email'] ? 'border-red-500' : 'border-gray-300'
                       }`}
                       placeholder="ornek@email.com"
                     />
-                    {validationErrors.email && (
-                      <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
+                    {validationErrors['email'] && (
+                      <p className="mt-1 text-sm text-red-600">{validationErrors['email']}</p>
                     )}
                   </div>
                   <div>
@@ -427,21 +426,21 @@ export function LoginPage() {
                           const newPassword = e.target.value
                           setPassword(newPassword)
                           setPasswordStrength(newPassword ? getPasswordStrength(newPassword) : null)
-                          if (validationErrors.password) {
+                          if (validationErrors['password']) {
                             setValidationErrors(prev => {
                               const newErrors = {...prev}
-                              delete newErrors.password
+                              delete newErrors['password']
                               return newErrors
                             })
                           }
                         }}
                         className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${
-                          validationErrors.password ? 'border-red-500' : 'border-gray-300'
+                          validationErrors['password'] ? 'border-red-500' : 'border-gray-300'
                         }`}
                         placeholder="••••••••"
                       />
-                      {validationErrors.password && (
-                        <p className="mt-1 text-sm text-red-600">{validationErrors.password}</p>
+                      {validationErrors['password'] && (
+                        <p className="mt-1 text-sm text-red-600">{validationErrors['password']}</p>
                       )}
                       {password && passwordStrength && (
                         <div className="mt-2">
@@ -495,21 +494,21 @@ export function LoginPage() {
                       value={company}
                       onChange={e => {
                         setCompany(e.target.value)
-                        if (validationErrors.company) {
+                        if (validationErrors['company']) {
                           setValidationErrors(prev => {
                             const newErrors = {...prev}
-                            delete newErrors.company
+                            delete newErrors['company']
                             return newErrors
                           })
                         }
                       }}
                       className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${
-                        validationErrors.company ? 'border-red-500' : 'border-gray-300'
+                        validationErrors['company'] ? 'border-red-500' : 'border-gray-300'
                       }`}
                       placeholder="Firma Adı"
                     />
-                    {validationErrors.company && (
-                      <p className="mt-1 text-sm text-red-600">{validationErrors.company}</p>
+                    {validationErrors['company'] && (
+                      <p className="mt-1 text-sm text-red-600">{validationErrors['company']}</p>
                     )}
                   </div>
                   <div>
@@ -527,21 +526,21 @@ export function LoginPage() {
                       value={profession}
                       onChange={e => {
                         setProfession(e.target.value)
-                        if (validationErrors.profession) {
+                        if (validationErrors['profession']) {
                           setValidationErrors(prev => {
                             const newErrors = {...prev}
-                            delete newErrors.profession
+                            delete newErrors['profession']
                             return newErrors
                           })
                         }
                       }}
                       className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${
-                        validationErrors.profession ? 'border-red-500' : 'border-gray-300'
+                        validationErrors['profession'] ? 'border-red-500' : 'border-gray-300'
                       }`}
                       placeholder="Mesleğiniz"
                     />
-                    {validationErrors.profession && (
-                      <p className="mt-1 text-sm text-red-600">{validationErrors.profession}</p>
+                    {validationErrors['profession'] && (
+                      <p className="mt-1 text-sm text-red-600">{validationErrors['profession']}</p>
                     )}
                   </div>
                 </div>

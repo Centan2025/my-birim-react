@@ -9,7 +9,7 @@
 import {writeFileSync} from 'fs'
 import {join} from 'path'
 
-const SITE_URL = process.env.VITE_SITE_URL || 'https://yourdomain.com'
+const SITE_URL = process.env['VITE_SITE_URL'] || 'https://yourdomain.com'
 const SITEMAP_URL = `${SITE_URL}/sitemap.xml`
 
 const robotsContent = `User-agent: *

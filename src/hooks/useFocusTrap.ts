@@ -20,6 +20,8 @@ export function useFocusTrap(isActive: boolean) {
     const firstElement = focusableElements[0]
     const lastElement = focusableElements[focusableElements.length - 1]
 
+    if (!firstElement || !lastElement) return
+
     // Focus first element when trap activates
     firstElement.focus()
 

@@ -76,9 +76,9 @@ const toFileUrl = (asset: any): string => {
 
 // --- Sanity runtime setup (auto enable if env present) ---
 // Prefer env vars; if missing, fall back to known defaults
-const SANITY_PROJECT_ID = import.meta.env.VITE_SANITY_PROJECT_ID || 'wn3a082f'
-const SANITY_DATASET = import.meta.env.VITE_SANITY_DATASET || 'production'
-const SANITY_API_VERSION = import.meta.env.VITE_SANITY_API_VERSION || '2025-01-01'
+const SANITY_PROJECT_ID = import.meta.env['VITE_SANITY_PROJECT_ID'] || 'wn3a082f'
+const SANITY_DATASET = import.meta.env['VITE_SANITY_DATASET'] || 'production'
+const SANITY_API_VERSION = import.meta.env['VITE_SANITY_API_VERSION'] || '2025-01-01'
 const useSanity = Boolean(SANITY_PROJECT_ID && SANITY_DATASET)
 
 // Prod'da varsayılan davranış: local fallback kapalı.
@@ -99,7 +99,7 @@ const sanity = useSanity
   : null
 
 // Mutations için authenticated client (token varsa)
-const SANITY_TOKEN = import.meta.env.VITE_SANITY_TOKEN || ''
+const SANITY_TOKEN = import.meta.env['VITE_SANITY_TOKEN'] || ''
 const sanityMutations =
   useSanity && SANITY_TOKEN
     ? createClient({
@@ -353,7 +353,7 @@ try {
     get length() {
       return Object.keys(memoryStore).length
     },
-    key: (index: number) => Object.keys(memoryStore)[index],
+    key: (index: number) => Object.keys(memoryStore)[index] || null,
   }
 }
 
@@ -435,8 +435,8 @@ export const getTranslations = async (): Promise<Record<string, Record<string, s
           if (item.language && item.strings) {
             const normalized: Record<string, string> = {...item.strings}
             // Şema alanı 'models_3d' ise, frontend anahtarı '3d_models' bekliyor -> eşle
-            if (normalized.models_3d && !normalized['3d_models']) {
-              normalized['3d_models'] = normalized.models_3d
+            if (normalized['models_3d'] && !normalized['3d_models']) {
+              normalized['3d_models'] = normalized['models_3d']
             }
             // Aynı dil daha önce eklenmişse atla (ilk gelen en günceldir)
             if (!translationsMap[item.language]) {
@@ -1675,13 +1675,13 @@ export const registerUser = async (
 
           return {
             _id: updatedUser._id,
-            email: updatedUser.email,
-            name: updatedUser.name,
-            company: updatedUser.company,
-            profession: updatedUser.profession,
-            userType: updatedUser.userType as UserType,
-            isActive: updatedUser.isActive,
-            createdAt: updatedUser.createdAt || updatedUser._createdAt,
+            email: updatedUser['email'],
+            name: updatedUser['name'],
+            company: updatedUser['company'],
+            profession: updatedUser['profession'],
+            userType: updatedUser['userType'] as UserType,
+            isActive: updatedUser['isActive'],
+            createdAt: updatedUser['createdAt'] || updatedUser._createdAt,
           }
         } catch (error: any) {
           // Sanity hatası varsa hatayı fırlat (local storage'a düşme)

@@ -16,7 +16,7 @@ interface SitemapUrl {
   priority?: number
 }
 
-const BASE_URL = process.env.VITE_SITE_URL || 'https://yourdomain.com'
+const BASE_URL = process.env['VITE_SITE_URL'] || 'https://yourdomain.com'
 
 // Statik sayfalar
 // Not: HashRouter kullanıldığı için URL'lerde # kullanılmıyor (sitemap için)
