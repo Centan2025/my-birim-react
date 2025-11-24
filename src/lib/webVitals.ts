@@ -23,7 +23,7 @@ function handleMetric(metric: Metric, config: WebVitalsConfig = {}) {
   const {name, value, rating, delta, id} = metric
 
   // Debug mode
-  if (config.debug || import.meta.env.DEV) {
+  if (config.debug || (import.meta.env.DEV as boolean | undefined)) {
     console.log(`[Web Vitals] ${name}:`, {
       value: value.toFixed(2),
       rating,
@@ -75,7 +75,7 @@ function handleMetric(metric: Metric, config: WebVitalsConfig = {}) {
  */
 export function initWebVitals(config: WebVitalsConfig = {}) {
   // Production'da veya açıkça aktif edilmişse çalıştır
-  if (!import.meta.env.PROD && !config.debug) {
+  if (!(import.meta.env.PROD as boolean | undefined) && !config.debug) {
     return
   }
 
@@ -98,7 +98,7 @@ export function initWebVitals(config: WebVitalsConfig = {}) {
     // Interaction to Next Paint (INP) - FID'in yerine geçer
     onINP(metric => handleMetric(metric, config))
 
-    if (config.debug || import.meta.env.DEV) {
+    if (config.debug || (import.meta.env.DEV as boolean | undefined)) {
       console.log('[Web Vitals] Monitoring initialized')
     }
   } catch (error) {
