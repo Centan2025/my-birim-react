@@ -7,7 +7,7 @@ import {SiteLogo} from './SiteLogo'
 import {useTranslation} from '../i18n'
 import {useCart} from '../context/CartContext'
 import {useCategories} from '../src/hooks/useCategories'
-import {useProducts, useProductsByCategory} from '../src/hooks/useProducts'
+import {useProductsByCategory} from '../src/hooks/useProducts'
 import {useFocusTrap} from '../src/hooks/useFocusTrap'
 
 const UserIcon = () => (
@@ -337,9 +337,11 @@ export function Header() {
           const g = data[i + 1]
           const b = data[i + 2]
           // Luminance formülü: 0.299*R + 0.587*G + 0.114*B
-          const brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-          totalBrightness += brightness
-          pixelCount++
+          if (r !== undefined && g !== undefined && b !== undefined) {
+            const brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+            totalBrightness += brightness
+            pixelCount++
+          }
         }
 
         // Route değiştiyse sonucu kaydetme
@@ -1121,7 +1123,7 @@ export function Header() {
                           product.alternativeMedia.length > 0
                         ) {
                           const firstAlt = product.alternativeMedia[0]
-                          if (firstAlt.type === 'image' && firstAlt.url) {
+                          if (firstAlt && firstAlt.type === 'image' && firstAlt.url) {
                             tempImageUrl = firstAlt.url
                           }
                         }
@@ -1179,9 +1181,9 @@ export function Header() {
           {isMobileMenuOpen && (
             <div
               ref={node => {
-                mobileMenuRef.current = node
                 if (node) {
-                  mobileMenuFocusTrap.current = node
+                  ;(mobileMenuRef as React.MutableRefObject<HTMLDivElement | null>).current = node
+                  ;(mobileMenuFocusTrap as React.MutableRefObject<HTMLElement | null>).current = node
                 }
               }}
               id="mobile-menu"

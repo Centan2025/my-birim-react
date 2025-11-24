@@ -97,6 +97,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
 
       return () => observer.disconnect()
     }
+    return undefined
   }, [loading, preload])
 
   // Art Direction: srcMobile veya srcDesktop varsa kullan, yoksa src'i kullan
@@ -140,6 +141,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       window.addEventListener('resize', updatePoster)
       return () => window.removeEventListener('resize', updatePoster)
     }
+    return undefined
   }, [posterMobile, posterDesktop, poster])
 
   // Video yükleme durumunu kontrol et
@@ -167,6 +169,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
         video.removeEventListener('canplay', checkLoaded)
       }
     }
+    return undefined
   }, [src, srcMobile, srcDesktop])
 
   if (hasError) {

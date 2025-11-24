@@ -33,10 +33,10 @@ const getInitialLocale = (locales: string[]): Locale => {
     return savedLocale
   }
   const browserLang = navigator.language.split('-')[0]
-  if (locales.includes(browserLang)) {
-    return browserLang
+  if (browserLang && locales.includes(browserLang)) {
+    return browserLang as Locale
   }
-  return locales[0]
+  return locales[0] as Locale
 }
 
 export const I18nProvider = ({children}: PropsWithChildren) => {
@@ -84,7 +84,7 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
         // Try CMS translations first, then fallback to base translations
         const cmsTranslation = cmsTranslations[locale]?.[keyOrObject]
         const baseTranslation =
-          baseTranslations[locale]?.[keyOrObject] || baseTranslations.tr?.[keyOrObject]
+          baseTranslations[locale]?.[keyOrObject] || baseTranslations['tr']?.[keyOrObject]
         let translation = cmsTranslation || baseTranslation || keyOrObject
         if (args.length > 0) {
           args.forEach((arg, index) => {

@@ -588,11 +588,11 @@ const AppContent = () => {
   // Production'da aktif olabilir, ancak ?bypass=secret ile bypass edilebilir
   const {settings} = useSiteSettings()
   const maintenanceModeFromCMS = settings?.maintenanceMode ?? false
-  const maintenanceModeFromEnv = import.meta.env.VITE_MAINTENANCE_MODE === 'true'
+  const maintenanceModeFromEnv = import.meta.env['VITE_MAINTENANCE_MODE'] === 'true'
   const maintenanceModeEnabled = maintenanceModeFromCMS || maintenanceModeFromEnv
 
   const isProduction = import.meta.env.PROD
-  const bypassSecret = import.meta.env.VITE_MAINTENANCE_BYPASS_SECRET || 'dev-bypass-2024'
+  const bypassSecret = import.meta.env['VITE_MAINTENANCE_BYPASS_SECRET'] || 'dev-bypass-2024'
 
   // HashRouter'da query parameter hem hash'ten önce hem de hash içinde olabilir
   const searchParams = new URLSearchParams(window.location.search)
