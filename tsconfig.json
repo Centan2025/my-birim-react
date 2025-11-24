@@ -13,20 +13,18 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["vite/client"] ,
+    "types": ["vite/client"],
 
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true
   },
   "include": ["."],
-  "exclude": [
-    "vite.config.ts",
-    "birim-web/**",
-    "birrim-web/**",
-    "birim-web-1/**"
-  ],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "exclude": ["vite.config.ts", "birim-web/**", "birrim-web/**", "birim-web-1/**"],
+  "references": [{"path": "./tsconfig.node.json"}]
 }

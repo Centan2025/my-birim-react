@@ -9,30 +9,33 @@ export function CategoryProductsView(props: any) {
   const client = useClient({apiVersion: '2024-01-01'})
   const categoryId = props.document.displayed._id
   const router = useRouter()
-  
+
   useEffect(() => {
     // Draft ve published versiyonlar için ID'leri hazırla
     const cleanId = categoryId.replace('drafts.', '')
     const draftId = `drafts.${cleanId}`
-    
+
     const query = `*[_type == "product" && (category._ref == $categoryId || category._ref == $draftId || category._ref == $cleanId)] | order(name.tr asc) {
       _id,
       name,
       "imageUrl": mainImage.asset->url
     }`
-    client.fetch(query, {categoryId, draftId, cleanId}).then((data: any) => {
-      setProducts(data)
-      setLoading(false)
-    }).catch((err: any) => {
-      console.error('Error fetching products:', err)
-      setLoading(false)
-    })
+    client
+      .fetch(query, {categoryId, draftId, cleanId})
+      .then((data: any) => {
+        setProducts(data)
+        setLoading(false)
+      })
+      .catch((err: any) => {
+        console.error('Error fetching products:', err)
+        setLoading(false)
+      })
   }, [categoryId, client])
-  
+
   const handleProductClick = (productId: string) => {
     router.navigateIntent('edit', {id: productId, type: 'product'})
   }
-  
+
   if (loading) {
     return (
       <Card padding={4} style={{minHeight: '400px'}}>
@@ -42,7 +45,7 @@ export function CategoryProductsView(props: any) {
       </Card>
     )
   }
-  
+
   return (
     <Card padding={4} style={{minHeight: '400px', maxWidth: '800px', margin: '0 auto'}}>
       <Stack space={4}>
@@ -55,7 +58,7 @@ export function CategoryProductsView(props: any) {
         {products.length === 0 ? (
           <Card padding={4} tone="transparent" border radius={2}>
             <Text align="center" muted size={2}>
-              Bu kategoriye henüz model eklenmemiş. 
+              Bu kategoriye henüz model eklenmemiş.
               <br />
               Yeni model eklemek için sol menüden "Tüm Modeller" bölümüne gidin.
             </Text>
@@ -77,7 +80,7 @@ export function CategoryProductsView(props: any) {
                   border: 'none',
                   width: '100%',
                   transition: 'all 0.2s',
-                  background: 'var(--card-bg-color)'
+                  background: 'var(--card-bg-color)',
                 }}
               >
                 <Flex align="center" gap={3}>
@@ -89,7 +92,7 @@ export function CategoryProductsView(props: any) {
                         overflow: 'hidden',
                         borderRadius: '4px',
                         flexShrink: 0,
-                        backgroundColor: '#f1f3f4'
+                        backgroundColor: '#f1f3f4',
                       }}
                     >
                       <img
@@ -98,7 +101,7 @@ export function CategoryProductsView(props: any) {
                         style={{
                           width: '100%',
                           height: '100%',
-                          objectFit: 'cover'
+                          objectFit: 'cover',
                         }}
                       />
                     </Box>
@@ -112,7 +115,7 @@ export function CategoryProductsView(props: any) {
                         backgroundColor: '#e0e0e0',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
                       }}
                     >
                       <Text>📦</Text>
@@ -128,7 +131,9 @@ export function CategoryProductsView(props: any) {
                       </Text>
                     )}
                   </Stack>
-                  <Text size={1} muted>→</Text>
+                  <Text size={1} muted>
+                    →
+                  </Text>
                 </Flex>
               </Card>
             ))}
@@ -138,5 +143,3 @@ export function CategoryProductsView(props: any) {
     </Card>
   )
 }
-
-

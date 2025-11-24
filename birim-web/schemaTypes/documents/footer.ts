@@ -18,7 +18,8 @@ export default defineType({
       title: 'Partner İsimleri (Eski Format)',
       type: 'array',
       of: [{type: 'string'}],
-      description: 'Eski format - kullanımdan kaldırıldı. Lütfen yukarıdaki "Partnerler" alanını kullanın.',
+      description:
+        'Eski format - kullanımdan kaldırıldı. Lütfen yukarıdaki "Partnerler" alanını kullanın.',
       hidden: true, // Gizli tutuyoruz ama schema'da var olması gerekiyor
     }),
     defineField({
@@ -38,7 +39,8 @@ export default defineType({
       title: 'Yasal Bağlantılar',
       type: 'array',
       of: [{type: 'legalLink'}],
-      description: 'Şirket Bilgileri, Gizlilik Politikası, Çerez Politikası, Yasal Bilgiler gibi linkler',
+      description:
+        'Şirket Bilgileri, Gizlilik Politikası, Çerez Politikası, Yasal Bilgiler gibi linkler',
     }),
   ],
   preview: {
@@ -47,6 +49,3 @@ export default defineType({
     },
   },
 })
-
-
-

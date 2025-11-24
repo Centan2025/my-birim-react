@@ -3,7 +3,7 @@
  * Uygulama başlangıcında environment variable'ları validate eder
  */
 
-import {z} from 'zod'
+import {z, type ZodError} from 'zod'
 
 /**
  * Environment variable schema
@@ -23,7 +23,7 @@ const envSchema = z.object({
   VITE_PLAUSIBLE_DOMAIN: z.string().optional(),
   VITE_ENABLE_ANALYTICS: z
     .string()
-    .transform(val => val === 'true')
+    .transform((val: string) => val === 'true')
     .optional()
     .default('true'),
 
@@ -31,7 +31,7 @@ const envSchema = z.object({
   VITE_SITE_URL: z.string().url().optional(),
   VITE_MAINTENANCE_MODE: z
     .string()
-    .transform(val => val === 'true')
+    .transform((val: string) => val === 'true')
     .optional()
     .default('false'),
   VITE_MAINTENANCE_BYPASS_SECRET: z.string().optional(),
@@ -39,7 +39,7 @@ const envSchema = z.object({
   // Feature Flags
   VITE_ENABLE_LOCAL_FALLBACK: z
     .string()
-    .transform(val => val === 'true')
+    .transform((val: string) => val === 'true')
     .optional()
     .default('false'),
 
@@ -47,11 +47,11 @@ const envSchema = z.object({
   MODE: z.string().optional(),
   PROD: z
     .string()
-    .transform(val => val === 'true')
+    .transform((val: string) => val === 'true')
     .optional(),
   DEV: z
     .string()
-    .transform(val => val === 'true')
+    .transform((val: string) => val === 'true')
     .optional(),
 })
 

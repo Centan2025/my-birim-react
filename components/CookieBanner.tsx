@@ -1,26 +1,31 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import {useEffect, useState} from 'react'
+import {Link} from 'react-router-dom'
 
-const STORAGE_KEY = 'cookie_consent_v1';
+const STORAGE_KEY = 'cookie_consent_v1'
 
 export default function CookieBanner() {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(false)
 
   useEffect(() => {
     try {
-      const v = localStorage.getItem(STORAGE_KEY);
-      setVisible(!v);
+      const v = localStorage.getItem(STORAGE_KEY)
+      setVisible(!v)
     } catch {
-      setVisible(true);
+      setVisible(true)
     }
-  }, []);
+  }, [])
 
   const acceptAll = () => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ all: true, ts: Date.now() })); } catch {}
-    setVisible(false);
-  };
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({all: true, ts: Date.now()}))
+    } catch (error) {
+      // localStorage erişilemiyorsa sessizce devam et
+      console.warn('localStorage erişilemedi:', error)
+    }
+    setVisible(false)
+  }
 
-  if (!visible) return null;
+  if (!visible) return null
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-[60]">
@@ -52,7 +57,5 @@ export default function CookieBanner() {
         </div>
       </div>
     </div>
-  );
+  )
 }
-
-

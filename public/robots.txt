@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+# Not: Gerçek domain ile değiştirin veya environment variable kullanın
+Sitemap: https://yourdomain.com/sitemap.xml
+
+

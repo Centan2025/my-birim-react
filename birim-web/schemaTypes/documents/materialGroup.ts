@@ -5,18 +5,23 @@ export default defineType({
   title: 'Malzeme Grubu',
   type: 'document',
   fields: [
-    defineField({ name: 'title', title: 'Grup Adı', type: 'localizedString', validation: (Rule) => Rule.required() }),
+    defineField({
+      name: 'title',
+      title: 'Grup Adı',
+      type: 'localizedString',
+      validation: (Rule) => Rule.required(),
+    }),
     defineField({
       name: 'books',
       title: 'Kartelalar',
       type: 'array',
-      of: [{ type: 'materialSwatchBook' }],
+      of: [{type: 'materialSwatchBook'}],
     }),
   ],
   preview: {
-    select: { title: 'title.tr' },
-    prepare({ title }) { return { title: title || 'Malzeme Grubu' } },
+    select: {title: 'title.tr'},
+    prepare({title}) {
+      return {title: title || 'Malzeme Grubu'}
+    },
   },
 })
-
-

@@ -36,21 +36,24 @@ export default defineType({
           title: 'Arka Plan Görseli (Tüm Cihazlar)',
           type: 'image',
           options: {hotspot: true},
-          description: 'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+          description:
+            'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
         }),
         defineField({
           name: 'backgroundImageMobile',
           title: 'Arka Plan Görseli (Mobil)',
           type: 'image',
           options: {hotspot: true},
-          description: 'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+          description:
+            'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
         }),
         defineField({
           name: 'backgroundImageDesktop',
           title: 'Arka Plan Görseli (Desktop)',
           type: 'image',
           options: {hotspot: true},
-          description: 'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+          description:
+            'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
         }),
         defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
         defineField({name: 'subtitle', title: 'Alt Başlık', type: 'localizedString'}),
@@ -65,6 +68,3 @@ export default defineType({
     },
   },
 })
-
-
-

@@ -6,5 +6,3 @@ export const sanityClient = createClient({
   apiVersion: import.meta.env.VITE_SANITY_API_VERSION || '2025-01-01',
   useCdn: true,
 })
-
-

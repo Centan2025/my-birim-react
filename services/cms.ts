@@ -1,44 +1,64 @@
-import type { SiteSettings, Category, Designer, Product, AboutPageContent, ContactPageContent, HomePageContent, FooterContent, NewsItem, ProductMaterial, Project, LocalizedString, User, UserType, CookiesPolicy, PrivacyPolicy, TermsOfService, KvkkPolicy } from '../types';
-import { createClient } from '@sanity/client'
+import type {
+  SiteSettings,
+  Category,
+  Designer,
+  Product,
+  AboutPageContent,
+  ContactPageContent,
+  HomePageContent,
+  FooterContent,
+  NewsItem,
+  ProductMaterial,
+  Project,
+  LocalizedString,
+  User,
+  UserType,
+  CookiesPolicy,
+  PrivacyPolicy,
+  TermsOfService,
+  KvkkPolicy,
+} from '../types'
+import {createClient} from '@sanity/client'
 import groq from 'groq'
 import imageUrlBuilder from '@sanity/image-url'
+import bcrypt from 'bcryptjs'
 
-const SIMULATED_DELAY = 200;
+const SIMULATED_DELAY = 200
 
 // Local storage keys (fallback için)
 const KEYS = {
-    SITE_SETTINGS: 'birim_site_settings',
-    CATEGORIES: 'birim_categories',
-    DESIGNERS: 'birim_designers',
-    PRODUCTS: 'birim_products',
-    USERS: 'birim_users',
-    HOME_PAGE: 'birim_home_page',
-    ABOUT_PAGE: 'birim_about_page',
-    CONTACT_PAGE: 'birim_contact_page',
-    FOOTER: 'birim_footer',
-    NEWS: 'birim_news',
-    LANGUAGES: 'birim_languages',
-};
+  SITE_SETTINGS: 'birim_site_settings',
+  CATEGORIES: 'birim_categories',
+  DESIGNERS: 'birim_designers',
+  PRODUCTS: 'birim_products',
+  USERS: 'birim_users',
+  HOME_PAGE: 'birim_home_page',
+  ABOUT_PAGE: 'birim_about_page',
+  CONTACT_PAGE: 'birim_contact_page',
+  FOOTER: 'birim_footer',
+  NEWS: 'birim_news',
+  LANGUAGES: 'birim_languages',
+}
 
 // Empty fallback data (artık Sanity kullanıyoruz)
 const initialData: any = {
-    [KEYS.SITE_SETTINGS]: {},
-    [KEYS.CATEGORIES]: [],
-    [KEYS.DESIGNERS]: [],
-    [KEYS.PRODUCTS]: [],
-    [KEYS.USERS]: [],
-    [KEYS.HOME_PAGE]: {},
-    [KEYS.ABOUT_PAGE]: {},
-    [KEYS.CONTACT_PAGE]: {},
-    [KEYS.FOOTER]: {},
-    [KEYS.NEWS]: [],
-    [KEYS.LANGUAGES]: ['tr', 'en'],
-};
+  [KEYS.SITE_SETTINGS]: {},
+  [KEYS.CATEGORIES]: [],
+  [KEYS.DESIGNERS]: [],
+  [KEYS.PRODUCTS]: [],
+  [KEYS.USERS]: [],
+  [KEYS.HOME_PAGE]: {},
+  [KEYS.ABOUT_PAGE]: {},
+  [KEYS.CONTACT_PAGE]: {},
+  [KEYS.FOOTER]: {},
+  [KEYS.NEWS]: [],
+  [KEYS.LANGUAGES]: ['tr', 'en'],
+}
 
-const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+const delay = (ms: number) => new Promise(res => setTimeout(res, ms))
 
 // Email'leri tekilleştirmek için normalize et (trim + lowercase)
-const normalizeEmail = (value: string): string => (value || '').trim().toLowerCase();
+const normalizeEmail = (value: string): string => (value || '').trim().toLowerCase()
 
 // Build Sanity file CDN URL from asset {_id|_ref|url}
 const toFileUrl = (asset: any): string => {
@@ -64,67 +84,69 @@ const useSanity = Boolean(SANITY_PROJECT_ID && SANITY_DATASET)
 // Prod'da varsayılan davranış: local fallback kapalı.
 // İstenirse açıkça VITE_ENABLE_LOCAL_FALLBACK=true ile etkinleştirilebilir.
 const defaultEnableFallback = import.meta.env.PROD ? 'false' : 'true'
-const ENABLE_LOCAL_FALLBACK = String(
-  (import.meta as any).env?.VITE_ENABLE_LOCAL_FALLBACK ?? defaultEnableFallback
-).toLowerCase() !== 'false'
+const ENABLE_LOCAL_FALLBACK =
+  String(
+    (import.meta as any).env?.VITE_ENABLE_LOCAL_FALLBACK ?? defaultEnableFallback
+  ).toLowerCase() !== 'false'
 
 const sanity = useSanity
-  ? createClient({ projectId: SANITY_PROJECT_ID, dataset: SANITY_DATASET, apiVersion: SANITY_API_VERSION, useCdn: true })
+  ? createClient({
+      projectId: SANITY_PROJECT_ID,
+      dataset: SANITY_DATASET,
+      apiVersion: SANITY_API_VERSION,
+      useCdn: true,
+    })
   : null
 
 // Mutations için authenticated client (token varsa)
 const SANITY_TOKEN = import.meta.env.VITE_SANITY_TOKEN || ''
-const sanityMutations = useSanity && SANITY_TOKEN
-  ? createClient({ 
-      projectId: SANITY_PROJECT_ID, 
-      dataset: SANITY_DATASET, 
-      apiVersion: SANITY_API_VERSION, 
-      useCdn: false,
-      token: SANITY_TOKEN,
-      // Browser token uyarısını kapat (token sadece mutations için kullanılıyor)
-      ignoreBrowserTokenWarning: true
-    })
-  : null
+const sanityMutations =
+  useSanity && SANITY_TOKEN
+    ? createClient({
+        projectId: SANITY_PROJECT_ID,
+        dataset: SANITY_DATASET,
+        apiVersion: SANITY_API_VERSION,
+        useCdn: false,
+        token: SANITY_TOKEN,
+        // Browser token uyarısını kapat (token sadece mutations için kullanılıyor)
+        ignoreBrowserTokenWarning: true,
+      })
+    : null
 
 const urlFor = (source: any) => (useSanity && sanity ? imageUrlBuilder(sanity).image(source) : null)
 
-const mapImage = (img: any | undefined, options?: {
-  width?: number;
-  height?: number;
-  quality?: number;
-  format?: 'webp' | 'jpg' | 'png';
-}): string => {
+const mapImage = (
+  img: any | undefined,
+  options?: {
+    width?: number
+    height?: number
+    quality?: number
+    format?: 'webp' | 'jpg' | 'png'
+  }
+): string => {
   if (!img) return ''
   if (typeof img === 'string') return img
   if (img.url) return img.url
-  
+
   const b = urlFor && urlFor(img)
   if (!b) return ''
-  
+
   try {
-    const {
-      width = 1600,
-      quality = 85,
-      format = 'webp',
-    } = options || {};
-    
-    return b
-      .width(width)
-      .quality(quality)
-      .format(format)
-      .auto('format')
-      .url() || '';
-  } catch { 
-    return '' 
+    const {width = 1600, quality = 85, format = 'webp'} = options || {}
+
+    return b.width(width).quality(quality).format(format).auto('format').url() || ''
+  } catch {
+    return ''
   }
 }
 
-const mapImages = (imgs: any[] | undefined): string[] => Array.isArray(imgs) ? imgs.map(i => mapImage(i)).filter(Boolean) : []
+const mapImages = (imgs: any[] | undefined): string[] =>
+  Array.isArray(imgs) ? imgs.map(i => mapImage(i)).filter(Boolean) : []
 // Helper: Medya URL'ini map et (mobil/desktop desteği ile)
 const mapMediaUrl = (m: any, isMobile?: boolean, isDesktop?: boolean): string => {
   const type = m?.type
   let url = ''
-  
+
   if (type === 'image') {
     // Art Direction: Önce mobil/desktop'a özel görseli kontrol et
     if (isMobile && m?.imageMobile) {
@@ -168,93 +190,125 @@ const mapMediaUrl = (m: any, isMobile?: boolean, isDesktop?: boolean): string =>
   } else {
     url = m?.url || ''
   }
-  
+
   return url
 }
 
-const mapProductMedia = (row: any): { type: 'image'|'video'|'youtube'; url: string; urlMobile?: string; urlDesktop?: string; title?: any; description?: any; link?: string; linkText?: any }[] => {
+const mapProductMedia = (
+  row: any
+): {
+  type: 'image' | 'video' | 'youtube'
+  url: string
+  urlMobile?: string
+  urlDesktop?: string
+  title?: any
+  description?: any
+  link?: string
+  linkText?: any
+}[] => {
   const mediaArr = Array.isArray(row?.media) ? row.media : []
-  const fromMedia = mediaArr.map((m: any) => {
-    const type = m?.type
-    const url = mapMediaUrl(m) // Varsayılan URL
-    const urlMobile = mapMediaUrl(m, true, false) // Mobil URL (varsa)
-    const urlDesktop = mapMediaUrl(m, false, true) // Desktop URL (varsa)
-    
-    const title = m?.title
-    const description = m?.description
-    const link = m?.link
-    const linkText = m?.linkText
-    
-    // Sadece urlMobile veya urlDesktop varsa ekle
-    const result: any = { type, url, title, description, link, linkText }
-    if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
-    if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
-    
-    return result
-  }).filter((m: any) => m.type && m.url)
+  const fromMedia = mediaArr
+    .map((m: any) => {
+      const type = m?.type
+      const url = mapMediaUrl(m) // Varsayılan URL
+      const urlMobile = mapMediaUrl(m, true, false) // Mobil URL (varsa)
+      const urlDesktop = mapMediaUrl(m, false, true) // Desktop URL (varsa)
+
+      const title = m?.title
+      const description = m?.description
+      const link = m?.link
+      const linkText = m?.linkText
+
+      // Sadece urlMobile veya urlDesktop varsa ekle
+      const result: any = {type, url, title, description, link, linkText}
+      if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
+      if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
+
+      return result
+    })
+    .filter((m: any) => m.type && m.url)
   // Fallback kaldırıldı: Eğer hiç medya eklenmemişse boş array döndür
   return fromMedia
 }
 
-const mapAlternativeMedia = (row: any): { type: 'image'|'video'|'youtube'; url: string; urlMobile?: string; urlDesktop?: string }[] => {
+const mapAlternativeMedia = (
+  row: any
+): {
+  type: 'image' | 'video' | 'youtube'
+  url: string
+  urlMobile?: string
+  urlDesktop?: string
+}[] => {
   const alt = Array.isArray(row?.alternativeMedia) ? row.alternativeMedia : []
-  if (alt.length) return alt.map((m: any) => {
-    const type = m?.type
-    const url = mapMediaUrl(m) // Varsayılan URL
-    const urlMobile = mapMediaUrl(m, true, false) // Mobil URL (varsa)
-    const urlDesktop = mapMediaUrl(m, false, true) // Desktop URL (varsa)
-    
-    // Sadece urlMobile veya urlDesktop varsa ekle
-    const result: any = { type, url }
-    if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
-    if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
-    
-    return result
-  }).filter((m: any) => m.type && m.url)
+  if (alt.length)
+    return alt
+      .map((m: any) => {
+        const type = m?.type
+        const url = mapMediaUrl(m) // Varsayılan URL
+        const urlMobile = mapMediaUrl(m, true, false) // Mobil URL (varsa)
+        const urlDesktop = mapMediaUrl(m, false, true) // Desktop URL (varsa)
+
+        // Sadece urlMobile veya urlDesktop varsa ekle
+        const result: any = {type, url}
+        if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
+        if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
+
+        return result
+      })
+      .filter((m: any) => m.type && m.url)
   // fallback to legacy alternativeImages
-  return mapImages(row?.alternativeImages).map((u: string) => ({ type: 'image', url: u }))
+  return mapImages(row?.alternativeImages).map((u: string) => ({type: 'image', url: u}))
 }
-const mapMaterials = (materials: any[] | undefined): ProductMaterial[] => Array.isArray(materials) ? materials.map(m => ({ name: m?.name, image: mapImage(m?.image) })) : []
-const mapDimensionImages = (dimImgs: any[] | undefined): { image: string; imageMobile?: string; imageDesktop?: string; title?: LocalizedString }[] => {
+const mapMaterials = (materials: any[] | undefined): ProductMaterial[] =>
+  Array.isArray(materials) ? materials.map(m => ({name: m?.name, image: mapImage(m?.image)})) : []
+const mapDimensionImages = (
+  dimImgs: any[] | undefined
+): {image: string; imageMobile?: string; imageDesktop?: string; title?: LocalizedString}[] => {
   if (!Array.isArray(dimImgs)) return []
-  return dimImgs.map((di: any) => {
-    const image = mapImage(di?.image)
-    const imageMobile = di?.imageMobile ? mapImage(di.imageMobile) : undefined
-    const imageDesktop = di?.imageDesktop ? mapImage(di.imageDesktop) : undefined
-    
-    const result: any = {
-      image,
-      title: di?.title,
-    }
-    if (imageMobile && imageMobile !== image) result.imageMobile = imageMobile
-    if (imageDesktop && imageDesktop !== image) result.imageDesktop = imageDesktop
-    
-    return result
-  }).filter((di: any) => di.image) // sadece görseli olanları tut
+  return dimImgs
+    .map((di: any) => {
+      const image = mapImage(di?.image)
+      const imageMobile = di?.imageMobile ? mapImage(di.imageMobile) : undefined
+      const imageDesktop = di?.imageDesktop ? mapImage(di.imageDesktop) : undefined
+
+      const result: any = {
+        image,
+        title: di?.title,
+      }
+      if (imageMobile && imageMobile !== image) result.imageMobile = imageMobile
+      if (imageDesktop && imageDesktop !== image) result.imageDesktop = imageDesktop
+
+      return result
+    })
+    .filter((di: any) => di.image) // sadece görseli olanları tut
 }
 const mapGroupedMaterials = (materialSelections: any[]): any[] => {
   return (materialSelections || [])
     .map((s: any) => {
       const selectedMaterials = mapMaterials(s?.materials || [])
       // Create a set of selected material keys for faster lookup
-      const selectedKeys = new Set(selectedMaterials.map((sm: any) => `${sm.image}|${JSON.stringify(sm.name)}`))
-      
-      const groupBooks = (s?.group?.books || []).map((book: any) => {
-        const bookMaterials = mapMaterials(book?.items || [])
-        // Filter to only show materials that are selected for this product
-        const selectedBookMaterials = bookMaterials.filter((bm: any) => 
-          selectedKeys.has(`${bm.image}|${JSON.stringify(bm.name)}`)
-        )
-        return {
-          bookTitle: book?.title,
-          materials: selectedBookMaterials
-        }
-      }).filter((b: any) => b.materials.length > 0)
-      
+      const selectedKeys = new Set(
+        selectedMaterials.map((sm: any) => `${sm.image}|${JSON.stringify(sm.name)}`)
+      )
+
+      const groupBooks = (s?.group?.books || [])
+        .map((book: any) => {
+          const bookMaterials = mapMaterials(book?.items || [])
+          // Filter to only show materials that are selected for this product
+          const selectedBookMaterials = bookMaterials.filter((bm: any) =>
+            selectedKeys.has(`${bm.image}|${JSON.stringify(bm.name)}`)
+          )
+          return {
+            bookTitle: book?.title,
+            materials: selectedBookMaterials,
+          }
+        })
+        .filter((b: any) => b.materials.length > 0)
+
       return {
         groupTitle: s?.group?.title,
         books: groupBooks,
-        materials: selectedMaterials
+        materials: selectedMaterials,
       }
     })
     .filter((g: any) => g.materials.length > 0)
@@ -263,314 +317,331 @@ const mapGroupedMaterials = (materialSelections: any[]): any[] => {
 const normalizeProduct = (p: Product): Product => ({
   ...p,
   // legacy cleanups
-  dimensionImages: Array.isArray((p as any).dimensionImages) 
-    ? (p as any).dimensionImages.map((di: any) => 
-        typeof di === 'string' 
-          ? { image: di } // eski string array formatı için backward compatibility
+  dimensionImages: Array.isArray((p as any).dimensionImages)
+    ? (p as any).dimensionImages.map((di: any) =>
+        typeof di === 'string'
+          ? {image: di} // eski string array formatı için backward compatibility
           : di
       )
     : [],
 })
 
-let storage: Storage;
-const memoryStore: { [key: string]: string } = {};
+let storage: Storage
+const memoryStore: {[key: string]: string} = {}
 
 try {
   // Check if localStorage is available and writable
-  localStorage.setItem('__storage_test__', 'test');
-  localStorage.removeItem('__storage_test__');
-  storage = localStorage;
+  localStorage.setItem('__storage_test__', 'test')
+  localStorage.removeItem('__storage_test__')
+  storage = localStorage
 } catch (e) {
   storage = {
     getItem: (key: string) => memoryStore[key] || null,
-    setItem: (key: string, value: string) => { memoryStore[key] = value; },
-    removeItem: (key: string) => { delete memoryStore[key]; },
+    setItem: (key: string, value: string) => {
+      memoryStore[key] = value
+    },
+    removeItem: (key: string) => {
+      delete memoryStore[key]
+    },
     clear: () => {
       for (const key in memoryStore) {
         if (Object.prototype.hasOwnProperty.call(memoryStore, key)) {
-          delete memoryStore[key];
+          delete memoryStore[key]
         }
       }
     },
     get length() {
-      return Object.keys(memoryStore).length;
+      return Object.keys(memoryStore).length
     },
     key: (index: number) => Object.keys(memoryStore)[index],
-  };
+  }
 }
 
-
 const initializeData = () => {
-    Object.entries(initialData).forEach(([key, data]) => {
-        if (!storage.getItem(key)) {
-            try {
-                storage.setItem(key, JSON.stringify(data));
-            } catch(e) {
-                // Failed to initialize
-            }
-        }
-    });
-};
+  Object.entries(initialData).forEach(([key, data]) => {
+    if (!storage.getItem(key)) {
+      try {
+        storage.setItem(key, JSON.stringify(data))
+      } catch (e) {
+        // Failed to initialize
+      }
+    }
+  })
+}
 
-initializeData();
+initializeData()
 
 // Generic getter/setter
 const getItem = <T>(key: string): T => {
-    const data = storage.getItem(key);
+  const data = storage.getItem(key)
 
-    if (!data) {
-        initializeData(); // Re-initialize if a key is missing
-        const reloadedData = storage.getItem(key);
-        if (!reloadedData) {
-            return initialData[key as keyof typeof initialData] as T;
-        }
-         try {
-            return JSON.parse(reloadedData);
-        } catch (e) {
-            return initialData[key as keyof typeof initialData] as T;
-        }
+  if (!data) {
+    initializeData() // Re-initialize if a key is missing
+    const reloadedData = storage.getItem(key)
+    if (!reloadedData) {
+      return initialData[key as keyof typeof initialData] as T
     }
-
     try {
-        return JSON.parse(data);
+      return JSON.parse(reloadedData)
     } catch (e) {
-        storage.removeItem(key);
-        initializeData();
-        const reloadedData = storage.getItem(key);
-         if (!reloadedData) {
-            return initialData[key as keyof typeof initialData] as T;
-        }
-        try {
-            return JSON.parse(reloadedData);
-        } catch (parseError) {
-            return initialData[key as keyof typeof initialData] as T;
-        }
+      return initialData[key as keyof typeof initialData] as T
     }
-};
+  }
+
+  try {
+    return JSON.parse(data)
+  } catch (e) {
+    storage.removeItem(key)
+    initializeData()
+    const reloadedData = storage.getItem(key)
+    if (!reloadedData) {
+      return initialData[key as keyof typeof initialData] as T
+    }
+    try {
+      return JSON.parse(reloadedData)
+    } catch (parseError) {
+      return initialData[key as keyof typeof initialData] as T
+    }
+  }
+}
 
 const setItem = <T>(key: string, data: T): void => {
-    try {
-        storage.setItem(key, JSON.stringify(data));
-    } catch(e) {
-        alert("Warning: Could not save changes. Your browser's storage might be full or disabled.");
-    }
-};
+  try {
+    storage.setItem(key, JSON.stringify(data))
+  } catch (e) {
+    alert("Warning: Could not save changes. Your browser's storage might be full or disabled.")
+  }
+}
 
 // Translations
 export const getTranslations = async (): Promise<Record<string, Record<string, string>>> => {
-    if (useSanity && sanity) {
-        try {
-            // Sadece published dokümanları çek (draft'ları hariç tut)
-            // CDN cache'i bypass etmek için ayrı bir client kullan (useCdn: false)
-            // En güncel olanı önce getir, aynı dilde birden fazla kayıt varsa en güncel olan kazansın
-            const q = groq`*[_type == "uiTranslations" && !(_id in path("drafts.**"))] | order(_updatedAt desc){ language, strings }`
-            // Çeviriler için CDN cache'i bypass et (anlık güncellemeler için)
-            const noCacheClient = createClient({ 
-                projectId: SANITY_PROJECT_ID, 
-                dataset: SANITY_DATASET, 
-                apiVersion: SANITY_API_VERSION, 
-                useCdn: false 
-            })
-            const results = await noCacheClient.fetch(q)
-            const translationsMap: Record<string, Record<string, string>> = {}
-            if (Array.isArray(results)) {
-                results.forEach((item: any) => {
-                    if (item.language && item.strings) {
-                        const normalized: Record<string, string> = { ...item.strings }
-                        // Şema alanı 'models_3d' ise, frontend anahtarı '3d_models' bekliyor -> eşle
-                        if (normalized.models_3d && !normalized['3d_models']) {
-                            normalized['3d_models'] = normalized.models_3d
-                        }
-                        // Aynı dil daha önce eklenmişse atla (ilk gelen en günceldir)
-                        if (!translationsMap[item.language]) {
-                            translationsMap[item.language] = normalized
-                        }
-                    }
-                })
+  if (useSanity && sanity) {
+    try {
+      // Sadece published dokümanları çek (draft'ları hariç tut)
+      // CDN cache'i bypass etmek için ayrı bir client kullan (useCdn: false)
+      // En güncel olanı önce getir, aynı dilde birden fazla kayıt varsa en güncel olan kazansın
+      const q = groq`*[_type == "uiTranslations" && !(_id in path("drafts.**"))] | order(_updatedAt desc){ language, strings }`
+      // Çeviriler için CDN cache'i bypass et (anlık güncellemeler için)
+      const noCacheClient = createClient({
+        projectId: SANITY_PROJECT_ID,
+        dataset: SANITY_DATASET,
+        apiVersion: SANITY_API_VERSION,
+        useCdn: false,
+      })
+      const results = await noCacheClient.fetch(q)
+      const translationsMap: Record<string, Record<string, string>> = {}
+      if (Array.isArray(results)) {
+        results.forEach((item: any) => {
+          if (item.language && item.strings) {
+            const normalized: Record<string, string> = {...item.strings}
+            // Şema alanı 'models_3d' ise, frontend anahtarı '3d_models' bekliyor -> eşle
+            if (normalized.models_3d && !normalized['3d_models']) {
+              normalized['3d_models'] = normalized.models_3d
             }
-            return translationsMap
-            } catch (error) {
-                // Failed to fetch translations
-            return {}
-        }
+            // Aynı dil daha önce eklenmişse atla (ilk gelen en günceldir)
+            if (!translationsMap[item.language]) {
+              translationsMap[item.language] = normalized
+            }
+          }
+        })
+      }
+      return translationsMap
+    } catch (error) {
+      // Failed to fetch translations
+      return {}
     }
-    return {}
+  }
+  return {}
 }
 
 // Languages
 export const getLanguages = async (): Promise<string[]> => {
-    if (useSanity && sanity) {
-        try {
-            const langs = await sanity.fetch(groq`*[_type=="siteSettings"][0].languages`);
-            const base = ['tr', 'en'];
-            if (Array.isArray(langs)) {
-                // Support both legacy [string] and new [{code, visible}]
-                const normalized = langs.map((l: any) => {
-                    if (typeof l === 'string') return { code: l, visible: true };
-                    const code = String(l?.code || '').toLowerCase();
-                    const visible = l?.visible !== false;
-                    return { code, visible };
-                }).filter((l: any) => l.code);
-                const visibleCodes = normalized.filter((l: any) => l.visible).map((l: any) => l.code);
-                const merged = [...base, ...visibleCodes];
-                return Array.from(new Set(merged));
-            }
-            // if not array, fall back to base
-            return base;
-        } catch (e) {
-            // Failed to fetch languages
-        }
+  if (useSanity && sanity) {
+    try {
+      const langs = await sanity.fetch(groq`*[_type=="siteSettings"][0].languages`)
+      const base = ['tr', 'en']
+      if (Array.isArray(langs)) {
+        // Support both legacy [string] and new [{code, visible}]
+        const normalized = langs
+          .map((l: any) => {
+            if (typeof l === 'string') return {code: l, visible: true}
+            const code = String(l?.code || '').toLowerCase()
+            const visible = l?.visible !== false
+            return {code, visible}
+          })
+          .filter((l: any) => l.code)
+        const visibleCodes = normalized.filter((l: any) => l.visible).map((l: any) => l.code)
+        const merged = [...base, ...visibleCodes]
+        return Array.from(new Set(merged))
+      }
+      // if not array, fall back to base
+      return base
+    } catch (e) {
+      // Failed to fetch languages
     }
-    await delay(SIMULATED_DELAY);
-    const fromLocal = getItem<string[]>(KEYS.LANGUAGES);
-    const base = ['tr', 'en'];
-    const merged = Array.isArray(fromLocal) && fromLocal.length > 0 ? [...base, ...fromLocal] : base;
-    return Array.from(new Set(merged));
-};
+  }
+  await delay(SIMULATED_DELAY)
+  const fromLocal = getItem<string[]>(KEYS.LANGUAGES)
+  const base = ['tr', 'en']
+  const merged = Array.isArray(fromLocal) && fromLocal.length > 0 ? [...base, ...fromLocal] : base
+  return Array.from(new Set(merged))
+}
 export const updateLanguages = async (languages: string[]): Promise<void> => {
-    await delay(SIMULATED_DELAY);
-    setItem(KEYS.LANGUAGES, languages);
-};
+  await delay(SIMULATED_DELAY)
+  setItem(KEYS.LANGUAGES, languages)
+}
 
 // Site Settings
 export const getSiteSettings = async (): Promise<SiteSettings> => {
-    if (useSanity && sanity) {
-        const q = groq`*[_type == "siteSettings"][0]{
+  if (useSanity && sanity) {
+    const q = groq`*[_type == "siteSettings"][0]{
             ...,
             logo
         }`
-        const s = await sanity.fetch(q)
-        // Backward compatible defaults
-        return {
-            logoUrl: s?.logo ? mapImage(s.logo) : (s?.logoUrl || ''),
-            topBannerText: s?.topBannerText || '',
-            showProductPrevNext: Boolean(s?.showProductPrevNext ?? false),
-            showCartButton: Boolean(s?.showCartButton ?? true),
-            imageBorderStyle: (s?.imageBorderStyle === 'rounded' || s?.imageBorderStyle === 'square') ? s.imageBorderStyle : 'square',
-            isLanguageSwitcherVisible: s?.isLanguageSwitcherVisible !== false,
-            languages: Array.isArray(s?.languages) ? s.languages : undefined,
-            maintenanceMode: Boolean(s?.maintenanceMode ?? false),
-        }
-    }
-    await delay(SIMULATED_DELAY);
-    const s = getItem<SiteSettings>(KEYS.SITE_SETTINGS);
-    // Ensure all fields are present with defaults
+    const s = await sanity.fetch(q)
+    // Backward compatible defaults
     return {
-        logoUrl: s?.logoUrl || '',
-        topBannerText: s?.topBannerText || '',
-        showProductPrevNext: Boolean(s?.showProductPrevNext ?? false),
-        showCartButton: Boolean(s?.showCartButton ?? true),
-        imageBorderStyle: (s?.imageBorderStyle === 'rounded' || s?.imageBorderStyle === 'square') ? s.imageBorderStyle : 'square',
-        maintenanceMode: Boolean(s?.maintenanceMode ?? false),
-    };
-};
+      logoUrl: s?.logo ? mapImage(s.logo) : s?.logoUrl || '',
+      topBannerText: s?.topBannerText || '',
+      showProductPrevNext: Boolean(s?.showProductPrevNext ?? false),
+      showCartButton: Boolean(s?.showCartButton ?? true),
+      imageBorderStyle:
+        s?.imageBorderStyle === 'rounded' || s?.imageBorderStyle === 'square'
+          ? s.imageBorderStyle
+          : 'square',
+      isLanguageSwitcherVisible: s?.isLanguageSwitcherVisible !== false,
+      languages: Array.isArray(s?.languages) ? s.languages : undefined,
+      maintenanceMode: Boolean(s?.maintenanceMode ?? false),
+    }
+  }
+  await delay(SIMULATED_DELAY)
+  const s = getItem<SiteSettings>(KEYS.SITE_SETTINGS)
+  // Ensure all fields are present with defaults
+  return {
+    logoUrl: s?.logoUrl || '',
+    topBannerText: s?.topBannerText || '',
+    showProductPrevNext: Boolean(s?.showProductPrevNext ?? false),
+    showCartButton: Boolean(s?.showCartButton ?? true),
+    imageBorderStyle:
+      s?.imageBorderStyle === 'rounded' || s?.imageBorderStyle === 'square'
+        ? s.imageBorderStyle
+        : 'square',
+    maintenanceMode: Boolean(s?.maintenanceMode ?? false),
+  }
+}
 export const updateSiteSettings = async (settings: SiteSettings): Promise<void> => {
-    await delay(SIMULATED_DELAY);
-    setItem(KEYS.SITE_SETTINGS, settings);
-};
+  await delay(SIMULATED_DELAY)
+  setItem(KEYS.SITE_SETTINGS, settings)
+}
 
 // Categories
 export const getCategories = async (): Promise<Category[]> => {
-    if (useSanity && sanity) {
-        const query = groq`*[_type == "category"] | order(orderRank asc) { "id": id.current, name, subtitle, heroImage, menuImage }`
-        const rows = await sanity.fetch(query)
-        return rows.map((r: any) => ({ 
-            id: r.id, 
-            name: r.name, 
-            subtitle: r.subtitle, 
-            heroImage: mapImage(r.heroImage),
-            menuImage: mapImage(r.menuImage)
-        }))
-    }
-    await delay(SIMULATED_DELAY);
-    return getItem<Category[]>(KEYS.CATEGORIES);
-};
+  if (useSanity && sanity) {
+    const query = groq`*[_type == "category"] | order(orderRank asc) { "id": id.current, name, subtitle, heroImage, menuImage }`
+    const rows = await sanity.fetch(query)
+    return rows.map((r: any) => ({
+      id: r.id,
+      name: r.name,
+      subtitle: r.subtitle,
+      heroImage: mapImage(r.heroImage),
+      menuImage: mapImage(r.menuImage),
+    }))
+  }
+  await delay(SIMULATED_DELAY)
+  return getItem<Category[]>(KEYS.CATEGORIES)
+}
 export const addCategory = async (category: Category): Promise<void> => {
-    await delay(SIMULATED_DELAY);
-    const categories = await getCategories();
-    if (categories.some(c => c.id === category.id)) {
-        throw new Error('Category ID already exists');
-    }
-    setItem(KEYS.CATEGORIES, [...categories, category]);
-};
+  await delay(SIMULATED_DELAY)
+  const categories = await getCategories()
+  if (categories.some(c => c.id === category.id)) {
+    throw new Error('Category ID already exists')
+  }
+  setItem(KEYS.CATEGORIES, [...categories, category])
+}
 export const updateCategory = async (category: Category): Promise<void> => {
-    await delay(SIMULATED_DELAY);
-    let categories = await getCategories();
-    categories = categories.map(c => (c.id === category.id ? category : c));
-    setItem(KEYS.CATEGORIES, categories);
-};
+  await delay(SIMULATED_DELAY)
+  const categories = await getCategories()
+  const updatedCategories = categories.map(c => (c.id === category.id ? category : c))
+  setItem(KEYS.CATEGORIES, updatedCategories)
+}
 export const deleteCategory = async (id: string): Promise<void> => {
-    await delay(SIMULATED_DELAY);
-    let categories = await getCategories();
-    setItem(KEYS.CATEGORIES, categories.filter(c => c.id !== id));
-};
+  await delay(SIMULATED_DELAY)
+  const categories = await getCategories()
+  setItem(
+    KEYS.CATEGORIES,
+    categories.filter(c => c.id !== id)
+  )
+}
 
 // Designers
 export const getDesigners = async (): Promise<Designer[]> => {
-    if (useSanity && sanity) {
-        const query = groq`*[_type == "designer"]{ "id": id.current, name, bio, image, imageMobile, imageDesktop } | order(name.tr asc)`
-        const rows = await sanity.fetch(query)
-        return rows.map((r: any) => {
-          const image = mapImage(r.image)
-          const imageMobile = r.imageMobile ? mapImage(r.imageMobile) : undefined
-          const imageDesktop = r.imageDesktop ? mapImage(r.imageDesktop) : undefined
-          return { 
-            id: r.id, 
-            name: r.name, 
-            bio: r.bio, 
-            image,
-            imageMobile: imageMobile && imageMobile !== image ? imageMobile : undefined,
-            imageDesktop: imageDesktop && imageDesktop !== image ? imageDesktop : undefined,
-          }
-        })
-    }
-    await delay(SIMULATED_DELAY);
-    return getItem<Designer[]>(KEYS.DESIGNERS);
-};
+  if (useSanity && sanity) {
+    const query = groq`*[_type == "designer"]{ "id": id.current, name, bio, image, imageMobile, imageDesktop } | order(name.tr asc)`
+    const rows = await sanity.fetch(query)
+    return rows.map((r: any) => {
+      const image = mapImage(r.image)
+      const imageMobile = r.imageMobile ? mapImage(r.imageMobile) : undefined
+      const imageDesktop = r.imageDesktop ? mapImage(r.imageDesktop) : undefined
+      return {
+        id: r.id,
+        name: r.name,
+        bio: r.bio,
+        image,
+        imageMobile: imageMobile && imageMobile !== image ? imageMobile : undefined,
+        imageDesktop: imageDesktop && imageDesktop !== image ? imageDesktop : undefined,
+      }
+    })
+  }
+  await delay(SIMULATED_DELAY)
+  return getItem<Designer[]>(KEYS.DESIGNERS)
+}
 export const getDesignerById = async (id: string): Promise<Designer | undefined> => {
-    if (useSanity && sanity) {
-        const query = groq`*[_type == "designer" && id.current == $id][0]{ "id": id.current, name, bio, image, imageMobile, imageDesktop }`
-        const r = await sanity.fetch(query, { id })
-        if (!r) return undefined
-        const image = mapImage(r.image)
-        const imageMobile = r.imageMobile ? mapImage(r.imageMobile) : undefined
-        const imageDesktop = r.imageDesktop ? mapImage(r.imageDesktop) : undefined
-        return { 
-          id: r.id, 
-          name: r.name, 
-          bio: r.bio, 
-          image,
-          imageMobile: imageMobile && imageMobile !== image ? imageMobile : undefined,
-          imageDesktop: imageDesktop && imageDesktop !== image ? imageDesktop : undefined,
-        }
+  if (useSanity && sanity) {
+    const query = groq`*[_type == "designer" && id.current == $id][0]{ "id": id.current, name, bio, image, imageMobile, imageDesktop }`
+    const r = await sanity.fetch(query, {id})
+    if (!r) return undefined
+    const image = mapImage(r.image)
+    const imageMobile = r.imageMobile ? mapImage(r.imageMobile) : undefined
+    const imageDesktop = r.imageDesktop ? mapImage(r.imageDesktop) : undefined
+    return {
+      id: r.id,
+      name: r.name,
+      bio: r.bio,
+      image,
+      imageMobile: imageMobile && imageMobile !== image ? imageMobile : undefined,
+      imageDesktop: imageDesktop && imageDesktop !== image ? imageDesktop : undefined,
     }
-    const designers = await getDesigners();
-    return designers.find(d => d.id === id);
+  }
+  const designers = await getDesigners()
+  return designers.find(d => d.id === id)
 }
 export const addDesigner = async (designer: Designer): Promise<void> => {
-    await delay(SIMULATED_DELAY);
-    const designers = await getDesigners();
-     if (designers.some(d => d.id === designer.id)) {
-        throw new Error('Designer ID already exists');
-    }
-    setItem(KEYS.DESIGNERS, [...designers, designer]);
-};
+  await delay(SIMULATED_DELAY)
+  const designers = await getDesigners()
+  if (designers.some(d => d.id === designer.id)) {
+    throw new Error('Designer ID already exists')
+  }
+  setItem(KEYS.DESIGNERS, [...designers, designer])
+}
 export const updateDesigner = async (designer: Designer): Promise<void> => {
-    await delay(SIMULATED_DELAY);
-    let designers = await getDesigners();
-    designers = designers.map(d => (d.id === designer.id ? designer : d));
-    setItem(KEYS.DESIGNERS, designers);
-};
+  await delay(SIMULATED_DELAY)
+  const designers = await getDesigners()
+  const updatedDesigners = designers.map(d => (d.id === designer.id ? designer : d))
+  setItem(KEYS.DESIGNERS, updatedDesigners)
+}
 export const deleteDesigner = async (id: string): Promise<void> => {
-    await delay(SIMULATED_DELAY);
-    let designers = await getDesigners();
-    setItem(KEYS.DESIGNERS, designers.filter(d => d.id !== id));
-};
+  await delay(SIMULATED_DELAY)
+  const designers = await getDesigners()
+  setItem(
+    KEYS.DESIGNERS,
+    designers.filter(d => d.id !== id)
+  )
+}
 
 // Products
 export const getProducts = async (): Promise<Product[]> => {
-    if (useSanity && sanity) {
-        const query = groq`*[_type == "product" && (!defined(isPublished) || isPublished == true)] | order(year desc){
+  if (useSanity && sanity) {
+    const query = groq`*[_type == "product" && (!defined(isPublished) || isPublished == true)] | order(year desc){
           "id": id.current,
           name,
           year,
@@ -596,53 +667,63 @@ export const getProducts = async (): Promise<Product[]> => {
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
         }`
-        const rows = await sanity.fetch(query)
-        return rows.map((r: any) => normalizeProduct({
-          id: r.id,
-          name: r.name,
-          designerId: r.designer?.designerId || '',
-          categoryId: r.category?.categoryId || '',
-          year: r.year,
-          isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
-          description: r.description,
-          mainImage: (() => {
-            const img = mapImage(r.mainImage)
-            const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
-            const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
-            // Art Direction için object döndür
-            return { 
-              url: img,
-              urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
-              urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
-            }
-          })(),
-          alternativeImages: mapImages(r.alternativeImages),
-          alternativeMedia: mapAlternativeMedia(r),
-          media: mapProductMedia(r),
-          showMediaPanels: Boolean(r?.showMediaPanels),
-          dimensionImages: mapDimensionImages(r?.dimensionImages),
-          buyable: Boolean(r.buyable),
-          price: r.price,
-          currency: r.currency,
-          sku: r.sku,
-          stockStatus: r.stockStatus,
-          materials: mapMaterials((r.materialSelections || []).flatMap((s: any) => s?.materials || [])),
-          groupedMaterials: mapGroupedMaterials(r.materialSelections),
-          mediaSectionTitle: r?.mediaSectionTitle,
-          mediaSectionText: r?.mediaSectionText,
-          exclusiveContent: {
-            images: mapImages(r?.exclusiveContent?.images),
-            drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: toFileUrl(d?.file?.asset) })),
-            models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({ name: m?.name, url: toFileUrl(m?.file?.asset) })),
-          },
-        }))
-    }
-    await delay(SIMULATED_DELAY);
-    return getItem<Product[]>(KEYS.PRODUCTS).map(normalizeProduct);
-};
+    const rows = await sanity.fetch(query)
+    return rows.map((r: any) =>
+      normalizeProduct({
+        id: r.id,
+        name: r.name,
+        designerId: r.designer?.designerId || '',
+        categoryId: r.category?.categoryId || '',
+        year: r.year,
+        isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
+        description: r.description,
+        mainImage: (() => {
+          const img = mapImage(r.mainImage)
+          const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
+          const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
+          // Art Direction için object döndür
+          return {
+            url: img,
+            urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
+            urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
+          }
+        })(),
+        alternativeImages: mapImages(r.alternativeImages),
+        alternativeMedia: mapAlternativeMedia(r),
+        media: mapProductMedia(r),
+        showMediaPanels: Boolean(r?.showMediaPanels),
+        dimensionImages: mapDimensionImages(r?.dimensionImages),
+        buyable: Boolean(r.buyable),
+        price: r.price,
+        currency: r.currency,
+        sku: r.sku,
+        stockStatus: r.stockStatus,
+        materials: mapMaterials(
+          (r.materialSelections || []).flatMap((s: any) => s?.materials || [])
+        ),
+        groupedMaterials: mapGroupedMaterials(r.materialSelections),
+        mediaSectionTitle: r?.mediaSectionTitle,
+        mediaSectionText: r?.mediaSectionText,
+        exclusiveContent: {
+          images: mapImages(r?.exclusiveContent?.images),
+          drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({
+            name: d?.name,
+            url: toFileUrl(d?.file?.asset),
+          })),
+          models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({
+            name: m?.name,
+            url: toFileUrl(m?.file?.asset),
+          })),
+        },
+      })
+    )
+  }
+  await delay(SIMULATED_DELAY)
+  return getItem<Product[]>(KEYS.PRODUCTS).map(normalizeProduct)
+}
 export const getProductById = async (id: string): Promise<Product | undefined> => {
-    if (useSanity && sanity) {
-        const query = groq`*[_type == "product" && id.current == $id][0]{
+  if (useSanity && sanity) {
+    const query = groq`*[_type == "product" && id.current == $id][0]{
           "id": id.current,
           name,
           year,
@@ -668,54 +749,60 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
         }`
-        const r = await sanity.fetch(query, { id })
-        if (!r) return undefined
-        return normalizeProduct({
-          id: r.id,
-          name: r.name,
-          designerId: r.designer?.designerId || '',
-          categoryId: r.category?.categoryId || '',
-          year: r.year,
-          isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
-          description: r.description,
-          mainImage: (() => {
-            const img = mapImage(r.mainImage)
-            const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
-            const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
-            // Art Direction için object döndür
-            return { 
-              url: img,
-              urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
-              urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
-            }
-          })(),
-          alternativeImages: mapImages(r.alternativeImages),
-          alternativeMedia: mapAlternativeMedia(r),
-          media: mapProductMedia(r),
-          showMediaPanels: Boolean(r?.showMediaPanels),
-          dimensionImages: mapDimensionImages(r?.dimensionImages),
-          buyable: Boolean(r.buyable),
-          price: r.price,
-          currency: r.currency,
-          sku: r.sku,
-          stockStatus: r.stockStatus,
-          materials: mapMaterials((r.materialSelections || []).flatMap((s: any) => s?.materials || [])),
-          groupedMaterials: mapGroupedMaterials(r.materialSelections),
-          mediaSectionTitle: r?.mediaSectionTitle,
-          mediaSectionText: r?.mediaSectionText,
-          exclusiveContent: {
-            images: mapImages(r?.exclusiveContent?.images),
-            drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: toFileUrl(d?.file?.asset) })),
-            models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({ name: m?.name, url: toFileUrl(m?.file?.asset) })),
-          },
-        })
-    }
-    const products = await getProducts();
-    return products.find(p => p.id === id);
+    const r = await sanity.fetch(query, {id})
+    if (!r) return undefined
+    return normalizeProduct({
+      id: r.id,
+      name: r.name,
+      designerId: r.designer?.designerId || '',
+      categoryId: r.category?.categoryId || '',
+      year: r.year,
+      isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
+      description: r.description,
+      mainImage: (() => {
+        const img = mapImage(r.mainImage)
+        const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
+        const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
+        // Art Direction için object döndür
+        return {
+          url: img,
+          urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
+          urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
+        }
+      })(),
+      alternativeImages: mapImages(r.alternativeImages),
+      alternativeMedia: mapAlternativeMedia(r),
+      media: mapProductMedia(r),
+      showMediaPanels: Boolean(r?.showMediaPanels),
+      dimensionImages: mapDimensionImages(r?.dimensionImages),
+      buyable: Boolean(r.buyable),
+      price: r.price,
+      currency: r.currency,
+      sku: r.sku,
+      stockStatus: r.stockStatus,
+      materials: mapMaterials((r.materialSelections || []).flatMap((s: any) => s?.materials || [])),
+      groupedMaterials: mapGroupedMaterials(r.materialSelections),
+      mediaSectionTitle: r?.mediaSectionTitle,
+      mediaSectionText: r?.mediaSectionText,
+      exclusiveContent: {
+        images: mapImages(r?.exclusiveContent?.images),
+        drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({
+          name: d?.name,
+          url: toFileUrl(d?.file?.asset),
+        })),
+        models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({
+          name: m?.name,
+          url: toFileUrl(m?.file?.asset),
+        })),
+      },
+    })
+  }
+  const products = await getProducts()
+  return products.find(p => p.id === id)
 }
 export const getProductsByCategoryId = async (categoryId: string): Promise<Product[]> => {
-    if (useSanity && sanity) {
-        const query = groq`*[_type == "product" && references(*[_type == "category" && id.current == $categoryId]._id) && (!defined(isPublished) || isPublished == true)]{
+  if (useSanity && sanity) {
+    const query = groq`*[_type == "product" && references(*[_type == "category" && id.current == $categoryId]._id) && (!defined(isPublished) || isPublished == true)]{
           "id": id.current,
           name,
           year,
@@ -738,50 +825,60 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
         }`
-        const rows = await sanity.fetch(query, { categoryId })
-        return rows.map((r: any) => normalizeProduct({
-          id: r.id,
-          name: r.name,
-          designerId: r.designer?.designerId || '',
-          categoryId: r.category?.categoryId || '',
-          year: r.year,
-          isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
-          description: r.description,
-          mainImage: (() => {
-            const img = mapImage(r.mainImage)
-            const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
-            const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
-            // Art Direction için object döndür
-            return { 
-              url: img,
-              urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
-              urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
-            }
-          })(),
-          alternativeImages: mapImages(r.alternativeImages),
-          alternativeMedia: mapAlternativeMedia(r),
-          media: mapProductMedia(r),
-          showMediaPanels: Boolean(r?.showMediaPanels),
-          dimensionImages: mapDimensionImages(r?.dimensionImages),
-          buyable: Boolean(r.buyable),
-          price: r.price,
-          currency: r.currency,
-          materials: mapMaterials((r.materialSelections || []).flatMap((s: any) => s?.materials || [])),
-          mediaSectionTitle: r?.mediaSectionTitle,
-          mediaSectionText: r?.mediaSectionText,
-          exclusiveContent: {
-            images: mapImages(r?.exclusiveContent?.images),
-            drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: toFileUrl(d?.file?.asset) })),
-            models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({ name: m?.name, url: toFileUrl(m?.file?.asset) })),
-          },
-        }))
-    }
-    const products = await getProducts();
-    return products.filter(p => p.categoryId === categoryId);
+    const rows = await sanity.fetch(query, {categoryId})
+    return rows.map((r: any) =>
+      normalizeProduct({
+        id: r.id,
+        name: r.name,
+        designerId: r.designer?.designerId || '',
+        categoryId: r.category?.categoryId || '',
+        year: r.year,
+        isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
+        description: r.description,
+        mainImage: (() => {
+          const img = mapImage(r.mainImage)
+          const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
+          const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
+          // Art Direction için object döndür
+          return {
+            url: img,
+            urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
+            urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
+          }
+        })(),
+        alternativeImages: mapImages(r.alternativeImages),
+        alternativeMedia: mapAlternativeMedia(r),
+        media: mapProductMedia(r),
+        showMediaPanels: Boolean(r?.showMediaPanels),
+        dimensionImages: mapDimensionImages(r?.dimensionImages),
+        buyable: Boolean(r.buyable),
+        price: r.price,
+        currency: r.currency,
+        materials: mapMaterials(
+          (r.materialSelections || []).flatMap((s: any) => s?.materials || [])
+        ),
+        mediaSectionTitle: r?.mediaSectionTitle,
+        mediaSectionText: r?.mediaSectionText,
+        exclusiveContent: {
+          images: mapImages(r?.exclusiveContent?.images),
+          drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({
+            name: d?.name,
+            url: toFileUrl(d?.file?.asset),
+          })),
+          models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({
+            name: m?.name,
+            url: toFileUrl(m?.file?.asset),
+          })),
+        },
+      })
+    )
+  }
+  const products = await getProducts()
+  return products.filter(p => p.categoryId === categoryId)
 }
 export const getProductsByDesignerId = async (designerId: string): Promise<Product[]> => {
-    if (useSanity && sanity) {
-        const query = groq`*[_type == "product" && references(*[_type == "designer" && id.current == $designerId]._id) && (!defined(isPublished) || isPublished == true)]{
+  if (useSanity && sanity) {
+    const query = groq`*[_type == "product" && references(*[_type == "designer" && id.current == $designerId]._id) && (!defined(isPublished) || isPublished == true)]{
           "id": id.current,
           name,
           year,
@@ -804,113 +901,126 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
         }`
-        const rows = await sanity.fetch(query, { designerId })
-        return rows.map((r: any) => normalizeProduct({
-          id: r.id,
-          name: r.name,
-          designerId: r.designer?.designerId || '',
-          categoryId: r.category?.categoryId || '',
-          year: r.year,
-          isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
-          description: r.description,
-          mainImage: (() => {
-            const img = mapImage(r.mainImage)
-            const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
-            const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
-            // Art Direction için object döndür
-            return { 
-              url: img,
-              urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
-              urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
-            }
-          })(),
-          alternativeImages: mapImages(r.alternativeImages),
-          alternativeMedia: mapAlternativeMedia(r),
-          media: mapProductMedia(r),
-          showMediaPanels: Boolean(r?.showMediaPanels),
-          dimensionImages: mapDimensionImages(r?.dimensionImages),
-          buyable: Boolean(r.buyable),
-          price: r.price,
-          currency: r.currency,
-          materials: mapMaterials((r.materialSelections || []).flatMap((s: any) => s?.materials || [])),
-          mediaSectionTitle: r?.mediaSectionTitle,
-          mediaSectionText: r?.mediaSectionText,
-          exclusiveContent: {
-            images: mapImages(r?.exclusiveContent?.images),
-            drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: toFileUrl(d?.file?.asset) })),
-            models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({ name: m?.name, url: toFileUrl(m?.file?.asset) })),
-          },
-        }))
-    }
-    const products = await getProducts();
-    return products.filter(p => p.designerId === designerId);
+    const rows = await sanity.fetch(query, {designerId})
+    return rows.map((r: any) =>
+      normalizeProduct({
+        id: r.id,
+        name: r.name,
+        designerId: r.designer?.designerId || '',
+        categoryId: r.category?.categoryId || '',
+        year: r.year,
+        isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
+        description: r.description,
+        mainImage: (() => {
+          const img = mapImage(r.mainImage)
+          const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
+          const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
+          // Art Direction için object döndür
+          return {
+            url: img,
+            urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
+            urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
+          }
+        })(),
+        alternativeImages: mapImages(r.alternativeImages),
+        alternativeMedia: mapAlternativeMedia(r),
+        media: mapProductMedia(r),
+        showMediaPanels: Boolean(r?.showMediaPanels),
+        dimensionImages: mapDimensionImages(r?.dimensionImages),
+        buyable: Boolean(r.buyable),
+        price: r.price,
+        currency: r.currency,
+        materials: mapMaterials(
+          (r.materialSelections || []).flatMap((s: any) => s?.materials || [])
+        ),
+        mediaSectionTitle: r?.mediaSectionTitle,
+        mediaSectionText: r?.mediaSectionText,
+        exclusiveContent: {
+          images: mapImages(r?.exclusiveContent?.images),
+          drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({
+            name: d?.name,
+            url: toFileUrl(d?.file?.asset),
+          })),
+          models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({
+            name: m?.name,
+            url: toFileUrl(m?.file?.asset),
+          })),
+        },
+      })
+    )
+  }
+  const products = await getProducts()
+  return products.filter(p => p.designerId === designerId)
 }
 export const addProduct = async (product: Product): Promise<void> => {
-    await delay(SIMULATED_DELAY);
-    const products = await getProducts();
-    if (products.some(p => p.id === product.id)) {
-        throw new Error('Product ID already exists');
-    }
-    setItem(KEYS.PRODUCTS, [...products, product]);
-};
+  await delay(SIMULATED_DELAY)
+  const products = await getProducts()
+  if (products.some(p => p.id === product.id)) {
+    throw new Error('Product ID already exists')
+  }
+  setItem(KEYS.PRODUCTS, [...products, product])
+}
 export const updateProduct = async (product: Product): Promise<void> => {
-    await delay(SIMULATED_DELAY);
-    let products = await getProducts();
-    products = products.map(p => (p.id === product.id ? product : p));
-    setItem(KEYS.PRODUCTS, products);
-};
+  await delay(SIMULATED_DELAY)
+  const products = await getProducts()
+  const updatedProducts = products.map(p => (p.id === product.id ? product : p))
+  setItem(KEYS.PRODUCTS, updatedProducts)
+}
 export const deleteProduct = async (id: string): Promise<void> => {
-    await delay(SIMULATED_DELAY);
-    let products = await getProducts();
-    setItem(KEYS.PRODUCTS, products.filter(p => p.id !== id));
-};
+  await delay(SIMULATED_DELAY)
+  const products = await getProducts()
+  setItem(
+    KEYS.PRODUCTS,
+    products.filter(p => p.id !== id)
+  )
+}
 
 // Page Content
 export const getAboutPageContent = async (): Promise<AboutPageContent> => {
-    if (useSanity && sanity) {
-        const q = groq`*[_type == "aboutPage"][0]{
+  if (useSanity && sanity) {
+    const q = groq`*[_type == "aboutPage"][0]{
             ...,
             heroImage,
             storyImage
         }`
-        const data = await sanity.fetch(q);
-        if (data) {
-            // Normalize images
-            if (data.heroImage) {
-                data.heroImage = mapImage(data.heroImage);
-            }
-            if (data.storyImage) {
-                data.storyImage = mapImage(data.storyImage);
-            }
-            // Ensure values is always an array
-            if (!Array.isArray(data.values)) {
-                data.values = [];
-            }
-            return data;
-        }
-    }
-    await delay(SIMULATED_DELAY);
-    const data = getItem<AboutPageContent>(KEYS.ABOUT_PAGE);
-    // Ensure values is always an array
-    if (data && !Array.isArray(data.values)) {
-        data.values = [];
-    }
-    // Return data or fallback to default from initialData
+    const data = await sanity.fetch(q)
     if (data) {
-        return data;
+      // Normalize images
+      if (data.heroImage) {
+        data.heroImage = mapImage(data.heroImage)
+      }
+      if (data.storyImage) {
+        data.storyImage = mapImage(data.storyImage)
+      }
+      // Ensure values is always an array
+      if (!Array.isArray(data.values)) {
+        data.values = []
+      }
+      return data
     }
-    // If no data exists, return default from initialData
-    const defaultData = initialData[KEYS.ABOUT_PAGE] as AboutPageContent;
-    return defaultData || {} as AboutPageContent;
-};
+  }
+  await delay(SIMULATED_DELAY)
+  const data = getItem<AboutPageContent>(KEYS.ABOUT_PAGE)
+  // Ensure values is always an array
+  if (data && !Array.isArray(data.values)) {
+    data.values = []
+  }
+  // Return data or fallback to default from initialData
+  if (data) {
+    return data
+  }
+  // If no data exists, return default from initialData
+  const defaultData = initialData[KEYS.ABOUT_PAGE] as AboutPageContent
+  return defaultData || ({} as AboutPageContent)
+}
 export const updateAboutPageContent = async (content: AboutPageContent): Promise<void> => {
-    await delay(SIMULATED_DELAY);
-    setItem(KEYS.ABOUT_PAGE, content);
-};
+  await delay(SIMULATED_DELAY)
+  setItem(KEYS.ABOUT_PAGE, content)
+}
 
 export const getContactPageContent = async (): Promise<ContactPageContent> => {
-    if (useSanity && sanity) {
-        const q = groq`*[_type == "contactPage"][0]{
+  if (useSanity && sanity) {
+    const q = groq`*[_type == "contactPage"][0]{
             ...,
             locations[]{
                 ...,
@@ -924,43 +1034,45 @@ export const getContactPageContent = async (): Promise<ContactPageContent> => {
                 }
             }
         }`
-        const data = await sanity.fetch(q);
-        if (data?.locations) {
-            data.locations = data.locations.map((loc: any) => {
-                if (loc.media && Array.isArray(loc.media)) {
-                    const processedMedia = loc.media.map((mediaItem: any) => {
-                        let mediaUrl = mediaItem.url;
-                        if (mediaItem.type === 'image' && mediaItem.image) {
-                            mediaUrl = mapImage(mediaItem.image);
-                        } else if (mediaItem.type === 'video' && mediaItem.videoFile?.asset?.url) {
-                            mediaUrl = mediaItem.videoFile.asset.url;
-                        } else if (mediaItem.type === 'video' && mediaItem.videoFile?.asset?._id) {
-                            const fileId = mediaItem.videoFile.asset._id.replace('file-', '');
-                            mediaUrl = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`;
-                        } else if (mediaItem.type === 'video' && mediaItem.videoFile?.asset?._ref) {
-                            const fileId = mediaItem.videoFile.asset._ref.replace('file-', '');
-                            mediaUrl = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`;
-                        }
-                        return { ...mediaItem, url: mediaUrl };
-                    }).filter((m: any) => m.url); // URL'si olmayan medyaları filtrele
-                    return { ...loc, media: processedMedia };
-                }
-                return loc;
-            });
+    const data = await sanity.fetch(q)
+    if (data?.locations) {
+      data.locations = data.locations.map((loc: any) => {
+        if (loc.media && Array.isArray(loc.media)) {
+          const processedMedia = loc.media
+            .map((mediaItem: any) => {
+              let mediaUrl = mediaItem.url
+              if (mediaItem.type === 'image' && mediaItem.image) {
+                mediaUrl = mapImage(mediaItem.image)
+              } else if (mediaItem.type === 'video' && mediaItem.videoFile?.asset?.url) {
+                mediaUrl = mediaItem.videoFile.asset.url
+              } else if (mediaItem.type === 'video' && mediaItem.videoFile?.asset?._id) {
+                const fileId = mediaItem.videoFile.asset._id.replace('file-', '')
+                mediaUrl = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+              } else if (mediaItem.type === 'video' && mediaItem.videoFile?.asset?._ref) {
+                const fileId = mediaItem.videoFile.asset._ref.replace('file-', '')
+                mediaUrl = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+              }
+              return {...mediaItem, url: mediaUrl}
+            })
+            .filter((m: any) => m.url) // URL'si olmayan medyaları filtrele
+          return {...loc, media: processedMedia}
         }
-        return data;
+        return loc
+      })
     }
-    await delay(SIMULATED_DELAY);
-    return getItem<ContactPageContent>(KEYS.CONTACT_PAGE);
-};
+    return data
+  }
+  await delay(SIMULATED_DELAY)
+  return getItem<ContactPageContent>(KEYS.CONTACT_PAGE)
+}
 export const updateContactPageContent = async (content: ContactPageContent): Promise<void> => {
-    await delay(SIMULATED_DELAY);
-    setItem(KEYS.CONTACT_PAGE, content);
-};
+  await delay(SIMULATED_DELAY)
+  setItem(KEYS.CONTACT_PAGE, content)
+}
 
 export const getHomePageContent = async (): Promise<HomePageContent> => {
-    if (useSanity && sanity) {
-        const q = groq`*[_type == "homePage"][0]{
+  if (useSanity && sanity) {
+    const q = groq`*[_type == "homePage"][0]{
             ...,
             heroAutoPlay,
             heroMedia[]{
@@ -992,70 +1104,74 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
                 backgroundImageDesktop
             }
         }`
-        const data = await sanity.fetch(q);
-        if (data?.heroMedia) {
-            data.heroMedia = data.heroMedia.map((m: any) => {
-                const url = mapMediaUrl(m)
-                const urlMobile = mapMediaUrl(m, true, false)
-                const urlDesktop = mapMediaUrl(m, false, true)
-                
-                const result: any = { ...m, url }
-                if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
-                if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
-                
-                return result
-            });
-        }
-        if (data?.contentBlocks) {
-            data.contentBlocks = data.contentBlocks.map((b: any) => {
-                let url = b.url
-                if (b.mediaType === 'image' && b.image) {
-                    return { ...b, image: mapImage(b.image), url: undefined }
-                } else if (b.mediaType === 'video' && b.videoFile?.asset?.url) {
-                    url = b.videoFile.asset.url
-                } else if (b.mediaType === 'video' && b.videoFile?.asset?._id) {
-                    const fileId = b.videoFile.asset._id.replace('file-', '')
-                    url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
-                } else if (b.mediaType === 'video' && b.videoFile?.asset?._ref) {
-                    const fileId = b.videoFile.asset._ref.replace('file-', '')
-                    url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
-                }
-                return { ...b, image: undefined, url }
-            });
-        }
-        if (data?.inspirationSection) {
-            const bgImg = mapImage(data.inspirationSection.backgroundImage)
-            const bgImgMobile = data.inspirationSection.backgroundImageMobile ? mapImage(data.inspirationSection.backgroundImageMobile) : undefined
-            const bgImgDesktop = data.inspirationSection.backgroundImageDesktop ? mapImage(data.inspirationSection.backgroundImageDesktop) : undefined
-            data.inspirationSection.backgroundImage = {
-              url: bgImg,
-              urlMobile: bgImgMobile && bgImgMobile !== bgImg ? bgImgMobile : undefined,
-              urlDesktop: bgImgDesktop && bgImgDesktop !== bgImg ? bgImgDesktop : undefined,
-            }
-        }
-        // Ensure featuredProductIds is always an array
-        if (!Array.isArray(data?.featuredProductIds)) {
-            data.featuredProductIds = [];
-        }
-        return data;
+    const data = await sanity.fetch(q)
+    if (data?.heroMedia) {
+      data.heroMedia = data.heroMedia.map((m: any) => {
+        const url = mapMediaUrl(m)
+        const urlMobile = mapMediaUrl(m, true, false)
+        const urlDesktop = mapMediaUrl(m, false, true)
+
+        const result: any = {...m, url}
+        if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
+        if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
+
+        return result
+      })
     }
-    await delay(SIMULATED_DELAY);
-    const data = getItem<HomePageContent>(KEYS.HOME_PAGE);
+    if (data?.contentBlocks) {
+      data.contentBlocks = data.contentBlocks.map((b: any) => {
+        let url = b.url
+        if (b.mediaType === 'image' && b.image) {
+          return {...b, image: mapImage(b.image), url: undefined}
+        } else if (b.mediaType === 'video' && b.videoFile?.asset?.url) {
+          url = b.videoFile.asset.url
+        } else if (b.mediaType === 'video' && b.videoFile?.asset?._id) {
+          const fileId = b.videoFile.asset._id.replace('file-', '')
+          url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+        } else if (b.mediaType === 'video' && b.videoFile?.asset?._ref) {
+          const fileId = b.videoFile.asset._ref.replace('file-', '')
+          url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+        }
+        return {...b, image: undefined, url}
+      })
+    }
+    if (data?.inspirationSection) {
+      const bgImg = mapImage(data.inspirationSection.backgroundImage)
+      const bgImgMobile = data.inspirationSection.backgroundImageMobile
+        ? mapImage(data.inspirationSection.backgroundImageMobile)
+        : undefined
+      const bgImgDesktop = data.inspirationSection.backgroundImageDesktop
+        ? mapImage(data.inspirationSection.backgroundImageDesktop)
+        : undefined
+      data.inspirationSection.backgroundImage = {
+        url: bgImg,
+        urlMobile: bgImgMobile && bgImgMobile !== bgImg ? bgImgMobile : undefined,
+        urlDesktop: bgImgDesktop && bgImgDesktop !== bgImg ? bgImgDesktop : undefined,
+      }
+    }
     // Ensure featuredProductIds is always an array
-    if (data && !Array.isArray(data.featuredProductIds)) {
-        data.featuredProductIds = [];
+    if (!Array.isArray(data?.featuredProductIds)) {
+      data.featuredProductIds = []
     }
-    return data;
-};
+    return data
+  }
+  await delay(SIMULATED_DELAY)
+  const data = getItem<HomePageContent>(KEYS.HOME_PAGE)
+  // Ensure featuredProductIds is always an array
+  if (data && !Array.isArray(data.featuredProductIds)) {
+    data.featuredProductIds = []
+  }
+  return data
+}
 export const updateHomePageContent = async (content: HomePageContent): Promise<void> => {
-    await delay(SIMULATED_DELAY);
-    setItem(KEYS.HOME_PAGE, content);
-};
+  await delay(SIMULATED_DELAY)
+  setItem(KEYS.HOME_PAGE, content)
+}
 
 // Footer Content
 export const getFooterContent = async (): Promise<FooterContent> => {
-    if (useSanity && sanity) {
-        const q = groq`*[_type == "footer"][0]{
+  if (useSanity && sanity) {
+    const q = groq`*[_type == "footer"][0]{
             ...,
             partners[]{
                 ...,
@@ -1063,79 +1179,79 @@ export const getFooterContent = async (): Promise<FooterContent> => {
             },
             legalLinks[]
         }`
-        const data = await sanity.fetch(q);
-        if (data?.partners) {
-            data.partners = data.partners.map((p: any) => ({
-                ...p,
-                logo: mapImage(p.logo)
-            }));
-        }
-        // Ensure legalLinks is always an array
-        if (!Array.isArray(data?.legalLinks)) {
-            data.legalLinks = [];
-        }
-        return data;
+    const data = await sanity.fetch(q)
+    if (data?.partners) {
+      data.partners = data.partners.map((p: any) => ({
+        ...p,
+        logo: mapImage(p.logo),
+      }))
     }
-    await delay(SIMULATED_DELAY);
-    const data = getItem<FooterContent>(KEYS.FOOTER);
     // Ensure legalLinks is always an array
-    if (data && !Array.isArray(data.legalLinks)) {
-        data.legalLinks = [];
+    if (!Array.isArray(data?.legalLinks)) {
+      data.legalLinks = []
     }
-    return data;
-};
+    return data
+  }
+  await delay(SIMULATED_DELAY)
+  const data = getItem<FooterContent>(KEYS.FOOTER)
+  // Ensure legalLinks is always an array
+  if (data && !Array.isArray(data.legalLinks)) {
+    data.legalLinks = []
+  }
+  return data
+}
 export const updateFooterContent = async (content: FooterContent): Promise<void> => {
-    await delay(SIMULATED_DELAY);
-    setItem(KEYS.FOOTER, content);
-};
+  await delay(SIMULATED_DELAY)
+  setItem(KEYS.FOOTER, content)
+}
 
 // Cookies Policy
 export const getCookiesPolicy = async (): Promise<CookiesPolicy | null> => {
-    if (useSanity && sanity) {
-        const q = groq`*[_type == "cookiesPolicy"][0]{ title, content, updatedAt }`;
-        const data = await sanity.fetch(q);
-        return data || null;
-    }
-    await delay(SIMULATED_DELAY);
-    return null;
-};
+  if (useSanity && sanity) {
+    const q = groq`*[_type == "cookiesPolicy"][0]{ title, content, updatedAt }`
+    const data = await sanity.fetch(q)
+    return data || null
+  }
+  await delay(SIMULATED_DELAY)
+  return null
+}
 
 // Privacy Policy
 export const getPrivacyPolicy = async (): Promise<PrivacyPolicy | null> => {
-    if (useSanity && sanity) {
-        const q = groq`*[_type == "privacyPolicy"][0]{ title, content, updatedAt }`;
-        const data = await sanity.fetch(q);
-        return data || null;
-    }
-    await delay(SIMULATED_DELAY);
-    return null;
-};
+  if (useSanity && sanity) {
+    const q = groq`*[_type == "privacyPolicy"][0]{ title, content, updatedAt }`
+    const data = await sanity.fetch(q)
+    return data || null
+  }
+  await delay(SIMULATED_DELAY)
+  return null
+}
 
 // Terms of Service
 export const getTermsOfService = async (): Promise<TermsOfService | null> => {
-    if (useSanity && sanity) {
-        const q = groq`*[_type == "termsOfService"][0]{ title, content, updatedAt }`;
-        const data = await sanity.fetch(q);
-        return data || null;
-    }
-    await delay(SIMULATED_DELAY);
-    return null;
-};
+  if (useSanity && sanity) {
+    const q = groq`*[_type == "termsOfService"][0]{ title, content, updatedAt }`
+    const data = await sanity.fetch(q)
+    return data || null
+  }
+  await delay(SIMULATED_DELAY)
+  return null
+}
 
 // KVKK Policy
 export const getKvkkPolicy = async (): Promise<KvkkPolicy | null> => {
-    if (useSanity && sanity) {
-        const q = groq`*[_type == "kvkkPolicy"][0]{ title, content, updatedAt }`;
-        const data = await sanity.fetch(q);
-        return data || null;
-    }
-    await delay(SIMULATED_DELAY);
-    return null;
-};
+  if (useSanity && sanity) {
+    const q = groq`*[_type == "kvkkPolicy"][0]{ title, content, updatedAt }`
+    const data = await sanity.fetch(q)
+    return data || null
+  }
+  await delay(SIMULATED_DELAY)
+  return null
+}
 // News
 export const getNews = async (): Promise<NewsItem[]> => {
-    if (useSanity && sanity) {
-        const q = groq`*[_type == "newsItem"] | order(date desc){ 
+  if (useSanity && sanity) {
+    const q = groq`*[_type == "newsItem"] | order(date desc){ 
           "id": id.current, 
           title, 
           date, 
@@ -1155,114 +1271,121 @@ export const getNews = async (): Promise<NewsItem[]> => {
             videoFileDesktop{asset->{url, _ref, _id}}
           }
         }`
-        const rows = await sanity.fetch(q)
-        return rows.map((r: any) => ({
-          id: r.id,
-          title: r.title,
-          date: r.date,
-          content: r.content,
-          mainImage: (() => {
-            const img = mapImage(r.mainImage)
-            const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
-            const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
-            // Art Direction için object döndür
-            return { 
-              url: img,
-              urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
-              urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
-            }
-          })(),
-          media: (r.media || []).map((m: any) => {
-            const url = mapMediaUrl(m)
-            const urlMobile = mapMediaUrl(m, true, false)
-            const urlDesktop = mapMediaUrl(m, false, true)
-            
-            const result: any = { type: m.type, url, caption: m.caption }
-            if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
-            if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
-            
-            return result
-          }).filter((m: any) => m.url),
-        }))
-    }
-    await delay(SIMULATED_DELAY);
-    return getItem<NewsItem[]>(KEYS.NEWS);
-};
-export const getNewsById = async (id: string): Promise<NewsItem | undefined> => {
-    if (useSanity && sanity) {
-        const q = groq`*[_type == "newsItem" && id.current == $id][0]{ 
-          "id": id.current, 
-          title, 
-          date, 
-          content, 
-          mainImage,
-          mainImageMobile,
-          mainImageDesktop, 
-          media[]{
-            type,
-            url,
-            caption,
-            image,
-            imageMobile,
-            imageDesktop,
-            videoFile{asset->{url, _ref, _id}},
-            videoFileMobile{asset->{url, _ref, _id}},
-            videoFileDesktop{asset->{url, _ref, _id}}
-          }
-        }`
-        const r = await sanity.fetch(q, { id })
-        if (!r) return undefined
+    const rows = await sanity.fetch(q)
+    return rows.map((r: any) => ({
+      id: r.id,
+      title: r.title,
+      date: r.date,
+      content: r.content,
+      mainImage: (() => {
+        const img = mapImage(r.mainImage)
+        const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
+        const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
+        // Art Direction için object döndür
         return {
-          id: r.id,
-          title: r.title,
-          date: r.date,
-          content: r.content,
-          mainImage: (() => {
-            const img = mapImage(r.mainImage)
-            const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
-            const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
-            // Art Direction için object döndür
-            return { 
-              url: img,
-              urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
-              urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
-            }
-          })(),
-          media: (r.media || []).map((m: any) => {
-            const url = mapMediaUrl(m)
-            const urlMobile = mapMediaUrl(m, true, false)
-            const urlDesktop = mapMediaUrl(m, false, true)
-            
-            const result: any = { type: m.type, url, caption: m.caption }
-            if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
-            if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
-            
-            return result
-          }).filter((m: any) => m.url),
+          url: img,
+          urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
+          urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
         }
+      })(),
+      media: (r.media || [])
+        .map((m: any) => {
+          const url = mapMediaUrl(m)
+          const urlMobile = mapMediaUrl(m, true, false)
+          const urlDesktop = mapMediaUrl(m, false, true)
+
+          const result: any = {type: m.type, url, caption: m.caption}
+          if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
+          if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
+
+          return result
+        })
+        .filter((m: any) => m.url),
+    }))
+  }
+  await delay(SIMULATED_DELAY)
+  return getItem<NewsItem[]>(KEYS.NEWS)
+}
+export const getNewsById = async (id: string): Promise<NewsItem | undefined> => {
+  if (useSanity && sanity) {
+    const q = groq`*[_type == "newsItem" && id.current == $id][0]{ 
+          "id": id.current, 
+          title, 
+          date, 
+          content, 
+          mainImage,
+          mainImageMobile,
+          mainImageDesktop, 
+          media[]{
+            type,
+            url,
+            caption,
+            image,
+            imageMobile,
+            imageDesktop,
+            videoFile{asset->{url, _ref, _id}},
+            videoFileMobile{asset->{url, _ref, _id}},
+            videoFileDesktop{asset->{url, _ref, _id}}
+          }
+        }`
+    const r = await sanity.fetch(q, {id})
+    if (!r) return undefined
+    return {
+      id: r.id,
+      title: r.title,
+      date: r.date,
+      content: r.content,
+      mainImage: (() => {
+        const img = mapImage(r.mainImage)
+        const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
+        const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
+        // Art Direction için object döndür
+        return {
+          url: img,
+          urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
+          urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
+        }
+      })(),
+      media: (r.media || [])
+        .map((m: any) => {
+          const url = mapMediaUrl(m)
+          const urlMobile = mapMediaUrl(m, true, false)
+          const urlDesktop = mapMediaUrl(m, false, true)
+
+          const result: any = {type: m.type, url, caption: m.caption}
+          if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
+          if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
+
+          return result
+        })
+        .filter((m: any) => m.url),
     }
-    const newsItems = await getNews();
-    return newsItems.find(n => n.id === id);
+  }
+  const newsItems = await getNews()
+  return newsItems.find(n => n.id === id)
 }
 export const addNews = async (newsItem: NewsItem): Promise<void> => {
-    await delay(SIMULATED_DELAY);
-    const news = await getNews();
-    if (news.some(n => n.id === newsItem.id)) {
-        throw new Error('News ID already exists');
-    }
-    setItem(KEYS.NEWS, [...news, newsItem]);
-};
+  await delay(SIMULATED_DELAY)
+  const news = await getNews()
+  if (news.some(n => n.id === newsItem.id)) {
+    throw new Error('News ID already exists')
+  }
+  setItem(KEYS.NEWS, [...news, newsItem])
+}
 export const updateNews = async (newsItem: NewsItem): Promise<void> => {
-    await delay(SIMULATED_DELAY);
-    let news = await getNews();
-    news = news.map(n => (n.id === newsItem.id ? newsItem : n));
-    setItem(KEYS.NEWS, news);
-};
+  await delay(SIMULATED_DELAY)
+  const news = await getNews()
+  const updatedNews = news.map(n => (n.id === newsItem.id ? newsItem : n))
+  setItem(KEYS.NEWS, updatedNews)
+}
 export const deleteNews = async (id: string): Promise<void> => {
-    await delay(SIMULATED_DELAY);
-    let news = await getNews();
-    setItem(KEYS.NEWS, news.filter(n => n.id !== id));
-};
+  await delay(SIMULATED_DELAY)
+  const news = await getNews()
+  setItem(
+    KEYS.NEWS,
+    news.filter(n => n.id !== id)
+  )
+}
 
 // Projects
 export const getProjects = async (): Promise<Project[]> => {
@@ -1273,16 +1396,16 @@ export const getProjects = async (): Promise<Project[]> => {
       const cover = mapImage(r.cover)
       const coverMobile = r.coverMobile ? mapImage(r.coverMobile) : undefined
       const coverDesktop = r.coverDesktop ? mapImage(r.coverDesktop) : undefined
-      return { 
-        id: r.id, 
-        title: r.title, 
-        date: r.date, 
+      return {
+        id: r.id,
+        title: r.title,
+        date: r.date,
         cover: {
           url: cover,
           urlMobile: coverMobile && coverMobile !== cover ? coverMobile : undefined,
           urlDesktop: coverDesktop && coverDesktop !== cover ? coverDesktop : undefined,
         },
-        excerpt: r.excerpt 
+        excerpt: r.excerpt,
       }
     })
   }
@@ -1310,26 +1433,28 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
         videoFileDesktop{asset->{url, _ref, _id}}
       }
     }`
-    const r = await sanity.fetch(q, { id })
+    const r = await sanity.fetch(q, {id})
     if (!r) return undefined
-    
-    const media = (r.media || []).map((m: any) => {
-      const type = m?.type || 'image'
-      const url = mapMediaUrl(m)
-      const urlMobile = mapMediaUrl(m, true, false)
-      const urlDesktop = mapMediaUrl(m, false, true)
-      
-      const result: any = { type, url, image: type === 'image' ? url : undefined }
-      if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
-      if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
-      
-      return result
-    }).filter((m: any) => m.url)
-    
-    return { 
-      id: r.id, 
-      title: r.title, 
-      date: r.date, 
+
+    const media = (r.media || [])
+      .map((m: any) => {
+        const type = m?.type || 'image'
+        const url = mapMediaUrl(m)
+        const urlMobile = mapMediaUrl(m, true, false)
+        const urlDesktop = mapMediaUrl(m, false, true)
+
+        const result: any = {type, url, image: type === 'image' ? url : undefined}
+        if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
+        if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
+
+        return result
+      })
+      .filter((m: any) => m.url)
+
+    return {
+      id: r.id,
+      title: r.title,
+      date: r.date,
       cover: (() => {
         const cover = mapImage(r.cover)
         const coverMobile = r.coverMobile ? mapImage(r.coverMobile) : undefined
@@ -1339,63 +1464,81 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
           urlMobile: coverMobile && coverMobile !== cover ? coverMobile : undefined,
           urlDesktop: coverDesktop && coverDesktop !== cover ? coverDesktop : undefined,
         }
-      })(), 
-      excerpt: r.excerpt, 
-      body: r.body, 
-      media: media.length > 0 ? media : undefined
+      })(),
+      excerpt: r.excerpt,
+      body: r.body,
+      media: media.length > 0 ? media : undefined,
     }
   }
   return undefined
 }
 
-// Simple hash function (for production, use bcrypt or similar)
+// Password hashing with bcrypt (salt automatically added)
+// Note: This is a breaking change. Existing SHA-256 hashes need to be migrated.
+// For new users, passwords will be hashed with bcrypt.
+// For existing users, you may need to implement a migration strategy.
 const hashPassword = async (password: string): Promise<string> => {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-};
+  // Use bcrypt with 10 rounds (good balance between security and performance)
+  const saltRounds = 10
+  return await bcrypt.hash(password, saltRounds)
+}
+
+// Compare password with hash (supports both bcrypt and legacy SHA-256 for migration)
+const comparePassword = async (password: string, hash: string): Promise<boolean> => {
+  // Check if hash is bcrypt format (starts with $2a$, $2b$, or $2y$)
+  if (hash.startsWith('$2a$') || hash.startsWith('$2b$') || hash.startsWith('$2y$')) {
+    return await bcrypt.compare(password, hash)
+  }
+  // Legacy SHA-256 support (for migration period)
+  const encoder = new TextEncoder()
+  const data = encoder.encode(password)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  const sha256Hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+  return sha256Hash === hash
+}
 
 // Users
 // Email subscriber (password olmadan)
 export const subscribeEmail = async (email: string): Promise<User> => {
-  const normEmail = normalizeEmail(email);
+  const normEmail = normalizeEmail(email)
   if (!normEmail) {
-    throw new Error('Geçerli bir e-posta adresi girin');
+    throw new Error('Geçerli bir e-posta adresi girin')
   }
   // Eğer Sanity mutations aktif DEĞİLSE, local storage'ta tekrarı engelle
   if (!(useSanity && sanity && sanityMutations)) {
-    const existingLocal = (getItem<User[]>(KEYS.USERS || 'birim_users') || [])
-      .find(u => normalizeEmail(u.email) === normEmail);
+    const existingLocal = (getItem<User[]>(KEYS.USERS || 'birim_users') || []).find(
+      u => normalizeEmail(u.email) === normEmail
+    )
     if (existingLocal) {
-      throw new Error('Bu e-posta adresi zaten aboneliğe kayıtlı');
+      throw new Error('Bu e-posta adresi zaten aboneliğe kayıtlı')
     }
   }
   if (useSanity && sanity) {
     // Check if user already exists
-    const existingUser = await sanity.fetch(
-      groq`*[_type == "user" && lower(email) == $email][0]`,
-      { email: normEmail }
-    );
+    const existingUser = await sanity.fetch(groq`*[_type == "user" && lower(email) == $email][0]`, {
+      email: normEmail,
+    })
     if (existingUser) {
       // Sanity'de zaten varsa abonelik tekrarı olmasın
-      throw new Error('Bu e-posta adresi zaten aboneliğe kayıtlı');
+      throw new Error('Bu e-posta adresi zaten aboneliğe kayıtlı')
     }
-    
+
     // Create email subscriber (password olmadan)
     // Email aboneliği için token yoksa local storage'a kaydet (daha esnek)
     if (!sanityMutations) {
       if (!ENABLE_LOCAL_FALLBACK) {
-        throw new Error('Sunucuya yazma kapalı: Sanity token yok ve local fallback devre dışı. Lütfen VITE_SANITY_TOKEN ekleyin.');
+        throw new Error(
+          'Sunucuya yazma kapalı: Sanity token yok ve local fallback devre dışı. Lütfen VITE_SANITY_TOKEN ekleyin.'
+        )
       }
       // Local storage'a kaydet ve devam et
-      await delay(SIMULATED_DELAY);
-      const users = getItem<User[]>(KEYS.USERS || 'birim_users') || [];
+      await delay(SIMULATED_DELAY)
+      const users = getItem<User[]>(KEYS.USERS || 'birim_users') || []
       // Üstte kontrol edilse de yarış koşulları için tekrar kontrol
-      const exists = users.find(u => normalizeEmail(u.email) === normEmail);
-      if (exists) throw new Error('Bu e-posta adresi zaten aboneliğe kayıtlı');
-      
+      const exists = users.find(u => normalizeEmail(u.email) === normEmail)
+      if (exists) throw new Error('Bu e-posta adresi zaten aboneliğe kayıtlı')
+
       const newUser: User = {
         _id: `user_${Date.now()}`,
         email: normEmail,
@@ -1405,12 +1548,12 @@ export const subscribeEmail = async (email: string): Promise<User> => {
         userType: 'email_subscriber',
         isActive: true,
         createdAt: new Date().toISOString(),
-      };
-      
-      setItem(KEYS.USERS || 'birim_users', [...users, newUser]);
-      return newUser;
+      }
+
+      setItem(KEYS.USERS || 'birim_users', [...users, newUser])
+      return newUser
     }
-    
+
     try {
       const user = await sanityMutations.create({
         _type: 'user',
@@ -1422,8 +1565,8 @@ export const subscribeEmail = async (email: string): Promise<User> => {
         userType: 'email_subscriber',
         isActive: true,
         createdAt: new Date().toISOString(),
-      });
-      
+      })
+
       return {
         _id: user._id,
         email: user.email,
@@ -1433,33 +1576,39 @@ export const subscribeEmail = async (email: string): Promise<User> => {
         userType: user.userType as UserType,
         isActive: user.isActive,
         createdAt: user.createdAt || user._createdAt,
-      };
+      }
     } catch (error: any) {
       // Sanity hatası varsa hatayı fırlat
-      let errorMessage = 'E-posta aboneliği yapılırken bir hata oluştu. Lütfen tekrar deneyin.';
-      
+      let errorMessage = 'E-posta aboneliği yapılırken bir hata oluştu. Lütfen tekrar deneyin.'
+
       if (error.message?.includes('permission') || error.statusCode === 403) {
-        errorMessage = 'İZİN HATASI: Sanity token\'ınızın "Editor" veya "Admin" yetkisi olduğundan emin olun.';
-      } else if (error.message?.includes('duplicate') || error.message?.includes('already exists')) {
-        errorMessage = 'Bu e-posta adresi zaten kayıtlı.';
+        errorMessage =
+          'İZİN HATASI: Sanity token\'ınızın "Editor" veya "Admin" yetkisi olduğundan emin olun.'
+      } else if (
+        error.message?.includes('duplicate') ||
+        error.message?.includes('already exists')
+      ) {
+        errorMessage = 'Bu e-posta adresi zaten kayıtlı.'
       } else if (error.message) {
-        errorMessage = `Sanity hatası: ${error.message}`;
+        errorMessage = `Sanity hatası: ${error.message}`
       }
-      
-      throw new Error(errorMessage);
+
+      throw new Error(errorMessage)
     }
   }
-  
+
   // Local storage fallback - sadece Sanity kullanılmıyorsa
   if (!useSanity || !sanity) {
     if (!ENABLE_LOCAL_FALLBACK) {
-      throw new Error('Sunucuya yazma kapalı: Sanity yapılandırılmamış ve local fallback devre dışı.');
+      throw new Error(
+        'Sunucuya yazma kapalı: Sanity yapılandırılmamış ve local fallback devre dışı.'
+      )
     }
-    await delay(SIMULATED_DELAY);
-    const users = getItem<User[]>(KEYS.USERS || 'birim_users') || [];
-    const existingUser = users.find(u => normalizeEmail(u.email) === normEmail);
-    if (existingUser) throw new Error('Bu e-posta adresi zaten aboneliğe kayıtlı');
-    
+    await delay(SIMULATED_DELAY)
+    const users = getItem<User[]>(KEYS.USERS || 'birim_users') || []
+    const existingUser = users.find(u => normalizeEmail(u.email) === normEmail)
+    if (existingUser) throw new Error('Bu e-posta adresi zaten aboneliğe kayıtlı')
+
     const newUser: User = {
       _id: `user_${Date.now()}`,
       email: normEmail,
@@ -1469,49 +1618,61 @@ export const subscribeEmail = async (email: string): Promise<User> => {
       userType: 'email_subscriber',
       isActive: true,
       createdAt: new Date().toISOString(),
-    };
-    
-    setItem(KEYS.USERS || 'birim_users', [...users, newUser]);
-    return newUser;
+    }
+
+    setItem(KEYS.USERS || 'birim_users', [...users, newUser])
+    return newUser
   }
-  
+
   // Sanity kullanılıyorsa ama buraya gelmemeli (yukarıda hata fırlatılmalı)
-  throw new Error('Üye kaydı yapılamadı. Lütfen tekrar deneyin.');
-};
+  throw new Error('Üye kaydı yapılamadı. Lütfen tekrar deneyin.')
+}
 
 // Full member registration (password ile)
-export const registerUser = async (email: string, password: string, name?: string, company?: string, profession?: string): Promise<User> => {
-  const normEmail = normalizeEmail(email);
+export const registerUser = async (
+  email: string,
+  password: string,
+  name?: string,
+  company?: string,
+  profession?: string
+): Promise<User> => {
+  const normEmail = normalizeEmail(email)
   if (!normEmail) {
-    throw new Error('Geçerli bir e-posta adresi girin');
+    throw new Error('Geçerli bir e-posta adresi girin')
   }
   if (useSanity && sanity) {
     // Check if user already exists
-    const existingUser = await sanity.fetch(
-      groq`*[_type == "user" && lower(email) == $email][0]`,
-      { email: normEmail }
-    );
+    const existingUser = await sanity.fetch(groq`*[_type == "user" && lower(email) == $email][0]`, {
+      email: normEmail,
+    })
     if (existingUser) {
       // Eğer email_subscriber ise, full_member'a yükselt
       if (existingUser.userType === 'email_subscriber') {
-        const passwordHash = await hashPassword(password);
+        const passwordHash = await hashPassword(password)
         // Mutations için authenticated client kullan, yoksa hata fırlat
         if (!sanityMutations) {
           if (!ENABLE_LOCAL_FALLBACK) {
-            throw new Error('Sunucuya yazma kapalı: Sanity token yok ve local fallback devre dışı. Lütfen VITE_SANITY_TOKEN ekleyin.');
+            throw new Error(
+              'Sunucuya yazma kapalı: Sanity token yok ve local fallback devre dışı. Lütfen VITE_SANITY_TOKEN ekleyin.'
+            )
           }
-          throw new Error('Sanity token yapılandırılmamış. Lütfen .env dosyasına VITE_SANITY_TOKEN ekleyin. Üye bilgileri CMS\'de görünmeyecektir.');
+          throw new Error(
+            "Sanity token yapılandırılmamış. Lütfen .env dosyasına VITE_SANITY_TOKEN ekleyin. Üye bilgileri CMS'de görünmeyecektir."
+          )
         }
-        
+
         try {
-          const updatedUser = await sanityMutations.patch(existingUser._id).set({
-            password: passwordHash,
-            name: name || '',
-            company: company || '',
-            profession: profession || '',
-            userType: 'full_member',
-          }).commit();
-          
+          const updatedUser = await sanityMutations
+            .patch(existingUser._id)
+            .set({
+              password: passwordHash,
+              name: name || '',
+              company: company || '',
+              profession: profession || '',
+              userType: 'full_member',
+            })
+            .commit()
+
           return {
             _id: updatedUser._id,
             email: updatedUser.email,
@@ -1521,36 +1682,41 @@ export const registerUser = async (email: string, password: string, name?: strin
             userType: updatedUser.userType as UserType,
             isActive: updatedUser.isActive,
             createdAt: updatedUser.createdAt || updatedUser._createdAt,
-          };
+          }
         } catch (error: any) {
           // Sanity hatası varsa hatayı fırlat (local storage'a düşme)
-          let errorMessage = 'Üye kaydı güncellenirken bir hata oluştu. Lütfen tekrar deneyin.';
-          
+          let errorMessage = 'Üye kaydı güncellenirken bir hata oluştu. Lütfen tekrar deneyin.'
+
           if (error.message?.includes('permission')) {
-            errorMessage = 'İZİN HATASI: Sanity token\'ınızın "Editor" veya "Admin" yetkisi olduğundan emin olun. Üye bilgileri CMS\'de görünmeyecektir.';
+            errorMessage =
+              'İZİN HATASI: Sanity token\'ınızın "Editor" veya "Admin" yetkisi olduğundan emin olun. Üye bilgileri CMS\'de görünmeyecektir.'
           } else if (error.message) {
-            errorMessage = `Sanity hatası: ${error.message}`;
+            errorMessage = `Sanity hatası: ${error.message}`
           }
-          
-          throw new Error(errorMessage);
+
+          throw new Error(errorMessage)
         }
       } else {
-        throw new Error('Bu e-posta adresi zaten kayıtlı');
+        throw new Error('Bu e-posta adresi zaten kayıtlı')
       }
     }
-    
+
     // Hash password
-    const passwordHash = await hashPassword(password);
-    
+    const passwordHash = await hashPassword(password)
+
     // Create full member
     // Mutations için authenticated client kullan, yoksa hata fırlat
     if (!sanityMutations) {
       if (!ENABLE_LOCAL_FALLBACK) {
-        throw new Error('Sunucuya yazma kapalı: Sanity token yok ve local fallback devre dışı. Lütfen VITE_SANITY_TOKEN ekleyin.');
+        throw new Error(
+          'Sunucuya yazma kapalı: Sanity token yok ve local fallback devre dışı. Lütfen VITE_SANITY_TOKEN ekleyin.'
+        )
       }
-      throw new Error('Sanity token yapılandırılmamış. Lütfen proje kök dizininde .env dosyası oluşturup VITE_SANITY_TOKEN=your_token_here ekleyin. Token\'ı https://sanity.io/manage adresinden alabilirsiniz. Token\'ın "Editor" veya "Admin" yetkisi olmalıdır.');
+      throw new Error(
+        'Sanity token yapılandırılmamış. Lütfen proje kök dizininde .env dosyası oluşturup VITE_SANITY_TOKEN=your_token_here ekleyin. Token\'ı https://sanity.io/manage adresinden alabilirsiniz. Token\'ın "Editor" veya "Admin" yetkisi olmalıdır.'
+      )
     }
-    
+
     try {
       const user = await sanityMutations.create({
         _type: 'user',
@@ -1562,8 +1728,8 @@ export const registerUser = async (email: string, password: string, name?: strin
         userType: 'full_member',
         isActive: true,
         createdAt: new Date().toISOString(),
-      });
-      
+      })
+
       return {
         _id: user._id,
         email: user.email,
@@ -1573,51 +1739,57 @@ export const registerUser = async (email: string, password: string, name?: strin
         userType: user.userType as UserType,
         isActive: user.isActive,
         createdAt: user.createdAt || user._createdAt,
-      };
+      }
     } catch (error: any) {
       // Sanity hatası varsa hatayı fırlat (local storage'a düşme)
-      let errorMessage = 'Üye kaydı yapılırken bir hata oluştu. Lütfen tekrar deneyin.';
-      
+      let errorMessage = 'Üye kaydı yapılırken bir hata oluştu. Lütfen tekrar deneyin.'
+
       if (error.message?.includes('permission')) {
-        errorMessage = 'İZİN HATASI: Sanity token\'ınızın "Editor" veya "Admin" yetkisi olduğundan emin olun. Üye bilgileri CMS\'de görünmeyecektir.';
+        errorMessage =
+          'İZİN HATASI: Sanity token\'ınızın "Editor" veya "Admin" yetkisi olduğundan emin olun. Üye bilgileri CMS\'de görünmeyecektir.'
       } else if (error.message) {
-        errorMessage = `Sanity hatası: ${error.message}`;
+        errorMessage = `Sanity hatası: ${error.message}`
       }
-      
-      throw new Error(errorMessage);
+
+      throw new Error(errorMessage)
     }
   }
-  
+
   // Local storage fallback - sadece Sanity kullanılmıyorsa
   if (!useSanity || !sanity) {
     if (!ENABLE_LOCAL_FALLBACK) {
-      throw new Error('Sunucuya yazma kapalı: Sanity yapılandırılmamış ve local fallback devre dışı.');
+      throw new Error(
+        'Sunucuya yazma kapalı: Sanity yapılandırılmamış ve local fallback devre dışı.'
+      )
     }
-    await delay(SIMULATED_DELAY);
-    const users = getItem<User[]>(KEYS.USERS || 'birim_users') || [];
-    const existingUser = users.find(u => normalizeEmail(u.email) === normEmail);
+    await delay(SIMULATED_DELAY)
+    const users = getItem<User[]>(KEYS.USERS || 'birim_users') || []
+    const existingUser = users.find(u => normalizeEmail(u.email) === normEmail)
     if (existingUser) {
       if (existingUser.userType === 'email_subscriber') {
         // Email subscriber'ı full member'a yükselt
-        const passwordHash = await hashPassword(password);
-        const userPasswords = getItem<{ [email: string]: string }>('birim_user_passwords') || {};
-        userPasswords[normEmail] = passwordHash;
-        setItem('birim_user_passwords', userPasswords);
-        
+        const passwordHash = await hashPassword(password)
+        const userPasswords = getItem<{[email: string]: string}>('birim_user_passwords') || {}
+        userPasswords[normEmail] = passwordHash
+        setItem('birim_user_passwords', userPasswords)
+
         const updatedUser: User = {
           ...existingUser,
           name: name || '',
           company: company || '',
           profession: profession || '',
           userType: 'full_member',
-        };
-        setItem(KEYS.USERS || 'birim_users', users.map(u => normalizeEmail(u.email) === normEmail ? updatedUser : u));
-        return updatedUser;
+        }
+        setItem(
+          KEYS.USERS || 'birim_users',
+          users.map(u => (normalizeEmail(u.email) === normEmail ? updatedUser : u))
+        )
+        return updatedUser
       }
-      throw new Error('Bu e-posta adresi zaten kayıtlı');
+      throw new Error('Bu e-posta adresi zaten kayıtlı')
     }
-    
-    const passwordHash = await hashPassword(password);
+
+    const passwordHash = await hashPassword(password)
     const newUser: User = {
       _id: `user_${Date.now()}`,
       email: normEmail,
@@ -1627,27 +1799,27 @@ export const registerUser = async (email: string, password: string, name?: strin
       userType: 'full_member',
       isActive: true,
       createdAt: new Date().toISOString(),
-    };
-    
+    }
+
     // Store password hash separately (in real app, don't store in localStorage)
-    const userPasswords = getItem<{ [email: string]: string }>('birim_user_passwords') || {};
-    userPasswords[normEmail] = passwordHash;
-    setItem('birim_user_passwords', userPasswords);
-    
-    setItem(KEYS.USERS || 'birim_users', [...users, newUser]);
-    return newUser;
+    const userPasswords = getItem<{[email: string]: string}>('birim_user_passwords') || {}
+    userPasswords[normEmail] = passwordHash
+    setItem('birim_user_passwords', userPasswords)
+
+    setItem(KEYS.USERS || 'birim_users', [...users, newUser])
+    return newUser
   }
-  
+
   // Sanity kullanılıyorsa ama buraya gelmemeli (yukarıda hata fırlatılmalı)
-  throw new Error('Üye kaydı yapılamadı. Lütfen tekrar deneyin.');
-};
+  throw new Error('Üye kaydı yapılamadı. Lütfen tekrar deneyin.')
+}
 
 export const loginUser = async (email: string, password: string): Promise<User | null> => {
-  const normEmail = normalizeEmail(email);
+  const normEmail = normalizeEmail(email)
   if (useSanity && sanity) {
-    const passwordHash = await hashPassword(password);
+    // Fetch user by email first
     const user = await sanity.fetch(
-      groq`*[_type == "user" && lower(email) == $email && password == $passwordHash && isActive == true][0]{
+      groq`*[_type == "user" && lower(email) == $email && isActive == true][0]{
         _id,
         email,
         name,
@@ -1655,15 +1827,22 @@ export const loginUser = async (email: string, password: string): Promise<User |
         profession,
         userType,
         isActive,
-        createdAt
+        createdAt,
+        password
       }`,
-      { email: normEmail, passwordHash }
-    );
-    
-    if (!user) {
-      return null;
+      {email: normEmail}
+    )
+
+    if (!user || !user.password) {
+      return null
     }
-    
+
+    // Compare password with stored hash (supports both bcrypt and legacy SHA-256)
+    const passwordMatch = await comparePassword(password, user.password)
+    if (!passwordMatch) {
+      return null
+    }
+
     return {
       _id: user._id,
       email: user.email,
@@ -1673,25 +1852,35 @@ export const loginUser = async (email: string, password: string): Promise<User |
       userType: user.userType as UserType,
       isActive: user.isActive,
       createdAt: user.createdAt || user._createdAt,
-    };
+    }
   }
-  
+
   // Local storage fallback
-  await delay(SIMULATED_DELAY);
-  const users = getItem<User[]>(KEYS.USERS || 'birim_users') || [];
-  const userPasswords = getItem<{ [email: string]: string }>('birim_user_passwords') || {};
-  const passwordHash = await hashPassword(password);
-  
-  const user = users.find(u => normalizeEmail(u.email) === normEmail && u.isActive);
-  if (!user || userPasswords[normEmail] !== passwordHash) {
-    return null;
+  await delay(SIMULATED_DELAY)
+  const users = getItem<User[]>(KEYS.USERS || 'birim_users') || []
+  const userPasswords = getItem<{[email: string]: string}>('birim_user_passwords') || {}
+
+  const user = users.find(u => normalizeEmail(u.email) === normEmail && u.isActive)
+  if (!user) {
+    return null
   }
-  
-  return user;
-};
+
+  const storedHash = userPasswords[normEmail]
+  if (!storedHash) {
+    return null
+  }
+
+  // Compare password with stored hash (supports both bcrypt and legacy SHA-256)
+  const passwordMatch = await comparePassword(password, storedHash)
+  if (!passwordMatch) {
+    return null
+  }
+
+  return user
+}
 
 export const getUserByEmail = async (email: string): Promise<User | null> => {
-  const normEmail = normalizeEmail(email);
+  const normEmail = normalizeEmail(email)
   if (useSanity && sanity) {
     const user = await sanity.fetch(
       groq`*[_type == "user" && lower(email) == $email][0]{
@@ -1704,13 +1893,13 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
         isActive,
         createdAt
       }`,
-      { email: normEmail }
-    );
-    
+      {email: normEmail}
+    )
+
     if (!user) {
-      return null;
+      return null
     }
-    
+
     return {
       _id: user._id,
       email: user.email,
@@ -1720,14 +1909,14 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
       userType: user.userType as UserType,
       isActive: user.isActive,
       createdAt: user.createdAt || user._createdAt,
-    };
+    }
   }
-  
-  await delay(SIMULATED_DELAY);
-  const users = getItem<User[]>(KEYS.USERS || 'birim_users') || [];
-  const user = users.find(u => normalizeEmail(u.email) === normEmail);
-  return user || null;
-};
+
+  await delay(SIMULATED_DELAY)
+  const users = getItem<User[]>(KEYS.USERS || 'birim_users') || []
+  const user = users.find(u => normalizeEmail(u.email) === normEmail)
+  return user || null
+}
 
 export const getUserById = async (id: string): Promise<User | null> => {
   if (useSanity && sanity) {
@@ -1742,13 +1931,13 @@ export const getUserById = async (id: string): Promise<User | null> => {
         isActive,
         createdAt
       }`,
-      { id }
-    );
-    
+      {id}
+    )
+
     if (!user) {
-      return null;
+      return null
     }
-    
+
     return {
       _id: user._id,
       email: user.email,
@@ -1758,12 +1947,11 @@ export const getUserById = async (id: string): Promise<User | null> => {
       userType: user.userType,
       isActive: user.isActive,
       createdAt: user.createdAt || user._createdAt,
-    };
+    }
   }
-  
-  await delay(SIMULATED_DELAY);
-  const users = getItem<User[]>(KEYS.USERS || 'birim_users') || [];
-  const user = users.find(u => u._id === id);
-  return user || null;
-};
 
+  await delay(SIMULATED_DELAY)
+  const users = getItem<User[]>(KEYS.USERS || 'birim_users') || []
+  const user = users.find(u => u._id === id)
+  return user || null
+}

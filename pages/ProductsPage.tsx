@@ -1,68 +1,69 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
-import type { Product, Category } from '../types';
-import { getProductsByCategoryId, getCategories, getProducts } from '../services/cms';
-import { ProductCard } from '../components/ProductCard';
-import { OptimizedImage } from '../components/OptimizedImage';
-import { useTranslation } from '../i18n';
-import { useSiteSettings } from '../App';
+import {useState, useMemo} from 'react'
+import {useParams} from 'react-router-dom'
+import {ProductCard} from '../components/ProductCard'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {useProducts, useProductsByCategory} from '../src/hooks/useProducts'
+import {useCategory} from '../src/hooks/useCategories'
+import {useSiteSettings} from '../src/hooks/useSiteData'
 
 const ChevronDownIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-);
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="m6 9 6 6 6-6" />
+  </svg>
+)
 
 export function ProductsPage() {
-  const { categoryId } = useParams<{ categoryId: string }>();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [category, setCategory] = useState<Category | undefined>(undefined);
-  const [loading, setLoading] = useState(true);
-  const [isSortOpen, setIsSortOpen] = useState(false);
-  const [sortBy, setSortBy] = useState('year-desc'); // Default sort by newest
-  const { t } = useTranslation();
-  const { settings } = useSiteSettings();
-  const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none';
+  const {categoryId} = useParams<{categoryId: string}>()
+  const [isSortOpen, setIsSortOpen] = useState(false)
+  const [sortBy, setSortBy] = useState('year-desc') // Default sort by newest
+  const {t} = useTranslation()
+  const {data: settings} = useSiteSettings()
+  const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      if (categoryId) {
-        // Belirli bir kategori için ürünleri getir
-        const [productList, allCategories] = await Promise.all([
-            getProductsByCategoryId(categoryId),
-            getCategories()
-        ]);
-        setProducts(productList);
-        setCategory(allCategories.find(c => c.id === categoryId));
-      } else {
-        // Kategori yoksa tüm ürünleri getir
-        const allProducts = await getProducts();
-        setProducts(allProducts);
-        setCategory(undefined);
-      }
-      setLoading(false);
-    };
+  // React Query hooks - always call both, use enabled to control
+  const {data: allProducts = [], isLoading: allProductsLoading} = useProducts()
+  const {data: categoryProducts = [], isLoading: categoryProductsLoading} = useProductsByCategory(
+    categoryId
+  )
+  const {data: category} = useCategory(categoryId)
 
-    fetchProducts();
-  }, [categoryId]);
+  // Use category products if categoryId exists, otherwise use all products
+  const products = categoryId ? categoryProducts : allProducts
+  const loading = categoryId ? categoryProductsLoading : allProductsLoading
 
   const sortedProducts = useMemo(() => {
-    const sorted = [...products];
+    const sorted = [...products]
     if (sortBy === 'name-asc') {
-      sorted.sort((a, b) => t(a.name).localeCompare(t(b.name)));
+      sorted.sort((a, b) => t(a.name).localeCompare(t(b.name)))
     } else if (sortBy === 'year-desc') {
-      sorted.sort((a, b) => b.year - a.year);
+      sorted.sort((a, b) => b.year - a.year)
     }
-    return sorted;
-  }, [products, sortBy, t]);
-
+    return sorted
+  }, [products, sortBy, t])
 
   if (loading) {
-    return <div className="pt-20 flex items-center justify-center">{t('loading')}...</div>;
+    return (
+      <div className="pt-20">
+        <PageLoading message={t('loading')} />
+      </div>
+    )
   }
 
   const handleSortChange = (value: string) => {
-    setSortBy(value);
-    setIsSortOpen(false);
+    setSortBy(value)
+    setIsSortOpen(false)
   }
 
   return (
@@ -81,21 +82,27 @@ export function ProductsPage() {
         </div>
         <div className="relative h-full flex items-center justify-center text-center text-white pt-20">
           <div>
-            <h1 className="text-4xl md:text-6xl font-light tracking-tighter uppercase" style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}>
+            <h1
+              className="text-4xl md:text-6xl font-light tracking-tighter uppercase"
+              style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}
+            >
               {category ? t(category.name) : t('view_all')}
             </h1>
-            <p className="mt-4 text-lg max-w-2xl mx-auto font-light" style={{textShadow: '0 1px 3px rgba(0,0,0,0.5)'}}>
+            <p
+              className="mt-4 text-lg max-w-2xl mx-auto font-light"
+              style={{textShadow: '0 1px 3px rgba(0,0,0,0.5)'}}
+            >
               {category ? t(category.subtitle) : t('all_products_subtitle')}
             </p>
           </div>
         </div>
       </div>
-      
+
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Sort Controls */}
         <div className="flex justify-end items-center mb-12">
           <div className="relative">
-            <button 
+            <button
               onClick={() => setIsSortOpen(!isSortOpen)}
               className="flex items-center gap-2 text-sm font-light text-gray-500 hover:text-gray-600 transition-transform duration-300 transform hover:-translate-y-1 hover:scale-105"
             >
@@ -104,26 +111,42 @@ export function ProductsPage() {
             </button>
             {isSortOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-10">
-                <button onClick={() => handleSortChange('year-desc')} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">{t('sort_newest')}</button>
-                <button onClick={() => handleSortChange('name-asc')} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">{t('sort_name_asc')}</button>
+                <button
+                  onClick={() => handleSortChange('year-desc')}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  {t('sort_newest')}
+                </button>
+                <button
+                  onClick={() => handleSortChange('name-asc')}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  {t('sort_name_asc')}
+                </button>
               </div>
             )}
           </div>
         </div>
-        
+
         {/* Product Grid */}
         {sortedProducts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 animate-fade-in-up-subtle">
             {sortedProducts.map((product, index) => (
-              <div key={product.id} style={{ animationDelay: `${index * 100}ms` }} className="animate-fade-in-up-subtle">
+              <div
+                key={product.id}
+                style={{animationDelay: `${index * 100}ms`}}
+                className="animate-fade-in-up-subtle"
+              >
                 <ProductCard product={product} variant="light" />
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-600 animate-fade-in-up-subtle text-center">{t('no_products_in_category')}</p>
+          <p className="text-gray-600 animate-fade-in-up-subtle text-center">
+            {t('no_products_in_category')}
+          </p>
         )}
       </div>
     </div>
-  );
+  )
 }

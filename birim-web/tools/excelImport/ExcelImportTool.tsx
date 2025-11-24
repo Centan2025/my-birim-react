@@ -158,7 +158,8 @@ export function ExcelImportTool() {
 
   const addLog = (message: string, type: 'info' | 'success' | 'error' | 'warning' = 'info') => {
     const timestamp = new Date().toLocaleTimeString('tr-TR')
-    const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️'
+    const prefix =
+      type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️'
     setLogs((prev) => [...prev, `[${timestamp}] ${prefix} ${message}`])
   }
 
@@ -227,7 +228,7 @@ export function ExcelImportTool() {
       // Mevcut kategoriyi bul
       const existingCategory = await client.fetch(
         `*[_type == "category" && id.current == $slug][0]`,
-        {slug: categorySlug}
+        {slug: categorySlug},
       )
 
       if (existingCategory) {
@@ -269,7 +270,7 @@ export function ExcelImportTool() {
       // Mevcut tasarımcıyı AD ile bul (name.tr veya name.en) - büyük/küçük harf duyarsız
       const existingDesigner = await client.fetch(
         `*[_type == "designer" && (lower(name.tr) == lower($name) || lower(name.en) == lower($name))][0]`,
-        {name: trimmedName}
+        {name: trimmedName},
       )
 
       if (existingDesigner) {
@@ -300,7 +301,7 @@ export function ExcelImportTool() {
       // Mevcut tasarımcıyı AD ile bul
       const existingDesigner = await client.fetch(
         `*[_type == "designer" && (name.tr == $name || name.en == $name)][0]`,
-        {name: trimmedName}
+        {name: trimmedName},
       )
 
       if (existingDesigner) {
@@ -335,7 +336,7 @@ export function ExcelImportTool() {
     designerId: string,
     designerName: string,
     bioTr: string,
-    bioEn: string
+    bioEn: string,
   ): Promise<boolean> => {
     try {
       const designerSlug = createSlug(designerId)
@@ -343,7 +344,7 @@ export function ExcelImportTool() {
       // Mevcut tasarımcıyı kontrol et
       const existingDesigner = await client.fetch(
         `*[_type == "designer" && id.current == $slug][0]`,
-        {slug: designerSlug}
+        {slug: designerSlug},
       )
 
       const designerData: any = {
@@ -390,7 +391,7 @@ export function ExcelImportTool() {
     projectName: string,
     locationAndDate: string,
     excerptTr: string,
-    excerptEn: string
+    excerptEn: string,
   ): Promise<boolean> => {
     try {
       const projectSlug = createSlug(projectId)
@@ -398,7 +399,7 @@ export function ExcelImportTool() {
       // Mevcut projeyi kontrol et
       const existingProject = await client.fetch(
         `*[_type == "project" && id.current == $slug][0]`,
-        {slug: projectSlug}
+        {slug: projectSlug},
       )
 
       const projectData: any = {
@@ -453,7 +454,7 @@ export function ExcelImportTool() {
     designerId: string | null,
     year: number | null,
     descriptionTr: string,
-    descriptionEn: string
+    descriptionEn: string,
   ): Promise<boolean> => {
     try {
       const productSlug = createSlug(productId)
@@ -461,7 +462,7 @@ export function ExcelImportTool() {
       // Mevcut ürünü kontrol et
       const existingProduct = await client.fetch(
         `*[_type == "product" && id.current == $slug][0]`,
-        {slug: productSlug}
+        {slug: productSlug},
       )
 
       const productData: any = {
@@ -521,7 +522,9 @@ export function ExcelImportTool() {
   }
 
   // MALZEMELER sayfasını işle
-  const processMaterialsSheet = async (worksheet: XLSX.WorkSheet): Promise<{
+  const processMaterialsSheet = async (
+    worksheet: XLSX.WorkSheet,
+  ): Promise<{
     successCount: number
     errorCount: number
     skippedCount: number
@@ -579,7 +582,7 @@ export function ExcelImportTool() {
         // MALZEME GRUBU var mı kontrol et (büyük/küçük harf duyarsız)
         const existingGroup = await client.fetch(
           `*[_type == "materialGroup" && (lower(title.tr) == lower($groupName) || lower(title.en) == lower($groupName))][0]`,
-          {groupName: columnB.trim()}
+          {groupName: columnB.trim()},
         )
 
         let groupId: string
@@ -590,20 +593,23 @@ export function ExcelImportTool() {
 
           // KARTELA var mı kontrol et (büyük/küçük harf duyarsız)
           const existingBook = existingGroup.books?.find(
-            (book: any) => 
-              book.title?.tr?.toLowerCase() === columnC.trim().toLowerCase() || 
-              book.title?.en?.toLowerCase() === columnC.trim().toLowerCase()
+            (book: any) =>
+              book.title?.tr?.toLowerCase() === columnC.trim().toLowerCase() ||
+              book.title?.en?.toLowerCase() === columnC.trim().toLowerCase(),
           )
 
           if (existingBook) {
-            addLog(`MALZEMELER Satır ${i + 2}: KARTELA "${columnC}" zaten var, atlanıyor`, 'warning')
+            addLog(
+              `MALZEMELER Satır ${i + 2}: KARTELA "${columnC}" zaten var, atlanıyor`,
+              'warning',
+            )
             skippedCount++
             continue
           }
 
           // KARTELA yoksa, gruba ekle
           addLog(`Malzeme Grubuna yeni kartela ekleniyor: ${columnC}`, 'info')
-          
+
           const newBook = {
             _type: 'materialSwatchBook',
             title: {
@@ -653,7 +659,9 @@ export function ExcelImportTool() {
   }
 
   // PROJELER sayfasını işle
-  const processProjectsSheet = async (worksheet: XLSX.WorkSheet): Promise<{
+  const processProjectsSheet = async (
+    worksheet: XLSX.WorkSheet,
+  ): Promise<{
     successCount: number
     errorCount: number
     skippedCount: number
@@ -714,7 +722,7 @@ export function ExcelImportTool() {
       const projectSlug = createSlug(columnB)
       const existingProject = await client.fetch(
         `*[_type == "project" && id.current == $slug][0]`,
-        {slug: projectSlug}
+        {slug: projectSlug},
       )
 
       if (existingProject) {
@@ -722,19 +730,19 @@ export function ExcelImportTool() {
         if (existingName !== columnC) {
           addLog(
             `PROJELER Satır ${i + 2}: ID "${columnB}" zaten var, ancak AD farklı. Mevcut: "${existingName}", Yeni: "${columnC}". Güncellenecek.`,
-            'warning'
+            'warning',
           )
         }
       } else {
         // Yeni proje, AD kontrolü yap (büyük/küçük harf duyarsız)
         const existingByName = await client.fetch(
           `*[_type == "project" && (lower(title.tr) == lower($name) || lower(title.en) == lower($name))][0]`,
-          {name: columnC.trim()}
+          {name: columnC.trim()},
         )
         if (existingByName) {
           addLog(
             `PROJELER Satır ${i + 2}: AD "${columnC}" zaten başka bir projede kullanılıyor (ID: ${existingByName.id?.current}). Yine de devam ediliyor.`,
-            'warning'
+            'warning',
           )
         }
       }
@@ -753,7 +761,9 @@ export function ExcelImportTool() {
   }
 
   // TASARIMCILAR sayfasını işle
-  const processDesignersSheet = async (worksheet: XLSX.WorkSheet): Promise<{
+  const processDesignersSheet = async (
+    worksheet: XLSX.WorkSheet,
+  ): Promise<{
     successCount: number
     errorCount: number
     skippedCount: number
@@ -813,7 +823,7 @@ export function ExcelImportTool() {
       const designerSlug = createSlug(columnB)
       const existingDesigner = await client.fetch(
         `*[_type == "designer" && id.current == $slug][0]`,
-        {slug: designerSlug}
+        {slug: designerSlug},
       )
 
       if (existingDesigner) {
@@ -821,19 +831,19 @@ export function ExcelImportTool() {
         if (existingName !== columnC) {
           addLog(
             `TASARIMCILAR Satır ${i + 2}: ID "${columnB}" zaten var, ancak AD farklı. Mevcut: "${existingName}", Yeni: "${columnC}". Güncellenecek.`,
-            'warning'
+            'warning',
           )
         }
       } else {
         // Yeni tasarımcı, AD kontrolü yap (büyük/küçük harf duyarsız)
         const existingByName = await client.fetch(
           `*[_type == "designer" && (lower(name.tr) == lower($name) || lower(name.en) == lower($name))][0]`,
-          {name: columnC.trim()}
+          {name: columnC.trim()},
         )
         if (existingByName) {
           addLog(
             `TASARIMCILAR Satır ${i + 2}: AD "${columnC}" zaten başka bir tasarımcıda kullanılıyor (ID: ${existingByName.id?.current}). Yine de devam ediliyor.`,
-            'warning'
+            'warning',
           )
         }
       }
@@ -874,8 +884,8 @@ export function ExcelImportTool() {
       const designersInExcel = new Set<string>()
 
       // MALZEMELER sayfasını kontrol et ve işle
-      const materialsSheetName = workbook.SheetNames.find(
-        (name) => name.toUpperCase().includes('MALZEMELER')
+      const materialsSheetName = workbook.SheetNames.find((name) =>
+        name.toUpperCase().includes('MALZEMELER'),
       )
 
       let materialsResult = {successCount: 0, errorCount: 0, skippedCount: 0}
@@ -885,7 +895,7 @@ export function ExcelImportTool() {
         materialsResult = await processMaterialsSheet(materialsWorksheet)
         addLog(
           `MALZEMELER işlemi tamamlandı! Başarılı: ${materialsResult.successCount}, Hata: ${materialsResult.errorCount}, Atlandı: ${materialsResult.skippedCount}`,
-          'success'
+          'success',
         )
       } else {
         addLog('⚠️ MALZEMELER sayfası bulunamadı, atlanıyor', 'warning')
@@ -893,25 +903,29 @@ export function ExcelImportTool() {
 
       // TASARIMCILAR sayfasını kontrol et ve işle
       const designersSheetName = workbook.SheetNames.find(
-        (name) => name.toUpperCase().includes('TASARIMCILAR') || name.toUpperCase().includes('DESIGNER')
+        (name) =>
+          name.toUpperCase().includes('TASARIMCILAR') || name.toUpperCase().includes('DESIGNER'),
       )
 
       let designersResult = {successCount: 0, errorCount: 0, skippedCount: 0}
       if (designersSheetName) {
         addLog(`TASARIMCILAR sayfası bulundu: ${designersSheetName}`, 'info')
         const designersWorksheet = workbook.Sheets[designersSheetName]
-        
+
         // Tasarımcı isimlerini topla
-        const designersData = XLSX.utils.sheet_to_json(designersWorksheet, {header: 1, defval: ''}) as any[][]
+        const designersData = XLSX.utils.sheet_to_json(designersWorksheet, {
+          header: 1,
+          defval: '',
+        }) as any[][]
         if (designersData.length > 1) {
           const designersRows = designersData.slice(2) // İlk 2 satır başlık
           for (const row of designersRows) {
             const columnA = String(row[0] || '').trim()
             const columnC = String(row[2] || '').trim() // TASARIMCI ADI
-            
+
             // "SON" varsa dur
             if (columnA.toUpperCase() === 'SON') break
-            
+
             // "-" veya boş değilse ve isim varsa ekle
             if (columnA !== '-' && columnC) {
               designersInExcel.add(columnC.trim())
@@ -922,21 +936,30 @@ export function ExcelImportTool() {
             addLog(`Tanımlı tasarımcılar: ${Array.from(designersInExcel).join(', ')}`, 'info')
           }
         }
-        
+
         designersResult = await processDesignersSheet(designersWorksheet)
         addLog(
           `TASARIMCILAR işlemi tamamlandı! Başarılı: ${designersResult.successCount}, Hata: ${designersResult.errorCount}, Atlandı: ${designersResult.skippedCount}`,
-          'success'
+          'success',
         )
-        addLog('⚠️ Önemli: ÜRÜNLER sayfasında sadece CMS\'de mevcut tasarımcılar kullanılabilir. Yeni tasarımcı otomatik oluşturulmaz!', 'warning')
+        addLog(
+          "⚠️ Önemli: ÜRÜNLER sayfasında sadece CMS'de mevcut tasarımcılar kullanılabilir. Yeni tasarımcı otomatik oluşturulmaz!",
+          'warning',
+        )
       } else {
-        addLog('⚠️ TASARIMCILAR sayfası bulunamadı. ÜRÜNLER için CMS\'de mevcut tasarımcılar kullanılacak.', 'warning')
-        addLog('⚠️ Eğer bir ürünün tasarımcısı CMS\'de yoksa, ürün eklenmeyecek ve uyarı verilecek!', 'warning')
+        addLog(
+          "⚠️ TASARIMCILAR sayfası bulunamadı. ÜRÜNLER için CMS'de mevcut tasarımcılar kullanılacak.",
+          'warning',
+        )
+        addLog(
+          "⚠️ Eğer bir ürünün tasarımcısı CMS'de yoksa, ürün eklenmeyecek ve uyarı verilecek!",
+          'warning',
+        )
       }
 
       // PROJELER sayfasını kontrol et ve işle
       const projectsSheetName = workbook.SheetNames.find(
-        (name) => name.toUpperCase().includes('PROJELER') || name.toUpperCase().includes('PROJECT')
+        (name) => name.toUpperCase().includes('PROJELER') || name.toUpperCase().includes('PROJECT'),
       )
 
       let projectsResult = {successCount: 0, errorCount: 0, skippedCount: 0}
@@ -946,7 +969,7 @@ export function ExcelImportTool() {
         projectsResult = await processProjectsSheet(projectsWorksheet)
         addLog(
           `PROJELER işlemi tamamlandı! Başarılı: ${projectsResult.successCount}, Hata: ${projectsResult.errorCount}, Atlandı: ${projectsResult.skippedCount}`,
-          'success'
+          'success',
         )
       } else {
         addLog('⚠️ PROJELER sayfası bulunamadı, atlanıyor', 'warning')
@@ -954,7 +977,7 @@ export function ExcelImportTool() {
 
       // ÜRÜNLER sayfasını kontrol et ve işle (mevcut kod)
       const productsSheetName = workbook.SheetNames.find(
-        (name) => name.toUpperCase().includes('ÜRÜNLER') || name.toUpperCase().includes('PRODUCT')
+        (name) => name.toUpperCase().includes('ÜRÜNLER') || name.toUpperCase().includes('PRODUCT'),
       )
 
       let productsResult = {successCount: 0, errorCount: 0, skippedCount: 0, processedCount: 0}
@@ -1024,7 +1047,7 @@ export function ExcelImportTool() {
             const productSlug = createSlug(columnC)
             const existingProduct = await client.fetch(
               `*[_type == "product" && id.current == $slug][0]`,
-              {slug: productSlug}
+              {slug: productSlug},
             )
 
             if (existingProduct) {
@@ -1033,19 +1056,19 @@ export function ExcelImportTool() {
               if (existingName !== columnD) {
                 addLog(
                   `ÜRÜNLER Satır ${i + 2}: ID "${columnC}" zaten var, ancak AD farklı. Mevcut: "${existingName}", Yeni: "${columnD}". Güncellenecek.`,
-                  'warning'
+                  'warning',
                 )
               }
             } else {
               // Yeni ürün, AD kontrolü yap (büyük/küçük harf duyarsız)
               const existingByName = await client.fetch(
                 `*[_type == "product" && (lower(name.tr) == lower($name) || lower(name.en) == lower($name))][0]`,
-                {name: columnD.trim()}
+                {name: columnD.trim()},
               )
               if (existingByName) {
                 addLog(
                   `ÜRÜNLER Satır ${i + 2}: AD "${columnD}" zaten başka bir üründe kullanılıyor (ID: ${existingByName.id?.current}). Yine de devam ediliyor.`,
-                  'warning'
+                  'warning',
                 )
               }
             }
@@ -1065,19 +1088,19 @@ export function ExcelImportTool() {
               if (designersInExcel.size > 0 && !designersInExcel.has(columnE.trim())) {
                 addLog(
                   `ÜRÜNLER Satır ${i + 2}: ⚠️ Tasarımcı "${columnE}" TASARIMCILAR sayfasında tanımlı değil! Ürün atlanıyor.`,
-                  'error'
+                  'error',
                 )
                 errorCount++
                 continue
               }
-              
+
               // Tasarımcıyı sadece bul (oluşturma!)
               designerId = await findDesigner(columnE)
-              
+
               if (!designerId) {
                 addLog(
                   `ÜRÜNLER Satır ${i + 2}: ⚠️ Tasarımcı "${columnE}" CMS'de bulunamadı! Önce TASARIMCILAR sayfasında tanımlayın veya CMS'den manuel ekleyin. Ürün atlanıyor.`,
-                  'error'
+                  'error',
                 )
                 errorCount++
                 continue
@@ -1101,7 +1124,7 @@ export function ExcelImportTool() {
               designerId,
               year,
               columnG,
-              columnH
+              columnH,
             )
 
             if (success) {
@@ -1117,7 +1140,7 @@ export function ExcelImportTool() {
           productsResult = {successCount, errorCount, skippedCount, processedCount}
           addLog(
             `ÜRÜNLER işlemi tamamlandı! Başarılı: ${successCount}, Hata: ${errorCount}, Atlandı: ${skippedCount}`,
-            'success'
+            'success',
           )
         }
       } else {
@@ -1125,9 +1148,21 @@ export function ExcelImportTool() {
       }
 
       // Toplam sonuçları göster
-      const totalSuccess = materialsResult.successCount + designersResult.successCount + projectsResult.successCount + productsResult.successCount
-      const totalError = materialsResult.errorCount + designersResult.errorCount + projectsResult.errorCount + productsResult.errorCount
-      const totalSkipped = materialsResult.skippedCount + designersResult.skippedCount + projectsResult.skippedCount + productsResult.skippedCount
+      const totalSuccess =
+        materialsResult.successCount +
+        designersResult.successCount +
+        projectsResult.successCount +
+        productsResult.successCount
+      const totalError =
+        materialsResult.errorCount +
+        designersResult.errorCount +
+        projectsResult.errorCount +
+        productsResult.errorCount
+      const totalSkipped =
+        materialsResult.skippedCount +
+        designersResult.skippedCount +
+        projectsResult.skippedCount +
+        productsResult.skippedCount
 
       setStatus({
         success: totalError === 0,
@@ -1153,7 +1188,11 @@ export function ExcelImportTool() {
   }
 
   const deleteAllProducts = async () => {
-    if (!confirm('TÜM ÜRÜNLERİ VE KATEGORİLERİ SİLMEK İSTEDİĞİNİZDEN EMİN MİSİNİZ?\n\nÖnce tüm ürünler, sonra tüm kategoriler silinecek.\n\nBu işlem geri alınamaz!')) {
+    if (
+      !confirm(
+        'TÜM ÜRÜNLERİ VE KATEGORİLERİ SİLMEK İSTEDİĞİNİZDEN EMİN MİSİNİZ?\n\nÖnce tüm ürünler, sonra tüm kategoriler silinecek.\n\nBu işlem geri alınamaz!',
+      )
+    ) {
       return
     }
 
@@ -1208,7 +1247,9 @@ export function ExcelImportTool() {
 
       // Şimdi tüm kategorileri sil
       addLog('Tüm kategoriler siliniyor...', 'info')
-      const allCategories = await client.fetch(`*[_type == "category"]{_id, "id": id.current, name}`)
+      const allCategories = await client.fetch(
+        `*[_type == "category"]{_id, "id": id.current, name}`,
+      )
       const totalCategories = allCategories.length
 
       if (totalCategories === 0) {
@@ -1234,7 +1275,10 @@ export function ExcelImportTool() {
           }
         }
 
-        addLog(`Kategori silme işlemi tamamlandı! ${deletedCategoriesCount} kategori silindi`, 'success')
+        addLog(
+          `Kategori silme işlemi tamamlandı! ${deletedCategoriesCount} kategori silindi`,
+          'success',
+        )
         errorCount += categoryErrorCount
       }
 
@@ -1263,7 +1307,9 @@ export function ExcelImportTool() {
   }
 
   const deleteAllDesigners = async () => {
-    if (!confirm('TÜM TASARIMCILARI SİLMEK İSTEDİĞİNİZDEN EMİN MİSİNİZ?\n\nBu işlem geri alınamaz!')) {
+    if (
+      !confirm('TÜM TASARIMCILARI SİLMEK İSTEDİĞİNİZDEN EMİN MİSİNİZ?\n\nBu işlem geri alınamaz!')
+    ) {
       return
     }
 
@@ -1348,11 +1394,17 @@ export function ExcelImportTool() {
   return (
     <Container>
       <h1>Excel'den Ürün Yükle</h1>
-      <p>
-        Excel dosyanızı yükleyerek ürünleri toplu olarak ekleyebilir veya güncelleyebilirsiniz.
-      </p>
-      
-      <div style={{marginBottom: '2rem', padding: '1rem', background: '#e7f3ff', border: '1px solid #2196f3', borderRadius: '4px'}}>
+      <p>Excel dosyanızı yükleyerek ürünleri toplu olarak ekleyebilir veya güncelleyebilirsiniz.</p>
+
+      <div
+        style={{
+          marginBottom: '2rem',
+          padding: '1rem',
+          background: '#e7f3ff',
+          border: '1px solid #2196f3',
+          borderRadius: '4px',
+        }}
+      >
         <h3 style={{marginTop: 0, color: '#1976d2'}}>ℹ️ Excel Formatı ve Önemli Kurallar</h3>
         <ul style={{marginBottom: 0, color: '#1976d2', lineHeight: '1.8'}}>
           <li>
@@ -1380,20 +1432,37 @@ export function ExcelImportTool() {
           <li>
             <strong>ÜRÜNLER Sayfası:</strong> Son olarak işlenir.
             <ul style={{marginTop: '0.5rem'}}>
-              <li>Ürünlerin tasarımcıları <strong>MUTLAKA CMS'de mevcut olmalıdır</strong></li>
-              <li>Tasarımcı CMS'de yoksa → ⚠️ Uyarı verilir ve <strong>ürün eklenmez</strong></li>
+              <li>
+                Ürünlerin tasarımcıları <strong>MUTLAKA CMS'de mevcut olmalıdır</strong>
+              </li>
+              <li>
+                Tasarımcı CMS'de yoksa → ⚠️ Uyarı verilir ve <strong>ürün eklenmez</strong>
+              </li>
               <li>Tasarımcı otomatik oluşturulmaz, manuel eklemeniz gerekir</li>
             </ul>
           </li>
-          <li><strong>Kategoriler:</strong> Otomatik olarak oluşturulur (sorun değil).</li>
-          <li><strong>Öneri:</strong> Sırayla MALZEMELER → TASARIMCILAR → ÜRÜNLER şeklinde yükleyin.</li>
+          <li>
+            <strong>Kategoriler:</strong> Otomatik olarak oluşturulur (sorun değil).
+          </li>
+          <li>
+            <strong>Öneri:</strong> Sırayla MALZEMELER → TASARIMCILAR → ÜRÜNLER şeklinde yükleyin.
+          </li>
         </ul>
       </div>
 
-      <div style={{marginBottom: '2rem', padding: '1rem', background: '#fff3cd', border: '1px solid #ffc107', borderRadius: '4px'}}>
+      <div
+        style={{
+          marginBottom: '2rem',
+          padding: '1rem',
+          background: '#fff3cd',
+          border: '1px solid #ffc107',
+          borderRadius: '4px',
+        }}
+      >
         <h3 style={{marginTop: 0, color: '#856404'}}>⚠️ Tehlikeli İşlemler</h3>
         <p style={{marginBottom: '0.5rem', color: '#856404'}}>
-          Tüm ürünleri veya tasarımcıları silmek istiyorsanız aşağıdaki butonları kullanın. Bu işlemler geri alınamaz!
+          Tüm ürünleri veya tasarımcıları silmek istiyorsanız aşağıdaki butonları kullanın. Bu
+          işlemler geri alınamaz!
         </p>
         <div style={{display: 'flex', gap: '0.5rem', flexWrap: 'wrap'}}>
           <DangerButton onClick={deleteAllProducts} disabled={isDeleting || isProcessing}>
@@ -1423,9 +1492,7 @@ export function ExcelImportTool() {
           <p style={{fontSize: '1.2rem', marginBottom: '0.5rem'}}>
             {file ? file.name : 'Excel dosyasını buraya sürükleyin veya tıklayın'}
           </p>
-          <p style={{color: '#666', fontSize: '0.9rem'}}>
-            .xlsx veya .xls formatında dosya seçin
-          </p>
+          <p style={{color: '#666', fontSize: '0.9rem'}}>.xlsx veya .xls formatında dosya seçin</p>
         </div>
         <FileInput
           id="file-input"
@@ -1477,8 +1544,17 @@ export function ExcelImportTool() {
 
       {logs.length > 0 && (
         <div>
-          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem'}}>
-            <h3 style={{margin: 0}}>İşlem Logları ({filteredLogs.length}/{logs.length})</h3>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1rem',
+            }}
+          >
+            <h3 style={{margin: 0}}>
+              İşlem Logları ({filteredLogs.length}/{logs.length})
+            </h3>
             <FilterButtons>
               <FilterButton active={logFilter === 'all'} onClick={() => setLogFilter('all')}>
                 Tümü
@@ -1486,10 +1562,16 @@ export function ExcelImportTool() {
               <FilterButton active={logFilter === 'error'} onClick={() => setLogFilter('error')}>
                 ❌ Hatalar
               </FilterButton>
-              <FilterButton active={logFilter === 'warning'} onClick={() => setLogFilter('warning')}>
+              <FilterButton
+                active={logFilter === 'warning'}
+                onClick={() => setLogFilter('warning')}
+              >
                 ⚠️ Uyarılar
               </FilterButton>
-              <FilterButton active={logFilter === 'success'} onClick={() => setLogFilter('success')}>
+              <FilterButton
+                active={logFilter === 'success'}
+                onClick={() => setLogFilter('success')}
+              >
                 ✅ Başarılı
               </FilterButton>
             </FilterButtons>
@@ -1521,4 +1603,3 @@ export function ExcelImportTool() {
     </Container>
   )
 }
-

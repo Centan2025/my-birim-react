@@ -1,24 +1,32 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import type { Product } from '../types';
-import { OptimizedImage } from './OptimizedImage';
-import { useTranslation } from '../i18n';
-import { useSiteSettings } from '../App';
+import React from 'react'
+import {Link} from 'react-router-dom'
+import type {Product} from '../types'
+import {OptimizedImage} from './OptimizedImage'
+import {useTranslation} from '../i18n'
+import {useSiteSettings} from '../App'
 
-export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'light' }> = ({ product, variant = 'default' }) => {
-  const { t } = useTranslation();
-  const { settings } = useSiteSettings();
-  const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none';
-  const isLight = variant === 'light';
-  
+export const ProductCard: React.FC<{product: Product; variant?: 'default' | 'light'}> = ({
+  product,
+  variant = 'default',
+}) => {
+  const {t} = useTranslation()
+  const {settings} = useSiteSettings()
+  const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
+  const isLight = variant === 'light'
+
   // Helper: mainImage string veya object olabilir
-  const mainImageUrl = typeof product.mainImage === 'string' ? product.mainImage : product.mainImage?.url || '';
-  const mainImageMobile = typeof product.mainImage === 'object' ? product.mainImage.urlMobile : undefined;
-  const mainImageDesktop = typeof product.mainImage === 'object' ? product.mainImage.urlDesktop : undefined;
-  
+  const mainImageUrl =
+    typeof product.mainImage === 'string' ? product.mainImage : product.mainImage?.url || ''
+  const mainImageMobile =
+    typeof product.mainImage === 'object' ? product.mainImage.urlMobile : undefined
+  const mainImageDesktop =
+    typeof product.mainImage === 'object' ? product.mainImage.urlDesktop : undefined
+
   return (
     <Link to={`/product/${product.id}`} className="group block w-full">
-      <div className={`relative overflow-hidden aspect-square ${imageBorderClass} w-full bg-white flex items-center justify-center`}>
+      <div
+        className={`relative overflow-hidden aspect-square ${imageBorderClass} w-full bg-white flex items-center justify-center`}
+      >
         <OptimizedImage
           src={mainImageUrl}
           srcMobile={mainImageMobile}
@@ -31,10 +39,16 @@ export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'li
       </div>
       <div className="mt-4 overflow-hidden">
         <div className="transition-transform duration-700 ease-in-out group-hover:-translate-y-1">
-            <h3 className={`text-lg ${isLight ? 'font-light text-gray-600 group-hover:text-gray-700' : 'font-semibold text-gray-800 group-hover:text-black'}`}>{t(product.name)}</h3>
-            <p className={`text-sm mt-1 ${isLight ? 'text-gray-500' : 'text-gray-500'}`}>{product.year}</p>
+          <h3
+            className={`text-lg ${isLight ? 'font-light text-gray-600 group-hover:text-gray-700' : 'font-semibold text-gray-800 group-hover:text-black'}`}
+          >
+            {t(product.name)}
+          </h3>
+          <p className={`text-sm mt-1 ${isLight ? 'text-gray-500' : 'text-gray-500'}`}>
+            {product.year}
+          </p>
         </div>
       </div>
     </Link>
-  );
-};
+  )
+}

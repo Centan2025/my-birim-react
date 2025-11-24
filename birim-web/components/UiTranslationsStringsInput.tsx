@@ -160,7 +160,9 @@ export default function UiTranslationsStringsInput(props: ObjectInputProps) {
     const v = props.value as Record<string, any> | undefined
     if (!v) return true
     // Eğer herhangi bir alan doluysa boş saymayalım
-    return Object.values(v).every((val) => val === undefined || val === null || String(val).trim() === '')
+    return Object.values(v).every(
+      (val) => val === undefined || val === null || String(val).trim() === '',
+    )
   }, [props.value])
 
   // Dil değiştiğinde, ilgili mevcut kaydı ya da yerel varsayılanları YENİDEN uygula
@@ -173,7 +175,7 @@ export default function UiTranslationsStringsInput(props: ObjectInputProps) {
       try {
         const existing = await client.fetch(
           '*[_type == "uiTranslations" && language == $lang][0]',
-          {lang: currentLanguage}
+          {lang: currentLanguage},
         )
         // Base değerleri hazırla ve anahtarları normalize et
         const baseRaw = BASE_TRANSLATIONS[currentLanguage] || {}
@@ -182,7 +184,7 @@ export default function UiTranslationsStringsInput(props: ObjectInputProps) {
           normalizedBase.models_3d = normalizedBase['3d_models']
         }
         // Mevcut doküman değerleri (varsa) yalnızca DOLU ise base'i ezer
-        const fromExisting = (existing && existing.strings) ? existing.strings : {}
+        const fromExisting = existing && existing.strings ? existing.strings : {}
         const merged: Record<string, any> = {}
         const allKeys = new Set<string>([
           ...Object.keys(normalizedBase),
@@ -191,9 +193,7 @@ export default function UiTranslationsStringsInput(props: ObjectInputProps) {
         allKeys.forEach((k) => {
           const vExisting = fromExisting[k]
           const useExisting =
-            vExisting !== undefined &&
-            vExisting !== null &&
-            String(vExisting).trim() !== ''
+            vExisting !== undefined && vExisting !== null && String(vExisting).trim() !== ''
           merged[k] = useExisting ? vExisting : normalizedBase[k]
         })
         // Aynı değerleri tekrar yazıp dokümanı kirletme
@@ -212,4 +212,3 @@ export default function UiTranslationsStringsInput(props: ObjectInputProps) {
 
   return props.renderDefault(props)
 }
-

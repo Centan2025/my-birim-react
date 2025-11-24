@@ -16,14 +16,15 @@ export default defineType({
       title: 'Şifre (Hash)',
       type: 'string',
       description: 'Şifre hash olarak saklanmalıdır. E-posta aboneleri için boş bırakılabilir.',
-      validation: (Rule) => Rule.custom((value, context) => {
-        const userType = (context.document as any)?.userType;
-        // Eğer tam üye ise password zorunlu
-        if (userType === 'full_member' && !value) {
-          return 'Tam üyeler için şifre gereklidir';
-        }
-        return true;
-      }),
+      validation: (Rule) =>
+        Rule.custom((value, context) => {
+          const userType = (context.document as any)?.userType
+          // Eğer tam üye ise password zorunlu
+          if (userType === 'full_member' && !value) {
+            return 'Tam üyeler için şifre gereklidir'
+          }
+          return true
+        }),
       hidden: ({document}) => document?.userType === 'email_subscriber',
     }),
     defineField({
@@ -79,12 +80,13 @@ export default defineType({
       active: 'isActive',
     },
     prepare({title, subtitle, userType, active}) {
-      const typeLabel = userType === 'full_member' ? 'Tam Üye' : 'E-posta Abonesi';
+      const typeLabel = userType === 'full_member' ? 'Tam Üye' : 'E-posta Abonesi'
       return {
         title: title || 'Üye',
-        subtitle: subtitle ? `${subtitle} - ${typeLabel} - ${active ? 'Aktif' : 'Pasif'}` : `${typeLabel} - ${active ? 'Aktif' : 'Pasif'}`,
+        subtitle: subtitle
+          ? `${subtitle} - ${typeLabel} - ${active ? 'Aktif' : 'Pasif'}`
+          : `${typeLabel} - ${active ? 'Aktif' : 'Pasif'}`,
       }
     },
   },
 })
-

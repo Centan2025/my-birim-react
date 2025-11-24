@@ -12,7 +12,12 @@ export default defineType({
       options: {source: (doc) => doc.title?.tr || doc.title?.en, maxLength: 96},
       validation: (Rule) => Rule.required(),
     }),
-    defineField({name: 'title', title: 'Başlık', type: 'localizedString', validation: (Rule) => Rule.required()}),
+    defineField({
+      name: 'title',
+      title: 'Başlık',
+      type: 'localizedString',
+      validation: (Rule) => Rule.required(),
+    }),
     defineField({name: 'date', title: 'Tarih', type: 'datetime'}),
     defineField({name: 'content', title: 'İçerik', type: 'localizedText'}),
     defineField({
@@ -20,21 +25,24 @@ export default defineType({
       title: 'Kapak Görseli (Tüm Cihazlar)',
       type: 'image',
       options: {hotspot: true},
-      description: 'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+      description:
+        'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
     }),
     defineField({
       name: 'mainImageMobile',
       title: 'Kapak Görseli (Mobil)',
       type: 'image',
       options: {hotspot: true},
-      description: 'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+      description:
+        'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
     }),
     defineField({
       name: 'mainImageDesktop',
       title: 'Kapak Görseli (Desktop)',
       type: 'image',
       options: {hotspot: true},
-      description: 'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+      description:
+        'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
     }),
     defineField({
       name: 'media',
@@ -50,11 +58,13 @@ export default defineType({
               name: 'type',
               title: 'Tür',
               type: 'string',
-              options: {list: [
-                {title: 'Image', value: 'image'},
-                {title: 'Video', value: 'video'},
-                {title: 'YouTube', value: 'youtube'},
-              ]},
+              options: {
+                list: [
+                  {title: 'Image', value: 'image'},
+                  {title: 'Video', value: 'video'},
+                  {title: 'YouTube', value: 'youtube'},
+                ],
+              },
               initialValue: 'image',
             }),
             defineField({
@@ -63,7 +73,8 @@ export default defineType({
               type: 'image',
               options: {hotspot: true},
               hidden: ({parent}) => parent?.type !== 'image',
-              description: 'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+              description:
+                'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
             }),
             defineField({
               name: 'imageMobile',
@@ -71,7 +82,8 @@ export default defineType({
               type: 'image',
               options: {hotspot: true},
               hidden: ({parent}) => parent?.type !== 'image',
-              description: 'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+              description:
+                'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
             }),
             defineField({
               name: 'imageDesktop',
@@ -79,7 +91,8 @@ export default defineType({
               type: 'image',
               options: {hotspot: true},
               hidden: ({parent}) => parent?.type !== 'image',
-              description: 'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+              description:
+                'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
             }),
             defineField({
               name: 'videoFile',
@@ -89,7 +102,8 @@ export default defineType({
                 accept: 'video/*',
               },
               hidden: ({parent}) => parent?.type !== 'video',
-              description: 'Tüm cihazlar için varsayılan video. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+              description:
+                'Tüm cihazlar için varsayılan video. Mobil veya desktop versiyonu yoksa bu kullanılır.',
             }),
             defineField({
               name: 'videoFileMobile',
@@ -99,7 +113,8 @@ export default defineType({
                 accept: 'video/*',
               },
               hidden: ({parent}) => parent?.type !== 'video',
-              description: 'Mobil cihazlar için özel video (opsiyonel). Yoksa varsayılan video kullanılır.',
+              description:
+                'Mobil cihazlar için özel video (opsiyonel). Yoksa varsayılan video kullanılır.',
             }),
             defineField({
               name: 'videoFileDesktop',
@@ -109,14 +124,17 @@ export default defineType({
                 accept: 'video/*',
               },
               hidden: ({parent}) => parent?.type !== 'video',
-              description: 'Desktop cihazlar için özel video (opsiyonel). Yoksa varsayılan video kullanılır.',
+              description:
+                'Desktop cihazlar için özel video (opsiyonel). Yoksa varsayılan video kullanılır.',
             }),
             defineField({
               name: 'url',
               title: 'Video URL (veya YouTube URL)',
               type: 'url',
-              hidden: ({parent}) => parent?.type === 'image' || (parent?.type === 'video' && parent?.videoFile),
-              description: 'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.',
+              hidden: ({parent}) =>
+                parent?.type === 'image' || (parent?.type === 'video' && parent?.videoFile),
+              description:
+                'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.',
             }),
             defineField({name: 'caption', title: 'Açıklama', type: 'localizedString'}),
           ],
@@ -131,6 +149,3 @@ export default defineType({
     },
   },
 })
-
-
-

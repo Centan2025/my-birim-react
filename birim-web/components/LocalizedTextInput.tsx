@@ -93,7 +93,7 @@ export default function LocalizedTextInput(props: ObjectInputProps) {
 
     try {
       const translated = await translateText(trValue, targetLang)
-      
+
       // Çeviriyi ilgili alana kaydet
       const currentValue = value || {}
       onChange(set({...currentValue, [targetLang]: translated}))
@@ -121,29 +121,28 @@ export default function LocalizedTextInput(props: ObjectInputProps) {
     <div>
       {trValue && (
         <TranslateButtonsContainer>
-          <span style={{fontWeight: 'bold', marginRight: '0.5rem', color: '#333'}}>🌐 Otomatik Çeviri:</span>
+          <span style={{fontWeight: 'bold', marginRight: '0.5rem', color: '#333'}}>
+            🌐 Otomatik Çeviri:
+          </span>
           <TranslateButton
             onClick={() => handleTranslate('en')}
             disabled={translating !== null || !trValue}
           >
-            {translating === 'en' ? '⏳ Çevriliyor...' : '🇬🇧 İngilizce\'ye Çevir'}
+            {translating === 'en' ? '⏳ Çevriliyor...' : "🇬🇧 İngilizce'ye Çevir"}
           </TranslateButton>
           <TranslateButton
             onClick={() => handleTranslate('it')}
             disabled={translating !== null || !trValue}
           >
-            {translating === 'it' ? '⏳ Çevriliyor...' : '🇮🇹 İtalyanca\'ya Çevir'}
+            {translating === 'it' ? '⏳ Çevriliyor...' : "🇮🇹 İtalyanca'ya Çevir"}
           </TranslateButton>
         </TranslateButtonsContainer>
       )}
 
-      {status && (
-        <StatusMessage type={status.type}>{status.message}</StatusMessage>
-      )}
+      {status && <StatusMessage type={status.type}>{status.message}</StatusMessage>}
 
       {/* Sanity'nin varsayılan input'unu render et */}
       {renderDefault(props)}
     </div>
   )
 }
-

@@ -44,11 +44,13 @@ Medya-Klasörü/
 ### 4. Yükleme Yapın
 
 #### Yöntem 1: Sürükle-Bırak
+
 1. Medya klasörünüzü masaüstünden alın
 2. Sanity Studio'daki sürükle-bırak alanına bırakın
 3. İşlem otomatik başlar
 
 #### Yöntem 2: Klasör Seçimi
+
 1. **"Klasör Seç"** butonuna tıklayın
 2. Medya klasörünüzü seçin
 3. İşlem otomatik başlar
@@ -56,6 +58,7 @@ Medya-Klasörü/
 ### 5. İlerlemeyi Takip Edin
 
 Arayüzde şunları göreceksiniz:
+
 - 📊 Bulunan içerik sayıları (kategori, tasarımcı, ürün, görsel)
 - ⏳ Her bir öğenin yükleme durumu
 - ✅ Başarılı yüklemeler yeşil işaretle
@@ -64,11 +67,13 @@ Arayüzde şunları göreceksiniz:
 ## 📂 Klasör Yapısı Kuralları
 
 ### Kategori Klasörleri
+
 - `01 - KANEPELER` → Kategori: "KANEPELER"
 - `08 - RAF SİSTEMLERİ` → Kategori: "RAF SİSTEMLERİ"
 - Numara opsiyoneldir, araç son kısmı alır
 
 ### Model Klasörleri
+
 - `01 - 0203 - SU` → Model: "SU"
 - `16 - 0175 - RICH` → Model: "RICH"
 - `BRISTOL` → Model: "BRISTOL"
@@ -77,15 +82,18 @@ Arayüzde şunları göreceksiniz:
 ### Görsel İsimleri
 
 **Ürün Görselleri:**
+
 - `xxx_kapak.jpg` → Ana kapak (zorunlu)
 - `xxx_kapak_mobil.jpg` → Mobil kapak (opsiyonel)
 - Diğer tüm görseller → Alternatif görseller
 
 **Tasarımcı Görselleri:**
+
 - `profil.jpg` → Genel profil (tüm cihazlar)
 - `profil_mobil.jpg` → Mobil profil (opsiyonel)
 
 ### Desteklenen Formatlar
+
 - `.jpg` / `.jpeg`
 - `.png`
 - `.gif`
@@ -95,31 +103,36 @@ Arayüzde şunları göreceksiniz:
 ## 🎬 Ne Olur?
 
 ### Otomatik Oluşturulur:
+
 ✅ **Kategoriler:** Her kategori için bir döküman  
 ✅ **Tasarımcılar:** Profil görselleriyle birlikte  
 ✅ **Ürünler:** Ana kapak, mobil kapak ve tüm görseller  
-✅ **Asset'ler:** Tüm görseller Sanity asset'lere yüklenir  
+✅ **Asset'ler:** Tüm görseller Sanity asset'lere yüklenir
 
 ### Manuel Yapmanız Gerekenler:
+
 📝 Ürünlere tasarımcı ataması  
 📝 Kategorilere hero image ekleme  
 📝 Ürün açıklamalarını düzenleme  
 📝 Fiyat ve diğer bilgileri ekleme  
-📝 Ürünleri publish etme (isPublished: true)  
+📝 Ürünleri publish etme (isPublished: true)
 
 ## ⚠️ Önemli Notlar
 
 ### Yükleme Davranışı
+
 - **createOrReplace kullanır:** Aynı ID'ye sahip döküman varsa üzerine yazar
 - **Görseller yeniden yüklenir:** Her seferinde yeni asset'ler oluşturulur
 - **Unpublished başlar:** Ürünler otomatik publish edilmez, manuel kontrol gerekir
 
 ### Performans
+
 - Büyük klasörler için yükleme uzun sürebilir
 - Her görsel tek tek yüklenir
 - İnternet hızınıza bağlıdır
 
 ### Hata Durumları
+
 - Bozuk görseller atlanır
 - Kategori referansı olmayan ürünler hataya düşer
 - Tüm hatalar ekranda gösterilir
@@ -127,22 +140,29 @@ Arayüzde şunları göreceksiniz:
 ## 🔧 Sorun Giderme
 
 ### "Klasör seçme çalışmıyor"
+
 **Çözüm:** Bazı tarayıcılar klasör seçmeyi desteklemez. Chrome veya Edge kullanın.
 
 ### "Görseller yüklenmiyor"
+
 **Çözüm:**
+
 - Görsellerin bozuk olmadığından emin olun
 - Dosya boyutlarını kontrol edin (max 50MB)
 - İnternet bağlantınızı kontrol edin
 
 ### "Kategoriler oluşturulmuyor"
+
 **Çözüm:** Klasör yapınızın doğru olduğundan emin olun:
+
 ```
 ürünler/KATEGORİ/MODEL/görsel.jpg
 ```
 
 ### "İşlem çok yavaş"
+
 **Çözüm:**
+
 - Önce küçük bir klasörle test edin
 - Görselleri önceden optimize edin
 - İnternet hızınızı kontrol edin
@@ -160,6 +180,7 @@ Arayüzde şunları göreceksiniz:
 ### Senaryo: 5 Ürün Yükleme
 
 1. **Klasör Hazırlama (5 dakika)**
+
    ```
    Medya/
    ├── ürünler/
@@ -203,6 +224,7 @@ Yükleme tamamlandıktan sonra:
 ## 📞 Destek
 
 Sorun yaşarsanız:
+
 1. Console'u kontrol edin (F12)
 2. Klasör yapınızı kontrol edin
 3. Görsel formatlarını kontrol edin
@@ -211,4 +233,3 @@ Sorun yaşarsanız:
 ---
 
 **Başarılar!** 🎨 Artık Sanity Studio'da sürükle-bırak ile ürün yükleyebilirsiniz!
-

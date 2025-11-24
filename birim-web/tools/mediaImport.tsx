@@ -1,5 +1,5 @@
-import { UploadIcon } from '@sanity/icons'
-import { definePlugin } from 'sanity'
+import {UploadIcon} from '@sanity/icons'
+import {definePlugin} from 'sanity'
 import MediaImportTool from './mediaImport/MediaImportTool'
 
 export const mediaImportTool = definePlugin({
@@ -13,4 +13,3 @@ export const mediaImportTool = definePlugin({
     },
   ],
 })
-

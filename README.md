@@ -3,31 +3,34 @@
 ## Kurulum
 
 1. Bağımlılıkları yükleyin:
+
    ```bash
    npm install
    ```
 
 2. Sanity Token Yapılandırması:
-   
+
    Üye kayıtlarının CMS'de görünmesi için Sanity token'ı yapılandırmanız gerekmektedir.
-   
+
    a. Proje kök dizininde `.env` dosyası oluşturun:
+
    ```bash
    # Windows'ta
    type nul > .env
-   
+
    # Linux/Mac'te
    touch .env
    ```
-   
+
    b. `.env` dosyasına aşağıdaki satırları ekleyin:
+
    ```env
    VITE_SANITY_PROJECT_ID=wn3a082f
    VITE_SANITY_DATASET=production
    VITE_SANITY_API_VERSION=2025-01-01
    VITE_SANITY_TOKEN=your_sanity_token_here
    ```
-   
+
    c. Sanity token'ınızı alın:
    - https://sanity.io/manage adresine gidin
    - Projenizi seçin (wn3a082f)
@@ -36,8 +39,9 @@
    - Token'a bir isim verin (örn: "Web App Token")
    - **"Editor" veya "Admin" yetkisi seçin** (önemli!)
    - Token'ı kopyalayın ve `.env` dosyasındaki `VITE_SANITY_TOKEN` değerine yapıştırın
-   
+
    d. Uygulamayı yeniden başlatın:
+
    ```bash
    npm run dev
    ```
@@ -86,22 +90,24 @@ Maintenance mode aktifken production'da sayfalara erişmek için:
    - Vercel'de yeni bir environment variable ekleyin:
      - **Name:** `VITE_MAINTENANCE_BYPASS_SECRET`
      - **Value:** Kendi belirlediğiniz bir secret (örn: `my-secret-key-2024`)
-   
 2. **URL'ye query parameter ekleyin:**
-   
+
    HashRouter kullanıldığı için iki yöntem var:
-   
+
    **Yöntem 1 - Hash'ten önce (önerilen):**
+
    ```
    https://yourdomain.com/?bypass=my-secret-key-2024
    ```
-   
+
    **Yöntem 2 - Hash içinde:**
+
    ```
    https://yourdomain.com/#/products?bypass=my-secret-key-2024
    ```
-   
+
    Her iki yöntem de çalışır. İstediğiniz sayfaya gidebilirsiniz:
+
    ```
    https://yourdomain.com/?bypass=my-secret-key-2024#/products
    https://yourdomain.com/?bypass=my-secret-key-2024#/designers
@@ -115,11 +121,13 @@ Maintenance mode aktifken production'da sayfalara erişmek için:
 ### Normal Sayfaya Dönmek
 
 **CMS'den (Önerilen):**
+
 1. Sanity Studio'da **Site Ayarları** dokümanını açın
 2. **"Bakım Modu (Yakında Sayfası)"** seçeneğini kapatın
 3. Değişiklikleri kaydedin ve publish edin
 
 **Veya Environment Variable'dan:**
+
 - Vercel'de `VITE_MAINTENANCE_MODE` environment variable'ını silin veya `false` olarak güncelleyin
 - Yeniden deploy edin
 
@@ -139,6 +147,7 @@ Maintenance mode aktifken production'da sayfalara erişmek için:
 **En kolay ve hızlı yöntem!** Sanity Studio içinde grafik arayüzle:
 
 1. Sanity Studio'yu başlatın:
+
    ```bash
    cd birim-web
    npm run dev
@@ -155,6 +164,7 @@ Maintenance mode aktifken production'da sayfalara erişmek için:
 5. İşlem otomatik başlar, ilerlemeyı izleyin!
 
 **Avantajları:**
+
 - ✅ Grafik arayüz - kod bilgisi gerektirmez
 - ✅ Sürükle-bırak desteği
 - ✅ Canlı ilerleme takibi
@@ -168,11 +178,13 @@ Detaylar: `birim-web/tools/mediaImport/README.md`
 ### 💻 Yöntem 2: Komut Satırı (Terminal)
 
 **JSON dosyaları oluşturmak için:**
+
 ```bash
 npm run import-media -- --source "F:\Medya" --mode json
 ```
 
 **Direkt Sanity CMS'e yüklemek için:**
+
 ```bash
 SANITY_TOKEN=your_token npm run import-media -- --source "F:\Medya" --mode sanity
 ```

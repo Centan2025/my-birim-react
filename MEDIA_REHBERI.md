@@ -27,24 +27,28 @@ Bu rehber, Birim Web projesinde kullanılan tüm medya dosyalarının (görselle
 ### Görsel Boyut Önerileri
 
 #### Hero Görselleri (Ana Sayfa, Kategori Sayfaları)
+
 - **Desktop**: 1920x1080px (16:9) veya 1920x1200px (16:10)
 - **Mobil**: 768x1024px (3:4) veya 1080x1920px (9:16)
 - **Kalite**: %85-90
 - **Maksimum Dosya Boyutu**: 500KB (optimize edilmiş)
 
 #### Ürün Ana Görselleri
+
 - **Desktop**: 1200x1200px (1:1) veya 1200x1600px (3:4)
 - **Mobil**: 800x800px (1:1) veya 800x1067px (3:4)
 - **Kalite**: %85
 - **Maksimum Dosya Boyutu**: 300KB (optimize edilmiş)
 
 #### Ürün Alternatif Görselleri
+
 - **Desktop**: 1200x800px (3:2) veya 1200x900px (4:3)
 - **Mobil**: 800x600px (4:3)
 - **Kalite**: %80-85
 - **Maksimum Dosya Boyutu**: 250KB (optimize edilmiş)
 
 #### Ürün Ölçü Görselleri (Dimension Images)
+
 - **Desktop**: 1600x1200px (4:3) veya 1600x900px (16:9)
 - **Mobil**: 800x600px (4:3)
 - **Kalite**: %80
@@ -52,29 +56,32 @@ Bu rehber, Birim Web projesinde kullanılan tüm medya dosyalarının (görselle
 - **Format**: PNG (teknik çizimler için)
 
 #### Malzeme Görselleri
+
 - **Boyut**: 400x400px (1:1)
 - **Kalite**: %80
 - **Maksimum Dosya Boyutu**: 100KB (optimize edilmiş)
 
 #### Kart Görselleri (Product Card, Designer Card)
+
 - **Boyut**: 600x600px (1:1) veya 600x800px (3:4)
 - **Kalite**: %80
 - **Maksimum Dosya Boyutu**: 150KB (optimize edilmiş)
 
 #### Logo ve İkonlar
+
 - **Boyut**: 512x512px (1:1) veya SVG formatı (önerilen)
 - **Format**: PNG (şeffaflık için) veya SVG
 - **Maksimum Dosya Boyutu**: 50KB
 
 ### Aspect Ratio Önerileri
 
-| Kullanım Alanı | Önerilen Aspect Ratio | Notlar |
-|---------------|----------------------|--------|
-| Hero Görselleri | 16:9 (desktop), 9:16 (mobil) | Geniş ekranlar için yatay, mobil için dikey |
-| Ürün Ana Görseli | 1:1 veya 3:4 | Kare veya dikey dikdörtgen |
-| Ürün Galeri | 3:2 veya 4:3 | Yatay dikdörtgen |
-| Ölçü Görselleri | 4:3 veya 16:9 | Teknik çizimler için |
-| Kart Görselleri | 1:1 | Kare format |
+| Kullanım Alanı   | Önerilen Aspect Ratio        | Notlar                                      |
+| ---------------- | ---------------------------- | ------------------------------------------- |
+| Hero Görselleri  | 16:9 (desktop), 9:16 (mobil) | Geniş ekranlar için yatay, mobil için dikey |
+| Ürün Ana Görseli | 1:1 veya 3:4                 | Kare veya dikey dikdörtgen                  |
+| Ürün Galeri      | 3:2 veya 4:3                 | Yatay dikdörtgen                            |
+| Ölçü Görselleri  | 4:3 veya 16:9                | Teknik çizimler için                        |
+| Kart Görselleri  | 1:1                          | Kare format                                 |
 
 ---
 
@@ -89,6 +96,7 @@ Bu rehber, Birim Web projesinde kullanılan tüm medya dosyalarının (görselle
 ### Video Boyut Önerileri
 
 #### Hero Videoları (Ana Sayfa)
+
 - **Desktop**:
   - Çözünürlük: 1920x1080px (Full HD)
   - Bitrate: 5-8 Mbps
@@ -103,6 +111,7 @@ Bu rehber, Birim Web projesinde kullanılan tüm medya dosyalarının (görselle
   - Maksimum Dosya Boyutu: 5MB
 
 #### Ürün Videoları
+
 - **Desktop**:
   - Çözünürlük: 1280x720px (HD) veya 1920x1080px (Full HD)
   - Bitrate: 3-5 Mbps
@@ -115,6 +124,7 @@ Bu rehber, Birim Web projesinde kullanılan tüm medya dosyalarının (görselle
   - Maksimum Dosya Boyutu: 8MB
 
 #### Arka Plan Videoları (Background)
+
 - **Desktop**:
   - Çözünürlük: 1920x1080px
   - Bitrate: 4-6 Mbps
@@ -130,6 +140,7 @@ Bu rehber, Birim Web projesinde kullanılan tüm medya dosyalarının (görselle
 ### Video Optimizasyon Ayarları
 
 #### FFmpeg ile Optimizasyon
+
 ```bash
 # Desktop video için
 ffmpeg -i input.mp4 -c:v libx264 -preset slow -crf 23 -c:a aac -b:a 128k -movflags +faststart output.mp4
@@ -139,6 +150,7 @@ ffmpeg -i input.mp4 -c:v libx264 -preset slow -crf 25 -vf scale=1080:1920 -c:a a
 ```
 
 #### HandBrake Ayarları
+
 - **Preset**: Fast 1080p30 veya Fast 720p30
 - **Quality**: RF 23 (Desktop), RF 25 (Mobil)
 - **Audio**: AAC, 128kbps (Desktop), 96kbps (Mobil)
@@ -196,7 +208,6 @@ Her video için poster image (ilk frame görüntüsü) eklenmelidir:
 - **Görseller**:
   - Format: `{kategori}-{isim}-{boyut}.{uzanti}`
   - Örnek: `urun-ana-koltuk-desktop.jpg`, `urun-ana-koltuk-mobile.webp`
-  
 - **Videolar**:
   - Format: `{kategori}-{isim}-{boyut}.mp4`
   - Örnek: `hero-ana-sayfa-desktop.mp4`, `hero-ana-sayfa-mobile.mp4`
@@ -204,12 +215,14 @@ Her video için poster image (ilk frame görüntüsü) eklenmelidir:
 ### Sanity Otomatik Optimizasyon
 
 Sanity CDN otomatik olarak:
+
 - **WebP formatına** dönüştürür (destekleniyorsa)
 - **Responsive URL'ler** oluşturur
 - **Kalite optimizasyonu** yapar
 - **Boyut optimizasyonu** yapar
 
 URL Formatı:
+
 ```
 https://cdn.sanity.io/images/{projectId}/{dataset}/{imageId}-{width}x{height}.{format}?q={quality}&auto=format
 ```
@@ -230,18 +243,26 @@ Art Direction, farklı ekran boyutları için farklı medya dosyaları kullanman
 ### Görseller İçin Art Direction
 
 #### Sanity Schema'da
+
 ```typescript
 // Ana görsel (tüm cihazlar için)
-mainImage: { type: 'image' }
+mainImage: {
+  type: 'image'
+}
 
 // Mobil görsel (opsiyonel)
-mainImageMobile: { type: 'image' }
+mainImageMobile: {
+  type: 'image'
+}
 
 // Desktop görsel (opsiyonel)
-mainImageDesktop: { type: 'image' }
+mainImageDesktop: {
+  type: 'image'
+}
 ```
 
 #### Kod Kullanımı
+
 ```tsx
 <OptimizedImage
   src={product.mainImage.url} // Fallback
@@ -255,6 +276,7 @@ mainImageDesktop: { type: 'image' }
 ### Videolar İçin Art Direction
 
 #### Sanity Schema'da
+
 ```typescript
 // Ana video (tüm cihazlar için)
 videoFile: { type: 'file', accept: 'video/*' }
@@ -267,6 +289,7 @@ videoFileDesktop: { type: 'file', accept: 'video/*' }
 ```
 
 #### Kod Kullanımı
+
 ```tsx
 <OptimizedVideo
   src={media.url} // Fallback
@@ -305,17 +328,15 @@ videoFileDesktop: { type: 'file', accept: 'video/*' }
 ### OptimizedImage Component
 
 #### Temel Kullanım
-```tsx
-import { OptimizedImage } from '../components/OptimizedImage';
 
-<OptimizedImage
-  src={imageUrl}
-  alt="Açıklama"
-  className="w-full h-auto"
-/>
+```tsx
+import {OptimizedImage} from '../components/OptimizedImage'
+
+;<OptimizedImage src={imageUrl} alt="Açıklama" className="w-full h-auto" />
 ```
 
 #### Responsive Image
+
 ```tsx
 <OptimizedImage
   src={imageUrl}
@@ -330,6 +351,7 @@ import { OptimizedImage } from '../components/OptimizedImage';
 ```
 
 #### Eager Loading (Above the Fold)
+
 ```tsx
 <OptimizedImage
   src={heroImageUrl}
@@ -341,6 +363,7 @@ import { OptimizedImage } from '../components/OptimizedImage';
 ```
 
 #### Art Direction
+
 ```tsx
 <OptimizedImage
   src={imageUrl} // Fallback
@@ -354,17 +377,15 @@ import { OptimizedImage } from '../components/OptimizedImage';
 ### OptimizedVideo Component
 
 #### Temel Kullanım
-```tsx
-import { OptimizedVideo } from '../components/OptimizedVideo';
 
-<OptimizedVideo
-  src={videoUrl}
-  className="w-full"
-  controls
-/>
+```tsx
+import {OptimizedVideo} from '../components/OptimizedVideo'
+
+;<OptimizedVideo src={videoUrl} className="w-full" controls />
 ```
 
 #### Lazy Loading
+
 ```tsx
 <OptimizedVideo
   src={videoUrl}
@@ -377,6 +398,7 @@ import { OptimizedVideo } from '../components/OptimizedVideo';
 ```
 
 #### Autoplay Video (Hero)
+
 ```tsx
 <OptimizedVideo
   src={videoUrl}
@@ -390,6 +412,7 @@ import { OptimizedVideo } from '../components/OptimizedVideo';
 ```
 
 #### Art Direction
+
 ```tsx
 <OptimizedVideo
   src={videoUrl} // Fallback
@@ -406,15 +429,15 @@ import { OptimizedVideo } from '../components/OptimizedVideo';
 ### Manuel Optimizasyon Fonksiyonları
 
 ```tsx
-import { getOptimizedImageUrl } from '../src/lib/mediaOptimization';
+import {getOptimizedImageUrl} from '../src/lib/mediaOptimization'
 
 const optimizedUrl = getOptimizedImageUrl(sanityImageAsset, {
   width: 1200,
   height: 800,
   quality: 85,
   format: 'webp',
-  fit: 'crop'
-});
+  fit: 'crop',
+})
 ```
 
 ---
@@ -506,26 +529,26 @@ const optimizedUrl = getOptimizedImageUrl(sanityImageAsset, {
 
 ### Görseller
 
-| Kullanım Alanı | Maksimum Boyut (Optimize Edilmiş) | Notlar |
-|---------------|----------------------------------|--------|
-| Hero Görselleri | 500KB | Yüksek kalite, büyük görsel |
-| Ürün Ana Görseli | 300KB | Orta kalite |
-| Ürün Alternatif Görselleri | 250KB | Orta kalite |
-| Ölçü Görselleri | 400KB | Teknik çizimler, PNG formatı |
-| Malzeme Görselleri | 100KB | Küçük görsel |
-| Kart Görselleri | 150KB | Küçük görsel |
-| Logo ve İkonlar | 50KB | Çok küçük görsel veya SVG |
+| Kullanım Alanı             | Maksimum Boyut (Optimize Edilmiş) | Notlar                       |
+| -------------------------- | --------------------------------- | ---------------------------- |
+| Hero Görselleri            | 500KB                             | Yüksek kalite, büyük görsel  |
+| Ürün Ana Görseli           | 300KB                             | Orta kalite                  |
+| Ürün Alternatif Görselleri | 250KB                             | Orta kalite                  |
+| Ölçü Görselleri            | 400KB                             | Teknik çizimler, PNG formatı |
+| Malzeme Görselleri         | 100KB                             | Küçük görsel                 |
+| Kart Görselleri            | 150KB                             | Küçük görsel                 |
+| Logo ve İkonlar            | 50KB                              | Çok küçük görsel veya SVG    |
 
 ### Videolar
 
-| Kullanım Alanı | Maksimum Boyut | Notlar |
-|---------------|---------------|--------|
-| Hero Videoları (Desktop) | 10MB | 10-30 saniye, loop |
-| Hero Videoları (Mobil) | 5MB | 10-20 saniye, loop |
-| Ürün Videoları (Desktop) | 15MB | Orta uzunluk |
-| Ürün Videoları (Mobil) | 8MB | Orta uzunluk |
-| Arka Plan Videoları (Desktop) | 20MB | 15-60 saniye, loop |
-| Arka Plan Videoları (Mobil) | 10MB | 15-30 saniye, loop |
+| Kullanım Alanı                | Maksimum Boyut | Notlar             |
+| ----------------------------- | -------------- | ------------------ |
+| Hero Videoları (Desktop)      | 10MB           | 10-30 saniye, loop |
+| Hero Videoları (Mobil)        | 5MB            | 10-20 saniye, loop |
+| Ürün Videoları (Desktop)      | 15MB           | Orta uzunluk       |
+| Ürün Videoları (Mobil)        | 8MB            | Orta uzunluk       |
+| Arka Plan Videoları (Desktop) | 20MB           | 15-60 saniye, loop |
+| Arka Plan Videoları (Mobil)   | 10MB           | 15-30 saniye, loop |
 
 ### Sanity Limitleri
 
@@ -562,10 +585,11 @@ const optimizedUrl = getOptimizedImageUrl(sanityImageAsset, {
 ### Video Optimizasyon
 
 1. **FFmpeg** (Komut Satırı):
+
    ```bash
    # Desktop video
    ffmpeg -i input.mp4 -c:v libx264 -preset slow -crf 23 -c:a aac -b:a 128k -movflags +faststart output.mp4
-   
+
    # Mobil video
    ffmpeg -i input.mp4 -c:v libx264 -preset slow -crf 25 -vf scale=1080:1920 -c:a aac -b:a 96k -movflags +faststart output_mobile.mp4
    ```
@@ -600,6 +624,7 @@ const optimizedUrl = getOptimizedImageUrl(sanityImageAsset, {
 **Sorun**: Görsel sayfada görünmüyor.
 
 **Çözümler**:
+
 1. Sanity'de görselin yüklendiğinden emin olun
 2. URL'nin doğru olduğunu kontrol edin
 3. CORS ayarlarını kontrol edin
@@ -610,6 +635,7 @@ const optimizedUrl = getOptimizedImageUrl(sanityImageAsset, {
 **Sorun**: Video oynatılamıyor veya yüklenmiyor.
 
 **Çözümler**:
+
 1. Video formatının MP4 (H.264) olduğundan emin olun
 2. Dosya boyutunun limit içinde olduğunu kontrol edin
 3. Video codec'ini kontrol edin (H.264 önerilir)
@@ -620,6 +646,7 @@ const optimizedUrl = getOptimizedImageUrl(sanityImageAsset, {
 **Sorun**: Mobil/desktop görselleri doğru gösterilmiyor.
 
 **Çözümler**:
+
 1. Sanity'de mobil/desktop görsellerinin yüklendiğinden emin olun
 2. Component'te `srcMobile` ve `srcDesktop` prop'larının doğru geçirildiğini kontrol edin
 3. Browser'ın responsive mode'da olduğundan emin olun
@@ -630,6 +657,7 @@ const optimizedUrl = getOptimizedImageUrl(sanityImageAsset, {
 **Sorun**: Görsel/video dosyası çok büyük.
 
 **Çözümler**:
+
 1. Optimizasyon araçlarını kullanın (ImageOptim, FFmpeg, HandBrake)
 2. Kalite ayarlarını düşürün (%80-85)
 3. Görsel boyutunu küçültün
@@ -640,6 +668,7 @@ const optimizedUrl = getOptimizedImageUrl(sanityImageAsset, {
 **Sorun**: Sayfa yavaş yükleniyor.
 
 **Çözümler**:
+
 1. Lazy loading kullanın (`loading="lazy"`)
 2. Preload ayarlarını kontrol edin (videolar için)
 3. Görsel boyutlarını optimize edin
@@ -650,6 +679,7 @@ const optimizedUrl = getOptimizedImageUrl(sanityImageAsset, {
 **Sorun**: Sanity'de dosya yüklenemiyor.
 
 **Çözümler**:
+
 1. Dosya boyutunun limit içinde olduğunu kontrol edin
 2. İnternet bağlantınızı kontrol edin
 3. Tarayıcı cache'ini temizleyin
@@ -660,16 +690,19 @@ const optimizedUrl = getOptimizedImageUrl(sanityImageAsset, {
 ## 📚 Ek Kaynaklar
 
 ### Sanity Dokümantasyonu
+
 - [Sanity Image URLs](https://www.sanity.io/docs/image-urls)
 - [Sanity File Assets](https://www.sanity.io/docs/file-assets)
 
 ### Optimizasyon Araçları
+
 - [Squoosh](https://squoosh.app/)
 - [ImageOptim](https://imageoptim.com/)
 - [FFmpeg](https://ffmpeg.org/)
 - [HandBrake](https://handbrake.fr/)
 
 ### Web Performans
+
 - [Web.dev - Image Optimization](https://web.dev/fast/#optimize-your-images)
 - [Web.dev - Video Optimization](https://web.dev/fast/#optimize-your-videos)
 
@@ -678,6 +711,7 @@ const optimizedUrl = getOptimizedImageUrl(sanityImageAsset, {
 ## 📝 Özet Checklist
 
 ### Görsel Yüklemeden Önce
+
 - [ ] Doğru boyutta (önerilen boyutlara uygun)
 - [ ] Optimize edilmiş (ImageOptim, Squoosh, vb.)
 - [ ] WebP formatına dönüştürülmüş (opsiyonel ama önerilir)
@@ -685,6 +719,7 @@ const optimizedUrl = getOptimizedImageUrl(sanityImageAsset, {
 - [ ] Anlamlı dosya adı
 
 ### Video Yüklemeden Önce
+
 - [ ] MP4 formatında (H.264 codec)
 - [ ] Optimize edilmiş (FFmpeg, HandBrake)
 - [ ] Doğru çözünürlükte
@@ -692,6 +727,7 @@ const optimizedUrl = getOptimizedImageUrl(sanityImageAsset, {
 - [ ] Poster image hazırlanmış
 
 ### Sanity'de Yükleme
+
 - [ ] Ana görsel/video yüklendi
 - [ ] Mobil versiyonu yüklendi (gerekirse)
 - [ ] Desktop versiyonu yüklendi (gerekirse)
@@ -699,6 +735,7 @@ const optimizedUrl = getOptimizedImageUrl(sanityImageAsset, {
 - [ ] Alt text eklendi (görseller için)
 
 ### Kod Kullanımı
+
 - [ ] Doğru component kullanıldı (`OptimizedImage` veya `OptimizedVideo`)
 - [ ] Lazy loading ayarlandı (gerekirse)
 - [ ] Art Direction prop'ları eklendi (gerekirse)
@@ -709,5 +746,3 @@ const optimizedUrl = getOptimizedImageUrl(sanityImageAsset, {
 
 **Son Güncelleme**: 2025-01-29
 **Versiyon**: 1.0
-
-

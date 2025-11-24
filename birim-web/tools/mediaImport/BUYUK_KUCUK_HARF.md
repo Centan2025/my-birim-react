@@ -110,6 +110,7 @@ Bunlar **istediğiniz gibi** olabilir:
 ```
 
 ✅ **Hepsi çalışır!** Araç otomatik olarak:
+
 - `01 - KANEPELER` → KANEPELER (ID: kanepeler)
 - `02 - Sandalyeler` → Sandalyeler (ID: sandalyeler)
 - `AHŞAP` → AHŞAP (ID: ahsap)
@@ -127,7 +128,7 @@ Görsel isimleri için **önemli olan kısım:**
 - ✅ `Su_Kapak.jpg`
 - ✅ `SU_kapak.JPG`
 
-**Nasıl Çalışır:** Dosya adında "_kapak" geçiyorsa (büyük/küçük harf fark etmez) kapak görseli olarak tanır.
+**Nasıl Çalışır:** Dosya adında "\_kapak" geçiyorsa (büyük/küçük harf fark etmez) kapak görseli olarak tanır.
 
 ### Mobil Kapak
 
@@ -152,6 +153,7 @@ Görsel isimleri için **önemli olan kısım:**
 Ana klasörlerde **"urun"** veya **"tasarim"** kelimesi geçmeli:
 
 ❌ **ÇALIŞMAZ:**
+
 ```
 - products/          (İngilizce)
 - items/
@@ -159,6 +161,7 @@ Ana klasörlerde **"urun"** veya **"tasarim"** kelimesi geçmeli:
 ```
 
 ✅ **ÇALIŞIR:**
+
 ```
 - ürünler, ÜRÜNLER, urunler
 - tasarımcılar, TASARIMCILAR, tasarimcilar
@@ -187,6 +190,7 @@ Kapak ve mobil görselleri için özel isimler:
 ### Windows Kullanıcıları
 
 Windows'ta klasör isimleri genelde büyük harfle görünür:
+
 ```
 [BİRİM WEB]
   [ÜRÜNLER]
@@ -198,6 +202,7 @@ Windows'ta klasör isimleri genelde büyük harfle görünür:
 ### Mac/Linux Kullanıcıları
 
 Unix sistemlerde genelde küçük harf kullanılır:
+
 ```
 birim-web/
   ürünler/
@@ -211,12 +216,14 @@ birim-web/
 Tutarlılık için bir stil seçin:
 
 **Öneri 1: Türkçe Küçük Harf**
+
 ```
 ürünler/
 tasarımcılar/
 ```
 
 **Öneri 2: İngilizce Küçük Harf** (Türkçe karakter sorunu yaşıyorsanız)
+
 ```
 urunler/
 tasarimcilar/
@@ -236,6 +243,7 @@ Klasör yapınızın doğru tanınıp tanınmadığını test etmek için:
    ```
 
 Eğer "0 Kategori, 0 Tasarımcı" görüyorsanız:
+
 - Ana klasör isimlerini kontrol edin
 - "urun" veya "tasarim" kelimesi geçtiğinden emin olun
 
@@ -244,9 +252,8 @@ Eğer "0 Kategori, 0 Tasarımcı" görüyorsanız:
 ✅ **Ana klasörler:** "urun" veya "tasarim" içermeli (büyük/küçük harf önemli değil)  
 ✅ **Alt klasörler:** İstediğiniz gibi olabilir  
 ✅ **Dosya isimleri:** `_kapak`, `_mobil` önemli (büyük/küçük harf önemli değil)  
-✅ **Türkçe karakter:** Olsa da olur, olmasa da olur  
+✅ **Türkçe karakter:** Olsa da olur, olmasa da olur
 
 ---
 
 **Sonuç:** Klasör isimlerinizi **istediğiniz gibi** yazabilirsiniz! 🎉
-

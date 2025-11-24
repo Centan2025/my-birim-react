@@ -1,24 +1,27 @@
+import React from 'react'
+import {Link} from 'react-router-dom'
+import type {Designer} from '../types'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {useDesigners} from '../src/hooks/useDesigners'
+import {useSiteSettings} from '../src/hooks/useSiteData'
 
-
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import type { Designer } from '../types';
-import { getDesigners } from '../services/cms';
-import { OptimizedImage } from '../components/OptimizedImage';
-import { useTranslation } from '../i18n';
-import { useSiteSettings } from '../App';
-
-const DesignerCard: React.FC<{ designer: Designer }> = ({ designer }) => {
-  const { t } = useTranslation();
-  const { settings } = useSiteSettings();
-  const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none';
+const DesignerCard: React.FC<{designer: Designer}> = ({designer}) => {
+  const {t} = useTranslation()
+  const {data: settings} = useSiteSettings()
+  const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   return (
     <Link to={`/designer/${designer.id}`} className="group flex flex-col h-full text-center">
       <div className={`overflow-hidden bg-white aspect-[3/4] ${imageBorderClass}`}>
         <OptimizedImage
           src={typeof designer.image === 'string' ? designer.image : designer.image?.url || ''}
-          srcMobile={typeof designer.image === 'object' ? designer.image.urlMobile : designer.imageMobile}
-          srcDesktop={typeof designer.image === 'object' ? designer.image.urlDesktop : designer.imageDesktop}
+          srcMobile={
+            typeof designer.image === 'object' ? designer.image.urlMobile : designer.imageMobile
+          }
+          srcDesktop={
+            typeof designer.image === 'object' ? designer.image.urlDesktop : designer.imageDesktop
+          }
           alt={t(designer.name)}
           className={`w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-[1.03] filter grayscale ${imageBorderClass}`}
           loading="lazy"
@@ -26,31 +29,24 @@ const DesignerCard: React.FC<{ designer: Designer }> = ({ designer }) => {
         />
       </div>
       <div className="mt-4 min-h-[2.5rem] flex items-center justify-center">
-        <h3 className="text-xl font-light text-gray-500 transition-colors duration-700 ease-in-out group-hover:text-gray-600">{t(designer.name)}</h3>
+        <h3 className="text-xl font-light text-gray-500 transition-colors duration-700 ease-in-out group-hover:text-gray-600">
+          {t(designer.name)}
+        </h3>
       </div>
     </Link>
-  );
-};
-
+  )
+}
 
 export function DesignersPage() {
-  const [designers, setDesigners] = useState<Designer[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { t } = useTranslation();
+  const {data: designers = [], isLoading: loading} = useDesigners()
+  const {t} = useTranslation()
 
-  useEffect(() => {
-    const fetchDesigners = async () => {
-      setLoading(true);
-      const designerList = await getDesigners();
-      setDesigners(designerList);
-      setLoading(false);
-    };
-
-    fetchDesigners();
-  }, []);
-  
   if (loading) {
-    return <div className="pt-20 text-center">{t('loading')}...</div>;
+    return (
+      <div className="pt-20">
+        <PageLoading message={t('loading')} />
+      </div>
+    )
   }
 
   return (
@@ -62,7 +58,7 @@ export function DesignersPage() {
         </div>
         {designers.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8 items-stretch">
-            {designers.map((designer) => (
+            {designers.map(designer => (
               <DesignerCard key={designer.id} designer={designer} />
             ))}
           </div>
@@ -71,5 +67,5 @@ export function DesignersPage() {
         )}
       </div>
     </div>
-  );
+  )
 }

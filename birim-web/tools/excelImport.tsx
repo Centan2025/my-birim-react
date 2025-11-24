@@ -6,9 +6,8 @@ export const excelImportTool = definePlugin({
   tools: [
     {
       name: 'excel-import',
-      title: 'Excel\'den Ürün Yükle',
+      title: "Excel'den Ürün Yükle",
       component: ExcelImportTool,
     },
   ],
 })
-

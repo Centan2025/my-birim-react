@@ -12,14 +12,24 @@ export default defineType({
   ],
   fields: [
     defineField({
-      name: 'title', 
-      title: 'Başlık', 
-      type: 'localizedString', 
-      validation: Rule => Rule.required(),
-      initialValue: { tr: 'Çerez Politikası', en: 'Cookie Policy' }
+      name: 'title',
+      title: 'Başlık',
+      type: 'localizedString',
+      validation: (Rule) => Rule.required(),
+      initialValue: {tr: 'Çerez Politikası', en: 'Cookie Policy'},
     }),
-    defineField({name: 'content', title: 'İçerik', type: 'localizedPortableText', validation: Rule => Rule.required()}),
-    defineField({name: 'updatedAt', title: 'Güncellenme Tarihi', type: 'datetime', initialValue: () => new Date().toISOString()}),
+    defineField({
+      name: 'content',
+      title: 'İçerik',
+      type: 'localizedPortableText',
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'updatedAt',
+      title: 'Güncellenme Tarihi',
+      type: 'datetime',
+      initialValue: () => new Date().toISOString(),
+    }),
   ],
   preview: {
     select: {title: 'title.tr'},
@@ -28,5 +38,3 @@ export default defineType({
     },
   },
 })
-
-

@@ -5,7 +5,7 @@ import {CategoryProductsView} from './components/CategoryProductsView'
 export const deskStructure = async (S: StructureBuilder, context: any) => {
   const {getClient} = context
   const client = getClient({apiVersion: '2024-01-01'})
-  
+
   // Async işlemleri burada yapıyoruz
   const cookiesPolicy = await client.fetch('*[_type == "cookiesPolicy"][0]')
   const privacyPolicy = await client.fetch('*[_type == "privacyPolicy"][0]')
@@ -20,8 +20,7 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
     if (!id || typeof id !== 'string') return ''
     return id.replace(/^drafts\./, '')
   }
-  
-  
+
   return S.list()
     .title('İçerik')
     .items([
@@ -30,14 +29,9 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
         .child(
           siteSettingsDoc?._id
             ? S.document().schemaType('siteSettings').id(pubId(siteSettingsDoc._id))
-            : S.document().schemaType('siteSettings')
+            : S.document().schemaType('siteSettings'),
         ),
-      S.listItem()
-        .title('UI Çevirileri')
-        .child(
-          S.document()
-            .schemaType('uiTranslations')
-        ),
+      S.listItem().title('UI Çevirileri').child(S.document().schemaType('uiTranslations')),
       S.listItem()
         .title('Ana Sayfa')
         .child(
@@ -45,8 +39,7 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
             ? S.document()
                 .schemaType('homePage')
                 .id(pubId(homePage._id) || 'homePage') // mevcut belgeyi doğrudan aç
-            : S.document()
-                .schemaType('homePage') // belge yoksa yeni oluştur
+            : S.document().schemaType('homePage'), // belge yoksa yeni oluştur
         ),
       S.listItem()
         .title('Ürünler')
@@ -73,19 +66,25 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
                     .schemaType('category')
                     .filter('_type == "category"')
                     .defaultOrdering([{field: 'orderRank', direction: 'asc'}])
-                    .child((categoryId) => 
+                    .child((categoryId) =>
                       S.document()
                         .schemaType('category')
                         .documentId(categoryId)
                         .views([
-                          S.view.form().title('Düzenle').icon(() => '✏️'),
-                          S.view.component(CategoryProductsView).title('Modeller').icon(() => '📦')
-                        ])
-                    )
+                          S.view
+                            .form()
+                            .title('Düzenle')
+                            .icon(() => '✏️'),
+                          S.view
+                            .component(CategoryProductsView)
+                            .title('Modeller')
+                            .icon(() => '📦'),
+                        ]),
+                    ),
                 ),
               S.divider(),
               S.documentTypeListItem('product').title('Tüm Modeller'),
-            ])
+            ]),
         ),
       orderableDocumentListDeskItem({
         type: 'designer',
@@ -102,8 +101,7 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
             ? S.document()
                 .schemaType('aboutPage')
                 .id(pubId(aboutPage._id) || 'aboutPage') // mevcut belgeyi doğrudan aç
-            : S.document()
-                .schemaType('aboutPage') // belge yoksa yeni oluştur
+            : S.document().schemaType('aboutPage'), // belge yoksa yeni oluştur
         ),
       S.listItem()
         .title('İletişim')
@@ -112,8 +110,7 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
             ? S.document()
                 .schemaType('contactPage')
                 .id(pubId(contactPage._id) || 'contactPage') // mevcut belgeyi doğrudan aç
-            : S.document()
-                .schemaType('contactPage') // belge yoksa yeni oluştur
+            : S.document().schemaType('contactPage'), // belge yoksa yeni oluştur
         ),
       S.listItem()
         .title('Altbilgi')
@@ -121,42 +118,22 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
           S.list()
             .title('Altbilgi')
             .items([
-              S.listItem()
-                .title('Genel Ayarlar')
-                .child(
-                  S.document()
-                    .schemaType('footer')
-                    .id('footer') // tekil belge olarak doğrudan aç
-                ),
+              S.listItem().title('Genel Ayarlar').child(
+                S.document().schemaType('footer').id('footer'), // tekil belge olarak doğrudan aç
+              ),
               S.listItem()
                 .title('Çerez Politikası')
-                .child(
-                  S.document()
-                    .schemaType('cookiesPolicy')
-                    .id('cookiesPolicy')
-                ),
+                .child(S.document().schemaType('cookiesPolicy').id('cookiesPolicy')),
               S.listItem()
                 .title('Gizlilik Politikası')
-                .child(
-                  S.document()
-                    .schemaType('privacyPolicy')
-                    .id('privacyPolicy')
-                ),
+                .child(S.document().schemaType('privacyPolicy').id('privacyPolicy')),
               S.listItem()
                 .title('Kullanım Şartları')
-                .child(
-                  S.document()
-                    .schemaType('termsOfService')
-                    .id('termsOfService')
-                ),
+                .child(S.document().schemaType('termsOfService').id('termsOfService')),
               S.listItem()
                 .title('KVKK Aydınlatma Metni')
-                .child(
-                  S.document()
-                    .schemaType('kvkkPolicy')
-                    .id('kvkkPolicy')
-                ),
-            ])
+                .child(S.document().schemaType('kvkkPolicy').id('kvkkPolicy')),
+            ]),
         ),
       S.documentTypeListItem('materialGroup').title('Malzeme Grupları'),
       // Üyeler
@@ -173,8 +150,8 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
                     .title('E-posta Aboneleri')
                     .schemaType('user')
                     .filter('_type == "user" && userType == $t')
-                    .params({ t: 'email_subscriber' })
-                    .apiVersion('2024-01-01')
+                    .params({t: 'email_subscriber'})
+                    .apiVersion('2024-01-01'),
                 ),
               S.listItem()
                 .title('Tam Üyeler')
@@ -183,12 +160,12 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
                     .title('Tam Üyeler')
                     .schemaType('user')
                     .filter('_type == "user" && userType == $t')
-                    .params({ t: 'full_member' })
-                    .apiVersion('2024-01-01')
+                    .params({t: 'full_member'})
+                    .apiVersion('2024-01-01'),
                 ),
               S.divider(),
               S.documentTypeListItem('user').title('Tüm Üyeler'),
-            ])
+            ]),
         ),
     ])
 }

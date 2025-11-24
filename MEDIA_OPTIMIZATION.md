@@ -49,6 +49,7 @@ import { OptimizedImage } from '../components/OptimizedImage';
 ### 2. Sanity Image URL Optimizasyonu
 
 `services/cms.ts` dosyasındaki `mapImage` fonksiyonu artık otomatik olarak:
+
 - **WebP formatı** kullanıyor (daha küçük dosya boyutu)
 - **%85 kalite** ile optimize ediyor
 - **1600px genişlik** ile sınırlandırıyor
@@ -57,15 +58,15 @@ import { OptimizedImage } from '../components/OptimizedImage';
 ### 3. Manuel Optimizasyon
 
 ```tsx
-import { getOptimizedImageUrl } from '../src/lib/mediaOptimization';
+import {getOptimizedImageUrl} from '../src/lib/mediaOptimization'
 
 const optimizedUrl = getOptimizedImageUrl(sanityImageAsset, {
   width: 1200,
   height: 800,
   quality: 85,
   format: 'webp',
-  fit: 'crop'
-});
+  fit: 'crop',
+})
 ```
 
 ## 🎥 Video Optimizasyonu
@@ -191,6 +192,7 @@ Art Direction özelliği, farklı ekran boyutları için farklı medya dosyalar�
 ## 📊 Performans Metrikleri
 
 Optimizasyon sonrası beklenen iyileştirmeler:
+
 - **Görsel boyutu**: %60-80 azalma (WebP kullanımı ile)
 - **Sayfa yükleme süresi**: %40-60 iyileşme
 - **Bandwidth kullanımı**: %50-70 azalma
@@ -199,11 +201,13 @@ Optimizasyon sonrası beklenen iyileştirmeler:
 ## 🔧 Sanity CMS'de Optimizasyon
 
 Sanity'de görseller yüklenirken:
+
 - Otomatik olarak optimize edilir
 - WebP formatı desteklenir
 - Responsive URL'ler oluşturulur
 
 Örnek URL formatı:
+
 ```
 https://cdn.sanity.io/images/{project}/{dataset}/{imageId}-{width}x{height}.{format}?q={quality}&auto=format
 ```
@@ -211,6 +215,7 @@ https://cdn.sanity.io/images/{project}/{dataset}/{imageId}-{width}x{height}.{for
 ## 📝 Örnekler
 
 ### Hero Section Görseli
+
 ```tsx
 <OptimizedImage
   src={heroImage}
@@ -222,6 +227,7 @@ https://cdn.sanity.io/images/{project}/{dataset}/{imageId}-{width}x{height}.{for
 ```
 
 ### Product Card Görseli
+
 ```tsx
 <OptimizedImage
   src={productImage}
@@ -235,6 +241,7 @@ https://cdn.sanity.io/images/{project}/{dataset}/{imageId}-{width}x{height}.{for
 ```
 
 ### Video Background
+
 ```tsx
 <OptimizedVideo
   src={backgroundVideo}
@@ -248,6 +255,7 @@ https://cdn.sanity.io/images/{project}/{dataset}/{imageId}-{width}x{height}.{for
 ```
 
 ### Art Direction ile Hero Section
+
 ```tsx
 <OptimizedImage
   src={heroImage} // Fallback
@@ -261,6 +269,7 @@ https://cdn.sanity.io/images/{project}/{dataset}/{imageId}-{width}x{height}.{for
 ```
 
 ### Art Direction ile Video Hero
+
 ```tsx
 <OptimizedVideo
   src={heroVideo} // Fallback
@@ -277,4 +286,3 @@ https://cdn.sanity.io/images/{project}/{dataset}/{imageId}-{width}x{height}.{for
   className="absolute inset-0 w-full h-full object-cover"
 />
 ```
-

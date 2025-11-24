@@ -1,31 +1,22 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import type { Category } from '../types';
-import { getCategories } from '../services/cms';
-import { OptimizedImage } from '../components/OptimizedImage';
-import { useTranslation } from '../i18n';
-import { useSiteSettings } from '../App';
+import {Link} from 'react-router-dom'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {useCategories} from '../src/hooks/useCategories'
+import {useSiteSettings} from '../src/hooks/useSiteData'
 
 export function CategoriesPage() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { t } = useTranslation();
-  const { settings } = useSiteSettings();
-  const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none';
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      setLoading(true);
-      const categoryList = await getCategories();
-      setCategories(categoryList);
-      setLoading(false);
-    };
-
-    fetchCategories();
-  }, []);
+  const {data: categories = [], isLoading: loading} = useCategories()
+  const {t} = useTranslation()
+  const {data: settings} = useSiteSettings()
+  const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
 
   if (loading) {
-    return <div className="pt-20 flex items-center justify-center min-h-screen">{t('loading')}...</div>;
+    return (
+      <div className="pt-20 min-h-screen">
+        <PageLoading message={t('loading')} />
+      </div>
+    )
   }
 
   return (
@@ -44,10 +35,16 @@ export function CategoriesPage() {
         </div>
         <div className="relative h-full flex items-center justify-center text-center text-white pt-20">
           <div>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase" style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}>
+            <h1
+              className="text-4xl md:text-6xl font-bold tracking-tighter uppercase"
+              style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}
+            >
               {t('products')}
             </h1>
-            <p className="mt-4 text-lg max-w-2xl mx-auto" style={{textShadow: '0 1px 3px rgba(0,0,0,0.5)'}}>
+            <p
+              className="mt-4 text-lg max-w-2xl mx-auto"
+              style={{textShadow: '0 1px 3px rgba(0,0,0,0.5)'}}
+            >
               {t('products_page_subtitle')}
             </p>
           </div>
@@ -58,7 +55,7 @@ export function CategoriesPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {categories.length > 0 ? (
           <div className="grid grid-cols-1 gap-12">
-            {categories.map((category) => (
+            {categories.map(category => (
               <Link
                 key={category.id}
                 to={`/products/${category.id}`}
@@ -74,15 +71,16 @@ export function CategoriesPage() {
                   />
                   <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-300"></div>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white uppercase tracking-wider" style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}>
+                    <h2
+                      className="text-4xl md:text-5xl lg:text-6xl font-bold text-white uppercase tracking-wider"
+                      style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}
+                    >
                       {t(category.name)}
                     </h2>
                   </div>
                 </div>
                 <div className="mt-6">
-                  <p className="text-gray-600 text-lg md:text-xl">
-                    {t(category.subtitle)}
-                  </p>
+                  <p className="text-gray-600 text-lg md:text-xl">{t(category.subtitle)}</p>
                 </div>
               </Link>
             ))}
@@ -92,6 +90,5 @@ export function CategoriesPage() {
         )}
       </div>
     </div>
-  );
+  )
 }
-

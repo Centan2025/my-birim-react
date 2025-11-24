@@ -4,7 +4,7 @@ import {sanityClient} from '../lib/sanityClient'
 export type ProductCard = {
   _id: string
   title?: string
-  slug?: { current: string }
+  slug?: {current: string}
   images?: any[]
   price?: number
 }
@@ -34,5 +34,3 @@ export async function fetchProductBySlug(slug: string) {
   }`
   return sanityClient.fetch(query, {slug})
 }
-
-

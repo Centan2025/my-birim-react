@@ -1,10 +1,12 @@
 // scripts/add-missing-keys.ts
 import {getCliClient} from 'sanity/cli'
 const client = getCliClient({apiVersion: '2025-01-01'})
-const gen = () => `${Date.now().toString(36)}_${Math.random().toString(36).slice(2,10)}`
+const gen = () => `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`
 
 async function run() {
-  const docs = await client.fetch(`*[_type=="product" && defined(materialSelections)]{_id, materialSelections}`)
+  const docs = await client.fetch(
+    `*[_type=="product" && defined(materialSelections)]{_id, materialSelections}`,
+  )
   const tx = client.transaction()
   for (const d of docs) {
     const selections = (d.materialSelections || []).map((sel: any) => ({
@@ -16,4 +18,6 @@ async function run() {
   }
   if (docs.length) await tx.commit()
 }
-run().catch((e)=>{process.exit(1)})
+run().catch((e) => {
+  process.exit(1)
+})

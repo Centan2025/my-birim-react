@@ -20,7 +20,14 @@ export const localizedPortableText = defineType({
       title: 'Türkçe',
       type: 'array',
       of: [
-        {type: 'block', marks: {annotations: [{name: 'link', type: 'object', fields: [{name:'href', type:'url', title:'URL'}]}]}},
+        {
+          type: 'block',
+          marks: {
+            annotations: [
+              {name: 'link', type: 'object', fields: [{name: 'href', type: 'url', title: 'URL'}]},
+            ],
+          },
+        },
       ],
     }),
     defineField({
@@ -28,22 +35,15 @@ export const localizedPortableText = defineType({
       title: 'English',
       type: 'array',
       of: [
-        {type: 'block', marks: {annotations: [{name: 'link', type: 'object', fields: [{name:'href', type:'url', title:'URL'}]}]}},
+        {
+          type: 'block',
+          marks: {
+            annotations: [
+              {name: 'link', type: 'object', fields: [{name: 'href', type: 'url', title: 'URL'}]},
+            ],
+          },
+        },
       ],
     }),
   ],
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
