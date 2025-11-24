@@ -2,7 +2,6 @@ import React, {useState, useEffect, useRef} from 'react'
 import {Link} from 'react-router-dom'
 import {useSiteSettings} from '../src/hooks/useSiteData'
 import {useHomePageContent} from '../src/hooks/useHomePage'
-import type {SiteSettings} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {OptimizedVideo} from '../components/OptimizedVideo'
 import {useTranslation} from '../i18n'
@@ -131,7 +130,7 @@ export function HomePage() {
       }
       if (!e.touches || e.touches.length === 0) return
       setIsDragging(true)
-      const startX = e.touches[0].clientX
+      const startX = e.touches[0]?.clientX ?? 0
       setDragStartX(startX)
       setDraggedX(0)
       e.preventDefault() // Non-passive listener olduğu için preventDefault çalışır
@@ -140,7 +139,7 @@ export function HomePage() {
     const handleTouchMove = (e: TouchEvent) => {
       if (!isDragging) return
       if (!e.touches || e.touches.length === 0) return
-      const currentX = e.touches[0].clientX
+      const currentX = e.touches[0]?.clientX ?? 0
       setDraggedX(currentX - dragStartX)
       e.preventDefault() // Non-passive listener olduğu için preventDefault çalışır
     }
@@ -259,7 +258,7 @@ export function HomePage() {
       return
     }
     setIsDragging(true)
-    const startX = 'touches' in e && e.touches && e.touches.length > 0 ? e.touches[0].clientX : ('clientX' in e ? e.clientX : 0)
+    const startX = 'touches' in e && e.touches && e.touches.length > 0 ? (e.touches[0]?.clientX ?? 0) : ('clientX' in e ? e.clientX : 0)
     setDragStartX(startX)
     setDraggedX(0)
     // preventDefault sadece mouse event'lerde çalışır, touch event'ler için useEffect'te non-passive listener kullanıyoruz
@@ -272,7 +271,7 @@ export function HomePage() {
     e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
   ) => {
     if (!isDragging) return
-    const currentX = 'touches' in e && e.touches && e.touches.length > 0 ? e.touches[0].clientX : ('clientX' in e ? e.clientX : 0)
+    const currentX = 'touches' in e && e.touches && e.touches.length > 0 ? (e.touches[0]?.clientX ?? 0) : ('clientX' in e ? e.clientX : 0)
     setDraggedX(currentX - dragStartX)
     // preventDefault sadece mouse event'lerde çalışır, touch event'ler için useEffect'te non-passive listener kullanıyoruz
     if (!('touches' in e)) {

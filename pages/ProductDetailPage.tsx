@@ -382,7 +382,7 @@ export function ProductDetailPage() {
       return
     }
     setIsDragging(true)
-    const startX = 'touches' in e && e.touches && e.touches.length > 0 ? e.touches[0].clientX : ('clientX' in e ? e.clientX : 0)
+    const startX = 'touches' in e && e.touches && e.touches.length > 0 ? (e.touches[0]?.clientX ?? 0) : ('clientX' in e ? e.clientX : 0)
     setDragStartX(startX)
     setDraggedX(0)
     e.preventDefault()
@@ -392,7 +392,7 @@ export function ProductDetailPage() {
     e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
   ) => {
     if (!isDragging) return
-    const currentX = 'touches' in e && e.touches && e.touches.length > 0 ? e.touches[0].clientX : ('clientX' in e ? e.clientX : 0)
+    const currentX = 'touches' in e && e.touches && e.touches.length > 0 ? (e.touches[0]?.clientX ?? 0) : ('clientX' in e ? e.clientX : 0)
     setDraggedX(currentX - dragStartX)
   }
 
@@ -1493,19 +1493,23 @@ export function ProductDetailPage() {
                   </button>
                 </>
               )}
-              {dimLightbox.images[dimLightbox.currentIndex] && (
-                <OptimizedImage
-                  src={dimLightbox.images[dimLightbox.currentIndex].image}
-                  alt={
-                    dimLightbox.images[dimLightbox.currentIndex].title
-                      ? t(dimLightbox.images[dimLightbox.currentIndex].title!)
-                      : 'Technical Drawing'
-                  }
-                  className="w-full h-auto object-contain"
-                  loading="eager"
-                  quality={95}
-                />
-              )}
+              {(() => {
+                const currentImage = dimLightbox.images[dimLightbox.currentIndex]
+                if (!currentImage) return null
+                return (
+                  <OptimizedImage
+                    src={currentImage.image}
+                    alt={
+                      currentImage.title
+                        ? t(currentImage.title)
+                        : 'Technical Drawing'
+                    }
+                    className="w-full h-auto object-contain"
+                    loading="eager"
+                    quality={95}
+                  />
+                )
+              })()}
             </div>
           </div>
         </div>
@@ -1562,15 +1566,19 @@ export function ProductDetailPage() {
                   </button>
                 </>
               )}
-              {materialLightbox.images[materialLightbox.currentIndex] && (
-                <OptimizedImage
-                  src={materialLightbox.images[materialLightbox.currentIndex].image}
-                  alt={materialLightbox.images[materialLightbox.currentIndex].name}
-                  className="w-full h-auto object-contain"
-                  loading="eager"
-                  quality={95}
-                />
-              )}
+              {materialLightbox.images[materialLightbox.currentIndex] && (() => {
+                const currentImage = materialLightbox.images[materialLightbox.currentIndex]
+                if (!currentImage) return null
+                return (
+                  <OptimizedImage
+                    src={currentImage.image}
+                    alt={currentImage.name}
+                    className="w-full h-auto object-contain"
+                    loading="eager"
+                    quality={95}
+                  />
+                )
+              })()}
             </div>
           </div>
         </div>

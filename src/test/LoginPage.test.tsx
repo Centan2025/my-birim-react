@@ -15,7 +15,7 @@ const mockUseAuth = vi.fn(() => ({
   isLoggedIn: false,
   login: vi.fn(),
   logout: vi.fn(),
-  user: null,
+  user: null as any,
 }))
 
 vi.mock('../../App', () => ({
