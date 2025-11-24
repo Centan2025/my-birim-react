@@ -42,14 +42,17 @@ class ErrorReporter {
             }),
           ],
           // Performance Monitoring
-          tracesSampleRate: (import.meta.env.PROD as boolean | undefined) ? 0.1 : 1.0, // 10% in production, 100% in dev
+          tracesSampleRate: (import.meta.env.PROD as boolean | undefined) ? 0.1 : 1.0, // 10 percent in production, 100 percent in dev
           // Session Replay
           replaysSessionSampleRate: (import.meta.env.PROD as boolean | undefined) ? 0.1 : 1.0,
           replaysOnErrorSampleRate: 1.0, // Always record replays on errors
           // Filter out localhost errors in production
           beforeSend(event) {
             // Don't send errors from localhost in production
-            if ((import.meta.env.PROD as boolean | undefined) && window.location.hostname === 'localhost') {
+            if (
+              (import.meta.env.PROD as boolean | undefined) &&
+              window.location.hostname === 'localhost'
+            ) {
               return null
             }
             return event
@@ -71,7 +74,7 @@ class ErrorReporter {
    * Capture an exception
    */
   captureException(error: Error, context?: ErrorContext) {
-    if ((import.meta.env.DEV as boolean | undefined)) {
+    if (import.meta.env.DEV as boolean | undefined) {
       console.error('[ErrorReporter] Exception:', error, context)
     }
 
@@ -96,7 +99,7 @@ class ErrorReporter {
     level: 'info' | 'warning' | 'error' = 'info',
     context?: ErrorContext
   ) {
-    if ((import.meta.env.DEV as boolean | undefined)) {
+    if (import.meta.env.DEV as boolean | undefined) {
       console.log(`[ErrorReporter] ${level.toUpperCase()}:`, message, context)
     }
 
