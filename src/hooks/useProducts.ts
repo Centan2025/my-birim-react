@@ -1,11 +1,10 @@
-import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query'
+import {useQuery} from '@tanstack/react-query'
 import {
   getProducts,
   getProductById,
   getProductsByCategoryId,
   getProductsByDesignerId,
 } from '../../services/cms'
-import type {Product} from '../../types'
 
 /**
  * Tüm ürünleri getir

@@ -1,6 +1,5 @@
 import {useQuery} from '@tanstack/react-query'
 import {getCategories} from '../../services/cms'
-import type {Category} from '../../types'
 
 /**
  * Tüm kategorileri getir

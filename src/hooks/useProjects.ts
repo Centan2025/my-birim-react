@@ -1,6 +1,5 @@
 import {useQuery} from '@tanstack/react-query'
 import {getProjects, getProjectById} from '../../services/cms'
-import type {Project} from '../../types'
 
 /**
  * Tüm projeleri getir

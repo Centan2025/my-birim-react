@@ -1,6 +1,6 @@
 import React, {useMemo} from 'react'
 import {useParams, Link} from 'react-router-dom'
-import type {NewsItem, NewsMedia} from '../types'
+import type {NewsMedia} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {OptimizedVideo} from '../components/OptimizedVideo'
 import {PageLoading} from '../components/LoadingSpinner'
@@ -12,7 +12,7 @@ const getYouTubeId = (url: string): string | null => {
   if (!url) return null
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
   const match = url.match(regExp)
-  return match && match[2].length === 11 ? match[2] : null
+  return match && match[2] && match[2].length === 11 ? match[2] : null
 }
 
 const formatDate = (dateString: string): string => {
@@ -202,10 +202,10 @@ export function NewsDetailPage() {
             </div>
 
             <OptimizedImage
-              src={typeof item.mainImage === 'string' ? item.mainImage : item.mainImage?.url || ''}
-              srcMobile={typeof item.mainImage === 'object' ? item.mainImage.urlMobile : undefined}
+              src={typeof item.mainImage === 'string' ? item.mainImage : (item.mainImage && typeof item.mainImage === 'object' ? item.mainImage.url : '') || ''}
+              srcMobile={typeof item.mainImage === 'object' && item.mainImage ? item.mainImage.urlMobile : undefined}
               srcDesktop={
-                typeof item.mainImage === 'object' ? item.mainImage.urlDesktop : undefined
+                typeof item.mainImage === 'object' && item.mainImage ? item.mainImage.urlDesktop : undefined
               }
               alt={t(item.title)}
               className={`w-full h-auto object-cover mb-6 ${settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'}`}

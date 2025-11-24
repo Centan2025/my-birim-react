@@ -1,6 +1,5 @@
 import {useQuery} from '@tanstack/react-query'
 import {getHomePageContent} from '../../services/cms'
-import type {HomePageContent} from '../../types'
 
 /**
  * Ana sayfa içeriğini getir

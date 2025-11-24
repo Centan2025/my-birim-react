@@ -10,7 +10,7 @@ const getYouTubeId = (url: string): string | null => {
   const match = url.match(
     /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/
   )
-  return match && match[1].length === 11 ? match[1] : null
+  return match && match[1] && match[1].length === 11 ? match[1] : null
 }
 
 const youTubeThumb = (url: string): string => {
@@ -345,7 +345,7 @@ export function ContactPage() {
       setContent(pageContent)
       if (pageContent && pageContent.locations.length > 0) {
         const firstWithMap = pageContent.locations.find(loc => loc.mapEmbedUrl)
-        setSelectedLocation(firstWithMap || pageContent.locations[0])
+        setSelectedLocation(firstWithMap || pageContent.locations[0] || null)
       }
       setLoading(false)
     }
@@ -404,7 +404,7 @@ export function ContactPage() {
                 <h2 className="text-2xl font-light text-gray-600 mb-2">{type}</h2>
                 <div className="h-px bg-gray-300 mb-6 w-full"></div>
                 <div className="space-y-4">
-                  {locationGroups[type].map((loc, index) => (
+                  {(locationGroups[type] || []).map((loc, index) => (
                     <LocationCard
                       key={index}
                       location={loc}
@@ -560,14 +560,20 @@ export function ContactPage() {
             if (selectedMediaIndex < selectedLocationMedia.length - 1) {
               const nextIndex = selectedMediaIndex + 1
               setSelectedMediaIndex(nextIndex)
-              setSelectedMedia(selectedLocationMedia[nextIndex])
+              const nextMedia = selectedLocationMedia[nextIndex]
+              if (nextMedia) {
+                setSelectedMedia(nextMedia)
+              }
             }
           }}
           onPrevious={() => {
             if (selectedMediaIndex > 0) {
               const prevIndex = selectedMediaIndex - 1
               setSelectedMediaIndex(prevIndex)
-              setSelectedMedia(selectedLocationMedia[prevIndex])
+              const prevMedia = selectedLocationMedia[prevIndex]
+              if (prevMedia) {
+                setSelectedMedia(prevMedia)
+              }
             }
           }}
         />

@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useMemo, useRef} from 'react'
 import {useParams, Link, useNavigate} from 'react-router-dom'
 // FIX: Imported SiteSettings type to correctly type component state.
-import type {Product, Designer, Category, LocalizedString, SiteSettings} from '../types'
+import type {LocalizedString} from '../types'
 import {useAuth} from '../App'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {OptimizedVideo} from '../components/OptimizedVideo'
@@ -232,7 +232,7 @@ export function ProductDetailPage() {
   const productImage =
     product && typeof product.mainImage === 'string'
       ? product.mainImage
-      : product?.mainImage?.url || ''
+      : (product?.mainImage && typeof product.mainImage === 'object' ? product.mainImage.url : '') || ''
 
   useSEO({
     title: productName ? `${productName} - BIRIM` : 'BIRIM',
@@ -382,7 +382,7 @@ export function ProductDetailPage() {
       return
     }
     setIsDragging(true)
-    const startX = 'touches' in e ? e.touches[0].clientX : e.clientX
+    const startX = 'touches' in e && e.touches && e.touches.length > 0 ? e.touches[0].clientX : ('clientX' in e ? e.clientX : 0)
     setDragStartX(startX)
     setDraggedX(0)
     e.preventDefault()
@@ -392,7 +392,7 @@ export function ProductDetailPage() {
     e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
   ) => {
     if (!isDragging) return
-    const currentX = 'touches' in e ? e.touches[0].clientX : e.clientX
+    const currentX = 'touches' in e && e.touches && e.touches.length > 0 ? e.touches[0].clientX : ('clientX' in e ? e.clientX : 0)
     setDraggedX(currentX - dragStartX)
   }
 
@@ -1493,17 +1493,19 @@ export function ProductDetailPage() {
                   </button>
                 </>
               )}
-              <OptimizedImage
-                src={dimLightbox.images[dimLightbox.currentIndex].image}
-                alt={
-                  dimLightbox.images[dimLightbox.currentIndex].title
-                    ? t(dimLightbox.images[dimLightbox.currentIndex].title!)
-                    : 'Technical Drawing'
-                }
-                className="w-full h-auto object-contain"
-                loading="eager"
-                quality={95}
-              />
+              {dimLightbox.images[dimLightbox.currentIndex] && (
+                <OptimizedImage
+                  src={dimLightbox.images[dimLightbox.currentIndex].image}
+                  alt={
+                    dimLightbox.images[dimLightbox.currentIndex].title
+                      ? t(dimLightbox.images[dimLightbox.currentIndex].title!)
+                      : 'Technical Drawing'
+                  }
+                  className="w-full h-auto object-contain"
+                  loading="eager"
+                  quality={95}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -1560,13 +1562,15 @@ export function ProductDetailPage() {
                   </button>
                 </>
               )}
-              <OptimizedImage
-                src={materialLightbox.images[materialLightbox.currentIndex].image}
-                alt={materialLightbox.images[materialLightbox.currentIndex].name}
-                className="w-full h-auto object-contain"
-                loading="eager"
-                quality={95}
-              />
+              {materialLightbox.images[materialLightbox.currentIndex] && (
+                <OptimizedImage
+                  src={materialLightbox.images[materialLightbox.currentIndex].image}
+                  alt={materialLightbox.images[materialLightbox.currentIndex].name}
+                  className="w-full h-auto object-contain"
+                  loading="eager"
+                  quality={95}
+                />
+              )}
             </div>
           </div>
         </div>

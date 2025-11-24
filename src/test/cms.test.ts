@@ -1,5 +1,4 @@
 import {describe, it, expect, beforeEach, vi} from 'vitest'
-import * as cms from '../../services/cms'
 import bcrypt from 'bcryptjs'
 
 // Mock bcrypt

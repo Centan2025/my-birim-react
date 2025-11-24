@@ -2,7 +2,7 @@ import React, {useState, useEffect, useRef} from 'react'
 import {Link} from 'react-router-dom'
 import {useSiteSettings} from '../src/hooks/useSiteData'
 import {useHomePageContent} from '../src/hooks/useHomePage'
-import type {SiteSettings, HomePageContent} from '../types'
+import type {SiteSettings} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {OptimizedVideo} from '../components/OptimizedVideo'
 import {useTranslation} from '../i18n'
@@ -29,7 +29,7 @@ const getYouTubeId = (url: string): string | null => {
   if (!url) return null
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
   const match = url.match(regExp)
-  return match && match[2].length === 11 ? match[2] : null
+  return match && match[2] && match[2].length === 11 ? match[2] : null
 }
 
 const YouTubeBackground: React.FC<{url: string; isMobile?: boolean}> = ({
@@ -129,6 +129,7 @@ export function HomePage() {
       if (e.target instanceof HTMLElement && e.target.closest('a, button')) {
         return
       }
+      if (!e.touches || e.touches.length === 0) return
       setIsDragging(true)
       const startX = e.touches[0].clientX
       setDragStartX(startX)
@@ -138,6 +139,7 @@ export function HomePage() {
 
     const handleTouchMove = (e: TouchEvent) => {
       if (!isDragging) return
+      if (!e.touches || e.touches.length === 0) return
       const currentX = e.touches[0].clientX
       setDraggedX(currentX - dragStartX)
       e.preventDefault() // Non-passive listener olduğu için preventDefault çalışır
@@ -257,7 +259,7 @@ export function HomePage() {
       return
     }
     setIsDragging(true)
-    const startX = 'touches' in e ? e.touches[0].clientX : e.clientX
+    const startX = 'touches' in e && e.touches && e.touches.length > 0 ? e.touches[0].clientX : ('clientX' in e ? e.clientX : 0)
     setDragStartX(startX)
     setDraggedX(0)
     // preventDefault sadece mouse event'lerde çalışır, touch event'ler için useEffect'te non-passive listener kullanıyoruz
@@ -270,7 +272,7 @@ export function HomePage() {
     e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
   ) => {
     if (!isDragging) return
-    const currentX = 'touches' in e ? e.touches[0].clientX : e.clientX
+    const currentX = 'touches' in e && e.touches && e.touches.length > 0 ? e.touches[0].clientX : ('clientX' in e ? e.clientX : 0)
     setDraggedX(currentX - dragStartX)
     // preventDefault sadece mouse event'lerde çalışır, touch event'ler için useEffect'te non-passive listener kullanıyoruz
     if (!('touches' in e)) {
@@ -493,6 +495,7 @@ export function HomePage() {
       }, 650)
       return () => clearTimeout(timer)
     }
+    return undefined
   }, [currentSlide, content, isDragging, isTransitioning])
 
   // Mobilde Hero container yüksekliğini medyanın gerçek boyutuna göre ayarla
@@ -1051,6 +1054,7 @@ export function HomePage() {
             }
           >
             {clonedMedia.map((media, index) => {
+              if (!media) return null
               // Klon mu yoksa gerçek slide mı kontrol et
               const isClone = slideCount > 1 && (index === 0 || index === totalSlides - 1)
               const realIndex =
@@ -1106,7 +1110,7 @@ export function HomePage() {
                       src={media.url}
                       srcMobile={media.urlMobile}
                       srcDesktop={media.urlDesktop}
-                      alt={t(media.title)}
+                      alt={t(media.title || '')}
                       className={`${isMobile ? 'relative' : 'absolute'} top-0 left-0 w-full ${isMobile ? 'h-auto' : 'h-full'} ${isMobile ? 'object-contain object-top' : 'object-cover'}`}
                       loading="eager"
                       quality={90}
@@ -1142,13 +1146,13 @@ export function HomePage() {
                                   className="text-base md:text-5xl font-light tracking-tight mb-4 leading-relaxed"
                                   style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}
                                 >
-                                  {t(media.title)}
+                                  {t(media.title || '')}
                                 </h1>
                                 <p
                                   className="text-[10px] md:text-xl mb-8 leading-relaxed"
                                   style={{textShadow: '0 1px 3px rgba(0,0,0,0.5)'}}
                                 >
-                                  {t(media.subtitle)}
+                                  {t(media.subtitle || '')}
                                 </p>
                                 {media.isButtonVisible && (
                                   <Link
@@ -1157,7 +1161,7 @@ export function HomePage() {
                                   >
                                     <span className="inline-flex items-center gap-x-3 border-b border-transparent group-hover:border-white pb-1 transition-all duration-300 ease-out">
                                       <span className="group-hover:text-gray-200">
-                                        {t(media.buttonText)}
+                                        {t(media.buttonText || '')}
                                       </span>
                                       <ArrowRight className="w-3 h-3 md:w-6 md:h-6" />
                                     </span>

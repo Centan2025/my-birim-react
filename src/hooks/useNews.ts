@@ -1,6 +1,5 @@
 import {useQuery} from '@tanstack/react-query'
 import {getNews, getNewsById} from '../../services/cms'
-import type {NewsItem} from '../../types'
 
 /**
  * Tüm haberleri getir

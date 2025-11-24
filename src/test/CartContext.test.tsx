@@ -29,6 +29,13 @@ const TestComponent = () => {
     alternativeImages: [],
     buyable: true,
     price: 100,
+    currency: 'TRY',
+    materials: [],
+    exclusiveContent: {
+      images: [],
+      drawings: [],
+      models3d: [],
+    },
   }
 
   return (
@@ -172,7 +179,6 @@ describe('CartContext', () => {
 
     // Update to 0
     act(() => {
-      const updateButton = screen.getByTestId('update-button')
       // We need to manually call updateQuantity with 0
       // For this test, we'll check the remove functionality
       screen.getByTestId('remove-button').click()

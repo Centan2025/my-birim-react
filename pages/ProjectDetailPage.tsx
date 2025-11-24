@@ -1,6 +1,5 @@
 import {useMemo, useState, useEffect} from 'react'
 import {useParams, Link} from 'react-router-dom'
-import type {Project} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {OptimizedVideo} from '../components/OptimizedVideo'
 import {PageLoading} from '../components/LoadingSpinner'
