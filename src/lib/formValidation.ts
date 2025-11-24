@@ -55,13 +55,13 @@ export const validateLoginForm = (email: string, password: string): ValidationRe
   const errors: Record<string, string> = {}
   
   if (!email || !email.trim()) {
-    errors.email = 'E-posta adresi gereklidir'
+    errors['email'] = 'E-posta adresi gereklidir'
   } else if (!validateEmail(email)) {
-    errors.email = 'Geçerli bir e-posta adresi giriniz'
+    errors['email'] = 'Geçerli bir e-posta adresi giriniz'
   }
   
   if (!password) {
-    errors.password = 'Şifre gereklidir'
+    errors['password'] = 'Şifre gereklidir'
   }
   
   return {
@@ -83,30 +83,30 @@ export const validateRegisterForm = (
   const errors: Record<string, string> = {}
   
   if (!email || !email.trim()) {
-    errors.email = 'E-posta adresi gereklidir'
+    errors['email'] = 'E-posta adresi gereklidir'
   } else if (!validateEmail(email)) {
-    errors.email = 'Geçerli bir e-posta adresi giriniz'
+    errors['email'] = 'Geçerli bir e-posta adresi giriniz'
   }
   
   if (!password) {
-    errors.password = 'Şifre gereklidir'
+    errors['password'] = 'Şifre gereklidir'
   } else if (!validatePassword(password, 8)) {
-    errors.password = 'Şifre en az 8 karakter olmalıdır'
+    errors['password'] = 'Şifre en az 8 karakter olmalıdır'
   }
   
   if (!name || !name.trim()) {
-    errors.name = 'Ad soyad gereklidir'
+    errors['name'] = 'Ad soyad gereklidir'
   } else if (name.trim().length < 2) {
-    errors.name = 'Ad soyad en az 2 karakter olmalıdır'
+    errors['name'] = 'Ad soyad en az 2 karakter olmalıdır'
   }
   
   // Optional fields validation
   if (company && company.trim().length > 0 && company.trim().length < 2) {
-    errors.company = 'Şirket adı en az 2 karakter olmalıdır'
+    errors['company'] = 'Şirket adı en az 2 karakter olmalıdır'
   }
   
   if (profession && profession.trim().length > 0 && profession.trim().length < 2) {
-    errors.profession = 'Meslek en az 2 karakter olmalıdır'
+    errors['profession'] = 'Meslek en az 2 karakter olmalıdır'
   }
   
   return {
@@ -127,23 +127,23 @@ export const validateContactForm = (
   const errors: Record<string, string> = {}
   
   if (!name || !name.trim()) {
-    errors.name = 'Ad soyad gereklidir'
+    errors['name'] = 'Ad soyad gereklidir'
   }
   
   if (!email || !email.trim()) {
-    errors.email = 'E-posta adresi gereklidir'
+    errors['email'] = 'E-posta adresi gereklidir'
   } else if (!validateEmail(email)) {
-    errors.email = 'Geçerli bir e-posta adresi giriniz'
+    errors['email'] = 'Geçerli bir e-posta adresi giriniz'
   }
   
   if (!message || !message.trim()) {
-    errors.message = 'Mesaj gereklidir'
+    errors['message'] = 'Mesaj gereklidir'
   } else if (message.trim().length < 10) {
-    errors.message = 'Mesaj en az 10 karakter olmalıdır'
+    errors['message'] = 'Mesaj en az 10 karakter olmalıdır'
   }
   
   if (subject && subject.trim().length > 0 && subject.trim().length < 3) {
-    errors.subject = 'Konu en az 3 karakter olmalıdır'
+    errors['subject'] = 'Konu en az 3 karakter olmalıdır'
   }
   
   return {

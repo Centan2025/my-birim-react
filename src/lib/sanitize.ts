@@ -11,12 +11,12 @@ import DOMPurify from 'dompurify'
  * @param options - DOMPurify seçenekleri
  * @returns Sanitize edilmiş HTML string
  */
-export const sanitizeHtml = (dirty: string, options?: DOMPurify.Config): string => {
+export const sanitizeHtml = (dirty: string, options?: import('dompurify').Config): string => {
   if (typeof window === 'undefined') {
     // SSR için fallback
     return dirty
   }
-  return DOMPurify.sanitize(dirty, {
+  const sanitized = DOMPurify.sanitize(dirty, {
     ALLOWED_TAGS: [
       'p',
       'br',
@@ -41,6 +41,7 @@ export const sanitizeHtml = (dirty: string, options?: DOMPurify.Config): string 
     ALLOW_DATA_ATTR: false,
     ...options,
   })
+  return String(sanitized)
 }
 
 /**

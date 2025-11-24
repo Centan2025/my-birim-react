@@ -3,7 +3,7 @@
  * Uygulama başlangıcında environment variable'ları validate eder
  */
 
-import {z, type ZodError} from 'zod'
+import {z} from 'zod'
 
 /**
  * Environment variable schema

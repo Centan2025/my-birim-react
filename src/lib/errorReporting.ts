@@ -27,7 +27,7 @@ class ErrorReporter {
   init(dsn?: string) {
     if (this.isInitialized) return
 
-    this.dsn = dsn || import.meta.env.VITE_SENTRY_DSN || null
+    this.dsn = dsn || import.meta.env['VITE_SENTRY_DSN'] || null
 
     if (this.dsn) {
       try {
@@ -47,7 +47,7 @@ class ErrorReporter {
           replaysSessionSampleRate: import.meta.env.PROD ? 0.1 : 1.0,
           replaysOnErrorSampleRate: 1.0, // Always record replays on errors
           // Filter out localhost errors in production
-          beforeSend(event, hint) {
+          beforeSend(event) {
             // Don't send errors from localhost in production
             if (import.meta.env.PROD && window.location.hostname === 'localhost') {
               return null

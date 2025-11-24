@@ -90,8 +90,8 @@ export const updateMetaTags = (data: SEOData): void => {
 
   // Tags (article için)
   if (data.tags && data.tags.length > 0) {
-    data.tags.forEach((tag, index) => {
-      updateMetaTag('property', `article:tag`, tag, index)
+    data.tags.forEach((tag) => {
+      updateMetaTag('property', `article:tag`, tag)
     })
   }
 }
@@ -102,8 +102,7 @@ export const updateMetaTags = (data: SEOData): void => {
 const updateMetaTag = (
   attribute: 'name' | 'property',
   attributeValue: string,
-  content: string,
-  index?: number
+  content: string
 ): void => {
   if (typeof document === 'undefined') return
 

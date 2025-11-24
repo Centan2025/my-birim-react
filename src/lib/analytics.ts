@@ -26,13 +26,13 @@ class Analytics {
     if (this.isInitialized) return
 
     // Google Analytics
-    this.googleAnalyticsId = import.meta.env.VITE_GA_ID || null
+    this.googleAnalyticsId = import.meta.env['VITE_GA_ID'] || null
     if (this.googleAnalyticsId) {
       this.initGoogleAnalytics(this.googleAnalyticsId)
     }
 
     // Plausible Analytics
-    this.plausibleDomain = import.meta.env.VITE_PLAUSIBLE_DOMAIN || null
+    this.plausibleDomain = import.meta.env['VITE_PLAUSIBLE_DOMAIN'] || null
     if (this.plausibleDomain) {
       this.initPlausible(this.plausibleDomain)
     }
@@ -53,9 +53,9 @@ class Analytics {
     document.head.appendChild(script1)
 
     // Initialize gtag
-    window.dataLayer = window.dataLayer || []
+    const dataLayer = ((window as any).dataLayer = (window as any).dataLayer || [])
     function gtag(...args: any[]) {
-      window.dataLayer.push(args)
+      dataLayer.push(args)
     }
     (window as any).gtag = gtag
 
