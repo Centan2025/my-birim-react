@@ -5,8 +5,9 @@ import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
 import {useProducts, useProductsByCategory} from '../src/hooks/useProducts'
-import {useCategory} from '../src/hooks/useCategories'
+import {useCategory, useCategories} from '../src/hooks/useCategories'
 import {useSiteSettings} from '../src/hooks/useSiteData'
+import type {Product} from '../types'
 
 const ChevronDownIcon = () => (
   <svg
@@ -34,16 +35,73 @@ export function ProductsPage() {
 
   // React Query hooks - always call both, use enabled to control
   const {data: allProducts = [], isLoading: allProductsLoading} = useProducts()
-  const {data: categoryProducts = [], isLoading: categoryProductsLoading} = useProductsByCategory(
-    categoryId
-  )
+  const {data: categoryProducts = [], isLoading: categoryProductsLoading} =
+    useProductsByCategory(categoryId)
   const {data: category} = useCategory(categoryId)
+  const {data: categories = []} = useCategories()
 
   // Use category products if categoryId exists, otherwise use all products
   const products = categoryId ? categoryProducts : allProducts
   const loading = categoryId ? categoryProductsLoading : allProductsLoading
 
   const sortedProducts = useMemo(() => {
+    // If showing all products (no categoryId), group by category first
+    if (!categoryId && allProducts.length > 0) {
+      // Group products by category
+      const productsByCategory = new Map<string, Product[]>()
+
+      allProducts.forEach(product => {
+        const catId = product.categoryId || 'uncategorized'
+        if (!productsByCategory.has(catId)) {
+          productsByCategory.set(catId, [])
+        }
+        productsByCategory.get(catId)!.push(product)
+      })
+
+      // Sort products within each category
+      productsByCategory.forEach(categoryProducts => {
+        if (sortBy === 'name-asc') {
+          categoryProducts.sort((a, b) => t(a.name).localeCompare(t(b.name)))
+        } else if (sortBy === 'year-desc') {
+          categoryProducts.sort((a, b) => b.year - a.year)
+        }
+      })
+
+      // Get category order from categories list (CMS orderRank sırasına göre zaten sıralı)
+      const categoryOrder = categories.map(cat => cat.id)
+
+      // Sort categories by their order in the categories list (CMS sıralaması)
+      const sortedCategoryIds = Array.from(productsByCategory.keys()).sort((a, b) => {
+        const indexA = categoryOrder.indexOf(a)
+        const indexB = categoryOrder.indexOf(b)
+
+        // If both are in the list, use their CMS order
+        if (indexA !== -1 && indexB !== -1) {
+          return indexA - indexB
+        }
+        // If only one is in the list, prioritize it
+        if (indexA !== -1) return -1
+        if (indexB !== -1) return 1
+        // If neither is in the list, sort alphabetically by category name as fallback
+        const catA = categories.find(c => c.id === a)
+        const catB = categories.find(c => c.id === b)
+        if (catA && catB) {
+          return t(catA.name).localeCompare(t(catB.name))
+        }
+        return a.localeCompare(b)
+      })
+
+      // Flatten products in category order
+      const result: Product[] = []
+      sortedCategoryIds.forEach(catId => {
+        const categoryProducts = productsByCategory.get(catId) || []
+        result.push(...categoryProducts)
+      })
+
+      return result
+    }
+
+    // If showing products from a specific category, just sort normally
     const sorted = [...products]
     if (sortBy === 'name-asc') {
       sorted.sort((a, b) => t(a.name).localeCompare(t(b.name)))
@@ -51,7 +109,7 @@ export function ProductsPage() {
       sorted.sort((a, b) => b.year - a.year)
     }
     return sorted
-  }, [products, sortBy, t])
+  }, [products, sortBy, t, categoryId, allProducts, categories])
 
   if (loading) {
     return (

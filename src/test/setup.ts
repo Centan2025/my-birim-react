@@ -32,4 +32,3 @@ global.IntersectionObserver = class IntersectionObserver {
   }
   unobserve() {}
 } as any
-

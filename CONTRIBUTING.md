@@ -102,6 +102,7 @@ git push origin feature/your-feature-name
 ```
 
 GitHub'da Pull Request oluşturun ve şunları ekleyin:
+
 - Değişikliklerin açıklaması
 - İlgili issue numarası (varsa)
 - Screenshot'lar (UI değişiklikleri için)
@@ -225,4 +226,3 @@ Yeni özellik önerisi için:
 ---
 
 **Teşekkürler!** 🎉
-

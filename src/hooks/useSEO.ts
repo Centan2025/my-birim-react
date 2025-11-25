@@ -26,5 +26,3 @@ export const useSEO = (data: SEOData) => {
     setCanonicalUrl(data.url || fullUrl)
   }, [location, data])
 }
-
-

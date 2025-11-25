@@ -1,6 +1,6 @@
 /**
  * Rate Limiter - API istekleri için rate limiting
- * 
+ *
  * Brute-force saldırılarını önlemek için kullanılır.
  * LocalStorage tabanlı basit bir rate limiter.
  * Production'da backend'de daha gelişmiş rate limiting kullanılmalıdır.
@@ -140,5 +140,3 @@ export const apiRateLimiter = new RateLimiter({
   windowMs: 60 * 1000, // 1 dakika
   keyPrefix: 'rate_limit_api',
 })
-
-

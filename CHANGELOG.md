@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - CI/CD pipeline with GitHub Actions
 - Security headers configuration in vercel.json
 - Husky pre-commit hooks for code quality
@@ -17,16 +18,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Environment variables template documentation
 
 ### Changed
+
 - Build script now automatically generates sitemap.xml
 - robots.txt updated with placeholder domain note
 
 ### Fixed
+
 - Security headers configuration
 - Build process improvements
 
 ## [0.0.0] - 2025-01-27
 
 ### Added
+
 - Initial project setup
 - React + Vite configuration
 - Sanity CMS integration
@@ -46,4 +50,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://github.com/yourusername/birim-web/compare/v0.0.0...HEAD
 [0.0.0]: https://github.com/yourusername/birim-web/releases/tag/v0.0.0
-
