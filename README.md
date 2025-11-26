@@ -138,6 +138,100 @@ Maintenance mode aktifken production'da sayfalara erişmek için:
 - Production'da bypass secret ile sayfalara erişebilirsiniz
 - Maintenance mode aktifken normal kullanıcılar sadece "Yakında" sayfasını görür
 
+## Google Analytics ve Ziyaretçi Analizleri
+
+Bu proje, Google Analytics 4 (GA4) ve opsiyonel olarak Plausible destekler. Aşağıdaki adımlarla gerçek kullanıcı verilerini görebilirsin.
+
+### 1. Google Analytics hesabı ve GA4 property oluşturma
+
+- **analytics.google.com** adresine giriş yap.
+- Yeni bir **GA4 property (mülk)** oluştur (veya mevcut bir GA4 mülkünü kullan).
+- Web stream (veri akışı) eklerken alan adını gir:
+  - `https://www.birim.com` (veya kullandığın alan adı)
+- Oluşturduktan sonra **Measurement ID (Ölçüm Kimliği)** al:
+  - Format: `G-XXXXXXXXXX` (örnek: `G-ABCDE12345`)
+
+### 2. Projeye GA kimliğini tanıtma (Environment Variables)
+
+1. `.env` veya Vercel üzerinden aşağıdaki değişkeni ekle:
+
+   ```env
+   VITE_GA_ID=G-XXXXXXXXXX   # Buraya kendi GA4 Measurement ID'ni yaz
+   ```
+
+2. Opsiyonel: Geliştirme sırasında konsolda detaylı log görmek istersen:
+
+   ```env
+   VITE_DEBUG_LOGS=true
+   ```
+
+3. Vercel kullanıyorsan:
+   - Vercel > Project > **Settings > Environment Variables**
+   - `VITE_GA_ID` ve istersen `VITE_DEBUG_LOGS` değişkenlerini ekle
+   - Yeni deploy başlat (veya “Redeploy”)
+
+### 3. Uygulamada neler otomatik ölçülüyor?
+
+Kod tarafında `src/lib/analytics.ts` servisinden aşağıdaki aksiyonlar otomatik gönderilir:
+
+- **Sayfa görüntüleme (pageview)**:
+  - `App.tsx` içinde route değiştiğinde çalışır.
+  - GA4’te **Reports > Realtime** ve **Engagement > Pages and screens** ekranlarında görünür.
+- **Kullanıcı aksiyonları**:
+  - Login gibi işlemler için: `analytics.trackUserAction('login', userId)`
+  - GA4’te **Events** sekmesinde `login` event’ini görebilirsin.
+- **E-ticaret / Sepete ekleme**:
+  - `CartContext.tsx` içinde `addToCart` çağrıldığında:
+    - `analytics.trackEcommerce('add_to_cart', product.id, product.price)`
+  - GA4’te event adı `add_to_cart` olarak görünür.
+- **Medya / görsel etkileşimleri**:
+  - `ProductDetailPage.tsx` içinde galeri hareketleri:
+    - `hero_next`, `hero_prev`, `band_click`, `open_lightbox_band`, `open_lightbox_panel`
+  - GA4’te kategori `media`, action bu isimlerle kaydedilir.
+
+### 4. Google Analytics ekranında verileri nerede göreceğim?
+
+- **Gerçek zamanlı izleme**:
+  - GA4 panelinde: **Reports > Realtime**
+  - Siteyi aç, birkaç sayfa gez, 1–2 dakika içinde aktif kullanıcı olarak gözükmelisin.
+- **Sayfalara göre rapor**:
+  - **Reports > Engagement > Pages and screens**
+  - Hangi sayfa kaç kez görüntülenmiş, ortalama süre vb.
+- **Event (Olay) raporları**:
+  - **Reports > Engagement > Events**
+  - Burada yukarıdaki event isimlerini (`add_to_cart`, `login`, `hero_next` vb.) bulabilirsin.
+- **DebugView (detaylı geliştirme modu)**:
+  - Sol menüde **Admin > DebugView** (veya Configure > DebugView)
+  - Tarayıcıda GA Debugger eklentisi veya `VITE_DEBUG_LOGS=true` ile birlikte event akışını anlık görebilirsin.
+
+### 5. Olay isimlerini veya ekstra takipleri özelleştirmek
+
+- Ortak servis dosyası: `src/lib/analytics.ts`
+- Kullanım örnekleri:
+  - Özel bir buton için:
+
+    ```ts
+    analytics.event({
+      action: 'cta_click',
+      category: 'homepage',
+      label: 'hero_main_button',
+    })
+    ```
+
+  - Kullanıcı aksiyonları:
+
+    ```ts
+    analytics.trackUserAction('newsletter_subscribe', userId)
+    ```
+
+  - E-ticaret:
+
+    ```ts
+    analytics.trackEcommerce('purchase', orderId, totalAmount)
+    ```
+
+Bu sayede hem Google Analytics panelinden, hem de istersen geliştirme esnasında konsoldan sitendeki kullanıcı davranışlarını takip edebilirsin.
+
 ## Medya İçe Aktarma Aracı
 
 Ürün ve tasarımcı görsellerinizi kolayca yükleyin! **3 farklı yöntem:**

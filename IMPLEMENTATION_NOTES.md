@@ -94,6 +94,25 @@ Bu dosya, projeye eklenen iyileştirmeleri ve kurulum talimatlarını içerir.
 - `lint-staged` - Lint staged files
 - `rollup-plugin-visualizer` - Bundle analyzer
 
+### 9. Analytics Altyapısı (Google Analytics / Plausible)
+
+- **Dosya**: `src/lib/analytics.ts`
+- **Açıklama**:
+  - Google Analytics 4 (GA4) ve Plausible için ortak bir servis katmanı sağlar.
+  - Sayfa görüntülemeleri, kullanıcı aksiyonları ve e-ticaret event’leri buradan gönderilir.
+- **Environment Değişkenleri**:
+  - `VITE_GA_ID` → GA4 Measurement ID (`G-XXXXXXXXXX` formatında)
+  - `VITE_PLAUSIBLE_DOMAIN` → Plausible için domain (örn: `birim.com`)
+  - `VITE_DEBUG_LOGS` → `true` ise development modda `[Analytics]` debug log’ları konsola yazılır.
+- **Varsayılan Kullanımlar**:
+  - `App.tsx` içinde route değişiminde `analytics.pageview(...)` otomatik çağrılır.
+  - Login sonrasında `analytics.trackUserAction('login', userId)` tetiklenir.
+  - `CartContext.tsx` içinde `addToCart` çağrılarında `analytics.trackEcommerce('add_to_cart', product.id, product.price)` kullanılır.
+  - `ProductDetailPage.tsx` içinde galeri ve video etkileşimlerinde `analytics.event(...)` ile özel event’ler gönderilir (`hero_next`, `hero_prev`, `band_click`, `open_lightbox_band`, `open_lightbox_panel`).
+    ‑ **Raporlama**:
+  - Google Analytics’te event’ler **Reports > Engagement > Events** ekranında, sayfa görüntülemeleri **Pages and screens** ekranında görüntülenir.
+  - Geliştirme sırasında `VITE_DEBUG_LOGS=true` ile konsolda hangi event’in ne zaman gönderildiğini görebilirsin.
+
 ## 🚀 Kurulum Adımları
 
 1. **Bağımlılıkları yükle**:

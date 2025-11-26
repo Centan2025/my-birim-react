@@ -683,7 +683,7 @@ const AppContent = () => {
             <Footer />
           </>
         )}
-        {debugInfo && (
+        {import.meta.env.DEV && debugInfo && (
           <div className="fixed bottom-2 left-2 z-50 rounded bg-black/70 text-white text-[10px] px-2 py-1 font-mono text-left">
             <div>MAINT DEBUG</div>
             <div>bypassParam: {String(debugInfo.bypassParam)}</div>
