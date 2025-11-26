@@ -588,6 +588,7 @@ const AppContent = () => {
   // Production'da aktif olabilir, ancak ?bypass=secret ile bypass edilebilir
   const {settings} = useSiteSettings()
   const maintenanceModeFromCMS = settings?.maintenanceMode ?? false
+  // Tip güvenliği için string index kullan, ama Vite prod build'de gerçek değeri enjekte eder
   const maintenanceModeFromEnv = import.meta.env['VITE_MAINTENANCE_MODE'] === 'true'
   const maintenanceModeEnabled = maintenanceModeFromCMS || maintenanceModeFromEnv
 
@@ -621,7 +622,12 @@ const AppContent = () => {
             <SkipLink />
             <Header />
             <CartSidebar />
-            <main id="main-content" className="flex-grow" style={{overflowX: 'hidden'}} tabIndex={-1}>
+            <main
+              id="main-content"
+              className="flex-grow"
+              style={{overflowX: 'hidden'}}
+              tabIndex={-1}
+            >
               <TopBanner />
               <Suspense fallback={<PageLoader />}>
                 <Routes>
