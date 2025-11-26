@@ -1,35 +1,23 @@
-import React from 'react'
-import {SiteLogo} from '../components/SiteLogo'
-import {getSiteSettings} from '../services/cms'
-import type {SiteSettings} from '../types'
-
 export function ComingSoonPage() {
-  const [settings, setSettings] = React.useState<SiteSettings | null>(null)
-
-  React.useEffect(() => {
-    getSiteSettings().then(setSettings)
-  }, [])
-
-  const logoUrl = settings?.logoUrl
-
   return (
     <div className="min-h-screen bg-white text-[#1a1a1a] flex items-start justify-center px-4 md:px-8 py-5">
       <div className="w-full max-w-5xl">
         <div className="flex flex-col items-center justify-start text-center animate-fade-in">
           {/* Logo */}
-          <div className="w-full max-w-full flex justify-center items-center mb-3">
-            <SiteLogo
-              logoUrl={logoUrl ?? undefined}
-              className="max-w-[400px] max-h-[400px] w-auto h-auto object-contain"
+          <div className="w-full max-w-full flex justify-center items-center mb-6">
+            <img
+              src="/img/logo-1.png"
+              alt="Birim"
+              className="w-auto h-auto max-w-[420px] max-h-[140px] object-contain"
             />
           </div>
 
           {/* Sofa image */}
-          <div className="w-full max-w-full flex justify-center items-center mb-5">
+          <div className="w-full max-w-full flex justify-center items-center mb-6">
             <img
               src="/img/sofa.jpg"
               alt="Sofa"
-              className="w-full max-w-full max-h-[50vh] h-auto object-contain block"
+              className="w-full max-w-full max-h-[65vh] h-auto object-contain block"
             />
           </div>
 
