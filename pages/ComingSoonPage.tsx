@@ -23,8 +23,7 @@ export function ComingSoonPage() {
 
           {/* Title */}
           <h1 className="text-[1.8rem] md:text-[2rem] font-normal tracking-[0.12em] mb-5 font-[Inter,'system-ui',sans-serif]">
-            {/* Bu sayfada görsel tasarımı birebir korumak için metni sabit yazıyoruz */}
-            coming&nbsp;soon,&nbsp;under&nbsp;construction
+            Under construction
           </h1>
 
           {/* Contact */}
