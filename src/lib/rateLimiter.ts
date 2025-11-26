@@ -25,13 +25,38 @@ class RateLimiter {
     this.config = config
   }
 
+  private getStorage(): Storage | null {
+    if (typeof window === 'undefined' || !('localStorage' in window)) {
+      return null
+    }
+    try {
+      const testKey = '__rate_limit_test__'
+      window.localStorage.setItem(testKey, '1')
+      window.localStorage.removeItem(testKey)
+      return window.localStorage
+    } catch {
+      return null
+    }
+  }
+
   /**
    * Check if request is allowed
    */
   check(key: string): RateLimitResult {
-    const storageKey = `${this.config.keyPrefix}_${key}`
+    const storage = this.getStorage()
     const now = Date.now()
-    const stored = localStorage.getItem(storageKey)
+
+    // Storage yoksa veya kullanılamıyorsa rate limiting uygulama (her isteğe izin ver)
+    if (!storage) {
+      return {
+        allowed: true,
+        remaining: this.config.maxAttempts,
+        resetTime: now + this.config.windowMs,
+      }
+    }
+
+    const storageKey = `${this.config.keyPrefix}_${key}`
+    const stored = storage.getItem(storageKey)
 
     if (!stored) {
       // İlk deneme
@@ -39,7 +64,7 @@ class RateLimiter {
         count: 1,
         resetTime: now + this.config.windowMs,
       }
-      localStorage.setItem(storageKey, JSON.stringify(data))
+      storage.setItem(storageKey, JSON.stringify(data))
       return {
         allowed: true,
         remaining: this.config.maxAttempts - 1,
@@ -55,7 +80,7 @@ class RateLimiter {
         count: 1,
         resetTime: now + this.config.windowMs,
       }
-      localStorage.setItem(storageKey, JSON.stringify(newData))
+      storage.setItem(storageKey, JSON.stringify(newData))
       return {
         allowed: true,
         remaining: this.config.maxAttempts - 1,
@@ -74,7 +99,7 @@ class RateLimiter {
 
     // Deneme sayısını artır
     data.count++
-    localStorage.setItem(storageKey, JSON.stringify(data))
+    storage.setItem(storageKey, JSON.stringify(data))
 
     return {
       allowed: true,
@@ -87,16 +112,24 @@ class RateLimiter {
    * Reset rate limit for a key
    */
   reset(key: string): void {
+    const storage = this.getStorage()
+    if (!storage) return
+
     const storageKey = `${this.config.keyPrefix}_${key}`
-    localStorage.removeItem(storageKey)
+    storage.removeItem(storageKey)
   }
 
   /**
    * Get remaining attempts
    */
   getRemaining(key: string): number {
+    const storage = this.getStorage()
+    if (!storage) {
+      return this.config.maxAttempts
+    }
+
     const storageKey = `${this.config.keyPrefix}_${key}`
-    const stored = localStorage.getItem(storageKey)
+    const stored = storage.getItem(storageKey)
 
     if (!stored) {
       return this.config.maxAttempts

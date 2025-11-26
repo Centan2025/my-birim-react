@@ -23,7 +23,8 @@ export default defineConfig({
     hmr: {
       port: 3000,
       host: 'localhost',
-      clientPort: 3001, // Tarayıcı 3001'den erişiyorsa
+      // HMR WebSocket'ini doğrudan aynı porttan kullan (3001'e bağlanmaya çalışma)
+      clientPort: 3000,
     },
     watch: {
       // Gereksiz dosya değişikliklerini ignore et

@@ -77,5 +77,8 @@
   "navigation": "Navigation",
   "coming_soon_title": "Coming Soon",
   "coming_soon_message": "Our website will be launching soon. Please check back later.",
-  "coming_soon_footer": "We'll be with you soon..."
+  "coming_soon_footer": "We'll be with you soon...",
+  "coming_soon_under_construction": "Under construction",
+  "invalid_youtube_url": "Invalid YouTube URL",
+  "too_many_attempts": "Too many attempts. Please try again in {0} minutes."
 }

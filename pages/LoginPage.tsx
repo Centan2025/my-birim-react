@@ -21,7 +21,9 @@ export function LoginPage() {
   const [success, setSuccess] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
-  const [passwordStrength, setPasswordStrength] = useState<'weak' | 'medium' | 'strong' | null>(null)
+  const [passwordStrength, setPasswordStrength] = useState<'weak' | 'medium' | 'strong' | null>(
+    null
+  )
   const auth = useAuth()
   const navigate = useNavigate()
   const {t} = useTranslation()
@@ -47,7 +49,7 @@ export function LoginPage() {
 
     if (!rateLimitResult.allowed) {
       const minutes = Math.ceil((rateLimitResult.resetTime - Date.now()) / 60000)
-      setError(`Çok fazla deneme yapıldı. Lütfen ${minutes} dakika sonra tekrar deneyin.`)
+      setError(t('too_many_attempts', String(minutes)))
       setIsLoading(false)
       return
     }
@@ -522,7 +524,7 @@ export function LoginPage() {
                       id="profession"
                       name="profession"
                       type="text"
-                      autoComplete="job-title"
+                      autoComplete="organization-title"
                       value={profession}
                       onChange={e => {
                         setProfession(e.target.value)

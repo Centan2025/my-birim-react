@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
 import React, {useState, useEffect, useMemo, useRef} from 'react'
 import {useParams, Link, useNavigate} from 'react-router-dom'
 // FIX: Imported SiteSettings type to correctly type component state.
@@ -10,6 +11,7 @@ import {useTranslation} from '../i18n'
 import {useCart} from '../context/CartContext'
 import {useSEO} from '../src/hooks/useSEO'
 import {addStructuredData, getProductSchema} from '../src/lib/seo'
+import {analytics} from '../src/lib/analytics'
 import {useProduct, useProductsByCategory} from '../src/hooks/useProducts'
 import {useDesigner} from '../src/hooks/useDesigners'
 import {useCategories} from '../src/hooks/useCategories'
@@ -139,12 +141,12 @@ const MinimalChevronRight = (props: React.SVGProps<SVGSVGElement>) => (
 export function ProductDetailPage() {
   const {productId} = useParams<{productId: string}>()
   const navigate = useNavigate()
-  
+
   // React Query hooks
   const {data: product, isLoading: productLoading} = useProduct(productId)
   const {data: siteSettings} = useSiteSettings()
   const {data: allCategories = []} = useCategories()
-  
+
   // Designer ve category'yi product'tan al
   const {data: designer} = useDesigner(product?.designerId)
   const {data: siblingProducts = []} = useProductsByCategory(product?.categoryId)
@@ -152,7 +154,7 @@ export function ProductDetailPage() {
     () => allCategories.find(c => c.id === product?.categoryId),
     [allCategories, product?.categoryId]
   )
-  
+
   const loading = productLoading
   const [mainImage, setMainImage] = useState('')
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
@@ -194,7 +196,7 @@ export function ProductDetailPage() {
   // Product değiştiğinde main image'i ayarla
   useEffect(() => {
     if (!product) return
-    
+
     // İlk görünmesini istediğimiz medya: alternatifMedia varsa onun ilk öğesi; yoksa eski alternatif görseller
     const altMediaArr: any[] = Array.isArray((product as any).alternativeMedia)
       ? (product as any).alternativeMedia
@@ -207,19 +209,13 @@ export function ProductDetailPage() {
       } else {
         // video/youtube ise mainImage'i dokunmadan bırakıyoruz; slider yine doğru render eder
         const mainImgUrl =
-          typeof product.mainImage === 'string'
-            ? product.mainImage
-            : product.mainImage?.url || ''
+          typeof product.mainImage === 'string' ? product.mainImage : product.mainImage?.url || ''
         setMainImage(mainImgUrl)
       }
     } else {
-      const altImgs = Array.isArray(product.alternativeImages)
-        ? product.alternativeImages
-        : []
+      const altImgs = Array.isArray(product.alternativeImages) ? product.alternativeImages : []
       const mainImgUrl =
-        typeof product.mainImage === 'string'
-          ? product.mainImage
-          : product.mainImage?.url || ''
+        typeof product.mainImage === 'string' ? product.mainImage : product.mainImage?.url || ''
       const allImgs = [mainImgUrl, ...altImgs].filter(Boolean)
       setMainImage(allImgs[0] || '')
       setCurrentImageIndex(0)
@@ -232,7 +228,9 @@ export function ProductDetailPage() {
   const productImage =
     product && typeof product.mainImage === 'string'
       ? product.mainImage
-      : (product?.mainImage && typeof product.mainImage === 'object' ? product.mainImage.url : '') || ''
+      : (product?.mainImage && typeof product.mainImage === 'object'
+          ? product.mainImage.url
+          : '') || ''
 
   useSEO({
     title: productName ? `${productName} - BIRIM` : 'BIRIM',
@@ -382,7 +380,12 @@ export function ProductDetailPage() {
       return
     }
     setIsDragging(true)
-    const startX = 'touches' in e && e.touches && e.touches.length > 0 ? (e.touches[0]?.clientX ?? 0) : ('clientX' in e ? e.clientX : 0)
+    const startX =
+      'touches' in e && e.touches && e.touches.length > 0
+        ? (e.touches[0]?.clientX ?? 0)
+        : 'clientX' in e
+          ? e.clientX
+          : 0
     setDragStartX(startX)
     setDraggedX(0)
     e.preventDefault()
@@ -392,7 +395,12 @@ export function ProductDetailPage() {
     e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
   ) => {
     if (!isDragging) return
-    const currentX = 'touches' in e && e.touches && e.touches.length > 0 ? (e.touches[0]?.clientX ?? 0) : ('clientX' in e ? e.clientX : 0)
+    const currentX =
+      'touches' in e && e.touches && e.touches.length > 0
+        ? (e.touches[0]?.clientX ?? 0)
+        : 'clientX' in e
+          ? e.clientX
+          : 0
     setDraggedX(currentX - dragStartX)
   }
 
@@ -453,9 +461,19 @@ export function ProductDetailPage() {
 
   const heroNext = () => {
     setCurrentImageIndex(prev => (prev + 1) % slideCount)
+    analytics.event({
+      category: 'media',
+      action: 'hero_next',
+      label: product?.id,
+    })
   }
   const heroPrev = () => {
     setCurrentImageIndex(prev => (prev - 1 + slideCount) % slideCount)
+    analytics.event({
+      category: 'media',
+      action: 'hero_prev',
+      label: product?.id,
+    })
   }
 
   const closeLightbox = () => {
@@ -473,6 +491,12 @@ export function ProductDetailPage() {
     } else {
       setYtPlaying(false)
     }
+    analytics.event({
+      category: 'media',
+      action: 'open_lightbox_band',
+      label: product?.id,
+      value: currentImageIndex,
+    })
     setIsLightboxOpen(true)
   }
   const openPanelLightbox = (index: number) => {
@@ -485,6 +509,12 @@ export function ProductDetailPage() {
     } else {
       setYtPlaying(false)
     }
+    analytics.event({
+      category: 'media',
+      action: 'open_lightbox_panel',
+      label: product?.id,
+      value: index,
+    })
     setIsLightboxOpen(true)
   }
   const currentLightboxItems =
@@ -590,6 +620,12 @@ export function ProductDetailPage() {
                 style={{width: `${100 / slideCount}%`}}
                 onClick={() => {
                   if (!isDragging && draggedX === 0) {
+                    analytics.event({
+                      category: 'media',
+                      action: 'band_click',
+                      label: product?.id,
+                      value: index,
+                    })
                     openLightbox()
                   }
                 }}
@@ -1499,11 +1535,7 @@ export function ProductDetailPage() {
                 return (
                   <OptimizedImage
                     src={currentImage.image}
-                    alt={
-                      currentImage.title
-                        ? t(currentImage.title)
-                        : 'Technical Drawing'
-                    }
+                    alt={currentImage.title ? t(currentImage.title) : 'Technical Drawing'}
                     className="w-full h-auto object-contain"
                     loading="eager"
                     quality={95}
@@ -1566,19 +1598,20 @@ export function ProductDetailPage() {
                   </button>
                 </>
               )}
-              {materialLightbox.images[materialLightbox.currentIndex] && (() => {
-                const currentImage = materialLightbox.images[materialLightbox.currentIndex]
-                if (!currentImage) return null
-                return (
-                  <OptimizedImage
-                    src={currentImage.image}
-                    alt={currentImage.name}
-                    className="w-full h-auto object-contain"
-                    loading="eager"
-                    quality={95}
-                  />
-                )
-              })()}
+              {materialLightbox.images[materialLightbox.currentIndex] &&
+                (() => {
+                  const currentImage = materialLightbox.images[materialLightbox.currentIndex]
+                  if (!currentImage) return null
+                  return (
+                    <OptimizedImage
+                      src={currentImage.image}
+                      alt={currentImage.name}
+                      className="w-full h-auto object-contain"
+                      loading="eager"
+                      quality={95}
+                    />
+                  )
+                })()}
             </div>
           </div>
         </div>

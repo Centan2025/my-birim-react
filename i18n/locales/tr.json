@@ -77,5 +77,8 @@
   "navigation": "Navigasyon",
   "coming_soon_title": "Yakında",
   "coming_soon_message": "Web sitemiz yakında yayında olacak. Lütfen daha sonra tekrar kontrol edin.",
-  "coming_soon_footer": "Yakında sizlerle olacağız..."
+  "coming_soon_footer": "Yakında sizlerle olacağız...",
+  "coming_soon_under_construction": "Tasarım aşamasında",
+  "invalid_youtube_url": "Geçersiz YouTube URL'si",
+  "too_many_attempts": "Çok fazla deneme yapıldı. Lütfen {0} dakika sonra tekrar deneyin."
 }

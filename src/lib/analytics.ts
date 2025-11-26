@@ -1,6 +1,6 @@
 /**
  * Analytics Service
- * 
+ *
  * Supports multiple analytics providers:
  * - Google Analytics (gtag)
  * - Plausible Analytics
@@ -13,6 +13,8 @@ interface AnalyticsEvent {
   label?: string
   value?: number
 }
+
+const DEBUG_LOGS = (import.meta.env as any).VITE_DEBUG_LOGS === 'true'
 
 class Analytics {
   private isInitialized = false
@@ -57,14 +59,16 @@ class Analytics {
     function gtag(...args: any[]) {
       dataLayer.push(args)
     }
-    (window as any).gtag = gtag
+    ;(window as any).gtag = gtag
 
     gtag('js', new Date())
     gtag('config', gaId, {
       page_path: window.location.pathname,
     })
 
-    console.log('[Analytics] Google Analytics initialized')
+    if (import.meta.env.DEV && DEBUG_LOGS) {
+      console.debug('[Analytics] Google Analytics initialized')
+    }
   }
 
   /**
@@ -78,15 +82,16 @@ class Analytics {
     script.setAttribute('data-domain', domain)
     script.src = 'https://plausible.io/js/script.js'
     document.head.appendChild(script)
-
     ;(window as any).plausible =
       (window as any).plausible ||
       function (...args: any[]) {
-        ((window as any).plausible as any).q = ((window as any).plausible as any).q || []
+        ;((window as any).plausible as any).q = ((window as any).plausible as any).q || []
         ;((window as any).plausible as any).q.push(args)
       }
 
-    console.log('[Analytics] Plausible Analytics initialized')
+    if (import.meta.env.DEV && DEBUG_LOGS) {
+      console.debug('[Analytics] Plausible Analytics initialized')
+    }
   }
 
   /**
@@ -95,7 +100,7 @@ class Analytics {
   pageview(path: string, title?: string) {
     // Google Analytics
     if (this.googleAnalyticsId && (window as any).gtag) {
-      (window as any).gtag('config', this.googleAnalyticsId, {
+      ;(window as any).gtag('config', this.googleAnalyticsId, {
         page_path: path,
         page_title: title,
       })
@@ -103,11 +108,11 @@ class Analytics {
 
     // Plausible
     if (this.plausibleDomain && (window as any).plausible) {
-      (window as any).plausible('pageview', {url: path})
+      ;(window as any).plausible('pageview', {url: path})
     }
 
-    if (import.meta.env.DEV) {
-      console.log('[Analytics] Pageview:', path, title)
+    if (import.meta.env.DEV && DEBUG_LOGS) {
+      console.debug('[Analytics] Pageview:', path, title)
     }
   }
 
@@ -117,7 +122,7 @@ class Analytics {
   event(event: AnalyticsEvent) {
     // Google Analytics
     if (this.googleAnalyticsId && (window as any).gtag) {
-      (window as any).gtag('event', event.action, {
+      ;(window as any).gtag('event', event.action, {
         event_category: event.category,
         event_label: event.label,
         value: event.value,
@@ -126,7 +131,7 @@ class Analytics {
 
     // Plausible
     if (this.plausibleDomain && (window as any).plausible) {
-      (window as any).plausible(event.action, {
+      ;(window as any).plausible(event.action, {
         props: {
           category: event.category,
           label: event.label,
@@ -135,8 +140,8 @@ class Analytics {
       })
     }
 
-    if (import.meta.env.DEV) {
-      console.log('[Analytics] Event:', event)
+    if (import.meta.env.DEV && DEBUG_LOGS) {
+      console.debug('[Analytics] Event:', event)
     }
   }
 
@@ -170,5 +175,3 @@ export const analytics = new Analytics()
 if (typeof window !== 'undefined') {
   analytics.init()
 }
-
-

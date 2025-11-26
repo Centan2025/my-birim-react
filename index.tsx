@@ -7,13 +7,14 @@ import {initWebVitals} from './src/lib/webVitals'
 import {validateEnv, checkRequiredEnv} from './src/lib/envValidation'
 import './src/index.css'
 
+const DEBUG_LOGS = (import.meta.env as any).VITE_DEBUG_LOGS === 'true'
+
 // Validate environment variables
 try {
   validateEnv()
-  const {warnings} = checkRequiredEnv()
-  if (warnings.length > 0 && import.meta.env.DEV) {
-    console.warn('[Env Validation] Warnings:', warnings)
-  }
+  // checkRequiredEnv() sadece içsel kontrol için kullanılabilir,
+  // artık konsola uyarı basmıyoruz ki dev konsol temiz kalsın.
+  checkRequiredEnv()
 } catch (error) {
   console.error('[Env Validation] Failed:', error)
   if (import.meta.env.PROD) {
@@ -29,7 +30,7 @@ errorReporter.init()
 initWebVitals({
   sendToAnalytics: true,
   sendToSentry: true,
-  debug: import.meta.env.DEV,
+  debug: DEBUG_LOGS,
 })
 
 const rootElement = document.getElementById('root')

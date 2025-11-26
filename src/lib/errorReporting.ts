@@ -7,6 +7,8 @@
 
 import * as Sentry from '@sentry/react'
 
+const DEBUG_LOGS = (import.meta.env as any).VITE_DEBUG_LOGS === 'true'
+
 interface ErrorContext {
   user?: {
     id?: string
@@ -58,13 +60,17 @@ class ErrorReporter {
             return event
           },
         })
-        console.log('[ErrorReporter] Sentry initialized')
+        if (import.meta.env.DEV && DEBUG_LOGS) {
+          console.debug('[ErrorReporter] Sentry initialized')
+        }
       } catch (error) {
         console.error('[ErrorReporter] Failed to initialize Sentry:', error)
         this.dsn = null
       }
     } else {
-      console.log('[ErrorReporter] Initialized in console-only mode (no DSN provided)')
+      if (import.meta.env.DEV && DEBUG_LOGS) {
+        console.debug('[ErrorReporter] Initialized in console-only mode (no DSN provided)')
+      }
     }
 
     this.isInitialized = true
@@ -99,8 +105,8 @@ class ErrorReporter {
     level: 'info' | 'warning' | 'error' = 'info',
     context?: ErrorContext
   ) {
-    if (import.meta.env.DEV as boolean | undefined) {
-      console.log(`[ErrorReporter] ${level.toUpperCase()}:`, message, context)
+    if (import.meta.env.DEV && DEBUG_LOGS) {
+      console.debug(`[ErrorReporter] ${level.toUpperCase()}:`, message, context)
     }
 
     if (this.dsn) {

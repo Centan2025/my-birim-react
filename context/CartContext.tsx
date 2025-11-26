@@ -1,5 +1,6 @@
 import {createContext, useContext, useState, useEffect, PropsWithChildren} from 'react'
 import type {Product, CartItem} from '../types'
+import {analytics} from '../src/lib/analytics'
 
 interface CartContextType {
   cartItems: CartItem[]
@@ -49,12 +50,17 @@ export const CartProvider = ({children}: PropsWithChildren) => {
   const addToCart = (product: Product) => {
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item.product.id === product.id)
+      const newQuantity = existingItem ? existingItem.quantity + 1 : 1
+
+      // Analytics: sepete ekleme olayı
+      analytics.trackEcommerce('add_to_cart', product.id, product.price)
+
       if (existingItem) {
         return prevItems.map(item =>
-          item.product.id === product.id ? {...item, quantity: item.quantity + 1} : item
+          item.product.id === product.id ? {...item, quantity: newQuantity} : item
         )
       }
-      return [...prevItems, {product, quantity: 1}]
+      return [...prevItems, {product, quantity: newQuantity}]
     })
     openCart()
   }

@@ -7,6 +7,8 @@ import {onCLS, onFID, onFCP, onLCP, onTTFB, onINP, Metric} from 'web-vitals'
 import {analytics} from './analytics'
 import {errorReporter} from './errorReporting'
 
+const DEBUG_LOGS = (import.meta.env as any).VITE_DEBUG_LOGS === 'true'
+
 interface WebVitalsConfig {
   /** Analytics'e gönderilecek mi? */
   sendToAnalytics?: boolean
@@ -22,9 +24,9 @@ interface WebVitalsConfig {
 function handleMetric(metric: Metric, config: WebVitalsConfig = {}) {
   const {name, value, rating, delta, id} = metric
 
-  // Debug mode
-  if (config.debug || (import.meta.env.DEV as boolean | undefined)) {
-    console.log(`[Web Vitals] ${name}:`, {
+  // Debug mode (sadece açıkça debug istenirse veya VITE_DEBUG_LOGS=true ise)
+  if (config.debug || (import.meta.env.DEV && DEBUG_LOGS)) {
+    console.debug(`[Web Vitals] ${name}:`, {
       value: value.toFixed(2),
       rating,
       delta: delta.toFixed(2),
@@ -49,21 +51,18 @@ function handleMetric(metric: Metric, config: WebVitalsConfig = {}) {
   // Sentry'ye gönder (poor rating için)
   if (config.sendToSentry !== false && rating === 'poor') {
     try {
-      errorReporter.captureException(
-        new Error(`Poor Web Vital: ${name}`),
-        {
-          tags: {
-            type: 'web-vital',
-            metric: name,
-            rating,
-          },
-          extra: {
-            value: value.toFixed(2),
-            delta: delta.toFixed(2),
-            id,
-          },
-        }
-      )
+      errorReporter.captureException(new Error(`Poor Web Vital: ${name}`), {
+        tags: {
+          type: 'web-vital',
+          metric: name,
+          rating,
+        },
+        extra: {
+          value: value.toFixed(2),
+          delta: delta.toFixed(2),
+          id,
+        },
+      })
     } catch (error) {
       console.error('[Web Vitals] Sentry error:', error)
     }
@@ -98,8 +97,8 @@ export function initWebVitals(config: WebVitalsConfig = {}) {
     // Interaction to Next Paint (INP) - FID'in yerine geçer
     onINP(metric => handleMetric(metric, config))
 
-    if (config.debug || (import.meta.env.DEV as boolean | undefined)) {
-      console.log('[Web Vitals] Monitoring initialized')
+    if (config.debug || (import.meta.env.DEV && DEBUG_LOGS)) {
+      console.debug('[Web Vitals] Monitoring initialized')
     }
   } catch (error) {
     console.error('[Web Vitals] Initialization error:', error)
@@ -132,4 +131,3 @@ export function getWebVitalsMetrics(): Promise<Metric[]> {
     setTimeout(() => resolve(metrics), 10000)
   })
 }
-
