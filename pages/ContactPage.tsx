@@ -141,7 +141,6 @@ const MediaModal: React.FC<{
 
   const hasNext = currentIndex < allMedia.length - 1
   const hasPrevious = currentIndex > 0
-  const slideCount = allMedia.length || 1
 
   // Keyboard navigation
   React.useEffect(() => {
@@ -183,10 +182,11 @@ const MediaModal: React.FC<{
       }}
       style={{zIndex: 100}}
     >
-      <div className="relative max-w-5xl w-full mx-auto my-6 flex items-center justify-center">
+      <div className="relative inline-flex items-center justify-center mx-auto my-6">
+        {/* Kapatma butonu - görsel alanının köşesinde */}
         <button
           onClick={onClose}
-          className="absolute -top-4 right-0 md:-top-6 md:-right-6 text-white hover:text-gray-300 transition-colors bg-black/70 w-9 h-9 flex items-center justify-center hover:bg-black/90 shadow-lg rounded-full"
+          className="absolute top-1 right-1 md:top-0 md:right-0 text-white hover:text-gray-300 transition-colors bg-black/70 w-9 h-9 flex items-center justify-center hover:bg-black/90 shadow-lg rounded-full"
           aria-label="Close"
           style={{zIndex: 101}}
         >
@@ -206,14 +206,14 @@ const MediaModal: React.FC<{
           </svg>
         </button>
 
-        {/* Previous button */}
+        {/* Önceki buton */}
         {hasPrevious && (
           <button
             onClick={e => {
               e.stopPropagation()
               onPrevious()
             }}
-            className="absolute left-4 text-white hover:text-gray-300 transition-colors bg-black/70 w-10 h-10 flex items-center justify-center hover:bg-black/90 shadow-lg rounded-full"
+            className="absolute left-2 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-colors bg-black/70 w-10 h-10 flex items-center justify-center hover:bg-black/90 shadow-lg rounded-full"
             aria-label="Previous"
             style={{zIndex: 101}}
           >
@@ -233,14 +233,14 @@ const MediaModal: React.FC<{
           </button>
         )}
 
-        {/* Next button */}
+        {/* Sonraki buton */}
         {hasNext && (
           <button
             onClick={e => {
               e.stopPropagation()
               onNext()
             }}
-            className="absolute right-4 text-white hover:text-gray-300 transition-colors bg-black/70 w-10 h-10 flex items-center justify-center hover:bg-black/90 shadow-lg rounded-full"
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-colors bg-black/70 w-10 h-10 flex items-center justify-center hover:bg-black/90 shadow-lg rounded-full"
             aria-label="Next"
             style={{zIndex: 101}}
           >
@@ -260,48 +260,34 @@ const MediaModal: React.FC<{
           </button>
         )}
 
-        <div className="relative w-full max-h-[80vh] overflow-hidden flex items-center justify-center">
-          <div
-            className="flex h-full transition-transform duration-300 ease-out"
-            style={{
-              width: `${slideCount * 100}%`,
-              transform: `translateX(calc(-${currentIndex * (100 / slideCount)}%))`,
-            }}
-          >
-            {allMedia.map((m, index) => (
-              <div
-                key={index}
-                className="relative h-full shrink-0 flex items-center justify-center"
-                style={{width: `${100 / slideCount}%`}}
-              >
-                {m.type === 'youtube' ? (
-                  <iframe
-                    src={getMediaUrl(m)}
-                    className="w-full h-full"
-                    allow="autoplay; encrypted-media; fullscreen"
-                    frameBorder="0"
-                    title={`contact-location-media-${index}`}
-                  />
-                ) : m.type === 'video' ? (
-                  <OptimizedVideo
-                    src={getMediaUrl(m)}
-                    controls
-                    autoPlay
-                    className="w-full h-full object-contain"
-                    preload="auto"
-                    loading="eager"
-                  />
-                ) : (
-                  <OptimizedImage
-                    src={getMediaUrl(m)}
-                    alt=""
-                    className="w-full h-full object-contain"
-                    loading="eager"
-                    quality={95}
-                  />
-                )}
-              </div>
-            ))}
+        <div className="relative max-h-[90vh] max-w-[90vw] overflow-hidden flex items-center justify-center">
+          <div className="relative w-full h-full flex items-center justify-center">
+            {media.type === 'youtube' ? (
+              <iframe
+                src={getMediaUrl(media)}
+                className="w-full h-full"
+                allow="autoplay; encrypted-media; fullscreen"
+                frameBorder="0"
+                title={`contact-location-media-${currentIndex}`}
+              />
+            ) : media.type === 'video' ? (
+              <OptimizedVideo
+                src={getMediaUrl(media)}
+                controls
+                autoPlay
+                className="w-full h-full object-contain"
+                preload="auto"
+                loading="eager"
+              />
+            ) : (
+              <OptimizedImage
+                src={getMediaUrl(media)}
+                alt=""
+                className="w-full h-full object-contain"
+                loading="eager"
+                quality={95}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -432,10 +418,7 @@ export function ContactPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
         <Breadcrumbs
           className="mb-6"
-          items={[
-            {label: t('homepage'), to: '/'},
-            {label: t('contact')},
-          ]}
+          items={[{label: t('homepage'), to: '/'}, {label: t('contact')}]}
         />
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600 uppercase">
@@ -500,6 +483,8 @@ export function ContactPage() {
               .hide-scrollbar::-webkit-scrollbar { display: none; }
             `}</style>
             <div className="relative select-none">
+              {/* Mouse ile yatay sürükleme için; klavye ile etkileşim gerekmiyor */}
+              {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
               <div
                 ref={thumbRef}
                 className="hide-scrollbar overflow-x-auto cursor-grab active:cursor-grabbing"
