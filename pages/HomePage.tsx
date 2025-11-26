@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useMemo} from 'react'
+import {useState, useEffect, useMemo} from 'react'
 import {Link} from 'react-router-dom'
 import {useSiteSettings} from '../src/hooks/useSiteData'
 import {useHomePageContent} from '../src/hooks/useHomePage'

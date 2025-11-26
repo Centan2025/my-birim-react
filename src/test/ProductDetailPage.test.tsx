@@ -1,12 +1,11 @@
 import {describe, it, expect, vi} from 'vitest'
 import {render, screen} from '@testing-library/react'
-import {BrowserRouter, MemoryRouter, Route, Routes} from 'react-router-dom'
+import {MemoryRouter, Route, Routes} from 'react-router-dom'
 import {ProductDetailPage} from '../../pages/ProductDetailPage'
 import * as productsHooks from '../hooks/useProducts'
 import * as designersHooks from '../hooks/useDesigners'
 import * as categoriesHooks from '../hooks/useCategories'
 import * as siteHooks from '../hooks/useSiteData'
-import {useCart} from '../../context/CartContext'
 
 // Hooks'u mockla
 vi.mock('../hooks/useProducts')
