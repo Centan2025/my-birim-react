@@ -576,7 +576,15 @@ export const deleteCategory = async (id: string): Promise<void> => {
 // Designers
 export const getDesigners = async (): Promise<Designer[]> => {
   if (useSanity && sanity) {
-    const query = groq`*[_type == "designer"]{ "id": id.current, name, bio, image, imageMobile, imageDesktop } | order(name.tr asc)`
+    // Sıralama: önce orderRank (Sanity Studio'daki drag‑drop sırası)
+    const query = groq`*[_type == "designer"] | order(orderRank asc){
+          "id": id.current, 
+          name, 
+          bio, 
+          image, 
+          imageMobile, 
+          imageDesktop 
+        }`
     const rows = await sanity.fetch(query)
     return rows.map((r: any) => {
       const image = mapImage(r.image)
@@ -1251,10 +1259,14 @@ export const getKvkkPolicy = async (): Promise<KvkkPolicy | null> => {
 // News
 export const getNews = async (): Promise<NewsItem[]> => {
   if (useSanity && sanity) {
-    const q = groq`*[_type == "newsItem"] | order(date desc){ 
+    const q = groq`*[_type == "newsItem" && (isPublished != false) && (!defined(publishAt) || publishAt <= now())] 
+        | order(coalesce(sortOrder, 999999) asc, coalesce(publishAt, date, _createdAt) desc){
           "id": id.current, 
           title, 
           date, 
+          publishAt,
+          isPublished,
+          sortOrder,
           content, 
           mainImage,
           mainImageMobile,
@@ -1276,6 +1288,9 @@ export const getNews = async (): Promise<NewsItem[]> => {
       id: r.id,
       title: r.title,
       date: r.date,
+      publishAt: r.publishAt,
+      isPublished: r.isPublished,
+      sortOrder: r.sortOrder,
       content: r.content,
       mainImage: (() => {
         const img = mapImage(r.mainImage)
@@ -1390,7 +1405,19 @@ export const deleteNews = async (id: string): Promise<void> => {
 // Projects
 export const getProjects = async (): Promise<Project[]> => {
   if (useSanity && sanity) {
-    const q = groq`*[_type=="project"] | order(_createdAt desc){ "id": id.current, title, date, cover, coverMobile, coverDesktop, excerpt }`
+    const q = groq`*[_type=="project" && (isPublished != false) && (!defined(publishAt) || publishAt <= now())] 
+      | order(coalesce(sortOrder, 999999) asc, coalesce(publishAt, _createdAt) desc){
+        "id": id.current, 
+        title, 
+        date, 
+        publishAt,
+        isPublished,
+        sortOrder,
+        cover, 
+        coverMobile, 
+        coverDesktop, 
+        excerpt 
+      }`
     const rows = await sanity.fetch(q)
     return rows.map((r: any) => {
       const cover = mapImage(r.cover)
@@ -1400,6 +1427,9 @@ export const getProjects = async (): Promise<Project[]> => {
         id: r.id,
         title: r.title,
         date: r.date,
+        publishAt: r.publishAt,
+        isPublished: r.isPublished,
+        sortOrder: r.sortOrder,
         cover: {
           url: cover,
           urlMobile: coverMobile && coverMobile !== cover ? coverMobile : undefined,

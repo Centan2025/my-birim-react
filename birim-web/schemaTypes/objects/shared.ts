@@ -137,6 +137,27 @@ export const heroMediaItem = defineType({
   type: 'object',
   fields: [
     defineField({
+      name: 'isPublished',
+      title: 'Yayında Göster',
+      type: 'boolean',
+      initialValue: true,
+      description: 'Bu hero öğesinin ana sayfadaki slider’da görünüp görünmeyeceğini belirler.',
+    }),
+    defineField({
+      name: 'publishAt',
+      title: 'Yayın Tarihi (Opsiyonel)',
+      type: 'datetime',
+      description:
+        'Belirli bir tarihten sonra gösterilsin istiyorsanız kullanın. Boş bırakırsanız hemen yayına girer.',
+    }),
+    defineField({
+      name: 'sortOrder',
+      title: 'Sıra (Opsiyonel)',
+      type: 'number',
+      description:
+        'Küçük sayı önce gelir. Boş bırakırsanız Studio’daki drag‑drop sırasına göre gösterilir.',
+    }),
+    defineField({
       name: 'type',
       title: 'Tür',
       type: 'string',
@@ -612,7 +633,7 @@ export const contactLocation = defineType({
       description:
         "Google Maps linkini veya embed URL'sini yapıştırın. Normal link otomatik olarak embed formatına çevrilecektir.",
       validation: (Rule) =>
-        Rule.optional().custom((value: string | undefined) => {
+        Rule.custom((value: string | undefined) => {
           if (!value) return true // Optional field
           // Accept both regular Google Maps URLs and embed URLs
           const isGoogleMapsUrl = /google\.com\/maps/.test(value) || /maps\.google\.com/.test(value)

@@ -329,6 +329,7 @@ const Footer = () => {
                 if (email) {
                   try {
                     await subscribeEmail(email)
+                    analytics.trackUserAction('newsletter_subscribe', email)
                     alert('E-posta aboneliğiniz başarıyla oluşturuldu!')
                     setEmail('')
                   } catch (err: any) {
@@ -337,6 +338,7 @@ const Footer = () => {
                       alert(
                         "E-posta aboneliğiniz kaydedildi!\n\nNot: CMS'de görünmesi için .env dosyasına VITE_SANITY_TOKEN ekleyin. Detaylar: README.md"
                       )
+                      analytics.trackUserAction('newsletter_subscribe', email)
                       setEmail('')
                     } else {
                       alert(err.message || "Bir hata oluştu. Lütfen console'u kontrol edin.")
@@ -483,6 +485,7 @@ const Footer = () => {
                 if (email) {
                   try {
                     await subscribeEmail(email)
+                    analytics.trackUserAction('newsletter_subscribe', email)
                     alert('E-posta aboneliğiniz başarıyla oluşturuldu!')
                     setEmail('')
                   } catch (err: any) {
@@ -491,6 +494,7 @@ const Footer = () => {
                       alert(
                         "E-posta aboneliğiniz kaydedildi!\n\nNot: CMS'de görünmesi için .env dosyasına VITE_SANITY_TOKEN ekleyin. Detaylar: README.md"
                       )
+                      analytics.trackUserAction('newsletter_subscribe', email)
                       setEmail('')
                     } else {
                       alert(err.message || "Bir hata oluştu. Lütfen console'u kontrol edin.")

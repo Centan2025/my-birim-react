@@ -4,6 +4,7 @@ import type {Product} from '../types'
 import {OptimizedImage} from './OptimizedImage'
 import {useTranslation} from '../i18n'
 import {useSiteSettings} from '../App'
+import {analytics} from '../src/lib/analytics'
 
 export const ProductCard: React.FC<{product: Product; variant?: 'default' | 'light'}> = ({
   product,
@@ -23,7 +24,18 @@ export const ProductCard: React.FC<{product: Product; variant?: 'default' | 'lig
     typeof product.mainImage === 'object' ? product.mainImage.urlDesktop : undefined
 
   return (
-    <Link to={`/product/${product.id}`} className="group block w-full">
+    <Link
+      to={`/product/${product.id}`}
+      className="group block w-full"
+      onClick={() => {
+        analytics.event({
+          category: 'navigation',
+          action: 'product_click',
+          label: product.id,
+          value: product.year,
+        })
+      }}
+    >
       <div
         className={`relative overflow-hidden aspect-square ${imageBorderClass} w-full bg-white flex items-center justify-center`}
       >

@@ -4,6 +4,7 @@ import type {NewsItem} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
+import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useNews} from '../src/hooks/useNews'
 import {useSiteSettings} from '../src/hooks/useSiteData'
 
@@ -59,6 +60,13 @@ export function NewsPage() {
   return (
     <div className="bg-gray-100 animate-fade-in-up-subtle">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
+        <Breadcrumbs
+          className="mb-6"
+          items={[
+            {label: t('homepage'), to: '/'},
+            {label: t('news')},
+          ]}
+        />
         <div className="text-center mb-16">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600 uppercase">
             {t('news_title')}

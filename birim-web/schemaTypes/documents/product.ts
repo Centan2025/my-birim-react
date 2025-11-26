@@ -39,6 +39,20 @@ export default defineType({
       description:
         'Bu ürünün web sitesinde görünüp görünmeyeceğini belirler. Kapalıysa ürün listede görünmez.',
     }),
+    defineField({
+      name: 'publishAt',
+      title: 'Yayın Tarihi (Opsiyonel)',
+      type: 'datetime',
+      description:
+        'Belirli bir tarihten sonra görünsün istiyorsanız kullanın. Boş bırakırsanız hemen yayına girer.',
+    }),
+    defineField({
+      name: 'sortOrder',
+      title: 'Sıra (Opsiyonel)',
+      type: 'number',
+      description:
+        'Kategori içindeki özel sıralama için. Küçük sayı önce gelir. Boş bırakırsanız yıl alanına göre sıralanır.',
+    }),
     defineField({name: 'description', title: 'Açıklama', type: 'localizedText'}),
     defineField({
       name: 'mainImage',

@@ -4,6 +4,7 @@ import {useAuth} from '../App'
 import {useTranslation} from '../i18n'
 import {registerUser, loginUser} from '../services/cms'
 import {loginRateLimiter, registerRateLimiter} from '../src/lib/rateLimiter'
+import {analytics} from '../src/lib/analytics'
 import {
   validateLoginForm,
   validateRegisterForm,
@@ -109,6 +110,7 @@ export function LoginPage() {
       // Başarılı kayıtta rate limit'i sıfırla
       registerRateLimiter.reset(rateLimitKey)
       auth.login(user)
+      analytics.trackUserAction('register', user._id)
       // Kullanıcı local storage'a kaydedildiyse uyarı göster
       if (user._id.startsWith('user_')) {
         setSuccess(

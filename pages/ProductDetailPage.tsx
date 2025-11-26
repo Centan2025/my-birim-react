@@ -444,6 +444,12 @@ export function ProductDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bandMedia.length])
 
+  // Ürün detay sayfası görüntülendiğinde e-ticaret event'i gönder
+  useEffect(() => {
+    if (!product) return
+    analytics.trackEcommerce('view_product', product.id, (product as any)?.price)
+  }, [product])
+
   if (loading) {
     return (
       <div className="pt-20">

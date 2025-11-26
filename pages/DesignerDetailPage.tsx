@@ -6,6 +6,7 @@ import {useTranslation} from '../i18n'
 import {useDesigner} from '../src/hooks/useDesigners'
 import {useProductsByDesigner} from '../src/hooks/useProducts'
 import {useSiteSettings} from '../src/hooks/useSiteData'
+import {Breadcrumbs} from '../components/Breadcrumbs'
 
 export function DesignerDetailPage() {
   const {designerId} = useParams<{designerId: string}>()
@@ -34,6 +35,15 @@ export function DesignerDetailPage() {
   return (
     <div className="bg-gray-100 animate-fade-in-up-subtle">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
+        <Breadcrumbs
+          className="mb-8"
+          items={[
+            {label: t('homepage'), to: '/'},
+            {label: t('about'), to: '/about'},
+            {label: t('designers'), to: '/designers'},
+            {label: t(designer.name)},
+          ]}
+        />
         <div className="flex flex-col md:flex-row-reverse items-center md:items-start gap-8 md:gap-16 mb-12">
           <div className="flex-shrink-0">
             <OptimizedImage
@@ -61,7 +71,9 @@ export function DesignerDetailPage() {
         </div>
 
         <div className="border-t pt-12">
-          <h2 className="text-3xl font-light text-gray-600 mb-8">{t('designs')}</h2>
+          <h2 className="text-3xl font-light text-gray-600 mb-8">
+            {t('designs') || 'Tasarımları'}
+          </h2>
           {products.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
               {products.map(product => (

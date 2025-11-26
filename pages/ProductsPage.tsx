@@ -1,9 +1,10 @@
-import {useState, useMemo} from 'react'
+import {useState, useMemo, useEffect, useRef} from 'react'
 import {useParams} from 'react-router-dom'
 import {ProductCard} from '../components/ProductCard'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
+import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useProducts, useProductsByCategory} from '../src/hooks/useProducts'
 import {useCategory, useCategories} from '../src/hooks/useCategories'
 import {useSiteSettings} from '../src/hooks/useSiteData'
@@ -32,6 +33,7 @@ export function ProductsPage() {
   const {t} = useTranslation()
   const {data: settings} = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
+  const sortRef = useRef<HTMLDivElement | null>(null)
 
   // React Query hooks - always call both, use enabled to control
   const {data: allProducts = [], isLoading: allProductsLoading} = useProducts()
@@ -43,6 +45,20 @@ export function ProductsPage() {
   // Use category products if categoryId exists, otherwise use all products
   const products = categoryId ? categoryProducts : allProducts
   const loading = categoryId ? categoryProductsLoading : allProductsLoading
+
+  // Dışarı tıklayınca sort menüsünü kapat
+  useEffect(() => {
+    if (!isSortOpen) return
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
+        setIsSortOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isSortOpen])
 
   const sortedProducts = useMemo(() => {
     // If showing all products (no categoryId), group by category first
@@ -157,9 +173,24 @@ export function ProductsPage() {
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <Breadcrumbs
+          className="mb-6"
+          items={
+            category
+              ? [
+                  {label: t('homepage'), to: '/'},
+                  {label: t('products'), to: '/products'},
+                  {label: t(category.name)},
+                ]
+              : [
+                  {label: t('homepage'), to: '/'},
+                  {label: t('products')},
+                ]
+          }
+        />
         {/* Sort Controls */}
         <div className="flex justify-end items-center mb-12">
-          <div className="relative">
+          <div className="relative" ref={sortRef}>
             <button
               onClick={() => setIsSortOpen(!isSortOpen)}
               className="flex items-center gap-2 text-sm font-light text-gray-500 hover:text-gray-600 transition-transform duration-300 transform hover:-translate-y-1 hover:scale-105"
@@ -168,16 +199,16 @@ export function ProductsPage() {
               <ChevronDownIcon />
             </button>
             {isSortOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-10">
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 py-1 shadow-sm z-10">
                 <button
                   onClick={() => handleSortChange('year-desc')}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-100"
                 >
                   {t('sort_newest')}
                 </button>
                 <button
                   onClick={() => handleSortChange('name-asc')}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-100"
                 >
                   {t('sort_name_asc')}
                 </button>

@@ -81,8 +81,11 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
   const t = useCallback(
     (keyOrObject: string | LocalizedString | undefined, ...args: any[]): string => {
       if (typeof keyOrObject === 'string') {
-        // Try CMS translations first, then fallback to base translations
-        const cmsTranslation = cmsTranslations[locale]?.[keyOrObject]
+        // Bazı anahtarlar (ör. 'designs') için CMS çevirisini değil, dosya çevirisini tercih et
+        const shouldBypassCms = keyOrObject === 'designs'
+
+        // Try CMS translations first (gerekirse bypass), then fallback to base translations
+        const cmsTranslation = shouldBypassCms ? undefined : cmsTranslations[locale]?.[keyOrObject]
         const baseTranslation =
           baseTranslations[locale]?.[keyOrObject] || baseTranslations['tr']?.[keyOrObject]
         let translation = cmsTranslation || baseTranslation || keyOrObject

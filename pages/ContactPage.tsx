@@ -5,6 +5,8 @@ import {OptimizedImage} from '../components/OptimizedImage'
 import {OptimizedVideo} from '../components/OptimizedVideo'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
+import {analytics} from '../src/lib/analytics'
+import {Breadcrumbs} from '../components/Breadcrumbs'
 
 const getYouTubeId = (url: string): string | null => {
   const match = url.match(
@@ -161,16 +163,27 @@ const MediaModal: React.FC<{
 
   if (!isOpen || !media) return null
 
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose()
+    }
+  }
+
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
-      onClick={onClose}
+      role="button"
+      tabIndex={-1}
+      onClick={handleBackdropClick}
+      onKeyDown={e => {
+        if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onClose()
+        }
+      }}
       style={{zIndex: 100}}
     >
-      <div
-        className="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center"
-        onClick={e => e.stopPropagation()}
-      >
+      <div className="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 md:top-4 md:right-4 text-white hover:text-gray-300 transition-colors bg-black/70 w-10 h-10 flex items-center justify-center hover:bg-black/90 shadow-lg rounded-full"
@@ -267,6 +280,7 @@ const MediaModal: React.FC<{
                     className="w-full h-full"
                     allow="autoplay; encrypted-media; fullscreen"
                     frameBorder="0"
+                    title={`contact-location-media-${index}`}
                   />
                 ) : m.type === 'video' ? (
                   <OptimizedVideo
@@ -304,7 +318,27 @@ const LocationCard: React.FC<{
 
   return (
     <div
-      onClick={onSelect}
+      role="button"
+      tabIndex={0}
+      onClick={() => {
+        analytics.event({
+          category: 'contact',
+          action: 'select_location',
+          label: t(location.title),
+        })
+        onSelect()
+      }}
+      onKeyDown={e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          analytics.event({
+            category: 'contact',
+            action: 'select_location',
+            label: t(location.title),
+          })
+          onSelect()
+        }
+      }}
       className={`p-4 cursor-pointer transition-all duration-300 ${isSelected ? 'bg-gray-200' : 'hover:bg-gray-100'}`}
     >
       <h3 className="text-xl font-light text-gray-500">{t(location.title)}</h3>
@@ -379,6 +413,16 @@ export function ContactPage() {
     return selectedLocation.media.filter(m => m.url)
   }, [selectedLocation])
 
+  // Seçili lokasyon değiştiğinde analytics event gönder
+  useEffect(() => {
+    if (!selectedLocation) return
+    analytics.event({
+      category: 'contact',
+      action: 'view_location',
+      label: t(selectedLocation.title),
+    })
+  }, [selectedLocation, t])
+
   if (loading || !content) {
     return <PageLoading message={t('loading')} />
   }
@@ -386,6 +430,13 @@ export function ContactPage() {
   return (
     <div className="bg-gray-100 animate-fade-in-up-subtle">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
+        <Breadcrumbs
+          className="mb-6"
+          items={[
+            {label: t('homepage'), to: '/'},
+            {label: t('contact')},
+          ]}
+        />
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600 uppercase">
             {t('contact')}
@@ -473,6 +524,12 @@ export function ContactPage() {
                     <button
                       key={idx}
                       onClick={() => {
+                        analytics.event({
+                          category: 'contact',
+                          action: 'open_media',
+                          label: selectedLocation ? t(selectedLocation.title) : '',
+                          value: idx,
+                        })
                         setSelectedMedia(m)
                         setSelectedMediaIndex(idx)
                         setIsModalOpen(true)

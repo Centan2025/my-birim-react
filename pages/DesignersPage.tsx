@@ -6,6 +6,7 @@ import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
 import {useDesigners} from '../src/hooks/useDesigners'
 import {useSiteSettings} from '../src/hooks/useSiteData'
+import {Breadcrumbs} from '../components/Breadcrumbs'
 
 const DesignerCard: React.FC<{designer: Designer}> = ({designer}) => {
   const {t} = useTranslation()
@@ -52,6 +53,14 @@ export function DesignersPage() {
   return (
     <div className="bg-gray-100 animate-fade-in-up-subtle">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
+        <Breadcrumbs
+          className="mb-6"
+          items={[
+            {label: t('homepage'), to: '/'},
+            {label: t('about'), to: '/about'},
+            {label: t('designers')},
+          ]}
+        />
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600">{t('designers')}</h1>
           <div className="h-px bg-gray-300 mt-4 w-full"></div>

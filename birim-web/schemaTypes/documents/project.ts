@@ -9,7 +9,7 @@ export default defineType({
       name: 'id',
       title: 'ID (Slug)',
       type: 'slug',
-      options: {source: (doc) => doc.title?.tr || doc.title?.en, maxLength: 96},
+      options: {source: (doc: any) => doc.title?.tr || doc.title?.en, maxLength: 96},
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -17,6 +17,27 @@ export default defineType({
       title: 'Başlık',
       type: 'localizedString',
       validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'isPublished',
+      title: 'Yayında Göster',
+      type: 'boolean',
+      initialValue: true,
+      description: 'Bu projenin web sitesinde listelerde görünüp görünmeyeceğini belirler.',
+    }),
+    defineField({
+      name: 'publishAt',
+      title: 'Yayın Tarihi (Opsiyonel)',
+      type: 'datetime',
+      description:
+        'Belirli bir tarihten sonra görünsün istiyorsanız kullanın. Boş bırakırsanız hemen yayına girer.',
+    }),
+    defineField({
+      name: 'sortOrder',
+      title: 'Sıra (Opsiyonel)',
+      type: 'number',
+      description:
+        'Küçük sayı önce gelir. Boş bırakırsanız oluşturulma tarihine göre (yeniden eskiye) sıralanır.',
     }),
     defineField({
       name: 'date',

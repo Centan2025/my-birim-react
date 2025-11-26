@@ -40,12 +40,25 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
   const autoPlayIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const [isTransitioning, setIsTransitioning] = useState(false)
 
-  const heroMedia = useMemo(
-    () => (Array.isArray(content?.heroMedia) ? content!.heroMedia : []),
-    // content referansı bilerek dependency'e eklenmiyor; heroMedia sadece heroMedia alanına göre güncellenmeli
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [content?.heroMedia]
-  )
+  const heroMedia = useMemo(() => {
+    const items = Array.isArray(content?.heroMedia) ? content!.heroMedia : []
+    // Yayınlanmamışları ve gelecekte yayınlanacakları filtrele
+    const now = new Date()
+    const visible = items.filter(item => {
+      const publishedFlag = item.isPublished !== false
+      const publishAt = item.publishAt ? new Date(item.publishAt) : null
+      const allowedByTime = !publishAt || publishAt <= now
+      return publishedFlag && allowedByTime
+    })
+    // Opsiyonel manuel sıralama: küçük sortOrder önce
+    visible.sort((a, b) => {
+      const aOrder = typeof a.sortOrder === 'number' ? a.sortOrder : 999999
+      const bOrder = typeof b.sortOrder === 'number' ? b.sortOrder : 999999
+      if (aOrder !== bOrder) return aOrder - bOrder
+      return 0
+    })
+    return visible
+  }, [content?.heroMedia])
   const slideCount = heroMedia.length || 1
 
   // Mobile / viewport takibi

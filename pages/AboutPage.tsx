@@ -4,6 +4,7 @@ import type {AboutPageContent, LocalizedString} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
+import {Breadcrumbs} from '../components/Breadcrumbs'
 
 const ValuesIcon: React.FC<PropsWithChildren> = ({children}) => (
   <div className="bg-gray-800 text-white rounded-full w-16 h-16 flex items-center justify-center mb-4">
@@ -127,6 +128,13 @@ export function AboutPage() {
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <Breadcrumbs
+          className="mb-6"
+          items={[
+            {label: t('homepage'), to: '/'},
+            {label: t('about')},
+          ]}
+        />
         {/* Our Story Section */}
         <div className="max-w-4xl mx-auto grid md:grid-cols-5 gap-12 items-center">
           <div className="md:col-span-3 prose prose-lg text-gray-500 max-w-none font-light">

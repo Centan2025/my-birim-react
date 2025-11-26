@@ -227,6 +227,12 @@ export interface HeroMediaItem {
   buttonText: LocalizedString
   /** Link for the call-to-action button. */
   buttonLink: string
+  /** Whether this hero item should be shown on the site (default: true). */
+  isPublished?: boolean
+  /** Optional publish date/time for time-based scheduling. */
+  publishAt?: string
+  /** Optional manual sort order; smaller numbers appear first. */
+  sortOrder?: number
 }
 
 /**
@@ -362,6 +368,12 @@ export interface NewsItem {
   mainImage: string | {url: string; urlMobile?: string; urlDesktop?: string}
   /** Array of media items (images, videos) within the article. */
   media: NewsMedia[]
+  /** Whether this news item is published on the site. */
+  isPublished?: boolean
+  /** Optional scheduled publish date used for filtering/sorting. */
+  publishAt?: string
+  /** Optional manual sort order; smaller numbers appear first. */
+  sortOrder?: number
 }
 
 /**
@@ -490,4 +502,10 @@ export interface Project {
     image?: string
   }[]
   body?: LocalizedString
+  /** Whether this project is published on the site. */
+  isPublished?: boolean
+  /** Optional scheduled publish date used for filtering/sorting. */
+  publishAt?: string
+  /** Optional manual sort order; smaller numbers appear first. */
+  sortOrder?: number
 }

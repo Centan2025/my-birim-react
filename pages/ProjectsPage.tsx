@@ -3,6 +3,7 @@ import type {Project} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
+import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useProjects} from '../src/hooks/useProjects'
 import {useSiteSettings} from '../src/hooks/useSiteData'
 
@@ -49,6 +50,13 @@ export function ProjectsPage() {
   return (
     <div className="bg-gray-100 animate-fade-in-up-subtle">
       <div className="w-full max-w-[95vw] mx-auto px-2 sm:px-4 lg:px-6 pt-28 pb-16">
+        <Breadcrumbs
+          className="mb-6"
+          items={[
+            {label: t('homepage'), to: '/'},
+            {label: t('projects') || 'Projeler'},
+          ]}
+        />
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600">
             {t('projects') || 'Projeler'}
