@@ -603,6 +603,20 @@ const AppContent = () => {
   // Maintenance mode sadece production'da ve bypass yoksa aktif
   const isMaintenanceMode = isProduction && maintenanceModeEnabled && bypassParam !== bypassSecret
 
+  // Bypass paramı varken debug bilgisi yaz (sorun tespiti için)
+  if (typeof window !== 'undefined' && window.location.search.includes('bypass')) {
+    // eslint-disable-next-line no-console
+    console.log('[MaintenanceDebug]', {
+      isProduction,
+      maintenanceModeFromCMS,
+      maintenanceModeFromEnv,
+      maintenanceModeEnabled,
+      bypassSecret,
+      bypassParam,
+      isMaintenanceMode,
+    })
+  }
+
   return (
     <HashRouter future={{v7_startTransition: true, v7_relativeSplatPath: true}}>
       <div className="flex flex-col min-h-screen">
