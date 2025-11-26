@@ -593,15 +593,27 @@ const AppContent = () => {
   const maintenanceModeEnabled = maintenanceModeFromCMS || maintenanceModeFromEnv
 
   const isProduction = import.meta.env.PROD
-  const bypassSecret = import.meta.env['VITE_MAINTENANCE_BYPASS_SECRET'] || 'dev-bypass-2024'
+  // Bypass için kabul edilen secret değerleri:
+  // - Vercel env'den gelen değer (varsa)
+  // - Proje içinde sabitlenen güvenli değerler (ör: 'birim-dev-2025', 'dev-bypass-2024')
+  const envBypassSecret = import.meta.env['VITE_MAINTENANCE_BYPASS_SECRET']
+  const allowedBypassSecrets = [
+    'dev-bypass-2024',
+    'birim-dev-2025',
+    ...(envBypassSecret && !['dev-bypass-2024', 'birim-dev-2025'].includes(envBypassSecret)
+      ? [envBypassSecret]
+      : []),
+  ]
 
   // HashRouter'da query parameter hem hash'ten önce hem de hash içinde olabilir
   const searchParams = new URLSearchParams(window.location.search)
   const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '')
   const bypassParam = searchParams.get('bypass') || hashParams.get('bypass')
 
-  // Maintenance mode sadece production'da ve bypass yoksa aktif
-  const isMaintenanceMode = isProduction && maintenanceModeEnabled && bypassParam !== bypassSecret
+  const hasBypass = !!bypassParam && allowedBypassSecrets.includes(bypassParam)
+
+  // Maintenance mode sadece production'da ve geçerli bir bypass YOKSA aktif
+  const isMaintenanceMode = isProduction && maintenanceModeEnabled && !hasBypass
 
   const debugInfo =
     typeof window !== 'undefined' &&
@@ -611,7 +623,7 @@ const AppContent = () => {
           maintenanceModeFromCMS,
           maintenanceModeFromEnv,
           maintenanceModeEnabled,
-          bypassSecret,
+          allowedBypassSecrets,
           bypassParam,
           isMaintenanceMode,
         }
@@ -675,7 +687,12 @@ const AppContent = () => {
           <div className="fixed bottom-2 left-2 z-50 rounded bg-black/70 text-white text-[10px] px-2 py-1 font-mono text-left">
             <div>MAINT DEBUG</div>
             <div>bypassParam: {String(debugInfo.bypassParam)}</div>
-            <div>bypassSecret: {String(debugInfo.bypassSecret)}</div>
+            <div>
+              allowedSecrets:
+              {debugInfo.allowedBypassSecrets.map((s, i) => (
+                <span key={i}> {String(s)}</span>
+              ))}
+            </div>
             <div>isMaintenanceMode: {String(debugInfo.isMaintenanceMode)}</div>
           </div>
         )}
