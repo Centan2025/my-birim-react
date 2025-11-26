@@ -473,28 +473,17 @@ export function ContactPage() {
 
           <div className="bg-white shadow-sm border border-gray-300 overflow-hidden min-h-[400px] md:min-h-0 sticky top-28 h-[600px]">
             {selectedLocation?.mapEmbedUrl ? (
-              <div className="relative w-full h-full">
-                <iframe
-                  src={convertGoogleMapsUrlToEmbed(selectedLocation.mapEmbedUrl)}
-                  width="100%"
-                  height="100%"
-                  style={{border: 0}}
-                  allow="fullscreen"
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  title={`${t(selectedLocation.title)}`}
-                  key={selectedLocation.mapEmbedUrl}
-                  className="w-full h-full pointer-events-none"
-                ></iframe>
-                <a
-                  href={selectedLocation.mapEmbedUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute bottom-4 right-4 bg-white/90 hover:bg-white text-gray-800 text-xs px-3 py-2 shadow-md border border-gray-200 transition-colors"
-                >
-                  Haritada aç
-                </a>
-              </div>
+              <iframe
+                src={convertGoogleMapsUrlToEmbed(selectedLocation.mapEmbedUrl)}
+                width="100%"
+                height="100%"
+                style={{border: 0}}
+                allow="fullscreen"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title={`${t(selectedLocation.title)}`}
+                key={selectedLocation.mapEmbedUrl}
+              ></iframe>
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500">
                 <p>{t('map_not_available')}</p>
