@@ -603,19 +603,19 @@ const AppContent = () => {
   // Maintenance mode sadece production'da ve bypass yoksa aktif
   const isMaintenanceMode = isProduction && maintenanceModeEnabled && bypassParam !== bypassSecret
 
-  // Bypass paramı varken debug bilgisi yaz (sorun tespiti için)
-  if (typeof window !== 'undefined' && window.location.search.includes('bypass')) {
-    // eslint-disable-next-line no-console
-    console.log('[MaintenanceDebug]', {
-      isProduction,
-      maintenanceModeFromCMS,
-      maintenanceModeFromEnv,
-      maintenanceModeEnabled,
-      bypassSecret,
-      bypassParam,
-      isMaintenanceMode,
-    })
-  }
+  const debugInfo =
+    typeof window !== 'undefined' &&
+    (window.location.search.includes('bypass') || window.location.hash.includes('bypass'))
+      ? {
+          isProduction,
+          maintenanceModeFromCMS,
+          maintenanceModeFromEnv,
+          maintenanceModeEnabled,
+          bypassSecret,
+          bypassParam,
+          isMaintenanceMode,
+        }
+      : null
 
   return (
     <HashRouter future={{v7_startTransition: true, v7_relativeSplatPath: true}}>
@@ -670,6 +670,14 @@ const AppContent = () => {
             <CookieBanner />
             <Footer />
           </>
+        )}
+        {debugInfo && (
+          <div className="fixed bottom-2 left-2 z-50 rounded bg-black/70 text-white text-[10px] px-2 py-1 font-mono text-left">
+            <div>MAINT DEBUG</div>
+            <div>bypassParam: {String(debugInfo.bypassParam)}</div>
+            <div>bypassSecret: {String(debugInfo.bypassSecret)}</div>
+            <div>isMaintenanceMode: {String(debugInfo.isMaintenanceMode)}</div>
+          </div>
         )}
       </div>
     </HashRouter>
