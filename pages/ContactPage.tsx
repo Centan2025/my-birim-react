@@ -171,7 +171,7 @@ const MediaModal: React.FC<{
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 overflow-y-auto"
       role="button"
       tabIndex={-1}
       onClick={handleBackdropClick}
@@ -183,12 +183,12 @@ const MediaModal: React.FC<{
       }}
       style={{zIndex: 100}}
     >
-      <div className="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center">
+      <div className="relative max-w-5xl w-full mx-auto my-6 flex items-center justify-center">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 md:top-4 md:right-4 text-white hover:text-gray-300 transition-colors bg-black/70 w-10 h-10 flex items-center justify-center hover:bg-black/90 shadow-lg rounded-full"
+          className="absolute -top-4 right-0 md:-top-6 md:-right-6 text-white hover:text-gray-300 transition-colors bg-black/70 w-9 h-9 flex items-center justify-center hover:bg-black/90 shadow-lg rounded-full"
           aria-label="Close"
-          style={{zIndex: 101, top: '80px'}}
+          style={{zIndex: 101}}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -260,7 +260,7 @@ const MediaModal: React.FC<{
           </button>
         )}
 
-        <div className="relative w-full h-full max-w-7xl max-h-[90vh] overflow-hidden">
+        <div className="relative w-full max-h-[80vh] overflow-hidden flex items-center justify-center">
           <div
             className="flex h-full transition-transform duration-300 ease-out"
             style={{
@@ -473,17 +473,28 @@ export function ContactPage() {
 
           <div className="bg-white shadow-sm border border-gray-300 overflow-hidden min-h-[400px] md:min-h-0 sticky top-28 h-[600px]">
             {selectedLocation?.mapEmbedUrl ? (
-              <iframe
-                src={convertGoogleMapsUrlToEmbed(selectedLocation.mapEmbedUrl)}
-                width="100%"
-                height="100%"
-                style={{border: 0}}
-                allow="fullscreen"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title={`${t(selectedLocation.title)}`}
-                key={selectedLocation.mapEmbedUrl}
-              ></iframe>
+              <div className="relative w-full h-full">
+                <iframe
+                  src={convertGoogleMapsUrlToEmbed(selectedLocation.mapEmbedUrl)}
+                  width="100%"
+                  height="100%"
+                  style={{border: 0}}
+                  allow="fullscreen"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title={`${t(selectedLocation.title)}`}
+                  key={selectedLocation.mapEmbedUrl}
+                  className="w-full h-full pointer-events-none"
+                ></iframe>
+                <a
+                  href={selectedLocation.mapEmbedUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute bottom-4 right-4 bg-white/90 hover:bg-white text-gray-800 text-xs px-3 py-2 shadow-md border border-gray-200 transition-colors"
+                >
+                  Haritada aç
+                </a>
+              </div>
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500">
                 <p>{t('map_not_available')}</p>
