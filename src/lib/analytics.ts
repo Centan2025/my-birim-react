@@ -2,10 +2,12 @@
  * Analytics Service
  *
  * Supports multiple analytics providers:
- * - Google Analytics (gtag)
+ * - Google Analytics (GA4) via react-ga4
  * - Plausible Analytics
  * - Custom analytics
  */
+
+import ReactGA from 'react-ga4'
 
 interface AnalyticsEvent {
   action: string
@@ -43,43 +45,14 @@ class Analytics {
     this.isInitialized = true
   }
 
-  /**
-   * Initialize Google Analytics
-   */
   private initGoogleAnalytics(gaId: string) {
     if (typeof window === 'undefined') return
 
-    // Load gtag script (GA4 önerilen snippet ile birebir aynı mantık)
-    const script1 = document.createElement('script')
-    script1.async = true
-    script1.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`
-    document.head.appendChild(script1)
-
-    // Resmi GA4 snippet'iyle aynı dataLayer & gtag tanımı:
-    // window.dataLayer = window.dataLayer || [];
-    // function gtag(){dataLayer.push(arguments);}
-    const w = window as unknown as {
-      dataLayer?: unknown[]
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      gtag?: (...args: any[]) => void
-    }
-    w.dataLayer = w.dataLayer || []
-    // GA4'ün orijinal snippet'inde olduğu gibi arguments kullanmak gerekiyor;
-    // bu sayede collect istekleri doğru oluşuyor.
-    // Bu fonksiyonun içinde arguments kullanımı GA'nın resmi snippet'iyle uyum için gerekli.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, prefer-rest-params
-    w.gtag = function gtag(this: unknown, ...args: any[]) {
-      w.dataLayer!.push(args)
-    }
-
-    // İlk sayfa yüklemesinde config gönder
-    w.gtag('js', new Date())
-    w.gtag('config', gaId, {
-      page_path: window.location.pathname,
-    })
+    // react-ga4, GA4 script'ini kendi yükler ve initialize eder
+    ReactGA.initialize(gaId)
 
     if (import.meta.env.DEV && DEBUG_LOGS) {
-      console.debug('[Analytics] Google Analytics initialized')
+      console.debug('[Analytics] Google Analytics (react-ga4) initialized with', gaId)
     }
   }
 
@@ -110,11 +83,12 @@ class Analytics {
    * Track page view
    */
   pageview(path: string, title?: string) {
-    // Google Analytics
-    if (this.googleAnalyticsId && (window as any).gtag) {
-      ;(window as any).gtag('config', this.googleAnalyticsId, {
-        page_path: path,
-        page_title: title,
+    // Google Analytics (GA4 via react-ga4)
+    if (this.googleAnalyticsId) {
+      ReactGA.send({
+        hitType: 'pageview',
+        page: path,
+        title,
       })
     }
 
@@ -132,11 +106,12 @@ class Analytics {
    * Track event
    */
   event(event: AnalyticsEvent) {
-    // Google Analytics
-    if (this.googleAnalyticsId && (window as any).gtag) {
-      ;(window as any).gtag('event', event.action, {
-        event_category: event.category,
-        event_label: event.label,
+    // Google Analytics (GA4 via react-ga4)
+    if (this.googleAnalyticsId) {
+      ReactGA.event({
+        action: event.action,
+        category: event.category,
+        label: event.label,
         value: event.value,
       })
     }
