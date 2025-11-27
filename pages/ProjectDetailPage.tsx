@@ -160,6 +160,14 @@ export function ProjectDetailPage() {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
+      <Breadcrumbs
+        className="mb-6"
+        items={[
+          {label: t('homepage'), to: '/'},
+          {label: t('projects') || 'Projeler', to: '/projects'},
+          {label: t(project.title)},
+        ]}
+      />
       <div className="mb-8">
         <h1 className="text-4xl font-light tracking-tight text-gray-900">{t(project.title)}</h1>
         {project.date && <p className="text-sm text-gray-500 mt-2 font-light">{t(project.date)}</p>}

@@ -246,9 +246,15 @@ export function ProductDetailPage() {
       : (product?.mainImage && typeof product.mainImage === 'object'
           ? product.mainImage.url
           : '') || ''
+  const categoryNameForSeo = category ? t(category.name) : ''
+  const seoTitle = productName
+    ? categoryNameForSeo
+      ? `${categoryNameForSeo} - ${productName}`
+      : productName
+    : 'BIRIM'
 
   useSEO({
-    title: productName ? `${productName} - BIRIM` : 'BIRIM',
+    title: seoTitle,
     description: productDescription || 'BIRIM - Modern tasarım ve mimari çözümler',
     image: productImage,
     type: 'product',
