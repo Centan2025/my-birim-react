@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react'
+import React, {useMemo, useEffect} from 'react'
 import {useParams, Link} from 'react-router-dom'
 import type {NewsMedia} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'

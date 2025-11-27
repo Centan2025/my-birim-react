@@ -1,3 +1,4 @@
+import React, {useEffect} from 'react'
 import {useParams} from 'react-router-dom'
 import {ProductCard} from '../components/ProductCard'
 import {OptimizedImage} from '../components/OptimizedImage'
