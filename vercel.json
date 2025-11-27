@@ -2,7 +2,7 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/((?!img/).*)",
+      "source": "/((?!assets/|img/|robots\\.txt|sitemap\\.xml|favicon\\.ico).*)",
       "destination": "/index.html"
     }
   ],
