@@ -176,12 +176,61 @@ const AuthProvider = ({children}: PropsWithChildren) => {
 
 const ScrollToTop = () => {
   const {pathname} = useLocation()
+  const {t} = useTranslation()
 
   useEffect(() => {
     window.scrollTo(0, 0)
-    // Track page view
-    analytics.pageview(pathname, document.title)
-  }, [pathname])
+
+    // Sayfa başlığı - rota bazlı dinamik title
+    const baseTitle = 'BIRIM'
+    let suffix = ''
+
+    if (pathname === '/' || pathname === '') {
+      suffix = t('homepage') || 'Ana Sayfa'
+    } else if (pathname === '/about') {
+      suffix = t('about') || 'Hakkımızda'
+    } else if (pathname === '/products') {
+      suffix = t('products') || 'Ürünler'
+    } else if (pathname.startsWith('/product/')) {
+      suffix = t('product_detail_title') || t('product') || 'Ürün Detayı'
+    } else if (pathname === '/categories') {
+      suffix = t('categories') || 'Kategoriler'
+    } else if (pathname === '/designers') {
+      suffix = t('designers') || 'Tasarımcılar'
+    } else if (pathname.startsWith('/designer/')) {
+      suffix = t('designer_detail_title') || t('designers') || 'Tasarımcı Detayı'
+    } else if (pathname === '/projects') {
+      suffix = t('projects') || 'Projeler'
+    } else if (pathname.startsWith('/projects/')) {
+      suffix = t('project_detail_title') || t('projects') || 'Proje Detayı'
+    } else if (pathname === '/news') {
+      suffix = t('news') || 'Haberler'
+    } else if (pathname.startsWith('/news/')) {
+      suffix = t('news_detail_title') || t('news') || 'Haber Detayı'
+    } else if (pathname === '/contact') {
+      suffix = t('contact') || 'İletişim'
+    } else if (pathname === '/login') {
+      suffix = t('login') || 'Giriş'
+    } else if (pathname === '/profile') {
+      suffix = t('profile') || 'Profil'
+    } else if (pathname === '/cookies') {
+      suffix = t('cookies') || 'Çerez Politikası'
+    } else if (pathname === '/privacy') {
+      suffix = t('privacy') || 'Gizlilik Politikası'
+    } else if (pathname === '/terms') {
+      suffix = t('terms') || 'Kullanım Şartları'
+    } else if (pathname === '/kvkk') {
+      suffix = t('kvkk') || 'KVKK'
+    }
+
+    const finalTitle = suffix ? `${baseTitle} - ${suffix}` : baseTitle
+    if (typeof document !== 'undefined') {
+      document.title = finalTitle
+    }
+
+    // Google Analytics pageview
+    analytics.pageview(pathname, finalTitle)
+  }, [pathname, t])
 
   return null
 }
