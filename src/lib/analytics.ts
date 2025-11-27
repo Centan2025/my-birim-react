@@ -14,7 +14,8 @@ interface AnalyticsEvent {
   value?: number
 }
 
-const DEBUG_LOGS = (import.meta.env as any).VITE_DEBUG_LOGS === 'true'
+const DEBUG_LOGS =
+  (import.meta.env as unknown as {VITE_DEBUG_LOGS?: string}).VITE_DEBUG_LOGS === 'true'
 
 class Analytics {
   private isInitialized = false
@@ -48,19 +49,26 @@ class Analytics {
   private initGoogleAnalytics(gaId: string) {
     if (typeof window === 'undefined') return
 
-    // Load gtag script
+    // Load gtag script (GA4 önerilen snippet ile birebir aynı mantık)
     const script1 = document.createElement('script')
     script1.async = true
     script1.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`
     document.head.appendChild(script1)
 
-    // Initialize gtag
-    const dataLayer = ((window as any).dataLayer = (window as any).dataLayer || [])
-    function gtag(...args: any[]) {
-      dataLayer.push(args)
+    // Resmi GA4 snippet'iyle aynı dataLayer & gtag tanımı:
+    // window.dataLayer = window.dataLayer || [];
+    // function gtag(){dataLayer.push(arguments);}
+    const w = window as unknown as {
+      dataLayer?: unknown[]
+      gtag?: (...args: unknown[]) => void
     }
-    ;(window as any).gtag = gtag
+    w.dataLayer = w.dataLayer || []
+    const gtag = (...args: unknown[]) => {
+      w.dataLayer!.push(args)
+    }
+    w.gtag = gtag
 
+    // İlk sayfa yüklemesinde config gönder
     gtag('js', new Date())
     gtag('config', gaId, {
       page_path: window.location.pathname,
