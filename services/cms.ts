@@ -1545,15 +1545,6 @@ export const subscribeEmail = async (email: string): Promise<User> => {
     }
   }
   if (useSanity && sanity) {
-    // Check if user already exists
-    const existingUser = await sanity.fetch(groq`*[_type == "user" && lower(email) == $email][0]`, {
-      email: normEmail,
-    })
-    if (existingUser) {
-      // Sanity'de zaten varsa abonelik tekrarı olmasın
-      throw new Error('Bu e-posta adresi zaten aboneliğe kayıtlı')
-    }
-
     // Create email subscriber (password olmadan)
     // Email aboneliği için token yoksa local storage'a kaydet (daha esnek)
     if (!sanityMutations) {
@@ -1585,7 +1576,17 @@ export const subscribeEmail = async (email: string): Promise<User> => {
     }
 
     try {
-      const user = await sanityMutations.create({
+      // Aynı e-posta için tekrar tekrar create çağrıldığında
+      // yarış koşullarını engellemek için deterministik bir _id kullanıyoruz.
+      const safeId =
+        'email_subscriber_' +
+        normEmail
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, '_')
+          .replace(/_+/g, '_')
+
+      const user = await sanityMutations.createIfNotExists({
+        _id: safeId,
         _type: 'user',
         email: normEmail,
         password: '', // Email subscriber için password yok
