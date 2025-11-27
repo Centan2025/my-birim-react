@@ -6,6 +6,7 @@ import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
 import {useProject, useProjects} from '../src/hooks/useProjects'
 import {useSiteSettings} from '../src/hooks/useSiteData'
+import {analytics} from '../src/lib/analytics'
 
 const getYouTubeId = (url: string): string | null => {
   if (!url) return null
@@ -96,6 +97,13 @@ export function ProjectDetailPage() {
       </div>
     )
   }
+
+  // Analytics: proje detay görüntüleme
+  analytics.event({
+    category: 'project',
+    action: 'view_project',
+    label: t(project.title), // ID yerine proje başlığı
+  })
 
   // Helper: cover string veya object olabilir
   const coverUrl = project.cover

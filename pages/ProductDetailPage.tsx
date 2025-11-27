@@ -470,7 +470,7 @@ export function ProductDetailPage() {
     analytics.event({
       category: 'media',
       action: 'hero_next',
-      label: product?.id,
+      label: t(product.name), // ID yerine ürün adı
     })
   }
   const heroPrev = () => {
@@ -478,7 +478,7 @@ export function ProductDetailPage() {
     analytics.event({
       category: 'media',
       action: 'hero_prev',
-      label: product?.id,
+      label: t(product.name),
     })
   }
 
@@ -500,7 +500,7 @@ export function ProductDetailPage() {
     analytics.event({
       category: 'media',
       action: 'open_lightbox_band',
-      label: product?.id,
+      label: t(product.name),
       value: currentImageIndex,
     })
     setIsLightboxOpen(true)
@@ -518,7 +518,7 @@ export function ProductDetailPage() {
     analytics.event({
       category: 'media',
       action: 'open_lightbox_panel',
-      label: product?.id,
+      label: t(product.name),
       value: index,
     })
     setIsLightboxOpen(true)

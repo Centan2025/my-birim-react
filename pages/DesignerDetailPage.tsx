@@ -7,6 +7,7 @@ import {useDesigner} from '../src/hooks/useDesigners'
 import {useProductsByDesigner} from '../src/hooks/useProducts'
 import {useSiteSettings} from '../src/hooks/useSiteData'
 import {Breadcrumbs} from '../components/Breadcrumbs'
+import {analytics} from '../src/lib/analytics'
 
 export function DesignerDetailPage() {
   const {designerId} = useParams<{designerId: string}>()
@@ -31,6 +32,13 @@ export function DesignerDetailPage() {
       </div>
     )
   }
+
+  // Analytics: tasarımcı detay görüntüleme
+  analytics.event({
+    category: 'designer',
+    action: 'view_designer',
+    label: t(designer.name), // ID yerine tasarımcı adı
+  })
 
   return (
     <div className="bg-gray-100 animate-fade-in-up-subtle">

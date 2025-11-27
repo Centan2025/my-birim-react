@@ -31,7 +31,7 @@ export const ProductCard: React.FC<{product: Product; variant?: 'default' | 'lig
         analytics.event({
           category: 'navigation',
           action: 'product_click',
-          label: product.id,
+          label: t(product.name), // Ürün ID'si yerine okunabilir ürün adı
           value: product.year,
         })
       }}

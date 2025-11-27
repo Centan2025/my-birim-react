@@ -7,6 +7,7 @@ import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
 import {useNewsItem, useNews} from '../src/hooks/useNews'
 import {useSiteSettings} from '../src/hooks/useSiteData'
+import {analytics} from '../src/lib/analytics'
 
 const getYouTubeId = (url: string): string | null => {
   if (!url) return null
@@ -173,6 +174,13 @@ export function NewsDetailPage() {
     return <div className="pt-28 text-center">{t('news_not_found')}</div>
   }
 
+  // Analytics: haber detay görüntüleme
+  analytics.event({
+    category: 'news',
+    action: 'view_news',
+    label: t(item.title), // ID yerine haber başlığı
+  })
+
   // By adding a `key` prop here, we ensure that React treats navigations
   // between different news items as distinct components, automatically resetting state.
   return (
@@ -202,10 +210,22 @@ export function NewsDetailPage() {
             </div>
 
             <OptimizedImage
-              src={typeof item.mainImage === 'string' ? item.mainImage : (item.mainImage && typeof item.mainImage === 'object' ? item.mainImage.url : '') || ''}
-              srcMobile={typeof item.mainImage === 'object' && item.mainImage ? item.mainImage.urlMobile : undefined}
+              src={
+                typeof item.mainImage === 'string'
+                  ? item.mainImage
+                  : (item.mainImage && typeof item.mainImage === 'object'
+                      ? item.mainImage.url
+                      : '') || ''
+              }
+              srcMobile={
+                typeof item.mainImage === 'object' && item.mainImage
+                  ? item.mainImage.urlMobile
+                  : undefined
+              }
               srcDesktop={
-                typeof item.mainImage === 'object' && item.mainImage ? item.mainImage.urlDesktop : undefined
+                typeof item.mainImage === 'object' && item.mainImage
+                  ? item.mainImage.urlDesktop
+                  : undefined
               }
               alt={t(item.title)}
               className={`w-full h-auto object-cover mb-6 ${settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'}`}
