@@ -399,13 +399,23 @@ export function ContactPage() {
     return selectedLocation.media.filter(m => m.url)
   }, [selectedLocation])
 
-  // Seçili lokasyon değiştiğinde analytics event gönder
+  // Seçili lokasyon değiştiğinde analytics event + sayfa başlığı gönder
   useEffect(() => {
     if (!selectedLocation) return
+
+    const locationTitle = t(selectedLocation.title)
+    const title = `İLETİŞİM - ${locationTitle}`
+
+    if (typeof document !== 'undefined') {
+      document.title = title
+    }
+
+    analytics.pageview(window.location.pathname, title)
+
     analytics.event({
       category: 'contact',
       action: 'view_location',
-      label: t(selectedLocation.title),
+      label: locationTitle,
     })
   }, [selectedLocation, t])
 
