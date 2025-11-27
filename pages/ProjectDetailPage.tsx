@@ -83,6 +83,25 @@ export function ProjectDetailPage() {
     const next = currentIndex < allProjects.length - 1 ? allProjects[currentIndex + 1] : null
     return {prevProject: prev, nextProject: next}
   }, [project, allProjects])
+  // Analytics: proje detay görüntüleme
+  useEffect(() => {
+    if (!project) return
+    if (typeof window === 'undefined') return
+
+    const title = `BIRIM - ${t(project.title)}`
+    if (typeof document !== 'undefined') {
+      document.title = title
+    }
+
+    analytics.pageview(window.location.pathname, title)
+
+    analytics.event({
+      category: 'project',
+      action: 'view_project',
+      label: t(project.title), // ID yerine proje başlığı
+    })
+  }, [project, t])
+
   if (loading) {
     return (
       <div className="pt-20">
@@ -97,13 +116,6 @@ export function ProjectDetailPage() {
       </div>
     )
   }
-
-  // Analytics: proje detay görüntüleme
-  analytics.event({
-    category: 'project',
-    action: 'view_project',
-    label: t(project.title), // ID yerine proje başlığı
-  })
 
   // Helper: cover string veya object olabilir
   const coverUrl = project.cover

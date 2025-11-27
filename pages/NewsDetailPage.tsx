@@ -162,6 +162,25 @@ export function NewsDetailPage() {
     return {prevNews: prev, nextNews: next}
   }, [item, allNews])
 
+  // Analytics: haber detay görüntüleme
+  useEffect(() => {
+    if (!item) return
+    if (typeof window === 'undefined') return
+
+    const title = `BIRIM - ${t(item.title)}`
+    if (typeof document !== 'undefined') {
+      document.title = title
+    }
+
+    analytics.pageview(window.location.pathname, title)
+
+    analytics.event({
+      category: 'news',
+      action: 'view_news',
+      label: t(item.title), // ID yerine haber başlığı
+    })
+  }, [item, t])
+
   if (loading) {
     return (
       <div className="pt-28">
@@ -173,13 +192,6 @@ export function NewsDetailPage() {
   if (!item) {
     return <div className="pt-28 text-center">{t('news_not_found')}</div>
   }
-
-  // Analytics: haber detay görüntüleme
-  analytics.event({
-    category: 'news',
-    action: 'view_news',
-    label: t(item.title), // ID yerine haber başlığı
-  })
 
   // By adding a `key` prop here, we ensure that React treats navigations
   // between different news items as distinct components, automatically resetting state.

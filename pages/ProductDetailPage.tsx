@@ -188,6 +188,19 @@ export function ProductDetailPage() {
   const [thumbDragStartX, setThumbDragStartX] = useState<number | null>(null)
   const [thumbScrollStart, setThumbScrollStart] = useState<number>(0)
 
+  // Sayfa başlığı + GA pageview: ürün adıyla birlikte
+  useEffect(() => {
+    if (!product) return
+    if (typeof window === 'undefined') return
+
+    const title = `BIRIM - ${t(product.name)}`
+    if (typeof document !== 'undefined') {
+      document.title = title
+    }
+
+    analytics.pageview(window.location.pathname, title)
+  }, [product, t])
+
   // Grup değiştiğinde kartela indexini sıfırla
   useEffect(() => {
     setActiveBookIndex(0)

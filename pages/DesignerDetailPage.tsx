@@ -17,6 +17,25 @@ export function DesignerDetailPage() {
   const {data: settings} = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
 
+  // Analytics: tasarımcı detay görüntüleme
+  useEffect(() => {
+    if (!designer) return
+    if (typeof window === 'undefined') return
+
+    const title = `BIRIM - ${t(designer.name)}`
+    if (typeof document !== 'undefined') {
+      document.title = title
+    }
+
+    analytics.pageview(window.location.pathname, title)
+
+    analytics.event({
+      category: 'designer',
+      action: 'view_designer',
+      label: t(designer.name), // ID yerine tasarımcı adı
+    })
+  }, [designer, t])
+
   if (loading) {
     return (
       <div className="pt-20">
@@ -32,13 +51,6 @@ export function DesignerDetailPage() {
       </div>
     )
   }
-
-  // Analytics: tasarımcı detay görüntüleme
-  analytics.event({
-    category: 'designer',
-    action: 'view_designer',
-    label: t(designer.name), // ID yerine tasarımcı adı
-  })
 
   return (
     <div className="bg-gray-100 animate-fade-in-up-subtle">

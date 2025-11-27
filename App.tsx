@@ -181,6 +181,17 @@ const ScrollToTop = () => {
   useEffect(() => {
     window.scrollTo(0, 0)
 
+    // Dinamik detay sayfaları (ürün, proje, haber, tasarımcı) için
+    // başlık ve pageview takibini ilgili sayfa bileşenleri yapıyor.
+    const isDynamicDetail =
+      pathname.startsWith('/product/') ||
+      pathname.startsWith('/projects/') ||
+      pathname.startsWith('/news/') ||
+      pathname.startsWith('/designer/')
+    if (isDynamicDetail) {
+      return
+    }
+
     // Sayfa başlığı - rota bazlı dinamik title
     const baseTitle = 'BIRIM'
     let suffix = ''
@@ -228,7 +239,7 @@ const ScrollToTop = () => {
       document.title = finalTitle
     }
 
-    // Google Analytics pageview
+    // Google Analytics pageview (sadece statik sayfalar için)
     analytics.pageview(pathname, finalTitle)
   }, [pathname, t])
 
