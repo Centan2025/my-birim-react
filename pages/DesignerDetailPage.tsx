@@ -23,7 +23,7 @@ export function DesignerDetailPage() {
     if (!designer) return
     if (typeof window === 'undefined') return
 
-    const title = `BIRIM - ${t(designer.name)}`
+    const title = `TASARIMCI - ${t(designer.name)}`
     if (typeof document !== 'undefined') {
       document.title = title
     }

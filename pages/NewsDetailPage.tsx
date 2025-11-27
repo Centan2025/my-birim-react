@@ -167,7 +167,7 @@ export function NewsDetailPage() {
     if (!item) return
     if (typeof window === 'undefined') return
 
-    const title = `BIRIM - ${t(item.title)}`
+    const title = `HABERLER - ${t(item.title)}`
     if (typeof document !== 'undefined') {
       document.title = title
     }

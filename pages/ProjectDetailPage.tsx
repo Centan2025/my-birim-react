@@ -88,7 +88,7 @@ export function ProjectDetailPage() {
     if (!project) return
     if (typeof window === 'undefined') return
 
-    const title = `BIRIM - ${t(project.title)}`
+    const title = `PROJELER - ${t(project.title)}`
     if (typeof document !== 'undefined') {
       document.title = title
     }

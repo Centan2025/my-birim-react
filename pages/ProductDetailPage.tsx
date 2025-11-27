@@ -188,12 +188,14 @@ export function ProductDetailPage() {
   const [thumbDragStartX, setThumbDragStartX] = useState<number | null>(null)
   const [thumbScrollStart, setThumbScrollStart] = useState<number>(0)
 
-  // Sayfa başlığı + GA pageview: ürün adıyla birlikte
+  // Sayfa başlığı + GA pageview: "Kategori Adı - Ürün Adı"
   useEffect(() => {
     if (!product) return
     if (typeof window === 'undefined') return
 
-    const title = `BIRIM - ${t(product.name)}`
+    const categoryName = category ? t(category.name) : ''
+    const productName = t(product.name)
+    const title = categoryName ? `${categoryName} - ${productName}` : productName
     if (typeof document !== 'undefined') {
       document.title = title
     }
