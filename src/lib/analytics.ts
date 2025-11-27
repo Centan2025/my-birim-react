@@ -60,17 +60,21 @@ class Analytics {
     // function gtag(){dataLayer.push(arguments);}
     const w = window as unknown as {
       dataLayer?: unknown[]
-      gtag?: (...args: unknown[]) => void
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      gtag?: (...args: any[]) => void
     }
     w.dataLayer = w.dataLayer || []
-    const gtag = (...args: unknown[]) => {
+    // GA4'ün orijinal snippet'inde olduğu gibi arguments kullanmak gerekiyor;
+    // bu sayede collect istekleri doğru oluşuyor.
+    // Bu fonksiyonun içinde arguments kullanımı GA'nın resmi snippet'iyle uyum için gerekli.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, prefer-rest-params
+    w.gtag = function gtag(this: unknown, ...args: any[]) {
       w.dataLayer!.push(args)
     }
-    w.gtag = gtag
 
     // İlk sayfa yüklemesinde config gönder
-    gtag('js', new Date())
-    gtag('config', gaId, {
+    w.gtag('js', new Date())
+    w.gtag('config', gaId, {
       page_path: window.location.pathname,
     })
 
