@@ -50,10 +50,6 @@ class Analytics {
 
     // react-ga4, GA4 script'ini kendi yükler ve initialize eder
     ReactGA.initialize(gaId)
-
-    if (import.meta.env.DEV && DEBUG_LOGS) {
-      console.debug('[Analytics] Google Analytics (react-ga4) initialized with', gaId)
-    }
   }
 
   /**
