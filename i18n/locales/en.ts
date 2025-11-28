@@ -2,7 +2,7 @@ export default {
   collection: 'Collection',
   subscribe: 'SUBSCRIBE',
   email_placeholder: 'Your e-mail address',
-  designers: 'Designers',
+  designers: 'DESIGNERS',
   news: 'News',
   about: 'About Us',
   contact: 'Contact',

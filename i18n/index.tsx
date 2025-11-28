@@ -28,20 +28,41 @@ const I18nContext = createContext<II18nContext | null>(null)
 
 const getInitialLocale = (locales: string[]): Locale => {
   if (locales.length === 0) return 'tr'
-  const savedLocale = localStorage.getItem('birim_locale')
-  if (savedLocale && locales.includes(savedLocale)) {
-    return savedLocale
-  }
-  const browserLang = navigator.language.split('-')[0]
-  if (browserLang && locales.includes(browserLang)) {
-    return browserLang as Locale
+  try {
+    const savedLocale = typeof window !== 'undefined' ? localStorage.getItem('birim_locale') : null
+    if (savedLocale && locales.includes(savedLocale)) {
+      return savedLocale
+    }
+    const browserLang =
+      typeof navigator !== 'undefined' ? navigator.language.split('-')[0] : undefined
+    if (browserLang && locales.includes(browserLang)) {
+      return browserLang as Locale
+    }
+  } catch {
+    // ignore and fall back
   }
   return locales[0] as Locale
 }
 
+// Uygulama ilk açılırken dilin TR'ye kısa süreliğine dönmesini engellemek için
+// localStorage / browser diline göre senkron bir başlangıç dili seç
+const getInitialLocaleSync = (): Locale => {
+  try {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('birim_locale')
+      if (saved) return saved as Locale
+      const browserLang = navigator.language.split('-')[0]
+      if (browserLang === 'en' || browserLang === 'tr') return browserLang as Locale
+    }
+  } catch {
+    // ignore
+  }
+  return 'tr'
+}
+
 export const I18nProvider = ({children}: PropsWithChildren) => {
   const [supportedLocales, setSupportedLocales] = useState<string[]>([])
-  const [locale, setLocaleState] = useState<Locale>('tr')
+  const [locale, setLocaleState] = useState<Locale>(getInitialLocaleSync)
   const [loading, setLoading] = useState(true)
   const [cmsTranslations, setCmsTranslations] = useState<Record<string, Record<string, string>>>({})
 
