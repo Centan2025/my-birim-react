@@ -22,8 +22,16 @@ export function useFocusTrap(isActive: boolean) {
 
     if (!firstElement || !lastElement) return
 
-    // Focus first element when trap activates
-    firstElement.focus()
+    // Focus first element when trap activates, but mümkünse sayfayı kaydırmadan
+    if (firstElement && typeof firstElement.focus === 'function') {
+      try {
+        // Modern tarayıcılarda scroll'u tetiklemeden odaklan
+        ;(firstElement as HTMLElement).focus({preventScroll: true})
+      } catch {
+        // Eski tarayıcılar için normal focus'a geri dön
+        firstElement.focus()
+      }
+    }
 
     const handleTab = (e: KeyboardEvent) => {
       if (e.key !== 'Tab') return
@@ -61,4 +69,3 @@ export function useFocusTrap(isActive: boolean) {
 
   return containerRef
 }
-

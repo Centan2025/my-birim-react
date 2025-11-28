@@ -140,6 +140,7 @@ export function Header() {
   const [headerOpacity, setHeaderOpacity] = useState(0)
   const [isHeaderVisible, setIsHeaderVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
+  const scrollPositionRef = useRef(0)
   const [isMobile, setIsMobile] = useState(false)
   const [headerHeight, setHeaderHeight] = useState(56) // 3.5rem = 56px (mobil için varsayılan)
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -412,55 +413,50 @@ export function Header() {
 
       // Mobilde: Özel davranış
       if (isMobile) {
-        // Mobil menü açıksa opacity'yi artır
-        if (isMobileMenuOpen) {
-          setHeaderOpacity(0.75)
+        // Mobil menü veya arama AÇIKKEN scroll davranışını kilitle;
+        // header sabit kalsın, yukarı-aşağı zıplamasın.
+        if (isMobileMenuOpen || isSearchOpen) {
+          setHeaderOpacity(isMobileMenuOpen ? 0.75 : 0.7)
           setIsHeaderVisible(true)
-        } else if (isSearchOpen) {
-          // Arama açıldığında arama paneli ile aynı opacity (0.7) - scroll'da değişmesin
-          setHeaderOpacity(0.7)
-          setIsHeaderVisible(true)
-        } else {
-          // Mobilde: Sayfa en üstteyken (scrollY = 0) şeffaflığı ayarla
-          if (currentScrollY === 0) {
-            // Route değiştiyse brightness kullanma
+          setLastScrollY(currentScrollY)
+          return
+        }
+
+        // Mobilde: Sayfa en üstteyken (scrollY = 0) şeffaflığı ayarla
+        if (currentScrollY === 0) {
+          // Route değiştiyse brightness kullanma
+          if (currentPath !== location.pathname) {
+            setHeaderOpacity(0)
+            setIsHeaderVisible(true)
+          } else if (heroBrightness !== null) {
+            // Route değiştiyse brightness kullanma (double check)
             if (currentPath !== location.pathname) {
               setHeaderOpacity(0)
               setIsHeaderVisible(true)
-            } else if (heroBrightness !== null) {
-              // Route değiştiyse brightness kullanma (double check)
-              if (currentPath !== location.pathname) {
-                setHeaderOpacity(0)
-                setIsHeaderVisible(true)
-              } else if (heroBrightness > 0.4) {
-                // Görsel beyaza yakın, header'ı daha görünür yap
-                // Brightness 0.4'ten fazlaysa opacity artır, max 0.75
-                // Daha agresif: 0.4'ten başlayarak opacity artır
-                const adjustedOpacity = Math.min(0.75, 0.2 + (heroBrightness - 0.4) * 1.2)
-                setHeaderOpacity(adjustedOpacity)
-              } else {
-                // Görsel koyu, header tamamen şeffaf
-                setHeaderOpacity(0)
-              }
+            } else if (heroBrightness > 0.4) {
+              // Görsel beyaza yakın, header'ı daha görünür yap
+              // Brightness 0.4'ten fazlaysa opacity artır, max 0.75
+              const adjustedOpacity = Math.min(0.75, 0.2 + (heroBrightness - 0.4) * 1.2)
+              setHeaderOpacity(adjustedOpacity)
             } else {
-              // Brightness hesaplanamadı (CORS vb.) veya henüz hesaplanmadı (route değişti)
-              // Varsayılan olarak şeffaf bırak - brightness hesaplanınca güncellenecek
+              // Görsel koyu, header tamamen şeffaf
               setHeaderOpacity(0)
             }
-            setIsHeaderVisible(true) // Sayfa en üstteyken menü görünür
           } else {
-            // Scroll yapıldıkça opacity artıyor
-            const maxScroll = 200
-            const opacity = Math.min(0.75, (currentScrollY / maxScroll) * 0.75)
-            setHeaderOpacity(opacity)
-
-            // Yukarı kaydırırken (scroll down) menüyü gizle
-            if (currentScrollY > lastScrollY && currentScrollY > 30) {
-              setIsHeaderVisible(false) // Scrolling down - menüyü gizle
-            } else if (currentScrollY < lastScrollY) {
-              setIsHeaderVisible(true) // Scrolling up - menüyü göster
-            }
+            // Brightness hesaplanamadı (CORS vb.) veya henüz hesaplanmadı (route değişti)
+            // Varsayılan olarak şeffaf bırak - brightness hesaplanınca güncellenecek
+            setHeaderOpacity(0)
           }
+          setIsHeaderVisible(true) // Sayfa en üstteyken menü görünür
+        } else {
+          // Scroll yapıldıkça opacity artıyor
+          const maxScroll = 200
+          const opacity = Math.min(0.75, (currentScrollY / maxScroll) * 0.75)
+          setHeaderOpacity(opacity)
+
+          // Mobilde header'ı artık scroll yönüne göre gizlemiyoruz;
+          // her zaman görünür kalsın ki yukarı-aşağı zıplama olmasın.
+          setIsHeaderVisible(true)
         }
         setLastScrollY(currentScrollY)
       } else {
@@ -493,7 +489,7 @@ export function Header() {
         setHeaderOpacity(opacity)
       }
 
-      // Close any open menus on scroll
+      // Scroll sırasında açık menüleri kapat
       const scrollDelta = Math.abs(currentScrollY - lastScrollY)
       if (scrollDelta > 3) {
         // En az 3px scroll yapıldıysa
@@ -503,11 +499,12 @@ export function Header() {
             clearTimeout(scrollTimeoutRef.current)
           }
 
-          // Hemen kapat (gecikme yok)
+          // Hemen kapat (gecikme yok) — fakat mobil menü açıksa onu kapatma,
+          // aksi halde hamburger'e tıklandığında oluşan küçük scroll'larda menü anlık kapanabiliyor.
           if (isLangOpen) setIsLangOpen(false)
           if (isProductsOpen) setIsProductsOpen(false)
           if (isSearchOpen) closeSearch()
-          if (isMobileMenuOpen) setIsMobileMenuOpen(false)
+          // if (isMobileMenuOpen) setIsMobileMenuOpen(false) // scroll ile mobil menüyü artık kapatmıyoruz
         } else {
           // Desktop'ta: Arama açıksa kapat
           if (isSearchOpen) closeSearch()
@@ -557,6 +554,53 @@ export function Header() {
       }
     }
   }, [isMobile, isMobileMenuOpen, isSearchOpen, location.pathname])
+
+  // Mobil menü AÇIKKEN body scroll'unu kilitle (header'ın yukarı-aşağı zıplamasını engelle)
+  useEffect(() => {
+    if (!isMobile) return
+
+    if (isMobileMenuOpen) {
+      // Mevcut scroll pozisyonunu kaydet
+      scrollPositionRef.current = window.scrollY
+
+      // Body scroll'unu kilitle
+      const body = document.body
+      body.style.position = 'fixed'
+      body.style.top = `-${scrollPositionRef.current}px`
+      body.style.left = '0'
+      body.style.right = '0'
+      body.style.width = '100%'
+      body.style.overflow = 'hidden'
+    } else {
+      // Menü kapanınca body scroll'unu eski haline getir
+      const body = document.body
+      const scrollY = scrollPositionRef.current
+
+      body.style.position = ''
+      body.style.top = ''
+      body.style.left = ''
+      body.style.right = ''
+      body.style.width = ''
+      body.style.overflow = ''
+
+      if (scrollY > 0) {
+        window.scrollTo(0, scrollY)
+      }
+    }
+
+    return () => {
+      // Cleanup: herhangi bir nedenle effect yeniden çalışırsa style'ları sıfırla
+      if (!isMobileMenuOpen) {
+        const body = document.body
+        body.style.position = ''
+        body.style.top = ''
+        body.style.left = ''
+        body.style.right = ''
+        body.style.width = ''
+        body.style.overflow = ''
+      }
+    }
+  }, [isMobile, isMobileMenuOpen])
 
   // Hover edilen kategorinin ürünlerini yükle (eğer menuImage yoksa)
   const hoveredCategory = categories.find(c => c.id === hoveredCategoryId)
@@ -854,7 +898,10 @@ export function Header() {
         `}
       </style>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full'}`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out ${
+          // Mobilde header her zaman sabit kalsın, yukarı-aşağı kaymasın
+          isMobile ? 'translate-y-0' : isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+        }`}
       >
         <div
           className={`overflow-hidden transition-all duration-700 ease-in-out ${isProductsOpen ? 'max-h-[900px]' : isMobileMenuOpen ? 'max-h-[40rem]' : isMobile ? 'max-h-[3.5rem]' : 'max-h-[6rem]'} ${isMobile && headerOpacity <= 0 ? '' : 'backdrop-blur-lg border-b border-white/10'}`}
@@ -873,10 +920,28 @@ export function Header() {
         >
           <nav className="px-2 sm:px-4 lg:px-6" ref={navRef}>
             <div className="relative flex h-14 lg:h-24 items-center lg:grid lg:grid-cols-[1fr_auto_1fr]">
-              {/* Sol taraf - Menü düğmeleri (desktop) ve Logo (mobil) */}
+              {/* Sol taraf - Menü düğmeleri (desktop) ve arama + logo (mobil) */}
               <div className="flex flex-1 items-center lg:justify-start">
-                {/* Mobil Logo - Solda */}
-                <div className="lg:hidden flex items-center">
+                {/* Mobil Arama - Solda */}
+                {isMobile && (
+                  <button
+                    ref={searchButtonRef}
+                    onClick={() => (isSearchOpen ? closeSearch() : setIsSearchOpen(true))}
+                    className={`${iconClasses} absolute left-3 top-1/2 -translate-y-1/2`}
+                    aria-label={
+                      isSearchOpen
+                        ? t('close_search') || 'Aramayı kapat'
+                        : t('open_search') || 'Ara'
+                    }
+                    aria-expanded={isSearchOpen}
+                    aria-controls="search-panel"
+                  >
+                    {isSearchOpen ? <CloseIcon /> : <SearchIcon />}
+                  </button>
+                )}
+
+                {/* Mobil Logo - Ortada */}
+                <div className="lg:hidden flex items-center absolute left-1/2 -translate-x-1/2">
                   <Link to="/" className="flex items-center gap-1.5 text-white transition-colors">
                     <SiteLogo logoUrl={settings?.logoUrl} className="w-32 h-5" />
                   </Link>
@@ -966,16 +1031,23 @@ export function Header() {
 
               {/* Sağ taraf - İkonlar */}
               <div className="flex flex-1 items-center justify-end space-x-4 lg:justify-end">
-                <button
-                  ref={searchButtonRef}
-                  onClick={() => (isSearchOpen ? closeSearch() : setIsSearchOpen(true))}
-                  className={iconClasses}
-                  aria-label={isSearchOpen ? t('close_search') || 'Aramayı kapat' : t('open_search') || 'Ara'}
-                  aria-expanded={isSearchOpen}
-                  aria-controls="search-panel"
-                >
-                  {isSearchOpen ? <CloseIcon /> : <SearchIcon />}
-                </button>
+                {/* Desktop Arama - Dil seçeneklerinin solunda */}
+                {!isMobile && (
+                  <button
+                    ref={searchButtonRef}
+                    onClick={() => (isSearchOpen ? closeSearch() : setIsSearchOpen(true))}
+                    className={`${iconClasses} hidden md:inline-flex`}
+                    aria-label={
+                      isSearchOpen
+                        ? t('close_search') || 'Aramayı kapat'
+                        : t('open_search') || 'Ara'
+                    }
+                    aria-expanded={isSearchOpen}
+                    aria-controls="search-panel"
+                  >
+                    {isSearchOpen ? <CloseIcon /> : <SearchIcon />}
+                  </button>
+                )}
                 {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
                   <div className="hidden md:flex items-center gap-0">
                     {supportedLocales.map(langCode => {
@@ -1008,7 +1080,7 @@ export function Header() {
                 )}
                 <NavLink
                   to={isLoggedIn ? '/profile' : '/login'}
-                  className={iconClasses}
+                  className={`${iconClasses} hidden lg:inline-flex`}
                   aria-label={isLoggedIn ? t('profile') || 'Profil' : t('login') || 'Giriş Yap'}
                 >
                   <UserIcon />
@@ -1036,7 +1108,11 @@ export function Header() {
                     ref={mobileMenuButtonRef}
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                     className={`${iconClasses} flex items-center justify-center`}
-                    aria-label={isMobileMenuOpen ? t('close_menu') || 'Menüyü kapat' : t('open_menu') || 'Menüyü aç'}
+                    aria-label={
+                      isMobileMenuOpen
+                        ? t('close_menu') || 'Menüyü kapat'
+                        : t('open_menu') || 'Menüyü aç'
+                    }
                     aria-expanded={isMobileMenuOpen}
                     aria-controls="mobile-menu"
                   >
@@ -1183,7 +1259,8 @@ export function Header() {
               ref={node => {
                 if (node) {
                   ;(mobileMenuRef as React.MutableRefObject<HTMLDivElement | null>).current = node
-                  ;(mobileMenuFocusTrap as React.MutableRefObject<HTMLElement | null>).current = node
+                  ;(mobileMenuFocusTrap as React.MutableRefObject<HTMLElement | null>).current =
+                    node
                 }
               }}
               id="mobile-menu"
@@ -1195,28 +1272,39 @@ export function Header() {
               {/* Dil seçenekleri - Menü öğelerinin üstünde */}
               {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
                 <div className="relative w-full">
-                  <div className="flex items-center justify-start gap-1 bg-black/50 px-4 sm:px-5 lg:px-6 pt-3 pb-2 min-h-[3rem] border-b border-white/10">
-                    {supportedLocales.map(langCode => {
-                      const isActive = locale === langCode
-                      return (
-                        <button
-                          key={langCode}
-                          onClick={() => {
-                            setLocale(langCode)
-                            setIsMobileMenuOpen(false)
-                          }}
-                          aria-pressed={isActive}
-                          className={`group relative px-1.5 py-0.5 text-xs uppercase tracking-[0.2em] transition-colors duration-200 ${
-                            isActive
-                              ? 'text-white font-extralight'
-                              : 'text-gray-400/90 hover:text-white font-extralight'
-                          }`}
-                          style={{fontFamily: 'Inter, sans-serif', letterSpacing: '0.2em'}}
-                        >
-                          <span className="relative inline-block">{langCode.toUpperCase()}</span>
-                        </button>
-                      )
-                    })}
+                  <div className="flex items-center justify-between bg-black/50 px-4 sm:px-5 lg:px-6 pt-3 pb-2 min-h-[3rem] border-b border-white/10">
+                    <div className="flex items-center gap-1">
+                      {supportedLocales.map(langCode => {
+                        const isActive = locale === langCode
+                        return (
+                          <button
+                            key={langCode}
+                            onClick={() => {
+                              setLocale(langCode)
+                              setIsMobileMenuOpen(false)
+                            }}
+                            aria-pressed={isActive}
+                            className={`group relative px-1.5 py-0.5 text-xs uppercase tracking-[0.2em] transition-colors duration-200 ${
+                              isActive
+                                ? 'text-white font-extralight'
+                                : 'text-gray-400/90 hover:text-white font-extralight'
+                            }`}
+                            style={{fontFamily: 'Inter, sans-serif', letterSpacing: '0.2em'}}
+                          >
+                            <span className="relative inline-block">{langCode.toUpperCase()}</span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                    {/* Mobilde dil bölümünün en sağında giriş/profile ikonu */}
+                    <NavLink
+                      to={isLoggedIn ? '/profile' : '/login'}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={iconClasses}
+                      aria-label={isLoggedIn ? t('profile') || 'Profil' : t('login') || 'Giriş Yap'}
+                    >
+                      <UserIcon />
+                    </NavLink>
                   </div>
                 </div>
               )}
