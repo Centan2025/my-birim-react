@@ -1,4 +1,12 @@
-import React, {useState, useContext, createContext, PropsWithChildren, useEffect, Suspense, lazy} from 'react'
+import React, {
+  useState,
+  useContext,
+  createContext,
+  PropsWithChildren,
+  useEffect,
+  Suspense,
+  lazy,
+} from 'react'
 import {HashRouter, Routes, Route, useLocation, Link} from 'react-router-dom'
 
 import {Header} from './components/Header'
@@ -452,7 +460,7 @@ const Footer = () => {
               <div className="w-full flex justify-center mt-6">
                 <button
                   type="submit"
-                  className="px-0 py-1 bg-transparent border-0 text-gray-400 hover:text-white transition-colors duration-200 text-xs font-light uppercase tracking-wider"
+                  className="px-6 py-2 border border-white/50 text-white hover:bg-white hover:text-gray-800 transition-all duration-300 text-sm font-medium uppercase tracking-wider"
                 >
                   {t('subscribe')}
                 </button>
@@ -620,7 +628,7 @@ const Footer = () => {
               <div className="w-full flex justify-center mt-2 lg:mt-0 lg:w-auto lg:flex-shrink-0 lg:ml-2 lg:relative">
                 <button
                   type="submit"
-                  className="px-0 py-1 bg-transparent border-0 text-gray-400 hover:text-white transition-colors duration-200 text-xs font-light uppercase tracking-wider"
+                  className="px-4 py-1.5 border border-white/50 text-white hover:bg-white hover:text-gray-800 transition-all duration-300 text-xs font-medium uppercase tracking-wider"
                 >
                   {t('subscribe')}
                 </button>
