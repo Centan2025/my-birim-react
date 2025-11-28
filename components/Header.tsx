@@ -1200,22 +1200,20 @@ export function Header() {
                       <div className="flex flex-col gap-1.5 items-start w-6">
                         {/* Üst Çizgi: 45 derece döner ve aşağı iner */}
                         <span
-                          className={`h-0.5 bg-white transition-all duration-300 ${
-                            isMobileMenuOpen ? 'w-6 rotate-45 translate-y-2' : 'w-6'
+                          className={`h-0.5 w-6 bg-white transition-all duration-300 ${
+                            isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''
                           }`}
                         ></span>
                         {/* Orta Çizgi: Kaybolur */}
                         <span
-                          className={`h-0.5 bg-white transition-all duration-300 ${
-                            isMobileMenuOpen ? 'opacity-0' : 'w-4 group-hover:w-6'
+                          className={`h-0.5 w-6 bg-white transition-all duration-300 ${
+                            isMobileMenuOpen ? 'opacity-0' : ''
                           }`}
                         ></span>
                         {/* Alt Çizgi: -45 derece döner ve yukarı çıkar */}
                         <span
-                          className={`h-0.5 bg-white transition-all duration-300 ${
-                            isMobileMenuOpen
-                              ? 'w-6 -rotate-45 -translate-y-2'
-                              : 'w-5 group-hover:w-6'
+                          className={`h-0.5 w-6 bg-white transition-all duration-300 ${
+                            isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''
                           }`}
                         ></span>
                       </div>
