@@ -499,7 +499,8 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
           ...,
           logo
         }`
-    const s = await sanity.fetch(q)
+    // Site ayarları için CDN önbelleğini atla - değişiklikler hemen yansısın
+    const s = await sanity.fetch(q, {}, {cache: 'no-store'})
     // Backward compatible defaults
     return {
       logoUrl: s?.logo ? mapImage(s.logo) : s?.logoUrl || '',
