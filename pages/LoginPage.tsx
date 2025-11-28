@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react'
 import {useNavigate, Link} from 'react-router-dom'
 import {useAuth} from '../App'
 import {useTranslation} from '../i18n'
-import {registerUser, loginUser} from '../services/cms'
+import {registerUser, loginUser, getSiteSettings} from '../services/cms'
 import {loginRateLimiter, registerRateLimiter} from '../src/lib/rateLimiter'
 import {analytics} from '../src/lib/analytics'
 import {
@@ -172,6 +172,10 @@ export function LoginPage() {
 
         if (emailApiUrl) {
           try {
+            // Mail için kullanılacak logo yolu - public/img/logo-1.png
+            const logoPath = '/img/logo-1.png'
+            const logoUrl = `${window.location.origin}${logoPath}`
+
             await fetch(emailApiUrl, {
               method: 'POST',
               headers: {
@@ -180,6 +184,7 @@ export function LoginPage() {
               body: JSON.stringify({
                 email,
                 verificationUrl,
+                logoUrl,
               }),
             })
           } catch (e) {

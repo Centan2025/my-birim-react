@@ -598,16 +598,17 @@ const Footer = () => {
                   }
                 }
               }}
-              className="lg:flex lg:flex-row lg:items-end lg:justify-end lg:gap-2 lg:w-full lg:max-w-none flex-col items-center justify-center w-full"
+              className="flex w-full lg:w-auto lg:justify-end"
             >
-              <div className="flex flex-col w-full max-w-[280px] mx-auto lg:max-w-none lg:mx-0 lg:w-auto lg:items-end lg:flex-1 lg:relative">
-                <div className="flex items-center w-full lg:w-1/4 lg:ml-auto lg:relative lg:pb-0.5">
+              {/* Input + SUBSCRIBE hizası için ortak alt çizgi */}
+              <div className="flex items-center w-full lg:w-auto lg:min-w-[320px] lg:ml-auto border-b border-white/80 pb-0.5 gap-2">
+                <div className="flex-1 min-w-[180px]">
                   <input
                     type="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder={t('email_placeholder')}
-                    className="w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[11px] text-center lg:text-left"
+                    className="w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[11px] text-left"
                     style={{outline: 'none', boxShadow: 'none'}}
                     onFocus={e => {
                       e.target.style.outline = 'none'
@@ -619,19 +620,11 @@ const Footer = () => {
                     }}
                   />
                 </div>
-              </div>
-              <div className="w-full flex justify-center mt-2 lg:mt-0 lg:w-auto lg:flex-shrink-0 lg:ml-2 lg:relative">
                 <button
                   type="submit"
-                  className="px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-xs font-medium uppercase tracking-[0.2em] group"
+                  className="px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-xs font-medium uppercase tracking-[0.25em]"
                 >
-                  <span className="relative inline-block">
-                    {t('subscribe')}
-                    <span
-                      className="absolute -bottom-0.5 h-px bg-white/80"
-                      style={{right: 0, left: '-5.5rem'}}
-                    ></span>
-                  </span>
+                  {t('subscribe')}
                 </button>
               </div>
             </form>

@@ -96,7 +96,7 @@ export function HomePage() {
   }, [content?.inspirationSection?.backgroundImage, isMobile, viewportWidth])
 
   if (!content || !settings) {
-    return <div className="h-screen w-full bg-gray-800" />
+    return <div className="h-screen w-full bg-gray-900" />
   }
 
   const heroMedia = Array.isArray(content.heroMedia) ? content.heroMedia : []
@@ -414,7 +414,7 @@ export function HomePage() {
           <HomeHero content={content} settings={settings} />
         </>
       ) : (
-        <div className="relative h-[50vh] w-full bg-gray-800" />
+        <div className="relative h-[50vh] w-full bg-gray-900" />
       )}
 
       {/* Content Blocks Section */}
@@ -577,7 +577,7 @@ export function HomePage() {
       {inspiration &&
         (inspiration.backgroundImage || inspiration.title || inspiration.subtitle) && (
           <section
-            className="relative py-16 md:py-32 bg-gray-800 text-white text-center inspiration-section-mobile"
+            className="relative py-16 md:py-32 bg-gray-900 text-white text-center inspiration-section-mobile"
             style={{
               backgroundImage: `url(${isMobile && bgImageMobile ? bgImageMobile : bgImageDesktop || bgImageUrl})`,
               backgroundSize: isMobile ? '100vw auto' : 'cover',

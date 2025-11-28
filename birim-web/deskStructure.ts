@@ -123,16 +123,40 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
               ),
               S.listItem()
                 .title('Çerez Politikası')
-                .child(S.document().schemaType('cookiesPolicy').id('cookiesPolicy')),
+                .child(
+                  cookiesPolicy?._id
+                    ? S.document()
+                        .schemaType('cookiesPolicy')
+                        .id(pubId(cookiesPolicy._id) || 'cookiesPolicy')
+                    : S.document().schemaType('cookiesPolicy'),
+                ),
               S.listItem()
                 .title('Gizlilik Politikası')
-                .child(S.document().schemaType('privacyPolicy').id('privacyPolicy')),
+                .child(
+                  privacyPolicy?._id
+                    ? S.document()
+                        .schemaType('privacyPolicy')
+                        .id(pubId(privacyPolicy._id) || 'privacyPolicy')
+                    : S.document().schemaType('privacyPolicy'),
+                ),
               S.listItem()
                 .title('Kullanım Şartları')
-                .child(S.document().schemaType('termsOfService').id('termsOfService')),
+                .child(
+                  termsOfService?._id
+                    ? S.document()
+                        .schemaType('termsOfService')
+                        .id(pubId(termsOfService._id) || 'termsOfService')
+                    : S.document().schemaType('termsOfService'),
+                ),
               S.listItem()
                 .title('KVKK Aydınlatma Metni')
-                .child(S.document().schemaType('kvkkPolicy').id('kvkkPolicy')),
+                .child(
+                  kvkkPolicy?._id
+                    ? S.document()
+                        .schemaType('kvkkPolicy')
+                        .id(pubId(kvkkPolicy._id) || 'kvkkPolicy')
+                    : S.document().schemaType('kvkkPolicy'),
+                ),
             ]),
         ),
       S.documentTypeListItem('materialGroup').title('Malzeme Grupları'),

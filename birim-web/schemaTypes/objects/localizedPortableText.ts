@@ -5,7 +5,15 @@ export const linkMark = defineType({
   title: 'Link',
   type: 'object',
   fields: [
-    defineField({name: 'href', title: 'URL', type: 'url'}),
+    defineField({
+      name: 'href',
+      title: 'URL',
+      type: 'url',
+      validation: (Rule) =>
+        Rule.uri({
+          scheme: ['http', 'https', 'mailto', 'tel'],
+        }),
+    }),
     defineField({name: 'blank', title: 'Yeni sekmede aç', type: 'boolean'}),
   ],
 })
@@ -24,7 +32,21 @@ export const localizedPortableText = defineType({
           type: 'block',
           marks: {
             annotations: [
-              {name: 'link', type: 'object', fields: [{name: 'href', type: 'url', title: 'URL'}]},
+              {
+                name: 'link',
+                type: 'object',
+                fields: [
+                  {
+                    name: 'href',
+                    type: 'url',
+                    title: 'URL',
+                    validation: (Rule) =>
+                      Rule.uri({
+                        scheme: ['http', 'https', 'mailto', 'tel'],
+                      }),
+                  },
+                ],
+              },
             ],
           },
         },
@@ -39,7 +61,21 @@ export const localizedPortableText = defineType({
           type: 'block',
           marks: {
             annotations: [
-              {name: 'link', type: 'object', fields: [{name: 'href', type: 'url', title: 'URL'}]},
+              {
+                name: 'link',
+                type: 'object',
+                fields: [
+                  {
+                    name: 'href',
+                    type: 'url',
+                    title: 'URL',
+                    validation: (Rule) =>
+                      Rule.uri({
+                        scheme: ['http', 'https', 'mailto', 'tel'],
+                      }),
+                  },
+                ],
+              },
             ],
           },
         },

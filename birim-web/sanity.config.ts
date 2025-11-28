@@ -6,6 +6,7 @@ import {schemaTypes} from './schemaTypes'
 import {deskStructure} from './deskStructure'
 import {excelImportTool} from './tools/excelImport'
 import {mediaImportTool} from './tools/mediaImport'
+import {emailExportTool} from './tools/emailExport'
 
 export default defineConfig({
   name: 'default',
@@ -21,6 +22,7 @@ export default defineConfig({
     visionTool(),
     excelImportTool(),
     mediaImportTool(),
+    emailExportTool(),
   ],
 
   schema: {

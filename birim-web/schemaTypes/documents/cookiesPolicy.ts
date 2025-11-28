@@ -4,12 +4,7 @@ export default defineType({
   name: 'cookiesPolicy',
   title: 'Çerez Politikası',
   type: 'document',
-  __experimental_actions: [
-    // 'create', // Singleton olduğu için create'i kaldırıyoruz
-    'update',
-    'publish',
-    'delete',
-  ],
+  actions: (prev) => prev,
   fields: [
     defineField({
       name: 'title',
@@ -28,6 +23,7 @@ export default defineType({
       name: 'updatedAt',
       title: 'Güncellenme Tarihi',
       type: 'datetime',
+      readOnly: true,
       initialValue: () => new Date().toISOString(),
     }),
   ],

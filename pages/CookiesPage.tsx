@@ -20,8 +20,8 @@ export default function CookiesPage() {
     ? (policy.content as any)[locale] || (policy.content as any).tr || (policy.content as any).en
     : undefined
   const updated = policy?.updatedAt
-    ? new Date(policy.updatedAt).toLocaleDateString()
-    : new Date().toLocaleDateString()
+    ? new Date(policy.updatedAt).toLocaleDateString(locale === 'en' ? 'en-GB' : 'tr-TR')
+    : new Date().toLocaleDateString(locale === 'en' ? 'en-GB' : 'tr-TR')
 
   return (
     <div className="min-h-[60vh] bg-gray-50">
@@ -43,7 +43,9 @@ export default function CookiesPage() {
         {Array.isArray(contentBlocks) ? (
           <div className="prose prose-gray max-w-none">
             <PortableTextLite value={contentBlocks as any[]} />
-            <p className="text-sm text-gray-500 mt-6">Son güncelleme: {updated}</p>
+            <p className="text-sm text-gray-500 mt-6">
+              {locale === 'en' ? 'Last updated' : 'Son güncelleme'}: {updated}
+            </p>
           </div>
         ) : (
           <div className="text-gray-500">
