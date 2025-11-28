@@ -1508,7 +1508,12 @@ export function Header() {
         >
           {/* Dil ve kullanıcı alanı */}
           {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
-            <div className="mb-6 pt-4 pb-4">
+            <div
+              className={`mb-6 pt-4 pb-4 transition-all duration-500 ${
+                isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+              }`}
+              style={{transitionDelay: isMobileMenuOpen ? '50ms' : '0ms'}}
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {supportedLocales.map(langCode => {
@@ -1571,7 +1576,12 @@ export function Header() {
           </nav>
 
           {/* Alt kısım - Subscribe ve Sosyal Medya */}
-          <div className="mt-auto pt-8">
+          <div
+            className={`mt-auto pt-8 transition-all duration-500 ${
+              isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+            }`}
+            style={{transitionDelay: isMobileMenuOpen ? '300ms' : '0ms'}}
+          >
             {/* Ayırıcı çizgi - tam ekran genişliğinde */}
             <div
               className="border-t border-white/20 -mx-6 mb-6"
