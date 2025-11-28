@@ -628,8 +628,8 @@ const Footer = () => {
                   <span className="relative inline-block">
                     {t('subscribe')}
                     <span
-                      className="absolute -bottom-0.5 right-0 h-px bg-white/80"
-                      style={{width: 'calc(100% + 4rem)'}}
+                      className="absolute -bottom-0.5 h-px bg-white/80"
+                      style={{right: 0, left: '-5.5rem'}}
                     ></span>
                   </span>
                 </button>
