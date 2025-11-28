@@ -1671,13 +1671,13 @@ export function Header() {
           top: isHeaderVisible ? `${headerHeight}px` : '0px',
         }}
       >
-        <div className="container mx-auto px-6 py-8">
+        <div className={`container mx-auto px-6 ${isMobile ? 'py-4' : 'py-8'}`}>
           <div className="w-full max-w-3xl mx-auto">
             <input
               ref={searchInputRef}
               type="search"
               placeholder=""
-              className="w-full bg-transparent text-white text-2xl border-b border-gray-500 focus:border-white outline-none transition-colors duration-300 pb-3"
+              className={`w-full bg-transparent text-white border-b border-gray-500 focus:border-white outline-none transition-colors duration-300 ${isMobile ? 'text-lg pb-2' : 'text-2xl pb-3'}`}
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
             />
