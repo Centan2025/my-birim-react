@@ -618,19 +618,17 @@ const Footer = () => {
                       e.target.style.boxShadow = 'none'
                     }}
                   />
-                  {/* Çizgi - input'un sol başından button'ın sağ sonuna kadar */}
-                  <div
-                    className="hidden lg:block absolute bottom-0 left-0 border-b border-white"
-                    style={{width: 'calc(100% + 0.5rem + 4.8rem)'}}
-                  ></div>
                 </div>
               </div>
               <div className="w-full flex justify-center mt-2 lg:mt-0 lg:w-auto lg:flex-shrink-0 lg:ml-2 lg:relative">
                 <button
                   type="submit"
-                  className="px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-xs font-medium uppercase tracking-[0.2em]"
+                  className="px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-xs font-medium uppercase tracking-[0.2em] group"
                 >
-                  {t('subscribe')}
+                  <span className="relative inline-block">
+                    {t('subscribe')}
+                    <span className="absolute -bottom-0.5 left-0 w-full h-px bg-white/80"></span>
+                  </span>
                 </button>
               </div>
             </form>
