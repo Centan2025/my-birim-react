@@ -966,6 +966,20 @@ export function Header() {
             background-color: #000000 !important;
             background: #000000 !important;
           }
+          
+          /* Mobil menü linkleri için Goldman fontu */
+          #mobile-menu nav a,
+          #mobile-menu nav NavLink,
+          #mobile-menu .flex.flex-col a,
+          #mobile-menu .flex.flex-col NavLink {
+            font-family: 'Goldman', sans-serif !important;
+          }
+          
+          /* Overlay mobil menü linkleri için Goldman fontu */
+          .mobile-menu-overlay nav a,
+          .mobile-menu-overlay nav NavLink {
+            font-family: 'Goldman', sans-serif !important;
+          }
         `}
       </style>
       <header
@@ -1452,6 +1466,7 @@ export function Header() {
                     to="/categories"
                     className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
                     onClick={() => setIsMobileMenuOpen(false)}
+                    style={{fontFamily: "'Goldman', sans-serif"}}
                   >
                     {t('products')}
                   </NavLink>
@@ -1459,6 +1474,7 @@ export function Header() {
                     to="/designers"
                     className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
                     onClick={() => setIsMobileMenuOpen(false)}
+                    style={{fontFamily: "'Goldman', sans-serif"}}
                   >
                     {t('designers')}
                   </NavLink>
@@ -1466,6 +1482,7 @@ export function Header() {
                     to="/projects"
                     className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
                     onClick={() => setIsMobileMenuOpen(false)}
+                    style={{fontFamily: "'Goldman', sans-serif"}}
                   >
                     {t('projects') || 'Projeler'}
                   </NavLink>
@@ -1473,6 +1490,7 @@ export function Header() {
                     to="/news"
                     className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
                     onClick={() => setIsMobileMenuOpen(false)}
+                    style={{fontFamily: "'Goldman', sans-serif"}}
                   >
                     {t('news')}
                   </NavLink>
@@ -1480,6 +1498,7 @@ export function Header() {
                     to="/about"
                     className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
                     onClick={() => setIsMobileMenuOpen(false)}
+                    style={{fontFamily: "'Goldman', sans-serif"}}
                   >
                     {t('about')}
                   </NavLink>
@@ -1487,6 +1506,7 @@ export function Header() {
                     to="/contact"
                     className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300"
                     onClick={() => setIsMobileMenuOpen(false)}
+                    style={{fontFamily: "'Goldman', sans-serif"}}
                   >
                     {t('contact')}
                   </NavLink>
@@ -1579,7 +1599,7 @@ export function Header() {
                 to={item.to}
                 style={{
                   transitionDelay: `${index * 100}ms`,
-                  fontFamily: 'Inter, system-ui, sans-serif',
+                  fontFamily: "'Goldman', sans-serif",
                   fontStretch: 'expanded',
                   letterSpacing: '0.15em',
                 }}

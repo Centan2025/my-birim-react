@@ -52,15 +52,17 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
   const nodes: React.ReactNode[] = []
   let listBuffer: {type: 'ul' | 'ol'; items: React.ReactNode[]} | null = null
 
+  let listCounter = 0
   const flushList = () => {
     if (!listBuffer) return
+    const listKey = `list-${listCounter++}`
     nodes.push(
       listBuffer.type === 'ul' ? (
-        <ul className="list-disc pl-6 my-4" key={nodes.length}>
+        <ul className="list-disc pl-6 my-4" key={listKey}>
           {listBuffer.items}
         </ul>
       ) : (
-        <ol className="list-decimal pl-6 my-4" key={nodes.length}>
+        <ol className="list-decimal pl-6 my-4" key={listKey}>
           {listBuffer.items}
         </ol>
       )
@@ -69,9 +71,14 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
   }
 
   value.forEach((block, idx) => {
+    // Benzersiz key oluştur: block._key varsa onu kullan, yoksa idx ile prefix ekle
+    const blockKey = (block as any)?._key || `block-${idx}`
+
     if (block.listItem) {
       const type = block.listItem === 'bullet' ? 'ul' : 'ol'
-      const item = <li key={idx}>{renderInline(block.children as Span[], block.markDefs || [])}</li>
+      const item = (
+        <li key={blockKey}>{renderInline(block.children as Span[], block.markDefs || [])}</li>
+      )
       if (!listBuffer || listBuffer.type !== type) {
         flushList()
         listBuffer = {type, items: [item]}
@@ -86,25 +93,25 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
       const content = renderInline(block.children as Span[], block.markDefs || [])
       if (style === 'h1')
         nodes.push(
-          <h1 className="text-3xl font-light my-4" key={idx}>
+          <h1 className="text-3xl font-light my-4" key={blockKey}>
             {content}
           </h1>
         )
       else if (style === 'h2')
         nodes.push(
-          <h2 className="text-2xl font-light my-4" key={idx}>
+          <h2 className="text-2xl font-light my-4" key={blockKey}>
             {content}
           </h2>
         )
       else if (style === 'h3')
         nodes.push(
-          <h3 className="text-xl font-light my-3" key={idx}>
+          <h3 className="text-xl font-light my-3" key={blockKey}>
             {content}
           </h3>
         )
       else
         nodes.push(
-          <p className="my-3 leading-relaxed" key={idx}>
+          <p className="my-3 leading-relaxed" key={blockKey}>
             {content}
           </p>
         )
