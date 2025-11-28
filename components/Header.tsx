@@ -175,7 +175,6 @@ export function Header() {
   const [heroBrightness, setHeroBrightness] = useState<number | null>(null)
   const [settings, setSettings] = useState<SiteSettings | null>(null)
   const currentRouteRef = useRef<string>(location.pathname)
-  const mobileHeaderAnimation = settings?.mobileHeaderAnimation ?? 'default'
   // 2. seçenek (overlay) SADECE: (1) mobilde ve (2) CMS'te açıkça "overlay" seçiliyse aktif olsun.
   const isOverlayMobileMenu = Boolean(
     isMobile && settings && settings.mobileHeaderAnimation === 'overlay'
