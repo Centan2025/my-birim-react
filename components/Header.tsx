@@ -748,15 +748,34 @@ export function Header() {
         return
       }
 
-      const filteredProducts = allData.products.filter(p =>
-        t(p.name).toLowerCase().includes(lowercasedQuery)
-      )
-      const filteredDesigners = allData.designers.filter(d =>
-        t(d.name).toLowerCase().includes(lowercasedQuery)
-      )
-      const filteredCategories = allData.categories.filter(c =>
-        t(c.name).toLowerCase().includes(lowercasedQuery)
-      )
+      // Arama kelimelerini ayır (örn: "kanepe su" -> ["kanepe", "su"])
+      const searchTerms = lowercasedQuery.split(/\s+/).filter(term => term.length > 0)
+
+      // Ürünleri filtrele - ürün adı, kategori adı veya tasarımcı adına göre
+      const filteredProducts = allData.products.filter(p => {
+        const productName = t(p.name).toLowerCase()
+        const category = allData.categories.find(c => c.id === p.categoryId)
+        const categoryName = category ? t(category.name).toLowerCase() : ''
+        const designer = allData.designers.find(d => d.id === p.designerId)
+        const designerName = designer ? t(designer.name).toLowerCase() : ''
+
+        // Tüm aranabilir metin
+        const searchableText = `${productName} ${categoryName} ${designerName}`
+
+        // Tüm arama terimleri eşleşmeli (AND mantığı)
+        return searchTerms.every(term => searchableText.includes(term))
+      })
+
+      const filteredDesigners = allData.designers.filter(d => {
+        const designerName = t(d.name).toLowerCase()
+        return searchTerms.every(term => designerName.includes(term))
+      })
+
+      const filteredCategories = allData.categories.filter(c => {
+        const categoryName = t(c.name).toLowerCase()
+        return searchTerms.every(term => categoryName.includes(term))
+      })
+
       setSearchResults({
         products: filteredProducts,
         designers: filteredDesigners,
