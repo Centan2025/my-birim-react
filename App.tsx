@@ -460,7 +460,7 @@ const Footer = () => {
               <div className="w-full flex justify-center mt-6">
                 <button
                   type="submit"
-                  className="px-6 py-2 rounded-full border border-white/60 bg-white/5 text-white hover:bg-white hover:text-gray-900 transition-all duration-300 text-xs font-semibold uppercase tracking-[0.25em]"
+                  className="px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-xs font-medium uppercase tracking-[0.25em]"
                 >
                   {t('subscribe')}
                 </button>
@@ -628,7 +628,7 @@ const Footer = () => {
               <div className="w-full flex justify-center mt-2 lg:mt-0 lg:w-auto lg:flex-shrink-0 lg:ml-2 lg:relative">
                 <button
                   type="submit"
-                  className="px-5 py-1.5 rounded-full border border-white/60 bg-white/5 text-white hover:bg-white hover:text-gray-900 transition-all duration-300 text-xs font-semibold uppercase tracking-[0.2em]"
+                  className="px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-xs font-medium uppercase tracking-[0.2em]"
                 >
                   {t('subscribe')}
                 </button>
