@@ -2018,7 +2018,6 @@ export const getUserById = async (id: string): Promise<User | null> => {
       verificationToken: user.verificationToken ?? null,
       createdAt: user.createdAt || user._createdAt,
     }
-
   }
 
   await delay(SIMULATED_DELAY)
@@ -2031,8 +2030,7 @@ export const verifyUserByToken = async (token: string): Promise<User | null> => 
   if (!token) return null
 
   if (useSanity && sanity && sanityMutations) {
-    const user = await sanity.fetch(
-      groq`*[_type == "user" && verificationToken == $token && !defined(_deleted)][0]{
+    const query = groq`*[_type == "user" && verificationToken == $vtoken && !defined(_deleted)][0]{
         _id,
         email,
         name,
@@ -2043,9 +2041,8 @@ export const verifyUserByToken = async (token: string): Promise<User | null> => 
         isVerified,
         verificationToken,
         createdAt
-      }`,
-      {token}
-    )
+      }`
+    const user = await sanity.fetch<any>(query, {vtoken: token})
 
     if (!user) return null
 
@@ -2058,16 +2055,16 @@ export const verifyUserByToken = async (token: string): Promise<User | null> => 
       .commit()
 
     return {
-      _id: patched._id,
-      email: patched.email,
-      name: patched.name,
-      company: patched.company,
-      profession: patched.profession,
-      userType: patched.userType as UserType,
-      isActive: patched.isActive,
-      isVerified: patched.isVerified ?? true,
-      verificationToken: patched.verificationToken ?? null,
-      createdAt: patched.createdAt || patched._createdAt,
+      _id: patched['_id'],
+      email: patched['email'],
+      name: patched['name'],
+      company: patched['company'],
+      profession: patched['profession'],
+      userType: patched['userType'] as UserType,
+      isActive: patched['isActive'],
+      isVerified: (patched['isVerified'] as boolean | undefined) ?? true,
+      verificationToken: (patched['verificationToken'] as string | null | undefined) ?? null,
+      createdAt: (patched['createdAt'] as string | undefined) || patched['_createdAt'],
     }
   }
 
@@ -2077,8 +2074,11 @@ export const verifyUserByToken = async (token: string): Promise<User | null> => 
   const idx = users.findIndex(u => u.verificationToken === token)
   if (idx === -1) return null
 
+  const baseUser = users[idx]
+  if (!baseUser) return null
+
   const updatedUser: User = {
-    ...users[idx],
+    ...baseUser,
     isVerified: true,
     verificationToken: null,
   }

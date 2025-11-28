@@ -125,6 +125,11 @@ const MediaModal: React.FC<{
   onNext: () => void
   onPrevious: () => void
 }> = ({media, allMedia, currentIndex, isOpen, onClose, onNext, onPrevious}) => {
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStartX, setDragStartX] = useState(0)
+  const [draggedX, setDraggedX] = useState(0)
+  const DRAG_THRESHOLD = 50
+
   const getMediaUrl = (m: ContactLocationMedia) => {
     if (m.type === 'image' && m.url) {
       return m.url
@@ -141,6 +146,53 @@ const MediaModal: React.FC<{
 
   const hasNext = currentIndex < allMedia.length - 1
   const hasPrevious = currentIndex > 0
+
+  const handleDragStartMouse = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true)
+    setDragStartX(e.clientX)
+    setDraggedX(0)
+  }
+
+  const handleDragMoveMouse = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging) return
+    setDraggedX(e.clientX - dragStartX)
+  }
+
+  const handleDragEndMouse = () => {
+    if (!isDragging) return
+    setIsDragging(false)
+
+    if (draggedX < -DRAG_THRESHOLD && hasNext) {
+      onNext()
+    } else if (draggedX > DRAG_THRESHOLD && hasPrevious) {
+      onPrevious()
+    }
+    setDraggedX(0)
+  }
+
+  const handleDragStartTouch = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!e.touches || e.touches.length === 0) return
+    setIsDragging(true)
+    setDragStartX(e.touches[0].clientX)
+    setDraggedX(0)
+  }
+
+  const handleDragMoveTouch = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!isDragging || !e.touches || e.touches.length === 0) return
+    setDraggedX(e.touches[0].clientX - dragStartX)
+  }
+
+  const handleDragEndTouch = () => {
+    if (!isDragging) return
+    setIsDragging(false)
+
+    if (draggedX < -DRAG_THRESHOLD && hasNext) {
+      onNext()
+    } else if (draggedX > DRAG_THRESHOLD && hasPrevious) {
+      onPrevious()
+    }
+    setDraggedX(0)
+  }
 
   // Keyboard navigation
   React.useEffect(() => {
@@ -261,33 +313,63 @@ const MediaModal: React.FC<{
         )}
 
         <div className="relative max-h-[90vh] max-w-[90vw] overflow-hidden flex items-center justify-center">
-          <div className="relative w-full h-full flex items-center justify-center">
-            {media.type === 'youtube' ? (
-              <iframe
-                src={getMediaUrl(media)}
-                className="w-full h-full"
-                allow="autoplay; encrypted-media; fullscreen"
-                frameBorder="0"
-                title={`contact-location-media-${currentIndex}`}
-              />
-            ) : media.type === 'video' ? (
-              <OptimizedVideo
-                src={getMediaUrl(media)}
-                controls
-                autoPlay
-                className="w-full h-full object-contain"
-                preload="auto"
-                loading="eager"
-              />
-            ) : (
-              <OptimizedImage
-                src={getMediaUrl(media)}
-                alt=""
-                className="w-full h-full object-contain"
-                loading="eager"
-                quality={95}
-              />
-            )}
+          {/* Ürün detay sayfasındaki üst slider hissiyatına benzer yatay kayma animasyonu */}
+          <div className="relative w-full h-full">
+            {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
+            <div
+              className="flex h-full transition-transform duration-300 ease-out"
+              style={{
+                width: `${(allMedia.length || 1) * 100}%`,
+                transform: `translateX(calc(-${
+                  (currentIndex * 100) / (allMedia.length || 1)
+                }% + ${draggedX}px))`,
+              }}
+              onMouseDown={handleDragStartMouse}
+              onMouseMove={handleDragMoveMouse}
+              onMouseUp={handleDragEndMouse}
+              onMouseLeave={handleDragEndMouse}
+              onTouchStart={handleDragStartTouch}
+              onTouchMove={handleDragMoveTouch}
+              onTouchEnd={handleDragEndTouch}
+            >
+              {allMedia.map((item, idx) => {
+                const url = getMediaUrl(item)
+                return (
+                  <div
+                    key={idx}
+                    className="relative h-full shrink-0 flex items-center justify-center"
+                    style={{width: `${100 / (allMedia.length || 1)}%`}}
+                  >
+                    {item.type === 'youtube' ? (
+                      <iframe
+                        src={url}
+                        className="w-full h-full"
+                        allow="autoplay; encrypted-media; fullscreen"
+                        frameBorder="0"
+                        title={`contact-location-media-${idx}`}
+                      />
+                    ) : item.type === 'video' ? (
+                      <OptimizedVideo
+                        src={url}
+                        controls
+                        autoPlay
+                        className="w-full h-full object-contain"
+                        preload="auto"
+                        loading="eager"
+                      />
+                    ) : (
+                      <OptimizedImage
+                        src={url}
+                        alt=""
+                        className="w-full h-full object-contain"
+                        loading="eager"
+                        quality={95}
+                      />
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </div>
       </div>
@@ -423,6 +505,120 @@ export function ContactPage() {
     return <PageLoading message={t('loading')} />
   }
 
+  // Seçili lokasyonun medya bandı (thumbnail şeridi)
+  const renderSelectedLocationMediaStrip = () => {
+    if (selectedLocationMedia.length === 0) return null
+
+    return (
+      <>
+        <style>{`
+          .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+          .hide-scrollbar::-webkit-scrollbar { display: none; }
+        `}</style>
+        <div className="relative select-none">
+          {/* Mouse ile yatay sürükleme için; klavye ile etkileşim gerekmiyor */}
+          {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
+          <div
+            ref={thumbRef}
+            className="hide-scrollbar overflow-x-auto cursor-grab active:cursor-grabbing"
+            onMouseDown={e => {
+              setThumbDragStartX(e.clientX)
+              setThumbScrollStart(thumbRef.current ? thumbRef.current.scrollLeft : 0)
+            }}
+            onMouseLeave={() => {
+              setThumbDragStartX(null)
+            }}
+            onMouseUp={() => {
+              setThumbDragStartX(null)
+            }}
+            onMouseMove={e => {
+              if (thumbDragStartX === null || !thumbRef.current) return
+              const delta = e.clientX - thumbDragStartX
+              thumbRef.current.scrollLeft = thumbScrollStart - delta
+            }}
+          >
+            <div className="flex gap-3 min-w-max pb-2">
+              {selectedLocationMedia.map((m, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    analytics.event({
+                      category: 'contact',
+                      action: 'open_media',
+                      label: selectedLocation ? t(selectedLocation.title) : '',
+                      value: idx,
+                    })
+                    setSelectedMedia(m)
+                    setSelectedMediaIndex(idx)
+                    setIsModalOpen(true)
+                  }}
+                  className="relative flex-shrink-0 w-24 h-24 overflow-hidden border-2 border-transparent opacity-80 hover:opacity-100 hover:scale-105 transition-all duration-300"
+                >
+                  {m.type === 'image' ? (
+                    <OptimizedImage
+                      src={m.url || ''}
+                      alt={`Media ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      quality={75}
+                    />
+                  ) : m.type === 'video' ? (
+                    <div className="w-full h-full bg-black/60" />
+                  ) : (
+                    <OptimizedImage
+                      src={youTubeThumb(m.url || '')}
+                      alt={`youtube thumb ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      quality={75}
+                    />
+                  )}
+                  {(m.type === 'video' || m.type === 'youtube') && (
+                    <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                      <span className="bg-white/85 text-gray-900 w-10 h-10 flex items-center justify-center shadow">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className="w-5 h-5 ml-0.5"
+                        >
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </span>
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+          {/* Scroll buttons */}
+          {selectedLocationMedia.length > 6 && (
+            <>
+              <button
+                aria-label="scroll-left"
+                onClick={() => {
+                  if (thumbRef.current) thumbRef.current.scrollBy({left: -240, behavior: 'smooth'})
+                }}
+                className="absolute left-0 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-800 shadow px-2 py-2"
+              >
+                ‹
+              </button>
+              <button
+                aria-label="scroll-right"
+                onClick={() => {
+                  if (thumbRef.current) thumbRef.current.scrollBy({left: 240, behavior: 'smooth'})
+                }}
+                className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-800 shadow px-2 py-2"
+              >
+                ›
+              </button>
+            </>
+          )}
+        </div>
+      </>
+    )
+  }
+
   return (
     <div className="bg-gray-100 animate-fade-in-up-subtle">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
@@ -464,6 +660,13 @@ export function ContactPage() {
             ))}
           </div>
 
+          {/* Mobilde: haritanın üzerinde medya bandı */}
+          {selectedLocationMedia.length > 0 && (
+            <div className="mt-6 border-y border-gray-300 py-3 md:hidden">
+              {renderSelectedLocationMediaStrip()}
+            </div>
+          )}
+
           <div className="bg-white shadow-sm border border-gray-300 overflow-hidden min-h-[400px] md:min-h-0 sticky top-28 h-[600px]">
             {selectedLocation?.mapEmbedUrl ? (
               <iframe
@@ -485,115 +688,10 @@ export function ContactPage() {
           </div>
         </div>
 
-        {/* Medya Bantı - Seçili lokasyonun medyaları */}
+        {/* Medya Bantı - Seçili lokasyonun medyaları (sadece desktop: haritanın altında tam genişlik) */}
         {selectedLocationMedia.length > 0 && (
-          <div className="mt-12 border-y border-gray-300 py-3">
-            <style>{`
-              .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-              .hide-scrollbar::-webkit-scrollbar { display: none; }
-            `}</style>
-            <div className="relative select-none">
-              {/* Mouse ile yatay sürükleme için; klavye ile etkileşim gerekmiyor */}
-              {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
-              <div
-                ref={thumbRef}
-                className="hide-scrollbar overflow-x-auto cursor-grab active:cursor-grabbing"
-                onMouseDown={e => {
-                  setThumbDragStartX(e.clientX)
-                  setThumbScrollStart(thumbRef.current ? thumbRef.current.scrollLeft : 0)
-                }}
-                onMouseLeave={() => {
-                  setThumbDragStartX(null)
-                }}
-                onMouseUp={() => {
-                  setThumbDragStartX(null)
-                }}
-                onMouseMove={e => {
-                  if (thumbDragStartX === null || !thumbRef.current) return
-                  const delta = e.clientX - thumbDragStartX
-                  thumbRef.current.scrollLeft = thumbScrollStart - delta
-                }}
-              >
-                <div className="flex gap-3 min-w-max pb-2">
-                  {selectedLocationMedia.map((m, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        analytics.event({
-                          category: 'contact',
-                          action: 'open_media',
-                          label: selectedLocation ? t(selectedLocation.title) : '',
-                          value: idx,
-                        })
-                        setSelectedMedia(m)
-                        setSelectedMediaIndex(idx)
-                        setIsModalOpen(true)
-                      }}
-                      className="relative flex-shrink-0 w-24 h-24 overflow-hidden border-2 border-transparent opacity-80 hover:opacity-100 hover:scale-105 transition-all duration-300"
-                    >
-                      {m.type === 'image' ? (
-                        <OptimizedImage
-                          src={m.url || ''}
-                          alt={`Media ${idx + 1}`}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                          quality={75}
-                        />
-                      ) : m.type === 'video' ? (
-                        <div className="w-full h-full bg-black/60" />
-                      ) : (
-                        <OptimizedImage
-                          src={youTubeThumb(m.url || '')}
-                          alt={`youtube thumb ${idx + 1}`}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                          quality={75}
-                        />
-                      )}
-                      {(m.type === 'video' || m.type === 'youtube') && (
-                        <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                          <span className="bg-white/85 text-gray-900 w-10 h-10 flex items-center justify-center shadow">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
-                              className="w-5 h-5 ml-0.5"
-                            >
-                              <path d="M8 5v14l11-7z" />
-                            </svg>
-                          </span>
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {/* Scroll buttons */}
-              {selectedLocationMedia.length > 6 && (
-                <>
-                  <button
-                    aria-label="scroll-left"
-                    onClick={() => {
-                      if (thumbRef.current)
-                        thumbRef.current.scrollBy({left: -240, behavior: 'smooth'})
-                    }}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-800 shadow px-2 py-2"
-                  >
-                    ‹
-                  </button>
-                  <button
-                    aria-label="scroll-right"
-                    onClick={() => {
-                      if (thumbRef.current)
-                        thumbRef.current.scrollBy({left: 240, behavior: 'smooth'})
-                    }}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-800 shadow px-2 py-2"
-                  >
-                    ›
-                  </button>
-                </>
-              )}
-            </div>
+          <div className="mt-12 border-y border-gray-300 py-3 hidden md:block">
+            {renderSelectedLocationMediaStrip()}
           </div>
         )}
       </div>

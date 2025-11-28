@@ -39,14 +39,13 @@ export function LoginPage() {
 
   // İlk yüklemede tarayıcı otomatik doldurmuş olsa bile alanları temizle
   useEffect(() => {
-    if (!auth.isLoggedIn) {
-      // Küçük bir gecikmeyle React state'i DOM üzerine yazsın
-      const timer = setTimeout(() => {
-        setEmail('')
-        setPassword('')
-      }, 50)
-      return () => clearTimeout(timer)
-    }
+    if (auth.isLoggedIn) return
+    // Küçük bir gecikmeyle React state'i DOM üzerine yazsın
+    const timer = setTimeout(() => {
+      setEmail('')
+      setPassword('')
+    }, 50)
+    return () => clearTimeout(timer)
   }, [auth.isLoggedIn])
 
   // Ülkeyi konuma göre tahmin et (sadece üye ol modundayken ve country boşsa)
@@ -162,7 +161,7 @@ export function LoginPage() {
       analytics.trackUserAction('register', user._id)
       // E-posta doğrulama linki gönder
       const verificationToken = user.verificationToken
-      const emailApiUrl = import.meta.env.VITE_EMAIL_API_URL as string | undefined
+      const emailApiUrl = import.meta.env['VITE_EMAIL_API_URL'] as string | undefined
       if (verificationToken) {
         const verificationUrl = `${window.location.origin}/#/verify-email?token=${encodeURIComponent(
           verificationToken
@@ -220,11 +219,6 @@ export function LoginPage() {
     } finally {
       setIsLoading(false)
     }
-  }
-
-  const handleLogout = () => {
-    auth.logout()
-    navigate('/')
   }
 
   return (
@@ -331,13 +325,13 @@ export function LoginPage() {
                     >
                       {t('password') || 'Şifre'}
                     </label>
-                      <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        autoComplete="off"
-                        required
-                        value={password}
+                    <input
+                      id="password"
+                      name="password"
+                      type="password"
+                      autoComplete="off"
+                      required
+                      value={password}
                       onChange={e => {
                         setPassword(e.target.value)
                         if (validationErrors['password']) {
