@@ -1,7 +1,14 @@
 import React, {useState, useEffect, useRef, useCallback} from 'react'
 import {Link, NavLink, useLocation} from 'react-router-dom'
-import type {Category, SiteSettings, Product, Designer} from '../types'
-import {getSiteSettings, getDesigners, getProducts, getCategories} from '../services/cms'
+import type {Category, SiteSettings, Product, Designer, FooterContent} from '../types'
+import {
+  getSiteSettings,
+  getDesigners,
+  getProducts,
+  getCategories,
+  getFooterContent,
+  subscribeEmail as subscribeEmailService,
+} from '../services/cms'
 import {useAuth} from '../App'
 import {SiteLogo} from './SiteLogo'
 import {useTranslation} from '../i18n'
@@ -9,6 +16,11 @@ import {useCart} from '../context/CartContext'
 import {useCategories} from '../src/hooks/useCategories'
 import {useProductsByCategory} from '../src/hooks/useProducts'
 import {useFocusTrap} from '../src/hooks/useFocusTrap'
+
+// Helper component to render SVG strings safely
+const DynamicIcon: React.FC<{svgString: string}> = ({svgString}) => (
+  <div dangerouslySetInnerHTML={{__html: svgString}} />
+)
 
 const UserIcon = () => (
   <svg
@@ -113,6 +125,22 @@ const ShoppingBagIcon = () => (
   </svg>
 )
 
+const ChevronRightIcon: React.FC = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="9 6 15 12 9 18" />
+  </svg>
+)
+
 export function Header() {
   const {t, setLocale, locale, supportedLocales} = useTranslation()
   const location = useLocation()
@@ -147,6 +175,11 @@ export function Header() {
   const [heroBrightness, setHeroBrightness] = useState<number | null>(null)
   const [settings, setSettings] = useState<SiteSettings | null>(null)
   const currentRouteRef = useRef<string>(location.pathname)
+  const mobileHeaderAnimation = settings?.mobileHeaderAnimation ?? 'default'
+  // 2. seçenek (overlay) SADECE: (1) mobilde ve (2) CMS'te açıkça "overlay" seçiliyse aktif olsun.
+  const isOverlayMobileMenu = Boolean(
+    isMobile && settings && settings.mobileHeaderAnimation === 'overlay'
+  )
 
   // Search states
   const [searchQuery, setSearchQuery] = useState('')
@@ -162,6 +195,10 @@ export function Header() {
     categories: Category[]
   } | null>(null)
 
+  // Footer content for social links and subscribe
+  const [footerContent, setFooterContent] = useState<FooterContent | null>(null)
+  const [subscribeEmail, setSubscribeEmailState] = useState('')
+
   const closeSearch = useCallback(() => {
     setIsSearchOpen(false)
     setSearchQuery('')
@@ -170,6 +207,7 @@ export function Header() {
 
   useEffect(() => {
     getSiteSettings().then(setSettings)
+    getFooterContent().then(setFooterContent)
   }, [])
 
   // Route değiştiğinde brightness'i sıfırla ve header opacity'yi ayarla (sayfa geçişlerinde hemen güncelle)
@@ -800,6 +838,15 @@ export function Header() {
   const iconClasses =
     'text-white hover:text-gray-200 transition-all duration-300 transform hover:scale-125'
 
+  const mobileMenuLinks: {to: string; label: string}[] = [
+    {to: '/categories', label: (t('products') || '').toLocaleUpperCase('en')},
+    {to: '/designers', label: (t('designers') || '').toLocaleUpperCase('en')},
+    {to: '/projects', label: (t('projects') || 'Projeler').toLocaleUpperCase('en')},
+    {to: '/news', label: (t('news') || '').toLocaleUpperCase('en')},
+    {to: '/about', label: (t('about') || '').toLocaleUpperCase('en')},
+    {to: '/contact', label: (t('contact') || '').toLocaleUpperCase('en')},
+  ]
+
   const NavItem: React.FC<{
     to: string
     children: React.ReactNode
@@ -895,6 +942,12 @@ export function Header() {
             letter-spacing: 0.05em !important;
             line-height: 1.25rem !important;
           }
+          
+          /* Overlay mobil menü - tamamen opak siyah arka plan */
+          #mobile-menu.mobile-menu-overlay {
+            background-color: #000000 !important;
+            background: #000000 !important;
+          }
         `}
       </style>
       <header
@@ -904,12 +957,38 @@ export function Header() {
         }`}
       >
         <div
-          className={`overflow-hidden transition-all duration-700 ease-in-out ${isProductsOpen ? 'max-h-[900px]' : isMobileMenuOpen ? 'max-h-[40rem]' : isMobile ? 'max-h-[3.5rem]' : 'max-h-[6rem]'} ${isMobile && headerOpacity <= 0 ? '' : 'backdrop-blur-lg border-b border-white/10'}`}
+          className={`${isOverlayMobileMenu ? '' : 'overflow-hidden'} transition-all duration-700 ease-in-out ${
+            isProductsOpen
+              ? 'max-h-[900px]'
+              : // Overlay modda mobil menü açık olsa bile header yüksekliğini büyütme
+                isOverlayMobileMenu
+                ? isMobile
+                  ? 'max-h-[3.5rem]'
+                  : 'max-h-[6rem]'
+                : isMobileMenuOpen
+                  ? 'max-h-[40rem]'
+                  : isMobile
+                    ? 'max-h-[3.5rem]'
+                    : 'max-h-[6rem]'
+          } ${
+            // Arka plan blur'ü: mobilde de her zaman kullan (opacity 0 değilse)
+            isMobile && headerOpacity <= 0 ? '' : 'backdrop-blur-lg'
+          } ${
+            // Mobilde arama AÇIKKEN header altındaki ince beyaz çizgiyi gizlemek için border'ı kaldır
+            isMobile && isSearchOpen
+              ? ''
+              : isMobile && headerOpacity <= 0
+                ? ''
+                : 'border-b border-white/10'
+          }`}
           style={{
             backgroundColor:
-              isMobile && headerOpacity <= 0
-                ? 'transparent'
-                : `rgba(0, 0, 0, ${Math.max(headerOpacity, 0.6)})`,
+              // Overlay mobil menü AÇIKKEN header'ı da tamamen opak siyah yap
+              isOverlayMobileMenu && isMobileMenuOpen
+                ? '#000000'
+                : isMobile && headerOpacity <= 0
+                  ? 'transparent'
+                  : `rgba(0, 0, 0, ${Math.max(headerOpacity, 0.6)})`,
             transition: 'background-color 0.2s ease-out, max-height 0.7s ease-in-out',
             backdropFilter: isMobile && headerOpacity <= 0 ? 'none' : 'blur(16px)',
             WebkitBackdropFilter: isMobile && headerOpacity <= 0 ? 'none' : 'blur(16px)',
@@ -1104,20 +1183,59 @@ export function Header() {
                   </button>
                 )}
                 <div className="lg:hidden flex items-center">
-                  <button
-                    ref={mobileMenuButtonRef}
-                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    className={`${iconClasses} flex items-center justify-center`}
-                    aria-label={
-                      isMobileMenuOpen
-                        ? t('close_menu') || 'Menüyü kapat'
-                        : t('open_menu') || 'Menüyü aç'
-                    }
-                    aria-expanded={isMobileMenuOpen}
-                    aria-controls="mobile-menu"
-                  >
-                    <MenuIcon />
-                  </button>
+                  {isOverlayMobileMenu ? (
+                    // Overlay modunda: hamburger → X animasyonu (senin verdiğin pattern'e göre)
+                    <button
+                      ref={mobileMenuButtonRef}
+                      onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                      className="group p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center"
+                      aria-label={
+                        isMobileMenuOpen
+                          ? t('close_menu') || 'Menüyü kapat'
+                          : t('open_menu') || 'Menüyü aç'
+                      }
+                      aria-expanded={isMobileMenuOpen}
+                      aria-controls="mobile-menu"
+                    >
+                      <div className="flex flex-col gap-1.5 items-start w-6">
+                        {/* Üst Çizgi: 45 derece döner ve aşağı iner */}
+                        <span
+                          className={`h-0.5 bg-white transition-all duration-300 ${
+                            isMobileMenuOpen ? 'w-6 rotate-45 translate-y-2' : 'w-6'
+                          }`}
+                        ></span>
+                        {/* Orta Çizgi: Kaybolur */}
+                        <span
+                          className={`h-0.5 bg-white transition-all duration-300 ${
+                            isMobileMenuOpen ? 'opacity-0' : 'w-4 group-hover:w-6'
+                          }`}
+                        ></span>
+                        {/* Alt Çizgi: -45 derece döner ve yukarı çıkar */}
+                        <span
+                          className={`h-0.5 bg-white transition-all duration-300 ${
+                            isMobileMenuOpen
+                              ? 'w-6 -rotate-45 -translate-y-2'
+                              : 'w-5 group-hover:w-6'
+                          }`}
+                        ></span>
+                      </div>
+                    </button>
+                  ) : (
+                    <button
+                      ref={mobileMenuButtonRef}
+                      onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                      className={`${iconClasses} flex items-center justify-center`}
+                      aria-label={
+                        isMobileMenuOpen
+                          ? t('close_menu') || 'Menüyü kapat'
+                          : t('open_menu') || 'Menüyü aç'
+                      }
+                      aria-expanded={isMobileMenuOpen}
+                      aria-controls="mobile-menu"
+                    >
+                      <MenuIcon />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -1253,8 +1371,8 @@ export function Header() {
               </NavLink>
             </div>
           </div>
-          {/* Mobil menü - header içinde açılır */}
-          {isMobileMenuOpen && (
+          {/* Mobil menü - default stil (header içinde) - overlay stili header dışında render edilir */}
+          {!isOverlayMobileMenu && isMobileMenuOpen && (
             <div
               ref={node => {
                 if (node) {
@@ -1289,7 +1407,10 @@ export function Header() {
                                 ? 'text-white font-extralight'
                                 : 'text-gray-400/90 hover:text-white font-extralight'
                             }`}
-                            style={{fontFamily: 'Inter, sans-serif', letterSpacing: '0.2em'}}
+                            style={{
+                              fontFamily: 'Inter, sans-serif',
+                              letterSpacing: '0.2em',
+                            }}
                           >
                             <span className="relative inline-block">{langCode.toUpperCase()}</span>
                           </button>
@@ -1360,12 +1481,179 @@ export function Header() {
         {/* Desktop genişleyen ürün paneli kaldırıldı; içerik header içinde render ediliyor */}
       </header>
 
+      {/* Overlay mobil menü - header'ın DIŞINDA, tam ekran kaplayan panel */}
+      {isOverlayMobileMenu && (
+        <div
+          ref={node => {
+            if (node) {
+              ;(mobileMenuRef as React.MutableRefObject<HTMLDivElement | null>).current = node
+              ;(mobileMenuFocusTrap as React.MutableRefObject<HTMLElement | null>).current = node
+            }
+          }}
+          id="mobile-menu"
+          className={`mobile-menu-overlay fixed left-0 right-0 bottom-0 lg:hidden z-40 flex flex-col border-t border-white/10 text-white pb-8 px-6 transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] ${
+            isMobileMenuOpen
+              ? 'translate-y-0 visible pointer-events-auto'
+              : 'opacity-0 translate-y-2 invisible pointer-events-none'
+          }`}
+          style={{
+            top: `${headerHeight}px`,
+            backgroundColor: '#000000',
+            opacity: isMobileMenuOpen ? 1 : 0,
+          }}
+          role="menu"
+          aria-label={t('main_menu') || 'Ana menü'}
+          aria-hidden={!isMobileMenuOpen}
+        >
+          {/* Dil ve kullanıcı alanı */}
+          {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
+            <div className="mb-6 pt-4 pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {supportedLocales.map(langCode => {
+                    const isActive = locale === langCode
+                    return (
+                      <button
+                        key={langCode}
+                        onClick={() => {
+                          setLocale(langCode)
+                          setIsMobileMenuOpen(false)
+                        }}
+                        aria-pressed={isActive}
+                        className={`group relative px-1.5 py-0.5 text-xs uppercase tracking-[0.2em] transition-colors duration-200 ${
+                          isActive
+                            ? 'text-white font-extralight'
+                            : 'text-gray-400/90 hover:text-white font-extralight'
+                        }`}
+                        style={{fontFamily: 'Inter, sans-serif', letterSpacing: '0.2em'}}
+                      >
+                        <span className="relative inline-block">{langCode.toUpperCase()}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+                <NavLink
+                  to={isLoggedIn ? '/profile' : '/login'}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={iconClasses}
+                  aria-label={isLoggedIn ? t('profile') || 'Profil' : t('login') || 'Giriş Yap'}
+                >
+                  <UserIcon />
+                </NavLink>
+              </div>
+              {/* Tam ekran genişliğinde ayırıcı çizgi */}
+              <div
+                className="border-b border-white/20 mt-4 -mx-6"
+                style={{width: 'calc(100% + 3rem)'}}
+              ></div>
+            </div>
+          )}
+
+          {/* Menü linkleri - stagger animasyon */}
+          <nav className="flex flex-col justify-start gap-4">
+            {mobileMenuLinks.map((item, index) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                style={{transitionDelay: `${index * 100}ms`}}
+                className={`group flex items-center justify-between text-3xl md:text-5xl font-serif font-medium text-white transition-all duration-500 ${
+                  isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <span>{item.label}</span>
+                <span className="opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-300">
+                  <ChevronRightIcon />
+                </span>
+              </NavLink>
+            ))}
+          </nav>
+
+          {/* Alt kısım - Subscribe ve Sosyal Medya */}
+          <div className="mt-auto pt-8">
+            {/* Ayırıcı çizgi - tam ekran genişliğinde */}
+            <div
+              className="border-t border-white/20 -mx-6 mb-6"
+              style={{width: 'calc(100% + 3rem)'}}
+            ></div>
+
+            {/* Subscribe bölümü */}
+            <form
+              onSubmit={async e => {
+                e.preventDefault()
+                if (subscribeEmail) {
+                  try {
+                    await subscribeEmailService(subscribeEmail)
+                    alert(t('subscribe_success') || 'E-posta aboneliğiniz başarıyla oluşturuldu!')
+                    setSubscribeEmailState('')
+                  } catch (err: any) {
+                    if (err.message === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
+                      alert(t('subscribe_success') || 'E-posta aboneliğiniz kaydedildi!')
+                      setSubscribeEmailState('')
+                    } else {
+                      alert(err.message || 'Bir hata oluştu.')
+                    }
+                  }
+                }
+              }}
+              className="flex flex-col items-center mb-6"
+            >
+              <p className="text-sm text-gray-300 mb-4 text-center">{t('subscribe_prompt')}</p>
+              <div className="flex items-center justify-center border-b border-white pb-0.5 w-full max-w-[280px]">
+                <input
+                  type="email"
+                  value={subscribeEmail}
+                  onChange={e => setSubscribeEmailState(e.target.value)}
+                  placeholder={t('email_placeholder')}
+                  className="w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 transition-all duration-200 text-[11px] text-center"
+                  style={{outline: 'none', boxShadow: 'none'}}
+                />
+              </div>
+              <button
+                type="submit"
+                className="mt-4 px-6 py-2 border border-white/50 text-white hover:bg-white hover:text-black transition-all duration-300 text-sm font-medium uppercase tracking-wider"
+              >
+                {t('subscribe')}
+              </button>
+            </form>
+
+            {/* Sosyal medya ikonları */}
+            {footerContent?.socialLinks && footerContent.socialLinks.length > 0 && (
+              <div className="flex justify-center space-x-6">
+                {footerContent.socialLinks
+                  .filter(link => link.isEnabled)
+                  .map(link => (
+                    <a
+                      key={link.name}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-400 hover:text-white transition-opacity duration-200 opacity-70 hover:opacity-100"
+                    >
+                      <div className="w-5 h-5">
+                        <DynamicIcon svgString={link.svgIcon} />
+                      </div>
+                    </a>
+                  ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div
         ref={searchPanelRef}
         id="search-panel"
         role="search"
         aria-label={t('search') || 'Ara'}
-        className={`fixed left-0 right-0 z-[100] bg-black/80 backdrop-blur-lg border-b border-white/10 shadow-2xl transition-all duration-300 ease-out ${isSearchOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-4 pointer-events-none'}`}
+        className={`fixed left-0 right-0 z-[100] bg-black/80 backdrop-blur-lg border-b border-white/10 shadow-2xl transition-all duration-300 ease-out ${
+          isSearchOpen
+            ? 'opacity-100 translate-y-0 pointer-events-auto'
+            : isMobile
+              ? // Mobilde yukarıdan aşağı "atlama" hissini azaltmak için sadece opacity ile animasyon yap
+                'opacity-0 translate-y-0 pointer-events-none'
+              : 'opacity-0 -translate-y-4 pointer-events-none'
+        }`}
         style={{
           top: isHeaderVisible ? `${headerHeight}px` : '0px',
         }}

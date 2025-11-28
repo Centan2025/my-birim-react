@@ -494,9 +494,10 @@ export const updateLanguages = async (languages: string[]): Promise<void> => {
 // Site Settings
 export const getSiteSettings = async (): Promise<SiteSettings> => {
   if (useSanity && sanity) {
-    const q = groq`*[_type == "siteSettings"][0]{
-            ...,
-            logo
+    const q = groq`*[_type == "siteSettings" && !(_id in path("drafts.**"))] 
+        | order(_updatedAt desc)[0]{
+          ...,
+          logo
         }`
     const s = await sanity.fetch(q)
     // Backward compatible defaults
@@ -512,6 +513,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
       isLanguageSwitcherVisible: s?.isLanguageSwitcherVisible !== false,
       languages: Array.isArray(s?.languages) ? s.languages : undefined,
       maintenanceMode: Boolean(s?.maintenanceMode ?? false),
+      mobileHeaderAnimation: s?.mobileHeaderAnimation === 'overlay' ? 'overlay' : 'default',
     }
   }
   await delay(SIMULATED_DELAY)
@@ -527,6 +529,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
         ? s.imageBorderStyle
         : 'square',
     maintenanceMode: Boolean(s?.maintenanceMode ?? false),
+    mobileHeaderAnimation: s?.mobileHeaderAnimation === 'overlay' ? 'overlay' : 'default',
   }
 }
 export const updateSiteSettings = async (settings: SiteSettings): Promise<void> => {

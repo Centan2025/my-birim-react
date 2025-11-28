@@ -27,6 +27,8 @@ export interface SiteSettings {
   imageBorderStyle?: 'square' | 'rounded'
   /** Enables maintenance mode - shows "Coming Soon" page to visitors */
   maintenanceMode?: boolean
+  /** Mobile header / hamburger menu animation style. */
+  mobileHeaderAnimation?: 'default' | 'overlay'
 }
 
 // --- Core Data Models ---

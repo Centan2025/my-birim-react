@@ -76,6 +76,20 @@ export default defineType({
       ],
       // Sanity, obje dizilerinde Rule.unique() desteklemez; gerekirse custom validasyon eklenir
     }),
+    defineField({
+      name: 'mobileHeaderAnimation',
+      title: 'Mobil Header / Menü Animasyonu',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Varsayılan (Birim)', value: 'default'},
+          {title: 'Tam Ekran Overlay (Animasyonlu)', value: 'overlay'},
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'default',
+      description: 'Mobilde hamburger menüye tıklandığında kullanılacak açılma animasyonu.',
+    }),
   ],
   preview: {
     select: {media: 'logo'},
