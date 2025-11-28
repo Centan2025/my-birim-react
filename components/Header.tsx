@@ -1564,7 +1564,7 @@ export function Header() {
                   fontStretch: 'expanded',
                   letterSpacing: '0.15em',
                 }}
-                className={`group flex items-center justify-between text-xl md:text-2xl font-light text-white transition-all duration-500 ${
+                className={`group flex items-center justify-between text-xl md:text-2xl font-medium text-white transition-all duration-500 ${
                   isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
