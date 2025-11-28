@@ -1183,7 +1183,8 @@ export function Header() {
                   </button>
                 )}
                 <div className="lg:hidden flex items-center">
-                  {isOverlayMobileMenu ? (
+                  {/* Settings yüklenene kadar hamburger butonunu gizle - böylece yanlış stil gösterilmez */}
+                  {!settings ? null : isOverlayMobileMenu ? (
                     // Overlay modunda: hamburger → X animasyonu (senin verdiğin pattern'e göre)
                     <button
                       ref={mobileMenuButtonRef}
