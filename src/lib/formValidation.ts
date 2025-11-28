@@ -78,7 +78,8 @@ export const validateRegisterForm = (
   password: string,
   name: string,
   company?: string,
-  profession?: string
+  profession?: string,
+  country?: string
 ): ValidationResult => {
   const errors: Record<string, string> = {}
   
@@ -107,6 +108,10 @@ export const validateRegisterForm = (
   
   if (profession && profession.trim().length > 0 && profession.trim().length < 2) {
     errors['profession'] = 'Meslek en az 2 karakter olmalıdır'
+  }
+
+  if (!country || !country.trim()) {
+    errors['country'] = 'Ülke gereklidir'
   }
   
   return {

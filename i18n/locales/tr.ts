@@ -26,7 +26,7 @@ export default {
   "sort_name_asc": "İsme Göre (A-Z)",
   "no_products_in_category": "Bu kategoride ürün bulunamadı.",
   "loading": "Yükleniyor...",
-  "homepage": "Anasayfa",
+  "homepage": "ANASAYFA",
   "description": "Açıklama",
   "dimensions": "Ölçüler",
   "material_alternatives": "Bitişler",

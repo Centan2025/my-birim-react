@@ -19,7 +19,8 @@
     "generate-robots": "tsx scripts/generate-robots.ts",
     "prepare": "husky install",
     "size-limit": "size-limit",
-    "size-limit:ci": "size-limit --ci"
+    "size-limit:ci": "size-limit --ci",
+    "email:server": "node email-server.js"
   },
   "dependencies": {
     "@fontsource/zalando-sans-semiexpanded": "^5.2.1",
@@ -31,8 +32,12 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/dompurify": "^3.0.5",
     "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
     "dompurify": "^3.3.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
     "groq": "^3.53.3",
+    "nodemailer": "^6.9.15",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-ga4": "^2.1.0",

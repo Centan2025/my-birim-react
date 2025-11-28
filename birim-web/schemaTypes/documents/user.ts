@@ -45,6 +45,12 @@ export default defineType({
       description: 'Üyenin mesleği',
     }),
     defineField({
+      name: 'country',
+      title: 'Ülke',
+      type: 'string',
+      description: 'Üyenin bulunduğu ülke. Kayıt formu konuma göre otomatik doldurur, gerekirse değiştirilebilir.',
+    }),
+    defineField({
       name: 'userType',
       title: 'Üye Tipi',
       type: 'string',
@@ -57,6 +63,21 @@ export default defineType({
       },
       initialValue: 'email_subscriber',
       description: 'E-posta aboneleri sadece haberler alır, tam üyeler özel içeriklere erişebilir',
+    }),
+    defineField({
+      name: 'isVerified',
+      title: 'E-posta Doğrulandı mı?',
+      type: 'boolean',
+      initialValue: false,
+      description:
+        'Kullanıcı e-posta adresini doğruladıysa işaretlenir. Doğrulama linkiyle otomatik güncellenir.',
+    }),
+    defineField({
+      name: 'verificationToken',
+      title: 'Doğrulama Tokenı',
+      type: 'string',
+      description: 'Kullanıcıya gönderilen e-posta doğrulama linki için kullanılan tek seferlik token.',
+      hidden: ({document}) => Boolean((document as any)?.isVerified),
     }),
     defineField({
       name: 'isActive',

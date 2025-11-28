@@ -81,8 +81,14 @@ export interface User {
   company?: string
   /** User's profession. */
   profession?: string
+  /** User's country (e.g. 'Türkiye'). */
+  country?: string
   /** Type of user: email subscriber or full member. */
   userType?: UserType
+  /** Whether the user's email has been verified. */
+  isVerified?: boolean
+  /** Internal token used for email verification flow. */
+  verificationToken?: string | null
   /** Whether the user account is active. */
   isActive: boolean
   /** Registration date. */

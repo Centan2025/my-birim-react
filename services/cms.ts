@@ -1665,17 +1665,21 @@ export const registerUser = async (
   password: string,
   name?: string,
   company?: string,
-  profession?: string
+  profession?: string,
+  country?: string
 ): Promise<User> => {
   const normEmail = normalizeEmail(email)
   if (!normEmail) {
     throw new Error('Geçerli bir e-posta adresi girin')
   }
   if (useSanity && sanity) {
-    // Check if user already exists
-    const existingUser = await sanity.fetch(groq`*[_type == "user" && lower(email) == $email][0]`, {
-      email: normEmail,
-    })
+    // Check if user already exists (silinmiş kullanıcıları hariç tut)
+    const existingUser = await sanity.fetch(
+      groq`*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]`,
+      {
+        email: normEmail,
+      }
+    )
     if (existingUser) {
       // Eğer email_subscriber ise, full_member'a yükselt
       if (existingUser.userType === 'email_subscriber') {
@@ -1700,6 +1704,7 @@ export const registerUser = async (
               name: name || '',
               company: company || '',
               profession: profession || '',
+              country: country || existingUser.country || '',
               userType: 'full_member',
             })
             .commit()
@@ -1710,6 +1715,7 @@ export const registerUser = async (
             name: updatedUser['name'],
             company: updatedUser['company'],
             profession: updatedUser['profession'],
+            country: updatedUser['country'],
             userType: updatedUser['userType'] as UserType,
             isActive: updatedUser['isActive'],
             createdAt: updatedUser['createdAt'] || updatedUser._createdAt,
@@ -1749,6 +1755,10 @@ export const registerUser = async (
     }
 
     try {
+      const verificationToken =
+        typeof crypto !== 'undefined' && 'randomUUID' in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}_${Math.random().toString(36).slice(2)}`
       const user = await sanityMutations.create({
         _type: 'user',
         email: normEmail,
@@ -1756,8 +1766,11 @@ export const registerUser = async (
         name: name || '',
         company: company || '',
         profession: profession || '',
+        country: country || '',
         userType: 'full_member',
         isActive: true,
+        isVerified: false,
+        verificationToken,
         createdAt: new Date().toISOString(),
       })
 
@@ -1767,8 +1780,11 @@ export const registerUser = async (
         name: user.name,
         company: user.company,
         profession: user.profession,
+        country: user.country,
         userType: user.userType as UserType,
         isActive: user.isActive,
+        isVerified: user.isVerified ?? false,
+        verificationToken: user.verificationToken ?? null,
         createdAt: user.createdAt || user._createdAt,
       }
     } catch (error: any) {
@@ -1809,6 +1825,7 @@ export const registerUser = async (
           name: name || '',
           company: company || '',
           profession: profession || '',
+          country: country || existingUser.country,
           userType: 'full_member',
         }
         setItem(
@@ -1821,14 +1838,22 @@ export const registerUser = async (
     }
 
     const passwordHash = await hashPassword(password)
+    const verificationToken =
+      typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}_${Math.random().toString(36).slice(2)}`
+
     const newUser: User = {
       _id: `user_${Date.now()}`,
       email: normEmail,
       name: name || '',
       company: company || '',
       profession: profession || '',
+      country: country || '',
       userType: 'full_member',
       isActive: true,
+      isVerified: false,
+      verificationToken,
       createdAt: new Date().toISOString(),
     }
 
@@ -1848,14 +1873,15 @@ export const registerUser = async (
 export const loginUser = async (email: string, password: string): Promise<User | null> => {
   const normEmail = normalizeEmail(email)
   if (useSanity && sanity) {
-    // Fetch user by email first
+    // Fetch user by email first (silinmiş kullanıcıları hariç tut)
     const user = await sanity.fetch(
-      groq`*[_type == "user" && lower(email) == $email && isActive == true][0]{
+      groq`*[_type == "user" && lower(email) == $email && isActive == true && !defined(_deleted)][0]{
         _id,
         email,
         name,
         company,
         profession,
+        country,
         userType,
         isActive,
         createdAt,
@@ -1880,8 +1906,11 @@ export const loginUser = async (email: string, password: string): Promise<User |
       name: user.name,
       company: user.company,
       profession: user.profession,
+      country: user.country,
       userType: user.userType as UserType,
       isActive: user.isActive,
+      isVerified: user.isVerified ?? false,
+      verificationToken: user.verificationToken ?? null,
       createdAt: user.createdAt || user._createdAt,
     }
   }
@@ -1914,12 +1943,13 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
   const normEmail = normalizeEmail(email)
   if (useSanity && sanity) {
     const user = await sanity.fetch(
-      groq`*[_type == "user" && lower(email) == $email][0]{
+      groq`*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]{
         _id,
         email,
         name,
         company,
         profession,
+        country,
         userType,
         isActive,
         createdAt
@@ -1937,8 +1967,11 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
       name: user.name,
       company: user.company,
       profession: user.profession,
+      country: user.country,
       userType: user.userType as UserType,
       isActive: user.isActive,
+      isVerified: user.isVerified ?? false,
+      verificationToken: user.verificationToken ?? null,
       createdAt: user.createdAt || user._createdAt,
     }
   }
@@ -1960,6 +1993,9 @@ export const getUserById = async (id: string): Promise<User | null> => {
         profession,
         userType,
         isActive,
+        country,
+        isVerified,
+        verificationToken,
         createdAt
       }`,
       {id}
@@ -1977,12 +2013,79 @@ export const getUserById = async (id: string): Promise<User | null> => {
       profession: user.profession,
       userType: user.userType,
       isActive: user.isActive,
+      country: user.country,
+      isVerified: user.isVerified ?? false,
+      verificationToken: user.verificationToken ?? null,
       createdAt: user.createdAt || user._createdAt,
     }
+
   }
 
   await delay(SIMULATED_DELAY)
   const users = getItem<User[]>(KEYS.USERS || 'birim_users') || []
   const user = users.find(u => u._id === id)
   return user || null
+}
+
+export const verifyUserByToken = async (token: string): Promise<User | null> => {
+  if (!token) return null
+
+  if (useSanity && sanity && sanityMutations) {
+    const user = await sanity.fetch(
+      groq`*[_type == "user" && verificationToken == $token && !defined(_deleted)][0]{
+        _id,
+        email,
+        name,
+        company,
+        profession,
+        userType,
+        isActive,
+        isVerified,
+        verificationToken,
+        createdAt
+      }`,
+      {token}
+    )
+
+    if (!user) return null
+
+    const patched = await sanityMutations
+      .patch(user._id)
+      .set({
+        isVerified: true,
+        verificationToken: null,
+      })
+      .commit()
+
+    return {
+      _id: patched._id,
+      email: patched.email,
+      name: patched.name,
+      company: patched.company,
+      profession: patched.profession,
+      userType: patched.userType as UserType,
+      isActive: patched.isActive,
+      isVerified: patched.isVerified ?? true,
+      verificationToken: patched.verificationToken ?? null,
+      createdAt: patched.createdAt || patched._createdAt,
+    }
+  }
+
+  // Local fallback
+  await delay(SIMULATED_DELAY)
+  const users = getItem<User[]>(KEYS.USERS || 'birim_users') || []
+  const idx = users.findIndex(u => u.verificationToken === token)
+  if (idx === -1) return null
+
+  const updatedUser: User = {
+    ...users[idx],
+    isVerified: true,
+    verificationToken: null,
+  }
+
+  const nextUsers = [...users]
+  nextUsers[idx] = updatedUser
+  setItem(KEYS.USERS || 'birim_users', nextUsers)
+
+  return updatedUser
 }

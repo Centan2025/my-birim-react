@@ -1013,7 +1013,7 @@ export function Header() {
                 >
                   <UserIcon />
                 </NavLink>
-                {settings?.showCartButton !== false && (
+                {settings?.showCartButton === true && (
                   <button
                     onClick={toggleCart}
                     className={`relative ${iconClasses}`}

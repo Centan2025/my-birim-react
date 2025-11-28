@@ -199,19 +199,28 @@ export function NewsDetailPage() {
     <div key={newsId} className="bg-white animate-fade-in-up-subtle">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-0">
         <div className="max-w-4xl mx-auto">
-          <nav className="mb-8 text-sm text-gray-500" aria-label="Breadcrumb">
+          {/* Breadcrumbs - diğer sayfalarla aynı font ve yapı */}
+          <nav className="mb-8 text-[9px] sm:text-[11px] text-gray-500" aria-label="Breadcrumb">
             <ol className="list-none p-0 inline-flex items-center">
               <li>
-                <Link to="/" className="hover:text-gray-800">
+                <Link
+                  to="/"
+                  className="hover:text-gray-800 uppercase underline underline-offset-4"
+                >
                   {t('homepage')}
                 </Link>
               </li>
               <li className="mx-2 font-light text-gray-400">|</li>
               <li>
-                <Link to="/news" className="hover:text-gray-800">
+                <Link
+                  to="/news"
+                  className="hover:text-gray-800 uppercase underline underline-offset-4"
+                >
                   {t('news')}
                 </Link>
               </li>
+              <li className="mx-2 font-light text-gray-400">|</li>
+              <li className="text-gray-700">{t(item.title)}</li>
             </ol>
           </nav>
 

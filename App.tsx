@@ -1,12 +1,4 @@
-import React, {
-  useState,
-  useContext,
-  createContext,
-  PropsWithChildren,
-  useEffect,
-  Suspense,
-  lazy,
-} from 'react'
+import React, {useState, useContext, createContext, PropsWithChildren, useEffect, Suspense, lazy} from 'react'
 import {HashRouter, Routes, Route, useLocation, Link} from 'react-router-dom'
 
 import {Header} from './components/Header'
@@ -57,6 +49,9 @@ const ProjectsPage = lazy(() =>
 )
 const ProjectDetailPage = lazy(() =>
   import('./pages/ProjectDetailPage').then(m => ({default: m.ProjectDetailPage}))
+)
+const VerifyEmailPage = lazy(() =>
+  import('./pages/VerifyEmailPage').then(m => ({default: m.VerifyEmailPage}))
 )
 const ComingSoonPage = lazy(() =>
   import('./pages/ComingSoonPage').then(m => ({default: m.ComingSoonPage}))
@@ -224,6 +219,8 @@ const ScrollToTop = () => {
       suffix = t('login') || 'Giriş'
     } else if (pathname === '/profile') {
       suffix = t('profile') || 'Profil'
+    } else if (pathname === '/verify-email') {
+      suffix = 'E-posta Doğrulama'
     } else if (pathname === '/cookies') {
       suffix = t('cookies') || 'Çerez Politikası'
     } else if (pathname === '/privacy') {
@@ -244,6 +241,37 @@ const ScrollToTop = () => {
   }, [pathname, t])
 
   return null
+}
+
+const BackToTopButton: React.FC = () => {
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 400) {
+        setIsVisible(true)
+      } else {
+        setIsVisible(false)
+      }
+    }
+
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, {passive: true})
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  if (!isVisible) return null
+
+  return (
+    <button
+      type="button"
+      onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}
+      aria-label="Sayfanın en üstüne dön"
+      className="fixed bottom-6 right-6 z-40 w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-full bg-black/40 text-white shadow-md backdrop-blur hover:bg-black/60 transition-all duration-200"
+    >
+      <span className="text-lg leading-none">↑</span>
+    </button>
+  )
 }
 
 const TopBanner = () => {
@@ -734,6 +762,7 @@ const AppContent = () => {
                   <Route path="/contact" element={<ContactPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/verify-email" element={<VerifyEmailPage />} />
                   <Route path="/news" element={<NewsPage />} />
                   <Route path="/news/:newsId" element={<NewsDetailPage />} />
                   <Route path="/cookies" element={<CookiesPage />} />
@@ -747,6 +776,7 @@ const AppContent = () => {
             <Footer />
           </>
         )}
+        <BackToTopButton />
         {import.meta.env.DEV && debugInfo && (
           <div className="fixed bottom-2 left-2 z-50 rounded bg-black/70 text-white text-[10px] px-2 py-1 font-mono text-left">
             <div>MAINT DEBUG</div>

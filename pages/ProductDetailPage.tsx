@@ -698,7 +698,10 @@ export function ProductDetailPage() {
           <nav className="absolute top-4 left-4 text-sm text-white/80">
             <ol className="list-none p-0 inline-flex items-center gap-2">
               <li>
-                <Link to="/" className="hover:text-white">
+                <Link
+                  to="/"
+                  className="hover:text-white uppercase underline underline-offset-4"
+                >
                   {t('homepage')}
                 </Link>
               </li>
@@ -841,11 +844,11 @@ export function ProductDetailPage() {
       {/* DETAILS BELOW */}
       <main className="bg-gray-100">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {/* Breadcrumbs */}
-          <nav className="mb-8 text-sm text-gray-500" aria-label="Breadcrumb">
+          {/* Breadcrumbs - diğer sayfalardakiyle aynı font boyutu */}
+          <nav className="mb-8 text-[9px] sm:text-[11px] text-gray-500" aria-label="Breadcrumb">
             <ol className="list-none p-0 inline-flex items-center">
               <li>
-                <Link to="/" className="hover:text-gray-800">
+                <Link to="/" className="hover:text-gray-800 uppercase underline underline-offset-4">
                   {t('homepage')}
                 </Link>
               </li>
@@ -853,7 +856,10 @@ export function ProductDetailPage() {
               {category && (
                 <>
                   <li>
-                    <Link to={`/products/${category.id}`} className="hover:text-gray-800">
+                    <Link
+                      to={`/products/${category.id}`}
+                      className="hover:text-gray-800 uppercase underline underline-offset-4"
+                    >
                       {t(category.name)}
                     </Link>
                   </li>

@@ -41,6 +41,13 @@ export function ProfilePage() {
               <div className="border-b border-gray-200 pb-6">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Hesap Bilgileri</h2>
                 <div className="space-y-3">
+                  {auth.user.isVerified === false && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-none text-sm">
+                      E-posta adresinizi henüz doğrulamadınız. Lütfen gelen kutunuzu kontrol edin ve
+                      doğrulama linkine tıklayın. Doğrulama tamamlanana kadar özel içeriklere
+                      erişiminiz kısıtlı olacaktır.
+                    </div>
+                  )}
                   <div>
                     <label className="block text-sm font-medium text-gray-700">E-posta</label>
                     <p className="mt-1 text-sm text-gray-900">{auth.user.email}</p>
@@ -55,6 +62,12 @@ export function ProfilePage() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Firma</label>
                       <p className="mt-1 text-sm text-gray-900">{auth.user.company}</p>
+                    </div>
+                  )}
+                  {auth.user.country && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Ülke</label>
+                      <p className="mt-1 text-sm text-gray-900">{auth.user.country}</p>
                     </div>
                   )}
                   {auth.user.profession && (
@@ -76,19 +89,21 @@ export function ProfilePage() {
                 </div>
               </div>
 
-              <div className="border-b border-gray-200 pb-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Özel İçerik Erişimi</h2>
-                <p className="text-sm text-gray-600 mb-4">
-                  Üye olduğunuz için ürünlerin özel içeriklerine (teknik çizimler, 3D modeller, özel
-                  görseller) erişebilirsiniz.
-                </p>
-                <Link
-                  to="/products"
-                  className="inline-block bg-gray-800 text-white font-semibold py-2 px-6 rounded-none hover:bg-gray-700 transition-colors duration-200"
-                >
-                  Ürünleri Görüntüle
-                </Link>
-              </div>
+              {auth.user.isVerified !== false && (
+                <div className="border-b border-gray-200 pb-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Özel İçerik Erişimi</h2>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Üye olduğunuz için ürünlerin özel içeriklerine (teknik çizimler, 3D modeller,
+                    özel görseller) erişebilirsiniz.
+                  </p>
+                  <Link
+                    to="/products"
+                    className="inline-block bg-gray-800 text-white font-semibold py-2 px-6 rounded-none hover:bg-gray-700 transition-colors duration-200"
+                  >
+                    Ürünleri Görüntüle
+                  </Link>
+                </div>
+              )}
 
               <div>
                 <button

@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {useNavigate, Link} from 'react-router-dom'
 import {useAuth} from '../App'
 import {useTranslation} from '../i18n'
@@ -18,6 +18,7 @@ export function LoginPage() {
   const [name, setName] = useState('')
   const [company, setCompany] = useState('')
   const [profession, setProfession] = useState('')
+  const [country, setCountry] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -28,6 +29,54 @@ export function LoginPage() {
   const auth = useAuth()
   const navigate = useNavigate()
   const {t} = useTranslation()
+
+  // Eğer kullanıcı zaten giriş yaptıysa, /login'e geldiğinde direkt profiline yönlendir
+  useEffect(() => {
+    if (auth.isLoggedIn) {
+      navigate('/profile', {replace: true})
+    }
+  }, [auth.isLoggedIn, navigate])
+
+  // İlk yüklemede tarayıcı otomatik doldurmuş olsa bile alanları temizle
+  useEffect(() => {
+    if (!auth.isLoggedIn) {
+      // Küçük bir gecikmeyle React state'i DOM üzerine yazsın
+      const timer = setTimeout(() => {
+        setEmail('')
+        setPassword('')
+      }, 50)
+      return () => clearTimeout(timer)
+    }
+  }, [auth.isLoggedIn])
+
+  // Ülkeyi konuma göre tahmin et (sadece üye ol modundayken ve country boşsa)
+  useEffect(() => {
+    if (!isLoginMode && !country) {
+      // Önce tarayıcı konumunu dene
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          async pos => {
+            try {
+              const {latitude, longitude} = pos.coords
+              const resp = await fetch(
+                `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=tr`
+              )
+              const data = await resp.json()
+              if (data?.countryName) {
+                setCountry(data.countryName)
+                return
+              }
+            } catch {
+              // sessiz geç
+            }
+          },
+          () => {
+            // izin verilmezse sessizce geç
+          }
+        )
+      }
+    }
+  }, [isLoginMode, country])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -87,7 +136,7 @@ export function LoginPage() {
     setIsLoading(true)
 
     // Form validation
-    const validation = validateRegisterForm(email, password, name, company, profession)
+    const validation = validateRegisterForm(email, password, name, company, profession, country)
     if (!validation.isValid) {
       setValidationErrors(validation.errors)
       setIsLoading(false)
@@ -106,18 +155,47 @@ export function LoginPage() {
     }
 
     try {
-      const user = await registerUser(email, password, name, company, profession)
+      const user = await registerUser(email, password, name, company, profession, country)
       // Başarılı kayıtta rate limit'i sıfırla
       registerRateLimiter.reset(rateLimitKey)
       auth.login(user)
       analytics.trackUserAction('register', user._id)
+      // E-posta doğrulama linki gönder
+      const verificationToken = user.verificationToken
+      const emailApiUrl = import.meta.env.VITE_EMAIL_API_URL as string | undefined
+      if (verificationToken) {
+        const verificationUrl = `${window.location.origin}/#/verify-email?token=${encodeURIComponent(
+          verificationToken
+        )}`
+        // Konsolda her zaman test linki
+        // eslint-disable-next-line no-console
+        console.log('[Email Verification] Test link:', verificationUrl)
+
+        if (emailApiUrl) {
+          try {
+            await fetch(emailApiUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                email,
+                verificationUrl,
+              }),
+            })
+          } catch (e) {
+            // eslint-disable-next-line no-console
+            console.error('[Email Verification] Mail gönderilemedi:', e)
+          }
+        }
+      }
       // Kullanıcı local storage'a kaydedildiyse uyarı göster
       if (user._id.startsWith('user_')) {
         setSuccess(
           "Kayıt başarılı! (Not: Sanity token yapılandırılmamış, veriler local storage'da saklanıyor)"
         )
       } else {
-        setSuccess('Kayıt başarılı! Yönlendiriliyorsunuz...')
+        setSuccess('Kayıt başarılı! Lütfen e-posta kutunuzu kontrol edin ve üyeliğinizi onaylayın.')
       }
       setTimeout(() => {
         navigate('/profile')
@@ -149,33 +227,6 @@ export function LoginPage() {
     navigate('/')
   }
 
-  if (auth.isLoggedIn) {
-    return (
-      <div className="bg-gray-50 flex items-center justify-center animate-fade-in-up-subtle py-20">
-        <div className="text-center p-8">
-          <h1 className="text-2xl font-semibold mb-4">
-            {t('already_logged_in') || 'Zaten giriş yaptınız'}
-          </h1>
-          <p className="text-gray-600 mb-4">{auth.user?.email}</p>
-          <div className="flex gap-4 justify-center">
-            <Link
-              to="/profile"
-              className="bg-gray-800 text-white font-semibold py-2 px-6 rounded-none hover:bg-gray-700 transition-colors duration-200"
-            >
-              Üye Paneli
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="bg-gray-600 text-white font-semibold py-2 px-6 rounded-none hover:bg-gray-500 transition-colors duration-200"
-            >
-              {t('logout') || 'Çıkış Yap'}
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -197,6 +248,8 @@ export function LoginPage() {
               type="button"
               onClick={() => {
                 setIsLoginMode(true)
+                setEmail('')
+                setPassword('')
                 setError('')
                 setSuccess('')
                 setValidationErrors({})
@@ -215,6 +268,11 @@ export function LoginPage() {
               type="button"
               onClick={() => {
                 setIsLoginMode(false)
+                setEmail('')
+                setPassword('')
+                setName('')
+                setCompany('')
+                setProfession('')
                 setError('')
                 setSuccess('')
                 setValidationErrors({})
@@ -234,7 +292,7 @@ export function LoginPage() {
           {/* Form Content */}
           <div className="p-8">
             {isLoginMode ? (
-              <form onSubmit={handleLogin} className="space-y-6">
+              <form onSubmit={handleLogin} className="space-y-6" autoComplete="off">
                 <div className="space-y-5">
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -242,9 +300,9 @@ export function LoginPage() {
                     </label>
                     <input
                       id="email"
-                      name="email"
+                      name="login-email"
                       type="email"
-                      autoComplete="email"
+                      autoComplete="off"
                       required
                       value={email}
                       onChange={e => {
@@ -260,7 +318,7 @@ export function LoginPage() {
                       className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${
                         validationErrors['email'] ? 'border-red-500' : 'border-gray-300'
                       }`}
-                      placeholder="ornek@email.com"
+                      placeholder="E-posta adresiniz"
                     />
                     {validationErrors['email'] && (
                       <p className="mt-1 text-sm text-red-600">{validationErrors['email']}</p>
@@ -273,13 +331,13 @@ export function LoginPage() {
                     >
                       {t('password') || 'Şifre'}
                     </label>
-                    <input
-                      id="password"
-                      name="password"
-                      type="password"
-                      autoComplete="current-password"
-                      required
-                      value={password}
+                      <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        autoComplete="off"
+                        required
+                        value={password}
                       onChange={e => {
                         setPassword(e.target.value)
                         if (validationErrors['password']) {
@@ -347,7 +405,7 @@ export function LoginPage() {
                 </button>
               </form>
             ) : (
-              <form onSubmit={handleRegister} className="space-y-6">
+              <form onSubmit={handleRegister} className="space-y-6" autoComplete="off">
                 <div className="space-y-5">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -387,9 +445,9 @@ export function LoginPage() {
                     </label>
                     <input
                       id="register-email"
-                      name="email"
+                      name="register-email"
                       type="email"
-                      autoComplete="email"
+                      autoComplete="off"
                       required
                       value={email}
                       onChange={e => {
@@ -405,7 +463,7 @@ export function LoginPage() {
                       className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${
                         validationErrors['email'] ? 'border-red-500' : 'border-gray-300'
                       }`}
-                      placeholder="ornek@email.com"
+                      placeholder="E-posta adresiniz"
                     />
                     {validationErrors['email'] && (
                       <p className="mt-1 text-sm text-red-600">{validationErrors['email']}</p>
@@ -421,7 +479,7 @@ export function LoginPage() {
                     <div>
                       <input
                         id="register-password"
-                        name="password"
+                        name="register-password"
                         type="password"
                         autoComplete="new-password"
                         required
@@ -545,6 +603,37 @@ export function LoginPage() {
                     />
                     {validationErrors['profession'] && (
                       <p className="mt-1 text-sm text-red-600">{validationErrors['profession']}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="country"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      Ülke
+                    </label>
+                    <input
+                      id="country"
+                      name="country"
+                      type="text"
+                      value={country}
+                      onChange={e => {
+                        setCountry(e.target.value)
+                        if (validationErrors['country']) {
+                          setValidationErrors(prev => {
+                            const newErrors = {...prev}
+                            delete newErrors['country']
+                            return newErrors
+                          })
+                        }
+                      }}
+                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${
+                        validationErrors['country'] ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      placeholder="Ülkeniz"
+                    />
+                    {validationErrors['country'] && (
+                      <p className="mt-1 text-sm text-red-600">{validationErrors['country']}</p>
                     )}
                   </div>
                 </div>
