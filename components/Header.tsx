@@ -1553,13 +1553,18 @@ export function Header() {
           )}
 
           {/* Menü linkleri - stagger animasyon */}
-          <nav className="flex flex-col justify-start gap-4">
+          <nav className="flex flex-col justify-start gap-6">
             {mobileMenuLinks.map((item, index) => (
               <NavLink
                 key={item.to}
                 to={item.to}
-                style={{transitionDelay: `${index * 100}ms`}}
-                className={`group flex items-center justify-between text-3xl md:text-5xl font-serif font-medium text-white transition-all duration-500 ${
+                style={{
+                  transitionDelay: `${index * 100}ms`,
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                  fontStretch: 'expanded',
+                  letterSpacing: '0.15em',
+                }}
+                className={`group flex items-center justify-between text-xl md:text-2xl font-light text-white transition-all duration-500 ${
                   isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
