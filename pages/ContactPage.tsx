@@ -173,13 +173,13 @@ const MediaModal: React.FC<{
   const handleDragStartTouch = (e: React.TouchEvent<HTMLDivElement>) => {
     if (!e.touches || e.touches.length === 0) return
     setIsDragging(true)
-    setDragStartX(e.touches[0].clientX)
+    setDragStartX(e.touches[0]!.clientX)
     setDraggedX(0)
   }
 
   const handleDragMoveTouch = (e: React.TouchEvent<HTMLDivElement>) => {
     if (!isDragging || !e.touches || e.touches.length === 0) return
-    setDraggedX(e.touches[0].clientX - dragStartX)
+    setDraggedX(e.touches[0]!.clientX - dragStartX)
   }
 
   const handleDragEndTouch = () => {
