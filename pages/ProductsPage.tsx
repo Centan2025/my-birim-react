@@ -182,10 +182,7 @@ export function ProductsPage() {
                   {label: t('products'), to: '/products'},
                   {label: t(category.name)},
                 ]
-              : [
-                  {label: t('homepage'), to: '/'},
-                  {label: t('products')},
-                ]
+              : [{label: t('homepage'), to: '/'}, {label: t('products')}]
           }
         />
         {/* Sort Controls */}
@@ -219,7 +216,7 @@ export function ProductsPage() {
 
         {/* Product Grid */}
         {sortedProducts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 animate-fade-in-up-subtle">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 md:gap-x-8 md:gap-y-12 animate-fade-in-up-subtle">
             {sortedProducts.map((product, index) => (
               <div
                 key={product.id}

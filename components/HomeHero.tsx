@@ -385,10 +385,13 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
       if (!heroContainer) return
 
       const count = heroMedia.length || 1
-      const normalizedSlide =
-        currentSlide < 0 ? count - 1 : currentSlide >= count ? 0 : currentSlide
+      // Sonsuz kaydırma için: -1 (ilk slayttan sola) ve count (son slayttan sağa) değerlerine
+      // izin ver, fakat bunun dışındaki uç değerleri clamp et.
+      let virtualSlide = currentSlide
+      if (virtualSlide < -1) virtualSlide = -1
+      if (virtualSlide > count) virtualSlide = count
 
-      const realIndex = normalizedSlide + 1 // +1 çünkü ilk klon var
+      const realIndex = virtualSlide + 1 // +1 çünkü ilk klon var
 
       const slides = heroContainer.querySelectorAll('.hero-slide-mobile')
       const activeSlide = slides[realIndex] as HTMLElement
@@ -483,16 +486,20 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
 
   const getTransform = () => {
     if (slideCount <= 1) return 'translateX(0%)'
-    const normalizedSlide =
-      currentSlide < 0 ? slideCount - 1 : currentSlide >= slideCount ? 0 : currentSlide
+
+    // Sonsuz kaydırma efekti için currentSlide değerini doğrudan kullan;
+    // sadece -1 ve slideCount aralığının dışına çıkan uç değerleri clamp et.
+    let virtualSlide = currentSlide
+    if (virtualSlide < -1) virtualSlide = -1
+    if (virtualSlide > slideCount) virtualSlide = slideCount
 
     if (isMobile && viewportWidth > 0) {
       const slideWidth = viewportWidth
-      const translateX = -(normalizedSlide + 1) * slideWidth
+      const translateX = -(virtualSlide + 1) * slideWidth
       return `translateX(calc(${translateX}px + ${draggedX}px))`
     }
 
-    const translateX = -(normalizedSlide + 1) * 100
+    const translateX = -(virtualSlide + 1) * 100
     return `translateX(calc(${translateX}% + ${draggedX}px))`
   }
 

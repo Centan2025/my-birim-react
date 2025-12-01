@@ -96,7 +96,7 @@ export function DesignerDetailPage() {
             {t('designs') || 'Tasarımları'}
           </h2>
           {products.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 md:gap-x-8 md:gap-y-12">
               {products.map(product => (
                 <ProductCard key={product.id} product={product} variant="light" />
               ))}

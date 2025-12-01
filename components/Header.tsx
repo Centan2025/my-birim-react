@@ -1430,7 +1430,6 @@ export function Header() {
                             key={langCode}
                             onClick={() => {
                               setLocale(langCode)
-                              setIsMobileMenuOpen(false)
                             }}
                             aria-pressed={isActive}
                             className={`group relative px-1.5 py-0.5 text-xs uppercase tracking-[0.2em] transition-colors duration-200 ${
@@ -1464,7 +1463,7 @@ export function Header() {
                 <div className="flex flex-col">
                   <NavLink
                     to="/categories"
-                    className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
+                    className="flex items-center min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
                     onClick={() => setIsMobileMenuOpen(false)}
                     style={{fontFamily: "'Goldman', sans-serif"}}
                   >
@@ -1472,7 +1471,7 @@ export function Header() {
                   </NavLink>
                   <NavLink
                     to="/designers"
-                    className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
+                    className="flex items-center min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
                     onClick={() => setIsMobileMenuOpen(false)}
                     style={{fontFamily: "'Goldman', sans-serif"}}
                   >
@@ -1480,7 +1479,7 @@ export function Header() {
                   </NavLink>
                   <NavLink
                     to="/projects"
-                    className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
+                    className="flex items-center min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
                     onClick={() => setIsMobileMenuOpen(false)}
                     style={{fontFamily: "'Goldman', sans-serif"}}
                   >
@@ -1488,7 +1487,7 @@ export function Header() {
                   </NavLink>
                   <NavLink
                     to="/news"
-                    className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
+                    className="flex items-center min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
                     onClick={() => setIsMobileMenuOpen(false)}
                     style={{fontFamily: "'Goldman', sans-serif"}}
                   >
@@ -1496,7 +1495,7 @@ export function Header() {
                   </NavLink>
                   <NavLink
                     to="/about"
-                    className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
+                    className="flex items-center min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
                     onClick={() => setIsMobileMenuOpen(false)}
                     style={{fontFamily: "'Goldman', sans-serif"}}
                   >
@@ -1504,7 +1503,7 @@ export function Header() {
                   </NavLink>
                   <NavLink
                     to="/contact"
-                    className="flex items-center min-h-[3rem] py-3 text-base font-semibold tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300"
+                    className="flex items-center min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300"
                     onClick={() => setIsMobileMenuOpen(false)}
                     style={{fontFamily: "'Goldman', sans-serif"}}
                   >
@@ -1559,7 +1558,6 @@ export function Header() {
                         key={langCode}
                         onClick={() => {
                           setLocale(langCode)
-                          setIsMobileMenuOpen(false)
                         }}
                         aria-pressed={isActive}
                         className={`group relative px-1.5 py-0.5 text-xs uppercase tracking-[0.2em] transition-colors duration-200 ${
@@ -1600,10 +1598,10 @@ export function Header() {
                 style={{
                   transitionDelay: `${index * 100}ms`,
                   fontFamily: "'Goldman', sans-serif",
-                  fontStretch: 'expanded',
-                  letterSpacing: '0.15em',
+                  fontWeight: 300,
+                  letterSpacing: '0.2em',
                 }}
-                className={`group flex items-center justify-between text-xl md:text-2xl font-medium text-white transition-all duration-500 ${
+                className={`group flex items-center justify-between text-xl md:text-2xl font-light leading-tight text-white transition-all duration-500 ${
                   isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
