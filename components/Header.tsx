@@ -245,9 +245,10 @@ export function Header() {
     return () => clearTimeout(timeoutId)
   }, [location.pathname, isMobile])
 
-  // Sayfanın üst kısmındaki görselin parlaklığını kontrol et (mobilde, tüm sayfalarda)
+  // Sayfanın üst kısmındaki görselin parlaklığını kontrol et (tüm cihazlarda, sadece en üstteyken)
   useEffect(() => {
-    if (!isMobile || window.scrollY > 0) {
+    // Sadece sayfa en üstteyken parlaklığı hesapla
+    if (window.scrollY > 0) {
       setHeroBrightness(null)
       return
     }
@@ -1014,13 +1015,45 @@ export function Header() {
                 : 'border-b border-white/10'
           }`}
           style={{
-            backgroundColor:
+            backgroundColor: (() => {
               // Overlay mobil menü AÇIKKEN header'ı da tamamen opak siyah yap
-              isOverlayMobileMenu && isMobileMenuOpen
-                ? '#000000'
-                : isMobile && headerOpacity <= 0
-                  ? 'transparent'
-                  : `rgba(0, 0, 0, ${Math.max(headerOpacity, 0.6)})`,
+              if (isOverlayMobileMenu && isMobileMenuOpen) {
+                return '#000000'
+              }
+
+              // Mobilde ve opacity 0 ise: arka plan parlaklığına göre karar ver
+              if (isMobile && headerOpacity <= 0) {
+                // Parlaklık bilgisi yoksa veya arka plan koyuysa → şeffaf bırak
+                if (heroBrightness === null || heroBrightness < 0.45) {
+                  return 'transparent'
+                }
+                // Arka plan açık / beyaza yakın → header yine koyu dursun
+                const forcedOpacity = heroBrightness >= 0.65 ? 0.9 : 0.75
+                return `rgba(0, 0, 0, ${forcedOpacity})`
+              }
+
+              // Varsayılan temel opacity
+              let baseOpacity = Math.max(headerOpacity, 0.4)
+
+              // Eğer üstteki görselin parlaklığını biliyorsak, header koyuluğunu buna göre ayarla
+              if (heroBrightness !== null) {
+                if (heroBrightness >= 0.65) {
+                  // Çok açık arka plan → header'ı belirgin koyu yap
+                  baseOpacity = Math.max(baseOpacity, 0.85)
+                } else if (heroBrightness >= 0.45) {
+                  // Orta-açık arka plan → biraz daha koyu
+                  baseOpacity = Math.max(baseOpacity, 0.7)
+                } else if (heroBrightness <= 0.25) {
+                  // Çok koyu arka plan → header biraz daha şeffaf kalabilir
+                  baseOpacity = Math.min(baseOpacity, 0.5)
+                }
+              } else {
+                // Parlaklık bilgisi yoksa, çok şeffaf olmasın
+                baseOpacity = Math.max(baseOpacity, 0.6)
+              }
+
+              return `rgba(0, 0, 0, ${baseOpacity})`
+            })(),
             transition: 'background-color 0.2s ease-out, max-height 0.7s ease-in-out',
             backdropFilter: isMobile && headerOpacity <= 0 ? 'none' : 'blur(16px)',
             WebkitBackdropFilter: isMobile && headerOpacity <= 0 ? 'none' : 'blur(16px)',

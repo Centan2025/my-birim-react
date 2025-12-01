@@ -698,10 +698,7 @@ export function ProductDetailPage() {
           <nav className="absolute top-4 left-4 text-sm text-white/80">
             <ol className="list-none p-0 inline-flex items-center gap-2">
               <li>
-                <Link
-                  to="/"
-                  className="hover:text-white uppercase underline underline-offset-4"
-                >
+                <Link to="/" className="hover:text-white uppercase underline underline-offset-4">
                   {t('homepage')}
                 </Link>
               </li>
@@ -896,7 +893,7 @@ export function ProductDetailPage() {
               <div className="pb-4">
                 <h2 className="text-xl font-light text-gray-600">{t('dimensions')}</h2>
                 <div className="h-px bg-gray-300 my-4" />
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                   {dimImages.map(
                     (
                       dimImg: {

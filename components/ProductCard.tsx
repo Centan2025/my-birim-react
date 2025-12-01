@@ -1,10 +1,11 @@
-import React from 'react'
+import React, {useMemo} from 'react'
 import {Link} from 'react-router-dom'
-import type {Product} from '../types'
+import type {Product, Designer} from '../types'
 import {OptimizedImage} from './OptimizedImage'
 import {useTranslation} from '../i18n'
 import {useSiteSettings} from '../App'
 import {analytics} from '../src/lib/analytics'
+import {useDesigners} from '../src/hooks/useDesigners'
 
 export const ProductCard: React.FC<{product: Product; variant?: 'default' | 'light'}> = ({
   product,
@@ -14,6 +15,13 @@ export const ProductCard: React.FC<{product: Product; variant?: 'default' | 'lig
   const {settings} = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const isLight = variant === 'light'
+
+  const {data: designers = []} = useDesigners()
+  const designerName = useMemo(() => {
+    if (!product.designerId || !designers.length) return ''
+    const designer = (designers as Designer[]).find(d => d.id === product.designerId)
+    return designer ? t(designer.name) : ''
+  }, [designers, product.designerId, t])
 
   // Helper: mainImage string veya object olabilir
   const mainImageUrl =
@@ -37,28 +45,37 @@ export const ProductCard: React.FC<{product: Product; variant?: 'default' | 'lig
       }}
     >
       <div
-        className={`relative overflow-hidden aspect-square ${imageBorderClass} w-full bg-white flex items-center justify-center`}
+        className={`bg-white ${imageBorderClass} border border-gray-100 overflow-hidden transition-transform duration-700 ease-in-out group-hover:-translate-y-1`}
       >
-        <OptimizedImage
-          src={mainImageUrl}
-          srcMobile={mainImageMobile}
-          srcDesktop={mainImageDesktop}
-          alt={t(product.name)}
-          className={`w-full h-full object-contain transition-transform duration-700 ease-in-out group-hover:scale-[1.03] ${imageBorderClass}`}
-          loading="lazy"
-          quality={85}
-        />
-      </div>
-      <div className="mt-4 overflow-hidden">
-        <div className="transition-transform duration-700 ease-in-out group-hover:-translate-y-1">
-          <h3
-            className={`text-lg ${isLight ? 'font-light text-gray-600 group-hover:text-gray-700' : 'font-semibold text-gray-800 group-hover:text-black'}`}
-          >
-            {t(product.name)}
-          </h3>
-          <p className={`text-sm mt-1 ${isLight ? 'text-gray-500' : 'text-gray-500'}`}>
-            {product.year}
-          </p>
+        <div className="relative overflow-hidden aspect-square w-full flex items-center justify-center bg-white">
+          <OptimizedImage
+            src={mainImageUrl}
+            srcMobile={mainImageMobile}
+            srcDesktop={mainImageDesktop}
+            alt={t(product.name)}
+            className="w-full h-full object-contain transition-transform duration-700 ease-in-out group-hover:scale-[1.03]"
+            loading="lazy"
+            quality={85}
+          />
+        </div>
+        <div className="px-3 py-2 sm:px-3 sm:py-2">
+          <div className="flex items-baseline justify-between gap-2">
+            <h3
+              className={`text-base sm:text-lg tracking-tight font-semibold ${
+                isLight
+                  ? 'text-gray-700 group-hover:text-gray-800'
+                  : 'text-gray-800 group-hover:text-black'
+              }`}
+            >
+              {t(product.name)}
+            </h3>
+            <span className="text-[11px] sm:text-xs uppercase tracking-[0.18em] text-gray-500">
+              {product.year}
+            </span>
+          </div>
+          {designerName && (
+            <p className="mt-1 text-xs sm:text-sm text-gray-500 truncate">{designerName}</p>
+          )}
         </div>
       </div>
     </Link>

@@ -216,7 +216,7 @@ export function ProductsPage() {
 
         {/* Product Grid */}
         {sortedProducts.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 md:gap-x-8 md:gap-y-12 animate-fade-in-up-subtle">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-2 gap-y-3 md:gap-x-4 md:gap-y-4 animate-fade-in-up-subtle">
             {sortedProducts.map((product, index) => (
               <div
                 key={product.id}
