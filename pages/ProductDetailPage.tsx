@@ -174,6 +174,9 @@ export function ProductDetailPage() {
   const [dragStartX, setDragStartX] = useState<number>(0)
   const [draggedX, setDraggedX] = useState<number>(0)
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0)
+  // Hero için sonsuz kayma (cloned slides) index'i
+  const [heroSlideIndex, setHeroSlideIndex] = useState<number>(1) // 1: ilk gerçek slide
+  const [heroTransitionEnabled, setHeroTransitionEnabled] = useState(true)
   const DRAG_THRESHOLD = 50 // pixels
   const [dimLightbox, setDimLightbox] = useState<{
     images: {image: string; title?: LocalizedString}[]
@@ -393,7 +396,16 @@ export function ProductDetailPage() {
   const dimImages = product?.dimensionImages?.filter(di => di?.image) ?? []
   const slideCount = bandMedia.length || 1
 
-  // HomePage hero medya mantığına benzer drag sistemi
+  // Hero için cloned media: [son, ...band, ilk] → yönü koruyan sonsuz kayma
+  const heroMedia = useMemo(() => {
+    if (slideCount <= 1) return bandMedia
+    const first = bandMedia[0]
+    const last = bandMedia[bandMedia.length - 1]
+    return [last, ...bandMedia, first]
+  }, [bandMedia, slideCount])
+  const totalHeroSlides = heroMedia.length || 1
+
+  // HomePage hero medya mantığına benzer drag + sonsuz kayma sistemi
   const handleHeroDragStart = (
     e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
   ) => {
@@ -430,9 +442,9 @@ export function ProductDetailPage() {
     setIsDragging(false)
 
     if (draggedX < -DRAG_THRESHOLD) {
-      setCurrentImageIndex(prev => (prev + 1) % slideCount)
+      heroNext()
     } else if (draggedX > DRAG_THRESHOLD) {
-      setCurrentImageIndex(prev => (prev - 1 + slideCount) % slideCount)
+      heroPrev()
     }
     setDraggedX(0)
   }
@@ -456,6 +468,12 @@ export function ProductDetailPage() {
       const mainIdx = bandMedia.findIndex(m => m.type === 'image' && m.url === mainImageUrl)
       const idx = mainIdx >= 0 ? mainIdx : firstImageIndex >= 0 ? firstImageIndex : 0
       setCurrentImageIndex(idx)
+      // Hero sonsuz kayma index'ini de ilk gerçek slide'a hizala
+      if (slideCount > 1) {
+        setHeroSlideIndex(idx + 1) // cloned dizide +1 offset
+      } else {
+        setHeroSlideIndex(0)
+      }
       // mainImage'i anında güncelle (özellikle video ilkse boş kalmasın)
       const current = bandMedia[idx]
       if (current?.type === 'image' && current.url && current.url !== mainImage) {
@@ -470,6 +488,35 @@ export function ProductDetailPage() {
     if (!product) return
     analytics.trackEcommerce('view_product', product.id, (product as any)?.price)
   }, [product])
+
+  // Hero geçişi bittiğinde cloned slide'lardan gerçek slide'a "snap" et (animasyonsuz)
+  const handleHeroTransitionEnd = () => {
+    if (slideCount <= 1) return
+    if (!heroTransitionEnabled) return
+
+    // Sonraki clone'dan ilk gerçeğe
+    if (heroSlideIndex === totalHeroSlides - 1) {
+      setHeroTransitionEnabled(false)
+      setHeroSlideIndex(1)
+      return
+    }
+    // Önceki clone'dan son gerçeğe
+    if (heroSlideIndex === 0) {
+      setHeroTransitionEnabled(false)
+      setHeroSlideIndex(totalHeroSlides - 2)
+    }
+  }
+
+  // Snap sonrasında transition'ı tekrar aç
+  useEffect(() => {
+    if (!heroTransitionEnabled) {
+      const id = requestAnimationFrame(() => {
+        setHeroTransitionEnabled(true)
+      })
+      return () => cancelAnimationFrame(id)
+    }
+    return
+  }, [heroTransitionEnabled])
 
   if (loading) {
     return (
@@ -487,6 +534,10 @@ export function ProductDetailPage() {
   }
 
   const heroNext = () => {
+    if (slideCount <= 1) return
+    // Sonsuz kayma index'i: cloned dizide bir sağa
+    setHeroSlideIndex(prev => prev + 1)
+    // Mantıksal index (thumbnails, mainImage vs. için)
     setCurrentImageIndex(prev => (prev + 1) % slideCount)
     analytics.event({
       category: 'media',
@@ -495,6 +546,8 @@ export function ProductDetailPage() {
     })
   }
   const heroPrev = () => {
+    if (slideCount <= 1) return
+    setHeroSlideIndex(prev => prev - 1)
     setCurrentImageIndex(prev => (prev - 1 + slideCount) % slideCount)
     analytics.event({
       category: 'media',
@@ -634,17 +687,21 @@ export function ProductDetailPage() {
           onTouchEnd={handleHeroDragEnd}
         >
           <div
-            className="flex h-full transition-transform duration-300 ease-out"
+            className="flex h-full"
             style={{
-              width: `${slideCount * 100}%`,
-              transform: `translateX(calc(-${currentImageIndex * (100 / slideCount)}% + ${draggedX}px))`,
+              width: `${totalHeroSlides * 100}%`,
+              transform: `translateX(calc(-${
+                (heroSlideIndex * 100) / totalHeroSlides
+              }% + ${draggedX}px))`,
+              transition: heroTransitionEnabled ? 'transform 0.3s ease-out' : 'none',
             }}
+            onTransitionEnd={handleHeroTransitionEnd}
           >
-            {bandMedia.map((m, index) => (
+            {heroMedia.map((m, index) => (
               <div
                 key={index}
                 className="relative h-full shrink-0 cursor-pointer bg-white flex items-center justify-center"
-                style={{width: `${100 / slideCount}%`}}
+                style={{width: `${100 / totalHeroSlides}%`}}
                 onClick={() => {
                   if (!isDragging && draggedX === 0) {
                     analytics.event({
@@ -774,7 +831,17 @@ export function ProductDetailPage() {
                   {bandMedia.map((m, idx) => (
                     <button
                       key={idx}
-                      onClick={() => setCurrentImageIndex(idx)}
+                      onClick={() => {
+                        // Thumbnail tıklanınca hero sonsuz kaydırma index'ini
+                        // ilgili slide'a hizala ve ana görsel index'ini güncelle.
+                        if (slideCount > 1) {
+                          setHeroTransitionEnabled(false)
+                          setHeroSlideIndex(idx + 1) // cloned dizide +1 offset
+                        } else {
+                          setHeroSlideIndex(0)
+                        }
+                        setCurrentImageIndex(idx)
+                      }}
                       className={`relative flex-shrink-0 w-24 h-24 overflow-hidden border-2 transition-all duration-300 ${currentImageIndex === idx ? 'border-gray-400 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}
                     >
                       {m.type === 'image' ? (

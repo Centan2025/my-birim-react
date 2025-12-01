@@ -448,6 +448,8 @@ const Footer = () => {
               <div className="flex items-center justify-center border-b border-white pb-0.5 w-full max-w-[280px] mx-auto">
                 <input
                   type="email"
+                  id="footer-subscribe-email"
+                  name="footer-subscribe-email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder={t('email_placeholder')}
@@ -605,6 +607,8 @@ const Footer = () => {
                 <div className="flex-1 min-w-[180px]">
                   <input
                     type="email"
+                    id="footer-subscribe-email-inline"
+                    name="footer-subscribe-email-inline"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder={t('email_placeholder')}

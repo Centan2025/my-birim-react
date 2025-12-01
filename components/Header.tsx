@@ -1668,6 +1668,8 @@ export function Header() {
               <div className="flex items-center justify-center border-b border-white pb-0.5 w-full max-w-[280px]">
                 <input
                   type="email"
+                  id="header-subscribe-email"
+                  name="header-subscribe-email"
                   value={subscribeEmail}
                   onChange={e => setSubscribeEmailState(e.target.value)}
                   placeholder={t('email_placeholder')}
@@ -1729,7 +1731,9 @@ export function Header() {
             <input
               ref={searchInputRef}
               type="search"
-              placeholder=""
+              placeholder={t('search_placeholder') || ''}
+              id="global-search-input"
+              name="global-search"
               className={`w-full bg-transparent text-white border-b border-gray-500 focus:border-white outline-none transition-colors duration-300 ${isMobile ? 'text-lg pb-2' : 'text-2xl pb-3'}`}
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}

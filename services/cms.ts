@@ -329,11 +329,18 @@ const normalizeProduct = (p: Product): Product => ({
 let storage: Storage
 const memoryStore: {[key: string]: string} = {}
 
+// Storage erişimini güvenli hâle getir:
+// - SSR'de `window` olmadığı için localStorage kullanma
+// - Bazı tarayıcılarda "Access to storage is not allowed from this context" hatasını
+//   tetikleyebileceği için erişimi try/catch içinde ve sadece browser context'inde dene.
 try {
-  // Check if localStorage is available and writable
-  localStorage.setItem('__storage_test__', 'test')
-  localStorage.removeItem('__storage_test__')
-  storage = localStorage
+  if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+    window.localStorage.setItem('__storage_test__', 'test')
+    window.localStorage.removeItem('__storage_test__')
+    storage = window.localStorage
+  } else {
+    throw new Error('localStorage not available')
+  }
 } catch (e) {
   storage = {
     getItem: (key: string) => memoryStore[key] || null,

@@ -23,6 +23,31 @@ class Analytics {
   private isInitialized = false
   private googleAnalyticsId: string | null = null
   private plausibleDomain: string | null = null
+  private hasRejectionHandler = false
+  private hasErrorHandler = false
+  private storagePatched = false
+
+  /**
+   * Bazı tarayıcılarda (özellikle Safari / private mode) storage erişimi yasak.
+   * Bu helper, localStorage'a gerçekten erişilebiliyor mu diye test eder.
+   */
+  private isStorageAvailable(): boolean {
+    try {
+      if (typeof window === 'undefined') return false
+      const key = '__analytics_storage_test__'
+      window.localStorage.setItem(key, '1')
+      window.localStorage.removeItem(key)
+      return true
+    } catch (e: any) {
+      if (DEBUG_LOGS) {
+        console.debug(
+          '[Analytics] Storage not available, disabling GA usage for this session.',
+          e?.message || e
+        )
+      }
+      return false
+    }
+  }
 
   /**
    * Initialize analytics
@@ -48,8 +73,128 @@ class Analytics {
   private initGoogleAnalytics(gaId: string) {
     if (typeof window === 'undefined') return
 
-    // react-ga4, GA4 script'ini kendi yükler ve initialize eder
-    ReactGA.initialize(gaId)
+    // Bazı ortamlarda (özellikle Safari / 3rd party context) localStorage erişimi
+    // "Access to storage is not allowed from this context" hatası fırlatabiliyor.
+    // GA'yı kapatmak yerine, Storage API'lerini sarmalayıp bu spesifik hatayı
+    // yutan bir patch uyguluyoruz.
+    this.patchStorageIfNeeded()
+
+    try {
+      // react-ga4, GA4 script'ini kendi yükler ve initialize eder
+      ReactGA.initialize(gaId)
+    } catch (e: any) {
+      if (DEBUG_LOGS) {
+        console.debug(
+          '[Analytics] GA4 initialize error (GA etkin kalacak, hata yutuldu):',
+          e?.message || e
+        )
+      }
+    }
+
+    // GA her zaman etkin kalsın istiyoruz, fakat bazı ortamlarda (Safari, bazı Chrome context'leri)
+    // storage erişimi "Uncaught (in promise) Error: Access to storage is not allowed from this context"
+    // şeklinde görünüyor. Bunu global olarak yutmak için hem unhandledrejection hem de error handler ekliyoruz.
+    if (!this.hasRejectionHandler) {
+      window.addEventListener('unhandledrejection', event => {
+        try {
+          const reason = event.reason
+          const msg =
+            (reason && (reason.message || reason.toString?.())) || (event as any).message || ''
+          if (typeof msg === 'string' && msg.includes('Access to storage is not allowed')) {
+            // Bu hatayı GA yüzünden unutulmuş promise rejection olarak görme,
+            // uygulamayı ve konsolu kirletmesin.
+            event.preventDefault()
+            if (DEBUG_LOGS) {
+              console.debug('[Analytics] Storage access rejection suppressed:', msg)
+            }
+          }
+        } catch {
+          // Herhangi bir şey olursa, handler hata fırlatmasın.
+        }
+      })
+      this.hasRejectionHandler = true
+    }
+
+    if (!this.hasErrorHandler) {
+      window.addEventListener(
+        'error',
+        event => {
+          try {
+            const msg =
+              (event.error && (event.error as any).message) || (event.message as string) || ''
+
+            if (typeof msg === 'string' && msg.includes('Access to storage is not allowed')) {
+              // Bazı tarayıcılarda senkron hatalar "Uncaught Error: Access to storage is not allowed..."
+              // olarak geliyor; bunları da bastırıyoruz ki GA açık kalırken konsol kirlenmesin.
+              event.preventDefault()
+              // Safari vb. için ekstra güvenlik
+              // eslint-disable-next-line no-param-reassign
+              ;(event as any).returnValue = false
+
+              if (DEBUG_LOGS) {
+                console.debug('[Analytics] Storage access error suppressed:', msg)
+              }
+            }
+          } catch {
+            // handler kendi içinde asla patlamasın
+          }
+        },
+        {
+          capture: true,
+        }
+      )
+      this.hasErrorHandler = true
+    }
+  }
+
+  /**
+   * Storage API'lerini (localStorage / sessionStorage) patch ederek
+   * "Access to storage is not allowed..." hatasını sessizce yutar.
+   *
+   * Not: GA'yı kapatmıyoruz; sadece bu özel storage hatasını engelliyoruz.
+   */
+  private patchStorageIfNeeded() {
+    if (this.storagePatched) return
+    if (typeof window === 'undefined') return
+    const anyWindow = window as any
+    const StorageCtor = anyWindow.Storage
+    const StorageProto = StorageCtor && StorageCtor.prototype
+    if (!StorageProto) return
+
+    const BLOCK_SUBSTRING = 'Access to storage is not allowed'
+
+    const wrapMethod = (methodName: keyof Storage) => {
+      const original = (StorageProto as any)[methodName]
+      if (typeof original !== 'function') return
+      ;(StorageProto as any)[methodName] = function (...args: any[]) {
+        try {
+          return original.apply(this, args)
+        } catch (err: any) {
+          const msg = err?.message || String(err || '')
+          if (typeof msg === 'string' && msg.includes(BLOCK_SUBSTRING)) {
+            if (DEBUG_LOGS) {
+              console.debug('[Analytics] Storage method suppressed:', String(methodName), '-', msg)
+            }
+            // API sözleşmesine yakın kal: getItem / key için null döndür,
+            // diğerleri için undefined yeterli.
+            if (methodName === 'getItem' || methodName === 'key') {
+              return null
+            }
+            return undefined
+          }
+          // Farklı bir hata ise normal şekilde fırlat
+          throw err
+        }
+      }
+    }
+
+    wrapMethod('getItem')
+    wrapMethod('setItem')
+    wrapMethod('removeItem')
+    wrapMethod('clear')
+    wrapMethod('key')
+
+    this.storagePatched = true
   }
 
   /**
@@ -81,11 +226,17 @@ class Analytics {
   pageview(path: string, title?: string) {
     // Google Analytics (GA4 via react-ga4)
     if (this.googleAnalyticsId) {
-      ReactGA.send({
-        hitType: 'pageview',
-        page: path,
-        title,
-      })
+      try {
+        ReactGA.send({
+          hitType: 'pageview',
+          page: path,
+          title,
+        })
+      } catch (e: any) {
+        if (DEBUG_LOGS) {
+          console.debug('[Analytics] GA4 pageview error (ignored):', e?.message || e)
+        }
+      }
     }
 
     // Plausible
@@ -102,14 +253,23 @@ class Analytics {
    * Track event
    */
   event(event: AnalyticsEvent) {
+    const safeValue =
+      typeof event.value === 'number' && Number.isFinite(event.value) ? event.value : undefined
+
     // Google Analytics (GA4 via react-ga4)
     if (this.googleAnalyticsId) {
-      ReactGA.event({
-        action: event.action,
-        category: event.category,
-        label: event.label,
-        value: event.value,
-      })
+      try {
+        ReactGA.event({
+          action: event.action,
+          category: event.category,
+          label: event.label,
+          value: safeValue,
+        })
+      } catch (err) {
+        if (import.meta.env.DEV && DEBUG_LOGS) {
+          console.debug('[Analytics] GA4 event error (ignored):', err)
+        }
+      }
     }
 
     // Plausible
@@ -118,7 +278,7 @@ class Analytics {
         props: {
           category: event.category,
           label: event.label,
-          value: event.value,
+          value: safeValue,
         },
       })
     }
@@ -143,11 +303,13 @@ class Analytics {
    * Track e-commerce event
    */
   trackEcommerce(action: string, productId?: string, value?: number) {
+    const numericValue = typeof value === 'number' && Number.isFinite(value) ? value : undefined
+
     this.event({
       action,
       category: 'ecommerce',
       label: productId,
-      value,
+      value: numericValue,
     })
   }
 }
