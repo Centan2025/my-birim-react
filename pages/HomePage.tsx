@@ -581,7 +581,9 @@ export function HomePage() {
             style={{
               backgroundImage: `url(${isMobile && bgImageMobile ? bgImageMobile : bgImageDesktop || bgImageUrl})`,
               backgroundSize: isMobile ? '100vw auto' : 'cover',
-              backgroundAttachment: 'fixed',
+              // iOS Safari'de background-attachment: fixed scroll sırasında görseli kaybedebiliyor,
+              // bu yüzden mobilde 'scroll' kullanıyoruz.
+              backgroundAttachment: isMobile ? 'scroll' : 'fixed',
               backgroundPosition: isMobile ? 'left center' : 'center center',
               backgroundRepeat: 'no-repeat',
               ...(isMobile && inspirationImageHeight && bgImageUrl
