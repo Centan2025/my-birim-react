@@ -222,7 +222,7 @@ const MediaModal: React.FC<{
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 overflow-y-auto"
+      className="fixed inset-0 z-[100] flex items-center md:items-start justify-center md:pt-24 bg-black/80 p-4 overflow-hidden"
       role="button"
       tabIndex={-1}
       onClick={handleBackdropClick}
@@ -407,12 +407,14 @@ const LocationCard: React.FC<{
           onSelect()
         }
       }}
-      className={`p-4 cursor-pointer transition-all duration-300 ${isSelected ? 'bg-gray-200' : 'hover:bg-gray-100'}`}
+      className={`p-4 cursor-pointer w-full max-w-full transition-all duration-300 ${
+        isSelected ? 'bg-gray-200' : 'hover:bg-gray-100'
+      }`}
     >
       <h3 className="text-xl font-light text-gray-500">{t(location.title)}</h3>
       <p className="mt-2 text-gray-500 flex items-start gap-2 font-light">
         <MapPinIcon className="mt-1 flex-shrink-0 text-gray-400" />
-        <span>{location.address}</span>
+        <span className="break-words">{location.address}</span>
       </p>
       <p className="mt-1 text-gray-500 flex items-center gap-2 font-light">
         <PhoneIcon className="flex-shrink-0 text-gray-400" />
@@ -520,7 +522,7 @@ export function ContactPage() {
           {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
           <div
             ref={thumbRef}
-            className="hide-scrollbar overflow-x-auto cursor-grab active:cursor-grabbing"
+            className="hide-scrollbar overflow-x-auto cursor-grab active:cursor-grabbing w-full max-w-full"
             onMouseDown={e => {
               setThumbDragStartX(e.clientX)
               setThumbScrollStart(thumbRef.current ? thumbRef.current.scrollLeft : 0)
@@ -552,7 +554,7 @@ export function ContactPage() {
                     setSelectedMediaIndex(idx)
                     setIsModalOpen(true)
                   }}
-                  className="relative flex-shrink-0 w-24 h-24 overflow-hidden border-2 border-transparent opacity-80 hover:opacity-100 hover:scale-105 transition-all duration-300"
+                  className="relative flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 overflow-hidden border-2 border-transparent opacity-80 hover:opacity-100 hover:scale-105 transition-all duration-300"
                 >
                   {m.type === 'image' ? (
                     <OptimizedImage
@@ -594,21 +596,32 @@ export function ContactPage() {
           {/* Scroll buttons */}
           {selectedLocationMedia.length > 6 && (
             <>
+              {/* Ok butonlarını sadece desktop'ta göster; mobilde parmakla kaydırma yeterli */}
               <button
                 aria-label="scroll-left"
                 onClick={() => {
-                  if (thumbRef.current) thumbRef.current.scrollBy({left: -240, behavior: 'smooth'})
+                  if (!thumbRef.current) return
+                  const delta = thumbRef.current.clientWidth || 240
+                  thumbRef.current.scrollTo({
+                    left: thumbRef.current.scrollLeft - delta,
+                    behavior: 'smooth',
+                  })
                 }}
-                className="absolute left-0 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-800 shadow px-2 py-2"
+                className="hidden md:block md:absolute md:left-0 md:top-1/2 md:-translate-y-1/2 bg-white/70 hover:bg-white text-gray-800 shadow px-2 py-2"
               >
                 ‹
               </button>
               <button
                 aria-label="scroll-right"
                 onClick={() => {
-                  if (thumbRef.current) thumbRef.current.scrollBy({left: 240, behavior: 'smooth'})
+                  if (!thumbRef.current) return
+                  const delta = thumbRef.current.clientWidth || 240
+                  thumbRef.current.scrollTo({
+                    left: thumbRef.current.scrollLeft + delta,
+                    behavior: 'smooth',
+                  })
                 }}
-                className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-800 shadow px-2 py-2"
+                className="hidden md:block md:absolute md:right-0 md:top-1/2 md:-translate-y-1/2 bg-white/70 hover:bg-white text-gray-800 shadow px-2 py-2"
               >
                 ›
               </button>
@@ -636,8 +649,8 @@ export function ContactPage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-12">
-          <div className="bg-white p-6 shadow-sm border border-gray-300 space-y-8 overflow-y-auto max-h-[600px]">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12">
+          <div className="bg-white p-6 shadow-sm border border-gray-300 space-y-8 w-full overflow-x-hidden">
             {/* FIX: Refactored to use Object.keys to avoid potential type inference issues with Object.entries in some TypeScript environments. */}
             {Object.keys(locationGroups).map(type => (
               <div key={type}>
@@ -662,12 +675,12 @@ export function ContactPage() {
 
           {/* Mobilde: haritanın üzerinde medya bandı */}
           {selectedLocationMedia.length > 0 && (
-            <div className="mt-6 border-y border-gray-300 py-3 md:hidden">
+            <div className="mt-4 border-y border-gray-300 py-2 md:hidden w-full overflow-x-hidden">
               {renderSelectedLocationMediaStrip()}
             </div>
           )}
 
-          <div className="bg-white shadow-sm border border-gray-300 overflow-hidden min-h-[400px] md:min-h-0 sticky top-28 h-[600px]">
+          <div className="bg-white shadow-sm border border-gray-300 overflow-hidden min-h-[340px] md:min-h-[380px] sticky top-32 h-[420px] md:h-[460px] lg:h-[520px]">
             {selectedLocation?.mapEmbedUrl ? (
               <iframe
                 src={convertGoogleMapsUrlToEmbed(selectedLocation.mapEmbedUrl)}

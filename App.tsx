@@ -324,7 +324,7 @@ const Footer = () => {
               to="/products"
               className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
             >
-              {t('products')}
+              {t('view_all')}
             </Link>
             <Link
               to="/designers"

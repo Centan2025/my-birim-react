@@ -9,6 +9,7 @@ body {
   margin: 0;
   padding: 0;
   font-family:
+    'Jura',
     'Inter',
     -apple-system,
     BlinkMacSystemFont,
@@ -17,16 +18,28 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color: #111827; /* çok daha koyu gri (yaklaşık Tailwind gray-900) */
+  font-weight: 500;
 }
 
 * {
   font-family:
+    'Jura',
     'Inter',
     -apple-system,
     BlinkMacSystemFont,
     'Segoe UI',
     Roboto,
     sans-serif;
+}
+
+/* Tailwind gri tonlarını daha da koyulaştır (sık kullanılanlar) */
+.text-gray-500 {
+  color: #111827 !important; /* neredeyse siyah (gray-900) */
+}
+
+.text-gray-600 {
+  color: #111827 !important; /* aynı şekilde çok koyu */
 }
 
 @keyframes fade-in-down {
