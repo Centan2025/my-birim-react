@@ -14,7 +14,6 @@ export function HomePage() {
   const {data: content} = useHomePageContent()
   const {data: settings} = useSiteSettings()
   const [inspirationImageHeight, setInspirationImageHeight] = useState<number | null>(null)
-  const [isIOS, setIsIOS] = useState(false)
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth < 1024
@@ -44,13 +43,6 @@ export function HomePage() {
   )
 
   useSEO(seoData)
-
-  // iOS Safari tespiti (background-attachment: fixed bug'ları için)
-  useEffect(() => {
-    if (typeof navigator === 'undefined') return
-    const ua = navigator.userAgent || (navigator as any).vendor || ''
-    setIsIOS(/iPad|iPhone|iPod/.test(ua))
-  }, [])
 
   // İlham görselinin yüksekliğini hesapla - hook'lar early return'den önce olmalı
   useEffect(() => {
@@ -589,9 +581,8 @@ export function HomePage() {
             style={{
               backgroundImage: `url(${isMobile && bgImageMobile ? bgImageMobile : bgImageDesktop || bgImageUrl})`,
               backgroundSize: isMobile ? '100vw auto' : 'cover',
-              // iOS Safari'de background-attachment: fixed scroll sırasında görseli kaybedebiliyor,
-              // bu yüzden SADECE iOS mobilde 'scroll', diğer tüm cihazlarda 'fixed' kullanıyoruz.
-              backgroundAttachment: isMobile ? (isIOS ? 'scroll' : 'fixed') : 'fixed',
+              // Tüm cihazlarda sabit arka plan: görsel sabit, şeffaf içerik scroll ile hareket eder
+              backgroundAttachment: 'fixed',
               backgroundPosition: isMobile ? 'left center' : 'center center',
               backgroundRepeat: 'no-repeat',
               ...(isMobile && inspirationImageHeight && bgImageUrl
