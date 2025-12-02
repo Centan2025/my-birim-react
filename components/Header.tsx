@@ -161,6 +161,7 @@ export function Header() {
   const mobileMenuRef = useRef<HTMLDivElement>(null)
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null)
   const mobileMenuFocusTrap = useFocusTrap(isMobileMenuOpen)
+  const mobileMenuCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [submenuOffset, setSubmenuOffset] = useState(0)
 
   const {isLoggedIn} = useAuth()
@@ -179,6 +180,7 @@ export function Header() {
   const isOverlayMobileMenu = Boolean(
     isMobile && settings && settings.mobileHeaderAnimation === 'overlay'
   )
+  const [isMobileMenuClosing, setIsMobileMenuClosing] = useState(false)
 
   // Search states
   const [searchQuery, setSearchQuery] = useState('')
@@ -866,6 +868,49 @@ export function Header() {
     {to: '/contact', label: (t('contact') || '').toLocaleUpperCase('en')},
   ]
 
+  // Mobil overlay menü kapanırken önce yazıların kaybolup sonra panelin animasyonla kapanması için (biraz daha hızlı)
+  const mobileMenuCloseDelay = mobileMenuLinks.length * 80 + 80
+
+  // Overlay mobil menüde: kapanma animasyonu süresince header rengini sabit siyah tut
+  useEffect(() => {
+    if (!isOverlayMobileMenu || !isMobile) {
+      // Overlay modunda değilsek veya mobil değilsek zamanlayıcıyı temizle
+      if (mobileMenuCloseTimeoutRef.current) {
+        clearTimeout(mobileMenuCloseTimeoutRef.current)
+        mobileMenuCloseTimeoutRef.current = null
+      }
+      setIsMobileMenuClosing(false)
+      return
+    }
+
+    if (isMobileMenuOpen) {
+      // Menü tekrar açıldıysa: closing durumunu iptal et
+      setIsMobileMenuClosing(false)
+      if (mobileMenuCloseTimeoutRef.current) {
+        clearTimeout(mobileMenuCloseTimeoutRef.current)
+        mobileMenuCloseTimeoutRef.current = null
+      }
+      return
+    }
+
+    // Menü kapanıyorsa: kapanma animasyonu süresince header siyah kalsın
+    setIsMobileMenuClosing(true)
+    if (mobileMenuCloseTimeoutRef.current) {
+      clearTimeout(mobileMenuCloseTimeoutRef.current)
+    }
+    mobileMenuCloseTimeoutRef.current = setTimeout(() => {
+      setIsMobileMenuClosing(false)
+      mobileMenuCloseTimeoutRef.current = null
+    }, mobileMenuCloseDelay + 500)
+
+    return () => {
+      if (mobileMenuCloseTimeoutRef.current) {
+        clearTimeout(mobileMenuCloseTimeoutRef.current)
+        mobileMenuCloseTimeoutRef.current = null
+      }
+    }
+  }, [isMobileMenuOpen, isOverlayMobileMenu, isMobile, mobileMenuCloseDelay])
+
   const NavItem: React.FC<{
     to: string
     children: React.ReactNode
@@ -1006,8 +1051,9 @@ export function Header() {
           }`}
           style={{
             backgroundColor: (() => {
-              // Overlay mobil menü AÇIKKEN header'ı da tamamen opak siyah yap
-              if (isOverlayMobileMenu && isMobileMenuOpen) {
+              // Overlay mobil menü AÇIKKEN veya kapanma animasyonu sürerken
+              // header'ı da tamamen opak siyah yap
+              if (isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)) {
                 return '#000000'
               }
 
@@ -1544,15 +1590,16 @@ export function Header() {
             }
           }}
           id="mobile-menu"
-          className={`mobile-menu-overlay fixed left-0 right-0 bottom-0 lg:hidden z-40 flex flex-col border-t border-white/10 text-white pb-8 px-6 transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] ${
+          className={`mobile-menu-overlay fixed left-0 right-0 bottom-0 lg:hidden z-40 flex flex-col border-t border-white/10 text-white pb-8 px-6 transition-all duration-400 ease-[cubic-bezier(0.76,0,0.24,1)] ${
             isMobileMenuOpen
-              ? 'translate-y-0 visible pointer-events-auto'
-              : 'opacity-0 translate-y-2 invisible pointer-events-none'
+              ? 'translate-y-0 opacity-100 pointer-events-auto'
+              : 'translate-y-2 opacity-0 pointer-events-none'
           }`}
           style={{
             top: `${headerHeight}px`,
             backgroundColor: '#000000',
-            opacity: isMobileMenuOpen ? 1 : 0,
+            // Kapanırken panel animasyonunu, linklerin ters sırada kaybolma animasyonundan sonra başlat
+            transitionDelay: isMobileMenuOpen ? '0ms' : `${mobileMenuCloseDelay}ms`,
           }}
           role="menu"
           aria-label={t('main_menu') || 'Ana menü'}
@@ -1561,7 +1608,7 @@ export function Header() {
           {/* Dil ve kullanıcı alanı */}
           {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
             <div
-              className={`mb-6 pt-4 pb-4 transition-all duration-500 ${
+              className={`mb-6 pt-4 pb-4 transition-all duration-400 ${
                 isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
               }`}
               style={{transitionDelay: isMobileMenuOpen ? '50ms' : '0ms'}}
@@ -1577,14 +1624,16 @@ export function Header() {
                           setLocale(langCode)
                         }}
                         aria-pressed={isActive}
-                        className={`group relative px-1.5 py-0.5 text-xs uppercase tracking-[0.2em] transition-colors duration-200 ${
+                        className={`group relative px-1.5 py-0.5 text-xs uppercase tracking-[0.2em] transition-all duration-200 ${
                           isActive
                             ? 'text-white font-extralight'
                             : 'text-gray-400/90 hover:text-white font-extralight'
-                        }`}
+                        } ${isActive ? 'scale-105' : 'scale-100'}`}
                         style={{fontFamily: 'Inter, sans-serif', letterSpacing: '0.2em'}}
                       >
-                        <span className="relative inline-block">{langCode.toUpperCase()}</span>
+                        <span className="relative inline-block transition-opacity transition-transform duration-200 ease-out">
+                          {langCode.toUpperCase()}
+                        </span>
                       </button>
                     )
                   })}
@@ -1613,11 +1662,16 @@ export function Header() {
                 key={item.to}
                 to={item.to}
                 style={{
-                  transitionDelay: `${index * 100}ms`,
+                  // Açılırken yukarı doğru (ilk eleman en geç), kapanırken tersine (ilk eleman en erken)
+                  transitionDelay: `${
+                    isMobileMenuOpen
+                      ? index * 100
+                      : (mobileMenuLinks.length - 1 - index) * 100
+                  }ms`,
                   fontWeight: 300,
                   letterSpacing: '0.2em',
                 }}
-                className={`group flex items-center justify-between text-xl md:text-2xl font-light leading-tight text-white transition-all duration-500 ${
+                className={`group flex items-center justify-between text-xl md:text-2xl font-light leading-tight text-white transition-all duration-400 ${
                   isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -1632,7 +1686,7 @@ export function Header() {
 
           {/* Alt kısım - Subscribe ve Sosyal Medya */}
           <div
-            className={`mt-auto pt-8 transition-all duration-500 ${
+            className={`mt-auto pt-8 transition-all duration-400 ${
               isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
             }`}
             style={{transitionDelay: isMobileMenuOpen ? '300ms' : '0ms'}}
@@ -1673,7 +1727,7 @@ export function Header() {
                   value={subscribeEmail}
                   onChange={e => setSubscribeEmailState(e.target.value)}
                   placeholder={t('email_placeholder')}
-                  className="w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 transition-all duration-200 text-[11px] text-center"
+                  className="w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 transition-all duration-200 text-[15px] text-center"
                   style={{outline: 'none', boxShadow: 'none'}}
                 />
               </div>
@@ -1718,8 +1772,7 @@ export function Header() {
           isSearchOpen
             ? 'opacity-100 translate-y-0 pointer-events-auto'
             : isMobile
-              ? // Mobilde yukarıdan aşağı "atlama" hissini azaltmak için sadece opacity ile animasyon yap
-                'opacity-0 translate-y-0 pointer-events-none'
+              ? 'opacity-0 -translate-y-4 pointer-events-none'
               : 'opacity-0 -translate-y-4 pointer-events-none'
         }`}
         style={{

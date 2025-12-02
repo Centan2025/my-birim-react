@@ -26,9 +26,16 @@ export function useProducts() {
 export function useProduct(productId: string | undefined) {
   return useQuery({
     queryKey: ['product', productId],
-    queryFn: () => {
+    queryFn: async () => {
       if (!productId) throw new Error('Product ID is required')
-      return getProductById(productId)
+      const product = await getProductById(productId)
+      if (!product) {
+        // React Query, queryFn'in undefined döndürmesini sevmiyor; bunun yerine anlamlı bir hata fırlatalım.
+        const err = new Error(`Product not found for id "${productId}"`)
+        ;(err as any).status = 404
+        throw err
+      }
+      return product
     },
     enabled: !!productId,
     staleTime: 10 * 60 * 1000, // 10 dakika - detay sayfası daha az değişir

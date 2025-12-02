@@ -453,7 +453,7 @@ const Footer = () => {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder={t('email_placeholder')}
-                  className="w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[11px] text-center"
+                  className="w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[15px] text-center"
                   style={{outline: 'none', boxShadow: 'none'}}
                   onFocus={e => (e.target.style.outline = 'none')}
                   onBlur={e => (e.target.style.outline = 'none')}
@@ -462,7 +462,7 @@ const Footer = () => {
               <div className="w-full flex justify-center mt-6">
                 <button
                   type="submit"
-                  className="px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-xs font-medium uppercase tracking-[0.25em]"
+                  className="px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-sm font-medium uppercase tracking-[0.25em]"
                 >
                   {t('subscribe')}
                 </button>
@@ -612,7 +612,7 @@ const Footer = () => {
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder={t('email_placeholder')}
-                    className="w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[11px] text-left"
+                    className="w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[14px] text-left"
                     style={{outline: 'none', boxShadow: 'none'}}
                     onFocus={e => {
                       e.target.style.outline = 'none'
@@ -637,14 +637,14 @@ const Footer = () => {
         <div className="mt-8 lg:mt-16 border-t border-gray-700 pt-8 flex flex-col md:flex-row md:justify-between md:items-start gap-6 text-xs">
           <p className="md:flex-shrink-0 text-center md:text-left">{t(content.copyrightText)}</p>
           {content.legalLinks && content.legalLinks.length > 0 && (
-            <div className="flex flex-col md:flex-row md:items-center md:gap-x-4 items-center gap-2">
+          <div className="flex flex-col md:flex-row md:items-center md:gap-x-4 items-center gap-2">
               {content.legalLinks
                 .filter(link => link?.isVisible)
                 .map((link, index) => {
                   const url = typeof link?.url === 'string' ? link.url : ''
                   if (!url) {
                     return (
-                      <span key={index} className="opacity-80 select-none">
+                      <span key={index} className="opacity-80 select-none text-gray-400">
                         {t(link.text)}
                       </span>
                     )
@@ -655,7 +655,7 @@ const Footer = () => {
                     <Link
                       key={index}
                       to={url}
-                      className="text-gray-500 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
+                      className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
                     >
                       {t(link.text)}
                     </Link>
@@ -663,7 +663,7 @@ const Footer = () => {
                     <a
                       key={index}
                       href={url}
-                      className="text-gray-500 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
+                      className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
                       target={isHttp ? '_blank' : undefined}
                       rel={isHttp ? 'noopener noreferrer' : undefined}
                     >
@@ -753,28 +753,169 @@ const AppContent = () => {
               tabIndex={-1}
             >
               <TopBanner />
+              {/* Sayfalar arası kaydırma/fade animasyonlu geçişler */}
               <Suspense fallback={<PageLoader />}>
                 <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/categories" element={<CategoriesPage />} />
-                  <Route path="/products" element={<ProductsPage />} />
-                  <Route path="/products/:categoryId" element={<ProductsPage />} />
-                  <Route path="/product/:productId" element={<ProductDetailPage />} />
-                  <Route path="/designers" element={<DesignersPage />} />
-                  <Route path="/designer/:designerId" element={<DesignerDetailPage />} />
-                  <Route path="/projects" element={<ProjectsPage />} />
-                  <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
-                  <Route path="/about" element={<AboutPage />} />
-                  <Route path="/contact" element={<ContactPage />} />
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="/verify-email" element={<VerifyEmailPage />} />
-                  <Route path="/news" element={<NewsPage />} />
-                  <Route path="/news/:newsId" element={<NewsDetailPage />} />
-                  <Route path="/cookies" element={<CookiesPage />} />
-                  <Route path="/privacy" element={<PrivacyPage />} />
-                  <Route path="/terms" element={<TermsPage />} />
-                  <Route path="/kvkk" element={<KvkkPage />} />
+                  <Route
+                    path="/"
+                    element={
+                      <div className="page-transition">
+                        <HomePage />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="/categories"
+                    element={
+                      <div className="page-transition">
+                        <CategoriesPage />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="/products"
+                    element={
+                      <div className="page-transition">
+                        <ProductsPage />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="/products/:categoryId"
+                    element={
+                      <div className="page-transition">
+                        <ProductsPage />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="/product/:productId"
+                    element={
+                      <div className="page-transition">
+                        <ProductDetailPage />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="/designers"
+                    element={
+                      <div className="page-transition">
+                        <DesignersPage />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="/designer/:designerId"
+                    element={
+                      <div className="page-transition">
+                        <DesignerDetailPage />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="/projects"
+                    element={
+                      <div className="page-transition">
+                        <ProjectsPage />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="/projects/:projectId"
+                    element={
+                      <div className="page-transition">
+                        <ProjectDetailPage />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="/about"
+                    element={
+                      <div className="page-transition">
+                        <AboutPage />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="/contact"
+                    element={
+                      <div className="page-transition">
+                        <ContactPage />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="/login"
+                    element={
+                      <div className="page-transition">
+                        <LoginPage />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="/profile"
+                    element={
+                      <div className="page-transition">
+                        <ProfilePage />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="/verify-email"
+                    element={
+                      <div className="page-transition">
+                        <VerifyEmailPage />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="/news"
+                    element={
+                      <div className="page-transition">
+                        <NewsPage />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="/news/:newsId"
+                    element={
+                      <div className="page-transition">
+                        <NewsDetailPage />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="/cookies"
+                    element={
+                      <div className="page-transition">
+                        <CookiesPage />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="/privacy"
+                    element={
+                      <div className="page-transition">
+                        <PrivacyPage />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="/terms"
+                    element={
+                      <div className="page-transition">
+                        <TermsPage />
+                      </div>
+                    }
+                  />
+                  <Route
+                    path="/kvkk"
+                    element={
+                      <div className="page-transition">
+                        <KvkkPage />
+                      </div>
+                    }
+                  />
                 </Routes>
               </Suspense>
             </main>

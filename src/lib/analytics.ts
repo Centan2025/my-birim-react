@@ -55,6 +55,10 @@ class Analytics {
   init() {
     if (this.isInitialized) return
 
+    // GA ID olsa da olmasa da, Storage patch'ini devreye al ki
+    // "Access to storage is not allowed..." hataları development'ta konsolu kirletmesin.
+    this.patchStorageIfNeeded()
+
     // Google Analytics
     this.googleAnalyticsId = import.meta.env['VITE_GA_ID'] || null
     if (this.googleAnalyticsId) {

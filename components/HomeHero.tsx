@@ -84,6 +84,77 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
     }
   }, [])
 
+  // Ortak ileri/geri geçiş fonksiyonları (sonsuz kaydırma + klon mantığını korur)
+  const goToNextSlide = () => {
+    const count = heroMedia.length || 1
+    if (count <= 1) {
+      setDraggedX(0)
+      return
+    }
+
+    const nextSlide = currentSlide + 1
+    if (nextSlide >= count) {
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current)
+      }
+      if (innerTimeoutRef.current) {
+        clearTimeout(innerTimeoutRef.current)
+      }
+      setCurrentSlide(nextSlide)
+      transitionTimeoutRef.current = setTimeout(() => {
+        setIsTransitioning(true)
+        requestAnimationFrame(() => {
+          setCurrentSlide(0)
+          requestAnimationFrame(() => {
+            innerTimeoutRef.current = setTimeout(() => {
+              setIsTransitioning(false)
+              transitionTimeoutRef.current = null
+              innerTimeoutRef.current = null
+            }, 16)
+          })
+        })
+      }, 600)
+    } else {
+      setCurrentSlide(nextSlide)
+    }
+    setDraggedX(0)
+  }
+
+  const goToPrevSlide = () => {
+    const count = heroMedia.length || 1
+    if (count <= 1) {
+      setDraggedX(0)
+      return
+    }
+
+    const prevSlide = currentSlide - 1
+    if (prevSlide < 0) {
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current)
+      }
+      if (innerTimeoutRef.current) {
+        clearTimeout(innerTimeoutRef.current)
+      }
+      setCurrentSlide(prevSlide)
+      transitionTimeoutRef.current = setTimeout(() => {
+        setIsTransitioning(true)
+        requestAnimationFrame(() => {
+          setCurrentSlide(slideCount - 1)
+          requestAnimationFrame(() => {
+            innerTimeoutRef.current = setTimeout(() => {
+              setIsTransitioning(false)
+              transitionTimeoutRef.current = null
+              innerTimeoutRef.current = null
+            }, 16)
+          })
+        })
+      }, 600)
+    } else {
+      setCurrentSlide(prevSlide)
+    }
+    setDraggedX(0)
+  }
+
   // Touch event'ler için non-passive listener
   useEffect(() => {
     const container = heroContainerRef.current
@@ -120,59 +191,12 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
       }
 
       if (draggedX < -DRAG_THRESHOLD) {
-        const nextSlide = currentSlide + 1
-        if (nextSlide >= count) {
-          if (transitionTimeoutRef.current) {
-            clearTimeout(transitionTimeoutRef.current)
-          }
-          if (innerTimeoutRef.current) {
-            clearTimeout(innerTimeoutRef.current)
-          }
-          setCurrentSlide(nextSlide)
-          transitionTimeoutRef.current = setTimeout(() => {
-            setIsTransitioning(true)
-            requestAnimationFrame(() => {
-              setCurrentSlide(0)
-              requestAnimationFrame(() => {
-                innerTimeoutRef.current = setTimeout(() => {
-                  setIsTransitioning(false)
-                  transitionTimeoutRef.current = null
-                  innerTimeoutRef.current = null
-                }, 16)
-              })
-            })
-          }, 600)
-        } else {
-          setCurrentSlide(nextSlide)
-        }
+        goToNextSlide()
       } else if (draggedX > DRAG_THRESHOLD) {
-        const prevSlide = currentSlide - 1
-        if (prevSlide < 0) {
-          if (transitionTimeoutRef.current) {
-            clearTimeout(transitionTimeoutRef.current)
-          }
-          if (innerTimeoutRef.current) {
-            clearTimeout(innerTimeoutRef.current)
-          }
-          setCurrentSlide(prevSlide)
-          transitionTimeoutRef.current = setTimeout(() => {
-            setIsTransitioning(true)
-            requestAnimationFrame(() => {
-              setCurrentSlide(count - 1)
-              requestAnimationFrame(() => {
-                innerTimeoutRef.current = setTimeout(() => {
-                  setIsTransitioning(false)
-                  transitionTimeoutRef.current = null
-                  innerTimeoutRef.current = null
-                }, 16)
-              })
-            })
-          }, 600)
-        } else {
-          setCurrentSlide(prevSlide)
-        }
+        goToPrevSlide()
+      } else {
+        setDraggedX(0)
       }
-      setDraggedX(0)
     }
 
     container.addEventListener('touchstart', handleTouchStart, {passive: false})
@@ -233,59 +257,12 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
     }
 
     if (draggedX < -DRAG_THRESHOLD) {
-      const nextSlide = currentSlide + 1
-      if (nextSlide >= count) {
-        if (transitionTimeoutRef.current) {
-          clearTimeout(transitionTimeoutRef.current)
-        }
-        if (innerTimeoutRef.current) {
-          clearTimeout(innerTimeoutRef.current)
-        }
-        setCurrentSlide(nextSlide)
-        transitionTimeoutRef.current = setTimeout(() => {
-          setIsTransitioning(true)
-          requestAnimationFrame(() => {
-            setCurrentSlide(0)
-            requestAnimationFrame(() => {
-              innerTimeoutRef.current = setTimeout(() => {
-                setIsTransitioning(false)
-                transitionTimeoutRef.current = null
-                innerTimeoutRef.current = null
-              }, 16)
-            })
-          })
-        }, 600)
-      } else {
-        setCurrentSlide(nextSlide)
-      }
+      goToNextSlide()
     } else if (draggedX > DRAG_THRESHOLD) {
-      const prevSlide = currentSlide - 1
-      if (prevSlide < 0) {
-        if (transitionTimeoutRef.current) {
-          clearTimeout(transitionTimeoutRef.current)
-        }
-        if (innerTimeoutRef.current) {
-          clearTimeout(innerTimeoutRef.current)
-        }
-        setCurrentSlide(prevSlide)
-        transitionTimeoutRef.current = setTimeout(() => {
-          setIsTransitioning(true)
-          requestAnimationFrame(() => {
-            setCurrentSlide(slideCount - 1)
-            requestAnimationFrame(() => {
-              innerTimeoutRef.current = setTimeout(() => {
-                setIsTransitioning(false)
-                transitionTimeoutRef.current = null
-                innerTimeoutRef.current = null
-              }, 16)
-            })
-          })
-        }, 600)
-      } else {
-        setCurrentSlide(prevSlide)
-      }
+      goToPrevSlide()
+    } else {
+      setDraggedX(0)
     }
-    setDraggedX(0)
   }
 
   // Cleanup timeout/interval
@@ -687,6 +664,27 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
             )
           })}
         </div>
+        {/* Desktop için hero okları */}
+        {slideCount > 1 && !isMobile && (
+          <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-between px-6">
+            <button
+              type="button"
+              onClick={goToPrevSlide}
+              className="pointer-events-auto bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+              aria-label="Previous hero slide"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              onClick={goToNextSlide}
+              className="pointer-events-auto bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+              aria-label="Next hero slide"
+            >
+              ›
+            </button>
+          </div>
+        )}
         {slideCount > 1 && (
           <div
             className={`${isMobile ? 'absolute' : 'absolute'} ${isMobile ? 'bottom-4' : 'bottom-10'} left-1/2 -translate-x-1/2 z-30 flex items-center space-x-4`}

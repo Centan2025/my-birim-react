@@ -10,6 +10,7 @@ import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
 import {useCart} from '../context/CartContext'
 import {useSEO} from '../src/hooks/useSEO'
+import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
 import {addStructuredData, getProductSchema} from '../src/lib/seo'
 import {analytics} from '../src/lib/analytics'
 import {useProduct, useProductsByCategory} from '../src/hooks/useProducts'
@@ -178,6 +179,13 @@ export function ProductDetailPage() {
   const [heroSlideIndex, setHeroSlideIndex] = useState<number>(1) // 1: ilk gerçek slide
   const [heroTransitionEnabled, setHeroTransitionEnabled] = useState(true)
   const DRAG_THRESHOLD = 50 // pixels
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 1024
+    }
+    return false
+  })
+  const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
   const [dimLightbox, setDimLightbox] = useState<{
     images: {image: string; title?: LocalizedString}[]
     currentIndex: number
@@ -405,6 +413,19 @@ export function ProductDetailPage() {
   }, [bandMedia, slideCount])
   const totalHeroSlides = heroMedia.length || 1
 
+  // Ekran genişliğine göre mobil/desktop takibi
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024)
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   // HomePage hero medya mantığına benzer drag + sonsuz kayma sistemi
   const handleHeroDragStart = (
     e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
@@ -421,7 +442,11 @@ export function ProductDetailPage() {
           : 0
     setDragStartX(startX)
     setDraggedX(0)
-    e.preventDefault()
+    // React 18+ touch event'leri varsayılan olarak passive olabilir;
+    // bu nedenle sadece mouse olaylarında preventDefault çağır.
+    if (!('touches' in e)) {
+      e.preventDefault()
+    }
   }
 
   const handleHeroDragMove = (
@@ -535,6 +560,7 @@ export function ProductDetailPage() {
 
   const heroNext = () => {
     if (slideCount <= 1) return
+    if (!heroTransitionEnabled) return
     // Sonsuz kayma index'i: cloned dizide bir sağa
     setHeroSlideIndex(prev => prev + 1)
     // Mantıksal index (thumbnails, mainImage vs. için)
@@ -547,6 +573,7 @@ export function ProductDetailPage() {
   }
   const heroPrev = () => {
     if (slideCount <= 1) return
+    if (!heroTransitionEnabled) return
     setHeroSlideIndex(prev => prev - 1)
     setCurrentImageIndex(prev => (prev - 1 + slideCount) % slideCount)
     analytics.event({
@@ -703,14 +730,17 @@ export function ProductDetailPage() {
                 className="relative h-full shrink-0 cursor-pointer bg-white flex items-center justify-center"
                 style={{width: `${100 / totalHeroSlides}%`}}
                 onClick={() => {
-                  if (!isDragging && draggedX === 0) {
+                  // Küçük parmak hareketlerinde de tıklama algılansın diye
+                  // draggedX'in mutlak değeri belli bir eşikten küçükse tıklama kabul ediyoruz.
+                  if (!isDragging && Math.abs(draggedX) < 10) {
                     analytics.event({
                       category: 'media',
                       action: 'band_click',
                       label: product?.id,
                       value: index,
                     })
-                    openLightbox()
+                    // Hero medyaya tıklayınca tam ekran viewer aç
+                    setIsFullscreenOpen(true)
                   }
                 }}
               >
@@ -749,7 +779,7 @@ export function ProductDetailPage() {
               </div>
             ))}
           </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent pointer-events-none" />
 
           {/* overlay breadcrumbs top-left */}
           <nav className="absolute top-4 left-4 text-sm text-white/80">
@@ -788,19 +818,23 @@ export function ProductDetailPage() {
             )}
           </div>
 
-          {/* hero arrows */}
-          <button
-            onClick={heroPrev}
-            className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/35 hover:bg-black/50 text-white rounded-full w-10 h-10 flex items-center justify-center"
-          >
-            ‹
-          </button>
-          <button
-            onClick={heroNext}
-            className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/35 hover:bg-black/50 text-white rounded-full w-10 h-10 flex items-center justify-center"
-          >
-            ›
-          </button>
+          {/* hero arrows - sadece desktop'ta göster */}
+          {!isMobile && (
+            <>
+              <button
+                onClick={heroPrev}
+                className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/35 hover:bg-black/50 text-white rounded-full w-10 h-10 flex items-center justify-center"
+              >
+                ‹
+              </button>
+              <button
+                onClick={heroNext}
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/35 hover:bg-black/50 text-white rounded-full w-10 h-10 flex items-center justify-center"
+              >
+                ›
+              </button>
+            </>
+          )}
         </div>
         {/* Divider and Thumbnails under hero */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -841,6 +875,10 @@ export function ProductDetailPage() {
                           setHeroSlideIndex(0)
                         }
                         setCurrentImageIndex(idx)
+                        // Mobilde thumbnail'e tıklayınca da tam ekran aç
+                        if (isMobile) {
+                          setIsFullscreenOpen(true)
+                        }
                       }}
                       className={`relative flex-shrink-0 w-24 h-24 overflow-hidden border-2 transition-all duration-300 ${currentImageIndex === idx ? 'border-gray-400 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}
                     >
@@ -904,6 +942,20 @@ export function ProductDetailPage() {
           </div>
         </div>
       </header>
+
+      {/* Mobil tam ekran viewer - bandMedia üzerinden */}
+      {isMobile && isFullscreenOpen && bandMedia.length > 0 && (
+        <FullscreenMediaViewer
+          items={bandMedia.map(m => ({
+            type: m.type,
+            url: m.url,
+            urlMobile: m.urlMobile,
+            urlDesktop: m.urlDesktop,
+          }))}
+          initialIndex={currentImageIndex}
+          onClose={() => setIsFullscreenOpen(false)}
+        />
+      )}
 
       {/* DETAILS BELOW */}
       <main className="bg-gray-100">

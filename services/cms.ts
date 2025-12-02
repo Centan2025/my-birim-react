@@ -501,27 +501,33 @@ export const updateLanguages = async (languages: string[]): Promise<void> => {
 // Site Settings
 export const getSiteSettings = async (): Promise<SiteSettings> => {
   if (useSanity && sanity) {
-    const q = groq`*[_type == "siteSettings" && !(_id in path("drafts.**"))] 
+    try {
+      const q = groq`*[_type == "siteSettings" && !(_id in path("drafts.**"))] 
         | order(_updatedAt desc)[0]{
           ...,
           logo
         }`
-    // Site ayarları için CDN önbelleğini atla - değişiklikler hemen yansısın
-    const s = await sanity.withConfig({useCdn: false}).fetch(q)
-    // Backward compatible defaults
-    return {
-      logoUrl: s?.logo ? mapImage(s.logo) : s?.logoUrl || '',
-      topBannerText: s?.topBannerText || '',
-      showProductPrevNext: Boolean(s?.showProductPrevNext ?? false),
-      showCartButton: Boolean(s?.showCartButton ?? true),
-      imageBorderStyle:
-        s?.imageBorderStyle === 'rounded' || s?.imageBorderStyle === 'square'
-          ? s.imageBorderStyle
-          : 'square',
-      isLanguageSwitcherVisible: s?.isLanguageSwitcherVisible !== false,
-      languages: Array.isArray(s?.languages) ? s.languages : undefined,
-      maintenanceMode: Boolean(s?.maintenanceMode ?? false),
-      mobileHeaderAnimation: s?.mobileHeaderAnimation === 'overlay' ? 'overlay' : 'default',
+      // Site ayarları için CDN önbelleğini atla - değişiklikler hemen yansısın
+      const s = await sanity.withConfig({useCdn: false}).fetch(q)
+      // Backward compatible defaults
+      return {
+        logoUrl: s?.logo ? mapImage(s.logo) : s?.logoUrl || '',
+        topBannerText: s?.topBannerText || '',
+        showProductPrevNext: Boolean(s?.showProductPrevNext ?? false),
+        showCartButton: Boolean(s?.showCartButton ?? true),
+        imageBorderStyle:
+          s?.imageBorderStyle === 'rounded' || s?.imageBorderStyle === 'square'
+            ? s.imageBorderStyle
+            : 'square',
+        isLanguageSwitcherVisible: s?.isLanguageSwitcherVisible !== false,
+        languages: Array.isArray(s?.languages) ? s.languages : undefined,
+        maintenanceMode: Boolean(s?.maintenanceMode ?? false),
+        mobileHeaderAnimation: s?.mobileHeaderAnimation === 'overlay' ? 'overlay' : 'default',
+      }
+    } catch (e) {
+      // Ağ / DNS hatası vb. durumlarda Sanity yerine local fallback kullan
+      // (örn. net::ERR_NAME_NOT_RESOLVED) – uygulama boş kalmasın.
+      // Prod'da da tamamen patlatmak yerine local veriye düşmek daha iyi.
     }
   }
   await delay(SIMULATED_DELAY)
@@ -1091,7 +1097,8 @@ export const updateContactPageContent = async (content: ContactPageContent): Pro
 
 export const getHomePageContent = async (): Promise<HomePageContent> => {
   if (useSanity && sanity) {
-    const q = groq`*[_type == "homePage"][0]{
+    try {
+      const q = groq`*[_type == "homePage"][0]{
             ...,
             heroAutoPlay,
             heroMedia[]{
@@ -1123,56 +1130,60 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
                 backgroundImageDesktop
             }
         }`
-    const data = await sanity.fetch(q)
-    if (data?.heroMedia) {
-      data.heroMedia = data.heroMedia.map((m: any) => {
-        const url = mapMediaUrl(m)
-        const urlMobile = mapMediaUrl(m, true, false)
-        const urlDesktop = mapMediaUrl(m, false, true)
+      const data = await sanity.fetch(q)
+      if (data?.heroMedia) {
+        data.heroMedia = data.heroMedia.map((m: any) => {
+          const url = mapMediaUrl(m)
+          const urlMobile = mapMediaUrl(m, true, false)
+          const urlDesktop = mapMediaUrl(m, false, true)
 
-        const result: any = {...m, url}
-        if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
-        if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
+          const result: any = {...m, url}
+          if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
+          if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
 
-        return result
-      })
-    }
-    if (data?.contentBlocks) {
-      data.contentBlocks = data.contentBlocks.map((b: any) => {
-        let url = b.url
-        if (b.mediaType === 'image' && b.image) {
-          return {...b, image: mapImage(b.image), url: undefined}
-        } else if (b.mediaType === 'video' && b.videoFile?.asset?.url) {
-          url = b.videoFile.asset.url
-        } else if (b.mediaType === 'video' && b.videoFile?.asset?._id) {
-          const fileId = b.videoFile.asset._id.replace('file-', '')
-          url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
-        } else if (b.mediaType === 'video' && b.videoFile?.asset?._ref) {
-          const fileId = b.videoFile.asset._ref.replace('file-', '')
-          url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
-        }
-        return {...b, image: undefined, url}
-      })
-    }
-    if (data?.inspirationSection) {
-      const bgImg = mapImage(data.inspirationSection.backgroundImage)
-      const bgImgMobile = data.inspirationSection.backgroundImageMobile
-        ? mapImage(data.inspirationSection.backgroundImageMobile)
-        : undefined
-      const bgImgDesktop = data.inspirationSection.backgroundImageDesktop
-        ? mapImage(data.inspirationSection.backgroundImageDesktop)
-        : undefined
-      data.inspirationSection.backgroundImage = {
-        url: bgImg,
-        urlMobile: bgImgMobile && bgImgMobile !== bgImg ? bgImgMobile : undefined,
-        urlDesktop: bgImgDesktop && bgImgDesktop !== bgImg ? bgImgDesktop : undefined,
+          return result
+        })
       }
+      if (data?.contentBlocks) {
+        data.contentBlocks = data.contentBlocks.map((b: any) => {
+          let url = b.url
+          if (b.mediaType === 'image' && b.image) {
+            return {...b, image: mapImage(b.image), url: undefined}
+          } else if (b.mediaType === 'video' && b.videoFile?.asset?.url) {
+            url = b.videoFile.asset.url
+          } else if (b.mediaType === 'video' && b.videoFile?.asset?._id) {
+            const fileId = b.videoFile.asset._id.replace('file-', '')
+            url = `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+          } else if (b.mediaType === 'video' && b.videoFile?.asset?._ref) {
+            const fileId = b.videoFile.asset._ref.replace('file-', '')
+            url = `https://cdn.sanity.io.files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${fileId}`
+          }
+          return {...b, image: undefined, url}
+        })
+      }
+      if (data?.inspirationSection) {
+        const bgImg = mapImage(data.inspirationSection.backgroundImage)
+        const bgImgMobile = data.inspirationSection.backgroundImageMobile
+          ? mapImage(data.inspirationSection.backgroundImageMobile)
+          : undefined
+        const bgImgDesktop = data.inspirationSection.backgroundImageDesktop
+          ? mapImage(data.inspirationSection.backgroundImageDesktop)
+          : undefined
+        data.inspirationSection.backgroundImage = {
+          url: bgImg,
+          urlMobile: bgImgMobile && bgImgMobile !== bgImg ? bgImgMobile : undefined,
+          urlDesktop: bgImgDesktop && bgImgDesktop !== bgImg ? bgImgDesktop : undefined,
+        }
+      }
+      // Ensure featuredProductIds is always an array
+      if (!Array.isArray(data?.featuredProductIds)) {
+        data.featuredProductIds = []
+      }
+      return data
+    } catch (e) {
+      // Sanity veya ağ hatası durumunda (ör. net::ERR_NAME_NOT_RESOLVED)
+      // local fallback verilerine düş.
     }
-    // Ensure featuredProductIds is always an array
-    if (!Array.isArray(data?.featuredProductIds)) {
-      data.featuredProductIds = []
-    }
-    return data
   }
   await delay(SIMULATED_DELAY)
   const data = getItem<HomePageContent>(KEYS.HOME_PAGE)

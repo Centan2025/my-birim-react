@@ -226,3 +226,5 @@ Yeni özellik önerisi için:
 ---
 
 **Teşekkürler!** 🎉
+
+

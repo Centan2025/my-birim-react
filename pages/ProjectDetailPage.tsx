@@ -2,6 +2,7 @@ import {useMemo, useState, useEffect} from 'react'
 import {useParams, Link} from 'react-router-dom'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {OptimizedVideo} from '../components/OptimizedVideo'
+import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
 import {PageLoading} from '../components/LoadingSpinner'
 import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useTranslation} from '../i18n'
@@ -65,6 +66,20 @@ export function ProjectDetailPage() {
   const showBottomPrevNext = Boolean(settings?.showProductPrevNext)
   const [idx, setIdx] = useState(0)
   const [anim, setAnim] = useState<'enter' | 'leave' | null>(null)
+  // Hero için index ve geçiş kontrolü - ProductDetailPage'teki hero mantığına paralel
+  const [heroSlideIndex, setHeroSlideIndex] = useState(1) // 1: ilk gerçek slide (klonlu dizide)
+  const [heroTransitionEnabled, setHeroTransitionEnabled] = useState(true)
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStartX, setDragStartX] = useState(0)
+  const [draggedX, setDraggedX] = useState(0)
+  const DRAG_THRESHOLD = 50
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 1024
+    }
+    return false
+  })
+  const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
   useEffect(() => {
     if (!project) return
     setAnim('leave')
@@ -103,40 +118,45 @@ export function ProjectDetailPage() {
     })
   }, [project, t])
 
-  if (loading) {
-    return (
-      <div className="pt-20">
-        <PageLoading message={t('loading')} />
-      </div>
-    )
-  }
-  if (!project) {
-    return (
-      <div className="pt-20 text-center">
-        <p className="text-gray-600">{t('project_not_found') || 'Proje bulunamadı'}</p>
-      </div>
-    )
-  }
+  // Ekran genişliğine göre mobil/desktop takibi
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024)
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // --- HERO MEDYA HESAPLAMALARI (ÜRÜN DETAY MANTIĞINA YAKIN) ---
 
   // Helper: cover string veya object olabilir
-  const coverUrl = project.cover
+  const coverUrl = project?.cover
     ? typeof project.cover === 'string'
       ? project.cover
       : project.cover.url
     : ''
   const coverMobile =
-    project.cover && typeof project.cover === 'object' ? project.cover.urlMobile : undefined
+    project && project.cover && typeof project.cover === 'object'
+      ? project.cover.urlMobile
+      : undefined
   const coverDesktop =
-    project.cover && typeof project.cover === 'object' ? project.cover.urlDesktop : undefined
+    project && project.cover && typeof project.cover === 'object'
+      ? project.cover.urlDesktop
+      : undefined
 
   // Use cover image + media array (images and videos)
-  const mediaArray = (project.media || []).map(m => ({
+  const mediaArray = (project?.media || []).map(m => ({
     type: m.type,
     url: m.url,
     urlMobile: m.urlMobile,
     urlDesktop: m.urlDesktop,
     image: m.image || (m.type === 'image' ? m.url : undefined),
   }))
+
   // Cover görselini başa ekle (eğer varsa ve media array'inde yoksa)
   const coverMedia = coverUrl
     ? [
@@ -155,9 +175,123 @@ export function ProjectDetailPage() {
   const allMedia = [...coverToAdd, ...mediaArray]
 
   const curr = allMedia[idx]
-  const next = () => setIdx(i => (allMedia.length ? (i + 1) % allMedia.length : 0))
-  const prev = () =>
-    setIdx(i => (allMedia.length ? (i - 1 + allMedia.length) % allMedia.length : 0))
+  const slideCount = allMedia.length || 1
+
+  // Hero için cloned media: [son, ...allMedia, ilk] → yönü koruyan sonsuz kayma
+  const heroMedia = useMemo(() => {
+    if (slideCount <= 1) return allMedia
+    const first = allMedia[0]
+    const last = allMedia[allMedia.length - 1]
+    return [last, ...allMedia, first]
+  }, [allMedia, slideCount])
+  const totalSlides = heroMedia.length || 1
+
+  // Snap sonrası transition'ı tekrar aç
+  useEffect(() => {
+    if (!heroTransitionEnabled) {
+      const id = requestAnimationFrame(() => {
+        setHeroTransitionEnabled(true)
+      })
+      return () => cancelAnimationFrame(id)
+    }
+    return
+  }, [heroTransitionEnabled])
+
+  if (loading) {
+    return (
+      <div className="pt-20">
+        <PageLoading message={t('loading')} />
+      </div>
+    )
+  }
+  if (!project) {
+    return (
+      <div className="pt-20 text-center">
+        <p className="text-gray-600">{t('project_not_found') || 'Proje bulunamadı'}</p>
+      </div>
+    )
+  }
+
+  // Hero ileri/geri - ProductDetailPage'teki heroNext/heroPrev benzeri (sonsuz kayma)
+  const next = () => {
+    if (slideCount <= 1) return
+    if (!heroTransitionEnabled) return
+    // Sonsuz kayma index'i: cloned dizide bir sağa
+    setHeroSlideIndex(prev => prev + 1)
+    // Mantıksal index (thumbnails vb. için)
+    setIdx(prev => (prev + 1) % slideCount)
+  }
+
+  const prev = () => {
+    if (slideCount <= 1) return
+    if (!heroTransitionEnabled) return
+    setHeroSlideIndex(prev => prev - 1)
+    setIdx(prev => (prev - 1 + slideCount) % slideCount)
+  }
+
+  // Üst ana medya alanı için drag (mouse/touch) ile ileri-geri geçiş
+  const handleHeroDragStart = (
+    e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
+  ) => {
+    if (e.target instanceof HTMLElement && e.target.closest('a, button')) {
+      return
+    }
+    setIsDragging(true)
+    const startX =
+      'touches' in e && e.touches && e.touches.length > 0
+        ? (e.touches[0]?.clientX ?? 0)
+        : 'clientX' in e
+          ? e.clientX
+          : 0
+    setDragStartX(startX)
+    setDraggedX(0)
+    if (!('touches' in e)) {
+      e.preventDefault()
+    }
+  }
+
+  const handleHeroDragMove = (
+    e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
+  ) => {
+    if (!isDragging) return
+    const currentX =
+      'touches' in e && e.touches && e.touches.length > 0
+        ? (e.touches[0]?.clientX ?? 0)
+        : 'clientX' in e
+          ? e.clientX
+          : 0
+    setDraggedX(currentX - dragStartX)
+  }
+
+  const handleHeroDragEnd = () => {
+    if (!isDragging) return
+    setIsDragging(false)
+
+    if (draggedX < -DRAG_THRESHOLD) {
+      next()
+    } else if (draggedX > DRAG_THRESHOLD) {
+      prev()
+    }
+    setDraggedX(0)
+  }
+
+  // Hero geçişi bittiğinde cloned slide'lardan gerçek slide'a "snap" et (animasyonsuz)
+  const handleHeroTransitionEnd = () => {
+    if (slideCount <= 1) return
+    if (!heroTransitionEnabled) return
+
+    // Sonraki clone'dan ilk gerçeğe
+    if (heroSlideIndex === totalSlides - 1) {
+      setHeroTransitionEnabled(false)
+      setHeroSlideIndex(1)
+      return
+    }
+    // Önceki clone'dan son gerçeğe
+    if (heroSlideIndex === 0) {
+      setHeroTransitionEnabled(false)
+      setHeroSlideIndex(totalSlides - 2)
+    }
+  }
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
@@ -186,60 +320,92 @@ export function ProjectDetailPage() {
         />
       )}
       {curr && (
-        <div className="mt-10 relative">
-          {curr.type === 'image' && (
-            <OptimizedImage
-              src={curr.url}
-              srcMobile={curr.urlMobile}
-              srcDesktop={curr.urlDesktop}
-              alt="project"
-              className={`w-full h-auto object-contain transition-all duration-250 ${imageBorderClass} ${anim === 'leave' ? 'opacity-0 -translate-y-1' : anim === 'enter' ? 'opacity-100 translate-y-0' : ''}`}
-              loading="eager"
-              quality={90}
-            />
-          )}
-          {curr.type === 'video' && (
+        <div
+          className="mt-10 relative"
+          onMouseDown={handleHeroDragStart}
+          onMouseMove={handleHeroDragMove}
+          onMouseUp={handleHeroDragEnd}
+          onMouseLeave={handleHeroDragEnd}
+          onTouchStart={handleHeroDragStart}
+          onTouchMove={handleHeroDragMove}
+          onTouchEnd={handleHeroDragEnd}
+        >
+          <div className="w-full overflow-hidden relative">
             <div
-              className={`w-full transition-all duration-250 ${anim === 'leave' ? 'opacity-0 -translate-y-1' : anim === 'enter' ? 'opacity-100 translate-y-0' : ''}`}
-              style={{paddingTop: '56.25%'}}
+              className="flex h-full"
+              style={{
+                width: `${totalSlides * 100}%`,
+                transform: `translateX(calc(-${
+                  ((slideCount <= 1 ? 0 : heroSlideIndex) * 100) / totalSlides
+                }% + ${draggedX}px))`,
+                transition: isDragging || !heroTransitionEnabled ? 'none' : 'transform 0.3s ease-out',
+              }}
+              onTransitionEnd={handleHeroTransitionEnd}
             >
-              <OptimizedVideo
-                src={curr.url}
-                srcMobile={curr.urlMobile}
-                srcDesktop={curr.urlDesktop}
-                className={`absolute top-0 left-0 w-full h-full object-contain ${imageBorderClass}`}
-                controls
-                playsInline
-                preload="metadata"
-                loading="eager"
-              />
+              {heroMedia.map((m, i) => (
+                <div
+                  key={i}
+                  className="relative w-full shrink-0"
+                  style={{width: `${100 / totalSlides}%`}}
+                  onClick={() => {
+                    if (!isDragging && Math.abs(draggedX) < 10) {
+                      setIsFullscreenOpen(true)
+                    }
+                  }}
+                >
+                  {m.type === 'image' && (
+                    <OptimizedImage
+                      src={m.url}
+                      srcMobile={m.urlMobile}
+                      srcDesktop={m.urlDesktop}
+                      alt="project"
+                      className={`w-full h-auto object-contain ${imageBorderClass}`}
+                      loading="eager"
+                      quality={90}
+                    />
+                  )}
+                  {m.type === 'video' && (
+                    <div style={{paddingTop: '56.25%'}} className="w-full relative">
+                      <OptimizedVideo
+                        src={m.url}
+                        srcMobile={m.urlMobile}
+                        srcDesktop={m.urlDesktop}
+                        className={`absolute top-0 left-0 w-full h-full object-contain ${imageBorderClass}`}
+                        controls
+                        playsInline
+                        preload="metadata"
+                        loading="eager"
+                      />
+                    </div>
+                  )}
+                  {m.type === 'youtube' && (
+                    <div style={{paddingTop: '56.25%'}} className="w-full relative">
+                      <iframe
+                        src={`https://www.youtube.com/embed/${getYouTubeId(m.url)}?rel=0`}
+                        title="YouTube video player"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                        className="absolute top-0 left-0 w-full h-full"
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
-          )}
-          {curr.type === 'youtube' && (
-            <div
-              className={`w-full transition-all duration-250 ${anim === 'leave' ? 'opacity-0 -translate-y-1' : anim === 'enter' ? 'opacity-100 translate-y-0' : ''}`}
-              style={{paddingTop: '56.25%'}}
-            >
-              <iframe
-                src={`https://www.youtube.com/embed/${getYouTubeId(curr.url)}?rel=0`}
-                title="YouTube video player"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                className="absolute top-0 left-0 w-full h-full"
-              />
-            </div>
-          )}
-          {allMedia.length > 1 && (
+          </div>
+          {allMedia.length > 1 && !isMobile && (
             <div className="absolute inset-0 flex items-center justify-between px-2 pointer-events-none">
               <button
                 onClick={prev}
-                className="bg-black/40 text-white px-3 py-2 pointer-events-auto hover:bg-black/60 transition-colors"
+                className="pointer-events-auto bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+                aria-label={t('previous')}
               >
                 ‹
               </button>
               <button
                 onClick={next}
-                className="bg-black/40 text-white px-3 py-2 pointer-events-auto hover:bg-black/60 transition-colors"
+                className="pointer-events-auto bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+                aria-label={t('next')}
               >
                 ›
               </button>
@@ -264,7 +430,17 @@ export function ProjectDetailPage() {
           {allMedia.map((m, i) => (
             <button
               key={i}
-              onClick={() => setIdx(i)}
+              onClick={() => {
+                if (slideCount > 1) {
+                  // Thumbnail tıklanınca hero sonsuz kaydırma index'ini
+                  // ilgili slide'a hizala (cloned dizide +1 offset)
+                  setHeroTransitionEnabled(false)
+                  setHeroSlideIndex(i + 1)
+                } else {
+                  setHeroSlideIndex(0)
+                }
+                setIdx(i)
+              }}
               className={`border ${i === idx ? 'border-gray-900' : 'border-transparent hover:border-gray-400'}`}
             >
               {m.type === 'image' && (
@@ -356,6 +532,19 @@ export function ProjectDetailPage() {
             </div>
           </div>
         </div>
+      )}
+      {/* Mobil tam ekran viewer - allMedia üzerinden */}
+      {isMobile && isFullscreenOpen && allMedia.length > 0 && (
+        <FullscreenMediaViewer
+          items={allMedia.map(m => ({
+            type: m.type,
+            url: m.url,
+            urlMobile: m.urlMobile,
+            urlDesktop: m.urlDesktop,
+          }))}
+          initialIndex={idx}
+          onClose={() => setIsFullscreenOpen(false)}
+        />
       )}
     </div>
   )
