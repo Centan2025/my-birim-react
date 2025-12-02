@@ -28,28 +28,6 @@ class Analytics {
   private storagePatched = false
 
   /**
-   * Bazı tarayıcılarda (özellikle Safari / private mode) storage erişimi yasak.
-   * Bu helper, localStorage'a gerçekten erişilebiliyor mu diye test eder.
-   */
-  private isStorageAvailable(): boolean {
-    try {
-      if (typeof window === 'undefined') return false
-      const key = '__analytics_storage_test__'
-      window.localStorage.setItem(key, '1')
-      window.localStorage.removeItem(key)
-      return true
-    } catch (e: any) {
-      if (DEBUG_LOGS) {
-        console.debug(
-          '[Analytics] Storage not available, disabling GA usage for this session.',
-          e?.message || e
-        )
-      }
-      return false
-    }
-  }
-
-  /**
    * Initialize analytics
    */
   init() {
