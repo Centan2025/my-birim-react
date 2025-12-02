@@ -66,10 +66,8 @@ class Analytics {
       ReactGA.initialize(gaId)
     } catch (e: any) {
       if (DEBUG_LOGS) {
-        console.debug(
-          '[Analytics] GA4 initialize error (GA etkin kalacak, hata yutuldu):',
-          e?.message || e
-        )
+        const msg = (e as any)?.message || e
+        console.debug('[Analytics] GA4 initialize error (GA etkin kalacak, hata yutuldu):', msg)
       }
     }
 
