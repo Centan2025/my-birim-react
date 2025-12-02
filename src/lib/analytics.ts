@@ -64,15 +64,8 @@ class Analytics {
     try {
       // react-ga4, GA4 script'ini kendi yükler ve initialize eder
       ReactGA.initialize(gaId)
-    } catch (e: any) {
-      if (DEBUG_LOGS) {
-        const err: any = e
-        const msg = (err && (err.message || String(err))) || String(e)
-        console.debug(
-          '[Analytics] GA4 initialize error (GA etkin kalacak, hata yutuldu):',
-          msg
-        )
-      }
+    } catch (_e: any) {
+      // GA4 init hatalarını tamamen yut; prod build'te parse sorunu yaşamamak için
     }
 
     // GA her zaman etkin kalsın istiyoruz, fakat bazı ortamlarda (Safari, bazı Chrome context'leri)
