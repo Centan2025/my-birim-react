@@ -127,7 +127,7 @@ export function AboutPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 md:pt-10 pb-16">
         <Breadcrumbs
           className="mb-6"
           items={[

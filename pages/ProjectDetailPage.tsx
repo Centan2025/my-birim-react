@@ -294,7 +294,7 @@ export function ProjectDetailPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-28 pb-16">
       <Breadcrumbs
         className="mb-6"
         items={[

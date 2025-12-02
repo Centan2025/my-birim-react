@@ -7,6 +7,7 @@ import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
 import {analytics} from '../src/lib/analytics'
 import {Breadcrumbs} from '../components/Breadcrumbs'
+import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
 
 const getYouTubeId = (url: string): string | null => {
   const match = url.match(
@@ -437,6 +438,7 @@ export function ContactPage() {
   const [selectedMedia, setSelectedMedia] = useState<ContactLocationMedia | null>(null)
   const [selectedMediaIndex, setSelectedMediaIndex] = useState<number>(0)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
   const thumbRef = useRef<HTMLDivElement | null>(null)
   const [thumbDragStartX, setThumbDragStartX] = useState<number | null>(null)
   const [thumbScrollStart, setThumbScrollStart] = useState<number>(0)
@@ -482,6 +484,34 @@ export function ContactPage() {
     }
     return selectedLocation.media.filter(m => m.url)
   }, [selectedLocation])
+
+  const selectedLocationMediaForViewer = useMemo(
+    () =>
+      selectedLocationMedia
+        .map(m => {
+          let url = m.url || ''
+          if (!url) {
+            if (m.type === 'image' && m.image?.asset?.url) {
+              url = m.image.asset.url
+            } else if (m.type === 'video' && m.videoFile?.asset?.url) {
+              url = m.videoFile.asset.url
+            }
+          }
+          if (!url) return null
+
+          if (m.type === 'youtube') {
+            const id = getYouTubeId(url)
+            url = id ? `https://www.youtube.com/embed/${id}?rel=0` : url
+          }
+
+          return {
+            type: m.type,
+            url,
+          } as {type: 'image' | 'video' | 'youtube'; url: string}
+        })
+        .filter(Boolean) as {type: 'image' | 'video' | 'youtube'; url: string}[],
+    [selectedLocationMedia]
+  )
 
   // Seçili lokasyon değiştiğinde analytics event + sayfa başlığı gönder
   useEffect(() => {
@@ -552,7 +582,12 @@ export function ContactPage() {
                     })
                     setSelectedMedia(m)
                     setSelectedMediaIndex(idx)
-                    setIsModalOpen(true)
+                    // Mobilde ürün detay sayfasındaki gibi beyaz tam ekran viewer kullan
+                    if (window.innerWidth < 1024) {
+                      setIsFullscreenOpen(true)
+                    } else {
+                      setIsModalOpen(true)
+                    }
                   }}
                   className="relative flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 overflow-hidden border-2 border-transparent opacity-80 hover:opacity-100 hover:scale-105 transition-all duration-300"
                 >
@@ -634,7 +669,7 @@ export function ContactPage() {
 
   return (
     <div className="bg-gray-100 animate-fade-in-up-subtle">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-28 pb-16">
         <Breadcrumbs
           className="mb-6"
           items={[{label: t('homepage'), to: '/'}, {label: t('contact')}]}
@@ -739,6 +774,13 @@ export function ContactPage() {
               }
             }
           }}
+        />
+      )}
+      {isFullscreenOpen && selectedLocationMediaForViewer.length > 0 && (
+        <FullscreenMediaViewer
+          items={selectedLocationMediaForViewer}
+          initialIndex={selectedMediaIndex}
+          onClose={() => setIsFullscreenOpen(false)}
         />
       )}
     </div>
