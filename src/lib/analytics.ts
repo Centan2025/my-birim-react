@@ -76,7 +76,11 @@ class Analytics {
         try {
           const reason = event.reason
           const msg =
-            (reason && (reason.message || reason.toString?.())) || (event as any).message || ''
+            (reason &&
+              (reason.message ||
+                (typeof reason.toString === 'function' ? reason.toString() : String(reason)))) ||
+            (event as any).message ||
+            ''
           if (typeof msg === 'string' && msg.includes('Access to storage is not allowed')) {
             // Bu hatayı GA yüzünden unutulmuş promise rejection olarak görme,
             // uygulamayı ve konsolu kirletmesin.
@@ -149,9 +153,6 @@ class Analytics {
         } catch (err: any) {
           const msg = err?.message || String(err || '')
           if (typeof msg === 'string' && msg.includes(BLOCK_SUBSTRING)) {
-            if (DEBUG_LOGS) {
-              console.debug('[Analytics] Storage method suppressed:', String(methodName), '-', msg)
-            }
             // API sözleşmesine yakın kal: getItem / key için null döndür,
             // diğerleri için undefined yeterli.
             if (methodName === 'getItem' || methodName === 'key') {

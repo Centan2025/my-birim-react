@@ -18,8 +18,14 @@ export function removeConsole(options: {exclude?: string[]} = {}): Plugin {
         return null
       }
 
-      // Skip errorReporting.ts and webVitals.ts as they have complex console.log statements
-      if (id.includes('errorReporting.ts') || id.includes('webVitals.ts')) {
+      // Skip errorReporting.ts, webVitals.ts ve analytics.ts
+      // Bu dosyalarda kompleks console.* kullanımları var; basit regex temizliği
+      // bu dosyalarda syntax bozmaya sebep olabildiği için hariç tutuyoruz.
+      if (
+        id.includes('errorReporting.ts') ||
+        id.includes('webVitals.ts') ||
+        id.includes('analytics.ts')
+      ) {
         return null
       }
 
