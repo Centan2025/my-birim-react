@@ -22,13 +22,8 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   initialIndex = 0,
   onClose,
 }) => {
-  const [index, setIndex] = useState(() => {
-    if (!items || items.length === 0) return 0
-    const safe = Math.max(0, Math.min(initialIndex, items.length - 1))
-    return safe
-  })
   // Klonlu dizi üzerinde kayma için viewer index'i
-  const [viewerIndex, setViewerIndex] = useState(() => {
+  const [viewerIndex, setViewerIndex] = useState<number>(() => {
     if (!items || items.length === 0) return 0
     const safe = Math.max(0, Math.min(initialIndex, items.length - 1))
     return items.length > 1 ? safe + 1 : 0
@@ -55,22 +50,19 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   useEffect(() => {
     if (!items || items.length === 0) return
     const safe = Math.max(0, Math.min(initialIndex, items.length - 1))
-    setIndex(safe)
     setViewerIndex(items.length > 1 ? safe + 1 : 0)
   }, [items, initialIndex])
 
   const goNext = () => {
     if (slideCount <= 1) return
     if (!transitionEnabled) return
-    setViewerIndex(prev => prev + 1)
-    setIndex(prev => (prev + 1) % slideCount)
+    setViewerIndex((prev: number) => prev + 1)
   }
 
   const goPrev = () => {
     if (slideCount <= 1) return
     if (!transitionEnabled) return
-    setViewerIndex(prev => prev - 1)
-    setIndex(prev => (prev - 1 + slideCount) % slideCount)
+    setViewerIndex((prev: number) => prev - 1)
   }
 
   const handleDragStart = (
@@ -196,46 +188,49 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
             }}
             onTransitionEnd={handleTransitionEnd}
           >
-            {clonedItems.map((item, i) => (
-              <div
-                key={i}
-                className="w-full h-full shrink-0 flex items-start justify-center"
-                style={{width: `${100 / totalSlides}%`}}
-              >
-                {item.type === 'image' ? (
-                  <OptimizedImage
-                    src={item.url}
-                    srcMobile={item.urlMobile}
-                    srcDesktop={item.urlDesktop}
-                    alt=""
-                    className="w-full h-full object-contain object-top"
-                    loading="eager"
-                    quality={95}
-                  />
-                ) : item.type === 'video' ? (
-                  <OptimizedVideo
-                    src={item.url}
-                    srcMobile={item.urlMobile}
-                    srcDesktop={item.urlDesktop}
-                    className="w-full h-full object-contain object-top"
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="auto"
-                    loading="eager"
-                  />
-                ) : (
-                  <iframe
-                    className="w-full h-full object-top"
-                    title={`fullscreen-media-youtube-${i}`}
-                    src={item.url}
-                    allow="autoplay; encrypted-media; fullscreen"
-                    frameBorder="0"
-                  />
-                )}
-              </div>
-            ))}
+            {clonedItems.map((item, i) => {
+              if (!item) return null
+              return (
+                <div
+                  key={i}
+                  className="w-full h-full shrink-0 flex items-start justify-center"
+                  style={{width: `${100 / totalSlides}%`}}
+                >
+                  {item.type === 'image' ? (
+                    <OptimizedImage
+                      src={item.url}
+                      srcMobile={item.urlMobile}
+                      srcDesktop={item.urlDesktop}
+                      alt=""
+                      className="w-full h-full object-contain object-top"
+                      loading="eager"
+                      quality={95}
+                    />
+                  ) : item.type === 'video' ? (
+                    <OptimizedVideo
+                      src={item.url}
+                      srcMobile={item.urlMobile}
+                      srcDesktop={item.urlDesktop}
+                      className="w-full h-full object-contain object-top"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="auto"
+                      loading="eager"
+                    />
+                  ) : (
+                    <iframe
+                      className="w-full h-full object-top"
+                      title={`fullscreen-media-youtube-${i}`}
+                      src={item.url}
+                      allow="autoplay; encrypted-media; fullscreen"
+                      frameBorder="0"
+                    />
+                  )}
+                </div>
+              )
+            })}
           </div>
         </div>
       </div>

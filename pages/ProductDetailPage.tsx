@@ -588,24 +588,6 @@ export function ProductDetailPage() {
     // YouTube iframe'i sıfırla
     setYtPlaying(false)
   }
-  const openLightbox = () => {
-    setLightboxSource('band')
-    setLightboxImageIndex(currentImageIndex)
-    // Aktif medya YouTube ise direkt oynat
-    const item = bandMedia[currentImageIndex]
-    if (item && item.type === 'youtube') {
-      setYtPlaying(true)
-    } else {
-      setYtPlaying(false)
-    }
-    analytics.event({
-      category: 'media',
-      action: 'open_lightbox_band',
-      label: t(product.name),
-      value: currentImageIndex,
-    })
-    setIsLightboxOpen(true)
-  }
   const openPanelLightbox = (index: number) => {
     setLightboxSource('panel')
     setLightboxImageIndex(index)
@@ -724,60 +706,63 @@ export function ProductDetailPage() {
             }}
             onTransitionEnd={handleHeroTransitionEnd}
           >
-            {heroMedia.map((m, index) => (
-              <div
-                key={index}
-                className="relative h-full shrink-0 cursor-pointer bg-white flex items-center justify-center"
-                style={{width: `${100 / totalHeroSlides}%`}}
-                onClick={() => {
-                  // Küçük parmak hareketlerinde de tıklama algılansın diye
-                  // draggedX'in mutlak değeri belli bir eşikten küçükse tıklama kabul ediyoruz.
-                  if (!isDragging && Math.abs(draggedX) < 10) {
-                    analytics.event({
-                      category: 'media',
-                      action: 'band_click',
-                      label: product?.id,
-                      value: index,
-                    })
-                    // Hero medyaya tıklayınca tam ekran viewer aç
-                    setIsFullscreenOpen(true)
-                  }
-                }}
-              >
-                {m.type === 'image' ? (
-                  <OptimizedImage
-                    src={m.url}
-                    srcMobile={m.urlMobile}
-                    srcDesktop={m.urlDesktop}
-                    alt={`${t(product.name)} ${index + 1}`}
-                    className={`w-full h-full object-contain ${imageBorderClass}`}
-                    loading="eager"
-                    quality={90}
-                  />
-                ) : m.type === 'video' ? (
-                  <OptimizedVideo
-                    src={m.url}
-                    srcMobile={m.urlMobile}
-                    srcDesktop={m.urlDesktop}
-                    className={`w-full h-full object-contain ${imageBorderClass}`}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="auto"
-                    loading="eager"
-                  />
-                ) : (
-                  <iframe
-                    className="w-full h-full"
-                    title="youtube-player"
-                    src={toYouTubeEmbed(m.url, {autoplay: true})}
-                    allow="autoplay; encrypted-media; fullscreen"
-                    frameBorder="0"
-                  />
-                )}
-              </div>
-            ))}
+            {heroMedia.map((m, index) => {
+              if (!m) return null
+              return (
+                <div
+                  key={index}
+                  className="relative h-full shrink-0 cursor-pointer bg-white flex items-center justify-center"
+                  style={{width: `${100 / totalHeroSlides}%`}}
+                  onClick={() => {
+                    // Küçük parmak hareketlerinde de tıklama algılansın diye
+                    // draggedX'in mutlak değeri belli bir eşikten küçükse tıklama kabul ediyoruz.
+                    if (!isDragging && Math.abs(draggedX) < 10) {
+                      analytics.event({
+                        category: 'media',
+                        action: 'band_click',
+                        label: product?.id,
+                        value: index,
+                      })
+                      // Hero medyaya tıklayınca tam ekran viewer aç
+                      setIsFullscreenOpen(true)
+                    }
+                  }}
+                >
+                  {m.type === 'image' ? (
+                    <OptimizedImage
+                      src={m.url}
+                      srcMobile={m.urlMobile}
+                      srcDesktop={m.urlDesktop}
+                      alt={`${t(product.name)} ${index + 1}`}
+                      className={`w-full h-full object-contain ${imageBorderClass}`}
+                      loading="eager"
+                      quality={90}
+                    />
+                  ) : m.type === 'video' ? (
+                    <OptimizedVideo
+                      src={m.url}
+                      srcMobile={m.urlMobile}
+                      srcDesktop={m.urlDesktop}
+                      className={`w-full h-full object-contain ${imageBorderClass}`}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="auto"
+                      loading="eager"
+                    />
+                  ) : (
+                    <iframe
+                      className="w-full h-full"
+                      title="youtube-player"
+                      src={toYouTubeEmbed(m.url, {autoplay: true})}
+                      allow="autoplay; encrypted-media; fullscreen"
+                      frameBorder="0"
+                    />
+                  )}
+                </div>
+              )
+            })}
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent pointer-events-none" />
 

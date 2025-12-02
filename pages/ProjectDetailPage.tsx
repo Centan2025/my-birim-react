@@ -65,7 +65,6 @@ export function ProjectDetailPage() {
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const showBottomPrevNext = Boolean(settings?.showProductPrevNext)
   const [idx, setIdx] = useState(0)
-  const [anim, setAnim] = useState<'enter' | 'leave' | null>(null)
   // Hero için index ve geçiş kontrolü - ProductDetailPage'teki hero mantığına paralel
   const [heroSlideIndex, setHeroSlideIndex] = useState(1) // 1: ilk gerçek slide (klonlu dizide)
   const [heroTransitionEnabled, setHeroTransitionEnabled] = useState(true)
@@ -80,16 +79,6 @@ export function ProjectDetailPage() {
     return false
   })
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
-  useEffect(() => {
-    if (!project) return
-    setAnim('leave')
-    const a = setTimeout(() => setAnim('enter'), 10)
-    const b = setTimeout(() => setAnim(null), 260)
-    return () => {
-      clearTimeout(a)
-      clearTimeout(b)
-    }
-  }, [idx, project])
   // Prev/Next must be declared before any early returns to keep hooks order stable
   const {prevProject, nextProject} = useMemo(() => {
     if (!project || allProjects.length < 2) return {prevProject: null, nextProject: null}
@@ -342,55 +331,58 @@ export function ProjectDetailPage() {
               }}
               onTransitionEnd={handleHeroTransitionEnd}
             >
-              {heroMedia.map((m, i) => (
-                <div
-                  key={i}
-                  className="relative w-full shrink-0"
-                  style={{width: `${100 / totalSlides}%`}}
-                  onClick={() => {
-                    if (!isDragging && Math.abs(draggedX) < 10) {
-                      setIsFullscreenOpen(true)
-                    }
-                  }}
-                >
-                  {m.type === 'image' && (
-                    <OptimizedImage
-                      src={m.url}
-                      srcMobile={m.urlMobile}
-                      srcDesktop={m.urlDesktop}
-                      alt="project"
-                      className={`w-full h-auto object-contain ${imageBorderClass}`}
-                      loading="eager"
-                      quality={90}
-                    />
-                  )}
-                  {m.type === 'video' && (
-                    <div style={{paddingTop: '56.25%'}} className="w-full relative">
-                      <OptimizedVideo
+              {heroMedia.map((m, i) => {
+                if (!m) return null
+                return (
+                  <div
+                    key={i}
+                    className="relative w-full shrink-0"
+                    style={{width: `${100 / totalSlides}%`}}
+                    onClick={() => {
+                      if (!isDragging && Math.abs(draggedX) < 10) {
+                        setIsFullscreenOpen(true)
+                      }
+                    }}
+                  >
+                    {m.type === 'image' && (
+                      <OptimizedImage
                         src={m.url}
                         srcMobile={m.urlMobile}
                         srcDesktop={m.urlDesktop}
-                        className={`absolute top-0 left-0 w-full h-full object-contain ${imageBorderClass}`}
-                        controls
-                        playsInline
-                        preload="metadata"
+                        alt="project"
+                        className={`w-full h-auto object-contain ${imageBorderClass}`}
                         loading="eager"
+                        quality={90}
                       />
-                    </div>
-                  )}
-                  {m.type === 'youtube' && (
-                    <div style={{paddingTop: '56.25%'}} className="w-full relative">
-                      <iframe
-                        src={`https://www.youtube.com/embed/${getYouTubeId(m.url)}?rel=0`}
-                        title="YouTube video player"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                        className="absolute top-0 left-0 w-full h-full"
-                      />
-                    </div>
-                  )}
-                </div>
-              ))}
+                    )}
+                    {m.type === 'video' && (
+                      <div style={{paddingTop: '56.25%'}} className="w-full relative">
+                        <OptimizedVideo
+                          src={m.url}
+                          srcMobile={m.urlMobile}
+                          srcDesktop={m.urlDesktop}
+                          className={`absolute top-0 left-0 w-full h-full object-contain ${imageBorderClass}`}
+                          controls
+                          playsInline
+                          preload="metadata"
+                          loading="eager"
+                        />
+                      </div>
+                    )}
+                    {m.type === 'youtube' && (
+                      <div style={{paddingTop: '56.25%'}} className="w-full relative">
+                        <iframe
+                          src={`https://www.youtube.com/embed/${getYouTubeId(m.url)}?rel=0`}
+                          title="YouTube video player"
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                          className="absolute top-0 left-0 w-full h-full"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
           {allMedia.length > 1 && !isMobile && (
