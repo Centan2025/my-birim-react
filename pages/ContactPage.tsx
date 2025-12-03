@@ -118,25 +118,71 @@ const MailIcon = (props: React.ComponentProps<'svg'>) => (
 )
 
 const MediaModal: React.FC<{
-  media: ContactLocationMedia
   allMedia: ContactLocationMedia[]
-  currentIndex: number
+  initialIndex: number
   isOpen: boolean
   onClose: () => void
-  onNext: () => void
-  onPrevious: () => void
-}> = ({media, allMedia, currentIndex, isOpen, onClose, onNext, onPrevious}) => {
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragStartX, setDragStartX] = useState(0)
-  const [draggedX, setDraggedX] = useState(0)
-  const DRAG_THRESHOLD = 50
+}> = ({allMedia, initialIndex, isOpen, onClose}) => {
+  // Mantıksal index (sonsuz döngü için)
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    if (!allMedia || allMedia.length === 0) return 0
+    return Math.max(0, Math.min(initialIndex, allMedia.length - 1))
+  })
+
+  // Kayma animasyonu için klonlu dizi index'i
+  const [slideIndex, setSlideIndex] = useState(() => {
+    if (!allMedia || allMedia.length <= 1) return 0
+    const safe = Math.max(0, Math.min(initialIndex, allMedia.length - 1))
+    return safe + 1 // [last, ...allMedia, first] içinde gerçek index +1
+  })
+  const [transitionEnabled, setTransitionEnabled] = useState(true)
+  const sliderRef = useRef<HTMLDivElement | null>(null)
+  const [slideWidth, setSlideWidth] = useState(0)
+
+  const hasMultiple = allMedia.length > 1
+
+  // [son, ...allMedia, ilk] → sonsuz döngü için
+  const clonedMedia = useMemo(() => {
+    if (!allMedia || allMedia.length <= 1) return allMedia || []
+    const first = allMedia[0]
+    const last = allMedia[allMedia.length - 1]
+    return [last, ...allMedia, first]
+  }, [allMedia])
+
+  const totalSlides = clonedMedia.length || 1
+
+  useEffect(() => {
+    if (!allMedia || allMedia.length === 0) return
+    const safe = Math.max(0, Math.min(initialIndex, allMedia.length - 1))
+    setCurrentIndex(safe)
+    if (allMedia.length > 1) {
+      setSlideIndex(safe + 1)
+    } else {
+      setSlideIndex(0)
+    }
+  }, [initialIndex, allMedia])
+
+  // Modal açıldığında ve pencere boyutu değiştiğinde her slide'ın genişliğini piksel cinsinden ölç
+  useEffect(() => {
+    if (!isOpen) return
+    const measure = () => {
+      if (!sliderRef.current) return
+      const width = sliderRef.current.clientWidth
+      setSlideWidth(width)
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [isOpen, totalSlides])
 
   const getMediaUrl = (m: ContactLocationMedia) => {
-    if (m.type === 'image' && m.url) {
-      return m.url
+    if (m.type === 'image') {
+      if (m.url) return m.url
+      if (m.image?.asset?.url) return m.image.asset.url
     }
-    if (m.type === 'video' && m.url) {
-      return m.url
+    if (m.type === 'video') {
+      if (m.url) return m.url
+      if (m.videoFile?.asset?.url) return m.videoFile.asset.url
     }
     if (m.type === 'youtube' && m.url) {
       const videoId = getYouTubeId(m.url)
@@ -145,65 +191,35 @@ const MediaModal: React.FC<{
     return ''
   }
 
-  const hasNext = currentIndex < allMedia.length - 1
-  const hasPrevious = currentIndex > 0
-
-  const handleDragStartMouse = (e: React.MouseEvent<HTMLDivElement>) => {
-    setIsDragging(true)
-    setDragStartX(e.clientX)
-    setDraggedX(0)
+  const goNext = () => {
+    if (!hasMultiple) return
+    if (!transitionEnabled) return
+    setSlideIndex(prev => prev + 1)
+    setCurrentIndex(prev =>
+      allMedia.length > 0 ? (prev + 1) % allMedia.length : prev
+    )
   }
 
-  const handleDragMoveMouse = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDragging) return
-    setDraggedX(e.clientX - dragStartX)
+  const goPrev = () => {
+    if (!hasMultiple) return
+    if (!transitionEnabled) return
+    setSlideIndex(prev => prev - 1)
+    setCurrentIndex(prev =>
+      allMedia.length > 0
+        ? (prev - 1 + allMedia.length) % allMedia.length
+        : prev
+    )
   }
 
-  const handleDragEndMouse = () => {
-    if (!isDragging) return
-    setIsDragging(false)
-
-    if (draggedX < -DRAG_THRESHOLD && hasNext) {
-      onNext()
-    } else if (draggedX > DRAG_THRESHOLD && hasPrevious) {
-      onPrevious()
-    }
-    setDraggedX(0)
-  }
-
-  const handleDragStartTouch = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (!e.touches || e.touches.length === 0) return
-    setIsDragging(true)
-    setDragStartX(e.touches[0]!.clientX)
-    setDraggedX(0)
-  }
-
-  const handleDragMoveTouch = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (!isDragging || !e.touches || e.touches.length === 0) return
-    setDraggedX(e.touches[0]!.clientX - dragStartX)
-  }
-
-  const handleDragEndTouch = () => {
-    if (!isDragging) return
-    setIsDragging(false)
-
-    if (draggedX < -DRAG_THRESHOLD && hasNext) {
-      onNext()
-    } else if (draggedX > DRAG_THRESHOLD && hasPrevious) {
-      onPrevious()
-    }
-    setDraggedX(0)
-  }
-
-  // Keyboard navigation
-  React.useEffect(() => {
+  // Klavye navigasyonu (ok tuşları ve ESC)
+  useEffect(() => {
     if (!isOpen) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight' && hasNext) {
-        onNext()
-      } else if (e.key === 'ArrowLeft' && hasPrevious) {
-        onPrevious()
+      if (e.key === 'ArrowRight' && hasMultiple) {
+        goNext()
+      } else if (e.key === 'ArrowLeft' && hasMultiple) {
+        goPrev()
       } else if (e.key === 'Escape') {
         onClose()
       }
@@ -211,9 +227,39 @@ const MediaModal: React.FC<{
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, hasNext, hasPrevious, onNext, onPrevious, onClose])
+  }, [isOpen, hasMultiple, onClose])
 
-  if (!isOpen || !media) return null
+  if (!isOpen || allMedia.length === 0) return null
+
+  const currentItem = allMedia[currentIndex]
+  const currentUrl = currentItem ? getMediaUrl(currentItem) : ''
+
+  const handleTransitionEnd = () => {
+    if (!hasMultiple) return
+    if (!transitionEnabled) return
+
+    if (slideIndex === totalSlides - 1) {
+      // sağdaki clone'dan ilk gerçeğe
+      setTransitionEnabled(false)
+      setSlideIndex(1)
+      return
+    }
+    if (slideIndex === 0) {
+      // soldaki clone'dan son gerçeğe
+      setTransitionEnabled(false)
+      setSlideIndex(totalSlides - 2)
+    }
+  }
+
+  useEffect(() => {
+    if (!transitionEnabled) {
+      const id = requestAnimationFrame(() => {
+        setTransitionEnabled(true)
+      })
+      return () => cancelAnimationFrame(id)
+    }
+    return
+  }, [transitionEnabled])
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -223,25 +269,18 @@ const MediaModal: React.FC<{
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center md:items-start justify-center md:pt-24 bg-black/80 p-4 overflow-hidden"
-      role="button"
-      tabIndex={-1}
+      className="fixed inset-0 z-[130] flex items-center justify-center bg-black/80 p-4 overflow-hidden"
+      role="dialog"
+      aria-modal="true"
       onClick={handleBackdropClick}
-      onKeyDown={e => {
-        if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          onClose()
-        }
-      }}
-      style={{zIndex: 100}}
     >
-      <div className="relative inline-flex items-center justify-center mx-auto my-6">
-        {/* Kapatma butonu - görsel alanının köşesinde */}
+      <div className="relative inline-flex items-center justify-center w-[90vw] max-w-6xl h-[80vh] max-h-[85vh] bg-black">
+        {/* Kapatma butonu */}
         <button
           onClick={onClose}
-          className="absolute top-1 right-1 md:top-0 md:right-0 text-white hover:text-gray-300 transition-colors bg-black/70 w-9 h-9 flex items-center justify-center hover:bg-black/90 shadow-lg rounded-full"
+          className="absolute top-2 right-2 z-20 text-white hover:text-gray-300 transition-colors bg-black/70 w-9 h-9 flex items-center justify-center hover:bg-black/90 shadow-lg rounded-full pointer-events-auto"
           aria-label="Close"
-          style={{zIndex: 101}}
+          type="button"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -260,124 +299,90 @@ const MediaModal: React.FC<{
         </button>
 
         {/* Önceki buton */}
-        {hasPrevious && (
-          <button
-            onClick={e => {
-              e.stopPropagation()
-              onPrevious()
-            }}
-            className="absolute left-2 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-colors bg-black/70 w-10 h-10 flex items-center justify-center hover:bg-black/90 shadow-lg rounded-full"
-            aria-label="Previous"
-            style={{zIndex: 101}}
+        <button
+          type="button"
+          onClick={e => {
+            e.stopPropagation()
+            goPrev()
+          }}
+          className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 text-white hover:text-gray-300 transition-colors bg-black/70 w-10 h-10 items-center justify-center hover:bg-black/90 shadow-lg rounded-full pointer-events-auto"
+          aria-label="Previous"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-          </button>
-        )}
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
 
         {/* Sonraki buton */}
-        {hasNext && (
-          <button
-            onClick={e => {
-              e.stopPropagation()
-              onNext()
-            }}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 transition-colors bg-black/70 w-10 h-10 flex items-center justify-center hover:bg-black/90 shadow-lg rounded-full"
-            aria-label="Next"
-            style={{zIndex: 101}}
+        <button
+          type="button"
+          onClick={e => {
+            e.stopPropagation()
+            goNext()
+          }}
+          className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 text-white hover:text-gray-300 transition-colors bg-black/70 w-10 h-10 items-center justify-center hover:bg-black/90 shadow-lg rounded-full pointer-events-auto"
+          aria-label="Next"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-          </button>
-        )}
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
 
-        <div className="relative max-h-[90vh] max-w-[90vw] overflow-hidden flex items-center justify-center">
-          {/* Ürün detay sayfasındaki üst slider hissiyatına benzer yatay kayma animasyonu */}
-          <div className="relative w-full h-full">
-            {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
-            <div
-              className="flex h-full transition-transform duration-300 ease-out"
-              style={{
-                width: `${(allMedia.length || 1) * 100}%`,
-                transform: `translateX(calc(-${
-                  (currentIndex * 100) / (allMedia.length || 1)
-                }% + ${draggedX}px))`,
-              }}
-              onMouseDown={handleDragStartMouse}
-              onMouseMove={handleDragMoveMouse}
-              onMouseUp={handleDragEndMouse}
-              onMouseLeave={handleDragEndMouse}
-              onTouchStart={handleDragStartTouch}
-              onTouchMove={handleDragMoveTouch}
-              onTouchEnd={handleDragEndTouch}
-            >
-              {allMedia.map((item, idx) => {
-                const url = getMediaUrl(item)
-                return (
-                  <div
-                    key={idx}
-                    className="relative h-full shrink-0 flex items-center justify-center"
-                    style={{width: `${100 / (allMedia.length || 1)}%`}}
-                  >
-                    {item.type === 'youtube' ? (
-                      <iframe
-                        src={url}
-                        className="w-full h-full"
-                        allow="autoplay; encrypted-media; fullscreen"
-                        frameBorder="0"
-                        title={`contact-location-media-${idx}`}
-                      />
-                    ) : item.type === 'video' ? (
-                      <OptimizedVideo
-                        src={url}
-                        controls
-                        autoPlay
-                        className="w-full h-full object-contain"
-                        preload="auto"
-                        loading="eager"
-                      />
-                    ) : (
-                      <OptimizedImage
-                        src={url}
-                        alt=""
-                        className="w-full h-full object-contain"
-                        loading="eager"
-                        quality={95}
-                      />
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
+        <div className="relative max-h-full max-w-full overflow-hidden flex items-center justify-center w-full h-full">
+          {currentItem && (
+            currentItem.type === 'youtube' ? (
+              <iframe
+                src={currentUrl}
+                className="w-full h-full"
+                allow="autoplay; encrypted-media; fullscreen"
+                frameBorder="0"
+                title={`contact-location-media-${currentIndex}`}
+              />
+            ) : currentItem.type === 'video' ? (
+              <OptimizedVideo
+                src={currentUrl}
+                controls
+                autoPlay
+                className="max-w-full max-h-full w-auto h-auto object-contain"
+                preload="auto"
+                loading="eager"
+              />
+            ) : (
+              <OptimizedImage
+                src={currentUrl}
+                alt=""
+                className="max-w-full max-h-full w-auto h-auto object-contain"
+                loading="eager"
+                quality={95}
+                draggable={false}
+              />
+            )
+          )}
         </div>
       </div>
     </div>
   )
 }
-
 const LocationCard: React.FC<{
   location: ContactLocation
   isSelected: boolean
@@ -435,14 +440,31 @@ export function ContactPage() {
   const [content, setContent] = useState<ContactPageContent | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedLocation, setSelectedLocation] = useState<ContactLocation | null>(null)
-  const [selectedMedia, setSelectedMedia] = useState<ContactLocationMedia | null>(null)
   const [selectedMediaIndex, setSelectedMediaIndex] = useState<number>(0)
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
   const thumbRef = useRef<HTMLDivElement | null>(null)
   const [thumbDragStartX, setThumbDragStartX] = useState<number | null>(null)
   const [thumbScrollStart, setThumbScrollStart] = useState<number>(0)
   const {t} = useTranslation()
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== 'undefined') {
+      // Sadece gerçek mobil (telefon) için: Tailwind md breakpoint'i (768px) altı "mobil" kabul edilsin
+      return window.innerWidth < 768
+    }
+    return false
+  })
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -482,7 +504,12 @@ export function ContactPage() {
     ) {
       return []
     }
-    return selectedLocation.media.filter(m => m.url)
+    return selectedLocation.media.filter(m => {
+      const hasDirectUrl = Boolean(m.url)
+      const hasImageAsset = Boolean(m.type === 'image' && m.image?.asset?.url)
+      const hasVideoAsset = Boolean(m.type === 'video' && m.videoFile?.asset?.url)
+      return hasDirectUrl || hasImageAsset || hasVideoAsset
+    })
   }, [selectedLocation])
 
   const selectedLocationMediaForViewer = useMemo(
@@ -580,14 +607,9 @@ export function ContactPage() {
                       label: selectedLocation ? t(selectedLocation.title) : '',
                       value: idx,
                     })
-                    setSelectedMedia(m)
                     setSelectedMediaIndex(idx)
-                    // Mobilde ürün detay sayfasındaki gibi beyaz tam ekran viewer kullan
-                    if (window.innerWidth < 1024) {
-                      setIsFullscreenOpen(true)
-                    } else {
-                      setIsModalOpen(true)
-                    }
+                    // Tüm cihazlarda: ürün / proje detay sayfasındakiyle aynı tam ekran viewer
+                    setIsFullscreenOpen(true)
                   }}
                   className="relative flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 overflow-hidden border-2 border-transparent opacity-80 hover:opacity-100 hover:scale-105 transition-all duration-300"
                 >
@@ -598,6 +620,7 @@ export function ContactPage() {
                       className="w-full h-full object-cover"
                       loading="lazy"
                       quality={75}
+                      draggable={false}
                     />
                   ) : m.type === 'video' ? (
                     <div className="w-full h-full bg-black/60" />
@@ -669,7 +692,7 @@ export function ContactPage() {
 
   return (
     <div className="bg-gray-100 animate-fade-in-up-subtle">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-28 pb-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
         <Breadcrumbs
           className="mb-6"
           items={[{label: t('homepage'), to: '/'}, {label: t('contact')}]}
@@ -743,44 +766,13 @@ export function ContactPage() {
           </div>
         )}
       </div>
-      {selectedMedia && (
-        <MediaModal
-          media={selectedMedia}
-          allMedia={selectedLocationMedia}
-          currentIndex={selectedMediaIndex}
-          isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false)
-            setSelectedMedia(null)
-            setSelectedMediaIndex(0)
-          }}
-          onNext={() => {
-            if (selectedMediaIndex < selectedLocationMedia.length - 1) {
-              const nextIndex = selectedMediaIndex + 1
-              setSelectedMediaIndex(nextIndex)
-              const nextMedia = selectedLocationMedia[nextIndex]
-              if (nextMedia) {
-                setSelectedMedia(nextMedia)
-              }
-            }
-          }}
-          onPrevious={() => {
-            if (selectedMediaIndex > 0) {
-              const prevIndex = selectedMediaIndex - 1
-              setSelectedMediaIndex(prevIndex)
-              const prevMedia = selectedLocationMedia[prevIndex]
-              if (prevMedia) {
-                setSelectedMedia(prevMedia)
-              }
-            }
-          }}
-        />
-      )}
+      {/* Tüm cihazlar için: ürün / proje detay sayfasındakiyle aynı tam ekran viewer */}
       {isFullscreenOpen && selectedLocationMediaForViewer.length > 0 && (
         <FullscreenMediaViewer
           items={selectedLocationMediaForViewer}
           initialIndex={selectedMediaIndex}
           onClose={() => setIsFullscreenOpen(false)}
+          forceShowArrows
         />
       )}
     </div>

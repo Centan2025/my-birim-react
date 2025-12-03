@@ -283,7 +283,7 @@ export function ProjectDetailPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-28 pb-16">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
       <Breadcrumbs
         className="mb-6"
         items={[
@@ -384,6 +384,53 @@ export function ProjectDetailPage() {
                 )
               })}
             </div>
+
+            {/* Hero altındaki slider dot'ları (HomeHero / ProductDetailPage ile aynı stil) */}
+            {slideCount > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-4">
+                {(() => {
+                  // Klonlu dizideki index'ten gerçek slide index'ine normalize et
+                  const normalizedSlideIndex =
+                    slideCount <= 1
+                      ? 0
+                      : heroSlideIndex === 0
+                        ? slideCount - 1
+                        : heroSlideIndex === totalSlides - 1
+                          ? 0
+                          : heroSlideIndex - 1
+
+                  return allMedia.map((_, index) => {
+                    const isActive = index === normalizedSlideIndex
+
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          if (slideCount > 1) {
+                            setHeroTransitionEnabled(false)
+                            setHeroSlideIndex(index + 1) // cloned dizide +1 offset
+                          } else {
+                            setHeroSlideIndex(0)
+                          }
+                          setIdx(index)
+                        }}
+                        className={`relative rounded-full h-2 transition-all duration-500 ease-in-out group ${
+                          isActive ? 'w-12 bg-white/90' : 'w-2 bg-white/40 hover:bg-white/60'
+                        }`}
+                        aria-label={`Görsel ${index + 1}`}
+                      >
+                        {isActive && (
+                          <div
+                            key={`${normalizedSlideIndex}-${index}`}
+                            className="absolute top-0 left-0 h-full rounded-full bg-white animate-fill-line"
+                          ></div>
+                        )}
+                      </button>
+                    )
+                  })
+                })()}
+              </div>
+            )}
           </div>
           {allMedia.length > 1 && !isMobile && (
             <div className="absolute inset-0 flex items-center justify-between px-2 pointer-events-none">
@@ -432,6 +479,8 @@ export function ProjectDetailPage() {
                   setHeroSlideIndex(0)
                 }
                 setIdx(i)
+                // Tüm cihazlarda: ürün ve iletişim sayfalarındakiyle aynı tam ekran viewer
+                setIsFullscreenOpen(true)
               }}
               className={`border ${i === idx ? 'border-gray-900' : 'border-transparent hover:border-gray-400'}`}
             >
@@ -525,8 +574,8 @@ export function ProjectDetailPage() {
           </div>
         </div>
       )}
-      {/* Mobil tam ekran viewer - allMedia üzerinden */}
-      {isMobile && isFullscreenOpen && allMedia.length > 0 && (
+      {/* Tüm cihazlarda tam ekran viewer - ürün ve iletişim sayfalarıyla aynı sistem */}
+      {isFullscreenOpen && allMedia.length > 0 && (
         <FullscreenMediaViewer
           items={allMedia.map(m => ({
             type: m.type,

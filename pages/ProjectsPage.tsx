@@ -49,7 +49,7 @@ export function ProjectsPage() {
 
   return (
     <div className="bg-gray-100 animate-fade-in-up-subtle">
-      <div className="w-full max-w-[95vw] mx-auto px-2 sm:px-4 lg:px-6 pt-20 md:pt-24 lg:pt-28 pb-16">
+      <div className="w-full max-w-[95vw] mx-auto px-2 sm:px-4 lg:px-6 pt-20 md:pt-24 lg:pt-24 pb-16">
         <Breadcrumbs
           className="mb-6"
           items={[

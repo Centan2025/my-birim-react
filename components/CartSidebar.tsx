@@ -77,7 +77,6 @@ export function CartSidebar() {
         role="dialog"
         aria-modal="true"
         aria-label={t('cart') || 'Sepet'}
-        aria-hidden={!isCartOpen}
       >
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-6 border-b">

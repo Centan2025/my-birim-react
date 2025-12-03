@@ -820,6 +820,53 @@ export function ProductDetailPage() {
               </button>
             </>
           )}
+
+          {/* Hero altındaki slider dot'ları (HomeHero ile aynı stil) */}
+          {slideCount > 1 && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-4">
+              {(() => {
+                // Klonlu dizideki index'ten gerçek slide index'ine normalize et
+                const normalizedSlideIndex =
+                  slideCount <= 1
+                    ? 0
+                    : heroSlideIndex === 0
+                      ? slideCount - 1
+                      : heroSlideIndex === totalHeroSlides - 1
+                        ? 0
+                        : heroSlideIndex - 1
+
+                return bandMedia.map((_, index) => {
+                  const isActive = index === normalizedSlideIndex
+
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        if (slideCount > 1) {
+                          setHeroTransitionEnabled(false)
+                          setHeroSlideIndex(index + 1) // cloned dizide +1 offset
+                        } else {
+                          setHeroSlideIndex(0)
+                        }
+                        setCurrentImageIndex(index)
+                      }}
+                      className={`relative rounded-full h-2 transition-all duration-500 ease-in-out group ${
+                        isActive ? 'w-12 bg-white/90' : 'w-2 bg-white/40 hover:bg-white/60'
+                      }`}
+                      aria-label={`Görsel ${index + 1}`}
+                    >
+                      {isActive && (
+                        <div
+                          key={`${normalizedSlideIndex}-${index}`}
+                          className="absolute top-0 left-0 h-full rounded-full bg-white animate-fill-line"
+                        ></div>
+                      )}
+                    </button>
+                  )
+                })
+              })()}
+            </div>
+          )}
         </div>
         {/* Divider and Thumbnails under hero */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -860,10 +907,8 @@ export function ProductDetailPage() {
                           setHeroSlideIndex(0)
                         }
                         setCurrentImageIndex(idx)
-                        // Mobilde thumbnail'e tıklayınca da tam ekran aç
-                        if (isMobile) {
-                          setIsFullscreenOpen(true)
-                        }
+                        // Tüm cihazlarda: iletişim sayfasındakiyle aynı tam ekran viewer
+                        setIsFullscreenOpen(true)
                       }}
                       className={`relative flex-shrink-0 w-24 h-24 overflow-hidden border-2 transition-all duration-300 ${currentImageIndex === idx ? 'border-gray-400 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}
                     >
@@ -928,8 +973,8 @@ export function ProductDetailPage() {
         </div>
       </header>
 
-      {/* Mobil tam ekran viewer - bandMedia üzerinden */}
-      {isMobile && isFullscreenOpen && bandMedia.length > 0 && (
+      {/* Tüm cihazlarda tam ekran viewer - iletişim sayfasındaki sistem ile aynı */}
+      {isFullscreenOpen && bandMedia.length > 0 && (
         <FullscreenMediaViewer
           items={bandMedia.map(m => ({
             type: m.type,
@@ -945,8 +990,8 @@ export function ProductDetailPage() {
       {/* DETAILS BELOW */}
       <main className="bg-gray-100">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {/* Breadcrumbs - diğer sayfalardakiyle aynı font boyutu */}
-          <nav className="mb-8 text-[9px] sm:text-[11px] text-gray-500" aria-label="Breadcrumb">
+          {/* Breadcrumbs - mobilde biraz daha büyük */}
+          <nav className="mb-8 text-[11px] sm:text-[12px] text-gray-500" aria-label="Breadcrumb">
             <ol className="list-none p-0 inline-flex items-center">
               <li>
                 <Link to="/" className="hover:text-gray-800 uppercase underline underline-offset-4">

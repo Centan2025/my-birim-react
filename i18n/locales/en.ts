@@ -7,7 +7,7 @@ export default {
   about: 'About Us',
   contact: 'Contact',
   projects: 'PROJECTS',
-  search_placeholder: 'Search for products, categories, or designers...',
+  search_placeholder: 'Search...',
   search_no_results: 'No results found for "{0}".',
   searching: 'Searching...',
   products: 'Products',

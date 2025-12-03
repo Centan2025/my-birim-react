@@ -693,14 +693,18 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
             {heroMedia.map((_, index) => {
               const normalizedSlide =
                 currentSlide < 0 ? slideCount - 1 : currentSlide >= slideCount ? 0 : currentSlide
+              const isActive = index === normalizedSlide
+
               return (
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
-                  className={`relative rounded-full h-2 transition-all duration-500 ease-in-out group ${index === normalizedSlide ? 'w-12 bg-white/50' : 'w-2 bg-white/30 hover:bg-white/50'}`}
+                  className={`relative rounded-full h-2 transition-all duration-500 ease-in-out group ${
+                    isActive ? 'w-12 bg-white/90' : 'w-2 bg-white/40 hover:bg-white/60'
+                  }`}
                   aria-label={`Go to slide ${index + 1}`}
                 >
-                  {index === normalizedSlide && (
+                  {isActive && (
                     <div
                       key={`${normalizedSlide}-${index}`}
                       className="absolute top-0 left-0 h-full rounded-full bg-white animate-fill-line"

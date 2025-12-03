@@ -14,6 +14,7 @@ interface OptimizedImageProps {
   // Art Direction: Farklı ekranlar için farklı görseller
   srcMobile?: string // Mobil için görsel (varsa)
   srcDesktop?: string // Desktop için görsel (varsa)
+  draggable?: boolean
   onLoad?: () => void
   onError?: () => void
 }
@@ -38,6 +39,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   srcSet,
   srcMobile,
   srcDesktop,
+  draggable,
   onLoad,
   onError,
 }) => {
@@ -205,6 +207,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             height={height}
             loading={loading}
             className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ${className}`}
+            draggable={draggable}
             onLoad={handleLoad}
             onError={handleError}
             decoding="async"
@@ -248,6 +251,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           srcSet={responsiveSrcSet || undefined}
           sizes={responsiveSrcSet ? defaultSizes : undefined}
           className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ${className}`}
+          draggable={draggable}
           onLoad={handleLoad}
           onError={handleError}
           decoding="async"

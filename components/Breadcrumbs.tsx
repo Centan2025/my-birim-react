@@ -16,7 +16,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({items, className = ''})
 
   return (
     <nav aria-label="Breadcrumb" className={className}>
-      <ol className="flex flex-wrap items-center text-[9px] sm:text-[11px] text-gray-500 gap-1 sm:gap-2">
+      <ol className="flex flex-wrap items-center text-[11px] sm:text-[12px] text-gray-500 gap-1 sm:gap-2">
         {items.map((item, index) => {
           const isLast = index === items.length - 1
           const isFirst = index === 0

@@ -642,6 +642,18 @@ export function Header() {
     }
   }, [isMobile, isMobileMenuOpen])
 
+  // Mobil menü kapalıyken odaklanılmasını tamamen engelle (inert davranışı)
+  useEffect(() => {
+    const menuEl = mobileMenuRef.current
+    if (!menuEl) return
+
+    try {
+      ;(menuEl as any).inert = !isMobileMenuOpen
+    } catch {
+      // Eski tarayıcılar inert'i desteklemiyorsa sessizce yoksay
+    }
+  }, [isMobileMenuOpen])
+
   // Hover edilen kategorinin ürünlerini yükle (eğer menuImage yoksa)
   const hoveredCategory = categories.find(c => c.id === hoveredCategoryId)
   const shouldFetchProducts = hoveredCategoryId && hoveredCategory && !hoveredCategory.menuImage
@@ -1057,15 +1069,39 @@ export function Header() {
                 return '#000000'
               }
 
-              // Mobilde ve opacity 0 ise: arka plan parlaklığına göre karar ver
-              if (isMobile && headerOpacity <= 0) {
-                // Parlaklık bilgisi yoksa veya arka plan koyuysa → şeffaf bırak
-                if (heroBrightness === null || heroBrightness < 0.45) {
+              // MOBİL: Arka plan açık renkteyse header'ı her zaman belirgin koyu yap
+              if (isMobile) {
+                // Parlaklık ölçüldüyse, tamamen ona göre karar ver
+                if (heroBrightness !== null) {
+                  // Çok açık / beyaza yakın görseller
+                  if (heroBrightness >= 0.7) {
+                    return 'rgba(0, 0, 0, 0.92)'
+                  }
+                  // Açık arka plan
+                  if (heroBrightness >= 0.5) {
+                    return 'rgba(0, 0, 0, 0.82)'
+                  }
+                  // Orta ton arka plan – en az orta koyulukta olsun
+                  if (heroBrightness >= 0.35) {
+                    const safeOpacity = Math.max(headerOpacity, 0.65)
+                    return `rgba(0, 0, 0, ${safeOpacity})`
+                  }
+                  // Çok koyu arka plan – özellikle sayfanın en üstünde mümkün olduğunca şeffaf kalsın
+                  if (headerOpacity <= 0.25) {
+                    return 'transparent'
+                  }
+                  const darkOpacity = Math.max(headerOpacity, 0.4)
+                  return `rgba(0, 0, 0, ${darkOpacity})`
+                }
+
+                // Parlaklık bilgisi yoksa:
+                // - Sayfanın en üstünde (opacity neredeyse 0 iken) şeffaf kalsın
+                // - Aşağı scroll oldukça koyulaşsın
+                if (headerOpacity <= 0.05) {
                   return 'transparent'
                 }
-                // Arka plan açık / beyaza yakın → header yine koyu dursun
-                const forcedOpacity = heroBrightness >= 0.65 ? 0.9 : 0.75
-                return `rgba(0, 0, 0, ${forcedOpacity})`
+                const fallbackOpacity = Math.max(headerOpacity, 0.6)
+                return `rgba(0, 0, 0, ${fallbackOpacity})`
               }
 
               // Varsayılan temel opacity
@@ -1099,7 +1135,8 @@ export function Header() {
           ref={headerContainerRef}
         >
           <nav className="px-2 sm:px-4 lg:px-6" ref={navRef}>
-            <div className="relative flex h-14 lg:h-24 items-center lg:grid lg:grid-cols-[1fr_auto_1fr]">
+            {/* Desktop'ta menü satırını biraz incelterek nav düğmelerini header'a yaklaştır */}
+            <div className="relative flex h-14 lg:h-20 items-center lg:grid lg:grid-cols-[1fr_auto_1fr]">
               {/* Sol taraf - Menü düğmeleri (desktop) ve arama + logo (mobil) */}
               <div className="flex flex-1 items-center lg:justify-start">
                 {/* Mobil Arama - Solda */}
@@ -1485,7 +1522,6 @@ export function Header() {
               className="lg:hidden border-t border-white/10"
               role="menu"
               aria-label={t('main_menu') || 'Ana menü'}
-              aria-hidden={!isMobileMenuOpen}
             >
               {/* Dil seçenekleri - Menü öğelerinin üstünde */}
               {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
@@ -1603,7 +1639,6 @@ export function Header() {
           }}
           role="menu"
           aria-label={t('main_menu') || 'Ana menü'}
-          aria-hidden={!isMobileMenuOpen}
         >
           {/* Dil ve kullanıcı alanı */}
           {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (

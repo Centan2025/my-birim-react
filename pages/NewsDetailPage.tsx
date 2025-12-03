@@ -197,10 +197,10 @@ export function NewsDetailPage() {
   // between different news items as distinct components, automatically resetting state.
   return (
     <div key={newsId} className="bg-white animate-fade-in-up-subtle">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-0">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-0">
         <div className="max-w-4xl mx-auto">
-          {/* Breadcrumbs - diğer sayfalarla aynı font ve yapı */}
-          <nav className="mb-8 text-[9px] sm:text-[11px] text-gray-500" aria-label="Breadcrumb">
+          {/* Breadcrumbs - tasarımcı sayfalarıyla aynı konum ve font */}
+          <nav className="mb-8 text-[11px] sm:text-[12px] text-gray-500" aria-label="Breadcrumb">
             <ol className="list-none p-0 inline-flex items-center">
               <li>
                 <Link

@@ -7,7 +7,7 @@ export default {
   "about": "HAKKIMIZDA",
   "contact": "İLETİŞİM",
   "projects": "PROJELER",
-  "search_placeholder": "Ürün, kategori veya tasarımcı arayın...",
+  "search_placeholder": "Ara...",
   "search_no_results": "\"{0}\" için sonuç bulunamadı.",
   "searching": "Aranıyor...",
   "products": "Ürünler",
