@@ -24,11 +24,16 @@ export const DesktopMediaSlider: React.FC<DesktopMediaSliderProps> = ({
   const slideCount = items.length
 
   const cloned = useMemo(() => {
-    if (!items || items.length <= 1) return items || []
-    const first = items[0]
-    const last = items[items.length - 1]
-    return [last, ...items, first]
-  }, [items])
+    const safeItems: MediaItem[] = (items || []).filter(
+      (m): m is MediaItem => Boolean(m)
+    )
+
+    if (safeItems.length <= 1) return safeItems
+
+    const first = safeItems[0]
+    const last = safeItems[safeItems.length - 1]
+    return [last, ...safeItems, first]
+  }, [items]) as MediaItem[]
 
   const totalSlides = cloned.length || 1
 
@@ -42,7 +47,8 @@ export const DesktopMediaSlider: React.FC<DesktopMediaSliderProps> = ({
     }
   }, [activeIndex, items])
 
-  const getUrl = (m: MediaItem): string => {
+  const getUrl = (m: MediaItem | undefined): string => {
+    if (!m) return ''
     if (m.type === 'image') {
       if (m.url) return m.url
       if (m.image?.asset?.url) return m.image.asset.url
@@ -106,6 +112,7 @@ export const DesktopMediaSlider: React.FC<DesktopMediaSliderProps> = ({
         >
           {cloned.map((item, idx) => {
             const url = getUrl(item)
+            if (!item || !url) return null
             return (
               <div
                 key={idx}
