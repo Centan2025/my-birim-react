@@ -1,75 +1,10 @@
-import React, {useState, useEffect, PropsWithChildren, useRef} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import {getAboutPageContent} from '../services/cms'
 import type {AboutPageContent, LocalizedString} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
 import {Breadcrumbs} from '../components/Breadcrumbs'
-
-const ValuesIcon: React.FC<PropsWithChildren> = ({children}) => (
-  <div className="bg-gray-800 text-white rounded-full w-16 h-16 flex items-center justify-center mb-4">
-    {children}
-  </div>
-)
-
-const QualityIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="32"
-    height="32"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-  </svg>
-)
-const DesignIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="32"
-    height="32"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
-    <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
-  </svg>
-)
-const CraftIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="32"
-    height="32"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="m16 6 4 4-10 10-4-4 10-10"></path>
-    <path d="m16 6-1.5-1.5a3 3 0 0 0-4 0l-1.5 1.5"></path>
-    <path d="m3 21 4-4"></path>
-    <path d="m15 11 4 4"></path>
-  </svg>
-)
-
-const ICONS: {[key: string]: React.ComponentType} = {
-  Kalite: QualityIcon,
-  'Tasarım Odaklılık': DesignIcon,
-  Zanaatkarlık: CraftIcon,
-  Quality: QualityIcon,
-  'Design Focus': DesignIcon,
-  Craftsmanship: CraftIcon,
-}
 
 const CrossFadeText: React.FC<{text: string; triggerKey: number}> = ({text, triggerKey}) => {
   const [currentText, setCurrentText] = useState(text)
@@ -173,11 +108,6 @@ export function AboutPage() {
         <PageLoading message={t('loading')} />
       </div>
     )
-  }
-
-  const getIconKey = (title: LocalizedString) => {
-    if (typeof title === 'string') return title
-    return (title && (title as any).tr) || ''
   }
 
   return (
