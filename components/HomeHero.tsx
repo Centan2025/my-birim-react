@@ -619,7 +619,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                         : 'text-center'
                   return (
                     <div
-                      className={`absolute z-20 ${isMobile ? 'w-full px-4' : 'container mx-auto px-4 sm:px-6 lg:px-8'} h-full flex items-center ${justifyClass}`}
+                      className={`absolute z-20 ${isMobile ? 'w-full px-2' : 'container mx-auto px-2 sm:px-2 lg:px-3'} h-full flex items-center ${justifyClass}`}
                       style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
                     >
                       <div

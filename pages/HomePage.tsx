@@ -425,6 +425,9 @@ export function HomePage() {
         <div className="relative h-[50vh] w-full bg-gray-900" />
       )}
 
+      {/* Hero Altı Gri Bant */}
+      <section className="w-full bg-gray-200 h-10 md:h-12" />
+
       {/* Content Blocks Section */}
       {content?.contentBlocks &&
         content.contentBlocks.length > 0 &&
@@ -447,6 +450,7 @@ export function HomePage() {
                 const isLeft = block.position === 'left'
                 const isRight = block.position === 'right'
                 const isCenter = block.position === 'center'
+                const hasDescription = Boolean(block.description)
 
                 const backgroundColor =
                   block.backgroundColor === 'gray' ? 'bg-gray-100' : 'bg-white'
@@ -458,13 +462,31 @@ export function HomePage() {
                       ? 'text-right'
                       : 'text-left'
 
+                const sectionSpacingClass = (() => {
+                  // Yazı yoksa: mobilde minimum, desktop'ta daha kontrollü boşluk
+                  if (!hasDescription) {
+                    if (index === 0) return 'pt-0 pb-0'
+                    if (index === 1) return 'pt-0 pb-4 md:pb-10'
+                    return 'py-4 md:py-10'
+                  }
+
+                  // Yazı varsa: mevcut (biraz azaltılmış) boşlukları koru
+                  if (index === 0) return 'pt-0 pb-0'
+                  if (index === 1) return 'pt-0 pb-10 md:pb-20'
+                  return 'py-10 md:py-20'
+                })()
+
                 return (
                   <section
                     key={index}
-                    className={`${index === 0 ? 'pt-0 pb-0' : index === 1 ? 'pt-0 pb-20' : 'py-20'} ${backgroundColor}`}
+                    className={`${sectionSpacingClass} ${backgroundColor}`}
                   >
                     {isFullWidth ? (
-                      <div className="w-full overflow-hidden">
+                      <div
+                        className={`w-full overflow-hidden ${
+                          hasDescription ? 'py-6 md:py-16' : 'py-0 md:py-10'
+                        }`}
+                      >
                         {block.mediaType === 'youtube' ? (
                           <div className="relative w-full aspect-video overflow-hidden">
                             <YouTubeBackground url={mediaUrl} />
@@ -490,7 +512,7 @@ export function HomePage() {
                           />
                         )}
                         {block.description && (
-                          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                          <div className="container mx-auto px-2 sm:px-3 lg:px-4 py-12">
                             <div className={`prose max-w-none ${textAlignClass}`}>
                               <p className="text-sm md:text-lg text-gray-700 font-light leading-relaxed">
                                 {t(block.description)}
@@ -515,7 +537,11 @@ export function HomePage() {
                         )}
                       </div>
                     ) : (
-                      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                      <div
+                        className={`container mx-auto px-2 sm:px-3 lg:px-4 ${
+                          hasDescription ? 'py-6 md:py-16' : 'py-2 md:py-10'
+                        }`}
+                      >
                         <div
                           className={`flex flex-col ${isLeft ? 'md:flex-row' : isRight ? 'md:flex-row-reverse' : 'md:flex-row items-center'} gap-12`}
                         >
@@ -608,7 +634,7 @@ export function HomePage() {
             }}
           >
             <div className="absolute inset-0 bg-black/50"></div>
-            <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 animate-fade-in-up-subtle max-w-4xl">
+            <div className="relative z-10 container mx-auto px-2 sm:px-2 lg:px-3 animate-fade-in-up-subtle max-w-4xl">
               <h2 className="text-4xl font-light leading-relaxed">{t(inspiration.title)}</h2>
               <p className="mt-4 text-lg text-gray-200 max-w-2xl mx-auto font-light leading-relaxed">
                 {t(inspiration.subtitle)}
