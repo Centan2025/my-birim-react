@@ -14,17 +14,51 @@ export default defineType({
     defineField({name: 'heroTitle', title: 'Hero Başlığı', type: 'localizedString'}),
     defineField({name: 'heroSubtitle', title: 'Hero Alt Başlığı', type: 'localizedString'}),
     defineField({name: 'storyTitle', title: 'Hikaye Başlığı', type: 'localizedString'}),
-    defineField({name: 'storyContentP1', title: 'Hikaye Metni 1', type: 'localizedString'}),
-    defineField({name: 'storyContentP2', title: 'Hikaye Metni 2', type: 'localizedString'}),
+    defineField({name: 'storyContentP1', title: 'Hikaye Metni 1', type: 'localizedText'}),
+    defineField({name: 'storyContentP2', title: 'Hikaye Metni 2', type: 'localizedText'}),
     defineField({
       name: 'storyImage',
       title: 'Hikaye Görseli',
       type: 'image',
       options: {hotspot: true},
     }),
-    defineField({name: 'isQuoteVisible', title: 'Alıntıyı Göster', type: 'boolean'}),
-    defineField({name: 'quoteText', title: 'Alıntı Metni', type: 'localizedString'}),
-    defineField({name: 'quoteAuthor', title: 'Alıntı Yazarı', type: 'string'}),
+    // Özel üçlü bölüm: Tarihçe / Kimlik / Kalite
+    defineField({
+      name: 'historySection',
+      title: 'Tarihçe Bölümü',
+      type: 'object',
+      fields: [
+        defineField({
+          name: 'content',
+          title: 'Tarihçe Metni',
+          type: 'localizedText',
+        }),
+      ],
+    }),
+    defineField({
+      name: 'identitySection',
+      title: 'Kimlik Bölümü',
+      type: 'object',
+      fields: [
+        defineField({
+          name: 'content',
+          title: 'Kimlik Metni',
+          type: 'localizedText',
+        }),
+      ],
+    }),
+    defineField({
+      name: 'qualitySection',
+      title: 'Kalite Bölümü',
+      type: 'object',
+      fields: [
+        defineField({
+          name: 'content',
+          title: 'Kalite Metni',
+          type: 'localizedText',
+        }),
+      ],
+    }),
     defineField({
       name: 'values',
       title: 'Değerler',

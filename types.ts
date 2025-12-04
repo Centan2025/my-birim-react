@@ -306,11 +306,11 @@ export interface AboutPageContent {
   storyContentP1: LocalizedString
   storyContentP2: LocalizedString
   storyImage: string
-  isQuoteVisible: boolean
-  quoteText: LocalizedString
-  quoteAuthor: string
   valuesTitle: LocalizedString
   values: {title: LocalizedString; description: LocalizedString}[]
+  historySection?: {content?: LocalizedString}
+  identitySection?: {content?: LocalizedString}
+  qualitySection?: {content?: LocalizedString}
 }
 
 /**

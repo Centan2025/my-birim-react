@@ -420,8 +420,8 @@ export function ContactPage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12">
-          <div className="bg-white p-6 shadow-sm border border-gray-300 space-y-8 w-full overflow-x-hidden">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-stretch">
+          <div className="bg-white p-6 shadow-sm border border-gray-300 space-y-8 w-full overflow-x-hidden h-full">
             {/* FIX: Refactored to use Object.keys to avoid potential type inference issues with Object.entries in some TypeScript environments. */}
             {Object.keys(locationGroups).map(type => (
               <div key={type}>
@@ -451,13 +451,14 @@ export function ContactPage() {
             </div>
           )}
 
-          <div className="bg-white shadow-sm border border-gray-300 overflow-hidden min-h-[340px] md:min-h-[380px] sticky top-32 h-[420px] md:h-[460px] lg:h-[520px]">
+          <div className="bg-white shadow-sm border border-gray-300 overflow-hidden h-full flex">
             {selectedLocation?.mapEmbedUrl ? (
               <iframe
                 src={convertGoogleMapsUrlToEmbed(selectedLocation.mapEmbedUrl)}
                 width="100%"
                 height="100%"
                 style={{border: 0}}
+                className="w-full h-full"
                 allow="fullscreen"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"

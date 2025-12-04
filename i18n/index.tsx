@@ -102,10 +102,20 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
   const t = useCallback(
     (keyOrObject: string | LocalizedString | undefined, ...args: any[]): string => {
       if (typeof keyOrObject === 'string') {
-        // Bazı anahtarlar (ör. 'designs', 'search_placeholder') için CMS çevirisini değil,
-        // dosya çevirisini tercih et
+        // Bazı anahtarlar için (ör. ana menü ve arama yerleri) CMS çevirisini değil,
+        // dosya çevirisini tercih et ki TR/EN arasında net fark ve animasyon görülebilsin
         const shouldBypassCms =
-          keyOrObject === 'designs' || keyOrObject === 'search_placeholder'
+          keyOrObject === 'designs' ||
+          keyOrObject === 'search_placeholder' ||
+          keyOrObject === 'products' ||
+          keyOrObject === 'designers' ||
+          keyOrObject === 'projects' ||
+          keyOrObject === 'news' ||
+          keyOrObject === 'about' ||
+          keyOrObject === 'contact' ||
+          keyOrObject === 'subscribe' ||
+          keyOrObject === 'subscribe_prompt' ||
+          keyOrObject === 'email_placeholder'
 
         // Try CMS translations first (gerekirse bypass), then fallback to base translations
         const cmsTranslation = shouldBypassCms ? undefined : cmsTranslations[locale]?.[keyOrObject]

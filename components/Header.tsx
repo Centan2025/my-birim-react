@@ -141,6 +141,51 @@ const ChevronRightIcon: React.FC = () => (
   </svg>
 )
 
+// Ortak cross-fade metin bileşeni
+// Not: React state'in korunması için HEADER DIŞINDA tanımlanmalı
+// Aksi halde Header her render olduğunda CrossFadeText yeniden mount edilir ve animasyon tetiklenmez.
+const CrossFadeText: React.FC<{
+  text: string
+  className?: string
+  triggerKey?: string | number
+}> = ({text, className = '', triggerKey}) => {
+  const [currentText, setCurrentText] = useState(text)
+  const [previousText, setPreviousText] = useState(text)
+  const [isAnimating, setIsAnimating] = useState(false)
+
+  useEffect(() => {
+    // Her triggerKey değişiminde (yani dil değiştiğinde) animasyon oynat
+    setPreviousText(currentText)
+    setCurrentText(text)
+    setIsAnimating(true)
+
+    const timeout = window.setTimeout(() => {
+      setIsAnimating(false)
+    }, 1000)
+
+    return () => {
+      window.clearTimeout(timeout)
+    }
+  }, [triggerKey, text])
+
+  if (!isAnimating) {
+    return (
+      <span className={`relative inline-block ${className}`}>
+        <span className="block">{currentText}</span>
+      </span>
+    )
+  }
+
+  return (
+    <span key={String(triggerKey)} className={`relative inline-block ${className}`}>
+      {/* Yeni metin normal akışta, genişlik HER ZAMAN buna göre belirlenir */}
+      <span className="block cross-fade-text-in">{currentText}</span>
+      {/* Eski metin mutlak pozisyonda, sadece görsel olarak üstüne bindiriliyor */}
+      <span className="block absolute inset-0 cross-fade-text-out">{previousText}</span>
+    </span>
+  )
+}
+
 export function Header() {
   const {t, setLocale, locale, supportedLocales} = useTranslation()
   const location = useLocation()
@@ -162,6 +207,7 @@ export function Header() {
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null)
   const mobileMenuFocusTrap = useFocusTrap(isMobileMenuOpen)
   const mobileMenuCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const mobileLocaleTimeoutRef = useRef<number | null>(null)
   const [submenuOffset, setSubmenuOffset] = useState(0)
 
   const {isLoggedIn} = useAuth()
@@ -176,6 +222,7 @@ export function Header() {
   const [heroBrightness, setHeroBrightness] = useState<number | null>(null)
   const [settings, setSettings] = useState<SiteSettings | null>(null)
   const currentRouteRef = useRef<string>(location.pathname)
+  const [isMobileLocaleTransition, setIsMobileLocaleTransition] = useState(false)
   // 2. seçenek (overlay) SADECE: (1) mobilde ve (2) CMS'te açıkça "overlay" seçiliyse aktif olsun.
   const isOverlayMobileMenu = Boolean(
     isMobile && settings && settings.mobileHeaderAnimation === 'overlay'
@@ -955,6 +1002,20 @@ export function Header() {
     )
   }
 
+  const handleMobileLocaleChange = (langCode: string) => {
+    if (locale === langCode) return
+
+    setIsMobileLocaleTransition(true)
+    if (mobileLocaleTimeoutRef.current) {
+      window.clearTimeout(mobileLocaleTimeoutRef.current)
+    }
+    mobileLocaleTimeoutRef.current = window.setTimeout(() => {
+      setIsMobileLocaleTransition(false)
+    }, 400)
+
+    setLocale(langCode)
+  }
+
   return (
     <>
       <style>
@@ -973,6 +1034,28 @@ export function Header() {
           
           .image-transition {
             transition: opacity 0.5s ease-in-out;
+          }
+
+          @keyframes textFadeIn {
+            0%   { opacity: 0; }
+            100% { opacity: 1; }
+          }
+
+          @keyframes textFadeOut {
+            0%   { opacity: 1; }
+            100% { opacity: 0; }
+          }
+
+          .cross-fade-text-in {
+            animation: textFadeIn 0.6s ease-in-out forwards;
+          }
+
+          .cross-fade-text-out {
+            animation: textFadeOut 0.6s ease-in-out forwards;
+          }
+
+          .cross-fade-input {
+            animation: textFadeIn 0.6s ease-in-out forwards;
           }
           
           /* Tüm header menü öğelerini kesinlikle aynı boyutta yap */
@@ -1534,7 +1617,7 @@ export function Header() {
                           <button
                             key={langCode}
                             onClick={() => {
-                              setLocale(langCode)
+                              handleMobileLocaleChange(langCode)
                             }}
                             aria-pressed={isActive}
                             className={`group relative px-1.5 py-0.5 text-xs uppercase tracking-[0.2em] transition-colors duration-200 ${
@@ -1571,42 +1654,42 @@ export function Header() {
                     className="flex items-center min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    {t('products')}
+                    <CrossFadeText text={t('products')} triggerKey={locale} />
                   </NavLink>
                   <NavLink
                     to="/designers"
                     className="flex items-center min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    {t('designers')}
+                    <CrossFadeText text={t('designers')} triggerKey={locale} />
                   </NavLink>
                   <NavLink
                     to="/projects"
                     className="flex items-center min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    {t('projects') || 'Projeler'}
+                    <CrossFadeText text={t('projects') || 'Projeler'} triggerKey={locale} />
                   </NavLink>
                   <NavLink
                     to="/news"
                     className="flex items-center min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    {t('news')}
+                    <CrossFadeText text={t('news')} triggerKey={locale} />
                   </NavLink>
                   <NavLink
                     to="/about"
                     className="flex items-center min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    {t('about')}
+                    <CrossFadeText text={t('about')} triggerKey={locale} />
                   </NavLink>
                   <NavLink
                     to="/contact"
                     className="flex items-center min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    {t('contact')}
+                    <CrossFadeText text={t('contact')} triggerKey={locale} />
                   </NavLink>
                 </div>
               </nav>
@@ -1656,7 +1739,7 @@ export function Header() {
                       <button
                         key={langCode}
                         onClick={() => {
-                          setLocale(langCode)
+                          handleMobileLocaleChange(langCode)
                         }}
                         aria-pressed={isActive}
                         className={`group relative px-1.5 py-0.5 text-xs uppercase tracking-[0.2em] transition-all duration-200 ${
@@ -1711,7 +1794,9 @@ export function Header() {
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <span>{item.label}</span>
+                <span>
+                  <CrossFadeText text={item.label} triggerKey={locale} />
+                </span>
                 <span className="opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-300">
                   <ChevronRightIcon />
                 </span>
@@ -1753,7 +1838,9 @@ export function Header() {
               }}
               className="flex flex-col items-center mb-6"
             >
-              <p className="text-sm text-gray-300 mb-4 text-center">{t('subscribe_prompt')}</p>
+              <p className="text-sm text-gray-300 mb-4 text-center">
+                <CrossFadeText text={t('subscribe_prompt')} triggerKey={locale} />
+              </p>
               <div className="flex items-center justify-center border-b border-white pb-0.5 w-full max-w-[280px]">
                 <input
                   type="email"
@@ -1762,7 +1849,9 @@ export function Header() {
                   value={subscribeEmail}
                   onChange={e => setSubscribeEmailState(e.target.value)}
                   placeholder={t('email_placeholder')}
-                  className="w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 transition-all duration-200 text-[15px] text-center"
+                  className={`w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 transition-all duration-200 text-[15px] text-center ${
+                    isMobileLocaleTransition ? 'cross-fade-input' : ''
+                  }`}
                   style={{outline: 'none', boxShadow: 'none'}}
                 />
               </div>
@@ -1770,7 +1859,7 @@ export function Header() {
                 type="submit"
                 className="mt-4 px-6 py-2 border border-white/50 text-white hover:bg-white hover:text-black transition-all duration-300 text-sm font-medium uppercase tracking-wider"
               >
-                {t('subscribe')}
+                <CrossFadeText text={t('subscribe')} triggerKey={locale} />
               </button>
             </form>
 

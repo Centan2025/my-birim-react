@@ -35,6 +35,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   const [isDragging, setIsDragging] = useState(false)
   const [dragStartX, setDragStartX] = useState(0)
   const [draggedX, setDraggedX] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
 
   if (!items || items.length === 0) return null
 
@@ -64,6 +65,18 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     const safe = Math.max(0, Math.min(initialIndex, items.length - 1))
     setViewerIndex(items.length > 1 ? safe + 1 : 0)
   }, [items, initialIndex])
+
+  // Sadece viewport genişliğine göre basit mobil tespiti (desktop davranışını bozmamak için)
+  useEffect(() => {
+    const checkMobile = () => {
+      if (typeof window === 'undefined') return
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Açıldığında sayfayı en üste kaydır ve body scroll'unu kilitle
   useEffect(() => {
@@ -273,7 +286,8 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       {(slideCount > 1 || forceShowArrows) && (
         <div className="absolute left-0 right-0 bottom-0 pb-3 pt-2 px-6 flex items-center justify-between bg-white/95 shadow-inner">
           <div className="flex-1 flex justify-start">
-            {logicalIndex > 0 && (
+            {(logicalIndex > 0 ||
+              (forceShowArrows && isMobile && slideCount === 1)) && (
               <button
                 type="button"
                 onClick={goPrev}
@@ -297,7 +311,8 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
             )}
           </div>
           <div className="flex-1 flex justify-end">
-            {logicalIndex < slideCount - 1 && (
+            {(logicalIndex < slideCount - 1 ||
+              (forceShowArrows && isMobile && slideCount === 1)) && (
               <button
                 type="button"
                 onClick={goNext}

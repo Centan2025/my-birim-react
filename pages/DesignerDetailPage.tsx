@@ -78,7 +78,7 @@ export function DesignerDetailPage() {
                   : designer.imageDesktop
               }
               alt={t(designer.name)}
-              className={`w-80 h-96 md:w-96 md:h-[32rem] object-cover shadow-none md:shadow-lg filter grayscale ${imageBorderClass}`}
+              className={`w-80 h-96 md:w-96 md:h-[32rem] object-cover shadow-none md:shadow-none filter grayscale ${imageBorderClass}`}
               loading="eager"
               quality={90}
             />

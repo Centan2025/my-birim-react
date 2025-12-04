@@ -141,8 +141,16 @@ export default function LocalizedTextInput(props: ObjectInputProps) {
 
       {status && <StatusMessage type={status.type}>{status.message}</StatusMessage>}
 
-      {/* Sanity'nin varsayılan input'unu render et */}
-      {renderDefault(props)}
+      {/* Sanity'nin varsayılan input'unu render et, ama textarea yüksekliğini artır */}
+      <div style={{minHeight: '8rem'}}>
+        {renderDefault({
+          ...props,
+          elementProps: {
+            ...(props as any).elementProps,
+            rows: 6,
+          },
+        } as any)}
+      </div>
     </div>
   )
 }
