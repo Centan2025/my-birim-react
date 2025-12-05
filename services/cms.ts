@@ -1005,17 +1005,13 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
   if (useSanity && sanity) {
     const q = groq`*[_type == "aboutPage"][0]{
             ...,
-            heroImage,
-            storyImage
+            heroImage
         }`
     const data = await sanity.fetch(q)
     if (data) {
       // Normalize images
       if (data.heroImage) {
         data.heroImage = mapImage(data.heroImage)
-      }
-      if (data.storyImage) {
-        data.storyImage = mapImage(data.storyImage)
       }
       // Ensure values is always an array
       if (!Array.isArray(data.values)) {
@@ -1118,6 +1114,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             },
             contentBlocks[]{
                 ...,
+                titleFont,
                 image,
                 videoFile{
                     asset->{url, _ref, _id}

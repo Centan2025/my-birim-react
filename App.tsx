@@ -22,6 +22,8 @@ import {errorReporter} from './src/lib/errorReporting'
 import {analytics} from './src/lib/analytics'
 import {QueryClientProvider} from '@tanstack/react-query'
 import {queryClient} from './src/lib/queryClient'
+import ScrollReveal from './components/ScrollReveal'
+import {PageTransition} from './components/PageTransition'
 
 // Lazy load pages for code splitting
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({default: m.HomePage})))
@@ -137,19 +139,34 @@ const AuthProvider = ({children}: PropsWithChildren) => {
 
   // Load user from localStorage on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem('birim_user')
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser))
-      } catch (e) {
-        localStorage.removeItem('birim_user')
+    if (typeof window === 'undefined') return
+    try {
+      const storedUser = localStorage.getItem('birim_user')
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser))
+        } catch (e) {
+          try {
+            localStorage.removeItem('birim_user')
+          } catch {
+            // Ignore storage errors
+          }
+        }
       }
+    } catch (e) {
+      // Ignore storage access errors
     }
   }, [])
 
   const login = (userData: User) => {
     setUser(userData)
-    localStorage.setItem('birim_user', JSON.stringify(userData))
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem('birim_user', JSON.stringify(userData))
+      }
+    } catch (e) {
+      // Ignore storage errors
+    }
     // Set user in error reporting
     errorReporter.setUser({
       id: userData._id,
@@ -162,7 +179,13 @@ const AuthProvider = ({children}: PropsWithChildren) => {
 
   const logout = () => {
     setUser(null)
-    localStorage.removeItem('birim_user')
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.removeItem('birim_user')
+      }
+    } catch (e) {
+      // Ignore storage errors
+    }
     // Clear user from error reporting
     errorReporter.clearUser()
   }
@@ -309,82 +332,89 @@ const Footer = () => {
   if (!content || !settings) return null
 
   return (
-    <footer className="bg-gray-800 text-gray-400">
+    <footer className="bg-gray-800 text-gray-400 relative z-10">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Mobil düzen */}
         <div className="lg:hidden flex flex-col items-center space-y-6">
           {/* Logo - ortada üstte */}
-          <Link to="/" className="text-white -mt-4">
-            <SiteLogo logoUrl={settings.logoUrl} className="h-6 w-auto mx-auto" />
-          </Link>
+          <ScrollReveal>
+            <Link to="/" className="text-white -mt-4">
+              <SiteLogo logoUrl={settings.logoUrl} className="h-6 w-auto mx-auto" />
+            </Link>
+          </ScrollReveal>
 
           {/* Menü düğmeleri - alt alta ortada */}
-          <nav className="flex flex-col items-center space-y-3">
-            <Link
-              to="/products"
-              className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
-            >
-              {t('view_all')}
-            </Link>
-            <Link
-              to="/designers"
-              className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
-            >
-              {t('designers')}
-            </Link>
-            <Link
-              to="/projects"
-              className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
-            >
-              {t('projects') || 'Projeler'}
-            </Link>
-            <Link
-              to="/news"
-              className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
-            >
-              {t('news')}
-            </Link>
-            <Link
-              to="/about"
-              className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
-            >
-              {t('about')}
-            </Link>
-            <Link
-              to="/contact"
-              className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
-            >
-              {t('contact')}
-            </Link>
-          </nav>
+          <ScrollReveal delay={100}>
+            <nav className="flex flex-col items-center space-y-3">
+              <Link
+                to="/products"
+                className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
+              >
+                {t('view_all')}
+              </Link>
+              <Link
+                to="/designers"
+                className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
+              >
+                {t('designers')}
+              </Link>
+              <Link
+                to="/projects"
+                className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
+              >
+                {t('projects') || 'Projeler'}
+              </Link>
+              <Link
+                to="/news"
+                className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
+              >
+                {t('news')}
+              </Link>
+              <Link
+                to="/about"
+                className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
+              >
+                {t('about')}
+              </Link>
+              <Link
+                to="/contact"
+                className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
+              >
+                {t('contact')}
+              </Link>
+            </nav>
+          </ScrollReveal>
 
           {/* İnce çizgi */}
           <div className="w-full border-t border-gray-700"></div>
 
           {/* Dil seçenekleri */}
-          <div className="flex items-center gap-3">
-            {supportedLocales.map(langCode => {
-              const isActive = locale === langCode
-              return (
-                <button
-                  key={langCode}
-                  onClick={() => setLocale(langCode)}
-                  className={`text-xs uppercase tracking-wider transition-colors duration-200 ${
-                    isActive ? 'text-white font-bold' : 'text-gray-400 hover:text-white font-thin'
-                  }`}
-                >
-                  {langCode.toUpperCase()}
-                </button>
-              )
-            })}
-          </div>
+          <ScrollReveal delay={200}>
+            <div className="flex items-center gap-3">
+              {supportedLocales.map(langCode => {
+                const isActive = locale === langCode
+                return (
+                  <button
+                    key={langCode}
+                    onClick={() => setLocale(langCode)}
+                    className={`text-xs uppercase tracking-wider transition-colors duration-200 ${
+                      isActive ? 'text-white font-bold' : 'text-gray-400 hover:text-white font-thin'
+                    }`}
+                  >
+                    {langCode.toUpperCase()}
+                  </button>
+                )
+              })}
+            </div>
+          </ScrollReveal>
 
           {/* İnce çizgi */}
           <div className="w-full border-t border-gray-700"></div>
 
           {/* Partnerler */}
-          <div className="flex items-center justify-center flex-wrap gap-6 mb-0">
-            {(content.partners || content.partnerNames || []).map((partner, index) => {
+          <ScrollReveal delay={300}>
+            <div className="flex items-center justify-center flex-wrap gap-6 mb-0">
+              {(content.partners || content.partnerNames || []).map((partner, index) => {
               const partnerName = typeof partner === 'string' ? partner : t(partner.name)
               const partnerLogo = typeof partner === 'object' ? partner.logo : undefined
               const partnerUrl = typeof partner === 'object' ? partner.url : undefined
@@ -413,12 +443,14 @@ const Footer = () => {
                 </a>
               ) : (
                 <span key={index}>{partnerContent}</span>
-              )
-            })}
-          </div>
+                )
+              })}
+            </div>
+          </ScrollReveal>
 
           {/* Email abonelik formu - mobilde en altta ortalanmış */}
-          <div className="w-full flex justify-center !mt-16 lg:!mt-8">
+          <ScrollReveal delay={400}>
+            <div className="w-full flex justify-center !mt-16 lg:!mt-8">
             <form
               onSubmit={async e => {
                 e.preventDefault()
@@ -468,18 +500,22 @@ const Footer = () => {
                 </button>
               </div>
             </form>
-          </div>
+            </div>
+          </ScrollReveal>
         </div>
 
         {/* Desktop düzen */}
         <div className="hidden lg:flex flex-wrap items-start gap-8 lg:gap-16">
           {/* Sol taraf: Logo ve partner yazıları (sola hizalı) */}
           <div className="w-full lg:w-auto">
-            <div className="text-white mb-4">
-              <SiteLogo logoUrl={settings.logoUrl} className="h-4 w-auto" />
-            </div>
-            <div className="flex items-center flex-wrap gap-6 mb-4">
-              {(content.partners || content.partnerNames || []).map((partner, index) => {
+            <ScrollReveal>
+              <div className="text-white mb-4">
+                <SiteLogo logoUrl={settings.logoUrl} className="h-4 w-auto" />
+              </div>
+            </ScrollReveal>
+            <ScrollReveal delay={100}>
+              <div className="flex items-center flex-wrap gap-6 mb-4">
+                {(content.partners || content.partnerNames || []).map((partner, index) => {
                 const partnerName = typeof partner === 'string' ? partner : t(partner.name)
                 const partnerLogo = typeof partner === 'object' ? partner.logo : undefined
                 const partnerUrl = typeof partner === 'object' ? partner.url : undefined
@@ -507,18 +543,20 @@ const Footer = () => {
                     {partnerContent}
                   </a>
                 ) : (
-                  <span key={index}>{partnerContent}</span>
-                )
-              })}
-            </div>
+                    <span key={index}>{partnerContent}</span>
+                  )
+                })}
+              </div>
+            </ScrollReveal>
           </div>
 
           {/* Orta: Menü düğmeleri (sağa hizalı üstte) */}
           <div className="flex-1 flex justify-end">
-            <nav className="flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold uppercase tracking-wider text-gray-300 items-center justify-end">
+            <ScrollReveal delay={200}>
+              <nav className="flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold uppercase tracking-wider text-gray-300 items-center justify-end">
               <Link to="/products" className="group relative hover:text-white">
                 <span className="relative inline-block">
-                  {t('products')}
+                  {t('view_all')}
                   <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
                 </span>
               </Link>
@@ -552,13 +590,15 @@ const Footer = () => {
                   <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
                 </span>
               </Link>
-            </nav>
+              </nav>
+            </ScrollReveal>
           </div>
         </div>
         {/* Sosyal medya linkleri ve email formu - aynı üst hizasında */}
         <div className="mt-8 flex flex-col lg:flex-row flex-wrap items-center lg:items-start justify-center lg:justify-start gap-8 lg:gap-16">
           {/* Sosyal medya linkleri */}
-          <div className="w-full lg:w-auto flex justify-center lg:justify-start space-x-6">
+          <ScrollReveal delay={300}>
+            <div className="w-full lg:w-auto flex justify-center lg:justify-start space-x-6">
             {(content.socialLinks || [])
               .filter(link => link.isEnabled)
               .map(link => (
@@ -574,9 +614,11 @@ const Footer = () => {
                   </div>
                 </a>
               ))}
-          </div>
+            </div>
+          </ScrollReveal>
           {/* Email abonelik formu - sadece desktop'ta */}
-          <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+          <ScrollReveal delay={400}>
+            <div className="hidden lg:flex lg:flex-1 lg:justify-end">
             <form
               onSubmit={async e => {
                 e.preventDefault()
@@ -632,10 +674,12 @@ const Footer = () => {
                 </button>
               </div>
             </form>
-          </div>
+            </div>
+          </ScrollReveal>
         </div>
-        <div className="mt-8 lg:mt-16 border-t border-gray-700 pt-8 flex flex-col md:flex-row md:justify-between md:items-start gap-6 text-xs">
-          <p className="md:flex-shrink-0 text-center md:text-left">{t(content.copyrightText)}</p>
+        <ScrollReveal delay={500}>
+          <div className="mt-8 lg:mt-16 border-t border-gray-700 pt-8 flex flex-col md:flex-row md:justify-between md:items-start gap-6 text-xs">
+            <p className="md:flex-shrink-0 text-center md:text-left">{t(content.copyrightText)}</p>
           {content.legalLinks && content.legalLinks.length > 0 && (
           <div className="flex flex-col md:flex-row md:items-center md:gap-x-4 items-center gap-2">
               {content.legalLinks
@@ -673,7 +717,8 @@ const Footer = () => {
                 })}
             </div>
           )}
-        </div>
+          </div>
+        </ScrollReveal>
       </div>
     </footer>
   )
@@ -791,9 +836,9 @@ const AppContent = () => {
                   <Route
                     path="/product/:productId"
                     element={
-                      <div className="page-transition">
+                      <PageTransition>
                         <ProductDetailPage />
-                      </div>
+                      </PageTransition>
                     }
                   />
                   <Route

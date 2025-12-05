@@ -14,6 +14,7 @@ export default {
   "all_products": "Tüm Ürünler",
   "all_products_subtitle": "Koleksiyonumuzdaki tüm tasarımları keşfedin.",
   "view_all": "TÜM MODELLER",
+  "see_all": "HEPSİNİ GÖR",
   "categories": "Kategoriler",
   "designer": "Tasarımcı",
   "category": "Kategori",

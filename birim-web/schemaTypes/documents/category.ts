@@ -26,12 +26,15 @@ export default defineType({
       title: 'Kapak Görseli',
       type: 'image',
       options: {hotspot: true},
+      description:
+        'Kategori sayfası hero alanı için yatay görsel. Önerilen çözünürlük: Desktop 1920x1080px (16:9), Mobil 1080x1920px (9:16).',
     }),
     defineField({
       name: 'menuImage',
       title: 'Menü Görseli',
       type: 'image',
-      description: 'Ürünler menüsünde gösterilecek görsel (yatay dikdörtgen format önerilir)',
+      description:
+        'Ürünler menüsünde gösterilecek görsel. Yatay dikdörtgen format önerilir. Önerilen çözünürlük: 600x400px veya 800x500px.',
       options: {hotspot: true},
     }),
   ],

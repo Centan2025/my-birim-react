@@ -79,6 +79,9 @@ export function ProjectDetailPage() {
     return false
   })
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
+  const [isTitleVisible, setIsTitleVisible] = useState(false)
+  const [areDotsVisible, setAreDotsVisible] = useState(false)
+  const [isPageVisible, setIsPageVisible] = useState(false)
   // Prev/Next must be declared before any early returns to keep hooks order stable
   const {prevProject, nextProject} = useMemo(() => {
     if (!project || allProjects.length < 2) return {prevProject: null, nextProject: null}
@@ -88,6 +91,15 @@ export function ProjectDetailPage() {
     const next = currentIndex < allProjects.length - 1 ? allProjects[currentIndex + 1] : null
     return {prevProject: prev, nextProject: next}
   }, [project, allProjects])
+  // Sayfa animasyonu - ilk açılışta fade-in
+  useEffect(() => {
+    setIsPageVisible(false)
+    const timer = setTimeout(() => {
+      setIsPageVisible(true)
+    }, 50)
+    return () => clearTimeout(timer)
+  }, [projectId])
+
   // Analytics: proje detay görüntüleme
   useEffect(() => {
     if (!project) return
@@ -106,6 +118,27 @@ export function ProjectDetailPage() {
       label: t(project.title), // ID yerine proje başlığı
     })
   }, [project, t])
+
+
+  // Başlık animasyonu - ilk açılışta soldan gel
+  useEffect(() => {
+    if (!project) return
+    setIsTitleVisible(false)
+    const timer = setTimeout(() => {
+      setIsTitleVisible(true)
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [project])
+
+  // Dot'lar animasyonu - ilk açılışta sağdan ve soldan birlikte gel
+  useEffect(() => {
+    if (!project) return
+    setAreDotsVisible(false)
+    const timer = setTimeout(() => {
+      setAreDotsVisible(true)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [project])
 
   // Ekran genişliğine göre mobil/desktop takibi
   useEffect(() => {
@@ -283,7 +316,17 @@ export function ProjectDetailPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
+    <div 
+      className={`min-h-screen transition-all duration-700 ease-out ${
+        isPageVisible
+          ? 'opacity-100 translate-y-0'
+          : 'opacity-0 translate-y-20'
+      }`}
+      style={{
+        transform: isPageVisible ? 'translateY(0)' : 'translateY(80px)',
+      }}
+    >
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-16 md:pt-18 lg:pt-16 pb-16">
       <Breadcrumbs
         className="mb-6"
         items={[
@@ -292,25 +335,35 @@ export function ProjectDetailPage() {
           {label: t(project.title)},
         ]}
       />
-      <div className="mb-8">
+      <div className={`mb-4 md:mb-6 lg:mb-6 transition-all duration-[700ms] ease-out ${
+        isTitleVisible
+          ? 'translate-x-0 opacity-100'
+          : '-translate-x-[150%] opacity-0'
+      }`}>
         <h1 className="text-4xl font-light tracking-tight text-gray-900">{t(project.title)}</h1>
         {project.date && <p className="text-sm text-gray-500 mt-2 font-light">{t(project.date)}</p>}
-        <div className="h-px bg-gray-300 mt-4"></div>
+        {/* Başlık altındaki gri çizgi – tam ekran */}
+        <div className="mt-2 md:mt-3 lg:mt-2 relative left-1/2 right-1/2 -mx-[50vw] w-screen">
+          <div className="h-px bg-gray-300 w-full"></div>
+        </div>
       </div>
+      {/* Sadece kapak görseli varsa - sabit oranlı hero alanı */}
       {coverUrl && !curr && (
-        <OptimizedImage
-          src={coverUrl}
-          srcMobile={coverMobile}
-          srcDesktop={coverDesktop}
-          alt={t(project.title)}
-          className={`mt-10 w-full h-auto object-contain ${imageBorderClass}`}
-          loading="eager"
-          quality={90}
-        />
+        <div className="mt-2 md:mt-3 lg:mt-2 relative w-full aspect-[16/9]">
+          <OptimizedImage
+            src={coverUrl}
+            srcMobile={coverMobile}
+            srcDesktop={coverDesktop}
+            alt={t(project.title)}
+            className={`absolute inset-0 w-full h-full object-contain mx-auto ${imageBorderClass}`}
+            loading="eager"
+            quality={90}
+          />
+        </div>
       )}
       {curr && (
         <div
-          className="mt-10 relative"
+          className="mt-2 md:mt-3 lg:mt-2 relative"
           onMouseDown={handleHeroDragStart}
           onMouseMove={handleHeroDragMove}
           onMouseUp={handleHeroDragEnd}
@@ -319,7 +372,8 @@ export function ProjectDetailPage() {
           onTouchMove={handleHeroDragMove}
           onTouchEnd={handleHeroDragEnd}
         >
-          <div className="w-full overflow-hidden relative">
+          {/* Slider'lı hero alanı - sabit oranlı */}
+          <div className="w-full overflow-hidden relative aspect-[16/9]">
             <div
               className="flex h-full"
               style={{
@@ -336,13 +390,8 @@ export function ProjectDetailPage() {
                 return (
                   <div
                     key={i}
-                    className="relative w-full shrink-0"
+                    className="relative w-full h-full shrink-0"
                     style={{width: `${100 / totalSlides}%`}}
-                    onClick={() => {
-                      if (!isDragging && Math.abs(draggedX) < 10) {
-                        setIsFullscreenOpen(true)
-                      }
-                    }}
                   >
                     {m.type === 'image' && (
                       <OptimizedImage
@@ -350,7 +399,7 @@ export function ProjectDetailPage() {
                         srcMobile={m.urlMobile}
                         srcDesktop={m.urlDesktop}
                         alt="project"
-                        className={`w-full h-auto object-contain ${imageBorderClass}`}
+                        className={`w-full h-full object-contain mx-auto ${imageBorderClass}`}
                         loading="eager"
                         quality={90}
                       />
@@ -401,6 +450,11 @@ export function ProjectDetailPage() {
 
                   return allMedia.map((_, index) => {
                     const isActive = index === normalizedSlideIndex
+                    // Ortadaki dot'tan başlayarak sağa ve sola doğru animasyon
+                    const centerIndex = Math.floor(allMedia.length / 2)
+                    const distanceFromCenter = Math.abs(index - centerIndex)
+                    const isLeft = index < centerIndex
+                    const animationDelay = distanceFromCenter * 50
 
                     return (
                       <button
@@ -415,8 +469,17 @@ export function ProjectDetailPage() {
                           setIdx(index)
                         }}
                         className={`relative rounded-full h-2 transition-all duration-500 ease-in-out group ${
-                          isActive ? 'w-12 bg-white/90' : 'w-2 bg-white/40 hover:bg-white/60'
+                          isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
+                        } ${
+                          areDotsVisible
+                            ? 'translate-x-0 opacity-100'
+                            : isLeft
+                              ? '-translate-x-[150%] opacity-0'
+                              : 'translate-x-[150%] opacity-0'
                         }`}
+                        style={{
+                          transitionDelay: `${animationDelay}ms`,
+                        }}
                         aria-label={`Görsel ${index + 1}`}
                       >
                         {isActive && (
@@ -431,9 +494,42 @@ export function ProjectDetailPage() {
                 })()}
               </div>
             )}
+
+            {/* Fullscreen button - sadece medya varsa göster */}
+            {allMedia.length > 0 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  analytics.event({
+                    category: 'media',
+                    action: 'project_fullscreen_click',
+                    label: project?.id,
+                    value: idx,
+                  })
+                  setIsFullscreenOpen(true)
+                }}
+                className={`group absolute bottom-3 right-3 md:bottom-4 md:right-4 bg-black/35 text-white rounded-full w-8 h-8 md:w-10 md:h-10 transition-all duration-500 ease-out z-20 hover:scale-110 active:scale-95 flex items-center justify-center`}
+                aria-label="Büyüt"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="transition-transform duration-300 group-hover:scale-110 md:w-5 md:h-5"
+                >
+                  <path d="M14 3h8v8M10 21h-8v-8" />
+                </svg>
+              </button>
+            )}
           </div>
           {allMedia.length > 1 && !isMobile && (
-            <div className="absolute inset-0 flex items-center justify-between px-2 pointer-events-none">
+            <div className="absolute inset-0 flex items-center justify-between px-6 pointer-events-none">
               <button
                 onClick={prev}
                 className="pointer-events-auto bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
@@ -452,90 +548,98 @@ export function ProjectDetailPage() {
           )}
         </div>
       )}
-      {(project.excerpt || project.body) && (
-        <div className="mt-12 space-y-4">
-          {project.excerpt && (
-            <p className="text-lg text-gray-600 leading-relaxed font-light">{t(project.excerpt)}</p>
-          )}
-          {project.body && (
-            <div className="text-gray-700 leading-relaxed font-light whitespace-pre-line">
-              {t(project.body)}
-            </div>
-          )}
+      {/* Ana görselin altında ince gri çizgi – tam ekran */}
+      {curr && (
+        <div className="mt-6 relative left-1/2 right-1/2 -mx-[50vw] w-screen">
+          <div className="h-px bg-gray-300 w-full" />
         </div>
       )}
-      {allMedia.length > 0 && (
-        <div className="mt-8 grid grid-cols-6 gap-2">
-          {allMedia.map((m, i) => (
-            <button
-              key={i}
-              onClick={() => {
-                if (slideCount > 1) {
-                  // Thumbnail tıklanınca hero sonsuz kaydırma index'ini
-                  // ilgili slide'a hizala (cloned dizide +1 offset)
-                  setHeroTransitionEnabled(false)
-                  setHeroSlideIndex(i + 1)
-                } else {
-                  setHeroSlideIndex(0)
-                }
-                setIdx(i)
-                // Tüm cihazlarda: ürün ve iletişim sayfalarındakiyle aynı tam ekran viewer
-                setIsFullscreenOpen(true)
-              }}
-              className={`border ${i === idx ? 'border-gray-900' : 'border-transparent hover:border-gray-400'}`}
-            >
-              {m.type === 'image' && (
-                <OptimizedImage
-                  src={m.url}
-                  alt={`thumb-${i}`}
-                  className="w-full aspect-square object-contain bg-gray-50"
-                  loading="lazy"
-                  quality={75}
-                />
-              )}
-              {m.type === 'video' && (
-                <div className="w-full aspect-square bg-gray-50 flex items-center justify-center relative">
-                  <OptimizedVideo
-                    src={m.url}
-                    className="w-full h-full object-contain"
-                    preload="none"
-                    loading="lazy"
-                  />
-                  <span className="absolute bottom-1 right-1 bg-white/85 text-gray-900 rounded-full w-6 h-6 flex items-center justify-center shadow text-xs">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="w-3 h-3 ml-0.5"
-                    >
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  </span>
-                </div>
-              )}
-              {m.type === 'youtube' && (
-                <div className="w-full aspect-square bg-gray-50 relative">
-                  <OptimizedImage
-                    src={youTubeThumb(m.url)}
-                    alt={`youtube thumb ${i + 1}`}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                    quality={75}
-                  />
-                  <span className="absolute bottom-1 right-1 bg-white/85 text-gray-900 rounded-full w-6 h-6 flex items-center justify-center shadow text-xs">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="w-3 h-3 ml-0.5"
-                    >
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  </span>
-                </div>
-              )}
-            </button>
-          ))}
+      {(project.excerpt || project.body || allMedia.length > 0) && (
+        <div className="mt-0 relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-gray-100">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+            {/* Başlık ile aynı sol hizaya oturan içerik */}
+            {(project.excerpt || project.body) && (
+              <div className="max-w-4xl space-y-4">
+                {project.excerpt && (
+                  <p className="text-lg text-gray-600 leading-relaxed font-light">
+                    {t(project.excerpt)}
+                  </p>
+                )}
+                {project.body && (
+                  <div className="text-gray-700 leading-relaxed font-light whitespace-pre-line">
+                    {t(project.body)}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {allMedia.length > 0 && (
+              <div className={`grid grid-cols-2 gap-4 ${project.excerpt || project.body ? 'mt-10' : ''}`}>
+                {allMedia.map((m, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => {
+                      setIdx(i)
+                      setIsFullscreenOpen(true)
+                    }}
+                    className="border border-gray-200 bg-gray-50 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+                  >
+                    {m.type === 'image' && (
+                      <OptimizedImage
+                        src={m.url}
+                        alt={`thumb-${i}`}
+                        className="w-full aspect-square object-contain"
+                        loading="lazy"
+                        quality={75}
+                      />
+                    )}
+                    {m.type === 'video' && (
+                      <div className="w-full aspect-square bg-gray-50 flex items-center justify-center relative">
+                        <OptimizedVideo
+                          src={m.url}
+                          className="w-full h-full object-contain"
+                          preload="none"
+                          loading="lazy"
+                        />
+                        <span className="absolute bottom-1 right-1 bg-white/85 text-gray-900 rounded-full w-6 h-6 flex items-center justify-center shadow text-xs">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            className="w-3 h-3 ml-0.5"
+                          >
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </span>
+                      </div>
+                    )}
+                    {m.type === 'youtube' && (
+                      <div className="w-full aspect-square bg-gray-50 relative">
+                        <OptimizedImage
+                          src={youTubeThumb(m.url)}
+                          alt={`youtube thumb ${i + 1}`}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          quality={75}
+                        />
+                        <span className="absolute bottom-1 right-1 bg-white/85 text-gray-900 rounded-full w-6 h-6 flex items-center justify-center shadow text-xs">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            className="w-3 h-3 ml-0.5"
+                          >
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </span>
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -587,6 +691,7 @@ export function ProjectDetailPage() {
           onClose={() => setIsFullscreenOpen(false)}
         />
       )}
+    </div>
     </div>
   )
 }

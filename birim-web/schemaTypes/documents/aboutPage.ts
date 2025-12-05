@@ -10,18 +10,11 @@ export default defineType({
       title: 'Hero Görseli',
       type: 'image',
       options: {hotspot: true},
+      description:
+        'Hakkımızda sayfası hero alanı için geniş görsel. Önerilen çözünürlük: Desktop 1920x1080px (16:9), Mobil 1080x1920px (9:16).',
     }),
     defineField({name: 'heroTitle', title: 'Hero Başlığı', type: 'localizedString'}),
     defineField({name: 'heroSubtitle', title: 'Hero Alt Başlığı', type: 'localizedString'}),
-    defineField({name: 'storyTitle', title: 'Hikaye Başlığı', type: 'localizedString'}),
-    defineField({name: 'storyContentP1', title: 'Hikaye Metni 1', type: 'localizedText'}),
-    defineField({name: 'storyContentP2', title: 'Hikaye Metni 2', type: 'localizedText'}),
-    defineField({
-      name: 'storyImage',
-      title: 'Hikaye Görseli',
-      type: 'image',
-      options: {hotspot: true},
-    }),
     // Özel üçlü bölüm: Tarihçe / Kimlik / Kalite
     defineField({
       name: 'historySection',

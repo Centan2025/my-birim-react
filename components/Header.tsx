@@ -191,6 +191,7 @@ export function Header() {
   const location = useLocation()
   const {data: categories = []} = useCategories()
   const [isProductsOpen, setIsProductsOpen] = useState(false)
+  const [isMobileProductsMenuOpen, setIsMobileProductsMenuOpen] = useState(false)
   const [isLangOpen, setIsLangOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -919,7 +920,6 @@ export function Header() {
     'text-white hover:text-gray-200 transition-all duration-300 transform hover:scale-125'
 
   const mobileMenuLinks: {to: string; label: string}[] = [
-    {to: '/categories', label: (t('products') || '').toLocaleUpperCase('en')},
     {to: '/designers', label: (t('designers') || '').toLocaleUpperCase('en')},
     {to: '/projects', label: (t('projects') || 'Projeler').toLocaleUpperCase('en')},
     {to: '/news', label: (t('news') || '').toLocaleUpperCase('en')},
@@ -1131,8 +1131,8 @@ export function Header() {
                     ? 'max-h-[3.5rem]'
                     : 'max-h-[6rem]'
           } ${
-            // Header'ın nadiren ince kalmasını engellemek için minimum yükseklik ekle
-            isMobile ? 'min-h-[3.5rem]' : 'min-h-[6rem]'
+            // Header yüksekliği: mobil ve desktop için satır yüksekliğiyle tam uyumlu tut
+            isMobile ? 'min-h-[3.5rem]' : 'min-h-[5rem]'
           } ${
             // Arka plan blur'ü: mobilde de her zaman kullan (opacity 0 değilse)
             isMobile && headerOpacity <= 0 ? '' : 'backdrop-blur-lg'
@@ -1218,8 +1218,8 @@ export function Header() {
           ref={headerContainerRef}
         >
           <nav className="px-2 sm:px-4 lg:px-6" ref={navRef}>
-            {/* Desktop'ta menü satırını biraz incelterek nav düğmelerini header'a yaklaştır */}
-            <div className="relative flex h-14 lg:h-20 items-center lg:grid lg:grid-cols-[1fr_auto_1fr]">
+            {/* Üst satır: logo ve menü düğmeleri dikeyde tam ortalı */}
+            <div className="relative flex h-14 lg:h-20 items-center lg:grid lg:grid-cols-[1fr_auto_1fr] lg:items-center">
               {/* Sol taraf - Menü düğmeleri (desktop) ve arama + logo (mobil) */}
               <div className="flex flex-1 items-center lg:justify-start">
                 {/* Mobil Arama - Solda */}
@@ -1649,16 +1649,66 @@ export function Header() {
               )}
               <nav className="px-4 sm:px-5 lg:px-6 pb-2 flex flex-col">
                 <div className="flex flex-col">
-                  <NavLink
-                    to="/categories"
-                    className="flex items-center min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <CrossFadeText text={t('products')} triggerKey={locale} />
-                  </NavLink>
+                  {/* Ürünler düğmesi - tıklanınca alt menü açılır */}
+                  <div className="border-b border-white/10">
+                    <button
+                      onClick={() => setIsMobileProductsMenuOpen(!isMobileProductsMenuOpen)}
+                      className="flex items-center justify-between w-full min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300"
+                    >
+                      <CrossFadeText text={t('products')} triggerKey={locale} />
+                      <svg
+                        className={`w-5 h-5 transition-transform duration-300 ${isMobileProductsMenuOpen ? 'rotate-180' : ''}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {/* Alt menü - kategoriler ve Hepsini Gör */}
+                    <div
+                      className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                        isMobileProductsMenuOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+                      }`}
+                    >
+                      <div className="pl-4 pb-2 flex flex-col">
+                        {categories.map((category, index) => (
+                          <NavLink
+                            key={category.id}
+                            to={`/products/${category.id}`}
+                            className="flex items-center min-h-[2.5rem] py-2 text-base font-light leading-tight tracking-[0.15em] uppercase text-gray-300 hover:text-white transition-colors duration-300 border-b border-white/5 last:border-b-0"
+                            onClick={() => {
+                              setIsMobileMenuOpen(false)
+                              setIsMobileProductsMenuOpen(false)
+                            }}
+                            style={{
+                              transitionDelay: isMobileProductsMenuOpen ? `${index * 50}ms` : '0ms',
+                            }}
+                          >
+                            <CrossFadeText text={t(category.name)} triggerKey={locale} />
+                          </NavLink>
+                        ))}
+                        <NavLink
+                          to="/products"
+                          className="flex items-center min-h-[2.5rem] py-2 mt-2 text-base font-light leading-tight tracking-[0.15em] uppercase text-gray-300 hover:text-white transition-colors duration-300 border-t border-white/10 pt-2"
+                          onClick={() => {
+                            setIsMobileMenuOpen(false)
+                            setIsMobileProductsMenuOpen(false)
+                          }}
+                          style={{
+                            transitionDelay: isMobileProductsMenuOpen ? `${categories.length * 50}ms` : '0ms',
+                          }}
+                        >
+                          <CrossFadeText text={t('see_all')} triggerKey={locale} />
+                        </NavLink>
+                      </div>
+                    </div>
+                  </div>
                   <NavLink
                     to="/designers"
-                    className="flex items-center min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
+                    className={`flex items-center min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10 transition-transform ${
+                      isMobileProductsMenuOpen ? 'translate-y-0' : 'translate-y-0'
+                    }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <CrossFadeText text={t('designers')} triggerKey={locale} />
@@ -1775,6 +1825,93 @@ export function Header() {
 
           {/* Menü linkleri - stagger animasyon */}
           <nav className="flex flex-col justify-start gap-6">
+            {/* Ürünler düğmesi - tıklanınca alt menü açılır */}
+            <div>
+              <button
+                onClick={() => setIsMobileProductsMenuOpen(!isMobileProductsMenuOpen)}
+                style={{
+                  transitionDelay: `${
+                    isMobileMenuOpen
+                      ? 0
+                      : (mobileMenuLinks.length - 1) * 100
+                  }ms`,
+                  fontWeight: 300,
+                  letterSpacing: '0.2em',
+                }}
+                className={`group flex items-center justify-between w-full text-xl md:text-2xl font-light leading-tight text-white transition-all duration-400 ${
+                  isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
+                }`}
+              >
+                <span>
+                  <CrossFadeText text={(t('products') || '').toLocaleUpperCase('en')} triggerKey={locale} />
+                </span>
+                <svg
+                  className={`w-6 h-6 transition-transform duration-300 ${isMobileProductsMenuOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {/* Alt menü - kategoriler ve Hepsini Gör */}
+              <div
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                  isMobileProductsMenuOpen ? 'max-h-[1000px] opacity-100 mt-4' : 'max-h-0 opacity-0'
+                }`}
+              >
+                <div className="pl-4 flex flex-col gap-3">
+                  {categories.map((category, index) => (
+                    <NavLink
+                      key={category.id}
+                      to={`/products/${category.id}`}
+                      style={{
+                        transitionDelay: isMobileProductsMenuOpen ? `${index * 50}ms` : '0ms',
+                        fontWeight: 300,
+                        letterSpacing: '0.15em',
+                      }}
+                      className={`group flex items-center justify-between text-lg md:text-xl font-light leading-tight text-gray-300 hover:text-white transition-all duration-400 ${
+                        isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
+                      }`}
+                      onClick={() => {
+                        setIsMobileMenuOpen(false)
+                        setIsMobileProductsMenuOpen(false)
+                      }}
+                    >
+                      <span>
+                        <CrossFadeText text={t(category.name)} triggerKey={locale} />
+                      </span>
+                      <span className="opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-300">
+                        <ChevronRightIcon />
+                      </span>
+                    </NavLink>
+                  ))}
+                  <NavLink
+                    to="/products"
+                    style={{
+                      transitionDelay: isMobileProductsMenuOpen ? `${categories.length * 50}ms` : '0ms',
+                      fontWeight: 300,
+                      letterSpacing: '0.15em',
+                    }}
+                    className={`group flex items-center justify-between text-lg md:text-xl font-light leading-tight text-gray-300 hover:text-white transition-all duration-400 border-t border-white/20 pt-3 mt-2 ${
+                      isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
+                    }`}
+                    onClick={() => {
+                      setIsMobileMenuOpen(false)
+                      setIsMobileProductsMenuOpen(false)
+                    }}
+                  >
+                    <span>
+                      <CrossFadeText text={(t('see_all') || '').toLocaleUpperCase('en')} triggerKey={locale} />
+                    </span>
+                    <span className="opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-300">
+                      <ChevronRightIcon />
+                    </span>
+                  </NavLink>
+                </div>
+              </div>
+            </div>
+            {/* Diğer menü linkleri */}
             {mobileMenuLinks.map((item, index) => (
               <NavLink
                 key={item.to}
@@ -1783,7 +1920,7 @@ export function Header() {
                   // Açılırken yukarı doğru (ilk eleman en geç), kapanırken tersine (ilk eleman en erken)
                   transitionDelay: `${
                     isMobileMenuOpen
-                      ? index * 100
+                      ? (index + 1) * 100
                       : (mobileMenuLinks.length - 1 - index) * 100
                   }ms`,
                   fontWeight: 300,

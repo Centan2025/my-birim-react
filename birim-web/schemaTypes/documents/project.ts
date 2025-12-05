@@ -51,7 +51,7 @@ export default defineType({
       type: 'image',
       options: {hotspot: true},
       description:
-        'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+        'Tüm cihazlar için varsayılan kapak görseli. Mobil veya desktop versiyonu yoksa bu kullanılır. Önerilen çözünürlük: Desktop 1920x1080px (16:9), Mobil 1080x1920px (9:16).',
     }),
     defineField({
       name: 'coverMobile',
@@ -59,7 +59,7 @@ export default defineType({
       type: 'image',
       options: {hotspot: true},
       description:
-        'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+        'Mobil cihazlar için özel kapak görseli (opsiyonel). Yoksa varsayılan görsel kullanılır. Önerilen çözünürlük: 1080x1920px veya 768x1024px.',
     }),
     defineField({
       name: 'coverDesktop',
@@ -67,7 +67,7 @@ export default defineType({
       type: 'image',
       options: {hotspot: true},
       description:
-        'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+        'Desktop cihazlar için özel kapak görseli (opsiyonel). Yoksa varsayılan görsel kullanılır. Önerilen çözünürlük: 1920x1080px veya 1920x1200px.',
     }),
     defineField({name: 'excerpt', title: 'Kısa Açıklama', type: 'localizedText'}),
     defineField({

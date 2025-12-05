@@ -153,7 +153,7 @@ export function AboutPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 md:pt-10 pb-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-16">
         <Breadcrumbs
           className="mb-6"
           items={[
@@ -161,38 +161,18 @@ export function AboutPage() {
             {label: t('about')},
           ]}
         />
-        {/* Our Story Section */}
-        <div className="max-w-4xl mx-auto grid md:grid-cols-5 gap-12 items-center">
-          <div className="md:col-span-3 prose prose-lg text-gray-500 max-w-none font-light">
-            <h2 className="text-3xl font-light text-gray-600">{t(content.storyTitle)}</h2>
-            <p>{t(content.storyContentP1)}</p>
-            <p>{t(content.storyContentP2)}</p>
-          </div>
-          <div className="md:col-span-2">
-            {content.storyImage && (
-              <OptimizedImage
-                src={content.storyImage}
-                alt="story"
-                className="w-full shadow-lg"
-                loading="lazy"
-                quality={85}
-              />
-            )}
-          </div>
-        </div>
-
         {/* Üçlü özel içerik bölümü: TARİHÇE, KİMLİK, KALİTE (tıklanabilir, ortak metin alanı) */}
-        <div className="my-24">
+        <div className="mt-8 md:mt-10 mb-16 md:mb-24">
           <div className="flex flex-col items-center">
             <div className="w-full md:w-auto">
               <div
                 ref={tabsContainerRef}
                 className="relative inline-flex w-full max-w-4xl justify-center border-b border-gray-300"
               >
-                {/* Seçili düğme için kayan koyu gri arka plan */}
+                {/* Seçili düğme için kayan gri arka plan + kenarlık */}
                 {activeSection && indicatorStyle && (
                   <div
-                    className="absolute bottom-0 top-0 bg-gray-300 transition-all duration-500 ease-out pointer-events-none"
+                    className="absolute inset-y-0 bg-gray-200 border border-gray-400 transition-all duration-300 ease-out pointer-events-none"
                     style={{
                       left: indicatorStyle.left,
                       width: indicatorStyle.width,

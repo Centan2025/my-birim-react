@@ -1,20 +1,43 @@
-import {useState, useEffect, useMemo} from 'react'
+import React, {useState, useEffect, useMemo} from 'react'
 import {Link} from 'react-router-dom'
 import {useSiteSettings} from '../src/hooks/useSiteData'
 import {useHomePageContent} from '../src/hooks/useHomePage'
-import {OptimizedImage} from '../components/OptimizedImage'
 import {OptimizedVideo} from '../components/OptimizedVideo'
 import {ArrowRight} from '../components/ArrowRight'
 import {YouTubeBackground} from '../components/YouTubeBackground'
 import {HomeHero} from '../components/HomeHero'
 import {useTranslation} from '../i18n'
 import {useSEO} from '../src/hooks/useSEO'
+import ScrollReveal from '../components/ScrollReveal'
+import ParallaxImage from '../components/ParallaxImage'
 
 export function HomePage() {
   const {data: content} = useHomePageContent()
   const {data: settings} = useSiteSettings()
+  
+  // Google Fonts'ları dinamik olarak yükle
+  useEffect(() => {
+    if (!content?.contentBlocks) return
+    
+    // Tüm content block'lardaki Google Fonts'ları topla
+    const googleFonts = new Set<string>()
+    content.contentBlocks.forEach((block) => {
+      const font = block.titleFont
+      if (font && font !== 'normal' && font !== 'serif' && font !== 'mono') {
+        googleFonts.add(font)
+      }
+    })
+    
+    // Fontları yükle
+    if (googleFonts.size > 0) {
+      import('../src/lib/loadGoogleFont').then(({loadGoogleFont}) => {
+        googleFonts.forEach((font) => loadGoogleFont(font))
+      })
+    }
+  }, [content?.contentBlocks])
   const [inspirationImageHeight, setInspirationImageHeight] = useState<number | null>(null)
-  const [isIOS, setIsIOS] = useState(false)
+  const [inspirationSectionRef, setInspirationSectionRef] = useState<HTMLElement | null>(null)
+  const [showFixedBackground, setShowFixedBackground] = useState(false)
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth < 1024
@@ -45,12 +68,28 @@ export function HomePage() {
 
   useSEO(seoData)
 
-  // iOS Safari tespiti (background-attachment: fixed bug'ları için)
+  // İlham section görünürken fixed background'u göster
   useEffect(() => {
-    if (typeof navigator === 'undefined') return
-    const ua = navigator.userAgent || (navigator as any).vendor || ''
-    setIsIOS(/iPad|iPhone|iPod/.test(ua))
-  }, [])
+    if (!inspirationSectionRef || typeof window === 'undefined') return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setShowFixedBackground(entry.isIntersecting)
+        })
+      },
+      {
+        threshold: 0.1,
+      }
+    )
+
+    observer.observe(inspirationSectionRef)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [inspirationSectionRef])
+
 
   // İlham görselinin yüksekliğini hesapla - hook'lar early return'den önce olmalı
   useEffect(() => {
@@ -132,22 +171,36 @@ export function HomePage() {
       : undefined
 
   return (
-    <div
-      className={`bg-gray-100 text-gray-800 ${isMobile ? 'hero-page-container-mobile' : ''}`}
-      style={
-        isMobile && viewportWidth > 0
-          ? {
-              width: `${viewportWidth}px`,
-              maxWidth: `${viewportWidth}px`,
-              overflowX: 'hidden',
-              margin: 0,
-              padding: 0,
-              left: 0,
-              right: 0,
-            }
-          : {}
-      }
-    >
+    <>
+      {/* Fixed background image - sadece section görünürken göster */}
+      {showFixedBackground && bgImageUrl && (
+        <div
+          className="fixed inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `url(${isMobile && bgImageMobile ? bgImageMobile : bgImageDesktop || bgImageUrl})`,
+            backgroundSize: isMobile ? '100vw auto' : 'cover',
+            backgroundPosition: isMobile ? 'left center' : 'center center',
+            backgroundRepeat: 'no-repeat',
+            zIndex: 1,
+          }}
+        />
+      )}
+      <div
+        className={`bg-gray-100 text-gray-800 ${isMobile ? 'hero-page-container-mobile' : ''}`}
+        style={
+          isMobile && viewportWidth > 0
+            ? {
+                width: `${viewportWidth}px`,
+                maxWidth: `${viewportWidth}px`,
+                overflowX: 'hidden',
+                margin: 0,
+                padding: 0,
+                left: 0,
+                right: 0,
+              }
+            : {}
+        }
+      >
       {/* Hero Section */}
       {heroMedia.length > 0 ? (
         <>
@@ -231,6 +284,7 @@ export function HomePage() {
                 background-size: 100vw auto !important;
                 background-position: left center !important;
                 background-repeat: no-repeat !important;
+                background-attachment: scroll !important;
               }
               body {
                 overflow-x: hidden !important;
@@ -435,9 +489,25 @@ export function HomePage() {
           const sortedBlocks = [...content.contentBlocks].sort(
             (a, b) => (a.order || 0) - (b.order || 0)
           )
+
+          // Boş (medya da yazı da olmayan) blokları tamamen gösterme
+          const hasAnyContent = (block: any) => {
+            const hasDescription = Boolean(block?.description)
+            const hasImage =
+              block?.image || block?.imageMobile || block?.imageDesktop
+            const hasVideo =
+              block?.videoFile || block?.videoFileMobile || block?.videoFileDesktop
+            const hasUrl = Boolean(block?.url)
+
+            return hasDescription || hasImage || hasVideo || hasUrl
+          }
+
+          const visibleBlocks = sortedBlocks.filter(hasAnyContent)
+          const lastIndex = visibleBlocks.length - 1
+
           return (
-            <>
-              {sortedBlocks.map((block, index) => {
+            <div className="relative" style={{zIndex: 2}}>
+              {visibleBlocks.map((block, index) => {
                 const getMediaUrl = () => {
                   if (block.mediaType === 'image' && block.image) {
                     return block.image
@@ -461,32 +531,66 @@ export function HomePage() {
                     : textAlign === 'right'
                       ? 'text-right'
                       : 'text-left'
+                const titleFont = block.titleFont || 'normal'
+                
+                // Font class veya style belirle
+                const titleFontClass =
+                  titleFont === 'serif'
+                    ? 'font-serif'
+                    : titleFont === 'mono'
+                      ? 'font-mono'
+                      : titleFont === 'normal'
+                        ? 'font-sans'
+                        : '' // Google Font için class yok, inline style kullanacağız
+                
+                // Google Font için inline style
+                const titleFontStyle = 
+                  titleFont && titleFont !== 'normal' && titleFont !== 'serif' && titleFont !== 'mono'
+                    ? {fontFamily: `"${titleFont}", sans-serif`}
+                    : undefined
 
                 const sectionSpacingClass = (() => {
-                  // Yazı yoksa: mobilde minimum, desktop'ta daha kontrollü boşluk
+                  const isLast = index === lastIndex
+
+                  // Yazı yoksa: mobilde minimum, desktop'ta daha sıkı boşluk
                   if (!hasDescription) {
                     if (index === 0) return 'pt-0 pb-0'
-                    if (index === 1) return 'pt-0 pb-4 md:pb-10'
-                    return 'py-4 md:py-10'
+                    if (index === 1) return 'pt-0 pb-2 md:pb-6'
+                    if (isLast) return 'pt-2 pb-1 md:pt-4 md:pb-6'
+                    return 'py-3 md:py-8'
                   }
 
-                  // Yazı varsa: mevcut (biraz azaltılmış) boşlukları koru
+                  // Yazı varsa: genel olarak hem mobilde hem desktop'ta boşlukları azalt
                   if (index === 0) return 'pt-0 pb-0'
-                  if (index === 1) return 'pt-0 pb-10 md:pb-20'
-                  return 'py-10 md:py-20'
+                  if (index === 1) return 'pt-2 pb-6 md:pt-3 md:pb-10'
+                  if (isLast) return 'pt-4 pb-6 md:pt-6 md:pb-12'
+                  return 'py-6 md:py-12'
                 })()
 
                 return (
-                  <section
-                    key={index}
-                    className={`${sectionSpacingClass} ${backgroundColor}`}
-                  >
-                    {isFullWidth ? (
+                  <React.Fragment key={`block-${block.order || index}-${index}`}>
+                    {index > 0 && (
+                      <div className="w-full h-px bg-gray-200" />
+                    )}
+                    <section key={index} className={`${sectionSpacingClass} ${backgroundColor}`}>
+                      {isFullWidth ? (
                       <div
                         className={`w-full overflow-hidden ${
-                          hasDescription ? 'py-6 md:py-16' : 'py-0 md:py-10'
+                          hasDescription ? 'py-4 md:py-10' : 'py-0 md:py-6'
                         }`}
                       >
+                        {block.title && (
+                          <ScrollReveal delay={100}>
+                            <div className="container mx-auto px-2 sm:px-3 lg:px-4 pb-6 md:pb-8">
+                              <h2 
+                                className={`text-2xl md:text-4xl font-bold ${titleFontClass} ${textAlignClass} text-gray-900`}
+                                style={titleFontStyle}
+                              >
+                                {t(block.title)}
+                              </h2>
+                            </div>
+                          </ScrollReveal>
+                        )}
                         {block.mediaType === 'youtube' ? (
                           <div className="relative w-full aspect-video overflow-hidden">
                             <YouTubeBackground url={mediaUrl} />
@@ -502,79 +606,19 @@ export function HomePage() {
                             preload="auto"
                             loading="lazy"
                           />
-                        ) : (
-                          <OptimizedImage
-                            src={mediaUrl}
-                            alt=""
-                            className={`w-full h-auto ${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`}
-                            loading="lazy"
-                            quality={85}
-                          />
-                        )}
+                          ) : (
+                            <ParallaxImage
+                              src={mediaUrl}
+                              alt=""
+                              className="w-full"
+                              imgClassName={`${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`}
+                              loading="lazy"
+                              quality={85}
+                            />
+                          )}
                         {block.description && (
-                          <div className="container mx-auto px-2 sm:px-3 lg:px-4 py-12">
-                            <div className={`prose max-w-none ${textAlignClass}`}>
-                              <p className="text-sm md:text-lg text-gray-700 font-light leading-relaxed">
-                                {t(block.description)}
-                              </p>
-                            </div>
-                            {block.linkText && block.linkUrl && (
-                              <div className={`mt-6 ${textAlignClass}`}>
-                                <Link
-                                  to={block.linkUrl}
-                                  className="group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
-                                >
-                                  <span className="inline-flex items-center gap-x-3 border-b border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
-                                    <span className="group-hover:text-gray-500">
-                                      {t(block.linkText)}
-                                    </span>
-                                    <ArrowRight className="w-5 h-5 md:w-6 md:h-6" />
-                                  </span>
-                                </Link>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div
-                        className={`container mx-auto px-2 sm:px-3 lg:px-4 ${
-                          hasDescription ? 'py-6 md:py-16' : 'py-2 md:py-10'
-                        }`}
-                      >
-                        <div
-                          className={`flex flex-col ${isLeft ? 'md:flex-row' : isRight ? 'md:flex-row-reverse' : 'md:flex-row items-center'} gap-12`}
-                        >
-                          <div
-                            className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'} overflow-hidden`}
-                          >
-                            {block.mediaType === 'youtube' ? (
-                              <div className="relative w-full aspect-video overflow-hidden">
-                                <YouTubeBackground url={mediaUrl} />
-                              </div>
-                            ) : block.mediaType === 'video' ? (
-                              <OptimizedVideo
-                                src={mediaUrl}
-                                className={`w-full h-auto ${imageBorderClass} max-w-full ${isMobile ? 'object-contain' : 'object-cover'}`}
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
-                                preload="auto"
-                                loading="lazy"
-                              />
-                            ) : (
-                              <OptimizedImage
-                                src={mediaUrl}
-                                alt=""
-                                className={`w-full h-auto ${imageBorderClass} ${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`}
-                                loading="lazy"
-                                quality={85}
-                              />
-                            )}
-                          </div>
-                          {block.description && (
-                            <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'}`}>
+                          <ScrollReveal delay={200}>
+                            <div className="container mx-auto px-2 sm:px-3 lg:px-4 py-12">
                               <div className={`prose max-w-none ${textAlignClass}`}>
                                 <p className="text-sm md:text-lg text-gray-700 font-light leading-relaxed">
                                   {t(block.description)}
@@ -590,69 +634,151 @@ export function HomePage() {
                                       <span className="group-hover:text-gray-500">
                                         {t(block.linkText)}
                                       </span>
-                                      <ArrowRight className="w-5 h-5 md:w-6 md:h-6" />
+                                      <ArrowRight className="w-8 h-8 md:w-10 md:h-10" />
                                     </span>
                                   </Link>
                                 </div>
                               )}
                             </div>
-                          )}
-                        </div>
+                          </ScrollReveal>
+                        )}
                       </div>
-                    )}
-                  </section>
+                    ) : (
+                        <div
+                          className={`container mx-auto px-2 sm:px-3 lg:px-4 ${
+                            hasDescription ? 'py-4 md:py-10' : 'py-1 md:py-6'
+                          }`}
+                        >
+                          {block.title && (
+                            <ScrollReveal delay={100}>
+                              <div className={`pb-6 md:pb-8 ${textAlignClass}`}>
+                                <h2 
+                                  className={`text-2xl md:text-4xl font-bold ${titleFontClass} text-gray-900`}
+                                  style={titleFontStyle}
+                                >
+                                  {t(block.title)}
+                                </h2>
+                              </div>
+                            </ScrollReveal>
+                          )}
+                          <div
+                            className={`flex flex-col ${isLeft ? 'md:flex-row' : isRight ? 'md:flex-row-reverse' : 'md:flex-row items-center'} gap-12`}
+                          >
+                            <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'} overflow-visible`}>
+                              {block.mediaType === 'youtube' ? (
+                                <div className="relative w-full aspect-video overflow-hidden">
+                                  <YouTubeBackground url={mediaUrl} />
+                                </div>
+                              ) : block.mediaType === 'video' ? (
+                                <OptimizedVideo
+                                  src={mediaUrl}
+                                  className={`w-full h-auto ${imageBorderClass} max-w-full ${isMobile ? 'object-contain' : 'object-cover'}`}
+                                  autoPlay
+                                  loop
+                                  muted
+                                  playsInline
+                                  preload="auto"
+                                  loading="lazy"
+                                />
+                                ) : (
+                                  <ParallaxImage
+                                    src={mediaUrl}
+                                    alt=""
+                                    className="w-full"
+                                    imgClassName={`${imageBorderClass} ${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`}
+                                    loading="lazy"
+                                    quality={85}
+                                  />
+                                )}
+                            </div>
+                            {block.description && (
+                              <ScrollReveal delay={200} width="w-full" className={`${isCenter ? 'md:w-full' : 'md:w-1/2'}`}>
+                                <div className={`prose max-w-none ${textAlignClass}`}>
+                                  <p className="text-sm md:text-lg text-gray-700 font-light leading-relaxed">
+                                    {t(block.description)}
+                                  </p>
+                                </div>
+                                {block.linkText && block.linkUrl && (
+                                  <div className={`mt-6 ${textAlignClass}`}>
+                                    <Link
+                                      to={block.linkUrl}
+                                      className="group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
+                                    >
+                                      <span className="inline-flex items-center gap-x-3 border-b border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
+                                        <span className="group-hover:text-gray-500">
+                                          {t(block.linkText)}
+                                        </span>
+                                        <ArrowRight className="w-8 h-8 md:w-10 md:h-10" />
+                                      </span>
+                                    </Link>
+                                  </div>
+                                )}
+                              </ScrollReveal>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </section>
+                  </React.Fragment>
                 )
               })}
-            </>
+            </div>
           )
         })()}
 
       {/* Inspiration Section */}
       {inspiration &&
         (inspiration.backgroundImage || inspiration.title || inspiration.subtitle) && (
-          <section
-            className="relative py-16 md:py-32 bg-gray-900 text-white text-center inspiration-section-mobile"
-            style={{
-              backgroundImage: `url(${isMobile && bgImageMobile ? bgImageMobile : bgImageDesktop || bgImageUrl})`,
-              backgroundSize: isMobile ? '100vw auto' : 'cover',
-              // iOS Safari'de background-attachment: fixed scroll sırasında görseli kaybedebiliyor,
-              // bu yüzden SADECE iOS mobilde 'scroll', diğer tüm cihazlarda 'fixed' kullanıyoruz.
-              backgroundAttachment: isMobile ? (isIOS ? 'scroll' : 'fixed') : 'fixed',
-              backgroundPosition: isMobile ? 'left center' : 'center center',
-              backgroundRepeat: 'no-repeat',
-              ...(isMobile && inspirationImageHeight && bgImageUrl
-                ? {
-                    height: `${inspirationImageHeight}px`,
-                    minHeight: `${inspirationImageHeight}px`,
-                    paddingTop: 0,
-                    paddingBottom: 0,
-                  }
-                : {}),
-              ...(!isMobile && inspirationImageHeight && bgImageUrl
-                ? {minHeight: `${inspirationImageHeight}px`}
-                : {}),
-            }}
-          >
-            <div className="absolute inset-0 bg-black/50"></div>
-            <div className="relative z-10 container mx-auto px-2 sm:px-2 lg:px-3 animate-fade-in-up-subtle max-w-4xl">
-              <h2 className="text-4xl font-light leading-relaxed">{t(inspiration.title)}</h2>
-              <p className="mt-4 text-lg text-gray-200 max-w-2xl mx-auto font-light leading-relaxed">
-                {t(inspiration.subtitle)}
-              </p>
-              {inspiration.buttonText && (
-                <Link
-                  to={inspiration.buttonLink || '/'}
-                  className="group mt-8 inline-flex items-center gap-x-3 text-white font-semibold py-3 pl-0 pr-5 text-lg rounded-lg"
-                >
-                  <span className="inline-flex items-center gap-x-3 border-b border-transparent group-hover:border-white pb-1 transition-all duration-300 ease-out">
-                    <span className="group-hover:text-gray-200">{t(inspiration.buttonText)}</span>
-                    <ArrowRight className="w-6 h-6" />
-                  </span>
-                </Link>
-              )}
-            </div>
-          </section>
+          <>
+            <ScrollReveal>
+              <section
+                ref={(el) => setInspirationSectionRef(el)}
+                className="relative py-16 md:py-32 bg-gray-900 text-white text-center inspiration-section-mobile"
+                style={{
+                  ...(isMobile && inspirationImageHeight && bgImageUrl
+                    ? {
+                        height: `${inspirationImageHeight}px`,
+                        minHeight: `${inspirationImageHeight}px`,
+                        paddingTop: 0,
+                        paddingBottom: 0,
+                      }
+                    : {}),
+                  ...(!isMobile && inspirationImageHeight && bgImageUrl
+                    ? {minHeight: `${inspirationImageHeight}px`}
+                    : {}),
+                  position: 'relative',
+                  zIndex: 3,
+                }}
+              >
+                <div className="absolute inset-0 bg-black/50 z-0"></div>
+              <div className="relative z-10 container mx-auto px-2 sm:px-2 lg:px-3 max-w-4xl">
+                <ScrollReveal delay={200}>
+                  <h2 className="text-4xl font-light leading-relaxed">{t(inspiration.title)}</h2>
+                </ScrollReveal>
+                <ScrollReveal delay={300}>
+                  <p className="mt-4 text-lg text-gray-200 max-w-2xl mx-auto font-light leading-relaxed">
+                    {t(inspiration.subtitle)}
+                  </p>
+                </ScrollReveal>
+                {inspiration.buttonText && (
+                  <ScrollReveal delay={400}>
+                    <Link
+                      to={inspiration.buttonLink || '/'}
+                      className="group mt-8 inline-flex items-center gap-x-3 text-white font-semibold py-3 pl-0 pr-5 text-lg rounded-lg"
+                    >
+                      <span className="inline-flex items-center gap-x-3 border-b border-transparent group-hover:border-white pb-1 transition-all duration-300 ease-out">
+                        <span className="group-hover:text-gray-200">{t(inspiration.buttonText)}</span>
+                        <ArrowRight className="w-8 h-8 md:w-10 md:h-10" />
+                      </span>
+                    </Link>
+                  </ScrollReveal>
+                )}
+              </div>
+              </section>
+            </ScrollReveal>
+          </>
         )}
-    </div>
+      </div>
+    </>
   )
 }

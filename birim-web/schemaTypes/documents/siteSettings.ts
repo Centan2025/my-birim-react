@@ -5,7 +5,13 @@ export default defineType({
   title: 'Site Ayarları',
   type: 'document',
   fields: [
-    defineField({name: 'logo', title: 'Logo', type: 'image', options: {hotspot: true}}),
+    defineField({
+      name: 'logo',
+      title: 'Logo',
+      type: 'image',
+      options: {hotspot: true},
+      description: 'Site logosu. Önerilen: SVG veya en az 512x512px PNG (şeffaf arka planlı).',
+    }),
     defineField({
       name: 'topBannerText',
       title: 'Üst Bilgi Metni',

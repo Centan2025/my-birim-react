@@ -14,6 +14,7 @@ export default {
   all_products: 'All Products',
   all_products_subtitle: 'Discover all designs in our collection.',
   view_all: 'ALL MODELS',
+  see_all: 'VIEW ALL',
   categories: 'Categories',
   designer: 'Designer',
   category: 'Category',

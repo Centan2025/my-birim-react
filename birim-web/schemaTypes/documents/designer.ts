@@ -27,7 +27,7 @@ export default defineType({
       type: 'image',
       options: {hotspot: true},
       description:
-        'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+        'Tüm cihazlar için varsayılan tasarımcı görseli. Mobil veya desktop versiyonu yoksa bu kullanılır. Önerilen çözünürlük: 600x800px veya 800x1000px (dikey portre).',
     }),
     defineField({
       name: 'imageMobile',
@@ -35,7 +35,7 @@ export default defineType({
       type: 'image',
       options: {hotspot: true},
       description:
-        'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+        'Mobil cihazlar için özel tasarımcı görseli (opsiyonel). Yoksa varsayılan görsel kullanılır. Önerilen çözünürlük: 600x800px.',
     }),
     defineField({
       name: 'imageDesktop',
@@ -43,7 +43,7 @@ export default defineType({
       type: 'image',
       options: {hotspot: true},
       description:
-        'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+        'Desktop cihazlar için özel tasarımcı görseli (opsiyonel). Yoksa varsayılan görsel kullanılır. Önerilen çözünürlük: 800x1000px.',
     }),
   ],
   preview: {

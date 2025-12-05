@@ -37,7 +37,7 @@ export default defineType({
           type: 'image',
           options: {hotspot: true},
           description:
-            'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+            'Tüm cihazlar için varsayılan arka plan görseli. Mobil veya desktop versiyonu yoksa bu kullanılır. Önerilen çözünürlük: Desktop 1920x1080px, Mobil 1080x1920px.',
         }),
         defineField({
           name: 'backgroundImageMobile',
@@ -45,7 +45,7 @@ export default defineType({
           type: 'image',
           options: {hotspot: true},
           description:
-            'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+            'Mobil cihazlar için özel arka plan görseli (opsiyonel). Yoksa varsayılan görsel kullanılır. Önerilen çözünürlük: 1080x1920px (dikey).',
         }),
         defineField({
           name: 'backgroundImageDesktop',
@@ -53,7 +53,7 @@ export default defineType({
           type: 'image',
           options: {hotspot: true},
           description:
-            'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+            'Desktop cihazlar için özel arka plan görseli (opsiyonel). Yoksa varsayılan görsel kullanılır. Önerilen çözünürlük: 1920x1080px veya 1920x1200px.',
         }),
         defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
         defineField({name: 'subtitle', title: 'Alt Başlık', type: 'localizedString'}),

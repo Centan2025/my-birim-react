@@ -39,15 +39,16 @@ const DownloadIcon = () => (
 const ChevronRightIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
+    width="32"
+    height="32"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2"
+    strokeWidth="4"
     strokeLinecap="round"
     strokeLinejoin="round"
     {...props}
+    style={{...props.style, display: 'block', margin: '0 auto'}}
   >
     <path d="m9 18 6-6-6-6" />
   </svg>
@@ -56,15 +57,16 @@ const ChevronRightIcon = (props: React.SVGProps<SVGSVGElement>) => (
 const ChevronLeftIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
+    width="32"
+    height="32"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2"
+    strokeWidth="4"
     strokeLinecap="round"
     strokeLinejoin="round"
     {...props}
+    style={{...props.style, display: 'block', margin: '0 auto'}}
   >
     <path d="m15 18-6-6 6-6" />
   </svg>
@@ -186,6 +188,9 @@ export function ProductDetailPage() {
     return false
   })
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
+  const [isTitleVisible, setIsTitleVisible] = useState(false)
+  const [areDotsVisible, setAreDotsVisible] = useState(false)
+  const [isPageVisible, setIsPageVisible] = useState(false)
   const [dimLightbox, setDimLightbox] = useState<{
     images: {image: string; title?: LocalizedString}[]
     currentIndex: number
@@ -198,6 +203,12 @@ export function ProductDetailPage() {
   const thumbRef = useRef<HTMLDivElement | null>(null)
   const [thumbDragStartX, setThumbDragStartX] = useState<number | null>(null)
   const [thumbScrollStart, setThumbScrollStart] = useState<number>(0)
+
+  // Sayfa animasyonu - ilk açılışta fade-in
+  useEffect(() => {
+    // PageTransition animasyonu kullanıldığı için bu animasyonu kaldırdık
+    setIsPageVisible(true)
+  }, [productId])
 
   // Sayfa başlığı + GA pageview: "Kategori Adı - Ürün Adı"
   useEffect(() => {
@@ -218,6 +229,27 @@ export function ProductDetailPage() {
   useEffect(() => {
     setActiveBookIndex(0)
   }, [activeMaterialGroup])
+
+
+  // Model adı ve tasarımcı animasyonu - ilk açılışta sağdan gel
+  useEffect(() => {
+    if (!product) return
+    setIsTitleVisible(false)
+    const timer = setTimeout(() => {
+      setIsTitleVisible(true)
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [product])
+
+  // Dot'lar animasyonu - ilk açılışta sağdan ve soldan birlikte gel
+  useEffect(() => {
+    if (!product) return
+    setAreDotsVisible(false)
+    const timer = setTimeout(() => {
+      setAreDotsVisible(true)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [product])
 
   // Product değiştiğinde main image'i ayarla
   useEffect(() => {
@@ -673,8 +705,19 @@ export function ProductDetailPage() {
   }
 
   return (
-    <>
+    <div 
+      className={`min-h-screen transition-all duration-700 ease-out ${
+        isPageVisible
+          ? 'opacity-100 translate-y-0'
+          : 'opacity-0 translate-y-20'
+      }`}
+      style={{
+        transform: isPageVisible ? 'translateY(0)' : 'translateY(80px)',
+        backgroundColor: 'white',
+      }}
+    >
       {/* Local style for hiding scrollbar */}
+      <div data-product-detail>
       <style>
         {`
           .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -711,22 +754,8 @@ export function ProductDetailPage() {
               return (
                 <div
                   key={index}
-                  className="relative h-full shrink-0 cursor-pointer bg-white flex items-center justify-center"
+                  className="relative h-full shrink-0 bg-white flex items-center justify-center"
                   style={{width: `${100 / totalHeroSlides}%`}}
-                  onClick={() => {
-                    // Küçük parmak hareketlerinde de tıklama algılansın diye
-                    // draggedX'in mutlak değeri belli bir eşikten küçükse tıklama kabul ediyoruz.
-                    if (!isDragging && Math.abs(draggedX) < 10) {
-                      analytics.event({
-                        category: 'media',
-                        action: 'band_click',
-                        label: product?.id,
-                        value: index,
-                      })
-                      // Hero medyaya tıklayınca tam ekran viewer aç
-                      setIsFullscreenOpen(true)
-                    }
-                  }}
                 >
                   {m.type === 'image' ? (
                     <OptimizedImage
@@ -789,7 +818,11 @@ export function ProductDetailPage() {
             </ol>
           </nav>
 
-          <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-white">
+          <div className={`absolute bottom-10 md:bottom-10 left-6 md:left-10 text-white transition-all duration-[700ms] ease-out ${
+            isTitleVisible
+              ? 'translate-x-0 opacity-100'
+              : '-translate-x-[150%] opacity-0'
+          }`}>
             <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg">
               {t(product.name)}
             </h1>
@@ -808,13 +841,15 @@ export function ProductDetailPage() {
             <>
               <button
                 onClick={heroPrev}
-                className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/35 hover:bg-black/50 text-white rounded-full w-10 h-10 flex items-center justify-center"
+                className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+                aria-label="Previous hero slide"
               >
                 ‹
               </button>
               <button
                 onClick={heroNext}
-                className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/35 hover:bg-black/50 text-white rounded-full w-10 h-10 flex items-center justify-center"
+                className="absolute right-6 top-1/2 -translate-y-1/2 bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+                aria-label="Next hero slide"
               >
                 ›
               </button>
@@ -837,6 +872,11 @@ export function ProductDetailPage() {
 
                 return bandMedia.map((_, index) => {
                   const isActive = index === normalizedSlideIndex
+                  // Ortadaki dot'tan başlayarak sağa ve sola doğru animasyon
+                  const centerIndex = Math.floor(bandMedia.length / 2)
+                  const distanceFromCenter = Math.abs(index - centerIndex)
+                  const isLeft = index < centerIndex
+                  const animationDelay = distanceFromCenter * 50
 
                   return (
                     <button
@@ -851,8 +891,17 @@ export function ProductDetailPage() {
                         setCurrentImageIndex(index)
                       }}
                       className={`relative rounded-full h-2 transition-all duration-500 ease-in-out group ${
-                        isActive ? 'w-12 bg-white/90' : 'w-2 bg-white/40 hover:bg-white/60'
+                        isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
+                      } ${
+                        areDotsVisible
+                          ? 'translate-x-0 opacity-100'
+                          : isLeft
+                            ? '-translate-x-[150%] opacity-0'
+                            : 'translate-x-[150%] opacity-0'
                       }`}
+                      style={{
+                        transitionDelay: `${animationDelay}ms`,
+                      }}
                       aria-label={`Görsel ${index + 1}`}
                     >
                       {isActive && (
@@ -866,6 +915,39 @@ export function ProductDetailPage() {
                 })
               })()}
             </div>
+          )}
+
+          {/* Fullscreen button - sadece görsel varsa göster */}
+          {bandMedia.length > 0 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                analytics.event({
+                  category: 'media',
+                  action: 'band_click',
+                  label: product?.id,
+                  value: currentImageIndex,
+                })
+                setIsFullscreenOpen(true)
+              }}
+              className={`group absolute bottom-3 right-3 md:bottom-4 md:right-4 bg-black/35 text-white rounded-full w-8 h-8 md:w-10 md:h-10 transition-all duration-500 ease-out z-20 hover:scale-110 active:scale-95 flex items-center justify-center`}
+              aria-label="Büyüt"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="transition-transform duration-300 group-hover:scale-110 md:w-5 md:h-5"
+              >
+                <path d="M14 3h8v8M10 21h-8v-8" />
+              </svg>
+            </button>
           )}
         </div>
         {/* Divider and Thumbnails under hero */}
@@ -907,8 +989,6 @@ export function ProductDetailPage() {
                           setHeroSlideIndex(0)
                         }
                         setCurrentImageIndex(idx)
-                        // Tüm cihazlarda: iletişim sayfasındakiyle aynı tam ekran viewer
-                        setIsFullscreenOpen(true)
                       }}
                       className={`relative flex-shrink-0 w-24 h-24 overflow-hidden border-2 transition-all duration-300 ${currentImageIndex === idx ? 'border-gray-400 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}
                     >
@@ -955,18 +1035,56 @@ export function ProductDetailPage() {
                 onClick={() => {
                   if (thumbRef.current) thumbRef.current.scrollBy({left: -240, behavior: 'smooth'})
                 }}
-                className="absolute left-0 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-800 shadow px-2 py-2"
+                className="absolute top-1/2 -translate-y-1/2 flex items-center justify-center rounded transition-transform hover:scale-105 active:scale-95 z-10"
+                style={{
+                  left: '-60px',
+                  width: '44px',
+                  height: '44px',
+                  backgroundColor: 'transparent',
+                  color: '#4b5563'
+                }}
               >
-                ‹
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="33"
+                  height="33"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="16 20 8 12 16 4" />
+                </svg>
               </button>
               <button
                 aria-label="scroll-right"
                 onClick={() => {
                   if (thumbRef.current) thumbRef.current.scrollBy({left: 240, behavior: 'smooth'})
                 }}
-                className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-gray-800 shadow px-2 py-2"
+                className="absolute top-1/2 -translate-y-1/2 flex items-center justify-center rounded transition-transform hover:scale-105 active:scale-95 z-10"
+                style={{
+                  right: '-60px',
+                  width: '44px',
+                  height: '44px',
+                  backgroundColor: 'transparent',
+                  color: '#4b5563'
+                }}
               >
-                ›
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="33"
+                  height="33"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="8 20 16 12 8 4" />
+                </svg>
               </button>
             </div>
           </div>
@@ -1474,15 +1592,51 @@ export function ProductDetailPage() {
         >
           <button
             onClick={prevImageFn}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:opacity-75 transition-opacity z-20 bg-black/20 rounded-full p-2"
+            className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-20"
+            style={{
+              width: '54px',
+              height: '54px',
+              backgroundColor: 'rgba(62, 60, 60, 0.5)',
+              color: '#d3caca'
+            }}
           >
-            <ChevronLeftIcon />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="41"
+              height="41"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="16 20 8 12 16 4" />
+            </svg>
           </button>
           <button
             onClick={nextImage}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:opacity-75 transition-opacity z-20 bg-black/20 rounded-full p-2"
+            className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-20"
+            style={{
+              width: '54px',
+              height: '54px',
+              backgroundColor: 'rgba(62, 60, 60, 0.5)',
+              color: '#d3caca'
+            }}
           >
-            <ChevronRightIcon />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="41"
+              height="41"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="8 20 16 12 8 4" />
+            </svg>
           </button>
           <div className="relative w-screen max-w-screen-2xl h-[80vh] p-2 overflow-hidden">
             <button
@@ -1688,10 +1842,28 @@ export function ProductDetailPage() {
                           dimLightbox.images.length,
                       })
                     }}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-2 rounded-full shadow-md transition-all z-10"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10"
+                    style={{
+                      width: '54px',
+                      height: '54px',
+                      backgroundColor: 'rgba(62, 60, 60, 0.5)',
+                      color: '#d3caca'
+                    }}
                     aria-label="Previous"
                   >
-                    <ChevronLeftIcon className="w-6 h-6" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="41"
+                      height="41"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="16 20 8 12 16 4" />
+                    </svg>
                   </button>
                   <button
                     onClick={e => {
@@ -1701,10 +1873,28 @@ export function ProductDetailPage() {
                         currentIndex: (dimLightbox.currentIndex + 1) % dimLightbox.images.length,
                       })
                     }}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-2 rounded-full shadow-md transition-all z-10"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10"
+                    style={{
+                      width: '54px',
+                      height: '54px',
+                      backgroundColor: 'rgba(62, 60, 60, 0.5)',
+                      color: '#d3caca'
+                    }}
                     aria-label="Next"
                   >
-                    <ChevronRightIcon className="w-6 h-6" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="41"
+                      height="41"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="8 20 16 12 8 4" />
+                    </svg>
                   </button>
                 </>
               )}
@@ -1756,10 +1946,28 @@ export function ProductDetailPage() {
                           materialLightbox.images.length,
                       })
                     }}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-1.5 rounded-full shadow-md transition-all z-10"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10"
+                    style={{
+                      width: '54px',
+                      height: '54px',
+                      backgroundColor: 'rgba(62, 60, 60, 0.5)',
+                      color: '#d3caca'
+                    }}
                     aria-label="Previous"
                   >
-                    <ChevronLeftIcon className="w-5 h-5" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="41"
+                      height="41"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="16 20 8 12 16 4" />
+                    </svg>
                   </button>
                   <button
                     onClick={e => {
@@ -1770,10 +1978,28 @@ export function ProductDetailPage() {
                           (materialLightbox.currentIndex + 1) % materialLightbox.images.length,
                       })
                     }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-1.5 rounded-full shadow-md transition-all z-10"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10"
+                    style={{
+                      width: '54px',
+                      height: '54px',
+                      backgroundColor: 'rgba(62, 60, 60, 0.5)',
+                      color: '#d3caca'
+                    }}
                     aria-label="Next"
                   >
-                    <ChevronRightIcon className="w-5 h-5" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="41"
+                      height="41"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="8 20 16 12 8 4" />
+                    </svg>
                   </button>
                 </>
               )}
@@ -1795,6 +2021,7 @@ export function ProductDetailPage() {
           </div>
         </div>
       )}
-    </>
+      </div>
+    </div>
   )
 }

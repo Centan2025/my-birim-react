@@ -225,6 +225,7 @@ export function ContactPage() {
     })
   }, [selectedLocation])
 
+
   const selectedLocationMediaForViewer = useMemo(
     () =>
       selectedLocationMedia
@@ -311,56 +312,61 @@ export function ContactPage() {
           >
             <div className="flex gap-3 min-w-max pb-2">
               {selectedLocationMedia.map((m, idx) => (
-                <button
+                <div
                   key={idx}
-                  onClick={() => {
-                    analytics.event({
-                      category: 'contact',
-                      action: 'open_media',
-                      label: selectedLocation ? t(selectedLocation.title) : '',
-                      value: idx,
-                    })
-                    setSelectedMediaIndex(idx)
-                    // Tüm cihazlarda: ürün / proje detay sayfasındakiyle aynı tam ekran viewer
-                    setIsFullscreenOpen(true)
-                  }}
-                  className="relative flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 overflow-hidden border-2 border-transparent opacity-80 hover:opacity-100 hover:scale-105 transition-all duration-300"
+                  className="relative flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24"
                 >
-                  {m.type === 'image' ? (
-                    <OptimizedImage
-                      src={m.url || ''}
-                      alt={`Media ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                      quality={75}
-                      draggable={false}
-                    />
-                  ) : m.type === 'video' ? (
-                    <div className="w-full h-full bg-black/60" />
-                  ) : (
-                    <OptimizedImage
-                      src={youTubeThumb(m.url || '')}
-                      alt={`youtube thumb ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                      quality={75}
-                    />
-                  )}
-                  {(m.type === 'video' || m.type === 'youtube') && (
-                    <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                      <span className="bg-white/85 text-gray-900 w-10 h-10 flex items-center justify-center shadow">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          className="w-5 h-5 ml-0.5"
-                        >
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
+                  <button
+                    onClick={() => {
+                      analytics.event({
+                        category: 'contact',
+                        action: 'open_media',
+                        label: selectedLocation ? t(selectedLocation.title) : '',
+                        value: idx,
+                      })
+                      setSelectedMediaIndex(idx)
+                      // Tüm cihazlarda: ürün / proje detay sayfasındakiyle aynı tam ekran viewer
+                      setIsFullscreenOpen(true)
+                    }}
+                    className="relative w-full h-full overflow-hidden border-2 border-transparent opacity-80 hover:opacity-100 hover:scale-105 transition-all duration-300"
+                  >
+                    {m.type === 'image' ? (
+                      <OptimizedImage
+                        src={m.url || ''}
+                        alt={`Media ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                        quality={75}
+                        draggable={false}
+                      />
+                    ) : m.type === 'video' ? (
+                      <div className="w-full h-full bg-black/60" />
+                    ) : (
+                      <OptimizedImage
+                        src={youTubeThumb(m.url || '')}
+                        alt={`youtube thumb ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                        quality={75}
+                      />
+                    )}
+                    {(m.type === 'video' || m.type === 'youtube') && (
+                      <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                        <span className="bg-white/85 text-gray-900 w-10 h-10 flex items-center justify-center shadow">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            className="w-5 h-5 ml-0.5"
+                          >
+                            <path d="M8 5v14l11-7z" />
+                          </svg>
+                        </span>
                       </span>
-                    </span>
-                  )}
-                </button>
+                    )}
+                  </button>
+                  
+                </div>
               ))}
             </div>
           </div>
@@ -378,9 +384,28 @@ export function ContactPage() {
                     behavior: 'smooth',
                   })
                 }}
-                className="hidden md:block md:absolute md:left-0 md:top-1/2 md:-translate-y-1/2 bg-white/70 hover:bg-white text-gray-800 shadow px-2 py-2"
+                className="hidden md:block md:absolute md:top-1/2 md:-translate-y-1/2 flex items-center justify-center rounded transition-transform hover:scale-105 active:scale-95 z-10"
+                style={{
+                  left: '-60px',
+                  width: '44px',
+                  height: '44px',
+                  backgroundColor: 'transparent',
+                  color: '#4b5563'
+                }}
               >
-                ‹
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="33"
+                  height="33"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="16 20 8 12 16 4" />
+                </svg>
               </button>
               <button
                 aria-label="scroll-right"
@@ -392,9 +417,28 @@ export function ContactPage() {
                     behavior: 'smooth',
                   })
                 }}
-                className="hidden md:block md:absolute md:right-0 md:top-1/2 md:-translate-y-1/2 bg-white/70 hover:bg-white text-gray-800 shadow px-2 py-2"
+                className="hidden md:block md:absolute md:top-1/2 md:-translate-y-1/2 flex items-center justify-center rounded transition-transform hover:scale-105 active:scale-95 z-10"
+                style={{
+                  right: '-60px',
+                  width: '44px',
+                  height: '44px',
+                  backgroundColor: 'transparent',
+                  color: '#4b5563'
+                }}
               >
-                ›
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="33"
+                  height="33"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="8 20 16 12 8 4" />
+                </svg>
               </button>
             </>
           )}
@@ -404,7 +448,9 @@ export function ContactPage() {
   }
 
   return (
-    <div className="bg-gray-100 animate-fade-in-up-subtle">
+    <div
+      className={`${isFullscreenOpen ? 'bg-white' : 'bg-gray-100'} animate-fade-in-up-subtle`}
+    >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
         <Breadcrumbs
           className="mb-6"
@@ -486,7 +532,6 @@ export function ContactPage() {
           items={selectedLocationMediaForViewer}
           initialIndex={selectedMediaIndex}
           onClose={() => setIsFullscreenOpen(false)}
-          forceShowArrows
         />
       )}
     </div>
