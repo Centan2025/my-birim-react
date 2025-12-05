@@ -16,7 +16,7 @@ export const PageTransition: React.FC<PageTransitionProps> = ({children}) => {
     if (isFirstMount.current) {
       isFirstMount.current = false
       prevPathRef.current = location.pathname
-      return
+      return undefined
     }
 
     // Sadece gerçek sayfa değişikliğinde animasyon yap
@@ -89,6 +89,7 @@ export const PageTransition: React.FC<PageTransitionProps> = ({children}) => {
       // Normal geçiş - animasyon yapma
       setIsEntering(false)
       prevPathRef.current = location.pathname
+      return undefined
     }
   }, [location.pathname])
 
