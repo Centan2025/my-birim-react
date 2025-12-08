@@ -154,6 +154,7 @@ export function ProductDetailPage() {
     return false
   })
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
+  const [isFullscreenButtonVisible, setIsFullscreenButtonVisible] = useState(false)
   const [isTitleVisible, setIsTitleVisible] = useState(false)
   const [isDesignerVisible, setIsDesignerVisible] = useState(false)
   const [areDotsVisible, setAreDotsVisible] = useState(false)
@@ -197,6 +198,18 @@ export function ProductDetailPage() {
     setActiveBookIndex(0)
   }, [activeMaterialGroup])
 
+
+  // Fullscreen buton animasyonu - sağdan fade ile gelir
+  useEffect(() => {
+    if (!product) return
+    setIsFullscreenButtonVisible(false)
+    const timer = setTimeout(() => {
+      requestAnimationFrame(() => {
+        setIsFullscreenButtonVisible(true)
+      })
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [product])
 
   // Tasarımcı adı animasyonu - önce başlar, fade ile birlikte soldan gel
   useEffect(() => {
@@ -933,7 +946,13 @@ export function ProductDetailPage() {
                 })
                 setIsFullscreenOpen(true)
               }}
-              className={`group absolute bottom-3 right-3 md:bottom-4 md:right-4 bg-black/35 text-white rounded-full w-8 h-8 md:w-10 md:h-10 transition-all duration-500 ease-out z-20 hover:scale-110 active:scale-95 flex items-center justify-center`}
+              className="group absolute bottom-3 right-3 md:bottom-4 md:right-4 bg-black/35 text-white rounded-full w-8 h-8 md:w-10 md:h-10 z-20 hover:scale-110 active:scale-95 flex items-center justify-center"
+              style={{
+                opacity: isFullscreenButtonVisible ? 1 : 0,
+                transform: isFullscreenButtonVisible ? 'translateX(0)' : 'translateX(80px)',
+                transition: 'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+                willChange: 'transform, opacity',
+              }}
               aria-label="Büyüt"
             >
               <svg
