@@ -19,7 +19,6 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
   alt,
   className = '',
   imgClassName = '',
-  height = '100%',
   speed = 0.1, // Subtle parallax effect
   srcMobile,
   srcDesktop,

@@ -3,6 +3,7 @@ import React, {useState, useRef} from 'react'
 interface OptimizedVideoProps {
   src: string
   className?: string
+  style?: React.CSSProperties
   poster?: string
   autoPlay?: boolean
   loop?: boolean
@@ -30,6 +31,7 @@ interface OptimizedVideoProps {
 export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
   src,
   className = '',
+  style,
   poster,
   autoPlay = false,
   loop = false,
@@ -194,6 +196,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
         playsInline={playsInline}
         preload={preload}
         className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ${className}`}
+        style={style}
         onLoadedData={handleLoadedData}
         onError={handleError}
         onCanPlay={handleLoadedData}
@@ -219,6 +222,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       playsInline={playsInline}
       preload={preload}
       className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ${className}`}
+      style={style}
       onLoadedData={handleLoadedData}
       onError={handleError}
       onCanPlay={handleLoadedData}
