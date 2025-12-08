@@ -9,6 +9,7 @@ import { useTranslation } from '../i18n'
 import { useSEO } from '../src/hooks/useSEO'
 import ScrollReveal from '../components/ScrollReveal'
 import ParallaxImage from '../components/ParallaxImage'
+import { useGoogleFonts } from '../src/hooks/useGoogleFont'
 
 export function HomePage() {
   const { data: content } = useHomePageContent()
@@ -46,6 +47,16 @@ export function HomePage() {
   )
 
   useSEO(seoData)
+
+  // Content block'lardaki Google Fonts'u yükle
+  const contentBlockFonts = useMemo(() => {
+    if (!content?.contentBlocks) return []
+    return content.contentBlocks
+      .map((block) => block.titleFont)
+      .filter((font): font is string => Boolean(font))
+  }, [content?.contentBlocks])
+
+  useGoogleFonts(contentBlockFonts)
 
   // İlham section görünürken fixed background'u göster
   useEffect(() => {
@@ -562,7 +573,7 @@ export function HomePage() {
                               <ScrollReveal delay={100}>
                                 <div className="container mx-auto px-2 sm:px-3 lg:px-4 pb-6 md:pb-8">
                                   <h2
-                                    className={`text-2xl md:text-4xl font-bold ${titleFontClass} ${textAlignClass} text-gray-900`}
+                                    className={`text-3xl md:text-5xl lg:text-6xl font-bold ${titleFontClass} ${textAlignClass} text-gray-900`}
                                     style={titleFontStyle}
                                   >
                                     {t(block.title)}
@@ -631,7 +642,7 @@ export function HomePage() {
                               <ScrollReveal delay={100}>
                                 <div className={`pb-6 md:pb-8 ${textAlignClass}`}>
                                   <h2
-                                    className={`text-2xl md:text-4xl font-bold ${titleFontClass} text-gray-900`}
+                                    className={`text-3xl md:text-5xl lg:text-6xl font-bold ${titleFontClass} text-gray-900`}
                                     style={titleFontStyle}
                                   >
                                     {t(block.title)}

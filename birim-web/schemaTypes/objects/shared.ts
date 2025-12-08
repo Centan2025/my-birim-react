@@ -772,6 +772,20 @@ export const contentBlock = defineType({
       description: 'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.',
     }),
     defineField({
+      name: 'title',
+      title: 'Başlık',
+      type: 'localizedString',
+      description: 'İçerik bloğu için başlık metni',
+    }),
+    defineField({
+      name: 'titleFont',
+      title: 'Başlık Fontu',
+      type: 'string',
+      description:
+        'Başlık için font seçin. "normal", "serif", "mono" veya Google Fonts\'tan bir font adı (örn: "Playfair Display", "Roboto")',
+      initialValue: 'normal',
+    }),
+    defineField({
       name: 'description',
       title: 'Açıklama Metni',
       type: 'localizedText',
