@@ -102,8 +102,8 @@ const SearchInput = styled.input`
 
 const FontGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
   max-height: 500px;
   overflow-y: auto;
   padding: 0.5rem;
@@ -111,8 +111,8 @@ const FontGrid = styled.div`
 
 const FontCard = styled.div<{isSelected: boolean}>`
   border: 2px solid ${(props) => (props.isSelected ? '#4285f4' : '#e0e0e0')};
-  border-radius: 8px;
-  padding: 1rem;
+  border-radius: 6px;
+  padding: 0.75rem;
   cursor: pointer;
   background: ${(props) => (props.isSelected ? '#f0f7ff' : 'white')};
   transition: all 0.2s ease;
@@ -125,15 +125,15 @@ const FontCard = styled.div<{isSelected: boolean}>`
 
 const FontName = styled.div`
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   color: #333;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 `
 
 const FontCategory = styled.div`
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #666;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 `
 
 const FontPreview = styled.div<{fontFamily: string}>`
@@ -143,12 +143,12 @@ const FontPreview = styled.div<{fontFamily: string}>`
     if (props.fontFamily === 'mono') return 'monospace'
     return `"${props.fontFamily}", sans-serif`
   }};
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #111;
-  line-height: 1.3;
-  margin-bottom: 0.5rem;
-  min-height: 1.5rem;
+  line-height: 1.2;
+  margin-bottom: 0.4rem;
+  min-height: 1.2rem;
 `
 
 const FontPreviewText = styled.div<{fontFamily: string}>`
@@ -158,9 +158,9 @@ const FontPreviewText = styled.div<{fontFamily: string}>`
     if (props.fontFamily === 'mono') return 'monospace'
     return `"${props.fontFamily}", sans-serif`
   }};
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: #666;
-  line-height: 1.5;
+  line-height: 1.4;
 `
 
 const SelectedBadge = styled.div`
