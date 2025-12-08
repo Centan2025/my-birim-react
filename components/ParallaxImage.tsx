@@ -20,7 +20,7 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
   className = '',
   imgClassName = '',
   height = '100%',
-  speed = 0.08, // Reduced from 0.15 to 0.08 for very subtle effect
+  speed = 0.1, // Slightly increased for better visibility
   srcMobile,
   srcDesktop,
   loading = 'lazy',
@@ -28,9 +28,26 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const [offset, setOffset] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Mobil kontrolü
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
+
+    // Mobilde parallax efektini devre dışı bırak (performans ve UX için)
+    if (isMobile) {
+      setOffset(0)
+      return
+    }
 
     let animationFrameId: number
 
@@ -40,17 +57,18 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
       const rect = containerRef.current.getBoundingClientRect()
       const windowHeight = window.innerHeight
 
-      // Check if element is in view (with a buffer)
+      // Element viewport içinde mi?
+      // (buffer ekleyerek smooth geçişi garantiliyoruz)
       if (rect.top < windowHeight && rect.bottom > 0) {
-        const elementCenter = rect.top + rect.height / 2
-        const viewportCenter = windowHeight / 2
-        const distanceFromCenter = elementCenter - viewportCenter
-
-        // Calculate translation - ters yönde hareket (scroll yukarı → görsel aşağı, scroll aşağı → görsel yukarı)
-        setOffset(distanceFromCenter * speed)
-      } else {
-        // Element viewport dışındaysa offset'i sıfırla
-        setOffset(0)
+        // Elementin viewport'a göre konumu (-1 ile 1 arası normalize edilebilir)
+        // Ancak basit bir piksel offset daha doğal duruyor
+        const distanceFromCenter = (rect.top + rect.height / 2) - (windowHeight / 2)
+        
+        // Parallax hesaplama: 
+        // Element yukarı kaydıkça (distanceFromCenter azalır/negatif olur),
+        // görseli aşağı kaydır (offset artar/pozitif olur) => ters yön hareketi
+        // speed faktörü ile çarpıyoruz.
+        setOffset(distanceFromCenter * speed * -1) 
       }
     }
 
@@ -58,8 +76,8 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
       animationFrameId = requestAnimationFrame(handleScroll)
     }
 
-    window.addEventListener('scroll', onScroll)
-    // Initial calculation
+    window.addEventListener('scroll', onScroll, {passive: true})
+    // İlk hesaplama
     handleScroll()
 
     return () => {
@@ -68,21 +86,23 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
         cancelAnimationFrame(animationFrameId)
       }
     }
-  }, [speed])
+  }, [speed, isMobile])
 
-  // Parallax efekti: container sabit, içindeki görsel hareket eder
-  const useFixedHeight = height && height !== 'auto'
-
+  // Parallax efekti: container overflow-hidden olmalı
+  // Görselin transform ile hareket etmesi için container'dan daha büyük olması gerekir
+  // Scale ile görseli büyüterek boşlukları önlüyoruz
+  
   return (
     <div
       ref={containerRef}
       className={`relative overflow-hidden ${className}`}
-      style={useFixedHeight ? {height} : undefined}
+      style={height && height !== 'auto' ? {height} : undefined}
     >
       <div
-        className="relative w-full transition-transform duration-75 ease-linear will-change-transform"
+        className="relative w-full h-full will-change-transform"
         style={{
-          transform: `translateY(${offset}px)`,
+          transform: isMobile ? 'none' : `translateY(${offset}px) scale(1.15)`,
+          transition: 'transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1)', // Smooth transition
         }}
       >
         <OptimizedImage
@@ -90,7 +110,7 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
           alt={alt}
           srcMobile={srcMobile}
           srcDesktop={srcDesktop}
-          className={`w-full h-auto ${imgClassName}`}
+          className={`w-full h-full object-cover ${imgClassName}`} // h-full ve object-cover eklendi
           loading={loading}
           quality={quality}
         />
@@ -100,4 +120,3 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
 }
 
 export default ParallaxImage
-

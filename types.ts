@@ -247,10 +247,8 @@ export interface HeroMediaItem {
  * Defines a content block that can be displayed on the homepage.
  */
 export interface ContentBlock {
-  title?: LocalizedString
   backgroundColor?: 'white' | 'gray'
   textAlignment?: 'left' | 'center' | 'right'
-  titleFont?: string // 'normal' | 'serif' | 'mono' | Google Font name
   /** Type of media: image, video, or youtube */
   mediaType: 'image' | 'video' | 'youtube'
   /** Image asset (for image type) */
@@ -304,7 +302,11 @@ export interface AboutPageContent {
   heroImage: string
   heroTitle: LocalizedString
   heroSubtitle: LocalizedString
-  valuesTitle?: LocalizedString
+  storyTitle: LocalizedString
+  storyContentP1: LocalizedString
+  storyContentP2: LocalizedString
+  storyImage: string
+  valuesTitle: LocalizedString
   values: {title: LocalizedString; description: LocalizedString}[]
   historySection?: {content?: LocalizedString}
   identitySection?: {content?: LocalizedString}

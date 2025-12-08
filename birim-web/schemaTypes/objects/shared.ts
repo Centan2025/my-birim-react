@@ -1,5 +1,4 @@
 import {defineField, defineType} from 'sanity'
-import GoogleFontSelect from '../../components/GoogleFontSelect'
 import {localizedString} from './localizedString'
 import MaterialSelectionInput from '../../components/MaterialSelectionInput'
 
@@ -39,7 +38,7 @@ export const productDimensionImage = defineType({
       options: {hotspot: true},
       validation: (Rule) => Rule.required(),
       description:
-        'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır. Önerilen çözünürlük: Desktop 1600x1200px veya 1600x900px, Mobil 800x600px.',
+        'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
     }),
     defineField({
       name: 'imageMobile',
@@ -72,13 +71,7 @@ export const productMaterial = defineType({
   type: 'object',
   fields: [
     defineField({name: 'name', title: 'Ad', type: 'localizedString'}),
-    defineField({
-      name: 'image',
-      title: 'Görsel',
-      type: 'image',
-      options: {hotspot: true},
-      description: 'Malzeme dokusu için kare görsel. Önerilen çözünürlük: 400x400px.',
-    }),
+    defineField({name: 'image', title: 'Görsel', type: 'image', options: {hotspot: true}}),
   ],
 })
 
@@ -185,7 +178,7 @@ export const heroMediaItem = defineType({
       options: {hotspot: true},
       hidden: ({parent}) => parent?.type !== 'image',
       description:
-        'Tüm cihazlar için varsayılan hero görseli. Mobil veya desktop versiyonu yoksa bu kullanılır. Önerilen çözünürlük: Desktop 1920x1080px (16:9), Mobil 1080x1920px (9:16).',
+        'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
     }),
     // Art Direction: Mobil için görsel
     defineField({
@@ -195,7 +188,7 @@ export const heroMediaItem = defineType({
       options: {hotspot: true},
       hidden: ({parent}) => parent?.type !== 'image',
       description:
-        'Mobil cihazlar için özel hero görseli (opsiyonel). Yoksa varsayılan görsel kullanılır. Önerilen çözünürlük: 1080x1920px (dikey) veya 768x1024px.',
+        'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
     }),
     // Art Direction: Desktop için görsel
     defineField({
@@ -205,7 +198,7 @@ export const heroMediaItem = defineType({
       options: {hotspot: true},
       hidden: ({parent}) => parent?.type !== 'image',
       description:
-        'Desktop cihazlar için özel hero görseli (opsiyonel). Yoksa varsayılan görsel kullanılır. Önerilen çözünürlük: 1920x1080px veya 1920x1200px.',
+        'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
     }),
     // For video, allow file upload
     defineField({
@@ -718,7 +711,7 @@ export const contentBlock = defineType({
       options: {hotspot: true},
       hidden: ({parent}) => parent?.mediaType !== 'image',
       description:
-        'Tüm cihazlar için varsayılan blok görseli. Mobil veya desktop versiyonu yoksa bu kullanılır. Önerilen çözünürlük: Desktop ~1600x900px (16:9), Mobil ~1080x1350px (4:5).',
+        'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
     }),
     defineField({
       name: 'imageMobile',
@@ -777,22 +770,6 @@ export const contentBlock = defineType({
       hidden: ({parent}) =>
         parent?.mediaType === 'image' || (parent?.mediaType === 'video' && parent?.videoFile),
       description: 'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.',
-    }),
-    defineField({
-      name: 'title',
-      title: 'Başlık',
-      type: 'localizedString',
-      description: 'İçerik bloğunun başlığı (büyük ve kalın görünecek)',
-    }),
-    defineField({
-      name: 'titleFont',
-      title: 'Başlık Fontu',
-      type: 'string',
-      components: {
-        input: GoogleFontSelect,
-      },
-      initialValue: 'normal',
-      description: 'Başlık için kullanılacak font ailesi. Google Fonts\'tan seçebilirsiniz.',
     }),
     defineField({
       name: 'description',

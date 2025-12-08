@@ -15,26 +15,6 @@ export function HomePage() {
   const {data: content} = useHomePageContent()
   const {data: settings} = useSiteSettings()
   
-  // Google Fonts'ları dinamik olarak yükle
-  useEffect(() => {
-    if (!content?.contentBlocks) return
-    
-    // Tüm content block'lardaki Google Fonts'ları topla
-    const googleFonts = new Set<string>()
-    content.contentBlocks.forEach((block) => {
-      const font = block.titleFont
-      if (font && font !== 'normal' && font !== 'serif' && font !== 'mono') {
-        googleFonts.add(font)
-      }
-    })
-    
-    // Fontları yükle
-    if (googleFonts.size > 0) {
-      import('../src/lib/loadGoogleFont').then(({loadGoogleFont}) => {
-        googleFonts.forEach((font) => loadGoogleFont(font))
-      })
-    }
-  }, [content?.contentBlocks])
   const [inspirationImageHeight, setInspirationImageHeight] = useState<number | null>(null)
   const [inspirationSectionRef, setInspirationSectionRef] = useState<HTMLElement | null>(null)
   const [showFixedBackground, setShowFixedBackground] = useState(false)
@@ -580,17 +560,15 @@ export function HomePage() {
                         }`}
                       >
                         {block.title && (
-                          <ScrollReveal delay={100}>
-                            <div className="container mx-auto px-2 sm:px-3 lg:px-4 pb-6 md:pb-8">
-                              <h2 
-                                className={`text-2xl md:text-4xl font-bold ${titleFontClass} ${textAlignClass} text-gray-900`}
-                                style={titleFontStyle}
-                              >
-                                {t(block.title)}
-                              </h2>
-                            </div>
-                          </ScrollReveal>
-                        )}
+                          <div className="container mx-auto px-2 sm:px-3 lg:px-4 pb-6 md:pb-8">
+                            <h2 
+                              className={`text-2xl md:text-4xl font-bold ${titleFontClass} ${textAlignClass} text-gray-900`}
+                              style={titleFontStyle}
+                            >
+                              {t(block.title)}
+                            </h2>
+                          </div>
+                      )}
                         {block.mediaType === 'youtube' ? (
                           <div className="relative w-full aspect-video overflow-hidden">
                             <YouTubeBackground url={mediaUrl} />
@@ -617,30 +595,28 @@ export function HomePage() {
                             />
                           )}
                         {block.description && (
-                          <ScrollReveal delay={200}>
-                            <div className="container mx-auto px-2 sm:px-3 lg:px-4 py-12">
-                              <div className={`prose max-w-none ${textAlignClass}`}>
-                                <p className="text-sm md:text-lg text-gray-700 font-light leading-relaxed">
-                                  {t(block.description)}
-                                </p>
-                              </div>
-                              {block.linkText && block.linkUrl && (
-                                <div className={`mt-6 ${textAlignClass}`}>
-                                  <Link
-                                    to={block.linkUrl}
-                                    className="group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
-                                  >
-                                    <span className="inline-flex items-center gap-x-3 border-b border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
-                                      <span className="group-hover:text-gray-500">
-                                        {t(block.linkText)}
-                                      </span>
-                                      <ArrowRight className="w-8 h-8 md:w-10 md:h-10" />
-                                    </span>
-                                  </Link>
-                                </div>
-                              )}
+                          <div className="container mx-auto px-2 sm:px-3 lg:px-4 py-12">
+                            <div className={`prose max-w-none ${textAlignClass}`}>
+                              <p className="text-lg md:text-xl text-gray-700 font-light leading-relaxed">
+                                {t(block.description)}
+                              </p>
                             </div>
-                          </ScrollReveal>
+                            {block.linkText && block.linkUrl && (
+                              <div className={`mt-6 ${textAlignClass}`}>
+                                <Link
+                                  to={block.linkUrl}
+                                  className="group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
+                                >
+                                  <span className="inline-flex items-end gap-x-3 border-b border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
+                                    <span className="group-hover:text-gray-500 leading-none">
+                                      {t(block.linkText)}
+                                    </span>
+                                    <span className="w-8 h-[2px] md:w-10 bg-current mb-1.5" />
+                                  </span>
+                                </Link>
+                              </div>
+                            )}
+                          </div>
                         )}
                       </div>
                     ) : (
@@ -649,18 +625,16 @@ export function HomePage() {
                             hasDescription ? 'py-4 md:py-10' : 'py-1 md:py-6'
                           }`}
                         >
-                          {block.title && (
-                            <ScrollReveal delay={100}>
-                              <div className={`pb-6 md:pb-8 ${textAlignClass}`}>
-                                <h2 
-                                  className={`text-2xl md:text-4xl font-bold ${titleFontClass} text-gray-900`}
-                                  style={titleFontStyle}
-                                >
-                                  {t(block.title)}
-                                </h2>
-                              </div>
-                            </ScrollReveal>
-                          )}
+                        {block.title && (
+                            <div className={`pb-6 md:pb-8 ${textAlignClass}`}>
+                              <h2 
+                                className={`text-2xl md:text-4xl font-bold ${titleFontClass} text-gray-900`}
+                                style={titleFontStyle}
+                              >
+                                {t(block.title)}
+                              </h2>
+                            </div>
+                        )}
                           <div
                             className={`flex flex-col ${isLeft ? 'md:flex-row' : isRight ? 'md:flex-row-reverse' : 'md:flex-row items-center'} gap-12`}
                           >
@@ -691,30 +665,28 @@ export function HomePage() {
                                   />
                                 )}
                             </div>
-                            {block.description && (
-                              <ScrollReveal delay={200} width="w-full" className={`${isCenter ? 'md:w-full' : 'md:w-1/2'}`}>
-                                <div className={`prose max-w-none ${textAlignClass}`}>
-                                  <p className="text-sm md:text-lg text-gray-700 font-light leading-relaxed">
-                                    {t(block.description)}
-                                  </p>
-                                </div>
-                                {block.linkText && block.linkUrl && (
-                                  <div className={`mt-6 ${textAlignClass}`}>
-                                    <Link
-                                      to={block.linkUrl}
-                                      className="group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
-                                    >
-                                      <span className="inline-flex items-center gap-x-3 border-b border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
-                                        <span className="group-hover:text-gray-500">
-                                          {t(block.linkText)}
-                                        </span>
-                                        <ArrowRight className="w-8 h-8 md:w-10 md:h-10" />
-                                      </span>
-                                    </Link>
-                                  </div>
-                                )}
-                              </ScrollReveal>
+                          <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'}`}>
+                            <div className={`prose max-w-none ${textAlignClass}`}>
+                              <p className="text-lg md:text-xl text-gray-700 font-light leading-relaxed">
+                                {t(block.description)}
+                              </p>
+                            </div>
+                            {block.linkText && block.linkUrl && (
+                              <div className={`mt-6 ${textAlignClass}`}>
+                                <Link
+                                  to={block.linkUrl}
+                                  className="group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
+                                >
+                                  <span className="inline-flex items-end gap-x-3 border-b border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
+                                    <span className="group-hover:text-gray-500 leading-none">
+                                      {t(block.linkText)}
+                                    </span>
+                                    <span className="w-8 h-[2px] md:w-10 bg-current mb-1.5" />
+                                  </span>
+                                </Link>
+                              </div>
                             )}
+                          </div>
                           </div>
                         </div>
                       )}
@@ -766,9 +738,9 @@ export function HomePage() {
                       to={inspiration.buttonLink || '/'}
                       className="group mt-8 inline-flex items-center gap-x-3 text-white font-semibold py-3 pl-0 pr-5 text-lg rounded-lg"
                     >
-                      <span className="inline-flex items-center gap-x-3 border-b border-transparent group-hover:border-white pb-1 transition-all duration-300 ease-out">
-                        <span className="group-hover:text-gray-200">{t(inspiration.buttonText)}</span>
-                        <ArrowRight className="w-8 h-8 md:w-10 md:h-10" />
+                      <span className="inline-flex items-end gap-x-3 border-b border-transparent group-hover:border-white pb-1 transition-all duration-300 ease-out">
+                        <span className="group-hover:text-gray-200 leading-none">{t(inspiration.buttonText)}</span>
+                        <span className="w-8 h-[2px] md:w-10 bg-current mb-1.5" />
                       </span>
                     </Link>
                   </ScrollReveal>
