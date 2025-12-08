@@ -58,15 +58,22 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
 
   // Açılış animasyonu
   useEffect(() => {
-    // Kısa bir gecikme ile animasyonu başlat
-    const timer = setTimeout(() => {
+    // İlk render'da butonun başlangıç pozisyonunu ayarla
+    const timer1 = setTimeout(() => {
       setIsVisible(true)
-      // Buton animasyonu için kısa bir gecikme - sağdan fade ile gelir
-      setTimeout(() => {
-        setIsButtonVisible(true)
-      }, 300)
     }, 50)
-    return () => clearTimeout(timer)
+    
+    // Buton animasyonu için gecikme - sağdan fade ile gelir
+    const timer2 = setTimeout(() => {
+      requestAnimationFrame(() => {
+        setIsButtonVisible(true)
+      })
+    }, 400)
+    
+    return () => {
+      clearTimeout(timer1)
+      clearTimeout(timer2)
+    }
   }, [])
 
   // Kapanış animasyonu
@@ -681,7 +688,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
               onClick={handleClose}
               className="p-2 rounded-full bg-black/30 hover:bg-black/50 outline-none focus:outline-none focus:ring-0 active:outline-none active:ring-0"
               style={{
-                opacity: isClosing ? 0 : 1,
+                opacity: isClosing ? 0 : (isButtonVisible ? 1 : 0.3),
                 transform: isButtonVisible && !isClosing ? 'translateX(0)' : 'translateX(100px)',
                 transition: 'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
                 willChange: 'transform, opacity',
