@@ -255,6 +255,10 @@ export interface ContentBlock {
   image?: string
   /** URL for video or YouTube (for video/youtube types) */
   url?: string
+  /** Title text */
+  title?: LocalizedString
+  /** Title font style */
+  titleFont?: string
   /** Description text */
   description?: LocalizedString
   /** Link text */
