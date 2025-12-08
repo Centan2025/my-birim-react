@@ -7,62 +7,63 @@ import React, {
   Suspense,
   lazy,
 } from 'react'
-import {HashRouter, Routes, Route, useLocation, Link} from 'react-router-dom'
+import { HashRouter, Routes, Route, useLocation, Link } from 'react-router-dom'
 
-import {Header} from './components/Header'
-import {getFooterContent, getSiteSettings, subscribeEmail} from './services/cms'
-import type {FooterContent, SiteSettings, User} from './types'
-import {SiteLogo} from './components/SiteLogo'
-import {I18nProvider, useTranslation} from './i18n'
-import {CartProvider} from './context/CartContext'
-import {CartSidebar} from './components/CartSidebar'
+import { Header } from './components/Header'
+import { getFooterContent, getSiteSettings, subscribeEmail } from './services/cms'
+import type { FooterContent, SiteSettings, User } from './types'
+import { SiteLogo } from './components/SiteLogo'
+import { I18nProvider, useTranslation } from './i18n'
+import { CartProvider } from './context/CartContext'
+import { CartSidebar } from './components/CartSidebar'
 import CookieBanner from './components/CookieBanner'
-import {SkipLink} from './components/SkipLink'
-import {errorReporter} from './src/lib/errorReporting'
-import {analytics} from './src/lib/analytics'
-import {QueryClientProvider} from '@tanstack/react-query'
-import {queryClient} from './src/lib/queryClient'
+import { SkipLink } from './components/SkipLink'
+import { errorReporter } from './src/lib/errorReporting'
+import { analytics } from './src/lib/analytics'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { queryClient } from './src/lib/queryClient'
+import ScrollReveal from './components/ScrollReveal'
 
 // Lazy load pages for code splitting
-const HomePage = lazy(() => import('./pages/HomePage').then(m => ({default: m.HomePage})))
+const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })))
 const CategoriesPage = lazy(() =>
-  import('./pages/CategoriesPage').then(m => ({default: m.CategoriesPage}))
+  import('./pages/CategoriesPage').then(m => ({ default: m.CategoriesPage }))
 )
 const ProductsPage = lazy(() =>
-  import('./pages/ProductsPage').then(m => ({default: m.ProductsPage}))
+  import('./pages/ProductsPage').then(m => ({ default: m.ProductsPage }))
 )
 const ProductDetailPage = lazy(() =>
-  import('./pages/ProductDetailPage').then(m => ({default: m.ProductDetailPage}))
+  import('./pages/ProductDetailPage').then(m => ({ default: m.ProductDetailPage }))
 )
 const DesignersPage = lazy(() =>
-  import('./pages/DesignersPage').then(m => ({default: m.DesignersPage}))
+  import('./pages/DesignersPage').then(m => ({ default: m.DesignersPage }))
 )
 const DesignerDetailPage = lazy(() =>
-  import('./pages/DesignerDetailPage').then(m => ({default: m.DesignerDetailPage}))
+  import('./pages/DesignerDetailPage').then(m => ({ default: m.DesignerDetailPage }))
 )
-const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({default: m.AboutPage})))
-const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({default: m.ContactPage})))
-const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({default: m.LoginPage})))
-const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({default: m.ProfilePage})))
-const NewsPage = lazy(() => import('./pages/NewsPage').then(m => ({default: m.NewsPage})))
+const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })))
+const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })))
+const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })))
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })))
+const NewsPage = lazy(() => import('./pages/NewsPage').then(m => ({ default: m.NewsPage })))
 const NewsDetailPage = lazy(() =>
-  import('./pages/NewsDetailPage').then(m => ({default: m.NewsDetailPage}))
+  import('./pages/NewsDetailPage').then(m => ({ default: m.NewsDetailPage }))
 )
 const CookiesPage = lazy(() => import('./pages/CookiesPage'))
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
 const TermsPage = lazy(() => import('./pages/TermsPage'))
 const KvkkPage = lazy(() => import('./pages/KvkkPage'))
 const ProjectsPage = lazy(() =>
-  import('./pages/ProjectsPage').then(m => ({default: m.ProjectsPage}))
+  import('./pages/ProjectsPage').then(m => ({ default: m.ProjectsPage }))
 )
 const ProjectDetailPage = lazy(() =>
-  import('./pages/ProjectDetailPage').then(m => ({default: m.ProjectDetailPage}))
+  import('./pages/ProjectDetailPage').then(m => ({ default: m.ProjectDetailPage }))
 )
 const VerifyEmailPage = lazy(() =>
-  import('./pages/VerifyEmailPage').then(m => ({default: m.VerifyEmailPage}))
+  import('./pages/VerifyEmailPage').then(m => ({ default: m.VerifyEmailPage }))
 )
 const ComingSoonPage = lazy(() =>
-  import('./pages/ComingSoonPage').then(m => ({default: m.ComingSoonPage}))
+  import('./pages/ComingSoonPage').then(m => ({ default: m.ComingSoonPage }))
 )
 
 // Loading fallback component
@@ -76,8 +77,8 @@ const PageLoader = () => (
 )
 
 // Helper component to render SVG strings safely
-const DynamicIcon: React.FC<{svgString: string}> = ({svgString}) => (
-  <div dangerouslySetInnerHTML={{__html: svgString}} />
+const DynamicIcon: React.FC<{ svgString: string }> = ({ svgString }) => (
+  <div dangerouslySetInnerHTML={{ __html: svgString }} />
 )
 
 interface AuthContextType {
@@ -111,7 +112,7 @@ export function useSiteSettings() {
   return context
 }
 
-const SiteSettingsProvider = ({children}: PropsWithChildren) => {
+const SiteSettingsProvider = ({ children }: PropsWithChildren) => {
   const [settings, setSettings] = useState<SiteSettings | null>(null)
 
   useEffect(() => {
@@ -129,10 +130,10 @@ const SiteSettingsProvider = ({children}: PropsWithChildren) => {
     }
   }, [settings?.topBannerText])
 
-  return <SiteSettingsContext.Provider value={{settings}}>{children}</SiteSettingsContext.Provider>
+  return <SiteSettingsContext.Provider value={{ settings }}>{children}</SiteSettingsContext.Provider>
 }
 
-const AuthProvider = ({children}: PropsWithChildren) => {
+const AuthProvider = ({ children }: PropsWithChildren) => {
   const [user, setUser] = useState<User | null>(null)
 
   // Load user from localStorage on mount
@@ -178,8 +179,8 @@ const AuthProvider = ({children}: PropsWithChildren) => {
 }
 
 const ScrollToTop = () => {
-  const {pathname} = useLocation()
-  const {t} = useTranslation()
+  const { pathname } = useLocation()
+  const { t } = useTranslation()
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -264,7 +265,7 @@ const BackToTopButton: React.FC = () => {
     }
 
     handleScroll()
-    window.addEventListener('scroll', handleScroll, {passive: true})
+    window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -273,7 +274,7 @@ const BackToTopButton: React.FC = () => {
   return (
     <button
       type="button"
-      onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       aria-label="Sayfanın en üstüne dön"
       className="fixed bottom-6 right-6 z-40 w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-full bg-black/40 text-white shadow-md backdrop-blur hover:bg-black/60 transition-all duration-200"
     >
@@ -283,11 +284,11 @@ const BackToTopButton: React.FC = () => {
 }
 
 const TopBanner = () => {
-  const {settings} = useSiteSettings()
+  const { settings } = useSiteSettings()
   const text = settings?.topBannerText?.trim()
   if (!text) return null
   return (
-    <div className="hidden md:block bg-gray-900 text-gray-200 text-xs md:text-sm px-4 sm:px-6 lg:px-8 py-2 border-b border-white/10">
+    <div className="hidden lg:block bg-gray-900 text-gray-200 text-xs md:text-sm px-4 sm:px-6 lg:px-8 py-2 border-b border-white/10">
       <div className="container mx-auto">{text}</div>
     </div>
   )
@@ -297,7 +298,7 @@ const Footer = () => {
   const [content, setContent] = useState<FooterContent | null>(null)
   const [settings, setSettings] = useState<SiteSettings | null>(null)
   const [email, setEmail] = useState('')
-  const {t, setLocale, locale, supportedLocales} = useTranslation()
+  const { t, setLocale, locale, supportedLocales } = useTranslation()
 
   useEffect(() => {
     Promise.all([getFooterContent(), getSiteSettings()]).then(([footerData, settingsData]) => {
@@ -309,166 +310,179 @@ const Footer = () => {
   if (!content || !settings) return null
 
   return (
-    <footer className="bg-gray-800 text-gray-400">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <footer className="bg-gray-800 text-gray-400" style={{ position: 'relative', zIndex: 1 }}>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Mobil düzen */}
         <div className="lg:hidden flex flex-col items-center space-y-6">
           {/* Logo - ortada üstte */}
-          <Link to="/" className="text-white -mt-4">
-            <SiteLogo logoUrl={settings.logoUrl} className="h-6 w-auto mx-auto" />
-          </Link>
+          <ScrollReveal delay={0}>
+            <Link to="/" className="text-white -mt-4">
+              <SiteLogo logoUrl={settings.logoUrl} className="h-6 w-auto mx-auto" />
+            </Link>
+          </ScrollReveal>
 
           {/* Menü düğmeleri - alt alta ortada */}
-          <nav className="flex flex-col items-center space-y-3">
-            <Link
-              to="/products"
-              className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
-            >
-              {t('view_all')}
-            </Link>
-            <Link
-              to="/designers"
-              className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
-            >
-              {t('designers')}
-            </Link>
-            <Link
-              to="/projects"
-              className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
-            >
-              {t('projects') || 'Projeler'}
-            </Link>
-            <Link
-              to="/news"
-              className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
-            >
-              {t('news')}
-            </Link>
-            <Link
-              to="/about"
-              className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
-            >
-              {t('about')}
-            </Link>
-            <Link
-              to="/contact"
-              className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
-            >
-              {t('contact')}
-            </Link>
-          </nav>
+          <ScrollReveal delay={100}>
+            <nav className="flex flex-col items-center space-y-3">
+              <Link
+                to="/products"
+                className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
+              >
+                {t('view_all')}
+              </Link>
+              <Link
+                to="/designers"
+                className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
+              >
+                {t('designers')}
+              </Link>
+              <Link
+                to="/projects"
+                className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
+              >
+                {t('projects') || 'Projeler'}
+              </Link>
+              <Link
+                to="/news"
+                className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
+              >
+                {t('news')}
+              </Link>
+              <Link
+                to="/about"
+                className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
+              >
+                {t('about')}
+              </Link>
+              <Link
+                to="/contact"
+                className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
+              >
+                {t('contact')}
+              </Link>
+            </nav>
+          </ScrollReveal>
 
           {/* İnce çizgi */}
-          <div className="w-full border-t border-gray-700"></div>
+          <ScrollReveal delay={150}>
+            <div className="w-full border-t border-gray-700"></div>
+          </ScrollReveal>
 
           {/* Dil seçenekleri */}
-          <div className="flex items-center gap-3">
-            {supportedLocales.map(langCode => {
-              const isActive = locale === langCode
-              return (
-                <button
-                  key={langCode}
-                  onClick={() => setLocale(langCode)}
-                  className={`text-xs uppercase tracking-wider transition-colors duration-200 ${
-                    isActive ? 'text-white font-bold' : 'text-gray-400 hover:text-white font-thin'
-                  }`}
-                >
-                  {langCode.toUpperCase()}
-                </button>
-              )
-            })}
-          </div>
+          <ScrollReveal delay={200}>
+            <div className="flex items-center gap-3">
+              {supportedLocales.map(langCode => {
+                const isActive = locale === langCode
+                return (
+                  <button
+                    key={langCode}
+                    onClick={() => setLocale(langCode)}
+                    className={`text-xs uppercase tracking-wider transition-colors duration-200 ${isActive ? 'text-white font-bold' : 'text-gray-400 hover:text-white font-thin'
+                      }`}
+                  >
+                    {langCode.toUpperCase()}
+                  </button>
+                )
+              })}
+            </div>
+          </ScrollReveal>
 
           {/* İnce çizgi */}
-          <div className="w-full border-t border-gray-700"></div>
+          <ScrollReveal delay={250}>
+            <div className="w-full border-t border-gray-700"></div>
+          </ScrollReveal>
 
           {/* Partnerler */}
-          <div className="flex items-center justify-center flex-wrap gap-6 mb-0">
-            {(content.partners || content.partnerNames || []).map((partner, index) => {
-              const partnerName = typeof partner === 'string' ? partner : t(partner.name)
-              const partnerLogo = typeof partner === 'object' ? partner.logo : undefined
-              const partnerUrl = typeof partner === 'object' ? partner.url : undefined
+          <ScrollReveal delay={300}>
+            <div className="flex items-center justify-center flex-wrap gap-6 mb-0">
+              {(content.partners || content.partnerNames || []).map((partner, index) => {
+                const partnerName = typeof partner === 'string' ? partner : t(partner.name)
+                const partnerLogo = typeof partner === 'object' ? partner.logo : undefined
+                const partnerUrl = typeof partner === 'object' ? partner.url : undefined
 
-              const partnerContent = partnerLogo ? (
-                <img
-                  src={partnerLogo}
-                  alt={partnerName}
-                  className="h-8 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
-                />
-              ) : (
-                <span className="font-semibold text-gray-300 opacity-70 hover:opacity-100 transition-opacity duration-200">
-                  {partnerName}
-                </span>
-              )
+                const partnerContent = partnerLogo ? (
+                  <img
+                    src={partnerLogo}
+                    alt={partnerName}
+                    className="h-8 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
+                  />
+                ) : (
+                  <span className="font-semibold text-gray-300 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    {partnerName}
+                  </span>
+                )
 
-              return partnerUrl ? (
-                <a
-                  key={index}
-                  href={partnerUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group"
-                >
-                  {partnerContent}
-                </a>
-              ) : (
-                <span key={index}>{partnerContent}</span>
-              )
-            })}
-          </div>
+                return partnerUrl ? (
+                  <a
+                    key={index}
+                    href={partnerUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group"
+                  >
+                    {partnerContent}
+                  </a>
+                ) : (
+                  <span key={index}>{partnerContent}</span>
+                )
+              })}
+            </div>
+          </ScrollReveal>
 
           {/* Email abonelik formu - mobilde en altta ortalanmış */}
-          <div className="w-full flex justify-center !mt-16 lg:!mt-8">
-            <form
-              onSubmit={async e => {
-                e.preventDefault()
-                if (email) {
-                  try {
-                    await subscribeEmail(email)
-                    analytics.trackUserAction('newsletter_subscribe', email)
-                    alert('E-posta aboneliğiniz başarıyla oluşturuldu!')
-                    setEmail('')
-                  } catch (err: any) {
-                    // Özel durum: Local storage'a kaydedildi ama CMS'de görünmüyor
-                    if (err.message === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
-                      alert(
-                        "E-posta aboneliğiniz kaydedildi!\n\nNot: CMS'de görünmesi için .env dosyasına VITE_SANITY_TOKEN ekleyin. Detaylar: README.md"
-                      )
+          <ScrollReveal delay={350}>
+            <div className="w-full flex justify-center !mt-8 lg:!mt-6">
+              <form
+                onSubmit={async e => {
+                  e.preventDefault()
+                  if (email) {
+                    try {
+                      await subscribeEmail(email)
                       analytics.trackUserAction('newsletter_subscribe', email)
+                      alert('E-posta aboneliğiniz başarıyla oluşturuldu!')
                       setEmail('')
-                    } else {
-                      alert(err.message || "Bir hata oluştu. Lütfen console'u kontrol edin.")
+                    } catch (err: any) {
+                      // Özel durum: Local storage'a kaydedildi ama CMS'de görünmüyor
+                      if (err.message === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
+                        alert(
+                          "E-posta aboneliğiniz kaydedildi!\n\nNot: CMS'de görünmesi için .env dosyasına VITE_SANITY_TOKEN ekleyin. Detaylar: README.md"
+                        )
+                        analytics.trackUserAction('newsletter_subscribe', email)
+                        setEmail('')
+                      } else {
+                        alert(err.message || "Bir hata oluştu. Lütfen console'u kontrol edin.")
+                      }
                     }
                   }
-                }
-              }}
-              className="flex flex-col items-center justify-center w-full"
-            >
-              <p className="text-sm text-gray-300 mb-4 text-center">{t('subscribe_prompt')}</p>
-              <div className="flex items-center justify-center border-b border-white pb-0.5 w-full max-w-[280px] mx-auto">
-                <input
-                  type="email"
-                  id="footer-subscribe-email"
-                  name="footer-subscribe-email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  placeholder={t('email_placeholder')}
-                  className="w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[15px] text-center"
-                  style={{outline: 'none', boxShadow: 'none'}}
-                  onFocus={e => (e.target.style.outline = 'none')}
-                  onBlur={e => (e.target.style.outline = 'none')}
-                />
-              </div>
-              <div className="w-full flex justify-center mt-6">
-                <button
-                  type="submit"
-                  className="px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-sm font-medium uppercase tracking-[0.25em]"
-                >
-                  {t('subscribe')}
-                </button>
-              </div>
-            </form>
-          </div>
+                }}
+                className="flex flex-col items-center justify-center w-full"
+              >
+                <p className="text-sm text-gray-300 mb-4 text-center">{t('subscribe_prompt')}</p>
+                <div className="flex items-center justify-center border-b border-white pb-0.5 w-full max-w-[280px] mx-auto">
+                  <input
+                    type="email"
+                    id="footer-subscribe-email"
+                    name="footer-subscribe-email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder={t('email_placeholder')}
+                    className="w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[15px] text-center"
+                    style={{ outline: 'none', boxShadow: 'none' }}
+                    onFocus={e => (e.target.style.outline = 'none')}
+                    onBlur={e => (e.target.style.outline = 'none')}
+                  />
+                </div>
+                <div className="w-full flex justify-center mt-6">
+                  <button
+                    type="submit"
+                    className="px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-sm font-medium uppercase tracking-[0.25em]"
+                  >
+                    {t('subscribe')}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </ScrollReveal>
         </div>
 
         {/* Desktop düzen */}
@@ -556,7 +570,7 @@ const Footer = () => {
           </div>
         </div>
         {/* Sosyal medya linkleri ve email formu - aynı üst hizasında */}
-        <div className="mt-8 flex flex-col lg:flex-row flex-wrap items-center lg:items-start justify-center lg:justify-start gap-8 lg:gap-16">
+        <div className="mt-6 flex flex-col lg:flex-row flex-wrap items-center lg:items-start justify-center lg:justify-start gap-6 lg:gap-12">
           {/* Sosyal medya linkleri */}
           <div className="w-full lg:w-auto flex justify-center lg:justify-start space-x-6">
             {(content.socialLinks || [])
@@ -613,7 +627,7 @@ const Footer = () => {
                     onChange={e => setEmail(e.target.value)}
                     placeholder={t('email_placeholder')}
                     className="w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[14px] text-left"
-                    style={{outline: 'none', boxShadow: 'none'}}
+                    style={{ outline: 'none', boxShadow: 'none' }}
                     onFocus={e => {
                       e.target.style.outline = 'none'
                       e.target.style.boxShadow = 'none'
@@ -634,46 +648,48 @@ const Footer = () => {
             </form>
           </div>
         </div>
-        <div className="mt-8 lg:mt-16 border-t border-gray-700 pt-8 flex flex-col md:flex-row md:justify-between md:items-start gap-6 text-xs">
-          <p className="md:flex-shrink-0 text-center md:text-left">{t(content.copyrightText)}</p>
-          {content.legalLinks && content.legalLinks.length > 0 && (
-          <div className="flex flex-col md:flex-row md:items-center md:gap-x-4 items-center gap-2">
-              {content.legalLinks
-                .filter(link => link?.isVisible)
-                .map((link, index) => {
-                  const url = typeof link?.url === 'string' ? link.url : ''
-                  if (!url) {
-                    return (
-                      <span key={index} className="opacity-80 select-none text-gray-400">
+        <ScrollReveal delay={400}>
+          <div className="mt-6 lg:mt-8 border-t border-gray-700 pt-6 flex flex-col md:flex-row md:justify-between md:items-start gap-4 text-xs">
+            <p className="md:flex-shrink-0 text-center md:text-left">{t(content.copyrightText)}</p>
+            {content.legalLinks && content.legalLinks.length > 0 && (
+              <div className="flex flex-col md:flex-row md:items-center md:gap-x-4 items-center gap-2">
+                {content.legalLinks
+                  .filter(link => link?.isVisible)
+                  .map((link, index) => {
+                    const url = typeof link?.url === 'string' ? link.url : ''
+                    if (!url) {
+                      return (
+                        <span key={index} className="opacity-80 select-none text-gray-400">
+                          {t(link.text)}
+                        </span>
+                      )
+                    }
+                    const isHttp = /^https?:\/\//.test(url)
+                    const isInternalLink = url.startsWith('/') && !url.startsWith('//') && !isHttp
+                    return isInternalLink ? (
+                      <Link
+                        key={index}
+                        to={url}
+                        className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
+                      >
                         {t(link.text)}
-                      </span>
+                      </Link>
+                    ) : (
+                      <a
+                        key={index}
+                        href={url}
+                        className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
+                        target={isHttp ? '_blank' : undefined}
+                        rel={isHttp ? 'noopener noreferrer' : undefined}
+                      >
+                        {t(link.text)}
+                      </a>
                     )
-                  }
-                  const isHttp = /^https?:\/\//.test(url)
-                  const isInternalLink = url.startsWith('/') && !url.startsWith('//') && !isHttp
-                  return isInternalLink ? (
-                    <Link
-                      key={index}
-                      to={url}
-                      className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
-                    >
-                      {t(link.text)}
-                    </Link>
-                  ) : (
-                    <a
-                      key={index}
-                      href={url}
-                      className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
-                      target={isHttp ? '_blank' : undefined}
-                      rel={isHttp ? 'noopener noreferrer' : undefined}
-                    >
-                      {t(link.text)}
-                    </a>
-                  )
-                })}
-            </div>
-          )}
-        </div>
+                  })}
+              </div>
+            )}
+          </div>
+        </ScrollReveal>
       </div>
     </footer>
   )
@@ -684,7 +700,7 @@ const AppContent = () => {
   // Maintenance mode kontrolü - öncelikle CMS'den, yoksa environment variable'dan
   // Development modunda (dev server) maintenance mode devre dışı
   // Production'da aktif olabilir, ancak ?bypass=secret ile bypass edilebilir
-  const {settings} = useSiteSettings()
+  const { settings } = useSiteSettings()
   const maintenanceModeFromCMS = settings?.maintenanceMode ?? false
   // Tip güvenliği için string index kullan, ama Vite prod build'de gerçek değeri enjekte eder
   const maintenanceModeFromEnv = import.meta.env['VITE_MAINTENANCE_MODE'] === 'true'
@@ -715,25 +731,25 @@ const AppContent = () => {
 
   const debugInfo =
     typeof window !== 'undefined' &&
-    (window.location.search.includes('bypass') || window.location.hash.includes('bypass'))
+      (window.location.search.includes('bypass') || window.location.hash.includes('bypass'))
       ? {
-          isProduction,
-          maintenanceModeFromCMS,
-          maintenanceModeFromEnv,
-          maintenanceModeEnabled,
-          allowedBypassSecrets,
-          bypassParam,
-          isMaintenanceMode,
-        }
+        isProduction,
+        maintenanceModeFromCMS,
+        maintenanceModeFromEnv,
+        maintenanceModeEnabled,
+        allowedBypassSecrets,
+        bypassParam,
+        isMaintenanceMode,
+      }
       : null
 
   return (
-    <HashRouter future={{v7_startTransition: true, v7_relativeSplatPath: true}}>
+    <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="flex flex-col min-h-screen">
         <ScrollToTop />
         {isMaintenanceMode ? (
           // Maintenance mode aktifse sadece ComingSoonPage göster
-          <main className="flex-grow" style={{overflowX: 'hidden'}}>
+          <main className="flex-grow" style={{ overflowX: 'hidden' }}>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="*" element={<ComingSoonPage />} />
@@ -749,7 +765,7 @@ const AppContent = () => {
             <main
               id="main-content"
               className="flex-grow"
-              style={{overflowX: 'hidden'}}
+              style={{ overflowX: 'hidden' }}
               tabIndex={-1}
             >
               <TopBanner />
