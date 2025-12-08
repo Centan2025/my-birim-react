@@ -322,56 +322,46 @@ const Footer = () => {
           </ScrollReveal>
 
           {/* Menü düğmeleri - alt alta ortada */}
-          <nav className="flex flex-col items-center space-y-3">
-            <ScrollReveal delay={100}>
+          <ScrollReveal delay={100}>
+            <nav className="flex flex-col items-center space-y-3">
               <Link
                 to="/products"
                 className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
               >
                 {t('view_all')}
               </Link>
-            </ScrollReveal>
-            <ScrollReveal delay={150}>
               <Link
                 to="/designers"
                 className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
               >
                 {t('designers')}
               </Link>
-            </ScrollReveal>
-            <ScrollReveal delay={200}>
               <Link
                 to="/projects"
                 className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
               >
                 {t('projects') || 'Projeler'}
               </Link>
-            </ScrollReveal>
-            <ScrollReveal delay={250}>
               <Link
                 to="/news"
                 className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
               >
                 {t('news')}
               </Link>
-            </ScrollReveal>
-            <ScrollReveal delay={300}>
               <Link
                 to="/about"
                 className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
               >
                 {t('about')}
               </Link>
-            </ScrollReveal>
-            <ScrollReveal delay={350}>
               <Link
                 to="/contact"
                 className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
               >
                 {t('contact')}
               </Link>
-            </ScrollReveal>
-          </nav>
+            </nav>
+          </ScrollReveal>
 
           {/* İnce çizgi */}
           <ScrollReveal delay={150}>
@@ -542,7 +532,7 @@ const Footer = () => {
             <nav className="flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold uppercase tracking-wider text-gray-300 items-center justify-end">
               <Link to="/products" className="group relative hover:text-white">
                 <span className="relative inline-block">
-                  {t('products')}
+                  {t('view_all')}
                   <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
                 </span>
               </Link>
