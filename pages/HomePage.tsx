@@ -573,7 +573,7 @@ export function HomePage() {
                               <ScrollReveal delay={100}>
                                 <div className="container mx-auto px-2 sm:px-3 lg:px-4 pb-6 md:pb-8">
                                   <h2
-                                    className={`text-3xl md:text-5xl lg:text-6xl font-bold ${titleFontClass} ${textAlignClass} text-gray-900`}
+                                    className={`text-2xl md:text-4xl lg:text-5xl font-bold ${titleFontClass} ${textAlignClass} text-gray-900`}
                                     style={titleFontStyle}
                                   >
                                     {t(block.title)}
@@ -642,7 +642,7 @@ export function HomePage() {
                               <ScrollReveal delay={100}>
                                 <div className={`pb-6 md:pb-8 ${textAlignClass}`}>
                                   <h2
-                                    className={`text-3xl md:text-5xl lg:text-6xl font-bold ${titleFontClass} text-gray-900`}
+                                    className={`text-2xl md:text-4xl lg:text-5xl font-bold ${titleFontClass} text-gray-900`}
                                     style={titleFontStyle}
                                   >
                                     {t(block.title)}
