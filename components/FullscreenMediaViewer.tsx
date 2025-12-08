@@ -64,8 +64,8 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       // Buton animasyonu için gecikme - sağdan fade ile gelir
       setTimeout(() => {
         setIsButtonVisible(true)
-      }, 200)
-    }, 10)
+      }, 400)
+    }, 50)
     return () => clearTimeout(timer)
   }, [])
 
@@ -679,14 +679,11 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
             <button
               type="button"
               onClick={handleClose}
-              className={`p-2 rounded-full bg-black/30 hover:bg-black/50 outline-none focus:outline-none focus:ring-0 active:outline-none active:ring-0 ${
-                isButtonVisible && !isClosing
-                  ? 'opacity-100 translate-x-0'
-                  : 'opacity-0 translate-x-12'
-              }`}
+              className="p-2 rounded-full bg-black/30 hover:bg-black/50 outline-none focus:outline-none focus:ring-0 active:outline-none active:ring-0"
               style={{
-                transition: 'opacity 600ms ease-out, transform 600ms ease-out',
-                transitionDelay: isButtonVisible && !isClosing ? '0ms' : '0ms',
+                opacity: isButtonVisible && !isClosing ? 1 : 0,
+                transform: isButtonVisible && !isClosing ? 'translateX(0)' : 'translateX(60px)',
+                transition: 'opacity 800ms cubic-bezier(0.4, 0, 0.2, 1), transform 800ms cubic-bezier(0.4, 0, 0.2, 1)',
               }}
               aria-label="Kapat"
             >
