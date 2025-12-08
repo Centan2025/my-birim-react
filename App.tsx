@@ -322,46 +322,56 @@ const Footer = () => {
           </ScrollReveal>
 
           {/* Menü düğmeleri - alt alta ortada */}
-          <ScrollReveal delay={100}>
-            <nav className="flex flex-col items-center space-y-3">
+          <nav className="flex flex-col items-center space-y-3">
+            <ScrollReveal delay={100}>
               <Link
                 to="/products"
                 className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
               >
                 {t('view_all')}
               </Link>
+            </ScrollReveal>
+            <ScrollReveal delay={150}>
               <Link
                 to="/designers"
                 className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
               >
                 {t('designers')}
               </Link>
+            </ScrollReveal>
+            <ScrollReveal delay={200}>
               <Link
                 to="/projects"
                 className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
               >
                 {t('projects') || 'Projeler'}
               </Link>
+            </ScrollReveal>
+            <ScrollReveal delay={250}>
               <Link
                 to="/news"
                 className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
               >
                 {t('news')}
               </Link>
+            </ScrollReveal>
+            <ScrollReveal delay={300}>
               <Link
                 to="/about"
                 className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
               >
                 {t('about')}
               </Link>
+            </ScrollReveal>
+            <ScrollReveal delay={350}>
               <Link
                 to="/contact"
                 className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
               >
                 {t('contact')}
               </Link>
-            </nav>
-          </ScrollReveal>
+            </ScrollReveal>
+          </nav>
 
           {/* İnce çizgi */}
           <ScrollReveal delay={150}>
