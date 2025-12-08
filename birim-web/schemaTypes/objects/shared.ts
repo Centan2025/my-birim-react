@@ -1,6 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {localizedString} from './localizedString'
 import MaterialSelectionInput from '../../components/MaterialSelectionInput'
+import FontSelectorInput from '../../components/FontSelectorInput'
 
 export const productDimensionDetail = defineType({
   name: 'productDimensionDetail',
@@ -784,6 +785,9 @@ export const contentBlock = defineType({
       description:
         'Başlık için font seçin. "normal", "serif", "mono" veya Google Fonts\'tan bir font adı (örn: "Playfair Display", "Roboto")',
       initialValue: 'normal',
+      components: {
+        input: FontSelectorInput,
+      },
     }),
     defineField({
       name: 'description',
