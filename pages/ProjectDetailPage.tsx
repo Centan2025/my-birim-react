@@ -9,6 +9,7 @@ import {useTranslation} from '../i18n'
 import {useProject, useProjects} from '../src/hooks/useProjects'
 import {useSiteSettings} from '../src/hooks/useSiteData'
 import {analytics} from '../src/lib/analytics'
+import ScrollReveal from '../components/ScrollReveal'
 
 const getYouTubeId = (url: string): string | null => {
   if (!url) return null
@@ -80,6 +81,7 @@ export function ProjectDetailPage() {
   })
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
   const [isTitleVisible, setIsTitleVisible] = useState(false)
+  const [isLocationVisible, setIsLocationVisible] = useState(false)
   const [areDotsVisible, setAreDotsVisible] = useState(false)
   const [isPageVisible, setIsPageVisible] = useState(false)
   // Prev/Next must be declared before any early returns to keep hooks order stable
@@ -120,13 +122,23 @@ export function ProjectDetailPage() {
   }, [project, t])
 
 
-  // Başlık animasyonu - ilk açılışta soldan gel
+  // Proje adı animasyonu - önce başlar, fade ile birlikte soldan gel
   useEffect(() => {
     if (!project) return
     setIsTitleVisible(false)
     const timer = setTimeout(() => {
       setIsTitleVisible(true)
     }, 400)
+    return () => clearTimeout(timer)
+  }, [project])
+
+  // Proje konumu animasyonu - proje adından sonra başlar, fade ile birlikte soldan gel
+  useEffect(() => {
+    if (!project) return
+    setIsLocationVisible(false)
+    const timer = setTimeout(() => {
+      setIsLocationVisible(true)
+    }, 550)
     return () => clearTimeout(timer)
   }, [project])
 
@@ -335,13 +347,29 @@ export function ProjectDetailPage() {
           {label: t(project.title)},
         ]}
       />
-      <div className={`mb-4 md:mb-6 lg:mb-6 transition-all duration-[700ms] ease-out ${
-        isTitleVisible
-          ? 'translate-x-0 opacity-100'
-          : '-translate-x-[150%] opacity-0'
-      }`}>
-        <h1 className="text-4xl font-light tracking-tight text-gray-900">{t(project.title)}</h1>
-        {project.date && <p className="text-sm text-gray-500 mt-2 font-light">{t(project.date)}</p>}
+      <div className="mb-4 md:mb-6 lg:mb-6">
+        <h1 
+          className="text-4xl font-light tracking-tight text-gray-900"
+          style={{
+            transform: isTitleVisible ? 'translateX(0)' : 'translateX(-150%)',
+            opacity: isTitleVisible ? 1 : 0,
+            transition: 'transform 700ms ease-out, opacity 1800ms ease-out'
+          }}
+        >
+          {t(project.title)}
+        </h1>
+        {project.date && (
+          <p 
+            className="text-sm text-gray-500 mt-2 font-light"
+            style={{
+              transform: isLocationVisible ? 'translateX(0)' : 'translateX(-150%)',
+              opacity: isLocationVisible ? 1 : 0,
+              transition: 'transform 700ms ease-out, opacity 1800ms ease-out'
+            }}
+          >
+            {t(project.date)}
+          </p>
+        )}
         {/* Başlık altındaki gri çizgi – tam ekran */}
         <div className="mt-2 md:mt-3 lg:mt-2 relative left-1/2 right-1/2 -mx-[50vw] w-screen">
           <div className="h-px bg-gray-300 w-full"></div>
@@ -561,14 +589,18 @@ export function ProjectDetailPage() {
             {(project.excerpt || project.body) && (
               <div className="max-w-4xl space-y-4">
                 {project.excerpt && (
-                  <p className="text-lg text-gray-600 leading-relaxed font-light">
-                    {t(project.excerpt)}
-                  </p>
+                  <ScrollReveal delay={200}>
+                    <p className="text-lg text-gray-600 leading-relaxed font-light">
+                      {t(project.excerpt)}
+                    </p>
+                  </ScrollReveal>
                 )}
                 {project.body && (
-                  <div className="text-gray-700 leading-relaxed font-light whitespace-pre-line">
-                    {t(project.body)}
-                  </div>
+                  <ScrollReveal delay={300}>
+                    <div className="text-gray-700 leading-relaxed font-light whitespace-pre-line">
+                      {t(project.body)}
+                    </div>
+                  </ScrollReveal>
                 )}
               </div>
             )}

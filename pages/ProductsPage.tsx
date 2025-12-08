@@ -9,6 +9,7 @@ import {useProducts, useProductsByCategory} from '../src/hooks/useProducts'
 import {useCategory, useCategories} from '../src/hooks/useCategories'
 import {useSiteSettings} from '../src/hooks/useSiteData'
 import type {Product} from '../types'
+import ScrollReveal from '../components/ScrollReveal'
 
 const ChevronDownIcon = () => (
   <svg
@@ -172,7 +173,7 @@ export function ProductsPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="container mx-auto px-2 sm:px-2 lg:px-2 py-16">
         <Breadcrumbs
           className="mb-6"
           items={
@@ -216,21 +217,23 @@ export function ProductsPage() {
 
         {/* Product Grid */}
         {sortedProducts.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-2 gap-y-3 md:gap-x-4 md:gap-y-4 animate-fade-in-up-subtle">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[2px]">
             {sortedProducts.map((product, index) => (
-              <div
-                key={product.id}
-                style={{animationDelay: `${index * 100}ms`}}
-                className="animate-fade-in-up-subtle"
+              <ScrollReveal 
+                key={product.id} 
+                delay={index < 12 ? index * 20 : 0} 
+                threshold={0.01}
               >
                 <ProductCard product={product} variant="light" />
-              </div>
+              </ScrollReveal>
             ))}
           </div>
         ) : (
-          <p className="text-gray-600 animate-fade-in-up-subtle text-center">
-            {t('no_products_in_category')}
-          </p>
+          <ScrollReveal delay={0} threshold={0.01}>
+            <p className="text-gray-600 text-center">
+              {t('no_products_in_category')}
+            </p>
+          </ScrollReveal>
         )}
       </div>
     </div>

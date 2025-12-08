@@ -7,6 +7,7 @@ import {useTranslation} from '../i18n'
 import {useDesigners} from '../src/hooks/useDesigners'
 import {useSiteSettings} from '../src/hooks/useSiteData'
 import {Breadcrumbs} from '../components/Breadcrumbs'
+import ScrollReveal from '../components/ScrollReveal'
 
 const DesignerCard: React.FC<{designer: Designer}> = ({designer}) => {
   const {t} = useTranslation()
@@ -67,12 +68,20 @@ export function DesignersPage() {
         </div>
         {designers.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8 items-stretch">
-            {designers.map(designer => (
-              <DesignerCard key={designer.id} designer={designer} />
+            {designers.map((designer, index) => (
+              <ScrollReveal 
+                key={designer.id} 
+                delay={index < 12 ? index * 20 : 0} 
+                threshold={0.01}
+              >
+                <DesignerCard designer={designer} />
+              </ScrollReveal>
             ))}
           </div>
         ) : (
-          <p className="text-gray-600 text-center">{t('designer_not_found')}</p>
+          <ScrollReveal delay={0} threshold={0.01}>
+            <p className="text-gray-600 text-center">{t('designer_not_found')}</p>
+          </ScrollReveal>
         )}
       </div>
     </div>

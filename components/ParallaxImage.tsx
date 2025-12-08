@@ -20,7 +20,7 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
   className = '',
   imgClassName = '',
   height = '100%',
-  speed = 0.1, // Slightly increased for better visibility
+  speed = 0.1, // Subtle parallax effect
   srcMobile,
   srcDesktop,
   loading = 'lazy',
@@ -29,11 +29,14 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
   const containerRef = useRef<HTMLDivElement>(null)
   const [offset, setOffset] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
+  
+  // Sabit scale değeri - parallax sırasında boşlukların oluşmaması için
+  const scale = 1.2
 
   // Mobil kontrolü
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
+      setIsMobile(window.innerWidth < 1024) // Desktop breakpoint
     }
     checkMobile()
     window.addEventListener('resize', checkMobile)
@@ -43,13 +46,9 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    // Mobilde parallax efektini devre dışı bırak (performans ve UX için)
-    if (isMobile) {
-      setOffset(0)
-      return
-    }
-
     let animationFrameId: number
+    // Mobilde daha düşük speed kullan
+    const effectiveSpeed = isMobile ? speed * 0.3 : speed
 
     const handleScroll = () => {
       if (!containerRef.current) return
@@ -58,17 +57,21 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
       const windowHeight = window.innerHeight
 
       // Element viewport içinde mi?
-      // (buffer ekleyerek smooth geçişi garantiliyoruz)
       if (rect.top < windowHeight && rect.bottom > 0) {
-        // Elementin viewport'a göre konumu (-1 ile 1 arası normalize edilebilir)
-        // Ancak basit bir piksel offset daha doğal duruyor
-        const distanceFromCenter = (rect.top + rect.height / 2) - (windowHeight / 2)
+        // Parallax hesaplama: Element'in viewport'a göre konumu
+        // Element yukarı kaydıkça (rect.top azalır), görseli daha yavaş kaydır
+        // Bu parallax efektini oluşturur
         
-        // Parallax hesaplama: 
-        // Element yukarı kaydıkça (distanceFromCenter azalır/negatif olur),
-        // görseli aşağı kaydır (offset artar/pozitif olur) => ters yön hareketi
-        // speed faktörü ile çarpıyoruz.
-        setOffset(distanceFromCenter * speed * -1) 
+        // Element'in viewport'un üstünden ne kadar uzakta olduğunu hesapla
+        const distanceFromTop = rect.top
+        
+        // Parallax offset: distanceFromTop'a göre görseli hareket ettir
+        // Element yukarı kaydıkça görsel daha yavaş kayar (parallax efekti)
+        const parallaxOffset = (windowHeight - distanceFromTop) * effectiveSpeed * 0.5
+        
+        setOffset(parallaxOffset)
+      } else {
+        setOffset(0)
       }
     }
 
@@ -96,13 +99,12 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
     <div
       ref={containerRef}
       className={`relative overflow-hidden ${className}`}
-      style={height && height !== 'auto' ? {height} : undefined}
     >
       <div
-        className="relative w-full h-full will-change-transform"
+        className="relative w-full will-change-transform"
         style={{
-          transform: isMobile ? 'none' : `translateY(${offset}px) scale(1.15)`,
-          transition: 'transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1)', // Smooth transition
+          transform: `translateY(${offset}px) scale(${scale})`,
+          transition: 'none',
         }}
       >
         <OptimizedImage
@@ -110,7 +112,7 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
           alt={alt}
           srcMobile={srcMobile}
           srcDesktop={srcDesktop}
-          className={`w-full h-full object-cover ${imgClassName}`} // h-full ve object-cover eklendi
+          className={`w-full h-auto ${imgClassName}`}
           loading={loading}
           quality={quality}
         />

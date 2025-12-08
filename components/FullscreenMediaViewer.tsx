@@ -1,6 +1,6 @@
-import React, {useEffect, useRef, useState} from 'react'
-import {OptimizedImage} from './OptimizedImage'
-import {OptimizedVideo} from './OptimizedVideo'
+import React, { useEffect, useRef, useState } from 'react'
+import { OptimizedImage } from './OptimizedImage'
+import { OptimizedVideo } from './OptimizedVideo'
 
 type MediaItem = {
   type: 'image' | 'video' | 'youtube'
@@ -25,13 +25,14 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   const [isButtonVisible, setIsButtonVisible] = useState(false)
   const [visibleIndices, setVisibleIndices] = useState<number[]>([])
   const [isMobile, setIsMobile] = useState(false)
+  const [isLandscape, setIsLandscape] = useState(false)
   const closingVisibleIndicesRef = useRef<number[]>([])
-  
-  // Mouse drag için state'ler (sadece desktop)
+
+  // Mouse drag için state'ler (desktop için)
   const [isDragging, setIsDragging] = useState(false)
   const dragStartX = useRef(0)
   const dragStartScrollLeft = useRef(0)
-  
+
   // Mobilde yukarı git butonu için state
   const [showScrollToTop, setShowScrollToTop] = useState(false)
 
@@ -39,15 +40,20 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
 
   const slideCount = items.length
 
-  // Mobil kontrolü
+  // Mobil ve orientation kontrolü
   useEffect(() => {
     if (typeof window === 'undefined') return
-    const checkMobile = () => {
+    const checkMobileAndOrientation = () => {
       setIsMobile(window.innerWidth < 768)
+      setIsLandscape(window.innerWidth > window.innerHeight)
     }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
+    checkMobileAndOrientation()
+    window.addEventListener('resize', checkMobileAndOrientation)
+    window.addEventListener('orientationchange', checkMobileAndOrientation)
+    return () => {
+      window.removeEventListener('resize', checkMobileAndOrientation)
+      window.removeEventListener('orientationchange', checkMobileAndOrientation)
+    }
   }, [])
 
   // Açılış animasyonu
@@ -69,49 +75,76 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     let currentVisible: number[] = []
     if (scrollContainerRef.current) {
       const container = scrollContainerRef.current
-      const containerTop = container.scrollTop
-      const containerBottom = containerTop + container.clientHeight
-      
-      itemRefs.current.forEach((ref, index) => {
-        if (!ref) return
-        const itemTop = ref.offsetTop
-        const itemBottom = itemTop + ref.offsetHeight
-        
-        if (itemBottom > containerTop && itemTop < containerBottom) {
-          currentVisible.push(index)
-        }
-      })
-      
-      // Görünür görselleri pozisyonlarına göre sırala (üstten alta)
-      currentVisible.sort((a, b) => {
-        const refA = itemRefs.current[a]
-        const refB = itemRefs.current[b]
-        if (!refA || !refB) return 0
-        return refA.offsetTop - refB.offsetTop
-      })
-      
+      const isHorizontal = isMobile && isLandscape
+
+      if (isHorizontal) {
+        // Yatay scroll için
+        const containerLeft = container.scrollLeft
+        const containerRight = containerLeft + container.clientWidth
+
+        itemRefs.current.forEach((ref, index) => {
+          if (!ref) return
+          const itemLeft = ref.offsetLeft
+          const itemRight = itemLeft + ref.offsetWidth
+
+          if (itemRight > containerLeft && itemLeft < containerRight) {
+            currentVisible.push(index)
+          }
+        })
+
+        // Görünür görselleri pozisyonlarına göre sırala (soldan sağa)
+        currentVisible.sort((a, b) => {
+          const refA = itemRefs.current[a]
+          const refB = itemRefs.current[b]
+          if (!refA || !refB) return 0
+          return refA.offsetLeft - refB.offsetLeft
+        })
+      } else {
+        // Dikey scroll için
+        const containerTop = container.scrollTop
+        const containerBottom = containerTop + container.clientHeight
+
+        itemRefs.current.forEach((ref, index) => {
+          if (!ref) return
+          const itemTop = ref.offsetTop
+          const itemBottom = itemTop + ref.offsetHeight
+
+          if (itemBottom > containerTop && itemTop < containerBottom) {
+            currentVisible.push(index)
+          }
+        })
+
+        // Görünür görselleri pozisyonlarına göre sırala (üstten alta)
+        currentVisible.sort((a, b) => {
+          const refA = itemRefs.current[a]
+          const refB = itemRefs.current[b]
+          if (!refA || !refB) return 0
+          return refA.offsetTop - refB.offsetTop
+        })
+      }
+
       setVisibleIndices(currentVisible)
       closingVisibleIndicesRef.current = currentVisible
     }
-    
+
     // Önce görsellerin animasyonunu başlat (isClosing = true, isVisible hala true)
     setIsClosing(true)
-    
+
     // Buton animasyonunu hemen başlat (kapanış)
     setIsButtonVisible(false)
-    
+
     // En üstteki görselin animasyonu bitince (en üstteki görselin delay + duration)
-    const visibleCount = closingVisibleIndicesRef.current.length > 0 
-      ? closingVisibleIndicesRef.current.length 
+    const visibleCount = closingVisibleIndicesRef.current.length > 0
+      ? closingVisibleIndicesRef.current.length
       : currentVisible.length
     const topItemDelay = visibleCount > 0 ? (visibleCount - 1) * 75 : (items.length - 1) * 75 // 100ms -> 75ms
     const imageAnimationDuration = 250 // Hızlandırıldı: 400 -> 250
     const totalImageAnimation = topItemDelay + imageAnimationDuration
-    
+
     // Görseller animasyonu bitince beyaz fon fade'i başlat
     setTimeout(() => {
       setIsVisible(false)
-      
+
       // Beyaz fon fade bitince onClose çağır (hızlandırıldı: 300 -> 200)
       setTimeout(() => {
         onClose()
@@ -123,7 +156,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    window.scrollTo({top: 0, behavior: 'auto'})
+    window.scrollTo({ top: 0, behavior: 'auto' })
     const previousBodyOverflow = document.body.style.overflow
     const previousHtmlOverflow = document.documentElement.style.overflow
 
@@ -141,16 +174,16 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const itemRefs = useRef<(HTMLDivElement | null)[]>([])
 
-  // Mouse drag handlers (sadece desktop)
+  // Mouse drag handlers (desktop için - mobil yatay gibi)
   const handleMouseDown = (e: React.MouseEvent) => {
     if (isMobile || !scrollContainerRef.current) return
     e.preventDefault()
     setIsDragging(true)
     dragStartX.current = e.clientX
     dragStartScrollLeft.current = scrollContainerRef.current.scrollLeft
-    // Cursor'u grabbing yap
     if (scrollContainerRef.current) {
       scrollContainerRef.current.style.cursor = 'grabbing'
+      scrollContainerRef.current.style.scrollSnapType = 'none'
     }
   }
 
@@ -158,96 +191,180 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     if (isMobile || !isDragging || !scrollContainerRef.current) return
     e.preventDefault()
     const x = e.clientX
-    const walk = (dragStartX.current - x) * 1.5 // Hız çarpanı
+    const walk = (dragStartX.current - x) * 1.5
     scrollContainerRef.current.scrollLeft = dragStartScrollLeft.current + walk
-  }
-
-  // Mouse bırakıldığında en yakın görsele snap et
-  const snapToNearestImage = () => {
-    if (!scrollContainerRef.current || isMobile) return
-    const container = scrollContainerRef.current
-    const itemWidth = window.innerWidth * 0.98 - 32 // 98vw - 2rem (32px)
-    const currentScroll = container.scrollLeft
-    const nearestIndex = Math.round(currentScroll / itemWidth)
-    const targetScroll = nearestIndex * itemWidth
-    
-    container.scrollTo({
-      left: Math.max(0, Math.min(targetScroll, container.scrollWidth - container.clientWidth)),
-      behavior: 'smooth',
-    })
   }
 
   const handleMouseUp = () => {
     if (isMobile || !isDragging) return
     setIsDragging(false)
-    // Cursor'u grab yap
     if (scrollContainerRef.current) {
       scrollContainerRef.current.style.cursor = 'grab'
+
+      // En yakın görseli bul ve smooth scroll ile oraya git
+      const container = scrollContainerRef.current
+      const scrollLeft = container.scrollLeft
+
+      // Her görselin sol kenarını bul
+      let nearestIndex = 0
+      let minDistance = Infinity
+
+      itemRefs.current.forEach((ref, index) => {
+        if (!ref) return
+        const itemLeft = ref.offsetLeft - container.offsetLeft
+        const distance = Math.abs(scrollLeft - itemLeft)
+        if (distance < minDistance) {
+          minDistance = distance
+          nearestIndex = index
+        }
+      })
+
+      // En yakın görsele smooth scroll
+      const targetRef = itemRefs.current[nearestIndex]
+      if (targetRef) {
+        const targetLeft = targetRef.offsetLeft - container.offsetLeft
+        container.scrollTo({
+          left: targetLeft,
+          behavior: 'smooth'
+        })
+      }
+
+      // Scroll tamamlandıktan sonra snap'i tekrar aç
+      setTimeout(() => {
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
+        }
+      }, 300) // Smooth scroll animasyonu için bekle
     }
-    // En yakın görsele snap et
-    snapToNearestImage()
   }
 
   const handleMouseLeave = () => {
     if (isMobile || !isDragging) return
     setIsDragging(false)
-    // Cursor'u grab yap
     if (scrollContainerRef.current) {
       scrollContainerRef.current.style.cursor = 'grab'
+
+      // handleMouseUp ile aynı mantık
+      const container = scrollContainerRef.current
+      const scrollLeft = container.scrollLeft
+
+      let nearestIndex = 0
+      let minDistance = Infinity
+
+      itemRefs.current.forEach((ref, index) => {
+        if (!ref) return
+        const itemLeft = ref.offsetLeft - container.offsetLeft
+        const distance = Math.abs(scrollLeft - itemLeft)
+        if (distance < minDistance) {
+          minDistance = distance
+          nearestIndex = index
+        }
+      })
+
+      const targetRef = itemRefs.current[nearestIndex]
+      if (targetRef) {
+        const targetLeft = targetRef.offsetLeft - container.offsetLeft
+        container.scrollTo({
+          left: targetLeft,
+          behavior: 'smooth'
+        })
+      }
+
+      setTimeout(() => {
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
+        }
+      }, 300)
     }
-    // En yakın görsele snap et
-    snapToNearestImage()
   }
+
 
   // Görünür görselleri tespit et (mobilde scroll pozisyonuna göre)
   useEffect(() => {
     if (!scrollContainerRef.current || typeof window === 'undefined') return
-    
+
     const updateVisibleIndices = () => {
       if (!scrollContainerRef.current) return
       const container = scrollContainerRef.current
-      const containerTop = container.scrollTop
-      const containerBottom = containerTop + container.clientHeight
-      
-      // Mobilde yukarı git butonunu göster/gizle
-      if (isMobile) {
-        // 200px'den fazla aşağı kaydırıldıysa butonu göster
-        setShowScrollToTop(containerTop > 200)
-      }
-      
-      const visible: number[] = []
-      itemRefs.current.forEach((ref, index) => {
-        if (!ref) return
-        const itemTop = ref.offsetTop
-        const itemBottom = itemTop + ref.offsetHeight
-        
-        // Görselin bir kısmı görünürse ekle
-        if (itemBottom > containerTop && itemTop < containerBottom) {
-          visible.push(index)
+
+      // Mobil landscape'ta yatay scroll, diğer durumlarda dikey scroll
+      // Desktop'ta da yatay scroll var artık
+      const isHorizontal = (isMobile && isLandscape) || !isMobile
+
+      if (isHorizontal) {
+        // Yatay scroll için
+        const containerLeft = container.scrollLeft
+        const containerRight = containerLeft + container.clientWidth
+
+        // Mobil landscape'ta yukarı git butonu gösterilmez
+        setShowScrollToTop(false)
+
+        const visible: number[] = []
+        itemRefs.current.forEach((ref, index) => {
+          if (!ref) return
+          const itemLeft = ref.offsetLeft
+          const itemRight = itemLeft + ref.offsetWidth
+
+          // Görselin bir kısmı görünürse ekle
+          if (itemRight > containerLeft && itemLeft < containerRight) {
+            visible.push(index)
+          }
+        })
+
+        // Görünür görselleri pozisyonlarına göre sırala (soldan sağa)
+        visible.sort((a, b) => {
+          const refA = itemRefs.current[a]
+          const refB = itemRefs.current[b]
+          if (!refA || !refB) return 0
+          return refA.offsetLeft - refB.offsetLeft
+        })
+
+        setVisibleIndices(visible)
+      } else {
+        // Dikey scroll için (sadece mobil portrait)
+        const containerTop = container.scrollTop
+        const containerBottom = containerTop + container.clientHeight
+
+        // Mobilde yukarı git butonunu göster/gizle (sadece portrait'ta)
+        if (isMobile && !isLandscape) {
+          // 200px'den fazla aşağı kaydırıldıysa butonu göster
+          setShowScrollToTop(containerTop > 200)
         }
-      })
-      
-      // Görünür görselleri pozisyonlarına göre sırala (üstten alta)
-      visible.sort((a, b) => {
-        const refA = itemRefs.current[a]
-        const refB = itemRefs.current[b]
-        if (!refA || !refB) return 0
-        return refA.offsetTop - refB.offsetTop
-      })
-      
-      setVisibleIndices(visible)
+
+        const visible: number[] = []
+        itemRefs.current.forEach((ref, index) => {
+          if (!ref) return
+          const itemTop = ref.offsetTop
+          const itemBottom = itemTop + ref.offsetHeight
+
+          // Görselin bir kısmı görünürse ekle
+          if (itemBottom > containerTop && itemTop < containerBottom) {
+            visible.push(index)
+          }
+        })
+
+        // Görünür görselleri pozisyonlarına göre sırala (üstten alta)
+        visible.sort((a, b) => {
+          const refA = itemRefs.current[a]
+          const refB = itemRefs.current[b]
+          if (!refA || !refB) return 0
+          return refA.offsetTop - refB.offsetTop
+        })
+
+        setVisibleIndices(visible)
+      }
     }
-    
+
     updateVisibleIndices()
     const container = scrollContainerRef.current
     container.addEventListener('scroll', updateVisibleIndices)
     window.addEventListener('resize', updateVisibleIndices)
-    
+
     return () => {
       container.removeEventListener('scroll', updateVisibleIndices)
       window.removeEventListener('resize', updateVisibleIndices)
     }
-  }, [items.length, isMobile])
+  }, [items.length, isMobile, isLandscape])
 
   // Mobilde yukarı git fonksiyonu
   const handleScrollToTop = () => {
@@ -261,9 +378,25 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   const scrollToIndex = (index: number) => {
     if (!scrollContainerRef.current) return
     const container = scrollContainerRef.current
-    // Her görselin genişliği: calc(98vw - 2rem)
+
+    // Desktop'ta artık sabit genişlik yok, o yüzden index'e göre scroll yapmak için
+    // ilgili elemanın offsetLeft değerini kullanmalıyız
+    if (!isMobile) {
+      const targetEl = itemRefs.current[index]
+      if (targetEl) {
+        container.scrollTo({
+          left: targetEl.offsetLeft,
+          behavior: 'smooth',
+        })
+      }
+      return
+    }
+
+    // Her görselin genişliği: calc(98vw - 2rem), gap görseller arasında
+    const gap = 6 // Desktop'ta görseller arası boşluk (px)
     const itemWidth = window.innerWidth * 0.98 - 32 // 98vw - 2rem (32px)
-    const scrollPosition = index * itemWidth
+    const itemWithGap = itemWidth + gap // Görsel genişliği + gap
+    const scrollPosition = index * itemWithGap
     container.scrollTo({
       left: scrollPosition,
       behavior: 'smooth',
@@ -273,13 +406,25 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   const handleScrollLeft = () => {
     if (!scrollContainerRef.current) return
     const container = scrollContainerRef.current
+
+    // Desktop'ta ekran genişliğinin yarısı kadar kaydır
+    if (!isMobile) {
+      container.scrollBy({
+        left: -window.innerWidth / 2,
+        behavior: 'smooth'
+      })
+      return
+    }
+
     // Bir sonraki görselin sınırına kadar git
+    const gap = 6 // Desktop'ta görseller arası boşluk (px)
     const itemWidth = window.innerWidth * 0.98 - 32 // 98vw - 2rem (32px)
+    const itemWithGap = itemWidth + gap // Görsel genişliği + gap
     const currentScroll = container.scrollLeft
-    const targetScroll = Math.floor(currentScroll / itemWidth) * itemWidth
+    const targetScroll = Math.floor(currentScroll / itemWithGap) * itemWithGap
     // Eğer zaten tam hizalıysa, bir önceki görsele git
-    const scrollTo = Math.abs(currentScroll - targetScroll) < 10 
-      ? Math.max(0, targetScroll - itemWidth)
+    const scrollTo = Math.abs(currentScroll - targetScroll) < 10
+      ? Math.max(0, targetScroll - itemWithGap)
       : targetScroll
     container.scrollTo({
       left: scrollTo,
@@ -290,13 +435,25 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   const handleScrollRight = () => {
     if (!scrollContainerRef.current) return
     const container = scrollContainerRef.current
+
+    // Desktop'ta ekran genişliğinin yarısı kadar kaydır
+    if (!isMobile) {
+      container.scrollBy({
+        left: window.innerWidth / 2,
+        behavior: 'smooth'
+      })
+      return
+    }
+
     // Bir sonraki görselin sınırına kadar git
+    const gap = 6 // Desktop'ta görseller arası boşluk (px)
     const itemWidth = window.innerWidth * 0.98 - 32 // 98vw - 2rem (32px)
+    const itemWithGap = itemWidth + gap // Görsel genişliği + gap
     const currentScroll = container.scrollLeft
-    const targetScroll = Math.ceil(currentScroll / itemWidth) * itemWidth
+    const targetScroll = Math.ceil(currentScroll / itemWithGap) * itemWithGap
     // Eğer zaten tam hizalıysa, bir sonraki görsele git
     const scrollTo = Math.abs(currentScroll - targetScroll) < 10
-      ? Math.min(container.scrollWidth - container.clientWidth, targetScroll + itemWidth)
+      ? Math.min(container.scrollWidth - container.clientWidth, targetScroll + itemWithGap)
       : targetScroll
     container.scrollTo({
       left: scrollTo,
@@ -307,7 +464,10 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   // initialIndex değiştiğinde scroll yap
   useEffect(() => {
     if (initialIndex >= 0 && scrollContainerRef.current) {
-      scrollToIndex(initialIndex)
+      // Hafif bir gecikme ile scroll yap ki layout otursun
+      setTimeout(() => {
+        scrollToIndex(initialIndex)
+      }, 100)
     }
   }, [initialIndex])
 
@@ -328,18 +488,39 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       setIsDragging(false)
       if (scrollContainerRef.current) {
         scrollContainerRef.current.style.cursor = 'grab'
+
+        // En yakın görseli bul ve smooth scroll ile oraya git
+        const container = scrollContainerRef.current
+        const scrollLeft = container.scrollLeft
+
+        let nearestIndex = 0
+        let minDistance = Infinity
+
+        itemRefs.current.forEach((ref, index) => {
+          if (!ref) return
+          const itemLeft = ref.offsetLeft - container.offsetLeft
+          const distance = Math.abs(scrollLeft - itemLeft)
+          if (distance < minDistance) {
+            minDistance = distance
+            nearestIndex = index
+          }
+        })
+
+        const targetRef = itemRefs.current[nearestIndex]
+        if (targetRef) {
+          const targetLeft = targetRef.offsetLeft - container.offsetLeft
+          container.scrollTo({
+            left: targetLeft,
+            behavior: 'smooth'
+          })
+        }
+
+        setTimeout(() => {
+          if (scrollContainerRef.current) {
+            scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
+          }
+        }, 300)
       }
-      // En yakın görsele snap et
-      const container = scrollContainerRef.current
-      const itemWidth = window.innerWidth * 0.98 - 32
-      const currentScroll = container.scrollLeft
-      const nearestIndex = Math.round(currentScroll / itemWidth)
-      const targetScroll = nearestIndex * itemWidth
-      
-      container.scrollTo({
-        left: Math.max(0, Math.min(targetScroll, container.scrollWidth - container.clientWidth)),
-        behavior: 'smooth',
-      })
     }
 
     if (isDragging) {
@@ -353,11 +534,35 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     }
   }, [isDragging, isMobile])
 
+  // Mouse wheel horizontal scroll support (desktop)
+  useEffect(() => {
+    if (isMobile || !scrollContainerRef.current) return
+
+    const container = scrollContainerRef.current
+
+    const handleWheel = (e: WheelEvent) => {
+      // Eğer yatay scroll varsa ve dikey scroll yoksa
+      if (Math.abs(e.deltaX) > 0 || Math.abs(e.deltaY) > 0) {
+        e.preventDefault()
+        // Mouse wheel ile yatay scroll (deltaY'yi yatay scroll'a çevir)
+        const scrollAmount = e.deltaY !== 0 ? e.deltaY : e.deltaX
+        container.scrollLeft += scrollAmount
+      }
+    }
+
+    container.addEventListener('wheel', handleWheel, { passive: false })
+
+    return () => {
+      container.removeEventListener('wheel', handleWheel)
+    }
+  }, [isMobile])
+
+
   // Header, TopBanner, Footer ve diğer üstteki/altteki elementleri tamamen gizle
   useEffect(() => {
     // Body'ye class ekle
     document.body.classList.add('fullscreen-viewer-active')
-    
+
     const hideElement = (selector: string) => {
       const elements = document.querySelectorAll(selector)
       elements.forEach((el) => {
@@ -373,7 +578,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
         }
       })
     }
-    
+
     // Tüm üstteki ve altteki elementleri gizle
     hideElement('header')
     hideElement('footer')
@@ -390,11 +595,11 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
         hideElement('main > div.bg-gray-900')
       }
     }
-    
+
     return () => {
       // Body'den class'ı kaldır
       document.body.classList.remove('fullscreen-viewer-active')
-      
+
       // Tüm elementleri geri getir
       const showElement = (selector: string) => {
         const elements = document.querySelectorAll(selector)
@@ -411,7 +616,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
           }
         })
       }
-      
+
       showElement('header')
       showElement('footer')
       showElement('a[href="#main-content"]')
@@ -425,92 +630,116 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
 
   return (
     // Tam ekran overlay - arka plandaki sayfayı tamamen kapatır
-    <div 
-      className="fixed bg-white flex flex-col overflow-hidden" 
+    <div
+      className="fixed bg-white flex flex-col overflow-hidden"
       style={{
-        top: 0, 
-        left: 0, 
-        right: 0, 
-        bottom: 0, 
-        width: '100vw', 
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
         height: '100vh',
+        maxHeight: '100vh',
         zIndex: 99999,
         overflow: 'hidden',
+        boxSizing: 'border-box',
       }}
     >
-      {/* İçerik için opacity animasyonu */}
-      <div 
-        className={`w-full h-full flex flex-col transition-opacity duration-500 ease-in-out ${
-          isVisible ? 'opacity-100' : 'opacity-0'
-        }`}
-      >
-      {/* Üstte kapatma düğmesi */}
-      <div 
-        className="flex items-center justify-end px-4 py-2 md:py-3 bg-white/95 shadow-sm z-10 shrink-0"
+      {/* İçerik için opacity animasyonu - tam ekran */}
+      <div
+        className={`w-full relative transition-opacity duration-500 ease-in-out ${isVisible ? 'opacity-100' : 'opacity-0'
+          }`}
         style={{
-          opacity: isClosing ? 0 : 1,
-          transition: 'opacity 300ms ease-in-out',
-          transitionDelay: isClosing ? (isMobile ? '200ms' : '0ms') : '0ms',
+          width: '100%',
+          height: '100vh',
+          maxHeight: '100vh',
+          overflow: 'hidden',
+          boxSizing: 'border-box',
         }}
       >
-        <button
-          type="button"
-          onClick={handleClose}
-          className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-500 ease-in-out outline-none focus:outline-none focus:ring-0 active:outline-none active:ring-0"
-          aria-label="Kapat"
+        {/* Görseller - mobilde alt alta, desktop'ta yan yana - tam ekran */}
+        <div
+          className="absolute inset-0 overflow-hidden"
+          style={{
+            width: '100%',
+            height: '100vh',
+            maxHeight: '100vh',
+            boxSizing: 'border-box',
+          }}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={`text-gray-900 transition-all duration-500 ease-in-out ${
-              isButtonVisible && !isClosing
-                ? 'opacity-100 rotate-0'
-                : isClosing
-                  ? 'opacity-0 rotate-90'
-                  : 'opacity-0 rotate-90'
-            }`}
+          {/* Üstte kapatma düğmesi - overlay olarak */}
+          <div
+            className="absolute top-0 left-0 right-0 flex items-center justify-end px-4 py-2 md:py-3 z-10"
             style={{
-              transform: isButtonVisible && !isClosing 
-                ? 'rotate(0deg)' 
-                : isClosing 
-                  ? 'rotate(90deg)' 
-                  : 'rotate(90deg)',
+              opacity: isClosing ? 0 : 1,
+              transition: 'opacity 300ms ease-in-out',
               transitionDelay: isClosing ? (isMobile ? '200ms' : '0ms') : '0ms',
             }}
           >
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Görseller - mobilde alt alta, desktop'ta yan yana */}
-      <div className="flex-1 relative overflow-hidden" style={{width: '100%', height: '100vh', maxHeight: '100vh'}}>
-        <div
-          ref={scrollContainerRef}
-          className="w-full h-full overflow-y-auto md:overflow-y-hidden md:overflow-x-auto flex flex-col md:flex-row items-start md:items-stretch gap-[2px] md:gap-1 px-0 md:px-4 pt-0 md:pt-0 md:cursor-grab md:select-none"
-          style={{
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            width: '100%',
-            height: '100%',
-            maxHeight: '100%',
-            cursor: isDragging && !isMobile ? 'grabbing' : (!isMobile ? 'grab' : 'default'),
-          }}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseLeave}
-        >
-          <style>
-            {`
+            <button
+              type="button"
+              onClick={handleClose}
+              className="p-2 rounded-full bg-black/30 hover:bg-black/50 transition-colors duration-500 ease-in-out outline-none focus:outline-none focus:ring-0 active:outline-none active:ring-0"
+              aria-label="Kapat"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={`text-white transition-all duration-500 ease-in-out ${isButtonVisible && !isClosing
+                  ? 'opacity-100 rotate-0'
+                  : isClosing
+                    ? 'opacity-0 rotate-90'
+                    : 'opacity-0 rotate-90'
+                  }`}
+                style={{
+                  transform: isButtonVisible && !isClosing
+                    ? 'rotate(0deg)'
+                    : isClosing
+                      ? 'rotate(90deg)'
+                      : 'rotate(90deg)',
+                  transitionDelay: isClosing ? (isMobile ? '200ms' : '0ms') : '0ms',
+                }}
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+          <div
+            ref={scrollContainerRef}
+            className={`w-full overflow-y-auto md:overflow-y-hidden md:overflow-x-auto flex ${isMobile && isLandscape ? 'flex-row' : isMobile ? 'flex-col' : 'flex-row'
+              } items-start md:items-stretch px-0 md:px-4 md:cursor-grab md:select-none`}
+            style={{
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              width: '100%',
+              height: isMobile ? '100vh' : '100%',
+              maxHeight: isMobile ? '100vh' : '100%',
+              minHeight: isMobile ? '100vh' : '100%',
+              paddingTop: isMobile && isLandscape ? '4px' : (isMobile ? '0' : '8px'),
+              paddingBottom: isMobile && isLandscape ? '4px' : (isMobile ? '0' : '8px'),
+              gap: isMobile && isLandscape ? '4px' : (isMobile ? '0' : '6px'),
+              boxSizing: 'border-box',
+              cursor: isDragging && !isMobile ? 'grabbing' : (!isMobile ? 'grab' : 'default'),
+              overflowY: isMobile && isLandscape ? 'hidden' : (isMobile ? 'auto' : 'hidden'),
+              overflowX: isMobile && isLandscape ? 'auto' : (isMobile ? 'hidden' : 'auto'),
+              // Add scroll-snap for desktop and mobile landscape
+              scrollSnapType: (isMobile && isLandscape) || !isMobile ? 'x mandatory' : 'none',
+            }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+          >
+            <style>
+              {`
               div::-webkit-scrollbar {
                 display: none !important;
                 width: 0 !important;
@@ -521,160 +750,216 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
                 -ms-overflow-style: none !important;
               }
             `}
-          </style>
-          {items.map((item, i) => {
-            if (!item) return null
-            // Açılırken: ilk görselden son görsele (i * 150ms)
-            // Kapanırken: ekranda görünen görsellerin sırasına göre (en alttaki önce)
-            let animationDelay = 0
-            if (isClosing) {
-              // Desktop'ta görünmeyen görseller için delay 0
-              if (!isMobile) {
-                // Desktop'ta görünür görselleri kontrol et
-                const currentVisible = closingVisibleIndicesRef.current.length > 0 
-                  ? closingVisibleIndicesRef.current 
-                  : visibleIndices
-                
-                if (currentVisible.length > 0) {
-                  const visibleIndex = currentVisible.indexOf(i)
-                  if (visibleIndex >= 0) {
-                    // En alttaki görsel (currentVisible'deki son) önce gitsin
-                    const reverseIndex = currentVisible.length - 1 - visibleIndex
-                    animationDelay = reverseIndex * 75 // 150ms -> 75ms
+            </style>
+            {items.map((item, i) => {
+              if (!item) return null
+              // Açılırken: ilk görselden son görsele (i * 150ms)
+              // Kapanırken: ekranda görünen görsellerin sırasına göre (en alttaki önce)
+              let animationDelay = 0
+              if (isClosing) {
+                // Desktop'ta görünmeyen görseller için delay 0
+                if (!isMobile) {
+                  // Desktop'ta görünür görselleri kontrol et
+                  const currentVisible = closingVisibleIndicesRef.current.length > 0
+                    ? closingVisibleIndicesRef.current
+                    : visibleIndices
+
+                  if (currentVisible.length > 0) {
+                    const visibleIndex = currentVisible.indexOf(i)
+                    if (visibleIndex >= 0) {
+                      // En alttaki görsel (currentVisible'deki son) önce gitsin
+                      const reverseIndex = currentVisible.length - 1 - visibleIndex
+                      animationDelay = reverseIndex * 75 // 150ms -> 75ms
+                    } else {
+                      // Desktop'ta görünmeyen görseller hemen gitsin
+                      animationDelay = 0
+                    }
                   } else {
-                    // Desktop'ta görünmeyen görseller hemen gitsin
-                    animationDelay = 0
+                    // Fallback: eski mantık
+                    animationDelay = (items.length - 1 - i) * 75 // 150ms -> 75ms
                   }
                 } else {
-                  // Fallback: eski mantık
-                  animationDelay = (items.length - 1 - i) * 75 // 150ms -> 75ms
+                  // Mobilde: kapanışta hesaplanan görünür görselleri kullan
+                  const currentVisible = closingVisibleIndicesRef.current.length > 0
+                    ? closingVisibleIndicesRef.current
+                    : visibleIndices
+
+                  if (currentVisible.length > 0) {
+                    const visibleIndex = currentVisible.indexOf(i)
+                    if (visibleIndex >= 0) {
+                      // En alttaki görsel (currentVisible'deki son) önce gitsin
+                      const reverseIndex = currentVisible.length - 1 - visibleIndex
+                      animationDelay = reverseIndex * 75 // 150ms -> 75ms
+                    } else {
+                      // Görünmeyen görseller hemen gitsin
+                      animationDelay = 0
+                    }
+                  } else {
+                    // Fallback: eski mantık
+                    animationDelay = (items.length - 1 - i) * 75 // 150ms -> 75ms
+                  }
                 }
               } else {
-                // Mobilde: kapanışta hesaplanan görünür görselleri kullan
-                const currentVisible = closingVisibleIndicesRef.current.length > 0 
-                  ? closingVisibleIndicesRef.current 
-                  : visibleIndices
-                
-                if (currentVisible.length > 0) {
-                  const visibleIndex = currentVisible.indexOf(i)
-                  if (visibleIndex >= 0) {
-                    // En alttaki görsel (currentVisible'deki son) önce gitsin
-                    const reverseIndex = currentVisible.length - 1 - visibleIndex
-                    animationDelay = reverseIndex * 75 // 150ms -> 75ms
-                  } else {
-                    // Görünmeyen görseller hemen gitsin
-                    animationDelay = 0
-                  }
-                } else {
-                  // Fallback: eski mantık
-                  animationDelay = (items.length - 1 - i) * 75 // 150ms -> 75ms
-                }
+                animationDelay = isVisible ? i * 150 : 0
               }
-            } else {
-              animationDelay = isVisible ? i * 150 : 0
-            }
-            
-            return (
-              <div
-                key={i}
-                ref={(el) => {
-                  itemRefs.current[i] = el
-                }}
-                className={`flex-shrink-0 flex items-start md:items-stretch justify-center w-full md:w-[calc(98vw-2rem)] md:min-w-[calc(98vw-2rem)] h-auto md:h-full transition-all ease-out ${
-                  isVisible && !isClosing
+
+              // Desktop ve mobil landscape için sabit yükseklik hesapla
+              const fixedHeight = isMobile && isLandscape
+                ? 'calc(100vh - 12px)'
+                : !isMobile
+                  ? 'calc(100vh - 16px)'
+                  : 'auto'
+
+              // Desktop ve mobil landscape için genişlik hesapla
+              // Mobil landscape'ta container genişliği görselin aspect ratio'suna göre otomatik hesaplanacak
+              // Desktop'ta da artık auto (yan yana dizilim için)
+              const itemWidth = isMobile && isLandscape
+                ? 'auto'
+                : !isMobile
+                  ? 'auto' // Eski: 'calc(98vw - 2rem)' -> Yeni: 'auto'
+                  : '100%'
+
+              return (
+                <div
+                  key={i}
+                  ref={(el) => {
+                    itemRefs.current[i] = el
+                  }}
+                  className={`flex-shrink-0 flex items-center justify-center transition-all ease-out ${isVisible && !isClosing
                     ? 'opacity-100 translate-y-0'
                     : 'opacity-0 translate-y-8 md:translate-y-0'
-                }`}
-                style={{
-                  transitionDelay: `${animationDelay}ms`,
-                  transitionDuration: '250ms', // 400ms -> 250ms
-                }}
-              >
-                {item.type === 'image' ? (
-                  <OptimizedImage
-                    src={item.url}
-                    srcMobile={item.urlMobile}
-                    srcDesktop={item.urlDesktop}
-                    alt=""
-                    className="w-full h-auto md:w-full md:h-full md:object-cover"
-                    loading="eager"
-                    quality={95}
-                  />
-                ) : item.type === 'video' ? (
-                  <OptimizedVideo
-                    src={item.url}
-                    srcMobile={item.urlMobile}
-                    srcDesktop={item.urlDesktop}
-                    className="w-full h-auto md:w-full md:h-full md:object-cover"
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="auto"
-                    loading="eager"
-                  />
-                ) : (
-                  <iframe
-                    className="w-full h-[60vh] md:w-full md:h-full"
-                    title={`fullscreen-media-youtube-${i}`}
-                    src={item.url}
-                    allow="autoplay; encrypted-media; fullscreen"
-                    frameBorder="0"
-                  />
-                )}
-              </div>
-            )
-          })}
-        </div>
-
-        {/* Sağa sola düğmeleri - altta ortada (sadece desktop'ta) */}
-        {slideCount > 1 && (
-          <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-4 z-20" style={{bottom: '32px'}}>
-            <button
-              type="button"
-              onClick={handleScrollLeft}
-              className="bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
-              aria-label="Sol"
-            >
-              ‹
-            </button>
-            <button
-              type="button"
-              onClick={handleScrollRight}
-              className="bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
-              aria-label="Sağ"
-            >
-              ›
-            </button>
+                    }`}
+                  style={{
+                    transitionDelay: `${animationDelay}ms`,
+                    transitionDuration: '250ms', // 400ms -> 250ms
+                    height: fixedHeight,
+                    minHeight: fixedHeight === 'auto' ? 'auto' : fixedHeight,
+                    maxHeight: fixedHeight === 'auto' ? 'none' : fixedHeight,
+                    width: itemWidth,
+                    minWidth: isMobile && isLandscape ? '0' : (!isMobile ? '0' : '100%'), // Desktop minWidth 0
+                    maxWidth: isMobile && isLandscape ? 'none' : (!isMobile ? 'none' : '100%'), // Desktop maxWidth none
+                    marginTop: isMobile && isLandscape ? '0' : (isMobile ? (i === 0 ? '0' : '2px') : '0'),
+                    marginBottom: isMobile && isLandscape ? '0' : '0',
+                    boxSizing: 'border-box',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    // Add scroll-snap-align for desktop and mobile landscape
+                    scrollSnapAlign: (isMobile && isLandscape) || !isMobile ? 'start' : 'none',
+                  }}
+                >
+                  {item.type === 'image' ? (
+                    <OptimizedImage
+                      src={item.url}
+                      srcMobile={item.urlMobile}
+                      srcDesktop={item.urlDesktop}
+                      alt=""
+                      className="h-full w-auto max-w-none"
+                      style={{
+                        height: fixedHeight === 'auto' ? 'auto' : '100%',
+                        maxHeight: fixedHeight === 'auto' ? 'none' : '100%',
+                        maxWidth: 'none',
+                        width: isMobile && isLandscape
+                          ? 'auto'
+                          : (fixedHeight === 'auto' ? '100%' : 'fit-content'), // Desktop: fit-content to wrap image width
+                        minWidth: isMobile && isLandscape ? '0' : 'auto',
+                        display: 'block',
+                      }}
+                      loading="eager"
+                      quality={95}
+                    />
+                  ) : item.type === 'video' ? (
+                    <OptimizedVideo
+                      src={item.url}
+                      srcMobile={item.urlMobile}
+                      srcDesktop={item.urlDesktop}
+                      className="h-full w-auto max-w-none"
+                      style={{
+                        height: fixedHeight === 'auto' ? 'auto' : '100%',
+                        maxHeight: fixedHeight === 'auto' ? 'none' : '100%',
+                        maxWidth: 'none',
+                        width: isMobile && isLandscape
+                          ? 'auto'
+                          : (fixedHeight === 'auto' ? '100%' : 'fit-content'), // Desktop: fit-content
+                        minWidth: isMobile && isLandscape ? '0' : 'auto',
+                        display: 'block',
+                      }}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="auto"
+                      loading="eager"
+                    />
+                  ) : (
+                    <iframe
+                      className="w-full h-full"
+                      title={`fullscreen-media-youtube-${i}`}
+                      src={item.url}
+                      allow="autoplay; encrypted-media; fullscreen"
+                      frameBorder="0"
+                      style={{
+                        height: fixedHeight === 'auto' ? '60vh' : '100%',
+                        width: isMobile && isLandscape ? 'auto' : (fixedHeight === 'auto' ? '100%' : 'auto'), // Desktop'ta auto
+                        maxWidth: isMobile && isLandscape ? 'none' : 'none', // Desktop'ta none
+                        minWidth: isMobile && isLandscape ? '0' : 'auto',
+                        aspectRatio: '16/9', // YouTube için aspect ratio
+                      }}
+                    />
+                  )}
+                </div>
+              )
+            })}
           </div>
-        )}
 
-        {/* Mobilde yukarı git butonu - sağ alt köşe */}
-        {isMobile && (
-          <button
-            type="button"
-            onClick={handleScrollToTop}
-            className={`md:hidden absolute bottom-6 right-6 bg-black/70 hover:bg-black/90 text-white rounded-full p-4 transition-all duration-300 z-30 shadow-lg ${
-              showScrollToTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-            }`}
-            aria-label="Yukarı git"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+          {/* Sağa sola düğmeleri - altta ortada (sadece desktop'ta) */}
+          {slideCount > 1 && (
+            <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-4 z-20" style={{ bottom: '32px' }}>
+              <button
+                type="button"
+                onClick={handleScrollLeft}
+                className="bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+                aria-label="Sol"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                onClick={handleScrollRight}
+                className="bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+                aria-label="Sağ"
+              >
+                ›
+              </button>
+            </div>
+          )}
+
+          {/* Mobilde yukarı git butonu - sağ alt köşe */}
+          {isMobile && (
+            <button
+              type="button"
+              onClick={handleScrollToTop}
+              className={`md:hidden absolute bottom-6 right-6 bg-black/70 hover:bg-black/90 text-white rounded-full p-4 transition-all duration-300 z-30 shadow-lg ${showScrollToTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+                }`}
+              aria-label="Yukarı git"
             >
-              <path d="m18 15-6-6-6 6" />
-            </svg>
-          </button>
-        )}
-      </div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m18 15-6-6-6 6" />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )

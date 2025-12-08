@@ -17,6 +17,7 @@ interface OptimizedImageProps {
   draggable?: boolean
   onLoad?: () => void
   onError?: () => void
+  style?: React.CSSProperties
 }
 
 /**
@@ -42,6 +43,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   draggable,
   onLoad,
   onError,
+  style,
 }) => {
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
@@ -139,7 +141,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   // Art Direction ile picture elementi kullan
   if (useArtDirection) {
     return (
-      <div className={`relative ${className}`} style={{width, height}}>
+      <div className={`relative ${className}`} style={{width, height, ...style}}>
         {!isLoaded && (
           <img
             src={placeholder}
@@ -211,6 +213,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             onLoad={handleLoad}
             onError={handleError}
             decoding="async"
+            style={style}
           />
         </picture>
       </div>
@@ -219,7 +222,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   // Normal kullanım (Art Direction yok)
   return (
-    <div className={`relative ${className}`} style={{width, height}}>
+    <div className={`relative ${className}`} style={{width, height, ...style}}>
       {!isLoaded && (
         <img
           src={placeholder}
@@ -255,6 +258,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           onLoad={handleLoad}
           onError={handleError}
           decoding="async"
+          style={style}
         />
       </picture>
     </div>

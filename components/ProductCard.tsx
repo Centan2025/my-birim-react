@@ -45,7 +45,7 @@ export const ProductCard: React.FC<{product: Product; variant?: 'default' | 'lig
       }}
     >
       <div
-        className={`bg-white ${imageBorderClass} border border-gray-100 overflow-hidden transition-transform duration-700 ease-in-out group-hover:-translate-y-1`}
+        className={`bg-white ${imageBorderClass} overflow-hidden transition-transform duration-700 ease-in-out group-hover:-translate-y-1`}
       >
         <div className="relative overflow-hidden aspect-square w-full flex items-center justify-center bg-white">
           <OptimizedImage
@@ -58,7 +58,7 @@ export const ProductCard: React.FC<{product: Product; variant?: 'default' | 'lig
             quality={85}
           />
         </div>
-        <div className="px-3 py-2 sm:px-3 sm:py-2">
+        <div className="px-2 py-1.5 sm:px-2 sm:py-1.5">
           <div className="flex items-baseline justify-between gap-2">
             <h3
               className={`text-base sm:text-lg tracking-tight font-semibold ${

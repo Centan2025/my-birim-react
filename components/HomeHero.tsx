@@ -39,6 +39,8 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
   const innerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const autoPlayIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [isHeroTextVisible, setIsHeroTextVisible] = useState(false)
+  const [areDotsVisible, setAreDotsVisible] = useState(false)
 
   const heroMedia = useMemo(() => {
     const items = Array.isArray(content?.heroMedia) ? content!.heroMedia : []
@@ -353,6 +355,25 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
     return undefined
   }, [currentSlide, heroMedia, isDragging, isTransitioning])
 
+  // Hero text animasyonu - slide değiştiğinde soldan gel
+  useEffect(() => {
+    setIsHeroTextVisible(false)
+    const timer = setTimeout(() => {
+      setIsHeroTextVisible(true)
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [currentSlide])
+
+  // Dots animasyonu - ilk açılışta sağdan ve soldan birlikte gel
+  useEffect(() => {
+    if (!content || heroMedia.length === 0) return
+    setAreDotsVisible(false)
+    const timer = setTimeout(() => {
+      setAreDotsVisible(true)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [content, heroMedia.length])
+
   // Mobilde hero container yüksekliğini medyanın gerçek boyutuna göre ayarla
   useEffect(() => {
     if (!isMobile || !heroMedia || heroMedia.length === 0) return
@@ -626,34 +647,36 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                         className={`flex flex-col md:flex-row items-center text-white gap-12 md:gap-16 ${content?.isHeroTextVisible ? 'max-w-4xl' : ''} ${textAlignClass}`}
                       >
                         {content?.isHeroTextVisible && (
-                          <div className="relative w-full">
-                            <div className="animate-fade-in-up-subtle">
-                              <h1
-                                className="text-base md:text-5xl font-light tracking-tight mb-4 leading-relaxed"
-                                style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}
+                          <div className={`relative w-full transition-all duration-[700ms] ease-out ${
+                            isHeroTextVisible
+                              ? 'translate-x-0 opacity-100'
+                              : '-translate-x-[150%] opacity-0'
+                          }`}>
+                            <h1
+                              className="text-base md:text-5xl font-light tracking-tight mb-4 leading-relaxed"
+                              style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}
+                            >
+                              {t(media.title || '')}
+                            </h1>
+                            <p
+                              className="text-[10px] md:text-xl mb-8 leading-relaxed"
+                              style={{textShadow: '0 1px 3px rgba(0,0,0,0.5)'}}
+                            >
+                              {t(media.subtitle || '')}
+                            </p>
+                            {media.isButtonVisible && (
+                              <Link
+                                to={media.buttonLink || '/'}
+                                className="group inline-flex items-center gap-x-3 text-white font-semibold py-2 pl-0 pr-4 text-[10px] md:text-lg rounded-lg"
                               >
-                                {t(media.title || '')}
-                              </h1>
-                              <p
-                                className="text-[10px] md:text-xl mb-8 leading-relaxed"
-                                style={{textShadow: '0 1px 3px rgba(0,0,0,0.5)'}}
-                              >
-                                {t(media.subtitle || '')}
-                              </p>
-                              {media.isButtonVisible && (
-                                <Link
-                                  to={media.buttonLink || '/'}
-                                  className="group inline-flex items-center gap-x-3 text-white font-semibold py-2 pl-0 pr-4 text-[10px] md:text-lg rounded-lg"
-                                >
-                                  <span className="inline-flex items-center gap-x-3 border-b border-transparent group-hover:border-white pb-1 transition-all duration-300 ease-out">
-                                    <span className="group-hover:text-gray-200">
-                                      {t(media.buttonText || '')}
-                                    </span>
-                                    <ArrowRight className="w-3 h-3 md:w-6 md:h-6" />
+                                <span className="inline-flex items-center gap-x-3 border-b border-transparent group-hover:border-white pb-1 transition-all duration-300 ease-out">
+                                  <span className="group-hover:text-gray-200">
+                                    {t(media.buttonText || '')}
                                   </span>
-                                </Link>
-                              )}
-                            </div>
+                                  <ArrowRight className="w-3 h-3 md:w-6 md:h-6" />
+                                </span>
+                              </Link>
+                            )}
                           </div>
                         )}
                       </div>
@@ -690,29 +713,45 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
             className={`${isMobile ? 'absolute' : 'absolute'} ${isMobile ? 'bottom-4' : 'bottom-10'} left-1/2 -translate-x-1/2 z-30 flex items-center space-x-4`}
             style={isMobile ? {position: 'absolute', bottom: '16px'} : {}}
           >
-            {heroMedia.map((_, index) => {
+            {(() => {
               const normalizedSlide =
                 currentSlide < 0 ? slideCount - 1 : currentSlide >= slideCount ? 0 : currentSlide
-              const isActive = index === normalizedSlide
+              const centerIndex = Math.floor(heroMedia.length / 2)
+              
+              return heroMedia.map((_, index) => {
+                const isActive = index === normalizedSlide
+                const isLeft = index < centerIndex
+                const distanceFromCenter = Math.abs(index - centerIndex)
+                const animationDelay = distanceFromCenter * 50
 
-              return (
-                <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`relative rounded-full h-2 transition-all duration-500 ease-in-out group ${
-                    isActive ? 'w-12 bg-white/90' : 'w-2 bg-white/40 hover:bg-white/60'
-                  }`}
-                  aria-label={`Go to slide ${index + 1}`}
-                >
-                  {isActive && (
-                    <div
-                      key={`${normalizedSlide}-${index}`}
-                      className="absolute top-0 left-0 h-full rounded-full bg-white animate-fill-line"
-                    ></div>
-                  )}
-                </button>
-              )
-            })}
+                return (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`relative rounded-full h-2 transition-all duration-500 ease-in-out group ${
+                      isActive ? 'w-12 bg-white/90' : 'w-2 bg-white/40 hover:bg-white/60'
+                    } ${
+                      areDotsVisible
+                        ? 'translate-x-0 opacity-100'
+                        : isLeft
+                          ? '-translate-x-[150%] opacity-0'
+                          : 'translate-x-[150%] opacity-0'
+                    }`}
+                    style={{
+                      transitionDelay: `${animationDelay}ms`,
+                    }}
+                    aria-label={`Go to slide ${index + 1}`}
+                  >
+                    {isActive && (
+                      <div
+                        key={`${normalizedSlide}-${index}`}
+                        className="absolute top-0 left-0 h-full rounded-full bg-white animate-fill-line"
+                      ></div>
+                    )}
+                  </button>
+                )
+              })
+            })()}
           </div>
         )}
       </div>

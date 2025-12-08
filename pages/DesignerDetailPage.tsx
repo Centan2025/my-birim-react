@@ -1,4 +1,4 @@
-import {useEffect} from 'react'
+import {useEffect, useState} from 'react'
 import {useParams} from 'react-router-dom'
 import {ProductCard} from '../components/ProductCard'
 import {OptimizedImage} from '../components/OptimizedImage'
@@ -9,6 +9,7 @@ import {useProductsByDesigner} from '../src/hooks/useProducts'
 import {useSiteSettings} from '../src/hooks/useSiteData'
 import {Breadcrumbs} from '../components/Breadcrumbs'
 import {analytics} from '../src/lib/analytics'
+import ScrollReveal from '../components/ScrollReveal'
 
 export function DesignerDetailPage() {
   const {designerId} = useParams<{designerId: string}>()
@@ -17,6 +18,7 @@ export function DesignerDetailPage() {
   const {t} = useTranslation()
   const {data: settings} = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
+  const [isTitleVisible, setIsTitleVisible] = useState(false)
 
   // Analytics: tasarımcı detay görüntüleme
   useEffect(() => {
@@ -37,6 +39,16 @@ export function DesignerDetailPage() {
     })
   }, [designer, t])
 
+  // Tasarımcı adı animasyonu - soldan fade ile gel
+  useEffect(() => {
+    if (!designer) return
+    setIsTitleVisible(false)
+    const timer = setTimeout(() => {
+      setIsTitleVisible(true)
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [designer])
+
   if (loading) {
     return (
       <div className="pt-20">
@@ -55,7 +67,7 @@ export function DesignerDetailPage() {
 
   return (
     <div className="bg-gray-100 animate-fade-in-up-subtle">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
+      <div className="container mx-auto px-2 sm:px-2 lg:px-2 pt-20 md:pt-24 lg:pt-24 pb-16">
         <Breadcrumbs
           className="mb-8"
           items={[
@@ -85,8 +97,16 @@ export function DesignerDetailPage() {
           </div>
           <div className="text-left w-full">
             <div className="max-w-2xl">
-              <h1 className="text-4xl font-light text-gray-600">{t(designer.name)}</h1>
-              <p className="mt-4 text-gray-500 leading-relaxed">{t(designer.bio)}</p>
+              <h1 className={`text-4xl font-light text-gray-600 ${
+                isTitleVisible
+                  ? 'translate-x-0 opacity-100'
+                  : '-translate-x-[150%] opacity-0'
+              }`} style={{
+                transition: 'transform 700ms ease-out, opacity 1200ms ease-out'
+              }}>{t(designer.name)}</h1>
+              <ScrollReveal delay={200}>
+                <p className="mt-4 text-gray-500 leading-relaxed">{t(designer.bio)}</p>
+              </ScrollReveal>
             </div>
           </div>
         </div>
@@ -96,13 +116,21 @@ export function DesignerDetailPage() {
             {t('designs') || 'Tasarımları'}
           </h2>
           {products.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-2 gap-y-3 md:gap-x-4 md:gap-y-4">
-              {products.map(product => (
-                <ProductCard key={product.id} product={product} variant="light" />
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[2px]">
+              {products.map((product, index) => (
+                <ScrollReveal 
+                  key={product.id} 
+                  delay={index < 12 ? index * 20 : 0} 
+                  threshold={0.01}
+                >
+                  <ProductCard product={product} variant="light" />
+                </ScrollReveal>
               ))}
             </div>
           ) : (
-            <p className="text-gray-600">{t('no_products_by_designer')}</p>
+            <ScrollReveal delay={0} threshold={0.01}>
+              <p className="text-gray-600">{t('no_products_by_designer')}</p>
+            </ScrollReveal>
           )}
         </div>
       </div>

@@ -6,6 +6,7 @@ import {useTranslation} from '../i18n'
 import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useProjects} from '../src/hooks/useProjects'
 import {useSiteSettings} from '../src/hooks/useSiteData'
+import ScrollReveal from '../components/ScrollReveal'
 
 const ProjectCard: React.FC<{project: Project}> = ({project}) => {
   const {t} = useTranslation()
@@ -65,14 +66,22 @@ export function ProjectsPage() {
         </div>
         {projects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-16 gap-x-8 items-stretch">
-            {projects.map(project => (
-              <ProjectCard key={project.id} project={project} />
+            {projects.map((project, index) => (
+              <ScrollReveal 
+                key={project.id} 
+                delay={index < 12 ? index * 20 : 0} 
+                threshold={0.01}
+              >
+                <ProjectCard project={project} />
+              </ScrollReveal>
             ))}
           </div>
         ) : (
-          <p className="text-gray-600 text-center">
-            {t('project_not_found') || 'Proje bulunamadı'}
-          </p>
+          <ScrollReveal delay={0} threshold={0.01}>
+            <p className="text-gray-600 text-center">
+              {t('project_not_found') || 'Proje bulunamadı'}
+            </p>
+          </ScrollReveal>
         )}
       </div>
     </div>

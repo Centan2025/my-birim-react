@@ -891,12 +891,14 @@ export function Header() {
       clearTimeout(productsTimeoutRef.current)
       productsTimeoutRef.current = null
     }
+    setHoveredCategoryId(null) // Menü açıldığında görsel alanı temizle
     setIsProductsOpen(true)
   }
 
   const handleProductsLeave = () => {
     productsTimeoutRef.current = window.setTimeout(() => {
       setIsProductsOpen(false)
+      setHoveredCategoryId(null) // Menü kapandığında görsel alanı temizle
       productsTimeoutRef.current = null
     }, 200)
   }
@@ -907,6 +909,7 @@ export function Header() {
       productsTimeoutRef.current = null
     }
     setIsProductsOpen(false)
+    setHoveredCategoryId(null) // Menü kapandığında görsel alanı temizle
   }
 
   const navLinkClasses =

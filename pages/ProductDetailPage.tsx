@@ -17,6 +17,7 @@ import {useProduct, useProductsByCategory} from '../src/hooks/useProducts'
 import {useDesigner} from '../src/hooks/useDesigners'
 import {useCategories} from '../src/hooks/useCategories'
 import {useSiteSettings} from '../src/hooks/useSiteData'
+import ScrollReveal from '../components/ScrollReveal'
 
 const DownloadIcon = () => (
   <svg
@@ -154,6 +155,7 @@ export function ProductDetailPage() {
   })
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
   const [isTitleVisible, setIsTitleVisible] = useState(false)
+  const [isDesignerVisible, setIsDesignerVisible] = useState(false)
   const [areDotsVisible, setAreDotsVisible] = useState(false)
   const [isPageVisible, setIsPageVisible] = useState(false)
   const [dimLightbox, setDimLightbox] = useState<{
@@ -196,13 +198,23 @@ export function ProductDetailPage() {
   }, [activeMaterialGroup])
 
 
-  // Model adı ve tasarımcı animasyonu - ilk açılışta sağdan gel
+  // Tasarımcı adı animasyonu - önce başlar, fade ile birlikte soldan gel
+  useEffect(() => {
+    if (!product || !designer) return
+    setIsDesignerVisible(false)
+    const timer = setTimeout(() => {
+      setIsDesignerVisible(true)
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [product, designer])
+
+  // Ürün adı animasyonu - tasarımcı adından sonra başlar, fade ile birlikte soldan gel
   useEffect(() => {
     if (!product) return
     setIsTitleVisible(false)
     const timer = setTimeout(() => {
       setIsTitleVisible(true)
-    }, 400)
+    }, 700)
     return () => clearTimeout(timer)
   }, [product])
 
@@ -687,6 +699,21 @@ export function ProductDetailPage() {
         {`
           .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
           .hide-scrollbar::-webkit-scrollbar { display: none; }
+          /* Product Detail Hero - CSS override'larından koru */
+          @media (max-width: 767px) {
+            [data-product-detail] header > div:first-child {
+              height: 60vh !important;
+              min-height: 60vh !important;
+              max-height: 60vh !important;
+            }
+          }
+          @media (min-width: 768px) {
+            [data-product-detail] header > div:first-child {
+              height: 70vh !important;
+              min-height: 70vh !important;
+              max-height: 70vh !important;
+            }
+          }
         `}
       </style>
       {/* helpers */}
@@ -695,6 +722,11 @@ export function ProductDetailPage() {
       <header className="relative w-full">
         <div
           className="relative w-full h-[60vh] md:h-[70vh] overflow-hidden cursor-grab active:cursor-grabbing"
+          style={{
+            height: '60vh',
+            minHeight: '60vh',
+            maxHeight: '60vh',
+          }}
           onMouseDown={handleHeroDragStart}
           onMouseMove={handleHeroDragMove}
           onMouseUp={handleHeroDragEnd}
@@ -783,21 +815,27 @@ export function ProductDetailPage() {
             </ol>
           </nav>
 
-          <div className={`absolute bottom-10 md:bottom-10 left-6 md:left-10 text-white transition-all duration-[700ms] ease-out ${
-            isTitleVisible
-              ? 'translate-x-0 opacity-100'
-              : '-translate-x-[150%] opacity-0'
-          }`}>
-            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg">
-              {t(product.name)}
-            </h1>
+          <div className="absolute bottom-10 md:bottom-10 left-6 md:left-10 text-white">
+            <div style={{
+              transform: isTitleVisible ? 'translateX(0)' : 'translateX(-150%)',
+              opacity: isTitleVisible ? 1 : 0,
+              transition: 'transform 700ms ease-out, opacity 1800ms ease-out'
+            }}>
+              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg">
+                {t(product.name)}
+              </h1>
+            </div>
             {designer && (
-              <p className="mt-2 text-white/80">
+              <div className="mt-2 text-white/80" style={{
+                transform: isDesignerVisible ? 'translateX(0)' : 'translateX(-150%)',
+                opacity: isDesignerVisible ? 1 : 0,
+                transition: 'transform 700ms ease-out, opacity 1800ms ease-out'
+              }}>
                 <Link to={`/designer/${designer.id}`} className="underline hover:text-white">
                   {t(designer.name)}
                 </Link>{' '}
                 — {product.year}
-              </p>
+              </div>
             )}
           </div>
 
@@ -1115,17 +1153,20 @@ export function ProductDetailPage() {
 
             <div>
               <h2 className="text-2xl md:text-4xl font-light text-gray-600">{t(product.name)}</h2>
-              <p className="mt-3 text-gray-500 leading-relaxed max-w-2xl font-light">
-                {t(product.description)}
-              </p>
+              <ScrollReveal delay={200}>
+                <p className="mt-3 text-gray-500 leading-relaxed max-w-2xl font-light">
+                  {t(product.description)}
+                </p>
+              </ScrollReveal>
             </div>
 
             {/* Dimensions as small drawings (thumbnails) - MOVED BEFORE MATERIALS */}
             {dimImages.length > 0 && (
-              <div className="pb-4">
-                <h2 className="text-xl font-light text-gray-600">{t('dimensions')}</h2>
-                <div className="h-px bg-gray-300 my-4" />
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              <ScrollReveal delay={200} threshold={0.05}>
+                <div className="pb-4">
+                  <h2 className="text-xl font-light text-gray-600">{t('dimensions')}</h2>
+                  <div className="h-px bg-gray-300 my-4" />
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                   {dimImages.map(
                     (
                       dimImg: {
@@ -1159,12 +1200,14 @@ export function ProductDetailPage() {
                       </div>
                     )
                   )}
+                  </div>
                 </div>
-              </div>
+              </ScrollReveal>
             )}
 
             {product.materials && grouped.length > 0 && (
-              <div className="pb-4">
+              <ScrollReveal delay={300} threshold={0.05}>
+                <div className="pb-4">
                 <h2 className="text-xl font-light text-gray-600 mb-4">
                   {t('material_alternatives')}
                 </h2>
@@ -1282,12 +1325,14 @@ export function ProductDetailPage() {
                     </div>
                   </>
                 )}
-              </div>
+                </div>
+              </ScrollReveal>
             )}
 
             {/* Designer section after materials */}
             {designer && (
-              <section className="mt-10 bg-gray-200 text-gray-600 border-t border-b border-gray-400">
+              <ScrollReveal delay={400} threshold={0.05}>
+                <section className="mt-10 bg-gray-200 text-gray-600 border-t border-b border-gray-400">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-10">
                   <h2 className="text-xl font-thin text-gray-600 mb-4">{t('designer')}</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
@@ -1330,10 +1375,12 @@ export function ProductDetailPage() {
                   </div>
                 </div>
               </section>
+              </ScrollReveal>
             )}
 
             {product.buyable && (
-              <div className="pt-6 border-t border-gray-200">
+              <ScrollReveal delay={500} threshold={0.05}>
+                <div className="pt-6 border-t border-gray-200">
                 <button
                   onClick={() => addToCart(product)}
                   className="group w-20 h-20 flex items-center justify-center bg-gray-900 text-white rounded-full hover:bg-gray-700 transition-all duration-300 ease-in-out transform hover:scale-110 active:scale-100 hover:shadow-lg"
@@ -1342,10 +1389,12 @@ export function ProductDetailPage() {
                   <TransparentShoppingBagIcon />
                 </button>
               </div>
+              </ScrollReveal>
             )}
 
             {product.exclusiveContent && (
-              <div className="relative rounded-none border border-gray-200 bg-white/70 backdrop-blur p-6 sm:p-8 pb-10">
+              <ScrollReveal delay={600} threshold={0.05}>
+                <div className="relative rounded-none border border-gray-200 bg-white/70 backdrop-blur p-6 sm:p-8 pb-10">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl md:text-3xl font-light text-gray-700">
                     İndirilebilir Dosyalar
@@ -1448,6 +1497,7 @@ export function ProductDetailPage() {
                 {/* Alt çizgi: kartın tam alt kenarında, kenarlara kadar */}
                 <div className="absolute left-0 right-0 bottom-0 h-px bg-gray-300" />
               </div>
+              </ScrollReveal>
             )}
 
             {/* bottom prev/next removed; now overlay under menu */}
@@ -1455,7 +1505,8 @@ export function ProductDetailPage() {
           {Array.isArray((product as any)?.media) &&
             (product as any).media.length > 0 &&
             (product as any).showMediaPanels !== false && (
-              <section className="mt-12">
+              <ScrollReveal delay={700} threshold={0.05}>
+                <section className="mt-12">
                 <h2 className="text-xl font-light text-gray-600 mb-4">
                   {(product as any)?.mediaSectionTitle &&
                   String((product as any).mediaSectionTitle).trim().length > 0
@@ -1510,6 +1561,7 @@ export function ProductDetailPage() {
                   ))}
                 </div>
               </section>
+              </ScrollReveal>
             )}
         </div>
       </main>
