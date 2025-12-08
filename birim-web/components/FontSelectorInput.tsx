@@ -31,6 +31,53 @@ const POPULAR_FONTS = [
   {name: 'Fjalla One', displayName: 'Fjalla One', category: 'Sans-serif'},
   {name: 'Bitter', displayName: 'Bitter', category: 'Serif'},
   {name: 'Libre Baskerville', displayName: 'Libre Baskerville', category: 'Serif'},
+  {name: 'Inter', displayName: 'Inter', category: 'Sans-serif'},
+  {name: 'Work Sans', displayName: 'Work Sans', category: 'Sans-serif'},
+  {name: 'Noto Sans', displayName: 'Noto Sans', category: 'Sans-serif'},
+  {name: 'DM Sans', displayName: 'DM Sans', category: 'Sans-serif'},
+  {name: 'Space Grotesk', displayName: 'Space Grotesk', category: 'Sans-serif'},
+  {name: 'Manrope', displayName: 'Manrope', category: 'Sans-serif'},
+  {name: 'Plus Jakarta Sans', displayName: 'Plus Jakarta Sans', category: 'Sans-serif'},
+  {name: 'Outfit', displayName: 'Outfit', category: 'Sans-serif'},
+  {name: 'Sora', displayName: 'Sora', category: 'Sans-serif'},
+  {name: 'Figtree', displayName: 'Figtree', category: 'Sans-serif'},
+  {name: 'Rubik', displayName: 'Rubik', category: 'Sans-serif'},
+  {name: 'Quicksand', displayName: 'Quicksand', category: 'Sans-serif'},
+  {name: 'Comfortaa', displayName: 'Comfortaa', category: 'Sans-serif'},
+  {name: 'Josefin Sans', displayName: 'Josefin Sans', category: 'Sans-serif'},
+  {name: 'Cormorant Garamond', displayName: 'Cormorant Garamond', category: 'Serif'},
+  {name: 'EB Garamond', displayName: 'EB Garamond', category: 'Serif'},
+  {name: 'Cinzel', displayName: 'Cinzel', category: 'Serif'},
+  {name: 'Abril Fatface', displayName: 'Abril Fatface', category: 'Display'},
+  {name: 'Bodoni Moda', displayName: 'Bodoni Moda', category: 'Serif'},
+  {name: 'Prata', displayName: 'Prata', category: 'Serif'},
+  {name: 'DM Serif Display', displayName: 'DM Serif Display', category: 'Serif'},
+  {name: 'Cormorant', displayName: 'Cormorant', category: 'Serif'},
+  {name: 'Vollkorn', displayName: 'Vollkorn', category: 'Serif'},
+  {name: 'Crimson Pro', displayName: 'Crimson Pro', category: 'Serif'},
+  {name: 'Fraunces', displayName: 'Fraunces', category: 'Serif'},
+  {name: 'Spectral', displayName: 'Spectral', category: 'Serif'},
+  {name: 'Zilla Slab', displayName: 'Zilla Slab', category: 'Serif'},
+  {name: 'Alfa Slab One', displayName: 'Alfa Slab One', category: 'Display'},
+  {name: 'Righteous', displayName: 'Righteous', category: 'Display'},
+  {name: 'Fredoka One', displayName: 'Fredoka One', category: 'Display'},
+  {name: 'Bangers', displayName: 'Bangers', category: 'Display'},
+  {name: 'Lobster', displayName: 'Lobster', category: 'Display'},
+  {name: 'Satisfy', displayName: 'Satisfy', category: 'Handwriting'},
+  {name: 'Kalam', displayName: 'Kalam', category: 'Handwriting'},
+  {name: 'Caveat', displayName: 'Caveat', category: 'Handwriting'},
+  {name: 'Permanent Marker', displayName: 'Permanent Marker', category: 'Handwriting'},
+  {name: 'Shadows Into Light', displayName: 'Shadows Into Light', category: 'Handwriting'},
+  {name: 'Amatic SC', displayName: 'Amatic SC', category: 'Handwriting'},
+  {name: 'Indie Flower', displayName: 'Indie Flower', category: 'Handwriting'},
+  {name: 'Dosis', displayName: 'Dosis', category: 'Sans-serif'},
+  {name: 'Exo 2', displayName: 'Exo 2', category: 'Sans-serif'},
+  {name: 'Orbitron', displayName: 'Orbitron', category: 'Sans-serif'},
+  {name: 'Rajdhani', displayName: 'Rajdhani', category: 'Sans-serif'},
+  {name: 'Titillium Web', displayName: 'Titillium Web', category: 'Sans-serif'},
+  {name: 'Yanone Kaffeesatz', displayName: 'Yanone Kaffeesatz', category: 'Sans-serif'},
+  {name: 'Comic Neue', displayName: 'Comic Neue', category: 'Handwriting'},
+  {name: 'Patrick Hand', displayName: 'Patrick Hand', category: 'Handwriting'},
 ]
 
 const Container = styled.div`
@@ -96,12 +143,12 @@ const FontPreview = styled.div<{fontFamily: string}>`
     if (props.fontFamily === 'mono') return 'monospace'
     return `"${props.fontFamily}", sans-serif`
   }};
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #111;
-  line-height: 1.4;
+  line-height: 1.3;
   margin-bottom: 0.5rem;
-  min-height: 3rem;
+  min-height: 1.5rem;
 `
 
 const FontPreviewText = styled.div<{fontFamily: string}>`
