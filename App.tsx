@@ -7,63 +7,62 @@ import React, {
   Suspense,
   lazy,
 } from 'react'
-import { HashRouter, Routes, Route, useLocation, Link } from 'react-router-dom'
+import {HashRouter, Routes, Route, useLocation, Link} from 'react-router-dom'
 
-import { Header } from './components/Header'
-import { getFooterContent, getSiteSettings, subscribeEmail } from './services/cms'
-import type { FooterContent, SiteSettings, User } from './types'
-import { SiteLogo } from './components/SiteLogo'
-import { I18nProvider, useTranslation } from './i18n'
-import { CartProvider } from './context/CartContext'
-import { CartSidebar } from './components/CartSidebar'
+import {Header} from './components/Header'
+import {getFooterContent, getSiteSettings, subscribeEmail} from './services/cms'
+import type {FooterContent, SiteSettings, User} from './types'
+import {SiteLogo} from './components/SiteLogo'
+import {I18nProvider, useTranslation} from './i18n'
+import {CartProvider} from './context/CartContext'
+import {CartSidebar} from './components/CartSidebar'
 import CookieBanner from './components/CookieBanner'
-import { SkipLink } from './components/SkipLink'
-import { errorReporter } from './src/lib/errorReporting'
-import { analytics } from './src/lib/analytics'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClient } from './src/lib/queryClient'
-import ScrollReveal from './components/ScrollReveal'
+import {SkipLink} from './components/SkipLink'
+import {errorReporter} from './src/lib/errorReporting'
+import {analytics} from './src/lib/analytics'
+import {QueryClientProvider} from '@tanstack/react-query'
+import {queryClient} from './src/lib/queryClient'
 
 // Lazy load pages for code splitting
-const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })))
+const HomePage = lazy(() => import('./pages/HomePage').then(m => ({default: m.HomePage})))
 const CategoriesPage = lazy(() =>
-  import('./pages/CategoriesPage').then(m => ({ default: m.CategoriesPage }))
+  import('./pages/CategoriesPage').then(m => ({default: m.CategoriesPage}))
 )
 const ProductsPage = lazy(() =>
-  import('./pages/ProductsPage').then(m => ({ default: m.ProductsPage }))
+  import('./pages/ProductsPage').then(m => ({default: m.ProductsPage}))
 )
 const ProductDetailPage = lazy(() =>
-  import('./pages/ProductDetailPage').then(m => ({ default: m.ProductDetailPage }))
+  import('./pages/ProductDetailPage').then(m => ({default: m.ProductDetailPage}))
 )
 const DesignersPage = lazy(() =>
-  import('./pages/DesignersPage').then(m => ({ default: m.DesignersPage }))
+  import('./pages/DesignersPage').then(m => ({default: m.DesignersPage}))
 )
 const DesignerDetailPage = lazy(() =>
-  import('./pages/DesignerDetailPage').then(m => ({ default: m.DesignerDetailPage }))
+  import('./pages/DesignerDetailPage').then(m => ({default: m.DesignerDetailPage}))
 )
-const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })))
-const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })))
-const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })))
-const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })))
-const NewsPage = lazy(() => import('./pages/NewsPage').then(m => ({ default: m.NewsPage })))
+const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({default: m.AboutPage})))
+const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({default: m.ContactPage})))
+const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({default: m.LoginPage})))
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({default: m.ProfilePage})))
+const NewsPage = lazy(() => import('./pages/NewsPage').then(m => ({default: m.NewsPage})))
 const NewsDetailPage = lazy(() =>
-  import('./pages/NewsDetailPage').then(m => ({ default: m.NewsDetailPage }))
+  import('./pages/NewsDetailPage').then(m => ({default: m.NewsDetailPage}))
 )
 const CookiesPage = lazy(() => import('./pages/CookiesPage'))
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
 const TermsPage = lazy(() => import('./pages/TermsPage'))
 const KvkkPage = lazy(() => import('./pages/KvkkPage'))
 const ProjectsPage = lazy(() =>
-  import('./pages/ProjectsPage').then(m => ({ default: m.ProjectsPage }))
+  import('./pages/ProjectsPage').then(m => ({default: m.ProjectsPage}))
 )
 const ProjectDetailPage = lazy(() =>
-  import('./pages/ProjectDetailPage').then(m => ({ default: m.ProjectDetailPage }))
+  import('./pages/ProjectDetailPage').then(m => ({default: m.ProjectDetailPage}))
 )
 const VerifyEmailPage = lazy(() =>
-  import('./pages/VerifyEmailPage').then(m => ({ default: m.VerifyEmailPage }))
+  import('./pages/VerifyEmailPage').then(m => ({default: m.VerifyEmailPage}))
 )
 const ComingSoonPage = lazy(() =>
-  import('./pages/ComingSoonPage').then(m => ({ default: m.ComingSoonPage }))
+  import('./pages/ComingSoonPage').then(m => ({default: m.ComingSoonPage}))
 )
 
 // Loading fallback component
@@ -77,8 +76,8 @@ const PageLoader = () => (
 )
 
 // Helper component to render SVG strings safely
-const DynamicIcon: React.FC<{ svgString: string }> = ({ svgString }) => (
-  <div dangerouslySetInnerHTML={{ __html: svgString }} />
+const DynamicIcon: React.FC<{svgString: string}> = ({svgString}) => (
+  <div dangerouslySetInnerHTML={{__html: svgString}} />
 )
 
 interface AuthContextType {
@@ -112,7 +111,7 @@ export function useSiteSettings() {
   return context
 }
 
-const SiteSettingsProvider = ({ children }: PropsWithChildren) => {
+const SiteSettingsProvider = ({children}: PropsWithChildren) => {
   const [settings, setSettings] = useState<SiteSettings | null>(null)
 
   useEffect(() => {
@@ -130,42 +129,27 @@ const SiteSettingsProvider = ({ children }: PropsWithChildren) => {
     }
   }, [settings?.topBannerText])
 
-  return <SiteSettingsContext.Provider value={{ settings }}>{children}</SiteSettingsContext.Provider>
+  return <SiteSettingsContext.Provider value={{settings}}>{children}</SiteSettingsContext.Provider>
 }
 
-const AuthProvider = ({ children }: PropsWithChildren) => {
+const AuthProvider = ({children}: PropsWithChildren) => {
   const [user, setUser] = useState<User | null>(null)
 
   // Load user from localStorage on mount
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem('birim_user')
-      if (storedUser) {
-        try {
-          setUser(JSON.parse(storedUser))
-        } catch (e) {
-          // Invalid JSON, remove corrupted data
-          try {
-            localStorage.removeItem('birim_user')
-          } catch {
-            // Ignore storage errors
-          }
-        }
+    const storedUser = localStorage.getItem('birim_user')
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser))
+      } catch (e) {
+        localStorage.removeItem('birim_user')
       }
-    } catch (e) {
-      // Storage access not allowed, silently continue
-      // User will need to login again
     }
   }, [])
 
   const login = (userData: User) => {
     setUser(userData)
-    try {
-      localStorage.setItem('birim_user', JSON.stringify(userData))
-    } catch (e) {
-      // Storage access not allowed, continue without saving
-      // User session will be lost on page refresh
-    }
+    localStorage.setItem('birim_user', JSON.stringify(userData))
     // Set user in error reporting
     errorReporter.setUser({
       id: userData._id,
@@ -178,11 +162,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
 
   const logout = () => {
     setUser(null)
-    try {
-      localStorage.removeItem('birim_user')
-    } catch (e) {
-      // Storage access not allowed, silently continue
-    }
+    localStorage.removeItem('birim_user')
     // Clear user from error reporting
     errorReporter.clearUser()
   }
@@ -198,8 +178,8 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
 }
 
 const ScrollToTop = () => {
-  const { pathname } = useLocation()
-  const { t } = useTranslation()
+  const {pathname} = useLocation()
+  const {t} = useTranslation()
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -284,7 +264,7 @@ const BackToTopButton: React.FC = () => {
     }
 
     handleScroll()
-    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('scroll', handleScroll, {passive: true})
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -293,7 +273,7 @@ const BackToTopButton: React.FC = () => {
   return (
     <button
       type="button"
-      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}
       aria-label="Sayfanın en üstüne dön"
       className="fixed bottom-6 right-6 z-40 w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-full bg-black/40 text-white shadow-md backdrop-blur hover:bg-black/60 transition-all duration-200"
     >
@@ -303,11 +283,11 @@ const BackToTopButton: React.FC = () => {
 }
 
 const TopBanner = () => {
-  const { settings } = useSiteSettings()
+  const {settings} = useSiteSettings()
   const text = settings?.topBannerText?.trim()
   if (!text) return null
   return (
-    <div className="hidden lg:block bg-gray-900 text-gray-200 text-xs md:text-sm px-4 sm:px-6 lg:px-8 py-2 border-b border-white/10">
+    <div className="hidden md:block bg-gray-900 text-gray-200 text-xs md:text-sm px-4 sm:px-6 lg:px-8 py-2 border-b border-white/10">
       <div className="container mx-auto">{text}</div>
     </div>
   )
@@ -317,7 +297,7 @@ const Footer = () => {
   const [content, setContent] = useState<FooterContent | null>(null)
   const [settings, setSettings] = useState<SiteSettings | null>(null)
   const [email, setEmail] = useState('')
-  const { t, setLocale, locale, supportedLocales } = useTranslation()
+  const {t, setLocale, locale, supportedLocales} = useTranslation()
 
   useEffect(() => {
     Promise.all([getFooterContent(), getSiteSettings()]).then(([footerData, settingsData]) => {
@@ -326,199 +306,224 @@ const Footer = () => {
     })
   }, [])
 
+  // Footer yazı animasyonları için - üstten aşağıya sıralı
+  useEffect(() => {
+    if (!content || !settings) return
+
+    let observer: IntersectionObserver | null = null
+    
+    // Footer render olduktan sonra başlat
+    const timeoutId = setTimeout(() => {
+      const footer = document.querySelector('footer')
+      if (!footer) return
+
+      // Footer içindeki tüm .text-animate elemanlarını DOM sırasına göre al
+      const textElements = Array.from(footer.querySelectorAll('.text-animate'))
+      if (textElements.length === 0) return
+
+      // Her elemana sıra numarası ver (üstten aşağıya) - 30ms aralıklarla (çok daha hızlı)
+      textElements.forEach((el, index) => {
+        ;(el as HTMLElement).style.transitionDelay = `${index * 30}ms`
+      })
+
+      // IntersectionObserver ile sadece görünür olduklarında animasyonu tetikle
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('text-animate-visible')
+              if (observer) {
+                observer.unobserve(entry.target) // Bir kez görünür olduktan sonra takibi bırak
+              }
+            }
+          })
+        },
+        {
+          threshold: 0.01, // %1 görünür olduğunda tetikle (daha erken başlasın)
+          rootMargin: '200px', // 200px önceden tetikle - footer'a yaklaşırken daha erken başlasın
+        }
+      )
+
+      textElements.forEach((el) => observer!.observe(el))
+    }, 200) // 200ms bekle - footer render olsun (daha hızlı başlasın)
+
+    return () => {
+      clearTimeout(timeoutId)
+      if (observer) {
+        observer.disconnect()
+      }
+    }
+  }, [content, settings])
+
   if (!content || !settings) return null
 
   return (
-    <footer className="bg-gray-800 text-gray-400" style={{ position: 'relative', zIndex: 1 }}>
+    <footer className="bg-gray-800 text-gray-400" style={{position: 'relative', zIndex: 1}}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Mobil düzen */}
         <div className="lg:hidden flex flex-col items-center space-y-6">
           {/* Logo - ortada üstte */}
-          <ScrollReveal delay={0}>
-            <Link to="/" className="text-white -mt-4">
-              <SiteLogo logoUrl={settings.logoUrl} className="h-6 w-auto mx-auto" />
-            </Link>
-          </ScrollReveal>
+          <Link to="/" className="text-animate text-white -mt-4">
+            <SiteLogo logoUrl={settings.logoUrl} className="h-6 w-auto mx-auto" />
+          </Link>
 
           {/* Menü düğmeleri - alt alta ortada */}
           <nav className="flex flex-col items-center space-y-3">
-            <ScrollReveal delay={100}>
-              <Link
-                to="/products"
-                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
-              >
-                {t('view_all')}
-              </Link>
-            </ScrollReveal>
-            <ScrollReveal delay={150}>
-              <Link
-                to="/designers"
-                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
-              >
-                {t('designers')}
-              </Link>
-            </ScrollReveal>
-            <ScrollReveal delay={200}>
-              <Link
-                to="/projects"
-                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
-              >
-                {t('projects') || 'Projeler'}
-              </Link>
-            </ScrollReveal>
-            <ScrollReveal delay={250}>
-              <Link
-                to="/news"
-                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
-              >
-                {t('news')}
-              </Link>
-            </ScrollReveal>
-            <ScrollReveal delay={300}>
-              <Link
-                to="/about"
-                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
-              >
-                {t('about')}
-              </Link>
-            </ScrollReveal>
-            <ScrollReveal delay={350}>
-              <Link
-                to="/contact"
-                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
-              >
-                {t('contact')}
-              </Link>
-            </ScrollReveal>
+            <Link
+              to="/products"
+              className="text-animate block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
+            >
+              {t('view_all')}
+            </Link>
+            <Link
+              to="/designers"
+              className="text-animate block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
+            >
+              {t('designers')}
+            </Link>
+            <Link
+              to="/projects"
+              className="text-animate block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
+            >
+              {t('projects') || 'Projeler'}
+            </Link>
+            <Link
+              to="/news"
+              className="text-animate block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
+            >
+              {t('news')}
+            </Link>
+            <Link
+              to="/about"
+              className="text-animate block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
+            >
+              {t('about')}
+            </Link>
+            <Link
+              to="/contact"
+              className="text-animate block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
+            >
+              {t('contact')}
+            </Link>
           </nav>
 
           {/* İnce çizgi */}
-          <ScrollReveal delay={150}>
-            <div className="w-full border-t border-gray-700"></div>
-          </ScrollReveal>
+          <div className="text-animate w-full border-t border-gray-700"></div>
 
           {/* Dil seçenekleri */}
-          <ScrollReveal delay={200} width="w-auto">
-            <div className="flex items-center justify-center gap-3 w-full">
-              {supportedLocales.map(langCode => {
-                const isActive = locale === langCode
-                return (
-                  <button
-                    key={langCode}
-                    onClick={() => setLocale(langCode)}
-                    className={`text-xs uppercase tracking-wider transition-colors duration-200 ${isActive ? 'text-white font-bold' : 'text-gray-400 hover:text-white font-thin'
-                      }`}
-                  >
-                    {langCode.toUpperCase()}
-                  </button>
-                )
-              })}
-            </div>
-          </ScrollReveal>
+          <div className="flex items-center justify-center gap-3 w-full">
+            {supportedLocales.map(langCode => {
+              const isActive = locale === langCode
+              return (
+                <button
+                  key={langCode}
+                  onClick={() => setLocale(langCode)}
+                  className={`text-animate text-xs uppercase tracking-wider transition-colors duration-200 ${isActive ? 'text-white font-bold' : 'text-gray-400 hover:text-white font-thin'
+                    }`}
+                >
+                  {langCode.toUpperCase()}
+                </button>
+              )
+            })}
+          </div>
 
           {/* İnce çizgi */}
-          <ScrollReveal delay={250}>
-            <div className="w-full border-t border-gray-700"></div>
-          </ScrollReveal>
+          <div className="text-animate w-full border-t border-gray-700"></div>
 
           {/* Email abonelik formu - mobilde en altta ortalanmış */}
-          <ScrollReveal delay={300}>
-            <div className="w-full flex justify-center !mt-8 lg:!mt-6">
-              <form
-                onSubmit={async e => {
-                  e.preventDefault()
-                  if (email) {
-                    try {
-                      await subscribeEmail(email)
+          <div className="w-full flex justify-center !mt-8 lg:!mt-6">
+            <form
+              onSubmit={async e => {
+                e.preventDefault()
+                if (email) {
+                  try {
+                    await subscribeEmail(email)
+                    analytics.trackUserAction('newsletter_subscribe', email)
+                    alert('E-posta aboneliğiniz başarıyla oluşturuldu!')
+                    setEmail('')
+                  } catch (err: any) {
+                    // Özel durum: Local storage'a kaydedildi ama CMS'de görünmüyor
+                    if (err.message === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
+                      alert(
+                        "E-posta aboneliğiniz kaydedildi!\n\nNot: CMS'de görünmesi için .env dosyasına VITE_SANITY_TOKEN ekleyin. Detaylar: README.md"
+                      )
                       analytics.trackUserAction('newsletter_subscribe', email)
-                      alert('E-posta aboneliğiniz başarıyla oluşturuldu!')
                       setEmail('')
-                    } catch (err: any) {
-                      // Özel durum: Local storage'a kaydedildi ama CMS'de görünmüyor
-                      if (err.message === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
-                        alert(
-                          "E-posta aboneliğiniz kaydedildi!\n\nNot: CMS'de görünmesi için .env dosyasına VITE_SANITY_TOKEN ekleyin. Detaylar: README.md"
-                        )
-                        analytics.trackUserAction('newsletter_subscribe', email)
-                        setEmail('')
-                      } else {
-                        alert(err.message || "Bir hata oluştu. Lütfen console'u kontrol edin.")
-                      }
+                    } else {
+                      alert(err.message || "Bir hata oluştu. Lütfen console'u kontrol edin.")
                     }
                   }
-                }}
-                className="flex flex-col items-center justify-center w-full"
-              >
-                <p className="text-sm text-gray-300 mb-4 text-center">{t('subscribe_prompt')}</p>
-                <div className="flex items-center justify-center border-b border-white pb-0.5 w-full max-w-[280px] mx-auto">
-                  <input
-                    type="email"
-                    id="footer-subscribe-email"
-                    name="footer-subscribe-email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    placeholder={t('email_placeholder')}
-                    className="w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[15px] text-center"
-                    style={{ outline: 'none', boxShadow: 'none' }}
-                    onFocus={e => (e.target.style.outline = 'none')}
-                    onBlur={e => (e.target.style.outline = 'none')}
-                  />
-                </div>
-                <div className="w-full flex justify-center mt-6">
-                  <button
-                    type="submit"
-                    className="px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-sm font-medium uppercase tracking-[0.25em]"
-                  >
-                    {t('subscribe')}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </ScrollReveal>
+                }
+              }}
+              className="flex flex-col items-center justify-center w-full"
+            >
+              <p className="text-animate text-sm text-gray-300 mb-4 text-center">{t('subscribe_prompt')}</p>
+              <div className="flex items-center justify-center border-b border-white pb-0.5 w-full max-w-[280px] mx-auto">
+                <input
+                  type="email"
+                  id="footer-subscribe-email"
+                  name="footer-subscribe-email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder={t('email_placeholder')}
+                  className="text-animate w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[15px] text-center"
+                  style={{outline: 'none', boxShadow: 'none'}}
+                  onFocus={e => (e.target.style.outline = 'none')}
+                  onBlur={e => (e.target.style.outline = 'none')}
+                />
+              </div>
+              <div className="w-full flex justify-center mt-6">
+                <button
+                  type="submit"
+                  className="text-animate px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-sm font-medium uppercase tracking-[0.25em]"
+                >
+                  {t('subscribe')}
+                </button>
+              </div>
+            </form>
+          </div>
 
           {/* Partnerler - mobilde en altta */}
-          <ScrollReveal delay={400}>
-            <div className="flex items-center justify-center flex-wrap gap-6 mb-0">
-              {(content.partners || content.partnerNames || []).map((partner, index) => {
-                const partnerName = typeof partner === 'string' ? partner : t(partner.name)
-                const partnerLogo = typeof partner === 'object' ? partner.logo : undefined
-                const partnerUrl = typeof partner === 'object' ? partner.url : undefined
+          <div className="flex items-center justify-center flex-wrap gap-6 mb-0">
+            {(content.partners || content.partnerNames || []).map((partner, index) => {
+              const partnerName = typeof partner === 'string' ? partner : t(partner.name)
+              const partnerLogo = typeof partner === 'object' ? partner.logo : undefined
+              const partnerUrl = typeof partner === 'object' ? partner.url : undefined
 
-                const partnerContent = partnerLogo ? (
-                  <img
-                    src={partnerLogo}
-                    alt={partnerName}
-                    className="h-8 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
-                  />
-                ) : (
-                  <span className="font-semibold text-gray-300 opacity-70 hover:opacity-100 transition-opacity duration-200">
-                    {partnerName}
-                  </span>
-                )
+              const partnerContent = partnerLogo ? (
+                <img
+                  src={partnerLogo}
+                  alt={partnerName}
+                  className="text-animate h-8 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
+                />
+              ) : (
+                <span className="text-animate font-semibold text-gray-300 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                  {partnerName}
+                </span>
+              )
 
-                return partnerUrl ? (
-                  <a
-                    key={index}
-                    href={partnerUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group"
-                  >
-                    {partnerContent}
-                  </a>
-                ) : (
-                  <span key={index}>{partnerContent}</span>
-                )
-              })}
-            </div>
-          </ScrollReveal>
+              return partnerUrl ? (
+                <a
+                  key={index}
+                  href={partnerUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group"
+                >
+                  {partnerContent}
+                </a>
+              ) : (
+                <span key={index}>{partnerContent}</span>
+              )
+            })}
+          </div>
         </div>
 
         {/* Desktop düzen */}
         <div className="hidden lg:flex flex-wrap items-start gap-8 lg:gap-16">
           {/* Sol taraf: Logo ve partner yazıları (sola hizalı) */}
           <div className="w-full lg:w-auto">
-            <div className="text-white mb-4">
+            <div className="text-animate text-white mb-4">
               <SiteLogo logoUrl={settings.logoUrl} className="h-4 w-auto" />
             </div>
             <div className="flex items-center flex-wrap gap-6 mb-4">
@@ -531,10 +536,10 @@ const Footer = () => {
                   <img
                     src={partnerLogo}
                     alt={partnerName}
-                    className="h-8 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
+                    className="text-animate h-8 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
                   />
                 ) : (
-                  <span className="font-semibold text-gray-300 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                  <span className="text-animate font-semibold text-gray-300 opacity-70 hover:opacity-100 transition-opacity duration-200">
                     {partnerName}
                   </span>
                 )
@@ -559,37 +564,37 @@ const Footer = () => {
           {/* Orta: Menü düğmeleri (sağa hizalı üstte) */}
           <div className="flex-1 flex justify-end">
             <nav className="flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold uppercase tracking-wider text-gray-300 items-center justify-end">
-              <Link to="/products" className="group relative hover:text-white">
+              <Link to="/products" className="text-animate group relative hover:text-white">
                 <span className="relative inline-block">
                   {t('view_all')}
                   <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
                 </span>
               </Link>
-              <Link to="/designers" className="group relative hover:text-white">
+              <Link to="/designers" className="text-animate group relative hover:text-white">
                 <span className="relative inline-block">
                   {t('designers')}
                   <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
                 </span>
               </Link>
-              <Link to="/projects" className="group relative hover:text-white">
+              <Link to="/projects" className="text-animate group relative hover:text-white">
                 <span className="relative inline-block">
                   {t('projects') || 'Projeler'}
                   <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
                 </span>
               </Link>
-              <Link to="/news" className="group relative hover:text-white">
+              <Link to="/news" className="text-animate group relative hover:text-white">
                 <span className="relative inline-block">
                   {t('news')}
                   <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
                 </span>
               </Link>
-              <Link to="/about" className="group relative hover:text-white">
+              <Link to="/about" className="text-animate group relative hover:text-white">
                 <span className="relative inline-block">
                   {t('about')}
                   <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
                 </span>
               </Link>
-              <Link to="/contact" className="group relative hover:text-white">
+              <Link to="/contact" className="text-animate group relative hover:text-white">
                 <span className="relative inline-block">
                   {t('contact')}
                   <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
@@ -610,7 +615,7 @@ const Footer = () => {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-white transition-opacity duration-200 opacity-70 hover:opacity-100"
+                  className="text-animate hover:text-white transition-opacity duration-200 opacity-70 hover:opacity-100"
                 >
                   <div className="w-3 h-3">
                     <DynamicIcon svgString={link.svgIcon} />
@@ -655,8 +660,8 @@ const Footer = () => {
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder={t('email_placeholder')}
-                    className="w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[14px] text-left"
-                    style={{ outline: 'none', boxShadow: 'none' }}
+                    className="text-animate w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[14px] text-left"
+                    style={{outline: 'none', boxShadow: 'none'}}
                     onFocus={e => {
                       e.target.style.outline = 'none'
                       e.target.style.boxShadow = 'none'
@@ -669,7 +674,7 @@ const Footer = () => {
                 </div>
                 <button
                   type="submit"
-                  className="px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-xs font-medium uppercase tracking-[0.25em]"
+                  className="text-animate px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-xs font-medium uppercase tracking-[0.25em]"
                 >
                   {t('subscribe')}
                 </button>
@@ -677,52 +682,48 @@ const Footer = () => {
             </form>
           </div>
         </div>
-        <ScrollReveal delay={450}>
-          <div className="mt-6 lg:mt-8 border-t border-gray-700 pt-6 flex flex-col md:flex-row md:justify-between md:items-start gap-4 text-xs">
-            {content.legalLinks && content.legalLinks.length > 0 && (
-              <div className="flex flex-col md:flex-row md:items-center md:gap-x-4 items-center gap-2">
-                {content.legalLinks
-                  .filter(link => link?.isVisible)
-                  .map((link, index) => {
-                    const url = typeof link?.url === 'string' ? link.url : ''
-                    if (!url) {
-                      return (
-                        <span key={index} className="opacity-80 select-none text-gray-400">
-                          {t(link.text)}
-                        </span>
-                      )
-                    }
-                    const isHttp = /^https?:\/\//.test(url)
-                    const isInternalLink = url.startsWith('/') && !url.startsWith('//') && !isHttp
-                    return isInternalLink ? (
-                      <Link
-                        key={index}
-                        to={url}
-                        className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
-                      >
+        <div className="text-animate mt-6 lg:mt-8 border-t border-gray-700 pt-6 flex flex-col md:flex-row md:justify-between md:items-start gap-4 text-xs">
+          {content.legalLinks && content.legalLinks.length > 0 && (
+            <div className="flex flex-col md:flex-row md:items-center md:gap-x-4 items-center gap-2">
+              {content.legalLinks
+                .filter(link => link?.isVisible)
+                .map((link, index) => {
+                  const url = typeof link?.url === 'string' ? link.url : ''
+                  if (!url) {
+                    return (
+                      <span key={index} className="text-animate opacity-80 select-none text-gray-400">
                         {t(link.text)}
-                      </Link>
-                    ) : (
-                      <a
-                        key={index}
-                        href={url}
-                        className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
-                        target={isHttp ? '_blank' : undefined}
-                        rel={isHttp ? 'noopener noreferrer' : undefined}
-                      >
-                        {t(link.text)}
-                      </a>
+                      </span>
                     )
-                  })}
-              </div>
-            )}
-          </div>
-        </ScrollReveal>
-        <ScrollReveal delay={500}>
-          <div className="mt-4 text-center md:text-left text-xs">
-            <p>{t(content.copyrightText)}</p>
-          </div>
-        </ScrollReveal>
+                  }
+                  const isHttp = /^https?:\/\//.test(url)
+                  const isInternalLink = url.startsWith('/') && !url.startsWith('//') && !isHttp
+                  return isInternalLink ? (
+                    <Link
+                      key={index}
+                      to={url}
+                      className="text-animate text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
+                    >
+                      {t(link.text)}
+                    </Link>
+                  ) : (
+                    <a
+                      key={index}
+                      href={url}
+                      className="text-animate text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
+                      target={isHttp ? '_blank' : undefined}
+                      rel={isHttp ? 'noopener noreferrer' : undefined}
+                    >
+                      {t(link.text)}
+                    </a>
+                  )
+                })}
+            </div>
+          )}
+        </div>
+        <div className="mt-4 text-center md:text-left text-xs">
+          <p className="text-animate">{t(content.copyrightText)}</p>
+        </div>
       </div>
     </footer>
   )
@@ -733,7 +734,7 @@ const AppContent = () => {
   // Maintenance mode kontrolü - öncelikle CMS'den, yoksa environment variable'dan
   // Development modunda (dev server) maintenance mode devre dışı
   // Production'da aktif olabilir, ancak ?bypass=secret ile bypass edilebilir
-  const { settings } = useSiteSettings()
+  const {settings} = useSiteSettings()
   const maintenanceModeFromCMS = settings?.maintenanceMode ?? false
   // Tip güvenliği için string index kullan, ama Vite prod build'de gerçek değeri enjekte eder
   const maintenanceModeFromEnv = import.meta.env['VITE_MAINTENANCE_MODE'] === 'true'
@@ -764,25 +765,25 @@ const AppContent = () => {
 
   const debugInfo =
     typeof window !== 'undefined' &&
-      (window.location.search.includes('bypass') || window.location.hash.includes('bypass'))
+    (window.location.search.includes('bypass') || window.location.hash.includes('bypass'))
       ? {
-        isProduction,
-        maintenanceModeFromCMS,
-        maintenanceModeFromEnv,
-        maintenanceModeEnabled,
-        allowedBypassSecrets,
-        bypassParam,
-        isMaintenanceMode,
-      }
+          isProduction,
+          maintenanceModeFromCMS,
+          maintenanceModeFromEnv,
+          maintenanceModeEnabled,
+          allowedBypassSecrets,
+          bypassParam,
+          isMaintenanceMode,
+        }
       : null
 
   return (
-    <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <HashRouter future={{v7_startTransition: true, v7_relativeSplatPath: true}}>
       <div className="flex flex-col min-h-screen">
         <ScrollToTop />
         {isMaintenanceMode ? (
           // Maintenance mode aktifse sadece ComingSoonPage göster
-          <main className="flex-grow" style={{ overflowX: 'hidden' }}>
+          <main className="flex-grow" style={{overflowX: 'hidden'}}>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="*" element={<ComingSoonPage />} />
@@ -798,173 +799,32 @@ const AppContent = () => {
             <main
               id="main-content"
               className="flex-grow"
-              style={{ overflowX: 'hidden' }}
+              style={{overflowX: 'hidden'}}
               tabIndex={-1}
             >
               <TopBanner />
-              {/* Sayfalar arası kaydırma/fade animasyonlu geçişler */}
               <Suspense fallback={<PageLoader />}>
                 <Routes>
-                  <Route
-                    path="/"
-                    element={
-                      <div className="page-transition">
-                        <HomePage />
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/categories"
-                    element={
-                      <div className="page-transition">
-                        <CategoriesPage />
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/products"
-                    element={
-                      <div className="page-transition">
-                        <ProductsPage />
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/products/:categoryId"
-                    element={
-                      <div className="page-transition">
-                        <ProductsPage />
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/product/:productId"
-                    element={
-                      <div className="page-transition">
-                        <ProductDetailPage />
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/designers"
-                    element={
-                      <div className="page-transition">
-                        <DesignersPage />
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/designer/:designerId"
-                    element={
-                      <div className="page-transition">
-                        <DesignerDetailPage />
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/projects"
-                    element={
-                      <div className="page-transition">
-                        <ProjectsPage />
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/projects/:projectId"
-                    element={
-                      <div className="page-transition">
-                        <ProjectDetailPage />
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/about"
-                    element={
-                      <div className="page-transition">
-                        <AboutPage />
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/contact"
-                    element={
-                      <div className="page-transition">
-                        <ContactPage />
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/login"
-                    element={
-                      <div className="page-transition">
-                        <LoginPage />
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/profile"
-                    element={
-                      <div className="page-transition">
-                        <ProfilePage />
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/verify-email"
-                    element={
-                      <div className="page-transition">
-                        <VerifyEmailPage />
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/news"
-                    element={
-                      <div className="page-transition">
-                        <NewsPage />
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/news/:newsId"
-                    element={
-                      <div className="page-transition">
-                        <NewsDetailPage />
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/cookies"
-                    element={
-                      <div className="page-transition">
-                        <CookiesPage />
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/privacy"
-                    element={
-                      <div className="page-transition">
-                        <PrivacyPage />
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/terms"
-                    element={
-                      <div className="page-transition">
-                        <TermsPage />
-                      </div>
-                    }
-                  />
-                  <Route
-                    path="/kvkk"
-                    element={
-                      <div className="page-transition">
-                        <KvkkPage />
-                      </div>
-                    }
-                  />
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/categories" element={<CategoriesPage />} />
+                  <Route path="/products" element={<ProductsPage />} />
+                  <Route path="/products/:categoryId" element={<ProductsPage />} />
+                  <Route path="/product/:productId" element={<ProductDetailPage />} />
+                  <Route path="/designers" element={<DesignersPage />} />
+                  <Route path="/designer/:designerId" element={<DesignerDetailPage />} />
+                  <Route path="/projects" element={<ProjectsPage />} />
+                  <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/verify-email" element={<VerifyEmailPage />} />
+                  <Route path="/news" element={<NewsPage />} />
+                  <Route path="/news/:newsId" element={<NewsDetailPage />} />
+                  <Route path="/cookies" element={<CookiesPage />} />
+                  <Route path="/privacy" element={<PrivacyPage />} />
+                  <Route path="/terms" element={<TermsPage />} />
+                  <Route path="/kvkk" element={<KvkkPage />} />
                 </Routes>
               </Suspense>
             </main>

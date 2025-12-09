@@ -602,12 +602,71 @@ export function Header() {
       }
     }
 
-    // İlk yüklemede şeffaflığı ayarla
-    handleScroll()
+    // RADIKAL ÇÖZÜM: Scroll listener'ı throttle et ve sayfa yüklenene kadar ekleme
+    // Sayfa yüklenirken scroll listener'lar scroll'u engelliyor
+    let scrollListener: (() => void) | null = null
+    let loadHandler: (() => void) | null = null
+    let rafId: number | null = null
+    let lastScrollTime = 0
+    const SCROLL_THROTTLE_MS = 50 // 50ms throttle - scroll'u yavaşlatmayacak kadar hızlı
 
-    window.addEventListener('scroll', handleScroll, {passive: true})
+    const throttledHandleScroll = () => {
+      const now = Date.now()
+      if (now - lastScrollTime < SCROLL_THROTTLE_MS) {
+        // Throttle: Eğer son scroll'dan 50ms geçmediyse, bir sonraki frame'de çalıştır
+        if (rafId === null) {
+          rafId = requestAnimationFrame(() => {
+            rafId = null
+            lastScrollTime = Date.now()
+            handleScroll()
+          })
+        }
+        return
+      }
+      lastScrollTime = now
+      handleScroll()
+    }
+
+    const initializeScrollListener = () => {
+      scrollListener = throttledHandleScroll
+      // İlk yüklemede şeffaflığı ayarla (throttle olmadan)
+      handleScroll()
+      window.addEventListener('scroll', throttledHandleScroll, {passive: true})
+    }
+
+    // Sayfa yüklenene kadar bekle - daha uzun gecikme
+    if (document.readyState === 'complete') {
+      // Sayfa zaten yüklenmişse bile bir süre bekle
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(initializeScrollListener)
+        })
+      }, 500) // 500ms bekle - scroll işlemleri tamamen bitene kadar
+    } else {
+      // Sayfa yüklenene kadar bekle
+      loadHandler = () => {
+        setTimeout(() => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(initializeScrollListener)
+          })
+        }, 500) // 500ms bekle - scroll işlemleri tamamen bitene kadar
+        if (loadHandler) {
+          window.removeEventListener('load', loadHandler)
+        }
+      }
+      window.addEventListener('load', loadHandler)
+    }
+
     return () => {
-      window.removeEventListener('scroll', handleScroll)
+      if (loadHandler) {
+        window.removeEventListener('load', loadHandler)
+      }
+      if (scrollListener) {
+        window.removeEventListener('scroll', scrollListener)
+      }
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId)
+      }
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current)
       }
