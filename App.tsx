@@ -138,19 +138,34 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
 
   // Load user from localStorage on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem('birim_user')
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser))
-      } catch (e) {
-        localStorage.removeItem('birim_user')
+    try {
+      const storedUser = localStorage.getItem('birim_user')
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser))
+        } catch (e) {
+          // Invalid JSON, remove corrupted data
+          try {
+            localStorage.removeItem('birim_user')
+          } catch {
+            // Ignore storage errors
+          }
+        }
       }
+    } catch (e) {
+      // Storage access not allowed, silently continue
+      // User will need to login again
     }
   }, [])
 
   const login = (userData: User) => {
     setUser(userData)
-    localStorage.setItem('birim_user', JSON.stringify(userData))
+    try {
+      localStorage.setItem('birim_user', JSON.stringify(userData))
+    } catch (e) {
+      // Storage access not allowed, continue without saving
+      // User session will be lost on page refresh
+    }
     // Set user in error reporting
     errorReporter.setUser({
       id: userData._id,
@@ -163,7 +178,11 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
 
   const logout = () => {
     setUser(null)
-    localStorage.removeItem('birim_user')
+    try {
+      localStorage.removeItem('birim_user')
+    } catch (e) {
+      // Storage access not allowed, silently continue
+    }
     // Clear user from error reporting
     errorReporter.clearUser()
   }
@@ -322,46 +341,56 @@ const Footer = () => {
           </ScrollReveal>
 
           {/* Menü düğmeleri - alt alta ortada */}
-          <ScrollReveal delay={100}>
-            <nav className="flex flex-col items-center space-y-3">
+          <nav className="flex flex-col items-center space-y-3">
+            <ScrollReveal delay={100}>
               <Link
                 to="/products"
-                className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
+                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
               >
                 {t('view_all')}
               </Link>
+            </ScrollReveal>
+            <ScrollReveal delay={150}>
               <Link
                 to="/designers"
-                className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
+                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
               >
                 {t('designers')}
               </Link>
+            </ScrollReveal>
+            <ScrollReveal delay={200}>
               <Link
                 to="/projects"
-                className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
+                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
               >
                 {t('projects') || 'Projeler'}
               </Link>
+            </ScrollReveal>
+            <ScrollReveal delay={250}>
               <Link
                 to="/news"
-                className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
+                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
               >
                 {t('news')}
               </Link>
+            </ScrollReveal>
+            <ScrollReveal delay={300}>
               <Link
                 to="/about"
-                className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
+                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
               >
                 {t('about')}
               </Link>
+            </ScrollReveal>
+            <ScrollReveal delay={350}>
               <Link
                 to="/contact"
-                className="text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200"
+                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
               >
                 {t('contact')}
               </Link>
-            </nav>
-          </ScrollReveal>
+            </ScrollReveal>
+          </nav>
 
           {/* İnce çizgi */}
           <ScrollReveal delay={150}>
@@ -369,8 +398,8 @@ const Footer = () => {
           </ScrollReveal>
 
           {/* Dil seçenekleri */}
-          <ScrollReveal delay={200}>
-            <div className="flex items-center gap-3">
+          <ScrollReveal delay={200} width="w-auto">
+            <div className="flex items-center justify-center gap-3 w-full">
               {supportedLocales.map(langCode => {
                 const isActive = locale === langCode
                 return (
@@ -392,45 +421,8 @@ const Footer = () => {
             <div className="w-full border-t border-gray-700"></div>
           </ScrollReveal>
 
-          {/* Partnerler */}
-          <ScrollReveal delay={300}>
-            <div className="flex items-center justify-center flex-wrap gap-6 mb-0">
-              {(content.partners || content.partnerNames || []).map((partner, index) => {
-                const partnerName = typeof partner === 'string' ? partner : t(partner.name)
-                const partnerLogo = typeof partner === 'object' ? partner.logo : undefined
-                const partnerUrl = typeof partner === 'object' ? partner.url : undefined
-
-                const partnerContent = partnerLogo ? (
-                  <img
-                    src={partnerLogo}
-                    alt={partnerName}
-                    className="h-8 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
-                  />
-                ) : (
-                  <span className="font-semibold text-gray-300 opacity-70 hover:opacity-100 transition-opacity duration-200">
-                    {partnerName}
-                  </span>
-                )
-
-                return partnerUrl ? (
-                  <a
-                    key={index}
-                    href={partnerUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group"
-                  >
-                    {partnerContent}
-                  </a>
-                ) : (
-                  <span key={index}>{partnerContent}</span>
-                )
-              })}
-            </div>
-          </ScrollReveal>
-
           {/* Email abonelik formu - mobilde en altta ortalanmış */}
-          <ScrollReveal delay={350}>
+          <ScrollReveal delay={300}>
             <div className="w-full flex justify-center !mt-8 lg:!mt-6">
               <form
                 onSubmit={async e => {
@@ -481,6 +473,43 @@ const Footer = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </ScrollReveal>
+
+          {/* Partnerler - mobilde en altta */}
+          <ScrollReveal delay={400}>
+            <div className="flex items-center justify-center flex-wrap gap-6 mb-0">
+              {(content.partners || content.partnerNames || []).map((partner, index) => {
+                const partnerName = typeof partner === 'string' ? partner : t(partner.name)
+                const partnerLogo = typeof partner === 'object' ? partner.logo : undefined
+                const partnerUrl = typeof partner === 'object' ? partner.url : undefined
+
+                const partnerContent = partnerLogo ? (
+                  <img
+                    src={partnerLogo}
+                    alt={partnerName}
+                    className="h-8 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
+                  />
+                ) : (
+                  <span className="font-semibold text-gray-300 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    {partnerName}
+                  </span>
+                )
+
+                return partnerUrl ? (
+                  <a
+                    key={index}
+                    href={partnerUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group"
+                  >
+                    {partnerContent}
+                  </a>
+                ) : (
+                  <span key={index}>{partnerContent}</span>
+                )
+              })}
             </div>
           </ScrollReveal>
         </div>
@@ -648,9 +677,8 @@ const Footer = () => {
             </form>
           </div>
         </div>
-        <ScrollReveal delay={400}>
+        <ScrollReveal delay={450}>
           <div className="mt-6 lg:mt-8 border-t border-gray-700 pt-6 flex flex-col md:flex-row md:justify-between md:items-start gap-4 text-xs">
-            <p className="md:flex-shrink-0 text-center md:text-left">{t(content.copyrightText)}</p>
             {content.legalLinks && content.legalLinks.length > 0 && (
               <div className="flex flex-col md:flex-row md:items-center md:gap-x-4 items-center gap-2">
                 {content.legalLinks
@@ -688,6 +716,11 @@ const Footer = () => {
                   })}
               </div>
             )}
+          </div>
+        </ScrollReveal>
+        <ScrollReveal delay={500}>
+          <div className="mt-4 text-center md:text-left text-xs">
+            <p>{t(content.copyrightText)}</p>
           </div>
         </ScrollReveal>
       </div>
