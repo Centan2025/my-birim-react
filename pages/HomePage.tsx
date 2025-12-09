@@ -171,7 +171,7 @@ export function HomePage() {
             backgroundSize: isMobile ? '100vw auto' : 'cover',
             backgroundPosition: isMobile ? 'left center' : 'center center',
             backgroundRepeat: 'no-repeat',
-            zIndex: 0, // Behind everything
+            zIndex: isMobile ? 1 : 0, // Mobilde section'ın altında ama görünür, desktop'ta arkasında
             opacity: 1.0,
           }}
         />
@@ -736,7 +736,7 @@ export function HomePage() {
                       ? { minHeight: `${inspirationImageHeight}px` }
                       : {}),
                     position: 'relative',
-                    zIndex: 1, // Above fixed background (0)
+                    zIndex: isMobile ? 2 : 1, // Mobilde fixed background'un üstünde, desktop'ta aynı
                     backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent dark overlay (50%)
                   }}
                 >
