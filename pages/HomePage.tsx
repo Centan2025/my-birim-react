@@ -1,23 +1,18 @@
-import React, { useState, useEffect, useMemo } from 'react'
-import { Link } from 'react-router-dom'
-import { useSiteSettings } from '../src/hooks/useSiteData'
-import { useHomePageContent } from '../src/hooks/useHomePage'
-import { OptimizedVideo } from '../components/OptimizedVideo'
-import { YouTubeBackground } from '../components/YouTubeBackground'
-import { HomeHero } from '../components/HomeHero'
-import { useTranslation } from '../i18n'
-import { useSEO } from '../src/hooks/useSEO'
-import ScrollReveal from '../components/ScrollReveal'
-import ParallaxImage from '../components/ParallaxImage'
-import { useGoogleFonts } from '../src/hooks/useGoogleFont'
+import {useState, useEffect, useMemo} from 'react'
+import {Link} from 'react-router-dom'
+import {useSiteSettings} from '../src/hooks/useSiteData'
+import {useHomePageContent} from '../src/hooks/useHomePage'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {OptimizedVideo} from '../components/OptimizedVideo'
+import {YouTubeBackground} from '../components/YouTubeBackground'
+import {HomeHero} from '../components/HomeHero'
+import {useTranslation} from '../i18n'
+import {useSEO} from '../src/hooks/useSEO'
 
 export function HomePage() {
-  const { data: content } = useHomePageContent()
-  const { data: settings } = useSiteSettings()
-
+  const {data: content} = useHomePageContent()
+  const {data: settings} = useSiteSettings()
   const [inspirationImageHeight, setInspirationImageHeight] = useState<number | null>(null)
-  const [inspirationSectionRef, setInspirationSectionRef] = useState<HTMLElement | null>(null)
-  const [showFixedBackground, setShowFixedBackground] = useState(false)
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth < 1024
@@ -30,7 +25,7 @@ export function HomePage() {
     }
     return 0
   })
-  const { t } = useTranslation()
+  const {t} = useTranslation()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
 
   // SEO
@@ -48,37 +43,146 @@ export function HomePage() {
 
   useSEO(seoData)
 
-  // Content block'lardaki Google Fonts'u yükle
-  const contentBlockFonts = useMemo(() => {
-    if (!content?.contentBlocks) return []
-    return content.contentBlocks
-      .map((block) => block.titleFont)
-      .filter((font): font is string => Boolean(font))
-  }, [content?.contentBlocks])
-
-  useGoogleFonts(contentBlockFonts)
-
-  // İlham section görünürken fixed background'u göster
+  // Yazı animasyonları için - Blok bazlı yaklaşım
   useEffect(() => {
-    if (!inspirationSectionRef || typeof window === 'undefined') return
+    const observers: IntersectionObserver[] = []
+    
+    // Sayfa yüklendikten sonra başlat
+    const timeoutId = setTimeout(() => {
+      const blocks = document.querySelectorAll('.content-block-wrapper')
+      const animatedElements = new Set<Element>()
+      
+      if (blocks.length === 0) return
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          setShowFixedBackground(entry.isIntersecting)
-        })
-      },
-      {
-        threshold: 0.1,
+      // Element görünür mü kontrol et - element viewport içinde olmalı
+      const isElementVisible = (element: Element): boolean => {
+        const rect = element.getBoundingClientRect()
+        return (
+          rect.top < window.innerHeight && // Üst kısmı viewport içinde
+          rect.bottom > 0 && // Alt kısmı viewport içinde
+          rect.left < window.innerWidth &&
+          rect.right > 0
+        )
       }
-    )
 
-    observer.observe(inspirationSectionRef)
+      // Blok içindeki elementleri sırayla animasyonlu yap
+      const animateBlockElements = (block: HTMLElement) => {
+        const title = block.querySelector('.text-animate-title')
+        const media = block.querySelector('.media-animate')
+        const text = block.querySelector('p.text-animate')
+        const link = block.querySelector('a.text-animate')
+        
+        const elements: Array<{element: Element, visibleClass: string, isMedia: boolean}> = []
+        
+        if (title) elements.push({element: title, visibleClass: 'text-animate-visible', isMedia: false})
+        if (media) elements.push({element: media, visibleClass: 'media-animate-visible', isMedia: true})
+        if (text) elements.push({element: text, visibleClass: 'text-animate-visible', isMedia: false})
+        if (link) elements.push({element: link, visibleClass: 'text-animate-visible', isMedia: false})
+        
+        // Her element için sırayla animasyon başlat
+        elements.forEach((item, index) => {
+          const delay = index * 400 // Her element arasında 400ms
+          
+          setTimeout(() => {
+            const {element, visibleClass, isMedia} = item
+            
+            // Element zaten animasyonlu olmuşsa atla
+            if (animatedElements.has(element) || element.classList.contains(visibleClass)) {
+              return
+            }
+            
+            // Element görünür mü kontrol et - görünür değilse bekle
+            const checkAndAnimate = () => {
+              if (!isElementVisible(element)) {
+                // Görünür değilse, 100ms sonra tekrar kontrol et
+                setTimeout(checkAndAnimate, 100)
+                return
+              }
+              
+              // Media için resim yükleme kontrolü
+              if (isMedia) {
+                const mediaElement = element as HTMLElement
+                const img = mediaElement.querySelector('img')
+                
+                if (img) {
+                  if (img.complete) {
+                    element.classList.add(visibleClass)
+                    animatedElements.add(element)
+                  } else {
+                    img.onload = () => {
+                      element.classList.add(visibleClass)
+                      animatedElements.add(element)
+                    }
+                    img.onerror = () => {
+                      element.classList.add(visibleClass)
+                      animatedElements.add(element)
+                    }
+                  }
+                } else {
+                  element.classList.add(visibleClass)
+                  animatedElements.add(element)
+                }
+              } else {
+                element.classList.add(visibleClass)
+                animatedElements.add(element)
+              }
+            }
+            
+            checkAndAnimate()
+          }, delay)
+        })
+      }
+
+      // Her blok için observer oluştur
+      blocks.forEach((block) => {
+        const blockElement = block as HTMLElement
+        
+        // İlk yüklemede görünür mü kontrol et
+        const checkInitialVisibility = () => {
+          const rect = blockElement.getBoundingClientRect()
+          const isInViewport = rect.top < window.innerHeight && rect.bottom > 0
+          if (isInViewport) {
+            // Biraz bekle ki DOM tam yüklensin
+            setTimeout(() => {
+              animateBlockElements(blockElement)
+            }, 200)
+            return true
+          }
+          return false
+        }
+
+        // İlk kontrol
+        if (checkInitialVisibility()) {
+          return
+        }
+
+        // Intersection Observer oluştur
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                // Blok görünür oldu - içindeki elementleri animasyonlu yap
+                animateBlockElements(entry.target as HTMLElement)
+                observer.unobserve(entry.target)
+              }
+            })
+          },
+          {
+            threshold: 0.1, // Blok'un %10'u görünür olduğunda tetikle
+            rootMargin: '0px',
+          }
+        )
+        
+        observer.observe(blockElement)
+        observers.push(observer)
+      })
+    }, 300)
 
     return () => {
-      observer.disconnect()
+      clearTimeout(timeoutId)
+      observers.forEach(observer => observer.disconnect())
     }
-  }, [inspirationSectionRef])
+  }, [content])
 
 
   // İlham görselinin yüksekliğini hesapla - hook'lar early return'den önce olmalı
@@ -161,26 +265,11 @@ export function HomePage() {
       : undefined
 
   return (
-    <>
-      {/* Fixed background image - sadece ilham section görünürken göster */}
-      {showFixedBackground && bgImageUrl && (
-        <div
-          className="fixed inset-0 pointer-events-none"
-          style={{
-            backgroundImage: `url(${isMobile && bgImageMobile ? bgImageMobile : bgImageDesktop || bgImageUrl})`,
-            backgroundSize: isMobile ? '100vw auto' : 'cover',
-            backgroundPosition: isMobile ? 'left center' : 'center center',
-            backgroundRepeat: 'no-repeat',
-            zIndex: isMobile ? 1 : 0, // Mobilde section'ın altında ama görünür, desktop'ta arkasında
-            opacity: 1.0,
-          }}
-        />
-      )}
-      <div
-        className={`bg-gray-100 text-gray-800 ${isMobile ? 'hero-page-container-mobile' : ''}`}
-        style={
-          isMobile && viewportWidth > 0
-            ? {
+    <div
+      className={`bg-gray-100 text-gray-900 ${isMobile ? 'hero-page-container-mobile' : ''}`}
+      style={
+        isMobile && viewportWidth > 0
+          ? {
               width: `${viewportWidth}px`,
               maxWidth: `${viewportWidth}px`,
               overflowX: 'hidden',
@@ -189,13 +278,92 @@ export function HomePage() {
               left: 0,
               right: 0,
             }
-            : {}
-        }
-      >
-        {/* Hero Section */}
-        {heroMedia.length > 0 ? (
-          <>
-            <style>{`
+          : {}
+      }
+    >
+      {/* Hero Section */}
+      {heroMedia.length > 0 ? (
+        <>
+          <style>{`
+            /* Yazı animasyonları - alttan yavaşça belirme */
+            .text-animate {
+              opacity: 0;
+              transform: translateY(30px);
+              transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            }
+            
+            .text-animate.text-animate-visible {
+              opacity: 1;
+              transform: translateY(0);
+            }
+            
+            /* Başlık animasyonları - soldan sağa ve fade efekti */
+            .text-animate-title {
+              opacity: 0;
+              transform: translateX(-50px);
+              transition: opacity 1s ease-out, transform 1s ease-out;
+            }
+            
+            .text-animate-title.text-animate-visible {
+              opacity: 1;
+              transform: translateX(0);
+            }
+            
+            /* Medya animasyonları - fade efekti */
+            .media-animate {
+              opacity: 0;
+              transition: opacity 1.2s ease-out;
+            }
+            
+            .media-animate.media-animate-visible {
+              opacity: 1;
+            }
+            
+            /* Fallback: JavaScript yavaşsa veya çalışmazsa 3 saniye sonra görünür yap */
+            @supports (animation: none) {
+              .text-animate {
+                animation: fadeInFallback 0.1s ease-out 3s forwards;
+              }
+              .text-animate-title {
+                animation: fadeInFallbackTitle 0.1s ease-out 3s forwards;
+              }
+              .media-animate {
+                animation: fadeInMedia 0.1s ease-out 3s forwards;
+              }
+            }
+            
+            @keyframes fadeInFallback {
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+            
+            @keyframes fadeInFallbackTitle {
+              to {
+                opacity: 1;
+                transform: translateX(0);
+              }
+            }
+            
+            @keyframes fadeInMedia {
+              to {
+                opacity: 1;
+              }
+            }
+            
+            /* Reduced motion için animasyon yok */
+            @media (prefers-reduced-motion: reduce) {
+              .text-animate,
+              .text-animate-title,
+              .media-animate {
+                opacity: 1;
+                transform: none;
+                transition: none;
+                animation: none;
+              }
+            }
+            
             .hero-scroll-container::-webkit-scrollbar {
               display: none;
             }
@@ -275,7 +443,6 @@ export function HomePage() {
                 background-size: 100vw auto !important;
                 background-position: left center !important;
                 background-repeat: no-repeat !important;
-                background-attachment: scroll !important;
               }
               body {
                 overflow-x: hidden !important;
@@ -464,131 +631,158 @@ export function HomePage() {
               }
             }
           `}</style>
-            <HomeHero content={content} settings={settings} />
-          </>
-        ) : (
-          <div className="relative h-[50vh] w-full bg-gray-900" />
-        )}
+          <HomeHero content={content} settings={settings} />
+        </>
+      ) : (
+        <div className="relative h-[50vh] w-full bg-gray-900" />
+      )}
 
-        {/* Hero Altı Gri Bant */}
-        <section className="w-full bg-gray-200 h-10 md:h-12" />
+      {/* Hero Altı Gri Bant */}
+      <section className="w-full bg-gray-200 h-10 md:h-12" />
 
-        {/* Content Blocks Section */}
-        {content?.contentBlocks &&
-          content.contentBlocks.length > 0 &&
-          (() => {
-            const sortedBlocks = [...content.contentBlocks].sort(
-              (a, b) => (a.order || 0) - (b.order || 0)
-            )
-
-            // Boş (medya da yazı da olmayan) blokları tamamen gösterme
-            const hasAnyContent = (block: any) => {
-              const hasDescription = Boolean(block?.description)
-              const hasImage =
-                block?.image || block?.imageMobile || block?.imageDesktop
-              const hasVideo =
-                block?.videoFile || block?.videoFileMobile || block?.videoFileDesktop
-              const hasUrl = Boolean(block?.url)
-
-              return hasDescription || hasImage || hasVideo || hasUrl
-            }
-
-            const visibleBlocks = sortedBlocks.filter(hasAnyContent)
-            const lastIndex = visibleBlocks.length - 1
-
-            return (
-              <div className="relative" style={{ zIndex: 2 }}>
-                {visibleBlocks.map((block, index) => {
-                  const getMediaUrl = () => {
-                    if (block.mediaType === 'image' && block.image) {
-                      return block.image
-                    }
-                    return block.url || ''
+      {/* Content Blocks Section */}
+      {content?.contentBlocks &&
+        content.contentBlocks.length > 0 &&
+        (() => {
+          const sortedBlocks = [...content.contentBlocks].sort(
+            (a, b) => (a.order || 0) - (b.order || 0)
+          )
+          return (
+            <>
+              {sortedBlocks.map((block, index) => {
+                const getMediaUrl = () => {
+                  if (block.mediaType === 'image' && block.image) {
+                    return block.image
                   }
+                  return block.url || ''
+                }
 
-                  const mediaUrl = getMediaUrl()
-                  const isFullWidth = block.position === 'full'
-                  const isLeft = block.position === 'left'
-                  const isRight = block.position === 'right'
-                  const isCenter = block.position === 'center'
-                  const hasDescription = Boolean(block.description)
+                const mediaUrl = getMediaUrl()
+                const isFullWidth = block.position === 'full'
+                const isLeft = block.position === 'left'
+                const isRight = block.position === 'right'
+                const isCenter = block.position === 'center'
 
-                  const backgroundColor =
-                    block.backgroundColor === 'gray' ? 'bg-gray-100' : 'bg-white'
-                  const textAlign = block.textAlignment || 'left'
-                  const textAlignClass =
-                    textAlign === 'center'
-                      ? 'text-center'
-                      : textAlign === 'right'
-                        ? 'text-right'
-                        : 'text-left'
-                  const titleFont = block.titleFont || 'normal'
+                const backgroundColor =
+                  block.backgroundColor === 'gray' ? 'bg-gray-100' : 'bg-white'
+                const textAlign = block.textAlignment || 'left'
+                const textAlignClass =
+                  textAlign === 'center'
+                    ? 'text-center'
+                    : textAlign === 'right'
+                      ? 'text-right'
+                      : 'text-left'
+                const titleFont = block.titleFont || 'normal'
 
-                  // Font class veya style belirle
-                  const titleFontClass =
-                    titleFont === 'serif'
-                      ? 'font-serif'
-                      : titleFont === 'mono'
-                        ? 'font-mono'
-                        : titleFont === 'normal'
-                          ? 'font-sans'
-                          : '' // Google Font için class yok, inline style kullanacağız
+                // Font class veya style belirle
+                const titleFontClass =
+                  titleFont === 'serif'
+                    ? 'font-serif'
+                    : titleFont === 'mono'
+                      ? 'font-mono'
+                      : titleFont === 'normal'
+                        ? 'font-sans'
+                        : '' // Google Font için class yok, inline style kullanacağız
 
-                  // Google Font için inline style
-                  const titleFontStyle =
-                    titleFont && titleFont !== 'normal' && titleFont !== 'serif' && titleFont !== 'mono'
-                      ? { fontFamily: `"${titleFont}", sans-serif` }
-                      : undefined
+                // Google Font için inline style
+                const titleFontStyle =
+                  titleFont && titleFont !== 'normal' && titleFont !== 'serif' && titleFont !== 'mono'
+                    ? {fontFamily: `"${titleFont}", sans-serif`}
+                    : undefined
 
-                  const sectionSpacingClass = (() => {
-                    const isLast = index === lastIndex
-
-                    // Yazı yoksa: mobilde minimum, desktop'ta daha sıkı boşluk
-                    if (!hasDescription) {
-                      if (index === 0) return 'pt-0 pb-0'
-                      if (index === 1) return 'pt-0 pb-2 md:pb-6'
-                      if (isLast) return 'pt-2 pb-1 md:pt-4 md:pb-6'
-                      return 'py-3 md:py-8'
-                    }
-
-                    // Yazı varsa: genel olarak hem mobilde hem desktop'ta boşlukları azalt
-                    if (index === 0) return 'pt-0 pb-0'
-                    if (index === 1) return 'pt-2 pb-6 md:pt-3 md:pb-10'
-                    if (isLast) return 'pt-4 pb-6 md:pt-6 md:pb-12'
-                    return 'py-6 md:py-12'
-                  })()
-
-                  return (
-                    <React.Fragment key={`block-${block.order || index}-${index}`}>
-                      {index > 0 && (
-                        <div className="w-full h-px bg-gray-200" />
-                      )}
-                      <section key={index} className={`${sectionSpacingClass} ${backgroundColor}`}>
-                        {isFullWidth ? (
-                          <div
-                            className={`w-full overflow-hidden ${hasDescription ? 'py-4 md:py-10' : 'py-0 md:py-6'
-                              }`}
-                          >
-                            {block.title && (
-                              <ScrollReveal delay={100}>
-                                <div className="container mx-auto px-2 sm:px-3 lg:px-4 pb-6 md:pb-8">
-                                  <h2
-                                    className={`text-2xl md:text-4xl lg:text-5xl font-bold ${titleFontClass} ${textAlignClass} text-gray-900`}
-                                    style={titleFontStyle}
-                                  >
-                                    {t(block.title)}
-                                  </h2>
-                                </div>
-                              </ScrollReveal>
+                return (
+                  <section
+                    key={index}
+                    className={`content-block-wrapper ${index === 0 ? 'pt-0 pb-0' : index === 1 ? 'pt-0 pb-20' : 'py-20'} ${backgroundColor}`}
+                    data-block-index={index}
+                  >
+                    {isFullWidth ? (
+                      <div className="w-full overflow-hidden">
+                        {block.title && (
+                          <div className="container mx-auto px-2 sm:px-3 lg:px-4 pb-6 md:pb-8">
+                            <h2
+                              className={`text-animate-title text-2xl md:text-4xl lg:text-5xl font-bold ${titleFontClass} ${textAlignClass} text-gray-900`}
+                              style={titleFontStyle}
+                            >
+                              {t(block.title)}
+                            </h2>
+                          </div>
+                        )}
+                        {block.mediaType === 'youtube' ? (
+                          <div className="relative w-full aspect-video overflow-hidden media-animate">
+                            <YouTubeBackground url={mediaUrl} />
+                          </div>
+                        ) : block.mediaType === 'video' ? (
+                          <OptimizedVideo
+                            src={mediaUrl}
+                            className={`media-animate w-full h-auto max-w-full ${isMobile ? 'object-contain' : 'object-cover'}`}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            preload="auto"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <OptimizedImage
+                            src={mediaUrl}
+                            alt=""
+                            className={`media-animate w-full h-auto ${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`}
+                            loading="lazy"
+                            quality={85}
+                          />
+                        )}
+                        {block.description && (
+                          <div className="container mx-auto px-2 sm:px-3 lg:px-4 py-12">
+                            <div className={`prose max-w-none ${textAlignClass}`}>
+                              <p className="text-animate text-lg md:text-xl text-gray-900 font-light leading-relaxed">
+                                {t(block.description)}
+                              </p>
+                            </div>
+                            {block.linkText && block.linkUrl && (
+                              <div className={`mt-6 ${textAlignClass}`}>
+                                <Link
+                                  to={block.linkUrl}
+                                  className="text-animate group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
+                                >
+                                  <span className="inline-flex items-end gap-x-3 border-b border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
+                                    <span className="group-hover:text-gray-500 leading-none">
+                                      {t(block.linkText)}
+                                    </span>
+                                    <span className="w-8 h-[1px] md:w-10 bg-current" />
+                                  </span>
+                                </Link>
+                              </div>
                             )}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="container mx-auto px-2 sm:px-3 lg:px-4">
+                        {block.title && (
+                          <div className={`pb-6 md:pb-8 ${textAlignClass}`}>
+                            <h2
+                              className={`text-animate-title text-2xl md:text-4xl lg:text-5xl font-bold ${titleFontClass} text-gray-900`}
+                              style={titleFontStyle}
+                            >
+                              {t(block.title)}
+                            </h2>
+                          </div>
+                        )}
+                        <div
+                          className={`flex flex-col ${isLeft ? 'md:flex-row' : isRight ? 'md:flex-row-reverse' : 'md:flex-row items-center'} gap-12`}
+                        >
+                          <div
+                            className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'} overflow-visible`}
+                          >
                             {block.mediaType === 'youtube' ? (
-                              <div className="relative w-full aspect-video overflow-hidden">
+                              <div className="relative w-full aspect-video overflow-hidden media-animate">
                                 <YouTubeBackground url={mediaUrl} />
                               </div>
                             ) : block.mediaType === 'video' ? (
                               <OptimizedVideo
                                 src={mediaUrl}
-                                className={`w-full h-auto max-w-full ${isMobile ? 'object-contain' : 'object-cover'}`}
+                                className={`media-animate w-full h-auto ${imageBorderClass} max-w-full ${isMobile ? 'object-contain' : 'object-cover'}`}
                                 autoPlay
                                 loop
                                 muted
@@ -597,178 +791,93 @@ export function HomePage() {
                                 loading="lazy"
                               />
                             ) : (
-                              <ParallaxImage
+                              <OptimizedImage
                                 src={mediaUrl}
                                 alt=""
-                                className="w-full"
-                                imgClassName={`${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`}
+                                className={`media-animate w-full h-auto ${imageBorderClass} ${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`}
                                 loading="lazy"
                                 quality={85}
                               />
                             )}
-                            {block.description && (
-                              <ScrollReveal delay={200}>
-                                <div className="container mx-auto px-2 sm:px-3 lg:px-4 py-12">
-                                  <div className={`prose max-w-none ${textAlignClass}`}>
-                                    <p className="text-lg md:text-xl text-gray-700 font-light leading-relaxed">
-                                      {t(block.description)}
-                                    </p>
-                                  </div>
-                                  {block.linkText && block.linkUrl && (
-                                    <div className={`mt-6 ${textAlignClass}`}>
-                                      <Link
-                                        to={block.linkUrl}
-                                        className="group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
-                                      >
-                                        <span className="inline-flex items-end gap-x-3 border-b border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
-                                          <span className="group-hover:text-gray-500 leading-none">
-                                            {t(block.linkText)}
-                                          </span>
-                                          <span className="w-8 h-[1px] md:w-10 bg-current" />
-                                        </span>
-                                      </Link>
-                                    </div>
-                                  )}
-                                </div>
-                              </ScrollReveal>
-                            )}
                           </div>
-                        ) : (
-                          <div
-                            className={`container mx-auto px-2 sm:px-3 lg:px-4 ${hasDescription ? 'py-4 md:py-10' : 'py-1 md:py-6'
-                              }`}
-                          >
-                            {block.title && (
-                              <ScrollReveal delay={100}>
-                                <div className={`pb-6 md:pb-8 ${textAlignClass}`}>
-                                  <h2
-                                    className={`text-2xl md:text-4xl lg:text-5xl font-bold ${titleFontClass} text-gray-900`}
-                                    style={titleFontStyle}
-                                  >
-                                    {t(block.title)}
-                                  </h2>
-                                </div>
-                              </ScrollReveal>
-                            )}
-                            <div
-                              className={`flex flex-col ${isLeft ? 'md:flex-row' : isRight ? 'md:flex-row-reverse' : 'md:flex-row items-center'} gap-12`}
-                            >
-                              <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'} overflow-visible`}>
-                                {block.mediaType === 'youtube' ? (
-                                  <div className="relative w-full aspect-video overflow-hidden">
-                                    <YouTubeBackground url={mediaUrl} />
-                                  </div>
-                                ) : block.mediaType === 'video' ? (
-                                  <OptimizedVideo
-                                    src={mediaUrl}
-                                    className={`w-full h-auto ${imageBorderClass} max-w-full ${isMobile ? 'object-contain' : 'object-cover'}`}
-                                    autoPlay
-                                    loop
-                                    muted
-                                    playsInline
-                                    preload="auto"
-                                    loading="lazy"
-                                  />
-                                ) : (
-                                  <ParallaxImage
-                                    src={mediaUrl}
-                                    alt=""
-                                    className="w-full"
-                                    imgClassName={`${imageBorderClass} ${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`}
-                                    loading="lazy"
-                                    quality={85}
-                                  />
-                                )}
+                          {block.description && (
+                            <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'}`}>
+                              <div className={`prose max-w-none ${textAlignClass}`}>
+                                <p className="text-animate text-lg md:text-xl text-gray-900 font-light leading-relaxed">
+                                  {t(block.description)}
+                                </p>
                               </div>
-                              <ScrollReveal delay={200} width="w-full" className={`${isCenter ? 'md:w-full' : 'md:w-1/2'}`}>
-                                <div className={`w-full`}>
-                                  <div className={`prose max-w-none ${textAlignClass}`}>
-                                    <p className="text-lg md:text-xl text-gray-700 font-light leading-relaxed">
-                                      {t(block.description)}
-                                    </p>
-                                  </div>
-                                  {block.linkText && block.linkUrl && (
-                                    <div className={`mt-6 ${textAlignClass}`}>
-                                      <Link
-                                        to={block.linkUrl}
-                                        className="group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
-                                      >
-                                        <span className="inline-flex items-end gap-x-3 border-b border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
-                                          <span className="group-hover:text-gray-500 leading-none">
-                                            {t(block.linkText)}
-                                          </span>
-                                          <span className="w-8 h-[1px] md:w-10 bg-current" />
-                                        </span>
-                                      </Link>
-                                    </div>
-                                  )}
+                              {block.linkText && block.linkUrl && (
+                                <div className={`mt-6 ${textAlignClass}`}>
+                                  <Link
+                                    to={block.linkUrl}
+                                    className="text-animate group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
+                                  >
+                                    <span className="inline-flex items-end gap-x-3 border-b border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
+                                      <span className="group-hover:text-gray-500 leading-none">
+                                        {t(block.linkText)}
+                                      </span>
+                                      <span className="w-8 h-[1px] md:w-10 bg-current" />
+                                    </span>
+                                  </Link>
                                 </div>
-                              </ScrollReveal>
+                              )}
                             </div>
-                          </div>
-                        )}
-                      </section>
-                    </React.Fragment>
-                  )
-                })}
-              </div>
-            )
-          })()}
-
-        {/* Inspiration Section */}
-        {inspiration &&
-          (inspiration.backgroundImage || inspiration.title || inspiration.subtitle) && (
-            <>
-              <ScrollReveal>
-                <section
-                  ref={(el) => setInspirationSectionRef(el)}
-                  className="relative py-16 md:py-32 text-white text-center inspiration-section-mobile"
-                  style={{
-                    ...(isMobile && inspirationImageHeight && bgImageUrl
-                      ? {
-                        height: `${inspirationImageHeight}px`,
-                        minHeight: `${inspirationImageHeight}px`,
-                        paddingTop: 0,
-                        paddingBottom: 0,
-                      }
-                      : {}),
-                    ...(!isMobile && inspirationImageHeight && bgImageUrl
-                      ? { minHeight: `${inspirationImageHeight}px` }
-                      : {}),
-                    position: 'relative',
-                    zIndex: isMobile ? 2 : 1, // Mobilde fixed background'un üstünde, desktop'ta aynı
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent dark overlay (50%)
-                  }}
-                >
-                  {/* Overlay removed - using section backgroundColor instead */}
-                  <div className="relative z-10 container mx-auto px-2 sm:px-2 lg:px-3 max-w-4xl">
-                    <ScrollReveal delay={200}>
-                      <h2 className="text-4xl font-light leading-relaxed">{t(inspiration.title)}</h2>
-                    </ScrollReveal>
-                    <ScrollReveal delay={300}>
-                      <p className="mt-4 text-lg text-gray-200 max-w-2xl mx-auto font-light leading-relaxed">
-                        {t(inspiration.subtitle)}
-                      </p>
-                    </ScrollReveal>
-                    {inspiration.buttonText && (
-                      <ScrollReveal delay={400}>
-                        <Link
-                          to={inspiration.buttonLink || '/'}
-                          className="group mt-8 inline-flex items-center gap-x-3 text-white font-semibold py-3 pl-0 pr-5 text-lg rounded-lg"
-                        >
-                          <span className="inline-flex items-end gap-x-3 border-b border-transparent group-hover:border-white pb-1 transition-all duration-300 ease-out">
-                            <span className="group-hover:text-gray-200 leading-none">{t(inspiration.buttonText)}</span>
-                            <span className="w-8 h-[1px] md:w-10 bg-current" />
-                          </span>
-                        </Link>
-                      </ScrollReveal>
+                          )}
+                        </div>
+                      </div>
                     )}
-                  </div>
-                </section>
-              </ScrollReveal>
+                  </section>
+                )
+              })}
             </>
-          )}
-      </div>
-    </>
+          )
+        })()}
+
+      {/* Inspiration Section */}
+      {inspiration &&
+        (inspiration.backgroundImage || inspiration.title || inspiration.subtitle) && (
+          <section
+            className="relative py-16 md:py-32 bg-gray-900 text-white text-center inspiration-section-mobile"
+            style={{
+              backgroundImage: `url(${isMobile && bgImageMobile ? bgImageMobile : bgImageDesktop || bgImageUrl})`,
+              backgroundSize: isMobile ? '100vw auto' : 'cover',
+              backgroundAttachment: 'fixed',
+              backgroundPosition: isMobile ? 'left center' : 'center center',
+              backgroundRepeat: 'no-repeat',
+              ...(isMobile && inspirationImageHeight && bgImageUrl
+                ? {
+                    height: `${inspirationImageHeight}px`,
+                    minHeight: `${inspirationImageHeight}px`,
+                    paddingTop: 0,
+                    paddingBottom: 0,
+                  }
+                : {}),
+              ...(!isMobile && inspirationImageHeight && bgImageUrl
+                ? {minHeight: `${inspirationImageHeight}px`}
+                : {}),
+            }}
+          >
+            <div className="absolute inset-0 bg-black/50"></div>
+            <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+              <h2 className="text-animate-title text-4xl font-light leading-relaxed">{t(inspiration.title)}</h2>
+              <p className="text-animate mt-4 text-lg text-gray-200 max-w-2xl mx-auto font-light leading-relaxed">
+                {t(inspiration.subtitle)}
+              </p>
+              {inspiration.buttonText && (
+                <Link
+                  to={inspiration.buttonLink || '/'}
+                  className="text-animate group mt-8 inline-flex items-center gap-x-3 text-white font-semibold py-3 pl-0 pr-5 text-lg rounded-lg"
+                >
+                  <span className="inline-flex items-end gap-x-3 border-b border-transparent group-hover:border-white pb-1 transition-all duration-300 ease-out">
+                    <span className="group-hover:text-gray-200 leading-none">{t(inspiration.buttonText)}</span>
+                    <span className="w-8 h-[1px] md:w-10 bg-current" />
+                  </span>
+                </Link>
+              )}
+            </div>
+          </section>
+        )}
+    </div>
   )
 }
