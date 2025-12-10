@@ -53,26 +53,10 @@ body {
   }
 }
 
-/* Yazı animasyonları - alttan yavaşça belirme */
+/* Animasyon sistemi kaldırıldı - tüm yazılar direkt görünür */
 .text-animate {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
-}
-
-.text-animate.text-animate-visible {
   opacity: 1;
-  transform: translateY(0);
-}
-
-
-/* Reduced motion için animasyon yok */
-@media (prefers-reduced-motion: reduce) {
-  .text-animate {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
+  transform: none;
 }
 
 @keyframes fade-in-up {

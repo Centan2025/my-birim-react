@@ -735,7 +735,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                         ? 'translate-x-0 opacity-100'
                         : isLeft
                           ? '-translate-x-[150%] opacity-0'
-                          : 'translate-x-[150%] opacity-0'
+                          : 'translate-x-[250%] opacity-0'
                     }`}
                     style={{
                       transitionDelay: `${animationDelay}ms`,

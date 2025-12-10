@@ -8,6 +8,8 @@ import {YouTubeBackground} from '../components/YouTubeBackground'
 import {HomeHero} from '../components/HomeHero'
 import {useTranslation} from '../i18n'
 import {useSEO} from '../src/hooks/useSEO'
+import ScrollReveal from '../components/ScrollReveal'
+import AnimatedText from '../components/AnimatedText'
 
 export function HomePage() {
   const {data: content} = useHomePageContent()
@@ -43,146 +45,7 @@ export function HomePage() {
 
   useSEO(seoData)
 
-  // Yazı animasyonları için - Blok bazlı yaklaşım
-  useEffect(() => {
-    const observers: IntersectionObserver[] = []
-    
-    // Sayfa yüklendikten sonra başlat
-    const timeoutId = setTimeout(() => {
-      const blocks = document.querySelectorAll('.content-block-wrapper')
-      const animatedElements = new Set<Element>()
-      
-      if (blocks.length === 0) return
-
-      // Element görünür mü kontrol et - element viewport içinde olmalı
-      const isElementVisible = (element: Element): boolean => {
-        const rect = element.getBoundingClientRect()
-        return (
-          rect.top < window.innerHeight && // Üst kısmı viewport içinde
-          rect.bottom > 0 && // Alt kısmı viewport içinde
-          rect.left < window.innerWidth &&
-          rect.right > 0
-        )
-      }
-
-      // Blok içindeki elementleri sırayla animasyonlu yap
-      const animateBlockElements = (block: HTMLElement) => {
-        const title = block.querySelector('.text-animate-title')
-        const media = block.querySelector('.media-animate')
-        const text = block.querySelector('p.text-animate')
-        const link = block.querySelector('a.text-animate')
-        
-        const elements: Array<{element: Element, visibleClass: string, isMedia: boolean}> = []
-        
-        if (title) elements.push({element: title, visibleClass: 'text-animate-visible', isMedia: false})
-        if (media) elements.push({element: media, visibleClass: 'media-animate-visible', isMedia: true})
-        if (text) elements.push({element: text, visibleClass: 'text-animate-visible', isMedia: false})
-        if (link) elements.push({element: link, visibleClass: 'text-animate-visible', isMedia: false})
-        
-        // Her element için sırayla animasyon başlat
-        elements.forEach((item, index) => {
-          const delay = index * 400 // Her element arasında 400ms
-          
-          setTimeout(() => {
-            const {element, visibleClass, isMedia} = item
-            
-            // Element zaten animasyonlu olmuşsa atla
-            if (animatedElements.has(element) || element.classList.contains(visibleClass)) {
-              return
-            }
-            
-            // Element görünür mü kontrol et - görünür değilse bekle
-            const checkAndAnimate = () => {
-              if (!isElementVisible(element)) {
-                // Görünür değilse, 100ms sonra tekrar kontrol et
-                setTimeout(checkAndAnimate, 100)
-                return
-              }
-              
-              // Media için resim yükleme kontrolü
-              if (isMedia) {
-                const mediaElement = element as HTMLElement
-                const img = mediaElement.querySelector('img')
-                
-                if (img) {
-                  if (img.complete) {
-                    element.classList.add(visibleClass)
-                    animatedElements.add(element)
-                  } else {
-                    img.onload = () => {
-                      element.classList.add(visibleClass)
-                      animatedElements.add(element)
-                    }
-                    img.onerror = () => {
-                      element.classList.add(visibleClass)
-                      animatedElements.add(element)
-                    }
-                  }
-                } else {
-                  element.classList.add(visibleClass)
-                  animatedElements.add(element)
-                }
-              } else {
-                element.classList.add(visibleClass)
-                animatedElements.add(element)
-              }
-            }
-            
-            checkAndAnimate()
-          }, delay)
-        })
-      }
-
-      // Her blok için observer oluştur
-      blocks.forEach((block) => {
-        const blockElement = block as HTMLElement
-        
-        // İlk yüklemede görünür mü kontrol et
-        const checkInitialVisibility = () => {
-          const rect = blockElement.getBoundingClientRect()
-          const isInViewport = rect.top < window.innerHeight && rect.bottom > 0
-          if (isInViewport) {
-            // Biraz bekle ki DOM tam yüklensin
-            setTimeout(() => {
-              animateBlockElements(blockElement)
-            }, 200)
-            return true
-          }
-          return false
-        }
-
-        // İlk kontrol
-        if (checkInitialVisibility()) {
-          return
-        }
-
-        // Intersection Observer oluştur
-        const observer = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (entry.isIntersecting) {
-                // Blok görünür oldu - içindeki elementleri animasyonlu yap
-                animateBlockElements(entry.target as HTMLElement)
-                observer.unobserve(entry.target)
-              }
-            })
-          },
-          {
-            threshold: 0.1, // Blok'un %10'u görünür olduğunda tetikle
-            rootMargin: '0px',
-          }
-        )
-        
-        observer.observe(blockElement)
-        observers.push(observer)
-      })
-    }, 300)
-
-    return () => {
-      clearTimeout(timeoutId)
-      observers.forEach(observer => observer.disconnect())
-    }
-  }, [content])
+  // Animasyon sistemi kaldırıldı - yazılar direkt görünür
 
 
   // İlham görselinin yüksekliğini hesapla - hook'lar early return'den önce olmalı
@@ -285,84 +148,6 @@ export function HomePage() {
       {heroMedia.length > 0 ? (
         <>
           <style>{`
-            /* Yazı animasyonları - alttan yavaşça belirme */
-            .text-animate {
-              opacity: 0;
-              transform: translateY(30px);
-              transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-            }
-            
-            .text-animate.text-animate-visible {
-              opacity: 1;
-              transform: translateY(0);
-            }
-            
-            /* Başlık animasyonları - soldan sağa ve fade efekti */
-            .text-animate-title {
-              opacity: 0;
-              transform: translateX(-50px);
-              transition: opacity 1s ease-out, transform 1s ease-out;
-            }
-            
-            .text-animate-title.text-animate-visible {
-              opacity: 1;
-              transform: translateX(0);
-            }
-            
-            /* Medya animasyonları - fade efekti */
-            .media-animate {
-              opacity: 0;
-              transition: opacity 1.2s ease-out;
-            }
-            
-            .media-animate.media-animate-visible {
-              opacity: 1;
-            }
-            
-            /* Fallback: JavaScript yavaşsa veya çalışmazsa 3 saniye sonra görünür yap */
-            @supports (animation: none) {
-              .text-animate {
-                animation: fadeInFallback 0.1s ease-out 3s forwards;
-              }
-              .text-animate-title {
-                animation: fadeInFallbackTitle 0.1s ease-out 3s forwards;
-              }
-              .media-animate {
-                animation: fadeInMedia 0.1s ease-out 3s forwards;
-              }
-            }
-            
-            @keyframes fadeInFallback {
-              to {
-                opacity: 1;
-                transform: translateY(0);
-              }
-            }
-            
-            @keyframes fadeInFallbackTitle {
-              to {
-                opacity: 1;
-                transform: translateX(0);
-              }
-            }
-            
-            @keyframes fadeInMedia {
-              to {
-                opacity: 1;
-              }
-            }
-            
-            /* Reduced motion için animasyon yok */
-            @media (prefers-reduced-motion: reduce) {
-              .text-animate,
-              .text-animate-title,
-              .media-animate {
-                opacity: 1;
-                transform: none;
-                transition: none;
-                animation: none;
-              }
-            }
             
             .hero-scroll-container::-webkit-scrollbar {
               display: none;
@@ -701,21 +486,26 @@ export function HomePage() {
                         {block.title && (
                           <div className="container mx-auto px-2 sm:px-3 lg:px-4 pb-6 md:pb-8">
                             <h2
-                              className={`text-animate-title text-2xl md:text-4xl lg:text-5xl font-bold ${titleFontClass} ${textAlignClass} text-gray-900`}
+                              className={`text-2xl md:text-4xl lg:text-5xl font-bold ${titleFontClass} ${textAlignClass} text-gray-950`}
                               style={titleFontStyle}
                             >
-                              {t(block.title)}
+                              <AnimatedText
+                                text={t(block.title)}
+                                delay={50}
+                                threshold={0.1}
+                                direction="left"
+                              />
                             </h2>
                           </div>
                         )}
                         {block.mediaType === 'youtube' ? (
-                          <div className="relative w-full aspect-video overflow-hidden media-animate">
+                          <div className="relative w-full aspect-video overflow-hidden">
                             <YouTubeBackground url={mediaUrl} />
                           </div>
                         ) : block.mediaType === 'video' ? (
                           <OptimizedVideo
                             src={mediaUrl}
-                            className={`media-animate w-full h-auto max-w-full ${isMobile ? 'object-contain' : 'object-cover'}`}
+                            className={`w-full h-auto max-w-full ${isMobile ? 'object-contain' : 'object-cover'}`}
                             autoPlay
                             loop
                             muted
@@ -727,32 +517,36 @@ export function HomePage() {
                           <OptimizedImage
                             src={mediaUrl}
                             alt=""
-                            className={`media-animate w-full h-auto ${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`}
+                            className={`w-full h-auto ${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`}
                             loading="lazy"
                             quality={85}
                           />
                         )}
                         {block.description && (
                           <div className="container mx-auto px-2 sm:px-3 lg:px-4 py-12">
-                            <div className={`prose max-w-none ${textAlignClass}`}>
-                              <p className="text-animate text-lg md:text-xl text-gray-900 font-light leading-relaxed">
-                                {t(block.description)}
-                              </p>
-                            </div>
-                            {block.linkText && block.linkUrl && (
-                              <div className={`mt-6 ${textAlignClass}`}>
-                                <Link
-                                  to={block.linkUrl}
-                                  className="text-animate group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
-                                >
-                                  <span className="inline-flex items-end gap-x-3 border-b border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
-                                    <span className="group-hover:text-gray-500 leading-none">
-                                      {t(block.linkText)}
-                                    </span>
-                                    <span className="w-8 h-[1px] md:w-10 bg-current" />
-                                  </span>
-                                </Link>
+                            <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
+                              <div className={`prose max-w-none ${textAlignClass}`}>
+                                <p className="text-lg md:text-xl text-gray-950 font-light leading-relaxed">
+                                  {t(block.description)}
+                                </p>
                               </div>
+                            </ScrollReveal>
+                            {block.linkText && block.linkUrl && (
+                              <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto">
+                                <div className={`mt-6 ${textAlignClass}`}>
+                                  <Link
+                                    to={block.linkUrl}
+                                    className="group inline-flex items-center gap-x-3 text-gray-950 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
+                                  >
+                                    <span className="inline-flex items-end gap-x-3 border-b border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
+                                      <span className="group-hover:text-gray-500 leading-none">
+                                        {t(block.linkText)}
+                                      </span>
+                                      <span className="w-8 h-[1px] md:w-10 bg-current" />
+                                    </span>
+                                  </Link>
+                                </div>
+                              </ScrollReveal>
                             )}
                           </div>
                         )}
@@ -762,10 +556,15 @@ export function HomePage() {
                         {block.title && (
                           <div className={`pb-6 md:pb-8 ${textAlignClass}`}>
                             <h2
-                              className={`text-animate-title text-2xl md:text-4xl lg:text-5xl font-bold ${titleFontClass} text-gray-900`}
+                              className={`text-2xl md:text-4xl lg:text-5xl font-bold ${titleFontClass} text-gray-950`}
                               style={titleFontStyle}
                             >
-                              {t(block.title)}
+                              <AnimatedText
+                                text={t(block.title)}
+                                delay={50}
+                                threshold={0.1}
+                                direction="left"
+                              />
                             </h2>
                           </div>
                         )}
@@ -776,13 +575,13 @@ export function HomePage() {
                             className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'} overflow-visible`}
                           >
                             {block.mediaType === 'youtube' ? (
-                              <div className="relative w-full aspect-video overflow-hidden media-animate">
+                              <div className="relative w-full aspect-video overflow-hidden">
                                 <YouTubeBackground url={mediaUrl} />
                               </div>
                             ) : block.mediaType === 'video' ? (
                               <OptimizedVideo
                                 src={mediaUrl}
-                                className={`media-animate w-full h-auto ${imageBorderClass} max-w-full ${isMobile ? 'object-contain' : 'object-cover'}`}
+                                className={`w-full h-auto ${imageBorderClass} max-w-full ${isMobile ? 'object-contain' : 'object-cover'}`}
                                 autoPlay
                                 loop
                                 muted
@@ -794,7 +593,7 @@ export function HomePage() {
                               <OptimizedImage
                                 src={mediaUrl}
                                 alt=""
-                                className={`media-animate w-full h-auto ${imageBorderClass} ${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`}
+                                className={`w-full h-auto ${imageBorderClass} ${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`}
                                 loading="lazy"
                                 quality={85}
                               />
@@ -802,25 +601,29 @@ export function HomePage() {
                           </div>
                           {block.description && (
                             <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'}`}>
-                              <div className={`prose max-w-none ${textAlignClass}`}>
-                                <p className="text-animate text-lg md:text-xl text-gray-900 font-light leading-relaxed">
-                                  {t(block.description)}
-                                </p>
-                              </div>
-                              {block.linkText && block.linkUrl && (
-                                <div className={`mt-6 ${textAlignClass}`}>
-                                  <Link
-                                    to={block.linkUrl}
-                                    className="text-animate group inline-flex items-center gap-x-3 text-gray-900 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
-                                  >
-                                    <span className="inline-flex items-end gap-x-3 border-b border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
-                                      <span className="group-hover:text-gray-500 leading-none">
-                                        {t(block.linkText)}
-                                      </span>
-                                      <span className="w-8 h-[1px] md:w-10 bg-current" />
-                                    </span>
-                                  </Link>
+                              <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
+                                <div className={`prose max-w-none ${textAlignClass}`}>
+                                  <p className="text-lg md:text-xl text-gray-900 font-light leading-relaxed">
+                                    {t(block.description)}
+                                  </p>
                                 </div>
+                              </ScrollReveal>
+                              {block.linkText && block.linkUrl && (
+                                <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto">
+                                  <div className={`mt-6 ${textAlignClass}`}>
+                                    <Link
+                                      to={block.linkUrl}
+                                      className="group inline-flex items-center gap-x-3 text-gray-950 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
+                                    >
+                                      <span className="inline-flex items-end gap-x-3 border-b border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
+                                        <span className="group-hover:text-gray-500 leading-none">
+                                          {t(block.linkText)}
+                                        </span>
+                                        <span className="w-8 h-[1px] md:w-10 bg-current" />
+                                      </span>
+                                    </Link>
+                                  </div>
+                                </ScrollReveal>
                               )}
                             </div>
                           )}
@@ -838,7 +641,7 @@ export function HomePage() {
       {inspiration &&
         (inspiration.backgroundImage || inspiration.title || inspiration.subtitle) && (
           <section
-            className="relative py-16 md:py-32 bg-gray-900 text-white text-center inspiration-section-mobile"
+            className="content-block-wrapper relative py-16 md:py-32 bg-gray-900 text-white text-center inspiration-section-mobile"
             style={{
               backgroundImage: `url(${isMobile && bgImageMobile ? bgImageMobile : bgImageDesktop || bgImageUrl})`,
               backgroundSize: isMobile ? '100vw auto' : 'cover',
@@ -860,20 +663,26 @@ export function HomePage() {
           >
             <div className="absolute inset-0 bg-black/50"></div>
             <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
-              <h2 className="text-animate-title text-4xl font-light leading-relaxed">{t(inspiration.title)}</h2>
-              <p className="text-animate mt-4 text-lg text-gray-200 max-w-2xl mx-auto font-light leading-relaxed">
-                {t(inspiration.subtitle)}
-              </p>
+              <ScrollReveal delay={0} threshold={0.1} width="w-full" className="h-auto">
+                <h2 className="text-4xl font-light leading-relaxed">{t(inspiration.title)}</h2>
+              </ScrollReveal>
+              <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
+                <p className="mt-4 text-lg text-gray-200 max-w-2xl mx-auto font-light leading-relaxed">
+                  {t(inspiration.subtitle)}
+                </p>
+              </ScrollReveal>
               {inspiration.buttonText && (
-                <Link
-                  to={inspiration.buttonLink || '/'}
-                  className="text-animate group mt-8 inline-flex items-center gap-x-3 text-white font-semibold py-3 pl-0 pr-5 text-lg rounded-lg"
-                >
-                  <span className="inline-flex items-end gap-x-3 border-b border-transparent group-hover:border-white pb-1 transition-all duration-300 ease-out">
-                    <span className="group-hover:text-gray-200 leading-none">{t(inspiration.buttonText)}</span>
-                    <span className="w-8 h-[1px] md:w-10 bg-current" />
-                  </span>
-                </Link>
+                <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto">
+                  <Link
+                    to={inspiration.buttonLink || '/'}
+                    className="group mt-8 inline-flex items-center gap-x-3 text-white font-semibold py-3 pl-0 pr-5 text-lg rounded-lg"
+                  >
+                    <span className="inline-flex items-end gap-x-3 border-b border-transparent group-hover:border-white pb-1 transition-all duration-300 ease-out">
+                      <span className="group-hover:text-gray-200 leading-none">{t(inspiration.buttonText)}</span>
+                      <span className="w-8 h-[1px] md:w-10 bg-current" />
+                    </span>
+                  </Link>
+                </ScrollReveal>
               )}
             </div>
           </section>

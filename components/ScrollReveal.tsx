@@ -6,6 +6,7 @@ interface ScrollRevealProps {
   threshold?: number // 0 to 1
   className?: string
   width?: string
+  direction?: 'up' | 'left' // Animasyon yönü: 'up' = aşağıdan yukarıya, 'left' = soldan sağa
 }
 
 const ScrollReveal: React.FC<ScrollRevealProps> = ({
@@ -14,6 +15,7 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
   threshold = 0.15,
   className = '',
   width = 'w-full',
+  direction = 'up',
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -68,13 +70,24 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
     transitionDelay: `${delay}ms`,
   }
 
+  // Animasyon yönüne göre transform class'ları
+  const getTransformClasses = () => {
+    if (direction === 'left') {
+      return isVisible
+        ? 'opacity-100 translate-x-0'
+        : 'opacity-0 -translate-x-16'
+    }
+    // Default: 'up' - aşağıdan yukarıya
+    return isVisible
+      ? 'opacity-100 translate-y-0'
+      : 'opacity-0 translate-y-16'
+  }
+
   return (
     <div
       ref={ref}
       style={style}
-      className={`${width} h-full transition-all duration-700 ease-out transform ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-16'
-      } ${className}`}
+      className={`${width} transition-all duration-700 ease-out transform ${getTransformClasses()} ${className}`}
     >
       {children}
     </div>
