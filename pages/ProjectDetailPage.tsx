@@ -135,22 +135,22 @@ export function ProjectDetailPage() {
     return () => clearTimeout(timer)
   }, [project])
 
-  // Proje adı animasyonu - önce başlar, fade ile birlikte soldan gel
-  useEffect(() => {
-    if (!project) return
-    setIsTitleVisible(false)
-    const timer = setTimeout(() => {
-      setIsTitleVisible(true)
-    }, 400)
-    return () => clearTimeout(timer)
-  }, [project])
-
-  // Proje konumu animasyonu - proje adından sonra başlar, fade ile birlikte soldan gel
+  // Proje konumu animasyonu - önce başlar, fade ile birlikte soldan gel
   useEffect(() => {
     if (!project) return
     setIsLocationVisible(false)
     const timer = setTimeout(() => {
       setIsLocationVisible(true)
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [project])
+
+  // Proje adı animasyonu - proje konumundan sonra başlar, fade ile birlikte soldan gel
+  useEffect(() => {
+    if (!project) return
+    setIsTitleVisible(false)
+    const timer = setTimeout(() => {
+      setIsTitleVisible(true)
     }, 550)
     return () => clearTimeout(timer)
   }, [project])
@@ -351,7 +351,7 @@ export function ProjectDetailPage() {
         transform: isPageVisible ? 'translateY(0)' : 'translateY(80px)',
       }}
     >
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-16 md:pt-18 lg:pt-16 pb-16">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
       <Breadcrumbs
         className="mb-6"
         items={[
@@ -364,9 +364,9 @@ export function ProjectDetailPage() {
         <h1 
           className="text-4xl font-light tracking-tight text-gray-900"
           style={{
-            transform: isTitleVisible ? 'translateX(0)' : 'translateX(-150%)',
+            transform: isTitleVisible ? 'translateX(0)' : 'translateX(-40px)',
             opacity: isTitleVisible ? 1 : 0,
-            transition: 'transform 700ms ease-out, opacity 1800ms ease-out'
+            transition: 'transform 1000ms ease-out, opacity 1000ms ease-out'
           }}
         >
           {t(project.title)}
@@ -375,9 +375,9 @@ export function ProjectDetailPage() {
           <p 
             className="text-sm text-gray-500 mt-2 font-light"
             style={{
-              transform: isLocationVisible ? 'translateX(0)' : 'translateX(-150%)',
+              transform: isLocationVisible ? 'translateX(0)' : 'translateX(-40px)',
               opacity: isLocationVisible ? 1 : 0,
-              transition: 'transform 700ms ease-out, opacity 1800ms ease-out'
+              transition: 'transform 1000ms ease-out, opacity 1000ms ease-out'
             }}
           >
             {t(project.date)}
@@ -509,17 +509,20 @@ export function ProjectDetailPage() {
                           }
                           setIdx(index)
                         }}
-                        className={`relative rounded-full h-2 transition-all duration-500 ease-in-out group ${
+                        className={`relative rounded-full transition-all duration-500 ease-in-out group ${
+                          areDotsVisible ? 'animate-dot-height-grow' : 'h-0.5'
+                        } ${
                           isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
                         } ${
                           areDotsVisible
                             ? 'translate-x-0 opacity-100'
                             : isLeft
                               ? '-translate-x-[150%] opacity-0'
-                              : 'translate-x-[150%] opacity-0'
+                              : 'translate-x-[250%] opacity-0'
                         }`}
                         style={{
                           transitionDelay: `${animationDelay}ms`,
+                          ...(areDotsVisible ? {} : {height: '0.0625rem'}),
                         }}
                         aria-label={`Görsel ${index + 1}`}
                       >

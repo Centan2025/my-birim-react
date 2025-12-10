@@ -1715,7 +1715,7 @@ export function Header() {
                   <div className="border-b border-white/10">
                     <button
                       onClick={() => setIsMobileProductsMenuOpen(!isMobileProductsMenuOpen)}
-                      className="flex items-center justify-between w-full min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300"
+                      className="flex items-center justify-between w-full min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300"
                     >
                       <CrossFadeText text={t('products')} triggerKey={locale} />
                       <svg
@@ -1738,7 +1738,7 @@ export function Header() {
                           <NavLink
                             key={category.id}
                             to={`/products/${category.id}`}
-                            className="flex items-center min-h-[2.5rem] py-2 text-base font-light leading-tight tracking-[0.15em] uppercase text-gray-300 hover:text-white transition-colors duration-300 border-b border-white/5 last:border-b-0"
+                            className="flex items-center min-h-[2.5rem] py-2 text-lg font-light leading-tight tracking-[0.15em] uppercase text-gray-300 hover:text-white transition-colors duration-300 border-b border-white/5 last:border-b-0"
                             onClick={() => {
                               setIsMobileMenuOpen(false)
                               setIsMobileProductsMenuOpen(false)
@@ -1752,7 +1752,7 @@ export function Header() {
                         ))}
                         <NavLink
                           to="/products"
-                          className="flex items-center min-h-[2.5rem] py-2 mt-2 text-base font-light leading-tight tracking-[0.15em] uppercase text-gray-300 hover:text-white transition-colors duration-300 border-t border-white/10 pt-2"
+                          className="flex items-center min-h-[2.5rem] py-2 mt-2 text-lg font-light leading-tight tracking-[0.15em] uppercase text-gray-300 hover:text-white transition-colors duration-300 border-t border-white/10 pt-2"
                           onClick={() => {
                             setIsMobileMenuOpen(false)
                             setIsMobileProductsMenuOpen(false)
@@ -1768,7 +1768,7 @@ export function Header() {
                   </div>
                   <NavLink
                     to="/designers"
-                    className={`flex items-center min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10 transition-transform ${
+                    className={`flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10 transition-transform ${
                       isMobileProductsMenuOpen ? 'translate-y-0' : 'translate-y-0'
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -1777,28 +1777,28 @@ export function Header() {
                   </NavLink>
                   <NavLink
                     to="/projects"
-                    className="flex items-center min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
+                    className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <CrossFadeText text={t('projects') || 'Projeler'} triggerKey={locale} />
                   </NavLink>
                   <NavLink
                     to="/news"
-                    className="flex items-center min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
+                    className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <CrossFadeText text={t('news')} triggerKey={locale} />
                   </NavLink>
                   <NavLink
                     to="/about"
-                    className="flex items-center min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
+                    className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <CrossFadeText text={t('about')} triggerKey={locale} />
                   </NavLink>
                   <NavLink
                     to="/contact"
-                    className="flex items-center min-h-[3rem] py-3 text-lg font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300"
+                    className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <CrossFadeText text={t('contact')} triggerKey={locale} />
@@ -1932,7 +1932,7 @@ export function Header() {
                         fontWeight: 300,
                         letterSpacing: '0.15em',
                       }}
-                      className={`group flex items-center justify-between text-lg md:text-xl font-light leading-tight text-gray-300 hover:text-white transition-all duration-400 ${
+                      className={`group flex items-center justify-between text-xl md:text-2xl font-light leading-tight text-gray-300 hover:text-white transition-all duration-400 ${
                         isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
                       }`}
                       onClick={() => {
@@ -1955,7 +1955,7 @@ export function Header() {
                       fontWeight: 300,
                       letterSpacing: '0.15em',
                     }}
-                    className={`group flex items-center justify-between text-lg md:text-xl font-light leading-tight text-gray-300 hover:text-white transition-all duration-400 border-t border-white/20 pt-3 mt-2 ${
+                    className={`group flex items-center justify-between text-xl md:text-2xl font-light leading-tight text-gray-300 hover:text-white transition-all duration-400 border-t border-white/20 pt-3 mt-2 ${
                       isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
                     }`}
                     onClick={() => {
@@ -1988,7 +1988,7 @@ export function Header() {
                   fontWeight: 300,
                   letterSpacing: '0.2em',
                 }}
-                className={`group flex items-center justify-between text-xl md:text-2xl font-light leading-tight text-white transition-all duration-400 ${
+                className={`group flex items-center justify-between text-2xl md:text-3xl font-light leading-tight text-white transition-all duration-400 ${
                   isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
