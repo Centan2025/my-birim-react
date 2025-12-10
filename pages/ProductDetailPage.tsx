@@ -1113,6 +1113,34 @@ export function ProductDetailPage() {
               </button>
             </div>
           </div>
+          
+          {/* Breadcrumbs - mobilde thumbnails bantının altında */}
+          <nav className="lg:hidden py-4 text-[11px] sm:text-[12px] text-gray-500" aria-label="Breadcrumb">
+            <ol className="list-none p-0 inline-flex items-center">
+              <li>
+                <Link to="/" className="hover:text-gray-800 uppercase underline underline-offset-4">
+                  {t('homepage')}
+                </Link>
+              </li>
+              <li className="mx-2 font-light text-gray-400">|</li>
+              {category && (
+                <>
+                  <li>
+                    <Link
+                      to={`/products/${category.id}`}
+                      className="hover:text-gray-800 uppercase underline underline-offset-4"
+                    >
+                      {t(category.name)}
+                    </Link>
+                  </li>
+                  <li className="mx-2 font-light text-gray-400">|</li>
+                </>
+              )}
+              <li className="font-light text-gray-500" aria-current="page">
+                {t(product.name)}
+              </li>
+            </ol>
+          </nav>
         </div>
       </header>
 
@@ -1130,47 +1158,11 @@ export function ProductDetailPage() {
         />
       )}
 
-      {/* Bottom Prev / Next controls - mobilde medya bantının altında */}
-      {showBottomPrevNext && (prevProduct || nextProduct) && (
-        <div className="bg-white border-t border-gray-200">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex-1">
-                {prevProduct ? (
-                  <Link
-                    to={`/product/${prevProduct.id}`}
-                    className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
-                    aria-label="Previous product"
-                  >
-                    <MinimalChevronLeft className="w-12 h-12 md:w-16 md:h-16" />
-                  </Link>
-                ) : (
-                  <span />
-                )}
-              </div>
-              <div className="flex-1 text-right">
-                {nextProduct ? (
-                  <Link
-                    to={`/product/${nextProduct.id}`}
-                    className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
-                    aria-label="Next product"
-                  >
-                    <MinimalChevronRight className="w-12 h-12 md:w-16 md:h-16" />
-                  </Link>
-                ) : (
-                  <span />
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* DETAILS BELOW */}
       <main className="bg-gray-100">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {/* Breadcrumbs - mobilde biraz daha büyük */}
-          <nav className="mb-8 text-[11px] sm:text-[12px] text-gray-500" aria-label="Breadcrumb">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-32 lg:pt-12 pb-12">
+          {/* Breadcrumbs - desktop'ta burada */}
+          <nav className="hidden lg:block mb-8 text-[11px] sm:text-[12px] text-gray-500" aria-label="Breadcrumb">
             <ol className="list-none p-0 inline-flex items-center">
               <li>
                 <Link to="/" className="hover:text-gray-800 uppercase underline underline-offset-4">
@@ -2056,6 +2048,42 @@ export function ProductDetailPage() {
                     />
                   )
                 })()}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom Prev / Next controls - footer'ın hemen üzerinde */}
+      {showBottomPrevNext && (prevProduct || nextProduct) && (
+        <div className="bg-white border-t border-gray-200">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1">
+                {prevProduct ? (
+                  <Link
+                    to={`/product/${prevProduct.id}`}
+                    className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
+                    aria-label="Previous product"
+                  >
+                    <MinimalChevronLeft className="w-12 h-12 md:w-16 md:h-16" />
+                  </Link>
+                ) : (
+                  <span />
+                )}
+              </div>
+              <div className="flex-1 text-right">
+                {nextProduct ? (
+                  <Link
+                    to={`/product/${nextProduct.id}`}
+                    className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
+                    aria-label="Next product"
+                  >
+                    <MinimalChevronRight className="w-12 h-12 md:w-16 md:h-16" />
+                  </Link>
+                ) : (
+                  <span />
+                )}
+              </div>
             </div>
           </div>
         </div>

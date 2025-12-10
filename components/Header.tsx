@@ -521,9 +521,14 @@ export function Header() {
             if (currentPath !== location.pathname) {
               setHeaderOpacity(0)
               setIsHeaderVisible(true)
+            } else if (heroBrightness >= 0.7) {
+              // Çok açık / beyaza yakın görseller - minimum opacity garantile
+              setHeaderOpacity(0.75)
+            } else if (heroBrightness >= 0.5) {
+              // Açık arka plan - minimum opacity garantile
+              setHeaderOpacity(0.65)
             } else if (heroBrightness > 0.4) {
-              // Görsel beyaza yakın, header'ı daha görünür yap
-              // Brightness 0.4'ten fazlaysa opacity artır, max 0.75
+              // Orta-açık arka plan
               const adjustedOpacity = Math.min(0.75, 0.2 + (heroBrightness - 0.4) * 1.2)
               setHeaderOpacity(adjustedOpacity)
             } else {
@@ -531,9 +536,41 @@ export function Header() {
               setHeaderOpacity(0)
             }
           } else {
-            // Brightness hesaplanamadı (CORS vb.) veya henüz hesaplanmadı (route değişti)
-            // Varsayılan olarak şeffaf bırak - brightness hesaplanınca güncellenecek
-            setHeaderOpacity(0)
+            // Brightness hesaplanamadı (CORS vb.) veya henüz hesaplanmadı
+            // Sayfa arka plan rengini kontrol et
+            try {
+              const body = document.body
+              const main = document.querySelector('main')
+              const computedStyle = window.getComputedStyle(main || body)
+              const bgColor = computedStyle.backgroundColor
+              if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+                const rgbMatch = bgColor.match(/\d+/g)
+                if (rgbMatch && rgbMatch.length >= 3) {
+                  const r = parseInt(rgbMatch[0])
+                  const g = parseInt(rgbMatch[1])
+                  const b = parseInt(rgbMatch[2])
+                  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+                  // Açık renkli sayfalarda minimum opacity garantile
+                  if (luminance >= 0.7) {
+                    setHeaderOpacity(0.7)
+                  } else if (luminance >= 0.5) {
+                    setHeaderOpacity(0.65)
+                  } else {
+                    // Koyu sayfalarda şeffaf kal
+                    setHeaderOpacity(0)
+                  }
+                } else {
+                  // Arka plan rengi parse edilemezse şeffaf bırak (koyu sayfa olabilir)
+                  setHeaderOpacity(0)
+                }
+              } else {
+                // Arka plan rengi belirlenemezse şeffaf bırak (koyu sayfa olabilir)
+                setHeaderOpacity(0)
+              }
+            } catch (e) {
+              // Hata durumunda şeffaf bırak (koyu sayfa olabilir)
+              setHeaderOpacity(0)
+            }
           }
           setIsHeaderVisible(true) // Sayfa en üstteyken menü görünür
         } else {
@@ -1216,15 +1253,40 @@ export function Header() {
 
               // MOBİL: Arka plan açık renkteyse header'ı her zaman belirgin koyu yap
               if (isMobile) {
+                // Sayfa arka plan rengini kontrol et (brightness hesaplanamadığında)
+                const getPageBackgroundColor = () => {
+                  try {
+                    const body = document.body
+                    const main = document.querySelector('main')
+                    const computedStyle = window.getComputedStyle(main || body)
+                    const bgColor = computedStyle.backgroundColor
+                    if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+                      // RGB değerlerini çıkar
+                      const rgbMatch = bgColor.match(/\d+/g)
+                      if (rgbMatch && rgbMatch.length >= 3) {
+                        const r = parseInt(rgbMatch[0])
+                        const g = parseInt(rgbMatch[1])
+                        const b = parseInt(rgbMatch[2])
+                        // Luminance hesapla
+                        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+                        return luminance
+                      }
+                    }
+                  } catch (e) {
+                    // Hata durumunda null döndür
+                  }
+                  return null
+                }
+
                 // Parlaklık ölçüldüyse, tamamen ona göre karar ver
                 if (heroBrightness !== null) {
-                  // Çok açık / beyaza yakın görseller
+                  // Çok açık / beyaza yakın görseller - headerOpacity'den bağımsız minimum opacity
                   if (heroBrightness >= 0.7) {
-                    return 'rgba(0, 0, 0, 0.92)'
+                    return 'rgba(0, 0, 0, 0.85)'
                   }
-                  // Açık arka plan
+                  // Açık arka plan - minimum opacity garantile
                   if (heroBrightness >= 0.5) {
-                    return 'rgba(0, 0, 0, 0.82)'
+                    return 'rgba(0, 0, 0, 0.75)'
                   }
                   // Orta ton arka plan – en az orta koyulukta olsun
                   if (heroBrightness >= 0.35) {
@@ -1239,14 +1301,57 @@ export function Header() {
                   return `rgba(0, 0, 0, ${darkOpacity})`
                 }
 
-                // Parlaklık bilgisi yoksa:
-                // - Sayfanın en üstünde (opacity neredeyse 0 iken) şeffaf kalsın
-                // - Aşağı scroll oldukça koyulaşsın
-                if (headerOpacity <= 0.05) {
+                // Parlaklık bilgisi yoksa sayfa arka plan rengini kontrol et
+                const pageBgLuminance = getPageBackgroundColor()
+                if (pageBgLuminance !== null) {
+                  // Sayfa arka planı açık renkliyse header'ı koyu yap
+                  if (pageBgLuminance >= 0.7) {
+                    return 'rgba(0, 0, 0, 0.8)'
+                  }
+                  if (pageBgLuminance >= 0.5) {
+                    return 'rgba(0, 0, 0, 0.7)'
+                  }
+                  // Koyu sayfalarda şeffaf kal
+                  if (pageBgLuminance < 0.4) {
+                    if (headerOpacity <= 0.25) {
+                      return 'transparent'
+                    }
+                    return `rgba(0, 0, 0, ${Math.max(headerOpacity, 0.4)})`
+                  }
+                }
+
+                // Brightness ve pageBgLuminance bilgisi yoksa headerOpacity'ye göre karar ver
+                // Koyu sayfalarda şeffaf kalabilir
+                if (headerOpacity <= 0.25) {
                   return 'transparent'
                 }
-                const fallbackOpacity = Math.max(headerOpacity, 0.6)
-                return `rgba(0, 0, 0, ${fallbackOpacity})`
+                // Scroll yapıldıysa headerOpacity'yi kullan
+                return `rgba(0, 0, 0, ${Math.max(headerOpacity, 0.4)})`
+              }
+
+              // Desktop için sayfa arka plan rengini kontrol et
+              const getPageBackgroundColor = () => {
+                try {
+                  const body = document.body
+                  const main = document.querySelector('main')
+                  const computedStyle = window.getComputedStyle(main || body)
+                  const bgColor = computedStyle.backgroundColor
+                  if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+                    // RGB değerlerini çıkar
+                    const rgbMatch = bgColor.match(/\d+/g)
+                    if (rgbMatch && rgbMatch.length >= 3) {
+                      const r = parseInt(rgbMatch[0])
+                      const g = parseInt(rgbMatch[1])
+                      const b = parseInt(rgbMatch[2])
+                      // Luminance hesapla
+                      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+                      return luminance
+                    }
+                  }
+                } catch (e) {
+                  // Hata durumunda null döndür
+                }
+                return null
               }
 
               // Varsayılan temel opacity
@@ -1254,9 +1359,12 @@ export function Header() {
 
               // Eğer üstteki görselin parlaklığını biliyorsak, header koyuluğunu buna göre ayarla
               if (heroBrightness !== null) {
-                if (heroBrightness >= 0.65) {
-                  // Çok açık arka plan → header'ı belirgin koyu yap
-                  baseOpacity = Math.max(baseOpacity, 0.85)
+                if (heroBrightness >= 0.7) {
+                  // Çok açık arka plan → header'ı belirgin koyu yap (headerOpacity'den bağımsız)
+                  baseOpacity = 0.85
+                } else if (heroBrightness >= 0.5) {
+                  // Açık arka plan → minimum opacity garantile
+                  baseOpacity = Math.max(baseOpacity, 0.75)
                 } else if (heroBrightness >= 0.45) {
                   // Orta-açık arka plan → biraz daha koyu
                   baseOpacity = Math.max(baseOpacity, 0.7)
@@ -1265,8 +1373,31 @@ export function Header() {
                   baseOpacity = Math.min(baseOpacity, 0.5)
                 }
               } else {
-                // Parlaklık bilgisi yoksa, çok şeffaf olmasın
-                baseOpacity = Math.max(baseOpacity, 0.6)
+                // Parlaklık bilgisi yoksa sayfa arka plan rengini kontrol et
+                const pageBgLuminance = getPageBackgroundColor()
+                if (pageBgLuminance !== null) {
+                  // Sayfa arka planı açık renkliyse header'ı koyu yap
+                  if (pageBgLuminance >= 0.7) {
+                    baseOpacity = 0.8
+                  } else if (pageBgLuminance >= 0.5) {
+                    baseOpacity = Math.max(baseOpacity, 0.7)
+                  } else {
+                    // Koyu arka plan - headerOpacity'ye göre karar ver, şeffaf kalabilir
+                    if (headerOpacity <= 0.25) {
+                      baseOpacity = 0.1
+                    } else {
+                      baseOpacity = Math.max(baseOpacity, 0.4)
+                    }
+                  }
+                } else {
+                  // Brightness ve pageBgLuminance bilgisi yoksa headerOpacity'ye göre karar ver
+                  // Koyu sayfalarda şeffaf kalabilir
+                  if (headerOpacity <= 0.25) {
+                    baseOpacity = 0.1
+                  } else {
+                    baseOpacity = Math.max(baseOpacity, 0.4)
+                  }
+                }
               }
 
               return `rgba(0, 0, 0, ${baseOpacity})`
