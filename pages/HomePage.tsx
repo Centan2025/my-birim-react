@@ -498,30 +498,32 @@ export function HomePage() {
                             </h2>
                           </div>
                         )}
-                        {block.mediaType === 'youtube' ? (
-                          <div className="relative w-full aspect-video overflow-hidden">
-                            <YouTubeBackground url={mediaUrl} />
-                          </div>
-                        ) : block.mediaType === 'video' ? (
-                          <OptimizedVideo
-                            src={mediaUrl}
-                            className={`w-full h-auto max-w-full ${isMobile ? 'object-contain' : 'object-cover'}`}
-                            autoPlay
-                            loop
-                            muted
-                            playsInline
-                            preload="auto"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <OptimizedImage
-                            src={mediaUrl}
-                            alt=""
-                            className={`w-full h-auto ${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`}
-                            loading="lazy"
-                            quality={85}
-                          />
-                        )}
+                        <ScrollReveal delay={50} threshold={0.1} width="w-full" className="h-auto">
+                          {block.mediaType === 'youtube' ? (
+                            <div className="relative w-full aspect-video overflow-hidden">
+                              <YouTubeBackground url={mediaUrl} />
+                            </div>
+                          ) : block.mediaType === 'video' ? (
+                            <OptimizedVideo
+                              src={mediaUrl}
+                              className={`w-full h-auto max-w-full ${isMobile ? 'object-contain' : 'object-cover'}`}
+                              autoPlay
+                              loop
+                              muted
+                              playsInline
+                              preload="auto"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <OptimizedImage
+                              src={mediaUrl}
+                              alt=""
+                              className={`w-full h-auto ${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`}
+                              loading="lazy"
+                              quality={85}
+                            />
+                          )}
+                        </ScrollReveal>
                         {block.description && (
                           <div className="container mx-auto px-2 sm:px-3 lg:px-4 py-12">
                             <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
@@ -574,36 +576,38 @@ export function HomePage() {
                           <div
                             className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'} overflow-visible`}
                           >
-                            {block.mediaType === 'youtube' ? (
-                              <div className="relative w-full aspect-video overflow-hidden">
-                                <YouTubeBackground url={mediaUrl} />
-                              </div>
-                            ) : block.mediaType === 'video' ? (
-                              <OptimizedVideo
-                                src={mediaUrl}
-                                className={`w-full h-auto ${imageBorderClass} max-w-full ${isMobile ? 'object-contain' : 'object-cover'}`}
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
-                                preload="auto"
-                                loading="lazy"
-                              />
-                            ) : (
-                              <OptimizedImage
-                                src={mediaUrl}
-                                alt=""
-                                className={`w-full h-auto ${imageBorderClass} ${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`}
-                                loading="lazy"
-                                quality={85}
-                              />
-                            )}
+                            <ScrollReveal delay={50} threshold={0.1} width="w-full" className="h-auto">
+                              {block.mediaType === 'youtube' ? (
+                                <div className="relative w-full aspect-video overflow-hidden">
+                                  <YouTubeBackground url={mediaUrl} />
+                                </div>
+                              ) : block.mediaType === 'video' ? (
+                                <OptimizedVideo
+                                  src={mediaUrl}
+                                  className={`w-full h-auto ${imageBorderClass} max-w-full ${isMobile ? 'object-contain' : 'object-cover'}`}
+                                  autoPlay
+                                  loop
+                                  muted
+                                  playsInline
+                                  preload="auto"
+                                  loading="lazy"
+                                />
+                              ) : (
+                                <OptimizedImage
+                                  src={mediaUrl}
+                                  alt=""
+                                  className={`w-full h-auto ${imageBorderClass} ${isMobile ? 'object-contain' : 'object-cover'} max-w-full block`}
+                                  loading="lazy"
+                                  quality={85}
+                                />
+                              )}
+                            </ScrollReveal>
                           </div>
                           {block.description && (
                             <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'}`}>
                               <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
                                 <div className={`prose max-w-none ${textAlignClass}`}>
-                                  <p className="text-lg md:text-xl text-gray-900 font-light leading-relaxed">
+                                  <p className="text-lg md:text-xl text-gray-950 font-light leading-relaxed">
                                     {t(block.description)}
                                   </p>
                                 </div>
