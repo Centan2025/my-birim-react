@@ -830,9 +830,9 @@ export function ProductDetailPage() {
 
           <div className="absolute bottom-10 md:bottom-10 left-6 md:left-10 text-white">
             <div style={{
-              transform: isTitleVisible ? 'translateX(0)' : 'translateX(-150%)',
+              transform: isTitleVisible ? 'translateX(0)' : 'translateX(-40px)',
               opacity: isTitleVisible ? 1 : 0,
-              transition: 'transform 700ms ease-out, opacity 1800ms ease-out'
+              transition: 'transform 1000ms ease-out, opacity 1000ms ease-out'
             }}>
               <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg">
                 {t(product.name)}
@@ -840,9 +840,9 @@ export function ProductDetailPage() {
             </div>
             {designer && (
               <div className="mt-2 text-white/80" style={{
-                transform: isDesignerVisible ? 'translateX(0)' : 'translateX(-150%)',
+                transform: isDesignerVisible ? 'translateX(0)' : 'translateX(-40px)',
                 opacity: isDesignerVisible ? 1 : 0,
-                transition: 'transform 700ms ease-out, opacity 1800ms ease-out'
+                transition: 'transform 1000ms ease-out, opacity 1000ms ease-out'
               }}>
                 <Link to={`/designer/${designer.id}`} className="underline hover:text-white">
                   {t(designer.name)}
@@ -906,17 +906,20 @@ export function ProductDetailPage() {
                         }
                         setCurrentImageIndex(index)
                       }}
-                      className={`relative rounded-full h-2 transition-all duration-500 ease-in-out group ${
+                      className={`relative rounded-full transition-all duration-500 ease-in-out group ${
+                        areDotsVisible ? 'animate-dot-height-grow' : 'h-0.5'
+                      } ${
                         isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
                       } ${
                         areDotsVisible
                           ? 'translate-x-0 opacity-100'
                           : isLeft
                             ? '-translate-x-[150%] opacity-0'
-                            : 'translate-x-[150%] opacity-0'
+                            : 'translate-x-[250%] opacity-0'
                       }`}
                       style={{
                         transitionDelay: `${animationDelay}ms`,
+                        ...(areDotsVisible ? {} : {height: '0.0625rem'}),
                       }}
                       aria-label={`Görsel ${index + 1}`}
                     >
@@ -1125,6 +1128,42 @@ export function ProductDetailPage() {
           initialIndex={currentImageIndex}
           onClose={() => setIsFullscreenOpen(false)}
         />
+      )}
+
+      {/* Bottom Prev / Next controls - mobilde medya bantının altında */}
+      {showBottomPrevNext && (prevProduct || nextProduct) && (
+        <div className="bg-white border-t border-gray-200">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1">
+                {prevProduct ? (
+                  <Link
+                    to={`/product/${prevProduct.id}`}
+                    className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
+                    aria-label="Previous product"
+                  >
+                    <MinimalChevronLeft className="w-12 h-12 md:w-16 md:h-16" />
+                  </Link>
+                ) : (
+                  <span />
+                )}
+              </div>
+              <div className="flex-1 text-right">
+                {nextProduct ? (
+                  <Link
+                    to={`/product/${nextProduct.id}`}
+                    className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
+                    aria-label="Next product"
+                  >
+                    <MinimalChevronRight className="w-12 h-12 md:w-16 md:h-16" />
+                  </Link>
+                ) : (
+                  <span />
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* DETAILS BELOW */}
@@ -1584,42 +1623,6 @@ export function ProductDetailPage() {
             )}
         </div>
       </main>
-
-      {/* Bottom Prev / Next controls (toggle with ?showNav=1) */}
-      {showBottomPrevNext && (prevProduct || nextProduct) && (
-        <div className="bg-white border-t border-gray-200">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex-1">
-                {prevProduct ? (
-                  <Link
-                    to={`/product/${prevProduct.id}`}
-                    className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
-                    aria-label="Previous product"
-                  >
-                    <MinimalChevronLeft className="w-12 h-12 md:w-16 md:h-16" />
-                  </Link>
-                ) : (
-                  <span />
-                )}
-              </div>
-              <div className="flex-1 text-right">
-                {nextProduct ? (
-                  <Link
-                    to={`/product/${nextProduct.id}`}
-                    className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
-                    aria-label="Next product"
-                  >
-                    <MinimalChevronRight className="w-12 h-12 md:w-16 md:h-16" />
-                  </Link>
-                ) : (
-                  <span />
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {isLightboxOpen && (
         <div

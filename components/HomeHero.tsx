@@ -728,7 +728,9 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                   <button
                     key={index}
                     onClick={() => setCurrentSlide(index)}
-                    className={`relative rounded-full h-2 transition-all duration-500 ease-in-out group ${
+                    className={`relative rounded-full transition-all duration-500 ease-in-out group ${
+                      areDotsVisible ? 'animate-dot-height-grow' : 'h-0.5'
+                    } ${
                       isActive ? 'w-12 bg-white/90' : 'w-2 bg-white/40 hover:bg-white/60'
                     } ${
                       areDotsVisible
@@ -739,6 +741,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                     }`}
                     style={{
                       transitionDelay: `${animationDelay}ms`,
+                      ...(areDotsVisible ? {} : {height: '0.0625rem'}),
                     }}
                     aria-label={`Go to slide ${index + 1}`}
                   >

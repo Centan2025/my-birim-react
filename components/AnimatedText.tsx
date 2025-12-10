@@ -79,10 +79,10 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
           direction === 'left'
             ? isVisible
               ? 'opacity-100 translate-x-0'
-              : 'opacity-0 -translate-x-16'
+              : 'opacity-0 -translate-x-40'
             : isVisible
             ? 'opacity-100 translate-y-0'
-            : 'opacity-0 translate-y-16'
+            : 'opacity-0 translate-y-32'
 
         return (
           <span
@@ -91,7 +91,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
               transitionDelay: `${charDelay}ms`,
               display: isSpace ? 'inline' : 'inline-block',
             }}
-            className={`transition-all duration-500 ease-out ${transformClasses}`}
+            className={`transition-all duration-900 ease-out ${transformClasses}`}
           >
             {isSpace ? '\u00A0' : char}
           </span>

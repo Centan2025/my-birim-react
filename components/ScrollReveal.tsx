@@ -75,19 +75,19 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
     if (direction === 'left') {
       return isVisible
         ? 'opacity-100 translate-x-0'
-        : 'opacity-0 -translate-x-16'
+        : 'opacity-0 -translate-x-40'
     }
     // Default: 'up' - aşağıdan yukarıya
     return isVisible
       ? 'opacity-100 translate-y-0'
-      : 'opacity-0 translate-y-16'
+      : 'opacity-0 translate-y-32'
   }
 
   return (
     <div
       ref={ref}
       style={style}
-      className={`${width} transition-all duration-700 ease-out transform ${getTransformClasses()} ${className}`}
+      className={`${width} transition-all duration-1000 ease-out transform ${getTransformClasses()} ${className}`}
     >
       {children}
     </div>

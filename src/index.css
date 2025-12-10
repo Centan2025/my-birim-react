@@ -107,6 +107,19 @@ body {
   animation: fill-line 7s linear;
 }
 
+@keyframes dot-height-grow {
+  from {
+    height: 0.0625rem; /* 1px - ince çizgi */
+  }
+  to {
+    height: 0.5rem; /* 8px - normal height */
+  }
+}
+
+.animate-dot-height-grow {
+  animation: dot-height-grow 1s ease-out forwards;
+}
+
 /* Tüm header menü öğelerinin aynı font boyutunda olmasını garanti et */
 .header-nav-item,
 .header-nav-item.active,

@@ -57,24 +57,43 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
   }
 
   const handleError = (e?: React.SyntheticEvent<HTMLVideoElement, Event>) => {
-    // ERR_CACHE_OPERATION_NOT_SUPPORTED gibi cache hatalarını görmezden gel
-    // Bu hatalar genellikle tarayıcı cache mekanizmasından kaynaklanır ve video yine de yüklenebilir
     const videoElement = e?.currentTarget
     if (videoElement?.error) {
       const error = videoElement.error
+      // Hata kodlarını kontrol et
+      // MEDIA_ERR_ABORTED (1): Yükleme kullanıcı tarafından durduruldu
+      // MEDIA_ERR_NETWORK (2): Ağ hatası
+      // MEDIA_ERR_DECODE (3): Video decode edilemedi
+      // MEDIA_ERR_SRC_NOT_SUPPORTED (4): Video formatı desteklenmiyor veya URL geçersiz
+      
+      console.error('Video yükleme hatası:', {
+        code: error.code,
+        message: error.message,
+        videoSrc: videoElement.src || videoElement.currentSrc,
+        errorCode: {
+          1: 'MEDIA_ERR_ABORTED',
+          2: 'MEDIA_ERR_NETWORK',
+          3: 'MEDIA_ERR_DECODE',
+          4: 'MEDIA_ERR_SRC_NOT_SUPPORTED'
+        }[error.code]
+      })
+      
       // Sadece gerçek yükleme hatalarını yakala
-      // MEDIA_ERR_SRC_NOT_SUPPORTED: Video formatı desteklenmiyor veya URL geçersiz
-      if (error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
+      if (error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED || 
+          error.code === MediaError.MEDIA_ERR_NETWORK ||
+          error.code === MediaError.MEDIA_ERR_DECODE) {
         setHasError(true)
         onError?.()
         return
       }
-      // Diğer hatalar (cache, network vb.) için sessizce devam et
-      // Video yine de yüklenmeye çalışacak veya zaten yüklenmiş olabilir
+      // MEDIA_ERR_ABORTED için sessizce devam et (kullanıcı durdurmuş olabilir)
       return
     }
     // Error event'i geldi ama error objesi yoksa, muhtemelen cache hatası
     // Bu durumda video yine de çalışabilir, bu yüzden görmezden gel
+    console.warn('Video error event tetiklendi ama error objesi yok:', {
+      videoSrc: videoElement?.src || videoElement?.currentSrc
+    })
   }
 
   // Intersection Observer ile lazy loading
@@ -176,18 +195,21 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
 
   if (hasError) {
     return (
-      <div className={`bg-gray-200 flex items-center justify-center ${className}`}>
-        <span className="text-gray-400 text-sm">Video yüklenemedi</span>
+      <div className={`bg-gray-200 flex items-center justify-center ${className}`} style={{minHeight: '200px'}}>
+        <div className="text-center p-4">
+          <span className="text-gray-400 text-sm block mb-2">Video yüklenemedi</span>
+          <span className="text-gray-300 text-xs block">URL: {src || srcMobile || srcDesktop || 'Belirtilmemiş'}</span>
+        </div>
       </div>
     )
   }
 
   // Art Direction kullanılıyorsa, video src'i dinamik olarak ayarla
   if (useArtDirection) {
+    const videoSrc = getVideoSrc()
     return (
       <video
         ref={videoRef}
-        src={getVideoSrc()}
         poster={getPosterForScreen()}
         autoPlay={autoPlay}
         loop={loop}
@@ -198,22 +220,33 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
         className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ${className}`}
         style={style}
         onLoadedData={handleLoadedData}
-        onError={handleError}
+        onError={(e) => {
+          // İlk hata source tag'lerinden gelirse, direkt src'i dene
+          const video = e.currentTarget
+          if (!video.src && videoSrc) {
+            video.src = videoSrc
+            video.load()
+          } else {
+            handleError(e)
+          }
+        }}
         onCanPlay={handleLoadedData}
       >
         {/* Mobil için video source */}
-        {srcMobile && <source src={mobileSrc} media="(max-width: 768px)" />}
+        {srcMobile && <source src={mobileSrc} type="video/mp4" media="(max-width: 768px)" />}
         {/* Desktop için video source */}
-        {srcDesktop && <source src={desktopSrc} media="(min-width: 769px)" />}
+        {srcDesktop && <source src={desktopSrc} type="video/mp4" media="(min-width: 769px)" />}
+        {/* Fallback source */}
+        <source src={videoSrc} type="video/mp4" />
       </video>
     )
   }
 
   // Normal kullanım (Art Direction yok)
+  // Video URL'i geçerliyse, önce source tag'lerini dene, sonra direkt src kullan
   return (
     <video
       ref={videoRef}
-      src={src}
       poster={poster}
       autoPlay={autoPlay}
       loop={loop}
@@ -224,8 +257,20 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ${className}`}
       style={style}
       onLoadedData={handleLoadedData}
-      onError={handleError}
+      onError={(e) => {
+        // İlk hata source tag'inden gelirse, direkt src'i dene
+        const video = e.currentTarget
+        if (video.src !== src && src) {
+          video.src = src
+          video.load()
+        } else {
+          handleError(e)
+        }
+      }}
       onCanPlay={handleLoadedData}
-    />
+    >
+      <source src={src} type="video/mp4" />
+      {/* Fallback: Eğer source çalışmazsa, video element'inin src'i kullanılacak */}
+    </video>
   )
 }
