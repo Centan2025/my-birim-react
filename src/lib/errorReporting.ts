@@ -36,13 +36,16 @@ class ErrorReporter {
         Sentry.init({
           dsn: this.dsn,
           environment: (import.meta.env.MODE as string | undefined) || 'development',
+          // Disable default integrations and only include what we need
+          defaultIntegrations: false,
           integrations: [
             Sentry.browserTracingIntegration(),
             Sentry.replayIntegration({
               maskAllText: true,
               blockAllMedia: true,
             }),
-          ],
+            // Explicitly exclude feedback widget to prevent storage errors
+          ].filter(Boolean),
           // Performance Monitoring
           tracesSampleRate: (import.meta.env.PROD as boolean | undefined) ? 0.1 : 1.0, // 10 percent in production, 100 percent in dev
           // Session Replay
