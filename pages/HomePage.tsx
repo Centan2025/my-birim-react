@@ -264,6 +264,13 @@ export function HomePage() {
                 left: 0 !important;
                 right: 0 !important;
               }
+              .hero-page-container-mobile > div:first-child,
+              .hero-page-container-mobile > div:first-child[class*="relative"],
+              .hero-container-mobile {
+                height: 100vh !important;
+                min-height: 100vh !important;
+                max-height: 100vh !important;
+              }
               .hero-main-container-mobile {
                 width: 100vw !important;
                 max-width: 100vw !important;

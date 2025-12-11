@@ -31,7 +31,6 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
     }
     return 0
   })
-  const [heroHeight, setHeroHeight] = useState<number | null>(null)
 
   const DRAG_THRESHOLD = 50 // pixels
   const heroContainerRef = useRef<HTMLDivElement>(null)
@@ -374,104 +373,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
     return () => clearTimeout(timer)
   }, [content, heroMedia.length])
 
-  // Mobilde hero container yüksekliğini medyanın gerçek boyutuna göre ayarla
-  useEffect(() => {
-    if (!isMobile || !heroMedia || heroMedia.length === 0) return
-
-    const updateHeroHeight = () => {
-      const heroContainer = heroContainerRef.current
-      if (!heroContainer) return
-
-      const count = heroMedia.length || 1
-      // Sonsuz kaydırma için: -1 (ilk slayttan sola) ve count (son slayttan sağa) değerlerine
-      // izin ver, fakat bunun dışındaki uç değerleri clamp et.
-      let virtualSlide = currentSlide
-      if (virtualSlide < -1) virtualSlide = -1
-      if (virtualSlide > count) virtualSlide = count
-
-      const realIndex = virtualSlide + 1 // +1 çünkü ilk klon var
-
-      const slides = heroContainer.querySelectorAll('.hero-slide-mobile')
-      const activeSlide = slides[realIndex] as HTMLElement
-      if (!activeSlide) return
-
-      const mediaElement = activeSlide.querySelector('video, img') as
-        | HTMLVideoElement
-        | HTMLImageElement
-      if (!mediaElement) return
-
-      const doUpdate = () => {
-        const containerWidth =
-          viewportWidth || window.innerWidth || heroContainer.getBoundingClientRect().width
-
-        let calculatedHeight = 0
-
-        if (mediaElement instanceof HTMLVideoElement) {
-          if (mediaElement.videoWidth > 0 && mediaElement.videoHeight > 0) {
-            const aspectRatio = mediaElement.videoWidth / mediaElement.videoHeight
-            calculatedHeight = containerWidth / aspectRatio
-          }
-        } else if (mediaElement instanceof HTMLImageElement) {
-          if (mediaElement.naturalWidth > 0 && mediaElement.naturalHeight > 0) {
-            const aspectRatio = mediaElement.naturalWidth / mediaElement.naturalHeight
-            calculatedHeight = containerWidth / aspectRatio
-          }
-        }
-
-        if (calculatedHeight <= 0) {
-          const rect = mediaElement.getBoundingClientRect()
-          if (rect.height > 0) {
-            calculatedHeight = rect.height
-          }
-        }
-
-        if (calculatedHeight > 0) {
-          setHeroHeight(calculatedHeight)
-          heroContainer.style.height = `${calculatedHeight}px`
-          heroContainer.style.minHeight = `${calculatedHeight}px`
-          heroContainer.style.maxHeight = `${calculatedHeight}px`
-          activeSlide.style.height = `${calculatedHeight}px`
-          activeSlide.style.minHeight = `${calculatedHeight}px`
-        }
-      }
-
-      if (mediaElement instanceof HTMLVideoElement) {
-        if (mediaElement.readyState >= 2) {
-          setTimeout(doUpdate, 50)
-        } else {
-          mediaElement.addEventListener(
-            'loadedmetadata',
-            () => {
-              setTimeout(doUpdate, 50)
-            },
-            {once: true}
-          )
-          mediaElement.addEventListener(
-            'loadeddata',
-            () => {
-              setTimeout(doUpdate, 50)
-            },
-            {once: true}
-          )
-        }
-      } else if (mediaElement instanceof HTMLImageElement) {
-        if (mediaElement.complete && mediaElement.naturalHeight > 0) {
-          setTimeout(doUpdate, 50)
-        } else {
-          mediaElement.addEventListener(
-            'load',
-            () => {
-              setTimeout(doUpdate, 50)
-            },
-            {once: true}
-          )
-        }
-      }
-    }
-
-    const timeoutId = setTimeout(updateHeroHeight, 100)
-    return () => clearTimeout(timeoutId)
-  }, [isMobile, heroMedia, currentSlide, viewportWidth])
+  // Mobilde hero container yüksekliği sabit 100vh - medya boyutundan bağımsız
 
   if (!content || heroMedia.length === 0) {
     return <div className="relative h-[50vh] w-full bg-gray-800" />
@@ -504,7 +406,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
   return (
     <>
       <div // eslint-disable-line jsx-a11y/no-static-element-interactions
-        className={`relative ${isMobile ? 'h-screen' : 'h-screen'} md:h-screen overflow-hidden cursor-grab active:cursor-grabbing`}
+        className={`relative ${isMobile ? 'h-screen hero-container-mobile' : 'h-screen'} md:h-screen overflow-hidden cursor-grab active:cursor-grabbing`}
         ref={heroContainerRef}
         onMouseDown={handleDragStart}
         onMouseMove={handleDragMove}
