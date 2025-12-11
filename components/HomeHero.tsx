@@ -428,9 +428,9 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
             position: 'relative',
             ...(isMobile
               ? {
-                  height: '100vh',
-                  minHeight: '100vh',
-                  maxHeight: '100vh',
+                  height: '100dvh',
+                  minHeight: '100dvh',
+                  maxHeight: '100dvh',
                 }
               : {}),
           } as React.CSSProperties
@@ -493,7 +493,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                   overflow: 'hidden',
                   position: 'relative',
                   ...(isMobile
-                    ? {height: '100vh', minHeight: '100vh', maxHeight: '100vh'}
+                    ? {height: '100dvh', minHeight: '100dvh', maxHeight: '100dvh'}
                     : {height: '100%', minHeight: '100%'}),
                 }}
               >
@@ -611,7 +611,14 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
         {slideCount > 1 && (
           <div
             className={`${isMobile ? 'absolute' : 'absolute'} ${isMobile ? 'bottom-4' : 'bottom-10'} left-1/2 -translate-x-1/2 z-30 flex items-center space-x-4`}
-            style={isMobile ? {position: 'absolute', bottom: '16px'} : {}}
+            style={
+              isMobile
+                ? {
+                    position: 'absolute',
+                    bottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)',
+                  }
+                : {}
+            }
           >
             {(() => {
               const normalizedSlide =

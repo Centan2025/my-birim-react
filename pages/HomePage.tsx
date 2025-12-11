@@ -267,9 +267,9 @@ export function HomePage() {
               .hero-page-container-mobile > div:first-child,
               .hero-page-container-mobile > div:first-child[class*="relative"],
               .hero-container-mobile {
-                height: 100vh !important;
-                min-height: 100vh !important;
-                max-height: 100vh !important;
+                height: 100dvh !important;
+                min-height: 100dvh !important;
+                max-height: 100dvh !important;
               }
               .hero-main-container-mobile {
                 width: 100vw !important;
@@ -313,9 +313,9 @@ export function HomePage() {
               .hero-slide-mobile,
               .hero-slide-mobile[style] {
                 /* Genişlik inline style'dan gelecek, CSS override etmesin */
-                height: 100vh !important;
-                min-height: 100vh !important;
-                max-height: 100vh !important;
+                height: 100dvh !important;
+                min-height: 100dvh !important;
+                max-height: 100dvh !important;
                 flex-shrink: 0 !important;
                 flex-grow: 0 !important;
                 padding: 0 !important;
@@ -349,9 +349,9 @@ export function HomePage() {
                 width: 100vw !important;
                 min-width: 100vw !important;
                 max-width: 100vw !important;
-                height: 100vh !important;
-                min-height: 100vh !important;
-                max-height: 100vh !important;
+                height: 100dvh !important;
+                min-height: 100dvh !important;
+                max-height: 100dvh !important;
                 left: 0 !important;
                 right: 0 !important;
                 margin-left: 0 !important;
@@ -376,9 +376,9 @@ export function HomePage() {
                 width: 100vw !important;
                 min-width: 100vw !important;
                 max-width: 100vw !important;
-                height: 100vh !important;
-                min-height: 100vh !important;
-                max-height: 100vh !important;
+                height: 100dvh !important;
+                min-height: 100dvh !important;
+                max-height: 100dvh !important;
                 left: 0 !important;
                 right: 0 !important;
                 margin-left: 0 !important;
@@ -410,8 +410,8 @@ export function HomePage() {
                 width: 100vw !important;
                 max-width: 100vw !important;
                 min-width: 100vw !important;
-                height: 100vh !important;
-                min-height: 100vh !important;
+                height: 100dvh !important;
+                min-height: 100dvh !important;
                 left: 0 !important;
                 right: 0 !important;
                 margin-left: 0 !important;
