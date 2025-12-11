@@ -546,9 +546,9 @@ export function Header() {
               if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
                 const rgbMatch = bgColor.match(/\d+/g)
                 if (rgbMatch && rgbMatch.length >= 3) {
-                  const r = parseInt(rgbMatch[0])
-                  const g = parseInt(rgbMatch[1])
-                  const b = parseInt(rgbMatch[2])
+                  const r = parseInt(rgbMatch[0] || '0')
+                  const g = parseInt(rgbMatch[1] || '0')
+                  const b = parseInt(rgbMatch[2] || '0')
                   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
                   // Açık renkli sayfalarda minimum opacity garantile
                   if (luminance >= 0.7) {
@@ -1285,9 +1285,9 @@ export function Header() {
                       // RGB değerlerini çıkar
                       const rgbMatch = bgColor.match(/\d+/g)
                       if (rgbMatch && rgbMatch.length >= 3) {
-                        const r = parseInt(rgbMatch[0])
-                        const g = parseInt(rgbMatch[1])
-                        const b = parseInt(rgbMatch[2])
+                        const r = parseInt(rgbMatch[0] || '0')
+                        const g = parseInt(rgbMatch[1] || '0')
+                        const b = parseInt(rgbMatch[2] || '0')
                         // Luminance hesapla
                         const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
                         return luminance
@@ -1361,9 +1361,9 @@ export function Header() {
                     // RGB değerlerini çıkar
                     const rgbMatch = bgColor.match(/\d+/g)
                     if (rgbMatch && rgbMatch.length >= 3) {
-                      const r = parseInt(rgbMatch[0])
-                      const g = parseInt(rgbMatch[1])
-                      const b = parseInt(rgbMatch[2])
+                      const r = parseInt(rgbMatch[0] || '0')
+                      const g = parseInt(rgbMatch[1] || '0')
+                      const b = parseInt(rgbMatch[2] || '0')
                       // Luminance hesapla
                       const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
                       return luminance
