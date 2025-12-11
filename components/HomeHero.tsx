@@ -156,7 +156,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
     setDraggedX(0)
   }
 
-  // Touch event'ler için non-passive listener
+  // Touch event'ler – dikey scroll'a izin ver, yatay sürüklemeyi koru
   useEffect(() => {
     const container = heroContainerRef.current
     if (!container) return
@@ -170,7 +170,6 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
       const startX = e.touches[0]?.clientX ?? 0
       setDragStartX(startX)
       setDraggedX(0)
-      e.preventDefault()
     }
 
     const handleTouchMove = (e: TouchEvent) => {
@@ -178,7 +177,6 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
       if (!e.touches || e.touches.length === 0) return
       const currentX = e.touches[0]?.clientX ?? 0
       setDraggedX(currentX - dragStartX)
-      e.preventDefault()
     }
 
     const handleTouchEnd = () => {
@@ -200,9 +198,9 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
       }
     }
 
-    container.addEventListener('touchstart', handleTouchStart, {passive: false})
-    container.addEventListener('touchmove', handleTouchMove, {passive: false})
-    container.addEventListener('touchend', handleTouchEnd, {passive: false})
+    container.addEventListener('touchstart', handleTouchStart, {passive: true})
+    container.addEventListener('touchmove', handleTouchMove, {passive: true})
+    container.addEventListener('touchend', handleTouchEnd, {passive: true})
 
     return () => {
       container.removeEventListener('touchstart', handleTouchStart)
@@ -426,6 +424,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
             WebkitOverflowScrolling: 'auto',
             boxSizing: 'border-box',
             position: 'relative',
+            touchAction: 'pan-y',
             ...(isMobile
               ? {
                   height: '100dvh',
