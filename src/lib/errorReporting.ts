@@ -77,27 +77,6 @@ class ErrorReporter {
             return event
           },
         })
-        
-        // Global unhandled promise rejection handler for Sentry session errors
-        if (typeof window !== 'undefined') {
-          const originalHandler = window.onunhandledrejection
-          window.onunhandledrejection = (event: PromiseRejectionEvent) => {
-            const errorMessage = event.reason?.message || String(event.reason || '')
-            // Silently ignore Sentry session fetch errors
-            if (
-              typeof errorMessage === 'string' &&
-              (errorMessage.includes('Could not fetch session') ||
-                errorMessage.includes('Access to storage is not allowed from this context'))
-            ) {
-              event.preventDefault()
-              return
-            }
-            // Call original handler if exists
-            if (originalHandler) {
-              originalHandler.call(window, event)
-            }
-          }
-        }
         if (import.meta.env.DEV && DEBUG_LOGS) {
           console.debug('[ErrorReporter] Sentry initialized')
         }

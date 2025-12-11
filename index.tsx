@@ -9,8 +9,50 @@ import './src/index.css'
 
 const DEBUG_LOGS = (import.meta.env as any).VITE_DEBUG_LOGS === 'true'
 
-// Filter out known non-critical console warnings
+// Patch Storage API to silently handle access errors (must be done early)
 if (typeof window !== 'undefined') {
+  try {
+    const StorageProto = window.Storage?.prototype
+    if (StorageProto) {
+      const BLOCK_SUBSTRING = 'Access to storage is not allowed'
+      const wrapMethod = (methodName: keyof Storage) => {
+        const original = (StorageProto as any)[methodName]
+        if (typeof original !== 'function') return
+        const wrapped = (StorageProto as any)[methodName]
+        if (wrapped.__patched) return // Already patched
+        
+        ;(StorageProto as any)[methodName] = function (...args: any[]) {
+          try {
+            return original.apply(this, args)
+          } catch (err: any) {
+            const msg = err?.message || String(err || '')
+            if (typeof msg === 'string' && msg.includes(BLOCK_SUBSTRING)) {
+              // Return appropriate default values
+              if (methodName === 'getItem' || methodName === 'key') {
+                return null
+              }
+              return undefined
+            }
+            throw err
+          }
+        }
+        ;(StorageProto as any)[methodName].__patched = true
+      }
+      
+      wrapMethod('getItem')
+      wrapMethod('setItem')
+      wrapMethod('removeItem')
+      wrapMethod('clear')
+      wrapMethod('key')
+    }
+  } catch {
+    // If patching fails, continue anyway
+  }
+}
+
+// Filter out known non-critical console warnings and errors
+if (typeof window !== 'undefined') {
+  // Filter console.warn
   const originalWarn = console.warn
   console.warn = (...args: any[]) => {
     const message = args.join(' ')
@@ -20,6 +62,84 @@ if (typeof window !== 'undefined') {
     }
     // Call original warn for other messages
     originalWarn.apply(console, args)
+  }
+
+  // Filter console.error for known non-critical errors
+  const originalError = console.error
+  console.error = (...args: any[]) => {
+    const message = args.join(' ')
+    // Filter out storage access errors and Sentry session errors
+    if (
+      typeof message === 'string' &&
+      (message.includes('Access to storage is not allowed from this context') ||
+        message.includes('Could not fetch session'))
+    ) {
+      return
+    }
+    // Call original error for other messages
+    originalError.apply(console, args)
+  }
+
+  // Global unhandled promise rejection handler - must be set early
+  const originalUnhandledRejection = window.onunhandledrejection
+  window.onunhandledrejection = (event: PromiseRejectionEvent) => {
+    const errorMessage =
+      event.reason?.message ||
+      event.reason?.toString() ||
+      String(event.reason || '')
+    
+    // Silently ignore known non-critical errors
+    if (
+      typeof errorMessage === 'string' &&
+      (errorMessage.includes('Could not fetch session') ||
+        errorMessage.includes('Access to storage is not allowed from this context'))
+    ) {
+      event.preventDefault()
+      return
+    }
+    
+    // Call original handler if exists
+    if (originalUnhandledRejection) {
+      originalUnhandledRejection.call(window, event)
+    }
+  }
+
+  // Also handle uncaught errors that might be related
+  const originalErrorHandler = window.onerror
+  window.onerror = (
+    message: string | Event,
+    source?: string,
+    lineno?: number,
+    colno?: number,
+    error?: Error
+  ): boolean => {
+    const errorMessage =
+      typeof message === 'string'
+        ? message
+        : error?.message || String(message || '')
+    
+    // Silently ignore known non-critical errors
+    if (
+      typeof errorMessage === 'string' &&
+      (errorMessage.includes('Could not fetch session') ||
+        errorMessage.includes('Access to storage is not allowed from this context'))
+    ) {
+      return true // Prevent default error handling
+    }
+    
+    // Call original handler if exists
+    if (originalErrorHandler) {
+      const result = originalErrorHandler.call(
+        window,
+        message,
+        source,
+        lineno,
+        colno,
+        error
+      )
+      return result === true
+    }
+    return false
   }
 }
 
