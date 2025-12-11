@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { OptimizedImage } from './OptimizedImage'
 import { OptimizedVideo } from './OptimizedVideo'
 
@@ -635,7 +636,8 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     }
   }, [])
 
-  return (
+  // React Portal ile document.body'ye render et - z-index sorunlarını önler
+  return createPortal(
     // Tam ekran overlay - arka plandaki sayfayı tamamen kapatır
     <div
       className="fixed bg-white flex flex-col overflow-hidden"
@@ -974,7 +976,8 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 

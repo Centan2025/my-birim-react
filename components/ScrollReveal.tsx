@@ -1,93 +1,73 @@
-import React, {useRef, useEffect, useState} from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 interface ScrollRevealProps {
   children: React.ReactNode
-  delay?: number // delay in ms
-  threshold?: number // 0 to 1
+  delay?: number
+  threshold?: number
   className?: string
   width?: string
-  direction?: 'up' | 'left' // Animasyon yönü: 'up' = aşağıdan yukarıya, 'left' = soldan sağa
+  direction?: 'up' | 'left'
+  distance?: number
+  duration?: number
 }
 
 const ScrollReveal: React.FC<ScrollRevealProps> = ({
   children,
   delay = 0,
-  threshold = 0.15,
+  threshold = 0.1,
   className = '',
   width = 'w-full',
   direction = 'up',
+  distance = 30,
+  duration = 0.25,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const elementRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (typeof window === 'undefined' || !ref.current) return
+    const element = elementRef.current
+    if (!element) return
 
-    // İlk render'da görünür alandaysa hemen göster (animasyon olmadan)
-    const checkInitialVisibility = () => {
-      if (!ref.current) return
-      const rect = ref.current.getBoundingClientRect()
-      const isInViewport = rect.top < window.innerHeight + 100 && rect.bottom > -100
-      
-      if (isInViewport) {
-        setIsVisible(true)
-        return true
-      }
-      return false
-    }
-
-    // İlk kontrolü hemen yap
-    if (checkInitialVisibility()) {
-      return
-    }
-
-    // Görünür alanda değilse IntersectionObserver ile izle
     const observer = new IntersectionObserver(
       (entries) => {
-        const entry = entries[0]
-        if (entry && entry.isIntersecting) {
-          setIsVisible(true)
-          observer.disconnect() // Only animate once
-        }
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Delay ile animasyonu başlat
+            setTimeout(() => {
+              setIsVisible(true)
+            }, delay)
+            // Bir kez görünür olduktan sonra observer'ı kaldır
+            observer.unobserve(entry.target)
+          }
+        })
       },
       {
         threshold,
-        rootMargin: '150px' // Daha erken tetikle - 150px önceden
+        rootMargin: threshold === 0 ? '0px 0px 100px 0px' : '0px 0px -50px 0px', // Footer elementleri için daha erken tetiklenir
       }
     )
 
-    observer.observe(ref.current)
+    observer.observe(element)
 
     return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current)
+      if (element) {
+        observer.unobserve(element)
       }
-      observer.disconnect()
     }
-  }, [threshold])
+  }, [delay, threshold])
 
-  const style = {
-    transitionDelay: `${delay}ms`,
-  }
-
-  // Animasyon yönüne göre transform class'ları
-  const getTransformClasses = () => {
-    if (direction === 'left') {
-      return isVisible
-        ? 'opacity-100 translate-x-0'
-        : 'opacity-0 -translate-x-40'
-    }
-    // Default: 'up' - aşağıdan yukarıya
-    return isVisible
-      ? 'opacity-100 translate-y-0'
-      : 'opacity-0 translate-y-32'
-  }
+  const translateDirection = direction === 'left' ? `translateX(-${distance}px)` : `translateY(${distance}px)`
 
   return (
     <div
-      ref={ref}
-      style={style}
-      className={`${width} transition-all duration-1000 ease-out transform ${getTransformClasses()} ${className}`}
+      ref={elementRef}
+      className={`${width} ${className}`}
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? 'translateY(0)' : translateDirection,
+        transition: `opacity ${duration}s ease-out ${delay}ms, transform ${duration}s ease-out ${delay}ms`,
+        willChange: 'opacity, transform',
+      }}
     >
       {children}
     </div>
@@ -95,4 +75,3 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
 }
 
 export default ScrollReveal
-

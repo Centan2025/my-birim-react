@@ -8,6 +8,7 @@ html {
 body {
   margin: 0;
   padding: 0;
+  background-color: #ffffff; /* Varsayılan beyaz arka plan */
   font-family:
     'Jura',
     'Inter',
@@ -77,6 +78,8 @@ body {
 .animate-fade-in-up {
   animation: fade-in-up 0.8s ease-out forwards;
 }
+
+/* Footer - animasyon yok */
 
 .animate-fade-in-up-subtle {
   animation: fade-in-up-subtle 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;

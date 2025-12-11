@@ -278,12 +278,22 @@ const BackToTopButton: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
+    let lastVisible = false
+    let ticking = false
+
     const handleScroll = () => {
-      if (window.scrollY > 400) {
-        setIsVisible(true)
-      } else {
-        setIsVisible(false)
-      }
+      if (ticking) return
+      ticking = true
+
+      requestAnimationFrame(() => {
+        const shouldBeVisible = window.scrollY > 400
+        // Sadece değiştiğinde state güncelle
+        if (shouldBeVisible !== lastVisible) {
+          lastVisible = shouldBeVisible
+          setIsVisible(shouldBeVisible)
+        }
+        ticking = false
+      })
     }
 
     handleScroll()
@@ -305,16 +315,8 @@ const BackToTopButton: React.FC = () => {
   )
 }
 
-const TopBanner = () => {
-  const {settings} = useSiteSettings()
-  const text = settings?.topBannerText?.trim()
-  if (!text) return null
-  return (
-    <div className="hidden md:block bg-gray-900 text-gray-200 text-xs md:text-sm px-4 sm:px-6 lg:px-8 py-2 border-b border-white/10">
-      <div className="container mx-auto">{text}</div>
-    </div>
-  )
-}
+// TopBanner kaldırıldı
+const TopBanner = () => null
 
 const Footer = () => {
   const [content, setContent] = useState<FooterContent | null>(null)
@@ -329,69 +331,70 @@ const Footer = () => {
     })
   }, [])
 
-  // Footer animasyonları kaldırıldı
-
   if (!content || !settings) return null
 
   return (
     <>
-      <footer className="bg-gray-800 text-gray-400" style={{position: 'relative', zIndex: 1}}>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-3 lg:py-8">
+      <footer 
+        className="bg-gray-800 text-gray-400"
+        style={{position: 'relative', zIndex: 1}}
+      >
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6 lg:py-12">
         {/* Mobil düzen */}
         <div className="lg:hidden flex flex-col items-center space-y-6">
           {/* Logo - ortada üstte */}
           <ScrollReveal delay={0} threshold={0.1} width="w-full" className="h-auto">
-            <Link to="/" className=" text-white -mt-4">
+            <Link to="/" className="text-white">
               <SiteLogo logoUrl={settings.logoUrl} className="h-6 w-auto mx-auto" />
             </Link>
           </ScrollReveal>
 
           {/* Menü düğmeleri - alt alta ortada */}
-          <nav className="flex flex-col items-center space-y-3">
-            <ScrollReveal delay={50} threshold={0.1} width="w-full" className="h-auto">
+          <nav className="flex flex-col items-center space-y-3 w-full">
+            <ScrollReveal delay={15} threshold={0.1} width="w-full" className="h-auto">
               <Link
                 to="/products"
-                className=" block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
+                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
               >
                 {t('view_all')}
               </Link>
             </ScrollReveal>
-            <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
+            <ScrollReveal delay={30} threshold={0.1} width="w-full" className="h-auto">
               <Link
                 to="/designers"
-                className=" block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
+                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
               >
                 {t('designers')}
               </Link>
             </ScrollReveal>
-            <ScrollReveal delay={150} threshold={0.1} width="w-full" className="h-auto">
+            <ScrollReveal delay={45} threshold={0.1} width="w-full" className="h-auto">
               <Link
                 to="/projects"
-                className=" block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
+                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
               >
                 {t('projects') || 'Projeler'}
               </Link>
             </ScrollReveal>
-            <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto">
+            <ScrollReveal delay={60} threshold={0.1} width="w-full" className="h-auto">
               <Link
                 to="/news"
-                className=" block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
+                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
               >
                 {t('news')}
               </Link>
             </ScrollReveal>
-            <ScrollReveal delay={250} threshold={0.1} width="w-full" className="h-auto">
+            <ScrollReveal delay={75} threshold={0.1} width="w-full" className="h-auto">
               <Link
                 to="/about"
-                className=" block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
+                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
               >
                 {t('about')}
               </Link>
             </ScrollReveal>
-            <ScrollReveal delay={300} threshold={0.1} width="w-full" className="h-auto">
+            <ScrollReveal delay={90} threshold={0.1} width="w-full" className="h-auto">
               <Link
                 to="/contact"
-                className=" block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
+                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
               >
                 {t('contact')}
               </Link>
@@ -399,14 +402,14 @@ const Footer = () => {
           </nav>
 
           {/* İnce çizgi */}
-          <ScrollReveal delay={350} threshold={0.1} width="w-full" className="h-auto">
+          <ScrollReveal delay={105} threshold={0.1} width="w-full" className="h-auto">
             <div className="w-full border-t border-gray-700"></div>
           </ScrollReveal>
 
           {/* Dil seçenekleri */}
-          <ScrollReveal delay={400} threshold={0.1} width="w-full" className="h-auto">
+          <ScrollReveal delay={120} threshold={0.1} width="w-full" className="h-auto">
             <div className="flex items-center justify-center gap-3 w-full">
-              {supportedLocales.map(langCode => {
+              {supportedLocales.map((langCode) => {
                 const isActive = locale === langCode
                 return (
                   <button
@@ -423,12 +426,12 @@ const Footer = () => {
           </ScrollReveal>
 
           {/* İnce çizgi */}
-          <ScrollReveal delay={450} threshold={0.1} width="w-full" className="h-auto">
+          <ScrollReveal delay={135} threshold={0.1} width="w-full" className="h-auto">
             <div className="w-full border-t border-gray-700"></div>
           </ScrollReveal>
 
           {/* Email abonelik formu - mobilde en altta ortalanmış */}
-          <ScrollReveal delay={500} threshold={0.1} width="w-full" className="h-auto">
+          <ScrollReveal delay={150} threshold={0.1} width="w-full" className="h-auto">
             <div className="w-full flex justify-center !mt-8 lg:!mt-6">
               <form
                 onSubmit={async e => {
@@ -455,10 +458,10 @@ const Footer = () => {
                 }}
                 className="flex flex-col items-center justify-center w-full"
               >
-                <ScrollReveal delay={550} threshold={0.1} width="w-full" className="h-auto">
+                <ScrollReveal delay={165} threshold={0.1} width="w-full" className="h-auto">
                   <p className="text-sm text-gray-300 mb-4 text-center">{t('subscribe_prompt')}</p>
                 </ScrollReveal>
-                <ScrollReveal delay={600} threshold={0.1} width="w-full" className="h-auto">
+                <ScrollReveal delay={180} threshold={0.1} width="w-full" className="h-auto">
                   <div className="flex items-center justify-center border-b border-white pb-0.5 w-full max-w-[280px] mx-auto">
                     <input
                       type="email"
@@ -474,7 +477,7 @@ const Footer = () => {
                     />
                   </div>
                 </ScrollReveal>
-                <ScrollReveal delay={650} threshold={0.1} width="w-full" className="h-auto">
+                <ScrollReveal delay={195} threshold={0.1} width="w-full" className="h-auto">
                   <div className="w-full flex justify-center mt-6">
                     <button
                       type="submit"
@@ -489,7 +492,7 @@ const Footer = () => {
           </ScrollReveal>
 
           {/* Partnerler - mobilde en altta */}
-          <ScrollReveal delay={700} threshold={0.1} width="w-full" className="h-auto">
+          <ScrollReveal delay={210} threshold={0.1} width="w-full" className="h-auto">
             <div className="flex items-center justify-center flex-wrap gap-6 mb-0">
               {(content.partners || content.partnerNames || []).map((partner, index) => {
                 const partnerName = typeof partner === 'string' ? partner : t(partner.name)
@@ -535,7 +538,7 @@ const Footer = () => {
                 <SiteLogo logoUrl={settings.logoUrl} className="h-4 w-auto" />
               </div>
             </ScrollReveal>
-            <ScrollReveal delay={50} threshold={0.1} width="w-auto" className="h-auto">
+            <ScrollReveal delay={15} threshold={0.1} width="w-full" className="h-auto">
               <div className="flex items-center flex-wrap gap-6 mb-4">
                 {(content.partners || content.partnerNames || []).map((partner, index) => {
                   const partnerName = typeof partner === 'string' ? partner : t(partner.name)
@@ -575,7 +578,7 @@ const Footer = () => {
           {/* Orta: Menü düğmeleri (sağa hizalı üstte) */}
           <div className="flex-1 flex justify-end">
             <nav className="flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold uppercase tracking-wider text-gray-300 items-center justify-end">
-              <ScrollReveal delay={100} threshold={0.1} width="w-auto" className="h-auto">
+              <ScrollReveal delay={30} threshold={0.1} width="w-auto" className="h-auto">
                 <Link to="/products" className="group relative hover:text-white">
                   <span className="relative inline-block">
                     {t('view_all')}
@@ -583,40 +586,40 @@ const Footer = () => {
                   </span>
                 </Link>
               </ScrollReveal>
-              <ScrollReveal delay={150} threshold={0.1} width="w-auto" className="h-auto">
-                <Link to="/designers" className=" group relative hover:text-white">
+              <ScrollReveal delay={45} threshold={0.1} width="w-auto" className="h-auto">
+                <Link to="/designers" className="group relative hover:text-white">
                   <span className="relative inline-block">
                     {t('designers')}
                     <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
                   </span>
                 </Link>
               </ScrollReveal>
-              <ScrollReveal delay={200} threshold={0.1} width="w-auto" className="h-auto">
-                <Link to="/projects" className=" group relative hover:text-white">
+              <ScrollReveal delay={60} threshold={0.1} width="w-auto" className="h-auto">
+                <Link to="/projects" className="group relative hover:text-white">
                   <span className="relative inline-block">
                     {t('projects') || 'Projeler'}
                     <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
                   </span>
                 </Link>
               </ScrollReveal>
-              <ScrollReveal delay={250} threshold={0.1} width="w-auto" className="h-auto">
-                <Link to="/news" className=" group relative hover:text-white">
+              <ScrollReveal delay={75} threshold={0.1} width="w-auto" className="h-auto">
+                <Link to="/news" className="group relative hover:text-white">
                   <span className="relative inline-block">
                     {t('news')}
                     <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
                   </span>
                 </Link>
               </ScrollReveal>
-              <ScrollReveal delay={300} threshold={0.1} width="w-auto" className="h-auto">
-                <Link to="/about" className=" group relative hover:text-white">
+              <ScrollReveal delay={90} threshold={0.1} width="w-auto" className="h-auto">
+                <Link to="/about" className="group relative hover:text-white">
                   <span className="relative inline-block">
                     {t('about')}
                     <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
                   </span>
                 </Link>
               </ScrollReveal>
-              <ScrollReveal delay={350} threshold={0.1} width="w-auto" className="h-auto">
-                <Link to="/contact" className=" group relative hover:text-white">
+              <ScrollReveal delay={105} threshold={0.1} width="w-auto" className="h-auto">
+                <Link to="/contact" className="group relative hover:text-white">
                   <span className="relative inline-block">
                     {t('contact')}
                     <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
@@ -627,19 +630,19 @@ const Footer = () => {
           </div>
         </div>
         {/* Sosyal medya linkleri ve email formu - aynı üst hizasında */}
-        <div className="mt-6 flex flex-col lg:flex-row flex-wrap items-center lg:items-start justify-center lg:justify-start gap-6 lg:gap-12">
+        <div className="mt-8 flex flex-col lg:flex-row flex-wrap items-center lg:items-start justify-center lg:justify-start gap-6 lg:gap-12">
           {/* Sosyal medya linkleri */}
-          <ScrollReveal delay={400} threshold={0.1} width="w-auto" className="h-auto">
+          <ScrollReveal delay={120} threshold={0.1} width="w-auto" className="h-auto">
             <div className="w-full lg:w-auto flex justify-center lg:justify-start space-x-6">
               {(content.socialLinks || [])
                 .filter(link => link.isEnabled)
                 .map((link, index) => (
-                  <ScrollReveal key={link.name} delay={400 + index * 50} threshold={0.1} width="w-auto" className="h-auto">
+                  <ScrollReveal key={link.name} delay={135 + index * 15} threshold={0.1} width="w-auto" className="h-auto">
                     <a
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className=" hover:text-white transition-opacity duration-200 opacity-70 hover:opacity-100"
+                      className="hover:text-white transition-opacity duration-200 opacity-70 hover:opacity-100"
                     >
                       <div className="w-3 h-3">
                         <DynamicIcon svgString={link.svgIcon} />
@@ -650,7 +653,7 @@ const Footer = () => {
             </div>
           </ScrollReveal>
           {/* Email abonelik formu - sadece desktop'ta */}
-          <ScrollReveal delay={500} threshold={0.1} width="w-auto" className="h-auto">
+          <ScrollReveal delay={150} threshold={0.1} width="w-full lg:w-auto" className="h-auto">
             <div className="hidden lg:flex lg:flex-1 lg:justify-end">
               <form
                 onSubmit={async e => {
@@ -678,42 +681,40 @@ const Footer = () => {
                 className="flex w-full lg:w-auto lg:justify-end"
               >
                 {/* Input + SUBSCRIBE hizası için ortak alt çizgi */}
-                <ScrollReveal delay={550} threshold={0.1} width="w-auto" className="h-auto">
-                  <div className="flex items-center w-full lg:w-auto lg:min-w-[320px] lg:ml-auto border-b border-white/80 pb-0.5 gap-2">
-                    <div className="flex-1 min-w-[180px]">
-                      <input
-                        type="email"
-                        id="footer-subscribe-email-inline"
-                        name="footer-subscribe-email-inline"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        placeholder={t('email_placeholder')}
-                        className=" w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[14px] text-left"
-                        style={{outline: 'none', boxShadow: 'none'}}
-                        onFocus={e => {
-                          e.target.style.outline = 'none'
-                          e.target.style.boxShadow = 'none'
-                        }}
-                        onBlur={e => {
-                          e.target.style.outline = 'none'
-                          e.target.style.boxShadow = 'none'
-                        }}
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      className=" px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-xs font-medium uppercase tracking-[0.25em]"
-                    >
-                      {t('subscribe')}
-                    </button>
+                <div className="flex items-center w-full lg:w-auto lg:min-w-[320px] lg:ml-auto border-b border-white/80 pb-0.5 gap-2">
+                  <div className="flex-1 min-w-[180px]">
+                    <input
+                      type="email"
+                      id="footer-subscribe-email-inline"
+                      name="footer-subscribe-email-inline"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder={t('email_placeholder')}
+                      className="w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[14px] text-left"
+                      style={{outline: 'none', boxShadow: 'none'}}
+                      onFocus={e => {
+                        e.target.style.outline = 'none'
+                        e.target.style.boxShadow = 'none'
+                      }}
+                      onBlur={e => {
+                        e.target.style.outline = 'none'
+                        e.target.style.boxShadow = 'none'
+                      }}
+                    />
                   </div>
-                </ScrollReveal>
+                  <button
+                    type="submit"
+                    className="px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-xs font-medium uppercase tracking-[0.25em]"
+                  >
+                    {t('subscribe')}
+                  </button>
+                </div>
               </form>
             </div>
           </ScrollReveal>
         </div>
-        <ScrollReveal delay={600} threshold={0.1} width="w-full" className="h-auto">
-          <div className=" mt-6 lg:mt-8 border-t border-gray-700 pt-6 flex flex-col md:flex-row md:justify-between md:items-start gap-4 text-xs">
+        <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
+          <div className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col md:flex-row md:justify-between md:items-start gap-4 text-xs">
             {content.legalLinks && content.legalLinks.length > 0 && (
               <div className="flex flex-col md:flex-row md:items-center md:gap-x-4 items-center gap-2">
                 {content.legalLinks
@@ -722,8 +723,8 @@ const Footer = () => {
                     const url = typeof link?.url === 'string' ? link.url : ''
                     if (!url) {
                       return (
-                        <ScrollReveal key={index} delay={600 + index * 50} threshold={0.1} width="w-auto" className="h-auto">
-                          <span className=" opacity-80 select-none text-gray-400">
+                        <ScrollReveal key={index} delay={185 + index * 10} threshold={0} width="w-auto" className="h-auto">
+                          <span className="opacity-80 select-none text-gray-400 whitespace-nowrap">
                             {t(link.text)}
                           </span>
                         </ScrollReveal>
@@ -731,25 +732,25 @@ const Footer = () => {
                     }
                     const isHttp = /^https?:\/\//.test(url)
                     const isInternalLink = url.startsWith('/') && !url.startsWith('//') && !isHttp
-                    return isInternalLink ? (
-                      <ScrollReveal key={index} delay={600 + index * 50} threshold={0.1} width="w-auto" className="h-auto">
-                        <Link
-                          to={url}
-                          className=" text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
-                        >
-                          {t(link.text)}
-                        </Link>
-                      </ScrollReveal>
-                    ) : (
-                      <ScrollReveal key={index} delay={600 + index * 50} threshold={0.1} width="w-auto" className="h-auto">
-                        <a
-                          href={url}
-                          className=" text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
-                          target={isHttp ? '_blank' : undefined}
-                          rel={isHttp ? 'noopener noreferrer' : undefined}
-                        >
-                          {t(link.text)}
-                        </a>
+                    return (
+                      <ScrollReveal key={index} delay={185 + index * 10} threshold={0} width="w-auto" className="h-auto">
+                        {isInternalLink ? (
+                          <Link
+                            to={url}
+                            className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm whitespace-nowrap"
+                          >
+                            {t(link.text)}
+                          </Link>
+                        ) : (
+                          <a
+                            href={url}
+                            className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm whitespace-nowrap"
+                            target={isHttp ? '_blank' : undefined}
+                            rel={isHttp ? 'noopener noreferrer' : undefined}
+                          >
+                            {t(link.text)}
+                          </a>
+                        )}
                       </ScrollReveal>
                     )
                   })}
@@ -757,9 +758,9 @@ const Footer = () => {
             )}
           </div>
         </ScrollReveal>
-        <ScrollReveal delay={700} threshold={0.1} width="w-full" className="h-auto">
-          <div className="mt-4 text-center md:text-left text-xs">
-            <p className="">{t(content.copyrightText)}</p>
+        <ScrollReveal delay={210} threshold={0} width="w-full" className="h-auto">
+          <div className="mt-6 text-center md:text-left text-xs pb-4">
+            <p>{t(content.copyrightText)}</p>
           </div>
         </ScrollReveal>
       </div>

@@ -432,7 +432,7 @@ export function HomePage() {
       )}
 
       {/* Hero Altı Gri Bant */}
-      <section className="w-full bg-gray-200 h-10 md:h-12" />
+      <section className="w-full bg-gray-100 h-10 md:h-12" />
 
       {/* Content Blocks Section */}
       {content?.contentBlocks &&
@@ -494,7 +494,7 @@ export function HomePage() {
                       <div className="w-full overflow-hidden">
                         {block.title && (
                           <div className="container mx-auto px-2 sm:px-3 lg:px-4 pt-6 md:pt-8 pb-6 md:pb-8">
-                            <ScrollReveal delay={0} threshold={0.1} width="w-full" className="h-auto">
+                            <ScrollReveal delay={0} threshold={0.1} width="w-full" className="h-auto" distance={50} duration={0.6}>
                               <h2
                                 className={`text-2xl md:text-4xl lg:text-5xl font-bold ${titleFontClass} ${textAlignClass} text-gray-950`}
                                 style={titleFontStyle}
@@ -563,7 +563,7 @@ export function HomePage() {
                       <div className="container mx-auto px-2 sm:px-3 lg:px-4">
                         {block.title && (
                           <div className={`pt-6 md:pt-8 pb-6 md:pb-8 ${textAlignClass}`}>
-                            <ScrollReveal delay={0} threshold={0.1} width="w-full" className="h-auto">
+                            <ScrollReveal delay={0} threshold={0.1} width="w-full" className="h-auto" distance={50} duration={0.6}>
                               <h2
                                 className={`text-2xl md:text-4xl lg:text-5xl font-bold ${titleFontClass} text-gray-950`}
                                 style={titleFontStyle}

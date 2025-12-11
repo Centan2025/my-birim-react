@@ -342,7 +342,7 @@ export function ProjectDetailPage() {
 
   return (
     <div 
-      className={`min-h-screen transition-all duration-700 ease-out ${
+      className={`min-h-screen bg-white transition-all duration-700 ease-out ${
         isPageVisible
           ? 'opacity-100 translate-y-0'
           : 'opacity-0 translate-y-20'
@@ -351,7 +351,7 @@ export function ProjectDetailPage() {
         transform: isPageVisible ? 'translateY(0)' : 'translateY(80px)',
       }}
     >
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24">
       <Breadcrumbs
         className="mb-6"
         items={[
@@ -697,7 +697,7 @@ export function ProjectDetailPage() {
         </div>
       )}
 
-      {/* Bottom Prev / Next controls */}
+      {/* Bottom Prev / Next controls - footer'ın hemen üzerinde */}
       {showBottomPrevNext && (prevProject || nextProject) && (
         <div className="bg-white border-t border-gray-200">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
