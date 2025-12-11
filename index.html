@@ -143,8 +143,8 @@
           originalWarn.apply(console, arguments);
         };
         
-        // Prevent Sentry feedback widget from loading
-        // Block feedback.html and feedback.js requests
+        // Prevent Sentry and Vercel feedback widgets from loading
+        // Block feedback.html, feedback.js, and Vercel instrument requests
         var originalFetch = window.fetch;
         if (originalFetch) {
           window.fetch = function() {
@@ -152,22 +152,24 @@
             if (typeof url === 'string' && (
               url.indexOf('feedback.html') !== -1 ||
               url.indexOf('feedback.js') !== -1 ||
-              url.indexOf('/feedback') !== -1
+              url.indexOf('/feedback') !== -1 ||
+              url.indexOf('instrument') !== -1
             )) {
-              return Promise.reject(new Error('Feedback widget blocked'));
+              // Return a resolved promise with empty response to avoid errors
+              return Promise.resolve(new Response('', { status: 200 }));
             }
             return originalFetch.apply(this, arguments);
           };
         }
         
-        // Also block script tags that load feedback
+        // Also block script tags that load feedback or Vercel analytics
         var observer = new MutationObserver(function(mutations) {
           mutations.forEach(function(mutation) {
             mutation.addedNodes.forEach(function(node) {
               if (node.nodeType === 1) { // Element node
                 if (node.tagName === 'SCRIPT' || node.tagName === 'IFRAME') {
                   var src = node.src || node.getAttribute('src') || '';
-                  if (src.indexOf('feedback') !== -1) {
+                  if (src.indexOf('feedback') !== -1 || src.indexOf('instrument') !== -1) {
                     node.remove();
                   }
                 }
