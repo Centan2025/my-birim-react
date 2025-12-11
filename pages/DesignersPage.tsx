@@ -62,7 +62,7 @@ export function DesignersPage() {
             {label: t('designers')},
           ]}
         />
-        <div className="text-center mb-12">
+        <div className="text-center mt-6 md:mt-8 mb-12">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600">{t('designers')}</h1>
           <div className="h-px bg-gray-300 mt-4 w-full"></div>
         </div>

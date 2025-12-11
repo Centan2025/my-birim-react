@@ -449,20 +449,28 @@ export function ProductDetailPage() {
   }, [])
 
   // HomePage hero medya mantığına benzer drag + sonsuz kayma sistemi
+  const dragStartY = useRef<number>(0)
   const handleHeroDragStart = (
     e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
   ) => {
     if (e.target instanceof HTMLElement && e.target.closest('a, button')) {
       return
     }
-    setIsDragging(true)
     const startX =
       'touches' in e && e.touches && e.touches.length > 0
         ? (e.touches[0]?.clientX ?? 0)
         : 'clientX' in e
           ? e.clientX
           : 0
+    const startY =
+      'touches' in e && e.touches && e.touches.length > 0
+        ? (e.touches[0]?.clientY ?? 0)
+        : 'clientY' in e
+          ? e.clientY
+          : 0
+    setIsDragging(true)
     setDragStartX(startX)
+    dragStartY.current = startY
     setDraggedX(0)
     // React 18+ touch event'leri varsayılan olarak passive olabilir;
     // bu nedenle sadece mouse olaylarında preventDefault çağır.
@@ -481,6 +489,22 @@ export function ProductDetailPage() {
         : 'clientX' in e
           ? e.clientX
           : 0
+    const currentY =
+      'touches' in e && e.touches && e.touches.length > 0
+        ? (e.touches[0]?.clientY ?? 0)
+        : 'clientY' in e
+          ? e.clientY
+          : 0
+    
+    const deltaX = Math.abs(currentX - dragStartX)
+    const deltaY = Math.abs(currentY - dragStartY.current)
+    
+    // Dikey scroll daha fazlaysa, yatay drag'ı iptal et ve sayfa scroll'una izin ver
+    if (deltaY > deltaX && deltaY > 10) {
+      setIsDragging(false)
+      return
+    }
+    
     setDraggedX(currentX - dragStartX)
   }
 
@@ -725,6 +749,43 @@ export function ProductDetailPage() {
               height: 70vh !important;
               min-height: 70vh !important;
               max-height: 70vh !important;
+            }
+          }
+          /* Mobilde sayfa scroll'unu düzelt */
+          @media (max-width: 1023px) {
+            /* Ana container ve body scroll düzeltmesi */
+            html, body {
+              overflow-x: hidden;
+              overflow-y: auto !important;
+              height: auto !important;
+              min-height: 100vh;
+            }
+            /* Hero touch action */
+            [data-product-detail] header > div:first-child {
+              touch-action: pan-x pan-y;
+            }
+            /* Thumbnail container - yatay scroll korunmalı */
+            [data-product-detail] header .hide-scrollbar {
+              overflow-x: auto !important;
+              overflow-y: visible !important;
+            }
+            /* Main içerik tam yükseklikte olmalı */
+            [data-product-detail] {
+              min-height: 100vh;
+              overflow: visible !important;
+            }
+            [data-product-detail] main {
+              touch-action: pan-y;
+              -webkit-overflow-scrolling: touch;
+              overflow: visible !important;
+              height: auto !important;
+              max-height: none !important;
+              min-height: auto !important;
+            }
+            [data-product-detail] main > div {
+              overflow: visible !important;
+              height: auto !important;
+              max-height: none !important;
             }
           }
         `}
@@ -1115,7 +1176,7 @@ export function ProductDetailPage() {
           </div>
           
           {/* Breadcrumbs - mobilde thumbnails bantının altında */}
-          <nav className="lg:hidden py-4 text-[11px] sm:text-[12px] text-gray-500" aria-label="Breadcrumb">
+          <nav className="lg:hidden py-8 mt-4 text-[11px] sm:text-[12px] text-gray-500" aria-label="Breadcrumb">
             <ol className="list-none p-0 inline-flex items-center">
               <li>
                 <Link to="/" className="hover:text-gray-800 uppercase underline underline-offset-4">

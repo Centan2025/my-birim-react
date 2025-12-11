@@ -67,7 +67,7 @@ export function NewsPage() {
             {label: t('news')},
           ]}
         />
-        <div className="text-center mb-16">
+        <div className="text-center mt-6 md:mt-8 mb-16">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600 uppercase">
             {t('news_title')}
           </h1>

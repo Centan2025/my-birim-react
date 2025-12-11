@@ -171,7 +171,7 @@ const CrossFadeText: React.FC<{
   if (!isAnimating) {
     return (
       <span className={`relative inline-block ${className}`}>
-        <span className="block">{currentText}</span>
+        <span className={`block ${className}`}>{currentText}</span>
       </span>
     )
   }
@@ -179,9 +179,9 @@ const CrossFadeText: React.FC<{
   return (
     <span key={String(triggerKey)} className={`relative inline-block ${className}`}>
       {/* Yeni metin normal akışta, genişlik HER ZAMAN buna göre belirlenir */}
-      <span className="block cross-fade-text-in">{currentText}</span>
+      <span className={`block cross-fade-text-in ${className}`}>{currentText}</span>
       {/* Eski metin mutlak pozisyonda, sadece görsel olarak üstüne bindiriliyor */}
-      <span className="block absolute inset-0 cross-fade-text-out">{previousText}</span>
+      <span className={`block absolute inset-0 cross-fade-text-out ${className}`}>{previousText}</span>
     </span>
   )
 }
@@ -1207,6 +1207,27 @@ export function Header() {
             background: #000000 !important;
           }
           
+          /* Mobil menüde TÜM menü öğeleri için aynı font boyutu garantisi */
+          #mobile-menu nav button,
+          #mobile-menu nav a,
+          #mobile-menu nav button *,
+          #mobile-menu nav a *,
+          #mobile-menu nav button span,
+          #mobile-menu nav a span,
+          #mobile-menu nav button span span,
+          #mobile-menu nav a span span,
+          #mobile-menu nav button span span span,
+          #mobile-menu nav a span span span,
+          #mobile-menu nav button .cross-fade-text-in,
+          #mobile-menu nav a .cross-fade-text-in,
+          #mobile-menu nav button .cross-fade-text-out,
+          #mobile-menu nav a .cross-fade-text-out {
+            font-size: 1.25rem !important;
+            font-weight: 300 !important;
+            letter-spacing: 0.2em !important;
+            line-height: 1.25 !important;
+          }
+          
         `}
       </style>
       <header
@@ -1846,7 +1867,7 @@ export function Header() {
                   <div className="border-b border-white/10">
                     <button
                       onClick={() => setIsMobileProductsMenuOpen(!isMobileProductsMenuOpen)}
-                      className="flex items-center justify-between w-full min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300"
+                      className="mobile-menu-products-button flex items-center justify-between w-full min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300"
                     >
                       <CrossFadeText text={t('products')} triggerKey={locale} />
                       <svg

@@ -360,7 +360,7 @@ export function ProjectDetailPage() {
           {label: t(project.title)},
         ]}
       />
-      <div className="mb-4 md:mb-6 lg:mb-6">
+      <div className="mt-6 md:mt-8 mb-4 md:mb-6 lg:mb-6">
         <h1 
           className="text-4xl font-light tracking-tight text-gray-900"
           style={{

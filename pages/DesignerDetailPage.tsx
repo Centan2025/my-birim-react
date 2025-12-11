@@ -77,7 +77,7 @@ export function DesignerDetailPage() {
             {label: t(designer.name)},
           ]}
         />
-        <div className="flex flex-col md:flex-row-reverse items-center md:items-start gap-8 md:gap-16 mb-12">
+        <div className="flex flex-col md:flex-row-reverse items-center md:items-start gap-8 md:gap-16 mt-6 md:mt-8 mb-12">
           <div className="flex-shrink-0">
             <OptimizedImage
               src={typeof designer.image === 'string' ? designer.image : designer.image?.url || ''}
@@ -111,11 +111,12 @@ export function DesignerDetailPage() {
           </div>
         </div>
 
-        <div className="border-t pt-12">
-          <h2 className="text-3xl font-light text-gray-600 mb-8">
-            {t('designs') || 'Tasarımları'}
-          </h2>
-          {products.length > 0 ? (
+        <ScrollReveal delay={400} threshold={0.01}>
+          <div className="border-t pt-12 mt-6 md:mt-8">
+            <h2 className="text-3xl font-light text-gray-600 mb-8">
+              {t('designs') || 'Tasarımları'}
+            </h2>
+            {products.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[2px]">
               {products.map((product, index) => (
                 <ScrollReveal 
@@ -132,7 +133,8 @@ export function DesignerDetailPage() {
               <p className="text-gray-600">{t('no_products_by_designer')}</p>
             </ScrollReveal>
           )}
-        </div>
+          </div>
+        </ScrollReveal>
       </div>
     </div>
   )

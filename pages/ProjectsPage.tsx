@@ -58,7 +58,7 @@ export function ProjectsPage() {
             {label: t('projects') || 'Projeler'},
           ]}
         />
-        <div className="text-center mb-12">
+        <div className="text-center mt-6 md:mt-8 mb-12">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600">
             {t('projects') || 'Projeler'}
           </h1>

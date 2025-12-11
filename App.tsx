@@ -312,8 +312,9 @@ const Footer = () => {
   if (!content || !settings) return null
 
   return (
-    <footer className="bg-gray-800 text-gray-400" style={{position: 'relative', zIndex: 1}}>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <>
+      <footer className="bg-gray-800 text-gray-400" style={{position: 'relative', zIndex: 1}}>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-3 lg:py-8">
         {/* Mobil düzen */}
         <div className="lg:hidden flex flex-col items-center space-y-6">
           {/* Logo - ortada üstte */}
@@ -741,6 +742,9 @@ const Footer = () => {
         </ScrollReveal>
       </div>
     </footer>
+    {/* Mobilde footer'dan sonra ekstra padding - scroll bounce beyaz alanını önler */}
+    <div className="lg:hidden h-2 bg-gray-800" aria-hidden="true"></div>
+    </>
   )
 }
 

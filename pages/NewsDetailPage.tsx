@@ -225,7 +225,7 @@ export function NewsDetailPage() {
           </nav>
 
           <article>
-            <div className="mb-6">
+            <div className="mt-6 md:mt-8 mb-6">
               <p className="text-sm text-gray-500 mb-3 font-light">{formatDate(item.date)}</p>
               <div className="h-px bg-gray-300"></div>
             </div>
