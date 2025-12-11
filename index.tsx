@@ -69,10 +69,13 @@ if (typeof window !== 'undefined') {
   console.error = (...args: any[]) => {
     const message = args.join(' ')
     // Filter out storage access errors and Sentry session errors
+    // Also filter "Uncaught (in promise)" messages for these errors
     if (
       typeof message === 'string' &&
-      (message.includes('Access to storage is not allowed from this context') ||
-        message.includes('Could not fetch session'))
+      (message.includes('Access to storage is not allowed') ||
+        message.includes('Could not fetch session') ||
+        (message.includes('Uncaught (in promise)') &&
+          (message.includes('Access to storage') || message.includes('Could not fetch session'))))
     ) {
       return
     }
@@ -81,6 +84,27 @@ if (typeof window !== 'undefined') {
   }
 
   // Global unhandled promise rejection handler - must be set early
+  // Use addEventListener for better compatibility and earlier execution
+  window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
+    const errorMessage =
+      event.reason?.message ||
+      event.reason?.toString() ||
+      String(event.reason || '')
+    
+    // Silently ignore known non-critical errors
+    if (
+      typeof errorMessage === 'string' &&
+      (errorMessage.includes('Could not fetch session') ||
+        errorMessage.includes('Access to storage is not allowed from this context') ||
+        errorMessage.includes('Access to storage is not allowed'))
+    ) {
+      event.preventDefault()
+      event.stopPropagation()
+      return
+    }
+  }, true) // Use capture phase for earlier execution
+
+  // Also set onunhandledrejection as fallback
   const originalUnhandledRejection = window.onunhandledrejection
   window.onunhandledrejection = (event: PromiseRejectionEvent) => {
     const errorMessage =
@@ -92,7 +116,8 @@ if (typeof window !== 'undefined') {
     if (
       typeof errorMessage === 'string' &&
       (errorMessage.includes('Could not fetch session') ||
-        errorMessage.includes('Access to storage is not allowed from this context'))
+        errorMessage.includes('Access to storage is not allowed from this context') ||
+        errorMessage.includes('Access to storage is not allowed'))
     ) {
       event.preventDefault()
       return
@@ -105,6 +130,27 @@ if (typeof window !== 'undefined') {
   }
 
   // Also handle uncaught errors that might be related
+  // Use addEventListener for better compatibility
+  window.addEventListener('error', (event: ErrorEvent) => {
+    const errorMessage =
+      event.message ||
+      event.error?.message ||
+      String(event.error || '')
+    
+    // Silently ignore known non-critical errors
+    if (
+      typeof errorMessage === 'string' &&
+      (errorMessage.includes('Could not fetch session') ||
+        errorMessage.includes('Access to storage is not allowed') ||
+        errorMessage.includes('Access to storage is not allowed from this context'))
+    ) {
+      event.preventDefault()
+      event.stopPropagation()
+      return
+    }
+  }, true) // Use capture phase for earlier execution
+
+  // Also set onerror as fallback
   const originalErrorHandler = window.onerror
   window.onerror = (
     message: string | Event,
@@ -122,6 +168,7 @@ if (typeof window !== 'undefined') {
     if (
       typeof errorMessage === 'string' &&
       (errorMessage.includes('Could not fetch session') ||
+        errorMessage.includes('Access to storage is not allowed') ||
         errorMessage.includes('Access to storage is not allowed from this context'))
     ) {
       return true // Prevent default error handling

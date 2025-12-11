@@ -20,6 +20,106 @@
       href="https://fonts.googleapis.com/css2?family=Jura:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <!-- Early error handlers - must run before any other scripts -->
+    <script>
+      (function() {
+        'use strict';
+        
+        // Patch Storage API immediately
+        try {
+          if (window.Storage && window.Storage.prototype) {
+            var StorageProto = window.Storage.prototype;
+            var BLOCK_SUBSTRING = 'Access to storage is not allowed';
+            
+            var wrapMethod = function(methodName) {
+              var original = StorageProto[methodName];
+              if (typeof original !== 'function') return;
+              if (StorageProto[methodName].__patched) return;
+              
+              StorageProto[methodName] = function() {
+                try {
+                  return original.apply(this, arguments);
+                } catch (err) {
+                  var msg = err && err.message ? String(err.message) : String(err || '');
+                  if (typeof msg === 'string' && msg.indexOf(BLOCK_SUBSTRING) !== -1) {
+                    if (methodName === 'getItem' || methodName === 'key') {
+                      return null;
+                    }
+                    return undefined;
+                  }
+                  throw err;
+                }
+              };
+              StorageProto[methodName].__patched = true;
+            };
+            
+            wrapMethod('getItem');
+            wrapMethod('setItem');
+            wrapMethod('removeItem');
+            wrapMethod('clear');
+            wrapMethod('key');
+          }
+        } catch (e) {
+          // Silently fail if patching doesn't work
+        }
+        
+        // Global promise rejection handler
+        window.addEventListener('unhandledrejection', function(event) {
+          var errorMessage = '';
+          if (event.reason) {
+            errorMessage = event.reason.message || event.reason.toString() || String(event.reason || '');
+          }
+          
+          if (typeof errorMessage === 'string' && (
+            errorMessage.indexOf('Could not fetch session') !== -1 ||
+            errorMessage.indexOf('Access to storage is not allowed') !== -1
+          )) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+          }
+        }, true);
+        
+        // Global error handler
+        window.addEventListener('error', function(event) {
+          var errorMessage = event.message || (event.error && event.error.message) || String(event.error || '');
+          
+          if (typeof errorMessage === 'string' && (
+            errorMessage.indexOf('Could not fetch session') !== -1 ||
+            errorMessage.indexOf('Access to storage is not allowed') !== -1
+          )) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+          }
+        }, true);
+        
+        // Filter console.error
+        var originalError = console.error;
+        console.error = function() {
+          var message = Array.prototype.join.call(arguments, ' ');
+          if (typeof message === 'string' && (
+            message.indexOf('Access to storage is not allowed') !== -1 ||
+            message.indexOf('Could not fetch session') !== -1 ||
+            (message.indexOf('Uncaught (in promise)') !== -1 && 
+             (message.indexOf('Access to storage') !== -1 || message.indexOf('Could not fetch session') !== -1))
+          )) {
+            return;
+          }
+          originalError.apply(console, arguments);
+        };
+        
+        // Filter console.warn for Zustand
+        var originalWarn = console.warn;
+        console.warn = function() {
+          var message = Array.prototype.join.call(arguments, ' ');
+          if (typeof message === 'string' && message.indexOf('[DEPRECATED] Default export is deprecated') !== -1) {
+            return;
+          }
+          originalWarn.apply(console, arguments);
+        };
+      })();
+    </script>
 <script type="importmap">
 {
   "imports": {
