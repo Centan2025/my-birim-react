@@ -1,9 +1,5 @@
 {
   "outputDirectory": "dist",
-  "analytics": false,
-  "speedInsights": {
-    "enabled": false
-  },
   "rewrites": [
     {
       "source": "/((?!assets/|img/|robots\\.txt|sitemap\\.xml|favicon\\.ico).*)",
