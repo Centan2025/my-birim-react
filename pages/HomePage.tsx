@@ -306,8 +306,9 @@ export function HomePage() {
               .hero-slide-mobile,
               .hero-slide-mobile[style] {
                 /* Genişlik inline style'dan gelecek, CSS override etmesin */
-                height: auto !important;
-                min-height: auto !important;
+                height: 100vh !important;
+                min-height: 100vh !important;
+                max-height: 100vh !important;
                 flex-shrink: 0 !important;
                 flex-grow: 0 !important;
                 padding: 0 !important;
@@ -341,17 +342,18 @@ export function HomePage() {
                 width: 100vw !important;
                 min-width: 100vw !important;
                 max-width: 100vw !important;
-                height: auto !important;
-                min-height: auto !important;
+                height: 100vh !important;
+                min-height: 100vh !important;
+                max-height: 100vh !important;
                 left: 0 !important;
                 right: 0 !important;
                 margin-left: 0 !important;
                 margin-right: 0 !important;
                 padding-left: 0 !important;
                 padding-right: 0 !important;
-                object-fit: contain !important;
-                object-position: top !important;
-                position: relative !important;
+                object-fit: cover !important;
+                object-position: center !important;
+                position: absolute !important;
                 top: 0 !important;
                 transform: none !important;
                 box-sizing: border-box !important;
@@ -367,17 +369,18 @@ export function HomePage() {
                 width: 100vw !important;
                 min-width: 100vw !important;
                 max-width: 100vw !important;
-                height: auto !important;
-                min-height: auto !important;
+                height: 100vh !important;
+                min-height: 100vh !important;
+                max-height: 100vh !important;
                 left: 0 !important;
                 right: 0 !important;
                 margin-left: 0 !important;
                 margin-right: 0 !important;
                 padding-left: 0 !important;
                 padding-right: 0 !important;
-                object-fit: contain !important;
-                object-position: top !important;
-                position: relative !important;
+                object-fit: cover !important;
+                object-position: center !important;
+                position: absolute !important;
                 top: 0 !important;
                 transform: none !important;
                 box-sizing: border-box !important;

@@ -504,7 +504,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
   return (
     <>
       <div // eslint-disable-line jsx-a11y/no-static-element-interactions
-        className={`relative ${isMobile ? '' : 'h-screen'} md:h-screen overflow-hidden cursor-grab active:cursor-grabbing`}
+        className={`relative ${isMobile ? 'h-screen' : 'h-screen'} md:h-screen overflow-hidden cursor-grab active:cursor-grabbing`}
         ref={heroContainerRef}
         onMouseDown={handleDragStart}
         onMouseMove={handleDragMove}
@@ -524,11 +524,11 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
             WebkitOverflowScrolling: 'auto',
             boxSizing: 'border-box',
             position: 'relative',
-            ...(isMobile && heroHeight
+            ...(isMobile
               ? {
-                  height: `${heroHeight}px`,
-                  minHeight: `${heroHeight}px`,
-                  maxHeight: `${heroHeight}px`,
+                  height: '100vh',
+                  minHeight: '100vh',
+                  maxHeight: '100vh',
                 }
               : {}),
           } as React.CSSProperties
@@ -576,7 +576,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
             return (
               <div
                 key={`${realIndex}-${index}`}
-                className={`relative ${isMobile ? '' : 'h-full'} flex-shrink-0 ${isMobile ? 'hero-slide-mobile' : ''}`}
+                className={`relative ${isMobile ? 'h-full' : 'h-full'} flex-shrink-0 ${isMobile ? 'hero-slide-mobile' : ''}`}
                 style={{
                   width: isMobile && viewportWidth > 0 ? `${viewportWidth}px` : '100%',
                   minWidth: isMobile && viewportWidth > 0 ? `${viewportWidth}px` : '100%',
@@ -590,11 +590,9 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                   boxSizing: 'border-box',
                   overflow: 'hidden',
                   position: 'relative',
-                  ...(isMobile && heroHeight
-                    ? {height: `${heroHeight}px`, minHeight: `${heroHeight}px`}
-                    : !isMobile
-                      ? {height: '100%', minHeight: '100%'}
-                      : {}),
+                  ...(isMobile
+                    ? {height: '100vh', minHeight: '100vh', maxHeight: '100vh'}
+                    : {height: '100%', minHeight: '100%'}),
                 }}
               >
                 {media.type === 'video' ? (
@@ -602,7 +600,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                     src={media.url}
                     srcMobile={media.urlMobile}
                     srcDesktop={media.urlDesktop}
-                    className={`${isMobile ? 'relative' : 'absolute'} top-0 left-0 w-full ${isMobile ? 'h-auto' : 'h-full'} ${isMobile ? 'object-contain object-top' : 'object-cover'}`}
+                    className={`${isMobile ? 'absolute' : 'absolute'} top-0 left-0 w-full ${isMobile ? 'h-full' : 'h-full'} ${isMobile ? 'object-cover object-center' : 'object-cover'}`}
                     autoPlay
                     loop
                     muted
@@ -618,7 +616,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                     srcMobile={media.urlMobile}
                     srcDesktop={media.urlDesktop}
                     alt={t(media.title || '')}
-                    className={`${isMobile ? 'relative' : 'absolute'} top-0 left-0 w-full ${isMobile ? 'h-auto' : 'h-full'} ${isMobile ? 'object-contain object-top' : 'object-cover'}`}
+                    className={`${isMobile ? 'absolute' : 'absolute'} top-0 left-0 w-full ${isMobile ? 'h-full' : 'h-full'} ${isMobile ? 'object-cover object-center' : 'object-cover'}`}
                     loading="eager"
                     quality={90}
                   />
