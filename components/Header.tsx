@@ -215,12 +215,23 @@ export function Header() {
   const {cartCount, toggleCart} = useCart()
   const [headerOpacity, setHeaderOpacity] = useState(0)
   const [isHeaderVisible, setIsHeaderVisible] = useState(true)
-  const [lastScrollY, setLastScrollY] = useState(0)
+  const lastScrollYRef = useRef(0)
   const scrollPositionRef = useRef(0)
+  const headerVisibilityLastChanged = useRef(0)
+  const lastScrollForHeader = useRef(0) // Header visibility için ayrı scroll takibi
   const [isMobile, setIsMobile] = useState(false)
   const [headerHeight, setHeaderHeight] = useState(56) // 3.5rem = 56px (mobil için varsayılan)
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [heroBrightness, setHeroBrightness] = useState<number | null>(null)
+  const heroBrightnessRef = useRef<number | null>(null)
+  const opacitySetByHandleScrollRef = useRef(false) // handleScroll tarafından opacity ayarlandı mı kontrolü için
+  // Menü state'lerini ref olarak da tut (scroll handler için)
+  const menuStateRef = useRef({
+    isLangOpen: false,
+    isProductsOpen: false,
+    isSearchOpen: false,
+    isMobileMenuOpen: false,
+  })
   const [settings, setSettings] = useState<SiteSettings | null>(null)
   const currentRouteRef = useRef<string>(location.pathname)
   const [isMobileLocaleTransition, setIsMobileLocaleTransition] = useState(false)
@@ -267,7 +278,9 @@ export function Header() {
     // Sayfa değiştiğinde brightness'i hemen sıfırla
     setHeroBrightness(null)
     // Scroll pozisyonunu sıfırla (ScrollToTop component'i bunu yapıyor ama biz de garantilemek için)
-    setLastScrollY(0)
+    lastScrollYRef.current = 0
+    // Flag'i sıfırla (route değiştiğinde)
+    opacitySetByHandleScrollRef.current = false
     // Header opacity'yi hemen 0 yap (route değiştiğinde)
     if (isMobile) {
       setHeaderOpacity(0)
@@ -489,10 +502,197 @@ export function Header() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
+  // Koyu hero olan sayfaları kontrol et
+  const isDarkHeroPage = () => {
+    const path = location.pathname
+    // HashRouter'da path / veya /about gibi gelir
+    return path === '/' || path === '' || path.includes('about')
+  }
+
+  // Açık arka planlı sayfaları kontrol et (hero olmayan)
+  const isLightBackgroundPage = () => {
+    const path = location.pathname
+    // Bu sayfalarda hero yok ve arka plan açık renk
+    // NOT: /projects/123 gibi detay sayfaları hariç (onlar beyaz arka planlı)
+    // NOT: /products/123 gibi detay sayfaları hariç (onlarda hero var)
+    // NOT: /news/123 gibi detay sayfaları hariç (onlar beyaz arka planlı)
+    const isProjectsList = path === '/projects' || path === '/projects/'
+    const isProductsList = path === '/products' || path === '/products/' || path.match(/^\/products\/?$/)
+    const isNewsList = path === '/news' || path === '/news/'
+    
+    return isProjectsList || 
+           isProductsList || 
+           isNewsList ||
+           path.includes('contact') ||
+           path.includes('cart') ||
+           path.includes('favorites') ||
+           path.includes('profile') ||
+           path.includes('orders') ||
+           path.includes('search')
+  }
+
+  // Beyaz arka planlı sayfa (detay sayfaları)
+  const isWhiteBackgroundPage = () => {
+    const path = location.pathname
+    // Proje detay, haberler detay ve ürün detay sayfaları beyaz arka planlı
+    // NOT: Ürün detay route'u /product/:productId şeklinde (tekil)
+    const isProjectDetail = path.match(/^\/projects\/[^/]+$/)
+    const isProductDetail = path.match(/^\/product\/[^/]+$/)
+    const isNewsDetail = path.match(/^\/news\/[^/]+$/)
+    return isProjectDetail || isProductDetail || isNewsDetail
+  }
+
+  // heroBrightness değiştiğinde ref'i güncelle ve opacity'yi ayarla
+  useEffect(() => {
+    heroBrightnessRef.current = heroBrightness
+    
+    // Products menüsü açıkken opacity'yi değiştirme
+    if (isProductsOpen) return
+    
+    // Sayfa en üstteyken (scrollY <= 10) opacity'yi ayarla
+    if (window.scrollY <= 10) {
+      // Projeler ve haberler sayfalarını kontrol et (ana sayfa ve detay sayfası)
+      const path = location.pathname
+      const isProjectsList = path === '/projects' || path === '/projects/'
+      const isProjectDetail = path.match(/^\/projects\/[^/]+$/)
+      const isNewsList = path === '/news' || path === '/news/'
+      const isNewsDetail = path.match(/^\/news\/[^/]+$/)
+      
+      // Projeler ve haberler ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
+      if (isProjectsList || isProjectDetail || isNewsList || isNewsDetail) {
+        setHeaderOpacity(0.7)
+        return
+      }
+      
+      if (isDarkHeroPage()) {
+        setHeaderOpacity(0)
+        return
+      }
+      
+      // Beyaz arka planlı detay sayfalarında (ürün) her zaman yarı şeffaf
+      // Çünkü hero görseli koyu olsa bile arka plan beyaz
+      if (isWhiteBackgroundPage()) {
+        setHeaderOpacity(0.7)
+        return
+      }
+      
+      // Diğer sayfalar için heroBrightness'a bak
+      if (heroBrightness !== null) {
+        if (heroBrightness >= 0.7) {
+          setHeaderOpacity(0.75)
+        } else if (heroBrightness >= 0.5) {
+          setHeaderOpacity(0.65)
+        } else if (heroBrightness > 0.4) {
+          const adjustedOpacity = Math.min(0.75, 0.2 + (heroBrightness - 0.4) * 1.2)
+          setHeaderOpacity(adjustedOpacity)
+        } else {
+          setHeaderOpacity(0)
+        }
+      } else {
+        setHeaderOpacity(0.7)
+      }
+    }
+  }, [heroBrightness, location.pathname, isProductsOpen])
+
+  // Sayfa değiştiğinde header opacity'yi ayarla
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (window.scrollY <= 10 && !isProductsOpen) {
+        // Projeler ve haberler sayfalarını kontrol et (ana sayfa ve detay sayfası)
+        const path = location.pathname
+        const isProjectsList = path === '/projects' || path === '/projects/'
+        const isProjectDetail = path.match(/^\/projects\/[^/]+$/)
+        const isNewsList = path === '/news' || path === '/news/'
+        const isNewsDetail = path.match(/^\/news\/[^/]+$/)
+        
+        // Projeler ve haberler ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
+        if (isProjectsList || isProjectDetail || isNewsList || isNewsDetail) {
+          setHeaderOpacity(0.7)
+        } else if (isDarkHeroPage()) {
+          setHeaderOpacity(0)
+        } else if (isLightBackgroundPage() || isWhiteBackgroundPage()) {
+          setHeaderOpacity(0.7) // Açık/beyaz arka planlı sayfalarda yarı şeffaf
+        }
+      }
+    }, 100)
+    
+    return () => clearTimeout(timer)
+  }, [location.pathname])
+
+  // Products menüsü açılınca header'ı yarı şeffaf yap
+  useEffect(() => {
+    if (isProductsOpen) {
+      setHeaderOpacity(0.85)
+    } else if (window.scrollY <= 10) {
+      // Projeler ve haberler sayfalarını kontrol et (ana sayfa ve detay sayfası)
+      const path = location.pathname
+      const isProjectsList = path === '/projects' || path === '/projects/'
+      const isProjectDetail = path.match(/^\/projects\/[^/]+$/)
+      const isNewsList = path === '/news' || path === '/news/'
+      const isNewsDetail = path.match(/^\/news\/[^/]+$/)
+      
+      // Projeler ve haberler ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
+      if (isProjectsList || isProjectDetail || isNewsList || isNewsDetail) {
+        setHeaderOpacity(0.7)
+      } else if (isDarkHeroPage()) {
+        setHeaderOpacity(0)
+      } else if (isLightBackgroundPage() || isWhiteBackgroundPage()) {
+        setHeaderOpacity(0.7)
+      }
+    }
+  }, [isProductsOpen, location.pathname])
+
+  // Desktop header visibility - throttle olmadan anında tepki
+  useEffect(() => {
+    if (isMobile) return
+
+    const handleHeaderVisibility = () => {
+      const currentY = window.scrollY
+      const lastY = lastScrollForHeader.current
+      
+      // Sayfa en üstündeyken her zaman görünür
+      if (currentY < 150) {
+        setIsHeaderVisible(true)
+        lastScrollForHeader.current = currentY
+        return
+      }
+      
+      const diff = currentY - lastY
+      
+      // Sadece belirgin scroll hareketlerine tepki ver (15px+)
+      if (Math.abs(diff) > 15) {
+        if (diff > 0) {
+          // Aşağı scroll - gizle
+          setIsHeaderVisible(false)
+        } else {
+          // Yukarı scroll - göster
+          setIsHeaderVisible(true)
+        }
+        lastScrollForHeader.current = currentY
+      }
+    }
+
+    window.addEventListener('scroll', handleHeaderVisibility, {passive: true})
+    return () => window.removeEventListener('scroll', handleHeaderVisibility)
+  }, [isMobile])
+
+  // Menü state'leri değiştiğinde ref'i güncelle (scroll handler stale closure'dan kaçınmak için)
+  useEffect(() => {
+    menuStateRef.current = {
+      isLangOpen,
+      isProductsOpen,
+      isSearchOpen,
+      isMobileMenuOpen,
+    }
+  }, [isLangOpen, isProductsOpen, isSearchOpen, isMobileMenuOpen])
+
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
       const currentPath = currentRouteRef.current
+      // Ref'lerden güncel değerleri al (stale closure'dan kaçınmak için)
+      const currentHeroBrightness = heroBrightnessRef.current
+      const { isMobileMenuOpen: menuOpen, isSearchOpen: searchOpen, isLangOpen: langOpen, isProductsOpen: productsOpen } = menuStateRef.current
 
       // Route değiştiyse işlemi durdur
       if (currentPath !== location.pathname) {
@@ -503,10 +703,10 @@ export function Header() {
       if (isMobile) {
         // Mobil menü veya arama AÇIKKEN scroll davranışını kilitle;
         // header sabit kalsın, yukarı-aşağı zıplamasın.
-        if (isMobileMenuOpen || isSearchOpen) {
-          setHeaderOpacity(isMobileMenuOpen ? 0.75 : 0.7)
+        if (menuOpen || searchOpen) {
+          setHeaderOpacity(menuOpen ? 0.75 : 0.7)
           setIsHeaderVisible(true)
-          setLastScrollY(currentScrollY)
+          lastScrollYRef.current = currentScrollY
           return
         }
 
@@ -516,106 +716,155 @@ export function Header() {
           if (currentPath !== location.pathname) {
             setHeaderOpacity(0)
             setIsHeaderVisible(true)
-          } else if (heroBrightness !== null) {
-            // Route değiştiyse brightness kullanma (double check)
-            if (currentPath !== location.pathname) {
-              setHeaderOpacity(0)
-              setIsHeaderVisible(true)
-            } else if (heroBrightness >= 0.7) {
-              // Çok açık / beyaza yakın görseller - minimum opacity garantile
-              setHeaderOpacity(0.75)
-            } else if (heroBrightness >= 0.5) {
-              // Açık arka plan - minimum opacity garantile
-              setHeaderOpacity(0.65)
-            } else if (heroBrightness > 0.4) {
-              // Orta-açık arka plan
-              const adjustedOpacity = Math.min(0.75, 0.2 + (heroBrightness - 0.4) * 1.2)
-              setHeaderOpacity(adjustedOpacity)
-            } else {
-              // Görsel koyu, header tamamen şeffaf
-              setHeaderOpacity(0)
-            }
+            opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
           } else {
-            // Brightness hesaplanamadı (CORS vb.) veya henüz hesaplanmadı
-            // Sayfa arka plan rengini kontrol et
-            try {
-              const body = document.body
-              const main = document.querySelector('main')
-              const computedStyle = window.getComputedStyle(main || body)
-              const bgColor = computedStyle.backgroundColor
-              if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
-                const rgbMatch = bgColor.match(/\d+/g)
-                if (rgbMatch && rgbMatch.length >= 3) {
-                  const r = parseInt(rgbMatch[0] || '0')
-                  const g = parseInt(rgbMatch[1] || '0')
-                  const b = parseInt(rgbMatch[2] || '0')
-                  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-                  // Açık renkli sayfalarda minimum opacity garantile
-                  if (luminance >= 0.7) {
-                    setHeaderOpacity(0.7)
-                  } else if (luminance >= 0.5) {
-                    setHeaderOpacity(0.65)
-                  } else {
-                    // Koyu sayfalarda şeffaf kal
-                    setHeaderOpacity(0)
-                  }
-                } else {
-                  // Arka plan rengi parse edilemezse şeffaf bırak (koyu sayfa olabilir)
-                  setHeaderOpacity(0)
-                }
-              } else {
-                // Arka plan rengi belirlenemezse şeffaf bırak (koyu sayfa olabilir)
+            // Projeler ve haberler sayfalarını önce kontrol et (ana sayfa ve detay sayfası)
+            const path = location.pathname
+            const isProjectsList = path === '/projects' || path === '/projects/'
+            const isProjectDetailPage = path.match(/^\/projects\/[^/]+$/)
+            const isNewsList = path === '/news' || path === '/news/'
+            const isNewsDetailPage = path.match(/^\/news\/[^/]+$/)
+            const isProductDetailPage = path.match(/^\/product\/[^/]+$/)
+            
+            // Projeler ve haberler ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
+            if (isProjectsList || isProjectDetailPage || isNewsList || isNewsDetailPage) {
+              setHeaderOpacity(0.7)
+              opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
+            } else if (isProductDetailPage) {
+              // Ürün detay sayfalarında her zaman yarı şeffaf (görsel koyu olsa bile arka plan beyaz)
+              setHeaderOpacity(0.7)
+              opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
+            } else if (currentHeroBrightness !== null) {
+              // Route değiştiyse brightness kullanma (double check)
+              if (currentPath !== location.pathname) {
                 setHeaderOpacity(0)
+                setIsHeaderVisible(true)
+                opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
+              } else if (currentHeroBrightness >= 0.7) {
+                // Çok açık / beyaza yakın görseller - minimum opacity garantile
+                setHeaderOpacity(0.75)
+                opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
+              } else if (currentHeroBrightness >= 0.5) {
+                // Açık arka plan - minimum opacity garantile
+                setHeaderOpacity(0.65)
+                opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
+              } else if (currentHeroBrightness > 0.4) {
+                // Orta-açık arka plan
+                const adjustedOpacity = Math.min(0.75, 0.2 + (currentHeroBrightness - 0.4) * 1.2)
+                setHeaderOpacity(adjustedOpacity)
+                opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
+              } else {
+                // Görsel koyu, header tamamen şeffaf
+                setHeaderOpacity(0)
+                opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
               }
-            } catch (e) {
-              // Hata durumunda şeffaf bırak (koyu sayfa olabilir)
-              setHeaderOpacity(0)
+            } else {
+            // Brightness hesaplanamadı (CORS vb.) veya henüz hesaplanmadı
+            // Sayfa türüne göre opacity belirle
+            const path = location.pathname
+            const isProjectsList = path === '/projects' || path === '/projects/'
+            const isProductsList = path === '/products' || path === '/products/' || path.match(/^\/products\/?$/)
+            const isProjectDetail = path.match(/^\/projects\/[^/]+$/)
+            const isProductDetail = path.match(/^\/product\/[^/]+$/)
+            const isNewsList = path === '/news' || path === '/news/'
+            const isNewsDetail = path.match(/^\/news\/[^/]+$/)
+            const isLightPage = isProjectsList || 
+                               isProductsList || 
+                               isProjectDetail ||
+                               isProductDetail ||
+                               isNewsList ||
+                               isNewsDetail ||
+                               path.includes('contact') ||
+                               path.includes('cart') ||
+                               path.includes('favorites') ||
+                               path.includes('profile') ||
+                               path.includes('orders') ||
+                               path.includes('search')
+            
+            if (isLightPage) {
+              setHeaderOpacity(0.7) // Açık/beyaz arka planlı sayfalarda yarı şeffaf
+            } else {
+              setHeaderOpacity(0) // Koyu sayfalarda şeffaf
+            }
+            opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
             }
           }
           setIsHeaderVisible(true) // Sayfa en üstteyken menü görünür
         } else {
-          // Scroll yapıldıkça opacity artıyor
-          const maxScroll = 200
-          const opacity = Math.min(0.75, (currentScrollY / maxScroll) * 0.75)
-          setHeaderOpacity(opacity)
-
-          // Mobilde header'ı artık scroll yönüne göre gizlemiyoruz;
-          // her zaman görünür kalsın ki yukarı-aşağı zıplama olmasın.
-          setIsHeaderVisible(true)
-        }
-        setLastScrollY(currentScrollY)
-      } else {
-        // Desktop: Scroll yapınca menüyü gizle/göster
-        // Arama açıkken header'ı gizleme
-        if (!isSearchOpen) {
-          // Sayfa en üstteyken header görünür
-          if (currentScrollY <= 0) {
-            setIsHeaderVisible(true)
-          } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
-            setIsHeaderVisible(false) // Scrolling down - menüyü gizle
-          } else if (currentScrollY < lastScrollY) {
-            setIsHeaderVisible(true) // Scrolling up - menüyü göster
+          // Projeler ve haberler sayfalarında scroll yapıldığında da opacity sabit kalmalı
+          const path = location.pathname
+          const isProjectsList = path === '/projects' || path === '/projects/'
+          const isProjectDetailPage = path.match(/^\/projects\/[^/]+$/)
+          const isNewsList = path === '/news' || path === '/news/'
+          const isNewsDetailPage = path.match(/^\/news\/[^/]+$/)
+          
+          if (isProjectsList || isProjectDetailPage || isNewsList || isNewsDetailPage) {
+            // Projeler ve haberler sayfalarında her zaman yarı şeffaf (renk kontrolü yapma)
+            setHeaderOpacity(0.7)
+            opacitySetByHandleScrollRef.current = true
+          } else {
+            // Scroll yapıldıkça opacity artıyor
+            opacitySetByHandleScrollRef.current = false // Scroll yapıldı, checkOpacityOnScrollEnd çalışabilir
+            const maxScroll = 200
+            const opacity = Math.min(0.75, (currentScrollY / maxScroll) * 0.75)
+            setHeaderOpacity(opacity)
           }
-          // currentScrollY === lastScrollY durumunda değişiklik yok
-        } else {
-          // Arama açıkken header görünür kalmalı
+
+          // Mobilde de scroll yönüne göre header'ı gizle/göster
+          const now = Date.now()
+          const timeSinceLastChange = now - (headerVisibilityLastChanged.current || 0)
+          
+          if (timeSinceLastChange > 150) {
+            const scrollDiff = currentScrollY - lastScrollYRef.current
+            if (scrollDiff > 20) {
+              setIsHeaderVisible(false)
+              headerVisibilityLastChanged.current = now
+            } else if (scrollDiff < -20) {
+              setIsHeaderVisible(true)
+              headerVisibilityLastChanged.current = now
+            }
+          }
+        }
+        lastScrollYRef.current = currentScrollY
+      } else {
+        // Desktop header visibility artık ayrı useEffect ile yönetiliyor
+        // Burada sadece arama açıkken görünür tutuyoruz
+        if (searchOpen) {
           setIsHeaderVisible(true)
         }
 
-        setLastScrollY(currentScrollY)
+        lastScrollYRef.current = currentScrollY
 
-        const maxScroll = 200
-        let opacity = 0.1
+        // Projeler ve haberler sayfalarını kontrol et (ana sayfa ve detay sayfası)
+        const path = location.pathname
+        const isProjectsList = path === '/projects' || path === '/projects/'
+        const isProjectDetailPage = path.match(/^\/projects\/[^/]+$/)
+        const isNewsList = path === '/news' || path === '/news/'
+        const isNewsDetailPage = path.match(/^\/news\/[^/]+$/)
 
-        if (currentScrollY > 0) {
-          opacity = Math.min(0.75, 0.1 + (currentScrollY / maxScroll) * 0.65)
+        // Projeler ve haberler ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
+        if (isProjectsList || isProjectDetailPage || isNewsList || isNewsDetailPage) {
+          // Projeler ve haberler sayfalarında scroll yapıldığında da opacity sabit kalmalı
+          setHeaderOpacity(0.7)
+          opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
+        } else {
+          const maxScroll = 200
+          let opacity = 0.1
+
+          if (currentScrollY > 0) {
+            opacity = Math.min(0.75, 0.1 + (currentScrollY / maxScroll) * 0.65)
+            opacitySetByHandleScrollRef.current = false // Scroll yapıldı, checkOpacityOnScrollEnd çalışabilir
+          } else {
+            // Desktop'ta sayfa en üstteyken opacity ayarlanıyor
+            opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
+          }
+
+          setHeaderOpacity(opacity)
         }
-
-        setHeaderOpacity(opacity)
       }
 
       // Scroll sırasında açık menüleri kapat
-      const scrollDelta = Math.abs(currentScrollY - lastScrollY)
+      const scrollDelta = Math.abs(currentScrollY - lastScrollYRef.current)
       if (scrollDelta > 3) {
         // En az 3px scroll yapıldıysa
         if (isMobile) {
@@ -626,36 +875,37 @@ export function Header() {
 
           // Hemen kapat (gecikme yok) — fakat mobil menü açıksa onu kapatma,
           // aksi halde hamburger'e tıklandığında oluşan küçük scroll'larda menü anlık kapanabiliyor.
-          if (isLangOpen) setIsLangOpen(false)
-          if (isProductsOpen) setIsProductsOpen(false)
-          if (isSearchOpen) closeSearch()
-          // if (isMobileMenuOpen) setIsMobileMenuOpen(false) // scroll ile mobil menüyü artık kapatmıyoruz
+          if (langOpen) setIsLangOpen(false)
+          if (productsOpen) setIsProductsOpen(false)
+          if (searchOpen) closeSearch()
+          // if (menuOpen) setIsMobileMenuOpen(false) // scroll ile mobil menüyü artık kapatmıyoruz
         } else {
           // Desktop'ta: Arama açıksa kapat
-          if (isSearchOpen) closeSearch()
-          if (isLangOpen) setIsLangOpen(false)
-          if (isProductsOpen) setIsProductsOpen(false)
+          if (searchOpen) closeSearch()
+          if (langOpen) setIsLangOpen(false)
+          if (productsOpen) setIsProductsOpen(false)
         }
       }
     }
 
-    // RADIKAL ÇÖZÜM: Scroll listener'ı throttle et ve sayfa yüklenene kadar ekleme
-    // Sayfa yüklenirken scroll listener'lar scroll'u engelliyor
+    // Scroll listener - header visibility için hızlı tepki
     let scrollListener: (() => void) | null = null
-    let loadHandler: (() => void) | null = null
     let rafId: number | null = null
     let lastScrollTime = 0
-    const SCROLL_THROTTLE_MS = 50 // 50ms throttle - scroll'u yavaşlatmayacak kadar hızlı
+    const SCROLL_THROTTLE_MS = 50 // 50ms throttle - hızlı tepki için
 
     const throttledHandleScroll = () => {
       const now = Date.now()
       if (now - lastScrollTime < SCROLL_THROTTLE_MS) {
-        // Throttle: Eğer son scroll'dan 50ms geçmediyse, bir sonraki frame'de çalıştır
+        // Throttle: Sadece bir RAF beklet, birden fazla queue etme
         if (rafId === null) {
           rafId = requestAnimationFrame(() => {
             rafId = null
-            lastScrollTime = Date.now()
-            handleScroll()
+            // Throttle süresini kontrol et
+            if (Date.now() - lastScrollTime >= SCROLL_THROTTLE_MS) {
+              lastScrollTime = Date.now()
+              handleScroll()
+            }
           })
         }
         return
@@ -664,40 +914,80 @@ export function Header() {
       handleScroll()
     }
 
+    // Scroll bittiğinde sadece şeffaflık kontrolü (görünürlüğe dokunma)
+    let scrollEndTimeout: ReturnType<typeof setTimeout> | null = null
+    
+    const checkOpacityOnScrollEnd = () => {
+      const currentScrollY = window.scrollY || document.documentElement.scrollTop
+      
+      // Sayfa en üstteyse şeffaflık durumunu kontrol et
+      // Ancak handleScroll zaten opacity'yi ayarladıysa çift kontrol yapma
+      if (currentScrollY <= 10) {
+        // handleScroll zaten opacity'yi ayarladıysa, checkOpacityOnScrollEnd çalışmasın
+        if (opacitySetByHandleScrollRef.current) {
+          // Flag'i sıfırla ki bir sonraki scroll'da tekrar çalışabilsin
+          opacitySetByHandleScrollRef.current = false
+          return
+        }
+        
+        const path = location.pathname
+        const isProjectsList = path === '/projects' || path === '/projects/'
+        const isProjectDetail = path.match(/^\/projects\/[^/]+$/)
+        const isNewsList = path === '/news' || path === '/news/'
+        const isNewsDetail = path.match(/^\/news\/[^/]+$/)
+        
+        // Projeler ve haberler ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
+        if (isProjectsList || isProjectDetail || isNewsList || isNewsDetail) {
+          setHeaderOpacity(0.7)
+        } else {
+          const isProductsList = path === '/products' || path === '/products/' || path.match(/^\/products\/?$/)
+          const isProductDetail = path.match(/^\/product\/[^/]+$/)
+          const isLightPage = isProductsList || 
+                             isProductDetail ||
+                             path.includes('contact') ||
+                             path.includes('cart') ||
+                             path.includes('favorites') ||
+                             path.includes('profile') ||
+                             path.includes('orders') ||
+                             path.includes('search')
+          
+          if (isLightPage) {
+            setHeaderOpacity(0.7) // Açık/beyaz arka planlı sayfalarda yarı şeffaf
+          } else if (heroBrightnessRef.current !== null) {
+            if (heroBrightnessRef.current < 0.5) {
+              setHeaderOpacity(0) // Koyu hero - şeffaf header
+            } else {
+              setHeaderOpacity(0.7) // Açık hero - yarı şeffaf header
+            }
+          }
+        }
+      } else {
+        // Scroll yapıldı, flag'i sıfırla
+        opacitySetByHandleScrollRef.current = false
+      }
+      // Header görünürlüğüne dokunma - kullanıcı nereye scroll yaptıysa orada kalsın
+    }
+
+    const handleScrollWithEnd = () => {
+      throttledHandleScroll()
+      // Scroll bittiğinde kontrol et
+      if (scrollEndTimeout) clearTimeout(scrollEndTimeout)
+      scrollEndTimeout = setTimeout(checkOpacityOnScrollEnd, 150)
+    }
+
     const initializeScrollListener = () => {
-      scrollListener = throttledHandleScroll
+      scrollListener = handleScrollWithEnd
       // İlk yüklemede şeffaflığı ayarla (throttle olmadan)
       handleScroll()
-      window.addEventListener('scroll', throttledHandleScroll, {passive: true})
+      window.addEventListener('scroll', handleScrollWithEnd, {passive: true})
     }
 
-    // Sayfa yüklenene kadar bekle - daha uzun gecikme
-    if (document.readyState === 'complete') {
-      // Sayfa zaten yüklenmişse bile bir süre bekle
-      setTimeout(() => {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(initializeScrollListener)
-        })
-      }, 500) // 500ms bekle - scroll işlemleri tamamen bitene kadar
-    } else {
-      // Sayfa yüklenene kadar bekle
-      loadHandler = () => {
-        setTimeout(() => {
-          requestAnimationFrame(() => {
-            requestAnimationFrame(initializeScrollListener)
-          })
-        }, 500) // 500ms bekle - scroll işlemleri tamamen bitene kadar
-        if (loadHandler) {
-          window.removeEventListener('load', loadHandler)
-        }
-      }
-      window.addEventListener('load', loadHandler)
-    }
+    // Scroll listener'ı hemen başlat (gecikme yok)
+    // State değişikliklerinde useEffect yeniden çalıştığında listener yeniden kurulacak
+    // Ama artık state'lere ref üzerinden eriştiğimiz için dependency array minimize edildi
+    initializeScrollListener()
 
     return () => {
-      if (loadHandler) {
-        window.removeEventListener('load', loadHandler)
-      }
       if (scrollListener) {
         window.removeEventListener('scroll', scrollListener)
       }
@@ -707,19 +997,13 @@ export function Header() {
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current)
       }
+      if (scrollEndTimeout) {
+        clearTimeout(scrollEndTimeout)
+      }
     }
-  }, [
-    isMobile,
-    lastScrollY,
-    isLangOpen,
-    isProductsOpen,
-    isSearchOpen,
-    closeSearch,
-    isMobileMenuOpen,
-    heroBrightness,
-    isHeaderVisible,
-    location.pathname,
-  ])
+  // Sadece isMobile ve location.pathname değiştiğinde yeniden kur
+  // Diğer state'lere ref üzerinden erişiyoruz
+  }, [isMobile, location.pathname, closeSearch])
 
   // Mobil menü açıldığında/kapandığında opacity'yi güncelle
   useEffect(() => {
@@ -1231,25 +1515,21 @@ export function Header() {
         `}
       </style>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out ${
-          // Mobilde header her zaman sabit kalsın, yukarı-aşağı kaymasın
-          isMobile ? 'translate-y-0' : isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+        className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-150 ease-out ${
+          // Scroll yönüne göre header'ı gizle/göster (mobil ve desktop)
+          isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
         }`}
       >
         <div
-          className={`${isOverlayMobileMenu ? '' : 'overflow-hidden'} ${
+          className={`${isOverlayMobileMenu || (isProductsOpen && !isMobile) ? '' : 'overflow-hidden'} ${
             // Header yüksekliği: mobil ve desktop için sabit yükseklik - her zaman
             isMobile ? 'h-[3.5rem] min-h-[3.5rem] max-h-[3.5rem]' : 'h-[5rem] min-h-[5rem] max-h-[5rem]'
           } ${
-            // Arka plan blur'ü: mobilde de her zaman kullan (opacity 0 değilse)
-            isMobile && headerOpacity <= 0 ? '' : 'backdrop-blur-lg'
+            // Arka plan blur'ü: opacity 0 ise blur'ü kaldır (Products açıkken blur aktif)
+            headerOpacity <= 0 && !isProductsOpen ? '' : 'backdrop-blur-lg'
           } ${
-            // Mobilde arama AÇIKKEN header altındaki ince beyaz çizgiyi gizlemek için border'ı kaldır
-            isMobile && isSearchOpen
-              ? ''
-              : isMobile && headerOpacity <= 0
-                ? ''
-                : 'border-b border-white/10'
+            // Header altındaki ince beyaz çizgiyi opacity 0 iken veya products açıkken kaldır
+            isSearchOpen || headerOpacity <= 0 || isProductsOpen ? '' : 'border-b border-white/10'
           } ${
             // Sadece menü açıldığında transition ve max-height değişimi
             isProductsOpen || (isMobileMenuOpen && !isOverlayMobileMenu)
@@ -1258,6 +1538,18 @@ export function Header() {
           }`}
           style={{
             backgroundColor: (() => {
+              // Desktop'ta Products dropdown açıkken yarı şeffaf arka plan
+              if (isProductsOpen && !isMobile) {
+                return 'rgba(0, 0, 0, 0.85)'
+              }
+              
+              // Koyu hero olan sayfalarda en üstteyken şeffaf
+              const path = location.pathname
+              const isDarkHero = path === '/' || path === '' || path.includes('about')
+              if (isDarkHero && window.scrollY <= 10 && headerOpacity <= 0) {
+                return 'transparent'
+              }
+              
               // Overlay mobil menü AÇIKKEN veya kapanma animasyonu sürerken
               // header'ı da tamamen opak siyah yap
               if (isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)) {
@@ -1270,7 +1562,8 @@ export function Header() {
                 const getPageBackgroundColor = () => {
                   try {
                   // Açık renkli sayfaları route'a göre kontrol et
-                  const lightPages = ['/privacy', '/terms', '/cookies', '/kvkk', '/about']
+                  // NOT: /about sayfası hero bölümü koyu olduğu için buradan çıkarıldı
+                  const lightPages = ['/privacy', '/terms', '/cookies', '/kvkk']
                   if (lightPages.some(page => location.pathname.includes(page))) {
                     return 0.85 // Açık renkli sayfalar için yüksek luminance
                   }
@@ -1375,7 +1668,8 @@ export function Header() {
               const getPageBackgroundColor = () => {
                 try {
                   // Açık renkli sayfaları route'a göre kontrol et
-                  const lightPages = ['/privacy', '/terms', '/cookies', '/kvkk', '/about']
+                  // NOT: /about sayfası hero bölümü koyu olduğu için buradan çıkarıldı
+                  const lightPages = ['/privacy', '/terms', '/cookies', '/kvkk']
                   if (lightPages.some(page => location.pathname.includes(page))) {
                     return 0.85 // Açık renkli sayfalar için yüksek luminance
                   }
@@ -1476,22 +1770,20 @@ export function Header() {
             transition: isProductsOpen || (isMobileMenuOpen && !isOverlayMobileMenu) 
               ? 'background-color 0.2s ease-out, max-height 0.7s ease-in-out'
               : 'background-color 0.2s ease-out',
-            backdropFilter: isMobile && headerOpacity <= 0 ? 'none' : 'blur(16px)',
-            WebkitBackdropFilter: isMobile && headerOpacity <= 0 ? 'none' : 'blur(16px)',
-            borderBottom: isMobile && headerOpacity <= 0 ? 'none' : undefined,
+            backdropFilter: headerOpacity <= 0 && !isProductsOpen ? 'none' : 'blur(16px)',
+            WebkitBackdropFilter: headerOpacity <= 0 && !isProductsOpen ? 'none' : 'blur(16px)',
+            borderBottom: (headerOpacity <= 0 || isProductsOpen) ? 'none' : undefined,
             pointerEvents: 'auto',
-            // Header yüksekliğini her zaman sabit tut - scroll pozisyonundan bağımsız
-            height: isProductsOpen 
+            // Desktop'ta header yüksekliği her zaman sabit - products dropdown overflow ile gösterilir
+            height: isMobileMenuOpen && !isOverlayMobileMenu 
               ? 'auto' 
-              : (isMobileMenuOpen && !isOverlayMobileMenu 
-                  ? 'auto' 
-                  : (isMobile ? '3.5rem' : '5rem')),
+              : (isMobile ? '3.5rem' : '5rem'),
             minHeight: isMobile ? '3.5rem' : '5rem',
-            maxHeight: isProductsOpen 
-              ? '900px' 
-              : (isMobileMenuOpen && !isOverlayMobileMenu 
-                  ? '40rem' 
-                  : (isMobile ? '3.5rem' : '5rem')),
+            maxHeight: isMobileMenuOpen && !isOverlayMobileMenu 
+              ? '40rem' 
+              : (isMobile ? '3.5rem' : '5rem'),
+            // Products dropdown için overflow visible
+            overflow: isProductsOpen && !isMobile ? 'visible' : undefined,
           }}
           ref={headerContainerRef}
         >
@@ -1741,17 +2033,22 @@ export function Header() {
           {/* Ürün kategorileri paneli - header içinde genişleyip daralır */}
           <div
             className={`hidden lg:block transition-all duration-500 ease-in-out ${isProductsOpen ? 'opacity-100 translate-y-0 max-h-[800px]' : 'opacity-0 -translate-y-2 max-h-0 overflow-hidden'}`}
+            style={{
+              backgroundColor: isProductsOpen ? 'rgba(0, 0, 0, 0.85)' : 'transparent',
+              backdropFilter: isProductsOpen ? 'blur(16px)' : 'none',
+              WebkitBackdropFilter: isProductsOpen ? 'blur(16px)' : 'none',
+            }}
             onMouseEnter={handleProductsEnter}
             onMouseLeave={handleProductsLeave}
           >
-            {/* Beyaz çizgi */}
+            {/* Beyaz ayırıcı çizgi */}
             <div
-              className="border-t border-white/80 mx-4 mt-3"
+              className="h-[1px] bg-white/60 mx-4"
               style={{marginLeft: submenuOffset}}
             ></div>
 
             <div
-              className="pt-8 pb-3 grid grid-cols-[auto_1fr] gap-24"
+              className="pt-4 pb-3 grid grid-cols-[auto_1fr] gap-24"
               style={{paddingLeft: submenuOffset, paddingRight: '5rem'}}
             >
               {/* Sol taraf - Kategoriler */}
