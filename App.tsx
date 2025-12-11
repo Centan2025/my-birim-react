@@ -138,19 +138,35 @@ const AuthProvider = ({children}: PropsWithChildren) => {
 
   // Load user from localStorage on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem('birim_user')
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser))
-      } catch (e) {
-        localStorage.removeItem('birim_user')
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const storedUser = localStorage.getItem('birim_user')
+        if (storedUser) {
+          try {
+            setUser(JSON.parse(storedUser))
+          } catch (e) {
+            try {
+              localStorage.removeItem('birim_user')
+            } catch {
+              // Storage erişilemiyorsa sessizce devam et
+            }
+          }
+        }
       }
+    } catch {
+      // Storage erişilemiyorsa sessizce devam et
     }
   }, [])
 
   const login = (userData: User) => {
     setUser(userData)
-    localStorage.setItem('birim_user', JSON.stringify(userData))
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem('birim_user', JSON.stringify(userData))
+      }
+    } catch {
+      // Storage erişilemiyorsa sessizce devam et
+    }
     // Set user in error reporting
     errorReporter.setUser({
       id: userData._id,
@@ -163,7 +179,13 @@ const AuthProvider = ({children}: PropsWithChildren) => {
 
   const logout = () => {
     setUser(null)
-    localStorage.removeItem('birim_user')
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.removeItem('birim_user')
+      }
+    } catch {
+      // Storage erişilemiyorsa sessizce devam et
+    }
     // Clear user from error reporting
     errorReporter.clearUser()
   }

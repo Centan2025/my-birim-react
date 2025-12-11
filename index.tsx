@@ -9,6 +9,20 @@ import './src/index.css'
 
 const DEBUG_LOGS = (import.meta.env as any).VITE_DEBUG_LOGS === 'true'
 
+// Filter out known non-critical console warnings
+if (typeof window !== 'undefined') {
+  const originalWarn = console.warn
+  console.warn = (...args: any[]) => {
+    const message = args.join(' ')
+    // Filter out Zustand deprecation warnings (from Sentry or other dependencies)
+    if (typeof message === 'string' && message.includes('[DEPRECATED] Default export is deprecated')) {
+      return
+    }
+    // Call original warn for other messages
+    originalWarn.apply(console, args)
+  }
+}
+
 // Validate environment variables
 try {
   validateEnv()

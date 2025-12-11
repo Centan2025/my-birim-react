@@ -89,7 +89,13 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
 
   useEffect(() => {
     if (!loading) {
-      localStorage.setItem('birim_locale', locale)
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          localStorage.setItem('birim_locale', locale)
+        }
+      } catch {
+        // Storage erişilemiyorsa sessizce devam et
+      }
     }
   }, [locale, loading])
 

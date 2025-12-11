@@ -48,6 +48,13 @@ class ErrorReporter {
           // Session Replay
           replaysSessionSampleRate: (import.meta.env.PROD as boolean | undefined) ? 0.1 : 1.0,
           replaysOnErrorSampleRate: 1.0, // Always record replays on errors
+          // Ignore known non-critical errors
+          ignoreErrors: [
+            // Sentry session fetch errors
+            'Could not fetch session',
+            // Storage access errors (handled by our code)
+            'Access to storage is not allowed from this context',
+          ],
           // Filter out localhost errors in production
           beforeSend(event) {
             // Don't send errors from localhost in production
@@ -57,9 +64,40 @@ class ErrorReporter {
             ) {
               return null
             }
+            // Filter out known non-critical errors
+            if (event.exception) {
+              const errorMessage = event.exception.values?.[0]?.value || ''
+              if (
+                errorMessage.includes('Could not fetch session') ||
+                errorMessage.includes('Access to storage is not allowed from this context')
+              ) {
+                return null
+              }
+            }
             return event
           },
         })
+        
+        // Global unhandled promise rejection handler for Sentry session errors
+        if (typeof window !== 'undefined') {
+          const originalHandler = window.onunhandledrejection
+          window.onunhandledrejection = (event: PromiseRejectionEvent) => {
+            const errorMessage = event.reason?.message || String(event.reason || '')
+            // Silently ignore Sentry session fetch errors
+            if (
+              typeof errorMessage === 'string' &&
+              (errorMessage.includes('Could not fetch session') ||
+                errorMessage.includes('Access to storage is not allowed from this context'))
+            ) {
+              event.preventDefault()
+              return
+            }
+            // Call original handler if exists
+            if (originalHandler) {
+              originalHandler.call(window, event)
+            }
+          }
+        }
         if (import.meta.env.DEV && DEBUG_LOGS) {
           console.debug('[ErrorReporter] Sentry initialized')
         }

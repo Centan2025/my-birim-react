@@ -41,7 +41,13 @@ export const CartProvider = ({children}: PropsWithChildren) => {
   }, [])
 
   useEffect(() => {
-    localStorage.setItem('birim_cart', JSON.stringify(cartItems))
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.setItem('birim_cart', JSON.stringify(cartItems))
+      }
+    } catch {
+      // Storage erişilemiyorsa sessizce devam et
+    }
   }, [cartItems])
 
   const toggleCart = () => setIsCartOpen(!isCartOpen)
