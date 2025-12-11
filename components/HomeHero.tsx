@@ -609,7 +609,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
         )}
         {slideCount > 1 && (
           <div
-            className={`${isMobile ? 'absolute' : 'absolute'} ${isMobile ? 'bottom-4' : 'bottom-10'} left-1/2 -translate-x-1/2 z-30 flex items-center space-x-4`}
+            className={`${isMobile ? 'absolute' : 'absolute'} ${isMobile ? 'bottom-4' : 'bottom-10'} left-1/2 -translate-x-1/2 z-30 flex items-center ${isMobile ? 'space-x-2' : 'space-x-4'}`}
             style={
               isMobile
                 ? {
@@ -635,9 +635,9 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                     key={index}
                     onClick={() => setCurrentSlide(index)}
                     className={`relative rounded-full transition-all duration-500 ease-in-out group ${
-                      areDotsVisible ? 'animate-dot-height-grow' : 'h-0.5'
+                      areDotsVisible ? (isMobile ? 'h-1' : 'animate-dot-height-grow') : 'h-0.5'
                     } ${
-                      isActive ? 'w-12 bg-white/90' : 'w-2 bg-white/40 hover:bg-white/60'
+                      isActive ? (isMobile ? 'w-8 bg-white/90' : 'w-12 bg-white/90') : (isMobile ? 'w-1.5 bg-white/40' : 'w-2 bg-white/40 hover:bg-white/60')
                     } ${
                       areDotsVisible
                         ? 'translate-x-0 opacity-100'
@@ -647,7 +647,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                     }`}
                     style={{
                       transitionDelay: `${animationDelay}ms`,
-                      ...(areDotsVisible ? {} : {height: '0.0625rem'}),
+                      ...(areDotsVisible ? (isMobile ? {height: '4px'} : {}) : {height: '0.0625rem'}),
                     }}
                     aria-label={`Go to slide ${index + 1}`}
                   >

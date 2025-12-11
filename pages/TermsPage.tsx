@@ -25,8 +25,8 @@ export default function TermsPage() {
 
   return (
     <div className="min-h-[60vh] bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <nav className="mb-8 text-sm text-gray-500" aria-label="Breadcrumb">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
+        <nav className="mb-6 text-sm text-gray-500" aria-label="Breadcrumb">
           <ol className="list-none p-0 inline-flex items-center">
             <li>
               <Link to="/" className="hover:text-gray-800">
@@ -39,7 +39,7 @@ export default function TermsPage() {
             </li>
           </ol>
         </nav>
-        <h1 className="text-3xl font-light text-gray-800 mb-6">{title}</h1>
+        <h1 className="text-3xl font-light text-gray-800 mt-6 md:mt-8 mb-6">{title}</h1>
         {Array.isArray(contentBlocks) ? (
           <div className="prose prose-gray max-w-none">
             <PortableTextLite value={contentBlocks as any[]} />
