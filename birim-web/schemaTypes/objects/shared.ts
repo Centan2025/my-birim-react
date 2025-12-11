@@ -208,10 +208,19 @@ export const heroMediaItem = defineType({
       type: 'file',
       options: {
         accept: 'video/*',
+        storeOriginalFilename: true,
       },
       hidden: ({parent}) => parent?.type !== 'video',
       description:
         'Tüm cihazlar için varsayılan video. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+      validation: (Rule) =>
+        Rule.custom((file, context) => {
+          const parent = context.parent as {type?: string}
+          if (parent?.type === 'video' && !file && !parent?.url) {
+            return 'Video dosyası veya URL gerekli'
+          }
+          return true
+        }),
     }),
     // Art Direction: Mobil için video
     defineField({
@@ -220,6 +229,7 @@ export const heroMediaItem = defineType({
       type: 'file',
       options: {
         accept: 'video/*',
+        storeOriginalFilename: true,
       },
       hidden: ({parent}) => parent?.type !== 'video',
       description: 'Mobil cihazlar için özel video (opsiyonel). Yoksa varsayılan video kullanılır.',
@@ -231,6 +241,7 @@ export const heroMediaItem = defineType({
       type: 'file',
       options: {
         accept: 'video/*',
+        storeOriginalFilename: true,
       },
       hidden: ({parent}) => parent?.type !== 'video',
       description:
@@ -317,6 +328,7 @@ export const productSimpleMediaItem = defineType({
       type: 'file',
       options: {
         accept: 'video/*',
+        storeOriginalFilename: true,
       },
       hidden: ({parent}) => parent?.type !== 'video',
       description:
@@ -328,6 +340,7 @@ export const productSimpleMediaItem = defineType({
       type: 'file',
       options: {
         accept: 'video/*',
+        storeOriginalFilename: true,
       },
       hidden: ({parent}) => parent?.type !== 'video',
       description: 'Mobil cihazlar için özel video (opsiyonel).',
@@ -338,6 +351,7 @@ export const productSimpleMediaItem = defineType({
       type: 'file',
       options: {
         accept: 'video/*',
+        storeOriginalFilename: true,
       },
       hidden: ({parent}) => parent?.type !== 'video',
       description: 'Desktop cihazlar için özel video (opsiyonel).',
@@ -403,6 +417,7 @@ export const productPanelMediaItem = defineType({
       type: 'file',
       options: {
         accept: 'video/*',
+        storeOriginalFilename: true,
       },
       hidden: ({parent}) => parent?.type !== 'video',
       description:
@@ -414,6 +429,7 @@ export const productPanelMediaItem = defineType({
       type: 'file',
       options: {
         accept: 'video/*',
+        storeOriginalFilename: true,
       },
       hidden: ({parent}) => parent?.type !== 'video',
       description: 'Mobil cihazlar için özel video (opsiyonel).',
@@ -424,6 +440,7 @@ export const productPanelMediaItem = defineType({
       type: 'file',
       options: {
         accept: 'video/*',
+        storeOriginalFilename: true,
       },
       hidden: ({parent}) => parent?.type !== 'video',
       description: 'Desktop cihazlar için özel video (opsiyonel).',
@@ -580,6 +597,7 @@ export const contactLocationMedia = defineType({
       type: 'file',
       options: {
         accept: 'video/*',
+        storeOriginalFilename: true,
       },
       hidden: ({parent}) => parent?.type !== 'video',
       description:
@@ -591,6 +609,7 @@ export const contactLocationMedia = defineType({
       type: 'file',
       options: {
         accept: 'video/*',
+        storeOriginalFilename: true,
       },
       hidden: ({parent}) => parent?.type !== 'video',
       description: 'Mobil cihazlar için özel video (opsiyonel). Yoksa varsayılan video kullanılır.',
@@ -601,6 +620,7 @@ export const contactLocationMedia = defineType({
       type: 'file',
       options: {
         accept: 'video/*',
+        storeOriginalFilename: true,
       },
       hidden: ({parent}) => parent?.type !== 'video',
       description:
@@ -738,6 +758,7 @@ export const contentBlock = defineType({
       type: 'file',
       options: {
         accept: 'video/*',
+        storeOriginalFilename: true,
       },
       hidden: ({parent}) => parent?.mediaType !== 'video',
       description:
@@ -749,6 +770,7 @@ export const contentBlock = defineType({
       type: 'file',
       options: {
         accept: 'video/*',
+        storeOriginalFilename: true,
       },
       hidden: ({parent}) => parent?.mediaType !== 'video',
       description: 'Mobil cihazlar için özel video (opsiyonel). Yoksa varsayılan video kullanılır.',
@@ -759,6 +781,7 @@ export const contentBlock = defineType({
       type: 'file',
       options: {
         accept: 'video/*',
+        storeOriginalFilename: true,
       },
       hidden: ({parent}) => parent?.mediaType !== 'video',
       description:

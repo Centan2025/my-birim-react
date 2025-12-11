@@ -1237,22 +1237,9 @@ export function Header() {
         }`}
       >
         <div
-          className={`${isOverlayMobileMenu ? '' : 'overflow-hidden'} transition-all duration-700 ease-in-out ${
-            isProductsOpen
-              ? 'max-h-[900px]'
-              : // Overlay modda mobil menü açık olsa bile header yüksekliğini büyütme
-                isOverlayMobileMenu
-                ? isMobile
-                  ? 'max-h-[3.5rem]'
-                  : 'max-h-[6rem]'
-                : isMobileMenuOpen
-                  ? 'max-h-[40rem]'
-                  : isMobile
-                    ? 'max-h-[3.5rem]'
-                    : 'max-h-[6rem]'
-          } ${
-            // Header yüksekliği: mobil ve desktop için satır yüksekliğiyle tam uyumlu tut
-            isMobile ? 'min-h-[3.5rem]' : 'min-h-[5rem]'
+          className={`${isOverlayMobileMenu ? '' : 'overflow-hidden'} ${
+            // Header yüksekliği: mobil ve desktop için sabit yükseklik - her zaman
+            isMobile ? 'h-[3.5rem] min-h-[3.5rem] max-h-[3.5rem]' : 'h-[5rem] min-h-[5rem] max-h-[5rem]'
           } ${
             // Arka plan blur'ü: mobilde de her zaman kullan (opacity 0 değilse)
             isMobile && headerOpacity <= 0 ? '' : 'backdrop-blur-lg'
@@ -1263,6 +1250,11 @@ export function Header() {
               : isMobile && headerOpacity <= 0
                 ? ''
                 : 'border-b border-white/10'
+          } ${
+            // Sadece menü açıldığında transition ve max-height değişimi
+            isProductsOpen || (isMobileMenuOpen && !isOverlayMobileMenu)
+              ? 'transition-all duration-700 ease-in-out'
+              : ''
           }`}
           style={{
             backgroundColor: (() => {
@@ -1277,18 +1269,47 @@ export function Header() {
                 // Sayfa arka plan rengini kontrol et (brightness hesaplanamadığında)
                 const getPageBackgroundColor = () => {
                   try {
+                  // Açık renkli sayfaları route'a göre kontrol et
+                  const lightPages = ['/privacy', '/terms', '/cookies', '/kvkk', '/about']
+                  if (lightPages.some(page => location.pathname.includes(page))) {
+                    return 0.85 // Açık renkli sayfalar için yüksek luminance
+                  }
+                    
+                    // Header'ın hemen altındaki elementi kontrol et
+                    const headerElement = headerContainerRef.current
+                    if (headerElement) {
+                      let element = headerElement.nextElementSibling as HTMLElement
+                      // İlk görünür elementi bul
+                      while (element) {
+                        const style = window.getComputedStyle(element)
+                        if (style.display !== 'none' && style.visibility !== 'hidden') {
+                          const bgColor = style.backgroundColor
+                          if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+                            const rgbMatch = bgColor.match(/\d+/g)
+                            if (rgbMatch && rgbMatch.length >= 3) {
+                              const r = parseInt(rgbMatch[0] || '0')
+                              const g = parseInt(rgbMatch[1] || '0')
+                              const b = parseInt(rgbMatch[2] || '0')
+                              const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+                              return luminance
+                            }
+                          }
+                        }
+                        element = element.nextElementSibling as HTMLElement
+                      }
+                    }
+                    
+                    // Fallback: main veya body'yi kontrol et
                     const body = document.body
                     const main = document.querySelector('main')
                     const computedStyle = window.getComputedStyle(main || body)
                     const bgColor = computedStyle.backgroundColor
                     if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
-                      // RGB değerlerini çıkar
                       const rgbMatch = bgColor.match(/\d+/g)
                       if (rgbMatch && rgbMatch.length >= 3) {
                         const r = parseInt(rgbMatch[0] || '0')
                         const g = parseInt(rgbMatch[1] || '0')
                         const b = parseInt(rgbMatch[2] || '0')
-                        // Luminance hesapla
                         const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
                         return luminance
                       }
@@ -1325,14 +1346,14 @@ export function Header() {
                 // Parlaklık bilgisi yoksa sayfa arka plan rengini kontrol et
                 const pageBgLuminance = getPageBackgroundColor()
                 if (pageBgLuminance !== null) {
-                  // Sayfa arka planı açık renkliyse header'ı koyu yap
+                  // Sayfa arka planı açık renkliyse header'ı koyu yap (düğmeler görünsün)
                   if (pageBgLuminance >= 0.7) {
-                    return 'rgba(0, 0, 0, 0.8)'
+                    return 'rgba(0, 0, 0, 0.9)'
                   }
                   if (pageBgLuminance >= 0.5) {
-                    return 'rgba(0, 0, 0, 0.7)'
+                    return 'rgba(0, 0, 0, 0.8)'
                   }
-                  // Koyu sayfalarda şeffaf kal
+                  // Koyu sayfalarda tam şeffaf kal
                   if (pageBgLuminance < 0.4) {
                     if (headerOpacity <= 0.25) {
                       return 'transparent'
@@ -1342,7 +1363,7 @@ export function Header() {
                 }
 
                 // Brightness ve pageBgLuminance bilgisi yoksa headerOpacity'ye göre karar ver
-                // Koyu sayfalarda şeffaf kalabilir
+                // Koyu sayfalarda tam şeffaf kalabilir
                 if (headerOpacity <= 0.25) {
                   return 'transparent'
                 }
@@ -1353,18 +1374,47 @@ export function Header() {
               // Desktop için sayfa arka plan rengini kontrol et
               const getPageBackgroundColor = () => {
                 try {
+                  // Açık renkli sayfaları route'a göre kontrol et
+                  const lightPages = ['/privacy', '/terms', '/cookies', '/kvkk', '/about']
+                  if (lightPages.some(page => location.pathname.includes(page))) {
+                    return 0.85 // Açık renkli sayfalar için yüksek luminance
+                  }
+                  
+                  // Header'ın hemen altındaki elementi kontrol et
+                  const headerElement = headerContainerRef.current
+                  if (headerElement) {
+                    let element = headerElement.nextElementSibling as HTMLElement
+                    // İlk görünür elementi bul
+                    while (element) {
+                      const style = window.getComputedStyle(element)
+                      if (style.display !== 'none' && style.visibility !== 'hidden') {
+                        const bgColor = style.backgroundColor
+                        if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+                          const rgbMatch = bgColor.match(/\d+/g)
+                          if (rgbMatch && rgbMatch.length >= 3) {
+                            const r = parseInt(rgbMatch[0] || '0')
+                            const g = parseInt(rgbMatch[1] || '0')
+                            const b = parseInt(rgbMatch[2] || '0')
+                            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+                            return luminance
+                          }
+                        }
+                      }
+                      element = element.nextElementSibling as HTMLElement
+                    }
+                  }
+                  
+                  // Fallback: main veya body'yi kontrol et
                   const body = document.body
                   const main = document.querySelector('main')
                   const computedStyle = window.getComputedStyle(main || body)
                   const bgColor = computedStyle.backgroundColor
                   if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
-                    // RGB değerlerini çıkar
                     const rgbMatch = bgColor.match(/\d+/g)
                     if (rgbMatch && rgbMatch.length >= 3) {
                       const r = parseInt(rgbMatch[0] || '0')
                       const g = parseInt(rgbMatch[1] || '0')
                       const b = parseInt(rgbMatch[2] || '0')
-                      // Luminance hesapla
                       const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
                       return luminance
                     }
@@ -1376,7 +1426,7 @@ export function Header() {
               }
 
               // Varsayılan temel opacity
-              let baseOpacity = Math.max(headerOpacity, 0.4)
+              let baseOpacity = headerOpacity > 0.25 ? Math.max(headerOpacity, 0.4) : 0
 
               // Eğer üstteki görselin parlaklığını biliyorsak, header koyuluğunu buna göre ayarla
               if (heroBrightness !== null) {
@@ -1397,24 +1447,24 @@ export function Header() {
                 // Parlaklık bilgisi yoksa sayfa arka plan rengini kontrol et
                 const pageBgLuminance = getPageBackgroundColor()
                 if (pageBgLuminance !== null) {
-                  // Sayfa arka planı açık renkliyse header'ı koyu yap
+                  // Sayfa arka planı açık renkliyse header'ı koyu yap (düğmeler görünsün)
                   if (pageBgLuminance >= 0.7) {
-                    baseOpacity = 0.8
+                    baseOpacity = 0.9
                   } else if (pageBgLuminance >= 0.5) {
-                    baseOpacity = Math.max(baseOpacity, 0.7)
+                    baseOpacity = Math.max(baseOpacity, 0.8)
                   } else {
-                    // Koyu arka plan - headerOpacity'ye göre karar ver, şeffaf kalabilir
+                    // Koyu arka plan - tam şeffaf kalabilir
                     if (headerOpacity <= 0.25) {
-                      baseOpacity = 0.1
+                      baseOpacity = 0
                     } else {
                       baseOpacity = Math.max(baseOpacity, 0.4)
                     }
                   }
                 } else {
                   // Brightness ve pageBgLuminance bilgisi yoksa headerOpacity'ye göre karar ver
-                  // Koyu sayfalarda şeffaf kalabilir
+                  // Koyu sayfalarda tam şeffaf kalabilir
                   if (headerOpacity <= 0.25) {
-                    baseOpacity = 0.1
+                    baseOpacity = 0
                   } else {
                     baseOpacity = Math.max(baseOpacity, 0.4)
                   }
@@ -1423,17 +1473,31 @@ export function Header() {
 
               return `rgba(0, 0, 0, ${baseOpacity})`
             })(),
-            transition: 'background-color 0.2s ease-out, max-height 0.7s ease-in-out',
+            transition: isProductsOpen || (isMobileMenuOpen && !isOverlayMobileMenu) 
+              ? 'background-color 0.2s ease-out, max-height 0.7s ease-in-out'
+              : 'background-color 0.2s ease-out',
             backdropFilter: isMobile && headerOpacity <= 0 ? 'none' : 'blur(16px)',
             WebkitBackdropFilter: isMobile && headerOpacity <= 0 ? 'none' : 'blur(16px)',
             borderBottom: isMobile && headerOpacity <= 0 ? 'none' : undefined,
             pointerEvents: 'auto',
+            // Header yüksekliğini her zaman sabit tut - scroll pozisyonundan bağımsız
+            height: isProductsOpen 
+              ? 'auto' 
+              : (isMobileMenuOpen && !isOverlayMobileMenu 
+                  ? 'auto' 
+                  : (isMobile ? '3.5rem' : '5rem')),
+            minHeight: isMobile ? '3.5rem' : '5rem',
+            maxHeight: isProductsOpen 
+              ? '900px' 
+              : (isMobileMenuOpen && !isOverlayMobileMenu 
+                  ? '40rem' 
+                  : (isMobile ? '3.5rem' : '5rem')),
           }}
           ref={headerContainerRef}
         >
-          <nav className="px-2 sm:px-4 lg:px-6" ref={navRef}>
+          <nav className="px-2 sm:px-4 lg:px-6 h-full flex items-center" ref={navRef}>
             {/* Üst satır: logo ve menü düğmeleri dikeyde tam ortalı */}
-            <div className="relative flex h-14 lg:h-20 items-center lg:grid lg:grid-cols-[1fr_auto_1fr] lg:items-center">
+            <div className="relative flex w-full h-full items-center lg:grid lg:grid-cols-[1fr_auto_1fr] lg:items-center">
               {/* Sol taraf - Menü düğmeleri (desktop) ve arama + logo (mobil) */}
               <div className="flex flex-1 items-center lg:justify-start">
                 {/* Mobil Arama - Solda */}

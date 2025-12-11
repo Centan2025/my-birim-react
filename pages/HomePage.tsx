@@ -9,7 +9,6 @@ import {HomeHero} from '../components/HomeHero'
 import {useTranslation} from '../i18n'
 import {useSEO} from '../src/hooks/useSEO'
 import ScrollReveal from '../components/ScrollReveal'
-import AnimatedText from '../components/AnimatedText'
 
 export function HomePage() {
   const {data: content} = useHomePageContent()
@@ -495,17 +494,14 @@ export function HomePage() {
                       <div className="w-full overflow-hidden">
                         {block.title && (
                           <div className="container mx-auto px-2 sm:px-3 lg:px-4 pt-6 md:pt-8 pb-6 md:pb-8">
-                            <h2
-                              className={`text-2xl md:text-4xl lg:text-5xl font-bold ${titleFontClass} ${textAlignClass} text-gray-950`}
-                              style={titleFontStyle}
-                            >
-                              <AnimatedText
-                                text={t(block.title)}
-                                delay={50}
-                                threshold={0.1}
-                                direction="left"
-                              />
-                            </h2>
+                            <ScrollReveal delay={0} threshold={0.1} width="w-full" className="h-auto">
+                              <h2
+                                className={`text-2xl md:text-4xl lg:text-5xl font-bold ${titleFontClass} ${textAlignClass} text-gray-950`}
+                                style={titleFontStyle}
+                              >
+                                {t(block.title)}
+                              </h2>
+                            </ScrollReveal>
                           </div>
                         )}
                         <ScrollReveal delay={50} threshold={0.1} width="w-full" className="h-auto">
@@ -567,17 +563,14 @@ export function HomePage() {
                       <div className="container mx-auto px-2 sm:px-3 lg:px-4">
                         {block.title && (
                           <div className={`pt-6 md:pt-8 pb-6 md:pb-8 ${textAlignClass}`}>
-                            <h2
-                              className={`text-2xl md:text-4xl lg:text-5xl font-bold ${titleFontClass} text-gray-950`}
-                              style={titleFontStyle}
-                            >
-                              <AnimatedText
-                                text={t(block.title)}
-                                delay={50}
-                                threshold={0.1}
-                                direction="left"
-                              />
-                            </h2>
+                            <ScrollReveal delay={0} threshold={0.1} width="w-full" className="h-auto">
+                              <h2
+                                className={`text-2xl md:text-4xl lg:text-5xl font-bold ${titleFontClass} text-gray-950`}
+                                style={titleFontStyle}
+                              >
+                                {t(block.title)}
+                              </h2>
+                            </ScrollReveal>
                           </div>
                         )}
                         <div
