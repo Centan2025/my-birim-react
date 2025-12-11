@@ -46,8 +46,6 @@ class ErrorReporter {
             }),
             // Explicitly exclude feedback widget to prevent storage errors
           ].filter(Boolean),
-          // Disable feedback widget completely
-          enableUserFeedback: false,
           // Performance Monitoring
           tracesSampleRate: (import.meta.env.PROD as boolean | undefined) ? 0.1 : 1.0, // 10 percent in production, 100 percent in dev
           // Session Replay
