@@ -717,7 +717,7 @@ const Footer = () => {
           <div className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col md:flex-row md:items-start gap-4 text-xs" style={{overflow: 'visible', width: '100%'}}>
             {content.legalLinks && content.legalLinks.length > 0 && (
               <div 
-                className="flex flex-col md:flex-row md:flex-wrap md:items-center items-center gap-2 md:gap-x-4" 
+                className="flex flex-col md:flex-row md:flex-wrap md:items-center items-center gap-y-2 md:gap-x-4 md:gap-y-0" 
                 style={{
                   overflow: 'visible', 
                   maxWidth: '100%',
