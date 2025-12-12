@@ -120,7 +120,10 @@ export function CategoriesPage() {
                     <div className="absolute inset-0 flex items-center justify-center">
                       <h2
                         className="text-4xl md:text-5xl lg:text-6xl font-bebas text-white uppercase tracking-wider"
-                        style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}
+                        style={{
+                          textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                          fontFamily: '"Bebas Neue", sans-serif'
+                        }}
                       >
                         {t(category.name)}
                       </h2>

@@ -43,6 +43,12 @@ body {
   color: #111827 !important; /* aynı şekilde çok koyu */
 }
 
+/* Bebas Neue font utility */
+.font-bebas,
+.font-bebas * {
+  font-family: 'Bebas Neue', sans-serif !important;
+}
+
 @keyframes fade-in-down {
   0% {
     opacity: 0;
