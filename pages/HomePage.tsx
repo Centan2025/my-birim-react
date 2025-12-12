@@ -1,18 +1,18 @@
-import {useState, useEffect, useMemo} from 'react'
-import {Link} from 'react-router-dom'
-import {useSiteSettings} from '../src/hooks/useSiteData'
-import {useHomePageContent} from '../src/hooks/useHomePage'
-import {OptimizedImage} from '../components/OptimizedImage'
-import {OptimizedVideo} from '../components/OptimizedVideo'
-import {YouTubeBackground} from '../components/YouTubeBackground'
-import {HomeHero} from '../components/HomeHero'
-import {useTranslation} from '../i18n'
-import {useSEO} from '../src/hooks/useSEO'
+import { useState, useEffect, useMemo } from 'react'
+import { Link } from 'react-router-dom'
+import { useSiteSettings } from '../src/hooks/useSiteData'
+import { useHomePageContent } from '../src/hooks/useHomePage'
+import { OptimizedImage } from '../components/OptimizedImage'
+import { OptimizedVideo } from '../components/OptimizedVideo'
+import { YouTubeBackground } from '../components/YouTubeBackground'
+import { HomeHero } from '../components/HomeHero'
+import { useTranslation } from '../i18n'
+import { useSEO } from '../src/hooks/useSEO'
 import ScrollReveal from '../components/ScrollReveal'
 
 export function HomePage() {
-  const {data: content} = useHomePageContent()
-  const {data: settings} = useSiteSettings()
+  const { data: content } = useHomePageContent()
+  const { data: settings } = useSiteSettings()
   const [inspirationImageHeight, setInspirationImageHeight] = useState<number | null>(null)
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -26,7 +26,7 @@ export function HomePage() {
     }
     return 0
   })
-  const {t} = useTranslation()
+  const { t } = useTranslation()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
 
   // SEO
@@ -132,14 +132,14 @@ export function HomePage() {
       style={
         isMobile && viewportWidth > 0
           ? {
-              width: `${viewportWidth}px`,
-              maxWidth: `${viewportWidth}px`,
-              overflowX: 'hidden',
-              margin: 0,
-              padding: 0,
-              left: 0,
-              right: 0,
-            }
+            width: `${viewportWidth}px`,
+            maxWidth: `${viewportWidth}px`,
+            overflowX: 'hidden',
+            margin: 0,
+            padding: 0,
+            left: 0,
+            right: 0,
+          }
           : {}
       }
     >
@@ -289,9 +289,7 @@ export function HomePage() {
                 -webkit-overflow-scrolling: touch !important;
                 scrollbar-width: none !important;
                 -ms-overflow-style: none !important;
-                overscroll-behavior-x: none !important;
-                overscroll-behavior-y: none !important;
-                overscroll-behavior: none !important;
+                overscroll-behavior-x: contain !important;
               }
               .hero-main-container-mobile::-webkit-scrollbar {
                 display: none !important;
@@ -483,7 +481,7 @@ export function HomePage() {
                 // Google Font için inline style
                 const titleFontStyle =
                   titleFont && titleFont !== 'normal' && titleFont !== 'serif' && titleFont !== 'mono'
-                    ? {fontFamily: `"${titleFont}", sans-serif`}
+                    ? { fontFamily: `"${titleFont}", sans-serif` }
                     : undefined
 
                 return (
@@ -659,14 +657,14 @@ export function HomePage() {
               backgroundRepeat: 'no-repeat',
               ...(isMobile && inspirationImageHeight && bgImageUrl
                 ? {
-                    height: `${inspirationImageHeight}px`,
-                    minHeight: `${inspirationImageHeight}px`,
-                    paddingTop: 0,
-                    paddingBottom: 0,
-                  }
+                  height: `${inspirationImageHeight}px`,
+                  minHeight: `${inspirationImageHeight}px`,
+                  paddingTop: 0,
+                  paddingBottom: 0,
+                }
                 : {}),
               ...(!isMobile && inspirationImageHeight && bgImageUrl
-                ? {minHeight: `${inspirationImageHeight}px`}
+                ? { minHeight: `${inspirationImageHeight}px` }
                 : {}),
             }}
           >
