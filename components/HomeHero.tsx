@@ -157,13 +157,19 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
     setDraggedX(0)
   }
 
-  // Touch event'ler – dikey scroll'a izin ver, yatay sürüklemeyi koru
+  // Touch event'ler – mobilde sadece içerideki slide container'a ekle, hero container'a ekleme
+  const slideContainerRef = useRef<HTMLDivElement>(null)
+  
   useEffect(() => {
-    const container = heroContainerRef.current
-    if (!container) return
+    // Mobilde touch event'leri hero container'a ekleme, sadece slide container'a ekle
+    if (!isMobile) return
+    
+    const slideContainer = slideContainerRef.current
+    if (!slideContainer) return
 
     let touchStarted = false
     let isVerticalScroll = false
+    let initialTouch: {x: number; y: number} | null = null
 
     const handleTouchStart = (e: TouchEvent) => {
       if (e.target instanceof HTMLElement && e.target.closest('a, button')) {
@@ -174,6 +180,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
       const startY = e.touches[0]?.clientY ?? 0
       touchStarted = true
       isVerticalScroll = false
+      initialTouch = {x: startX, y: startY}
       setIsDragging(true)
       setDragStartX(startX)
       dragStartY.current = startY
@@ -181,24 +188,30 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
     }
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (!touchStarted || !isDragging) return
+      if (!touchStarted || !isDragging || !initialTouch) return
       if (!e.touches || e.touches.length === 0) return
       const currentX = e.touches[0]?.clientX ?? 0
       const currentY = e.touches[0]?.clientY ?? 0
       
-      const deltaX = Math.abs(currentX - dragStartX)
-      const deltaY = Math.abs(currentY - dragStartY.current)
+      const deltaX = Math.abs(currentX - initialTouch.x)
+      const deltaY = Math.abs(currentY - initialTouch.y)
       
-      // Dikey scroll daha fazlaysa, yatay drag'ı tamamen iptal et
-      if (deltaY > deltaX && deltaY > 10) {
+      // İlk hareket dikey ise, yatay drag'ı tamamen iptal et ve sayfa scroll'una izin ver
+      if (!isVerticalScroll && deltaY > deltaX && deltaY > 15) {
         isVerticalScroll = true
         setIsDragging(false)
         setDraggedX(0)
+        initialTouch = null
         return
       }
       
-      // Yatay hareket varsa ve dikey scroll değilse devam et
-      if (!isVerticalScroll && deltaX > 5) {
+      // Dikey scroll yapıldıysa hiçbir şey yapma
+      if (isVerticalScroll) {
+        return
+      }
+      
+      // Yatay hareket varsa devam et
+      if (deltaX > 5) {
         setDraggedX(currentX - dragStartX)
       }
     }
@@ -211,12 +224,14 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
       if (isVerticalScroll) {
         setIsDragging(false)
         setDraggedX(0)
+        initialTouch = null
         return
       }
 
       if (!isDragging) {
         setIsDragging(false)
         setDraggedX(0)
+        initialTouch = null
         return
       }
 
@@ -225,6 +240,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
       const count = heroMedia.length || 1
       if (count <= 1) {
         setDraggedX(0)
+        initialTouch = null
         return
       }
 
@@ -235,20 +251,21 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
       } else {
         setDraggedX(0)
       }
+      initialTouch = null
     }
 
-    container.addEventListener('touchstart', handleTouchStart, {passive: true})
-    container.addEventListener('touchmove', handleTouchMove, {passive: true})
-    container.addEventListener('touchend', handleTouchEnd, {passive: true})
-    container.addEventListener('touchcancel', handleTouchEnd, {passive: true})
+    slideContainer.addEventListener('touchstart', handleTouchStart, {passive: true})
+    slideContainer.addEventListener('touchmove', handleTouchMove, {passive: true})
+    slideContainer.addEventListener('touchend', handleTouchEnd, {passive: true})
+    slideContainer.addEventListener('touchcancel', handleTouchEnd, {passive: true})
 
     return () => {
-      container.removeEventListener('touchstart', handleTouchStart)
-      container.removeEventListener('touchmove', handleTouchMove)
-      container.removeEventListener('touchend', handleTouchEnd)
-      container.removeEventListener('touchcancel', handleTouchEnd)
+      slideContainer.removeEventListener('touchstart', handleTouchStart)
+      slideContainer.removeEventListener('touchmove', handleTouchMove)
+      slideContainer.removeEventListener('touchend', handleTouchEnd)
+      slideContainer.removeEventListener('touchcancel', handleTouchEnd)
     }
-  }, [isDragging, dragStartX, draggedX, currentSlide, heroMedia.length])
+  }, [isMobile, isDragging, dragStartX, draggedX, currentSlide, heroMedia.length])
 
   const handleDragStart = (
     e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
@@ -488,7 +505,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
             WebkitOverflowScrolling: 'auto',
             boxSizing: 'border-box',
             position: 'relative',
-            touchAction: 'pan-y pinch-zoom',
+            touchAction: isMobile ? 'pan-y pinch-zoom' : 'pan-y',
             ...(isMobile
               ? {
                   height: '100dvh',
@@ -501,6 +518,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
       >
         {/* Global hero CSS override'ları HomePage'deki <style> içinde kalıyor */}
         <div
+          ref={slideContainerRef}
           className="flex h-full md:h-full hero-scroll-container"
           style={
             {
