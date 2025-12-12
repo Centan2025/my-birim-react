@@ -734,8 +734,16 @@ const Footer = () => {
                     // Çeviri için direkt kontrol - LocalizedString'i doğrudan işle
                     let linkText = ''
                     
-                    // Debug: KVKK linki için özel kontrol
-                    const isKvkkLink = url === '/kvkk' || url.includes('kvkk')
+                    // URL'e göre çeviri anahtarı belirle
+                    const getTranslationKeyFromUrl = (url: string): string | null => {
+                      const urlLower = url.toLowerCase()
+                      if (urlLower.includes('kvkk') || urlLower === '/kvkk') return 'kvkk_disclosure'
+                      if (urlLower.includes('privacy') || urlLower === '/privacy') return 'privacy_policy'
+                      if (urlLower.includes('cookie') || urlLower === '/cookies') return 'cookie_policy'
+                      if (urlLower.includes('terms') || urlLower === '/terms') return 'terms_of_service'
+                      if (urlLower.includes('legal') || urlLower === '/legal') return 'legal_information'
+                      return null
+                    }
                     
                     if (link.text) {
                       if (typeof link.text === 'object' && link.text !== null && !Array.isArray(link.text)) {
@@ -759,14 +767,28 @@ const Footer = () => {
                           linkText = (firstValue as string) || ''
                         }
                       } else if (typeof link.text === 'string') {
-                        // String ise t() fonksiyonunu kullan
-                        linkText = t(link.text)
+                        // String ise önce URL'e göre çeviri anahtarı dene
+                        const translationKey = getTranslationKeyFromUrl(url)
+                        if (translationKey) {
+                          // URL'e göre çeviri anahtarı varsa onu kullan
+                          linkText = t(translationKey)
+                          // Eğer çeviri bulunamazsa (anahtar yoksa), orijinal string'i kullan
+                          if (!linkText || linkText === translationKey) {
+                            linkText = t(link.text)
+                          }
+                        } else {
+                          // URL'e göre çeviri anahtarı yoksa, string'i direkt çeviri anahtarı olarak kullan
+                          linkText = t(link.text)
+                        }
                       }
                     }
                     
-                    // KVKK linki için fallback
-                    if (isKvkkLink && (!linkText || !linkText.trim())) {
-                      linkText = locale === 'en' ? 'KVKK Disclosure' : 'KVKK Aydınlatma Metni'
+                    // Fallback: Eğer hala boşsa, URL'e göre çeviri anahtarı dene
+                    if (!linkText || !linkText.trim()) {
+                      const translationKey = getTranslationKeyFromUrl(url)
+                      if (translationKey) {
+                        linkText = t(translationKey)
+                      }
                     }
                     
                     if (!url) {

@@ -37,6 +37,7 @@ export default defineType({
         {name: 'product', title: 'Ürün Detay'},
         {name: 'designer', title: 'Tasarımcı'},
         {name: 'news', title: 'Haberler'},
+        {name: 'legal', title: 'Yasal Bağlantılar'},
         {name: 'misc', title: 'Diğer'},
       ],
       fields: [
@@ -256,6 +257,37 @@ export default defineType({
           fieldset: 'product',
         }),
         defineField({name: 'navigation', title: 'Navigasyon', type: 'string', fieldset: 'misc'}),
+        // Yasal Bağlantılar
+        defineField({
+          name: 'kvkk_disclosure',
+          title: 'KVKK Aydınlatma Metni',
+          type: 'string',
+          fieldset: 'legal',
+        }),
+        defineField({
+          name: 'privacy_policy',
+          title: 'Gizlilik Politikası',
+          type: 'string',
+          fieldset: 'legal',
+        }),
+        defineField({
+          name: 'cookie_policy',
+          title: 'Çerez Politikası',
+          type: 'string',
+          fieldset: 'legal',
+        }),
+        defineField({
+          name: 'terms_of_service',
+          title: 'Kullanım Koşulları',
+          type: 'string',
+          fieldset: 'legal',
+        }),
+        defineField({
+          name: 'legal_information',
+          title: 'Yasal Bilgiler',
+          type: 'string',
+          fieldset: 'legal',
+        }),
         // Yönetim paneliyle ilgili ve kullanılmayan alanlar şemadan kaldırıldı
       ],
     }),
