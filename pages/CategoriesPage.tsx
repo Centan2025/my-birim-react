@@ -77,8 +77,11 @@ export function CategoriesPage() {
         <div className="relative h-full flex items-center justify-center text-center text-white pt-20">
           <div>
             <h1
-              className="text-4xl md:text-6xl font-bold tracking-tighter uppercase"
-              style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}
+              className="text-4xl md:text-6xl font-bebas tracking-tighter uppercase"
+              style={{
+                textShadow: '0 2px 4px rgba(0,0,0,0.5)',
+                fontFamily: '"Bebas Neue", sans-serif'
+              }}
             >
               {t('products')}
             </h1>
