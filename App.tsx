@@ -734,111 +734,92 @@ const Footer = () => {
                     // Çeviri için direkt kontrol - LocalizedString'i doğrudan işle
                     let linkText = ''
                     
-                    // URL'e göre çeviri anahtarı belirle
-                    const getTranslationKeyFromUrl = (url: string): string | null => {
+                    // URL'e göre direkt çeviri döndür (t() fonksiyonuna güvenme)
+                    const getTranslationFromUrl = (url: string, locale: string): string | null => {
                       const urlLower = url.toLowerCase()
-                      if (urlLower.includes('kvkk') || urlLower === '/kvkk') return 'kvkk_disclosure'
-                      if (urlLower.includes('privacy') || urlLower === '/privacy') return 'privacy_policy'
-                      if (urlLower.includes('cookie') || urlLower === '/cookies') return 'cookie_policy'
-                      if (urlLower.includes('terms') || urlLower === '/terms') return 'terms_of_service'
-                      if (urlLower.includes('legal') || urlLower === '/legal') return 'legal_information'
-                      return null
-                    }
-                    
-                    // Hardcoded fallback çeviriler (çeviri bulunamazsa)
-                    const getHardcodedTranslation = (key: string | null, locale: string): string | null => {
-                      if (!key) return null
-                      const fallbacks: Record<string, Record<string, string>> = {
-                        kvkk_disclosure: {
+                      const translations: Record<string, Record<string, string>> = {
+                        '/kvkk': {
                           tr: 'KVKK Aydınlatma Metni',
                           en: 'KVKK Disclosure',
                         },
-                        privacy_policy: {
+                        '/privacy': {
                           tr: 'Gizlilik Politikası',
                           en: 'Privacy Policy',
                         },
-                        cookie_policy: {
+                        '/cookies': {
                           tr: 'Çerez Politikası',
                           en: 'Cookie Policy',
                         },
-                        terms_of_service: {
+                        '/terms': {
                           tr: 'Kullanım Koşulları',
                           en: 'Terms of Service',
                         },
-                        legal_information: {
+                        '/legal': {
                           tr: 'Yasal Bilgiler',
                           en: 'Legal Information',
                         },
                       }
-                      return fallbacks[key]?.[locale] || null
+                      // Tam URL eşleşmesi
+                      if (translations[urlLower]) {
+                        return translations[urlLower][locale] || translations[urlLower]['tr'] || null
+                      }
+                      // URL içinde geçen kelimelere göre
+                      if (urlLower.includes('kvkk')) {
+                        return locale === 'en' ? 'KVKK Disclosure' : 'KVKK Aydınlatma Metni'
+                      }
+                      if (urlLower.includes('privacy')) {
+                        return locale === 'en' ? 'Privacy Policy' : 'Gizlilik Politikası'
+                      }
+                      if (urlLower.includes('cookie')) {
+                        return locale === 'en' ? 'Cookie Policy' : 'Çerez Politikası'
+                      }
+                      if (urlLower.includes('terms')) {
+                        return locale === 'en' ? 'Terms of Service' : 'Kullanım Koşulları'
+                      }
+                      if (urlLower.includes('legal')) {
+                        return locale === 'en' ? 'Legal Information' : 'Yasal Bilgiler'
+                      }
+                      return null
                     }
                     
-                    if (link.text) {
-                      if (typeof link.text === 'object' && link.text !== null && !Array.isArray(link.text)) {
-                        const textObj = link.text as any
-                        // Locale'e göre direkt değer al - önce mevcut locale
-                        if (locale === 'en') {
-                          linkText = textObj.en || textObj.english || textObj.English || ''
-                          if (!linkText || !linkText.trim()) {
-                            linkText = textObj.tr || textObj.turkish || textObj.Turkish || ''
-                          }
-                        } else {
-                          // locale === 'tr' veya başka bir değer
-                          linkText = textObj.tr || textObj.turkish || textObj.Turkish || ''
-                          if (!linkText || !linkText.trim()) {
+                    // Önce URL'e göre direkt çeviri dene (en güvenilir yöntem)
+                    linkText = getTranslationFromUrl(url, locale) || ''
+                    
+                    // Eğer URL'e göre çeviri bulunamadıysa, link.text'i kullan
+                    if (!linkText || !linkText.trim()) {
+                      if (link.text) {
+                        if (typeof link.text === 'object' && link.text !== null && !Array.isArray(link.text)) {
+                          const textObj = link.text as any
+                          // Locale'e göre direkt değer al - önce mevcut locale
+                          if (locale === 'en') {
                             linkText = textObj.en || textObj.english || textObj.English || ''
-                          }
-                        }
-                        // Eğer hala boşsa, object'teki ilk geçerli string değeri al
-                        if (!linkText || !linkText.trim()) {
-                          const firstValue = Object.values(textObj).find((v: any) => v && typeof v === 'string' && v.trim())
-                          linkText = (firstValue as string) || ''
-                        }
-                      } else if (typeof link.text === 'string') {
-                        // String ise önce URL'e göre çeviri anahtarı dene
-                        const translationKey = getTranslationKeyFromUrl(url)
-                        if (translationKey) {
-                          // Önce hardcoded fallback'i kullan (en güvenilir)
-                          const hardcoded = getHardcodedTranslation(translationKey, locale)
-                          if (hardcoded) {
-                            linkText = hardcoded
+                            if (!linkText || !linkText.trim()) {
+                              linkText = textObj.tr || textObj.turkish || textObj.Turkish || ''
+                            }
                           } else {
-                            // Hardcoded yoksa t() fonksiyonunu dene
-                            linkText = t(translationKey)
-                            // Eğer çeviri bulunamazsa veya aynı değer döndüyse, orijinal string'i kullanma
-                            if (!linkText || linkText === translationKey || linkText.trim() === '') {
-                              // Son çare: locale'e göre hardcoded değer
-                              linkText = locale === 'en' 
-                                ? (translationKey === 'kvkk_disclosure' ? 'KVKK Disclosure' : link.text)
-                                : link.text
+                            // locale === 'tr' veya başka bir değer
+                            linkText = textObj.tr || textObj.turkish || textObj.Turkish || ''
+                            if (!linkText || !linkText.trim()) {
+                              linkText = textObj.en || textObj.english || textObj.English || ''
                             }
                           }
-                        } else {
-                          // URL'e göre çeviri anahtarı yoksa, string'i direkt çeviri anahtarı olarak kullan
-                          linkText = t(link.text)
-                          // Eğer çeviri bulunamazsa, orijinal string'i kullan (son çare)
-                          if (!linkText || linkText === link.text || linkText.trim() === '') {
-                            linkText = link.text
+                          // Eğer hala boşsa, object'teki ilk geçerli string değeri al
+                          if (!linkText || !linkText.trim()) {
+                            const firstValue = Object.values(textObj).find((v: any) => v && typeof v === 'string' && v.trim())
+                            linkText = (firstValue as string) || ''
                           }
-                        }
-                      }
-                    }
-                    
-                    // Fallback: Eğer hala boşsa, URL'e göre çeviri anahtarı dene
-                    if (!linkText || !linkText.trim()) {
-                      const translationKey = getTranslationKeyFromUrl(url)
-                      if (translationKey) {
-                        // Önce hardcoded fallback'i kullan
-                        const hardcoded = getHardcodedTranslation(translationKey, locale)
-                        if (hardcoded) {
-                          linkText = hardcoded
-                        } else {
-                          linkText = t(translationKey)
-                          // Eğer çeviri bulunamazsa, locale'e göre hardcoded değer
-                          if (!linkText || linkText === translationKey || linkText.trim() === '') {
-                            linkText = locale === 'en' 
-                              ? (translationKey === 'kvkk_disclosure' ? 'KVKK Disclosure' : '')
-                              : (translationKey === 'kvkk_disclosure' ? 'KVKK Aydınlatma Metni' : '')
+                        } else if (typeof link.text === 'string') {
+                          // String ise, URL'e göre çeviri dene (tekrar)
+                          const urlTranslation = getTranslationFromUrl(url, locale)
+                          if (urlTranslation) {
+                            linkText = urlTranslation
+                          } else {
+                            // URL'e göre çeviri yoksa, t() fonksiyonunu dene
+                            linkText = t(link.text)
+                            // Eğer çeviri bulunamazsa, orijinal string'i kullan (son çare)
+                            if (!linkText || linkText === link.text || linkText.trim() === '') {
+                              linkText = link.text
+                            }
                           }
                         }
                       }
@@ -860,16 +841,19 @@ const Footer = () => {
                     return (
                       <span 
                         key={index} 
+                        className="legal-link-wrapper"
                         style={{
                           whiteSpace: 'nowrap', 
                           overflow: 'visible', 
                           textOverflow: 'clip', 
-                          maxWidth: 'fit-content',
-                          minWidth: 'fit-content',
-                          width: 'fit-content',
+                          maxWidth: 'none',
+                          minWidth: 'auto',
+                          width: 'auto',
                           display: 'inline-block',
                           flexShrink: 0,
-                          flexGrow: 0
+                          flexGrow: 0,
+                          wordBreak: 'normal',
+                          overflowWrap: 'normal'
                         }}
                       >
                         {isInternalLink ? (

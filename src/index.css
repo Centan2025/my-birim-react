@@ -474,7 +474,9 @@ header nav a.active .header-nav-text {
   }
   /* Footer legal links - her bir link için kesin kurallar */
   footer span[style*="white-space: nowrap"] a,
-  footer span[style*="whiteSpace: nowrap"] a {
+  footer span[style*="whiteSpace: nowrap"] a,
+  footer .legal-link-wrapper,
+  footer .legal-link-wrapper a {
     white-space: nowrap !important;
     overflow: visible !important;
     text-overflow: clip !important;
@@ -487,5 +489,20 @@ header nav a.active .header-nav-text {
     word-break: normal !important;
     overflow-wrap: normal !important;
     letter-spacing: normal !important;
+  }
+  /* Footer legal links wrapper - kesin genişlik kontrolü */
+  footer .legal-link-wrapper {
+    max-width: none !important;
+    width: auto !important;
+    min-width: 0 !important;
+    flex-basis: auto !important;
+  }
+  /* Footer legal links - tüm parent'lar için */
+  footer .flex.flex-col.md\\:flex-row .legal-link-wrapper {
+    max-width: none !important;
+    width: auto !important;
+    min-width: fit-content !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
   }
 }
