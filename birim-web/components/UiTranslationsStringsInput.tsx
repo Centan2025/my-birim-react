@@ -78,6 +78,12 @@ const BASE_TRANSLATIONS: Record<string, Record<string, string>> = {
     next_product: 'Sonraki Ürün',
     news_not_found: 'Haber bulunamadı.',
     navigation: 'Navigasyon',
+    // Yasal Bağlantılar
+    kvkk_disclosure: 'KVKK Aydınlatma Metni',
+    privacy_policy: 'Gizlilik Politikası',
+    cookie_policy: 'Çerez Politikası',
+    terms_of_service: 'Kullanım Koşulları',
+    legal_information: 'Yasal Bilgiler',
   },
   en: {
     collection: 'Collection',
@@ -140,6 +146,12 @@ const BASE_TRANSLATIONS: Record<string, Record<string, string>> = {
     next_product: 'Next Product',
     news_not_found: 'News item not found.',
     navigation: 'Navigation',
+    // Legal Links
+    kvkk_disclosure: 'KVKK Disclosure',
+    privacy_policy: 'Privacy Policy',
+    cookie_policy: 'Cookie Policy',
+    terms_of_service: 'Terms of Service',
+    legal_information: 'Legal Information',
   },
 }
 
