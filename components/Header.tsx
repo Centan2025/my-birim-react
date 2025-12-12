@@ -624,15 +624,17 @@ export function Header() {
     if (isProductsOpen) {
       setHeaderOpacity(0.85)
     } else if (window.scrollY <= 10) {
-      // Projeler ve haberler sayfalarını kontrol et (ana sayfa ve detay sayfası)
+      // Projeler, haberler ve tasarımcılar sayfalarını kontrol et (ana sayfa ve detay sayfası)
       const path = location.pathname
       const isProjectsList = path === '/projects' || path === '/projects/'
       const isProjectDetail = path.match(/^\/projects\/[^/]+$/)
       const isNewsList = path === '/news' || path === '/news/'
       const isNewsDetail = path.match(/^\/news\/[^/]+$/)
+      const isDesignersList = path === '/designers' || path === '/designers/'
+      const isDesignerDetail = path.match(/^\/designer\/[^/]+$/)
       
-      // Projeler ve haberler ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
-      if (isProjectsList || isProjectDetail || isNewsList || isNewsDetail) {
+      // Projeler, haberler ve tasarımcılar ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
+      if (isProjectsList || isProjectDetail || isNewsList || isNewsDetail || isDesignersList || isDesignerDetail) {
         setHeaderOpacity(0.7)
       } else if (isDarkHeroPage()) {
         setHeaderOpacity(0)
@@ -724,10 +726,12 @@ export function Header() {
             const isProjectDetailPage = path.match(/^\/projects\/[^/]+$/)
             const isNewsList = path === '/news' || path === '/news/'
             const isNewsDetailPage = path.match(/^\/news\/[^/]+$/)
+            const isDesignersList = path === '/designers' || path === '/designers/'
+            const isDesignerDetailPage = path.match(/^\/designer\/[^/]+$/)
             const isProductDetailPage = path.match(/^\/product\/[^/]+$/)
             
-            // Projeler ve haberler ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
-            if (isProjectsList || isProjectDetailPage || isNewsList || isNewsDetailPage) {
+            // Projeler, haberler ve tasarımcılar ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
+            if (isProjectsList || isProjectDetailPage || isNewsList || isNewsDetailPage || isDesignersList || isDesignerDetailPage) {
               setHeaderOpacity(0.7)
               opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
             } else if (isProductDetailPage) {
@@ -768,12 +772,16 @@ export function Header() {
             const isProductDetail = path.match(/^\/product\/[^/]+$/)
             const isNewsList = path === '/news' || path === '/news/'
             const isNewsDetail = path.match(/^\/news\/[^/]+$/)
+            const isDesignersList = path === '/designers' || path === '/designers/'
+            const isDesignerDetail = path.match(/^\/designer\/[^/]+$/)
             const isLightPage = isProjectsList || 
                                isProductsList || 
                                isProjectDetail ||
                                isProductDetail ||
                                isNewsList ||
                                isNewsDetail ||
+                               isDesignersList ||
+                               isDesignerDetail ||
                                path.includes('contact') ||
                                path.includes('cart') ||
                                path.includes('favorites') ||
@@ -791,15 +799,17 @@ export function Header() {
           }
           setIsHeaderVisible(true) // Sayfa en üstteyken menü görünür
         } else {
-          // Projeler ve haberler sayfalarında scroll yapıldığında da opacity sabit kalmalı
+          // Projeler, haberler ve tasarımcılar sayfalarında scroll yapıldığında da opacity sabit kalmalı
           const path = location.pathname
           const isProjectsList = path === '/projects' || path === '/projects/'
           const isProjectDetailPage = path.match(/^\/projects\/[^/]+$/)
           const isNewsList = path === '/news' || path === '/news/'
           const isNewsDetailPage = path.match(/^\/news\/[^/]+$/)
+          const isDesignersList = path === '/designers' || path === '/designers/'
+          const isDesignerDetailPage = path.match(/^\/designer\/[^/]+$/)
           
-          if (isProjectsList || isProjectDetailPage || isNewsList || isNewsDetailPage) {
-            // Projeler ve haberler sayfalarında her zaman yarı şeffaf (renk kontrolü yapma)
+          if (isProjectsList || isProjectDetailPage || isNewsList || isNewsDetailPage || isDesignersList || isDesignerDetailPage) {
+            // Projeler, haberler ve tasarımcılar sayfalarında her zaman yarı şeffaf (renk kontrolü yapma)
             setHeaderOpacity(0.7)
             opacitySetByHandleScrollRef.current = true
           } else {
@@ -835,16 +845,18 @@ export function Header() {
 
         lastScrollYRef.current = currentScrollY
 
-        // Projeler ve haberler sayfalarını kontrol et (ana sayfa ve detay sayfası)
+        // Projeler, haberler ve tasarımcılar sayfalarını kontrol et (ana sayfa ve detay sayfası)
         const path = location.pathname
         const isProjectsList = path === '/projects' || path === '/projects/'
         const isProjectDetailPage = path.match(/^\/projects\/[^/]+$/)
         const isNewsList = path === '/news' || path === '/news/'
         const isNewsDetailPage = path.match(/^\/news\/[^/]+$/)
+        const isDesignersList = path === '/designers' || path === '/designers/'
+        const isDesignerDetailPage = path.match(/^\/designer\/[^/]+$/)
 
-        // Projeler ve haberler ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
-        if (isProjectsList || isProjectDetailPage || isNewsList || isNewsDetailPage) {
-          // Projeler ve haberler sayfalarında scroll yapıldığında da opacity sabit kalmalı
+        // Projeler, haberler ve tasarımcılar ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
+        if (isProjectsList || isProjectDetailPage || isNewsList || isNewsDetailPage || isDesignersList || isDesignerDetailPage) {
+          // Projeler, haberler ve tasarımcılar sayfalarında scroll yapıldığında da opacity sabit kalmalı
           setHeaderOpacity(0.7)
           opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
         } else {
@@ -935,9 +947,11 @@ export function Header() {
         const isProjectDetail = path.match(/^\/projects\/[^/]+$/)
         const isNewsList = path === '/news' || path === '/news/'
         const isNewsDetail = path.match(/^\/news\/[^/]+$/)
+        const isDesignersList = path === '/designers' || path === '/designers/'
+        const isDesignerDetail = path.match(/^\/designer\/[^/]+$/)
         
-        // Projeler ve haberler ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
-        if (isProjectsList || isProjectDetail || isNewsList || isNewsDetail) {
+        // Projeler, haberler ve tasarımcılar ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
+        if (isProjectsList || isProjectDetail || isNewsList || isNewsDetail || isDesignersList || isDesignerDetail) {
           setHeaderOpacity(0.7)
         } else {
           const isProductsList = path === '/products' || path === '/products/' || path.match(/^\/products\/?$/)
