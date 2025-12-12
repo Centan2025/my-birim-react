@@ -85,4 +85,9 @@ export default {
     'This action will delete all changes made in the admin panel and revert the content to its original state. Are you sure?',
   reset_success_message: 'Content has been reset. The page will now reload.',
   navigation: 'Navigation',
+  kvkk_disclosure: 'KVKK Disclosure',
+  privacy_policy: 'Privacy Policy',
+  cookie_policy: 'Cookie Policy',
+  terms_of_service: 'Terms of Service',
+  legal_information: 'Legal Information',
 }

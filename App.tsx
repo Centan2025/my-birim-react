@@ -809,7 +809,7 @@ const Footer = () => {
                           // URL'e göre çeviri anahtarı yoksa, string'i direkt çeviri anahtarı olarak kullan
                           linkText = t(link.text)
                           // Eğer çeviri bulunamazsa, orijinal string'i kullan (son çare)
-                          if (!linkText || linkText === link.text) {
+                          if (!linkText || linkText === link.text || linkText.trim() === '') {
                             linkText = link.text
                           }
                         }

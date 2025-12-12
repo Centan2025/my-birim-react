@@ -436,4 +436,26 @@ header nav a.active .header-nav-text {
     flex-shrink: 0 !important;
     flex-grow: 0 !important;
   }
+  /* Footer legal links - tüm link'ler için kesin kurallar */
+  footer .flex.flex-col.md\\:flex-row span a,
+  footer .flex.flex-col.md\\:flex-row span a * {
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    max-width: none !important;
+    min-width: auto !important;
+    width: auto !important;
+    display: inline-block !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+  }
+  /* Footer legal links container - genişlik kontrolü */
+  footer .flex.flex-col.md\\:flex-row {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+  }
 }

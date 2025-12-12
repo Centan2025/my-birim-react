@@ -81,5 +81,10 @@ export default {
   "reset_content_warning": "Bu işlem geri alınamaz. Bu butona basmak, admin panelinde yaptığınız tüm değişiklikleri silecek ve site içeriğini başlangıç durumuna döndürecektir. Bu, özellikle `data.ts` dosyasında yapılan güncellemelerin uygulanması için kullanışlıdır.",
   "reset_confirm_message": "Bu işlem, admin panelinde yaptığınız tüm değişiklikleri silecek ve içeriği ilk haline döndürecektir. Emin misiniz?",
   "reset_success_message": "İçerik sıfırlandı. Sayfa yeniden yüklenecek.",
-  "navigation": "Navigasyon"
+  "navigation": "Navigasyon",
+  "kvkk_disclosure": "KVKK Aydınlatma Metni",
+  "privacy_policy": "Gizlilik Politikası",
+  "cookie_policy": "Çerez Politikası",
+  "terms_of_service": "Kullanım Koşulları",
+  "legal_information": "Yasal Bilgiler"
 };
