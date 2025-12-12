@@ -905,7 +905,7 @@ export function ProductDetailPage() {
                 opacity: isDesignerVisible ? 1 : 0,
                 transition: 'transform 1000ms ease-out, opacity 1000ms ease-out'
               }}>
-                <Link to={`/designer/${designer.id}`} className="underline hover:text-white">
+                <Link to={`/designer/${designer.id}`} className="hover:text-white">
                   {t(designer.name)}
                 </Link>{' '}
                 — {product.year}
