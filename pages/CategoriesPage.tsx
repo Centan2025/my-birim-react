@@ -77,11 +77,12 @@ export function CategoriesPage() {
         <div className="relative h-full flex items-center justify-center text-center text-white pt-20">
           <div>
             <h1
-              className="text-4xl md:text-6xl font-oswald tracking-tighter uppercase"
+              className="text-4xl md:text-6xl font-oswald uppercase"
               style={{
                 textShadow: '0 2px 4px rgba(0,0,0,0.5)',
                 fontFamily: '"Oswald", sans-serif',
-                fontWeight: 300
+                fontWeight: 300,
+                letterSpacing: '0.1em'
               }}
             >
               {t('products')}
@@ -123,11 +124,12 @@ export function CategoriesPage() {
                     <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-300"></div>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <h2
-                        className="text-4xl md:text-5xl lg:text-6xl font-oswald text-white uppercase tracking-wider"
+                        className="text-4xl md:text-5xl lg:text-6xl font-oswald text-white uppercase"
                         style={{
                           textShadow: '0 2px 4px rgba(0,0,0,0.5)',
                           fontFamily: '"Oswald", sans-serif',
-                          fontWeight: 300
+                          fontWeight: 300,
+                          letterSpacing: '0.1em'
                         }}
                       >
                         {t(category.name)}

@@ -255,10 +255,11 @@ export function ProductsPage() {
                       <div key={catId} className="mb-16">
                         {/* Category Title */}
                         <h2 
-                          className="font-oswald text-4xl md:text-5xl lg:text-6xl uppercase tracking-wider text-gray-900 mb-8"
+                          className="font-oswald text-4xl md:text-5xl lg:text-6xl uppercase text-gray-900 mb-8"
                           style={{
                             fontFamily: '"Oswald", sans-serif',
-                            fontWeight: 300
+                            fontWeight: 300,
+                            letterSpacing: '0.1em'
                           }}
                         >
                           {categoryName}
