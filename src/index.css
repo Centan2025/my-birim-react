@@ -377,4 +377,28 @@ header nav a.active .header-nav-text {
     overflow: hidden !important;
     clip-path: inset(0) !important;
   }
+  /* Footer legal links - kesinlikle tam görünür olmalı */
+  footer a[href*="/kvkk"],
+  footer a[href="/kvkk"],
+  footer a[href*="kvkk"],
+  footer [href*="/kvkk"],
+  footer [href="/kvkk"] {
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    max-width: none !important;
+    min-width: auto !important;
+    width: auto !important;
+    display: inline-block !important;
+    flex-shrink: 0 !important;
+  }
+  footer span:has([href*="/kvkk"]),
+  footer span:has([href="/kvkk"]) {
+    white-space: nowrap !important;
+    overflow: visible !important;
+    max-width: none !important;
+    min-width: auto !important;
+    width: auto !important;
+    flex-shrink: 0 !important;
+  }
 }
