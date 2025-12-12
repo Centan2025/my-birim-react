@@ -137,13 +137,21 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
       }
 
       if (typeof keyOrObject === 'object' && keyOrObject !== null) {
-        if (locale in keyOrObject) {
-          return (keyOrObject as any)[locale] || (keyOrObject as any)['tr'] || ''
+        // Önce mevcut locale'i kontrol et
+        if (locale in keyOrObject && (keyOrObject as any)[locale]) {
+          return (keyOrObject as any)[locale]
         }
-      }
-
-      if (typeof keyOrObject === 'object' && keyOrObject !== null && 'tr' in keyOrObject) {
-        return (keyOrObject as any)['tr'] || ''
+        // Locale yoksa veya boşsa, 'tr' fallback'i kullan
+        if ('tr' in keyOrObject && (keyOrObject as any)['tr']) {
+          return (keyOrObject as any)['tr']
+        }
+        // 'tr' de yoksa, 'en' fallback'i dene
+        if ('en' in keyOrObject && (keyOrObject as any)['en']) {
+          return (keyOrObject as any)['en']
+        }
+        // Hiçbiri yoksa, object'teki ilk değeri al
+        const firstValue = Object.values(keyOrObject as any).find((val: any) => val && typeof val === 'string')
+        return firstValue || ''
       }
 
       return ''

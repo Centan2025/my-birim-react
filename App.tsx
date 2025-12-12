@@ -724,7 +724,7 @@ const Footer = () => {
                     if (!url) {
                       return (
                         <ScrollReveal key={index} delay={185 + index * 10} threshold={0} width="w-auto" className="h-auto">
-                          <span className="opacity-80 select-none text-gray-400 whitespace-nowrap">
+                          <span className="opacity-80 select-none text-gray-400 whitespace-normal break-words">
                             {t(link.text)}
                           </span>
                         </ScrollReveal>
@@ -737,14 +737,14 @@ const Footer = () => {
                         {isInternalLink ? (
                           <Link
                             to={url}
-                            className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm whitespace-nowrap"
+                            className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm whitespace-normal break-words"
                           >
                             {t(link.text)}
                           </Link>
                         ) : (
                           <a
                             href={url}
-                            className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm whitespace-nowrap"
+                            className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm whitespace-normal break-words"
                             target={isHttp ? '_blank' : undefined}
                             rel={isHttp ? 'noopener noreferrer' : undefined}
                           >
