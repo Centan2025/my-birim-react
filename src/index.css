@@ -386,7 +386,9 @@ header nav a.active .header-nav-text {
   footer a:has-text("KVKK"),
   footer span:has([href*="/kvkk"]),
   footer span:has([href="/kvkk"]),
-  footer div:has([href*="/kvkk"]) {
+  footer div:has([href*="/kvkk"]),
+  footer a:contains("KVKK"),
+  footer span:contains("KVKK") {
     white-space: nowrap !important;
     overflow: visible !important;
     text-overflow: clip !important;
@@ -395,10 +397,13 @@ header nav a.active .header-nav-text {
     width: auto !important;
     display: inline-block !important;
     flex-shrink: 0 !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
   }
   /* Footer legal links container */
   footer div:has([href*="/kvkk"]),
-  footer div:has([href="/kvkk"]) {
+  footer div:has([href="/kvkk"]),
+  footer div:has(span:has([href*="/kvkk"])) {
     overflow: visible !important;
     max-width: none !important;
     width: auto !important;
@@ -407,8 +412,18 @@ header nav a.active .header-nav-text {
     flex-grow: 0 !important;
   }
   /* Footer legal links parent container */
-  footer > div > div:has([href*="/kvkk"]) {
+  footer > div > div:has([href*="/kvkk"]),
+  footer > div > div:has([href="/kvkk"]) {
     overflow: visible !important;
     max-width: 100% !important;
+    width: auto !important;
+  }
+  /* Footer legal links flex container */
+  footer .flex.flex-col.md\\:flex-row {
+    overflow: visible !important;
+  }
+  footer .flex.flex-col.md\\:flex-row > div {
+    overflow: visible !important;
+    max-width: none !important;
   }
 }

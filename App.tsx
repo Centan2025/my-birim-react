@@ -714,17 +714,17 @@ const Footer = () => {
           </ScrollReveal>
         </div>
         <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
-          <div className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col md:flex-row md:items-start gap-4 text-xs" style={{overflow: 'visible'}}>
+          <div className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col md:flex-row md:items-start gap-4 text-xs" style={{overflow: 'visible', width: '100%'}}>
             {content.legalLinks && content.legalLinks.length > 0 && (
               <div 
                 className="flex flex-col md:flex-row md:flex-wrap md:items-center items-center gap-2 md:gap-x-4" 
                 style={{
                   overflow: 'visible', 
-                  maxWidth: 'none',
-                  width: 'auto',
+                  maxWidth: '100%',
+                  width: '100%',
                   minWidth: 0,
-                  flexShrink: 0,
-                  flexGrow: 0
+                  flexShrink: 1,
+                  flexGrow: 1
                 }}
               >
                 {content.legalLinks
@@ -733,27 +733,40 @@ const Footer = () => {
                     const url = typeof link?.url === 'string' ? link.url : ''
                     // Çeviri için direkt kontrol - LocalizedString'i doğrudan işle
                     let linkText = ''
+                    
+                    // Debug: KVKK linki için özel kontrol
+                    const isKvkkLink = url === '/kvkk' || url.includes('kvkk')
+                    
                     if (link.text) {
-                      if (typeof link.text === 'object' && link.text !== null) {
+                      if (typeof link.text === 'object' && link.text !== null && !Array.isArray(link.text)) {
                         const textObj = link.text as any
-                        // Locale'e göre direkt değer al
+                        // Locale'e göre direkt değer al - önce mevcut locale
                         if (locale === 'en') {
-                          linkText = (textObj.en && typeof textObj.en === 'string' && textObj.en.trim()) 
-                            ? textObj.en 
-                            : (textObj.tr && typeof textObj.tr === 'string' && textObj.tr.trim() ? textObj.tr : '')
+                          linkText = textObj.en || textObj.english || textObj.English || ''
+                          if (!linkText || !linkText.trim()) {
+                            linkText = textObj.tr || textObj.turkish || textObj.Turkish || ''
+                          }
                         } else {
                           // locale === 'tr' veya başka bir değer
-                          linkText = (textObj.tr && typeof textObj.tr === 'string' && textObj.tr.trim()) 
-                            ? textObj.tr 
-                            : (textObj.en && typeof textObj.en === 'string' && textObj.en.trim() ? textObj.en : '')
+                          linkText = textObj.tr || textObj.turkish || textObj.Turkish || ''
+                          if (!linkText || !linkText.trim()) {
+                            linkText = textObj.en || textObj.english || textObj.English || ''
+                          }
                         }
-                        // Eğer hala boşsa, object'teki ilk geçerli değeri al
-                        if (!linkText) {
-                          linkText = Object.values(textObj).find((v: any) => v && typeof v === 'string' && v.trim()) as string || ''
+                        // Eğer hala boşsa, object'teki ilk geçerli string değeri al
+                        if (!linkText || !linkText.trim()) {
+                          const firstValue = Object.values(textObj).find((v: any) => v && typeof v === 'string' && v.trim())
+                          linkText = (firstValue as string) || ''
                         }
                       } else if (typeof link.text === 'string') {
+                        // String ise t() fonksiyonunu kullan
                         linkText = t(link.text)
                       }
+                    }
+                    
+                    // KVKK linki için fallback
+                    if (isKvkkLink && (!linkText || !linkText.trim())) {
+                      linkText = locale === 'en' ? 'KVKK Disclosure' : 'KVKK Aydınlatma Metni'
                     }
                     
                     if (!url) {
@@ -776,11 +789,12 @@ const Footer = () => {
                           whiteSpace: 'nowrap', 
                           overflow: 'visible', 
                           textOverflow: 'clip', 
-                          maxWidth: 'none',
-                          minWidth: 'auto',
-                          width: 'auto',
+                          maxWidth: 'fit-content',
+                          minWidth: 'fit-content',
+                          width: 'fit-content',
                           display: 'inline-block',
-                          flexShrink: 0
+                          flexShrink: 0,
+                          flexGrow: 0
                         }}
                       >
                         {isInternalLink ? (
