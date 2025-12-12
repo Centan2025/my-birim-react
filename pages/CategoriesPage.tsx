@@ -80,7 +80,8 @@ export function CategoriesPage() {
               className="text-4xl md:text-6xl font-oswald tracking-tighter uppercase"
               style={{
                 textShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                fontFamily: '"Oswald", sans-serif'
+                fontFamily: '"Oswald", sans-serif',
+                fontWeight: 300
               }}
             >
               {t('products')}
@@ -125,7 +126,8 @@ export function CategoriesPage() {
                         className="text-4xl md:text-5xl lg:text-6xl font-oswald text-white uppercase tracking-wider"
                         style={{
                           textShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                          fontFamily: '"Oswald", sans-serif'
+                          fontFamily: '"Oswald", sans-serif',
+                          fontWeight: 300
                         }}
                       >
                         {t(category.name)}
