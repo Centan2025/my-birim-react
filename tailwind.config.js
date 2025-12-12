@@ -20,7 +20,7 @@ export default {
           'Roboto',
           'sans-serif',
         ],
-        bebas: ['"Bebas Neue"', 'sans-serif'],
+        oswald: ['"Oswald"', 'sans-serif'],
       },
     },
   },

@@ -254,7 +254,10 @@ export function ProductsPage() {
                     return (
                       <div key={catId} className="mb-16">
                         {/* Category Title */}
-                        <h2 className="font-bebas text-4xl md:text-5xl lg:text-6xl uppercase tracking-wider text-gray-900 mb-8">
+                        <h2 
+                          className="font-oswald text-4xl md:text-5xl lg:text-6xl uppercase tracking-wider text-gray-900 mb-8"
+                          style={{fontFamily: '"Oswald", sans-serif'}}
+                        >
                           {categoryName}
                         </h2>
                         {/* Products Grid */}
