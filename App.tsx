@@ -714,7 +714,7 @@ const Footer = () => {
           </ScrollReveal>
         </div>
         <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
-          <div className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col md:flex-row md:items-start gap-4 text-xs">
+          <div className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col md:flex-row md:items-start gap-4 text-xs" style={{overflow: 'visible'}}>
             {content.legalLinks && content.legalLinks.length > 0 && (
               <div 
                 className="flex flex-col md:flex-row md:flex-wrap md:items-center items-center gap-2 md:gap-x-4" 
@@ -723,34 +723,32 @@ const Footer = () => {
                   maxWidth: 'none',
                   width: 'auto',
                   minWidth: 0,
-                  flexShrink: 1
+                  flexShrink: 0,
+                  flexGrow: 0
                 }}
               >
                 {content.legalLinks
                   .filter(link => link?.isVisible)
                   .map((link, index) => {
                     const url = typeof link?.url === 'string' ? link.url : ''
-                    // Çeviri için direkt kontrol - t() fonksiyonunu bypass et
+                    // Çeviri için direkt kontrol - LocalizedString'i doğrudan işle
                     let linkText = ''
                     if (link.text) {
                       if (typeof link.text === 'object' && link.text !== null) {
                         const textObj = link.text as any
-                        // Debug: KVKK linki için özel kontrol
-                        const isKvkkLink = url.includes('/kvkk') || url === '/kvkk'
-                        
-                        // Önce mevcut locale'i kontrol et (en yüksek öncelik)
-                        if (locale === 'en' && textObj.en && typeof textObj.en === 'string' && textObj.en.trim()) {
-                          linkText = textObj.en
-                        } else if (locale === 'tr' && textObj.tr && typeof textObj.tr === 'string' && textObj.tr.trim()) {
-                          linkText = textObj.tr
-                        } else if (textObj[locale] && typeof textObj[locale] === 'string' && textObj[locale].trim()) {
-                          linkText = textObj[locale]
-                        } else if (textObj.en && typeof textObj.en === 'string' && textObj.en.trim()) {
-                          linkText = textObj.en
-                        } else if (textObj.tr && typeof textObj.tr === 'string' && textObj.tr.trim()) {
-                          linkText = textObj.tr
+                        // Locale'e göre direkt değer al
+                        if (locale === 'en') {
+                          linkText = (textObj.en && typeof textObj.en === 'string' && textObj.en.trim()) 
+                            ? textObj.en 
+                            : (textObj.tr && typeof textObj.tr === 'string' && textObj.tr.trim() ? textObj.tr : '')
                         } else {
-                          // Object'teki ilk geçerli değeri al
+                          // locale === 'tr' veya başka bir değer
+                          linkText = (textObj.tr && typeof textObj.tr === 'string' && textObj.tr.trim()) 
+                            ? textObj.tr 
+                            : (textObj.en && typeof textObj.en === 'string' && textObj.en.trim() ? textObj.en : '')
+                        }
+                        // Eğer hala boşsa, object'teki ilk geçerli değeri al
+                        if (!linkText) {
                           linkText = Object.values(textObj).find((v: any) => v && typeof v === 'string' && v.trim()) as string || ''
                         }
                       } else if (typeof link.text === 'string') {

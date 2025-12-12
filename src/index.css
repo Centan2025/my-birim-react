@@ -382,7 +382,11 @@ header nav a.active .header-nav-text {
   footer a[href="/kvkk"],
   footer a[href*="kvkk"],
   footer [href*="/kvkk"],
-  footer [href="/kvkk"] {
+  footer [href="/kvkk"],
+  footer a:has-text("KVKK"),
+  footer span:has([href*="/kvkk"]),
+  footer span:has([href="/kvkk"]),
+  footer div:has([href*="/kvkk"]) {
     white-space: nowrap !important;
     overflow: visible !important;
     text-overflow: clip !important;
@@ -392,13 +396,19 @@ header nav a.active .header-nav-text {
     display: inline-block !important;
     flex-shrink: 0 !important;
   }
-  footer span:has([href*="/kvkk"]),
-  footer span:has([href="/kvkk"]) {
-    white-space: nowrap !important;
+  /* Footer legal links container */
+  footer div:has([href*="/kvkk"]),
+  footer div:has([href="/kvkk"]) {
     overflow: visible !important;
     max-width: none !important;
-    min-width: auto !important;
     width: auto !important;
+    min-width: 0 !important;
     flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+  }
+  /* Footer legal links parent container */
+  footer > div > div:has([href*="/kvkk"]) {
+    overflow: visible !important;
+    max-width: 100% !important;
   }
 }
