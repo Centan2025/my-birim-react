@@ -716,45 +716,51 @@ const Footer = () => {
         <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
           <div className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col md:flex-row md:justify-between md:items-start gap-4 text-xs">
             {content.legalLinks && content.legalLinks.length > 0 && (
-              <div className="flex flex-col md:flex-row md:items-center md:gap-x-4 items-center gap-2 min-w-0">
+              <div className="flex flex-col md:flex-row md:flex-wrap md:items-center items-center gap-2 md:gap-x-4">
                 {content.legalLinks
                   .filter(link => link?.isVisible)
                   .map((link, index) => {
                     const url = typeof link?.url === 'string' ? link.url : ''
-                    const linkText = t(link.text)
+                    // Çeviri için daha agresif kontrol
+                    let linkText = ''
+                    if (typeof link.text === 'object' && link.text !== null) {
+                      const textObj = link.text as any
+                      linkText = (locale in textObj && textObj[locale]?.trim()) 
+                        ? textObj[locale] 
+                        : (textObj.tr?.trim() || textObj.en?.trim() || '')
+                    } else if (typeof link.text === 'string') {
+                      linkText = t(link.text)
+                    }
+                    
                     if (!url) {
                       return (
-                        <div key={index} className="min-w-0">
-                          <span className="opacity-80 select-none text-gray-400 inline-block" style={{wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal'}}>
-                            {linkText}
-                          </span>
-                        </div>
+                        <span key={index} className="opacity-80 select-none text-gray-400 whitespace-nowrap">
+                          {linkText}
+                        </span>
                       )
                     }
                     const isHttp = /^https?:\/\//.test(url)
                     const isInternalLink = url.startsWith('/') && !url.startsWith('//') && !isHttp
                     return (
-                      <div key={index} className="min-w-0">
+                      <span key={index} className="whitespace-nowrap">
                         {isInternalLink ? (
                           <Link
                             to={url}
-                            className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm inline-block"
-                            style={{wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal'}}
+                            className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
                           >
                             {linkText}
                           </Link>
                         ) : (
                           <a
                             href={url}
-                            className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm inline-block"
-                            style={{wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal'}}
+                            className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
                             target={isHttp ? '_blank' : undefined}
                             rel={isHttp ? 'noopener noreferrer' : undefined}
                           >
                             {linkText}
                           </a>
                         )}
-                      </div>
+                      </span>
                     )
                   })}
               </div>
