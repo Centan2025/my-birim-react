@@ -37,6 +37,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
   const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const innerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const autoPlayIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const dragStartY = useRef<number>(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [isHeroTextVisible, setIsHeroTextVisible] = useState(false)
   const [areDotsVisible, setAreDotsVisible] = useState(false)
@@ -166,9 +167,11 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
         return
       }
       if (!e.touches || e.touches.length === 0) return
-      setIsDragging(true)
       const startX = e.touches[0]?.clientX ?? 0
+      const startY = e.touches[0]?.clientY ?? 0
+      setIsDragging(true)
       setDragStartX(startX)
+      dragStartY.current = startY
       setDraggedX(0)
     }
 
@@ -176,6 +179,17 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
       if (!isDragging) return
       if (!e.touches || e.touches.length === 0) return
       const currentX = e.touches[0]?.clientX ?? 0
+      const currentY = e.touches[0]?.clientY ?? 0
+      
+      const deltaX = Math.abs(currentX - dragStartX)
+      const deltaY = Math.abs(currentY - dragStartY.current)
+      
+      // Dikey scroll daha fazlaysa, yatay drag'ı iptal et ve sayfa scroll'una izin ver
+      if (deltaY > deltaX && deltaY > 10) {
+        setIsDragging(false)
+        return
+      }
+      
       setDraggedX(currentX - dragStartX)
     }
 
@@ -215,14 +229,21 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
     if (e.target instanceof HTMLElement && e.target.closest('a, button')) {
       return
     }
-    setIsDragging(true)
     const startX =
       'touches' in e && e.touches && e.touches.length > 0
         ? (e.touches[0]?.clientX ?? 0)
         : 'clientX' in e
           ? e.clientX
           : 0
+    const startY =
+      'touches' in e && e.touches && e.touches.length > 0
+        ? (e.touches[0]?.clientY ?? 0)
+        : 'clientY' in e
+          ? e.clientY
+          : 0
+    setIsDragging(true)
     setDragStartX(startX)
+    dragStartY.current = startY
     setDraggedX(0)
     if (!('touches' in e)) {
       e.preventDefault()
@@ -239,6 +260,22 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
         : 'clientX' in e
           ? e.clientX
           : 0
+    const currentY =
+      'touches' in e && e.touches && e.touches.length > 0
+        ? (e.touches[0]?.clientY ?? 0)
+        : 'clientY' in e
+          ? e.clientY
+          : 0
+    
+    const deltaX = Math.abs(currentX - dragStartX)
+    const deltaY = Math.abs(currentY - dragStartY.current)
+    
+    // Dikey scroll daha fazlaysa, yatay drag'ı iptal et ve sayfa scroll'una izin ver
+    if (deltaY > deltaX && deltaY > 10) {
+      setIsDragging(false)
+      return
+    }
+    
     setDraggedX(currentX - dragStartX)
     if (!('touches' in e)) {
       e.preventDefault()
@@ -609,7 +646,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
         )}
         {slideCount > 1 && (
           <div
-            className={`${isMobile ? 'absolute' : 'absolute'} ${isMobile ? 'bottom-4' : 'bottom-10'} left-1/2 -translate-x-1/2 z-30 flex items-center ${isMobile ? 'space-x-2' : 'space-x-4'}`}
+            className={`${isMobile ? 'absolute' : 'absolute'} ${isMobile ? 'bottom-4' : 'bottom-10'} left-1/2 -translate-x-1/2 z-30 flex items-center space-x-4`}
             style={
               isMobile
                 ? {
@@ -635,9 +672,9 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                     key={index}
                     onClick={() => setCurrentSlide(index)}
                     className={`relative rounded-full transition-all duration-500 ease-in-out group ${
-                      areDotsVisible ? (isMobile ? 'h-1' : 'animate-dot-height-grow') : 'h-0.5'
+                      areDotsVisible ? 'animate-dot-height-grow' : 'h-0.5'
                     } ${
-                      isActive ? (isMobile ? 'w-8 bg-white/90' : 'w-12 bg-white/90') : (isMobile ? 'w-1.5 bg-white/40' : 'w-2 bg-white/40 hover:bg-white/60')
+                      isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
                     } ${
                       areDotsVisible
                         ? 'translate-x-0 opacity-100'
@@ -647,7 +684,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                     }`}
                     style={{
                       transitionDelay: `${animationDelay}ms`,
-                      ...(areDotsVisible ? (isMobile ? {height: '4px'} : {}) : {height: '0.0625rem'}),
+                      ...(areDotsVisible ? {} : {height: '0.0625rem'}),
                     }}
                     aria-label={`Go to slide ${index + 1}`}
                   >
