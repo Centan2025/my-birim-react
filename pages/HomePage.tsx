@@ -266,9 +266,9 @@ export function HomePage() {
               .hero-page-container-mobile > div:first-child,
               .hero-page-container-mobile > div:first-child[class*="relative"],
               .hero-container-mobile {
-                height: 100dvh !important;
-                min-height: 100dvh !important;
-                max-height: 100dvh !important;
+                height: 100vh !important;
+                min-height: 100vh !important;
+                max-height: 100vh !important;
               }
               .hero-main-container-mobile {
                 width: 100vw !important;
@@ -314,9 +314,9 @@ export function HomePage() {
               .hero-slide-mobile,
               .hero-slide-mobile[style] {
                 /* Genişlik inline style'dan gelecek, CSS override etmesin */
-                height: 100dvh !important;
-                min-height: 100dvh !important;
-                max-height: 100dvh !important;
+                height: 100vh !important;
+                min-height: 100vh !important;
+                max-height: 100vh !important;
                 flex-shrink: 0 !important;
                 flex-grow: 0 !important;
                 padding: 0 !important;
@@ -350,9 +350,9 @@ export function HomePage() {
                 width: 100vw !important;
                 min-width: 100vw !important;
                 max-width: 100vw !important;
-                height: 100dvh !important;
-                min-height: 100dvh !important;
-                max-height: 100dvh !important;
+                height: 100vh !important;
+                min-height: 100vh !important;
+                max-height: 100vh !important;
                 left: 0 !important;
                 right: 0 !important;
                 margin-left: 0 !important;
@@ -377,9 +377,9 @@ export function HomePage() {
                 width: 100vw !important;
                 min-width: 100vw !important;
                 max-width: 100vw !important;
-                height: 100dvh !important;
-                min-height: 100dvh !important;
-                max-height: 100dvh !important;
+                height: 100vh !important;
+                min-height: 100vh !important;
+                max-height: 100vh !important;
                 left: 0 !important;
                 right: 0 !important;
                 margin-left: 0 !important;
@@ -411,8 +411,8 @@ export function HomePage() {
                 width: 100vw !important;
                 max-width: 100vw !important;
                 min-width: 100vw !important;
-                height: 100dvh !important;
-                min-height: 100dvh !important;
+                height: 100vh !important;
+                min-height: 100vh !important;
                 left: 0 !important;
                 right: 0 !important;
                 margin-left: 0 !important;
@@ -654,7 +654,7 @@ export function HomePage() {
             style={{
               backgroundImage: `url(${isMobile && bgImageMobile ? bgImageMobile : bgImageDesktop || bgImageUrl})`,
               backgroundSize: isMobile ? '100vw auto' : 'cover',
-              backgroundAttachment: 'fixed',
+              backgroundAttachment: isMobile ? 'scroll' : 'fixed',
               backgroundPosition: isMobile ? 'left center' : 'center center',
               backgroundRepeat: 'no-repeat',
               ...(isMobile && inspirationImageHeight && bgImageUrl

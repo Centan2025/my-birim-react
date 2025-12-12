@@ -453,9 +453,9 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
             overscrollBehaviorX: 'none',
             ...(isMobile
               ? {
-                  height: '100dvh',
-                  minHeight: '100dvh',
-                  maxHeight: '100dvh',
+                  height: '100vh',
+                  minHeight: '100vh',
+                  maxHeight: '100vh',
                 }
               : {}),
           } as React.CSSProperties
@@ -518,7 +518,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                   overflow: 'hidden',
                   position: 'relative',
                   ...(isMobile
-                    ? {height: '100dvh', minHeight: '100dvh', maxHeight: '100dvh'}
+                    ? {height: '100vh', minHeight: '100vh', maxHeight: '100vh'}
                     : {height: '100%', minHeight: '100%'}),
                 }}
               >
