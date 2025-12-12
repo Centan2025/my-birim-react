@@ -162,6 +162,9 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
     const container = heroContainerRef.current
     if (!container) return
 
+    let touchStarted = false
+    let isVerticalScroll = false
+
     const handleTouchStart = (e: TouchEvent) => {
       if (e.target instanceof HTMLElement && e.target.closest('a, button')) {
         return
@@ -169,6 +172,8 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
       if (!e.touches || e.touches.length === 0) return
       const startX = e.touches[0]?.clientX ?? 0
       const startY = e.touches[0]?.clientY ?? 0
+      touchStarted = true
+      isVerticalScroll = false
       setIsDragging(true)
       setDragStartX(startX)
       dragStartY.current = startY
@@ -176,7 +181,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
     }
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (!isDragging) return
+      if (!touchStarted || !isDragging) return
       if (!e.touches || e.touches.length === 0) return
       const currentX = e.touches[0]?.clientX ?? 0
       const currentY = e.touches[0]?.clientY ?? 0
@@ -184,17 +189,37 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
       const deltaX = Math.abs(currentX - dragStartX)
       const deltaY = Math.abs(currentY - dragStartY.current)
       
-      // Dikey scroll daha fazlaysa, yatay drag'ı iptal et ve sayfa scroll'una izin ver
+      // Dikey scroll daha fazlaysa, yatay drag'ı tamamen iptal et
       if (deltaY > deltaX && deltaY > 10) {
+        isVerticalScroll = true
         setIsDragging(false)
+        setDraggedX(0)
         return
       }
       
-      setDraggedX(currentX - dragStartX)
+      // Yatay hareket varsa ve dikey scroll değilse devam et
+      if (!isVerticalScroll && deltaX > 5) {
+        setDraggedX(currentX - dragStartX)
+      }
     }
 
     const handleTouchEnd = () => {
-      if (!isDragging) return
+      if (!touchStarted) return
+      touchStarted = false
+      
+      // Dikey scroll yapıldıysa hiçbir şey yapma
+      if (isVerticalScroll) {
+        setIsDragging(false)
+        setDraggedX(0)
+        return
+      }
+
+      if (!isDragging) {
+        setIsDragging(false)
+        setDraggedX(0)
+        return
+      }
+
       setIsDragging(false)
 
       const count = heroMedia.length || 1
@@ -215,11 +240,13 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
     container.addEventListener('touchstart', handleTouchStart, {passive: true})
     container.addEventListener('touchmove', handleTouchMove, {passive: true})
     container.addEventListener('touchend', handleTouchEnd, {passive: true})
+    container.addEventListener('touchcancel', handleTouchEnd, {passive: true})
 
     return () => {
       container.removeEventListener('touchstart', handleTouchStart)
       container.removeEventListener('touchmove', handleTouchMove)
       container.removeEventListener('touchend', handleTouchEnd)
+      container.removeEventListener('touchcancel', handleTouchEnd)
     }
   }, [isDragging, dragStartX, draggedX, currentSlide, heroMedia.length])
 
@@ -461,7 +488,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
             WebkitOverflowScrolling: 'auto',
             boxSizing: 'border-box',
             position: 'relative',
-            touchAction: 'pan-y',
+            touchAction: 'pan-y pinch-zoom',
             ...(isMobile
               ? {
                   height: '100dvh',
