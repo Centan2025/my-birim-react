@@ -160,6 +160,10 @@ header nav a.active .header-nav-text {
     padding: 0 !important;
     /* Mobil scroll bounce'u engelle - beyaz alan görünmesini önler */
     overscroll-behavior-y: none !important;
+    overscroll-behavior-x: none !important;
+    overscroll-behavior: none !important;
+    /* Mobil scroll momentum sorunlarını önle */
+    -webkit-overflow-scrolling: touch !important;
     /* Footer altındaki beyaz alanı önlemek için body arka planını footer ile aynı yap */
     background-color: #1f2937 !important; /* gray-800 - footer ile aynı renk */
   }
@@ -169,6 +173,10 @@ header nav a.active .header-nav-text {
     padding: 0 !important;
     /* Mobil scroll bounce'u engelle */
     overscroll-behavior-y: none !important;
+    overscroll-behavior-x: none !important;
+    overscroll-behavior: none !important;
+    /* Mobil scroll momentum sorunlarını önle */
+    -webkit-overflow-scrolling: touch !important;
     /* Footer altındaki beyaz alanı önlemek için */
     background-color: #1f2937 !important; /* gray-800 - footer ile aynı renk */
   }

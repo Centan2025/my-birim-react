@@ -45,9 +45,16 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
   useEffect(() => {
     if (typeof window === 'undefined') return
 
+    // Mobilde parallax efektini devre dışı bırak - scroll sorunlarını önlemek için
+    if (isMobile) {
+      setOffset(0)
+      return
+    }
+
     let animationFrameId: number
-    // Mobilde daha düşük speed kullan
-    const effectiveSpeed = isMobile ? speed * 0.3 : speed
+    let scrollTimeout: ReturnType<typeof setTimeout> | null = null
+    let lastScrollTime = 0
+    const SCROLL_THROTTLE_MS = 16 // ~60fps
 
     const handleScroll = () => {
       if (!containerRef.current) return
@@ -66,7 +73,7 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
         
         // Parallax offset: distanceFromTop'a göre görseli hareket ettir
         // Element yukarı kaydıkça görsel daha yavaş kayar (parallax efekti)
-        const parallaxOffset = (windowHeight - distanceFromTop) * effectiveSpeed * 0.5
+        const parallaxOffset = (windowHeight - distanceFromTop) * speed * 0.5
         
         setOffset(parallaxOffset)
       } else {
@@ -75,6 +82,26 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
     }
 
     const onScroll = () => {
+      const now = Date.now()
+
+      // Throttle scroll event'leri - sadece belirli aralıklarla çalıştır
+      if (now - lastScrollTime < SCROLL_THROTTLE_MS) {
+        if (scrollTimeout) clearTimeout(scrollTimeout)
+        scrollTimeout = setTimeout(() => {
+          lastScrollTime = Date.now()
+          animationFrameId = requestAnimationFrame(handleScroll)
+        }, SCROLL_THROTTLE_MS)
+        return
+      }
+
+      lastScrollTime = now
+
+      // Scroll bittiğinde son bir kez güncelle (momentum scroll sonrası)
+      if (scrollTimeout) clearTimeout(scrollTimeout)
+      scrollTimeout = setTimeout(() => {
+        animationFrameId = requestAnimationFrame(handleScroll)
+      }, 150)
+
       animationFrameId = requestAnimationFrame(handleScroll)
     }
 
@@ -86,6 +113,9 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
       window.removeEventListener('scroll', onScroll)
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId)
+      }
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout)
       }
     }
   }, [speed, isMobile])

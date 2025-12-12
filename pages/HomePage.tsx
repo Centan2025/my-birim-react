@@ -289,7 +289,9 @@ export function HomePage() {
                 -webkit-overflow-scrolling: touch !important;
                 scrollbar-width: none !important;
                 -ms-overflow-style: none !important;
-                overscroll-behavior-x: contain !important;
+                overscroll-behavior-x: none !important;
+                overscroll-behavior-y: none !important;
+                overscroll-behavior: none !important;
               }
               .hero-main-container-mobile::-webkit-scrollbar {
                 display: none !important;

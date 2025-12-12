@@ -195,7 +195,10 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
         return
       }
       
-      // Normal yatay drag devam etsin
+      // Normal yatay drag devam etsin - sadece yatay hareket varsa preventDefault
+      if (deltaX > deltaY) {
+        e.preventDefault()
+      }
       setDraggedX(currentX - dragStartX)
     }
 
@@ -219,7 +222,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
     }
 
     container.addEventListener('touchstart', handleTouchStart, {passive: true})
-    container.addEventListener('touchmove', handleTouchMove, {passive: true})
+    container.addEventListener('touchmove', handleTouchMove, {passive: false})
     container.addEventListener('touchend', handleTouchEnd, {passive: true})
 
     return () => {
@@ -444,7 +447,10 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
             WebkitOverflowScrolling: 'auto',
             boxSizing: 'border-box',
             position: 'relative',
-            touchAction: 'pan-y',
+            touchAction: isMobile ? 'pan-y pan-x' : 'pan-y',
+            overscrollBehavior: 'none',
+            overscrollBehaviorY: 'none',
+            overscrollBehaviorX: 'none',
             ...(isMobile
               ? {
                   height: '100dvh',
