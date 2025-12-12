@@ -59,22 +59,29 @@ export const ProductCard: React.FC<{product: Product; variant?: 'default' | 'lig
           />
         </div>
         <div className="px-2 py-1.5 sm:px-2 sm:py-1.5">
-          <div className="flex items-baseline justify-between gap-2">
-            <h3
-              className={`text-base sm:text-lg tracking-tight font-semibold ${
-                isLight
-                  ? 'text-gray-700 group-hover:text-gray-800'
-                  : 'text-gray-800 group-hover:text-black'
-              }`}
-            >
-              {t(product.name)}
-            </h3>
-            <span className="text-[11px] sm:text-xs uppercase tracking-[0.18em] text-gray-500">
-              {product.year}
-            </span>
-          </div>
+          <h3
+            className={`text-base sm:text-lg tracking-tight font-semibold ${
+              isLight
+                ? 'text-gray-700 group-hover:text-gray-800'
+                : 'text-gray-800 group-hover:text-black'
+            }`}
+          >
+            {t(product.name)}
+          </h3>
           {designerName && (
-            <p className="mt-1 text-xs sm:text-sm text-gray-500 truncate">{designerName}</p>
+            <div className="mt-1 flex items-baseline justify-between gap-2">
+              <p className="text-xs sm:text-sm text-gray-500 truncate">{designerName}</p>
+              <span className="text-[11px] sm:text-xs uppercase tracking-[0.18em] text-gray-500 flex-shrink-0">
+                {product.year}
+              </span>
+            </div>
+          )}
+          {!designerName && (
+            <div className="mt-1 flex items-baseline justify-end">
+              <span className="text-[11px] sm:text-xs uppercase tracking-[0.18em] text-gray-500">
+                {product.year}
+              </span>
+            </div>
           )}
         </div>
       </div>
