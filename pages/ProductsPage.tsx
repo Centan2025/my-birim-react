@@ -217,17 +217,78 @@ export function ProductsPage() {
 
         {/* Product Grid */}
         {sortedProducts.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[2px]">
-            {sortedProducts.map((product, index) => (
-              <ScrollReveal 
-                key={product.id} 
-                delay={index < 12 ? index * 20 : 0} 
-                threshold={0.01}
-              >
-                <ProductCard product={product} variant="light" />
-              </ScrollReveal>
-            ))}
-          </div>
+          !categoryId && allProducts.length > 0 ? (
+            // Eğer kategori seçili değilse (tüm ürünler), kategorilere göre grupla ve başlık göster
+            (() => {
+              const productsByCategory = new Map<string, {category: any, products: Product[]}>()
+              
+              sortedProducts.forEach(product => {
+                const catId = product.categoryId || 'uncategorized'
+                if (!productsByCategory.has(catId)) {
+                  const category = categories.find(c => c.id === catId)
+                  productsByCategory.set(catId, {category, products: []})
+                }
+                productsByCategory.get(catId)!.products.push(product)
+              })
+
+              // Kategori sırasına göre sırala
+              const categoryOrder = categories.map(cat => cat.id)
+              const sortedCategoryIds = Array.from(productsByCategory.keys()).sort((a, b) => {
+                const indexA = categoryOrder.indexOf(a)
+                const indexB = categoryOrder.indexOf(b)
+                if (indexA !== -1 && indexB !== -1) return indexA - indexB
+                if (indexA !== -1) return -1
+                if (indexB !== -1) return 1
+                return a.localeCompare(b)
+              })
+
+              let productIndex = 0
+              return (
+                <div>
+                  {sortedCategoryIds.map(catId => {
+                    const {category, products} = productsByCategory.get(catId)!
+                    const categoryName = category ? t(category.name) : catId
+                    const startIndex = productIndex
+                    productIndex += products.length
+                    
+                    return (
+                      <div key={catId} className="mb-16">
+                        {/* Category Title */}
+                        <h2 className="font-bebas text-4xl md:text-5xl lg:text-6xl uppercase tracking-wider text-gray-900 mb-8">
+                          {categoryName}
+                        </h2>
+                        {/* Products Grid */}
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[2px]">
+                          {products.map((product, idx) => (
+                            <ScrollReveal 
+                              key={product.id} 
+                              delay={startIndex + idx < 12 ? (startIndex + idx) * 20 : 0} 
+                              threshold={0.01}
+                            >
+                              <ProductCard product={product} variant="light" />
+                            </ScrollReveal>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )
+            })()
+          ) : (
+            // Eğer kategori seçiliyse, normal grid göster
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[2px]">
+              {sortedProducts.map((product, index) => (
+                <ScrollReveal 
+                  key={product.id} 
+                  delay={index < 12 ? index * 20 : 0} 
+                  threshold={0.01}
+                >
+                  <ProductCard product={product} variant="light" />
+                </ScrollReveal>
+              ))}
+            </div>
+          )
         ) : (
           <ScrollReveal delay={0} threshold={0.01}>
             <p className="text-gray-600 text-center">
