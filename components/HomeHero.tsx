@@ -632,10 +632,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
             style={
               isMobile
                 ? {
-                  position: 'absolute',
                   bottom: 'max(16px, env(safe-area-inset-bottom, 0px) + 16px)',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
                 }
                 : {}
             }
