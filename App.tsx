@@ -745,6 +745,34 @@ const Footer = () => {
                       return null
                     }
                     
+                    // Hardcoded fallback çeviriler (çeviri bulunamazsa)
+                    const getHardcodedTranslation = (key: string | null, locale: string): string | null => {
+                      if (!key) return null
+                      const fallbacks: Record<string, Record<string, string>> = {
+                        kvkk_disclosure: {
+                          tr: 'KVKK Aydınlatma Metni',
+                          en: 'KVKK Disclosure',
+                        },
+                        privacy_policy: {
+                          tr: 'Gizlilik Politikası',
+                          en: 'Privacy Policy',
+                        },
+                        cookie_policy: {
+                          tr: 'Çerez Politikası',
+                          en: 'Cookie Policy',
+                        },
+                        terms_of_service: {
+                          tr: 'Kullanım Koşulları',
+                          en: 'Terms of Service',
+                        },
+                        legal_information: {
+                          tr: 'Yasal Bilgiler',
+                          en: 'Legal Information',
+                        },
+                      }
+                      return fallbacks[key]?.[locale] || null
+                    }
+                    
                     if (link.text) {
                       if (typeof link.text === 'object' && link.text !== null && !Array.isArray(link.text)) {
                         const textObj = link.text as any
@@ -772,13 +800,18 @@ const Footer = () => {
                         if (translationKey) {
                           // URL'e göre çeviri anahtarı varsa onu kullan
                           linkText = t(translationKey)
-                          // Eğer çeviri bulunamazsa (anahtar yoksa), orijinal string'i kullan
-                          if (!linkText || linkText === translationKey) {
-                            linkText = t(link.text)
+                          // Eğer çeviri bulunamazsa (anahtar yoksa veya aynı değer döndüyse), hardcoded fallback kullan
+                          if (!linkText || linkText === translationKey || linkText.trim() === '') {
+                            const hardcoded = getHardcodedTranslation(translationKey, locale)
+                            linkText = hardcoded || linkText
                           }
                         } else {
                           // URL'e göre çeviri anahtarı yoksa, string'i direkt çeviri anahtarı olarak kullan
                           linkText = t(link.text)
+                          // Eğer çeviri bulunamazsa, orijinal string'i kullan (son çare)
+                          if (!linkText || linkText === link.text) {
+                            linkText = link.text
+                          }
                         }
                       }
                     }
@@ -788,6 +821,11 @@ const Footer = () => {
                       const translationKey = getTranslationKeyFromUrl(url)
                       if (translationKey) {
                         linkText = t(translationKey)
+                        // Eğer çeviri bulunamazsa, hardcoded fallback kullan
+                        if (!linkText || linkText === translationKey || linkText.trim() === '') {
+                          const hardcoded = getHardcodedTranslation(translationKey, locale)
+                          linkText = hardcoded || linkText
+                        }
                       }
                     }
                     

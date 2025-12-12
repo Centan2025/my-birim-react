@@ -388,7 +388,12 @@ header nav a.active .header-nav-text {
   footer span:has([href="/kvkk"]),
   footer div:has([href*="/kvkk"]),
   footer a:contains("KVKK"),
-  footer span:contains("KVKK") {
+  footer span:contains("KVKK"),
+  /* Tüm footer legal links için genel kurallar */
+  footer span:has(a[href]),
+  footer span:has(a[href]) > a,
+  footer .flex.flex-col.md\\:flex-row span:has(a),
+  footer .flex.flex-col.md\\:flex-row span:has(a) > a {
     white-space: nowrap !important;
     overflow: visible !important;
     text-overflow: clip !important;
@@ -397,33 +402,38 @@ header nav a.active .header-nav-text {
     width: auto !important;
     display: inline-block !important;
     flex-shrink: 0 !important;
+    flex-grow: 0 !important;
     word-break: normal !important;
     overflow-wrap: normal !important;
+    text-overflow: clip !important;
   }
   /* Footer legal links container */
   footer div:has([href*="/kvkk"]),
   footer div:has([href="/kvkk"]),
-  footer div:has(span:has([href*="/kvkk"])) {
+  footer div:has(span:has([href*="/kvkk"])),
+  footer .flex.flex-col.md\\:flex-row {
     overflow: visible !important;
-    max-width: none !important;
-    width: auto !important;
+    max-width: 100% !important;
+    width: 100% !important;
     min-width: 0 !important;
-    flex-shrink: 0 !important;
-    flex-grow: 0 !important;
+    flex-shrink: 1 !important;
+    flex-grow: 1 !important;
   }
   /* Footer legal links parent container */
   footer > div > div:has([href*="/kvkk"]),
-  footer > div > div:has([href="/kvkk"]) {
+  footer > div > div:has([href="/kvkk"]),
+  footer > div > div:has(span:has(a[href])) {
     overflow: visible !important;
     max-width: 100% !important;
-    width: auto !important;
+    width: 100% !important;
   }
-  /* Footer legal links flex container */
-  footer .flex.flex-col.md\\:flex-row {
-    overflow: visible !important;
-  }
-  footer .flex.flex-col.md\\:flex-row > div {
+  /* Footer legal links flex container - her bir span */
+  footer .flex.flex-col.md\\:flex-row > span {
     overflow: visible !important;
     max-width: none !important;
+    width: auto !important;
+    min-width: fit-content !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
   }
 }
