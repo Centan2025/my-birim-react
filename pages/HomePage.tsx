@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useSiteSettings } from '../src/hooks/useSiteData'
 import { useHomePageContent } from '../src/hooks/useHomePage'
@@ -44,16 +44,32 @@ export function HomePage() {
 
   useSEO(seoData)
 
-  // Animasyon sistemi kaldırıldı - yazılar direkt görünür
-
+  const [mobileHeroHeight, setMobileHeroHeight] = useState<number | null>(null)
+  const lastWidthRef = React.useRef(typeof window !== 'undefined' ? window.innerWidth : 0)
 
   // İlham görselinin yüksekliğini hesapla - hook'lar early return'den önce olmalı
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth < 1024
       const vw = document.documentElement.clientWidth || window.innerWidth
+      const currentWidth = window.innerWidth
+
       setIsMobile(mobile)
       setViewportWidth(vw)
+
+      // Mobilde ve genişlik değiştiyse (ya da ilk yükleme) height hesapla
+      if (mobile) {
+        if (Math.abs(currentWidth - lastWidthRef.current) > 1 || !mobileHeroHeight) {
+          setMobileHeroHeight(window.innerHeight)
+          lastWidthRef.current = currentWidth
+        }
+      } else {
+        setMobileHeroHeight(null)
+      }
+    }
+    // İlk çalıştırma
+    if (typeof window !== 'undefined' && !mobileHeroHeight) {
+      setMobileHeroHeight(window.innerHeight)
     }
     checkMobile()
 
@@ -266,9 +282,9 @@ export function HomePage() {
               .hero-page-container-mobile > div:first-child,
               .hero-page-container-mobile > div:first-child[class*="relative"],
               .hero-container-mobile {
-                height: 100vh !important;
-                min-height: 100vh !important;
-                max-height: 100vh !important;
+                height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
+                min-height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
+                max-height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
               }
               .hero-main-container-mobile {
                 width: 100vw !important;
@@ -312,9 +328,9 @@ export function HomePage() {
               .hero-slide-mobile,
               .hero-slide-mobile[style] {
                 /* Genişlik inline style'dan gelecek, CSS override etmesin */
-                height: 100vh !important;
-                min-height: 100vh !important;
-                max-height: 100vh !important;
+                height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
+                min-height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
+                max-height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
                 flex-shrink: 0 !important;
                 flex-grow: 0 !important;
                 padding: 0 !important;
@@ -348,13 +364,11 @@ export function HomePage() {
                 width: 100vw !important;
                 min-width: 100vw !important;
                 max-width: 100vw !important;
-                height: 100vh !important;
-                min-height: 100vh !important;
-                max-height: 100vh !important;
+                height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
+                min-height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
+                max-height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
                 left: 0 !important;
                 right: 0 !important;
-                top: 0 !important;
-                bottom: 0 !important;
                 margin-left: 0 !important;
                 margin-right: 0 !important;
                 padding-left: 0 !important;
@@ -362,6 +376,7 @@ export function HomePage() {
                 object-fit: cover !important;
                 object-position: center !important;
                 position: absolute !important;
+                top: 0 !important;
                 transform: none !important;
                 box-sizing: border-box !important;
               }
@@ -376,13 +391,11 @@ export function HomePage() {
                 width: 100vw !important;
                 min-width: 100vw !important;
                 max-width: 100vw !important;
-                height: 100vh !important;
-                min-height: 100vh !important;
-                max-height: 100vh !important;
+                height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
+                min-height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
+                max-height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
                 left: 0 !important;
                 right: 0 !important;
-                top: 0 !important;
-                bottom: 0 !important;
                 margin-left: 0 !important;
                 margin-right: 0 !important;
                 padding-left: 0 !important;
@@ -390,6 +403,7 @@ export function HomePage() {
                 object-fit: cover !important;
                 object-position: center !important;
                 position: absolute !important;
+                top: 0 !important;
                 transform: none !important;
                 box-sizing: border-box !important;
               }
@@ -411,8 +425,8 @@ export function HomePage() {
                 width: 100vw !important;
                 max-width: 100vw !important;
                 min-width: 100vw !important;
-                height: 100vh !important;
-                min-height: 100vh !important;
+                height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
+                min-height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
                 left: 0 !important;
                 right: 0 !important;
                 margin-left: 0 !important;
