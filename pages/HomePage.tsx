@@ -251,21 +251,17 @@ export function HomePage() {
                 padding: 0 !important;
               }
               .hero-page-container-mobile {
-                width: 100% !important;
-                max-width: 100% !important;
+                width: 100vw !important;
+                max-width: 100vw !important;
                 margin-left: 0 !important;
                 margin-right: 0 !important;
                 padding-left: 0 !important;
                 padding-right: 0 !important;
+                overflow-x: hidden !important;
                 box-sizing: border-box !important;
                 position: relative !important;
                 left: 0 !important;
                 right: 0 !important;
-                overflow-x: hidden !important;
-                overflow-y: visible !important;
-              }
-              .hero-page-container-mobile * {
-                max-width: 100% !important;
               }
               .hero-page-container-mobile > div:first-child,
               .hero-page-container-mobile > div:first-child[class*="relative"],
@@ -281,21 +277,19 @@ export function HomePage() {
                 margin-left: 0 !important;
                 margin-right: 0 !important;
                 padding: 0 !important;
-                overflow-x: hidden !important;
+                overflow-x: auto !important;
                 overflow-y: hidden !important;
                 box-sizing: border-box !important;
                 position: relative !important;
                 left: 0 !important;
                 right: 0 !important;
-                scroll-snap-type: none !important;
+                scroll-snap-type: x mandatory !important;
                 scroll-padding: 0 !important;
                 scroll-behavior: auto !important;
                 -webkit-overflow-scrolling: touch !important;
                 scrollbar-width: none !important;
                 -ms-overflow-style: none !important;
-                overscroll-behavior-x: none !important;
-                overscroll-behavior-y: none !important;
-                overscroll-behavior: none !important;
+                overscroll-behavior-x: contain !important;
               }
               .hero-main-container-mobile::-webkit-scrollbar {
                 display: none !important;
@@ -330,12 +324,9 @@ export function HomePage() {
                 box-sizing: border-box !important;
                 left: 0 !important;
                 right: 0 !important;
-                scroll-snap-align: none !important;
-                scroll-snap-stop: normal !important;
+                scroll-snap-align: start !important;
+                scroll-snap-stop: always !important;
                 scroll-margin: 0 !important;
-                overscroll-behavior: none !important;
-                overscroll-behavior-y: none !important;
-                overscroll-behavior-x: none !important;
               }
               .hero-slide-mobile video,
               .hero-slide-mobile video[style],
