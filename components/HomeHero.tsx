@@ -3,6 +3,7 @@ import {Link} from 'react-router-dom'
 import type {HomePageContent, SiteSettings} from '../types'
 import {OptimizedImage} from './OptimizedImage'
 import {OptimizedVideo} from './OptimizedVideo'
+// Build fix
 import {ArrowRight} from './ArrowRight'
 import {YouTubeBackground} from './YouTubeBackground'
 import {useTranslation} from '../i18n'
