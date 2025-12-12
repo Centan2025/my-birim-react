@@ -251,17 +251,21 @@ export function HomePage() {
                 padding: 0 !important;
               }
               .hero-page-container-mobile {
-                width: 100vw !important;
-                max-width: 100vw !important;
+                width: 100% !important;
+                max-width: 100% !important;
                 margin-left: 0 !important;
                 margin-right: 0 !important;
                 padding-left: 0 !important;
                 padding-right: 0 !important;
-                overflow-x: hidden !important;
                 box-sizing: border-box !important;
                 position: relative !important;
                 left: 0 !important;
                 right: 0 !important;
+                overflow-x: hidden !important;
+                overflow-y: visible !important;
+              }
+              .hero-page-container-mobile * {
+                max-width: 100% !important;
               }
               .hero-page-container-mobile > div:first-child,
               .hero-page-container-mobile > div:first-child[class*="relative"],
@@ -269,9 +273,6 @@ export function HomePage() {
                 height: 100dvh !important;
                 min-height: 100dvh !important;
                 max-height: 100dvh !important;
-                overscroll-behavior: none !important;
-                overscroll-behavior-y: none !important;
-                overscroll-behavior-x: none !important;
               }
               .hero-main-container-mobile {
                 width: 100vw !important;
@@ -280,7 +281,7 @@ export function HomePage() {
                 margin-left: 0 !important;
                 margin-right: 0 !important;
                 padding: 0 !important;
-                overflow-x: auto !important;
+                overflow-x: hidden !important;
                 overflow-y: hidden !important;
                 box-sizing: border-box !important;
                 position: relative !important;
@@ -312,9 +313,6 @@ export function HomePage() {
                 flex-wrap: nowrap !important;
                 scroll-snap-type: none !important;
                 will-change: transform !important;
-                overscroll-behavior: none !important;
-                overscroll-behavior-y: none !important;
-                overscroll-behavior-x: none !important;
                 /* Genişlik inline style'dan gelecek, CSS override etmesin */
               }
               .hero-slide-mobile,
