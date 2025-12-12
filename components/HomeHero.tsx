@@ -521,7 +521,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                     src={media.url}
                     srcMobile={media.urlMobile}
                     srcDesktop={media.urlDesktop}
-                    className={`${isMobile ? 'absolute' : 'absolute'} top-0 left-0 w-full ${isMobile ? 'h-full' : 'h-full'} ${isMobile ? 'object-cover object-center' : 'object-cover'}`}
+                    className={`absolute inset-0 w-full h-full ${isMobile ? 'object-cover object-center' : 'object-cover'}`}
                     autoPlay
                     loop
                     muted
@@ -537,7 +537,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                     srcMobile={media.urlMobile}
                     srcDesktop={media.urlDesktop}
                     alt={t(media.title || '')}
-                    className={`${isMobile ? 'absolute' : 'absolute'} top-0 left-0 w-full ${isMobile ? 'h-full' : 'h-full'} ${isMobile ? 'object-cover object-center' : 'object-cover'}`}
+                    className={`absolute inset-0 w-full h-full ${isMobile ? 'object-cover object-center' : 'object-cover'}`}
                     loading="eager"
                     quality={90}
                   />
@@ -633,7 +633,9 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
               isMobile
                 ? {
                   position: 'absolute',
-                  bottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)',
+                  bottom: 'max(16px, env(safe-area-inset-bottom, 0px) + 16px)',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
                 }
                 : {}
             }

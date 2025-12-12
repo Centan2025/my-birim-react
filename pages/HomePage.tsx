@@ -353,6 +353,8 @@ export function HomePage() {
                 max-height: 100vh !important;
                 left: 0 !important;
                 right: 0 !important;
+                top: 0 !important;
+                bottom: 0 !important;
                 margin-left: 0 !important;
                 margin-right: 0 !important;
                 padding-left: 0 !important;
@@ -360,7 +362,6 @@ export function HomePage() {
                 object-fit: cover !important;
                 object-position: center !important;
                 position: absolute !important;
-                top: 0 !important;
                 transform: none !important;
                 box-sizing: border-box !important;
               }
@@ -380,6 +381,8 @@ export function HomePage() {
                 max-height: 100vh !important;
                 left: 0 !important;
                 right: 0 !important;
+                top: 0 !important;
+                bottom: 0 !important;
                 margin-left: 0 !important;
                 margin-right: 0 !important;
                 padding-left: 0 !important;
@@ -387,7 +390,6 @@ export function HomePage() {
                 object-fit: cover !important;
                 object-position: center !important;
                 position: absolute !important;
-                top: 0 !important;
                 transform: none !important;
                 box-sizing: border-box !important;
               }
