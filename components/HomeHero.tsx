@@ -506,6 +506,9 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
             boxSizing: 'border-box',
             position: 'relative',
             touchAction: isMobile ? 'pan-y pinch-zoom' : 'pan-y',
+            overscrollBehavior: 'none',
+            overscrollBehaviorY: 'none',
+            overscrollBehaviorX: 'none',
             ...(isMobile
               ? {
                   height: '100dvh',

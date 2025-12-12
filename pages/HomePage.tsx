@@ -269,6 +269,9 @@ export function HomePage() {
                 height: 100dvh !important;
                 min-height: 100dvh !important;
                 max-height: 100dvh !important;
+                overscroll-behavior: none !important;
+                overscroll-behavior-y: none !important;
+                overscroll-behavior-x: none !important;
               }
               .hero-main-container-mobile {
                 width: 100vw !important;
@@ -283,13 +286,15 @@ export function HomePage() {
                 position: relative !important;
                 left: 0 !important;
                 right: 0 !important;
-                scroll-snap-type: x mandatory !important;
+                scroll-snap-type: none !important;
                 scroll-padding: 0 !important;
                 scroll-behavior: auto !important;
                 -webkit-overflow-scrolling: touch !important;
                 scrollbar-width: none !important;
                 -ms-overflow-style: none !important;
-                overscroll-behavior-x: contain !important;
+                overscroll-behavior-x: none !important;
+                overscroll-behavior-y: none !important;
+                overscroll-behavior: none !important;
               }
               .hero-main-container-mobile::-webkit-scrollbar {
                 display: none !important;
@@ -307,6 +312,9 @@ export function HomePage() {
                 flex-wrap: nowrap !important;
                 scroll-snap-type: none !important;
                 will-change: transform !important;
+                overscroll-behavior: none !important;
+                overscroll-behavior-y: none !important;
+                overscroll-behavior-x: none !important;
                 /* Genişlik inline style'dan gelecek, CSS override etmesin */
               }
               .hero-slide-mobile,
@@ -324,9 +332,12 @@ export function HomePage() {
                 box-sizing: border-box !important;
                 left: 0 !important;
                 right: 0 !important;
-                scroll-snap-align: start !important;
-                scroll-snap-stop: always !important;
+                scroll-snap-align: none !important;
+                scroll-snap-stop: normal !important;
                 scroll-margin: 0 !important;
+                overscroll-behavior: none !important;
+                overscroll-behavior-y: none !important;
+                overscroll-behavior-x: none !important;
               }
               .hero-slide-mobile video,
               .hero-slide-mobile video[style],
