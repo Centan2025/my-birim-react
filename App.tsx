@@ -714,9 +714,18 @@ const Footer = () => {
           </ScrollReveal>
         </div>
         <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
-          <div className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col md:flex-row md:justify-between md:items-start gap-4 text-xs">
+          <div className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col md:flex-row md:items-start gap-4 text-xs">
             {content.legalLinks && content.legalLinks.length > 0 && (
-              <div className="flex flex-col md:flex-row md:flex-wrap md:items-center items-center gap-2 md:gap-x-4" style={{overflow: 'visible', maxWidth: '100%'}}>
+              <div 
+                className="flex flex-col md:flex-row md:flex-wrap md:items-center items-center gap-2 md:gap-x-4" 
+                style={{
+                  overflow: 'visible', 
+                  maxWidth: 'none',
+                  width: 'auto',
+                  minWidth: 0,
+                  flexShrink: 1
+                }}
+              >
                 {content.legalLinks
                   .filter(link => link?.isVisible)
                   .map((link, index) => {
@@ -726,13 +735,20 @@ const Footer = () => {
                     if (link.text) {
                       if (typeof link.text === 'object' && link.text !== null) {
                         const textObj = link.text as any
-                        // Önce mevcut locale'i kontrol et
-                        if (textObj[locale] && typeof textObj[locale] === 'string' && textObj[locale].trim()) {
-                          linkText = textObj[locale]
-                        } else if (textObj.tr && typeof textObj.tr === 'string' && textObj.tr.trim()) {
+                        // Debug: KVKK linki için özel kontrol
+                        const isKvkkLink = url.includes('/kvkk') || url === '/kvkk'
+                        
+                        // Önce mevcut locale'i kontrol et (en yüksek öncelik)
+                        if (locale === 'en' && textObj.en && typeof textObj.en === 'string' && textObj.en.trim()) {
+                          linkText = textObj.en
+                        } else if (locale === 'tr' && textObj.tr && typeof textObj.tr === 'string' && textObj.tr.trim()) {
                           linkText = textObj.tr
+                        } else if (textObj[locale] && typeof textObj[locale] === 'string' && textObj[locale].trim()) {
+                          linkText = textObj[locale]
                         } else if (textObj.en && typeof textObj.en === 'string' && textObj.en.trim()) {
                           linkText = textObj.en
+                        } else if (textObj.tr && typeof textObj.tr === 'string' && textObj.tr.trim()) {
+                          linkText = textObj.tr
                         } else {
                           // Object'teki ilk geçerli değeri al
                           linkText = Object.values(textObj).find((v: any) => v && typeof v === 'string' && v.trim()) as string || ''
@@ -758,13 +774,28 @@ const Footer = () => {
                     return (
                       <span 
                         key={index} 
-                        style={{whiteSpace: 'nowrap', overflow: 'visible', textOverflow: 'clip', maxWidth: 'none', display: 'inline-block'}}
+                        style={{
+                          whiteSpace: 'nowrap', 
+                          overflow: 'visible', 
+                          textOverflow: 'clip', 
+                          maxWidth: 'none',
+                          minWidth: 'auto',
+                          width: 'auto',
+                          display: 'inline-block',
+                          flexShrink: 0
+                        }}
                       >
                         {isInternalLink ? (
                           <Link
                             to={url}
                             className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
-                            style={{whiteSpace: 'nowrap', overflow: 'visible', textOverflow: 'clip'}}
+                            style={{
+                              whiteSpace: 'nowrap', 
+                              overflow: 'visible', 
+                              textOverflow: 'clip',
+                              maxWidth: 'none',
+                              display: 'inline-block'
+                            }}
                           >
                             {linkText}
                           </Link>
@@ -772,7 +803,13 @@ const Footer = () => {
                           <a
                             href={url}
                             className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
-                            style={{whiteSpace: 'nowrap', overflow: 'visible', textOverflow: 'clip'}}
+                            style={{
+                              whiteSpace: 'nowrap', 
+                              overflow: 'visible', 
+                              textOverflow: 'clip',
+                              maxWidth: 'none',
+                              display: 'inline-block'
+                            }}
                             target={isHttp ? '_blank' : undefined}
                             rel={isHttp ? 'noopener noreferrer' : undefined}
                           >
