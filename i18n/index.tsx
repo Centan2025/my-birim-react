@@ -137,20 +137,23 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
       }
 
       if (typeof keyOrObject === 'object' && keyOrObject !== null) {
-        // Önce mevcut locale'i kontrol et
-        if (locale in keyOrObject && (keyOrObject as any)[locale]) {
-          return (keyOrObject as any)[locale]
+        const obj = keyOrObject as any
+        // Önce mevcut locale'i kontrol et (boş string değilse)
+        if (locale in obj && obj[locale] && typeof obj[locale] === 'string' && obj[locale].trim()) {
+          return obj[locale]
         }
         // Locale yoksa veya boşsa, 'tr' fallback'i kullan
-        if ('tr' in keyOrObject && (keyOrObject as any)['tr']) {
-          return (keyOrObject as any)['tr']
+        if ('tr' in obj && obj['tr'] && typeof obj['tr'] === 'string' && obj['tr'].trim()) {
+          return obj['tr']
         }
         // 'tr' de yoksa, 'en' fallback'i dene
-        if ('en' in keyOrObject && (keyOrObject as any)['en']) {
-          return (keyOrObject as any)['en']
+        if ('en' in obj && obj['en'] && typeof obj['en'] === 'string' && obj['en'].trim()) {
+          return obj['en']
         }
-        // Hiçbiri yoksa, object'teki ilk değeri al
-        const firstValue = Object.values(keyOrObject as any).find((val: any) => val && typeof val === 'string')
+        // Hiçbiri yoksa, object'teki ilk geçerli string değeri al
+        const firstValue = Object.values(obj).find(
+          (val: any) => val && typeof val === 'string' && val.trim()
+        ) as string | undefined
         return firstValue || ''
       }
 

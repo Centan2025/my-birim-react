@@ -716,42 +716,45 @@ const Footer = () => {
         <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
           <div className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col md:flex-row md:justify-between md:items-start gap-4 text-xs">
             {content.legalLinks && content.legalLinks.length > 0 && (
-              <div className="flex flex-col md:flex-row md:items-center md:gap-x-4 items-center gap-2">
+              <div className="flex flex-col md:flex-row md:items-center md:gap-x-4 items-center gap-2 min-w-0">
                 {content.legalLinks
                   .filter(link => link?.isVisible)
                   .map((link, index) => {
                     const url = typeof link?.url === 'string' ? link.url : ''
+                    const linkText = t(link.text)
                     if (!url) {
                       return (
-                        <ScrollReveal key={index} delay={185 + index * 10} threshold={0} width="w-auto" className="h-auto">
-                          <span className="opacity-80 select-none text-gray-400 whitespace-normal break-words">
-                            {t(link.text)}
+                        <div key={index} className="min-w-0">
+                          <span className="opacity-80 select-none text-gray-400 inline-block" style={{wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal'}}>
+                            {linkText}
                           </span>
-                        </ScrollReveal>
+                        </div>
                       )
                     }
                     const isHttp = /^https?:\/\//.test(url)
                     const isInternalLink = url.startsWith('/') && !url.startsWith('//') && !isHttp
                     return (
-                      <ScrollReveal key={index} delay={185 + index * 10} threshold={0} width="w-auto" className="h-auto">
+                      <div key={index} className="min-w-0">
                         {isInternalLink ? (
                           <Link
                             to={url}
-                            className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm whitespace-normal break-words"
+                            className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm inline-block"
+                            style={{wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal'}}
                           >
-                            {t(link.text)}
+                            {linkText}
                           </Link>
                         ) : (
                           <a
                             href={url}
-                            className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm whitespace-normal break-words"
+                            className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm inline-block"
+                            style={{wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal'}}
                             target={isHttp ? '_blank' : undefined}
                             rel={isHttp ? 'noopener noreferrer' : undefined}
                           >
-                            {t(link.text)}
+                            {linkText}
                           </a>
                         )}
-                      </ScrollReveal>
+                      </div>
                     )
                   })}
               </div>
