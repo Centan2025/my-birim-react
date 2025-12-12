@@ -1564,13 +1564,20 @@ export function Header() {
           }`}
           style={{
             backgroundColor: (() => {
+              // Ürün detay sayfasında arka plan rengini kontrol etme - sabit değer kullan
+              const path = location.pathname
+              const isProductDetail = path.match(/^\/product\/[^/]+$/)
+              if (isProductDetail) {
+                // Ürün detay sayfasında header opacity'ye göre sabit değer
+                return `rgba(0, 0, 0, ${Math.max(headerOpacity, 0.7)})`
+              }
+              
               // Desktop'ta Products dropdown açıkken yarı şeffaf arka plan
               if (isProductsOpen && !isMobile) {
                 return 'rgba(0, 0, 0, 0.85)'
               }
               
               // Koyu hero olan sayfalarda en üstteyken şeffaf
-              const path = location.pathname
               const isDarkHero = path === '/' || path === '' || path.includes('about')
               if (isDarkHero && window.scrollY <= 10 && headerOpacity <= 0) {
                 return 'transparent'
