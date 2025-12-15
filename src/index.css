@@ -519,32 +519,33 @@ header nav a.active .header-nav-text {
 
   /* Footer container - genişlik kontrolü - sadece footer içindeki container, diğer sayfaları etkilemesin */
   /* NOT: Bu kurallar sadece footer içindeki container'ı etkiler, diğer sayfaları etkilemez */
-  footer.bg-gray-800 > .container.mx-auto,
-  footer[class*="bg-gray"] > .container.mx-auto {
+  footer.bg-gray-800>.container.mx-auto,
+  footer[class*="bg-gray"]>.container.mx-auto {
     overflow-x: visible !important;
   }
 
   /* Footer legal links - parent container */
-  footer.bg-gray-800 > .container.mx-auto > div,
-  footer.bg-gray-800 > .container.mx-auto > div > div,
-  footer[class*="bg-gray"] > .container.mx-auto > div,
-  footer[class*="bg-gray"] > .container.mx-auto > div > div {
+  footer.bg-gray-800>.container.mx-auto>div,
+  footer.bg-gray-800>.container.mx-auto>div>div,
+  footer[class*="bg-gray"]>.container.mx-auto>div,
+  footer[class*="bg-gray"]>.container.mx-auto>div>div {
     overflow-x: visible !important;
     overflow-y: visible !important;
   }
 
   /* Mobilde footer container'ı sabit genişlikte ve ortada tut - dil değişiminde kaymasın */
   @media (max-width: 1023px) {
-    footer.bg-gray-800 > .container.mx-auto,
-    footer[class*="bg-gray"] > .container.mx-auto {
+
+    footer.bg-gray-800>.container.mx-auto,
+    footer[class*="bg-gray"]>.container.mx-auto {
       width: 100% !important;
       max-width: 100% !important;
       margin-left: auto !important;
       margin-right: auto !important;
     }
 
-    footer.bg-gray-800 > .container.mx-auto > div.lg\:hidden,
-    footer[class*="bg-gray"] > .container.mx-auto > div.lg\:hidden {
+    footer.bg-gray-800>.container.mx-auto>div.lg\:hidden,
+    footer[class*="bg-gray"]>.container.mx-auto>div.lg\:hidden {
       width: 100% !important;
       max-width: 100% !important;
       margin-left: auto !important;
@@ -611,6 +612,15 @@ header nav a.active .header-nav-text {
       max-width: 100% !important;
       text-align: center !important;
       display: block !important;
+    }
+
+    /* Force vertical stack for inner container on mobile */
+    footer .legal-links-inner {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      width: 100% !important;
+      gap: 0.75rem !important;
     }
   }
 }

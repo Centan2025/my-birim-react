@@ -721,8 +721,8 @@ export function ProductDetailPage() {
   return (
     <div
       className={`min-h-screen transition-all duration-700 ease-out ${isPageVisible
-          ? 'opacity-100 translate-y-0'
-          : 'opacity-0 translate-y-20'
+        ? 'opacity-100 translate-y-0'
+        : 'opacity-0 translate-y-20'
         }`}
       style={{
         transform: isPageVisible ? 'translateY(0)' : 'translateY(80px)',
@@ -1170,33 +1170,8 @@ export function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Breadcrumbs - mobilde thumbnails bantının altında */}
-            <nav className="lg:hidden py-8 mt-4 text-[11px] sm:text-[12px] text-gray-500" aria-label="Breadcrumb">
-              <ol className="list-none p-0 inline-flex items-center">
-                <li>
-                  <Link to="/" className="hover:text-gray-800 uppercase underline underline-offset-4">
-                    {t('homepage')}
-                  </Link>
-                </li>
-                <li className="mx-2 font-light text-gray-400">|</li>
-                {category && (
-                  <>
-                    <li>
-                      <Link
-                        to={`/products/${category.id}`}
-                        className="hover:text-gray-800 uppercase underline underline-offset-4"
-                      >
-                        {t(category.name)}
-                      </Link>
-                    </li>
-                    <li className="mx-2 font-light text-gray-400">|</li>
-                  </>
-                )}
-                <li className="font-light text-gray-500" aria-current="page">
-                  {t(product.name)}
-                </li>
-              </ol>
-            </nav>
+            {/* Breadcrumbs removed from here to move to gray area */}
+            <div className="hidden"></div>
           </section>
         </header>
 
@@ -1215,10 +1190,10 @@ export function ProductDetailPage() {
         )}
 
         {/* DETAILS BELOW */}
-      <main className="bg-gray-100">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-4 md:pt-24 lg:pt-12 pb-12">
-            {/* Breadcrumbs - desktop'ta burada */}
-            <nav className="hidden lg:block mb-8 text-[11px] sm:text-[12px] text-gray-500" aria-label="Breadcrumb">
+        <main className="bg-gray-100">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 lg:pt-12 pb-12">
+            {/* Breadcrumbs - desktop ve mobile (artık gray alanda) */}
+            <nav className="mb-8 text-[11px] sm:text-[12px] text-gray-500" aria-label="Breadcrumb">
               <ol className="list-none p-0 inline-flex items-center">
                 <li>
                   <Link to="/" className="hover:text-gray-800 uppercase underline underline-offset-4">
@@ -1325,8 +1300,8 @@ export function ProductDetailPage() {
                           key={idx}
                           onClick={() => setActiveMaterialGroup(idx)}
                           className={`px-5 py-3 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeMaterialGroup === idx
-                              ? 'bg-white text-gray-800 border-gray-500'
-                              : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
+                            ? 'bg-white text-gray-800 border-gray-500'
+                            : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
                             }`}
                         >
                           {t(g.groupTitle)}
@@ -1343,8 +1318,8 @@ export function ProductDetailPage() {
                               key={idx}
                               onClick={() => setActiveBookIndex(idx)}
                               className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeBookIndex === idx
-                                  ? 'bg-white text-gray-800 border-gray-500'
-                                  : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
+                                ? 'bg-white text-gray-800 border-gray-500'
+                                : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
                                 }`}
                             >
                               {t(book.bookTitle)}
