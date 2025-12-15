@@ -69,7 +69,6 @@ export function DesignersPage() {
           className="mb-6"
           items={[
             {label: t('homepage'), to: '/'},
-            {label: t('about'), to: '/about'},
             {label: t('designers')},
           ]}
         />
