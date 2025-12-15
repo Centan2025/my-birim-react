@@ -741,12 +741,16 @@ const Footer = () => {
                           justify-content: center !important;
                           gap: 12px !important;
                           width: 100% !important;
+                          text-align: center !important;
                         }
                         #mobile-legal-links-stack .legal-link-wrapper,
-                        #mobile-legal-links-stack span {
+                        #mobile-legal-links-stack span,
+                        #mobile-legal-links-stack a {
                           width: 100% !important;
                           text-align: center !important;
                           display: block !important;
+                          margin-left: auto !important;
+                          margin-right: auto !important;
                         }
                       }
                     `}
