@@ -1,7 +1,5 @@
-import React from 'react'
-import type { NavigateFunction } from 'react-router-dom'
-import { Link } from 'react-router-dom'
-import { OptimizedImage } from './OptimizedImage'
+import type {NavigateFunction} from 'react-router-dom'
+import {OptimizedImage} from './OptimizedImage'
 import ScrollReveal from './ScrollReveal'
 
 interface ExclusiveContentSectionProps {

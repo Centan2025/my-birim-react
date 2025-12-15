@@ -1,6 +1,4 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { OptimizedImage } from './OptimizedImage'
+import {OptimizedImage} from './OptimizedImage'
 import ScrollReveal from './ScrollReveal'
 
 interface ProductMediaPanelsProps {

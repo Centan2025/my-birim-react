@@ -130,7 +130,7 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
         let translation = cmsTranslation || baseTranslation || keyOrObject
         if (args.length > 0) {
           args.forEach((arg, index) => {
-            translation = translation.replace(`{${index}}`, arg)
+            translation = translation.replace(`{${index}}`, String(arg))
           })
         }
         return translation

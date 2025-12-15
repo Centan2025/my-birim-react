@@ -1,6 +1,5 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { OptimizedImage } from './OptimizedImage'
+import {Link} from 'react-router-dom'
+import {OptimizedImage} from './OptimizedImage'
 import ScrollReveal from './ScrollReveal'
 
 interface ProductDesignerSectionProps {
@@ -8,7 +7,7 @@ interface ProductDesignerSectionProps {
   t: (value: any) => string
 }
 
-export function ProductDesignerSection({ designer, t }: ProductDesignerSectionProps) {
+export function ProductDesignerSection({designer, t}: ProductDesignerSectionProps) {
   if (!designer) return null
 
   return (

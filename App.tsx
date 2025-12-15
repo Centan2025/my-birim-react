@@ -603,9 +603,9 @@ const Footer = () => {
                         href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="hover:text-white transition-opacity duration-200 opacity-95 hover:opacity-100"
+                        className="group text-gray-300/80 hover:text-white transition-colors duration-300 ease-out"
                       >
-                        <div className="w-10 h-10 flex items-center justify-center">
+                        <div className="w-10 h-10 flex items-center justify-center transition-transform duration-300 ease-out group-hover:scale-110">
                           {(() => {
                             const key = link.name.toLowerCase()
 

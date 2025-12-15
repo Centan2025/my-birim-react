@@ -15,7 +15,7 @@ import {HeaderProductsPanel} from './HeaderProductsPanel'
 import {HeaderMobileMenuInline} from './HeaderMobileMenuInline'
 import {HeaderMobileMenuOverlay} from './HeaderMobileMenuOverlay'
 import {HeaderSearchPanel} from './HeaderSearchPanel'
-import {CrossFadeText, DynamicIcon, UserIcon, ChevronRightIcon} from './HeaderShared'
+import {UserIcon} from './HeaderShared'
 import {useTranslation} from '../i18n'
 import {useCart} from '../context/CartContext'
 import {useCategories} from '../src/hooks/useCategories'
@@ -182,6 +182,12 @@ export function Header() {
   // Footer content for social links and subscribe
   const [footerContent, setFooterContent] = useState<FooterContent | null>(null)
   const [subscribeEmail, setSubscribeEmailState] = useState('')
+  const handleHeaderSubscribeEmail = useCallback(
+    async (email: string): Promise<void> => {
+      await subscribeEmailService(email)
+    },
+    []
+  )
 
   const closeSearch = useCallback(() => {
     setIsSearchOpen(false)
@@ -2094,7 +2100,7 @@ export function Header() {
         setIsMobileMenuOpen={setIsMobileMenuOpen}
         setIsMobileProductsMenuOpen={setIsMobileProductsMenuOpen}
         setSubscribeEmail={setSubscribeEmailState}
-        subscribeEmailService={subscribeEmailService}
+        subscribeEmailService={handleHeaderSubscribeEmail}
         mobileMenuRef={mobileMenuRef}
         mobileMenuFocusTrap={mobileMenuFocusTrap}
       />

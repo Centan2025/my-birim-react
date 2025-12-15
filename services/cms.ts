@@ -9,6 +9,7 @@ import type {
   FooterContent,
   NewsItem,
   ProductMaterial,
+  ProductMaterialsGroup,
   Project,
   LocalizedString,
   User,
@@ -239,7 +240,11 @@ const mapProductMedia = (
   const mediaArr: SanityProductMediaItem[] = Array.isArray(row?.media) ? row.media : []
   const fromMedia = mediaArr
     .map(m => {
-      const type = m?.type
+      const rawType = m?.type
+      if (rawType !== 'image' && rawType !== 'video' && rawType !== 'youtube') {
+        return null
+      }
+      const type: 'image' | 'video' | 'youtube' = rawType
       const url = mapMediaUrl(m) // Varsayılan URL
       const urlMobile = mapMediaUrl(m, true, false) // Mobil URL (varsa)
       const urlDesktop = mapMediaUrl(m, false, true) // Desktop URL (varsa)
@@ -251,7 +256,7 @@ const mapProductMedia = (
 
       // Sadece urlMobile veya urlDesktop varsa ekle
       const result: {
-        type: SanityProductMediaItem['type']
+        type: 'image' | 'video' | 'youtube'
         url: string
         urlMobile?: string
         urlDesktop?: string
@@ -265,7 +270,16 @@ const mapProductMedia = (
 
       return result
     })
-    .filter(m => m.type && m.url)
+    .filter((m): m is {
+      type: 'image' | 'video' | 'youtube'
+      url: string
+      urlMobile?: string
+      urlDesktop?: string
+      title?: LocalizedString
+      description?: LocalizedString
+      link?: string
+      linkText?: LocalizedString
+    } => !!m && !!m.url)
   // Fallback kaldırıldı: Eğer hiç medya eklenmemişse boş array döndür
   return fromMedia
 }
@@ -282,14 +296,18 @@ const mapAlternativeMedia = (
   if (alt.length)
     return alt
       .map(m => {
-        const type = m?.type
+        const rawType = m?.type
+        if (rawType !== 'image' && rawType !== 'video' && rawType !== 'youtube') {
+          return null
+        }
+        const type: 'image' | 'video' | 'youtube' = rawType
         const url = mapMediaUrl(m) // Varsayılan URL
         const urlMobile = mapMediaUrl(m, true, false) // Mobil URL (varsa)
         const urlDesktop = mapMediaUrl(m, false, true) // Desktop URL (varsa)
 
         // Sadece urlMobile veya urlDesktop varsa ekle
         const result: {
-          type: SanityProductMediaItem['type']
+          type: 'image' | 'video' | 'youtube'
           url: string
           urlMobile?: string
           urlDesktop?: string
@@ -299,7 +317,14 @@ const mapAlternativeMedia = (
 
         return result
       })
-      .filter(m => m.type && m.url)
+      .filter(
+        (m): m is {
+          type: 'image' | 'video' | 'youtube'
+          url: string
+          urlMobile?: string
+          urlDesktop?: string
+        } => !!m && !!m.url
+      )
   // fallback to legacy alternativeImages
   return mapImages(row?.alternativeImages).map((u: string) => ({type: 'image', url: u}))
 }
@@ -369,19 +394,19 @@ const mapGroupedMaterials = (materialSelections: SanityMaterialSelection[]): Pro
             selectedKeys.has(`${bm.image}|${JSON.stringify(bm.name)}`)
           )
           return {
-            bookTitle: book?.title,
+            bookTitle: (book?.title ?? '') as LocalizedString,
             materials: selectedBookMaterials,
           }
         })
         .filter(b => b.materials.length > 0)
 
       return {
-        groupTitle: s?.group?.title,
+        groupTitle: (s?.group?.title ?? '') as LocalizedString,
         books: groupBooks,
         materials: selectedMaterials,
       }
     })
-    .filter((g: ProductMaterialsGroup) => g.materials.length > 0)
+    .filter(g => g.materials.length > 0)
 }
 // Ürünlerde ölçü alanını boşlayarak normalize et
 const normalizeProduct = (p: Product): Product => ({
