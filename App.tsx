@@ -843,28 +843,12 @@ const Footer = () => {
                       return (
                         <span
                           key={index}
-                          className="legal-link-wrapper block w-full text-center md:inline-block md:w-auto md:text-left"
-                          style={{
-                            whiteSpace: 'nowrap',
-                            overflow: 'visible',
-                            textOverflow: 'clip',
-                            maxWidth: 'none',
-                            minWidth: 'auto',
-                            wordBreak: 'normal',
-                            overflowWrap: 'normal'
-                          }}
+                          className="legal-link-wrapper"
                         >
                           {isInternalLink ? (
                             <Link
                               to={url}
                               className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
-                              style={{
-                                whiteSpace: 'nowrap',
-                                overflow: 'visible',
-                                textOverflow: 'clip',
-                                maxWidth: 'none',
-                                display: 'inline-block'
-                              }}
                             >
                               {linkText}
                             </Link>
@@ -872,13 +856,6 @@ const Footer = () => {
                             <a
                               href={url}
                               className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
-                              style={{
-                                whiteSpace: 'nowrap',
-                                overflow: 'visible',
-                                textOverflow: 'clip',
-                                maxWidth: 'none',
-                                display: 'inline-block'
-                              }}
                               target={isHttp ? '_blank' : undefined}
                               rel={isHttp ? 'noopener noreferrer' : undefined}
                             >
