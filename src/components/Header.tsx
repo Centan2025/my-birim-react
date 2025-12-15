@@ -18,9 +18,9 @@ import {HeaderSearchPanel} from './HeaderSearchPanel'
 import {UserIcon} from './HeaderShared'
 import {useTranslation} from '../i18n'
 import {useCart} from '../context/CartContext'
-import {useCategories} from '../src/hooks/useCategories'
-import {useProductsByCategory} from '../src/hooks/useProducts'
-import {useFocusTrap} from '../src/hooks/useFocusTrap'
+import {useCategories} from '../hooks/useCategories'
+import {useProductsByCategory} from '../hooks/useProducts'
+import {useFocusTrap} from '../hooks/useFocusTrap'
 
 const MenuIcon = () => (
   <svg
@@ -1535,9 +1535,6 @@ export function Header() {
             // Arka plan blur'ü: opacity 0 ise blur'ü kaldır (Products açıkken blur aktif)
             headerOpacity <= 0 && !isProductsOpen ? '' : 'backdrop-blur-lg'
           } ${
-            // Header altındaki ince beyaz çizgiyi opacity 0 iken veya products açıkken kaldır
-            isSearchOpen || headerOpacity <= 0 || isProductsOpen ? '' : 'border-b border-white/10'
-          } ${
             // Sadece menü açıldığında transition ve max-height değişimi
             isProductsOpen || (isMobileMenuOpen && !isOverlayMobileMenu)
               ? 'transition-all duration-700 ease-in-out'
@@ -1797,7 +1794,9 @@ export function Header() {
                 : headerOpacity <= 0 && !isProductsOpen
                   ? 'none'
                   : 'blur(16px)',
-            borderBottom: (headerOpacity <= 0 || isProductsOpen) ? 'none' : undefined,
+            // Header altındaki çizgi: sadece arama ve products kapalıyken göster
+            borderBottom:
+              headerOpacity <= 0 || isProductsOpen || isSearchOpen ? 'none' : undefined,
             pointerEvents: 'auto',
             // Desktop'ta header yüksekliği her zaman sabit - products dropdown overflow ile gösterilir
             height: isMobileMenuOpen && !isOverlayMobileMenu 

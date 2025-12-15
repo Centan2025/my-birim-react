@@ -4,7 +4,7 @@ import {
   getProductById,
   getProductsByCategoryId,
   getProductsByDesignerId,
-} from '../../services/cms'
+} from '@/services/cms'
 
 /**
  * Tüm ürünleri getir

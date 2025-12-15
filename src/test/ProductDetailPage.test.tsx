@@ -1,7 +1,7 @@
 import {describe, it, expect, vi} from 'vitest'
 import {render, screen} from '@testing-library/react'
 import {MemoryRouter, Route, Routes} from 'react-router-dom'
-import {ProductDetailPage} from '../../pages/ProductDetailPage'
+import {ProductDetailPage} from '@/pages/ProductDetailPage'
 import * as productsHooks from '../hooks/useProducts'
 import * as designersHooks from '../hooks/useDesigners'
 import * as categoriesHooks from '../hooks/useCategories'
@@ -14,7 +14,7 @@ vi.mock('../hooks/useCategories')
 vi.mock('../hooks/useSiteData')
 
 // Cart context mock'u
-vi.mock('../../context/CartContext', () => ({
+vi.mock('@/context/CartContext', () => ({
   useCart: vi.fn(() => ({
     addToCart: vi.fn(),
   })),

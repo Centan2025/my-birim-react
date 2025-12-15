@@ -5,11 +5,11 @@ import {OptimizedImage} from '../components/OptimizedImage'
 import {OptimizedVideo} from '../components/OptimizedVideo'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
-import {useNewsItem, useNews} from '../src/hooks/useNews'
-import {useSiteSettings} from '../src/hooks/useSiteData'
-import {analytics} from '../src/lib/analytics'
-import {useSEO} from '../src/hooks/useSEO'
-import {addStructuredData, getArticleSchema} from '../src/lib/seo'
+import {useNewsItem, useNews} from '../hooks/useNews'
+import {useSiteSettings} from '../hooks/useSiteData'
+import {analytics} from '../lib/analytics'
+import {useSEO} from '../hooks/useSEO'
+import {addStructuredData, getArticleSchema} from '../lib/seo'
 
 const getYouTubeId = (url: string): string | null => {
   if (!url) return null

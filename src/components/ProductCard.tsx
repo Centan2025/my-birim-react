@@ -4,8 +4,8 @@ import type {Product, Designer} from '../types'
 import {OptimizedImage} from './OptimizedImage'
 import {useTranslation} from '../i18n'
 import {useSiteSettings} from '../App'
-import {analytics} from '../src/lib/analytics'
-import {useDesigners} from '../src/hooks/useDesigners'
+import {analytics} from '../lib/analytics'
+import {useDesigners} from '../hooks/useDesigners'
 
 export const ProductCard: React.FC<{product: Product; variant?: 'default' | 'light'}> = ({
   product,

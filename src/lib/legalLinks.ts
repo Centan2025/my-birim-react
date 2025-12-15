@@ -1,4 +1,4 @@
-import type {LegalLink, LocalizedString} from '../../types'
+import type {LegalLink, LocalizedString} from '@/types'
 
 // URL'e göre direkt çeviri döndür (t() fonksiyonuna güvenmeden)
 const TRANSLATIONS: Record<string, Record<string, string>> = {

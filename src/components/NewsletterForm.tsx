@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 
 import {subscribeEmail} from '../services/cms'
-import {analytics} from '../src/lib/analytics'
+import {analytics} from '../lib/analytics'
 import {useTranslation} from '../i18n'
 
 interface NewsletterFormProps {

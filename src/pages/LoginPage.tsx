@@ -3,13 +3,13 @@ import {useNavigate, Link} from 'react-router-dom'
 import {useAuth} from '../App'
 import {useTranslation} from '../i18n'
 import {registerUser, loginUser} from '../services/cms'
-import {loginRateLimiter, registerRateLimiter} from '../src/lib/rateLimiter'
-import {analytics} from '../src/lib/analytics'
+import {loginRateLimiter, registerRateLimiter} from '../lib/rateLimiter'
+import {analytics} from '../lib/analytics'
 import {
   validateLoginForm,
   validateRegisterForm,
   getPasswordStrength,
-} from '../src/lib/formValidation'
+} from '../lib/formValidation'
 
 export function LoginPage() {
   const [isLoginMode, setIsLoginMode] = useState(true)

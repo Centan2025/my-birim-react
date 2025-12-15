@@ -6,11 +6,11 @@ import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
 import {PageLoading} from '../components/LoadingSpinner'
 import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useTranslation} from '../i18n'
-import {useProject, useProjects} from '../src/hooks/useProjects'
-import {useSiteSettings} from '../src/hooks/useSiteData'
-import {analytics} from '../src/lib/analytics'
+import {useProject, useProjects} from '../hooks/useProjects'
+import {useSiteSettings} from '../hooks/useSiteData'
+import {analytics} from '../lib/analytics'
 import ScrollReveal from '../components/ScrollReveal'
-import {useSEO} from '../src/hooks/useSEO'
+import {useSEO} from '../hooks/useSEO'
 
 const getYouTubeId = (url: string): string | null => {
   if (!url) return null

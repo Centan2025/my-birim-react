@@ -1,6 +1,6 @@
 import {useCart} from '../context/CartContext'
 import {useTranslation} from '../i18n'
-import {useFocusTrap} from '../src/hooks/useFocusTrap'
+import {useFocusTrap} from '../hooks/useFocusTrap'
 import {Link} from 'react-router-dom'
 
 const CloseIcon = () => (

@@ -52,7 +52,7 @@ export const HeaderSearchPanel: React.FC<HeaderSearchPanelProps> = ({
       id="search-panel"
       role="search"
       aria-label={t('search') || 'Ara'}
-      className={`fixed left-0 right-0 z-[100] bg-black/80 backdrop-blur-lg border-b border-white/10 shadow-2xl transition-all duration-300 ease-out ${
+      className={`fixed left-0 right-0 z-[100] bg-black/80 backdrop-blur-lg transition-all duration-300 ease-out ${
         isOpen
           ? 'opacity-100 translate-y-0 pointer-events-auto'
           : isMobile
@@ -60,7 +60,9 @@ export const HeaderSearchPanel: React.FC<HeaderSearchPanelProps> = ({
             : 'opacity-0 -translate-y-4 pointer-events-none'
       }`}
       style={{
+        // Paneli tam olarak header'ın altından başlat
         top: isHeaderVisible ? `${headerHeight}px` : '0px',
+        borderTop: 'none',
       }}
     >
       <div className={`container mx-auto px-6 ${isMobile ? 'py-4' : 'py-8'}`}>

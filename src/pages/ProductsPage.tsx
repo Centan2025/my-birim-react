@@ -5,12 +5,12 @@ import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
 import {Breadcrumbs} from '../components/Breadcrumbs'
-import {useProducts, useProductsByCategory} from '../src/hooks/useProducts'
-import {useCategory, useCategories} from '../src/hooks/useCategories'
-import {useSiteSettings} from '../src/hooks/useSiteData'
+import {useProducts, useProductsByCategory} from '../hooks/useProducts'
+import {useCategory, useCategories} from '../hooks/useCategories'
+import {useSiteSettings} from '../hooks/useSiteData'
 import type {Product} from '../types'
 import ScrollReveal from '../components/ScrollReveal'
-import {useSEO} from '../src/hooks/useSEO'
+import {useSEO} from '../hooks/useSEO'
 
 const ChevronDownIcon = () => (
   <svg

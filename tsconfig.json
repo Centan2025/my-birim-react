@@ -15,6 +15,12 @@
     "jsx": "react-jsx",
     "types": ["vite/client"],
 
+    /* Base url & path aliases - src kök dizin olacak */
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["*"]
+    },
+
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
@@ -24,7 +30,7 @@
     "noImplicitReturns": true,
     "noPropertyAccessFromIndexSignature": true
   },
-  "include": ["."],
-  "exclude": ["vite.config.ts", "birim-web/**", "birrim-web/**", "birim-web-1/**"],
+  "include": ["src"],
+  "exclude": ["vite.config.ts", "vitest.config.ts", "birim-web/**", "birrim-web/**", "birim-web-1/**"],
   "references": [{"path": "./tsconfig.node.json"}]
 }

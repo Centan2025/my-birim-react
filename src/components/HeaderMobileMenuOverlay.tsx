@@ -166,6 +166,7 @@ export const HeaderMobileMenuOverlay: React.FC<HeaderMobileMenuOverlayProps> = p
               <CrossFadeText
                 text={(t('products') || '').toLocaleUpperCase('en')}
                 triggerKey={locale}
+                className="inline-block w-[8rem] text-left"
               />
             </span>
             <svg

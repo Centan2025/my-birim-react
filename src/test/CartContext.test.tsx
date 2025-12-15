@@ -1,7 +1,7 @@
 import {describe, it, expect, beforeEach, vi} from 'vitest'
 import {render, screen, act} from '@testing-library/react'
-import {CartProvider, useCart} from '../../context/CartContext'
-import type {Product} from '../../types'
+import {CartProvider, useCart} from '@/context/CartContext'
+import type {Product} from '@/types'
 
 // Test component that uses the cart
 const TestComponent = () => {

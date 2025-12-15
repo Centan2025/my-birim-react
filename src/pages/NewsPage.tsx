@@ -5,9 +5,9 @@ import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
 import {Breadcrumbs} from '../components/Breadcrumbs'
-import {useNews} from '../src/hooks/useNews'
-import {useSiteSettings} from '../src/hooks/useSiteData'
-import {useSEO} from '../src/hooks/useSEO'
+import {useNews} from '../hooks/useNews'
+import {useSiteSettings} from '../hooks/useSiteData'
+import {useSEO} from '../hooks/useSEO'
 
 const formatDate = (dateString: string): string => {
   if (!dateString) return ''

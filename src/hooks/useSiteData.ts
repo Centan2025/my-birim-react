@@ -1,5 +1,5 @@
 import {useQuery} from '@tanstack/react-query'
-import {getSiteSettings, getFooterContent} from '../../services/cms'
+import {getSiteSettings, getFooterContent} from '@/services/cms'
 
 /**
  * Site ayarlarını getir

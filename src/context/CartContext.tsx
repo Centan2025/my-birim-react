@@ -1,6 +1,6 @@
 import {createContext, useContext, useState, useEffect, PropsWithChildren} from 'react'
 import type {Product, CartItem} from '../types'
-import {analytics} from '../src/lib/analytics'
+import {analytics} from '../lib/analytics'
 
 interface CartContextType {
   cartItems: CartItem[]

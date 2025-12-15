@@ -1,7 +1,7 @@
 import {describe, it, expect, vi} from 'vitest'
 import {render, screen} from '@testing-library/react'
 import {BrowserRouter} from 'react-router-dom'
-import {HomePage} from '../../pages/HomePage'
+import {HomePage} from '@/pages/HomePage'
 import * as homeHook from '../hooks/useHomePage'
 import * as siteHook from '../hooks/useSiteData'
 

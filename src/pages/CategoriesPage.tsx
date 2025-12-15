@@ -3,9 +3,9 @@ import {useMemo} from 'react'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
-import {useCategories} from '../src/hooks/useCategories'
-import {useProducts} from '../src/hooks/useProducts'
-import {useSiteSettings} from '../src/hooks/useSiteData'
+import {useCategories} from '../hooks/useCategories'
+import {useProducts} from '../hooks/useProducts'
+import {useSiteSettings} from '../hooks/useSiteData'
 import ScrollReveal from '../components/ScrollReveal'
 
 export function CategoriesPage() {

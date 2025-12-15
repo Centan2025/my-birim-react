@@ -1,5 +1,5 @@
 import React from 'react'
-import {sanitizeText, sanitizeUrl} from '../src/lib/sanitize'
+import {sanitizeText, sanitizeUrl} from '../lib/sanitize'
 
 type Span = {_type: 'span'; text: string; marks?: string[]}
 type Block = {

@@ -2,13 +2,13 @@ import {describe, it, expect, beforeEach, vi} from 'vitest'
 import {render, screen, waitFor, act} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {BrowserRouter} from 'react-router-dom'
-import {LoginPage} from '../../pages/LoginPage'
-import * as cms from '../../services/cms'
-import * as rateLimiter from '../../src/lib/rateLimiter'
+import {LoginPage} from '@/pages/LoginPage'
+import * as cms from '@/services/cms'
+import * as rateLimiter from '@/lib/rateLimiter'
 
 // Mock dependencies
-vi.mock('../../services/cms')
-vi.mock('../../src/lib/rateLimiter')
+vi.mock('@/services/cms')
+vi.mock('@/lib/rateLimiter')
 
 // Mock useAuth with a factory function
 const mockUseAuth = vi.fn(() => ({

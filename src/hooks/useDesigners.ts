@@ -1,5 +1,5 @@
 import {useQuery} from '@tanstack/react-query'
-import {getDesigners, getDesignerById} from '../../services/cms'
+import {getDesigners, getDesignerById} from '@/services/cms'
 
 /**
  * Tüm tasarımcıları getir

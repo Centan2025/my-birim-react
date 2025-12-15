@@ -2,7 +2,7 @@ import {describe, it, expect, vi} from 'vitest'
 import {render, screen} from '@testing-library/react'
 import {MemoryRouter, Routes, Route} from 'react-router-dom'
 
-import {NewsDetailPage} from '../../pages/NewsDetailPage'
+import {NewsDetailPage} from '@/pages/NewsDetailPage'
 import * as newsHooks from '../hooks/useNews'
 import * as siteHooks from '../hooks/useSiteData'
 

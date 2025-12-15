@@ -2,6 +2,7 @@ import {defineConfig} from 'vite'
 import react from '@vitejs/plugin-react'
 import {visualizer} from 'rollup-plugin-visualizer'
 import {removeConsole} from './vite-plugin-remove-console'
+import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -18,6 +19,11 @@ export default defineConfig({
         brotliSize: true,
       }),
   ].filter(Boolean),
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
   server: {
     port: 3000,
     hmr: {

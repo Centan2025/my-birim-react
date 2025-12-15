@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { useSiteSettings } from '../src/hooks/useSiteData'
-import { useHomePageContent } from '../src/hooks/useHomePage'
+import { useSiteSettings } from '../hooks/useSiteData'
+import { useHomePageContent } from '../hooks/useHomePage'
 import { HomeHero } from '../components/HomeHero'
-import { useSEO } from '../src/hooks/useSEO'
+import { useSEO } from '../hooks/useSEO'
 import { HomeContentBlocks } from '../components/HomeContentBlocks'
 import { HomeInspirationSection } from '../components/HomeInspirationSection'
 

@@ -4,11 +4,11 @@ import type {Designer} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
-import {useDesigners} from '../src/hooks/useDesigners'
-import {useSiteSettings} from '../src/hooks/useSiteData'
+import {useDesigners} from '../hooks/useDesigners'
+import {useSiteSettings} from '../hooks/useSiteData'
 import {Breadcrumbs} from '../components/Breadcrumbs'
 import ScrollReveal from '../components/ScrollReveal'
-import {useSEO} from '../src/hooks/useSEO'
+import {useSEO} from '../hooks/useSEO'
 
 const DesignerCard: React.FC<{designer: Designer}> = ({designer}) => {
   const {t} = useTranslation()
