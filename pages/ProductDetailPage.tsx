@@ -1215,8 +1215,8 @@ export function ProductDetailPage() {
         )}
 
         {/* DETAILS BELOW */}
-        <main className="bg-gray-100">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-32 lg:pt-12 pb-12">
+      <main className="bg-gray-100">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-4 md:pt-24 lg:pt-12 pb-12">
             {/* Breadcrumbs - desktop'ta burada */}
             <nav className="hidden lg:block mb-8 text-[11px] sm:text-[12px] text-gray-500" aria-label="Breadcrumb">
               <ol className="list-none p-0 inline-flex items-center">
