@@ -717,6 +717,7 @@ const Footer = () => {
             <div className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col items-center justify-center md:flex-row md:items-start md:justify-start gap-4 text-xs w-full legal-links-row" style={{ overflow: 'visible', width: '100%' }}>
               {content.legalLinks && content.legalLinks.length > 0 && (
                 <div
+                  id="mobile-legal-links-stack"
                   className="legal-links-inner flex flex-col w-full md:w-auto md:flex-row md:flex-wrap md:items-center items-center justify-center md:justify-start gap-y-2 md:gap-x-4 md:gap-y-0"
                   style={{
                     overflow: 'visible',
@@ -729,6 +730,27 @@ const Footer = () => {
                     marginRight: 'auto'
                   }}
                 >
+                  <style>
+                    {`
+                      @media (max-width: 767px) {
+                        #mobile-legal-links-stack {
+                          display: flex !important;
+                          flex-direction: column !important;
+                          flex-wrap: nowrap !important;
+                          align-items: center !important;
+                          justify-content: center !important;
+                          gap: 12px !important;
+                          width: 100% !important;
+                        }
+                        #mobile-legal-links-stack .legal-link-wrapper,
+                        #mobile-legal-links-stack span {
+                          width: 100% !important;
+                          text-align: center !important;
+                          display: block !important;
+                        }
+                      }
+                    `}
+                  </style>
                   {content.legalLinks
                     .filter(link => link?.isVisible)
                     .map((link, index) => {
