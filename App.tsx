@@ -714,18 +714,17 @@ const Footer = () => {
           </ScrollReveal>
         </div>
         <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
-          <div className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col md:flex-row md:items-center gap-4 text-xs items-center" style={{overflow: 'visible', width: '100%'}}>
+          <div className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col md:flex-row md:items-start gap-4 text-xs" style={{overflow: 'visible', width: '100%'}}>
             {content.legalLinks && content.legalLinks.length > 0 && (
               <div 
-                className="w-full flex flex-col items-center text-center gap-2 md:flex-row md:flex-wrap md:items-center md:text-left md:gap-x-4 md:gap-y-2" 
+                className="flex flex-col md:flex-row md:flex-wrap md:items-center items-center gap-y-2 md:gap-x-4 md:gap-y-0" 
                 style={{
                   overflow: 'visible', 
                   maxWidth: '100%',
                   width: '100%',
                   minWidth: 0,
                   flexShrink: 1,
-                  flexGrow: 1,
-                  justifyContent: 'center'
+                  flexGrow: 1
                 }}
               >
                 {content.legalLinks
@@ -830,7 +829,7 @@ const Footer = () => {
                       return (
                         <span 
                           key={index} 
-                          className="opacity-80 select-none text-gray-400 block w-full text-center md:w-auto md:text-left"
+                          className="opacity-80 select-none text-gray-400"
                           style={{whiteSpace: 'nowrap', overflow: 'visible', textOverflow: 'clip', maxWidth: 'none'}}
                         >
                           {linkText}
@@ -842,7 +841,7 @@ const Footer = () => {
                     return (
                       <span 
                         key={index} 
-                        className="legal-link-wrapper block w-full text-center md:w-auto md:text-left"
+                        className="legal-link-wrapper"
                         style={{
                           whiteSpace: 'nowrap', 
                           overflow: 'visible', 
