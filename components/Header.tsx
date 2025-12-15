@@ -11,33 +11,16 @@ import {
 } from '../services/cms'
 import {useAuth} from '../App'
 import {SiteLogo} from './SiteLogo'
+import {HeaderProductsPanel} from './HeaderProductsPanel'
+import {HeaderMobileMenuInline} from './HeaderMobileMenuInline'
+import {HeaderMobileMenuOverlay} from './HeaderMobileMenuOverlay'
+import {HeaderSearchPanel} from './HeaderSearchPanel'
+import {CrossFadeText, DynamicIcon, UserIcon, ChevronRightIcon} from './HeaderShared'
 import {useTranslation} from '../i18n'
 import {useCart} from '../context/CartContext'
 import {useCategories} from '../src/hooks/useCategories'
 import {useProductsByCategory} from '../src/hooks/useProducts'
 import {useFocusTrap} from '../src/hooks/useFocusTrap'
-
-// Helper component to render SVG strings safely
-const DynamicIcon: React.FC<{svgString: string}> = ({svgString}) => (
-  <div dangerouslySetInnerHTML={{__html: svgString}} />
-)
-
-const UserIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-    <circle cx="12" cy="7" r="4"></circle>
-  </svg>
-)
 
 const MenuIcon = () => (
   <svg
@@ -125,66 +108,7 @@ const ShoppingBagIcon = () => (
   </svg>
 )
 
-const ChevronRightIcon: React.FC = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <polyline points="9 6 15 12 9 18" />
-  </svg>
-)
-
-// Ortak cross-fade metin bileşeni
-// Not: React state'in korunması için HEADER DIŞINDA tanımlanmalı
-// Aksi halde Header her render olduğunda CrossFadeText yeniden mount edilir ve animasyon tetiklenmez.
-const CrossFadeText: React.FC<{
-  text: string
-  className?: string
-  triggerKey?: string | number
-}> = ({text, className = '', triggerKey}) => {
-  const [currentText, setCurrentText] = useState(text)
-  const [previousText, setPreviousText] = useState(text)
-  const [isAnimating, setIsAnimating] = useState(false)
-
-  useEffect(() => {
-    // Her triggerKey değişiminde (yani dil değiştiğinde) animasyon oynat
-    setPreviousText(currentText)
-    setCurrentText(text)
-    setIsAnimating(true)
-
-    const timeout = window.setTimeout(() => {
-      setIsAnimating(false)
-    }, 1000)
-
-    return () => {
-      window.clearTimeout(timeout)
-    }
-  }, [triggerKey, text])
-
-  if (!isAnimating) {
-    return (
-      <span className={`relative inline-block ${className}`}>
-        <span className={`block ${className}`}>{currentText}</span>
-      </span>
-    )
-  }
-
-  return (
-    <span key={String(triggerKey)} className={`relative inline-block ${className}`}>
-      {/* Yeni metin normal akışta, genişlik HER ZAMAN buna göre belirlenir */}
-      <span className={`block cross-fade-text-in ${className}`}>{currentText}</span>
-      {/* Eski metin mutlak pozisyonda, sadece görsel olarak üstüne bindiriliyor */}
-      <span className={`block absolute inset-0 cross-fade-text-out ${className}`}>{previousText}</span>
-    </span>
-  )
-}
+// Diğer ikon bileşenleri HeaderShared içinde ortak kullanılıyor
 
 export function Header() {
   const {t, setLocale, locale, supportedLocales} = useTranslation()
@@ -1425,9 +1349,14 @@ export function Header() {
     setLocale(langCode)
   }
 
-  return (
-    <>
-      <style>
+  /**
+   * Header ile ilgili büyük JSX bloklarını küçük parçalara bölen
+   * yardımcı render fonksiyonları.
+   * Not: Bu fonksiyonlar HOOK kullanmaz, sadece mevcut state/prop değerlerini okur.
+   */
+
+  const renderHeaderStyles = () => (
+    <style>
         {`
           .hide-scrollbar::-webkit-scrollbar { display: none; }
           .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -1561,7 +1490,15 @@ export function Header() {
           }
           
         `}
-      </style>
+    </style>
+  )
+
+  // renderDesktopProductsPanel, renderInlineMobileMenu, renderOverlayMobileMenu, renderSearchPanel
+  // ayrı dosyalara taşındı (HeaderProductsPanel, HeaderMobileMenuInline, HeaderMobileMenuOverlay, HeaderSearchPanel)
+
+  return (
+    <>
+      {renderHeaderStyles()}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-150 ease-out ${
           // Scroll yönüne göre header'ı gizle/göster (mobil ve desktop)
@@ -2099,721 +2036,84 @@ export function Header() {
               </div>
             </div>
           </nav>
-          {/* Ürün kategorileri paneli - header içinde genişleyip daralır */}
-          <div
-            className={`hidden lg:block transition-all duration-500 ease-in-out ${isProductsOpen ? 'opacity-100 translate-y-0 max-h-[800px]' : 'opacity-0 -translate-y-2 max-h-0 overflow-hidden'}`}
-            style={{
-              backgroundColor: isProductsOpen ? 'rgba(0, 0, 0, 0.85)' : 'transparent',
-              backdropFilter: isProductsOpen ? 'blur(16px)' : 'none',
-              WebkitBackdropFilter: isProductsOpen ? 'blur(16px)' : 'none',
-            }}
-            onMouseEnter={handleProductsEnter}
-            onMouseLeave={handleProductsLeave}
-          >
-            {/* Beyaz ayırıcı çizgi */}
-            <div
-              className="h-[1px] bg-white/60 mx-4"
-              style={{marginLeft: submenuOffset}}
-            ></div>
-
-            <div
-              className="pt-4 pb-3 grid grid-cols-[auto_1fr] gap-24"
-              style={{paddingLeft: submenuOffset, paddingRight: '5rem'}}
-            >
-              {/* Sol taraf - Kategoriler */}
-              <div className="overflow-y-auto hide-scrollbar pr-6 pl-4">
-                <div className="flex flex-col gap-3">
-                  {categories.map(category => (
-                    <NavLink
-                      key={category.id}
-                      to={`/products/${category.id}`}
-                      className="group relative px-1 py-2 text-sm font-semibold uppercase text-gray-200 hover:text-white transition-colors duration-300"
-                      onClick={() => setIsProductsOpen(false)}
-                      onMouseEnter={() => setHoveredCategoryId(category.id)}
-                    >
-                      <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase">
-                        {t(category.name)}
-                        <span className="absolute -bottom-1 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
-                      </span>
-                    </NavLink>
-                  ))}
-                </div>
-              </div>
-
-              {/* Sağ taraf - Görsel */}
-              <div
-                className="relative w-[600px] self-stretch overflow-hidden"
-                style={{
-                  backgroundColor: 'transparent',
-                }}
-              >
-                {(() => {
-                  const hoveredCategory = categories.find(c => c.id === hoveredCategoryId)
-
-                  // Hover edilmediyse boş alan göster
-                  if (!hoveredCategory) {
-                    return null
-                  }
-
-                  let imageUrl = ''
-                  let imageClass = 'w-full h-full object-cover'
-
-                  // Önce menuImage'i kontrol et
-                  if (hoveredCategory.menuImage) {
-                    imageUrl = hoveredCategory.menuImage
-                  } else {
-                    // menuImage yoksa ilk ürün görselini göster
-                    const products = categoryProducts.get(hoveredCategory.id)
-
-                    if (products && products.length > 0) {
-                      // Görseli olan ilk ürünü bul
-                      for (const product of products) {
-                        // Ana görseli kontrol et
-                        let tempImageUrl =
-                          typeof product.mainImage === 'string'
-                            ? product.mainImage
-                            : product.mainImage?.url
-
-                        // Ana görsel yoksa alternativeMedia'dan al
-                        if (
-                          !tempImageUrl &&
-                          product.alternativeMedia &&
-                          product.alternativeMedia.length > 0
-                        ) {
-                          const firstAlt = product.alternativeMedia[0]
-                          if (firstAlt && firstAlt.type === 'image' && firstAlt.url) {
-                            tempImageUrl = firstAlt.url
-                          }
-                        }
-
-                        if (tempImageUrl && tempImageUrl.trim() !== '') {
-                          imageUrl = tempImageUrl
-                          imageClass = 'max-w-full max-h-full object-contain'
-                          break
-                        }
-                      }
-                    }
-                  }
-
-                  // Görsel bulunduysa göster
-                  if (imageUrl) {
-                    return (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <img
-                          key={hoveredCategory.id}
-                          src={imageUrl}
-                          alt={t(hoveredCategory.name)}
-                          className={`${imageClass} image-transition`}
-                          style={{
-                            animation: 'crossFade 0.5s ease-in-out',
-                          }}
-                        />
-                      </div>
-                    )
-                  }
-
-                  return null
-                })()}
-              </div>
-            </div>
-
-            {/* Tüm Modeller butonu - boydan boya çizgi ile */}
-            <div
-              className="border-t border-white/80 mx-4 mt-3"
-              style={{marginLeft: submenuOffset}}
-            ></div>
-            <div className="pt-3 pb-3" style={{paddingLeft: submenuOffset, paddingRight: '5rem'}}>
-              <NavLink
-                to="/products"
-                className="group relative inline-block px-1 py-2 text-sm font-bold uppercase text-white hover:text-gray-200 transition-colors duration-300"
-                onClick={() => setIsProductsOpen(false)}
-              >
-                <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase">
-                  {t('view_all')}
-                  <span className="absolute -bottom-1 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
-                </span>
-              </NavLink>
-            </div>
-          </div>
-          {/* Mobil menü - default stil (header içinde) - overlay stili header dışında render edilir */}
-          {!isOverlayMobileMenu && isMobileMenuOpen && (
-            <div
-              ref={node => {
-                if (node) {
-                  ;(mobileMenuRef as React.MutableRefObject<HTMLDivElement | null>).current = node
-                  ;(mobileMenuFocusTrap as React.MutableRefObject<HTMLElement | null>).current =
-                    node
-                }
-              }}
-              id="mobile-menu"
-              className="lg:hidden border-t border-white/10"
-              role="menu"
-              aria-label={t('main_menu') || 'Ana menü'}
-            >
-              {/* Dil seçenekleri - Menü öğelerinin üstünde */}
-              {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
-                <div className="relative w-full">
-                  <div className="flex items-center justify-between bg-black/50 px-4 sm:px-5 lg:px-6 pt-3 pb-2 min-h-[3rem] border-b border-white/10">
-                    <div className="flex items-center gap-1">
-                      {supportedLocales.map(langCode => {
-                        const isActive = locale === langCode
-                        return (
-                          <button
-                            key={langCode}
-                            onClick={() => {
-                              handleMobileLocaleChange(langCode)
-                            }}
-                            aria-pressed={isActive}
-                            className={`group relative px-1.5 py-0.5 text-xs uppercase tracking-[0.2em] transition-colors duration-200 ${
-                              isActive
-                                ? 'text-white font-extralight'
-                                : 'text-gray-400/90 hover:text-white font-extralight'
-                            }`}
-                            style={{
-                              fontFamily: 'Inter, sans-serif',
-                              letterSpacing: '0.2em',
-                            }}
-                          >
-                            <span className="relative inline-block">{langCode.toUpperCase()}</span>
-                          </button>
-                        )
-                      })}
-                    </div>
-                    {/* Mobilde dil bölümünün en sağında giriş/profile ikonu */}
-                    <NavLink
-                      to={isLoggedIn ? '/profile' : '/login'}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={iconClasses}
-                      aria-label={isLoggedIn ? t('profile') || 'Profil' : t('login') || 'Giriş Yap'}
-                    >
-                      <UserIcon />
-                    </NavLink>
-                  </div>
-                </div>
-              )}
-              <nav className="px-4 sm:px-5 lg:px-6 pb-2 flex flex-col">
-                <div className="flex flex-col">
-                  {/* Ürünler düğmesi - tıklanınca alt menü açılır */}
-                  <div className="border-b border-white/10">
-                    <button
-                      onClick={() => setIsMobileProductsMenuOpen(!isMobileProductsMenuOpen)}
-                      className="mobile-menu-products-button flex items-center justify-between w-full min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300"
-                    >
-                      <CrossFadeText text={t('products')} triggerKey={locale} />
-                      <svg
-                        className={`w-5 h-5 transition-transform duration-300 ${isMobileProductsMenuOpen ? 'rotate-180' : ''}`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                    {/* Alt menü - kategoriler ve Hepsini Gör */}
-                    <div
-                      className={`overflow-hidden transition-all duration-700 ease-in-out ${
-                        isMobileProductsMenuOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
-                      }`}
-                    >
-                      <div className="pl-4 pb-2 flex flex-col">
-                        {categories.map((category, index) => (
-                          <NavLink
-                            key={category.id}
-                            to={`/products/${category.id}`}
-                            className="flex items-center min-h-[2.5rem] py-2 text-lg font-light leading-tight tracking-[0.15em] uppercase text-gray-300 hover:text-white transition-colors duration-300 border-b border-white/5 last:border-b-0"
-                            onClick={() => {
-                              setIsMobileMenuOpen(false)
-                              setIsMobileProductsMenuOpen(false)
-                            }}
-                            style={{
-                              transitionDelay: isMobileProductsMenuOpen ? `${index * 50}ms` : '0ms',
-                            }}
-                          >
-                            <CrossFadeText text={t(category.name)} triggerKey={locale} />
-                          </NavLink>
-                        ))}
-                        <NavLink
-                          to="/products"
-                          className="flex items-center min-h-[2.5rem] py-2 mt-2 text-lg font-light leading-tight tracking-[0.15em] uppercase text-gray-300 hover:text-white transition-colors duration-300 border-t border-white/10 pt-2"
-                          onClick={() => {
-                            setIsMobileMenuOpen(false)
-                            setIsMobileProductsMenuOpen(false)
-                          }}
-                          style={{
-                            transitionDelay: isMobileProductsMenuOpen ? `${categories.length * 50}ms` : '0ms',
-                          }}
-                        >
-                          <CrossFadeText text={t('see_all')} triggerKey={locale} />
-                        </NavLink>
-                      </div>
-                    </div>
-                  </div>
-                  <NavLink
-                    to="/designers"
-                    className={`flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10 transition-transform ${
-                      isMobileProductsMenuOpen ? 'translate-y-0' : 'translate-y-0'
-                    }`}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <CrossFadeText text={t('designers')} triggerKey={locale} />
-                  </NavLink>
-                  <NavLink
-                    to="/projects"
-                    className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <CrossFadeText text={t('projects') || 'Projeler'} triggerKey={locale} />
-                  </NavLink>
-                  <NavLink
-                    to="/news"
-                    className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <CrossFadeText text={t('news')} triggerKey={locale} />
-                  </NavLink>
-                  <NavLink
-                    to="/about"
-                    className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <CrossFadeText text={t('about')} triggerKey={locale} />
-                  </NavLink>
-                  <NavLink
-                    to="/contact"
-                    className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <CrossFadeText text={t('contact')} triggerKey={locale} />
-                  </NavLink>
-                </div>
-              </nav>
-            </div>
-          )}
+          {/* Desktop ürün paneli */}
+          <HeaderProductsPanel
+            isOpen={isProductsOpen}
+            categories={categories}
+            hoveredCategoryId={hoveredCategoryId}
+            onHoveredCategoryChange={setHoveredCategoryId}
+            categoryProducts={categoryProducts}
+            submenuOffset={submenuOffset}
+            onEnter={handleProductsEnter}
+            onLeave={handleProductsLeave}
+            onClose={handleCloseProducts}
+            t={t}
+          />
+          {/* Inline mobil menü (overlay olmayan mod) */}
+          <HeaderMobileMenuInline
+            isOpen={!isOverlayMobileMenu && isMobileMenuOpen}
+            isMobileProductsMenuOpen={isMobileProductsMenuOpen}
+            categories={categories}
+            settings={settings}
+            supportedLocales={supportedLocales}
+            locale={locale}
+            t={t}
+            isLoggedIn={isLoggedIn}
+            iconClasses={iconClasses}
+            onLocaleChange={handleMobileLocaleChange}
+            onToggleProductsMenu={() => setIsMobileProductsMenuOpen(!isMobileProductsMenuOpen)}
+            onCloseAll={() => setIsMobileMenuOpen(false)}
+            setIsMobileMenuOpen={setIsMobileMenuOpen}
+            setIsMobileProductsMenuOpen={setIsMobileProductsMenuOpen}
+            mobileMenuRef={mobileMenuRef}
+            mobileMenuFocusTrap={mobileMenuFocusTrap}
+          />
         </div>
-        {/* Desktop genişleyen ürün paneli kaldırıldı; içerik header içinde render ediliyor */}
       </header>
 
-      {/* Overlay mobil menü - header'ın DIŞINDA, tam ekran kaplayan panel */}
-      {isOverlayMobileMenu && (
-        <div
-          ref={node => {
-            if (node) {
-              ;(mobileMenuRef as React.MutableRefObject<HTMLDivElement | null>).current = node
-              ;(mobileMenuFocusTrap as React.MutableRefObject<HTMLElement | null>).current = node
-            }
-          }}
-          id="mobile-menu"
-          className={`mobile-menu-overlay fixed left-0 right-0 bottom-0 lg:hidden z-40 flex flex-col border-t border-white/10 text-white pb-8 px-6 transition-all duration-400 ease-[cubic-bezier(0.76,0,0.24,1)] ${
-            isMobileMenuOpen
-              ? 'translate-y-0 opacity-100 pointer-events-auto'
-              : 'translate-y-2 opacity-0 pointer-events-none'
-          }`}
-          style={{
-            top: `${headerHeight}px`,
-            backgroundColor: '#111827', // Biraz daha koyu gri (Tailwind gray-900)
-            // Kapanırken panel animasyonunu, linklerin ters sırada kaybolma animasyonundan sonra başlat
-            transitionDelay: isMobileMenuOpen ? '0ms' : `${mobileMenuCloseDelay}ms`,
-          }}
-          role="menu"
-          aria-label={t('main_menu') || 'Ana menü'}
-        >
-          {/* Dil ve kullanıcı alanı */}
-          {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
-            <div
-              className={`mb-6 pt-4 pb-4 transition-all duration-400 ${
-                isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-              }`}
-              style={{transitionDelay: isMobileMenuOpen ? '50ms' : '0ms'}}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {supportedLocales.map(langCode => {
-                    const isActive = locale === langCode
-                    return (
-                      <button
-                        key={langCode}
-                        onClick={() => {
-                          handleMobileLocaleChange(langCode)
-                        }}
-                        aria-pressed={isActive}
-                        className={`group relative px-1.5 py-0.5 text-xs uppercase tracking-[0.2em] transition-all duration-200 ${
-                          isActive
-                            ? 'text-white font-extralight'
-                            : 'text-gray-400/90 hover:text-white font-extralight'
-                        } ${isActive ? 'scale-105' : 'scale-100'}`}
-                        style={{fontFamily: 'Inter, sans-serif', letterSpacing: '0.2em'}}
-                      >
-                        <span className="relative inline-block transition-opacity transition-transform duration-200 ease-out">
-                          {langCode.toUpperCase()}
-                        </span>
-                      </button>
-                    )
-                  })}
-                </div>
-                <NavLink
-                  to={isLoggedIn ? '/profile' : '/login'}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={iconClasses}
-                  aria-label={isLoggedIn ? t('profile') || 'Profil' : t('login') || 'Giriş Yap'}
-                >
-                  <UserIcon />
-                </NavLink>
-              </div>
-              {/* Tam ekran genişliğinde ayırıcı çizgi */}
-              <div
-                className="border-b border-white/20 mt-4 -mx-6"
-                style={{width: 'calc(100% + 3rem)'}}
-              ></div>
-            </div>
-          )}
+      <HeaderMobileMenuOverlay
+        isOverlayMobileMenu={isOverlayMobileMenu}
+        isMobileMenuOpen={isMobileMenuOpen}
+        isMobileProductsMenuOpen={isMobileProductsMenuOpen}
+        settings={settings}
+        supportedLocales={supportedLocales}
+        locale={locale}
+        t={t}
+        isLoggedIn={isLoggedIn}
+        iconClasses={iconClasses}
+        categories={categories}
+        headerHeight={headerHeight}
+        mobileMenuLinks={mobileMenuLinks}
+        mobileMenuCloseDelay={mobileMenuCloseDelay}
+        subscribeEmail={subscribeEmail}
+        isMobileLocaleTransition={isMobileLocaleTransition}
+        footerContent={footerContent}
+        onLocaleChange={handleMobileLocaleChange}
+        onToggleProductsMenu={() => setIsMobileProductsMenuOpen(!isMobileProductsMenuOpen)}
+        onCloseAll={() => setIsMobileMenuOpen(false)}
+        setIsMobileMenuOpen={setIsMobileMenuOpen}
+        setIsMobileProductsMenuOpen={setIsMobileProductsMenuOpen}
+        setSubscribeEmail={setSubscribeEmailState}
+        subscribeEmailService={subscribeEmailService}
+        mobileMenuRef={mobileMenuRef}
+        mobileMenuFocusTrap={mobileMenuFocusTrap}
+      />
 
-          {/* Menü linkleri - stagger animasyon */}
-          <nav className="flex flex-col justify-start gap-6">
-            {/* Ürünler düğmesi - tıklanınca alt menü açılır */}
-            <div>
-              <button
-                onClick={() => setIsMobileProductsMenuOpen(!isMobileProductsMenuOpen)}
-                style={{
-                  transitionDelay: `${
-                    isMobileMenuOpen
-                      ? 0
-                      : (mobileMenuLinks.length - 1) * 100
-                  }ms`,
-                  fontWeight: 300,
-                  letterSpacing: '0.2em',
-                }}
-                className={`group flex items-center justify-between w-full text-xl md:text-2xl font-light leading-tight text-white transition-all duration-400 ${
-                  isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
-                }`}
-              >
-                <span>
-                  <CrossFadeText text={(t('products') || '').toLocaleUpperCase('en')} triggerKey={locale} />
-                </span>
-                <svg
-                  className={`w-6 h-6 transition-transform duration-300 ${isMobileProductsMenuOpen ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {/* Alt menü - kategoriler ve Hepsini Gör */}
-              <div
-                className={`overflow-hidden transition-all duration-700 ease-in-out ${
-                  isMobileProductsMenuOpen ? 'max-h-[1000px] opacity-100 mt-4' : 'max-h-0 opacity-0'
-                }`}
-              >
-                <div className="pl-4 flex flex-col gap-3">
-                  {categories.map((category, index) => (
-                    <NavLink
-                      key={category.id}
-                      to={`/products/${category.id}`}
-                      style={{
-                        transitionDelay: isMobileProductsMenuOpen ? `${index * 50}ms` : '0ms',
-                        fontWeight: 300,
-                        letterSpacing: '0.15em',
-                      }}
-                      className={`group flex items-center justify-between text-xl md:text-2xl font-light leading-tight text-gray-300 hover:text-white transition-all duration-400 ${
-                        isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
-                      }`}
-                      onClick={() => {
-                        setIsMobileMenuOpen(false)
-                        setIsMobileProductsMenuOpen(false)
-                      }}
-                    >
-                      <span>
-                        <CrossFadeText text={t(category.name)} triggerKey={locale} />
-                      </span>
-                      <span className="opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-300">
-                        <ChevronRightIcon />
-                      </span>
-                    </NavLink>
-                  ))}
-                  <NavLink
-                    to="/products"
-                    style={{
-                      transitionDelay: isMobileProductsMenuOpen ? `${categories.length * 50}ms` : '0ms',
-                      fontWeight: 300,
-                      letterSpacing: '0.15em',
-                    }}
-                    className={`group flex items-center justify-between text-xl md:text-2xl font-light leading-tight text-gray-300 hover:text-white transition-all duration-400 border-t border-white/20 pt-3 mt-2 ${
-                      isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
-                    }`}
-                    onClick={() => {
-                      setIsMobileMenuOpen(false)
-                      setIsMobileProductsMenuOpen(false)
-                    }}
-                  >
-                    <span>
-                      <CrossFadeText text={(t('see_all') || '').toLocaleUpperCase('en')} triggerKey={locale} />
-                    </span>
-                    <span className="opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-300">
-                      <ChevronRightIcon />
-                    </span>
-                  </NavLink>
-                </div>
-              </div>
-            </div>
-            {/* Diğer menü linkleri */}
-            {mobileMenuLinks.map((item, index) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                style={{
-                  // Açılırken yukarı doğru (ilk eleman en geç), kapanırken tersine (ilk eleman en erken)
-                  transitionDelay: `${
-                    isMobileMenuOpen
-                      ? (index + 1) * 100
-                      : (mobileMenuLinks.length - 1 - index) * 100
-                  }ms`,
-                  fontWeight: 300,
-                  letterSpacing: '0.2em',
-                }}
-                className={`group flex items-center justify-between text-2xl md:text-3xl font-light leading-tight text-white transition-all duration-400 ${
-                  isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
-                }`}
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <span>
-                  <CrossFadeText text={item.label} triggerKey={locale} />
-                </span>
-                <span className="opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-300">
-                  <ChevronRightIcon />
-                </span>
-              </NavLink>
-            ))}
-          </nav>
-
-          {/* Alt kısım - Subscribe ve Sosyal Medya */}
-          <div
-            className={`mt-auto pt-8 transition-all duration-400 ${
-              isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-            }`}
-            style={{transitionDelay: isMobileMenuOpen ? '300ms' : '0ms'}}
-          >
-            {/* Ayırıcı çizgi - tam ekran genişliğinde */}
-            <div
-              className="border-t border-white/20 -mx-6 mb-6"
-              style={{width: 'calc(100% + 3rem)'}}
-            ></div>
-
-            {/* Subscribe bölümü */}
-            <form
-              onSubmit={async e => {
-                e.preventDefault()
-                if (subscribeEmail) {
-                  try {
-                    await subscribeEmailService(subscribeEmail)
-                    alert(t('subscribe_success') || 'E-posta aboneliğiniz başarıyla oluşturuldu!')
-                    setSubscribeEmailState('')
-                  } catch (err: any) {
-                    if (err.message === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
-                      alert(t('subscribe_success') || 'E-posta aboneliğiniz kaydedildi!')
-                      setSubscribeEmailState('')
-                    } else {
-                      alert(err.message || 'Bir hata oluştu.')
-                    }
-                  }
-                }
-              }}
-              className="flex flex-col items-center mb-6"
-            >
-              <p className="text-sm text-gray-300 mb-4 text-center">
-                <CrossFadeText text={t('subscribe_prompt')} triggerKey={locale} />
-              </p>
-              <div className="flex items-center justify-center border-b border-white pb-0.5 w-full max-w-[280px]">
-                <input
-                  type="email"
-                  id="header-subscribe-email"
-                  name="header-subscribe-email"
-                  value={subscribeEmail}
-                  onChange={e => setSubscribeEmailState(e.target.value)}
-                  placeholder={t('email_placeholder')}
-                  className={`w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 transition-all duration-200 text-[15px] text-center ${
-                    isMobileLocaleTransition ? 'cross-fade-input' : ''
-                  }`}
-                  style={{outline: 'none', boxShadow: 'none'}}
-                />
-              </div>
-              <button
-                type="submit"
-                className="mt-4 px-6 py-2 border border-white/50 text-white hover:bg-white hover:text-black transition-all duration-300 text-sm font-medium uppercase tracking-wider"
-              >
-                <CrossFadeText text={t('subscribe')} triggerKey={locale} />
-              </button>
-            </form>
-
-            {/* Sosyal medya ikonları */}
-            {footerContent?.socialLinks && footerContent.socialLinks.length > 0 && (
-              <div className="flex justify-center space-x-6">
-                {footerContent.socialLinks
-                  .filter(link => link.isEnabled)
-                  .map(link => (
-                    <a
-                      key={link.name}
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-400 hover:text-white transition-opacity duration-200 opacity-70 hover:opacity-100"
-                    >
-                      <div className="w-5 h-5">
-                        <DynamicIcon svgString={link.svgIcon} />
-                      </div>
-                    </a>
-                  ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      <div
-        ref={searchPanelRef}
-        id="search-panel"
-        role="search"
-        aria-label={t('search') || 'Ara'}
-        className={`fixed left-0 right-0 z-[100] bg-black/80 backdrop-blur-lg border-b border-white/10 shadow-2xl transition-all duration-300 ease-out ${
-          isSearchOpen
-            ? 'opacity-100 translate-y-0 pointer-events-auto'
-            : isMobile
-              ? 'opacity-0 -translate-y-4 pointer-events-none'
-              : 'opacity-0 -translate-y-4 pointer-events-none'
-        }`}
-        style={{
-          top: isHeaderVisible ? `${headerHeight}px` : '0px',
-        }}
-      >
-        <div className={`container mx-auto px-6 ${isMobile ? 'py-4' : 'py-8'}`}>
-          <div className="w-full max-w-3xl mx-auto">
-            <input
-              ref={searchInputRef}
-              type="search"
-              placeholder={t('search_placeholder') || ''}
-              id="global-search-input"
-              name="global-search"
-              className={`w-full bg-transparent text-white border-b border-gray-500 focus:border-white outline-none transition-colors duration-300 ${isMobile ? 'text-lg pb-2' : 'text-2xl pb-3'}`}
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-            />
-
-            {searchQuery.length > 0 && (
-              <div className="mt-6 max-h-[50vh] overflow-y-auto pr-2">
-                {isSearching && <p className="text-center text-gray-300">{t('searching')}</p>}
-
-                {!isSearching &&
-                  searchQuery.length > 1 &&
-                  searchResults.products.length === 0 &&
-                  searchResults.designers.length === 0 &&
-                  searchResults.categories.length === 0 && (
-                    <p className="text-center text-gray-300">
-                      {t('search_no_results', searchQuery)}
-                    </p>
-                  )}
-
-                {searchResults.products.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-3 pl-3">
-                      {t('products')}
-                    </h3>
-                    <div className="space-y-2">
-                      {searchResults.products.map(product => {
-                        const designerName = t(
-                          allData?.designers.find(d => d.id === product.designerId)?.name
-                        )
-                        return (
-                          <Link
-                            key={product.id}
-                            to={`/product/${product.id}`}
-                            onClick={closeSearch}
-                            className="flex items-center p-3 hover:bg-white/10 rounded-md transition-colors duration-200"
-                          >
-                            <img
-                              src={
-                                typeof product.mainImage === 'string'
-                                  ? product.mainImage
-                                  : product.mainImage?.url || ''
-                              }
-                              alt={t(product.name)}
-                              className="w-12 h-12 object-cover rounded-md mr-4 flex-shrink-0"
-                            />
-                            <div>
-                              <p className="font-semibold text-white">{t(product.name)}</p>
-                              {designerName && (
-                                <p className="text-sm text-gray-400">{designerName}</p>
-                              )}
-                            </div>
-                          </Link>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {searchResults.categories.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-3 pl-3">
-                      {t('categories')}
-                    </h3>
-                    <div className="space-y-2">
-                      {searchResults.categories.map(category => (
-                        <Link
-                          key={category.id}
-                          to={`/products/${category.id}`}
-                          onClick={closeSearch}
-                          className="flex items-center p-3 hover:bg-white/10 rounded-md transition-colors duration-200"
-                        >
-                          <img
-                            src={category.heroImage}
-                            alt={t(category.name)}
-                            className="w-12 h-12 object-cover rounded-md mr-4 flex-shrink-0"
-                          />
-                          <div>
-                            <p className="font-semibold text-white">{t(category.name)}</p>
-                            <p className="text-sm text-gray-400">{t('category')}</p>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {searchResults.designers.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-3 pl-3">
-                      {t('designers')}
-                    </h3>
-                    <div className="space-y-2">
-                      {searchResults.designers.map(designer => (
-                        <Link
-                          key={designer.id}
-                          to={`/designer/${designer.id}`}
-                          onClick={closeSearch}
-                          className="flex items-center p-3 hover:bg-white/10 rounded-md transition-colors duration-200"
-                        >
-                          <img
-                            src={
-                              typeof designer.image === 'string'
-                                ? designer.image
-                                : designer.image?.url || ''
-                            }
-                            alt={t(designer.name)}
-                            className="w-12 h-12 object-cover rounded-full mr-4 flex-shrink-0"
-                          />
-                          <div>
-                            <p className="font-semibold text-white">{t(designer.name)}</p>
-                            <p className="text-sm text-gray-400">{t('designer')}</p>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      <HeaderSearchPanel
+        isOpen={isSearchOpen}
+        isMobile={isMobile}
+        isHeaderVisible={isHeaderVisible}
+        headerHeight={headerHeight}
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
+        searchResults={searchResults}
+        isSearching={isSearching}
+        allData={allData}
+        t={t}
+        closeSearch={closeSearch}
+        searchPanelRef={searchPanelRef}
+        searchInputRef={searchInputRef}
+      />
     </>
   )
 }

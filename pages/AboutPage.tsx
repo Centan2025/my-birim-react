@@ -74,6 +74,14 @@ export function AboutPage() {
     section: 'About',
   })
 
+  // Sayfa içeriği yüklendiğinde varsayılan olarak "Tarihçe" sekmesini seç
+  useEffect(() => {
+    if (!activeSection && content) {
+      setActiveSection('history')
+      setSectionChangeId(id => id + 1)
+    }
+  }, [activeSection, content])
+
   useEffect(() => {
     const fetchContent = async () => {
       setLoading(true)
@@ -151,7 +159,13 @@ export function AboutPage() {
             <OptimizedImage
               src={content.heroImage}
               alt={t(content.heroTitle)}
-              className="w-full h-full object-cover opacity-40"
+              className="w-full h-full opacity-40"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center',
+              }}
               width={1920}
               height={800}
               loading="eager"

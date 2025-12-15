@@ -588,19 +588,105 @@ const Footer = () => {
           <div className="mt-8 flex flex-col lg:flex-row flex-wrap items-center lg:items-start justify-center lg:justify-between gap-6 lg:gap-0">
             {/* Sosyal medya linkleri */}
             <ScrollReveal delay={120} threshold={0.1} width="w-auto" className="h-auto">
-              <div className="w-full lg:w-auto flex justify-center lg:justify-start space-x-6">
+              <div className="w-full lg:w-auto flex justify-center lg:justify-start space-x-4">
                 {(content.socialLinks || [])
                   .filter(link => link.isEnabled)
                   .map((link, index) => (
-                    <ScrollReveal key={link.name} delay={135 + index * 15} threshold={0.1} width="w-auto" className="h-auto">
+                    <ScrollReveal
+                      key={link.name}
+                      delay={135 + index * 15}
+                      threshold={0.1}
+                      width="w-auto"
+                      className="h-auto"
+                    >
                       <a
                         href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="hover:text-white transition-opacity duration-200 opacity-70 hover:opacity-100"
+                        className="hover:text-white transition-opacity duration-200 opacity-95 hover:opacity-100"
                       >
-                        <div className="w-3 h-3">
-                          <DynamicIcon svgString={link.svgIcon} />
+                        <div className="w-10 h-10 flex items-center justify-center">
+                          {(() => {
+                            const key = link.name.toLowerCase()
+
+                            if (key.includes('instagram')) {
+                              // Kullanıcının verdiği black-instagram-transparent-logo-10671.svg'den sadeleştirilmiş ikon
+                              // viewBox'ı 0–32 aralığına çekerek ikonun çerçeve içinde daha büyük görünmesini sağlıyoruz
+                              return (
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 32 32"
+                                  className="w-8 h-8"
+                                  fill="currentColor"
+                                >
+                                  <path d="M 31.336 8.741 c -0.078 -1.71 -0.35 -2.878 -0.747 -3.9 c -0.403 -1.072 -1.036 -2.043 -1.853 -2.846 c -0.802 -0.817 -1.774 -1.45 -2.846 -1.854 c -1.022 -0.397 -2.19 -0.668 -3.9 -0.746 c -1.713 -0.078 -2.261 -0.097 -6.624 -0.097 s -4.911 0.019 -6.624 0.097 c -1.71 0.078 -2.878 0.35 -3.9 0.747 C 3.769 0.546 2.798 1.178 1.996 1.996 c -0.817 0.802 -1.45 1.773 -1.854 2.846 c -0.397 1.022 -0.668 2.19 -0.746 3.9 c -0.079 1.714 -0.097 2.261 -0.097 6.625 c 0 4.364 0.019 4.911 0.097 6.625 c 0.078 1.71 0.35 2.878 0.747 3.9 c 0.403 1.072 1.036 2.043 1.853 2.846 c 0.802 0.817 1.774 1.45 2.846 1.853 c 1.022 0.397 2.19 0.669 3.9 0.747 c 1.713 0.078 2.261 0.097 6.624 0.097 s 4.911 -0.018 6.624 -0.097 c 1.71 -0.078 2.878 -0.35 3.9 -0.747 c 2.158 -0.834 3.864 -2.541 4.699 -4.699 c 0.397 -1.022 0.669 -2.19 0.747 -3.9 c 0.078 -1.714 0.097 -2.261 0.097 -6.625 S 31.414 10.455 31.336 8.741 z M 28.444 21.858 c -0.071 1.567 -0.333 2.417 -0.553 2.983 c -0.541 1.401 -1.648 2.509 -3.049 3.049 c -0.566 0.22 -1.417 0.482 -2.983 0.553 c -1.694 0.077 -2.202 0.094 -6.492 0.094 c -4.291 0 -4.799 -0.016 -6.492 -0.094 c -1.566 -0.071 -2.417 -0.333 -2.983 -0.553 c -0.698 -0.258 -1.329 -0.668 -1.847 -1.202 c -0.534 -0.518 -0.944 -1.149 -1.202 -1.847 c -0.22 -0.566 -0.482 -1.417 -0.553 -2.983 c -0.077 -1.694 -0.094 -2.202 -0.094 -6.492 s 0.016 -4.798 0.094 -6.492 C 2.359 7.306 2.62 6.456 2.84 5.89 C 3.098 5.192 3.509 4.56 4.042 4.042 C 4.561 3.508 5.192 3.098 5.89 2.84 c 0.566 -0.22 1.417 -0.482 2.983 -0.553 c 1.694 -0.077 2.202 -0.093 6.492 -0.093 h 0 c 4.29 0 4.798 0.016 6.492 0.094 c 1.567 0.071 2.417 0.333 2.983 0.553 c 0.698 0.258 1.329 0.668 1.847 1.202 c 0.534 0.518 0.944 1.15 1.202 1.848 c 0.22 0.566 0.482 1.417 0.553 2.983 c 0.077 1.694 0.094 2.202 0.094 6.492 S 28.521 20.164 28.444 21.858 z" />
+                                  <path d="M 15.365 7.115 c -4.557 0 -8.25 3.694 -8.25 8.25 s 3.694 8.251 8.25 8.251 c 4.557 0 8.251 -3.694 8.251 -8.251 S 19.922 7.115 15.365 7.115 z M 15.365 20.721 c -2.957 0 -5.355 -2.398 -5.355 -5.356 s 2.398 -5.356 5.356 -5.356 c 2.958 0 5.356 2.398 5.356 5.356 S 18.323 20.721 15.365 20.721 z" />
+                                  <path d="M 25.87 6.789 c 0 1.065 -0.863 1.928 -1.928 1.928 c -1.065 0 -1.928 -0.863 -1.928 -1.928 c 0 -1.065 0.863 -1.928 1.928 -1.928 S 25.87 5.724 25.87 6.789 z" />
+                                </svg>
+                              )
+                            }
+
+                            if (key.includes('pinterest')) {
+                              // Kullanıcının verdiği pinterest-113.svg'den sadeleştirilmiş ikon
+                              // Orijinal path koordinatları 0–90 aralığında olduğundan viewBox'ı daraltıp ikonu büyütüyoruz.
+                              return (
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 90 90"
+                                  className="w-8 h-8"
+                                  fill="currentColor"
+                                >
+                                  <path d="M 25.334 90 c 3.415 -2.853 8.943 -12.256 10.189 -17.048 c 0.671 -2.581 3.437 -13.114 3.437 -13.114 c 1.799 3.43 7.054 6.334 12.644 6.334 c 16.638 0 28.626 -15.301 28.626 -34.312 C 80.229 13.636 65.357 0 46.22 0 C 22.415 0 9.771 15.981 9.771 33.382 c 0 8.091 4.307 18.164 11.198 21.371 c 1.045 0.486 1.604 0.272 1.845 -0.738 c 0.183 -0.767 1.113 -4.513 1.532 -6.256 c 0.134 -0.557 0.068 -1.036 -0.383 -1.582 c -2.279 -2.764 -4.105 -7.848 -4.105 -12.589 c 0 -12.167 9.213 -23.94 24.909 -23.94 c 13.552 0 23.042 9.235 23.042 22.443 c 0 14.923 -7.536 25.261 -17.341 25.261 c -5.415 0 -9.469 -4.478 -8.169 -9.968 c 1.555 -6.558 4.569 -13.634 4.569 -18.367 c 0 -4.237 -2.274 -7.771 -6.98 -7.771 c -5.536 0 -9.982 5.727 -9.982 13.397 c 0 4.886 1.65 8.19 1.65 8.19 s -5.467 23.115 -6.469 27.421 c -1.109 4.764 -0.674 11.476 -0.191 15.84 L 25.334 90 z" />
+                                </svg>
+                              )
+                            }
+
+                            if (key.includes('facebook') || key === 'fb') {
+                              // Kullanıcının verdiği facebook-logo-108.svg'den sadeleştirilmiş ikon
+                              return (
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 90 90"
+                                  className="w-8 h-8"
+                                  fill="currentColor"
+                                >
+                                  <path d="M 51.991 90 V 49.008 h 13.781 l 2.12 -16.049 H 51.991 V 22.739 c 0 -4.632 1.293 -7.791 7.94 -7.791 h 8.417 V 0.637 C 64.25 0.196 60.13 -0.017 56.009 0.001 c -12.212 0 -20.576 7.42 -20.576 21.148 v 11.809 H 21.652 v 16.049 h 13.781 V 90 H 51.991 z" />
+                                </svg>
+                              )
+                            }
+
+                            if (key.includes('youtube')) {
+                              // Kullanıcının verdiği youtube-123.svg'den sadeleştirilmiş ikon
+                              return (
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 90 90"
+                                  className="w-8 h-8"
+                                  fill="currentColor"
+                                >
+                                  <path d="M 88.119 23.338 c -1.035 -3.872 -4.085 -6.922 -7.957 -7.957 C 73.144 13.5 45 13.5 45 13.5 s -28.144 0 -35.162 1.881 c -3.872 1.035 -6.922 4.085 -7.957 7.957 C 0 30.356 0 45 0 45 s 0 14.644 1.881 21.662 c 1.035 3.872 4.085 6.922 7.957 7.957 C 16.856 76.5 45 76.5 45 76.5 s 28.144 0 35.162 -1.881 c 3.872 -1.035 6.922 -4.085 7.957 -7.957 C 90 59.644 90 45 90 45 S 90 30.356 88.119 23.338 z M 36 58.5 v -27 L 59.382 45 L 36 58.5 z" />
+                                </svg>
+                              )
+                            }
+
+                            if (key.includes('linkedin') || key.includes('linkdin')) {
+                              // Kullanıcının verdiği linkedin-112.svg'den sadeleştirilmiş ikon
+                              return (
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 90 90"
+                                  className="w-8 h-8"
+                                  fill="currentColor"
+                                >
+                                  <path d="M 1.48 29.91 h 18.657 v 60.01 H 1.48 V 29.91 z M 10.809 0.08 c 5.963 0 10.809 4.846 10.809 10.819 c 0 5.967 -4.846 10.813 -10.809 10.813 C 4.832 21.712 0 16.866 0 10.899 C 0 4.926 4.832 0.08 10.809 0.08" />
+                                  <path d="M 31.835 29.91 h 17.89 v 8.206 h 0.255 c 2.49 -4.72 8.576 -9.692 17.647 -9.692 C 86.514 28.424 90 40.849 90 57.007 V 89.92 H 71.357 V 60.737 c 0 -6.961 -0.121 -15.912 -9.692 -15.912 c -9.706 0 -11.187 7.587 -11.187 15.412 V 89.92 H 31.835 V 29.91 z" />
+                                </svg>
+                              )
+                            }
+
+                            // Bilinmeyen platformlarda CMS'ten gelen SVG'yi kullan
+                            return <DynamicIcon svgString={link.svgIcon} />
+                          })()}
                         </div>
                       </a>
                     </ScrollReveal>
@@ -637,47 +723,61 @@ const Footer = () => {
                   }}
                 >
                   {content.legalLinks
-                  .filter(link => link?.isVisible)
-                  .map((link, index) => {
+                    .filter(link => link?.isVisible)
+                    .map((link, index) => {
                       const url = typeof link?.url === 'string' ? link.url : ''
                       const linkText = resolveLegalLinkText(link, locale, t)
 
-                      if (!url) {
-                        return (
-                          <span
-                            key={index}
-                            className="opacity-80 select-none text-gray-400"
-                            style={{ whiteSpace: 'nowrap', overflow: 'visible', textOverflow: 'clip', maxWidth: 'none' }}
-                          >
-                            {linkText}
-                          </span>
-                        )
-                      }
-                      const isHttp = /^https?:\/\//.test(url)
-                      const isInternalLink = url.startsWith('/') && !url.startsWith('//') && !isHttp
+                      // Diğer footer öğeleri gibi her yasal linke de ScrollReveal animasyonu ekle
                       return (
-                        <span
+                        <ScrollReveal
                           key={index}
-                          className="legal-link-wrapper"
+                          delay={195 + index * 15}
+                          threshold={0}
+                          width="w-auto"
+                          className="h-auto"
                         >
-                          {isInternalLink ? (
-                            <Link
-                              to={url}
-                              className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
+                          {!url ? (
+                            <span
+                              className="opacity-80 select-none text-gray-400"
+                              style={{
+                                whiteSpace: 'nowrap',
+                                overflow: 'visible',
+                                textOverflow: 'clip',
+                                maxWidth: 'none',
+                              }}
                             >
                               {linkText}
-                            </Link>
+                            </span>
                           ) : (
-                            <a
-                              href={url}
-                              className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
-                              target={isHttp ? '_blank' : undefined}
-                              rel={isHttp ? 'noopener noreferrer' : undefined}
-                            >
-                              {linkText}
-                            </a>
+                            (() => {
+                              const isHttp = /^https?:\/\//.test(url)
+                              const isInternalLink =
+                                url.startsWith('/') && !url.startsWith('//') && !isHttp
+                              const commonClasses =
+                                'text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm'
+
+                              return (
+                                <span className="legal-link-wrapper">
+                                  {isInternalLink ? (
+                                    <Link to={url} className={commonClasses}>
+                                      {linkText}
+                                    </Link>
+                                  ) : (
+                                    <a
+                                      href={url}
+                                      className={commonClasses}
+                                      target={isHttp ? '_blank' : undefined}
+                                      rel={isHttp ? 'noopener noreferrer' : undefined}
+                                    >
+                                      {linkText}
+                                    </a>
+                                  )}
+                                </span>
+                              )
+                            })()
                           )}
-                        </span>
+                        </ScrollReveal>
                       )
                     })}
                 </div>

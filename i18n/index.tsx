@@ -15,12 +15,12 @@ import {getLanguages, getTranslations} from '../services/cms'
 export type Locale = string
 
 // Base translations from files (fallback)
-const baseTranslations: Record<string, any> = {tr, en}
+const baseTranslations: Record<string, Record<string, string>> = {tr, en}
 
 interface II18nContext {
   locale: Locale
   setLocale: (locale: Locale) => void
-  t: (keyOrObject: string | LocalizedString | undefined, ...args: any[]) => string
+  t: (keyOrObject: string | LocalizedString | undefined, ...args: (string | number)[]) => string
   supportedLocales: string[]
 }
 
@@ -106,7 +106,7 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
   }
 
   const t = useCallback(
-    (keyOrObject: string | LocalizedString | undefined, ...args: any[]): string => {
+    (keyOrObject: string | LocalizedString | undefined, ...args: (string | number)[]): string => {
       if (typeof keyOrObject === 'string') {
         // Bazı anahtarlar için (ör. ana menü ve arama yerleri) CMS çevirisini değil,
         // dosya çevirisini tercih et ki TR/EN arasında net fark ve animasyon görülebilsin
@@ -152,8 +152,8 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
         }
         // Hiçbiri yoksa, object'teki ilk geçerli string değeri al
         const firstValue = Object.values(obj).find(
-          (val: any) => val && typeof val === 'string' && val.trim()
-        ) as string | undefined
+          (val): val is string => typeof val === 'string' && !!val.trim()
+        )
         return firstValue || ''
       }
 

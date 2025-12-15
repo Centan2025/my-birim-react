@@ -72,7 +72,6 @@ export function DesignerDetailPage() {
           className="mb-8"
           items={[
             {label: t('homepage'), to: '/'},
-            {label: t('about'), to: '/about'},
             {label: t('designers'), to: '/designers'},
             {label: t(designer.name)},
           ]}

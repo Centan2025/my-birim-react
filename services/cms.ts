@@ -41,7 +41,7 @@ const KEYS = {
 }
 
 // Empty fallback data (artık Sanity kullanıyoruz)
-const initialData: any = {
+const initialData: Record<string, unknown> = {
   [KEYS.SITE_SETTINGS]: {},
   [KEYS.CATEGORIES]: [],
   [KEYS.DESIGNERS]: [],
@@ -60,8 +60,15 @@ const delay = (ms: number) => new Promise(res => setTimeout(res, ms))
 // Email'leri tekilleştirmek için normalize et (trim + lowercase)
 const normalizeEmail = (value: string): string => (value || '').trim().toLowerCase()
 
+// Sanity file asset tipi (URL üretmek için ihtiyaç duyulan minimum alanlar)
+interface SanityFileAsset {
+  url?: string
+  _id?: string
+  _ref?: string
+}
+
 // Build Sanity file CDN URL from asset {_id|_ref|url}
-const toFileUrl = (asset: any): string => {
+const toFileUrl = (asset: SanityFileAsset | null | undefined): string => {
   if (!asset) return ''
   if (asset.url) return asset.url
   const raw = String(asset._id || asset._ref || '')
@@ -113,10 +120,16 @@ const sanityMutations =
       })
     : null
 
-const urlFor = (source: any) => (useSanity && sanity ? imageUrlBuilder(sanity).image(source) : null)
+// Not: Sanity image builder kendi tiplerini kullanıyor; burada boundary olduğu için
+// parametreyi geniş bırakıyoruz.
+const urlFor = (source: unknown) =>
+  useSanity && sanity ? imageUrlBuilder(sanity).image(source as any) : null
+
+// Sanity image benzeri tip - string veya url alanı olan obje
+type SanityImageLike = string | {url?: string} | null | undefined
 
 const mapImage = (
-  img: any | undefined,
+  img: SanityImageLike | undefined,
   options?: {
     width?: number
     height?: number
@@ -140,10 +153,27 @@ const mapImage = (
   }
 }
 
-const mapImages = (imgs: any[] | undefined): string[] =>
+const mapImages = (imgs: SanityImageLike[] | undefined): string[] =>
   Array.isArray(imgs) ? imgs.map(i => mapImage(i)).filter(Boolean) : []
+
+// Medya satırı için Sanity modeli (sadece ihtiyaç duyulan alanlar)
+interface SanityProductMediaItem {
+  type?: 'image' | 'video' | 'youtube' | string
+  url?: string
+  image?: SanityImageLike
+  imageMobile?: SanityImageLike
+  imageDesktop?: SanityImageLike
+  title?: LocalizedString
+  description?: LocalizedString
+  link?: string
+  linkText?: LocalizedString
+  videoFile?: {asset?: SanityFileAsset}
+  videoFileMobile?: {asset?: SanityFileAsset}
+  videoFileDesktop?: {asset?: SanityFileAsset}
+}
+
 // Helper: Medya URL'ini map et (mobil/desktop desteği ile)
-const mapMediaUrl = (m: any, isMobile?: boolean, isDesktop?: boolean): string => {
+const mapMediaUrl = (m: SanityProductMediaItem, isMobile?: boolean, isDesktop?: boolean): string => {
   const type = m?.type
   let url = ''
 
@@ -195,7 +225,7 @@ const mapMediaUrl = (m: any, isMobile?: boolean, isDesktop?: boolean): string =>
 }
 
 const mapProductMedia = (
-  row: any
+  row: {media?: SanityProductMediaItem[] | null | undefined}
 ): {
   type: 'image' | 'video' | 'youtube'
   url: string
@@ -206,9 +236,9 @@ const mapProductMedia = (
   link?: string
   linkText?: any
 }[] => {
-  const mediaArr = Array.isArray(row?.media) ? row.media : []
+  const mediaArr: SanityProductMediaItem[] = Array.isArray(row?.media) ? row.media : []
   const fromMedia = mediaArr
-    .map((m: any) => {
+    .map(m => {
       const type = m?.type
       const url = mapMediaUrl(m) // Varsayılan URL
       const urlMobile = mapMediaUrl(m, true, false) // Mobil URL (varsa)
@@ -220,19 +250,28 @@ const mapProductMedia = (
       const linkText = m?.linkText
 
       // Sadece urlMobile veya urlDesktop varsa ekle
-      const result: any = {type, url, title, description, link, linkText}
+      const result: {
+        type: SanityProductMediaItem['type']
+        url: string
+        urlMobile?: string
+        urlDesktop?: string
+        title?: LocalizedString
+        description?: LocalizedString
+        link?: string
+        linkText?: LocalizedString
+      } = {type, url, title, description, link, linkText}
       if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
       if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
 
       return result
     })
-    .filter((m: any) => m.type && m.url)
+    .filter(m => m.type && m.url)
   // Fallback kaldırıldı: Eğer hiç medya eklenmemişse boş array döndür
   return fromMedia
 }
 
 const mapAlternativeMedia = (
-  row: any
+  row: {alternativeMedia?: SanityProductMediaItem[] | null; alternativeImages?: SanityImageLike[]}
 ): {
   type: 'image' | 'video' | 'youtube'
   url: string
@@ -242,36 +281,57 @@ const mapAlternativeMedia = (
   const alt = Array.isArray(row?.alternativeMedia) ? row.alternativeMedia : []
   if (alt.length)
     return alt
-      .map((m: any) => {
+      .map(m => {
         const type = m?.type
         const url = mapMediaUrl(m) // Varsayılan URL
         const urlMobile = mapMediaUrl(m, true, false) // Mobil URL (varsa)
         const urlDesktop = mapMediaUrl(m, false, true) // Desktop URL (varsa)
 
         // Sadece urlMobile veya urlDesktop varsa ekle
-        const result: any = {type, url}
+        const result: {
+          type: SanityProductMediaItem['type']
+          url: string
+          urlMobile?: string
+          urlDesktop?: string
+        } = {type, url}
         if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
         if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
 
         return result
       })
-      .filter((m: any) => m.type && m.url)
+      .filter(m => m.type && m.url)
   // fallback to legacy alternativeImages
   return mapImages(row?.alternativeImages).map((u: string) => ({type: 'image', url: u}))
 }
-const mapMaterials = (materials: any[] | undefined): ProductMaterial[] =>
-  Array.isArray(materials) ? materials.map(m => ({name: m?.name, image: mapImage(m?.image)})) : []
+const mapMaterials = (
+  materials: {name?: LocalizedString; image?: SanityImageLike}[] | undefined
+): ProductMaterial[] =>
+  Array.isArray(materials)
+    ? materials.map(m => ({name: m?.name ?? '', image: mapImage(m?.image)}))
+    : []
 const mapDimensionImages = (
-  dimImgs: any[] | undefined
+  dimImgs:
+    | {
+        image?: SanityImageLike
+        imageMobile?: SanityImageLike
+        imageDesktop?: SanityImageLike
+        title?: LocalizedString
+      }[]
+    | undefined
 ): {image: string; imageMobile?: string; imageDesktop?: string; title?: LocalizedString}[] => {
   if (!Array.isArray(dimImgs)) return []
   return dimImgs
-    .map((di: any) => {
+    .map(di => {
       const image = mapImage(di?.image)
       const imageMobile = di?.imageMobile ? mapImage(di.imageMobile) : undefined
       const imageDesktop = di?.imageDesktop ? mapImage(di.imageDesktop) : undefined
 
-      const result: any = {
+      const result: {
+        image: string
+        imageMobile?: string
+        imageDesktop?: string
+        title?: LocalizedString
+      } = {
         image,
         title: di?.title,
       }
@@ -280,22 +340,32 @@ const mapDimensionImages = (
 
       return result
     })
-    .filter((di: any) => di.image) // sadece görseli olanları tut
+    .filter(di => di.image) // sadece görseli olanları tut
 }
-const mapGroupedMaterials = (materialSelections: any[]): any[] => {
+
+// Sanity tarafındaki materialSelections yapısı (ihtiyaç duyulan alanlar)
+interface SanityMaterialSelection {
+  group?: {
+    title?: LocalizedString
+    books?: {title?: LocalizedString; items?: {name?: LocalizedString; image?: SanityImageLike}[]}[]
+  }
+  materials?: {name?: LocalizedString; image?: SanityImageLike}[]
+}
+
+const mapGroupedMaterials = (materialSelections: SanityMaterialSelection[]): ProductMaterialsGroup[] => {
   return (materialSelections || [])
-    .map((s: any) => {
+    .map(s => {
       const selectedMaterials = mapMaterials(s?.materials || [])
       // Create a set of selected material keys for faster lookup
       const selectedKeys = new Set(
-        selectedMaterials.map((sm: any) => `${sm.image}|${JSON.stringify(sm.name)}`)
+        selectedMaterials.map(sm => `${sm.image}|${JSON.stringify(sm.name)}`)
       )
 
       const groupBooks = (s?.group?.books || [])
-        .map((book: any) => {
+        .map(book => {
           const bookMaterials = mapMaterials(book?.items || [])
           // Filter to only show materials that are selected for this product
-          const selectedBookMaterials = bookMaterials.filter((bm: any) =>
+          const selectedBookMaterials = bookMaterials.filter(bm =>
             selectedKeys.has(`${bm.image}|${JSON.stringify(bm.name)}`)
           )
           return {
@@ -303,7 +373,7 @@ const mapGroupedMaterials = (materialSelections: any[]): any[] => {
             materials: selectedBookMaterials,
           }
         })
-        .filter((b: any) => b.materials.length > 0)
+        .filter(b => b.materials.length > 0)
 
       return {
         groupTitle: s?.group?.title,
@@ -311,7 +381,7 @@ const mapGroupedMaterials = (materialSelections: any[]): any[] => {
         materials: selectedMaterials,
       }
     })
-    .filter((g: any) => g.materials.length > 0)
+    .filter((g: ProductMaterialsGroup) => g.materials.length > 0)
 }
 // Ürünlerde ölçü alanını boşlayarak normalize et
 const normalizeProduct = (p: Product): Product => ({

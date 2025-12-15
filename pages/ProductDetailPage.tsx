@@ -18,25 +18,9 @@ import { useDesigner } from '../src/hooks/useDesigners'
 import { useCategories } from '../src/hooks/useCategories'
 import { useSiteSettings } from '../src/hooks/useSiteData'
 import ScrollReveal from '../components/ScrollReveal'
-
-const DownloadIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-    <polyline points="7 10 12 15 17 10" />
-    <line x1="12" y1="15" x2="12" y2="3" />
-  </svg>
-)
-
+import { ProductDesignerSection } from '../components/ProductDesignerSection'
+import { ProductExclusiveContentSection } from '../components/ProductExclusiveContentSection'
+import { ProductMediaPanels } from '../components/ProductMediaPanels'
 
 const CloseIcon = () => (
   <svg
@@ -1425,53 +1409,7 @@ export function ProductDetailPage() {
               )}
 
               {/* Designer section after materials */}
-              {designer && (
-                <ScrollReveal delay={400} threshold={0.05}>
-                  <section className="mt-10 bg-gray-200 text-gray-600 border-t border-b border-gray-400">
-                    <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-10">
-                      <h2 className="text-xl font-thin text-gray-600 mb-4">{t('designer')}</h2>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                        <div className="w-full">
-                          <OptimizedImage
-                            src={
-                              typeof designer.image === 'string'
-                                ? designer.image
-                                : designer.image?.url || ''
-                            }
-                            srcMobile={
-                              typeof designer.image === 'object'
-                                ? designer.image.urlMobile
-                                : designer.imageMobile
-                            }
-                            srcDesktop={
-                              typeof designer.image === 'object'
-                                ? designer.image.urlDesktop
-                                : designer.imageDesktop
-                            }
-                            alt={t(designer.name)}
-                            className="w-full h-auto object-cover filter grayscale"
-                            loading="lazy"
-                            quality={85}
-                          />
-                        </div>
-                        <div className="w-full">
-                          <h3 className="text-2xl font-thin text-gray-600">{t(designer.name)}</h3>
-                          <p className="mt-4 text-gray-500 font-light leading-relaxed">
-                            {t(designer.bio).slice(0, 400)}
-                            {t(designer.bio).length > 400 ? '…' : ''}
-                          </p>
-                          <Link
-                            to={`/designer/${designer.id}`}
-                            className="inline-block mt-6 text-gray-600 font-light underline underline-offset-4 hover:text-gray-800"
-                          >
-                            {t('discover_the_designer')}
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  </section>
-                </ScrollReveal>
-              )}
+              <ProductDesignerSection designer={designer} t={t} />
 
               {product.buyable && (
                 <ScrollReveal delay={500} threshold={0.05}>
@@ -1488,111 +1426,14 @@ export function ProductDetailPage() {
               )}
 
               {product.exclusiveContent && (
-                <ScrollReveal delay={600} threshold={0.05}>
-                  <div className="relative rounded-none border border-gray-200 bg-white/70 backdrop-blur p-6 sm:p-8 pb-10">
-                    <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-2xl md:text-3xl font-light text-gray-700">
-                        İndirilebilir Dosyalar
-                      </h2>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="rounded-none border border-gray-200 bg-white p-4">
-                        <div className="text-xs uppercase tracking-wider text-gray-500 mb-3">
-                          {t('additional_images') || 'Ek Görseller'}
-                        </div>
-                        {product.exclusiveContent.images &&
-                          product.exclusiveContent.images.length > 0 ? (
-                          <div className="grid grid-cols-2 gap-2">
-                            {product.exclusiveContent.images.map((img, idx) => (
-                              <OptimizedImage
-                                key={idx}
-                                src={img}
-                                alt={`exclusive-${idx}`}
-                                className={`w-full aspect-video object-cover ${imageBorderClass}`}
-                                loading="lazy"
-                                quality={85}
-                              />
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-gray-400 text-sm">Ek görsel bulunmuyor</p>
-                        )}
-                      </div>
-                      <div className="rounded-none border border-gray-200 bg-white p-4">
-                        <div className="text-xs uppercase tracking-wider text-gray-500 mb-3">
-                          {t('technical_drawings') || 'Teknik Çizimler'}
-                        </div>
-                        {product.exclusiveContent.drawings &&
-                          product.exclusiveContent.drawings.length > 0 ? (
-                          <ul className="space-y-2">
-                            {product.exclusiveContent.drawings.map((doc, idx) => (
-                              <li key={idx} className="group">
-                                <a
-                                  href={doc.url}
-                                  download
-                                  onClick={e => {
-                                    const canDownload = isLoggedIn && user?.userType === 'full_member'
-                                    if (!canDownload) {
-                                      e.preventDefault()
-                                      navigate('/login')
-                                    }
-                                  }}
-                                  className="flex items-center gap-2 px-3 py-2 rounded-none border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 transition-colors"
-                                >
-                                  <span className="shrink-0 text-gray-600 group-hover:text-gray-900">
-                                    <DownloadIcon />
-                                  </span>
-                                  <span className="text-sm text-gray-700 group-hover:text-gray-900">
-                                    {t(doc.name)}
-                                  </span>
-                                </a>
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="text-gray-400 text-sm">Teknik çizim bulunmuyor</p>
-                        )}
-                      </div>
-                      <div className="rounded-none border border-gray-200 bg-white p-4">
-                        <div className="text-xs uppercase tracking-wider text-gray-500 mb-3">
-                          {t('3d_models') || '3D Modeller'}
-                        </div>
-                        {product.exclusiveContent.models3d &&
-                          product.exclusiveContent.models3d.length > 0 ? (
-                          <ul className="space-y-2">
-                            {product.exclusiveContent.models3d.map((model, idx) => (
-                              <li key={idx} className="group">
-                                <a
-                                  href={model.url}
-                                  download
-                                  onClick={e => {
-                                    const canDownload = isLoggedIn && user?.userType === 'full_member'
-                                    if (!canDownload) {
-                                      e.preventDefault()
-                                      navigate('/login')
-                                    }
-                                  }}
-                                  className="flex items-center gap-2 px-3 py-2 rounded-none border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 transition-colors"
-                                >
-                                  <span className="shrink-0 text-gray-600 group-hover:text-gray-900">
-                                    <DownloadIcon />
-                                  </span>
-                                  <span className="text-sm text-gray-700 group-hover:text-gray-900">
-                                    {t(model.name)}
-                                  </span>
-                                </a>
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="text-gray-400 text-sm">3D model bulunmuyor</p>
-                        )}
-                      </div>
-                    </div>
-                    {/* Alt çizgi: kartın tam alt kenarında, kenarlara kadar */}
-                    <div className="absolute left-0 right-0 bottom-0 h-px bg-gray-300" />
-                  </div>
-                </ScrollReveal>
+                <ProductExclusiveContentSection
+                  exclusiveContent={product.exclusiveContent}
+                  isLoggedIn={isLoggedIn}
+                  user={user}
+                  navigate={navigate}
+                  imageBorderClass={imageBorderClass}
+                  t={t}
+                />
               )}
 
               {/* bottom prev/next removed; now overlay under menu */}
@@ -1600,63 +1441,13 @@ export function ProductDetailPage() {
             {Array.isArray((product as any)?.media) &&
               (product as any).media.length > 0 &&
               (product as any).showMediaPanels !== false && (
-                <ScrollReveal delay={700} threshold={0.05}>
-                  <section className="mt-12">
-                    <h2 className="text-xl font-light text-gray-600 mb-4">
-                      {(product as any)?.mediaSectionTitle &&
-                        String((product as any).mediaSectionTitle).trim().length > 0
-                        ? t((product as any).mediaSectionTitle)
-                        : 'Projeler'}
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {(product as any).media.map((m: any, idx: number) => (
-                        <div key={idx} className="overflow-hidden">
-                          <button
-                            onClick={() => openPanelLightbox(idx)}
-                            className="relative w-full aspect-video bg-gray-200 flex items-center justify-center"
-                          >
-                            {m.type === 'image' ? (
-                              <OptimizedImage
-                                src={m.url}
-                                alt={`media-${idx}`}
-                                className={`w-full h-full object-cover ${imageBorderClass}`}
-                                loading="lazy"
-                                quality={85}
-                              />
-                            ) : m.type === 'video' ? (
-                              <div className={`w-full h-full bg-gray-300 ${imageBorderClass}`} />
-                            ) : (
-                              <OptimizedImage
-                                src={youTubeThumb(m.url)}
-                                alt={`youtube thumb ${idx + 1}`}
-                                className={`w-full h-full object-cover ${imageBorderClass}`}
-                                loading="lazy"
-                                quality={75}
-                              />
-                            )}
-                            {(m.type === 'video' || m.type === 'youtube') && (
-                              <span className="pointer-events-none absolute bottom-2 right-2">
-                                <span className="bg-white/85 text-gray-900 rounded-full w-10 h-10 flex items-center justify-center shadow">
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="currentColor"
-                                    className="w-5 h-5 ml-0.5"
-                                  >
-                                    <path d="M8 5v14l11-7z" />
-                                  </svg>
-                                </span>
-                              </span>
-                            )}
-                          </button>
-                          {m.title && (
-                            <div className="px-1 pt-2 text-sm text-gray-600">{t(m.title)}</div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                </ScrollReveal>
+                <ProductMediaPanels
+                  product={product}
+                  imageBorderClass={imageBorderClass}
+                  youTubeThumb={youTubeThumb}
+                  openPanelLightbox={openPanelLightbox}
+                  t={t}
+                />
               )}
           </div>
         </main>
