@@ -715,7 +715,11 @@ const Footer = () => {
             </ScrollReveal>
           </div>
           <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
-            <div className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col items-center justify-center md:flex-row md:items-start md:justify-start gap-4 text-xs w-full legal-links-row" style={{ overflow: 'visible', width: '100%' }}>
+            <div
+              id="mobile-legal-row-container"
+              className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col items-center justify-center md:flex-row md:items-start md:justify-start gap-4 text-xs w-full legal-links-row"
+              style={{ overflow: 'visible', width: '100%' }}
+            >
               {content.legalLinks && content.legalLinks.length > 0 && (
                 <div
                   id="mobile-legal-links-stack"
@@ -734,36 +738,53 @@ const Footer = () => {
                   <style>
                     {`
                       @media (max-width: 767px) {
-                        /* Force the row/border container to be full width and properly aligned */
-                        .legal-links-row {
-                          width: 100% !important;
-                          max-width: 100% !important;
+                        /* Force the row/border wrapper to be a full-width block */
+                        #mobile-legal-row-container {
                           display: flex !important;
                           flex-direction: column !important;
                           align-items: center !important;
                           justify-content: center !important;
+                          width: 100vw !important; /* Force Viewport Width just in case */
+                          max-width: 100vw !important;
+                          margin-left: -1rem !important; /* Counteract standard padding if any */
+                          width: calc(100% + 2rem) !important; /* Hack for padding compensation */
+                          margin-left: -1rem !important;
+                          padding-left: 0 !important;
+                          padding-right: 0 !important;
                           border-top-width: 1px !important;
-                          border-top-style: solid !important;
-                          margin-left: 0 !important;
+                          text-align: center !important;
+                          box-sizing: border-box !important;
                         }
+                        /* But to be safe, stick to standard 100% first but aggressive */
+                         #mobile-legal-row-container {
+                          width: 100% !important;
+                          min-width: 100% !important;
+                          margin-left: 0 !important;
+                          margin-right: 0 !important;
+                          padding-left: 0 !important;
+                          padding-right: 0 !important;
+                          border-top: 1px solid #374151 !important; /* Force border visibility */
+                        }
+
                         #mobile-legal-links-stack {
+                          width: 100% !important;
                           display: flex !important;
                           flex-direction: column !important;
                           flex-wrap: nowrap !important;
                           align-items: center !important;
                           justify-content: center !important;
-                          gap: 12px !important;
-                          width: 100% !important;
                           text-align: center !important;
+                          gap: 12px !important;
+                          padding-top: 1rem !important;
                         }
+
                         #mobile-legal-links-stack .legal-link-wrapper,
                         #mobile-legal-links-stack span,
                         #mobile-legal-links-stack a {
                           width: 100% !important;
-                          text-align: center !important;
                           display: block !important;
-                          margin-left: auto !important;
-                          margin-right: auto !important;
+                          text-align: center !important;
+                          margin: 0 auto !important;
                         }
                       }
                     `}
