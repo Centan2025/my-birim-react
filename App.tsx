@@ -341,7 +341,7 @@ const Footer = () => {
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6 lg:py-12" style={{ overflow: 'visible' }}>
           {/* Mobil düzen */}
-          <div className="lg:hidden flex flex-col items-center space-y-6">
+          <div className="lg:hidden flex flex-col items-center justify-center space-y-6 w-full" style={{ maxWidth: '100%', marginLeft: 'auto', marginRight: 'auto' }}>
             {/* Logo - ortada üstte */}
             <ScrollReveal delay={0} threshold={0.1} width="w-full" className="h-auto">
               <Link to="/" className="text-white flex justify-center w-full">
@@ -723,8 +723,8 @@ const Footer = () => {
                     maxWidth: '100%',
                     width: '100%',
                     minWidth: 0,
-                    flexShrink: 1,
-                    flexGrow: 1,
+                    flexShrink: 0,
+                    flexGrow: 0,
                     marginLeft: 'auto',
                     marginRight: 'auto'
                   }}

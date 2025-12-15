@@ -518,20 +518,44 @@ header nav a.active .header-nav-text {
   }
 
   /* Footer container - genişlik kontrolü - sadece footer içindeki container, diğer sayfaları etkilemesin */
-  footer.bg-gray-800 > .container,
-  footer[class*="bg-gray"] > .container {
+  /* NOT: Bu kurallar sadece footer içindeki container'ı etkiler, diğer sayfalardaki container'ları etkilemez */
+  footer.bg-gray-800 > .container.mx-auto,
+  footer[class*="bg-gray"] > .container.mx-auto {
     overflow-x: visible !important;
     /* max-width ve width'i kaldırdık, Tailwind'in varsayılan container genişliği kullanılsın */
   }
 
   /* Footer legal links - tüm parent container'lar için - sadece footer içinde */
-  footer.bg-gray-800 > .container > div,
-  footer.bg-gray-800 > .container > div > div,
-  footer[class*="bg-gray"] > .container > div,
-  footer[class*="bg-gray"] > .container > div > div {
+  footer.bg-gray-800 > .container.mx-auto > div,
+  footer.bg-gray-800 > .container.mx-auto > div > div,
+  footer[class*="bg-gray"] > .container.mx-auto > div,
+  footer[class*="bg-gray"] > .container.mx-auto > div > div {
     overflow-x: visible !important;
     overflow-y: visible !important;
     /* max-width ve width'i kaldırdık, sadece footer içeriği için gerekli */
+  }
+
+  /* Mobilde footer container'ı sabit genişlikte ve ortada tut - dil değişiminde kaymasın */
+  @media (max-width: 1023px) {
+    footer.bg-gray-800 > .container.mx-auto,
+    footer[class*="bg-gray"] > .container.mx-auto {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+
+    footer.bg-gray-800 > .container.mx-auto > div.lg\:hidden,
+    footer[class*="bg-gray"] > .container.mx-auto > div.lg\:hidden {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
   }
 
   /* Footer legal links - her bir link için kesin kurallar */
@@ -570,15 +594,31 @@ header nav a.active .header-nav-text {
     flex-grow: 0 !important;
   }
 
-  /* Mobilde footer yasal linkler alt alta olmalı ve ortalanmalı */
+  /* Mobilde footer yasal linkler alt alta olmalı ve ortalanmalı - kesin kurallar */
   @media (max-width: 767px) {
+    /* Yasal linkler parent container */
     footer .flex.flex-col.md\:flex-row {
       flex-direction: column !important;
       align-items: center !important;
       justify-content: center !important;
       width: 100% !important;
+      max-width: 100% !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
     }
 
+    /* Yasal linkler wrapper container */
+    footer div.flex.flex-col.w-full.md\:w-auto {
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+
+    /* Her bir yasal link wrapper */
     footer .legal-link-wrapper {
       width: 100% !important;
       max-width: 100% !important;
@@ -587,12 +627,15 @@ header nav a.active .header-nav-text {
       margin-left: auto !important;
       margin-right: auto !important;
       margin-bottom: 0.5rem !important;
+      flex-shrink: 0 !important;
+      flex-grow: 0 !important;
     }
 
     footer .legal-link-wrapper:last-child {
       margin-bottom: 0 !important;
     }
 
+    /* Yasal link içindeki a ve span */
     footer .legal-link-wrapper a,
     footer .legal-link-wrapper span {
       display: block !important;
@@ -606,13 +649,15 @@ header nav a.active .header-nav-text {
     footer div.flex.flex-col.items-center.md\:flex-row {
       justify-content: center !important;
       align-items: center !important;
+      width: 100% !important;
+      max-width: 100% !important;
     }
 
-    /* Yasal linkler container'ını da ortala */
-    footer div.flex.flex-col.w-full.md\:w-auto {
-      justify-content: center !important;
-      align-items: center !important;
-      width: 100% !important;
+    /* Yasal linklerin yan yana olmasını engelle */
+    footer .flex.flex-col.md\:flex-row .legal-link-wrapper {
+      flex-basis: 100% !important;
+      flex-shrink: 0 !important;
+      flex-grow: 0 !important;
     }
   }
 }
