@@ -339,7 +339,7 @@ const Footer = () => {
         className="bg-gray-800 text-gray-400"
         style={{ position: 'relative', zIndex: 1 }}
       >
-        <div className="container mx-auto max-w-screen-sm lg:max-w-7xl px-4 sm:px-6 lg:px-8 pt-10 pb-6 lg:py-12" style={{ overflow: 'visible' }}>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6 lg:py-12" style={{ overflow: 'visible' }}>
           {/* Mobil düzen */}
           <div className="lg:hidden flex flex-col items-center space-y-6">
             {/* Logo - ortada üstte */}
@@ -713,21 +713,20 @@ const Footer = () => {
               </div>
             </ScrollReveal>
           </div>
-        <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
-          <div className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col md:flex-row md:items-center items-center gap-4 text-xs text-center md:text-left" style={{ overflow: 'visible', width: '100%' }}>
-            {content.legalLinks && content.legalLinks.length > 0 && (
-              <div
-                className="w-full flex flex-col items-center text-center gap-2 md:flex-row md:flex-wrap md:items-center md:justify-center md:text-left md:gap-x-4 md:gap-y-2"
-                style={{
-                  overflow: 'visible',
-                  maxWidth: '100%',
-                  width: '100%',
-                  minWidth: 0,
-                  flexShrink: 1,
-                  flexGrow: 1,
-                  justifyContent: 'center'
-                }}
-              >
+          <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
+            <div className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col items-center md:flex-row md:items-start gap-4 text-xs w-full" style={{ overflow: 'visible', width: '100%' }}>
+              {content.legalLinks && content.legalLinks.length > 0 && (
+                <div
+                  className="flex flex-col w-full md:w-auto md:flex-row md:flex-wrap md:items-center items-center justify-center md:justify-start gap-y-2 md:gap-x-4 md:gap-y-0"
+                  style={{
+                    overflow: 'visible',
+                    maxWidth: '100%',
+                    width: '100%',
+                    minWidth: 0,
+                    flexShrink: 1,
+                    flexGrow: 1
+                  }}
+                >
                   {content.legalLinks
                     .filter(link => link?.isVisible)
                     .map((link, index) => {
@@ -826,23 +825,23 @@ const Footer = () => {
                         }
                       }
 
-                    if (!url) {
-                      return (
-                        <span
-                          key={index}
-                          className="opacity-80 select-none text-gray-400 block w-full text-center md:w-auto md:text-left"
-                          style={{ whiteSpace: 'nowrap', overflow: 'visible', textOverflow: 'clip', maxWidth: 'none' }}
-                        >
-                          {linkText}
-                        </span>
-                      )
-                    }
+                      if (!url) {
+                        return (
+                          <span
+                            key={index}
+                            className="opacity-80 select-none text-gray-400"
+                            style={{ whiteSpace: 'nowrap', overflow: 'visible', textOverflow: 'clip', maxWidth: 'none' }}
+                          >
+                            {linkText}
+                          </span>
+                        )
+                      }
                       const isHttp = /^https?:\/\//.test(url)
                       const isInternalLink = url.startsWith('/') && !url.startsWith('//') && !isHttp
                       return (
                         <span
                           key={index}
-                          className="legal-link-wrapper block w-full text-center md:w-auto md:text-left"
+                          className="legal-link-wrapper w-full text-center md:w-auto md:text-left"
                           style={{
                             whiteSpace: 'nowrap',
                             overflow: 'visible',
