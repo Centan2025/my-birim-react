@@ -614,13 +614,18 @@ header nav a.active .header-nav-text {
       display: block !important;
     }
 
-    /* Force vertical stack for inner container on mobile */
+    /* Force vertical stack for inner container on mobile with aggressive resets */
     footer .legal-links-inner {
       display: flex !important;
       flex-direction: column !important;
       align-items: center !important;
+      justify-content: center !important;
       width: 100% !important;
-      gap: 0.75rem !important;
+      max-width: 100% !important;
+      gap: 1rem !important;
+      /* Biraz daha fazla boşluk */
+      flex-wrap: nowrap !important;
+      /* Yan yana gelmeyi kesinlikle engelle */
     }
   }
 }
