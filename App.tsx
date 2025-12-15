@@ -714,7 +714,7 @@ const Footer = () => {
             </ScrollReveal>
           </div>
           <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
-            <div className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col items-center md:flex-row md:items-start gap-4 text-xs w-full" style={{ overflow: 'visible', width: '100%' }}>
+            <div className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col items-center justify-center md:flex-row md:items-start md:justify-start gap-4 text-xs w-full" style={{ overflow: 'visible', width: '100%' }}>
               {content.legalLinks && content.legalLinks.length > 0 && (
                 <div
                   className="flex flex-col w-full md:w-auto md:flex-row md:flex-wrap md:items-center items-center justify-center md:justify-start gap-y-2 md:gap-x-4 md:gap-y-0"
@@ -724,7 +724,9 @@ const Footer = () => {
                     width: '100%',
                     minWidth: 0,
                     flexShrink: 1,
-                    flexGrow: 1
+                    flexGrow: 1,
+                    marginLeft: 'auto',
+                    marginRight: 'auto'
                   }}
                 >
                   {content.legalLinks
@@ -841,17 +843,13 @@ const Footer = () => {
                       return (
                         <span
                           key={index}
-                          className="legal-link-wrapper w-full text-center md:w-auto md:text-left"
+                          className="legal-link-wrapper block w-full text-center md:inline-block md:w-auto md:text-left"
                           style={{
                             whiteSpace: 'nowrap',
                             overflow: 'visible',
                             textOverflow: 'clip',
                             maxWidth: 'none',
                             minWidth: 'auto',
-                            width: 'auto',
-                            display: 'inline-block',
-                            flexShrink: 0,
-                            flexGrow: 0,
                             wordBreak: 'normal',
                             overflowWrap: 'normal'
                           }}

@@ -517,20 +517,21 @@ header nav a.active .header-nav-text {
     overflow-y: visible !important;
   }
 
-  /* Footer container - genişlik kontrolü */
-  footer .container {
-    max-width: 100% !important;
-    width: 100% !important;
+  /* Footer container - genişlik kontrolü - sadece footer içindeki container, diğer sayfaları etkilemesin */
+  footer.bg-gray-800 > .container,
+  footer[class*="bg-gray"] > .container {
     overflow-x: visible !important;
+    /* max-width ve width'i kaldırdık, Tailwind'in varsayılan container genişliği kullanılsın */
   }
 
-  /* Footer legal links - tüm parent container'lar için */
-  footer .container>div,
-  footer .container>div>div {
+  /* Footer legal links - tüm parent container'lar için - sadece footer içinde */
+  footer.bg-gray-800 > .container > div,
+  footer.bg-gray-800 > .container > div > div,
+  footer[class*="bg-gray"] > .container > div,
+  footer[class*="bg-gray"] > .container > div > div {
     overflow-x: visible !important;
     overflow-y: visible !important;
-    max-width: 100% !important;
-    width: 100% !important;
+    /* max-width ve width'i kaldırdık, sadece footer içeriği için gerekli */
   }
 
   /* Footer legal links - her bir link için kesin kurallar */
@@ -569,30 +570,49 @@ header nav a.active .header-nav-text {
     flex-grow: 0 !important;
   }
 
-  /* Mobilde footer yasal linkler alt alta olmalı */
+  /* Mobilde footer yasal linkler alt alta olmalı ve ortalanmalı */
   @media (max-width: 767px) {
     footer .flex.flex-col.md\:flex-row {
       flex-direction: column !important;
       align-items: center !important;
+      justify-content: center !important;
+      width: 100% !important;
     }
 
-    footer .flex.flex-col.md\:flex-row .legal-link-wrapper {
+    footer .legal-link-wrapper {
       width: 100% !important;
       max-width: 100% !important;
       display: block !important;
       text-align: center !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
       margin-bottom: 0.5rem !important;
     }
 
-    footer .flex.flex-col.md\:flex-row .legal-link-wrapper:last-child {
+    footer .legal-link-wrapper:last-child {
       margin-bottom: 0 !important;
     }
 
-    footer .flex.flex-col.md\:flex-row .legal-link-wrapper a,
-    footer .flex.flex-col.md\:flex-row .legal-link-wrapper span {
+    footer .legal-link-wrapper a,
+    footer .legal-link-wrapper span {
       display: block !important;
       width: 100% !important;
       text-align: center !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+
+    /* Parent container'ı da ortala */
+    footer div.flex.flex-col.items-center.md\:flex-row {
+      justify-content: center !important;
+      align-items: center !important;
+    }
+
+    /* Yasal linkler container'ını da ortala */
+    footer div.flex.flex-col.w-full.md\:w-auto {
+      justify-content: center !important;
+      align-items: center !important;
+      width: 100% !important;
     }
   }
 }
