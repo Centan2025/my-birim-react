@@ -1511,10 +1511,18 @@ export function Header() {
             line-height: 1.25rem !important;
           }
           
-          /* Overlay mobil menü - tamamen opak siyah arka plan */
+          /* Overlay mobil menü - tamamen opak, siyaha çok yakın koyu gri arka plan */
           #mobile-menu.mobile-menu-overlay {
-            background-color: #000000 !important;
-            background: #000000 !important;
+            background-color: #020617 !important; /* Tailwind gray-950 */
+            background: #020617 !important;
+          }
+
+          /* Overlay mobil menü AÇIKKEN header'ı da menü paneli ile bire bir aynı renge zorla */
+          header.overlay-menu-open > div {
+            background-color: #020617 !important; /* Aynı ton */
+            background: #020617 !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
           }
           
           /* Mobil menüde TÜM menü öğeleri için aynı font boyutu garantisi */
@@ -1544,6 +1552,9 @@ export function Header() {
         className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-150 ease-out ${
           // Scroll yönüne göre header'ı gizle/göster (mobil ve desktop)
           isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+        } ${
+          // Overlay mobil menü açıkken header ile panelin tam aynı renkte görünmesi için özel sınıf
+          isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing) ? 'overlay-menu-open' : ''
         }`}
       >
         <div
@@ -1584,9 +1595,9 @@ export function Header() {
               }
               
               // Overlay mobil menü AÇIKKEN veya kapanma animasyonu sürerken
-              // header'ı da tamamen opak siyah yap
+              // header'ı da mobil menü paneli ile aynı çok koyu gri yap (siyaha yakın)
               if (isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)) {
-                return '#000000'
+                return '#020617' // Tailwind gray-950
               }
 
               // MOBİL: Arka plan açık renkteyse header'ı her zaman belirgin koyu yap
@@ -1803,8 +1814,19 @@ export function Header() {
             transition: isProductsOpen || (isMobileMenuOpen && !isOverlayMobileMenu) 
               ? 'background-color 0.2s ease-out, max-height 0.7s ease-in-out'
               : 'background-color 0.2s ease-out',
-            backdropFilter: headerOpacity <= 0 && !isProductsOpen ? 'none' : 'blur(16px)',
-            WebkitBackdropFilter: headerOpacity <= 0 && !isProductsOpen ? 'none' : 'blur(16px)',
+            // Overlay mobil menü AÇIKKEN blur'ü tamamen kapat ki panel ile header aynı tonda görünsün
+            backdropFilter:
+              isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)
+                ? 'none'
+                : headerOpacity <= 0 && !isProductsOpen
+                  ? 'none'
+                  : 'blur(16px)',
+            WebkitBackdropFilter:
+              isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)
+                ? 'none'
+                : headerOpacity <= 0 && !isProductsOpen
+                  ? 'none'
+                  : 'blur(16px)',
             borderBottom: (headerOpacity <= 0 || isProductsOpen) ? 'none' : undefined,
             pointerEvents: 'auto',
             // Desktop'ta header yüksekliği her zaman sabit - products dropdown overflow ile gösterilir
@@ -2374,7 +2396,7 @@ export function Header() {
           }`}
           style={{
             top: `${headerHeight}px`,
-            backgroundColor: '#000000',
+            backgroundColor: '#020617', // Siyaha çok yakın koyu gri (Tailwind gray-950)
             // Kapanırken panel animasyonunu, linklerin ters sırada kaybolma animasyonundan sonra başlat
             transitionDelay: isMobileMenuOpen ? '0ms' : `${mobileMenuCloseDelay}ms`,
           }}

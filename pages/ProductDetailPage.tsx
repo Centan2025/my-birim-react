@@ -1008,25 +1008,29 @@ export function ProductDetailPage() {
                 className="group absolute bottom-3 right-3 md:bottom-4 md:right-4 bg-black/35 text-white rounded-full w-8 h-8 md:w-10 md:h-10 z-20 hover:scale-110 active:scale-95 flex items-center justify-center"
                 style={{
                   opacity: isFullscreenButtonVisible ? 1 : 0,
-                  transform: isFullscreenButtonVisible ? 'translateX(0)' : 'translateX(80px)',
-                  transition: 'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  transform: isFullscreenButtonVisible
+                    ? 'translateX(0) rotate(0deg)'
+                    : 'translateX(80px) rotate(90deg)',
+                  transition:
+                    'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
                   willChange: 'transform, opacity',
                 }}
                 aria-label="Büyüt"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
+                  width="24"
+                  height="24"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="1"
+                  strokeWidth="2.2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="transition-transform duration-300 group-hover:scale-110 md:w-5 md:h-5"
+                  className="transition-transform duration-500 group-hover:scale-110 md:w-7 md:h-7"
                 >
-                  <path d="M14 3h8v8M10 21h-8v-8" />
+                  <line x1="12" y1="4" x2="12" y2="20" />
+                  <line x1="4" y1="12" x2="20" y2="12" />
                 </svg>
               </button>
             )}

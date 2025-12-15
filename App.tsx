@@ -354,7 +354,7 @@ const Footer = () => {
               <ScrollReveal delay={15} threshold={0.1} width="w-full" className="h-auto">
                 <Link
                   to="/products"
-                  className="flex justify-center items-center text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
+                  className="flex justify-center items-center text-lg font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
                 >
                   {t('view_all')}
                 </Link>
@@ -362,7 +362,7 @@ const Footer = () => {
               <ScrollReveal delay={30} threshold={0.1} width="w-full" className="h-auto">
                 <Link
                   to="/designers"
-                  className="flex justify-center items-center text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
+                  className="flex justify-center items-center text-lg font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
                 >
                   {t('designers')}
                 </Link>
@@ -370,7 +370,7 @@ const Footer = () => {
               <ScrollReveal delay={45} threshold={0.1} width="w-full" className="h-auto">
                 <Link
                   to="/projects"
-                  className="flex justify-center items-center text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
+                  className="flex justify-center items-center text-lg font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
                 >
                   {t('projects') || 'Projeler'}
                 </Link>
@@ -378,7 +378,7 @@ const Footer = () => {
               <ScrollReveal delay={60} threshold={0.1} width="w-full" className="h-auto">
                 <Link
                   to="/news"
-                  className="flex justify-center items-center text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
+                  className="flex justify-center items-center text-lg font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
                 >
                   {t('news')}
                 </Link>
@@ -386,7 +386,7 @@ const Footer = () => {
               <ScrollReveal delay={75} threshold={0.1} width="w-full" className="h-auto">
                 <Link
                   to="/about"
-                  className="flex justify-center items-center text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
+                  className="flex justify-center items-center text-lg font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
                 >
                   {t('about')}
                 </Link>
@@ -394,7 +394,7 @@ const Footer = () => {
               <ScrollReveal delay={90} threshold={0.1} width="w-full" className="h-auto">
                 <Link
                   to="/contact"
-                  className="flex justify-center items-center text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
+                  className="flex justify-center items-center text-lg font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
                 >
                   {t('contact')}
                 </Link>
