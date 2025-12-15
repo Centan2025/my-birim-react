@@ -668,7 +668,7 @@ export function HomePage() {
             style={{
               backgroundImage: `url(${isMobile && bgImageMobile ? bgImageMobile : bgImageDesktop || bgImageUrl})`,
               backgroundSize: isMobile ? '100vw auto' : 'cover',
-              backgroundAttachment: isMobile ? 'scroll' : 'fixed',
+              backgroundAttachment: 'fixed',
               backgroundPosition: isMobile ? 'left center' : 'center center',
               backgroundRepeat: 'no-repeat',
               ...(isMobile && inspirationImageHeight && bgImageUrl
