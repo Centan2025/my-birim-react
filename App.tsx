@@ -732,63 +732,10 @@ const Footer = () => {
                     flexShrink: 0,
                     flexGrow: 0,
                     marginLeft: 'auto',
-                    marginRight: 'auto'
+                    marginRight: 'auto',
+                    textAlign: 'center',
                   }}
                 >
-                  <style>
-                    {`
-                      @media (max-width: 767px) {
-                        /* Force the row/border wrapper to be a full-width block */
-                        #mobile-legal-row-container {
-                          display: flex !important;
-                          flex-direction: column !important;
-                          align-items: center !important;
-                          justify-content: center !important;
-                          width: 100vw !important; /* Force Viewport Width just in case */
-                          max-width: 100vw !important;
-                          margin-left: -1rem !important; /* Counteract standard padding if any */
-                          width: calc(100% + 2rem) !important; /* Hack for padding compensation */
-                          margin-left: -1rem !important;
-                          padding-left: 0 !important;
-                          padding-right: 0 !important;
-                          border-top-width: 1px !important;
-                          text-align: center !important;
-                          box-sizing: border-box !important;
-                        }
-                        /* But to be safe, stick to standard 100% first but aggressive */
-                         #mobile-legal-row-container {
-                          width: 100% !important;
-                          min-width: 100% !important;
-                          margin-left: 0 !important;
-                          margin-right: 0 !important;
-                          padding-left: 0 !important;
-                          padding-right: 0 !important;
-                          border-top: 1px solid #374151 !important; /* Force border visibility */
-                        }
-
-                        #mobile-legal-links-stack {
-                          width: 100% !important;
-                          display: flex !important;
-                          flex-direction: column !important;
-                          flex-wrap: nowrap !important;
-                          align-items: center !important;
-                          justify-content: center !important;
-                          text-align: center !important;
-                          gap: 12px !important;
-                          padding-top: 1rem !important;
-                        }
-
-                        #mobile-legal-links-stack .legal-link-wrapper,
-                        #mobile-legal-links-stack span,
-                        #mobile-legal-links-stack a {
-                          width: 100% !important;
-                          display: block !important;
-                          text-align: center !important;
-                          margin: 0 auto !important;
-                        }
-                      }
-                    `}
-                  </style>
                   {content.legalLinks
                     .filter(link => link?.isVisible)
                     .map((link, index) => {
