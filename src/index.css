@@ -1,14 +1,16 @@
 @import 'tailwindcss';
 
 html {
-  font-size: 16px; /* Sabit base font-size: 1rem = 16px */
+  font-size: 16px;
+  /* Sabit base font-size: 1rem = 16px */
   scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   padding: 0;
-  background-color: #ffffff; /* Varsayılan beyaz arka plan */
+  background-color: #ffffff;
+  /* Varsayılan beyaz arka plan */
   font-family:
     'Jura',
     'Inter',
@@ -19,7 +21,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #111827; /* çok daha koyu gri (yaklaşık Tailwind gray-900) */
+  color: #111827;
+  /* çok daha koyu gri (yaklaşık Tailwind gray-900) */
   font-weight: 500;
 }
 
@@ -36,11 +39,13 @@ body {
 
 /* Tailwind gri tonlarını daha da koyulaştır (sık kullanılanlar) */
 .text-gray-500 {
-  color: #111827 !important; /* neredeyse siyah (gray-900) */
+  color: #111827 !important;
+  /* neredeyse siyah (gray-900) */
 }
 
 .text-gray-600 {
-  color: #111827 !important; /* aynı şekilde çok koyu */
+  color: #111827 !important;
+  /* aynı şekilde çok koyu */
 }
 
 /* Oswald font utility */
@@ -51,7 +56,12 @@ body {
 }
 
 /* Tüm başlıklar Oswald fontu ile */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: 'Oswald', sans-serif !important;
   font-weight: 300 !important;
   letter-spacing: 0.1em !important;
@@ -62,6 +72,7 @@ h1, h2, h3, h4, h5, h6 {
     opacity: 0;
     transform: translateY(-20px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -79,6 +90,7 @@ h1, h2, h3, h4, h5, h6 {
     opacity: 0;
     transform: translateY(20px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -104,6 +116,7 @@ h1, h2, h3, h4, h5, h6 {
     opacity: 0;
     transform: translateY(15px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -114,6 +127,7 @@ h1, h2, h3, h4, h5, h6 {
   from {
     transform: scaleX(0);
   }
+
   to {
     transform: scaleX(1);
   }
@@ -126,10 +140,13 @@ h1, h2, h3, h4, h5, h6 {
 
 @keyframes dot-height-grow {
   from {
-    height: 0.0625rem; /* 1px - ince çizgi */
+    height: 0.0625rem;
+    /* 1px - ince çizgi */
   }
+
   to {
-    height: 0.5rem; /* 8px - normal height */
+    height: 0.5rem;
+    /* 8px - normal height */
   }
 }
 
@@ -179,8 +196,10 @@ header nav a.active .header-nav-text {
     /* Mobil scroll momentum sorunlarını önle */
     -webkit-overflow-scrolling: touch !important;
     /* Footer altındaki beyaz alanı önlemek için body arka planını footer ile aynı yap */
-    background-color: #1f2937 !important; /* gray-800 - footer ile aynı renk */
+    background-color: #1f2937 !important;
+    /* gray-800 - footer ile aynı renk */
   }
+
   html {
     overflow-x: hidden !important;
     margin: 0 !important;
@@ -192,8 +211,10 @@ header nav a.active .header-nav-text {
     /* Mobil scroll momentum sorunlarını önle */
     -webkit-overflow-scrolling: touch !important;
     /* Footer altındaki beyaz alanı önlemek için */
-    background-color: #1f2937 !important; /* gray-800 - footer ile aynı renk */
+    background-color: #1f2937 !important;
+    /* gray-800 - footer ile aynı renk */
   }
+
   #root {
     overflow-x: hidden !important;
     margin: 0 !important;
@@ -201,11 +222,13 @@ header nav a.active .header-nav-text {
     width: 100% !important;
     max-width: 100% !important;
   }
+
   main {
     overflow-x: hidden !important;
     margin: 0 !important;
     padding: 0 !important;
   }
+
   header {
     width: 100% !important;
     max-width: 100% !important;
@@ -213,13 +236,15 @@ header nav a.active .header-nav-text {
     right: 0 !important;
     box-sizing: border-box !important;
   }
-  header > div {
+
+  header>div {
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
+
   /* Mobilde header yüksekliğini sabitle - scroll sırasında değişmesin */
-  header > div:not([class*="max-h-[40rem]"]):not([class*="max-h-[900px]"]) {
+  header>div:not([class*="max-h-[40rem]"]):not([class*="max-h-[900px]"]) {
     height: 4rem !important;
     min-height: 4rem !important;
     max-height: 4rem !important;
@@ -232,6 +257,7 @@ header nav a.active .header-nav-text {
     margin-bottom: 0 !important;
     box-sizing: border-box !important;
   }
+
   /* Mobilde nav elementini de sabitle */
   @media (max-width: 1023px) {
     header nav {
@@ -242,7 +268,8 @@ header nav a.active .header-nav-text {
       padding-bottom: 0 !important;
       box-sizing: border-box !important;
     }
-    header nav > div:first-child {
+
+    header nav>div:first-child {
       height: 4rem !important;
       min-height: 4rem !important;
       max-height: 4rem !important;
@@ -251,6 +278,7 @@ header nav a.active .header-nav-text {
       box-sizing: border-box !important;
     }
   }
+
   .hero-page-container-mobile {
     width: 100vw !important;
     max-width: 100vw !important;
@@ -264,6 +292,7 @@ header nav a.active .header-nav-text {
     left: 0 !important;
     right: 0 !important;
   }
+
   .hero-main-container-mobile {
     width: 100vw !important;
     max-width: 100vw !important;
@@ -278,6 +307,7 @@ header nav a.active .header-nav-text {
     left: 0 !important;
     right: 0 !important;
   }
+
   .hero-scroll-container {
     margin-left: 0 !important;
     margin-right: 0 !important;
@@ -290,6 +320,7 @@ header nav a.active .header-nav-text {
     display: flex !important;
     flex-wrap: nowrap !important;
   }
+
   .hero-slide-mobile,
   .hero-slide-mobile[style] {
     width: 100vw !important;
@@ -304,19 +335,22 @@ header nav a.active .header-nav-text {
     clip-path: inset(0) !important;
     box-sizing: border-box !important;
   }
+
   /* Product Detail Page hero'sunu koru - CSS override'larından etkilenmesin */
-  [data-product-detail] header > div:first-child {
+  [data-product-detail] header>div:first-child {
     height: 60vh !important;
     min-height: 60vh !important;
     max-height: 60vh !important;
   }
+
   @media (min-width: 768px) {
-    [data-product-detail] header > div:first-child {
+    [data-product-detail] header>div:first-child {
       height: 70vh !important;
       min-height: 70vh !important;
       max-height: 70vh !important;
     }
   }
+
   .hero-slide-mobile video,
   .hero-slide-mobile video[style],
   .hero-slide-mobile video.w-full,
@@ -327,8 +361,8 @@ header nav a.active .header-nav-text {
   video.hero-video-mobile[style],
   video.w-full.hero-video-mobile,
   video.h-full.hero-video-mobile,
-  .hero-slide-mobile > video,
-  .hero-slide-mobile > video[style],
+  .hero-slide-mobile>video,
+  .hero-slide-mobile>video[style],
   .hero-slide-mobile video.w-full.h-full,
   .hero-slide-mobile video.object-cover,
   .hero-slide-mobile video.absolute,
@@ -355,19 +389,23 @@ header nav a.active .header-nav-text {
     overflow: hidden !important;
     clip-path: inset(0) !important;
   }
+
   .hero-slide-mobile video.w-full {
     width: 100vw !important;
   }
+
   .hero-slide-mobile .w-full {
     width: 100vw !important;
   }
+
   .hero-slide-mobile video[style*='100vw'] {
     width: 100vw !important;
     max-width: 100vw !important;
     min-width: 100vw !important;
   }
-  .hero-slide-mobile > div[style*='backgroundImage'],
-  .hero-slide-mobile > div[style*='background-image'] {
+
+  .hero-slide-mobile>div[style*='backgroundImage'],
+  .hero-slide-mobile>div[style*='background-image'] {
     width: 100vw !important;
     max-width: 100vw !important;
     min-width: 100vw !important;
@@ -391,6 +429,7 @@ header nav a.active .header-nav-text {
     overflow: hidden !important;
     clip-path: inset(0) !important;
   }
+
   /* Footer legal links - kesinlikle tam görünür olmalı */
   footer a[href*="/kvkk"],
   footer a[href="/kvkk"],
@@ -405,9 +444,9 @@ header nav a.active .header-nav-text {
   footer span:contains("KVKK"),
   /* Tüm footer legal links için genel kurallar */
   footer span:has(a[href]),
-  footer span:has(a[href]) > a,
-  footer .flex.flex-col.md\\:flex-row span:has(a),
-  footer .flex.flex-col.md\\:flex-row span:has(a) > a {
+  footer span:has(a[href])>a,
+  footer .flex.flex-col.md\:flex-row span:has(a),
+  footer .flex.flex-col.md\:flex-row span:has(a)>a {
     white-space: nowrap !important;
     overflow: visible !important;
     text-overflow: clip !important;
@@ -421,11 +460,12 @@ header nav a.active .header-nav-text {
     overflow-wrap: normal !important;
     text-overflow: clip !important;
   }
+
   /* Footer legal links container */
   footer div:has([href*="/kvkk"]),
   footer div:has([href="/kvkk"]),
   footer div:has(span:has([href*="/kvkk"])),
-  footer .flex.flex-col.md\\:flex-row {
+  footer .flex.flex-col.md\:flex-row {
     overflow: visible !important;
     max-width: 100% !important;
     width: 100% !important;
@@ -433,16 +473,18 @@ header nav a.active .header-nav-text {
     flex-shrink: 1 !important;
     flex-grow: 1 !important;
   }
+
   /* Footer legal links parent container */
-  footer > div > div:has([href*="/kvkk"]),
-  footer > div > div:has([href="/kvkk"]),
-  footer > div > div:has(span:has(a[href])) {
+  footer>div>div:has([href*="/kvkk"]),
+  footer>div>div:has([href="/kvkk"]),
+  footer>div>div:has(span:has(a[href])) {
     overflow: visible !important;
     max-width: 100% !important;
     width: 100% !important;
   }
+
   /* Footer legal links flex container - her bir span */
-  footer .flex.flex-col.md\\:flex-row > span {
+  footer .flex.flex-col.md\:flex-row>span {
     overflow: visible !important;
     max-width: none !important;
     width: auto !important;
@@ -450,9 +492,10 @@ header nav a.active .header-nav-text {
     flex-shrink: 0 !important;
     flex-grow: 0 !important;
   }
+
   /* Footer legal links - tüm link'ler için kesin kurallar */
-  footer .flex.flex-col.md\\:flex-row span a,
-  footer .flex.flex-col.md\\:flex-row span a * {
+  footer .flex.flex-col.md\:flex-row span a,
+  footer .flex.flex-col.md\:flex-row span a * {
     white-space: nowrap !important;
     overflow: visible !important;
     text-overflow: clip !important;
@@ -465,27 +508,31 @@ header nav a.active .header-nav-text {
     word-break: normal !important;
     overflow-wrap: normal !important;
   }
+
   /* Footer legal links container - genişlik kontrolü */
-  footer .flex.flex-col.md\\:flex-row {
+  footer .flex.flex-col.md\:flex-row {
     width: 100% !important;
     max-width: 100% !important;
     overflow-x: visible !important;
     overflow-y: visible !important;
   }
+
   /* Footer container - genişlik kontrolü */
   footer .container {
     max-width: 100% !important;
     width: 100% !important;
     overflow-x: visible !important;
   }
+
   /* Footer legal links - tüm parent container'lar için */
-  footer .container > div,
-  footer .container > div > div {
+  footer .container>div,
+  footer .container>div>div {
     overflow-x: visible !important;
     overflow-y: visible !important;
     max-width: 100% !important;
     width: 100% !important;
   }
+
   /* Footer legal links - her bir link için kesin kurallar */
   footer span[style*="white-space: nowrap"] a,
   footer span[style*="whiteSpace: nowrap"] a,
@@ -504,6 +551,7 @@ header nav a.active .header-nav-text {
     overflow-wrap: normal !important;
     letter-spacing: normal !important;
   }
+
   /* Footer legal links wrapper - kesin genişlik kontrolü */
   footer .legal-link-wrapper {
     max-width: none !important;
@@ -511,32 +559,37 @@ header nav a.active .header-nav-text {
     min-width: 0 !important;
     flex-basis: auto !important;
   }
+
   /* Footer legal links - tüm parent'lar için */
-  footer .flex.flex-col.md\\:flex-row .legal-link-wrapper {
+  footer .flex.flex-col.md\:flex-row .legal-link-wrapper {
     max-width: none !important;
     width: auto !important;
     min-width: fit-content !important;
     flex-shrink: 0 !important;
     flex-grow: 0 !important;
   }
+
   /* Mobilde footer yasal linkler alt alta olmalı */
   @media (max-width: 767px) {
-    footer .flex.flex-col.md\\:flex-row {
+    footer .flex.flex-col.md\:flex-row {
       flex-direction: column !important;
       align-items: center !important;
     }
-    footer .flex.flex-col.md\\:flex-row .legal-link-wrapper {
+
+    footer .flex.flex-col.md\:flex-row .legal-link-wrapper {
       width: 100% !important;
       max-width: 100% !important;
       display: block !important;
       text-align: center !important;
       margin-bottom: 0.5rem !important;
     }
-    footer .flex.flex-col.md\\:flex-row .legal-link-wrapper:last-child {
+
+    footer .flex.flex-col.md\:flex-row .legal-link-wrapper:last-child {
       margin-bottom: 0 !important;
     }
-    footer .flex.flex-col.md\\:flex-row .legal-link-wrapper a,
-    footer .flex.flex-col.md\\:flex-row .legal-link-wrapper span {
+
+    footer .flex.flex-col.md\:flex-row .legal-link-wrapper a,
+    footer .flex.flex-col.md\:flex-row .legal-link-wrapper span {
       display: block !important;
       width: 100% !important;
       text-align: center !important;
