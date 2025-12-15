@@ -142,6 +142,7 @@ export function Header() {
   const lastScrollYRef = useRef(0)
   const scrollPositionRef = useRef(0)
   const headerVisibilityLastChanged = useRef(0)
+  const mobileMenuJustClosedUntilRef = useRef(0)
   const lastScrollForHeader = useRef(0) // Header visibility için ayrı scroll takibi
   const [isMobile, setIsMobile] = useState(false)
   const [headerHeight, setHeaderHeight] = useState(56) // 3.5rem = 56px (mobil için varsayılan)
@@ -650,6 +651,15 @@ export function Header() {
           return
         }
 
+        // Menü kapandıktan hemen sonraki kısa sürede (ör. 800ms),
+        // header'ın otomatik gizlenmesini engelle.
+        const now = Date.now()
+        if (now < mobileMenuJustClosedUntilRef.current) {
+          setIsHeaderVisible(true)
+          lastScrollYRef.current = currentScrollY
+          return
+        }
+
         // Mobilde: Sayfa en üstteyken (scrollY = 0) şeffaflığı ayarla
         if (currentScrollY === 0) {
           // Route değiştiyse brightness kullanma
@@ -967,14 +977,17 @@ export function Header() {
       if (isMobileMenuOpen) {
         setHeaderOpacity(0.75)
         setIsHeaderVisible(true)
+        // Menü yeni açıldı, "az önce kapandı" durumunu sıfırla
+        mobileMenuJustClosedUntilRef.current = 0
       } else if (isSearchOpen) {
         // Arama açıldığında arama paneli ile aynı opacity (0.7)
         setHeaderOpacity(0.7)
         setIsHeaderVisible(true)
       } else {
-        // Menü ve arama kapalıysa, scroll handler opacity'yi ayarlayacak
-        // Bu effect sadece menü/arama açıkken opacity'yi override eder
-        // Scroll handler zaten route değiştiğinde opacity'yi 0 yapıyor
+        // Menü KAPANIRKEN: belirli bir süre boyunca header'ın gizlenmesini engelle
+        // Böylece kullanıcı close'a bastığı anda header kaybolmaz.
+        mobileMenuJustClosedUntilRef.current = Date.now() + 800 // 800ms grace süresi
+        setIsHeaderVisible(true)
       }
     }
   }, [isMobile, isMobileMenuOpen, isSearchOpen, location.pathname])
@@ -1988,10 +2001,24 @@ export function Header() {
                 <div className="lg:hidden flex items-center">
                   {/* Settings yüklenene kadar hamburger butonunu gizle - böylece yanlış stil gösterilmez */}
                   {!settings ? null : isOverlayMobileMenu ? (
-                    // Overlay modunda: hamburger → X animasyonu (senin verdiğin pattern'e göre)
+                    // Overlay modunda: hamburger → X animasyonu
+                    // Eğer alt ürün menüsü (Products) açıksa, ilk tıklamada SADECE alt menüyü kapat,
+                    // hamburger menüyü (ana overlay menü) açık tut.
                     <button
                       ref={mobileMenuButtonRef}
-                      onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                      onClick={() => {
+                        if (isMobileMenuOpen && isMobileProductsMenuOpen) {
+                          setIsMobileProductsMenuOpen(false)
+                          return
+                        }
+                        const willOpen = !isMobileMenuOpen
+                        setIsMobileMenuOpen(willOpen)
+                        // Menü KAPANIRKEN header her durumda görünür kalsın
+                        if (!willOpen) {
+                          setIsHeaderVisible(true)
+                          headerVisibilityLastChanged.current = Date.now()
+                        }
+                      }}
                       className="group p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center"
                       aria-label={
                         isMobileMenuOpen
@@ -2025,7 +2052,19 @@ export function Header() {
                   ) : (
                     <button
                       ref={mobileMenuButtonRef}
-                      onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                      onClick={() => {
+                        if (isMobileMenuOpen && isMobileProductsMenuOpen) {
+                          setIsMobileProductsMenuOpen(false)
+                          return
+                        }
+                        const willOpen = !isMobileMenuOpen
+                        setIsMobileMenuOpen(willOpen)
+                        // Menü KAPANIRKEN header her durumda görünür kalsın
+                        if (!willOpen) {
+                          setIsHeaderVisible(true)
+                          headerVisibilityLastChanged.current = Date.now()
+                        }
+                      }}
                       className={`${iconClasses} flex items-center justify-center`}
                       aria-label={
                         isMobileMenuOpen

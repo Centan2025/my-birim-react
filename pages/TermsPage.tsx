@@ -29,8 +29,11 @@ export default function TermsPage() {
         <nav className="mb-6 text-sm text-gray-500" aria-label="Breadcrumb">
           <ol className="list-none p-0 inline-flex items-center">
             <li>
-              <Link to="/" className="hover:text-gray-800">
-                Ana Sayfa
+              <Link
+                to="/"
+                className="underline underline-offset-2 hover:text-gray-800 transition-colors"
+              >
+                ANASAYFA
               </Link>
             </li>
             <li className="mx-2 font-light text-gray-400">|</li>
