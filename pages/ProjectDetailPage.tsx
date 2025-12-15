@@ -235,7 +235,9 @@ export function ProjectDetailPage() {
   const projectDescription = project && project.body ? t(project.body) : projectTitle
   const seoImage =
     coverUrl ||
-    (project?.media && project.media.length > 0 ? project.media[0].url : undefined) ||
+    (project?.media && project.media.length > 0 && project.media[0]
+      ? project.media[0].url
+      : undefined) ||
     undefined
 
   useSEO({

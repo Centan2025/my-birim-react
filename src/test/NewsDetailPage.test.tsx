@@ -1,4 +1,3 @@
-import React from 'react'
 import {describe, it, expect, vi} from 'vitest'
 import {render, screen} from '@testing-library/react'
 import {MemoryRouter, Routes, Route} from 'react-router-dom'
@@ -110,6 +109,5 @@ describe('NewsDetailPage', () => {
     expect(parsed['@type']).toBe('Article')
     expect(parsed.headline).toBe('Haber Başlığı')
   })
-}
-
+})
 

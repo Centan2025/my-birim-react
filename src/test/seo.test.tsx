@@ -61,6 +61,5 @@ describe('structured data helpers', () => {
     expect(parsed.headline).toBe('News Headline')
     expect(parsed.description).toBe('News description')
   })
-}
-
+})
 

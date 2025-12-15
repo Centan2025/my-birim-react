@@ -28,7 +28,8 @@ const getTranslationFromUrl = (url: string, locale: string): string | null => {
   const urlLower = url.toLowerCase()
 
   if (TRANSLATIONS[urlLower]) {
-    return TRANSLATIONS[urlLower][locale] || TRANSLATIONS[urlLower].tr || null
+    const entry = TRANSLATIONS[urlLower]
+    return entry[locale] || entry['tr'] || null
   }
 
   if (urlLower.includes('kvkk')) {
@@ -67,10 +68,12 @@ const resolveLocalizedString = (
   }
 
   const obj = value as Record<string, string>
-
-  if (obj[locale] && obj[locale].trim()) return obj[locale]
-  if (obj.tr && obj.tr.trim()) return obj.tr
-  if (obj.en && obj.en.trim()) return obj.en
+  const current = obj[locale]
+  if (current && current.trim()) return current
+  const trVal = obj['tr']
+  if (trVal && trVal.trim()) return trVal
+  const enVal = obj['en']
+  if (enVal && enVal.trim()) return enVal
 
   const first = Object.values(obj).find(v => v && typeof v === 'string' && v.trim())
   return (first as string) || ''
