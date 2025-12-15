@@ -8,6 +8,7 @@ import {useDesigners} from '../src/hooks/useDesigners'
 import {useSiteSettings} from '../src/hooks/useSiteData'
 import {Breadcrumbs} from '../components/Breadcrumbs'
 import ScrollReveal from '../components/ScrollReveal'
+import {useSEO} from '../src/hooks/useSEO'
 
 const DesignerCard: React.FC<{designer: Designer}> = ({designer}) => {
   const {t} = useTranslation()
@@ -42,6 +43,16 @@ const DesignerCard: React.FC<{designer: Designer}> = ({designer}) => {
 export function DesignersPage() {
   const {data: designers = [], isLoading: loading} = useDesigners()
   const {t} = useTranslation()
+
+  // SEO meta
+  useSEO({
+    title: `BIRIM - ${t('designers') || 'Tasarımcılar'}`,
+    description: 'BIRIM ile çalışan tasarımcılar ve yaratıcı ekip hakkında bilgiler',
+    type: 'profile',
+    siteName: 'BIRIM',
+    locale: 'tr_TR',
+    section: 'Designers',
+  })
 
   if (loading) {
     return (

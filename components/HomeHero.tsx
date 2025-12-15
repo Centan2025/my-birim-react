@@ -494,6 +494,11 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                   : 0
                 : index - 1
 
+            const isInitialSlide =
+              slideCount <= 1
+                ? index === 0
+                : index === 1 // klonlu dizide: [son, ...heroMedia, ilk] → ilk gerçek slide index 1
+
             return (
               <div
                 key={`${realIndex}-${index}`}
@@ -527,7 +532,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                     muted
                     playsInline
                     preload="auto"
-                    loading="eager"
+                    loading={isInitialSlide ? 'eager' : 'lazy'}
                   />
                 ) : media.type === 'youtube' ? (
                   <YouTubeBackground url={media.url} isMobile={isMobile} />
@@ -538,7 +543,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                     srcDesktop={media.urlDesktop}
                     alt={t(media.title || '')}
                     className={`absolute inset-0 w-full h-full ${isMobile ? 'object-cover object-center' : 'object-cover'}`}
-                    loading="eager"
+                    loading={isInitialSlide ? 'eager' : 'lazy'}
                     quality={90}
                   />
                 )}

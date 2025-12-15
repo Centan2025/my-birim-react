@@ -7,6 +7,7 @@ import {useTranslation} from '../i18n'
 import {analytics} from '../src/lib/analytics'
 import {Breadcrumbs} from '../components/Breadcrumbs'
 import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
+import {useSEO} from '../src/hooks/useSEO'
 
 const getYouTubeId = (url: string): string | null => {
   const match = url.match(
@@ -179,6 +180,16 @@ export function ContactPage() {
   const [thumbScrollStart, setThumbScrollStart] = useState<number>(0)
   const {t} = useTranslation()
 
+  // SEO meta
+  useSEO({
+    title: `BIRIM - ${t('contact') || 'İletişim'}`,
+    description: t(content?.subtitle) || 'BIRIM iletişim ve showroom bilgileri',
+    type: 'website',
+    siteName: 'BIRIM',
+    locale: 'tr_TR',
+    section: 'Contact',
+  })
+
   useEffect(() => {
     const fetchContent = async () => {
       setLoading(true)
@@ -254,19 +265,11 @@ export function ContactPage() {
     [selectedLocationMedia]
   )
 
-  // Seçili lokasyon değiştiğinde analytics event + sayfa başlığı gönder
+  // Seçili lokasyon değiştiğinde analytics event gönder
   useEffect(() => {
     if (!selectedLocation) return
 
     const locationTitle = t(selectedLocation.title)
-    const title = `İLETİŞİM - ${locationTitle}`
-
-    if (typeof document !== 'undefined') {
-      document.title = title
-    }
-
-    analytics.pageview(window.location.pathname, title)
-
     analytics.event({
       category: 'contact',
       action: 'view_location',

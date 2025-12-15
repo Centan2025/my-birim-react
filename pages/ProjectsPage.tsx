@@ -7,6 +7,7 @@ import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useProjects} from '../src/hooks/useProjects'
 import {useSiteSettings} from '../src/hooks/useSiteData'
 import ScrollReveal from '../components/ScrollReveal'
+import {useSEO} from '../src/hooks/useSEO'
 
 const ProjectCard: React.FC<{project: Project}> = ({project}) => {
   const {t} = useTranslation()
@@ -22,6 +23,8 @@ const ProjectCard: React.FC<{project: Project}> = ({project}) => {
             srcDesktop={typeof project.cover === 'object' ? project.cover.urlDesktop : undefined}
             alt={t(project.title)}
             className={`w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-[1.03] ${imageBorderClass}`}
+            width={1600}
+            height={1000}
             loading="lazy"
             quality={85}
           />
@@ -39,6 +42,16 @@ const ProjectCard: React.FC<{project: Project}> = ({project}) => {
 export function ProjectsPage() {
   const {data: projects = [], isLoading: loading} = useProjects()
   const {t} = useTranslation()
+
+  // SEO meta
+  useSEO({
+    title: `BIRIM - ${t('projects') || 'Projeler'}`,
+    description: 'BIRIM projeleri, referans işleri ve uygulama örnekleri',
+    type: 'website',
+    siteName: 'BIRIM',
+    locale: 'tr_TR',
+    section: 'Projects',
+  })
 
   if (loading) {
     return (

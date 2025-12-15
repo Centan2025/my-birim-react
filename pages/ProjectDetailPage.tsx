@@ -10,6 +10,7 @@ import {useProject, useProjects} from '../src/hooks/useProjects'
 import {useSiteSettings} from '../src/hooks/useSiteData'
 import {analytics} from '../src/lib/analytics'
 import ScrollReveal from '../components/ScrollReveal'
+import {useSEO} from '../src/hooks/useSEO'
 
 const getYouTubeId = (url: string): string | null => {
   if (!url) return null
@@ -103,17 +104,13 @@ export function ProjectDetailPage() {
     return () => clearTimeout(timer)
   }, [projectId])
 
-  // Analytics: proje detay görüntüleme
+  // Analytics: proje detay görüntüleme (SEO başlığı ile uyumlu)
   useEffect(() => {
     if (!project) return
     if (typeof window === 'undefined') return
 
-    const title = `PROJELER - ${t(project.title)}`
-    if (typeof document !== 'undefined') {
-      document.title = title
-    }
-
-    analytics.pageview(window.location.pathname, title)
+    const pageTitle = `BIRIM - ${t('projects') || 'Projeler'} - ${t(project.title)}`
+    analytics.pageview(window.location.pathname, pageTitle)
 
     analytics.event({
       category: 'project',
@@ -232,6 +229,26 @@ export function ProjectDetailPage() {
     return [last, ...allMedia, first]
   }, [allMedia, slideCount])
   const totalSlides = heroMedia.length || 1
+
+  // SEO meta bilgileri
+  const projectTitle = project ? t(project.title) : ''
+  const projectDescription = project && project.body ? t(project.body) : projectTitle
+  const seoImage =
+    coverUrl ||
+    (project?.media && project.media.length > 0 ? project.media[0].url : undefined) ||
+    undefined
+
+  useSEO({
+    title: projectTitle
+      ? `BIRIM - ${t('projects') || 'Projeler'} - ${projectTitle}`
+      : 'BIRIM - Projeler',
+    description: projectDescription || 'BIRIM projeleri ve referans işleri',
+    image: seoImage,
+    type: 'article',
+    siteName: 'BIRIM',
+    locale: 'tr_TR',
+    section: 'Projects',
+  })
 
   // Snap sonrası transition'ı tekrar aç
   useEffect(() => {

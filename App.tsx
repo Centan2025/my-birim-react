@@ -10,7 +10,7 @@ import React, {
 import { HashRouter, Routes, Route, useLocation, Link } from 'react-router-dom'
 
 import { Header } from './components/Header'
-import { getFooterContent, getSiteSettings, subscribeEmail } from './services/cms'
+import { getFooterContent, getSiteSettings } from './services/cms'
 import type { FooterContent, SiteSettings, User } from './types'
 import { SiteLogo } from './components/SiteLogo'
 import { I18nProvider, useTranslation } from './i18n'
@@ -23,6 +23,8 @@ import { analytics } from './src/lib/analytics'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './src/lib/queryClient'
 import ScrollReveal from './components/ScrollReveal'
+import { resolveLegalLinkText } from './src/lib/legalLinks'
+import { NewsletterForm } from './components/NewsletterForm'
 
 // Lazy load pages for code splitting
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })))
@@ -321,7 +323,6 @@ const TopBanner = () => null
 const Footer = () => {
   const [content, setContent] = useState<FooterContent | null>(null)
   const [settings, setSettings] = useState<SiteSettings | null>(null)
-  const [email, setEmail] = useState('')
   const { t, setLocale, locale, supportedLocales } = useTranslation()
 
   useEffect(() => {
@@ -433,61 +434,14 @@ const Footer = () => {
             {/* Email abonelik formu - mobilde en altta ortalanmış */}
             <ScrollReveal delay={150} threshold={0.1} width="w-full" className="h-auto">
               <div className="w-full flex justify-center !mt-8 lg:!mt-6">
-                <form
-                  onSubmit={async e => {
-                    e.preventDefault()
-                    if (email) {
-                      try {
-                        await subscribeEmail(email)
-                        analytics.trackUserAction('newsletter_subscribe', email)
-                        alert('E-posta aboneliğiniz başarıyla oluşturuldu!')
-                        setEmail('')
-                      } catch (err: any) {
-                        // Özel durum: Local storage'a kaydedildi ama CMS'de görünmüyor
-                        if (err.message === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
-                          alert(
-                            "E-posta aboneliğiniz kaydedildi!\n\nNot: CMS'de görünmesi için .env dosyasına VITE_SANITY_TOKEN ekleyin. Detaylar: README.md"
-                          )
-                          analytics.trackUserAction('newsletter_subscribe', email)
-                          setEmail('')
-                        } else {
-                          alert(err.message || "Bir hata oluştu. Lütfen console'u kontrol edin.")
-                        }
-                      }
-                    }
-                  }}
-                  className="flex flex-col items-center justify-center w-full"
+                <ScrollReveal
+                  delay={165}
+                  threshold={0.1}
+                  width="w-full"
+                  className="h-auto w-full flex flex-col items-center justify-center"
                 >
-                  <ScrollReveal delay={165} threshold={0.1} width="w-full" className="h-auto">
-                    <p className="text-sm text-gray-300 mb-4 text-center">{t('subscribe_prompt')}</p>
-                  </ScrollReveal>
-                  <ScrollReveal delay={180} threshold={0.1} width="w-full" className="h-auto">
-                    <div className="flex items-center justify-center border-b border-white pb-0.5 w-full max-w-[280px] mx-auto">
-                      <input
-                        type="email"
-                        id="footer-subscribe-email"
-                        name="footer-subscribe-email"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        placeholder={t('email_placeholder')}
-                        className="w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[15px] text-center"
-                        style={{ outline: 'none', boxShadow: 'none' }}
-                        onFocus={e => (e.target.style.outline = 'none')}
-                        onBlur={e => (e.target.style.outline = 'none')}
-                      />
-                    </div>
-                  </ScrollReveal>
-                  <ScrollReveal delay={195} threshold={0.1} width="w-full" className="h-auto">
-                    <div className="w-full flex justify-center mt-6">
-                      <button
-                        type="submit"
-                        className="px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-sm font-medium uppercase tracking-[0.25em]"
-                      >
-                        {t('subscribe')}
-                      </button>
-                    </div>
-                  </ScrollReveal>
-                </form>
+                  <NewsletterForm variant="mobile" className="flex flex-col items-center w-full" />
+                </ScrollReveal>
               </div>
             </ScrollReveal>
 
@@ -656,61 +610,7 @@ const Footer = () => {
             {/* Email abonelik formu - sadece desktop'ta */}
             <ScrollReveal delay={150} threshold={0.1} width="w-full lg:w-auto" className="h-auto">
               <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-                <form
-                  onSubmit={async e => {
-                    e.preventDefault()
-                    if (email) {
-                      try {
-                        await subscribeEmail(email)
-                        analytics.trackUserAction('newsletter_subscribe', email)
-                        alert('E-posta aboneliğiniz başarıyla oluşturuldu!')
-                        setEmail('')
-                      } catch (err: any) {
-                        // Özel durum: Local storage'a kaydedildi ama CMS'de görünmüyor
-                        if (err.message === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
-                          alert(
-                            "E-posta aboneliğiniz kaydedildi!\n\nNot: CMS'de görünmesi için .env dosyasına VITE_SANITY_TOKEN ekleyin. Detaylar: README.md"
-                          )
-                          analytics.trackUserAction('newsletter_subscribe', email)
-                          setEmail('')
-                        } else {
-                          alert(err.message || "Bir hata oluştu. Lütfen console'u kontrol edin.")
-                        }
-                      }
-                    }
-                  }}
-                  className="flex w-full lg:w-auto lg:justify-end"
-                >
-                  {/* Input + SUBSCRIBE hizası için ortak alt çizgi */}
-                  <div className="flex items-center w-full lg:w-auto lg:min-w-[320px] lg:ml-auto border-b border-white/80 pb-0.5 gap-2">
-                    <div className="flex-1 min-w-[180px]">
-                      <input
-                        type="email"
-                        id="footer-subscribe-email-inline"
-                        name="footer-subscribe-email-inline"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        placeholder={t('email_placeholder')}
-                        className="w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[14px] text-left"
-                        style={{ outline: 'none', boxShadow: 'none' }}
-                        onFocus={e => {
-                          e.target.style.outline = 'none'
-                          e.target.style.boxShadow = 'none'
-                        }}
-                        onBlur={e => {
-                          e.target.style.outline = 'none'
-                          e.target.style.boxShadow = 'none'
-                        }}
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      className="px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-xs font-medium uppercase tracking-[0.25em]"
-                    >
-                      {t('subscribe')}
-                    </button>
-                  </div>
-                </form>
+                <NewsletterForm variant="desktop" className="flex w-full lg:w-auto lg:justify-end" />
               </div>
             </ScrollReveal>
           </div>
@@ -737,102 +637,10 @@ const Footer = () => {
                   }}
                 >
                   {content.legalLinks
-                    .filter(link => link?.isVisible)
-                    .map((link, index) => {
+                  .filter(link => link?.isVisible)
+                  .map((link, index) => {
                       const url = typeof link?.url === 'string' ? link.url : ''
-                      // Çeviri için direkt kontrol - LocalizedString'i doğrudan işle
-                      let linkText = ''
-
-                      // URL'e göre direkt çeviri döndür (t() fonksiyonuna güvenme)
-                      const getTranslationFromUrl = (url: string, locale: string): string | null => {
-                        const urlLower = url.toLowerCase()
-                        const translations: Record<string, Record<string, string>> = {
-                          '/kvkk': {
-                            tr: 'KVKK Aydınlatma Metni',
-                            en: 'KVKK Disclosure',
-                          },
-                          '/privacy': {
-                            tr: 'Gizlilik Politikası',
-                            en: 'Privacy Policy',
-                          },
-                          '/cookies': {
-                            tr: 'Çerez Politikası',
-                            en: 'Cookie Policy',
-                          },
-                          '/terms': {
-                            tr: 'Kullanım Koşulları',
-                            en: 'Terms of Service',
-                          },
-                          '/legal': {
-                            tr: 'Yasal Bilgiler',
-                            en: 'Legal Information',
-                          },
-                        }
-                        // Tam URL eşleşmesi
-                        if (translations[urlLower]) {
-                          return translations[urlLower][locale] || translations[urlLower]['tr'] || null
-                        }
-                        // URL içinde geçen kelimelere göre
-                        if (urlLower.includes('kvkk')) {
-                          return locale === 'en' ? 'KVKK Disclosure' : 'KVKK Aydınlatma Metni'
-                        }
-                        if (urlLower.includes('privacy')) {
-                          return locale === 'en' ? 'Privacy Policy' : 'Gizlilik Politikası'
-                        }
-                        if (urlLower.includes('cookie')) {
-                          return locale === 'en' ? 'Cookie Policy' : 'Çerez Politikası'
-                        }
-                        if (urlLower.includes('terms')) {
-                          return locale === 'en' ? 'Terms of Service' : 'Kullanım Koşulları'
-                        }
-                        if (urlLower.includes('legal')) {
-                          return locale === 'en' ? 'Legal Information' : 'Yasal Bilgiler'
-                        }
-                        return null
-                      }
-
-                      // Önce URL'e göre direkt çeviri dene (en güvenilir yöntem)
-                      linkText = getTranslationFromUrl(url, locale) || ''
-
-                      // Eğer URL'e göre çeviri bulunamadıysa, link.text'i kullan
-                      if (!linkText || !linkText.trim()) {
-                        if (link.text) {
-                          if (typeof link.text === 'object' && link.text !== null && !Array.isArray(link.text)) {
-                            const textObj = link.text as any
-                            // Locale'e göre direkt değer al - önce mevcut locale
-                            if (locale === 'en') {
-                              linkText = textObj.en || textObj.english || textObj.English || ''
-                              if (!linkText || !linkText.trim()) {
-                                linkText = textObj.tr || textObj.turkish || textObj.Turkish || ''
-                              }
-                            } else {
-                              // locale === 'tr' veya başka bir değer
-                              linkText = textObj.tr || textObj.turkish || textObj.Turkish || ''
-                              if (!linkText || !linkText.trim()) {
-                                linkText = textObj.en || textObj.english || textObj.English || ''
-                              }
-                            }
-                            // Eğer hala boşsa, object'teki ilk geçerli string değeri al
-                            if (!linkText || !linkText.trim()) {
-                              const firstValue = Object.values(textObj).find((v: any) => v && typeof v === 'string' && v.trim())
-                              linkText = (firstValue as string) || ''
-                            }
-                          } else if (typeof link.text === 'string') {
-                            // String ise, URL'e göre çeviri dene (tekrar)
-                            const urlTranslation = getTranslationFromUrl(url, locale)
-                            if (urlTranslation) {
-                              linkText = urlTranslation
-                            } else {
-                              // URL'e göre çeviri yoksa, t() fonksiyonunu dene
-                              linkText = t(link.text)
-                              // Eğer çeviri bulunamazsa, orijinal string'i kullan (son çare)
-                              if (!linkText || linkText === link.text || linkText.trim() === '') {
-                                linkText = link.text
-                              }
-                            }
-                          }
-                        }
-                      }
+                      const linkText = resolveLegalLinkText(link, locale, t)
 
                       if (!url) {
                         return (

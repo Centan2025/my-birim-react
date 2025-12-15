@@ -7,6 +7,7 @@ import {useTranslation} from '../i18n'
 import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useNews} from '../src/hooks/useNews'
 import {useSiteSettings} from '../src/hooks/useSiteData'
+import {useSEO} from '../src/hooks/useSEO'
 
 const formatDate = (dateString: string): string => {
   if (!dateString) return ''
@@ -33,6 +34,8 @@ const NewsCard: React.FC<{item: NewsItem}> = ({item}) => {
         srcDesktop={typeof item.mainImage === 'object' ? item.mainImage.urlDesktop : undefined}
         alt={t(item.title)}
         className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-[1.03] ${imageBorderClass}`}
+        width={800}
+        height={1000}
         loading="lazy"
         quality={85}
       />
@@ -48,6 +51,16 @@ const NewsCard: React.FC<{item: NewsItem}> = ({item}) => {
 export function NewsPage() {
   const {data: news = [], isLoading: loading} = useNews()
   const {t} = useTranslation()
+
+  // SEO meta
+  useSEO({
+    title: `BIRIM - ${t('news') || 'Haberler'}`,
+    description: 'BIRIM ile ilgili güncel haberler, duyurular ve basın içerikleri',
+    type: 'article',
+    siteName: 'BIRIM',
+    locale: 'tr_TR',
+    section: 'News',
+  })
 
   if (loading) {
     return (

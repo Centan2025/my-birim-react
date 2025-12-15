@@ -833,6 +833,8 @@ export function ProductDetailPage() {
                         srcDesktop={m.urlDesktop}
                         alt={`${t(product.name)} ${index + 1}`}
                         className={`w-full h-full object-contain ${imageBorderClass}`}
+                        width={1600}
+                        height={900}
                         loading="eager"
                         quality={90}
                       />
@@ -1034,7 +1036,7 @@ export function ProductDetailPage() {
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2.2"
+                  strokeWidth="1.2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   className="transition-transform duration-500 group-hover:scale-110 md:w-7 md:h-7"

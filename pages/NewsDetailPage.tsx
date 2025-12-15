@@ -8,6 +8,8 @@ import {useTranslation} from '../i18n'
 import {useNewsItem, useNews} from '../src/hooks/useNews'
 import {useSiteSettings} from '../src/hooks/useSiteData'
 import {analytics} from '../src/lib/analytics'
+import {useSEO} from '../src/hooks/useSEO'
+import {addStructuredData, getArticleSchema} from '../src/lib/seo'
 
 const getYouTubeId = (url: string): string | null => {
   if (!url) return null
@@ -162,17 +164,31 @@ export function NewsDetailPage() {
     return {prevNews: prev, nextNews: next}
   }, [item, allNews])
 
-  // Analytics: haber detay görüntüleme
+  // SEO ve Analytics: haber detay görüntüleme
+  const newsTitle = item ? t(item.title) : ''
+  const newsDescription = item ? t(item.content) || newsTitle : ''
+  const mainImageUrl =
+    item && typeof item.mainImage === 'string'
+      ? item.mainImage
+      : (item?.mainImage && typeof item.mainImage === 'object' ? item.mainImage.url : '') || undefined
+
+  useSEO({
+    title: newsTitle ? `BIRIM - ${t('news') || 'Haberler'} - ${newsTitle}` : 'BIRIM - Haberler',
+    description: newsDescription || 'BIRIM ile ilgili güncel haberler ve duyurular',
+    image: mainImageUrl,
+    type: 'article',
+    siteName: 'BIRIM',
+    locale: 'tr_TR',
+    section: 'News',
+    publishedTime: item?.date,
+  })
+
   useEffect(() => {
     if (!item) return
     if (typeof window === 'undefined') return
 
-    const title = `HABERLER - ${t(item.title)}`
-    if (typeof document !== 'undefined') {
-      document.title = title
-    }
-
-    analytics.pageview(window.location.pathname, title)
+    const pageTitle = `BIRIM - ${t('news') || 'Haberler'} - ${t(item.title)}`
+    analytics.pageview(window.location.pathname, pageTitle)
 
     analytics.event({
       category: 'news',
@@ -180,6 +196,27 @@ export function NewsDetailPage() {
       label: t(item.title), // ID yerine haber başlığı
     })
   }, [item, t])
+
+  // Structured Data (Article)
+  useEffect(() => {
+    if (!item) return
+
+    const schema = getArticleSchema({
+      headline: newsTitle || t(item.title),
+      description: newsDescription || t(item.content),
+      image: mainImageUrl,
+      datePublished: item.date,
+      author: {
+        name: 'BIRIM',
+      },
+      publisher: {
+        name: 'BIRIM',
+        logo: settings?.logoUrl,
+      },
+    })
+
+    addStructuredData(schema, 'news-article-schema')
+  }, [item, newsTitle, newsDescription, mainImageUrl, settings?.logoUrl])
 
   if (loading) {
     return (
@@ -250,6 +287,8 @@ export function NewsDetailPage() {
               }
               alt={t(item.title)}
               className={`w-full h-auto object-cover mb-6 ${settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'}`}
+              width={1200}
+              height={675}
               loading="eager"
               quality={90}
             />

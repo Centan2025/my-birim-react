@@ -5,6 +5,7 @@ import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
 import {Breadcrumbs} from '../components/Breadcrumbs'
+import {useSEO} from '../src/hooks/useSEO'
 
 const CrossFadeText: React.FC<{text: string; triggerKey: number}> = ({text, triggerKey}) => {
   const [currentText, setCurrentText] = useState(text)
@@ -59,6 +60,19 @@ export function AboutPage() {
   const identityBtnRef = useRef<HTMLButtonElement | null>(null)
   const qualityBtnRef = useRef<HTMLButtonElement | null>(null)
   const [indicatorStyle, setIndicatorStyle] = useState<{left: number; width: number} | null>(null)
+
+  // SEO - hook'lar her zaman en üstte ve koşulsuz olmalı
+  useSEO({
+    title: `BIRIM - ${t('about') || 'Hakkımızda'}`,
+    description:
+      (content && (t(content.heroSubtitle) || t(content.storyTitle))) ||
+      'BIRIM hakkında bilgiler',
+    image: content?.heroImage,
+    type: 'article',
+    siteName: 'BIRIM',
+    locale: 'tr_TR',
+    section: 'About',
+  })
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -138,6 +152,8 @@ export function AboutPage() {
               src={content.heroImage}
               alt={t(content.heroTitle)}
               className="w-full h-full object-cover opacity-40"
+              width={1920}
+              height={800}
               loading="eager"
               quality={90}
             />

@@ -1,0 +1,256 @@
+import React from 'react'
+import { Link } from 'react-router-dom'
+
+import { ContentBlock } from '../types'
+import { useTranslation } from '../i18n'
+import ScrollReveal from './ScrollReveal'
+import { OptimizedImage } from './OptimizedImage'
+import { OptimizedVideo } from './OptimizedVideo'
+import { YouTubeBackground } from './YouTubeBackground'
+
+interface HomeContentBlocksProps {
+  blocks: ContentBlock[]
+  isMobile: boolean
+  imageBorderClass: string
+}
+
+export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
+  blocks,
+  isMobile,
+  imageBorderClass,
+}) => {
+  const { t } = useTranslation()
+
+  if (!blocks || blocks.length === 0) {
+    return null
+  }
+
+  const sortedBlocks = [...blocks].sort((a, b) => (a.order || 0) - (b.order || 0))
+
+  return (
+    <>
+      {sortedBlocks.map((block, index) => {
+        const getMediaUrl = () => {
+          if (block.mediaType === 'image' && block.image) {
+            return block.image
+          }
+          return block.url || ''
+        }
+
+        const mediaUrl = getMediaUrl()
+        const isFullWidth = block.position === 'full'
+        const isLeft = block.position === 'left'
+        const isRight = block.position === 'right'
+        const isCenter = block.position === 'center'
+
+        const backgroundColor = block.backgroundColor === 'gray' ? 'bg-gray-100' : 'bg-white'
+        const textAlign = block.textAlignment || 'left'
+        const textAlignClass =
+          textAlign === 'center'
+            ? 'text-center'
+            : textAlign === 'right'
+              ? 'text-right'
+              : 'text-left'
+        const titleFont = block.titleFont || 'normal'
+
+        // Font class veya style belirle
+        const titleFontClass =
+          titleFont === 'serif'
+            ? 'font-serif'
+            : titleFont === 'mono'
+              ? 'font-mono'
+              : titleFont === 'normal'
+                ? 'font-sans'
+                : '' // Google Font için class yok, inline style kullanacağız
+
+        // Google Font için inline style
+        const titleFontStyle =
+          titleFont && titleFont !== 'normal' && titleFont !== 'serif' && titleFont !== 'mono'
+            ? { fontFamily: `"${titleFont}", sans-serif` }
+            : undefined
+
+        return (
+          <section
+            key={index}
+            className={`content-block-wrapper ${
+              index === 0 ? 'pt-0 pb-0' : index === 1 ? 'pt-0 pb-20' : 'py-20'
+            } ${backgroundColor}`}
+            data-block-index={index}
+          >
+            {isFullWidth ? (
+              <div className="w-full overflow-hidden">
+                {block.title && (
+                  <div className="container mx-auto px-2 sm:px-3 lg:px-4 pt-6 md:pt-8 pb-6 md:pb-8">
+                    <ScrollReveal
+                      delay={0}
+                      threshold={0.1}
+                      width="w-full"
+                      className="h-auto"
+                      distance={50}
+                      duration={0.6}
+                    >
+                      <h2
+                        className={`text-2xl md:text-4xl lg:text-5xl font-bold ${titleFontClass} ${textAlignClass} text-gray-950`}
+                        style={titleFontStyle}
+                      >
+                        {t(block.title)}
+                      </h2>
+                    </ScrollReveal>
+                  </div>
+                )}
+                <ScrollReveal delay={50} threshold={0.1} width="w-full" className="h-auto">
+                  {block.mediaType === 'youtube' ? (
+                    <div className="relative w-full aspect-video overflow-hidden">
+                      <YouTubeBackground url={mediaUrl} />
+                    </div>
+                  ) : block.mediaType === 'video' ? (
+                    <OptimizedVideo
+                      src={mediaUrl}
+                      className={`w-full h-auto max-w-full ${
+                        isMobile ? 'object-contain' : 'object-cover'
+                      }`}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      preload="auto"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <OptimizedImage
+                      src={mediaUrl}
+                      alt=""
+                      className={`w-full h-auto ${
+                        isMobile ? 'object-contain' : 'object-cover'
+                      } max-w-full block`}
+                      loading="lazy"
+                      quality={85}
+                    />
+                  )}
+                </ScrollReveal>
+                {block.description && (
+                  <div className="container mx-auto px-2 sm:px-3 lg:px-4 py-12">
+                    <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
+                      <div className={`prose max-w-none ${textAlignClass}`}>
+                        <p className="text-lg md:text-xl text-gray-950 font-light leading-relaxed">
+                          {t(block.description)}
+                        </p>
+                      </div>
+                    </ScrollReveal>
+                    {block.linkText && block.linkUrl && (
+                      <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto">
+                        <div className={`mt-6 ${textAlignClass}`}>
+                          <Link
+                            to={block.linkUrl}
+                            className="group inline-flex items-center gap-x-3 text-gray-950 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
+                          >
+                            <span className="inline-flex items-end gap-x-3 border-b border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
+                              <span className="group-hover:text-gray-500 leading-none">
+                                {t(block.linkText)}
+                              </span>
+                              <span className="w-8 h-[1px] md:w-10 bg-current" />
+                            </span>
+                          </Link>
+                        </div>
+                      </ScrollReveal>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="container mx-auto px-2 sm:px-3 lg:px-4">
+                {block.title && (
+                  <div className={`pt-6 md:pt-8 pb-6 md:pb-8 ${textAlignClass}`}>
+                    <ScrollReveal
+                      delay={0}
+                      threshold={0.1}
+                      width="w-full"
+                      className="h-auto"
+                      distance={50}
+                      duration={0.6}
+                    >
+                      <h2
+                        className={`text-2xl md:text-4xl lg:text-5xl font-bold ${titleFontClass} text-gray-950`}
+                        style={titleFontStyle}
+                      >
+                        {t(block.title)}
+                      </h2>
+                    </ScrollReveal>
+                  </div>
+                )}
+                <div
+                  className={`flex flex-col ${
+                    isLeft ? 'md:flex-row' : isRight ? 'md:flex-row-reverse' : 'md:flex-row items-center'
+                  } gap-12`}
+                >
+                  <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'} overflow-visible`}>
+                    <ScrollReveal delay={50} threshold={0.1} width="w-full" className="h-auto">
+                      {block.mediaType === 'youtube' ? (
+                        <div className="relative w-full aspect-video overflow-hidden">
+                          <YouTubeBackground url={mediaUrl} />
+                        </div>
+                      ) : block.mediaType === 'video' ? (
+                        <OptimizedVideo
+                          src={mediaUrl}
+                          className={`w-full h-auto ${imageBorderClass} max-w-full ${
+                            isMobile ? 'object-contain' : 'object-cover'
+                          }`}
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          preload="auto"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <OptimizedImage
+                          src={mediaUrl}
+                          alt=""
+                          className={`w-full h-auto ${imageBorderClass} ${
+                            isMobile ? 'object-contain' : 'object-cover'
+                          } max-w-full block`}
+                          loading="lazy"
+                          quality={85}
+                        />
+                      )}
+                    </ScrollReveal>
+                  </div>
+                  {block.description && (
+                    <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'}`}>
+                      <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
+                        <div className={`prose max-w-none ${textAlignClass}`}>
+                          <p className="text-lg md:text-xl text-gray-950 font-light leading-relaxed">
+                            {t(block.description)}
+                          </p>
+                        </div>
+                      </ScrollReveal>
+                      {block.linkText && block.linkUrl && (
+                        <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto">
+                          <div className={`mt-6 ${textAlignClass}`}>
+                            <Link
+                              to={block.linkUrl}
+                              className="group inline-flex items-center gap-x-3 text-gray-950 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
+                            >
+                              <span className="inline-flex items-end gap-x-3 border-b border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
+                                <span className="group-hover:text-gray-500 leading-none">
+                                  {t(block.linkText)}
+                                </span>
+                                <span className="w-8 h-[1px] md:w-10 bg-current" />
+                              </span>
+                            </Link>
+                          </div>
+                        </ScrollReveal>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </section>
+        )
+      })}
+    </>
+  )
+}
+
+

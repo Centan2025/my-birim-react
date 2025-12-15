@@ -10,6 +10,7 @@ import {useCategory, useCategories} from '../src/hooks/useCategories'
 import {useSiteSettings} from '../src/hooks/useSiteData'
 import type {Product} from '../types'
 import ScrollReveal from '../components/ScrollReveal'
+import {useSEO} from '../src/hooks/useSEO'
 
 const ChevronDownIcon = () => (
   <svg
@@ -127,6 +128,24 @@ export function ProductsPage() {
     }
     return sorted
   }, [products, sortBy, t, categoryId, allProducts, categories])
+
+  // SEO meta
+  const categoryName = category ? t(category.name) : ''
+  const pageTitle = categoryName || t('products') || 'Ürünler'
+  const pageDescription = category
+    ? t(category.subtitle) || pageTitle
+    : t('all_products_subtitle') || pageTitle
+  const heroImageUrl = category?.heroImage
+
+  useSEO({
+    title: `BIRIM - ${pageTitle}`,
+    description: pageDescription,
+    image: heroImageUrl,
+    type: 'website',
+    siteName: 'BIRIM',
+    locale: 'tr_TR',
+    section: 'Products',
+  })
 
   if (loading) {
     return (
