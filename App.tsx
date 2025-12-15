@@ -630,7 +630,8 @@ const Footer = () => {
             </div>
           </div>
           {/* Sosyal medya linkleri ve email formu - aynı üst hizasında */}
-          <div className="mt-8 flex flex-col lg:flex-row flex-wrap items-center lg:items-start justify-center lg:justify-start gap-6 lg:gap-12">
+          {/* Sosyal medya linkleri ve email formu - Desktop'ta justify-between ile ayrılır */}
+          <div className="mt-8 flex flex-col lg:flex-row flex-wrap items-center lg:items-start justify-center lg:justify-between gap-6 lg:gap-0">
             {/* Sosyal medya linkleri */}
             <ScrollReveal delay={120} threshold={0.1} width="w-auto" className="h-auto">
               <div className="w-full lg:w-auto flex justify-center lg:justify-start space-x-6">
@@ -733,6 +734,18 @@ const Footer = () => {
                   <style>
                     {`
                       @media (max-width: 767px) {
+                        /* Force the row/border container to be full width and properly aligned */
+                        .legal-links-row {
+                          width: 100% !important;
+                          max-width: 100% !important;
+                          display: flex !important;
+                          flex-direction: column !important;
+                          align-items: center !important;
+                          justify-content: center !important;
+                          border-top-width: 1px !important;
+                          border-top-style: solid !important;
+                          margin-left: 0 !important;
+                        }
                         #mobile-legal-links-stack {
                           display: flex !important;
                           flex-direction: column !important;
