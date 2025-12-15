@@ -7,63 +7,63 @@ import React, {
   Suspense,
   lazy,
 } from 'react'
-import {HashRouter, Routes, Route, useLocation, Link} from 'react-router-dom'
+import { HashRouter, Routes, Route, useLocation, Link } from 'react-router-dom'
 
-import {Header} from './components/Header'
-import {getFooterContent, getSiteSettings, subscribeEmail} from './services/cms'
-import type {FooterContent, SiteSettings, User} from './types'
-import {SiteLogo} from './components/SiteLogo'
-import {I18nProvider, useTranslation} from './i18n'
-import {CartProvider} from './context/CartContext'
-import {CartSidebar} from './components/CartSidebar'
+import { Header } from './components/Header'
+import { getFooterContent, getSiteSettings, subscribeEmail } from './services/cms'
+import type { FooterContent, SiteSettings, User } from './types'
+import { SiteLogo } from './components/SiteLogo'
+import { I18nProvider, useTranslation } from './i18n'
+import { CartProvider } from './context/CartContext'
+import { CartSidebar } from './components/CartSidebar'
 import CookieBanner from './components/CookieBanner'
-import {SkipLink} from './components/SkipLink'
-import {errorReporter} from './src/lib/errorReporting'
-import {analytics} from './src/lib/analytics'
-import {QueryClientProvider} from '@tanstack/react-query'
-import {queryClient} from './src/lib/queryClient'
+import { SkipLink } from './components/SkipLink'
+import { errorReporter } from './src/lib/errorReporting'
+import { analytics } from './src/lib/analytics'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { queryClient } from './src/lib/queryClient'
 import ScrollReveal from './components/ScrollReveal'
 
 // Lazy load pages for code splitting
-const HomePage = lazy(() => import('./pages/HomePage').then(m => ({default: m.HomePage})))
+const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })))
 const CategoriesPage = lazy(() =>
-  import('./pages/CategoriesPage').then(m => ({default: m.CategoriesPage}))
+  import('./pages/CategoriesPage').then(m => ({ default: m.CategoriesPage }))
 )
 const ProductsPage = lazy(() =>
-  import('./pages/ProductsPage').then(m => ({default: m.ProductsPage}))
+  import('./pages/ProductsPage').then(m => ({ default: m.ProductsPage }))
 )
 const ProductDetailPage = lazy(() =>
-  import('./pages/ProductDetailPage').then(m => ({default: m.ProductDetailPage}))
+  import('./pages/ProductDetailPage').then(m => ({ default: m.ProductDetailPage }))
 )
 const DesignersPage = lazy(() =>
-  import('./pages/DesignersPage').then(m => ({default: m.DesignersPage}))
+  import('./pages/DesignersPage').then(m => ({ default: m.DesignersPage }))
 )
 const DesignerDetailPage = lazy(() =>
-  import('./pages/DesignerDetailPage').then(m => ({default: m.DesignerDetailPage}))
+  import('./pages/DesignerDetailPage').then(m => ({ default: m.DesignerDetailPage }))
 )
-const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({default: m.AboutPage})))
-const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({default: m.ContactPage})))
-const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({default: m.LoginPage})))
-const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({default: m.ProfilePage})))
-const NewsPage = lazy(() => import('./pages/NewsPage').then(m => ({default: m.NewsPage})))
+const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })))
+const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })))
+const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })))
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })))
+const NewsPage = lazy(() => import('./pages/NewsPage').then(m => ({ default: m.NewsPage })))
 const NewsDetailPage = lazy(() =>
-  import('./pages/NewsDetailPage').then(m => ({default: m.NewsDetailPage}))
+  import('./pages/NewsDetailPage').then(m => ({ default: m.NewsDetailPage }))
 )
 const CookiesPage = lazy(() => import('./pages/CookiesPage'))
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
 const TermsPage = lazy(() => import('./pages/TermsPage'))
 const KvkkPage = lazy(() => import('./pages/KvkkPage'))
 const ProjectsPage = lazy(() =>
-  import('./pages/ProjectsPage').then(m => ({default: m.ProjectsPage}))
+  import('./pages/ProjectsPage').then(m => ({ default: m.ProjectsPage }))
 )
 const ProjectDetailPage = lazy(() =>
-  import('./pages/ProjectDetailPage').then(m => ({default: m.ProjectDetailPage}))
+  import('./pages/ProjectDetailPage').then(m => ({ default: m.ProjectDetailPage }))
 )
 const VerifyEmailPage = lazy(() =>
-  import('./pages/VerifyEmailPage').then(m => ({default: m.VerifyEmailPage}))
+  import('./pages/VerifyEmailPage').then(m => ({ default: m.VerifyEmailPage }))
 )
 const ComingSoonPage = lazy(() =>
-  import('./pages/ComingSoonPage').then(m => ({default: m.ComingSoonPage}))
+  import('./pages/ComingSoonPage').then(m => ({ default: m.ComingSoonPage }))
 )
 
 // Loading fallback component
@@ -77,8 +77,8 @@ const PageLoader = () => (
 )
 
 // Helper component to render SVG strings safely
-const DynamicIcon: React.FC<{svgString: string}> = ({svgString}) => (
-  <div dangerouslySetInnerHTML={{__html: svgString}} />
+const DynamicIcon: React.FC<{ svgString: string }> = ({ svgString }) => (
+  <div dangerouslySetInnerHTML={{ __html: svgString }} />
 )
 
 interface AuthContextType {
@@ -112,7 +112,7 @@ export function useSiteSettings() {
   return context
 }
 
-const SiteSettingsProvider = ({children}: PropsWithChildren) => {
+const SiteSettingsProvider = ({ children }: PropsWithChildren) => {
   const [settings, setSettings] = useState<SiteSettings | null>(null)
 
   useEffect(() => {
@@ -130,10 +130,10 @@ const SiteSettingsProvider = ({children}: PropsWithChildren) => {
     }
   }, [settings?.topBannerText])
 
-  return <SiteSettingsContext.Provider value={{settings}}>{children}</SiteSettingsContext.Provider>
+  return <SiteSettingsContext.Provider value={{ settings }}>{children}</SiteSettingsContext.Provider>
 }
 
-const AuthProvider = ({children}: PropsWithChildren) => {
+const AuthProvider = ({ children }: PropsWithChildren) => {
   const [user, setUser] = useState<User | null>(null)
 
   // Load user from localStorage on mount
@@ -201,8 +201,8 @@ const AuthProvider = ({children}: PropsWithChildren) => {
 }
 
 const ScrollToTop = () => {
-  const {pathname} = useLocation()
-  const {t} = useTranslation()
+  const { pathname } = useLocation()
+  const { t } = useTranslation()
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -297,7 +297,7 @@ const BackToTopButton: React.FC = () => {
     }
 
     handleScroll()
-    window.addEventListener('scroll', handleScroll, {passive: true})
+    window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -306,7 +306,7 @@ const BackToTopButton: React.FC = () => {
   return (
     <button
       type="button"
-      onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       aria-label="Sayfanın en üstüne dön"
       className="fixed bottom-6 right-6 z-40 w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-full bg-black/40 text-white shadow-md backdrop-blur hover:bg-black/60 transition-all duration-200"
     >
@@ -322,7 +322,7 @@ const Footer = () => {
   const [content, setContent] = useState<FooterContent | null>(null)
   const [settings, setSettings] = useState<SiteSettings | null>(null)
   const [email, setEmail] = useState('')
-  const {t, setLocale, locale, supportedLocales} = useTranslation()
+  const { t, setLocale, locale, supportedLocales } = useTranslation()
 
   useEffect(() => {
     Promise.all([getFooterContent(), getSiteSettings()]).then(([footerData, settingsData]) => {
@@ -335,211 +335,165 @@ const Footer = () => {
 
   return (
     <>
-      <footer 
+      <footer
         className="bg-gray-800 text-gray-400"
-        style={{position: 'relative', zIndex: 1}}
+        style={{ position: 'relative', zIndex: 1 }}
       >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6 lg:py-12" style={{overflow: 'visible'}}>
-        {/* Mobil düzen */}
-        <div className="lg:hidden flex flex-col items-center space-y-6">
-          {/* Logo - ortada üstte */}
-          <ScrollReveal delay={0} threshold={0.1} width="w-full" className="h-auto">
-            <Link to="/" className="text-white">
-              <SiteLogo logoUrl={settings.logoUrl} className="h-6 w-auto mx-auto" />
-            </Link>
-          </ScrollReveal>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6 lg:py-12" style={{ overflow: 'visible' }}>
+          {/* Mobil düzen */}
+          <div className="lg:hidden flex flex-col items-center space-y-6">
+            {/* Logo - ortada üstte */}
+            <ScrollReveal delay={0} threshold={0.1} width="w-full" className="h-auto">
+              <Link to="/" className="text-white flex justify-center w-full">
+                <SiteLogo logoUrl={settings.logoUrl} className="h-6 w-auto mx-auto" />
+              </Link>
+            </ScrollReveal>
 
-          {/* Menü düğmeleri - alt alta ortada */}
-          <nav className="flex flex-col items-center space-y-3 w-full">
-            <ScrollReveal delay={15} threshold={0.1} width="w-full" className="h-auto">
-              <Link
-                to="/products"
-                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
-              >
-                {t('view_all')}
-              </Link>
-            </ScrollReveal>
-            <ScrollReveal delay={30} threshold={0.1} width="w-full" className="h-auto">
-              <Link
-                to="/designers"
-                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
-              >
-                {t('designers')}
-              </Link>
-            </ScrollReveal>
-            <ScrollReveal delay={45} threshold={0.1} width="w-full" className="h-auto">
-              <Link
-                to="/projects"
-                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
-              >
-                {t('projects') || 'Projeler'}
-              </Link>
-            </ScrollReveal>
-            <ScrollReveal delay={60} threshold={0.1} width="w-full" className="h-auto">
-              <Link
-                to="/news"
-                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
-              >
-                {t('news')}
-              </Link>
-            </ScrollReveal>
-            <ScrollReveal delay={75} threshold={0.1} width="w-full" className="h-auto">
-              <Link
-                to="/about"
-                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
-              >
-                {t('about')}
-              </Link>
-            </ScrollReveal>
-            <ScrollReveal delay={90} threshold={0.1} width="w-full" className="h-auto">
-              <Link
-                to="/contact"
-                className="block text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 text-center w-full"
-              >
-                {t('contact')}
-              </Link>
-            </ScrollReveal>
-          </nav>
+            {/* Menü düğmeleri - alt alta ortada */}
+            <nav className="flex flex-col items-center space-y-3 w-full">
+              <ScrollReveal delay={15} threshold={0.1} width="w-full" className="h-auto">
+                <Link
+                  to="/products"
+                  className="flex justify-center items-center text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
+                >
+                  {t('view_all')}
+                </Link>
+              </ScrollReveal>
+              <ScrollReveal delay={30} threshold={0.1} width="w-full" className="h-auto">
+                <Link
+                  to="/designers"
+                  className="flex justify-center items-center text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
+                >
+                  {t('designers')}
+                </Link>
+              </ScrollReveal>
+              <ScrollReveal delay={45} threshold={0.1} width="w-full" className="h-auto">
+                <Link
+                  to="/projects"
+                  className="flex justify-center items-center text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
+                >
+                  {t('projects') || 'Projeler'}
+                </Link>
+              </ScrollReveal>
+              <ScrollReveal delay={60} threshold={0.1} width="w-full" className="h-auto">
+                <Link
+                  to="/news"
+                  className="flex justify-center items-center text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
+                >
+                  {t('news')}
+                </Link>
+              </ScrollReveal>
+              <ScrollReveal delay={75} threshold={0.1} width="w-full" className="h-auto">
+                <Link
+                  to="/about"
+                  className="flex justify-center items-center text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
+                >
+                  {t('about')}
+                </Link>
+              </ScrollReveal>
+              <ScrollReveal delay={90} threshold={0.1} width="w-full" className="h-auto">
+                <Link
+                  to="/contact"
+                  className="flex justify-center items-center text-sm font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
+                >
+                  {t('contact')}
+                </Link>
+              </ScrollReveal>
+            </nav>
 
-          {/* İnce çizgi */}
-          <ScrollReveal delay={105} threshold={0.1} width="w-full" className="h-auto">
-            <div className="w-full border-t border-gray-700"></div>
-          </ScrollReveal>
+            {/* İnce çizgi */}
+            <ScrollReveal delay={105} threshold={0.1} width="w-full" className="h-auto">
+              <div className="w-full border-t border-gray-700"></div>
+            </ScrollReveal>
 
-          {/* Dil seçenekleri */}
-          <ScrollReveal delay={120} threshold={0.1} width="w-full" className="h-auto">
-            <div className="flex items-center justify-center gap-3 w-full">
-              {supportedLocales.map((langCode) => {
-                const isActive = locale === langCode
-                return (
-                  <button
-                    key={langCode}
-                    onClick={() => setLocale(langCode)}
-                    className={`text-xs uppercase tracking-wider transition-colors duration-200 ${isActive ? 'text-white font-bold' : 'text-gray-400 hover:text-white font-thin'
-                      }`}
-                  >
-                    {langCode.toUpperCase()}
-                  </button>
-                )
-              })}
-            </div>
-          </ScrollReveal>
-
-          {/* İnce çizgi */}
-          <ScrollReveal delay={135} threshold={0.1} width="w-full" className="h-auto">
-            <div className="w-full border-t border-gray-700"></div>
-          </ScrollReveal>
-
-          {/* Email abonelik formu - mobilde en altta ortalanmış */}
-          <ScrollReveal delay={150} threshold={0.1} width="w-full" className="h-auto">
-            <div className="w-full flex justify-center !mt-8 lg:!mt-6">
-              <form
-                onSubmit={async e => {
-                  e.preventDefault()
-                  if (email) {
-                    try {
-                      await subscribeEmail(email)
-                      analytics.trackUserAction('newsletter_subscribe', email)
-                      alert('E-posta aboneliğiniz başarıyla oluşturuldu!')
-                      setEmail('')
-                    } catch (err: any) {
-                      // Özel durum: Local storage'a kaydedildi ama CMS'de görünmüyor
-                      if (err.message === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
-                        alert(
-                          "E-posta aboneliğiniz kaydedildi!\n\nNot: CMS'de görünmesi için .env dosyasına VITE_SANITY_TOKEN ekleyin. Detaylar: README.md"
-                        )
-                        analytics.trackUserAction('newsletter_subscribe', email)
-                        setEmail('')
-                      } else {
-                        alert(err.message || "Bir hata oluştu. Lütfen console'u kontrol edin.")
-                      }
-                    }
-                  }
-                }}
-                className="flex flex-col items-center justify-center w-full"
-              >
-                <ScrollReveal delay={165} threshold={0.1} width="w-full" className="h-auto">
-                  <p className="text-sm text-gray-300 mb-4 text-center">{t('subscribe_prompt')}</p>
-                </ScrollReveal>
-                <ScrollReveal delay={180} threshold={0.1} width="w-full" className="h-auto">
-                  <div className="flex items-center justify-center border-b border-white pb-0.5 w-full max-w-[280px] mx-auto">
-                    <input
-                      type="email"
-                      id="footer-subscribe-email"
-                      name="footer-subscribe-email"
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      placeholder={t('email_placeholder')}
-                      className="w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[15px] text-center"
-                      style={{outline: 'none', boxShadow: 'none'}}
-                      onFocus={e => (e.target.style.outline = 'none')}
-                      onBlur={e => (e.target.style.outline = 'none')}
-                    />
-                  </div>
-                </ScrollReveal>
-                <ScrollReveal delay={195} threshold={0.1} width="w-full" className="h-auto">
-                  <div className="w-full flex justify-center mt-6">
+            {/* Dil seçenekleri */}
+            <ScrollReveal delay={120} threshold={0.1} width="w-full" className="h-auto">
+              <div className="flex items-center justify-center gap-3 w-full">
+                {supportedLocales.map((langCode) => {
+                  const isActive = locale === langCode
+                  return (
                     <button
-                      type="submit"
-                      className="px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-sm font-medium uppercase tracking-[0.25em]"
+                      key={langCode}
+                      onClick={() => setLocale(langCode)}
+                      className={`text-xs uppercase tracking-wider transition-colors duration-200 ${isActive ? 'text-white font-bold' : 'text-gray-400 hover:text-white font-thin'
+                        }`}
                     >
-                      {t('subscribe')}
+                      {langCode.toUpperCase()}
                     </button>
-                  </div>
-                </ScrollReveal>
-              </form>
-            </div>
-          </ScrollReveal>
-
-          {/* Partnerler - mobilde en altta */}
-          <ScrollReveal delay={210} threshold={0.1} width="w-full" className="h-auto">
-            <div className="flex items-center justify-center flex-wrap gap-6 mb-0">
-              {(content.partners || content.partnerNames || []).map((partner, index) => {
-                const partnerName = typeof partner === 'string' ? partner : t(partner.name)
-                const partnerLogo = typeof partner === 'object' ? partner.logo : undefined
-                const partnerUrl = typeof partner === 'object' ? partner.url : undefined
-
-                const partnerContent = partnerLogo ? (
-                  <img
-                    src={partnerLogo}
-                    alt={partnerName}
-                    className="h-8 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
-                  />
-                ) : (
-                  <span className="font-semibold text-gray-300 opacity-70 hover:opacity-100 transition-opacity duration-200">
-                    {partnerName}
-                  </span>
-                )
-
-                return partnerUrl ? (
-                  <a
-                    key={index}
-                    href={partnerUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group"
-                  >
-                    {partnerContent}
-                  </a>
-                ) : (
-                  <span key={index}>{partnerContent}</span>
-                )
-              })}
-            </div>
-          </ScrollReveal>
-        </div>
-
-        {/* Desktop düzen */}
-        <div className="hidden lg:flex flex-wrap items-start gap-8 lg:gap-16">
-          {/* Sol taraf: Logo ve partner yazıları (sola hizalı) */}
-          <div className="w-full lg:w-auto">
-            <ScrollReveal delay={0} threshold={0.1} width="w-auto" className="h-auto">
-              <div className="text-white mb-4">
-                <SiteLogo logoUrl={settings.logoUrl} className="h-4 w-auto" />
+                  )
+                })}
               </div>
             </ScrollReveal>
-            <ScrollReveal delay={15} threshold={0.1} width="w-full" className="h-auto">
-              <div className="flex items-center flex-wrap gap-6 mb-4">
+
+            {/* İnce çizgi */}
+            <ScrollReveal delay={135} threshold={0.1} width="w-full" className="h-auto">
+              <div className="w-full border-t border-gray-700"></div>
+            </ScrollReveal>
+
+            {/* Email abonelik formu - mobilde en altta ortalanmış */}
+            <ScrollReveal delay={150} threshold={0.1} width="w-full" className="h-auto">
+              <div className="w-full flex justify-center !mt-8 lg:!mt-6">
+                <form
+                  onSubmit={async e => {
+                    e.preventDefault()
+                    if (email) {
+                      try {
+                        await subscribeEmail(email)
+                        analytics.trackUserAction('newsletter_subscribe', email)
+                        alert('E-posta aboneliğiniz başarıyla oluşturuldu!')
+                        setEmail('')
+                      } catch (err: any) {
+                        // Özel durum: Local storage'a kaydedildi ama CMS'de görünmüyor
+                        if (err.message === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
+                          alert(
+                            "E-posta aboneliğiniz kaydedildi!\n\nNot: CMS'de görünmesi için .env dosyasına VITE_SANITY_TOKEN ekleyin. Detaylar: README.md"
+                          )
+                          analytics.trackUserAction('newsletter_subscribe', email)
+                          setEmail('')
+                        } else {
+                          alert(err.message || "Bir hata oluştu. Lütfen console'u kontrol edin.")
+                        }
+                      }
+                    }
+                  }}
+                  className="flex flex-col items-center justify-center w-full"
+                >
+                  <ScrollReveal delay={165} threshold={0.1} width="w-full" className="h-auto">
+                    <p className="text-sm text-gray-300 mb-4 text-center">{t('subscribe_prompt')}</p>
+                  </ScrollReveal>
+                  <ScrollReveal delay={180} threshold={0.1} width="w-full" className="h-auto">
+                    <div className="flex items-center justify-center border-b border-white pb-0.5 w-full max-w-[280px] mx-auto">
+                      <input
+                        type="email"
+                        id="footer-subscribe-email"
+                        name="footer-subscribe-email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        placeholder={t('email_placeholder')}
+                        className="w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[15px] text-center"
+                        style={{ outline: 'none', boxShadow: 'none' }}
+                        onFocus={e => (e.target.style.outline = 'none')}
+                        onBlur={e => (e.target.style.outline = 'none')}
+                      />
+                    </div>
+                  </ScrollReveal>
+                  <ScrollReveal delay={195} threshold={0.1} width="w-full" className="h-auto">
+                    <div className="w-full flex justify-center mt-6">
+                      <button
+                        type="submit"
+                        className="px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-sm font-medium uppercase tracking-[0.25em]"
+                      >
+                        {t('subscribe')}
+                      </button>
+                    </div>
+                  </ScrollReveal>
+                </form>
+              </div>
+            </ScrollReveal>
+
+            {/* Partnerler - mobilde en altta */}
+            <ScrollReveal delay={210} threshold={0.1} width="w-full" className="h-auto">
+              <div className="flex items-center justify-center flex-wrap gap-6 mb-0">
                 {(content.partners || content.partnerNames || []).map((partner, index) => {
                   const partnerName = typeof partner === 'string' ? partner : t(partner.name)
                   const partnerLogo = typeof partner === 'object' ? partner.logo : undefined
@@ -575,334 +529,380 @@ const Footer = () => {
             </ScrollReveal>
           </div>
 
-          {/* Orta: Menü düğmeleri (sağa hizalı üstte) */}
-          <div className="flex-1 flex justify-end">
-            <nav className="flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold uppercase tracking-wider text-gray-300 items-center justify-end">
-              <ScrollReveal delay={30} threshold={0.1} width="w-auto" className="h-auto">
-                <Link to="/products" className="group relative hover:text-white">
-                  <span className="relative inline-block">
-                    {t('view_all')}
-                    <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
-                  </span>
-                </Link>
-              </ScrollReveal>
-              <ScrollReveal delay={45} threshold={0.1} width="w-auto" className="h-auto">
-                <Link to="/designers" className="group relative hover:text-white">
-                  <span className="relative inline-block">
-                    {t('designers')}
-                    <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
-                  </span>
-                </Link>
-              </ScrollReveal>
-              <ScrollReveal delay={60} threshold={0.1} width="w-auto" className="h-auto">
-                <Link to="/projects" className="group relative hover:text-white">
-                  <span className="relative inline-block">
-                    {t('projects') || 'Projeler'}
-                    <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
-                  </span>
-                </Link>
-              </ScrollReveal>
-              <ScrollReveal delay={75} threshold={0.1} width="w-auto" className="h-auto">
-                <Link to="/news" className="group relative hover:text-white">
-                  <span className="relative inline-block">
-                    {t('news')}
-                    <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
-                  </span>
-                </Link>
-              </ScrollReveal>
-              <ScrollReveal delay={90} threshold={0.1} width="w-auto" className="h-auto">
-                <Link to="/about" className="group relative hover:text-white">
-                  <span className="relative inline-block">
-                    {t('about')}
-                    <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
-                  </span>
-                </Link>
-              </ScrollReveal>
-              <ScrollReveal delay={105} threshold={0.1} width="w-auto" className="h-auto">
-                <Link to="/contact" className="group relative hover:text-white">
-                  <span className="relative inline-block">
-                    {t('contact')}
-                    <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
-                  </span>
-                </Link>
-              </ScrollReveal>
-            </nav>
-          </div>
-        </div>
-        {/* Sosyal medya linkleri ve email formu - aynı üst hizasında */}
-        <div className="mt-8 flex flex-col lg:flex-row flex-wrap items-center lg:items-start justify-center lg:justify-start gap-6 lg:gap-12">
-          {/* Sosyal medya linkleri */}
-          <ScrollReveal delay={120} threshold={0.1} width="w-auto" className="h-auto">
-            <div className="w-full lg:w-auto flex justify-center lg:justify-start space-x-6">
-              {(content.socialLinks || [])
-                .filter(link => link.isEnabled)
-                .map((link, index) => (
-                  <ScrollReveal key={link.name} delay={135 + index * 15} threshold={0.1} width="w-auto" className="h-auto">
-                    <a
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-white transition-opacity duration-200 opacity-70 hover:opacity-100"
-                    >
-                      <div className="w-3 h-3">
-                        <DynamicIcon svgString={link.svgIcon} />
-                      </div>
-                    </a>
-                  </ScrollReveal>
-                ))}
-            </div>
-          </ScrollReveal>
-          {/* Email abonelik formu - sadece desktop'ta */}
-          <ScrollReveal delay={150} threshold={0.1} width="w-full lg:w-auto" className="h-auto">
-            <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-              <form
-                onSubmit={async e => {
-                  e.preventDefault()
-                  if (email) {
-                    try {
-                      await subscribeEmail(email)
-                      analytics.trackUserAction('newsletter_subscribe', email)
-                      alert('E-posta aboneliğiniz başarıyla oluşturuldu!')
-                      setEmail('')
-                    } catch (err: any) {
-                      // Özel durum: Local storage'a kaydedildi ama CMS'de görünmüyor
-                      if (err.message === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
-                        alert(
-                          "E-posta aboneliğiniz kaydedildi!\n\nNot: CMS'de görünmesi için .env dosyasına VITE_SANITY_TOKEN ekleyin. Detaylar: README.md"
-                        )
-                        analytics.trackUserAction('newsletter_subscribe', email)
-                        setEmail('')
-                      } else {
-                        alert(err.message || "Bir hata oluştu. Lütfen console'u kontrol edin.")
-                      }
-                    }
-                  }
-                }}
-                className="flex w-full lg:w-auto lg:justify-end"
-              >
-                {/* Input + SUBSCRIBE hizası için ortak alt çizgi */}
-                <div className="flex items-center w-full lg:w-auto lg:min-w-[320px] lg:ml-auto border-b border-white/80 pb-0.5 gap-2">
-                  <div className="flex-1 min-w-[180px]">
-                    <input
-                      type="email"
-                      id="footer-subscribe-email-inline"
-                      name="footer-subscribe-email-inline"
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      placeholder={t('email_placeholder')}
-                      className="w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[14px] text-left"
-                      style={{outline: 'none', boxShadow: 'none'}}
-                      onFocus={e => {
-                        e.target.style.outline = 'none'
-                        e.target.style.boxShadow = 'none'
-                      }}
-                      onBlur={e => {
-                        e.target.style.outline = 'none'
-                        e.target.style.boxShadow = 'none'
-                      }}
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-xs font-medium uppercase tracking-[0.25em]"
-                  >
-                    {t('subscribe')}
-                  </button>
+          {/* Desktop düzen */}
+          <div className="hidden lg:flex flex-wrap items-start gap-8 lg:gap-16">
+            {/* Sol taraf: Logo ve partner yazıları (sola hizalı) */}
+            <div className="w-full lg:w-auto">
+              <ScrollReveal delay={0} threshold={0.1} width="w-auto" className="h-auto">
+                <div className="text-white mb-4">
+                  <SiteLogo logoUrl={settings.logoUrl} className="h-4 w-auto" />
                 </div>
-              </form>
+              </ScrollReveal>
+              <ScrollReveal delay={15} threshold={0.1} width="w-full" className="h-auto">
+                <div className="flex items-center flex-wrap gap-6 mb-4">
+                  {(content.partners || content.partnerNames || []).map((partner, index) => {
+                    const partnerName = typeof partner === 'string' ? partner : t(partner.name)
+                    const partnerLogo = typeof partner === 'object' ? partner.logo : undefined
+                    const partnerUrl = typeof partner === 'object' ? partner.url : undefined
+
+                    const partnerContent = partnerLogo ? (
+                      <img
+                        src={partnerLogo}
+                        alt={partnerName}
+                        className="h-8 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
+                      />
+                    ) : (
+                      <span className="font-semibold text-gray-300 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                        {partnerName}
+                      </span>
+                    )
+
+                    return partnerUrl ? (
+                      <a
+                        key={index}
+                        href={partnerUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group"
+                      >
+                        {partnerContent}
+                      </a>
+                    ) : (
+                      <span key={index}>{partnerContent}</span>
+                    )
+                  })}
+                </div>
+              </ScrollReveal>
             </div>
-          </ScrollReveal>
-        </div>
-        <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
-          <div className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col md:flex-row md:items-start gap-4 text-xs" style={{overflow: 'visible', width: '100%'}}>
-            {content.legalLinks && content.legalLinks.length > 0 && (
-              <div 
-                className="flex flex-col md:flex-row md:flex-wrap md:items-center items-center gap-y-2 md:gap-x-4 md:gap-y-0" 
-                style={{
-                  overflow: 'visible', 
-                  maxWidth: '100%',
-                  width: '100%',
-                  minWidth: 0,
-                  flexShrink: 1,
-                  flexGrow: 1
-                }}
-              >
-                {content.legalLinks
-                  .filter(link => link?.isVisible)
-                  .map((link, index) => {
-                    const url = typeof link?.url === 'string' ? link.url : ''
-                    // Çeviri için direkt kontrol - LocalizedString'i doğrudan işle
-                    let linkText = ''
-                    
-                    // URL'e göre direkt çeviri döndür (t() fonksiyonuna güvenme)
-                    const getTranslationFromUrl = (url: string, locale: string): string | null => {
-                      const urlLower = url.toLowerCase()
-                      const translations: Record<string, Record<string, string>> = {
-                        '/kvkk': {
-                          tr: 'KVKK Aydınlatma Metni',
-                          en: 'KVKK Disclosure',
-                        },
-                        '/privacy': {
-                          tr: 'Gizlilik Politikası',
-                          en: 'Privacy Policy',
-                        },
-                        '/cookies': {
-                          tr: 'Çerez Politikası',
-                          en: 'Cookie Policy',
-                        },
-                        '/terms': {
-                          tr: 'Kullanım Koşulları',
-                          en: 'Terms of Service',
-                        },
-                        '/legal': {
-                          tr: 'Yasal Bilgiler',
-                          en: 'Legal Information',
-                        },
+
+            {/* Orta: Menü düğmeleri (sağa hizalı üstte) */}
+            <div className="flex-1 flex justify-end">
+              <nav className="flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold uppercase tracking-wider text-gray-300 items-center justify-end">
+                <ScrollReveal delay={30} threshold={0.1} width="w-auto" className="h-auto">
+                  <Link to="/products" className="group relative hover:text-white">
+                    <span className="relative inline-block">
+                      {t('view_all')}
+                      <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
+                    </span>
+                  </Link>
+                </ScrollReveal>
+                <ScrollReveal delay={45} threshold={0.1} width="w-auto" className="h-auto">
+                  <Link to="/designers" className="group relative hover:text-white">
+                    <span className="relative inline-block">
+                      {t('designers')}
+                      <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
+                    </span>
+                  </Link>
+                </ScrollReveal>
+                <ScrollReveal delay={60} threshold={0.1} width="w-auto" className="h-auto">
+                  <Link to="/projects" className="group relative hover:text-white">
+                    <span className="relative inline-block">
+                      {t('projects') || 'Projeler'}
+                      <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
+                    </span>
+                  </Link>
+                </ScrollReveal>
+                <ScrollReveal delay={75} threshold={0.1} width="w-auto" className="h-auto">
+                  <Link to="/news" className="group relative hover:text-white">
+                    <span className="relative inline-block">
+                      {t('news')}
+                      <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
+                    </span>
+                  </Link>
+                </ScrollReveal>
+                <ScrollReveal delay={90} threshold={0.1} width="w-auto" className="h-auto">
+                  <Link to="/about" className="group relative hover:text-white">
+                    <span className="relative inline-block">
+                      {t('about')}
+                      <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
+                    </span>
+                  </Link>
+                </ScrollReveal>
+                <ScrollReveal delay={105} threshold={0.1} width="w-auto" className="h-auto">
+                  <Link to="/contact" className="group relative hover:text-white">
+                    <span className="relative inline-block">
+                      {t('contact')}
+                      <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
+                    </span>
+                  </Link>
+                </ScrollReveal>
+              </nav>
+            </div>
+          </div>
+          {/* Sosyal medya linkleri ve email formu - aynı üst hizasında */}
+          <div className="mt-8 flex flex-col lg:flex-row flex-wrap items-center lg:items-start justify-center lg:justify-start gap-6 lg:gap-12">
+            {/* Sosyal medya linkleri */}
+            <ScrollReveal delay={120} threshold={0.1} width="w-auto" className="h-auto">
+              <div className="w-full lg:w-auto flex justify-center lg:justify-start space-x-6">
+                {(content.socialLinks || [])
+                  .filter(link => link.isEnabled)
+                  .map((link, index) => (
+                    <ScrollReveal key={link.name} delay={135 + index * 15} threshold={0.1} width="w-auto" className="h-auto">
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-white transition-opacity duration-200 opacity-70 hover:opacity-100"
+                      >
+                        <div className="w-3 h-3">
+                          <DynamicIcon svgString={link.svgIcon} />
+                        </div>
+                      </a>
+                    </ScrollReveal>
+                  ))}
+              </div>
+            </ScrollReveal>
+            {/* Email abonelik formu - sadece desktop'ta */}
+            <ScrollReveal delay={150} threshold={0.1} width="w-full lg:w-auto" className="h-auto">
+              <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+                <form
+                  onSubmit={async e => {
+                    e.preventDefault()
+                    if (email) {
+                      try {
+                        await subscribeEmail(email)
+                        analytics.trackUserAction('newsletter_subscribe', email)
+                        alert('E-posta aboneliğiniz başarıyla oluşturuldu!')
+                        setEmail('')
+                      } catch (err: any) {
+                        // Özel durum: Local storage'a kaydedildi ama CMS'de görünmüyor
+                        if (err.message === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
+                          alert(
+                            "E-posta aboneliğiniz kaydedildi!\n\nNot: CMS'de görünmesi için .env dosyasına VITE_SANITY_TOKEN ekleyin. Detaylar: README.md"
+                          )
+                          analytics.trackUserAction('newsletter_subscribe', email)
+                          setEmail('')
+                        } else {
+                          alert(err.message || "Bir hata oluştu. Lütfen console'u kontrol edin.")
+                        }
                       }
-                      // Tam URL eşleşmesi
-                      if (translations[urlLower]) {
-                        return translations[urlLower][locale] || translations[urlLower]['tr'] || null
-                      }
-                      // URL içinde geçen kelimelere göre
-                      if (urlLower.includes('kvkk')) {
-                        return locale === 'en' ? 'KVKK Disclosure' : 'KVKK Aydınlatma Metni'
-                      }
-                      if (urlLower.includes('privacy')) {
-                        return locale === 'en' ? 'Privacy Policy' : 'Gizlilik Politikası'
-                      }
-                      if (urlLower.includes('cookie')) {
-                        return locale === 'en' ? 'Cookie Policy' : 'Çerez Politikası'
-                      }
-                      if (urlLower.includes('terms')) {
-                        return locale === 'en' ? 'Terms of Service' : 'Kullanım Koşulları'
-                      }
-                      if (urlLower.includes('legal')) {
-                        return locale === 'en' ? 'Legal Information' : 'Yasal Bilgiler'
-                      }
-                      return null
                     }
-                    
-                    // Önce URL'e göre direkt çeviri dene (en güvenilir yöntem)
-                    linkText = getTranslationFromUrl(url, locale) || ''
-                    
-                    // Eğer URL'e göre çeviri bulunamadıysa, link.text'i kullan
-                    if (!linkText || !linkText.trim()) {
-                      if (link.text) {
-                        if (typeof link.text === 'object' && link.text !== null && !Array.isArray(link.text)) {
-                          const textObj = link.text as any
-                          // Locale'e göre direkt değer al - önce mevcut locale
-                          if (locale === 'en') {
-                            linkText = textObj.en || textObj.english || textObj.English || ''
-                            if (!linkText || !linkText.trim()) {
-                              linkText = textObj.tr || textObj.turkish || textObj.Turkish || ''
-                            }
-                          } else {
-                            // locale === 'tr' veya başka bir değer
-                            linkText = textObj.tr || textObj.turkish || textObj.Turkish || ''
-                            if (!linkText || !linkText.trim()) {
+                  }}
+                  className="flex w-full lg:w-auto lg:justify-end"
+                >
+                  {/* Input + SUBSCRIBE hizası için ortak alt çizgi */}
+                  <div className="flex items-center w-full lg:w-auto lg:min-w-[320px] lg:ml-auto border-b border-white/80 pb-0.5 gap-2">
+                    <div className="flex-1 min-w-[180px]">
+                      <input
+                        type="email"
+                        id="footer-subscribe-email-inline"
+                        name="footer-subscribe-email-inline"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        placeholder={t('email_placeholder')}
+                        className="w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[14px] text-left"
+                        style={{ outline: 'none', boxShadow: 'none' }}
+                        onFocus={e => {
+                          e.target.style.outline = 'none'
+                          e.target.style.boxShadow = 'none'
+                        }}
+                        onBlur={e => {
+                          e.target.style.outline = 'none'
+                          e.target.style.boxShadow = 'none'
+                        }}
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-xs font-medium uppercase tracking-[0.25em]"
+                    >
+                      {t('subscribe')}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </ScrollReveal>
+          </div>
+          <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
+            <div className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col md:flex-row md:items-start gap-4 text-xs" style={{ overflow: 'visible', width: '100%' }}>
+              {content.legalLinks && content.legalLinks.length > 0 && (
+                <div
+                  className="flex flex-col md:flex-row md:flex-wrap md:items-center items-center gap-y-2 md:gap-x-4 md:gap-y-0"
+                  style={{
+                    overflow: 'visible',
+                    maxWidth: '100%',
+                    width: '100%',
+                    minWidth: 0,
+                    flexShrink: 1,
+                    flexGrow: 1
+                  }}
+                >
+                  {content.legalLinks
+                    .filter(link => link?.isVisible)
+                    .map((link, index) => {
+                      const url = typeof link?.url === 'string' ? link.url : ''
+                      // Çeviri için direkt kontrol - LocalizedString'i doğrudan işle
+                      let linkText = ''
+
+                      // URL'e göre direkt çeviri döndür (t() fonksiyonuna güvenme)
+                      const getTranslationFromUrl = (url: string, locale: string): string | null => {
+                        const urlLower = url.toLowerCase()
+                        const translations: Record<string, Record<string, string>> = {
+                          '/kvkk': {
+                            tr: 'KVKK Aydınlatma Metni',
+                            en: 'KVKK Disclosure',
+                          },
+                          '/privacy': {
+                            tr: 'Gizlilik Politikası',
+                            en: 'Privacy Policy',
+                          },
+                          '/cookies': {
+                            tr: 'Çerez Politikası',
+                            en: 'Cookie Policy',
+                          },
+                          '/terms': {
+                            tr: 'Kullanım Koşulları',
+                            en: 'Terms of Service',
+                          },
+                          '/legal': {
+                            tr: 'Yasal Bilgiler',
+                            en: 'Legal Information',
+                          },
+                        }
+                        // Tam URL eşleşmesi
+                        if (translations[urlLower]) {
+                          return translations[urlLower][locale] || translations[urlLower]['tr'] || null
+                        }
+                        // URL içinde geçen kelimelere göre
+                        if (urlLower.includes('kvkk')) {
+                          return locale === 'en' ? 'KVKK Disclosure' : 'KVKK Aydınlatma Metni'
+                        }
+                        if (urlLower.includes('privacy')) {
+                          return locale === 'en' ? 'Privacy Policy' : 'Gizlilik Politikası'
+                        }
+                        if (urlLower.includes('cookie')) {
+                          return locale === 'en' ? 'Cookie Policy' : 'Çerez Politikası'
+                        }
+                        if (urlLower.includes('terms')) {
+                          return locale === 'en' ? 'Terms of Service' : 'Kullanım Koşulları'
+                        }
+                        if (urlLower.includes('legal')) {
+                          return locale === 'en' ? 'Legal Information' : 'Yasal Bilgiler'
+                        }
+                        return null
+                      }
+
+                      // Önce URL'e göre direkt çeviri dene (en güvenilir yöntem)
+                      linkText = getTranslationFromUrl(url, locale) || ''
+
+                      // Eğer URL'e göre çeviri bulunamadıysa, link.text'i kullan
+                      if (!linkText || !linkText.trim()) {
+                        if (link.text) {
+                          if (typeof link.text === 'object' && link.text !== null && !Array.isArray(link.text)) {
+                            const textObj = link.text as any
+                            // Locale'e göre direkt değer al - önce mevcut locale
+                            if (locale === 'en') {
                               linkText = textObj.en || textObj.english || textObj.English || ''
+                              if (!linkText || !linkText.trim()) {
+                                linkText = textObj.tr || textObj.turkish || textObj.Turkish || ''
+                              }
+                            } else {
+                              // locale === 'tr' veya başka bir değer
+                              linkText = textObj.tr || textObj.turkish || textObj.Turkish || ''
+                              if (!linkText || !linkText.trim()) {
+                                linkText = textObj.en || textObj.english || textObj.English || ''
+                              }
                             }
-                          }
-                          // Eğer hala boşsa, object'teki ilk geçerli string değeri al
-                          if (!linkText || !linkText.trim()) {
-                            const firstValue = Object.values(textObj).find((v: any) => v && typeof v === 'string' && v.trim())
-                            linkText = (firstValue as string) || ''
-                          }
-                        } else if (typeof link.text === 'string') {
-                          // String ise, URL'e göre çeviri dene (tekrar)
-                          const urlTranslation = getTranslationFromUrl(url, locale)
-                          if (urlTranslation) {
-                            linkText = urlTranslation
-                          } else {
-                            // URL'e göre çeviri yoksa, t() fonksiyonunu dene
-                            linkText = t(link.text)
-                            // Eğer çeviri bulunamazsa, orijinal string'i kullan (son çare)
-                            if (!linkText || linkText === link.text || linkText.trim() === '') {
-                              linkText = link.text
+                            // Eğer hala boşsa, object'teki ilk geçerli string değeri al
+                            if (!linkText || !linkText.trim()) {
+                              const firstValue = Object.values(textObj).find((v: any) => v && typeof v === 'string' && v.trim())
+                              linkText = (firstValue as string) || ''
+                            }
+                          } else if (typeof link.text === 'string') {
+                            // String ise, URL'e göre çeviri dene (tekrar)
+                            const urlTranslation = getTranslationFromUrl(url, locale)
+                            if (urlTranslation) {
+                              linkText = urlTranslation
+                            } else {
+                              // URL'e göre çeviri yoksa, t() fonksiyonunu dene
+                              linkText = t(link.text)
+                              // Eğer çeviri bulunamazsa, orijinal string'i kullan (son çare)
+                              if (!linkText || linkText === link.text || linkText.trim() === '') {
+                                linkText = link.text
+                              }
                             }
                           }
                         }
                       }
-                    }
-                    
-                    if (!url) {
+
+                      if (!url) {
+                        return (
+                          <span
+                            key={index}
+                            className="opacity-80 select-none text-gray-400"
+                            style={{ whiteSpace: 'nowrap', overflow: 'visible', textOverflow: 'clip', maxWidth: 'none' }}
+                          >
+                            {linkText}
+                          </span>
+                        )
+                      }
+                      const isHttp = /^https?:\/\//.test(url)
+                      const isInternalLink = url.startsWith('/') && !url.startsWith('//') && !isHttp
                       return (
-                        <span 
-                          key={index} 
-                          className="opacity-80 select-none text-gray-400"
-                          style={{whiteSpace: 'nowrap', overflow: 'visible', textOverflow: 'clip', maxWidth: 'none'}}
+                        <span
+                          key={index}
+                          className="legal-link-wrapper"
+                          style={{
+                            whiteSpace: 'nowrap',
+                            overflow: 'visible',
+                            textOverflow: 'clip',
+                            maxWidth: 'none',
+                            minWidth: 'auto',
+                            width: 'auto',
+                            display: 'inline-block',
+                            flexShrink: 0,
+                            flexGrow: 0,
+                            wordBreak: 'normal',
+                            overflowWrap: 'normal'
+                          }}
                         >
-                          {linkText}
+                          {isInternalLink ? (
+                            <Link
+                              to={url}
+                              className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
+                              style={{
+                                whiteSpace: 'nowrap',
+                                overflow: 'visible',
+                                textOverflow: 'clip',
+                                maxWidth: 'none',
+                                display: 'inline-block'
+                              }}
+                            >
+                              {linkText}
+                            </Link>
+                          ) : (
+                            <a
+                              href={url}
+                              className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
+                              style={{
+                                whiteSpace: 'nowrap',
+                                overflow: 'visible',
+                                textOverflow: 'clip',
+                                maxWidth: 'none',
+                                display: 'inline-block'
+                              }}
+                              target={isHttp ? '_blank' : undefined}
+                              rel={isHttp ? 'noopener noreferrer' : undefined}
+                            >
+                              {linkText}
+                            </a>
+                          )}
                         </span>
                       )
-                    }
-                    const isHttp = /^https?:\/\//.test(url)
-                    const isInternalLink = url.startsWith('/') && !url.startsWith('//') && !isHttp
-                    return (
-                      <span 
-                        key={index} 
-                        className="legal-link-wrapper"
-                        style={{
-                          whiteSpace: 'nowrap', 
-                          overflow: 'visible', 
-                          textOverflow: 'clip', 
-                          maxWidth: 'none',
-                          minWidth: 'auto',
-                          width: 'auto',
-                          display: 'inline-block',
-                          flexShrink: 0,
-                          flexGrow: 0,
-                          wordBreak: 'normal',
-                          overflowWrap: 'normal'
-                        }}
-                      >
-                        {isInternalLink ? (
-                          <Link
-                            to={url}
-                            className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
-                            style={{
-                              whiteSpace: 'nowrap', 
-                              overflow: 'visible', 
-                              textOverflow: 'clip',
-                              maxWidth: 'none',
-                              display: 'inline-block'
-                            }}
-                          >
-                            {linkText}
-                          </Link>
-                        ) : (
-                          <a
-                            href={url}
-                            className="text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm"
-                            style={{
-                              whiteSpace: 'nowrap', 
-                              overflow: 'visible', 
-                              textOverflow: 'clip',
-                              maxWidth: 'none',
-                              display: 'inline-block'
-                            }}
-                            target={isHttp ? '_blank' : undefined}
-                            rel={isHttp ? 'noopener noreferrer' : undefined}
-                          >
-                            {linkText}
-                          </a>
-                        )}
-                      </span>
-                    )
-                  })}
-              </div>
-            )}
-          </div>
-        </ScrollReveal>
-        <ScrollReveal delay={210} threshold={0} width="w-full" className="h-auto">
-          <div className="mt-6 text-center md:text-left text-xs pb-4">
-            <p>{t(content.copyrightText)}</p>
-          </div>
-        </ScrollReveal>
-      </div>
-    </footer>
-    {/* Mobilde footer'dan sonra ekstra padding - scroll bounce beyaz alanını önler */}
-    <div className="lg:hidden h-2 bg-gray-800" aria-hidden="true"></div>
+                    })}
+                </div>
+              )}
+            </div>
+          </ScrollReveal>
+          <ScrollReveal delay={210} threshold={0} width="w-full" className="h-auto">
+            <div className="mt-6 text-center md:text-left text-xs pb-4">
+              <p>{t(content.copyrightText)}</p>
+            </div>
+          </ScrollReveal>
+        </div>
+      </footer>
+      {/* Mobilde footer'dan sonra ekstra padding - scroll bounce beyaz alanını önler */}
+      <div className="lg:hidden h-2 bg-gray-800" aria-hidden="true"></div>
     </>
   )
 }
@@ -912,7 +912,7 @@ const AppContent = () => {
   // Maintenance mode kontrolü - öncelikle CMS'den, yoksa environment variable'dan
   // Development modunda (dev server) maintenance mode devre dışı
   // Production'da aktif olabilir, ancak ?bypass=secret ile bypass edilebilir
-  const {settings} = useSiteSettings()
+  const { settings } = useSiteSettings()
   const maintenanceModeFromCMS = settings?.maintenanceMode ?? false
   // Tip güvenliği için string index kullan, ama Vite prod build'de gerçek değeri enjekte eder
   const maintenanceModeFromEnv = import.meta.env['VITE_MAINTENANCE_MODE'] === 'true'
@@ -943,25 +943,25 @@ const AppContent = () => {
 
   const debugInfo =
     typeof window !== 'undefined' &&
-    (window.location.search.includes('bypass') || window.location.hash.includes('bypass'))
+      (window.location.search.includes('bypass') || window.location.hash.includes('bypass'))
       ? {
-          isProduction,
-          maintenanceModeFromCMS,
-          maintenanceModeFromEnv,
-          maintenanceModeEnabled,
-          allowedBypassSecrets,
-          bypassParam,
-          isMaintenanceMode,
-        }
+        isProduction,
+        maintenanceModeFromCMS,
+        maintenanceModeFromEnv,
+        maintenanceModeEnabled,
+        allowedBypassSecrets,
+        bypassParam,
+        isMaintenanceMode,
+      }
       : null
 
   return (
-    <HashRouter future={{v7_startTransition: true, v7_relativeSplatPath: true}}>
+    <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <div className="flex flex-col min-h-screen">
         <ScrollToTop />
         {isMaintenanceMode ? (
           // Maintenance mode aktifse sadece ComingSoonPage göster
-          <main className="flex-grow" style={{overflowX: 'hidden'}}>
+          <main className="flex-grow" style={{ overflowX: 'hidden' }}>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="*" element={<ComingSoonPage />} />
@@ -977,7 +977,7 @@ const AppContent = () => {
             <main
               id="main-content"
               className="flex-grow"
-              style={{overflowX: 'hidden'}}
+              style={{ overflowX: 'hidden' }}
               tabIndex={-1}
             >
               <TopBanner />
