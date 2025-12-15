@@ -919,14 +919,24 @@ export function ProductDetailPage() {
                   className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
                   aria-label="Previous hero slide"
                 >
-                  ‹
+                  <span
+                    className="flex items-center justify-center w-full h-full text-2xl leading-none md:text-3xl"
+                    style={{ transform: 'translateY(-2px)' }}
+                  >
+                    ‹
+                  </span>
                 </button>
                 <button
                   onClick={heroNext}
                   className="absolute right-6 top-1/2 -translate-y-1/2 bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
                   aria-label="Next hero slide"
                 >
-                  ›
+                  <span
+                    className="flex items-center justify-center w-full h-full text-2xl leading-none md:text-3xl"
+                    style={{ transform: 'translateY(-2px)' }}
+                  >
+                    ›
+                  </span>
                 </button>
               </>
             )}

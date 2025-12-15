@@ -605,7 +605,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
             )
           })}
         </div>
-        {/* Desktop için hero okları */}
+        {/* Desktop için hero okları - ProductDetailPage stiline uyumlu */}
         {slideCount > 1 && !isMobile && (
           <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-between px-6">
             <button
@@ -614,7 +614,12 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
               className="pointer-events-auto bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
               aria-label="Previous hero slide"
             >
-              ‹
+              <span
+                className="flex items-center justify-center w-full h-full text-2xl leading-none md:text-3xl"
+                style={{ transform: 'translateY(-2px)' }}
+              >
+                ‹
+              </span>
             </button>
             <button
               type="button"
@@ -622,7 +627,12 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
               className="pointer-events-auto bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
               aria-label="Next hero slide"
             >
-              ›
+              <span
+                className="flex items-center justify-center w-full h-full text-2xl leading-none md:text-3xl"
+                style={{ transform: 'translateY(-2px)' }}
+              >
+                ›
+              </span>
             </button>
           </div>
         )}

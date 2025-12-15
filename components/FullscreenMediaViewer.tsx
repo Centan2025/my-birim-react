@@ -640,7 +640,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   return createPortal(
     // Tam ekran overlay - arka plandaki sayfayı tamamen kapatır
     <div
-      className="fixed bg-white flex flex-col overflow-hidden"
+      className="fixed flex flex-col overflow-hidden"
       style={{
         top: 0,
         left: 0,
@@ -652,6 +652,8 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
         zIndex: 99999,
         overflow: 'hidden',
         boxSizing: 'border-box',
+        // Beyaz yerine daha açık nötr gri fon (ürün ve proje detay tam ekranlarında daha yumuşak arka plan)
+        backgroundColor: '#e5e7eb', // Tailwind gray-200 - açık gri
       }}
     >
       {/* İçerik için opacity animasyonu - tam ekran */}
