@@ -1511,16 +1511,16 @@ export function Header() {
             line-height: 1.25rem !important;
           }
           
-          /* Overlay mobil menü - tamamen opak, siyaha çok yakın koyu gri arka plan */
+          /* Overlay mobil menü - tamamen opak, bir tık daha koyu gri arka plan */
           #mobile-menu.mobile-menu-overlay {
-            background-color: #020617 !important; /* Tailwind gray-950 */
-            background: #020617 !important;
+            background-color: #111827 !important; /* Tailwind gray-900 - daha koyu gri */
+            background: #111827 !important;
           }
 
           /* Overlay mobil menü AÇIKKEN header'ı da menü paneli ile bire bir aynı renge zorla */
           header.overlay-menu-open > div {
-            background-color: #020617 !important; /* Aynı ton */
-            background: #020617 !important;
+            background-color: #111827 !important; /* Aynı ton - daha koyu gri */
+            background: #111827 !important;
             backdrop-filter: none !important;
             -webkit-backdrop-filter: none !important;
           }
@@ -1544,6 +1544,20 @@ export function Header() {
             font-weight: 300 !important;
             letter-spacing: 0.2em !important;
             line-height: 1.25 !important;
+          }
+
+          /* Mobil menüde tıklama/tap mavi highlight'ını yumuşat (mavi yerine hafif beyaz overlay) */
+          #mobile-menu button,
+          #mobile-menu a {
+            -webkit-tap-highlight-color: rgba(255, 255, 255, 0.08);
+          }
+
+          /* Mobil menüde focus/outlines için mavi yerine nötr gri kullan */
+          #mobile-menu a:focus,
+          #mobile-menu a:focus-visible,
+          #mobile-menu button:focus,
+          #mobile-menu button:focus-visible {
+            outline-color: rgba(148, 163, 184, 0.6); /* slate-400 civarı nötr gri */
           }
           
         `}
@@ -1595,9 +1609,9 @@ export function Header() {
               }
               
               // Overlay mobil menü AÇIKKEN veya kapanma animasyonu sürerken
-              // header'ı da mobil menü paneli ile aynı çok koyu gri yap (siyaha yakın)
+              // header'ı da mobil menü paneli ile aynı daha koyu gri yap
               if (isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)) {
-                return '#020617' // Tailwind gray-950
+                return '#111827' // Tailwind gray-900 - daha koyu gri
               }
 
               // MOBİL: Arka plan açık renkteyse header'ı her zaman belirgin koyu yap
@@ -2396,7 +2410,7 @@ export function Header() {
           }`}
           style={{
             top: `${headerHeight}px`,
-            backgroundColor: '#020617', // Siyaha çok yakın koyu gri (Tailwind gray-950)
+            backgroundColor: '#111827', // Biraz daha koyu gri (Tailwind gray-900)
             // Kapanırken panel animasyonunu, linklerin ters sırada kaybolma animasyonundan sonra başlat
             transitionDelay: isMobileMenuOpen ? '0ms' : `${mobileMenuCloseDelay}ms`,
           }}
