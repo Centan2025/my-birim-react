@@ -123,8 +123,8 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 {hasDescription && (
                   <div className="container mx-auto px-2 sm:px-3 lg:px-4 pt-6 pb-10">
                     <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
-                      <div className={`prose max-w-none ${textAlignClass}`}>
-                        <p className="text-lg md:text-xl text-gray-900 font-normal leading-relaxed tracking-[0.03em]">
+                      <div className={`prose max-w-none ${textAlignClass} px-4 sm:px-0`}>
+                        <p className="text-base md:text-xl text-gray-950 font-normal leading-relaxed tracking-[0.03em]">
                           {t(block.description)}
                         </p>
                       </div>
@@ -227,8 +227,8 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   {hasDescription && (
                     <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'}`}>
                       <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
-                        <div className={`prose max-w-none ${textAlignClass}`}>
-                          <p className="text-lg md:text-xl text-gray-900 font-normal leading-relaxed tracking-[0.03em]">
+                        <div className={`prose max-w-none ${textAlignClass} px-4 sm:px-0`}>
+                          <p className="text-base md:text-xl text-gray-950 font-normal leading-relaxed tracking-[0.03em]">
                             {t(block.description)}
                           </p>
                         </div>
