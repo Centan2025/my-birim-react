@@ -700,93 +700,96 @@ const Footer = () => {
               </div>
             </ScrollReveal>
           </div>
+          {/* Yasal linkler ve telif metni - mobilde alt alta, desktop'ta aynı satırda
+              sol: telif, sağ: yasal düğmeler */}
           <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
             <div
-              id="mobile-legal-row-container"
-              className="mt-4 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col items-center justify-center md:flex-row md:items-start md:justify-start gap-4 text-xs w-full legal-links-row"
-              style={{ overflow: 'visible', width: '100%' }}
+              className="mt-4 lg:mt-10 border-t border-gray-600 lg:border-t-2 pt-8 w-full"
+              style={{overflow: 'visible', width: '100%'}}
             >
-              {content.legalLinks && content.legalLinks.length > 0 && (
-                <div
-                  id="mobile-legal-links-stack"
-                  className="legal-links-inner flex flex-col w-full md:w-auto md:flex-row md:flex-wrap md:items-center items-center justify-center md:justify-start gap-y-2 md:gap-x-4 md:gap-y-0"
-                  style={{
-                    overflow: 'visible',
-                    maxWidth: '100%',
-                    width: '100%',
-                    minWidth: 0,
-                    flexShrink: 0,
-                    flexGrow: 0,
-                    marginLeft: 'auto',
-                    marginRight: 'auto',
-                    textAlign: 'center',
-                  }}
-                >
-                  {content.legalLinks
-                    .filter(link => link?.isVisible)
-                    .map((link, index) => {
-                      const url = typeof link?.url === 'string' ? link.url : ''
-                      const linkText = resolveLegalLinkText(link, locale, t)
-
-                      // Diğer footer öğeleri gibi her yasal linke de ScrollReveal animasyonu ekle
-                      return (
-                        <ScrollReveal
-                          key={index}
-                          delay={195 + index * 15}
-                          threshold={0}
-                          width="w-auto"
-                          className="h-auto"
-                        >
-                          {!url ? (
-                            <span
-                              className="opacity-80 select-none text-gray-400"
-                              style={{
-                                whiteSpace: 'nowrap',
-                                overflow: 'visible',
-                                textOverflow: 'clip',
-                                maxWidth: 'none',
-                              }}
-                            >
-                              {linkText}
-                            </span>
-                          ) : (
-                            (() => {
-                              const isHttp = /^https?:\/\//.test(url)
-                              const isInternalLink =
-                                url.startsWith('/') && !url.startsWith('//') && !isHttp
-                              const commonClasses =
-                                'text-gray-400 hover:text-gray-300 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm'
-
-                              return (
-                                <span className="legal-link-wrapper">
-                                  {isInternalLink ? (
-                                    <Link to={url} className={commonClasses}>
-                                      {linkText}
-                                    </Link>
-                                  ) : (
-                                    <a
-                                      href={url}
-                                      className={commonClasses}
-                                      target={isHttp ? '_blank' : undefined}
-                                      rel={isHttp ? 'noopener noreferrer' : undefined}
-                                    >
-                                      {linkText}
-                                    </a>
-                                  )}
-                                </span>
-                              )
-                            })()
-                          )}
-                        </ScrollReveal>
-                      )
-                    })}
+              <div className="flex flex-col items-center justify-center gap-4 text-xs w-full lg:flex-row lg:items-start lg:justify-between">
+                {/* Sol: Telif metni */}
+                <div className="text-center lg:text-left">
+                  <p>{t(content.copyrightText)}</p>
                 </div>
-              )}
-            </div>
-          </ScrollReveal>
-          <ScrollReveal delay={210} threshold={0} width="w-full" className="h-auto">
-            <div className="mt-6 text-center md:text-left text-xs pb-4">
-              <p>{t(content.copyrightText)}</p>
+
+                {/* Sağ: Yasal linkler */}
+                {content.legalLinks && content.legalLinks.length > 0 && (
+                  <div
+                    id="mobile-legal-links-stack"
+                    className="legal-links-inner flex flex-col w-full md:w-auto md:flex-row md:flex-wrap md:items-center items-center justify-center md:justify-center lg:justify-end lg:self-end lg:items-end gap-y-2 md:gap-x-4 md:gap-y-0"
+                    style={{
+                      overflow: 'visible',
+                      maxWidth: '100%',
+                      minWidth: 0,
+                      flexShrink: 0,
+                      flexGrow: 0,
+                      marginLeft: 'auto',
+                      marginRight: 0,
+                      textAlign: 'center',
+                    }}
+                  >
+                    {content.legalLinks
+                      .filter(link => link?.isVisible)
+                      .map((link, index) => {
+                        const url = typeof link?.url === 'string' ? link.url : ''
+                        const linkText = resolveLegalLinkText(link, locale, t)
+
+                        // Diğer footer öğeleri gibi her yasal linke de ScrollReveal animasyonu ekle
+                        return (
+                          <ScrollReveal
+                            key={index}
+                            delay={195 + index * 15}
+                            threshold={0}
+                            width="w-auto"
+                            className="h-auto"
+                          >
+                            {!url ? (
+                              <span
+                                className="opacity-80 select-none text-gray-400"
+                                style={{
+                                  whiteSpace: 'nowrap',
+                                  overflow: 'visible',
+                                  textOverflow: 'clip',
+                                  maxWidth: 'none',
+                                }}
+                              >
+                                {linkText}
+                              </span>
+                            ) : (
+                              (() => {
+                                const isHttp = /^https?:\/\//.test(url)
+                                const isInternalLink =
+                                  url.startsWith('/') && !url.startsWith('//') && !isHttp
+                                const commonClasses =
+                                'text-gray-300 hover:text-gray-100 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm'
+
+                                return (
+                                  <span className="legal-link-wrapper">
+                                    {isInternalLink ? (
+                                      <Link to={url} className={commonClasses}>
+                                        {linkText}
+                                      </Link>
+                                    ) : (
+                                      <a
+                                        href={url}
+                                        className={commonClasses}
+                                        target={isHttp ? '_blank' : undefined}
+                                        rel={isHttp ? 'noopener noreferrer' : undefined}
+                                      >
+                                        {linkText}
+                                      </a>
+                                    )}
+                                  </span>
+                                )
+                              })()
+                            )}
+                          </ScrollReveal>
+                        )
+                      })}
+                  </div>
+                )}
+              </div>
             </div>
           </ScrollReveal>
         </div>

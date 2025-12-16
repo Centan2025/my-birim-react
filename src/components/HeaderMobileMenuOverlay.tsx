@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import {NavLink} from 'react-router-dom'
 import type {Category, FooterContent, SiteSettings} from '../types'
 import type {MutableRefObject} from 'react'
@@ -66,6 +66,30 @@ export const HeaderMobileMenuOverlay: React.FC<HeaderMobileMenuOverlayProps> = p
     mobileMenuRef,
     mobileMenuFocusTrap,
   } = props
+
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [toastType, setToastType] = useState<'success' | 'error'>('success')
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToastMessage(message)
+    setToastType(type)
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current)
+    }
+    toastTimeoutRef.current = setTimeout(() => {
+      setToastMessage(null)
+    }, 3000)
+  }
 
   if (!isOverlayMobileMenu) return null
 
@@ -287,41 +311,86 @@ export const HeaderMobileMenuOverlay: React.FC<HeaderMobileMenuOverlayProps> = p
         <form
           onSubmit={async e => {
             e.preventDefault()
-            if (subscribeEmail) {
-              try {
-                await subscribeEmailService(subscribeEmail)
-                alert(
-                  t('newsletter_success') ||
-                    t('subscribe_success') ||
-                    'E-posta aboneliğiniz başarıyla oluşturuldu!'
-                )
-                setSubscribeEmail('')
-              } catch (err: any) {
-                const errorMessage = String(err?.message || '')
+            if (!subscribeEmail) return
 
-                if (errorMessage === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
-                  alert(
-                    t('newsletter_success_local') ||
-                      t('subscribe_success') ||
-                      'E-posta aboneliğiniz kaydedildi!'
+            const normalizedEmail = subscribeEmail.trim().toLowerCase()
+
+            // Aynı tarayıcıda / oturumda tekrar tekrar aynı e-postayı göndermeyi
+            // engellemek ve kullanıcıya "zaten abonesiniz" demek için basit bir
+            // localStorage kontrolü (footer'daki NewsletterForm ile aynı mantık)
+            try {
+              if (typeof window !== 'undefined') {
+                const raw = window.localStorage.getItem('birim_newsletter_subscribers')
+                const list: string[] = raw ? JSON.parse(raw) : []
+                if (list.includes(normalizedEmail)) {
+                  showToast(
+                    t('newsletter_already_subscribed') ||
+                      'Bu e-posta adresi zaten aboneliğe kayıtlı.',
+                    'success'
                   )
                   setSubscribeEmail('')
-                } else if (
-                  errorMessage.includes('zaten aboneliğe kayıtlı') ||
-                  errorMessage.includes('zaten kayıtlı') ||
-                  errorMessage.toLowerCase().includes('already subscribed')
-                ) {
-                  alert(
-                    t('newsletter_already_subscribed') ||
-                      'Bu e-posta adresi zaten aboneliğe kayıtlı.'
-                  )
-                } else {
-                  alert(
-                    errorMessage ||
-                      t('newsletter_error') ||
-                      'Bir hata oluştu. Lütfen daha sonra tekrar deneyin.'
-                  )
+                  return
                 }
+              }
+            } catch {
+              // localStorage erişilemezse sessizce devam et
+            }
+
+            try {
+              await subscribeEmailService(subscribeEmail)
+              showToast(
+                t('newsletter_success') ||
+                  t('subscribe_success') ||
+                  'E-posta aboneliğiniz başarıyla oluşturuldu!',
+                'success'
+              )
+
+              // Başarılı abonelikte e-postayı localStorage'a yaz (footer ile aynı anahtar)
+              try {
+                if (typeof window !== 'undefined') {
+                  const raw = window.localStorage.getItem('birim_newsletter_subscribers')
+                  const list: string[] = raw ? JSON.parse(raw) : []
+                  if (!list.includes(normalizedEmail)) {
+                    list.push(normalizedEmail)
+                    window.localStorage.setItem(
+                      'birim_newsletter_subscribers',
+                      JSON.stringify(list)
+                    )
+                  }
+                }
+              } catch {
+                // localStorage yazılamazsa sessizce devam et
+              }
+
+              setSubscribeEmail('')
+            } catch (err: any) {
+              const errorMessage = String(err?.message || '')
+
+              if (errorMessage === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
+                showToast(
+                  t('newsletter_success_local') ||
+                    t('subscribe_success') ||
+                    'E-posta aboneliğiniz kaydedildi!',
+                  'success'
+                )
+                setSubscribeEmail('')
+              } else if (
+                errorMessage.includes('zaten aboneliğe kayıtlı') ||
+                errorMessage.includes('zaten kayıtlı') ||
+                errorMessage.toLowerCase().includes('already subscribed')
+              ) {
+                showToast(
+                  t('newsletter_already_subscribed') ||
+                    'Bu e-posta adresi zaten aboneliğe kayıtlı.',
+                  'success'
+                )
+              } else {
+                showToast(
+                  errorMessage ||
+                    t('newsletter_error') ||
+                    'Bir hata oluştu. Lütfen daha sonra tekrar deneyin.',
+                  'error'
+                )
               }
             }
           }}
@@ -373,6 +442,37 @@ export const HeaderMobileMenuOverlay: React.FC<HeaderMobileMenuOverlayProps> = p
           </div>
         )}
       </div>
+
+      {/* Toast mesajı - projenin koyu temasıyla uyumlu */}
+      {toastMessage && (
+        <div
+          className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-3 shadow-lg max-w-sm mx-auto animate-fade-in border-2 border-white/60 ${
+            toastType === 'error' ? 'bg-red-900/95' : 'bg-gray-900/95'
+          }`}
+          style={{
+            borderRadius: 0, // köşeleri düz
+            color: 'white',
+            animation: 'fadeIn 0.3s ease-in',
+          }}
+        >
+          <p className="text-sm text-center font-medium">{toastMessage}</p>
+        </div>
+      )}
+      <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+          }
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.3s ease-in;
+        }
+      `}</style>
     </div>
   )
 }
