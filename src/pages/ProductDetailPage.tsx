@@ -897,34 +897,52 @@ export function ProductDetailPage() {
               )}
             </div>
 
-            {/* hero arrows - sadece desktop'ta göster */}
-            {!isMobile && (
-              <>
+            {/* hero arrows - sadece desktop'ta göster - Modern Glassmorphism */}
+            {slideCount > 1 && !isMobile && (
+              <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-between px-4 xl:px-8">
                 <button
+                  type="button"
                   onClick={heroPrev}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+                  className="group pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
                   aria-label="Previous hero slide"
                 >
-                  <span
-                    className="flex items-center justify-center w-full h-full text-2xl leading-none md:text-3xl"
-                    style={{ transform: 'translateY(-2px)' }}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-8 w-8 transition-transform duration-300 group-hover:-translate-x-0.5"
                   >
-                    ‹
-                  </span>
+                    <path d="M15 18l-6-6 6-6" />
+                  </svg>
                 </button>
                 <button
+                  type="button"
                   onClick={heroNext}
-                  className="absolute right-6 top-1/2 -translate-y-1/2 bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+                  className="group pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
                   aria-label="Next hero slide"
                 >
-                  <span
-                    className="flex items-center justify-center w-full h-full text-2xl leading-none md:text-3xl"
-                    style={{ transform: 'translateY(-2px)' }}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-8 w-8 transition-transform duration-300 group-hover:translate-x-0.5"
                   >
-                    ›
-                  </span>
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
                 </button>
-              </>
+              </div>
             )}
 
             {/* Hero altındaki slider dot'ları (HomeHero ile aynı stil) */}
@@ -990,18 +1008,8 @@ export function ProductDetailPage() {
 
             {/* Fullscreen button - sadece görsel varsa göster */}
             {bandMedia.length > 0 && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  analytics.event({
-                    category: 'media',
-                    action: 'band_click',
-                    label: product?.id,
-                    value: currentImageIndex,
-                  })
-                  setIsFullscreenOpen(true)
-                }}
-                className="group absolute bottom-3 right-3 md:bottom-4 md:right-4 bg-black/35 text-white rounded-full w-8 h-8 md:w-10 md:h-10 z-20 hover:scale-110 active:scale-95 flex items-center justify-center"
+              <div
+                className="absolute bottom-3 right-3 md:bottom-4 md:right-4 z-20"
                 style={{
                   opacity: isFullscreenButtonVisible ? 1 : 0,
                   transform: isFullscreenButtonVisible
@@ -1011,24 +1019,52 @@ export function ProductDetailPage() {
                     'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
                   willChange: 'transform, opacity',
                 }}
-                aria-label="Büyüt"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="transition-transform duration-500 group-hover:scale-110 md:w-7 md:h-7"
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    analytics.event({
+                      category: 'media',
+                      action: 'band_click',
+                      label: product?.id,
+                      value: currentImageIndex,
+                    })
+                    setIsFullscreenOpen(true)
+                  }}
+                  className="group flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
+                  aria-label="Büyüt"
                 >
-                  <line x1="12" y1="4" x2="12" y2="20" />
-                  <line x1="4" y1="12" x2="20" y2="12" />
-                </svg>
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-8 w-8 transition-transform duration-500"
+                  >
+                    <line x1="12" y1="4" x2="12" y2="20" />
+                    <line x1="4" y1="12" x2="20" y2="12" />
+                  </svg>
+                </button>
+              </div>
+            )}
+            {/* Mobile Scroll Indicator - Minimal Vertical Line Design */}
+            {isMobile && (
+              <div
+                className="absolute left-6 z-30 pointer-events-none mix-blend-difference"
+                style={{
+                  bottom: 'max(40px, env(safe-area-inset-bottom, 0px) + 40px)',
+                }}
+              >
+                <div className="h-[40px] w-[1px] bg-white/20 overflow-hidden relative">
+                  <div className="absolute top-0 left-0 w-full h-full bg-white animate-scroll-line"></div>
+                </div>
+              </div>
             )}
           </div>
           {/* Divider and Thumbnails under hero */}

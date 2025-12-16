@@ -58,27 +58,27 @@ export const ProductCard: React.FC<{product: Product; variant?: 'default' | 'lig
             quality={85}
           />
         </div>
-        <div className="px-2 py-1.5 sm:px-2 sm:py-1.5">
+        <div className="px-2.5 py-2 sm:px-3 sm:py-2">
           <h3
             className={`text-base sm:text-lg tracking-tight font-semibold ${
               isLight
-                ? 'text-gray-700 group-hover:text-gray-800'
-                : 'text-gray-800 group-hover:text-black'
+                ? 'text-gray-800 group-hover:text-gray-900'
+                : 'text-gray-900 group-hover:text-black'
             }`}
           >
             {t(product.name)}
           </h3>
           {designerName && (
             <div className="mt-1 flex items-baseline justify-between gap-2">
-              <p className="text-xs sm:text-sm text-gray-500 truncate">{designerName}</p>
-              <span className="text-[11px] sm:text-xs uppercase tracking-[0.18em] text-gray-500 flex-shrink-0">
+              <p className="text-xs sm:text-sm text-gray-600 truncate">{designerName}</p>
+              <span className="text-[11px] sm:text-xs uppercase tracking-[0.18em] text-gray-600 flex-shrink-0">
                 {product.year}
               </span>
             </div>
           )}
           {!designerName && (
             <div className="mt-1 flex items-baseline justify-end">
-              <span className="text-[11px] sm:text-xs uppercase tracking-[0.18em] text-gray-500">
+              <span className="text-[11px] sm:text-xs uppercase tracking-[0.18em] text-gray-600">
                 {product.year}
               </span>
             </div>

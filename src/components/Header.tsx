@@ -160,6 +160,8 @@ export function Header() {
   const [settings, setSettings] = useState<SiteSettings | null>(null)
   const currentRouteRef = useRef<string>(location.pathname)
   const [isMobileLocaleTransition, setIsMobileLocaleTransition] = useState(false)
+  // Desktop arama açıldığında header şeffaf ise, eski opacity'yi hatırlamak için
+  const previousHeaderOpacityRef = useRef<number | null>(null)
   // 2. seçenek (overlay) SADECE: (1) mobilde ve (2) CMS'te açıkça "overlay" seçiliyse aktif olsun.
   const isOverlayMobileMenu = Boolean(
     isMobile && settings && settings.mobileHeaderAnimation === 'overlay'
@@ -194,7 +196,13 @@ export function Header() {
     setIsSearchOpen(false)
     setSearchQuery('')
     setSearchResults({products: [], designers: [], categories: []})
-  }, [])
+
+    // Desktop'ta arama paneli kapanırken, eğer biz header opacity'yi değiştirdiysek geri al
+    if (!isMobile && previousHeaderOpacityRef.current !== null) {
+      setHeaderOpacity(previousHeaderOpacityRef.current)
+      previousHeaderOpacityRef.current = null
+    }
+  }, [isMobile])
 
   useEffect(() => {
     getSiteSettings().then(setSettings)
@@ -1929,7 +1937,20 @@ export function Header() {
                 {!isMobile && (
                   <button
                     ref={searchButtonRef}
-                    onClick={() => (isSearchOpen ? closeSearch() : setIsSearchOpen(true))}
+                    onClick={() => {
+                      // Desktop: Header tamamen şeffafsa (veya neredeyse şeffafsa) arama açıldığında
+                      // geçici olarak yarı şeffaf yap; kapanırken eski değere döndür.
+                      if (!isSearchOpen && headerOpacity <= 0.05 && previousHeaderOpacityRef.current === null) {
+                        previousHeaderOpacityRef.current = headerOpacity
+                        setHeaderOpacity(0.7)
+                      }
+
+                      if (isSearchOpen) {
+                        closeSearch()
+                      } else {
+                        setIsSearchOpen(true)
+                      }
+                    }}
                     className={`${iconClasses} hidden md:inline-flex`}
                     aria-label={
                       isSearchOpen

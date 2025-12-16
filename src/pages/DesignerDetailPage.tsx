@@ -112,11 +112,11 @@ export function DesignerDetailPage() {
 
         <ScrollReveal delay={400} threshold={0.01}>
           <div className="border-t pt-12 mt-6 md:mt-8">
-            <h2 className="text-3xl font-light text-gray-600 mb-8">
+            <h2 className="text-3xl font-light text-gray-700 mb-8">
               {t('designs') || 'Tasarımları'}
             </h2>
             {products.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[2px]">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
               {products.map((product, index) => (
                 <ScrollReveal 
                   key={product.id} 

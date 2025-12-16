@@ -572,8 +572,8 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                       >
                         {content?.isHeroTextVisible && (
                           <div className={`relative w-full transition-all duration-[700ms] ease-out ${isHeroTextVisible
-                              ? 'translate-x-0 opacity-100'
-                              : '-translate-x-[150%] opacity-0'
+                            ? 'translate-x-0 opacity-100'
+                            : '-translate-x-[150%] opacity-0'
                             }`}>
                             <h1
                               className="text-base md:text-5xl font-light tracking-tight mb-4 leading-relaxed"
@@ -610,34 +610,50 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
             )
           })}
         </div>
-        {/* Desktop için hero okları - ProductDetailPage stiline uyumlu */}
+        {/* Desktop için hero okları - Modern Glassmorphism */}
         {slideCount > 1 && !isMobile && (
-          <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-between px-6">
+          <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-between px-4 xl:px-8">
             <button
               type="button"
               onClick={goToPrevSlide}
-              className="pointer-events-auto bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+              className="group pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
               aria-label="Previous hero slide"
             >
-              <span
-                className="flex items-center justify-center w-full h-full text-2xl leading-none md:text-3xl"
-                style={{ transform: 'translateY(-2px)' }}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-8 w-8 transition-transform duration-300 group-hover:-translate-x-0.5"
               >
-                ‹
-              </span>
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
             </button>
             <button
               type="button"
               onClick={goToNextSlide}
-              className="pointer-events-auto bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+              className="group pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
               aria-label="Next hero slide"
             >
-              <span
-                className="flex items-center justify-center w-full h-full text-2xl leading-none md:text-3xl"
-                style={{ transform: 'translateY(-2px)' }}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-8 w-8 transition-transform duration-300 group-hover:translate-x-0.5"
               >
-                ›
-              </span>
+                <path d="M9 18l6-6-6-6" />
+              </svg>
             </button>
           </div>
         )}
@@ -691,6 +707,19 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                 )
               })
             })()}
+          </div>
+        )}
+        {/* Mobile Scroll Indicator - Minimal Vertical Line Design */}
+        {isMobile && (
+          <div
+            className="absolute left-8 z-30 pointer-events-none mix-blend-difference"
+            style={{
+              bottom: 'max(40px, env(safe-area-inset-bottom, 0px) + 40px)',
+            }}
+          >
+            <div className="h-[40px] w-[1px] bg-white/20 overflow-hidden relative">
+              <div className="absolute top-0 left-0 w-full h-full bg-white animate-scroll-line"></div>
+            </div>
           </div>
         )}
       </div>
