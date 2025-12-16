@@ -709,75 +709,40 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                 })
               })()}
 
-              {/* Hero altındaki dotların sağına düşen noktalar - soldaki scroll çizgisinin üst noktasıyla hizalı */}
-              <div 
-                className="relative h-[40px] w-6 ml-2"
-                style={{
-                  // Soldaki scroll çizgisinin üst noktasıyla hizalamak için: 
-                  // scroll çizgisi bottom: max(24px, ...) + 40px yükseklik = üst nokta
-                  // hero dot'ları bottom: max(16px, ...) + ~8px yükseklik = üst nokta
-                  // Fark: (24 + 40) - (16 + 8) = 40px yukarıda başlamalı
-                  marginTop: isMobile ? '-32px' : '0',
-                }}
-              >
-                {[...Array(3)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="absolute top-0 left-1/2 -translate-x-1/2 w-[5px] h-[5px] bg-white rounded-full animate-scroll-dot-fall"
-                    style={{
-                      animationDelay: `${i * 0.7}s`,
-                    }}
-                  />
-                ))}
-              </div>
-
-              {/* Hero altındaki dotların sağına 'Falling Dots' animasyonu - soldaki scroll çizgisinin üst noktasıyla hizalı */}
-              <div 
-                className="relative ml-2"
-                style={{
-                  // Soldaki scroll çizgisinin üst noktasıyla hizalamak için aynı marginTop
-                  marginTop: isMobile ? '-32px' : '0',
-                }}
-              >
-                <div className="flex flex-col items-center">
-                  {/* Static Source Dot (Sabit Kaynak Nokta) - diğer animasyonların üst noktasıyla hizalı */}
-                  <div className="w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_4px_rgba(255,255,255,0.8)] z-10"></div>
-                  
-                  {/* Falling Dots Area (Noktaların Düştüğü Alan) */}
-                  <div className="relative w-1.5 h-16 -mt-0.5">
-                    {/* Dot 1 */}
-                    <div 
-                      className="absolute top-0 left-1/2 w-1 h-1 bg-white rounded-full animate-falling-dot opacity-0" 
-                      style={{ animationDelay: '0s', marginLeft: '-2px' }}
-                    ></div>
-                    {/* Dot 2 */}
-                    <div 
-                      className="absolute top-0 left-1/2 w-1 h-1 bg-white rounded-full animate-falling-dot opacity-0" 
-                      style={{ animationDelay: '0.8s', marginLeft: '-2px' }}
-                    ></div>
-                    {/* Dot 3 */}
-                    <div 
-                      className="absolute top-0 left-1/2 w-1 h-1 bg-white rounded-full animate-falling-dot opacity-0" 
-                      style={{ animationDelay: '1.6s', marginLeft: '-2px' }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         )}
         {/* Mobile Scroll Indicator - Sadece dikey çizgi, solda nokta animasyonu yok */}
         {isMobile && (
           <div
-            className="absolute left-8 z-30 pointer-events-none mix-blend-difference"
+            className="absolute left-8 z-30 pointer-events-none mix-blend-difference animate-scroll-indicator-intro"
             style={{
-              // Scroll göstergesini ekrana biraz daha yaklaştır (daha aşağıda görünsün)
-              bottom: 'max(24px, env(safe-area-inset-bottom, 0px) + 24px)',
+              // Scroll göstergesini tamamen aşağıya al
+              bottom: 'max(8px, env(safe-area-inset-bottom, 0px) + 8px)',
             }}
           >
-            {/* Çubuğun kendisi ilk açılışta aşağıdan yukarı uzayan animasyona sahip */}
-            <div className="h-[40px] w-[3px] bg-white/45 overflow-hidden relative animate-scroll-indicator-intro">
-              <div className="absolute top-0 left-0 w-full h-full bg-white animate-scroll-line"></div>
+            <div className="flex flex-col items-center">
+              {/* Çubuğun kendisi ilk açılışta aşağıdan yukarı uzayan animasyona sahip - inceltildi */}
+              <div className="h-[40px] w-[2px] bg-white/45 overflow-hidden relative">
+                <div className="absolute top-0 left-0 w-full h-full bg-white animate-scroll-line"></div>
+              </div>
+              {/* Aşağıyı gösteren ok - çizginin altında */}
+              <div className="mt-0.5">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="opacity-70"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </div>
             </div>
           </div>
         )}
