@@ -1500,6 +1500,7 @@ export function Header() {
             font-weight: 300 !important;
             letter-spacing: 0.2em !important;
             line-height: 1.25 !important;
+            font-family: 'Neue Montreal', 'Jura', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
           }
 
           /* Mobil menüde tıklama/tap mavi highlight'ını yumuşat (mavi yerine hafif beyaz overlay) */
