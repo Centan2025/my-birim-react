@@ -25,6 +25,14 @@ export default defineType({
       initialValue: false,
     }),
     defineField({
+      name: 'showRelatedProducts',
+      title: 'Ürün detay sayfasında "Benzer ürünler" bölümünü göster',
+      type: 'boolean',
+      initialValue: true,
+      description:
+        'Pasif edildiğinde ürün detay sayfalarındaki "Benzer ürünler" bölümü tamamen gizlenir.',
+    }),
+    defineField({
       name: 'showCartButton',
       title: "Header'da Sepet Düğmesini Göster",
       type: 'boolean',

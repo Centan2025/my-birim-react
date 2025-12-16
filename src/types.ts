@@ -21,6 +21,8 @@ export interface SiteSettings {
   languages?: string[]
   /** Toggles bottom Prev/Next navigation on product detail page. */
   showProductPrevNext?: boolean
+  /** Toggles "related products" section on product detail page. */
+  showRelatedProducts?: boolean
   /** Toggles the visibility of the cart button in the header. */
   showCartButton?: boolean
   /** Border style for images and videos: 'square' or 'rounded' */

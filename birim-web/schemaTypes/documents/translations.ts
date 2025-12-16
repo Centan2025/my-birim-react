@@ -173,6 +173,12 @@ export default defineType({
           type: 'string',
           fieldset: 'product',
         }),
+        defineField({
+          name: 'related_products',
+          title: 'Benzer Ürünler Başlığı',
+          type: 'string',
+          fieldset: 'product',
+        }),
         // Tasarımcı
         defineField({
           name: 'designer_not_found',

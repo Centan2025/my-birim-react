@@ -21,6 +21,7 @@ import ScrollReveal from '../components/ScrollReveal'
 import { ProductDesignerSection } from '../components/ProductDesignerSection'
 import { ProductExclusiveContentSection } from '../components/ProductExclusiveContentSection'
 import { ProductMediaPanels } from '../components/ProductMediaPanels'
+import { ProductCard } from '../components/ProductCard'
 
 const CloseIcon = () => (
   <svg
@@ -302,6 +303,16 @@ export function ProductDetailPage() {
   }, [product, siblingProducts])
   // Bottom prev/next visibility from CMS settings
   const showBottomPrevNext = Boolean(siteSettings?.showProductPrevNext)
+
+  // Benzer ürünler: aynı kategorideki diğer ürünler
+  const relatedProducts = useMemo(
+    () =>
+      siblingProducts
+        .filter(p => p.id !== product?.id)
+        .slice(0, 4),
+    [siblingProducts, product?.id]
+  )
+  const showRelatedProducts = siteSettings?.showRelatedProducts !== false
 
   // Aynı groupTitle'a sahip grupları tek bir sekme altında birleştir - erken return'lerden önce
   const grouped = useMemo(() => {
@@ -1460,6 +1471,28 @@ export function ProductDetailPage() {
                   imageBorderClass={imageBorderClass}
                   t={t}
                 />
+              )}
+
+              {/* Benzer ürünler / Bunlar da ilginizi çekebilir - indirilebilir alanın altında */}
+              {showRelatedProducts && relatedProducts.length > 0 && (
+                <ScrollReveal delay={550} threshold={0.05}>
+                  <div className="pt-10 border-t border-gray-200">
+                    <h2 className="text-xl md:text-2xl font-normal text-gray-700 mb-4">
+                      {t('related_products') || 'Benzer ürünler'}
+                    </h2>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
+                      {relatedProducts.map((related, index) => (
+                        <ScrollReveal
+                          key={related.id}
+                          delay={index < 8 ? index * 40 : 0}
+                          threshold={0.05}
+                        >
+                          <ProductCard product={related} variant="light" />
+                        </ScrollReveal>
+                      ))}
+                    </div>
+                  </div>
+                </ScrollReveal>
               )}
 
               {/* bottom prev/next removed; now overlay under menu */}

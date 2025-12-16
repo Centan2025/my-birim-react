@@ -44,6 +44,7 @@ export default {
   additional_images: 'Additional Images',
   technical_drawings: 'Technical Drawings',
   '3d_models': '3D Models',
+  related_products: 'Related products',
   product_not_found: 'Product not found.',
   designer_not_found: 'Designer not found.',
   designs: 'Designs',

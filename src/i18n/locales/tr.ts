@@ -42,6 +42,7 @@ export default {
   "additional_images": "Ek Görseller",
   "technical_drawings": "Teknik Çizimler",
   "3d_models": "3D Modeller",
+   "related_products": "Benzer ürünler",
   "product_not_found": "Ürün bulunamadı.",
   "designer_not_found": "Tasarımcı bulunamadı.",
   "designs": "Tasarımları",
