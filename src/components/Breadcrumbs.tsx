@@ -19,8 +19,10 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({items, className = ''})
       <ol className="flex flex-wrap items-center text-[11px] sm:text-[12px] text-gray-700 gap-1 sm:gap-2">
         {items.map((item, index) => {
           const isLast = index === items.length - 1
-          const isFirst = index === 0
-          const label = typeof item.label === 'string' && isFirst ? item.label.toUpperCase() : item.label
+          const label =
+            typeof item.label === 'string'
+              ? item.label.toLocaleUpperCase('tr-TR')
+              : item.label
           return (
             <li key={index} className="flex items-center gap-1">
               {item.to && !isLast ? (

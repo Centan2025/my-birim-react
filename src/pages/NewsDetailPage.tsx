@@ -303,7 +303,7 @@ export function NewsDetailPage() {
               {t(item.title)}
             </h1>
             <div className="flex items-center min-h-[200px]">
-              <div className="prose prose-lg lg:prose-xl text-gray-900 max-w-none w-full [&>p:first-child]:mt-0 [&>p:last-child]:mb-0">
+              <div className="prose prose-lg lg:prose-xl text-gray-900 max-w-none w-full px-4 sm:px-0 [&>p:first-child]:mt-0 [&>p:last-child]:mb-0">
                 <p className="font-normal">{t(item.content)}</p>
               </div>
             </div>

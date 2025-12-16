@@ -709,7 +709,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
             })()}
           </div>
         )}
-        {/* Mobile Scroll Indicator - Minimal Vertical Line Design */}
+        {/* Mobile Scroll Indicator - Minimal Vertical Line Design (biraz kalınlaştırıldı) */}
         {isMobile && (
           <div
             className="absolute left-8 z-30 pointer-events-none mix-blend-difference"
@@ -718,7 +718,8 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
               bottom: 'max(24px, env(safe-area-inset-bottom, 0px) + 24px)',
             }}
           >
-            <div className="h-[40px] w-[1px] bg-white/20 overflow-hidden relative">
+            {/* Çubuğun kendisi ilk açılışta aşağıdan yukarı uzayan animasyona sahip */}
+            <div className="h-[40px] w-[3px] bg-white/45 overflow-hidden relative animate-scroll-indicator-intro">
               <div className="absolute top-0 left-0 w-full h-full bg-white animate-scroll-line"></div>
             </div>
           </div>

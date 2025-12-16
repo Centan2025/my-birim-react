@@ -95,7 +95,7 @@ export function DesignerDetailPage() {
             />
           </div>
           <div className="text-left w-full">
-            <div className="max-w-2xl">
+            <div className="max-w-2xl px-4 sm:px-0 md:px-0 md:mx-0">
               <h1 className={`text-4xl font-normal text-gray-700 ${
                 isTitleVisible
                   ? 'translate-x-0 opacity-100'
@@ -111,8 +111,8 @@ export function DesignerDetailPage() {
         </div>
 
         <ScrollReveal delay={400} threshold={0.01}>
-          <div className="border-t pt-12 mt-6 md:mt-8">
-            <h2 className="text-3xl font-light text-gray-700 mb-8">
+          <div className="border-t pt-6 mt-4 md:pt-6 md:mt-6">
+            <h2 className="text-3xl font-light text-gray-700 mb-4">
               {t('designs') || 'Tasarımları'}
             </h2>
             {products.length > 0 ? (

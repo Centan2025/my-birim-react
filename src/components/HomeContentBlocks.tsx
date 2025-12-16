@@ -61,7 +61,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         return (
           <section
             key={index}
-            className={`content-block-wrapper font-gotham ${sectionSpacingClass} ${backgroundColor}`}
+            className={`content-block-wrapper ${sectionSpacingClass} ${backgroundColor}`}
             data-block-index={index}
           >
             {isFullWidth ? (
@@ -121,10 +121,10 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   )}
                 </ScrollReveal>
                 {hasDescription && (
-                  <div className="container mx-auto px-2 sm:px-3 lg:px-4 pt-6 pb-10">
+                  <div className="container mx-auto px-2 sm:px-3 lg:px-4 pt-3 pb-6">
                     <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
                       <div className={`prose max-w-none ${textAlignClass} px-4 sm:px-0`}>
-                        <p className="text-base md:text-xl text-gray-950 font-normal leading-relaxed tracking-[0.03em]">
+                        <p className="mt-3 text-gray-900 font-normal leading-relaxed max-w-2xl">
                           {t(block.description)}
                         </p>
                       </div>
@@ -184,8 +184,8 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                             : isRight
                               ? 'md:flex-row-reverse'
                               : 'md:flex-row items-center'
-                        } gap-8 md:gap-10`
-                      : 'flex flex-col items-center gap-8 md:gap-10'
+                        } gap-4 md:gap-6`
+                      : 'flex flex-col items-center gap-4 md:gap-6'
                   }
                 >
                   <div
@@ -228,7 +228,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'}`}>
                       <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
                         <div className={`prose max-w-none ${textAlignClass} px-4 sm:px-0`}>
-                          <p className="text-base md:text-xl text-gray-950 font-normal leading-relaxed tracking-[0.03em]">
+                          <p className="mt-3 text-gray-900 font-normal leading-relaxed max-w-2xl">
                             {t(block.description)}
                           </p>
                         </div>

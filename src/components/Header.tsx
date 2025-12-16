@@ -192,6 +192,36 @@ export function Header() {
     []
   )
 
+  // Locale duyarlı, Türkçe'ye uygun arama normalize helper'ı
+  const normalizeSearchText = useCallback(
+    (value: string): string => {
+      if (!value) return ''
+
+      // Locale'e göre lower-case
+      let lower: string
+      try {
+        // Türkçe ise mutlaka 'tr' locale kullan
+        if (locale === 'tr' || locale === 'tr-TR') {
+          lower = value.toLocaleLowerCase('tr')
+        } else {
+          lower = value.toLocaleLowerCase()
+        }
+      } catch {
+        // Her ihtimale karşı fallback
+        lower = value.toLowerCase()
+      }
+
+      // Unicode normalizasyonu ve aksan / işaret temizliği
+      // (İ → i, I → ı vb. gibi durumlarda olası noktalama/aksan farklarını sadeleştirir)
+      try {
+        return lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      } catch {
+        return lower
+      }
+    },
+    [locale]
+  )
+
   const closeSearch = useCallback(() => {
     setIsSearchOpen(false)
     setSearchQuery('')
@@ -1161,7 +1191,7 @@ export function Header() {
 
     setIsSearching(true)
     const handler = setTimeout(() => {
-      const lowercasedQuery = searchQuery.toLowerCase().trim()
+      const lowercasedQuery = normalizeSearchText(searchQuery).trim()
       if (!lowercasedQuery) {
         setSearchResults({products: [], designers: [], categories: []})
         setIsSearching(false)
@@ -1173,11 +1203,11 @@ export function Header() {
 
       // Ürünleri filtrele - ürün adı, kategori adı veya tasarımcı adına göre
       const filteredProducts = allData.products.filter(p => {
-        const productName = t(p.name).toLowerCase()
+        const productName = normalizeSearchText(t(p.name))
         const category = allData.categories.find(c => c.id === p.categoryId)
-        const categoryName = category ? t(category.name).toLowerCase() : ''
+        const categoryName = category ? normalizeSearchText(t(category.name)) : ''
         const designer = allData.designers.find(d => d.id === p.designerId)
-        const designerName = designer ? t(designer.name).toLowerCase() : ''
+        const designerName = designer ? normalizeSearchText(t(designer.name)) : ''
 
         // Tüm aranabilir metin
         const searchableText = `${productName} ${categoryName} ${designerName}`
@@ -1187,12 +1217,12 @@ export function Header() {
       })
 
       const filteredDesigners = allData.designers.filter(d => {
-        const designerName = t(d.name).toLowerCase()
+        const designerName = normalizeSearchText(t(d.name))
         return searchTerms.every(term => designerName.includes(term))
       })
 
       const filteredCategories = allData.categories.filter(c => {
-        const categoryName = t(c.name).toLowerCase()
+        const categoryName = normalizeSearchText(t(c.name))
         return searchTerms.every(term => categoryName.includes(term))
       })
 
@@ -1207,7 +1237,7 @@ export function Header() {
     return () => {
       clearTimeout(handler)
     }
-  }, [searchQuery, allData, t])
+  }, [searchQuery, allData, t, normalizeSearchText])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
@@ -1839,7 +1869,27 @@ export function Header() {
                     aria-expanded={isSearchOpen}
                     aria-controls="search-panel"
                   >
-                    {isSearchOpen ? <CloseIcon /> : <SearchIcon />}
+                    {/* Search → X arasında yumuşak geçiş animasyonu */}
+                    <span className="relative flex items-center justify-center w-6 h-6">
+                      <span
+                        className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${
+                          isSearchOpen
+                            ? 'opacity-0 scale-75 rotate-90'
+                            : 'opacity-100 scale-100 rotate-0'
+                        }`}
+                      >
+                        <SearchIcon />
+                      </span>
+                      <span
+                        className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${
+                          isSearchOpen
+                            ? 'opacity-100 scale-100 rotate-0'
+                            : 'opacity-0 scale-75 -rotate-90'
+                        }`}
+                      >
+                        <CloseIcon />
+                      </span>
+                    </span>
                   </button>
                 )}
 
@@ -1941,7 +1991,11 @@ export function Header() {
                     onClick={() => {
                       // Desktop: Header tamamen şeffafsa (veya neredeyse şeffafsa) arama açıldığında
                       // geçici olarak yarı şeffaf yap; kapanırken eski değere döndür.
-                      if (!isSearchOpen && headerOpacity <= 0.05 && previousHeaderOpacityRef.current === null) {
+                      if (
+                        !isSearchOpen &&
+                        headerOpacity <= 0.05 &&
+                        previousHeaderOpacityRef.current === null
+                      ) {
                         previousHeaderOpacityRef.current = headerOpacity
                         setHeaderOpacity(0.7)
                       }
@@ -1961,7 +2015,27 @@ export function Header() {
                     aria-expanded={isSearchOpen}
                     aria-controls="search-panel"
                   >
-                    {isSearchOpen ? <CloseIcon /> : <SearchIcon />}
+                    {/* Search → X arasında yumuşak geçiş animasyonu */}
+                    <span className="relative flex items-center justify-center w-6 h-6">
+                      <span
+                        className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${
+                          isSearchOpen
+                            ? 'opacity-0 scale-75 rotate-90'
+                            : 'opacity-100 scale-100 rotate-0'
+                        }`}
+                      >
+                        <SearchIcon />
+                      </span>
+                      <span
+                        className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${
+                          isSearchOpen
+                            ? 'opacity-100 scale-100 rotate-0'
+                            : 'opacity-0 scale-75 -rotate-90'
+                        }`}
+                      >
+                        <CloseIcon />
+                      </span>
+                    </span>
                   </button>
                 )}
                 {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
