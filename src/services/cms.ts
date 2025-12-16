@@ -609,6 +609,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
         logoUrl: s?.logo ? mapImage(s.logo) : s?.logoUrl || '',
         topBannerText: s?.topBannerText || '',
         showProductPrevNext: Boolean(s?.showProductPrevNext ?? false),
+        showRelatedProducts: s?.showRelatedProducts !== false,
         showCartButton: Boolean(s?.showCartButton ?? true),
         imageBorderStyle:
           s?.imageBorderStyle === 'rounded' || s?.imageBorderStyle === 'square'
@@ -632,6 +633,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
     logoUrl: s?.logoUrl || '',
     topBannerText: s?.topBannerText || '',
     showProductPrevNext: Boolean(s?.showProductPrevNext ?? false),
+    showRelatedProducts: s?.showRelatedProducts !== false,
     showCartButton: Boolean(s?.showCartButton ?? true),
     imageBorderStyle:
       s?.imageBorderStyle === 'rounded' || s?.imageBorderStyle === 'square'
