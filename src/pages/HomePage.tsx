@@ -9,7 +9,6 @@ import { HomeInspirationSection } from '../components/HomeInspirationSection'
 export function HomePage() {
   const { data: content } = useHomePageContent()
   const { data: settings } = useSiteSettings()
-  const [inspirationImageHeight, setInspirationImageHeight] = useState<number | null>(null)
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth < 1024
@@ -68,32 +67,6 @@ export function HomePage() {
     }
     checkMobile()
 
-    const inspiration = content?.inspirationSection
-    const bgImg = inspiration?.backgroundImage
-    const bgImgUrl = bgImg ? (typeof bgImg === 'string' ? bgImg : bgImg.url) : ''
-    if (!bgImgUrl) {
-      setInspirationImageHeight(null)
-      return
-    }
-
-    const img = new Image()
-    img.onload = () => {
-      if (isMobile) {
-        // Mobilde görsel genişliği viewport genişliğine eşit, yüksekliği orantılı
-        const aspectRatio = img.height / img.width
-        const calculatedHeight = viewportWidth * aspectRatio
-        // Bölüm yüksekliğini görsel yüksekliğinden %20 daha az yap
-        setInspirationImageHeight(calculatedHeight * 0.8)
-      } else {
-        // Desktop'ta görsel cover olarak kullanılıyor, minimum yükseklik ayarla
-        setInspirationImageHeight(Math.max(img.height, 400))
-      }
-    }
-    img.onerror = () => {
-      setInspirationImageHeight(null)
-    }
-    img.src = bgImgUrl
-
     let resizeTimeout: ReturnType<typeof setTimeout> | null = null
     const handleResize = () => {
       if (resizeTimeout) clearTimeout(resizeTimeout)
@@ -107,7 +80,7 @@ export function HomePage() {
       window.removeEventListener('resize', handleResize)
       if (resizeTimeout) clearTimeout(resizeTimeout)
     }
-  }, [content?.inspirationSection?.backgroundImage, isMobile, viewportWidth])
+  }, [isMobile, viewportWidth, mobileHeroHeight])
 
   if (!content || !settings) {
     return <div className="h-screen w-full bg-gray-900" />
@@ -431,7 +404,6 @@ export function HomePage() {
           bgImageUrl={bgImageUrl}
           bgImageMobile={bgImageMobile}
           bgImageDesktop={bgImageDesktop}
-          inspirationImageHeight={inspirationImageHeight}
         />
       )}
     </div>

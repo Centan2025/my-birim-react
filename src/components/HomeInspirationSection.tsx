@@ -11,7 +11,6 @@ interface HomeInspirationSectionProps {
   bgImageUrl: string
   bgImageMobile?: string
   bgImageDesktop?: string
-  inspirationImageHeight: number | null
 }
 
 export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
@@ -20,7 +19,6 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
   bgImageUrl,
   bgImageMobile,
   bgImageDesktop,
-  inspirationImageHeight,
 }) => {
   const { t } = useTranslation()
 

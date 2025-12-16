@@ -54,23 +54,6 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             : textAlign === 'right'
               ? 'text-right'
               : 'text-left'
-        const titleFont = block.titleFont || 'normal'
-
-        // Font class veya style belirle
-        const titleFontClass =
-          titleFont === 'serif'
-                ? 'font-serif'
-                : titleFont === 'mono'
-                  ? 'font-mono'
-                  : titleFont === 'normal'
-                    ? 'font-sans'
-                    : '' // Google Font için class yok, inline style kullanacağız
-
-        // Google Font için inline style
-        const titleFontStyle =
-          titleFont && titleFont !== 'normal' && titleFont !== 'serif' && titleFont !== 'mono'
-            ? { fontFamily: `"${titleFont}", sans-serif` }
-            : undefined
 
         // Content alanları arasında dikey boşluk olmasın
         const sectionSpacingClass = 'py-0'
