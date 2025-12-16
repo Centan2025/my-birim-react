@@ -668,48 +668,105 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                 : {}
             }
           >
-            {(() => {
-              const normalizedSlide =
-                currentSlide < 0 ? slideCount - 1 : currentSlide >= slideCount ? 0 : currentSlide
-              const centerIndex = Math.floor(heroMedia.length / 2)
+            <div className="flex items-center gap-3">
+              {(() => {
+                const normalizedSlide =
+                  currentSlide < 0 ? slideCount - 1 : currentSlide >= slideCount ? 0 : currentSlide
+                const centerIndex = Math.floor(heroMedia.length / 2)
 
-              return heroMedia.map((_, index) => {
-                const isActive = index === normalizedSlide
-                const isLeft = index < centerIndex
-                const distanceFromCenter = Math.abs(index - centerIndex)
-                const animationDelay = distanceFromCenter * 50
+                return heroMedia.map((_, index) => {
+                  const isActive = index === normalizedSlide
+                  const isLeft = index < centerIndex
+                  const distanceFromCenter = Math.abs(index - centerIndex)
+                  const animationDelay = distanceFromCenter * 50
 
-                return (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentSlide(index)}
-                    className={`relative rounded-full transition-all duration-500 ease-in-out group ${areDotsVisible ? 'animate-dot-height-grow' : 'h-0.5'
-                      } ${isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
-                      } ${areDotsVisible
-                        ? 'translate-x-0 opacity-100'
-                        : isLeft
-                          ? '-translate-x-[150%] opacity-0'
-                          : 'translate-x-[250%] opacity-0'
-                      }`}
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentSlide(index)}
+                      className={`relative rounded-full transition-all duration-500 ease-in-out group ${areDotsVisible ? 'animate-dot-height-grow' : 'h-0.5'
+                        } ${isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
+                        } ${areDotsVisible
+                          ? 'translate-x-0 opacity-100'
+                          : isLeft
+                            ? '-translate-x-[150%] opacity-0'
+                            : 'translate-x-[250%] opacity-0'
+                        }`}
+                      style={{
+                        transitionDelay: `${animationDelay}ms`,
+                        ...(areDotsVisible ? {} : { height: '0.0625rem' }),
+                      }}
+                      aria-label={`Go to slide ${index + 1}`}
+                    >
+                      {isActive && (
+                        <div
+                          key={`${normalizedSlide}-${index}`}
+                          className="absolute top-0 left-0 h-full rounded-full bg-white animate-fill-line"
+                        ></div>
+                      )}
+                    </button>
+                  )
+                })
+              })()}
+
+              {/* Hero altındaki dotların sağına düşen noktalar - soldaki scroll çizgisinin üst noktasıyla hizalı */}
+              <div 
+                className="relative h-[40px] w-6 ml-2"
+                style={{
+                  // Soldaki scroll çizgisinin üst noktasıyla hizalamak için: 
+                  // scroll çizgisi bottom: max(24px, ...) + 40px yükseklik = üst nokta
+                  // hero dot'ları bottom: max(16px, ...) + ~8px yükseklik = üst nokta
+                  // Fark: (24 + 40) - (16 + 8) = 40px yukarıda başlamalı
+                  marginTop: isMobile ? '-32px' : '0',
+                }}
+              >
+                {[...Array(3)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="absolute top-0 left-1/2 -translate-x-1/2 w-[5px] h-[5px] bg-white rounded-full animate-scroll-dot-fall"
                     style={{
-                      transitionDelay: `${animationDelay}ms`,
-                      ...(areDotsVisible ? {} : { height: '0.0625rem' }),
+                      animationDelay: `${i * 0.7}s`,
                     }}
-                    aria-label={`Go to slide ${index + 1}`}
-                  >
-                    {isActive && (
-                      <div
-                        key={`${normalizedSlide}-${index}`}
-                        className="absolute top-0 left-0 h-full rounded-full bg-white animate-fill-line"
-                      ></div>
-                    )}
-                  </button>
-                )
-              })
-            })()}
+                  />
+                ))}
+              </div>
+
+              {/* Hero altındaki dotların sağına 'Falling Dots' animasyonu - soldaki scroll çizgisinin üst noktasıyla hizalı */}
+              <div 
+                className="relative ml-2"
+                style={{
+                  // Soldaki scroll çizgisinin üst noktasıyla hizalamak için aynı marginTop
+                  marginTop: isMobile ? '-32px' : '0',
+                }}
+              >
+                <div className="flex flex-col items-center">
+                  {/* Static Source Dot (Sabit Kaynak Nokta) - diğer animasyonların üst noktasıyla hizalı */}
+                  <div className="w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_4px_rgba(255,255,255,0.8)] z-10"></div>
+                  
+                  {/* Falling Dots Area (Noktaların Düştüğü Alan) */}
+                  <div className="relative w-1.5 h-16 -mt-0.5">
+                    {/* Dot 1 */}
+                    <div 
+                      className="absolute top-0 left-1/2 w-1 h-1 bg-white rounded-full animate-falling-dot opacity-0" 
+                      style={{ animationDelay: '0s', marginLeft: '-2px' }}
+                    ></div>
+                    {/* Dot 2 */}
+                    <div 
+                      className="absolute top-0 left-1/2 w-1 h-1 bg-white rounded-full animate-falling-dot opacity-0" 
+                      style={{ animationDelay: '0.8s', marginLeft: '-2px' }}
+                    ></div>
+                    {/* Dot 3 */}
+                    <div 
+                      className="absolute top-0 left-1/2 w-1 h-1 bg-white rounded-full animate-falling-dot opacity-0" 
+                      style={{ animationDelay: '1.6s', marginLeft: '-2px' }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
-        {/* Mobile Scroll Indicator - Minimal Vertical Line Design (biraz kalınlaştırıldı) */}
+        {/* Mobile Scroll Indicator - Sadece dikey çizgi, solda nokta animasyonu yok */}
         {isMobile && (
           <div
             className="absolute left-8 z-30 pointer-events-none mix-blend-difference"

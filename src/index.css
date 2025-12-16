@@ -226,6 +226,50 @@ h6 {
   animation: scroll-indicator-intro 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
+@keyframes scroll-dot-fall {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.5);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  90% {
+    opacity: 1;
+    transform: translateY(40px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(50px) scale(0.5);
+  }
+}
+
+.animate-scroll-dot-fall {
+  animation: scroll-dot-fall 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes falling-dot {
+  0% { 
+    transform: translateY(0); 
+    opacity: 0; 
+  }
+  10% { 
+    opacity: 0.8; 
+  }
+  80% { 
+    opacity: 0.4; 
+  }
+  100% { 
+    transform: translateY(40px); 
+    opacity: 0; 
+  }
+}
+
+.animate-falling-dot {
+  animation: falling-dot 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
 @keyframes scroll-indicator-intro {
   0% {
     transform: scaleY(0.1) translateY(8px);
