@@ -579,7 +579,7 @@ export function ProjectDetailPage() {
                       })
                       setIsFullscreenOpen(true)
                     }}
-                    className="group flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
+                    className="group flex h-9 w-9 md:h-12 md:w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
                     aria-label="Büyüt"
                   >
                     <svg
@@ -592,7 +592,7 @@ export function ProjectDetailPage() {
                       strokeWidth="1.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className="h-8 w-8 transition-transform duration-500"
+                      className="h-6 w-6 md:h-8 md:w-8 transition-transform duration-500"
                     >
                       <line x1="12" y1="4" x2="12" y2="20" />
                       <line x1="4" y1="12" x2="20" y2="12" />

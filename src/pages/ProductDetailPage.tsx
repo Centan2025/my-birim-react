@@ -1032,7 +1032,7 @@ export function ProductDetailPage() {
                     })
                     setIsFullscreenOpen(true)
                   }}
-                  className="group flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
+                  className="group flex h-9 w-9 md:h-12 md:w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
                   aria-label="Büyüt"
                 >
                   <svg
@@ -1045,25 +1045,12 @@ export function ProductDetailPage() {
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-8 w-8 transition-transform duration-500"
+                    className="h-6 w-6 md:h-8 md:w-8 transition-transform duration-500"
                   >
                     <line x1="12" y1="4" x2="12" y2="20" />
                     <line x1="4" y1="12" x2="20" y2="12" />
                   </svg>
                 </button>
-              </div>
-            )}
-            {/* Mobile Scroll Indicator - Minimal Vertical Line Design */}
-            {isMobile && (
-              <div
-                className="absolute left-6 z-30 pointer-events-none mix-blend-difference"
-                style={{
-                  bottom: 'max(40px, env(safe-area-inset-bottom, 0px) + 40px)',
-                }}
-              >
-                <div className="h-[40px] w-[1px] bg-white/20 overflow-hidden relative">
-                  <div className="absolute top-0 left-0 w-full h-full bg-white animate-scroll-line"></div>
-                </div>
               </div>
             )}
           </div>
