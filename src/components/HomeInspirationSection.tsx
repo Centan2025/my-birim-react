@@ -31,17 +31,19 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
   const backgroundImage =
     isMobile && bgImageMobile ? bgImageMobile : bgImageDesktop || bgImageUrl
 
+  // Yükseklik davranışı:
+  // - Mobilde: her zaman ekran yüksekliğinin 1/4'ü kadar sabit yükseklik
+  // - Desktop'ta: her zaman ekran yüksekliğinin 3/2'si değil, 3'te 2'si (yaklaşık %66) kadar sabit yükseklik
   const dynamicHeightStyles =
-    isMobile && inspirationImageHeight && bgImageUrl
+    isMobile
       ? {
-          height: `${inspirationImageHeight}px`,
-          minHeight: `${inspirationImageHeight}px`,
-          paddingTop: 0,
-          paddingBottom: 0,
+          height: '25vh',
+          minHeight: '25vh',
         }
-      : !isMobile && inspirationImageHeight && bgImageUrl
-        ? { minHeight: `${inspirationImageHeight}px` }
-        : {}
+      : {
+          height: '66vh',
+          minHeight: '66vh',
+        }
 
   return (
     <section
@@ -50,7 +52,8 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: isMobile ? '100vw auto' : 'cover',
         backgroundAttachment: 'fixed',
-        backgroundPosition: isMobile ? 'left center' : 'center center',
+        // Mobilde ilham görselini ekranın altına yasla
+        backgroundPosition: isMobile ? 'left bottom' : 'center center',
         backgroundRepeat: 'no-repeat',
         ...dynamicHeightStyles,
       }}

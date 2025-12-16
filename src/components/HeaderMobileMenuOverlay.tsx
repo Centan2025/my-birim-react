@@ -204,7 +204,7 @@ export const HeaderMobileMenuOverlay: React.FC<HeaderMobileMenuOverlayProps> = p
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
-          {/* Alt menü - kategoriler ve Hepsini Gör */}
+        {/* Alt menü - kategoriler ve Hepsini Gör */}
           <div
             className={`overflow-hidden transition-all duration-700 ease-in-out ${
               isMobileProductsMenuOpen ? 'max-h-[1000px] opacity-100 mt-4' : 'max-h-0 opacity-0'
@@ -282,7 +282,11 @@ export const HeaderMobileMenuOverlay: React.FC<HeaderMobileMenuOverlayProps> = p
             className={`group flex items-center justify-between text-2xl md:text-3xl font-light leading-tight text-white transition-all duration-400 ${
               isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
             }`}
-            onClick={onCloseAll}
+            onClick={() => {
+              // Ana menüde başka bir linke gidildiğinde hem ana menüyü hem ürünler alt menüsünü kapat
+              onCloseAll()
+              setIsMobileProductsMenuOpen(false)
+            }}
           >
             <span>
               <CrossFadeText text={item.label} triggerKey={locale} />

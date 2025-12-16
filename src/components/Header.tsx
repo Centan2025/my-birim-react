@@ -2025,17 +2025,15 @@ export function Header() {
                   {/* Settings yüklenene kadar hamburger butonunu gizle - böylece yanlış stil gösterilmez */}
                   {!settings ? null : isOverlayMobileMenu ? (
                     // Overlay modunda: hamburger → X animasyonu
-                    // Eğer alt ürün menüsü (Products) açıksa, ilk tıklamada SADECE alt menüyü kapat,
-                    // hamburger menüyü (ana overlay menü) açık tut.
                     <button
                       ref={mobileMenuButtonRef}
                       onClick={() => {
-                        if (isMobileMenuOpen && isMobileProductsMenuOpen) {
-                          setIsMobileProductsMenuOpen(false)
-                          return
-                        }
                         const willOpen = !isMobileMenuOpen
                         setIsMobileMenuOpen(willOpen)
+                        // Menü tamamen KAPANIRKEN ürünler alt menüsünü de sıfırla
+                        if (!willOpen) {
+                          setIsMobileProductsMenuOpen(false)
+                        }
                         // Menü KAPANIRKEN header her durumda görünür kalsın
                         if (!willOpen) {
                           setIsHeaderVisible(true)
@@ -2076,12 +2074,12 @@ export function Header() {
                     <button
                       ref={mobileMenuButtonRef}
                       onClick={() => {
-                        if (isMobileMenuOpen && isMobileProductsMenuOpen) {
-                          setIsMobileProductsMenuOpen(false)
-                          return
-                        }
                         const willOpen = !isMobileMenuOpen
                         setIsMobileMenuOpen(willOpen)
+                        // Menü tamamen KAPANIRKEN ürünler alt menüsünü de sıfırla
+                        if (!willOpen) {
+                          setIsMobileProductsMenuOpen(false)
+                        }
                         // Menü KAPANIRKEN header her durumda görünür kalsın
                         if (!willOpen) {
                           setIsHeaderVisible(true)

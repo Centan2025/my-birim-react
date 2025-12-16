@@ -714,7 +714,8 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
           <div
             className="absolute left-8 z-30 pointer-events-none mix-blend-difference"
             style={{
-              bottom: 'max(40px, env(safe-area-inset-bottom, 0px) + 40px)',
+              // Scroll göstergesini ekrana biraz daha yaklaştır (daha aşağıda görünsün)
+              bottom: 'max(24px, env(safe-area-inset-bottom, 0px) + 24px)',
             }}
           >
             <div className="h-[40px] w-[1px] bg-white/20 overflow-hidden relative">

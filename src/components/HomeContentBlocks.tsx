@@ -75,12 +75,10 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         // Content alanları arasında dikey boşluk olmasın
         const sectionSpacingClass = 'py-0'
 
-          return (
+        return (
           <section
             key={index}
-            className={`content-block-wrapper ${
-              sectionSpacingClass
-            } ${backgroundColor}`}
+            className={`content-block-wrapper font-gotham ${sectionSpacingClass} ${backgroundColor}`}
             data-block-index={index}
           >
             {isFullWidth ? (
@@ -96,8 +94,13 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       duration={0.6}
                     >
                       <h2
-                        className={`text-2xl md:text-4xl lg:text-5xl font-bold ${titleFontClass} ${textAlignClass} text-gray-950`}
-                        style={titleFontStyle}
+                        className={`text-2xl md:text-4xl lg:text-5xl font-oswald uppercase ${textAlignClass} text-gray-950`}
+                        style={{
+                          textShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                          fontFamily: '"Oswald", sans-serif',
+                          fontWeight: 300,
+                          letterSpacing: '0.1em',
+                        }}
                       >
                         {t(block.title)}
                       </h2>
@@ -138,7 +141,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   <div className="container mx-auto px-2 sm:px-3 lg:px-4 pt-6 pb-10">
                     <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
                       <div className={`prose max-w-none ${textAlignClass}`}>
-                        <p className="text-lg md:text-xl text-gray-900 font-normal leading-relaxed">
+                        <p className="text-lg md:text-xl text-gray-900 font-normal leading-relaxed tracking-[0.03em]">
                           {t(block.description)}
                         </p>
                       </div>
@@ -148,10 +151,10 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                         <div className={`mt-6 ${textAlignClass}`}>
                           <Link
                             to={block.linkUrl}
-                            className="group inline-flex items-center gap-x-3 text-gray-950 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
+                            className="group inline-flex items-center gap-x-3 text-gray-950 font-bold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
                           >
                             <span className="inline-flex items-end gap-x-3 border-b border-transparent md:group-hover:border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
-                              <span className="group-hover:text-gray-500 leading-none">
+                              <span className="group-hover:text-gray-500 leading-none font-bold tracking-[0.05em] uppercase">
                                 {t(block.linkText)}
                               </span>
                               <span className="w-8 h-[1px] md:w-10 bg-current" />
@@ -176,8 +179,13 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       duration={0.6}
                     >
                       <h2
-                        className={`text-2xl md:text-4xl lg:text-5xl font-bold ${titleFontClass} text-gray-950`}
-                        style={titleFontStyle}
+                        className="text-2xl md:text-4xl lg:text-5xl font-oswald uppercase text-gray-950"
+                        style={{
+                          textShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                          fontFamily: '"Oswald", sans-serif',
+                          fontWeight: 300,
+                          letterSpacing: '0.1em',
+                        }}
                       >
                         {t(block.title)}
                       </h2>
@@ -237,7 +245,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'}`}>
                       <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
                         <div className={`prose max-w-none ${textAlignClass}`}>
-                          <p className="text-lg md:text-xl text-gray-900 font-normal leading-relaxed">
+                          <p className="text-lg md:text-xl text-gray-900 font-normal leading-relaxed tracking-[0.03em]">
                             {t(block.description)}
                           </p>
                         </div>
@@ -247,10 +255,10 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                           <div className={`mt-6 ${textAlignClass}`}>
                             <Link
                               to={block.linkUrl}
-                              className="group inline-flex items-center gap-x-3 text-gray-950 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
+                              className="group inline-flex items-center gap-x-3 text-gray-950 font-bold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
                             >
-                            <span className="inline-flex items-end gap-x-3 border-b border-transparent md:group-hover:border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
-                                <span className="group-hover:text-gray-500 leading-none">
+                              <span className="inline-flex items-end gap-x-3 border-b border-transparent md:group-hover:border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
+                                <span className="group-hover:text-gray-500 leading-none font-bold tracking-[0.05em] uppercase">
                                   {t(block.linkText)}
                                 </span>
                                 <span className="w-8 h-[1px] md:w-10 bg-current" />
