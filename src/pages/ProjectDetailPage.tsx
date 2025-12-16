@@ -645,14 +645,14 @@ export function ProjectDetailPage() {
               <div className="max-w-4xl space-y-4">
                 {project.excerpt && (
                   <ScrollReveal delay={200}>
-                    <p className="text-lg text-gray-600 leading-relaxed font-light">
+                    <p className="text-lg text-gray-900 leading-relaxed font-normal">
                       {t(project.excerpt)}
                     </p>
                   </ScrollReveal>
                 )}
                 {project.body && (
                   <ScrollReveal delay={300}>
-                    <div className="text-gray-700 leading-relaxed font-light whitespace-pre-line">
+                    <div className="text-gray-900 leading-relaxed font-normal whitespace-pre-line">
                       {t(project.body)}
                     </div>
                   </ScrollReveal>

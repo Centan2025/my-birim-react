@@ -1,7 +1,13 @@
 export default {
   collection: 'Collection',
   subscribe: 'SUBSCRIBE',
+  subscribing: 'Submitting...',
   email_placeholder: 'Your e-mail address',
+  newsletter_success: 'Your email subscription has been created successfully.',
+  newsletter_success_local:
+    'Your email subscription has been saved. Add VITE_SANITY_TOKEN for it to appear in the CMS.',
+  newsletter_already_subscribed: 'This email address is already subscribed.',
+  newsletter_error: 'An error occurred. Please try again later.',
   designers: 'DESIGNERS',
   news: 'News',
   about: 'About Us',

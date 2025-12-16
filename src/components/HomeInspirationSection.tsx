@@ -58,10 +58,10 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
       <div className="absolute inset-0 bg-black/50" />
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
         <ScrollReveal delay={0} threshold={0.1} width="w-full" className="h-auto">
-          <h2 className="text-4xl font-light leading-relaxed">{t(inspiration.title)}</h2>
+          <h2 className="text-4xl font-normal leading-relaxed">{t(inspiration.title)}</h2>
         </ScrollReveal>
         <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
-          <p className="mt-4 text-lg text-gray-200 max-w-2xl mx-auto font-light leading-relaxed">
+          <p className="mt-4 text-lg text-gray-100 max-w-2xl mx-auto font-normal leading-relaxed">
             {t(inspiration.subtitle)}
           </p>
         </ScrollReveal>

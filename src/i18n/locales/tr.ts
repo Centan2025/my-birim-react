@@ -1,7 +1,12 @@
 export default {
   "collection": "KOLEKSİYON",
   "subscribe": "ABONE OL",
+  "subscribing": "Gönderiliyor...",
   "email_placeholder": "E-posta adresiniz",
+  "newsletter_success": "E-posta aboneliğiniz başarıyla oluşturuldu.",
+  "newsletter_success_local": "E-posta aboneliğiniz kaydedildi. CMS'de görünmesi için VITE_SANITY_TOKEN ekleyin.",
+  "newsletter_already_subscribed": "Bu e-posta adresi zaten aboneliğe kayıtlı.",
+  "newsletter_error": "Bir hata oluştu. Lütfen daha sonra tekrar deneyin.",
   "designers": "TASARIMCILAR",
   "news": "HABERLER",
   "about": "HAKKIMIZDA",

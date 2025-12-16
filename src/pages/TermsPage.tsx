@@ -26,12 +26,12 @@ export default function TermsPage() {
   return (
     <div className="min-h-[60vh] bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
-        <nav className="mb-6 text-sm text-gray-500" aria-label="Breadcrumb">
+        <nav className="mb-6 text-sm text-gray-700" aria-label="Breadcrumb">
           <ol className="list-none p-0 inline-flex items-center">
             <li>
               <Link
                 to="/"
-                className="underline underline-offset-2 hover:text-gray-800 transition-colors"
+                className="underline underline-offset-2 text-gray-900 hover:text-gray-900 transition-colors"
               >
                 ANASAYFA
               </Link>

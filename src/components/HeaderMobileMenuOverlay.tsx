@@ -112,11 +112,11 @@ export const HeaderMobileMenuOverlay: React.FC<HeaderMobileMenuOverlayProps> = p
                       onLocaleChange(langCode)
                     }}
                     aria-pressed={isActive}
-                    className={`group relative px-1.5 py-0.5 text-xs uppercase tracking-[0.2em] transition-all duration-200 ${
+                    className={`group relative px-2.5 py-1.5 text-sm uppercase tracking-[0.2em] transition-all duration-200 ${
                       isActive
-                        ? 'text-white font-extralight'
-                        : 'text-gray-400/90 hover:text-white font-extralight'
-                    } ${isActive ? 'scale-105' : 'scale-100'}`}
+                        ? 'text-white font-light'
+                        : 'text-gray-400/90 hover:text-white font-light'
+                    } ${isActive ? 'scale-110' : 'scale-100'}`}
                     style={{fontFamily: 'Inter, sans-serif', letterSpacing: '0.2em'}}
                   >
                     <span className="relative inline-block transition-opacity transition-transform duration-200 ease-out">
@@ -290,14 +290,37 @@ export const HeaderMobileMenuOverlay: React.FC<HeaderMobileMenuOverlayProps> = p
             if (subscribeEmail) {
               try {
                 await subscribeEmailService(subscribeEmail)
-                alert(t('subscribe_success') || 'E-posta aboneliğiniz başarıyla oluşturuldu!')
+                alert(
+                  t('newsletter_success') ||
+                    t('subscribe_success') ||
+                    'E-posta aboneliğiniz başarıyla oluşturuldu!'
+                )
                 setSubscribeEmail('')
               } catch (err: any) {
-                if (err.message === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
-                  alert(t('subscribe_success') || 'E-posta aboneliğiniz kaydedildi!')
+                const errorMessage = String(err?.message || '')
+
+                if (errorMessage === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
+                  alert(
+                    t('newsletter_success_local') ||
+                      t('subscribe_success') ||
+                      'E-posta aboneliğiniz kaydedildi!'
+                  )
                   setSubscribeEmail('')
+                } else if (
+                  errorMessage.includes('zaten aboneliğe kayıtlı') ||
+                  errorMessage.includes('zaten kayıtlı') ||
+                  errorMessage.toLowerCase().includes('already subscribed')
+                ) {
+                  alert(
+                    t('newsletter_already_subscribed') ||
+                      'Bu e-posta adresi zaten aboneliğe kayıtlı.'
+                  )
                 } else {
-                  alert(err.message || 'Bir hata oluştu.')
+                  alert(
+                    errorMessage ||
+                      t('newsletter_error') ||
+                      'Bir hata oluştu. Lütfen daha sonra tekrar deneyin.'
+                  )
                 }
               }
             }

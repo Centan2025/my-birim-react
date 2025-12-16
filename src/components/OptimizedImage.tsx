@@ -141,7 +141,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   // Art Direction ile picture elementi kullan
   if (useArtDirection) {
     return (
-      <div className={`relative ${className}`} style={{width, height, ...style}}>
+      <div className={`relative ${className}`} style={style}>
         {!isLoaded && (
           <img
             src={placeholder}
@@ -222,7 +222,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   // Normal kullanım (Art Direction yok)
   return (
-    <div className={`relative ${className}`} style={{width, height, ...style}}>
+    <div className={`relative ${className}`} style={style}>
       {!isLoaded && (
         <img
           src={placeholder}

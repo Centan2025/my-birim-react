@@ -1193,10 +1193,13 @@ export function ProductDetailPage() {
         <main className="bg-gray-100">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 lg:pt-12 pb-12">
             {/* Breadcrumbs - desktop ve mobile (artık gray alanda) */}
-            <nav className="mb-8 text-[11px] sm:text-[12px] text-gray-500" aria-label="Breadcrumb">
+            <nav className="mb-8 text-[11px] sm:text-[12px] text-gray-700" aria-label="Breadcrumb">
               <ol className="list-none p-0 inline-flex items-center">
                 <li>
-                  <Link to="/" className="hover:text-gray-800 uppercase underline underline-offset-4">
+                  <Link
+                    to="/"
+                    className="uppercase underline underline-offset-4 text-gray-900 hover:text-gray-900"
+                  >
                     {t('homepage')}
                   </Link>
                 </li>
@@ -1206,7 +1209,7 @@ export function ProductDetailPage() {
                     <li>
                       <Link
                         to={`/products/${category.id}`}
-                        className="hover:text-gray-800 uppercase underline underline-offset-4"
+                        className="uppercase underline underline-offset-4 text-gray-900 hover:text-gray-900"
                       >
                         {t(category.name)}
                       </Link>
@@ -1233,9 +1236,9 @@ export function ProductDetailPage() {
               )}
 
               <div>
-                <h2 className="text-2xl md:text-4xl font-light text-gray-600">{t(product.name)}</h2>
+                <h2 className="text-2xl md:text-4xl font-normal text-gray-700">{t(product.name)}</h2>
                 <ScrollReveal delay={200}>
-                  <p className="mt-3 text-gray-500 leading-relaxed max-w-2xl font-light">
+                  <p className="mt-3 text-gray-900 leading-relaxed max-w-2xl font-normal">
                     {t(product.description)}
                   </p>
                 </ScrollReveal>

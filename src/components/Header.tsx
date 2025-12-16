@@ -1951,11 +1951,13 @@ export function Header() {
                           key={langCode}
                           onClick={() => setLocale(langCode)}
                           aria-pressed={isActive}
-                          aria-label={`${t('switch_language') || 'Dil değiştir'} - ${langCode.toUpperCase()}`}
-                          className={`group relative px-1 py-1 text-[0.8rem] uppercase tracking-[0.25em] transition-colors duration-200 ${
+                          aria-label={`${
+                            t('switch_language') || 'Dil değiştir'
+                          } - ${langCode.toUpperCase()}`}
+                          className={`group relative px-1.5 py-1.5 text-[0.9rem] uppercase tracking-[0.25em] transition-colors duration-200 ${
                             isActive
-                              ? 'text-white font-extralight'
-                              : 'text-gray-400/90 hover:text-white font-extralight'
+                              ? 'text-white font-light'
+                              : 'text-gray-400/90 hover:text-white font-light'
                           }`}
                           style={{fontFamily: 'Inter, sans-serif', letterSpacing: '0.25em'}}
                         >

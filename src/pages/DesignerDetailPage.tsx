@@ -96,7 +96,7 @@ export function DesignerDetailPage() {
           </div>
           <div className="text-left w-full">
             <div className="max-w-2xl">
-              <h1 className={`text-4xl font-light text-gray-600 ${
+              <h1 className={`text-4xl font-normal text-gray-700 ${
                 isTitleVisible
                   ? 'translate-x-0 opacity-100'
                   : '-translate-x-[150%] opacity-0'
@@ -104,7 +104,7 @@ export function DesignerDetailPage() {
                 transition: 'transform 700ms ease-out, opacity 1200ms ease-out'
               }}>{t(designer.name)}</h1>
               <ScrollReveal delay={200}>
-                <p className="mt-4 text-gray-500 leading-relaxed">{t(designer.bio)}</p>
+                <p className="mt-4 text-gray-900 leading-relaxed font-normal">{t(designer.bio)}</p>
               </ScrollReveal>
             </div>
           </div>

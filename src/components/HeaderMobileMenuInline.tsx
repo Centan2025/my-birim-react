@@ -70,10 +70,10 @@ export const HeaderMobileMenuInline: React.FC<HeaderMobileMenuInlineProps> = ({
                       onLocaleChange(langCode)
                     }}
                     aria-pressed={isActive}
-                    className={`group relative px-1.5 py-0.5 text-xs uppercase tracking-[0.2em] transition-colors duration-200 ${
+                    className={`group relative px-2 py-1 text-[0.85rem] uppercase tracking-[0.2em] transition-colors duration-200 ${
                       isActive
-                        ? 'text-white font-extralight'
-                        : 'text-gray-400/90 hover:text-white font-extralight'
+                        ? 'text-white font-light'
+                        : 'text-gray-400/90 hover:text-white font-light'
                     }`}
                     style={{
                       fontFamily: 'Inter, sans-serif',

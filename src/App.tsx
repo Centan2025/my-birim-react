@@ -447,7 +447,7 @@ const Footer = () => {
 
             {/* Partnerler - mobilde en altta */}
             <ScrollReveal delay={210} threshold={0.1} width="w-full" className="h-auto">
-              <div className="flex items-center justify-center flex-wrap gap-6 mb-0">
+              <div className="mt-10 lg:mt-0 flex items-center justify-center flex-wrap gap-6 mb-0">
                 {(content.partners || content.partnerNames || []).map((partner, index) => {
                   const partnerName = typeof partner === 'string' ? partner : t(partner.name)
                   const partnerLogo = typeof partner === 'object' ? partner.logo : undefined
@@ -585,7 +585,7 @@ const Footer = () => {
           </div>
           {/* Sosyal medya linkleri ve email formu - aynı üst hizasında */}
           {/* Sosyal medya linkleri ve email formu - Desktop'ta justify-between ile ayrılır */}
-          <div className="mt-8 flex flex-col lg:flex-row flex-wrap items-center lg:items-start justify-center lg:justify-between gap-6 lg:gap-0">
+          <div className="mt-4 lg:mt-8 flex flex-col lg:flex-row flex-wrap items-center lg:items-start justify-center lg:justify-between gap-6 lg:gap-0">
             {/* Sosyal medya linkleri */}
             <ScrollReveal delay={120} threshold={0.1} width="w-auto" className="h-auto">
               <div className="w-full lg:w-auto flex justify-center lg:justify-start space-x-4">
@@ -703,7 +703,7 @@ const Footer = () => {
           <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
             <div
               id="mobile-legal-row-container"
-              className="mt-8 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col items-center justify-center md:flex-row md:items-start md:justify-start gap-4 text-xs w-full legal-links-row"
+              className="mt-4 lg:mt-10 border-t border-gray-700 pt-8 flex flex-col items-center justify-center md:flex-row md:items-start md:justify-start gap-4 text-xs w-full legal-links-row"
               style={{ overflow: 'visible', width: '100%' }}
             >
               {content.legalLinks && content.legalLinks.length > 0 && (

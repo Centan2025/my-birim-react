@@ -236,13 +236,13 @@ export function NewsDetailPage() {
     <div key={newsId} className="bg-white animate-fade-in-up-subtle">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-0">
         <div className="max-w-4xl mx-auto">
-          {/* Breadcrumbs - tasarımcı sayfalarıyla aynı konum ve font */}
-          <nav className="mb-8 text-[11px] sm:text-[12px] text-gray-500" aria-label="Breadcrumb">
+          {/* Breadcrumbs - diğer sayfalarla aynı renk/stil */}
+          <nav className="mb-8 text-[11px] sm:text-[12px] text-gray-700" aria-label="Breadcrumb">
             <ol className="list-none p-0 inline-flex items-center">
               <li>
                 <Link
                   to="/"
-                  className="hover:text-gray-800 uppercase underline underline-offset-4"
+                  className="uppercase underline underline-offset-4 text-gray-900 hover:text-gray-900"
                 >
                   {t('homepage')}
                 </Link>
@@ -251,7 +251,7 @@ export function NewsDetailPage() {
               <li>
                 <Link
                   to="/news"
-                  className="hover:text-gray-800 uppercase underline underline-offset-4"
+                  className="uppercase underline underline-offset-4 text-gray-900 hover:text-gray-900"
                 >
                   {t('news')}
                 </Link>
@@ -299,12 +299,12 @@ export function NewsDetailPage() {
       <div className="bg-gray-100 w-full pt-6 pb-8">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl md:text-4xl font-light tracking-tight text-gray-600 mb-4">
+            <h1 className="text-3xl md:text-4xl font-normal tracking-tight text-gray-700 mb-4">
               {t(item.title)}
             </h1>
             <div className="flex items-center min-h-[200px]">
-              <div className="prose prose-lg lg:prose-xl text-gray-700 max-w-none w-full [&>p:first-child]:mt-0 [&>p:last-child]:mb-0">
-                <p className="font-light">{t(item.content)}</p>
+              <div className="prose prose-lg lg:prose-xl text-gray-900 max-w-none w-full [&>p:first-child]:mt-0 [&>p:last-child]:mb-0">
+                <p className="font-normal">{t(item.content)}</p>
               </div>
             </div>
           </div>

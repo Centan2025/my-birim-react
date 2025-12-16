@@ -1233,9 +1233,9 @@ export function ProductDetailPage() {
               )}
 
               <div>
-                <h2 className="text-2xl md:text-4xl font-light text-gray-600">{t(product.name)}</h2>
+                <h2 className="text-2xl md:text-4xl font-normal text-gray-700">{t(product.name)}</h2>
                 <ScrollReveal delay={200}>
-                  <p className="mt-3 text-gray-500 leading-relaxed max-w-2xl font-light">
+                  <p className="mt-3 text-gray-900 leading-relaxed max-w-2xl font-normal">
                     {t(product.description)}
                   </p>
                 </ScrollReveal>

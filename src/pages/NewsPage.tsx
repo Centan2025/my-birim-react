@@ -26,7 +26,7 @@ const NewsCard: React.FC<{item: NewsItem}> = ({item}) => {
   return (
     <Link
       to={`/news/${item.id}`}
-      className={`group block relative overflow-hidden shadow-lg transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl aspect-[4/5] ${imageBorderClass}`}
+      className={`group block relative w-full max-w-full overflow-hidden shadow-lg transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl aspect-[4/5] ${imageBorderClass}`}
     >
       <OptimizedImage
         src={typeof item.mainImage === 'string' ? item.mainImage : item.mainImage?.url || ''}
@@ -40,9 +40,11 @@ const NewsCard: React.FC<{item: NewsItem}> = ({item}) => {
         quality={85}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-      <div className="absolute bottom-0 left-0 p-6 text-white">
+      <div className="absolute bottom-0 left-0 p-6 text-white w-full max-w-full box-border">
         <p className="text-sm opacity-80">{formatDate(item.date)}</p>
-        <h2 className="text-2xl font-light mt-1 group-hover:underline">{t(item.title)}</h2>
+        <h2 className="text-2xl font-light mt-1 group-hover:underline break-words break-all">
+          {t(item.title)}
+        </h2>
       </div>
     </Link>
   )
@@ -71,8 +73,8 @@ export function NewsPage() {
   }
 
   return (
-    <div className="bg-gray-100 animate-fade-in-up-subtle">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
+    <div className="bg-gray-100 overflow-x-hidden animate-fade-in-up-subtle">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16 overflow-x-hidden max-w-full">
         <Breadcrumbs
           className="mb-6"
           items={[
@@ -80,14 +82,14 @@ export function NewsPage() {
             {label: t('news')},
           ]}
         />
-        <div className="text-center mt-6 md:mt-8 mb-16">
+        <div className="text-center mt-6 md:mt-8 mb-16 w-full max-w-full mx-auto">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600 uppercase">
             {t('news_title')}
           </h1>
           <div className="h-px bg-gray-300 mt-4 w-full"></div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 w-full max-w-full mx-auto">
           {news.length > 0 ? (
             news.map((item, index) => (
               <div

@@ -20,7 +20,6 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
   imageBorderClass,
 }) => {
   const { t } = useTranslation()
-
   if (!blocks || blocks.length === 0) {
     return null
   }
@@ -30,6 +29,10 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
   return (
     <>
       {sortedBlocks.map((block, index) => {
+        const hasTitle = !!block.title
+        const hasDescription = !!block.description
+        const hasTextContent = hasTitle || hasDescription
+
         const getMediaUrl = () => {
           if (block.mediaType === 'image' && block.image) {
             return block.image
@@ -56,12 +59,12 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         // Font class veya style belirle
         const titleFontClass =
           titleFont === 'serif'
-            ? 'font-serif'
-            : titleFont === 'mono'
-              ? 'font-mono'
-              : titleFont === 'normal'
-                ? 'font-sans'
-                : '' // Google Font için class yok, inline style kullanacağız
+                ? 'font-serif'
+                : titleFont === 'mono'
+                  ? 'font-mono'
+                  : titleFont === 'normal'
+                    ? 'font-sans'
+                    : '' // Google Font için class yok, inline style kullanacağız
 
         // Google Font için inline style
         const titleFontStyle =
@@ -69,17 +72,20 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             ? { fontFamily: `"${titleFont}", sans-serif` }
             : undefined
 
-        return (
+        // Content alanları arasında dikey boşluk olmasın
+        const sectionSpacingClass = 'py-0'
+
+          return (
           <section
             key={index}
             className={`content-block-wrapper ${
-              index === 0 ? 'pt-0 pb-0' : index === 1 ? 'pt-0 pb-20' : 'py-20'
+              sectionSpacingClass
             } ${backgroundColor}`}
             data-block-index={index}
           >
             {isFullWidth ? (
               <div className="w-full overflow-hidden">
-                {block.title && (
+                {hasTitle && (
                   <div className="container mx-auto px-2 sm:px-3 lg:px-4 pt-6 md:pt-8 pb-6 md:pb-8">
                     <ScrollReveal
                       delay={0}
@@ -128,11 +134,11 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     />
                   )}
                 </ScrollReveal>
-                {block.description && (
-                  <div className="container mx-auto px-2 sm:px-3 lg:px-4 py-12">
+                {hasDescription && (
+                  <div className="container mx-auto px-2 sm:px-3 lg:px-4 pt-6 pb-10">
                     <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
                       <div className={`prose max-w-none ${textAlignClass}`}>
-                        <p className="text-lg md:text-xl text-gray-950 font-light leading-relaxed">
+                        <p className="text-lg md:text-xl text-gray-900 font-normal leading-relaxed">
                           {t(block.description)}
                         </p>
                       </div>
@@ -144,7 +150,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                             to={block.linkUrl}
                             className="group inline-flex items-center gap-x-3 text-gray-950 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
                           >
-                            <span className="inline-flex items-end gap-x-3 border-b border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
+                            <span className="inline-flex items-end gap-x-3 border-b border-transparent md:group-hover:border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
                               <span className="group-hover:text-gray-500 leading-none">
                                 {t(block.linkText)}
                               </span>
@@ -159,7 +165,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               </div>
             ) : (
               <div className="container mx-auto px-2 sm:px-3 lg:px-4">
-                {block.title && (
+                {hasTitle && (
                   <div className={`pt-6 md:pt-8 pb-6 md:pb-8 ${textAlignClass}`}>
                     <ScrollReveal
                       delay={0}
@@ -179,11 +185,23 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   </div>
                 )}
                 <div
-                  className={`flex flex-col ${
-                    isLeft ? 'md:flex-row' : isRight ? 'md:flex-row-reverse' : 'md:flex-row items-center'
-                  } gap-12`}
+                  className={
+                    hasTextContent
+                      ? `flex flex-col ${
+                          isLeft
+                            ? 'md:flex-row'
+                            : isRight
+                              ? 'md:flex-row-reverse'
+                              : 'md:flex-row items-center'
+                        } gap-8 md:gap-10`
+                      : 'flex flex-col items-center gap-8 md:gap-10'
+                  }
                 >
-                  <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'} overflow-visible`}>
+                  <div
+                    className={`w-full ${
+                      !hasTextContent || isCenter ? 'md:w-full' : 'md:w-1/2'
+                    } overflow-visible`}
+                  >
                     <ScrollReveal delay={50} threshold={0.1} width="w-full" className="h-auto">
                       {block.mediaType === 'youtube' ? (
                         <div className="relative w-full aspect-video overflow-hidden">
@@ -215,11 +233,11 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       )}
                     </ScrollReveal>
                   </div>
-                  {block.description && (
+                  {hasDescription && (
                     <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'}`}>
                       <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
                         <div className={`prose max-w-none ${textAlignClass}`}>
-                          <p className="text-lg md:text-xl text-gray-950 font-light leading-relaxed">
+                          <p className="text-lg md:text-xl text-gray-900 font-normal leading-relaxed">
                             {t(block.description)}
                           </p>
                         </div>
@@ -231,7 +249,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                               to={block.linkUrl}
                               className="group inline-flex items-center gap-x-3 text-gray-950 font-semibold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
                             >
-                              <span className="inline-flex items-end gap-x-3 border-b border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
+                            <span className="inline-flex items-end gap-x-3 border-b border-transparent md:group-hover:border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
                                 <span className="group-hover:text-gray-500 leading-none">
                                   {t(block.linkText)}
                                 </span>

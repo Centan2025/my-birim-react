@@ -36,8 +36,8 @@ export function ProductDesignerSection({designer, t}: ProductDesignerSectionProp
               />
             </div>
             <div className="w-full">
-              <h3 className="text-2xl font-thin text-gray-600">{t(designer.name)}</h3>
-              <p className="mt-4 text-gray-500 font-light leading-relaxed">
+              <h3 className="text-2xl font-normal text-gray-700">{t(designer.name)}</h3>
+              <p className="mt-4 text-gray-800 font-normal leading-relaxed">
                 {t(designer.bio).slice(0, 400)}
                 {t(designer.bio).length > 400 ? '…' : ''}
               </p>
