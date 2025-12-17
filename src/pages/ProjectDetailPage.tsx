@@ -306,19 +306,6 @@ export function ProjectDetailPage() {
     )
   }
 
-  const arrowKeyframes = (
-    <style>{`
-      @keyframes proj-arrow-in-left {
-        from { opacity: 0; transform: translateX(-40px); }
-        to { opacity: 1; transform: translateX(0); }
-      }
-      @keyframes proj-arrow-in-right {
-        from { opacity: 0; transform: translateX(40px); }
-        to { opacity: 1; transform: translateX(0); }
-      }
-    `}</style>
-  )
-
   // Hero ileri/geri - ProductDetailPage'teki heroNext/heroPrev benzeri (sonsuz kayma)
   const next = () => {
     if (slideCount <= 1) return
