@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react'
+import React, {useEffect, useMemo, useState, useRef} from 'react'
 import type {ObjectInputProps} from 'sanity'
 import {useClient, set, unset, setIfMissing} from 'sanity'
 import imageUrlBuilder from '@sanity/image-url'
@@ -16,7 +16,15 @@ function withKey(items: Material[]): Material[] {
 function assetId(img: any): string {
   return img?.asset?._ref || img?._ref || img?._id || img?.asset?._id || ''
 }
+function ensureKey(m: any): any {
+  if (!m) return m
+  if (m._key) return m
+  return {...m, _key: genKey()}
+}
 function materialIdLoose(m: any): string {
+  // Öncelik _key; yoksa ad + görsel fallback
+  const key = m?._key || ''
+  if (key) return key
   const ntr = (m?.name?.tr || '').toString().trim()
   const nen = (m?.name?.en || '').toString().trim()
   const aid = assetId(m?.image)
@@ -31,24 +39,56 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
   const [selectedGroupId, setSelectedGroupId] = useState<string | undefined>(undefined)
   const [selectedBookIndex, setSelectedBookIndex] = useState<number>(0)
   const [localSelectedIds, setLocalSelectedIds] = useState<Set<string>>(new Set())
+  const [groupCache, setGroupCache] = useState<
+    Record<string, {materials: Material[]; bookIndex: number; ids: string[]}>
+  >({})
+  const restoringRef = useRef(false)
+  const touchedRef = useRef(false)
 
   useEffect(() => {
     setLoading(true)
     client
       .fetch<GroupDoc[]>(
-        `*[_type == "materialGroup"]{_id, title, books[]{ title, items[]{ _key, name, image{asset} } }, items[]{ _key, name, image{asset} }}`,
+        `*[_type == "materialGroup"]{
+          _id,
+          title,
+          books[]{
+            title,
+            items[]{
+              _key,
+              name,
+              image{
+                crop,
+                hotspot,
+                asset->{_id, _ref, url}
+              }
+            }
+          },
+          items[]{
+            _key,
+            name,
+            image{
+              crop,
+              hotspot,
+              asset->{_id, _ref, url}
+            }
+          }
+        }`,
       )
       .then((rows: any[]) => {
-        const normalized = (rows || []).map((r) => ({
-          _id: r._id,
-          title: r.title,
-          books:
-            r.books && r.books.length
-              ? r.books
-              : r.items && r.items.length
-                ? [{title: r.title, items: r.items}]
-                : [],
-        }))
+        const normalized = (rows || []).map((r) => {
+          const hasBooks = r.books && r.books.length
+          const books = hasBooks
+            ? r.books.map((b: any) => ({...b, items: withKey(b.items || [])}))
+            : r.items && r.items.length
+              ? [{title: r.title, items: withKey(r.items)}]
+              : []
+          return {
+            _id: r._id,
+            title: r.title,
+            books,
+          }
+        })
         setGroups(normalized as any)
       })
       .finally(() => setLoading(false))
@@ -79,6 +119,61 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
     setLocalSelectedIds(new Set(mats.map(materialIdLoose)))
   }, [value, onChange])
 
+  // Seçimler değiştikçe aktif grubu cache'e yaz (publish etmeden geri dönebilmek için)
+  useEffect(() => {
+    if (!selectedGroupId) return
+    if (restoringRef.current) return
+    const valueGroupId = (value as any)?.group?._ref
+    // Değer başka gruba aitken bu grubu cache'leme
+    if (valueGroupId && valueGroupId !== selectedGroupId) return
+    const mats: Material[] = Array.isArray((value as any)?.materials) ? (value as any).materials : []
+    const nextIds = Array.from(localSelectedIds)
+    const prev = groupCache[selectedGroupId]
+    const prevIdsKey = prev?.ids?.join('|') || ''
+    const nextIdsKey = nextIds.join('|')
+    const matKey = (ms: Material[]) => ms.map(materialIdLoose).join('|')
+    const prevMatKey = prev ? matKey(prev.materials || []) : ''
+    const nextMatKey = matKey(mats)
+    const needsUpdate =
+      !prev ||
+      prev.bookIndex !== selectedBookIndex ||
+      prevIdsKey !== nextIdsKey ||
+      prevMatKey !== nextMatKey
+    if (!needsUpdate) return
+    setGroupCache(prevCache => ({
+      ...prevCache,
+      [selectedGroupId]: {
+        materials: mats,
+        bookIndex: selectedBookIndex,
+        ids: nextIds,
+      },
+    }))
+  }, [selectedGroupId, selectedBookIndex, localSelectedIds, value, groupCache])
+
+  // Grup değiştiğinde cache varsa ve değer boşsa geri yükle (Sanity render sırasındaki kayıpları önlemek için)
+  useEffect(() => {
+    if (!selectedGroupId) return
+    if (restoringRef.current) return
+    if (touchedRef.current) return
+    const cached = groupCache[selectedGroupId]
+    if (!cached) return
+    const mats: any[] = (value as any)?.materials || []
+    const isEmpty = mats.length === 0
+    if (!isEmpty) return
+
+    restoringRef.current = true
+    onChange(set(cached.materials || [], ['materials']))
+    setSelectedBookIndex(cached.bookIndex || 0)
+    setLocalSelectedIds(new Set(cached.ids || []))
+  }, [selectedGroupId, groupCache, value, onChange])
+
+  // Restore tamamlanınca bayrağı temizle
+  useEffect(() => {
+    if (!restoringRef.current) return
+    const mats: any[] = (value as any)?.materials || []
+    if (mats.length > 0) restoringRef.current = false
+  }, [value])
+
   if (!groups.length && !loading) return renderDefault(props)
 
   const selectedMaterials: Material[] = (value as any)?.materials || []
@@ -93,17 +188,40 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
       <select
         value={selectedGroupId || ''}
         onChange={(e) => {
+          touchedRef.current = false
           const gid = e.target.value || undefined
+          const isGroupChanged = gid !== selectedGroupId
+
+          // Mevcut gruptaki seçimleri cache'le
+          if (selectedGroupId) {
+            const currentMats: Material[] = Array.isArray(selectedMaterials) ? selectedMaterials : []
+            setGroupCache((prev) => ({
+              ...prev,
+              [selectedGroupId]: {
+                materials: currentMats,
+                bookIndex: selectedBookIndex,
+                ids: Array.from(localSelectedIds),
+              },
+            }))
+          }
+
+          // Yeni gruba geçerken cache'te varsa geri yükle
+          const cached = gid ? groupCache[gid] : undefined
           setSelectedGroupId(gid)
-          setSelectedBookIndex(0)
+          setSelectedBookIndex(cached ? cached.bookIndex : 0)
+          setLocalSelectedIds(new Set(cached ? cached.ids : []))
+
           if (gid) {
             const refObj = {_type: 'reference', _ref: gid} as any
             const currentKey = (value as any)?._key
             const nextObj: any = {...(value || {}), group: refObj}
-            if (!Array.isArray(nextObj.materials)) nextObj.materials = []
+            const nextMaterials = cached ? cached.materials : []
+            nextObj.materials = Array.isArray(nextMaterials) ? nextMaterials : []
             if (currentKey) nextObj._key = currentKey
             onChange(set(nextObj))
           } else {
+            // Grup temizlenince seçimleri de sıfırla
+            setLocalSelectedIds(new Set())
             onChange(unset())
           }
         }}
@@ -155,7 +273,8 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
                   <input
                     type="checkbox"
                     checked={isChecked}
-                    onChange={(e) => {
+                  onChange={(e) => {
+                      touchedRef.current = true
                       let nextArr = [...(selectedMaterials || [])]
                       const nextIds = new Set(localSelectedIds)
                       if (e.target.checked) {
@@ -164,10 +283,11 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
                           const imgObj = aid
                             ? {_type: 'image', asset: {_type: 'reference', _ref: aid}}
                             : undefined
+                    const sourceKey = m?._key || genKey()
                           const toAdd: any = {
                             _type: 'productMaterial',
                             name: m?.name,
-                            _key: genKey(),
+                      _key: sourceKey,
                           }
                           if (imgObj) toAdd.image = imgObj
                           // prevent duplicate push

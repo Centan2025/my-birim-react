@@ -9,7 +9,9 @@ const Container = styled.div`
   margin: 0 auto;
 `
 
-const UploadArea = styled.div<{isDragging: boolean}>`
+const UploadArea = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== 'isDragging',
+})<{isDragging: boolean}>`
   border: 2px dashed ${(props) => (props.isDragging ? '#2276fc' : '#ccc')};
   border-radius: 8px;
   padding: 3rem;

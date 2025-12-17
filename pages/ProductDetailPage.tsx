@@ -1,5 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
 import React, { useState, useEffect, useMemo, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 // FIX: Imported SiteSettings type to correctly type component state.
 import type { LocalizedString } from '../types'
@@ -155,12 +156,102 @@ export function ProductDetailPage() {
   const thumbRef = useRef<HTMLDivElement | null>(null)
   const [thumbDragStartX, setThumbDragStartX] = useState<number | null>(null)
   const [thumbScrollStart, setThumbScrollStart] = useState<number>(0)
+  const scrollLockRef = useRef<number>(0)
+  const closeBtnAnimStyle: React.CSSProperties = {
+    animation: 'close-in 650ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+  }
+  const arrowInLeft: React.CSSProperties = {
+    transform: 'translateX(-40px)',
+    opacity: 0,
+    animation: 'arrow-in-left 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms forwards',
+  }
+  const arrowInRight: React.CSSProperties = {
+    transform: 'translateX(40px)',
+    opacity: 0,
+    animation: 'arrow-in-right 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 200ms forwards',
+  }
+
+  // Işık kutuları açıkken hem body hem html scroll'unu kilitle, pozisyonu koru
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    const html = document.documentElement
+    const body = document.body
+
+    const shouldLock = Boolean(dimLightbox || materialLightbox)
+    if (shouldLock) {
+      scrollLockRef.current = window.scrollY || 0
+      body.style.position = 'fixed'
+      body.style.top = `-${scrollLockRef.current}px`
+      body.style.left = '0'
+      body.style.right = '0'
+      body.style.width = '100%'
+      body.style.overflow = 'hidden'
+      body.style.touchAction = 'none'
+      html.style.overflow = 'hidden'
+      html.style.touchAction = 'none'
+    } else {
+      body.style.position = ''
+      body.style.top = ''
+      body.style.left = ''
+      body.style.right = ''
+      body.style.width = ''
+      body.style.overflow = ''
+      body.style.touchAction = ''
+      html.style.overflow = ''
+      html.style.touchAction = ''
+      if (scrollLockRef.current) {
+        window.scrollTo(0, scrollLockRef.current)
+      }
+    }
+
+    return () => {
+      body.style.position = ''
+      body.style.top = ''
+      body.style.left = ''
+      body.style.right = ''
+      body.style.width = ''
+      body.style.overflow = ''
+      body.style.touchAction = ''
+      html.style.overflow = ''
+      html.style.touchAction = ''
+      if (scrollLockRef.current) {
+        window.scrollTo(0, scrollLockRef.current)
+      }
+    }
+  }, [dimLightbox, materialLightbox])
 
   // Sayfa animasyonu - ilk açılışta fade-in
   useEffect(() => {
     // PageTransition animasyonu kullanıldığı için bu animasyonu kaldırdık
     setIsPageVisible(true)
   }, [productId])
+
+  // Close butonu slide-in + spin animasyonu için global keyframe
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    const id = 'lightbox-slide-in-right'
+    if (document.getElementById(id)) return
+    const style = document.createElement('style')
+    style.id = id
+    style.textContent = `
+      @keyframes close-in {
+        from { opacity: 0; transform: translateX(100px) rotate(90deg); }
+        to { opacity: 1; transform: translateX(0) rotate(0deg); }
+      }
+      @keyframes arrow-in-left {
+        from { opacity: 0; transform: translateX(-40px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+      @keyframes arrow-in-right {
+        from { opacity: 0; transform: translateX(40px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+    `
+    document.head.appendChild(style)
+    return () => {
+      style.remove()
+    }
+  }, [])
 
   // Sayfa başlığı + GA pageview: "Kategori Adı - Ürün Adı"
   useEffect(() => {
@@ -903,6 +994,7 @@ export function ProductDetailPage() {
                 <button
                   onClick={heroPrev}
                   className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+                  style={arrowInLeft}
                   aria-label="Previous hero slide"
                 >
                   <span
@@ -915,6 +1007,7 @@ export function ProductDetailPage() {
                 <button
                   onClick={heroNext}
                   className="absolute right-6 top-1/2 -translate-y-1/2 bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+                  style={arrowInRight}
                   aria-label="Next hero slide"
                 >
                   <span
@@ -1682,21 +1775,22 @@ export function ProductDetailPage() {
         {/* Dimension Images Modal */}
         {dimLightbox && dimLightbox.images.length > 0 && (
           <div
-            className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center"
             onClick={() => setDimLightbox(null)}
           >
             <div
-              className="bg-white rounded-lg shadow-sm border border-gray-100 max-w-4xl w-full max-h-[90vh] overflow-auto relative"
+              className="relative flex items-center justify-center w-full max-w-5xl max-h-[90vh] bg-white border border-gray-300 shadow-2xl overflow-hidden"
               onClick={e => e.stopPropagation()}
             >
               <button
                 onClick={() => setDimLightbox(null)}
-                className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 transition-colors z-20 p-2 hover:bg-gray-100 rounded-full"
+                className="absolute top-4 right-4 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/60 bg-white/70 backdrop-blur-md shadow-lg flex items-center justify-center text-gray-700 hover:bg-white hover:text-gray-900 transition-colors"
+                style={closeBtnAnimStyle}
                 aria-label="Close"
               >
                 <CloseIcon />
               </button>
-              <div className="p-8 relative">
+              <div className="relative w-full h-full flex items-center justify-center">
                 {dimLightbox.images.length > 1 && (
                   <>
                     <button
@@ -1709,19 +1803,20 @@ export function ProductDetailPage() {
                             dimLightbox.images.length,
                         })
                       }}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-10 h-10 md:w-14 md:h-14"
                       style={{
-                        width: '54px',
-                        height: '54px',
-                        backgroundColor: 'rgba(62, 60, 60, 0.5)',
-                        color: '#d3caca'
+                          backgroundColor: 'rgba(62, 60, 60, 0.5)',
+                          color: '#d3caca',
+                          transform: 'translateX(-40px)',
+                          opacity: 0,
+                          animation: 'arrow-in-left 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms forwards'
                       }}
                       aria-label="Previous"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        width="41"
-                        height="41"
+                        width="28"
+                        height="28"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -1740,19 +1835,20 @@ export function ProductDetailPage() {
                           currentIndex: (dimLightbox.currentIndex + 1) % dimLightbox.images.length,
                         })
                       }}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-10 h-10 md:w-14 md:h-14"
                       style={{
-                        width: '54px',
-                        height: '54px',
-                        backgroundColor: 'rgba(62, 60, 60, 0.5)',
-                        color: '#d3caca'
+                          backgroundColor: 'rgba(62, 60, 60, 0.5)',
+                          color: '#d3caca',
+                          transform: 'translateX(40px)',
+                          opacity: 0,
+                          animation: 'arrow-in-right 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 200ms forwards'
                       }}
                       aria-label="Next"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        width="41"
-                        height="41"
+                        width="28"
+                        height="28"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -1769,13 +1865,15 @@ export function ProductDetailPage() {
                   const currentImage = dimLightbox.images[dimLightbox.currentIndex]
                   if (!currentImage) return null
                   return (
-                    <OptimizedImage
-                      src={currentImage.image}
-                      alt={currentImage.title ? t(currentImage.title) : 'Technical Drawing'}
-                      className="w-full h-auto object-contain"
-                      loading="eager"
-                      quality={95}
-                    />
+                    <div className="w-full h-full flex items-center justify-center px-4 md:px-10 py-6">
+                      <OptimizedImage
+                        src={currentImage.image}
+                        alt={currentImage.title ? t(currentImage.title) : 'Technical Drawing'}
+                        className="max-h-[80vh] max-w-[90vw] object-contain"
+                        loading="eager"
+                        quality={95}
+                      />
+                    </div>
                   )
                 })()}
               </div>
@@ -1786,21 +1884,22 @@ export function ProductDetailPage() {
         {/* Material Images Modal */}
         {materialLightbox && materialLightbox.images.length > 0 && (
           <div
-            className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center p-1"
+            className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center"
             onClick={() => setMaterialLightbox(null)}
           >
             <div
-              className="bg-white border border-gray-300 max-w-2xl w-full max-h-[98vh] overflow-hidden relative"
+              className="relative flex items-center justify-center w-full max-w-4xl max-h-[90vh] bg-white border border-gray-300 shadow-2xl overflow-hidden"
               onClick={e => e.stopPropagation()}
             >
               <button
                 onClick={() => setMaterialLightbox(null)}
-                className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 transition-colors z-20 p-1 hover:bg-gray-100 rounded-full"
+                className="absolute top-3 right-3 z-20 w-10 h-10 md:w-11 md:h-11 rounded-full border border-white/60 bg-white/70 backdrop-blur-md shadow-lg flex items-center justify-center text-gray-700 hover:bg-white hover:text-gray-900 transition-colors"
+                style={closeBtnAnimStyle}
                 aria-label="Close"
               >
                 <CloseIcon />
               </button>
-              <div className="relative">
+              <div className="relative w-full h-full flex items-center justify-center">
                 {materialLightbox.images.length > 1 && (
                   <>
                     <button
@@ -1813,19 +1912,20 @@ export function ProductDetailPage() {
                             materialLightbox.images.length,
                         })
                       }}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-10 h-10 md:w-14 md:h-14"
                       style={{
-                        width: '54px',
-                        height: '54px',
                         backgroundColor: 'rgba(62, 60, 60, 0.5)',
-                        color: '#d3caca'
+                        color: '#d3caca',
+                        transform: 'translateX(-40px)',
+                        opacity: 0,
+                        animation: 'arrow-in-left 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms forwards'
                       }}
                       aria-label="Previous"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        width="41"
-                        height="41"
+                        width="28"
+                        height="28"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -1845,19 +1945,20 @@ export function ProductDetailPage() {
                             (materialLightbox.currentIndex + 1) % materialLightbox.images.length,
                         })
                       }}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-10 h-10 md:w-14 md:h-14"
                       style={{
-                        width: '54px',
-                        height: '54px',
                         backgroundColor: 'rgba(62, 60, 60, 0.5)',
-                        color: '#d3caca'
+                        color: '#d3caca',
+                        transform: 'translateX(40px)',
+                        opacity: 0,
+                        animation: 'arrow-in-right 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 200ms forwards'
                       }}
                       aria-label="Next"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        width="41"
-                        height="41"
+                        width="28"
+                        height="28"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -1875,13 +1976,15 @@ export function ProductDetailPage() {
                     const currentImage = materialLightbox.images[materialLightbox.currentIndex]
                     if (!currentImage) return null
                     return (
-                      <OptimizedImage
-                        src={currentImage.image}
-                        alt={currentImage.name}
-                        className="w-full h-auto object-contain"
-                        loading="eager"
-                        quality={95}
-                      />
+                      <div className="w-full h-full flex items-center justify-center px-4 md:px-10 py-6">
+                        <OptimizedImage
+                          src={currentImage.image}
+                          alt={currentImage.name}
+                          className="max-h-[80vh] max-w-[90vw] object-contain"
+                          loading="eager"
+                          quality={95}
+                        />
+                      </div>
                     )
                   })()}
               </div>

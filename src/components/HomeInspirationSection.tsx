@@ -61,12 +61,9 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
       }
 
       // HESAPLAMA:
-      // "Buffer" (taşma payı) kullanmıyoruz çünkü z-index yüksek olacağı için
-      // taşan kısımlar diğer içeriklerin üstüne biner.
-      // Bunun yerine "Siyah Arka Plan" hilesi ile yırtılmayı gizleyeceğiz.
-      
+      // Footer kesilmesini önlemek için "Safety Crop" mantığı (+1px)
       const top = Math.max(0, rect.top)
-      const bottom = Math.max(0, windowHeight - rect.bottom)
+      const bottom = Math.max(0, windowHeight - rect.bottom + 1)
       const left = Math.max(0, rect.left)
       const right = Math.max(0, windowWidth - rect.right)
 
@@ -87,6 +84,14 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
   return (
     <>
       <style>{`
+        /* DÜZELTME: Background-color kaldırıldı.
+           Footer artık kendi orijinal rengini kullanacak. 
+           Z-index: 50 olduğu için görselin üstünde kalmaya devam edecek. */
+        footer {
+          position: relative !important;
+          z-index: 50 !important;
+        }
+
         .portal-fixed-bg {
           position: fixed;
           top: 0;
@@ -94,9 +99,7 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
           width: 100vw;
           height: 100vh;
           
-          /* GÖRÜNÜRLÜK DÜZELTMESİ:
-             Z-index'i tekrar yükselttik (10). Böylece beyaz arka planın altında kalmaz.
-             Ancak buffer (taşma) yapmadığımız için footer'ın üstüne binmez. */
+          /* Görselin Z-index'i. Footer'ın (50) altında, sayfanın (body) üstünde. */
           z-index: 10; 
           
           pointer-events: none;
@@ -112,18 +115,15 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
 
         .inspiration-container {
           position: relative;
-          z-index: 20; /* İçerik görselin üstünde */
+          z-index: 20; 
           
-          /* YIRTILMA (BEYAZ ÇİZGİ) ÇÖZÜMÜ:
-             Arka planı SİYAH (#000) yapıyoruz.
-             Eğer scroll hızlı olur da maske gecikirse, alttan beyaz sayfa değil
-             siyah zemin görünecek. Göz bunu fark etmez. */
+          /* Yırtılmayı önleyen SİYAH arka plan */
           background-color: #000;
         }
         
         .inspiration-content {
           position: relative;
-          z-index: 30; /* En üst katman */
+          z-index: 30;
         }
       `}</style>
 

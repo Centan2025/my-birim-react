@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, CSSProperties } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { OptimizedImage } from '../components/OptimizedImage'
 import { OptimizedVideo } from '../components/OptimizedVideo'
@@ -88,6 +88,16 @@ export function ProjectDetailPage() {
   const [isLocationVisible, setIsLocationVisible] = useState(false)
   const [areDotsVisible, setAreDotsVisible] = useState(false)
   const [isPageVisible, setIsPageVisible] = useState(false)
+  const arrowInLeft: CSSProperties = {
+    transform: 'translateX(-40px)',
+    opacity: 0,
+    animation: 'proj-arrow-in-left 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms forwards',
+  }
+  const arrowInRight: CSSProperties = {
+    transform: 'translateX(40px)',
+    opacity: 0,
+    animation: 'proj-arrow-in-right 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 200ms forwards',
+  }
 
   // Header temasını kapak görseli paletinden besle
   useEffect(() => {
@@ -296,6 +306,19 @@ export function ProjectDetailPage() {
     )
   }
 
+  const arrowKeyframes = (
+    <style>{`
+      @keyframes proj-arrow-in-left {
+        from { opacity: 0; transform: translateX(-40px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+      @keyframes proj-arrow-in-right {
+        from { opacity: 0; transform: translateX(40px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+    `}</style>
+  )
+
   // Hero ileri/geri - ProductDetailPage'teki heroNext/heroPrev benzeri (sonsuz kayma)
   const next = () => {
     if (slideCount <= 1) return
@@ -387,6 +410,16 @@ export function ProjectDetailPage() {
         transform: isPageVisible ? 'translateY(0)' : 'translateY(80px)',
       }}
     >
+      <style>{`
+        @keyframes proj-arrow-in-left {
+          from { opacity: 0; transform: translateX(-40px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes proj-arrow-in-right {
+          from { opacity: 0; transform: translateX(40px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+      `}</style>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24">
         <Breadcrumbs
           className="mb-6"
@@ -597,7 +630,7 @@ export function ProjectDetailPage() {
                       })
                       setIsFullscreenOpen(true)
                     }}
-                    className="group flex h-9 w-9 md:h-12 md:w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
+                    className="group flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
                     aria-label="Büyüt"
                   >
                     <svg
@@ -610,7 +643,7 @@ export function ProjectDetailPage() {
                       strokeWidth="1.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className="h-6 w-6 md:h-8 md:w-8 transition-transform duration-500"
+                      className="h-6 w-6 md:h-7 md:w-7 transition-transform duration-500"
                     >
                       <line x1="12" y1="4" x2="12" y2="20" />
                       <line x1="4" y1="12" x2="20" y2="12" />
@@ -625,6 +658,7 @@ export function ProjectDetailPage() {
                   type="button"
                   onClick={prev}
                   className="group pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
+                  style={arrowInLeft}
                   aria-label={t('previous')}
                 >
                   <svg
@@ -646,6 +680,7 @@ export function ProjectDetailPage() {
                   type="button"
                   onClick={next}
                   className="group pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
+                  style={arrowInRight}
                   aria-label={t('next')}
                 >
                   <svg
@@ -712,13 +747,13 @@ export function ProjectDetailPage() {
                         <OptimizedImage
                           src={m.url}
                           alt={`thumb-${i}`}
-                          className="w-full aspect-square object-contain"
+                          className="w-full aspect-video object-contain"
                           loading="lazy"
                           quality={75}
                         />
                       )}
                       {m.type === 'video' && (
-                        <div className="w-full aspect-square bg-gray-50 flex items-center justify-center relative">
+                        <div className="w-full aspect-video bg-gray-50 flex items-center justify-center relative">
                           <OptimizedVideo
                             src={m.url}
                             className="w-full h-full object-contain"
@@ -738,7 +773,7 @@ export function ProjectDetailPage() {
                         </div>
                       )}
                       {m.type === 'youtube' && (
-                        <div className="w-full aspect-square bg-gray-50 relative">
+                        <div className="w-full aspect-video bg-gray-50 relative">
                           <OptimizedImage
                             src={youTubeThumb(m.url)}
                             alt={`youtube thumb ${i + 1}`}

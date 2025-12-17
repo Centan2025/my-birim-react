@@ -141,17 +141,22 @@ const mapImage = (
 ): string => {
   if (!img) return ''
   if (typeof img === 'string') return img
-  if (img.url) return img.url
+
+  const hasBuilderMeta =
+    (img as any)?.crop || (img as any)?.hotspot || (img as any)?.asset?._ref || (img as any)?.asset?._id
+
+  // Eğer crop/hotspot/asset bilgisi yoksa ve doğrudan url geldiyse orijinali kullan.
+  if (img.url && !hasBuilderMeta) return img.url
 
   const b = urlFor && urlFor(img)
-  if (!b) return ''
+  if (!b) return img.url || ''
 
   try {
     const {width = 1600, quality = 85, format = 'webp'} = options || {}
 
-    return b.width(width).quality(quality).format(format).auto('format').url() || ''
+    return b.width(width).quality(quality).format(format).auto('format').url() || img.url || ''
   } catch {
-    return ''
+    return img.url || ''
   }
 }
 
@@ -797,7 +802,30 @@ export const getProducts = async (): Promise<Product[]> => {
           currency,
           sku,
           stockStatus,
-          materialSelections[]{ group->{title, books[]{title, items[]{name, image}}}, materials },
+          materialSelections[]{
+            group->{
+              title,
+              books[]{
+                title,
+                items[]{
+                  name,
+                  image{
+                    crop,
+                    hotspot,
+                    asset->{url, _ref, _id}
+                  }
+                }
+              }
+            },
+            materials[]{
+              name,
+              image{
+                crop,
+                hotspot,
+                asset->{url, _ref, _id}
+              }
+            }
+          },
           dimensionImages[]{ image, imageMobile, imageDesktop, title },
           exclusiveContent,
           designer->{ "designerId": id.current },
@@ -890,7 +918,30 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           currency,
           sku,
           stockStatus,
-          materialSelections[]{ group->{title, books[]{title, items[]{name, image}}}, materials },
+          materialSelections[]{
+            group->{
+              title,
+              books[]{
+                title,
+                items[]{
+                  name,
+                  image{
+                    crop,
+                    hotspot,
+                    asset->{url, _ref, _id}
+                  }
+                }
+              }
+            },
+            materials[]{
+              name,
+              image{
+                crop,
+                hotspot,
+                asset->{url, _ref, _id}
+              }
+            }
+          },
           dimensionImages[]{ image, imageMobile, imageDesktop, title },
           exclusiveContent,
           designer->{ "designerId": id.current },

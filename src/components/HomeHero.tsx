@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { HomePageContent, SiteSettings } from '../types'
 import { OptimizedImage } from './OptimizedImage'
@@ -46,6 +46,16 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
   const [areDotsVisible, setAreDotsVisible] = useState(false)
   const [playMobileArrowIntro, setPlayMobileArrowIntro] = useState(false)
   const hasPlayedMobileArrowIntro = useRef(false)
+  const arrowInLeft: CSSProperties = {
+    transform: 'translateX(-40px)',
+    opacity: 0,
+    animation: 'home-arrow-in-left 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms forwards',
+  }
+  const arrowInRight: CSSProperties = {
+    transform: 'translateX(40px)',
+    opacity: 0,
+    animation: 'home-arrow-in-right 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 200ms forwards',
+  }
 
   const heroMedia = useMemo(() => {
     const items = Array.isArray(content?.heroMedia) ? content!.heroMedia : []
@@ -432,6 +442,16 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
 
   return (
     <>
+      <style>{`
+        @keyframes home-arrow-in-left {
+          from { opacity: 0; transform: translateX(-40px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes home-arrow-in-right {
+          from { opacity: 0; transform: translateX(40px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+      `}</style>
       <div // eslint-disable-line jsx-a11y/no-static-element-interactions
         className={`relative ${isMobile ? 'h-screen hero-container-mobile' : 'h-screen'} md:h-screen overflow-hidden cursor-grab active:cursor-grabbing`}
         ref={heroContainerRef}
@@ -633,6 +653,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
               type="button"
               onClick={goToPrevSlide}
               className="group pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
+              style={arrowInLeft}
               aria-label="Previous hero slide"
             >
               <svg
@@ -654,6 +675,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
               type="button"
               onClick={goToNextSlide}
               className="group pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
+              style={arrowInRight}
               aria-label="Next hero slide"
             >
               <svg

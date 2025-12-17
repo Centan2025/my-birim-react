@@ -1,5 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
-import React, { useState, useEffect, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useMemo, useRef, useLayoutEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 // FIX: Imported SiteSettings type to correctly type component state.
 import type { LocalizedString } from '../types'
@@ -157,13 +158,115 @@ export function ProductDetailPage() {
   // Thumbnails horizontal drag/scroll
   const thumbRef = useRef<HTMLDivElement | null>(null)
   const [thumbDragStartX, setThumbDragStartX] = useState<number | null>(null)
+  const thumbButtonsRef = useRef<(HTMLButtonElement | null)[]>([])
+  const thumbListRef = useRef<HTMLDivElement | null>(null)
+  const thumbIndicatorRef = useRef<HTMLDivElement | null>(null)
+  const [thumbIndicatorBox, setThumbIndicatorBox] = useState<{
+    left: number
+    top: number
+    width: number
+    height: number
+    visible: boolean
+  }>({ left: 0, top: 0, width: 0, height: 0, visible: false })
   const [thumbScrollStart, setThumbScrollStart] = useState<number>(0)
+  const scrollLockRef = useRef<number>(0)
+  const closeBtnAnimStyle: React.CSSProperties = {
+    animation: 'close-in 650ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+  }
+
+  const arrowInLeft: React.CSSProperties = {
+    transform: 'translateX(-40px)',
+    opacity: 0,
+    animation: 'arrow-in-left 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms forwards',
+  }
+
+  const arrowInRight: React.CSSProperties = {
+    transform: 'translateX(40px)',
+    opacity: 0,
+    animation: 'arrow-in-right 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 200ms forwards',
+  }
+
+  // Işık kutuları açıkken hem body hem html scroll'unu kilitle, pozisyonu koru
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    const html = document.documentElement
+    const body = document.body
+
+    const shouldLock = Boolean(dimLightbox || materialLightbox)
+    if (shouldLock) {
+      scrollLockRef.current = window.scrollY || 0
+      body.style.position = 'fixed'
+      body.style.top = `-${scrollLockRef.current}px`
+      body.style.left = '0'
+      body.style.right = '0'
+      body.style.width = '100%'
+      body.style.overflow = 'hidden'
+      body.style.touchAction = 'none'
+      html.style.overflow = 'hidden'
+      html.style.touchAction = 'none'
+    } else {
+      body.style.position = ''
+      body.style.top = ''
+      body.style.left = ''
+      body.style.right = ''
+      body.style.width = ''
+      body.style.overflow = ''
+      body.style.touchAction = ''
+      html.style.overflow = ''
+      html.style.touchAction = ''
+      if (scrollLockRef.current) {
+        window.scrollTo(0, scrollLockRef.current)
+      }
+    }
+
+    return () => {
+      body.style.position = ''
+      body.style.top = ''
+      body.style.left = ''
+      body.style.right = ''
+      body.style.width = ''
+      body.style.overflow = ''
+      body.style.touchAction = ''
+      html.style.overflow = ''
+      html.style.touchAction = ''
+      if (scrollLockRef.current) {
+        window.scrollTo(0, scrollLockRef.current)
+      }
+    }
+  }, [dimLightbox, materialLightbox])
 
   // Sayfa animasyonu - ilk açılışta fade-in
   useEffect(() => {
     // PageTransition animasyonu kullanıldığı için bu animasyonu kaldırdık
     setIsPageVisible(true)
   }, [productId])
+
+  // Close butonu slide-in + spin animasyonu için global keyframe
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    const id = 'lightbox-slide-in-right'
+    if (document.getElementById(id)) return
+    const style = document.createElement('style')
+    style.id = id
+    style.textContent = `
+      @keyframes close-in {
+        from { opacity: 0; transform: translateX(100px) rotate(90deg); }
+        to { opacity: 1; transform: translateX(0) rotate(0deg); }
+      }
+      @keyframes arrow-in-left {
+        from { opacity: 0; transform: translateX(-40px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+      @keyframes arrow-in-right {
+        from { opacity: 0; transform: translateX(40px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+    `
+    document.head.appendChild(style)
+    return () => {
+      style.remove()
+    }
+  }, [])
 
   // Header temasını ürün görseli paletinden besle
   useEffect(() => {
@@ -427,6 +530,9 @@ export function ProductDetailPage() {
   )
   const activeGroup = Array.isArray(mergedGroups) ? mergedGroups[safeActiveIndex] : undefined
   const books = Array.isArray((activeGroup as any)?.books) ? (activeGroup as any).books : []
+  const hasMaterialGroups = Array.isArray(mergedGroups) && mergedGroups.length > 0
+  const flatMaterials =
+    Array.isArray(product?.materials) && product.materials.length > 0 ? product.materials : []
   // FIX: Safely access `dimensionImages` (now added to Product type) and provide a fallback array to prevent errors when it's undefined.
   const dimImages = product?.dimensionImages?.filter(di => di?.image) ?? []
   const slideCount = bandMedia.length || 1
@@ -452,6 +558,45 @@ export function ProductDetailPage() {
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
+
+  // Desktop thumbnail seçimi: aktif çerçevenin kayarak gitmesi için ölçüm
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const updateIndicator = () => {
+      const listEl = thumbListRef.current
+      const targetEl = thumbButtonsRef.current[currentImageIndex]
+      const scrollEl = thumbRef.current
+      const indicatorEl = thumbIndicatorRef.current
+
+      if (!listEl || !targetEl || !indicatorEl || isMobile) {
+        setThumbIndicatorBox(prev => (prev.visible ? { ...prev, visible: false } : prev))
+        return
+      }
+
+      const scrollLeft = scrollEl?.scrollLeft ?? 0
+      const scrollTop = scrollEl?.scrollTop ?? 0
+
+      setThumbIndicatorBox({
+        left: targetEl.offsetLeft - scrollLeft,
+        top: targetEl.offsetTop - scrollTop,
+        width: targetEl.offsetWidth,
+        height: targetEl.offsetHeight,
+        visible: true,
+      })
+    }
+
+    updateIndicator()
+
+    window.addEventListener('resize', updateIndicator)
+    const scrollEl = thumbRef.current
+    scrollEl?.addEventListener('scroll', updateIndicator, { passive: true })
+
+    return () => {
+      window.removeEventListener('resize', updateIndicator)
+      scrollEl?.removeEventListener('scroll', updateIndicator)
+    }
+  }, [currentImageIndex, bandMedia.length, isMobile])
 
   // HomePage hero medya mantığına benzer drag + sonsuz kayma sistemi
   const dragStartY = useRef<number>(0)
@@ -930,6 +1075,7 @@ export function ProductDetailPage() {
                   type="button"
                   onClick={heroPrev}
                   className="group pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
+                  style={arrowInLeft}
                   aria-label="Previous hero slide"
                 >
                   <svg
@@ -951,6 +1097,7 @@ export function ProductDetailPage() {
                   type="button"
                   onClick={heroNext}
                   className="group pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
+                  style={arrowInRight}
                   aria-label="Next hero slide"
                 >
                   <svg
@@ -1058,7 +1205,7 @@ export function ProductDetailPage() {
                     })
                     setIsFullscreenOpen(true)
                   }}
-                  className="group flex h-9 w-9 md:h-12 md:w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
+                className="group flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
                   aria-label="Büyüt"
                 >
                   <svg
@@ -1071,7 +1218,7 @@ export function ProductDetailPage() {
                     strokeWidth="1.5"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-6 w-6 md:h-8 md:w-8 transition-transform duration-500"
+                    className="h-6 w-6 md:h-7 md:w-7 transition-transform duration-500"
                   >
                     <line x1="12" y1="4" x2="12" y2="20" />
                     <line x1="4" y1="12" x2="20" y2="12" />
@@ -1105,10 +1252,30 @@ export function ProductDetailPage() {
                     thumbRef.current.scrollLeft = thumbScrollStart - delta
                   }}
                 >
-                  <div className="flex gap-3 min-w-max pb-2">
+                  <div
+                    ref={thumbListRef}
+                    className="relative flex gap-3 min-w-max pb-2"
+                  >
+                    {!isMobile && (
+                      <div
+                        ref={thumbIndicatorRef}
+                        aria-hidden="true"
+                        className="pointer-events-none absolute z-10 rounded-none border-[1.5px] border-gray-400 transition-[transform,width,height,opacity] duration-350 ease-[cubic-bezier(0.22,0.61,0.36,1)]"
+                        style={{
+                          transform: `translate3d(${thumbIndicatorBox.left}px, ${thumbIndicatorBox.top}px, 0)`,
+                          width: thumbIndicatorBox.width || 0,
+                          height: thumbIndicatorBox.height || 0,
+                          opacity: thumbIndicatorBox.visible ? 1 : 0,
+                        }}
+                      />
+                    )}
                     {bandMedia.map((m, idx) => (
                       <button
                         key={idx}
+                        ref={el => {
+                          thumbButtonsRef.current[idx] = el
+                        }}
+                        className="relative z-20"
                         onClick={() => {
                           // Thumbnail tıklanınca hero sonsuz kaydırma index'ini
                           // ilgili slide'a hizala ve ana görsel index'ini güncelle.
@@ -1120,7 +1287,7 @@ export function ProductDetailPage() {
                           }
                           setCurrentImageIndex(idx)
                         }}
-                        className={`relative flex-shrink-0 w-24 h-24 overflow-hidden border-2 transition-all duration-300 ${currentImageIndex === idx ? 'border-gray-400 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}
+                        className={`flex-shrink-0 w-24 h-24 overflow-hidden rounded-none border-2 transition-all duration-300 ${currentImageIndex === idx ? 'border-transparent' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}
                       >
                         {m.type === 'image' ? (
                           <OptimizedImage
@@ -1338,123 +1505,157 @@ export function ProductDetailPage() {
                 </ScrollReveal>
               )}
 
-              {product.materials && grouped.length > 0 && (
+              {(hasMaterialGroups || flatMaterials.length > 0) && (
                 <ScrollReveal delay={300} threshold={0.05}>
                   <div className="pb-4">
                     <h2 className="text-xl font-light text-gray-600 mb-4">
                       {t('material_alternatives')}
                     </h2>
-
-                    {/* Group tabs - similar to image design */}
-                    <div className="flex flex-wrap gap-0 border-t border-b border-gray-400 mb-6 bg-gray-200">
-                      {(Array.isArray(mergedGroups) ? mergedGroups : []).map((g: any, idx: number) => (
-                        <button
-                          key={idx}
-                          onClick={() => setActiveMaterialGroup(idx)}
-                          className={`px-5 py-3 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeMaterialGroup === idx
-                            ? 'bg-white text-gray-800 border-gray-500'
-                            : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
-                            }`}
-                        >
-                          {t(g.groupTitle)}
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Swatch books (kartelalar) yatay sekmeler */}
-                    {books.length > 0 ? (
+                    {hasMaterialGroups ? (
                       <>
-                        <div className="flex flex-wrap gap-0 border-b border-gray-200 mb-6">
-                          {books.map((book: any, idx: number) => (
+                        {/* Group tabs - similar to image design */}
+                        <div className="flex flex-wrap gap-0 border-t border-b border-gray-400 mb-6 bg-gray-200">
+                          {(Array.isArray(mergedGroups) ? mergedGroups : []).map((g: any, idx: number) => (
                             <button
                               key={idx}
-                              onClick={() => setActiveBookIndex(idx)}
-                              className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeBookIndex === idx
+                              onClick={() => setActiveMaterialGroup(idx)}
+                              className={`px-5 py-3 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeMaterialGroup === idx
                                 ? 'bg-white text-gray-800 border-gray-500'
                                 : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
                                 }`}
                             >
-                              {t(book.bookTitle)}
+                              {t(g.groupTitle)}
                             </button>
                           ))}
                         </div>
 
-                        {/* Seçili kartelaya ait malzemeler */}
-                        <div className="flex flex-wrap gap-6">
-                          {(Array.isArray(books[activeBookIndex]?.materials)
-                            ? books[activeBookIndex].materials
-                            : []
-                          ).map((material: any, index: number) => (
-                            <div
-                              key={index}
-                              className="text-center group cursor-pointer"
-                              title={t(material.name)}
-                              onClick={() => {
-                                const allMaterials = Array.isArray(books[activeBookIndex]?.materials)
-                                  ? books[activeBookIndex].materials
-                                  : []
-                                setMaterialLightbox({
-                                  images: allMaterials.map((m: any) => ({
-                                    image: m.image,
-                                    name: t(m.name),
-                                  })),
-                                  currentIndex: index,
-                                })
-                              }}
-                            >
-                              <OptimizedImage
-                                src={material.image}
-                                alt={t(material.name)}
-                                className={`w-28 h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md ${imageBorderClass}`}
-                                loading="lazy"
-                                quality={80}
-                              />
-                              <p className="mt-3 text-xs md:text-sm text-gray-600 font-thin tracking-wider max-w-[120px] break-words">
-                                {t(material.name)}
-                              </p>
+                        {/* Swatch books (kartelalar) yatay sekmeler */}
+                        {books.length > 0 ? (
+                          <>
+                            <div className="flex flex-wrap gap-0 border-b border-gray-200 mb-6">
+                              {books.map((book: any, idx: number) => (
+                                <button
+                                  key={idx}
+                                  onClick={() => setActiveBookIndex(idx)}
+                                  className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeBookIndex === idx
+                                    ? 'bg-white text-gray-800 border-gray-500'
+                                    : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
+                                    }`}
+                                >
+                                  {t(book.bookTitle)}
+                                </button>
+                              ))}
                             </div>
-                          ))}
-                        </div>
+
+                            {/* Seçili kartelaya ait malzemeler */}
+                            <div className="flex flex-wrap gap-6">
+                              {(Array.isArray(books[activeBookIndex]?.materials)
+                                ? books[activeBookIndex].materials
+                                : []
+                              ).map((material: any, index: number) => (
+                                <div
+                                  key={index}
+                                  className="text-center group cursor-pointer"
+                                  title={t(material.name)}
+                                  onClick={() => {
+                                    const allMaterials = Array.isArray(books[activeBookIndex]?.materials)
+                                      ? books[activeBookIndex].materials
+                                      : []
+                                    setMaterialLightbox({
+                                      images: allMaterials.map((m: any) => ({
+                                        image: m.image,
+                                        name: t(m.name),
+                                      })),
+                                      currentIndex: index,
+                                    })
+                                  }}
+                                >
+                                  <OptimizedImage
+                                    src={material.image}
+                                    alt={t(material.name)}
+                                    className={`w-28 h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md ${imageBorderClass}`}
+                                    loading="lazy"
+                                    quality={80}
+                                  />
+                                  <p className="mt-3 text-xs md:text-sm text-gray-600 font-thin tracking-wider max-w-[120px] break-words">
+                                    {t(material.name)}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        ) : (
+                          /* Fallback: if no books, show materials directly */
+                          <>
+                            <div className="flex flex-wrap gap-6">
+                              {(Array.isArray(grouped[safeActiveIndex]?.materials)
+                                ? grouped[safeActiveIndex].materials
+                                : []
+                              ).map((material: any, index: number) => (
+                                <div
+                                  key={index}
+                                  className="text-center group cursor-pointer"
+                                  title={t(material.name)}
+                                  onClick={() => {
+                                    const allMaterials = Array.isArray(grouped[safeActiveIndex]?.materials)
+                                      ? grouped[safeActiveIndex].materials
+                                      : []
+                                    setMaterialLightbox({
+                                      images: allMaterials.map((m: any) => ({
+                                        image: m.image,
+                                        name: t(m.name),
+                                      })),
+                                      currentIndex: index,
+                                    })
+                                  }}
+                                >
+                                  <OptimizedImage
+                                    src={material.image}
+                                    alt={t(material.name)}
+                                    className={`w-28 h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md ${imageBorderClass}`}
+                                    loading="lazy"
+                                    quality={80}
+                                  />
+                                  <p className="mt-3 text-xs md:text-sm text-gray-600 font-thin tracking-wider max-w-[120px] break-words">
+                                    {t(material.name)}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        )}
                       </>
                     ) : (
-                      /* Fallback: if no books, show materials directly */
-                      <>
-                        <div className="flex flex-wrap gap-6">
-                          {(Array.isArray(grouped[safeActiveIndex]?.materials)
-                            ? grouped[safeActiveIndex].materials
-                            : []
-                          ).map((material: any, index: number) => (
-                            <div
-                              key={index}
-                              className="text-center group cursor-pointer"
-                              title={t(material.name)}
-                              onClick={() => {
-                                const allMaterials = Array.isArray(grouped[safeActiveIndex]?.materials)
-                                  ? grouped[safeActiveIndex].materials
-                                  : []
-                                setMaterialLightbox({
-                                  images: allMaterials.map((m: any) => ({
-                                    image: m.image,
-                                    name: t(m.name),
-                                  })),
-                                  currentIndex: index,
-                                })
-                              }}
-                            >
-                              <OptimizedImage
-                                src={material.image}
-                                alt={t(material.name)}
-                                className={`w-28 h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md ${imageBorderClass}`}
-                                loading="lazy"
-                                quality={80}
-                              />
-                              <p className="mt-3 text-xs md:text-sm text-gray-600 font-thin tracking-wider max-w-[120px] break-words">
-                                {t(material.name)}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </>
+                      /* Flat fallback: grouped malzeme yoksa product.materials listesini göster */
+                      <div className="flex flex-wrap gap-6">
+                        {flatMaterials.map((material: any, index: number) => (
+                          <div
+                            key={index}
+                            className="text-center group cursor-pointer"
+                            title={t(material.name)}
+                            onClick={() => {
+                              setMaterialLightbox({
+                                images: flatMaterials.map((m: any) => ({
+                                  image: m.image,
+                                  name: t(m.name),
+                                })),
+                                currentIndex: index,
+                              })
+                            }}
+                          >
+                            <OptimizedImage
+                              src={material.image}
+                              alt={t(material.name)}
+                              className={`w-28 h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md ${imageBorderClass}`}
+                              loading="lazy"
+                              quality={80}
+                            />
+                            <p className="mt-3 text-xs md:text-sm text-gray-600 font-thin tracking-wider max-w-[120px] break-words">
+                              {t(material.name)}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </ScrollReveal>
@@ -1541,19 +1742,19 @@ export function ProductDetailPage() {
                 color: '#d3caca'
               }}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="41"
-                height="41"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="16 20 8 12 16 4" />
-              </svg>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="28"
+                        height="28"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="16 20 8 12 16 4" />
+                      </svg>
             </button>
             <button
               onClick={nextImage}
@@ -1565,19 +1766,19 @@ export function ProductDetailPage() {
                 color: '#d3caca'
               }}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="41"
-                height="41"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="8 20 16 12 8 4" />
-              </svg>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="28"
+                        height="28"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="8 20 16 12 8 4" />
+                      </svg>
             </button>
             <div className="relative w-screen max-w-screen-2xl h-[80vh] p-2 overflow-hidden">
               <button
@@ -1754,48 +1955,50 @@ export function ProductDetailPage() {
         )}
 
         {/* Dimension Images Modal */}
-        {dimLightbox && dimLightbox.images.length > 0 && (
-          <div
-            className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-            onClick={() => setDimLightbox(null)}
-          >
+        {dimLightbox &&
+          dimLightbox.images.length > 0 &&
+          createPortal(
             <div
-              className="bg-white rounded-lg shadow-sm border border-gray-100 max-w-4xl w-full max-h-[90vh] overflow-auto relative"
-              onClick={e => e.stopPropagation()}
+              className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center"
+              onClick={() => setDimLightbox(null)}
             >
-              <button
-                onClick={() => setDimLightbox(null)}
-                className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 transition-colors z-20 p-2 hover:bg-gray-100 rounded-full"
-                aria-label="Close"
+              <div
+                className="relative flex items-center justify-center max-w-[90vw] max-h-[90vh] border border-gray-300 shadow-2xl overflow-hidden bg-transparent"
+                onClick={e => e.stopPropagation()}
               >
-                <CloseIcon />
-              </button>
-              <div className="p-8 relative">
-                {dimLightbox.images.length > 1 && (
-                  <>
-                    <button
-                      onClick={e => {
-                        e.stopPropagation()
-                        setDimLightbox({
-                          ...dimLightbox,
-                          currentIndex:
-                            (dimLightbox.currentIndex - 1 + dimLightbox.images.length) %
-                            dimLightbox.images.length,
-                        })
-                      }}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10"
-                      style={{
-                        width: '54px',
-                        height: '54px',
-                        backgroundColor: 'rgba(62, 60, 60, 0.5)',
-                        color: '#d3caca'
-                      }}
-                      aria-label="Previous"
-                    >
+      <button
+        onClick={() => setDimLightbox(null)}
+        className="absolute top-4 right-4 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/60 bg-white/70 backdrop-blur-md shadow-lg flex items-center justify-center text-gray-700 hover:bg-white hover:text-gray-900 transition-colors"
+        style={closeBtnAnimStyle}
+        aria-label="Close"
+      >
+        <CloseIcon />
+      </button>
+                <div className="relative w-full h-full flex items-center justify-center">
+                  {dimLightbox.images.length > 1 && (
+                    <>
+                      <button
+                        onClick={e => {
+                          e.stopPropagation()
+                          setDimLightbox({
+                            ...dimLightbox,
+                            currentIndex:
+                              (dimLightbox.currentIndex - 1 + dimLightbox.images.length) %
+                              dimLightbox.images.length,
+                          })
+                        }}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-10 h-10 md:w-14 md:h-14"
+                        style={{
+                          backgroundColor: 'rgba(62, 60, 60, 0.5)',
+                          color: '#d3caca',
+                          ...arrowInLeft,
+                        }}
+                        aria-label="Previous"
+                      >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        width="41"
-                        height="41"
+                        width="28"
+                        height="28"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -1805,28 +2008,28 @@ export function ProductDetailPage() {
                       >
                         <polyline points="16 20 8 12 16 4" />
                       </svg>
-                    </button>
-                    <button
-                      onClick={e => {
-                        e.stopPropagation()
-                        setDimLightbox({
-                          ...dimLightbox,
-                          currentIndex: (dimLightbox.currentIndex + 1) % dimLightbox.images.length,
-                        })
-                      }}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10"
-                      style={{
-                        width: '54px',
-                        height: '54px',
-                        backgroundColor: 'rgba(62, 60, 60, 0.5)',
-                        color: '#d3caca'
-                      }}
-                      aria-label="Next"
-                    >
+                      </button>
+                      <button
+                        onClick={e => {
+                          e.stopPropagation()
+                          setDimLightbox({
+                            ...dimLightbox,
+                            currentIndex:
+                              (dimLightbox.currentIndex + 1) % dimLightbox.images.length,
+                          })
+                        }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-10 h-10 md:w-14 md:h-14"
+                        style={{
+                          backgroundColor: 'rgba(62, 60, 60, 0.5)',
+                          color: '#d3caca',
+                          ...arrowInRight,
+                        }}
+                        aria-label="Next"
+                      >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        width="41"
-                        height="41"
+                        width="28"
+                        height="28"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -1836,132 +2039,139 @@ export function ProductDetailPage() {
                       >
                         <polyline points="8 20 16 12 8 4" />
                       </svg>
-                    </button>
-                  </>
-                )}
-                {(() => {
-                  const currentImage = dimLightbox.images[dimLightbox.currentIndex]
-                  if (!currentImage) return null
-                  return (
-                    <OptimizedImage
-                      src={currentImage.image}
-                      alt={currentImage.title ? t(currentImage.title) : 'Technical Drawing'}
-                      className="w-full h-auto object-contain"
-                      loading="eager"
-                      quality={95}
-                    />
-                  )
-                })()}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Material Images Modal */}
-        {materialLightbox && materialLightbox.images.length > 0 && (
-          <div
-            className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center p-1"
-            onClick={() => setMaterialLightbox(null)}
-          >
-            <div
-              className="bg-white border border-gray-300 max-w-2xl w-full max-h-[98vh] overflow-hidden relative"
-              onClick={e => e.stopPropagation()}
-            >
-              <button
-                onClick={() => setMaterialLightbox(null)}
-                className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 transition-colors z-20 p-1 hover:bg-gray-100 rounded-full"
-                aria-label="Close"
-              >
-                <CloseIcon />
-              </button>
-              <div className="relative">
-                {materialLightbox.images.length > 1 && (
-                  <>
-                    <button
-                      onClick={e => {
-                        e.stopPropagation()
-                        setMaterialLightbox({
-                          ...materialLightbox,
-                          currentIndex:
-                            (materialLightbox.currentIndex - 1 + materialLightbox.images.length) %
-                            materialLightbox.images.length,
-                        })
-                      }}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10"
-                      style={{
-                        width: '54px',
-                        height: '54px',
-                        backgroundColor: 'rgba(62, 60, 60, 0.5)',
-                        color: '#d3caca'
-                      }}
-                      aria-label="Previous"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="41"
-                        height="41"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="16 20 8 12 16 4" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={e => {
-                        e.stopPropagation()
-                        setMaterialLightbox({
-                          ...materialLightbox,
-                          currentIndex:
-                            (materialLightbox.currentIndex + 1) % materialLightbox.images.length,
-                        })
-                      }}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10"
-                      style={{
-                        width: '54px',
-                        height: '54px',
-                        backgroundColor: 'rgba(62, 60, 60, 0.5)',
-                        color: '#d3caca'
-                      }}
-                      aria-label="Next"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="41"
-                        height="41"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="8 20 16 12 8 4" />
-                      </svg>
-                    </button>
-                  </>
-                )}
-                {materialLightbox.images[materialLightbox.currentIndex] &&
-                  (() => {
-                    const currentImage = materialLightbox.images[materialLightbox.currentIndex]
+                      </button>
+                    </>
+                  )}
+                  {(() => {
+                    const currentImage = dimLightbox.images[dimLightbox.currentIndex]
                     if (!currentImage) return null
                     return (
-                      <OptimizedImage
-                        src={currentImage.image}
-                        alt={currentImage.name}
-                        className="w-full h-auto object-contain"
-                        loading="eager"
-                        quality={95}
-                      />
+                      <div className="flex items-center justify-center">
+                        <OptimizedImage
+                          src={currentImage.image}
+                          alt={currentImage.title ? t(currentImage.title) : 'Technical Drawing'}
+                          className="max-h-[82vh] max-w-[88vw] object-contain"
+                          loading="eager"
+                          quality={95}
+                        />
+                      </div>
                     )
                   })()}
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            </div>,
+            document.body
+          )}
+
+        {/* Material Images Modal */}
+        {materialLightbox &&
+          materialLightbox.images.length > 0 &&
+          createPortal(
+            <div
+              className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center"
+              onClick={() => setMaterialLightbox(null)}
+            >
+              <div
+                className="relative flex items-center justify-center max-w-[90vw] max-h-[90vh] border border-gray-300 shadow-2xl overflow-hidden bg-transparent"
+                onClick={e => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setMaterialLightbox(null)}
+                  className="absolute top-3 right-3 z-20 w-10 h-10 md:w-11 md:h-11 rounded-full border border-white/60 bg-white/70 backdrop-blur-md shadow-lg flex items-center justify-center text-gray-700 hover:bg-white hover:text-gray-900 transition-colors"
+                  style={closeBtnAnimStyle}
+                  aria-label="Close"
+                >
+                  <CloseIcon />
+                </button>
+                <div className="relative w-full h-full flex items-center justify-center">
+                  {materialLightbox.images.length > 1 && (
+                    <>
+                    <button
+                        onClick={e => {
+                          e.stopPropagation()
+                          setMaterialLightbox({
+                            ...materialLightbox,
+                            currentIndex:
+                              (materialLightbox.currentIndex - 1 + materialLightbox.images.length) %
+                              materialLightbox.images.length,
+                          })
+                        }}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-10 h-10 md:w-14 md:h-14"
+                      style={{
+                        backgroundColor: 'rgba(62, 60, 60, 0.5)',
+                        color: '#d3caca',
+                        ...arrowInLeft,
+                      }}
+                        aria-label="Previous"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="41"
+                          height="41"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polyline points="16 20 8 12 16 4" />
+                        </svg>
+                      </button>
+                    <button
+                        onClick={e => {
+                          e.stopPropagation()
+                          setMaterialLightbox({
+                            ...materialLightbox,
+                            currentIndex:
+                              (materialLightbox.currentIndex + 1) % materialLightbox.images.length,
+                          })
+                        }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-10 h-10 md:w-14 md:h-14"
+                      style={{
+                        backgroundColor: 'rgba(62, 60, 60, 0.5)',
+                        color: '#d3caca',
+                        ...arrowInRight,
+                      }}
+                        aria-label="Next"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="41"
+                          height="41"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polyline points="8 20 16 12 8 4" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
+                  {materialLightbox.images[materialLightbox.currentIndex] &&
+                    (() => {
+                      const currentImage = materialLightbox.images[materialLightbox.currentIndex]
+                      if (!currentImage) return null
+                    return (
+                      <div className="flex items-center justify-center">
+                        <OptimizedImage
+                          src={currentImage.image}
+                          alt={currentImage.name}
+                          className="max-h-[82vh] max-w-[88vw] object-contain"
+                          loading="eager"
+                          quality={95}
+                        />
+                      </div>
+                    )
+                    })()}
+                </div>
+              </div>
+            </div>,
+            document.body
+          )}
 
         {/* Bottom Prev / Next controls - footer'ın hemen üzerinde */}
         {showBottomPrevNext && (prevProduct || nextProduct) && (
