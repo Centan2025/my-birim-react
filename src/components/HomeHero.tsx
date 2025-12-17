@@ -712,21 +712,16 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
             </div>
           </div>
         )}
-        {/* Mobile Scroll Indicator - Sadece dikey çizgi, solda nokta animasyonu yok */}
+        {/* Mobile Scroll Indicator - Sadece ok (çizgi kaldırıldı) */}
         {isMobile && (
           <div
             className="absolute left-8 z-30 pointer-events-none mix-blend-difference animate-scroll-indicator-intro"
             style={{
-              // Scroll göstergesini tamamen aşağıya al
               bottom: 'max(8px, env(safe-area-inset-bottom, 0px) + 8px)',
             }}
           >
             <div className="flex flex-col items-center">
-              {/* Çubuğun kendisi ilk açılışta aşağıdan yukarı uzayan animasyona sahip - inceltildi */}
-              <div className="h-[40px] w-[2px] bg-white/45 overflow-hidden relative">
-                <div className="absolute top-0 left-0 w-full h-full bg-white animate-scroll-line"></div>
-              </div>
-              {/* Aşağıyı gösteren ok - çizginin altında */}
+              {/* Aşağıyı gösteren ok */}
               <div className="mt-0.5">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
