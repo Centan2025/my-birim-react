@@ -18,6 +18,7 @@ import type {
   PrivacyPolicy,
   TermsOfService,
   KvkkPolicy,
+  SanityImagePalette,
 } from '../types'
 import {createClient} from '@sanity/client'
 import groq from 'groq'
@@ -156,6 +157,10 @@ const mapImage = (
 
 const mapImages = (imgs: SanityImageLike[] | undefined): string[] =>
   Array.isArray(imgs) ? imgs.map(i => mapImage(i)).filter(Boolean) : []
+
+// Sanity palette metadata'yı güvenli şekilde çek
+const extractPalette = (img: any): SanityImagePalette | undefined =>
+  img?.asset?.metadata?.palette
 
 // Medya satırı için Sanity modeli (sadece ihtiyaç duyulan alanlar)
 interface SanityProductMediaItem {
@@ -769,9 +774,18 @@ export const getProducts = async (): Promise<Product[]> => {
           year,
           isPublished,
           description,
-          mainImage,
-          mainImageMobile,
-          mainImageDesktop,
+          mainImage{
+            ...,
+            asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
+          },
+          mainImageMobile{
+            ...,
+            asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
+          },
+          mainImageDesktop{
+            ...,
+            asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
+          },
           alternativeImages,
           alternativeMedia[]{ type, url, image, imageMobile, imageDesktop, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
           media[]{ type, url, image, imageMobile, imageDesktop, title, description, link, linkText, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
@@ -803,11 +817,13 @@ export const getProducts = async (): Promise<Product[]> => {
           const img = mapImage(r.mainImage)
           const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
           const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
+          const palette = extractPalette(r.mainImage)
           // Art Direction için object döndür
           return {
             url: img,
             urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
             urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
+            palette,
           }
         })(),
         alternativeImages: mapImages(r.alternativeImages),
@@ -851,9 +867,18 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           year,
           isPublished,
           description,
-          mainImage,
-          mainImageMobile,
-          mainImageDesktop,
+          mainImage{
+            ...,
+            asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
+          },
+          mainImageMobile{
+            ...,
+            asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
+          },
+          mainImageDesktop{
+            ...,
+            asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
+          },
           alternativeImages,
           alternativeMedia[]{ type, url, image, imageMobile, imageDesktop, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
           media[]{ type, url, image, imageMobile, imageDesktop, title, description, link, linkText, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
@@ -885,11 +910,13 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
         const img = mapImage(r.mainImage)
         const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
         const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
+        const palette = extractPalette(r.mainImage)
         // Art Direction için object döndür
         return {
           url: img,
           urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
           urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
+          palette,
         }
       })(),
       alternativeImages: mapImages(r.alternativeImages),
@@ -930,9 +957,18 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
           year,
           isPublished,
           description,
-          mainImage,
-          mainImageMobile,
-          mainImageDesktop,
+          mainImage{
+            ...,
+            asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
+          },
+          mainImageMobile{
+            ...,
+            asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
+          },
+          mainImageDesktop{
+            ...,
+            asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
+          },
           alternativeImages,
           alternativeMedia[]{ type, url, image, imageMobile, imageDesktop, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
           media[]{ type, url, image, imageMobile, imageDesktop, title, description, link, linkText, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
@@ -961,11 +997,13 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
           const img = mapImage(r.mainImage)
           const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
           const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
+          const palette = extractPalette(r.mainImage)
           // Art Direction için object döndür
           return {
             url: img,
             urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
             urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
+            palette,
           }
         })(),
         alternativeImages: mapImages(r.alternativeImages),
@@ -1006,9 +1044,18 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
           year,
           isPublished,
           description,
-          mainImage,
-          mainImageMobile,
-          mainImageDesktop,
+          mainImage{
+            ...,
+            asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
+          },
+          mainImageMobile{
+            ...,
+            asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
+          },
+          mainImageDesktop{
+            ...,
+            asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
+          },
           alternativeImages,
           alternativeMedia[]{ type, url, image, imageMobile, imageDesktop, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
           media[]{ type, url, image, imageMobile, imageDesktop, title, description, link, linkText, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
@@ -1037,11 +1084,13 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
           const img = mapImage(r.mainImage)
           const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
           const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
+          const palette = extractPalette(r.mainImage)
           // Art Direction için object döndür
           return {
             url: img,
             urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
             urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
+            palette,
           }
         })(),
         alternativeImages: mapImages(r.alternativeImages),
@@ -1102,13 +1151,19 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
   if (useSanity && sanity) {
     const q = groq`*[_type == "aboutPage"][0]{
             ...,
-            heroImage
+            heroImage{
+              ...,
+              asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
+            }
         }`
     const data = await sanity.fetch(q)
     if (data) {
       // Normalize images
       if (data.heroImage) {
-        data.heroImage = mapImage(data.heroImage)
+        data.heroImage = {
+          url: mapImage(data.heroImage),
+          palette: extractPalette(data.heroImage),
+        }
       }
       // Ensure values is always an array
       if (!Array.isArray(data.values)) {
@@ -1196,9 +1251,9 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             heroAutoPlay,
             heroMedia[]{
                 ...,
-                image,
-                imageMobile,
-                imageDesktop,
+                image{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}} },
+                imageMobile{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}} },
+                imageDesktop{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}} },
                 videoFile{
                     asset->{url, _ref, _id}
                 },
@@ -1219,9 +1274,9 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             },
             inspirationSection{
                 ...,
-                backgroundImage,
-                backgroundImageMobile,
-                backgroundImageDesktop
+                backgroundImage{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}} },
+                backgroundImageMobile{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}} },
+                backgroundImageDesktop{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}} }
             }
         }`
       const data = await sanity.fetch(q)
@@ -1230,10 +1285,12 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
           const url = mapMediaUrl(m)
           const urlMobile = mapMediaUrl(m, true, false)
           const urlDesktop = mapMediaUrl(m, false, true)
+          const palette = extractPalette(m.image)
 
           const result: any = {...m, url}
           if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
           if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
+          if (palette) result.palette = palette
 
           return result
         })
@@ -1263,10 +1320,12 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
         const bgImgDesktop = data.inspirationSection.backgroundImageDesktop
           ? mapImage(data.inspirationSection.backgroundImageDesktop)
           : undefined
+        const palette = extractPalette(data.inspirationSection.backgroundImage)
         data.inspirationSection.backgroundImage = {
           url: bgImg,
           urlMobile: bgImgMobile && bgImgMobile !== bgImg ? bgImgMobile : undefined,
           urlDesktop: bgImgDesktop && bgImgDesktop !== bgImg ? bgImgDesktop : undefined,
+          palette,
         }
       }
       // Ensure featuredProductIds is always an array
@@ -1529,9 +1588,9 @@ export const getProjects = async (): Promise<Project[]> => {
         publishAt,
         isPublished,
         sortOrder,
-        cover, 
-        coverMobile, 
-        coverDesktop, 
+        cover{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, 
+        coverMobile{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, 
+        coverDesktop{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, 
         excerpt 
       }`
     const rows = await sanity.fetch(q)
@@ -1539,6 +1598,7 @@ export const getProjects = async (): Promise<Project[]> => {
       const cover = mapImage(r.cover)
       const coverMobile = r.coverMobile ? mapImage(r.coverMobile) : undefined
       const coverDesktop = r.coverDesktop ? mapImage(r.coverDesktop) : undefined
+      const palette = extractPalette(r.cover)
       return {
         id: r.id,
         title: r.title,
@@ -1550,6 +1610,7 @@ export const getProjects = async (): Promise<Project[]> => {
           url: cover,
           urlMobile: coverMobile && coverMobile !== cover ? coverMobile : undefined,
           urlDesktop: coverDesktop && coverDesktop !== cover ? coverDesktop : undefined,
+          palette,
         },
         excerpt: r.excerpt,
       }
@@ -1563,9 +1624,9 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
       "id": id.current, 
       title, 
       date, 
-      cover, 
-      coverMobile,
-      coverDesktop,
+      cover{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, 
+      coverMobile{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, 
+      coverDesktop{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, 
       excerpt, 
       body, 
       media[]{
@@ -1605,10 +1666,12 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
         const cover = mapImage(r.cover)
         const coverMobile = r.coverMobile ? mapImage(r.coverMobile) : undefined
         const coverDesktop = r.coverDesktop ? mapImage(r.coverDesktop) : undefined
+        const palette = extractPalette(r.cover)
         return {
           url: cover,
           urlMobile: coverMobile && coverMobile !== cover ? coverMobile : undefined,
           urlDesktop: coverDesktop && coverDesktop !== cover ? coverDesktop : undefined,
+          palette,
         }
       })(),
       excerpt: r.excerpt,

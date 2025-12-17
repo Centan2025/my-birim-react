@@ -5,10 +5,12 @@ import { HomeHero } from '../components/HomeHero'
 import { useSEO } from '../hooks/useSEO'
 import { HomeContentBlocks } from '../components/HomeContentBlocks'
 import { HomeInspirationSection } from '../components/HomeInspirationSection'
+import { useHeaderTheme } from '../context/HeaderThemeContext'
 
 export function HomePage() {
   const { data: content } = useHomePageContent()
   const { data: settings } = useSiteSettings()
+  const { setFromPalette, reset } = useHeaderTheme()
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth < 1024
@@ -40,6 +42,22 @@ export function HomePage() {
 
   const [mobileHeroHeight, setMobileHeroHeight] = useState<number | null>(null)
   const lastWidthRef = React.useRef(typeof window !== 'undefined' ? window.innerWidth : 0)
+
+  // Header temasını hero görsel paletinden besle
+  useEffect(() => {
+    if (!content?.heroMedia || !Array.isArray(content.heroMedia)) {
+      reset()
+      return
+    }
+    const firstImageWithPalette = content.heroMedia.find(
+      (m: any) => m?.type === 'image' && m?.palette
+    )
+    if (firstImageWithPalette?.palette) {
+      setFromPalette(firstImageWithPalette.palette)
+      return () => reset()
+    }
+    reset()
+  }, [content?.heroMedia, reset, setFromPalette])
 
   // İlham görselinin yüksekliğini hesapla - hook'lar early return'den önce olmalı
   useEffect(() => {

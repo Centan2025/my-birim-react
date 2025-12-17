@@ -1,10 +1,12 @@
 import {describe, it, expect, vi} from 'vitest'
 import {render, screen} from '@testing-library/react'
 import {MemoryRouter, Routes, Route} from 'react-router-dom'
+import {HelmetProvider} from 'react-helmet-async'
 
 import {NewsDetailPage} from '@/pages/NewsDetailPage'
 import * as newsHooks from '../hooks/useNews'
 import * as siteHooks from '../hooks/useSiteData'
+import {SEOProvider} from '../hooks/useSEO'
 
 // Hooks'u mockla
 vi.mock('../hooks/useNews')
@@ -13,7 +15,12 @@ vi.mock('../hooks/useSiteData')
 // Basit i18n mock'u
 vi.mock('../../i18n', () => ({
   useTranslation: () => ({
-    t: (key: any) => (typeof key === 'string' ? key : key?.tr || ''),
+    t: (key: unknown) =>
+      typeof key === 'string'
+        ? key
+        : typeof key === 'object' && key !== null
+          ? (key as Record<string, string>).tr || ''
+          : '',
     locale: 'tr',
     setLocale: vi.fn(),
     supportedLocales: ['tr', 'en'],
@@ -24,11 +31,15 @@ vi.mock('../../i18n', () => ({
 
 const renderWithRouter = (initialPath: string) => {
   return render(
-    <MemoryRouter initialEntries={[initialPath]}>
-      <Routes>
-        <Route path="/news/:newsId" element={<NewsDetailPage />} />
-      </Routes>
-    </MemoryRouter>
+    <HelmetProvider>
+      <SEOProvider>
+        <MemoryRouter initialEntries={[initialPath]}>
+          <Routes>
+            <Route path="/news/:newsId" element={<NewsDetailPage />} />
+          </Routes>
+        </MemoryRouter>
+      </SEOProvider>
+    </HelmetProvider>
   )
 }
 
@@ -46,13 +57,13 @@ describe('NewsDetailPage', () => {
       },
       isLoading: false,
       isError: false,
-    } as any)
+    } as unknown as ReturnType<typeof newsHooks.useNewsItem>)
 
     vi.mocked(newsHooks.useNews).mockReturnValue({
       data: [],
       isLoading: false,
       isError: false,
-    } as any)
+    } as unknown as ReturnType<typeof newsHooks.useNews>)
 
     vi.mocked(siteHooks.useSiteSettings).mockReturnValue({
       data: {
@@ -61,7 +72,7 @@ describe('NewsDetailPage', () => {
       },
       isLoading: false,
       isError: false,
-    } as any)
+    } as unknown as ReturnType<typeof siteHooks.useSiteSettings>)
 
     renderWithRouter('/news/news-1')
 
@@ -82,13 +93,13 @@ describe('NewsDetailPage', () => {
       },
       isLoading: false,
       isError: false,
-    } as any)
+    } as unknown as ReturnType<typeof newsHooks.useNewsItem>)
 
     vi.mocked(newsHooks.useNews).mockReturnValue({
       data: [],
       isLoading: false,
       isError: false,
-    } as any)
+    } as unknown as ReturnType<typeof newsHooks.useNews>)
 
     vi.mocked(siteHooks.useSiteSettings).mockReturnValue({
       data: {
@@ -97,7 +108,7 @@ describe('NewsDetailPage', () => {
       },
       isLoading: false,
       isError: false,
-    } as any)
+    } as unknown as ReturnType<typeof siteHooks.useSiteSettings>)
 
     renderWithRouter('/news/news-1')
 

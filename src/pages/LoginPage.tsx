@@ -10,6 +10,7 @@ import {
   validateRegisterForm,
   getPasswordStrength,
 } from '../lib/formValidation'
+import {useSEO} from '../hooks/useSEO'
 
 export function LoginPage() {
   const [isLoginMode, setIsLoginMode] = useState(true)
@@ -29,6 +30,20 @@ export function LoginPage() {
   const auth = useAuth()
   const navigate = useNavigate()
   const {t} = useTranslation()
+  const pageTitle = isLoginMode
+    ? `BIRIM - ${t('login') || 'Giriş'}`
+    : `BIRIM - ${t('register') || 'Üyelik'}`
+
+  useSEO({
+    title: pageTitle,
+    description:
+      t('login_subtitle') ||
+      t('register') ||
+      'BIRIM üyelik ve giriş sayfası. Tasarım ve mimari ürünlere erişin.',
+    siteName: 'BIRIM',
+    type: 'website',
+    locale: 'tr_TR',
+  })
 
   // Eğer kullanıcı zaten giriş yaptıysa, /login'e geldiğinde direkt profiline yönlendir
   useEffect(() => {
@@ -120,8 +135,9 @@ export function LoginPage() {
           )
         }
       }
-    } catch (err: any) {
-      setError(err.message || 'Giriş yapılırken bir hata oluştu')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Giriş yapılırken bir hata oluştu'
+      setError(message)
     } finally {
       setIsLoading(false)
     }
@@ -204,8 +220,8 @@ export function LoginPage() {
       setTimeout(() => {
         navigate('/profile')
       }, 1000)
-    } catch (err: any) {
-      let errorMessage = err.message || 'Kayıt olurken bir hata oluştu'
+    } catch (err: unknown) {
+      let errorMessage = err instanceof Error ? err.message : 'Kayıt olurken bir hata oluştu'
       // Sanity token hatası için özel mesaj
       if (
         errorMessage.includes('token') ||

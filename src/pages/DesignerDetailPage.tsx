@@ -10,6 +10,7 @@ import {useSiteSettings} from '../hooks/useSiteData'
 import {Breadcrumbs} from '../components/Breadcrumbs'
 import {analytics} from '../lib/analytics'
 import ScrollReveal from '../components/ScrollReveal'
+import {useSEO} from '../hooks/useSEO'
 
 export function DesignerDetailPage() {
   const {designerId} = useParams<{designerId: string}>()
@@ -19,25 +20,35 @@ export function DesignerDetailPage() {
   const {data: settings} = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const [isTitleVisible, setIsTitleVisible] = useState(false)
+  const designerName = designer ? t(designer.name) : ''
+  const designerImageUrl =
+    typeof designer?.image === 'string'
+      ? designer.image
+      : designer?.image?.url || designer?.image?.urlDesktop || designer?.image?.urlMobile || ''
+  const pageTitle = designerName ? `TASARIMCI - ${designerName}` : 'TASARIMCI'
+
+  useSEO({
+    title: pageTitle,
+    description: designer ? t(designer.bio) || designerName : t('designers') || 'Tasarımcılar',
+    image: designerImageUrl,
+    type: 'profile',
+    siteName: 'BIRIM',
+    locale: 'tr_TR',
+  })
 
   // Analytics: tasarımcı detay görüntüleme
   useEffect(() => {
     if (!designer) return
     if (typeof window === 'undefined') return
 
-    const title = `TASARIMCI - ${t(designer.name)}`
-    if (typeof document !== 'undefined') {
-      document.title = title
-    }
-
-    analytics.pageview(window.location.pathname, title)
+    analytics.pageview(window.location.pathname, pageTitle)
 
     analytics.event({
       category: 'designer',
       action: 'view_designer',
       label: t(designer.name), // ID yerine tasarımcı adı
     })
-  }, [designer, t])
+  }, [designer, pageTitle, t])
 
   // Tasarımcı adı animasyonu - soldan fade ile gel
   useEffect(() => {
@@ -111,7 +122,7 @@ export function DesignerDetailPage() {
         </div>
 
         <ScrollReveal delay={400} threshold={0.01}>
-          <div className="border-t pt-6 mt-4 md:pt-6 md:mt-6">
+          <div className="border-t pt-6 mt-4 md:pt-6 md:mt-6 px-4 sm:px-0 md:px-0">
             <h2 className="text-3xl font-light text-gray-700 mb-4">
               {t('designs') || 'Tasarımları'}
             </h2>

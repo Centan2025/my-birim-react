@@ -4,10 +4,33 @@ import {getCookiesPolicy} from '../services/cms'
 import {useTranslation} from '../i18n'
 import PortableTextLite from '../components/PortableTextLite'
 import type {CookiesPolicy} from '../types'
+import {useSEO} from '../hooks/useSEO'
+
+type PortableBlock = {
+  _type?: string
+  [key: string]: unknown
+}
 
 export default function CookiesPage() {
   const [policy, setPolicy] = useState<CookiesPolicy | null>(null)
   const {t, locale} = useTranslation()
+  const title = policy?.title ? t(policy.title) : 'Çerez Politikası'
+  const localizedContent = policy?.content as Record<string, unknown> | undefined
+  const contentBlocks =
+    localizedContent?.[locale] ??
+    localizedContent?.tr ??
+    localizedContent?.en ??
+    undefined
+
+  useSEO({
+    title: `BIRIM - ${title}`,
+    description:
+      t('cookies_description') ||
+      'Çerez politikamız ve kullanıcı verilerinin nasıl işlendiğine dair bilgiler.',
+    siteName: 'BIRIM',
+    type: 'website',
+    locale: 'tr_TR',
+  })
 
   useEffect(() => {
     getCookiesPolicy()
@@ -15,10 +38,6 @@ export default function CookiesPage() {
       .catch(() => setPolicy(null))
   }, [])
 
-  const title = policy?.title ? t(policy.title) : 'Çerez Politikası'
-  const contentBlocks = policy?.content
-    ? (policy.content as any)[locale] || (policy.content as any).tr || (policy.content as any).en
-    : undefined
   const updated = policy?.updatedAt
     ? new Date(policy.updatedAt).toLocaleDateString(locale === 'en' ? 'en-GB' : 'tr-TR')
     : new Date().toLocaleDateString(locale === 'en' ? 'en-GB' : 'tr-TR')
@@ -45,7 +64,7 @@ export default function CookiesPage() {
         <h1 className="text-3xl font-light text-gray-800 mt-6 md:mt-8 mb-6">{title}</h1>
         {Array.isArray(contentBlocks) ? (
           <div className="prose prose-gray max-w-none">
-            <PortableTextLite value={contentBlocks as any[]} />
+            <PortableTextLite value={contentBlocks as PortableBlock[]} />
             <p className="text-sm text-gray-500 mt-6">
               {locale === 'en' ? 'Last updated' : 'Son güncelleme'}: {updated}
             </p>

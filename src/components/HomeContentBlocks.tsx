@@ -124,7 +124,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   <div className="container mx-auto px-2 sm:px-3 lg:px-4 pt-3 pb-6">
                     <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
                       <div className={`prose max-w-none ${textAlignClass} px-4 sm:px-0`}>
-                        <p className="mt-3 text-gray-900 font-normal leading-relaxed max-w-2xl">
+                        <p className="mt-3 text-gray-900 font-normal leading-relaxed max-w-2xl text-base md:text-lg">
                           {t(block.description)}
                         </p>
                       </div>
@@ -228,7 +228,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'}`}>
                       <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
                         <div className={`prose max-w-none ${textAlignClass} px-4 sm:px-0`}>
-                          <p className="mt-3 text-gray-900 font-normal leading-relaxed max-w-2xl">
+                          <p className="mt-3 text-gray-900 font-normal leading-relaxed max-w-2xl text-base md:text-lg">
                             {t(block.description)}
                           </p>
                         </div>

@@ -44,6 +44,8 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [isHeroTextVisible, setIsHeroTextVisible] = useState(false)
   const [areDotsVisible, setAreDotsVisible] = useState(false)
+  const [playMobileArrowIntro, setPlayMobileArrowIntro] = useState(false)
+  const hasPlayedMobileArrowIntro = useRef(false)
 
   const heroMedia = useMemo(() => {
     const items = Array.isArray(content?.heroMedia) ? content!.heroMedia : []
@@ -391,6 +393,13 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
     return () => clearTimeout(timer)
   }, [content, heroMedia.length])
 
+  // Mobilde sol ok intro animasyonu - sadece ilk açılışta çalışsın
+  useEffect(() => {
+    if (!isMobile || hasPlayedMobileArrowIntro.current) return
+    hasPlayedMobileArrowIntro.current = true
+    setPlayMobileArrowIntro(true)
+  }, [isMobile])
+
   // Mobilde hero container yüksekliği sabit 100vh - medya boyutundan bağımsız
 
   if (!content || heroMedia.length === 0) {
@@ -493,11 +502,13 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                   ? slideCount - 1
                   : 0
                 : index - 1
-
             const isInitialSlide =
               slideCount <= 1
                 ? index === 0
                 : index === 1 // klonlu dizide: [son, ...heroMedia, ilk] → ilk gerçek slide index 1
+            const normalizedCurrent =
+              slideCount > 0 ? ((currentSlide % slideCount) + slideCount) % slideCount : 0
+            const isActiveSlide = realIndex === normalizedCurrent
 
             return (
               <div
@@ -527,15 +538,19 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                     srcMobile={media.urlMobile}
                     srcDesktop={media.urlDesktop}
                     className={`absolute inset-0 w-full h-full ${isMobile ? 'object-cover object-center' : 'object-cover'}`}
-                    autoPlay
+                    autoPlay={isActiveSlide}
                     loop
                     muted
                     playsInline
-                    preload="auto"
+                    preload={isInitialSlide ? 'auto' : 'metadata'}
                     loading={isInitialSlide ? 'eager' : 'lazy'}
                   />
                 ) : media.type === 'youtube' ? (
-                  <YouTubeBackground url={media.url} isMobile={isMobile} />
+                  isActiveSlide ? (
+                    <YouTubeBackground url={media.url} isMobile={isMobile} />
+                  ) : (
+                    <div className="absolute inset-0 w-full h-full bg-black" />
+                  )
                 ) : (
                   <OptimizedImage
                     src={media.url}
@@ -544,6 +559,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                     alt={t(media.title || '')}
                     className={`absolute inset-0 w-full h-full ${isMobile ? 'object-cover object-center' : 'object-cover'}`}
                     loading={isInitialSlide ? 'eager' : 'lazy'}
+                    fetchPriority={isInitialSlide ? 'high' : 'low'}
                     quality={90}
                   />
                 )}
@@ -715,7 +731,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
         {/* Mobile Scroll Indicator - Sadece ok (çizgi kaldırıldı) */}
         {isMobile && (
           <div
-            className="absolute left-8 z-30 pointer-events-none mix-blend-difference animate-scroll-indicator-intro"
+            className={`absolute left-8 z-30 pointer-events-none mix-blend-difference ${playMobileArrowIntro ? 'animate-hero-mobile-left-arrow-intro' : ''}`}
             style={{
               bottom: 'max(8px, env(safe-area-inset-bottom, 0px) + 8px)',
             }}

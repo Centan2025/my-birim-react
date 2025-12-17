@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react'
 import {useLocation, useNavigate, Link} from 'react-router-dom'
 import {useAuth} from '../App'
+import {useSEO} from '../hooks/useSEO'
 
 export function VerifyEmailPage() {
   const location = useLocation()
@@ -12,6 +13,14 @@ export function VerifyEmailPage() {
     location.search || location.hash.split('?')[1] || ''
   )
   const token = searchParams.get('token') || ''
+
+  useSEO({
+    title: 'BIRIM - E-posta Doğrulama',
+    description: 'Üyeliğinizi doğrulayın ve üye paneline erişin.',
+    siteName: 'BIRIM',
+    type: 'website',
+    locale: 'tr_TR',
+  })
 
   useEffect(() => {
     let cancelled = false

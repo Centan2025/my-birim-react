@@ -7,13 +7,25 @@ import {useCategories} from '../hooks/useCategories'
 import {useProducts} from '../hooks/useProducts'
 import {useSiteSettings} from '../hooks/useSiteData'
 import ScrollReveal from '../components/ScrollReveal'
+import {useSEO} from '../hooks/useSEO'
+import {useHeaderTheme} from '../context/HeaderThemeContext'
 
 export function CategoriesPage() {
   const {data: categories = [], isLoading: loading} = useCategories()
   const {data: allProducts = []} = useProducts()
   const {t} = useTranslation()
   const {data: settings} = useSiteSettings()
+  const {setFromPalette, reset} = useHeaderTheme()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
+  const pageTitle = `BIRIM - ${t('categories') || t('products') || 'Kategoriler'}`
+
+  useSEO({
+    title: pageTitle,
+    description: t('products_page_subtitle') || t('products') || 'Ürün kategorileri',
+    siteName: 'BIRIM',
+    type: 'website',
+    locale: 'tr_TR',
+  })
 
   // Her kategori için görsel belirle: heroImage yoksa kategoriye ait bir ürünün görselini kullan
   const categoriesWithImages = useMemo(() => {
@@ -51,6 +63,18 @@ export function CategoriesPage() {
       return { ...category, displayImage: '' }
     })
   }, [categories, allProducts])
+
+  // Header temasını mevcut ürünlerden birinin paletinden besle (kategoriler listesi için)
+  useEffect(() => {
+    const candidate = allProducts.find(
+      p => typeof p.mainImage === 'object' && (p as any).mainImage?.palette
+    )
+    if (candidate && typeof candidate.mainImage === 'object' && (candidate.mainImage as any).palette) {
+      setFromPalette((candidate.mainImage as any).palette)
+      return () => reset()
+    }
+    reset()
+  }, [allProducts, setFromPalette, reset])
 
   if (loading) {
     return (

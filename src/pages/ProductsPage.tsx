@@ -11,6 +11,7 @@ import {useSiteSettings} from '../hooks/useSiteData'
 import type {Product} from '../types'
 import ScrollReveal from '../components/ScrollReveal'
 import {useSEO} from '../hooks/useSEO'
+import {useHeaderTheme} from '../context/HeaderThemeContext'
 
 const ChevronDownIcon = () => (
   <svg
@@ -38,11 +39,14 @@ export function ProductsPage() {
   const sortRef = useRef<HTMLDivElement | null>(null)
 
   // React Query hooks - always call both, use enabled to control
-  const {data: allProducts = [], isLoading: allProductsLoading} = useProducts()
-  const {data: categoryProducts = [], isLoading: categoryProductsLoading} =
+  const {data: allProductsData, isLoading: allProductsLoading} = useProducts()
+  const {data: categoryProductsData, isLoading: categoryProductsLoading} =
     useProductsByCategory(categoryId)
+  const allProducts = useMemo(() => allProductsData ?? [], [allProductsData])
+  const categoryProducts = useMemo(() => categoryProductsData ?? [], [categoryProductsData])
   const {data: category} = useCategory(categoryId)
   const {data: categories = []} = useCategories()
+  const {setFromPalette, reset} = useHeaderTheme()
 
   // Use category products if categoryId exists, otherwise use all products
   const products = categoryId ? categoryProducts : allProducts
@@ -147,17 +151,28 @@ export function ProductsPage() {
     section: 'Products',
   })
 
+  const handleSortChange = (value: string) => {
+    setSortBy(value)
+    setIsSortOpen(false)
+  }
+
+  // Header temasını listelenen ürünlerin paletlerinden besle (öncelik kategori ürünleri)
+  useEffect(() => {
+    const sourceProducts = categoryId ? categoryProducts : allProducts
+    const candidate = sourceProducts.find(p => typeof p.mainImage === 'object' && (p as any).mainImage?.palette)
+    if (candidate && typeof candidate.mainImage === 'object' && (candidate.mainImage as any).palette) {
+      setFromPalette((candidate.mainImage as any).palette)
+      return () => reset()
+    }
+    reset()
+  }, [categoryId, categoryProducts, allProducts, setFromPalette, reset])
+
   if (loading) {
     return (
       <div className="pt-20">
         <PageLoading message={t('loading')} />
       </div>
     )
-  }
-
-  const handleSortChange = (value: string) => {
-    setSortBy(value)
-    setIsSortOpen(false)
   }
 
   return (

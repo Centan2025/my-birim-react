@@ -1,4 +1,14 @@
+import {useSEO} from '../hooks/useSEO'
+
 export function ComingSoonPage() {
+  useSEO({
+    title: 'BIRIM - Yakında Yayında',
+    description: 'Birim web sitesi üzerinde çalışmalarımız devam ediyor.',
+    siteName: 'BIRIM',
+    type: 'website',
+    locale: 'tr_TR',
+  })
+
   return (
     <div className="min-h-screen bg-white text-[#1a1a1a] flex items-center justify-start px-5 md:px-10 py-5">
       <div className="w-full">

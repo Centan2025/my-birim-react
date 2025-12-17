@@ -17,6 +17,7 @@ import { useProduct, useProductsByCategory } from '../hooks/useProducts'
 import { useDesigner } from '../hooks/useDesigners'
 import { useCategories } from '../hooks/useCategories'
 import { useSiteSettings } from '../hooks/useSiteData'
+import { useHeaderTheme } from '../context/HeaderThemeContext'
 import ScrollReveal from '../components/ScrollReveal'
 import { ProductDesignerSection } from '../components/ProductDesignerSection'
 import { ProductExclusiveContentSection } from '../components/ProductExclusiveContentSection'
@@ -100,6 +101,7 @@ export function ProductDetailPage() {
   const { data: product, isLoading: productLoading } = useProduct(productId)
   const { data: siteSettings } = useSiteSettings()
   const { data: allCategories = [] } = useCategories()
+  const { setFromPalette, reset } = useHeaderTheme()
 
   // Designer ve category'yi product'tan al
   const { data: designer } = useDesigner(product?.designerId)
@@ -163,6 +165,18 @@ export function ProductDetailPage() {
     setIsPageVisible(true)
   }, [productId])
 
+  // Header temasını ürün görseli paletinden besle
+  useEffect(() => {
+    if (!product) {
+      reset()
+      return
+    }
+    const palette =
+      typeof product.mainImage === 'object' ? (product.mainImage as any).palette : undefined
+    setFromPalette(palette)
+    return () => reset()
+  }, [product, reset, setFromPalette])
+
   // Sayfa başlığı + GA pageview: "Kategori Adı - Ürün Adı"
   useEffect(() => {
     if (!product) return
@@ -171,10 +185,6 @@ export function ProductDetailPage() {
     const categoryName = category ? t(category.name) : ''
     const productName = t(product.name)
     const title = categoryName ? `${categoryName} - ${productName}` : productName
-    if (typeof document !== 'undefined') {
-      document.title = title
-    }
-
     analytics.pageview(window.location.pathname, title)
   }, [product, t])
 
@@ -815,6 +825,10 @@ export function ProductDetailPage() {
             >
               {heroMedia.map((m, index) => {
                 if (!m) return null
+                const shouldEagerLoad =
+                  (slideCount <= 1 && index === 0) ||
+                  (slideCount > 1 && index === 1) // cloned dizide ilk gerçek slide
+                const isActiveSlide = heroSlideIndex === index
                 return (
                   <div
                     key={index}
@@ -830,7 +844,8 @@ export function ProductDetailPage() {
                         className={`w-full h-full object-contain ${imageBorderClass}`}
                         width={1600}
                         height={900}
-                        loading="eager"
+                        loading={shouldEagerLoad ? 'eager' : 'lazy'}
+                        fetchPriority={shouldEagerLoad ? 'high' : 'low'}
                         quality={90}
                       />
                     ) : m.type === 'video' ? (
@@ -839,18 +854,18 @@ export function ProductDetailPage() {
                         srcMobile={m.urlMobile}
                         srcDesktop={m.urlDesktop}
                         className={`w-full h-full object-contain ${imageBorderClass}`}
-                        autoPlay
+                        autoPlay={isActiveSlide}
                         muted
                         loop
                         playsInline
-                        preload="auto"
-                        loading="eager"
+                        preload={shouldEagerLoad ? 'auto' : 'metadata'}
+                        loading={shouldEagerLoad ? 'eager' : 'lazy'}
                       />
                     ) : (
                       <iframe
                         className="w-full h-full"
                         title="youtube-player"
-                        src={toYouTubeEmbed(m.url, { autoplay: true })}
+                        src={toYouTubeEmbed(m.url, { autoplay: isActiveSlide })}
                         allow="autoplay; encrypted-media; fullscreen"
                         frameBorder="0"
                       />

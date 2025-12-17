@@ -4,10 +4,17 @@ import {getKvkkPolicy} from '../services/cms'
 import {useTranslation} from '../i18n'
 import PortableTextLite from '../components/PortableTextLite'
 import type {KvkkPolicy} from '../types'
+import {useSEO} from '../hooks/useSEO'
+
+type PortableBlock = {
+  _type?: string
+  [key: string]: unknown
+}
 
 export default function KvkkPage() {
   const [policy, setPolicy] = useState<KvkkPolicy | null>(null)
   const {t, locale} = useTranslation()
+  const localizedContent = policy?.content as Record<string, unknown> | undefined
 
   useEffect(() => {
     getKvkkPolicy()
@@ -16,9 +23,20 @@ export default function KvkkPage() {
   }, [])
 
   const title = policy?.title ? t(policy.title) : 'KVKK Aydınlatma Metni'
-  const contentBlocks = policy?.content
-    ? (policy.content as any)[locale] || (policy.content as any).tr || (policy.content as any).en
-    : undefined
+  const contentBlocks =
+    localizedContent?.[locale] ??
+    localizedContent?.tr ??
+    localizedContent?.en ??
+    undefined
+  useSEO({
+    title: `BIRIM - ${title}`,
+    description:
+      t('kvkk_description') ||
+      'Kişisel verilerin korunması ve işlenmesine dair KVKK aydınlatma metni.',
+    siteName: 'BIRIM',
+    type: 'website',
+    locale: 'tr_TR',
+  })
   const updated = policy?.updatedAt
     ? new Date(policy.updatedAt).toLocaleDateString(locale === 'en' ? 'en-GB' : 'tr-TR')
     : new Date().toLocaleDateString(locale === 'en' ? 'en-GB' : 'tr-TR')
@@ -45,7 +63,7 @@ export default function KvkkPage() {
         <h1 className="text-3xl font-light text-gray-800 mt-6 md:mt-8 mb-6">{title}</h1>
         {Array.isArray(contentBlocks) ? (
           <div className="prose prose-gray max-w-none">
-            <PortableTextLite value={contentBlocks as any[]} />
+            <PortableTextLite value={contentBlocks as PortableBlock[]} />
             <p className="text-sm text-gray-500 mt-6">
               {locale === 'en' ? 'Last updated' : 'Son güncelleme'}: {updated}
             </p>

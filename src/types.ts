@@ -5,6 +5,14 @@
  */
 export type LocalizedString = {[key: string]: string} | string
 
+// Sanity palette metadata (dominant renk bilgisi)
+export interface SanityImagePalette {
+  dominant?: {
+    background?: string
+    foreground?: string
+  }
+}
+
 // --- Core Site Configuration ---
 
 /**
@@ -135,7 +143,9 @@ export interface Product {
   /** Localized detailed description of the product. */
   description: LocalizedString
   /** URL for the main display image of the product. */
-  mainImage: string | {url: string; urlMobile?: string; urlDesktop?: string}
+  mainImage:
+    | string
+    | {url: string; urlMobile?: string; urlDesktop?: string; palette?: SanityImagePalette}
   /** Array of URLs for alternative product images. */
   alternativeImages: string[] // legacy
   /** Mixed alternative media for the band under hero. */
@@ -225,6 +235,8 @@ export interface HeroMediaItem {
   urlMobile?: string
   /** Art Direction: Desktop için URL (opsiyonel) */
   urlDesktop?: string
+  /** Image palette metadata (only for image type) */
+  palette?: SanityImagePalette
   /** Localized title text displayed over the media. */
   title: LocalizedString
   /** Metin konumu: center, left, right (default: center) */
@@ -305,7 +317,7 @@ export interface HomePageContent {
  * Defines the content structure for the About Us page.
  */
 export interface AboutPageContent {
-  heroImage: string
+  heroImage: string | {url: string; palette?: SanityImagePalette}
   heroTitle: LocalizedString
   heroSubtitle: LocalizedString
   storyTitle: LocalizedString
@@ -505,7 +517,7 @@ export interface CartItem {
 export interface Project {
   id: string
   title: LocalizedString
-  cover: string | {url: string; urlMobile?: string; urlDesktop?: string}
+  cover: string | {url: string; urlMobile?: string; urlDesktop?: string; palette?: SanityImagePalette}
   date?: LocalizedString
   excerpt?: LocalizedString
   media?: {

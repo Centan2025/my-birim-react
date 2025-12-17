@@ -21,6 +21,8 @@ import {useCart} from '../context/CartContext'
 import {useCategories} from '../hooks/useCategories'
 import {useProductsByCategory} from '../hooks/useProducts'
 import {useFocusTrap} from '../hooks/useFocusTrap'
+import {useHeaderScroll} from '../hooks/useHeaderScroll'
+import {useHeaderTheme} from '../context/HeaderThemeContext'
 
 const MenuIcon = () => (
   <svg
@@ -134,6 +136,7 @@ export function Header() {
   const mobileMenuCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const mobileLocaleTimeoutRef = useRef<number | null>(null)
   const [submenuOffset, setSubmenuOffset] = useState(0)
+  const {theme: headerTheme} = useHeaderTheme()
 
   const {isLoggedIn} = useAuth()
   const {cartCount, toggleCart} = useCart()
@@ -277,8 +280,34 @@ export function Header() {
     return () => clearTimeout(timeoutId)
   }, [location.pathname, isMobile])
 
+  // Context'ten gelen tema parlaklığı varsa, scroll durumuna göre uygula
+  useEffect(() => {
+    if (headerTheme.brightness === null) {
+      setHeroBrightness(null)
+      heroBrightnessRef.current = null
+      return
+    }
+
+    const applyPaletteBrightness = () => {
+      if (window.scrollY > 0) {
+        setHeroBrightness(null)
+        heroBrightnessRef.current = null
+      } else {
+        setHeroBrightness(headerTheme.brightness)
+        heroBrightnessRef.current = headerTheme.brightness
+      }
+    }
+
+    applyPaletteBrightness()
+    window.addEventListener('scroll', applyPaletteBrightness, {passive: true})
+    return () => window.removeEventListener('scroll', applyPaletteBrightness)
+  }, [headerTheme.brightness])
+
   // Sayfanın üst kısmındaki görselin parlaklığını kontrol et (tüm cihazlarda, sadece en üstteyken)
   useEffect(() => {
+    // Context'ten parlaklık sağlandıysa tarayıcıda hesaplama yapma
+    if (headerTheme.brightness !== null) return
+
     // Sadece sayfa en üstteyken parlaklığı hesapla
     if (window.scrollY > 0) {
       setHeroBrightness(null)
@@ -665,349 +694,23 @@ export function Header() {
     }
   }, [isLangOpen, isProductsOpen, isSearchOpen, isMobileMenuOpen])
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY
-      const currentPath = currentRouteRef.current
-      // Ref'lerden güncel değerleri al (stale closure'dan kaçınmak için)
-      const currentHeroBrightness = heroBrightnessRef.current
-      const { isMobileMenuOpen: menuOpen, isSearchOpen: searchOpen, isLangOpen: langOpen, isProductsOpen: productsOpen } = menuStateRef.current
-
-      // Route değiştiyse işlemi durdur
-      if (currentPath !== location.pathname) {
-        return
-      }
-
-      // Mobilde: Özel davranış
-      if (isMobile) {
-        // Mobil menü veya arama AÇIKKEN scroll davranışını kilitle;
-        // header sabit kalsın, yukarı-aşağı zıplamasın.
-        if (menuOpen || searchOpen) {
-          setHeaderOpacity(menuOpen ? 0.75 : 0.7)
-          setIsHeaderVisible(true)
-          lastScrollYRef.current = currentScrollY
-          return
-        }
-
-        // Menü kapandıktan hemen sonraki kısa sürede (ör. 800ms),
-        // header'ın otomatik gizlenmesini engelle.
-        const now = Date.now()
-        if (now < mobileMenuJustClosedUntilRef.current) {
-          setIsHeaderVisible(true)
-          lastScrollYRef.current = currentScrollY
-          return
-        }
-
-        // Mobilde: Sayfa en üstteyken (scrollY = 0) şeffaflığı ayarla
-        if (currentScrollY === 0) {
-          // Route değiştiyse brightness kullanma
-          if (currentPath !== location.pathname) {
-            setHeaderOpacity(0)
-            setIsHeaderVisible(true)
-            opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
-          } else {
-            // Projeler ve haberler sayfalarını önce kontrol et (ana sayfa ve detay sayfası)
-            const path = location.pathname
-            const isProjectsList = path === '/projects' || path === '/projects/'
-            const isProjectDetailPage = path.match(/^\/projects\/[^/]+$/)
-            const isNewsList = path === '/news' || path === '/news/'
-            const isNewsDetailPage = path.match(/^\/news\/[^/]+$/)
-            const isDesignersList = path === '/designers' || path === '/designers/'
-            const isDesignerDetailPage = path.match(/^\/designer\/[^/]+$/)
-            const isProductDetailPage = path.match(/^\/product\/[^/]+$/)
-            
-            // Projeler, haberler ve tasarımcılar ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
-            if (isProjectsList || isProjectDetailPage || isNewsList || isNewsDetailPage || isDesignersList || isDesignerDetailPage) {
-              setHeaderOpacity(0.7)
-              opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
-            } else if (isProductDetailPage) {
-              // Ürün detay sayfalarında her zaman yarı şeffaf (görsel koyu olsa bile arka plan beyaz)
-              setHeaderOpacity(0.7)
-              opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
-            } else if (currentHeroBrightness !== null) {
-              // Route değiştiyse brightness kullanma (double check)
-              if (currentPath !== location.pathname) {
-                setHeaderOpacity(0)
-                setIsHeaderVisible(true)
-                opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
-              } else if (currentHeroBrightness >= 0.7) {
-                // Çok açık / beyaza yakın görseller - minimum opacity garantile
-                setHeaderOpacity(0.75)
-                opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
-              } else if (currentHeroBrightness >= 0.5) {
-                // Açık arka plan - minimum opacity garantile
-                setHeaderOpacity(0.65)
-                opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
-              } else if (currentHeroBrightness > 0.4) {
-                // Orta-açık arka plan
-                const adjustedOpacity = Math.min(0.75, 0.2 + (currentHeroBrightness - 0.4) * 1.2)
-                setHeaderOpacity(adjustedOpacity)
-                opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
-              } else {
-                // Görsel koyu, header tamamen şeffaf
-                setHeaderOpacity(0)
-                opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
-              }
-            } else {
-            // Brightness hesaplanamadı (CORS vb.) veya henüz hesaplanmadı
-            // Sayfa türüne göre opacity belirle
-            const path = location.pathname
-            const isProjectsList = path === '/projects' || path === '/projects/'
-            const isProductsList = path === '/products' || path === '/products/' || path.match(/^\/products\/?$/)
-            const isProjectDetail = path.match(/^\/projects\/[^/]+$/)
-            const isProductDetail = path.match(/^\/product\/[^/]+$/)
-            const isNewsList = path === '/news' || path === '/news/'
-            const isNewsDetail = path.match(/^\/news\/[^/]+$/)
-            const isDesignersList = path === '/designers' || path === '/designers/'
-            const isDesignerDetail = path.match(/^\/designer\/[^/]+$/)
-            const isLightPage = isProjectsList || 
-                               isProductsList || 
-                               isProjectDetail ||
-                               isProductDetail ||
-                               isNewsList ||
-                               isNewsDetail ||
-                               isDesignersList ||
-                               isDesignerDetail ||
-                               path.includes('contact') ||
-                               path.includes('cart') ||
-                               path.includes('favorites') ||
-                               path.includes('profile') ||
-                               path.includes('orders') ||
-                               path.includes('search')
-            
-            if (isLightPage) {
-              setHeaderOpacity(0.7) // Açık/beyaz arka planlı sayfalarda yarı şeffaf
-            } else {
-              setHeaderOpacity(0) // Koyu sayfalarda şeffaf
-            }
-            opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
-            }
-          }
-          setIsHeaderVisible(true) // Sayfa en üstteyken menü görünür
-        } else {
-          // Projeler, haberler ve tasarımcılar sayfalarında scroll yapıldığında da opacity sabit kalmalı
-          const path = location.pathname
-          const isProjectsList = path === '/projects' || path === '/projects/'
-          const isProjectDetailPage = path.match(/^\/projects\/[^/]+$/)
-          const isNewsList = path === '/news' || path === '/news/'
-          const isNewsDetailPage = path.match(/^\/news\/[^/]+$/)
-          const isDesignersList = path === '/designers' || path === '/designers/'
-          const isDesignerDetailPage = path.match(/^\/designer\/[^/]+$/)
-          
-          if (isProjectsList || isProjectDetailPage || isNewsList || isNewsDetailPage || isDesignersList || isDesignerDetailPage) {
-            // Projeler, haberler ve tasarımcılar sayfalarında her zaman yarı şeffaf (renk kontrolü yapma)
-            setHeaderOpacity(0.7)
-            opacitySetByHandleScrollRef.current = true
-          } else {
-            // Scroll yapıldıkça opacity artıyor
-            opacitySetByHandleScrollRef.current = false // Scroll yapıldı, checkOpacityOnScrollEnd çalışabilir
-            const maxScroll = 200
-            const opacity = Math.min(0.75, (currentScrollY / maxScroll) * 0.75)
-            setHeaderOpacity(opacity)
-          }
-
-          // Mobilde de scroll yönüne göre header'ı gizle/göster
-          const now = Date.now()
-          const timeSinceLastChange = now - (headerVisibilityLastChanged.current || 0)
-          
-          if (timeSinceLastChange > 150) {
-            const scrollDiff = currentScrollY - lastScrollYRef.current
-            if (scrollDiff > 20) {
-              setIsHeaderVisible(false)
-              headerVisibilityLastChanged.current = now
-            } else if (scrollDiff < -20) {
-              setIsHeaderVisible(true)
-              headerVisibilityLastChanged.current = now
-            }
-          }
-        }
-        lastScrollYRef.current = currentScrollY
-      } else {
-        // Desktop header visibility artık ayrı useEffect ile yönetiliyor
-        // Burada sadece arama açıkken görünür tutuyoruz
-        if (searchOpen) {
-          setIsHeaderVisible(true)
-        }
-
-        lastScrollYRef.current = currentScrollY
-
-        // Projeler, haberler ve tasarımcılar sayfalarını kontrol et (ana sayfa ve detay sayfası)
-        const path = location.pathname
-        const isProjectsList = path === '/projects' || path === '/projects/'
-        const isProjectDetailPage = path.match(/^\/projects\/[^/]+$/)
-        const isNewsList = path === '/news' || path === '/news/'
-        const isNewsDetailPage = path.match(/^\/news\/[^/]+$/)
-        const isDesignersList = path === '/designers' || path === '/designers/'
-        const isDesignerDetailPage = path.match(/^\/designer\/[^/]+$/)
-
-        // Projeler, haberler ve tasarımcılar ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
-        if (isProjectsList || isProjectDetailPage || isNewsList || isNewsDetailPage || isDesignersList || isDesignerDetailPage) {
-          // Projeler, haberler ve tasarımcılar sayfalarında scroll yapıldığında da opacity sabit kalmalı
-          setHeaderOpacity(0.7)
-          opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
-        } else {
-          const maxScroll = 200
-          let opacity = 0.1
-
-          if (currentScrollY > 0) {
-            opacity = Math.min(0.75, 0.1 + (currentScrollY / maxScroll) * 0.65)
-            opacitySetByHandleScrollRef.current = false // Scroll yapıldı, checkOpacityOnScrollEnd çalışabilir
-          } else {
-            // Desktop'ta sayfa en üstteyken opacity ayarlanıyor
-            opacitySetByHandleScrollRef.current = true // handleScroll tarafından ayarlandı
-          }
-
-          setHeaderOpacity(opacity)
-        }
-      }
-
-      // Scroll sırasında açık menüleri kapat
-      const scrollDelta = Math.abs(currentScrollY - lastScrollYRef.current)
-      if (scrollDelta > 3) {
-        // En az 3px scroll yapıldıysa
-        if (isMobile) {
-          // Mobilde: Scroll timeout'u temizle ve yeni bir tane başlat
-          if (scrollTimeoutRef.current) {
-            clearTimeout(scrollTimeoutRef.current)
-          }
-
-          // Hemen kapat (gecikme yok) — fakat mobil menü açıksa onu kapatma,
-          // aksi halde hamburger'e tıklandığında oluşan küçük scroll'larda menü anlık kapanabiliyor.
-          if (langOpen) setIsLangOpen(false)
-          if (productsOpen) setIsProductsOpen(false)
-          if (searchOpen) closeSearch()
-          // if (menuOpen) setIsMobileMenuOpen(false) // scroll ile mobil menüyü artık kapatmıyoruz
-        } else {
-          // Desktop'ta: Arama açıksa kapat
-          if (searchOpen) closeSearch()
-          if (langOpen) setIsLangOpen(false)
-          if (productsOpen) setIsProductsOpen(false)
-        }
-      }
-    }
-
-    // Scroll listener - header visibility için hızlı tepki
-    let scrollListener: (() => void) | null = null
-    let rafId: number | null = null
-    let lastScrollTime = 0
-    const SCROLL_THROTTLE_MS = 50 // 50ms throttle - hızlı tepki için
-
-    const throttledHandleScroll = () => {
-      const now = Date.now()
-      if (now - lastScrollTime < SCROLL_THROTTLE_MS) {
-        // Throttle: Sadece bir RAF beklet, birden fazla queue etme
-        if (rafId === null) {
-          rafId = requestAnimationFrame(() => {
-            rafId = null
-            // Throttle süresini kontrol et
-            if (Date.now() - lastScrollTime >= SCROLL_THROTTLE_MS) {
-              lastScrollTime = Date.now()
-              handleScroll()
-            }
-          })
-        }
-        return
-      }
-      lastScrollTime = now
-      handleScroll()
-    }
-
-    // Scroll bittiğinde sadece şeffaflık kontrolü (görünürlüğe dokunma)
-    let scrollEndTimeout: ReturnType<typeof setTimeout> | null = null
-    
-    const checkOpacityOnScrollEnd = () => {
-      const currentScrollY = window.scrollY || document.documentElement.scrollTop
-      
-      // Sayfa en üstteyse şeffaflık durumunu kontrol et
-      // Ancak handleScroll zaten opacity'yi ayarladıysa çift kontrol yapma
-      if (currentScrollY <= 10) {
-        // handleScroll zaten opacity'yi ayarladıysa, checkOpacityOnScrollEnd çalışmasın
-        if (opacitySetByHandleScrollRef.current) {
-          // Flag'i sıfırla ki bir sonraki scroll'da tekrar çalışabilsin
-          opacitySetByHandleScrollRef.current = false
-          return
-        }
-        
-        const path = location.pathname
-        const isProjectsList = path === '/projects' || path === '/projects/'
-        const isProjectDetail = path.match(/^\/projects\/[^/]+$/)
-        const isNewsList = path === '/news' || path === '/news/'
-        const isNewsDetail = path.match(/^\/news\/[^/]+$/)
-        const isDesignersList = path === '/designers' || path === '/designers/'
-        const isDesignerDetail = path.match(/^\/designer\/[^/]+$/)
-        
-        // Projeler, haberler ve tasarımcılar ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
-        if (isProjectsList || isProjectDetail || isNewsList || isNewsDetail || isDesignersList || isDesignerDetail) {
-          setHeaderOpacity(0.7)
-        } else {
-          const isProductsList = path === '/products' || path === '/products/' || path.match(/^\/products\/?$/)
-          const isProductDetail = path.match(/^\/product\/[^/]+$/)
-          const isDesignersList = path === '/designers' || path === '/designers/'
-          const isDesignerDetail = path.match(/^\/designer\/[^/]+$/)
-          const isLightPage = isProductsList || 
-                             isProductDetail ||
-                             isDesignersList ||
-                             isDesignerDetail ||
-                             path.includes('contact') ||
-                             path.includes('cart') ||
-                             path.includes('favorites') ||
-                             path.includes('profile') ||
-                             path.includes('orders') ||
-                             path.includes('search')
-          
-          if (isLightPage) {
-            setHeaderOpacity(0.7) // Açık/beyaz arka planlı sayfalarda yarı şeffaf
-          } else if (heroBrightnessRef.current !== null) {
-            if (heroBrightnessRef.current < 0.5) {
-              setHeaderOpacity(0) // Koyu hero - şeffaf header
-            } else {
-              setHeaderOpacity(0.7) // Açık hero - yarı şeffaf header
-            }
-          }
-        }
-      } else {
-        // Scroll yapıldı, flag'i sıfırla
-        opacitySetByHandleScrollRef.current = false
-      }
-      // Header görünürlüğüne dokunma - kullanıcı nereye scroll yaptıysa orada kalsın
-    }
-
-    const handleScrollWithEnd = () => {
-      throttledHandleScroll()
-      // Scroll bittiğinde kontrol et
-      if (scrollEndTimeout) clearTimeout(scrollEndTimeout)
-      scrollEndTimeout = setTimeout(checkOpacityOnScrollEnd, 150)
-    }
-
-    const initializeScrollListener = () => {
-      scrollListener = handleScrollWithEnd
-      // İlk yüklemede şeffaflığı ayarla (throttle olmadan)
-      handleScroll()
-      window.addEventListener('scroll', handleScrollWithEnd, {passive: true})
-    }
-
-    // Scroll listener'ı hemen başlat (gecikme yok)
-    // State değişikliklerinde useEffect yeniden çalıştığında listener yeniden kurulacak
-    // Ama artık state'lere ref üzerinden eriştiğimiz için dependency array minimize edildi
-    initializeScrollListener()
-
-    return () => {
-      if (scrollListener) {
-        window.removeEventListener('scroll', scrollListener)
-      }
-      if (rafId !== null) {
-        cancelAnimationFrame(rafId)
-      }
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current)
-      }
-      if (scrollEndTimeout) {
-        clearTimeout(scrollEndTimeout)
-      }
-    }
-  // Sadece isMobile ve location.pathname değiştiğinde yeniden kur
-  // Diğer state'lere ref üzerinden erişiyoruz
-  }, [isMobile, location.pathname, closeSearch])
+  useHeaderScroll({
+    isMobile,
+    locationPathname: location.pathname,
+    closeSearch,
+    currentRouteRef,
+    heroBrightnessRef,
+    menuStateRef,
+    opacitySetByHandleScrollRef,
+    mobileMenuJustClosedUntilRef,
+    headerVisibilityLastChanged,
+    lastScrollYRef,
+    scrollTimeoutRef,
+    setHeaderOpacity,
+    setIsHeaderVisible,
+    setIsLangOpen,
+    setIsProductsOpen,
+  })
 
   // Mobil menü açıldığında/kapandığında opacity'yi güncelle
   useEffect(() => {

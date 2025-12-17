@@ -2,11 +2,23 @@ import {useNavigate} from 'react-router-dom'
 import {useAuth} from '../App'
 import {useTranslation} from '../i18n'
 import {Link} from 'react-router-dom'
+import {useSEO} from '../hooks/useSEO'
 
 export function ProfilePage() {
   const auth = useAuth()
   const navigate = useNavigate()
   const {t} = useTranslation()
+  const pageTitle = `BIRIM - ${t('profile') || 'Üye Paneli'}`
+
+  useSEO({
+    title: pageTitle,
+    description:
+      t('profile_description') ||
+      'Üye bilgilerinizi yönetin, özel içeriklere ve ürünlere erişin.',
+    siteName: 'BIRIM',
+    type: 'profile',
+    locale: 'tr_TR',
+  })
 
   if (!auth.isLoggedIn || !auth.user) {
     return (
@@ -48,37 +60,37 @@ export function ProfilePage() {
                       erişiminiz kısıtlı olacaktır.
                     </div>
                   )}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">E-posta</label>
-                    <p className="mt-1 text-sm text-gray-900">{auth.user.email}</p>
+                  <div aria-label="E-posta" className="space-y-1">
+                    <p className="block text-sm font-medium text-gray-700">E-posta</p>
+                    <p className="text-sm text-gray-900">{auth.user.email}</p>
                   </div>
                   {auth.user.name && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Ad Soyad</label>
-                      <p className="mt-1 text-sm text-gray-900">{auth.user.name}</p>
+                    <div aria-label="Ad Soyad" className="space-y-1">
+                      <p className="block text-sm font-medium text-gray-700">Ad Soyad</p>
+                      <p className="text-sm text-gray-900">{auth.user.name}</p>
                     </div>
                   )}
                   {auth.user.company && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Firma</label>
-                      <p className="mt-1 text-sm text-gray-900">{auth.user.company}</p>
+                    <div aria-label="Firma" className="space-y-1">
+                      <p className="block text-sm font-medium text-gray-700">Firma</p>
+                      <p className="text-sm text-gray-900">{auth.user.company}</p>
                     </div>
                   )}
                   {auth.user.country && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Ülke</label>
-                      <p className="mt-1 text-sm text-gray-900">{auth.user.country}</p>
+                    <div aria-label="Ülke" className="space-y-1">
+                      <p className="block text-sm font-medium text-gray-700">Ülke</p>
+                      <p className="text-sm text-gray-900">{auth.user.country}</p>
                     </div>
                   )}
                   {auth.user.profession && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Meslek</label>
-                      <p className="mt-1 text-sm text-gray-900">{auth.user.profession}</p>
+                    <div aria-label="Meslek" className="space-y-1">
+                      <p className="block text-sm font-medium text-gray-700">Meslek</p>
+                      <p className="text-sm text-gray-900">{auth.user.profession}</p>
                     </div>
                   )}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Kayıt Tarihi</label>
-                    <p className="mt-1 text-sm text-gray-900">
+                  <div aria-label="Kayıt Tarihi" className="space-y-1">
+                    <p className="block text-sm font-medium text-gray-700">Kayıt Tarihi</p>
+                    <p className="text-sm text-gray-900">
                       {new Date(auth.user.createdAt).toLocaleDateString('tr-TR', {
                         year: 'numeric',
                         month: 'long',

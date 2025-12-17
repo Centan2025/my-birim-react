@@ -12,7 +12,6 @@
 html {
   font-size: 16px;
   /* Sabit base font-size: 1rem = 16px */
-  scroll-behavior: smooth;
 }
 
 body {
@@ -169,27 +168,11 @@ h6 {
 }
 
 @media (max-width: 1023px) {
-  body {
-    overflow-x: hidden;
-    margin: 0;
-    padding: 0;
-  }
-
-  html {
-    overflow-x: hidden;
-    margin: 0;
-    padding: 0;
-  }
-
   header {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
   }
-
-  /* Hero ve ürün detayındaki mobil özel layout kuralları, ilgili komponentler
-     içinde inline <style> bloklarıyla yönetiliyor. Buradaki eski global
-     override'lar kaldırıldı ki debug ve tasarım değişiklikleri daha öngörülebilir olsun. */
 }
 
 @keyframes scroll-line {
@@ -243,6 +226,34 @@ h6 {
 
 .animate-scroll-dot-fall {
   animation: scroll-dot-fall 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes hero-mobile-left-arrow-intro {
+  0% {
+    opacity: 0;
+    transform: translateY(44px) scale(1.26);
+    filter: drop-shadow(0 0 26px rgba(255, 255, 255, 0.95));
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(-14px) scale(1.16);
+    filter: drop-shadow(0 0 32px rgba(255, 255, 255, 0.8));
+  }
+  75% {
+    opacity: 1;
+    transform: translateY(4px) scale(1.04);
+    filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.55));
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+  }
+}
+
+.animate-hero-mobile-left-arrow-intro {
+  animation: hero-mobile-left-arrow-intro 1.05s cubic-bezier(0.18, 1, 0.28, 1) forwards;
+  will-change: transform, opacity, filter;
 }
 
 @keyframes falling-dot {

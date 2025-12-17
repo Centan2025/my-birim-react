@@ -11,6 +11,7 @@ import { useSiteSettings } from '../hooks/useSiteData'
 import { analytics } from '../lib/analytics'
 import ScrollReveal from '../components/ScrollReveal'
 import { useSEO } from '../hooks/useSEO'
+import { useHeaderTheme } from '../context/HeaderThemeContext'
 
 const getYouTubeId = (url: string): string | null => {
   if (!url) return null
@@ -64,6 +65,7 @@ export function ProjectDetailPage() {
   const { data: allProjects = [] } = useProjects()
   const { t } = useTranslation()
   const { data: settings } = useSiteSettings()
+  const { setFromPalette, reset } = useHeaderTheme()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const showBottomPrevNext = Boolean(settings?.showProductPrevNext)
   const [idx, setIdx] = useState(0)
@@ -86,6 +88,21 @@ export function ProjectDetailPage() {
   const [isLocationVisible, setIsLocationVisible] = useState(false)
   const [areDotsVisible, setAreDotsVisible] = useState(false)
   const [isPageVisible, setIsPageVisible] = useState(false)
+
+  // Header temasını kapak görseli paletinden besle
+  useEffect(() => {
+    if (!project) {
+      reset()
+      return
+    }
+    const palette =
+      project.cover && typeof project.cover === 'object' ? (project.cover as any).palette : undefined
+    if (palette) {
+      setFromPalette(palette)
+      return () => reset()
+    }
+    reset()
+  }, [project, reset, setFromPalette])
   // Prev/Next must be declared before any early returns to keep hooks order stable
   const { prevProject, nextProject } = useMemo(() => {
     if (!project || allProjects.length < 2) return { prevProject: null, nextProject: null }

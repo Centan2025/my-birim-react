@@ -2,8 +2,9 @@ import React from 'react'
 import {describe, it, expect} from 'vitest'
 import {render} from '@testing-library/react'
 import {MemoryRouter} from 'react-router-dom'
+import {HelmetProvider} from 'react-helmet-async'
 
-import {useSEO} from '../hooks/useSEO'
+import {SEOProvider, useSEO} from '../hooks/useSEO'
 import {addStructuredData, getArticleSchema} from '../lib/seo'
 
 const SeoTestComponent: React.FC = () => {
@@ -21,9 +22,13 @@ const SeoTestComponent: React.FC = () => {
 describe('useSEO hook', () => {
   it('updates document title and basic meta tags', () => {
     render(
-      <MemoryRouter initialEntries={['/test']}>
-        <SeoTestComponent />
-      </MemoryRouter>
+      <HelmetProvider>
+        <SEOProvider>
+          <MemoryRouter initialEntries={['/test']}>
+            <SeoTestComponent />
+          </MemoryRouter>
+        </SEOProvider>
+      </HelmetProvider>
     )
 
     expect(document.title).toBe('BIRIM - Test Page')

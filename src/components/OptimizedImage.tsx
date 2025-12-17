@@ -7,6 +7,7 @@ interface OptimizedImageProps {
   width?: number
   height?: number
   loading?: 'lazy' | 'eager'
+  fetchPriority?: 'high' | 'low' | 'auto'
   quality?: number
   format?: 'webp' | 'avif' | 'jpg' | 'png'
   sizes?: string
@@ -34,6 +35,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   width,
   height,
   loading = 'lazy',
+  fetchPriority = 'auto',
   quality = 85,
   format = 'webp',
   sizes,
@@ -47,6 +49,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 }) => {
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
+  // React henüz fetchPriority prop'unu DOM attribute olarak tanımıyor; uyarıyı
+  // engellemek için custom attribute'u lowercase olarak enjekte ediyoruz.
+  const fetchPriorityAttr =
+    fetchPriority && fetchPriority !== 'auto'
+      ? ({fetchpriority: fetchPriority} as Record<string, string>)
+      : {}
 
   // Placeholder (çok küçük, gri renk)
   const placeholder =
@@ -208,6 +216,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             width={width}
             height={height}
             loading={loading}
+          {...fetchPriorityAttr}
             className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ${className}`}
             draggable={draggable}
             onLoad={handleLoad}
@@ -251,6 +260,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           width={width}
           height={height}
           loading={loading}
+          {...fetchPriorityAttr}
           srcSet={responsiveSrcSet || undefined}
           sizes={responsiveSrcSet ? defaultSizes : undefined}
           className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ${className}`}

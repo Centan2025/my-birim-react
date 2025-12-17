@@ -6,6 +6,7 @@ import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
 import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useSEO} from '../hooks/useSEO'
+import {useHeaderTheme} from '../context/HeaderThemeContext'
 
 const CrossFadeText: React.FC<{text: string; triggerKey: number}> = ({text, triggerKey}) => {
   const [currentText, setCurrentText] = useState(text)
@@ -60,6 +61,7 @@ export function AboutPage() {
   const identityBtnRef = useRef<HTMLButtonElement | null>(null)
   const qualityBtnRef = useRef<HTMLButtonElement | null>(null)
   const [indicatorStyle, setIndicatorStyle] = useState<{left: number; width: number} | null>(null)
+  const {setFromPalette, reset} = useHeaderTheme()
 
   // SEO - hook'lar her zaman en üstte ve koşulsuz olmalı
   useSEO({
@@ -94,6 +96,21 @@ export function AboutPage() {
     }
     fetchContent()
   }, [])
+
+  // Header temasını hero görseli paletinden besle
+  useEffect(() => {
+    if (!content?.heroImage) {
+      reset()
+      return
+    }
+    const palette =
+      typeof content.heroImage === 'object' ? (content.heroImage as any).palette : undefined
+    if (palette) {
+      setFromPalette(palette)
+      return () => reset()
+    }
+    reset()
+  }, [content?.heroImage, reset, setFromPalette])
 
   // Aktif sekmeye göre altındaki gri highlight alanını butonların gerçek genişliğine göre hizala
   useEffect(() => {
@@ -157,7 +174,11 @@ export function AboutPage() {
         {content.heroImage && (
           <div className="absolute inset-0 w-full h-full">
             <OptimizedImage
-              src={content.heroImage}
+              src={
+                typeof content.heroImage === 'string'
+                  ? content.heroImage
+                  : content.heroImage.url || ''
+              }
               alt={t(content.heroTitle)}
               className="w-full h-full opacity-40"
               style={{
