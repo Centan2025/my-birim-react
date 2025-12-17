@@ -1275,7 +1275,7 @@ export function ProductDetailPage() {
                         ref={el => {
                           thumbButtonsRef.current[idx] = el
                         }}
-                        className={`relative z-20 flex-shrink-0 w-24 h-24 overflow-hidden rounded-none border-2 transition-all duration-300 ${currentImageIndex === idx ? 'border-transparent' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}
+                        className={`relative z-20 flex-shrink-0 w-24 h-24 overflow-hidden rounded-none border-2 transition-all duration-300 ${currentImageIndex === idx ? (isMobile ? 'border-gray-400 shadow-md' : 'border-transparent') : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}
                         onClick={() => {
                           // Thumbnail tıklanınca hero sonsuz kaydırma index'ini
                           // ilgili slide'a hizala ve ana görsel index'ini güncelle.
