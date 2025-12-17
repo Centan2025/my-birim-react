@@ -289,12 +289,12 @@ const MainLayout: React.FC = () => {
       <SkipLink />
       <Header />
       <CartSidebar />
-      <main
-        id="main-content"
-        className="flex-grow"
-        style={{ overflowX: 'hidden' }}
-        tabIndex={-1}
-      >
+<main
+  id="main-content"
+  className="flex-grow"
+  style={{ overflowX: 'hidden', position: 'relative', zIndex: 5 }}
+  tabIndex={-1}
+>
         <TopBanner />
         <Suspense fallback={<PageLoader />}>
           <PageTransition key={location.pathname}>
@@ -391,7 +391,7 @@ const Footer = () => {
     <>
       <footer
         className="bg-gray-800 text-gray-400"
-        style={{ position: 'relative', zIndex: 1 }}
+        style={{ position: 'relative', zIndex: 5 }}
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6 lg:py-12" style={{ overflow: 'visible' }}>
           {/* Mobil düzen */}

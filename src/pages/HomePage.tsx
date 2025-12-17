@@ -60,7 +60,7 @@ export function HomePage() {
     return () => reset()
   }, [content?.heroMedia, reset, setFromPalette])
 
-  // İlham görselinin yüksekliğini hesapla - hook'lar early return'den önce olmalı
+  // İlham görselinin yüksekliğini hesapla
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth < 1024
@@ -70,7 +70,6 @@ export function HomePage() {
       setIsMobile(mobile)
       setViewportWidth(vw)
 
-      // Mobilde ve genişlik değiştiyse (ya da ilk yükleme) height hesapla
       if (mobile) {
         if (Math.abs(currentWidth - lastWidthRef.current) > 1 || !mobileHeroHeight) {
           setMobileHeroHeight(window.innerHeight)
@@ -80,7 +79,7 @@ export function HomePage() {
         setMobileHeroHeight(null)
       }
     }
-    // İlk çalıştırma
+    
     if (typeof window !== 'undefined' && !mobileHeroHeight) {
       setMobileHeroHeight(window.innerHeight)
     }
@@ -130,22 +129,25 @@ export function HomePage() {
       : undefined
 
   return (
-    <div
-      className={`bg-gray-100 text-gray-900 ${isMobile ? 'hero-page-container-mobile' : ''}`}
-      style={
-        isMobile && viewportWidth > 0
-          ? {
-            width: `${viewportWidth}px`,
-            maxWidth: `${viewportWidth}px`,
-            overflowX: 'hidden',
-            margin: 0,
-            padding: 0,
-            left: 0,
-            right: 0,
-          }
-          : {}
+<div
+  className={`bg-gray-100 text-gray-900 ${isMobile ? 'hero-page-container-mobile' : ''}`}
+  style={
+    isMobile && viewportWidth > 0
+      ? {
+        width: `${viewportWidth}px`,
+        maxWidth: `${viewportWidth}px`,
+        overflowX: 'hidden',
+        margin: 0,
+        padding: 0,
+        left: 0,
+        right: 0,
+        position: 'relative',
       }
-    >
+      : {
+        position: 'relative',
+      }
+  }
+>
       {/* Hero Section */}
       {heroMedia.length > 0 ? (
         <>
@@ -153,7 +155,6 @@ export function HomePage() {
             .hero-scroll-container::-webkit-scrollbar {
               display: none;
             }
-            /* Desktop override - mobil style'ları geçersiz kıl */
             @media (min-width: 1024px) {
               .hero-page-container-mobile {
                 width: 100% !important;
@@ -204,24 +205,6 @@ export function HomePage() {
               }
             }
             @media (max-width: 1023px) {
-              .inspiration-section-mobile {
-                width: 100vw !important;
-                max-width: 100vw !important;
-                margin-left: calc(-50vw + 50%) !important;
-                margin-right: calc(-50vw + 50%) !important;
-                left: 0 !important;
-                right: 0 !important;
-                position: relative !important;
-                box-sizing: border-box !important;
-                padding-left: 0 !important;
-                padding-right: 0 !important;
-                overflow: hidden !important;
-              }
-              .inspiration-section-mobile[style*="backgroundImage"] {
-                background-size: 100vw auto !important;
-                background-position: left center !important;
-                background-repeat: no-repeat !important;
-              }
               .hero-page-container-mobile {
                 width: 100vw !important;
                 max-width: 100vw !important;
@@ -279,11 +262,9 @@ export function HomePage() {
                 flex-wrap: nowrap !important;
                 scroll-snap-type: none !important;
                 will-change: transform !important;
-                /* Genişlik inline style'dan gelecek, CSS override etmesin */
               }
               .hero-slide-mobile,
               .hero-slide-mobile[style] {
-                /* Genişlik inline style'dan gelecek, CSS override etmesin */
                 height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
                 min-height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
                 max-height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;

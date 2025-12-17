@@ -252,7 +252,7 @@ h6 {
 }
 
 .animate-hero-mobile-left-arrow-intro {
-  animation: hero-mobile-left-arrow-intro 1.05s cubic-bezier(0.18, 1, 0.28, 1) forwards;
+  animation: hero-mobile-left-arrow-intro 1.25s cubic-bezier(0.18, 1, 0.28, 1) forwards;
   will-change: transform, opacity, filter;
 }
 
