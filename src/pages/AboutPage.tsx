@@ -64,12 +64,15 @@ export function AboutPage() {
   const {setFromPalette, reset} = useHeaderTheme()
 
   // SEO - hook'lar her zaman en üstte ve koşulsuz olmalı
+  const heroImageUrl =
+    typeof content?.heroImage === 'object' ? content?.heroImage?.url : content?.heroImage
+
   useSEO({
     title: `BIRIM - ${t('about') || 'Hakkımızda'}`,
     description:
       (content && (t(content.heroSubtitle) || t(content.storyTitle))) ||
       'BIRIM hakkında bilgiler',
-    image: content?.heroImage,
+    image: heroImageUrl,
     type: 'article',
     siteName: 'BIRIM',
     locale: 'tr_TR',
@@ -101,15 +104,16 @@ export function AboutPage() {
   useEffect(() => {
     if (!content?.heroImage) {
       reset()
-      return
+    } else {
+      const palette =
+        typeof content.heroImage === 'object' ? (content.heroImage as any).palette : undefined
+      if (palette) {
+        setFromPalette(palette)
+      } else {
+        reset()
+      }
     }
-    const palette =
-      typeof content.heroImage === 'object' ? (content.heroImage as any).palette : undefined
-    if (palette) {
-      setFromPalette(palette)
-      return () => reset()
-    }
-    reset()
+    return () => reset()
   }, [content?.heroImage, reset, setFromPalette])
 
   // Aktif sekmeye göre altındaki gri highlight alanını butonların gerçek genişliğine göre hizala
@@ -174,11 +178,7 @@ export function AboutPage() {
         {content.heroImage && (
           <div className="absolute inset-0 w-full h-full">
             <OptimizedImage
-              src={
-                typeof content.heroImage === 'string'
-                  ? content.heroImage
-                  : content.heroImage.url || ''
-              }
+              src={heroImageUrl || ''}
               alt={t(content.heroTitle)}
               className="w-full h-full opacity-40"
               style={{

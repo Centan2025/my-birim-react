@@ -47,16 +47,17 @@ export function HomePage() {
   useEffect(() => {
     if (!content?.heroMedia || !Array.isArray(content.heroMedia)) {
       reset()
-      return
+      return () => reset()
     }
     const firstImageWithPalette = content.heroMedia.find(
       (m: any) => m?.type === 'image' && m?.palette
     )
     if (firstImageWithPalette?.palette) {
       setFromPalette(firstImageWithPalette.palette)
-      return () => reset()
+    } else {
+      reset()
     }
-    reset()
+    return () => reset()
   }, [content?.heroMedia, reset, setFromPalette])
 
   // İlham görselinin yüksekliğini hesapla - hook'lar early return'den önce olmalı

@@ -1,5 +1,5 @@
 import {Link} from 'react-router-dom'
-import {useMemo} from 'react'
+import {useEffect, useMemo} from 'react'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
@@ -71,9 +71,10 @@ export function CategoriesPage() {
     )
     if (candidate && typeof candidate.mainImage === 'object' && (candidate.mainImage as any).palette) {
       setFromPalette((candidate.mainImage as any).palette)
-      return () => reset()
+    } else {
+      reset()
     }
-    reset()
+    return () => reset()
   }, [allProducts, setFromPalette, reset])
 
   if (loading) {

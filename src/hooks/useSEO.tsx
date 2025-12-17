@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, {
+import {
   createContext,
   useContext,
   useEffect,
@@ -7,6 +7,8 @@ import React, {
   useState,
   useCallback,
   type PropsWithChildren,
+  type Dispatch,
+  type SetStateAction,
 } from 'react'
 import {Helmet} from 'react-helmet-async'
 import {useLocation} from 'react-router-dom'
@@ -17,8 +19,8 @@ type SEOState = SEOData & {
 }
 
 type SEOContextValue = {
-  setSeoData: (data: SEOState) => void
-  setSeoDefaults: (data: Partial<SEOState>) => void
+  setSeoData: Dispatch<SetStateAction<SEOState>>
+  setSeoDefaults: Dispatch<SetStateAction<Partial<SEOState>>>
 }
 
 const isEqualSeoState = (a: SEOState, b: SEOState) =>
@@ -51,23 +53,9 @@ const useSeoContext = () => {
 
 export const SEOProvider = ({children}: PropsWithChildren) => {
   const [seoData, setSeoData] = useState<SEOState>(DEFAULT_STATE)
-  const [defaults, setSeoDefaults] = useState<Partial<SEOState>>(DEFAULT_STATE)
+  const [seoDefaults, setSeoDefaults] = useState<Partial<SEOState>>(DEFAULT_STATE)
 
-  const merged = useMemo(() => ({...defaults, ...seoData}), [defaults, seoData])
-
-  const updateSeoData = useCallback(
-    (updater: (prev: SEOState) => SEOState) => {
-      setSeoData(prev => updater(prev))
-    },
-    []
-  )
-
-  const updateSeoDefaults = useCallback(
-    (updater: (prev: Partial<SEOState>) => Partial<SEOState>) => {
-      setSeoDefaults(prev => updater(prev))
-    },
-    []
-  )
+  const merged = useMemo(() => ({...seoDefaults, ...seoData}), [seoDefaults, seoData])
 
   const title = merged.title || merged.siteName || DEFAULT_TITLE
   const siteName = merged.siteName || DEFAULT_SITE_NAME
@@ -76,10 +64,10 @@ export const SEOProvider = ({children}: PropsWithChildren) => {
 
   const contextValue = useMemo(
     () => ({
-      setSeoData: (data: SEOState) => updateSeoData(prev => ({...prev, ...data})),
-      setSeoDefaults: (data: Partial<SEOState>) => updateSeoDefaults(prev => ({...prev, ...data})),
+      setSeoData,
+      setSeoDefaults,
     }),
-    [updateSeoData, updateSeoDefaults]
+    [setSeoData, setSeoDefaults]
   )
 
   return (

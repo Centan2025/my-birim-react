@@ -123,7 +123,7 @@ export const HeaderMobileMenuInline: React.FC<HeaderMobileMenuInlineProps> = ({
                 isMobileProductsMenuOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
               }`}
             >
-              <div className="pl-4 pb-2 flex flex-col">
+              <div className="pl-6 pb-2 flex flex-col">
                 {categories.map((category, index) => (
                   <NavLink
                     key={category.id}

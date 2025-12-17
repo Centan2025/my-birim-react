@@ -210,7 +210,7 @@ export const HeaderMobileMenuOverlay: React.FC<HeaderMobileMenuOverlayProps> = p
               isMobileProductsMenuOpen ? 'max-h-[1000px] opacity-100 mt-4' : 'max-h-0 opacity-0'
             }`}
           >
-            <div className="pl-4 flex flex-col gap-3">
+            <div className="pl-6 flex flex-col gap-3">
               {categories.map((category, index) => (
                 <NavLink
                   key={category.id}

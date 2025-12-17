@@ -19,7 +19,7 @@ vi.mock('../../i18n', () => ({
       typeof key === 'string'
         ? key
         : typeof key === 'object' && key !== null
-          ? (key as Record<string, string>).tr || ''
+          ? (key as Record<string, string>)['tr'] || ''
           : '',
     locale: 'tr',
     setLocale: vi.fn(),

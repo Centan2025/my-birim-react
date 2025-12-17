@@ -93,15 +93,16 @@ export function ProjectDetailPage() {
   useEffect(() => {
     if (!project) {
       reset()
-      return
+      return () => reset()
     }
     const palette =
       project.cover && typeof project.cover === 'object' ? (project.cover as any).palette : undefined
     if (palette) {
       setFromPalette(palette)
-      return () => reset()
+    } else {
+      reset()
     }
-    reset()
+    return () => reset()
   }, [project, reset, setFromPalette])
   // Prev/Next must be declared before any early returns to keep hooks order stable
   const { prevProject, nextProject } = useMemo(() => {

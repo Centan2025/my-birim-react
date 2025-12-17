@@ -18,8 +18,8 @@ export default function CookiesPage() {
   const localizedContent = policy?.content as Record<string, unknown> | undefined
   const contentBlocks =
     localizedContent?.[locale] ??
-    localizedContent?.tr ??
-    localizedContent?.en ??
+    localizedContent?.['tr'] ??
+    localizedContent?.['en'] ??
     undefined
 
   useSEO({

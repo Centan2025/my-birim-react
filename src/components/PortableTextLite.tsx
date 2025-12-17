@@ -3,7 +3,7 @@ import {sanitizeText, sanitizeUrl} from '../lib/sanitize'
 
 type Span = {_type: 'span'; text: string; marks?: string[]}
 type Block = {
-  _type: 'block'
+  _type?: string
   style?: string
   children?: Span[]
   markDefs?: any[]

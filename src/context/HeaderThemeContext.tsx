@@ -1,11 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useMemo,
-  useState,
-  useCallback,
-  PropsWithChildren,
-} from 'react'
+import {createContext, useContext, useMemo, useState, useCallback, PropsWithChildren} from 'react'
 import type {SanityImagePalette} from '../types'
 
 type HeaderThemeMode = 'light' | 'dark'
@@ -41,7 +34,9 @@ const hexToLuminance = (hex?: string): number | null => {
     const c = v / 255
     return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
   })
-  const luminance = 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2]
+  const [sr, sg, sb] = srgb
+  if (sr === undefined || sg === undefined || sb === undefined) return null
+  const luminance = 0.2126 * sr + 0.7152 * sg + 0.0722 * sb
   return Number.isFinite(luminance) ? Math.min(1, Math.max(0, luminance)) : null
 }
 

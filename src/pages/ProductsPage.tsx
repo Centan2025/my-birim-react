@@ -162,9 +162,10 @@ export function ProductsPage() {
     const candidate = sourceProducts.find(p => typeof p.mainImage === 'object' && (p as any).mainImage?.palette)
     if (candidate && typeof candidate.mainImage === 'object' && (candidate.mainImage as any).palette) {
       setFromPalette((candidate.mainImage as any).palette)
-      return () => reset()
+    } else {
+      reset()
     }
-    reset()
+    return () => reset()
   }, [categoryId, categoryProducts, allProducts, setFromPalette, reset])
 
   if (loading) {
