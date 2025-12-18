@@ -1,12 +1,24 @@
 import {OptimizedImage} from './OptimizedImage'
 import ScrollReveal from './ScrollReveal'
+import type {LocalizedString, Product} from '../types'
+
+interface ProductMediaItem {
+  type: 'image' | 'video' | 'youtube'
+  url: string
+  title?: LocalizedString | string
+}
+
+interface ProductWithMedia extends Product {
+  media?: ProductMediaItem[]
+  mediaSectionTitle?: LocalizedString | string
+}
 
 interface ProductMediaPanelsProps {
-  product: any
+  product: ProductWithMedia
   imageBorderClass: string
   youTubeThumb: (url: string) => string
   openPanelLightbox: (index: number) => void
-  t: (value: any) => string
+  t: (value: string | LocalizedString) => string
 }
 
 export function ProductMediaPanels({
@@ -16,15 +28,15 @@ export function ProductMediaPanels({
   openPanelLightbox,
   t,
 }: ProductMediaPanelsProps) {
-  if (!Array.isArray((product as any)?.media) || (product as any).media.length === 0) {
+  if (!Array.isArray(product?.media) || product.media.length === 0) {
     return null
   }
 
-  const media = (product as any).media
+  const media = product.media || []
   const sectionTitle =
-    (product as any)?.mediaSectionTitle &&
-    String((product as any).mediaSectionTitle).trim().length > 0
-      ? t((product as any).mediaSectionTitle)
+    product?.mediaSectionTitle &&
+    String(product.mediaSectionTitle).trim().length > 0
+      ? t(product.mediaSectionTitle)
       : 'Projeler'
 
   return (
@@ -32,7 +44,7 @@ export function ProductMediaPanels({
       <section className="mt-12">
         <h2 className="text-xl font-light text-gray-600 mb-4">{sectionTitle}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {media.map((m: any, idx: number) => (
+          {media.map((m, idx) => (
             <div key={idx} className="overflow-hidden">
               <button
                 onClick={() => openPanelLightbox(idx)}

@@ -7,7 +7,8 @@
 
 import * as Sentry from '@sentry/react'
 
-const DEBUG_LOGS = (import.meta.env as any).VITE_DEBUG_LOGS === 'true'
+const DEBUG_LOGS =
+  (import.meta.env as {VITE_DEBUG_LOGS?: string}).VITE_DEBUG_LOGS === 'true'
 
 interface ErrorContext {
   user?: {
@@ -15,7 +16,7 @@ interface ErrorContext {
     email?: string
   }
   tags?: Record<string, string>
-  extra?: Record<string, any>
+  extra?: Record<string, unknown>
 }
 
 class ErrorReporter {

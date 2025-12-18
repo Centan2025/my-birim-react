@@ -1,12 +1,24 @@
 import type {NavigateFunction} from 'react-router-dom'
 import ScrollReveal from './ScrollReveal'
+import type {LocalizedString, User} from '../types'
+
+interface ExclusiveDownloadItem {
+  url: string
+  name: LocalizedString | string
+}
+
+interface ExclusiveContent {
+  images?: Array<string | {url?: string; image?: string}>
+  drawings?: ExclusiveDownloadItem[]
+  models3d?: ExclusiveDownloadItem[]
+}
 
 interface ExclusiveContentSectionProps {
-  exclusiveContent: any
+  exclusiveContent: ExclusiveContent | null
   isLoggedIn: boolean
-  user: any
+  user: User | null
   navigate: NavigateFunction
-  t: (value: any) => string
+  t: (value: string | LocalizedString) => string
 }
 
 const DownloadIcon = () => (
@@ -38,7 +50,10 @@ export function ProductExclusiveContentSection({
 
   const canDownload = isLoggedIn && user?.userType === 'full_member'
 
-  const getExtraImageLabel = (img: any, idx: number) => {
+  const getExtraImageLabel = (
+    img: string | {url?: string; image?: string},
+    idx: number
+  ) => {
     // Şema tarafında sadece image olduğu için genelde URL string geliyor
     const url = typeof img === 'string' ? img : img?.url || img?.image || ''
     if (!url) return `Görsel ${idx + 1}`
@@ -64,7 +79,7 @@ export function ProductExclusiveContentSection({
             </div>
             {exclusiveContent.images && exclusiveContent.images.length > 0 ? (
               <ul className="space-y-2">
-                {exclusiveContent.images.map((img: any, idx: number) => {
+                {exclusiveContent.images.map((img, idx) => {
                   const url = typeof img === 'string' ? img : img?.url || img?.image || ''
                   const label = getExtraImageLabel(img, idx)
                   return (
@@ -96,7 +111,7 @@ export function ProductExclusiveContentSection({
             </div>
             {exclusiveContent.drawings && exclusiveContent.drawings.length > 0 ? (
               <ul className="space-y-2">
-                {exclusiveContent.drawings.map((doc: any, idx: number) => (
+                {exclusiveContent.drawings.map((doc, idx) => (
                   <li key={idx} className="group">
                     <a
                       href={doc.url}
@@ -129,7 +144,7 @@ export function ProductExclusiveContentSection({
             </div>
             {exclusiveContent.models3d && exclusiveContent.models3d.length > 0 ? (
               <ul className="space-y-2">
-                {exclusiveContent.models3d.map((model: any, idx: number) => (
+                {exclusiveContent.models3d.map((model, idx) => (
                   <li key={idx} className="group">
                     <a
                       href={model.url}

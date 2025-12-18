@@ -2,16 +2,18 @@ import React from 'react'
 import {sanitizeText, sanitizeUrl} from '../lib/sanitize'
 
 type Span = {_type: 'span'; text: string; marks?: string[]}
+type MarkDef = {_key?: string; _type?: string; href?: string}
 type Block = {
   _type?: string
   style?: string
   children?: Span[]
-  markDefs?: any[]
+  markDefs?: MarkDef[]
   listItem?: 'bullet' | 'number'
   level?: number
+  _key?: string
 }
 
-function renderInline(spans: Span[] = [], markDefs: any[] = []) {
+function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
   return spans.map((s, i) => {
     // Sanitize text content to prevent XSS
     const sanitizedText = sanitizeText(s.text)
@@ -21,7 +23,7 @@ function renderInline(spans: Span[] = [], markDefs: any[] = []) {
       s.marks.forEach(m => {
         if (m === 'strong') el = <strong key={i + '-strong'}>{el}</strong>
         if (m === 'em') el = <em key={i + '-em'}>{el}</em>
-        const def = markDefs.find((d: any) => d?._key === m && d?._type === 'link' && d?.href)
+        const def = markDefs.find(d => d?._key === m && d?._type === 'link' && d?.href)
         if (def) {
           // Sanitize URL to prevent XSS
           const sanitizedHref = sanitizeUrl(def.href)
@@ -72,7 +74,7 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
 
   value.forEach((block, idx) => {
     // Benzersiz key oluştur: block._key varsa onu kullan, yoksa idx ile prefix ekle
-    const blockKey = (block as any)?._key || `block-${idx}`
+    const blockKey = block._key || `block-${idx}`
 
     if (block.listItem) {
       const type = block.listItem === 'bullet' ? 'ul' : 'ol'

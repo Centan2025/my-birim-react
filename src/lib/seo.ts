@@ -137,7 +137,7 @@ export const setCanonicalUrl = (url: string): void => {
 /**
  * Structured Data (JSON-LD) ekle
  */
-export const addStructuredData = (data: Record<string, any>, id?: string): void => {
+export const addStructuredData = (data: Record<string, unknown>, id?: string): void => {
   if (typeof document === 'undefined') return
 
   const scriptId = id || 'structured-data'
@@ -163,7 +163,7 @@ export const getOrganizationSchema = (data: {
   logo?: string
   description?: string
   sameAs?: string[]
-}): Record<string, any> => {
+}): Record<string, unknown> => {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -192,7 +192,7 @@ export const getArticleSchema = (data: {
     name: string
     logo?: string
   }
-}): Record<string, any> => {
+}): Record<string, unknown> => {
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -232,7 +232,7 @@ export const getProductSchema = (data: {
     priceCurrency: string
     availability?: string
   }
-}): Record<string, any> => {
+}): Record<string, unknown> => {
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',

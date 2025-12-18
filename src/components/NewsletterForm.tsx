@@ -57,7 +57,9 @@ export const NewsletterForm: React.FC<NewsletterFormProps> = ({variant = 'mobile
 
       // Backend bazı durumlarda "zaten kayıtlı" uyarısını normal dönüşte verebilir;
       // bu yüzden hem dönüş değerine hem de hata mesajlarına bakıyoruz.
-      const normalizedMessage = String((result as any)?.message || '').toLowerCase()
+      const normalizedMessage = String(
+        (result as {message?: string} | null | undefined)?.message || ''
+      ).toLowerCase()
       const isAlready =
         normalizedMessage.includes('zaten aboneliğe kayıtlı') ||
         normalizedMessage.includes('zaten kayıtlı') ||
@@ -96,8 +98,9 @@ export const NewsletterForm: React.FC<NewsletterFormProps> = ({variant = 'mobile
       }
 
       setEmail('')
-    } catch (err: any) {
-      const errorMessage = String(err?.message || '')
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : String((err as unknown) ?? '')
 
       if (errorMessage === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
         // Token yokken local storage'a yazılan durum

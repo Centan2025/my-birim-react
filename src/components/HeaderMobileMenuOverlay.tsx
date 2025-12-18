@@ -367,8 +367,9 @@ export const HeaderMobileMenuOverlay: React.FC<HeaderMobileMenuOverlayProps> = p
               }
 
               setSubscribeEmail('')
-            } catch (err: any) {
-              const errorMessage = String(err?.message || '')
+            } catch (err: unknown) {
+              const errorMessage =
+                err instanceof Error ? err.message : String((err as unknown) ?? '')
 
               if (errorMessage === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
                 showToast(

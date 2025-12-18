@@ -1,10 +1,11 @@
 import {Link} from 'react-router-dom'
 import {OptimizedImage} from './OptimizedImage'
 import ScrollReveal from './ScrollReveal'
+import type {Designer, LocalizedString} from '../types'
 
 interface ProductDesignerSectionProps {
-  designer: any
-  t: (value: any) => string
+  designer: Designer | null
+  t: (value: string | LocalizedString) => string
 }
 
 export function ProductDesignerSection({designer, t}: ProductDesignerSectionProps) {

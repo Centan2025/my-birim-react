@@ -8,25 +8,31 @@ import {initWebVitals} from './lib/webVitals'
 import {validateEnv, checkRequiredEnv} from './lib/envValidation'
 import './index.css'
 
-const DEBUG_LOGS = (import.meta.env as any).VITE_DEBUG_LOGS === 'true'
+const DEBUG_LOGS =
+  (import.meta.env as {VITE_DEBUG_LOGS?: string}).VITE_DEBUG_LOGS === 'true'
+
+type PatchedStorageMethod = ((...args: unknown[]) => unknown) & {__patched?: boolean}
 
 // Patch Storage API to silently handle access errors (must be done early)
 if (typeof window !== 'undefined') {
   try {
-    const StorageProto = window.Storage?.prototype
+    const StorageProto = window.Storage?.prototype as Storage & {
+      [key: string]: PatchedStorageMethod | undefined
+    }
     if (StorageProto) {
       const BLOCK_SUBSTRING = 'Access to storage is not allowed'
-      const wrapMethod = (methodName: keyof Storage) => {
-        const original = (StorageProto as any)[methodName]
+      const wrapMethod = (methodName: keyof Storage & string) => {
+        const original = StorageProto[methodName] as PatchedStorageMethod | undefined
         if (typeof original !== 'function') return
-        const wrapped = (StorageProto as any)[methodName]
-        if (wrapped.__patched) return // Already patched
-        
-        ;(StorageProto as any)[methodName] = function (...args: any[]) {
+        const wrapped = StorageProto[methodName]
+        if (wrapped?.__patched) return // Already patched
+
+        const patched: PatchedStorageMethod = function (...args: unknown[]) {
           try {
             return original.apply(this, args)
-          } catch (err: any) {
-            const msg = err?.message || String(err || '')
+          } catch (err) {
+            const msg =
+              err instanceof Error ? err.message : String((err as unknown) ?? '')
             if (typeof msg === 'string' && msg.includes(BLOCK_SUBSTRING)) {
               // Return appropriate default values
               if (methodName === 'getItem' || methodName === 'key') {
@@ -37,9 +43,10 @@ if (typeof window !== 'undefined') {
             throw err
           }
         }
-        ;(StorageProto as any)[methodName].__patched = true
+        patched.__patched = true
+        StorageProto[methodName] = patched
       }
-      
+
       wrapMethod('getItem')
       wrapMethod('setItem')
       wrapMethod('removeItem')
@@ -55,8 +62,8 @@ if (typeof window !== 'undefined') {
 if (typeof window !== 'undefined') {
   // Filter console.warn
   const originalWarn = console.warn
-  console.warn = (...args: any[]) => {
-    const message = args.join(' ')
+  console.warn = (...args: unknown[]) => {
+    const message = args.map(String).join(' ')
     // Filter out Zustand deprecation warnings (from Sentry or other dependencies)
     if (typeof message === 'string' && message.includes('[DEPRECATED] Default export is deprecated')) {
       return
@@ -67,8 +74,8 @@ if (typeof window !== 'undefined') {
 
   // Filter console.error for known non-critical errors
   const originalError = console.error
-  console.error = (...args: any[]) => {
-    const message = args.join(' ')
+  console.error = (...args: unknown[]) => {
+    const message = args.map(String).join(' ')
     // Filter out storage access errors and Sentry session errors
     // Also filter "Uncaught (in promise)" messages for these errors
     if (

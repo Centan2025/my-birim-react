@@ -9,7 +9,7 @@ const builder = imageUrlBuilder(sanityClient)
  * @param options Optimizasyon seçenekleri
  */
 export const getOptimizedImageUrl = (
-  source: any,
+  source: unknown,
   options: {
     width?: number
     height?: number
@@ -23,11 +23,11 @@ export const getOptimizedImageUrl = (
 
   // Eğer zaten URL ise (Sanity asset değilse), olduğu gibi döndür
   if (typeof source === 'string') return source
-  if (source.url) return source.url
+  if ((source as {url?: string}).url) return (source as {url?: string}).url as string
 
   if (!builder) return ''
 
-  let imageBuilder = builder.image(source)
+  let imageBuilder = builder.image(source as never)
 
   // Varsayılan optimizasyon ayarları
   const {
@@ -65,7 +65,7 @@ export const getOptimizedImageUrl = (
  * @param sizes Farklı ekran boyutları için genişlikler
  */
 export const getResponsiveImageSrcSet = (
-  source: any,
+  source: unknown,
   sizes: number[] = [400, 800, 1200, 1600, 2000]
 ): string => {
   if (!source) return ''
@@ -83,11 +83,12 @@ export const getResponsiveImageSrcSet = (
  * Video optimizasyonu için poster image URL'i oluşturur
  * @param source Sanity image asset veya video asset
  */
-export const getVideoPosterUrl = (source: any): string => {
+export const getVideoPosterUrl = (source: unknown): string => {
   if (!source) return ''
 
   // Eğer image asset ise, küçük bir poster oluştur
-  if (source._type === 'image' || source.asset?._type === 'image') {
+  const typed = source as {_type?: string; asset?: {_type?: string}}
+  if (typed._type === 'image' || typed.asset?._type === 'image') {
     return getOptimizedImageUrl(source, {
       width: 1280,
       height: 720,
