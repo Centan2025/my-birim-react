@@ -1677,7 +1677,6 @@ export function ProductDetailPage() {
                   isLoggedIn={isLoggedIn}
                   user={user}
                   navigate={navigate}
-                  imageBorderClass={imageBorderClass}
                   t={t}
                 />
               )}

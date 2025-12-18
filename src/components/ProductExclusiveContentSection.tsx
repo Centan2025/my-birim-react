@@ -1,5 +1,4 @@
 import type {NavigateFunction} from 'react-router-dom'
-import {OptimizedImage} from './OptimizedImage'
 import ScrollReveal from './ScrollReveal'
 
 interface ExclusiveContentSectionProps {
@@ -7,7 +6,6 @@ interface ExclusiveContentSectionProps {
   isLoggedIn: boolean
   user: any
   navigate: NavigateFunction
-  imageBorderClass: string
   t: (value: any) => string
 }
 
@@ -34,7 +32,6 @@ export function ProductExclusiveContentSection({
   isLoggedIn,
   user,
   navigate,
-  imageBorderClass,
   t,
 }: ExclusiveContentSectionProps) {
   if (!exclusiveContent) return null
