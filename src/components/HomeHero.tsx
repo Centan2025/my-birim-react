@@ -1,4 +1,4 @@
-import React, { CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
+import React, { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { HomePageContent, SiteSettings } from '../types'
 import { OptimizedImage } from './OptimizedImage'
@@ -75,7 +75,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
       return 0
     })
     return visible
-  }, [content?.heroMedia])
+  }, [content])
   const slideCount = heroMedia.length || 1
 
   // Mobile / viewport takibi
@@ -102,7 +102,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
   }, [])
 
   // Ortak ileri/geri geçiş fonksiyonları (sonsuz kaydırma + klon mantığını korur)
-  const goToNextSlide = () => {
+  const goToNextSlide = useCallback(() => {
     const count = heroMedia.length || 1
     if (count <= 1) {
       setDraggedX(0)
@@ -135,9 +135,9 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
       setCurrentSlide(nextSlide)
     }
     setDraggedX(0)
-  }
+  }, [currentSlide, heroMedia.length, slideCount])
 
-  const goToPrevSlide = () => {
+  const goToPrevSlide = useCallback(() => {
     const count = heroMedia.length || 1
     if (count <= 1) {
       setDraggedX(0)
@@ -170,7 +170,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
       setCurrentSlide(prevSlide)
     }
     setDraggedX(0)
-  }
+  }, [currentSlide, heroMedia.length, slideCount])
 
   // Touch event'ler – dikey scroll'a izin ver, yatay sürüklemeyi koru
   useEffect(() => {
@@ -239,7 +239,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
       container.removeEventListener('touchmove', handleTouchMove)
       container.removeEventListener('touchend', handleTouchEnd)
     }
-  }, [isDragging, dragStartX, draggedX, currentSlide, heroMedia.length])
+  }, [isDragging, dragStartX, draggedX, currentSlide, heroMedia.length, goToNextSlide, goToPrevSlide])
 
   const handleDragStart = (
     e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>

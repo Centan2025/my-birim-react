@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import {createContext, useContext, useState, useEffect, PropsWithChildren} from 'react'
 import type {Product, CartItem} from '../types'
 import {analytics} from '../lib/analytics'

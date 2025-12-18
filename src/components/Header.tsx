@@ -501,14 +501,14 @@ export function Header() {
   }, [])
 
   // Koyu hero olan sayfaları kontrol et
-  const isDarkHeroPage = () => {
+  const isDarkHeroPage = useCallback(() => {
     const path = location.pathname
     // HashRouter'da path / veya /about gibi gelir
     return path === '/' || path === '' || path.includes('about')
-  }
+  }, [location.pathname])
 
   // Açık arka planlı sayfaları kontrol et (hero olmayan)
-  const isLightBackgroundPage = () => {
+  const isLightBackgroundPage = useCallback(() => {
     const path = location.pathname
     // Bu sayfalarda hero yok ve arka plan açık renk
     // NOT: /projects/123 gibi detay sayfaları hariç (onlar beyaz arka planlı)
@@ -516,24 +516,27 @@ export function Header() {
     // NOT: /news/123 gibi detay sayfaları hariç (onlar beyaz arka planlı)
     // NOT: /designer/123 gibi detay sayfaları hariç (onlar beyaz arka planlı)
     const isProjectsList = path === '/projects' || path === '/projects/'
-    const isProductsList = path === '/products' || path === '/products/' || path.match(/^\/products\/?$/)
+    const isProductsList =
+      path === '/products' || path === '/products/' || path.match(/^\/products\/?$/)
     const isNewsList = path === '/news' || path === '/news/'
     const isDesignersList = path === '/designers' || path === '/designers/'
-    
-    return isProjectsList || 
-           isProductsList || 
-           isNewsList ||
-           isDesignersList ||
-           path.includes('contact') ||
-           path.includes('cart') ||
-           path.includes('favorites') ||
-           path.includes('profile') ||
-           path.includes('orders') ||
-           path.includes('search')
-  }
+
+    return (
+      isProjectsList ||
+      isProductsList ||
+      isNewsList ||
+      isDesignersList ||
+      path.includes('contact') ||
+      path.includes('cart') ||
+      path.includes('favorites') ||
+      path.includes('profile') ||
+      path.includes('orders') ||
+      path.includes('search')
+    )
+  }, [location.pathname])
 
   // Beyaz arka planlı sayfa (detay sayfaları)
-  const isWhiteBackgroundPage = () => {
+  const isWhiteBackgroundPage = useCallback(() => {
     const path = location.pathname
     // Proje detay, haberler detay, ürün detay ve tasarımcı detay sayfaları beyaz arka planlı
     // NOT: Ürün detay route'u /product/:productId şeklinde (tekil)
@@ -542,7 +545,7 @@ export function Header() {
     const isNewsDetail = path.match(/^\/news\/[^/]+$/)
     const isDesignerDetail = path.match(/^\/designer\/[^/]+$/)
     return isProjectDetail || isProductDetail || isNewsDetail || isDesignerDetail
-  }
+  }, [location.pathname])
 
   // heroBrightness değiştiğinde ref'i güncelle ve opacity'yi ayarla
   useEffect(() => {
