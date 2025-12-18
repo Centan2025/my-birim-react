@@ -40,6 +40,8 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
     }
 
     // Görünür alanda değilse IntersectionObserver ile izle
+    const target = ref.current
+
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0]
@@ -54,12 +56,10 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
       }
     )
 
-    observer.observe(ref.current)
+    observer.observe(target)
 
     return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current)
-      }
+      observer.unobserve(target)
       observer.disconnect()
     }
   }, [threshold])

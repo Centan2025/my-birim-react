@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { OptimizedImage } from './OptimizedImage'
 import { OptimizedVideo } from './OptimizedVideo'
@@ -384,7 +384,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     })
   }
 
-  const scrollToIndex = (index: number) => {
+  const scrollToIndex = useCallback((index: number) => {
     if (!scrollContainerRef.current) return
     const container = scrollContainerRef.current
 
@@ -410,7 +410,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       left: scrollPosition,
       behavior: 'smooth',
     })
-  }
+  }, [isMobile])
 
   const handleScrollLeft = () => {
     if (!scrollContainerRef.current) return
@@ -478,7 +478,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
         scrollToIndex(initialIndex)
       }, 100)
     }
-  }, [initialIndex])
+  }, [initialIndex, scrollToIndex])
 
   // Global mouse event listener'ları (drag container dışına çıktığında)
   useEffect(() => {

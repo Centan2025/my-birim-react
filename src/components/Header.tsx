@@ -782,11 +782,11 @@ export function Header() {
 
   // Mobil menü kapalıyken odaklanılmasını tamamen engelle (inert davranışı)
   useEffect(() => {
-    const menuEl = mobileMenuRef.current
+    const menuEl = mobileMenuRef.current as (HTMLElement & {inert?: boolean}) | null
     if (!menuEl) return
 
     try {
-      (menuEl as any).inert = !isMobileMenuOpen
+      menuEl.inert = !isMobileMenuOpen
     } catch {
       // Eski tarayıcılar inert'i desteklemiyorsa sessizce yoksay
     }
