@@ -39,8 +39,8 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
           minHeight: '25vh',
         }
       : {
-          height: '66vh',
-          minHeight: '66vh',
+          height: '55vh',
+          minHeight: '55vh',
         }
 
   useLayoutEffect(() => {
@@ -56,18 +56,34 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
       const windowHeight = window.innerHeight
       const windowWidth = window.innerWidth
 
-      // Performans: Ekran dışındaysa işlemi durdur
-      if (rect.bottom < 0 || rect.top > windowHeight) {
+      // Eleman ekranda görünmüyorsa portal'ı tamamen gizle
+      if (rect.bottom <= 0 || rect.top >= windowHeight) {
         portalBg.style.clipPath = 'inset(100% 0 0 0)' 
         return
       }
 
-      // HESAPLAMA (DÜZELTME BURADA):
-      // "-1" ve "-2" değerleri "Taşma Payı"dır (Bleed).
-      // Resmi kutudan biraz daha geniş keserek aradaki çizgileri ve beyaz boşlukları yutarız.
+      // --- KESİN ÇÖZÜM AYARI ---
+      // Desktop'ta hem üstten hem alttan kırpma ile çalışıyoruz,
+      // mobilde ise SENKRON problemlerini tamamen engellemek için
+      // sadece ÜSTTEN kırpma yapıyoruz, alttan hiç kırpmıyoruz.
+
+      // Mobil: sadece üstten clip, altta boşluk kalmaz
+      if (isMobile) {
+        const BUFFER_TOP = 5; // çok küçük bir tampon
+        const top = Math.max(0, rect.top - BUFFER_TOP)
+        const left = Math.max(0, rect.left)
+        const right = Math.max(0, windowWidth - rect.right)
+
+        portalBg.style.clipPath = `inset(${top}px ${right}px 0 ${left}px)`
+        return
+      }
+
+      // Desktop: önceki mantığı desktop için koruyoruz
+      const BUFFER = 60;
+
+      const top = Math.max(0, rect.top - BUFFER) 
+      const bottom = Math.max(0, windowHeight - rect.bottom - BUFFER)
       
-      const top = Math.max(0, rect.top - 1) // Üstten 1px daha az kes (yukarı taşsın)
-      const bottom = Math.max(0, windowHeight - rect.bottom - 2) // Alttan 2px daha az kes (aşağı taşsın)
       const left = Math.max(0, rect.left)
       const right = Math.max(0, windowWidth - rect.right)
 
@@ -105,7 +121,8 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
           left: 0;
           width: 100vw;
           height: 100vh;
-          z-index: 10; 
+          /* Portal arka planda, ilham bloğunun ALTINDA ama diğer içeriklerin ÜZERİNDE kalır */
+          z-index: 10;
           pointer-events: none;
           background-size: cover;
           background-position: center center;
@@ -119,16 +136,16 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
           position: relative;
           z-index: 20; 
           
-          /* TEKRAR SİYAH YAPTIK: */
-          /* Şeffaf (transparent) yapınca arkadaki beyaz body göründüğü için beyaz parlama oluyor. */
-          /* Siyah yaparsak, görselin tonuyla uyumlu olduğu için milisaniyelik gecikmeleri göz görmez. */
-          background-color: #000; 
+          /* ÇÖZÜMÜN PARÇASI: */
+          /* 1. Arka plan tamamen şeffaf (Siyah blok oluşamaz). */
+          background-color: transparent; 
           
           transform: translateZ(0);
         }
         
         .inspiration-content {
           position: relative;
+          /* İçerik portalın (resmin) önünde durmalı */
           z-index: 30;
         }
       `}</style>
