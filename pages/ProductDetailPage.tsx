@@ -1,6 +1,5 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
 import React, { useState, useEffect, useMemo, useRef } from 'react'
-import { createPortal } from 'react-dom'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 // FIX: Imported SiteSettings type to correctly type component state.
 import type { LocalizedString } from '../types'
@@ -266,7 +265,7 @@ export function ProductDetailPage() {
     }
 
     analytics.pageview(window.location.pathname, title)
-  }, [product, t])
+  }, [product, t, category])
 
   // Grup değiştiğinde kartela indexini sıfırla
   useEffect(() => {
