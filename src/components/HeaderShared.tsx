@@ -2,7 +2,10 @@ import React from 'react'
 import type {LocalizedString} from '../types'
 
 // Ortak çeviri fonksiyonu tipi (Header ve alt bileşenlerde)
-export type HeaderTranslateFn = (value: string | LocalizedString, ...rest: unknown[]) => string
+export type HeaderTranslateFn = (
+  value: string | LocalizedString,
+  ...rest: (string | number)[]
+) => string
 
 // Ortak cross-fade metin bileşeni (Header içinde ve alt bileşenlerde kullanmak için)
 export const CrossFadeText: React.FC<{

@@ -26,7 +26,7 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
         const def = markDefs.find(d => d?._key === m && d?._type === 'link' && d?.href)
         if (def) {
           // Sanitize URL to prevent XSS
-          const sanitizedHref = sanitizeUrl(def.href)
+          const sanitizedHref = sanitizeUrl(def.href || '')
           if (sanitizedHref) {
             el = (
               <a

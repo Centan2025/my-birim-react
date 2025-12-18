@@ -158,9 +158,11 @@ export const HeaderSearchPanel: React.FC<HeaderSearchPanelProps> = ({
                   </h3>
                   <div className="space-y-2">
                     {searchResults.products.map(product => {
-                      const designerName = t(
+                      const designerNameSource =
                         allData?.designers.find(d => d.id === product.designerId)?.name
-                      )
+                      const designerName = designerNameSource
+                        ? t(designerNameSource)
+                        : ''
                       return (
                         <Link
                           key={product.id}

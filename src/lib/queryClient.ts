@@ -63,7 +63,7 @@ export const queryClient = new QueryClient({
         // Network hatalarında retry yap, 4xx hatalarında yapma
         if (error instanceof Error && 'status' in error) {
           const status = (error as {status?: number}).status
-          if (status >= 400 && status < 500) {
+          if (typeof status === 'number' && status >= 400 && status < 500) {
             return false // Client errors için retry yapma
           }
         }
@@ -86,7 +86,7 @@ export const queryClient = new QueryClient({
         // Network hatalarında retry yap, 4xx hatalarında yapma
         if (error instanceof Error && 'status' in error) {
           const status = (error as {status?: number}).status
-          if (status >= 400 && status < 500) {
+          if (typeof status === 'number' && status >= 400 && status < 500) {
             return false // Client errors için retry yapma
           }
         }

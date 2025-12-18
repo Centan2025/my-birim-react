@@ -1655,7 +1655,7 @@ export function ProductDetailPage() {
               )}
 
               {/* Designer section after materials */}
-              <ProductDesignerSection designer={designer} t={t} />
+              <ProductDesignerSection designer={designer || null} t={t} />
 
               {product.buyable && (
                 <ScrollReveal delay={500} threshold={0.05}>

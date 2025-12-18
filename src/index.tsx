@@ -11,7 +11,7 @@ import './index.css'
 const DEBUG_LOGS =
   (import.meta.env as {VITE_DEBUG_LOGS?: string}).VITE_DEBUG_LOGS === 'true'
 
-type PatchedStorageMethod = ((...args: unknown[]) => unknown) & {__patched?: boolean}
+type PatchedStorageMethod = ((this: Storage, ...args: unknown[]) => unknown) & {__patched?: boolean}
 
 // Patch Storage API to silently handle access errors (must be done early)
 if (typeof window !== 'undefined') {
@@ -27,7 +27,7 @@ if (typeof window !== 'undefined') {
         const wrapped = StorageProto[methodName]
         if (wrapped?.__patched) return // Already patched
 
-        const patched: PatchedStorageMethod = function (...args: unknown[]) {
+        const patched: PatchedStorageMethod = function (this: Storage, ...args: unknown[]) {
           try {
             return original.apply(this, args)
           } catch (err) {
