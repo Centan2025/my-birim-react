@@ -183,7 +183,6 @@ export function LoginPage() {
           verificationToken
         )}`
         // Konsolda her zaman test linki
-        // eslint-disable-next-line no-console
         console.log('[Email Verification] Test link:', verificationUrl)
 
         if (emailApiUrl) {
@@ -204,7 +203,6 @@ export function LoginPage() {
               }),
             })
           } catch (e) {
-            // eslint-disable-next-line no-console
             console.error('[Email Verification] Mail gönderilemedi:', e)
           }
         }

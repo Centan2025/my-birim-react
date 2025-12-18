@@ -109,7 +109,6 @@ class Analytics {
               // olarak geliyor; bunları da bastırıyoruz ki GA açık kalırken konsol kirlenmesin.
               event.preventDefault()
               // Safari vb. için ekstra güvenlik
-              // eslint-disable-next-line no-param-reassign
               ;(event as any).returnValue = false
 
               if (DEBUG_LOGS) {
@@ -186,11 +185,13 @@ class Analytics {
     script.setAttribute('data-domain', domain)
     script.src = 'https://plausible.io/js/script.js'
     document.head.appendChild(script)
-    ;(window as any).plausible =
-      (window as any).plausible ||
+
+    const w = window as any
+    w.plausible =
+      w.plausible ||
       function (...args: any[]) {
-        ;((window as any).plausible as any).q = ((window as any).plausible as any).q || []
-        ;((window as any).plausible as any).q.push(args)
+        w.plausible.q = w.plausible.q || []
+        w.plausible.q.push(args)
       }
 
     if (import.meta.env.DEV && DEBUG_LOGS) {
@@ -219,7 +220,7 @@ class Analytics {
 
     // Plausible
     if (this.plausibleDomain && (window as any).plausible) {
-      ;(window as any).plausible('pageview', {url: path})
+      (window as any).plausible('pageview', {url: path})
     }
 
     if (import.meta.env.DEV && DEBUG_LOGS) {
@@ -252,7 +253,7 @@ class Analytics {
 
     // Plausible
     if (this.plausibleDomain && (window as any).plausible) {
-      ;(window as any).plausible(event.action, {
+      (window as any).plausible(event.action, {
         props: {
           category: event.category,
           label: event.label,

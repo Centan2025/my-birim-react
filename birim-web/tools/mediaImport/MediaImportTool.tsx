@@ -1163,26 +1163,42 @@ export default function MediaImportTool() {
         <Card padding={3} tone="transparent" radius={2}>
           <Stack space={2}>
             <Text size={1} weight="semibold">
-              💡 Klasör Yapısı:
+              💡 Örnek Klasör Yapısı:
             </Text>
             <Text size={1} style={{fontFamily: 'monospace', whiteSpace: 'pre'}}>
-              {`Klasör/
-├── ürünler/ (veya ÜRÜNLER)
-│   └── 01 - KANEPELER/
-│       └── 01 - SU/
-│           ├── su_kapak.jpg
-│           └── su_1.jpg
-├── tasarımcılar/ (veya TASARIMCILAR)
+              {`MedyaKlasoru/
+├── ÜRÜNLER/
+│   └── KANEPELER/                ← Kategori adı (CMS'teki kategori ile aynı)
+│       └── PUF_1/                ← Ürün adı (CMS'teki ürün AD/ID ile aynı)
+│           ├── puf_1_kapak.jpg   ← (opsiyonel) Ana kapak
+│           ├── puf_1_01.jpg      ← Diğer ürün görselleri
+│           ├── puf_1_02.jpg
+│           ├── ÖLÇÜLER/          ← Ölçü görselleri (dimensionImages)
+│           │   ├── olcu_1.jpg
+│           │   └── olcu_2.jpg
+│           └── İndirilebilir Dosyalar/
+│               ├── Ek Görseller/
+│               │   ├── katalog_1.jpg
+│               │   └── katalog_2.jpg
+│               ├── Teknik Çizimler/
+│               │   ├── 0203_SU.pdf
+│               │   └── teknik_2.dwg
+│               └── 3D Modeller/
+│                   ├── model_1.obj
+│                   └── model_2.fbx
+├── TASARIMCILAR/                 ← Tasarımcı görselleri (sadece görsel)
 │   └── Ahmet Yılmaz/
-│       └── profil.jpg
-└── MALZEMELER/
+│       ├── ahmet_kapak.jpg
+│       └── ahmet_mobil.jpg
+└── MALZEMELER/                   ← Malzeme kartelaları
     └── KUMAŞ/
         └── KARTELA-1/
             ├── malzeme1.jpg
             └── malzeme2.jpg`}
             </Text>
             <Text size={0} muted>
-              ℹ️ Klasör/tasarımcı/malzeme grup/kartela isimleri CMS'deki isimlerle eşleşmeli
+              ℹ️ Klasör / kategori / ürün / tasarımcı / malzeme grup ve kartela isimleri CMS'deki
+              isimlerle mümkün olduğunca bire bir aynı olmalıdır.
             </Text>
           </Stack>
         </Card>

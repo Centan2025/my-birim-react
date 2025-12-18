@@ -67,10 +67,12 @@ export function CartSidebar() {
 
   return (
     <>
-      <div
+      <button
+        type="button"
         className={`fixed inset-0 bg-black/60 z-[60] transition-opacity duration-300 ${isCartOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={toggleCart}
-      ></div>
+        aria-label={t('close_cart') || 'Sepeti kapat'}
+      />
       <div
         ref={cartFocusTrap as React.RefObject<HTMLDivElement>}
         className={`fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-[70] transform transition-transform duration-300 ease-in-out ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}

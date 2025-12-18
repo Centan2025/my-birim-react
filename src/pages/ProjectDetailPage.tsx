@@ -459,6 +459,7 @@ export function ProjectDetailPage() {
           </div>
         )}
         {curr && (
+          // eslint-disable-next-line jsx-a11y/no-static-element-interactions
           <div
             className="mt-2 md:mt-3 lg:mt-2 relative"
             onMouseDown={handleHeroDragStart}

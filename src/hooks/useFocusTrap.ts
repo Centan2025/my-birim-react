@@ -26,7 +26,7 @@ export function useFocusTrap(isActive: boolean) {
     if (firstElement && typeof firstElement.focus === 'function') {
       try {
         // Modern tarayıcılarda scroll'u tetiklemeden odaklan
-        ;(firstElement as HTMLElement).focus({preventScroll: true})
+        firstElement.focus({preventScroll: true})
       } catch {
         // Eski tarayıcılar için normal focus'a geri dön
         firstElement.focus()

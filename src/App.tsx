@@ -214,7 +214,6 @@ const ScrollToTop = () => {
   const { t } = useTranslation()
 
   // Sadece rota değişiminde en üste kaydır; dil değişiminde mevcut pozisyonu koru
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     // Route değişiminde yukarıya yumuşak kaydır
     if (typeof window !== 'undefined' && 'scrollBehavior' in document.documentElement.style) {

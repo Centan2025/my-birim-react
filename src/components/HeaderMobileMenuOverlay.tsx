@@ -98,7 +98,7 @@ export const HeaderMobileMenuOverlay: React.FC<HeaderMobileMenuOverlayProps> = p
     <div
       ref={node => {
         if (node) {
-          ;(mobileMenuRef as MutableRefObject<HTMLDivElement | null>).current = node
+          (mobileMenuRef as MutableRefObject<HTMLDivElement | null>).current = node
           ;(mobileMenuFocusTrap as MutableRefObject<HTMLElement | null>).current = node
         }
       }}

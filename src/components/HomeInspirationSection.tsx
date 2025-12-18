@@ -25,9 +25,9 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
   const containerRef = useRef<HTMLDivElement>(null)
   const portalRef = useRef<HTMLDivElement>(null)
 
-  if (!inspiration || (!inspiration.backgroundImage && !inspiration.title && !inspiration.subtitle)) {
-    return null
-  }
+  const hasInspiration =
+    Boolean(inspiration) &&
+    Boolean(inspiration.backgroundImage || inspiration.title || inspiration.subtitle)
 
   const backgroundImage =
     isMobile && bgImageMobile ? bgImageMobile : bgImageDesktop || bgImageUrl
@@ -107,6 +107,10 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
       cancelAnimationFrame(animationFrameId)
     }
   }, [])
+
+  if (!hasInspiration) {
+    return null
+  }
 
   return (
     <>

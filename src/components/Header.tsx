@@ -786,7 +786,7 @@ export function Header() {
     if (!menuEl) return
 
     try {
-      ;(menuEl as any).inert = !isMobileMenuOpen
+      (menuEl as any).inert = !isMobileMenuOpen
     } catch {
       // Eski tarayıcılar inert'i desteklemiyorsa sessizce yoksay
     }

@@ -37,9 +37,10 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   // Mobilde yukarı git butonu için state
   const [showScrollToTop, setShowScrollToTop] = useState(false)
 
-  if (!items || items.length === 0) return null
-
-  const slideCount = items.length
+  // items prop her zaman dolu gelmeli, ancak React Hooks kurallarına takılmamak için
+  // erken return yerine slideCount üzerinden koruyucu kontroller yapıyoruz.
+  const slideCount = items?.length ?? 0
+  const hasItems = slideCount > 0
 
   // Mobil ve orientation kontrolü
   useEffect(() => {
@@ -80,7 +81,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   // Kapanış animasyonu
   const handleClose = () => {
     // O anki scroll pozisyonuna göre görünür görselleri hesapla
-    let currentVisible: number[] = []
+    const currentVisible: number[] = []
     if (scrollContainerRef.current) {
       const container = scrollContainerRef.current
       const isHorizontal = isMobile && isLandscape
@@ -636,6 +637,11 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     }
   }, [])
 
+  // Eğer hiç medya yoksa, hiçbir şey render etme
+  if (!hasItems) {
+    return null
+  }
+
   // React Portal ile document.body'ye render et - z-index sorunlarını önler
   return createPortal(
     // Tam ekran overlay - arka plandaki sayfayı tamamen kapatır
@@ -729,6 +735,8 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
               </svg>
             </button>
           </div>
+          {/* Scroll container - sadece mouse/touch etkileşimi için; klavye ile odaklanmaz */}
+          {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
           <div
             ref={scrollContainerRef}
             className={`w-full overflow-y-auto md:overflow-y-hidden md:overflow-x-auto flex ${isMobile && isLandscape ? 'flex-row' : isMobile ? 'flex-col' : 'flex-row'
