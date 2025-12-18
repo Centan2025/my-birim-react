@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, {useState, useRef} from 'react'
+import React, {useState, useRef, useCallback} from 'react'
 
 interface OptimizedVideoProps {
   src: string
@@ -128,14 +128,14 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
   const useArtDirection = Boolean(srcMobile || srcDesktop)
 
   // Poster için de Art Direction desteği
-  const getPosterForScreen = (): string | undefined => {
+  const getPosterForScreen = useCallback((): string | undefined => {
     if (typeof window !== 'undefined') {
-      const isMobile = window.innerWidth <= 768
-      if (isMobile && posterMobile) return posterMobile
-      if (!isMobile && posterDesktop) return posterDesktop
+      const isMobileScreen = window.innerWidth <= 768
+      if (isMobileScreen && posterMobile) return posterMobile
+      if (!isMobileScreen && posterDesktop) return posterDesktop
     }
     return poster
-  }
+  }, [poster, posterMobile, posterDesktop])
 
   // Video src'i için ekran boyutuna göre seç
   const getVideoSrc = (): string => {
@@ -164,7 +164,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       return () => window.removeEventListener('resize', updatePoster)
     }
     return undefined
-  }, [posterMobile, posterDesktop, poster])
+  }, [posterMobile, posterDesktop, poster, getPosterForScreen])
 
   // Video yükleme durumunu kontrol et
   React.useEffect(() => {

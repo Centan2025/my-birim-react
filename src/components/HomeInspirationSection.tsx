@@ -106,7 +106,7 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
       window.removeEventListener('resize', onScroll)
       cancelAnimationFrame(animationFrameId)
     }
-  }, [])
+  }, [isMobile])
 
   if (!hasInspiration) {
     return null

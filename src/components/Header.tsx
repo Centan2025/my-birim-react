@@ -596,7 +596,7 @@ export function Header() {
         setHeaderOpacity(0.7)
       }
     }
-  }, [heroBrightness, location.pathname, isProductsOpen])
+  }, [heroBrightness, location.pathname, isProductsOpen, isDarkHeroPage, isWhiteBackgroundPage])
 
   // Sayfa değiştiğinde header opacity'yi ayarla
   useEffect(() => {
@@ -623,7 +623,7 @@ export function Header() {
     }, 100)
     
     return () => clearTimeout(timer)
-  }, [location.pathname])
+  }, [location.pathname, isDarkHeroPage, isLightBackgroundPage, isWhiteBackgroundPage])
 
   // Products menüsü açılınca header'ı yarı şeffaf yap
   useEffect(() => {
@@ -648,7 +648,7 @@ export function Header() {
         setHeaderOpacity(0.7)
       }
     }
-  }, [isProductsOpen, location.pathname])
+  }, [isProductsOpen, location.pathname, isDarkHeroPage, isLightBackgroundPage, isWhiteBackgroundPage])
 
   // Desktop header visibility - throttle olmadan anında tepki
   useEffect(() => {

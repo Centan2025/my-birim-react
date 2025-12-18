@@ -26,7 +26,7 @@ export const CrossFadeText: React.FC<{
     return () => {
       window.clearTimeout(timeout)
     }
-  }, [triggerKey, text])
+  }, [triggerKey, text, currentText])
 
   if (!isAnimating) {
     return (
