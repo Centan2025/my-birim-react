@@ -404,7 +404,8 @@ const getAssetKey = (img: SanityImageLike | {asset?: {_ref?: string; _id?: strin
   if (!img) return null
   const assetObj = typeof img === 'object' && img !== null && 'asset' in img ? img.asset : img
   const asset = assetObj as {_ref?: string; _id?: string} | null
-  const id = asset._id || asset._ref || asset.url
+  if (!asset) return null
+  const id = asset._id || asset._ref
   return id || null
 }
 
@@ -1930,16 +1931,17 @@ export const subscribeEmail = async (email: string): Promise<User> => {
       // Sanity hatası varsa hatayı fırlat
       let errorMessage = 'E-posta aboneliği yapılırken bir hata oluştu. Lütfen tekrar deneyin.'
 
-      if (error.message?.includes('permission') || error.statusCode === 403) {
+      const errorObj = error as {message?: string; statusCode?: number}
+      if (errorObj.message?.includes('permission') || errorObj.statusCode === 403) {
         errorMessage =
           'İZİN HATASI: Sanity token\'ınızın "Editor" veya "Admin" yetkisi olduğundan emin olun.'
       } else if (
-        error.message?.includes('duplicate') ||
-        error.message?.includes('already exists')
+        errorObj.message?.includes('duplicate') ||
+        errorObj.message?.includes('already exists')
       ) {
         errorMessage = 'Bu e-posta adresi zaten kayıtlı.'
-      } else if (error.message) {
-        errorMessage = `Sanity hatası: ${error.message}`
+      } else if (errorObj.message) {
+        errorMessage = `Sanity hatası: ${errorObj.message}`
       }
 
       throw new Error(errorMessage)
@@ -2042,11 +2044,12 @@ export const registerUser = async (
           // Sanity hatası varsa hatayı fırlat (local storage'a düşme)
           let errorMessage = 'Üye kaydı güncellenirken bir hata oluştu. Lütfen tekrar deneyin.'
 
-          if (error.message?.includes('permission')) {
+          const errorObj = error as {message?: string}
+          if (errorObj.message?.includes('permission')) {
             errorMessage =
               'İZİN HATASI: Sanity token\'ınızın "Editor" veya "Admin" yetkisi olduğundan emin olun. Üye bilgileri CMS\'de görünmeyecektir.'
-          } else if (error.message) {
-            errorMessage = `Sanity hatası: ${error.message}`
+          } else if (errorObj.message) {
+            errorMessage = `Sanity hatası: ${errorObj.message}`
           }
 
           throw new Error(errorMessage)
@@ -2109,11 +2112,12 @@ export const registerUser = async (
       // Sanity hatası varsa hatayı fırlat (local storage'a düşme)
       let errorMessage = 'Üye kaydı yapılırken bir hata oluştu. Lütfen tekrar deneyin.'
 
-      if (error.message?.includes('permission')) {
+      const errorObj = error as {message?: string}
+      if (errorObj.message?.includes('permission')) {
         errorMessage =
           'İZİN HATASI: Sanity token\'ınızın "Editor" veya "Admin" yetkisi olduğundan emin olun. Üye bilgileri CMS\'de görünmeyecektir.'
-      } else if (error.message) {
-        errorMessage = `Sanity hatası: ${error.message}`
+      } else if (errorObj.message) {
+        errorMessage = `Sanity hatası: ${errorObj.message}`
       }
 
       throw new Error(errorMessage)

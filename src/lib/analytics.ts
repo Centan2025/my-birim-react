@@ -201,7 +201,7 @@ class Analytics {
       w.plausible = function (...args: unknown[]) {
         queue.push(args)
       }
-      ;(w.plausible as {q: unknown[][]}).q = queue
+      ;(w.plausible as unknown as {q: unknown[][]}).q = queue
     }
 
     if (import.meta.env.DEV && DEBUG_LOGS) {

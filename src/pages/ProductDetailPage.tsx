@@ -470,7 +470,12 @@ export function ProductDetailPage() {
   }, [grouped])
 
   // Görsel/Video/YouTube bant medyası (erken return'lerden önce)
-  const rawAltMedia = product?.alternativeMedia || []
+  const rawAltMedia: {
+    type: 'image' | 'video' | 'youtube'
+    url: string
+    urlMobile?: string
+    urlDesktop?: string
+  }[] = product?.alternativeMedia || []
   // Helper: mainImage string veya object olabilir
   const mainImageUrl = product?.mainImage
     ? typeof product.mainImage === 'string'
@@ -503,10 +508,15 @@ export function ProductDetailPage() {
     urlDesktop?: string
   }[] = (() => {
     if (rawAltMedia.length) {
-      const head = mainImageUrl
+      const head: {
+        type: 'image'
+        url: string
+        urlMobile?: string
+        urlDesktop?: string
+      }[] = mainImageUrl
         ? [
           {
-            type: 'image',
+            type: 'image' as const,
             url: mainImageUrl,
             urlMobile: mainImageMobile,
             urlDesktop: mainImageDesktop,
@@ -517,7 +527,7 @@ export function ProductDetailPage() {
       // tekilleştir (aynı url tekrar etmesin)
       const seen = new Set<string>()
       return merged.filter((m) => {
-        const key = `${m.type}:${m.url || (m.image && 'image')}`
+        const key = `${m.type}:${m.url}`
         if (seen.has(key)) return false
         seen.add(key)
         return true
@@ -802,7 +812,24 @@ export function ProductDetailPage() {
     })
     setIsLightboxOpen(true)
   }
-  const currentLightboxItems =
+  const currentLightboxItems: (
+    | {
+        type: 'image' | 'video' | 'youtube'
+        url: string
+        urlMobile?: string
+        urlDesktop?: string
+        title?: LocalizedString
+        description?: LocalizedString
+        link?: string
+        linkText?: LocalizedString
+      }
+    | {
+        type: 'image' | 'video' | 'youtube'
+        url: string
+        urlMobile?: string
+        urlDesktop?: string
+      }
+  )[] =
     lightboxSource === 'panel'
       ? Array.isArray(product?.media)
         ? product.media
@@ -1873,9 +1900,10 @@ export function ProductDetailPage() {
                 currentLightboxItems[lightboxImageIndex] &&
                 (() => {
                   const currentItem = currentLightboxItems[lightboxImageIndex]
+                  const itemWithMeta = 'title' in currentItem || 'link' in currentItem ? currentItem : null
 
-                  const linkUrl = currentItem?.link ? String(currentItem.link).trim() : ''
-                  const linkText = currentItem?.linkText
+                  const linkUrl = itemWithMeta && 'link' in itemWithMeta && itemWithMeta.link ? String(itemWithMeta.link).trim() : ''
+                  const linkText = itemWithMeta && 'linkText' in itemWithMeta ? itemWithMeta.linkText : undefined
                   const hasLink = linkUrl.length > 0
                   const hasLinkText =
                     linkText &&
@@ -1884,12 +1912,12 @@ export function ProductDetailPage() {
 
                   return (
                     <div className="absolute bottom-2 left-2 max-w-md p-6 text-white z-[70] pointer-events-auto">
-                      {currentItem.title && (
-                        <h3 className="text-xl font-light mb-2">{t(currentItem.title)}</h3>
+                      {itemWithMeta && 'title' in itemWithMeta && itemWithMeta.title && (
+                        <h3 className="text-xl font-light mb-2">{t(itemWithMeta.title)}</h3>
                       )}
-                      {currentItem.description && (
+                      {itemWithMeta && 'description' in itemWithMeta && itemWithMeta.description && (
                         <p className="text-sm text-white/90 leading-relaxed mb-3">
-                          {t(currentItem.description)}
+                          {t(itemWithMeta.description)}
                         </p>
                       )}
                       {hasLink &&
