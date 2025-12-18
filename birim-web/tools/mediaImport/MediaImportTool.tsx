@@ -30,6 +30,9 @@ interface ParsedData {
     modelName: string
     files: File[]
     dimensionFiles: File[] // ÖLÇÜLER klasöründeki dosyalar
+    extraImages: File[] // İndirilebilir Dosyalar/Ek Görseller
+    drawingFiles: File[] // İndirilebilir Dosyalar/Teknik Çizimler
+    modelFiles: File[] // İndirilebilir Dosyalar/3D Modeller
   }>
   materialGroups: Array<{
     groupName: string
@@ -93,7 +96,16 @@ export default function MediaImportTool() {
     const categories = new Map<string, string>()
     const categoryMediaMap = new Map<string, File[]>()
     const designerMap = new Map<string, File[]>()
-    const productMap = new Map<string, {files: File[]; dimensionFiles: File[]}>()
+    const productMap = new Map<
+      string,
+      {
+        files: File[]
+        dimensionFiles: File[]
+        extraImages: File[]
+        drawingFiles: File[]
+        modelFiles: File[]
+      }
+    >()
     const materialGroupMap = new Map<string, Map<string, File[]>>()
     const projectMap = new Map<string, File[]>()
 
@@ -113,8 +125,8 @@ export default function MediaImportTool() {
 
       // ürünler/kategori/model/görsel.jpg (büyük/küçük harf duyarsız, Türkçe karakter destekli)
       const urunIndex = parts.findIndex((p) => {
-        const lower = p?.toLowerCase() || ''
-        return lower.includes('urun') || lower.includes('ürün')
+        const key = slugify(p || '').replace(/-/g, '')
+        return key.includes('urunler') || key.includes('urun')
       })
 
       // Debug: İlk 3 dosya için detaylı log
@@ -138,8 +150,14 @@ export default function MediaImportTool() {
         // ÖLÇÜLER klasörünü kontrol et (ürünler/kategori/model/ÖLÇÜLER/dosya.jpg)
         // ÖLÇÜLER klasörü model klasöründen hemen sonra olmalı (index: urunIndex + 3)
         const olcuFolderIndex = urunIndex + 3
-        const olcuFolderName = parts[olcuFolderIndex]?.toLowerCase() || ''
-        const isOlcuFolder = olcuFolderName.includes('olcu') || olcuFolderName.includes('ölçü')
+        const folderKey = slugify(parts[olcuFolderIndex] || '').replace(/-/g, '')
+        const isOlcuFolder = folderKey.startsWith('olculer') || folderKey.startsWith('olcu')
+
+        // İndirilebilir Dosyalar klasörü (ürünler/kategori/model/İndirilebilir Dosyalar/...)
+        const isDownloadRoot =
+          folderKey.includes('indirilebirdosyalar') ||
+          folderKey.includes('indirilebilir') ||
+          folderKey.includes('download')
 
         // ÖLÇÜLER klasöründeki dosyalar ayrı işlenecek
         // Dosya yolu: ürünler/kategori/model/ÖLÇÜLER/dosya.jpg (5 parça)
@@ -171,11 +189,37 @@ export default function MediaImportTool() {
 
         const productKey = `${categoryId}/${modelId}`
         if (!productMap.has(productKey)) {
-          productMap.set(productKey, {files: [], dimensionFiles: []})
+          productMap.set(productKey, {
+            files: [],
+            dimensionFiles: [],
+            extraImages: [],
+            drawingFiles: [],
+            modelFiles: [],
+          })
         }
 
         const productData = productMap.get(productKey)!
-        if (isDimensionFile) {
+
+        // İndirilebilir Dosyalar alt klasörleri
+        if (isDownloadRoot && parts.length >= urunIndex + 5) {
+          const subFolder = (parts[olcuFolderIndex + 1] || '').toLowerCase()
+
+          const isExtraImages =
+            subFolder.includes('ek') && (subFolder.includes('görsel') || subFolder.includes('gorsel'))
+          const isDrawings =
+            subFolder.includes('teknik') || subFolder.includes('çizim') || subFolder.includes('cizim')
+          const isModels =
+            subFolder.includes('3d') || subFolder.includes('3-b') || subFolder.includes('model')
+
+          if (isExtraImages && isMediaFile(file.name)) {
+            productData.extraImages.push(file)
+          } else if (isDrawings) {
+            productData.drawingFiles.push(file)
+          } else if (isModels) {
+            productData.modelFiles.push(file)
+          }
+          // Bu dosyalar ana ürün görsellerine eklenmez, sadece indirilebilir içerik için kullanılır
+        } else if (isDimensionFile) {
           productData.dimensionFiles.push(file)
         } else {
           productData.files.push(file)
@@ -184,8 +228,8 @@ export default function MediaImportTool() {
 
       // tasarımcılar/tasarımcı-adı/görsel.jpg (büyük/küçük harf duyarsız, Türkçe karakter destekli)
       const tasarimIndex = parts.findIndex((p) => {
-        const lower = p?.toLowerCase() || ''
-        return lower.includes('tasarim') || lower.includes('tasarım')
+        const key = slugify(p || '').replace(/-/g, '')
+        return key.includes('tasarimcilar') || key.includes('tasarim')
       })
 
       // Debug: Tasarımcı bulunduğunda log
@@ -212,8 +256,8 @@ export default function MediaImportTool() {
 
       // malzemeler/grup-adı/kartela-adı/görsel.jpg (büyük/küçük harf duyarsız)
       const malzemeIndex = parts.findIndex((p) => {
-        const lower = p?.toLowerCase() || ''
-        return lower === 'malzemeler' || lower === 'malzeme'
+        const key = slugify(p || '').replace(/-/g, '')
+        return key === 'malzemeler' || key === 'malzeme'
       })
 
       if (malzemeIndex !== -1 && parts.length >= malzemeIndex + 4 && isMediaFile(file.name)) {
@@ -247,8 +291,8 @@ export default function MediaImportTool() {
 
       // projeler/proje-adı/görsel.jpg (büyük/küçük harf duyarsız, Türkçe karakter destekli)
       const projeIndex = parts.findIndex((p) => {
-        const lower = p?.toLowerCase() || ''
-        return lower.includes('proje') || lower.includes('project')
+        const key = slugify(p || '').replace(/-/g, '')
+        return key.includes('projeler') || key.includes('proje') || key.includes('project')
       })
 
       if (projeIndex !== -1 && parts.length >= projeIndex + 3 && isMediaFile(file.name)) {
@@ -270,8 +314,8 @@ export default function MediaImportTool() {
 
       // kategoriler/kategori-adı/görsel.jpg (büyük/küçük harf duyarsız, Türkçe karakter destekli)
       const kategoriIndex = parts.findIndex((p) => {
-        const lower = p?.toLowerCase() || ''
-        return lower.includes('kategori') || lower.includes('category')
+        const key = slugify(p || '').replace(/-/g, '')
+        return key.includes('kategoriler') || key.includes('kategori') || key.includes('category')
       })
 
       if (kategoriIndex !== -1 && parts.length >= kategoriIndex + 3 && isMediaFile(file.name)) {
@@ -312,6 +356,9 @@ export default function MediaImportTool() {
         modelName: modelId.toUpperCase(),
         files: productData.files.filter((f) => isMediaFile(f.name)), // Görsel ve video dosyaları
         dimensionFiles: productData.dimensionFiles.filter((f) => isMediaFile(f.name)), // ÖLÇÜLER klasöründeki dosyalar
+        extraImages: productData.extraImages, // İndirilebilir / Ek Görseller (her türlü uzantı, filtreyi sonra yapacağız)
+        drawingFiles: productData.drawingFiles, // İndirilebilir / Teknik Çizimler
+        modelFiles: productData.modelFiles, // İndirilebilir / 3D Modeller
       }
     })
 
@@ -1169,11 +1216,12 @@ function slugify(text: string): string {
   Object.entries(turkishMap).forEach(([tr, en]) => {
     result = result.replace(new RegExp(tr, 'g'), en)
   })
+  // Türkçe karakterleri düzleştir, harf/rakam ve "_" dışındaki her şeyi "-" yap
+  // Böylece "PUF_1" -> "puf_1" olur, alt çizgi korunur
   return result
     .toLowerCase()
     .trim()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9_]+/g, '-') // "_" izinli, diğer özel karakterler "-"
     .replace(/-+/g, '-')
     .replace(/^-+|-+$/g, '')
 }
@@ -1381,6 +1429,11 @@ async function checkExistingAssets(client: any, productId: string) {
       videoFile{asset->{_id, originalFilename, sha1hash}},
       videoFileMobile{asset->{_id, originalFilename, sha1hash}},
       videoFileDesktop{asset->{_id, originalFilename, sha1hash}}
+    },
+    exclusiveContent{
+      images[]{asset->{_id, originalFilename, sha1hash}},
+      drawings[]{name, file{asset->{_id, originalFilename, sha1hash}}},
+      models3d[]{name, file{asset->{_id, originalFilename, sha1hash}}}
     }
   }`,
     {productId},
@@ -1513,12 +1566,57 @@ async function checkExistingAssets(client: any, productId: string) {
     })
   }
 
+  // Mevcut exclusiveContent alanlarını koru
+  const existingExclusiveImages: any[] = []
+  const existingDrawings: any[] = []
+  const existingModels3d: any[] = []
+
+  if (product?.exclusiveContent) {
+    // Ek Görseller (sadece görseller)
+    if (product.exclusiveContent.images) {
+      product.exclusiveContent.images.forEach((img: any) => {
+        if (img?.asset) {
+          if (img.asset.sha1hash) existingHashes.add(img.asset.sha1hash)
+          if (img.asset.originalFilename) existingFilenames.add(img.asset.originalFilename)
+        }
+        existingExclusiveImages.push(img)
+      })
+    }
+
+    // Teknik Çizimler (indirilebilir dosya)
+    if (product.exclusiveContent.drawings) {
+      product.exclusiveContent.drawings.forEach((item: any) => {
+        if (item?.file?.asset) {
+          if (item.file.asset.sha1hash) existingHashes.add(item.file.asset.sha1hash)
+          if (item.file.asset.originalFilename)
+            existingFilenames.add(item.file.asset.originalFilename)
+        }
+        existingDrawings.push(item)
+      })
+    }
+
+    // 3D Modeller (indirilebilir dosya)
+    if (product.exclusiveContent.models3d) {
+      product.exclusiveContent.models3d.forEach((item: any) => {
+        if (item?.file?.asset) {
+          if (item.file.asset.sha1hash) existingHashes.add(item.file.asset.sha1hash)
+          if (item.file.asset.originalFilename)
+            existingFilenames.add(item.file.asset.originalFilename)
+        }
+        existingModels3d.push(item)
+      })
+    }
+  }
+
   return {
     existingHashes,
     existingFilenames,
     existingAlternativeMedia,
     existingDimensionImages,
     existingMedia,
+    existingExclusiveImages,
+    existingDrawings,
+    existingModels3d,
   }
 }
 
@@ -1571,6 +1669,9 @@ async function updateProductImages(client: any, productId: string, product: any)
     existingAlternativeMedia,
     existingDimensionImages,
     existingMedia,
+    existingExclusiveImages,
+    existingDrawings,
+    existingModels3d,
   } = await checkExistingAssets(client, productId)
 
   // Kapak görselleri sadece görsel olabilir (video olamaz)
@@ -1594,6 +1695,11 @@ async function updateProductImages(client: any, productId: string, product: any)
   // Ölçü görselleri: ÖLÇÜLER klasöründeki dosyalar
   const dimensionImages = product.dimensionFiles || []
 
+  // İndirilebilir içerikler: İndirilebilir Dosyalar klasöründen
+  const extraImagesFiles: File[] = product.extraImages || []
+  const drawingFiles: File[] = product.drawingFiles || []
+  const modelFiles: File[] = product.modelFiles || []
+
   // Alt medya panelleri: _panel etiketi ile
   const panelMedia = product.files.filter((f: File) => f.name.toLowerCase().includes('_panel'))
 
@@ -1604,6 +1710,7 @@ async function updateProductImages(client: any, productId: string, product: any)
   )
 
   const updates: any = {}
+  const unsetFields: string[] = []
   let hasChanges = false
 
   // ============================================
@@ -1645,7 +1752,7 @@ async function updateProductImages(client: any, productId: string, product: any)
     } else {
       // Klasörde hiç görsel yok - CMS'deki kapak görselini sil (eşitleme)
       console.log(`   🗑️ Klasörde görsel yok, CMS'deki kapak siliniyor (eşitleme)`)
-      updates.mainImage = null
+      unsetFields.push('mainImage')
       hasChanges = true
     }
   }
@@ -1670,7 +1777,7 @@ async function updateProductImages(client: any, productId: string, product: any)
   } else {
     // Klasörde mobil kapak yok - CMS'deki mobil kapak görselini sil (eşitleme)
     console.log(`   🗑️ Klasörde mobil kapak yok, CMS'deki mobil kapak siliniyor (eşitleme)`)
-    updates.mainImageMobile = null
+    unsetFields.push('mainImageMobile')
     hasChanges = true
   }
 
@@ -1694,7 +1801,7 @@ async function updateProductImages(client: any, productId: string, product: any)
   } else {
     // Klasörde desktop kapak yok - CMS'deki desktop kapak görselini sil (eşitleme)
     console.log(`   🗑️ Klasörde desktop kapak yok, CMS'deki desktop kapak siliniyor (eşitleme)`)
-    updates.mainImageDesktop = null
+    unsetFields.push('mainImageDesktop')
     hasChanges = true
   }
 
@@ -2082,11 +2189,245 @@ async function updateProductImages(client: any, productId: string, product: any)
   }
 
   // ============================================
-  // 5. GÜNCELLEMELERİ UYGULA
+  // 5. İNDİRİLEBİLİR İÇERİKLERİ EŞİTLE
+  //    - Ek Görseller (exclusiveContent.images)
+  //    - Teknik Çizimler (exclusiveContent.drawings)
+  //    - 3D Modeller (exclusiveContent.models3d)
   // ============================================
 
-  if (hasChanges || syncedAlternativeMedia.length !== existingAlternativeMedia.length) {
-    await client.patch(productId).set(updates).commit()
+  let syncedExclusiveImages: any[] = existingExclusiveImages
+  let syncedDrawings: any[] = existingDrawings
+  let syncedModels3d: any[] = existingModels3d
+  let hasExclusiveChanges = false
+
+  // 5.1 Ek Görseller (sadece görsel dosyalar)
+  const extraImageMedia = extraImagesFiles.filter((f) => isImageFile(f.name))
+  if (extraImageMedia.length > 0) {
+    const folderHashes = new Set<string>()
+    const folderMap = new Map<string, File>() // hash -> file
+
+    for (const file of extraImageMedia) {
+      try {
+        const hash = await getFileHash(file)
+        folderHashes.add(hash)
+        folderMap.set(hash, file)
+      } catch (error) {
+        console.error(`   ❌ Ek görsel hash hesaplanamadı: ${file.name}`, error)
+      }
+    }
+
+    const cmsHashes = new Set<string>()
+    const cmsMap = new Map<string, any>() // hash -> image item
+
+    existingExclusiveImages.forEach((img: any) => {
+      const hash = img?.asset?.sha1hash
+      if (hash) {
+        cmsHashes.add(hash)
+        cmsMap.set(hash, img)
+      }
+    })
+
+    const newImages: any[] = []
+
+    for (const [hash, file] of folderMap.entries()) {
+      if (cmsHashes.has(hash)) {
+        newImages.push(cmsMap.get(hash))
+        console.log(`   ✓ Ek görsel korundu: ${file.name}`)
+      } else {
+        try {
+          console.log(`   ✅ Ek görsel yükleniyor: ${file.name}`)
+          const asset = await client.assets.upload('image', file)
+          newImages.push({
+            _type: 'image',
+            asset: {_type: 'reference', _ref: asset._id},
+          })
+          existingHashes.add(asset.sha1hash)
+          existingFilenames.add(asset.originalFilename)
+          hasExclusiveChanges = true
+        } catch (error) {
+          console.error(`   ❌ Ek görsel yüklenemedi: ${file.name}`, error)
+        }
+      }
+    }
+
+    // CMS'de olup klasörde olmayanlar silinecek (eşitleme)
+    const toDeleteExtra = Array.from(cmsHashes).filter((hash) => !folderHashes.has(hash))
+    if (toDeleteExtra.length > 0) {
+      console.log(`   🗑️ ${toDeleteExtra.length} ek görsel klasörde yok, CMS'den siliniyor`)
+      hasExclusiveChanges = true
+    }
+
+    syncedExclusiveImages = newImages
+  } else if (existingExclusiveImages.length > 0) {
+    // Klasörde hiç ek görsel yoksa CMS'tekileri sil
+    console.log(
+      `   🗑️ İndirilebilir/Ek Görseller klasöründe dosya yok, CMS'deki ek görseller siliniyor (eşitleme)`,
+    )
+    syncedExclusiveImages = []
+    hasExclusiveChanges = true
+  }
+
+  // 5.2 Teknik Çizimler (indirilebilirItem, her türlü dosya)
+  if (drawingFiles.length > 0) {
+    const folderHashes = new Set<string>()
+    const folderMap = new Map<string, File>()
+
+    for (const file of drawingFiles) {
+      try {
+        const hash = await getFileHash(file)
+        folderHashes.add(hash)
+        folderMap.set(hash, file)
+      } catch (error) {
+        console.error(`   ❌ Teknik çizim hash hesaplanamadı: ${file.name}`, error)
+      }
+    }
+
+    const cmsHashes = new Set<string>()
+    const cmsMap = new Map<string, any>() // hash -> downloadableItem
+
+    existingDrawings.forEach((item: any) => {
+      const hash = item?.file?.asset?.sha1hash
+      if (hash) {
+        cmsHashes.add(hash)
+        cmsMap.set(hash, item)
+      }
+    })
+
+    const newDrawings: any[] = []
+
+    for (const [hash, file] of folderMap.entries()) {
+      if (cmsHashes.has(hash)) {
+        newDrawings.push(cmsMap.get(hash))
+        console.log(`   ✓ Teknik çizim korundu: ${file.name}`)
+      } else {
+        try {
+          console.log(`   ✅ Teknik çizim dosyası yükleniyor: ${file.name}`)
+          const asset = await client.assets.upload('file', file)
+          const baseName = file.name.replace(/\.[^/.]+$/, '')
+          newDrawings.push({
+            _type: 'downloadableItem',
+            _key: asset._id,
+            name: {tr: baseName, en: baseName},
+            file: {
+              _type: 'file',
+              asset: {_type: 'reference', _ref: asset._id},
+            },
+          })
+          hasExclusiveChanges = true
+        } catch (error) {
+          console.error(`   ❌ Teknik çizim dosyası yüklenemedi: ${file.name}`, error)
+        }
+      }
+    }
+
+    const toDeleteDrawings = Array.from(cmsHashes).filter((hash) => !folderHashes.has(hash))
+    if (toDeleteDrawings.length > 0) {
+      console.log(
+        `   🗑️ ${toDeleteDrawings.length} teknik çizim klasörde yok, CMS'den siliniyor (eşitleme)`,
+      )
+      hasExclusiveChanges = true
+    }
+
+    syncedDrawings = newDrawings
+  } else if (existingDrawings.length > 0) {
+    console.log(
+      `   🗑️ İndirilebilir/Teknik Çizimler klasöründe dosya yok, CMS'deki teknik çizimler siliniyor (eşitleme)`,
+    )
+    syncedDrawings = []
+    hasExclusiveChanges = true
+  }
+
+  // 5.3 3D Modeller (indirilebilirItem, her türlü dosya)
+  if (modelFiles.length > 0) {
+    const folderHashes = new Set<string>()
+    const folderMap = new Map<string, File>()
+
+    for (const file of modelFiles) {
+      try {
+        const hash = await getFileHash(file)
+        folderHashes.add(hash)
+        folderMap.set(hash, file)
+      } catch (error) {
+        console.error(`   ❌ 3D model hash hesaplanamadı: ${file.name}`, error)
+      }
+    }
+
+    const cmsHashes = new Set<string>()
+    const cmsMap = new Map<string, any>() // hash -> downloadableItem
+
+    existingModels3d.forEach((item: any) => {
+      const hash = item?.file?.asset?.sha1hash
+      if (hash) {
+        cmsHashes.add(hash)
+        cmsMap.set(hash, item)
+      }
+    })
+
+    const newModels: any[] = []
+
+    for (const [hash, file] of folderMap.entries()) {
+      if (cmsHashes.has(hash)) {
+        newModels.push(cmsMap.get(hash))
+        console.log(`   ✓ 3D model korundu: ${file.name}`)
+      } else {
+        try {
+          console.log(`   ✅ 3D model dosyası yükleniyor: ${file.name}`)
+          const asset = await client.assets.upload('file', file)
+          const baseName = file.name.replace(/\.[^/.]+$/, '')
+          newModels.push({
+            _type: 'downloadableItem',
+            _key: asset._id,
+            name: {tr: baseName, en: baseName},
+            file: {
+              _type: 'file',
+              asset: {_type: 'reference', _ref: asset._id},
+            },
+          })
+          hasExclusiveChanges = true
+        } catch (error) {
+          console.error(`   ❌ 3D model dosyası yüklenemedi: ${file.name}`, error)
+        }
+      }
+    }
+
+    const toDeleteModels = Array.from(cmsHashes).filter((hash) => !folderHashes.has(hash))
+    if (toDeleteModels.length > 0) {
+      console.log(
+        `   🗑️ ${toDeleteModels.length} 3D model klasörde yok, CMS'den siliniyor (eşitleme)`,
+      )
+      hasExclusiveChanges = true
+    }
+
+    syncedModels3d = newModels
+  } else if (existingModels3d.length > 0) {
+    console.log(
+      `   🗑️ İndirilebilir/3D Modeller klasöründe dosya yok, CMS'deki 3D modeller siliniyor (eşitleme)`,
+    )
+    syncedModels3d = []
+    hasExclusiveChanges = true
+  }
+
+  if (hasExclusiveChanges) {
+    updates.exclusiveContent = {
+      images: syncedExclusiveImages,
+      drawings: syncedDrawings,
+      models3d: syncedModels3d,
+    }
+  }
+
+  // ============================================
+  // 6. GÜNCELLEMELERİ UYGULA
+  // ============================================
+
+  if (hasChanges || hasExclusiveChanges || syncedAlternativeMedia.length !== existingAlternativeMedia.length) {
+    let patch = client.patch(productId)
+    if (Object.keys(updates).length > 0) {
+      patch = patch.set(updates)
+    }
+    if (unsetFields.length > 0) {
+      patch = patch.unset(unsetFields)
+    }
+    await patch.commit()
     const added =
       syncedAlternativeMedia.length - (existingAlternativeMedia.length - toDelete.length)
     const deleted = toDelete.length
@@ -2094,7 +2435,7 @@ async function updateProductImages(client: any, productId: string, product: any)
     const deletedText = deleted > 0 ? `-${deleted} silindi` : ''
     const summary = [addedText, deletedText].filter(Boolean).join(' ')
     console.log(
-      `   ✅ Eşitleme tamamlandı: ${summary} (Toplam: ${syncedAlternativeMedia.length} medya)`,
+      `   ✅ Eşitleme tamamlandı: ${summary} (Toplam: ${syncedAlternativeMedia.length} alternatif medya, Özel içerik değişti: ${hasExclusiveChanges})`,
     )
   } else {
     console.log(`   ℹ️ Eşitleme gerekmedi, tüm medya zaten eşleşiyor`)

@@ -157,6 +157,7 @@ export function ExcelImportTool() {
   const [status, setStatus] = useState<ProcessResult | null>(null)
   const [logs, setLogs] = useState<string[]>([])
   const [logFilter, setLogFilter] = useState<'all' | 'error' | 'success' | 'warning'>('all')
+  const [folderStructure, setFolderStructure] = useState<string | null>(null)
 
   const addLog = (message: string, type: 'info' | 'success' | 'error' | 'warning' = 'info') => {
     const timestamp = new Date().toLocaleTimeString('tr-TR')
@@ -166,16 +167,21 @@ export function ExcelImportTool() {
   }
 
   const handleFileSelect = (selectedFile: File) => {
-    if (!selectedFile.name.endsWith('.xlsx') && !selectedFile.name.endsWith('.xls')) {
+    if (
+      !selectedFile.name.endsWith('.xlsx') &&
+      !selectedFile.name.endsWith('.xls') &&
+      !selectedFile.name.endsWith('.xlsm')
+    ) {
       setStatus({
         success: false,
-        message: 'Lütfen geçerli bir Excel dosyası seçin (.xlsx veya .xls)',
+        message: 'Lütfen geçerli bir Excel dosyası seçin (.xlsx, .xls veya .xlsm)',
       })
       return
     }
     setFile(selectedFile)
     setStatus(null)
     setLogs([])
+    setFolderStructure(null)
     addLog(`Dosya seçildi: ${selectedFile.name}`)
   }
 
@@ -201,6 +207,157 @@ export function ExcelImportTool() {
     const selectedFile = e.target.files?.[0]
     if (selectedFile) {
       handleFileSelect(selectedFile)
+    }
+  }
+
+  const downloadFolderStructure = () => {
+    if (!folderStructure) return
+
+    try {
+      const blob = new Blob([folderStructure], {type: 'text/plain;charset=utf-8'})
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `birim-klasor-yapisi-${new Date().toISOString().slice(0, 10)}.txt`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Klasör yapısı indirilemedi', error)
+    }
+  }
+
+  const generateFolderStructure = async () => {
+    if (!file) {
+      setStatus({
+        success: false,
+        message: 'Lütfen önce bir dosya seçin',
+      })
+      return
+    }
+
+    try {
+      setStatus(null)
+      setLogs([])
+      setFolderStructure(null)
+      addLog('Klasör yapısı oluşturuluyor...', 'info')
+
+      const arrayBuffer = await file.arrayBuffer()
+      const workbook = XLSX.read(arrayBuffer, {type: 'array'})
+
+      const paths = new Set<string>()
+      const addPath = (path: string) => {
+        const normalized = path.replace(/\\/g, '/')
+        paths.add(normalized.endsWith('/') ? normalized : `${normalized}/`)
+      }
+
+      // MALZEMELER sayfası → malzemeler/GRUP/KARTELA/
+      const materialsSheetName = workbook.SheetNames.find((name) =>
+        name.toUpperCase().includes('MALZEMELER'),
+      )
+      if (materialsSheetName) {
+        const worksheet = workbook.Sheets[materialsSheetName]
+        const data = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ''}) as any[][]
+        const rows = data.slice(2)
+
+        for (const row of rows) {
+          const columnA = String(row[0] || '').trim()
+          if (columnA.toUpperCase() === 'SON') break
+          if (columnA === '-') continue
+
+          const groupName = String(row[1] || '').trim()
+          const bookName = String(row[2] || '').trim()
+          if (!groupName || !bookName) continue
+
+          addPath(`MALZEMELER/${groupName}/${bookName}`)
+        }
+      }
+
+      // TASARIMCILAR sayfası → TASARIMCILAR/TASARIMCI/
+      const designersSheetName = workbook.SheetNames.find(
+        (name) =>
+          name.toUpperCase().includes('TASARIMCILAR') || name.toUpperCase().includes('DESIGNER'),
+      )
+      if (designersSheetName) {
+        const worksheet = workbook.Sheets[designersSheetName]
+        const data = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ''}) as any[][]
+        const rows = data.slice(2)
+
+        for (const row of rows) {
+          const columnA = String(row[0] || '').trim()
+          if (columnA.toUpperCase() === 'SON') break
+          if (columnA === '-') continue
+
+          const designerName = String(row[2] || '').trim()
+          if (!designerName) continue
+
+          addPath(`TASARIMCILAR/${designerName}`)
+        }
+      }
+
+      // PROJELER sayfası → PROJELER/PROJE/
+      const projectsSheetName = workbook.SheetNames.find(
+        (name) => name.toUpperCase().includes('PROJELER') || name.toUpperCase().includes('PROJECT'),
+      )
+      if (projectsSheetName) {
+        const worksheet = workbook.Sheets[projectsSheetName]
+        const data = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ''}) as any[][]
+        const rows = data.slice(1)
+
+        for (const row of rows) {
+          const columnA = String(row[0] || '').trim()
+          if (columnA.toUpperCase() === 'SON') break
+          if (columnA === '-') continue
+
+          const projectName = String(row[2] || '').trim()
+          if (!projectName) continue
+
+          addPath(`PROJELER/${projectName}`)
+        }
+      }
+
+      // ÜRÜNLER sayfası → ÜRÜNLER/KATEGORİ/ÜRÜN/ ve ÖLÇÜLER klasörü
+      const productsSheetName = workbook.SheetNames.find(
+        (name) => name.toUpperCase().includes('ÜRÜNLER') || name.toUpperCase().includes('PRODUCT'),
+      )
+      if (productsSheetName) {
+        const worksheet = workbook.Sheets[productsSheetName]
+        const data = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ''}) as any[][]
+        const rows = data.slice(2)
+
+        for (const row of rows) {
+          const columnA = String(row[0] || '').trim()
+          if (columnA.toUpperCase() === 'SON') break
+          if (columnA === '-') continue
+
+          const categoryName = String(row[1] || '').trim()
+          const productName = String(row[3] || '').trim()
+          if (!categoryName || !productName) continue
+
+          const basePath = `ÜRÜNLER/${categoryName}/${productName}`
+          addPath(basePath)
+          addPath(`${basePath}/ÖLÇÜLER`)
+        }
+      }
+
+      if (paths.size === 0) {
+        setFolderStructure('Bu Excel dosyasından klasör yapısı çıkarılamadı.')
+        addLog('Excel içinde klasör yapısı üretmek için yeterli veri bulunamadı', 'warning')
+      } else {
+        const sorted = Array.from(paths).sort()
+        const header =
+          '# Bu metni kopyalayıp bilgisayarınızda klasörleri bu yapıya göre oluşturabilirsiniz.\n' +
+          '# Görselleri ilgili klasörlerin içine koyduktan sonra "Medya İçe Aktarma" aracını kullanın.\n\n'
+        setFolderStructure(header + sorted.join('\n'))
+        addLog(`Klasör yapısı oluşturuldu (${paths.size} klasör)`, 'success')
+      }
+    } catch (error: any) {
+      addLog(`Klasör yapısı oluşturulurken hata: ${error.message}`, 'error')
+      setStatus({
+        success: false,
+        message: `Klasör yapısı oluşturulurken hata oluştu: ${error.message}`,
+      })
     }
   }
 
@@ -1499,7 +1656,7 @@ export function ExcelImportTool() {
         <FileInput
           id="file-input"
           type="file"
-          accept=".xlsx,.xls"
+          accept=".xlsx,.xls,.xlsm"
           onChange={handleFileInputChange}
         />
       </UploadArea>
@@ -1515,11 +1672,19 @@ export function ExcelImportTool() {
               setStatus(null)
               setLogs([])
               setProgress(0)
+              setFolderStructure(null)
             }}
             disabled={isProcessing}
             style={{background: '#6c757d'}}
           >
             Temizle
+          </Button>
+          <Button
+            onClick={generateFolderStructure}
+            disabled={isProcessing}
+            style={{background: '#17a2b8'}}
+          >
+            Klasör Yapısını Oluştur
           </Button>
         </div>
       )}
@@ -1600,6 +1765,36 @@ export function ExcelImportTool() {
               })
             )}
           </LogContainer>
+        </div>
+      )}
+      {folderStructure && (
+        <div style={{marginTop: '2rem'}}>
+          <h3>Klasör Yapısı (kopyalayıp bilgisayarınızda klasör oluşturmak için)</h3>
+          <p style={{fontSize: '0.9rem'}}>
+            Aşağıdaki satırları bir `.txt` dosyasına kaydedip referans olarak kullanabilir veya
+            doğrudan bu yapıya göre klasörleri oluşturabilirsiniz.
+          </p>
+          <div style={{marginBottom: '0.75rem'}}>
+            <Button onClick={downloadFolderStructure}>Klasör Yapısını TXT Olarak İndir</Button>
+          </div>
+          <textarea
+            readOnly
+            value={folderStructure}
+            style={{
+              width: '100%',
+              minHeight: '200px',
+              fontFamily: 'monospace',
+              fontSize: '0.85rem',
+              padding: '0.75rem',
+              borderRadius: '4px',
+              border: '1px solid #999',
+              background: 'var(--card-bg-color, #ffffff)',
+              color: 'var(--card-fg-color, #111111)',
+              resize: 'vertical',
+              whiteSpace: 'pre',
+              overflow: 'auto',
+            }}
+          />
         </div>
       )}
     </Container>

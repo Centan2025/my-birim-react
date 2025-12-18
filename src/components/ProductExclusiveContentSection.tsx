@@ -41,6 +41,19 @@ export function ProductExclusiveContentSection({
 
   const canDownload = isLoggedIn && user?.userType === 'full_member'
 
+  const getExtraImageLabel = (img: any, idx: number) => {
+    // Şema tarafında sadece image olduğu için genelde URL string geliyor
+    const url = typeof img === 'string' ? img : img?.url || img?.image || ''
+    if (!url) return `Görsel ${idx + 1}`
+    try {
+      const parts = url.split('/')
+      const last = parts[parts.length - 1] || ''
+      return decodeURIComponent(last)
+    } catch {
+      return `Görsel ${idx + 1}`
+    }
+  }
+
   return (
     <ScrollReveal delay={600} threshold={0.05}>
       <div className="relative rounded-none border border-gray-200 bg-white/70 backdrop-blur p-6 sm:p-8 pb-10">
@@ -53,18 +66,29 @@ export function ProductExclusiveContentSection({
               {t('additional_images') || 'Ek Görseller'}
             </div>
             {exclusiveContent.images && exclusiveContent.images.length > 0 ? (
-              <div className="grid grid-cols-2 gap-2">
-                {exclusiveContent.images.map((img: string, idx: number) => (
-                  <OptimizedImage
-                    key={idx}
-                    src={img}
-                    alt={`exclusive-${idx}`}
-                    className={`w-full aspect-video object-cover ${imageBorderClass}`}
-                    loading="lazy"
-                    quality={85}
-                  />
-                ))}
-              </div>
+              <ul className="space-y-2">
+                {exclusiveContent.images.map((img: any, idx: number) => {
+                  const url = typeof img === 'string' ? img : img?.url || img?.image || ''
+                  const label = getExtraImageLabel(img, idx)
+                  return (
+                    <li key={idx} className="group">
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-3 py-2 rounded-none border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 transition-colors"
+                      >
+                        <span className="shrink-0 text-gray-600 group-hover:text-gray-900">
+                          <DownloadIcon />
+                        </span>
+                        <span className="text-sm text-gray-700 group-hover:text-gray-900 break-all">
+                          {label}
+                        </span>
+                      </a>
+                    </li>
+                  )
+                })}
+              </ul>
             ) : (
               <p className="text-gray-400 text-sm">Ek görsel bulunmuyor</p>
             )}
