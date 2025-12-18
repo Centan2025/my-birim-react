@@ -275,7 +275,9 @@ export function ProductDetailPage() {
       return
     }
     const palette =
-      typeof product.mainImage === 'object' ? (product.mainImage as any).palette : undefined
+      typeof product.mainImage === 'object' && product.mainImage !== null && 'palette' in product.mainImage
+        ? product.mainImage.palette
+        : undefined
     setFromPalette(palette)
     return () => reset()
   }, [product, reset, setFromPalette])
@@ -344,9 +346,7 @@ export function ProductDetailPage() {
     if (!product) return
 
     // İlk görünmesini istediğimiz medya: alternatifMedia varsa onun ilk öğesi; yoksa eski alternatif görseller
-    const altMediaArr: any[] = Array.isArray((product as any).alternativeMedia)
-      ? (product as any).alternativeMedia
-      : []
+    const altMediaArr = product.alternativeMedia || []
     if (altMediaArr.length > 0) {
       setCurrentImageIndex(0)
       const first = altMediaArr[0]
@@ -430,11 +430,14 @@ export function ProductDetailPage() {
   // Aynı groupTitle'a sahip grupları tek bir sekme altında birleştir - erken return'lerden önce
   const grouped = useMemo(() => {
     if (!product) return []
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return Array.isArray((product as any).groupedMaterials) ? (product as any).groupedMaterials : []
   }, [product])
 
   const mergedGroups = useMemo(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const map = new Map<string, any>()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ; (grouped || []).forEach((g: any) => {
         const key = JSON.stringify(g.groupTitle || '')
         if (!map.has(key)) {
@@ -446,7 +449,9 @@ export function ProductDetailPage() {
         } else {
           const agg = map.get(key)
           // kitapları başlıklarına göre birleştir
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const byTitle = new Map<string, any>()
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ;[...(agg.books || []), ...(g.books || [])].forEach((b: any) => {
               const bKey = JSON.stringify(b.bookTitle || '')
               if (!byTitle.has(bKey)) byTitle.set(bKey, { bookTitle: b.bookTitle, materials: [] })
@@ -465,9 +470,7 @@ export function ProductDetailPage() {
   }, [grouped])
 
   // Görsel/Video/YouTube bant medyası (erken return'lerden önce)
-  const rawAltMedia: any[] = Array.isArray((product as any)?.alternativeMedia)
-    ? (product as any).alternativeMedia
-    : []
+  const rawAltMedia = product?.alternativeMedia || []
   // Helper: mainImage string veya object olabilir
   const mainImageUrl = product?.mainImage
     ? typeof product.mainImage === 'string'
@@ -484,8 +487,8 @@ export function ProductDetailPage() {
       : undefined
 
   const fallbackImages = (() => {
-    const ai = Array.isArray((product as any)?.alternativeImages)
-      ? (product as any).alternativeImages
+    const ai = Array.isArray(product?.alternativeImages)
+      ? product.alternativeImages
       : []
     const arw = [mainImageUrl, ...ai]
     return Array.isArray(arw)
@@ -500,7 +503,7 @@ export function ProductDetailPage() {
     urlDesktop?: string
   }[] = (() => {
     if (rawAltMedia.length) {
-      const head: any[] = mainImageUrl
+      const head = mainImageUrl
         ? [
           {
             type: 'image',
@@ -513,7 +516,7 @@ export function ProductDetailPage() {
       const merged = [...head, ...rawAltMedia]
       // tekilleştir (aynı url tekrar etmesin)
       const seen = new Set<string>()
-      return merged.filter((m: any) => {
+      return merged.filter((m) => {
         const key = `${m.type}:${m.url || (m.image && 'image')}`
         if (seen.has(key)) return false
         seen.add(key)
@@ -529,7 +532,7 @@ export function ProductDetailPage() {
     Math.max(mergedGroups.length - 1, 0)
   )
   const activeGroup = Array.isArray(mergedGroups) ? mergedGroups[safeActiveIndex] : undefined
-  const books = Array.isArray((activeGroup as any)?.books) ? (activeGroup as any).books : []
+  const books = Array.isArray(activeGroup?.books) ? activeGroup.books : []
   const hasMaterialGroups = Array.isArray(mergedGroups) && mergedGroups.length > 0
   const flatMaterials =
     Array.isArray(product?.materials) && product.materials.length > 0 ? product.materials : []
@@ -703,7 +706,8 @@ export function ProductDetailPage() {
   // Ürün detay sayfası görüntülendiğinde e-ticaret event'i gönder
   useEffect(() => {
     if (!product) return
-    analytics.trackEcommerce('view_product', product.id, (product as any)?.price)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    analytics.trackEcommerce('view_product', product.id, (product as any)?.price || 0)
   }, [product])
 
   // Hero geçişi bittiğinde cloned slide'lardan gerçek slide'a "snap" et (animasyonsuz)
@@ -783,7 +787,7 @@ export function ProductDetailPage() {
   const openPanelLightbox = (index: number) => {
     setLightboxSource('panel')
     setLightboxImageIndex(index)
-    const panels = (product as any)?.media || []
+    const panels = product?.media || []
     const item = panels[index]
     if (item && item.type === 'youtube') {
       setYtPlaying(true)
@@ -800,8 +804,8 @@ export function ProductDetailPage() {
   }
   const currentLightboxItems =
     lightboxSource === 'panel'
-      ? Array.isArray((product as any)?.media)
-        ? (product as any).media
+      ? Array.isArray(product?.media)
+        ? product.media
         : []
       : bandMedia
   const nextImage = () => {
@@ -1508,6 +1512,7 @@ export function ProductDetailPage() {
                       <>
                         {/* Group tabs - similar to image design */}
                         <div className="flex flex-wrap gap-0 border-t border-b border-gray-400 mb-6 bg-gray-200">
+                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                           {(Array.isArray(mergedGroups) ? mergedGroups : []).map((g: any, idx: number) => (
                             <button
                               key={idx}
@@ -1526,6 +1531,7 @@ export function ProductDetailPage() {
                         {books.length > 0 ? (
                           <>
                             <div className="flex flex-wrap gap-0 border-b border-gray-200 mb-6">
+                              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                               {books.map((book: any, idx: number) => (
                                 <button
                                   key={idx}
@@ -1542,6 +1548,7 @@ export function ProductDetailPage() {
 
                             {/* Seçili kartelaya ait malzemeler */}
                             <div className="flex flex-wrap gap-6">
+                              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                               {(Array.isArray(books[activeBookIndex]?.materials)
                                 ? books[activeBookIndex].materials
                                 : []
@@ -1554,6 +1561,7 @@ export function ProductDetailPage() {
                                     const allMaterials = Array.isArray(books[activeBookIndex]?.materials)
                                       ? books[activeBookIndex].materials
                                       : []
+                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                     setMaterialLightbox({
                                       images: allMaterials.map((m: any) => ({
                                         image: m.image,
@@ -1581,6 +1589,7 @@ export function ProductDetailPage() {
                           /* Fallback: if no books, show materials directly */
                           <>
                             <div className="flex flex-wrap gap-6">
+                              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                               {(Array.isArray(grouped[safeActiveIndex]?.materials)
                                 ? grouped[safeActiveIndex].materials
                                 : []
@@ -1593,6 +1602,7 @@ export function ProductDetailPage() {
                                     const allMaterials = Array.isArray(grouped[safeActiveIndex]?.materials)
                                       ? grouped[safeActiveIndex].materials
                                       : []
+                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                     setMaterialLightbox({
                                       images: allMaterials.map((m: any) => ({
                                         image: m.image,
@@ -1621,12 +1631,14 @@ export function ProductDetailPage() {
                     ) : (
                       /* Flat fallback: grouped malzeme yoksa product.materials listesini göster */
                       <div className="flex flex-wrap gap-6">
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                         {flatMaterials.map((material: any, index: number) => (
                           <div
                             key={index}
                             className="text-center group cursor-pointer"
                             title={t(material.name)}
                             onClick={() => {
+                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
                               setMaterialLightbox({
                                 images: flatMaterials.map((m: any) => ({
                                   image: m.image,
@@ -1705,9 +1717,9 @@ export function ProductDetailPage() {
 
               {/* bottom prev/next removed; now overlay under menu */}
             </section>
-            {Array.isArray((product as any)?.media) &&
-              (product as any).media.length > 0 &&
-              (product as any).showMediaPanels !== false && (
+            {Array.isArray(product?.media) &&
+              product.media.length > 0 &&
+              product.showMediaPanels !== false && (
                 <ProductMediaPanels
                   product={product}
                   imageBorderClass={imageBorderClass}
@@ -1802,6 +1814,7 @@ export function ProductDetailPage() {
                 <div className="relative w-full h-full">
                   {/* Doğrudan iframe'i göster, ortadaki büyük play butonu kaldırıldı */}
                   <iframe
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     ref={youTubePlayerRef as any}
                     className="w-full h-full pointer-events-auto"
                     title="youtube-player"

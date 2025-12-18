@@ -67,10 +67,10 @@ export function CategoriesPage() {
   // Header temasını mevcut ürünlerden birinin paletinden besle (kategoriler listesi için)
   useEffect(() => {
     const candidate = allProducts.find(
-      p => typeof p.mainImage === 'object' && (p as any).mainImage?.palette
+      p => typeof p.mainImage === 'object' && p.mainImage !== null && 'palette' in p.mainImage
     )
-    if (candidate && typeof candidate.mainImage === 'object' && (candidate.mainImage as any).palette) {
-      setFromPalette((candidate.mainImage as any).palette)
+    if (candidate && typeof candidate.mainImage === 'object' && candidate.mainImage !== null && 'palette' in candidate.mainImage) {
+      setFromPalette(candidate.mainImage.palette)
     } else {
       reset()
     }

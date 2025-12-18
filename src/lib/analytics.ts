@@ -64,7 +64,7 @@ class Analytics {
     try {
       // react-ga4, GA4 script'ini kendi yükler ve initialize eder
       ReactGA.initialize(gaId)
-    } catch (_e: any) {
+    } catch (_e: unknown) {
       // GA4 init hatalarını tamamen yut; prod build'te parse sorunu yaşamamak için
     }
 
@@ -77,9 +77,12 @@ class Analytics {
           const reason = event.reason
           const msg =
             (reason &&
-              (reason.message ||
-                (typeof reason.toString === 'function' ? reason.toString() : String(reason)))) ||
-            (event as any).message ||
+              (reason instanceof Error
+                ? reason.message
+                : typeof reason.toString === 'function'
+                  ? reason.toString()
+                  : String(reason))) ||
+            (event.reason instanceof Error ? event.reason.message : '') ||
             ''
           if (typeof msg === 'string' && msg.includes('Access to storage is not allowed')) {
             // Bu hatayı GA yüzünden unutulmuş promise rejection olarak görme,
@@ -102,14 +105,16 @@ class Analytics {
         event => {
           try {
             const msg =
-              (event.error && (event.error as any).message) || (event.message as string) || ''
+              (event.error instanceof Error ? event.error.message : '') || event.message || ''
 
             if (typeof msg === 'string' && msg.includes('Access to storage is not allowed')) {
               // Bazı tarayıcılarda senkron hatalar "Uncaught Error: Access to storage is not allowed..."
               // olarak geliyor; bunları da bastırıyoruz ki GA açık kalırken konsol kirlenmesin.
               event.preventDefault()
               // Safari vb. için ekstra güvenlik
-              ;(event as any).returnValue = false
+              if ('returnValue' in event) {
+                (event as ErrorEvent & {returnValue: boolean}).returnValue = false
+              }
 
               if (DEBUG_LOGS) {
                 console.debug('[Analytics] Storage access error suppressed:', msg)
@@ -136,21 +141,22 @@ class Analytics {
   private patchStorageIfNeeded() {
     if (this.storagePatched) return
     if (typeof window === 'undefined') return
-    const anyWindow = window as any
-    const StorageCtor = anyWindow.Storage
+    const StorageCtor = (window as Window & {Storage?: typeof Storage}).Storage
     const StorageProto = StorageCtor && StorageCtor.prototype
     if (!StorageProto) return
 
     const BLOCK_SUBSTRING = 'Access to storage is not allowed'
 
     const wrapMethod = (methodName: keyof Storage) => {
-      const original = (StorageProto as any)[methodName]
+      const original = (StorageProto as unknown as Record<string, unknown>)[methodName]
       if (typeof original !== 'function') return
-      ;(StorageProto as any)[methodName] = function (...args: any[]) {
+      ;(StorageProto as unknown as Record<string, unknown>)[methodName] = function (
+        ...args: unknown[]
+      ) {
         try {
           return original.apply(this, args)
-        } catch (err: any) {
-          const msg = err?.message || String(err || '')
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : String(err || '')
           if (typeof msg === 'string' && msg.includes(BLOCK_SUBSTRING)) {
             // API sözleşmesine yakın kal: getItem / key için null döndür,
             // diğerleri için undefined yeterli.
@@ -186,13 +192,17 @@ class Analytics {
     script.src = 'https://plausible.io/js/script.js'
     document.head.appendChild(script)
 
-    const w = window as any
-    w.plausible =
-      w.plausible ||
-      function (...args: any[]) {
-        w.plausible.q = w.plausible.q || []
-        w.plausible.q.push(args)
+    interface PlausibleWindow extends Window {
+      plausible?: ((...args: unknown[]) => void) | {q: unknown[][]}
+    }
+    const w = window as PlausibleWindow
+    if (!w.plausible) {
+      const queue: unknown[][] = []
+      w.plausible = function (...args: unknown[]) {
+        queue.push(args)
       }
+      ;(w.plausible as {q: unknown[][]}).q = queue
+    }
 
     if (import.meta.env.DEV && DEBUG_LOGS) {
       console.debug('[Analytics] Plausible Analytics initialized')
@@ -211,16 +221,21 @@ class Analytics {
           page: path,
           title,
         })
-      } catch (e: any) {
+      } catch (e: unknown) {
         if (DEBUG_LOGS) {
-          console.debug('[Analytics] GA4 pageview error (ignored):', e?.message || e)
+          const message = e instanceof Error ? e.message : String(e)
+          console.debug('[Analytics] GA4 pageview error (ignored):', message || e)
         }
       }
     }
 
     // Plausible
-    if (this.plausibleDomain && (window as any).plausible) {
-      (window as any).plausible('pageview', {url: path})
+    interface PlausibleWindow extends Window {
+      plausible?: (...args: unknown[]) => void
+    }
+    const plausibleWindow = window as PlausibleWindow
+    if (this.plausibleDomain && plausibleWindow.plausible) {
+      plausibleWindow.plausible('pageview', {url: path})
     }
 
     if (import.meta.env.DEV && DEBUG_LOGS) {
@@ -252,8 +267,12 @@ class Analytics {
     }
 
     // Plausible
-    if (this.plausibleDomain && (window as any).plausible) {
-      (window as any).plausible(event.action, {
+    interface PlausibleWindow extends Window {
+      plausible?: (...args: unknown[]) => void
+    }
+    const plausibleWindow = window as PlausibleWindow
+    if (this.plausibleDomain && plausibleWindow.plausible) {
+      plausibleWindow.plausible(event.action, {
         props: {
           category: event.category,
           label: event.label,

@@ -106,7 +106,9 @@ export function AboutPage() {
       reset()
     } else {
       const palette =
-        typeof content.heroImage === 'object' ? (content.heroImage as any).palette : undefined
+        typeof content.heroImage === 'object' && content.heroImage !== null && 'palette' in content.heroImage
+          ? content.heroImage.palette
+          : undefined
       if (palette) {
         setFromPalette(palette)
       } else {

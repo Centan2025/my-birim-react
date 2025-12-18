@@ -106,7 +106,9 @@ export function ProjectDetailPage() {
       return () => reset()
     }
     const palette =
-      project.cover && typeof project.cover === 'object' ? (project.cover as any).palette : undefined
+      project.cover && typeof project.cover === 'object' && project.cover !== null && 'palette' in project.cover
+        ? project.cover.palette
+        : undefined
     if (palette) {
       setFromPalette(palette)
     } else {

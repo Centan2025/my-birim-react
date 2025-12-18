@@ -6,6 +6,7 @@ import { useSEO } from '../hooks/useSEO'
 import { HomeContentBlocks } from '../components/HomeContentBlocks'
 import { HomeInspirationSection } from '../components/HomeInspirationSection'
 import { useHeaderTheme } from '../context/HeaderThemeContext'
+import type { HeroMediaItem } from '../types'
 
 export function HomePage() {
   const { data: content } = useHomePageContent()
@@ -50,7 +51,7 @@ export function HomePage() {
       return () => reset()
     }
     const firstImageWithPalette = content.heroMedia.find(
-      (m: any) => m?.type === 'image' && m?.palette
+      (m): m is HeroMediaItem => m?.type === 'image' && !!m?.palette
     )
     if (firstImageWithPalette?.palette) {
       setFromPalette(firstImageWithPalette.palette)
@@ -113,7 +114,6 @@ export function HomePage() {
     buttonLink: '/',
   }
 
-  // Helper: backgroundImage string veya object olabilir
   const bgImageUrl = inspiration.backgroundImage
     ? typeof inspiration.backgroundImage === 'string'
       ? inspiration.backgroundImage
@@ -129,25 +129,22 @@ export function HomePage() {
       : undefined
 
   return (
-<div
-  className={`bg-gray-100 text-gray-900 ${isMobile ? 'hero-page-container-mobile' : ''}`}
-  style={
-    isMobile && viewportWidth > 0
-      ? {
-        width: `${viewportWidth}px`,
-        maxWidth: `${viewportWidth}px`,
-        overflowX: 'hidden',
-        margin: 0,
-        padding: 0,
-        left: 0,
-        right: 0,
-        position: 'relative',
+    <div
+      className={`bg-gray-100 text-gray-900 ${isMobile ? 'hero-page-container-mobile' : ''}`}
+      style={
+        isMobile && viewportWidth > 0
+          ? {
+            width: `${viewportWidth}px`,
+            maxWidth: `${viewportWidth}px`,
+            overflowX: 'hidden',
+            margin: 0,
+            padding: 0,
+            left: 0,
+            right: 0,
+          }
+          : {}
       }
-      : {
-        position: 'relative',
-      }
-  }
->
+    >
       {/* Hero Section */}
       {heroMedia.length > 0 ? (
         <>

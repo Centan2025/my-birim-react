@@ -1,11 +1,21 @@
 import groq from 'groq'
 import {sanityClient} from '../lib/sanityClient'
 
+// Sanity image reference type
+export type SanityImageReference = {
+  _type?: string
+  asset?: {
+    _ref?: string
+    _type?: string
+  }
+  [key: string]: unknown
+}
+
 export type ProductCard = {
   _id: string
   title?: string
   slug?: {current: string}
-  images?: any[]
+  images?: SanityImageReference[]
   price?: number
 }
 

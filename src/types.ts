@@ -478,27 +478,30 @@ export interface FooterContent {
   legalLinks?: LegalLink[]
 }
 
+// Sanity Portable Text format (block content)
+export type PortableTextBlock = unknown
+
 export interface CookiesPolicy {
   title: LocalizedString
-  content: {tr?: any[]; en?: any[]}
+  content: {tr?: PortableTextBlock[]; en?: PortableTextBlock[]}
   updatedAt?: string
 }
 
 export interface PrivacyPolicy {
   title: LocalizedString
-  content: {tr?: any[]; en?: any[]}
+  content: {tr?: PortableTextBlock[]; en?: PortableTextBlock[]}
   updatedAt?: string
 }
 
 export interface TermsOfService {
   title: LocalizedString
-  content: {tr?: any[]; en?: any[]}
+  content: {tr?: PortableTextBlock[]; en?: PortableTextBlock[]}
   updatedAt?: string
 }
 
 export interface KvkkPolicy {
   title: LocalizedString
-  content: {tr?: any[]; en?: any[]}
+  content: {tr?: PortableTextBlock[]; en?: PortableTextBlock[]}
   updatedAt?: string
 }
 

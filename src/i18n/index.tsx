@@ -137,7 +137,7 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
       }
 
       if (typeof keyOrObject === 'object' && keyOrObject !== null) {
-        const obj = keyOrObject as any
+        const obj = keyOrObject as Record<string, string>
         // Önce mevcut locale'i kontrol et (boş string değilse)
         if (locale in obj && obj[locale] && typeof obj[locale] === 'string' && obj[locale].trim()) {
           return obj[locale]

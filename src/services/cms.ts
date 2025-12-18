@@ -164,8 +164,14 @@ const mapImages = (imgs: SanityImageLike[] | undefined): string[] =>
   Array.isArray(imgs) ? imgs.map(i => mapImage(i)).filter(Boolean) : []
 
 // Sanity palette metadata'yı güvenli şekilde çek
-const extractPalette = (img: any): SanityImagePalette | undefined =>
-  img?.asset?.metadata?.palette
+const extractPalette = (
+  img: SanityImageLike | {asset?: {metadata?: {palette?: SanityImagePalette}}}
+): SanityImagePalette | undefined => {
+  if (typeof img === 'object' && img !== null && 'asset' in img) {
+    return (img as {asset?: {metadata?: {palette?: SanityImagePalette}}}).asset?.metadata?.palette
+  }
+  return undefined
+}
 
 // Medya satırı için Sanity modeli (sadece ihtiyaç duyulan alanlar)
 interface SanityProductMediaItem {
@@ -242,10 +248,10 @@ const mapProductMedia = (
   url: string
   urlMobile?: string
   urlDesktop?: string
-  title?: any
-  description?: any
+  title?: LocalizedString
+  description?: LocalizedString
   link?: string
-  linkText?: any
+  linkText?: LocalizedString
 }[] => {
   const mediaArr: SanityProductMediaItem[] = Array.isArray(row?.media) ? row.media : []
   const fromMedia = mediaArr
@@ -382,21 +388,22 @@ interface SanityMaterialSelection {
       items?: {
         _key?: string
         name?: LocalizedString
-        image?: any
+        image?: SanityImageLike
       }[]
     }[]
   }
   materials?: {
     _key?: string
     name?: LocalizedString
-    image?: any
+    image?: SanityImageLike
   }[]
 }
 
 // Ortak yardımcı: Bir Sanity image objesinden asset tabanlı stabil bir key üret
-const getAssetKey = (img: any): string | null => {
+const getAssetKey = (img: SanityImageLike | {asset?: {_ref?: string; _id?: string}}): string | null => {
   if (!img) return null
-  const asset = img.asset || img
+  const assetObj = typeof img === 'object' && img !== null && 'asset' in img ? img.asset : img
+  const asset = assetObj as {_ref?: string; _id?: string} | null
   const id = asset._id || asset._ref || asset.url
   return id || null
 }
@@ -498,7 +505,9 @@ const mapGroupedMaterials = (materialSelections: SanityMaterialSelection[]): Pro
 const normalizeProduct = (p: Product): Product => ({
   ...p,
   // legacy cleanups
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dimensionImages: Array.isArray((p as any).dimensionImages)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ? (p as any).dimensionImages.map((di: any) =>
         typeof di === 'string'
           ? {image: di} // eski string array formatı için backward compatibility
@@ -618,8 +627,12 @@ export const getTranslations = async (): Promise<Record<string, Record<string, s
       })
       const results = await noCacheClient.fetch(q)
       const translationsMap: Record<string, Record<string, string>> = {}
+      interface TranslationItem {
+        language?: string
+        strings?: Record<string, string>
+      }
       if (Array.isArray(results)) {
-        results.forEach((item: any) => {
+        results.forEach((item: TranslationItem) => {
           if (item.language && item.strings) {
             const normalized: Record<string, string> = {...item.strings}
             // Şema alanı 'models_3d' ise, frontend anahtarı '3d_models' bekliyor -> eşle
@@ -650,15 +663,20 @@ export const getLanguages = async (): Promise<string[]> => {
       const base = ['tr', 'en']
       if (Array.isArray(langs)) {
         // Support both legacy [string] and new [{code, visible}]
-        const normalized = langs
-          .map((l: any) => {
+        interface LanguageItem {
+          code: string
+          visible: boolean
+        }
+        const normalized: LanguageItem[] = langs
+          .map((l: string | {code?: string; visible?: boolean}): LanguageItem | null => {
             if (typeof l === 'string') return {code: l, visible: true}
             const code = String(l?.code || '').toLowerCase()
+            if (!code) return null
             const visible = l?.visible !== false
             return {code, visible}
           })
-          .filter((l: any) => l.code)
-        const visibleCodes = normalized.filter((l: any) => l.visible).map((l: any) => l.code)
+          .filter((l): l is LanguageItem => l !== null)
+        const visibleCodes = normalized.filter((l) => l.visible).map((l) => l.code)
         const merged = [...base, ...visibleCodes]
         return Array.from(new Set(merged))
       }
@@ -1908,7 +1926,7 @@ export const subscribeEmail = async (email: string): Promise<User> => {
         isActive: user.isActive,
         createdAt: user.createdAt || user._createdAt,
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Sanity hatası varsa hatayı fırlat
       let errorMessage = 'E-posta aboneliği yapılırken bir hata oluştu. Lütfen tekrar deneyin.'
 
@@ -2020,7 +2038,7 @@ export const registerUser = async (
             isActive: updatedUser['isActive'],
             createdAt: updatedUser['createdAt'] || updatedUser._createdAt,
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
           // Sanity hatası varsa hatayı fırlat (local storage'a düşme)
           let errorMessage = 'Üye kaydı güncellenirken bir hata oluştu. Lütfen tekrar deneyin.'
 
@@ -2087,7 +2105,7 @@ export const registerUser = async (
         verificationToken: user.verificationToken ?? null,
         createdAt: user.createdAt || user._createdAt,
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Sanity hatası varsa hatayı fırlat (local storage'a düşme)
       let errorMessage = 'Üye kaydı yapılırken bir hata oluştu. Lütfen tekrar deneyin.'
 

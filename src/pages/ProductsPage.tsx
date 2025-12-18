@@ -159,9 +159,11 @@ export function ProductsPage() {
   // Header temasını listelenen ürünlerin paletlerinden besle (öncelik kategori ürünleri)
   useEffect(() => {
     const sourceProducts = categoryId ? categoryProducts : allProducts
-    const candidate = sourceProducts.find(p => typeof p.mainImage === 'object' && (p as any).mainImage?.palette)
-    if (candidate && typeof candidate.mainImage === 'object' && (candidate.mainImage as any).palette) {
-      setFromPalette((candidate.mainImage as any).palette)
+    const candidate = sourceProducts.find(
+      p => typeof p.mainImage === 'object' && p.mainImage !== null && 'palette' in p.mainImage
+    )
+    if (candidate && typeof candidate.mainImage === 'object' && candidate.mainImage !== null && 'palette' in candidate.mainImage) {
+      setFromPalette(candidate.mainImage.palette)
     } else {
       reset()
     }
@@ -255,6 +257,7 @@ export function ProductsPage() {
           !categoryId && allProducts.length > 0 ? (
             // Eğer kategori seçili değilse (tüm ürünler), kategorilere göre grupla ve başlık göster
             (() => {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const productsByCategory = new Map<string, {category: any, products: Product[]}>()
               
               sortedProducts.forEach(product => {
