@@ -822,16 +822,18 @@ export function Header() {
 
     updateHeaderHeight()
 
-    // Header yüksekliği değiştiğinde güncelle (menü açıldığında/kapandığında)
-    const observer = new ResizeObserver(updateHeaderHeight)
-    if (headerContainerRef.current) {
-      observer.observe(headerContainerRef.current)
+    // Ref değerini effect içinde sabitle, cleanup'ta da aynı DOM node'u kullan
+    const headerElement = headerContainerRef.current
+    if (!headerElement) {
+      return
     }
 
+    // Header yüksekliği değiştiğinde güncelle (menü açıldığında/kapandığında)
+    const observer = new ResizeObserver(updateHeaderHeight)
+    observer.observe(headerElement)
+
     return () => {
-      if (headerContainerRef.current) {
-        observer.unobserve(headerContainerRef.current)
-      }
+      observer.unobserve(headerElement)
     }
   }, [isMobileMenuOpen, isProductsOpen])
 
