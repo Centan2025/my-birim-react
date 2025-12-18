@@ -752,6 +752,22 @@ export const contentBlock = defineType({
       description:
         'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
     }),
+    // Görsel konumu – doğrudan görsel alanlarının altında
+    defineField({
+      name: 'position',
+      title: 'Görsel Konumu',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Sol', value: 'left'},
+          {title: 'Sağ', value: 'right'},
+          {title: 'Orta', value: 'center'},
+          {title: 'Tam Genişlik', value: 'full'},
+        ],
+      },
+      initialValue: 'center',
+      description: 'Görselin blok içinde konumunu belirler.',
+    }),
     defineField({
       name: 'videoFile',
       title: 'Video Dosyası (Tüm Cihazlar)',
@@ -817,6 +833,21 @@ export const contentBlock = defineType({
       title: 'Açıklama Metni',
       type: 'localizedText',
     }),
+    // Açıklama metni hizalaması – doğrudan açıklamanın altında
+    defineField({
+      name: 'textAlignment',
+      title: 'Açıklama Metni Hizalaması',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Sol', value: 'left'},
+          {title: 'Orta', value: 'center'},
+          {title: 'Sağ', value: 'right'},
+        ],
+      },
+      initialValue: 'left',
+      description: 'Açıklama metninin hizalaması (varsayılan: Sol).',
+    }),
     defineField({
       name: 'linkText',
       title: 'Link Metni',
@@ -826,20 +857,6 @@ export const contentBlock = defineType({
       name: 'linkUrl',
       title: 'Link URL',
       type: 'string',
-    }),
-    defineField({
-      name: 'position',
-      title: 'Konum',
-      type: 'string',
-      options: {
-        list: [
-          {title: 'Sol', value: 'left'},
-          {title: 'Sağ', value: 'right'},
-          {title: 'Orta', value: 'center'},
-          {title: 'Tam Genişlik', value: 'full'},
-        ],
-      },
-      initialValue: 'center',
     }),
     defineField({
       name: 'order',
@@ -860,20 +877,6 @@ export const contentBlock = defineType({
       },
       initialValue: 'white',
       description: 'İçerik bloğunun arka plan rengi (varsayılan: Beyaz)',
-    }),
-    defineField({
-      name: 'textAlignment',
-      title: 'Yazı Hizalaması',
-      type: 'string',
-      options: {
-        list: [
-          {title: 'Sol', value: 'left'},
-          {title: 'Orta', value: 'center'},
-          {title: 'Sağ', value: 'right'},
-        ],
-      },
-      initialValue: 'left',
-      description: 'Yazıların hizalaması (varsayılan: Sol)',
     }),
   ],
 })

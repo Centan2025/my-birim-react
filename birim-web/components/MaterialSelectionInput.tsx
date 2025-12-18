@@ -181,6 +181,57 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
   const books = group?.books || []
   const book = books[Math.min(Math.max(selectedBookIndex, 0), Math.max(books.length - 1, 0))]
   const materials = book?.items || []
+  const isBookFullySelected =
+    materials.length > 0 && materials.every((m) => localSelectedIds.has(materialIdLoose(m)))
+
+  const toggleSelectBook = (selectAll: boolean) => {
+    if (!selectedGroupId) return
+    touchedRef.current = true
+
+    let nextArr = [...(selectedMaterials || [])]
+    const nextIds = new Set(localSelectedIds)
+
+    if (selectAll) {
+      // Bu karteladaki TÜM malzemeleri ekle
+      for (const m of materials) {
+        const id = materialIdLoose(m)
+        if (!id || nextIds.has(id)) continue
+
+        const aid = assetId(m?.image)
+        const imgObj = aid
+          ? {
+              _type: 'image',
+              asset: {_type: 'reference', _ref: aid},
+              // crop/hotspot bilgisi varsa kopyala ki kırpma kaybolmasın
+              ...(m?.image?.crop ? {crop: m.image.crop} : {}),
+              ...(m?.image?.hotspot ? {hotspot: m.image.hotspot} : {}),
+            }
+          : undefined
+        const sourceKey = m?._key || genKey()
+        const toAdd: any = {
+          _type: 'productMaterial',
+          name: m?.name,
+          _key: sourceKey,
+        }
+        if (imgObj) toAdd.image = imgObj
+
+        // Aynı id'ye sahip eski kaydı sil, yenisini ekle
+        nextArr = nextArr.filter((x) => materialIdLoose(x) !== id)
+        nextArr.push(toAdd)
+        nextIds.add(id)
+      }
+    } else {
+      // Bu karteladaki TÜM malzemeleri kaldır
+      const bookIds = new Set(materials.map((m) => materialIdLoose(m)))
+      nextArr = nextArr.filter((x) => !bookIds.has(materialIdLoose(x)))
+      for (const bid of bookIds) {
+        nextIds.delete(bid)
+      }
+    }
+
+    setLocalSelectedIds(nextIds)
+    onChange(set(nextArr, ['materials']))
+  }
 
   return (
     <div style={{display: 'grid', gap: 10}}>
@@ -247,6 +298,29 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
               </option>
             ))}
           </select>
+          {materials.length > 0 && (
+            <button
+              type="button"
+              onClick={() => toggleSelectBook(!isBookFullySelected)}
+              style={{
+                marginTop: 6,
+                alignSelf: 'flex-start',
+                fontSize: 12,
+                fontWeight: 600,
+                padding: '4px 10px',
+                borderRadius: 4,
+                border: isBookFullySelected ? '1px solid #b91c1c' : '1px solid #2563eb',
+                background: isBookFullySelected ? '#fee2e2' : '#dbeafe',
+                color: isBookFullySelected ? '#991b1b' : '#1d4ed8',
+                boxShadow: '0 1px 2px rgba(15, 23, 42, 0.18)',
+                cursor: 'pointer',
+              }}
+            >
+              {isBookFullySelected
+                ? 'Bu karteladaki tüm malzemeleri kaldır'
+                : 'Bu karteladaki tüm malzemeleri seç'}
+            </button>
+          )}
         </>
       )}
 
@@ -281,13 +355,19 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
                         if (!nextIds.has(id)) {
                           const aid = assetId(m?.image)
                           const imgObj = aid
-                            ? {_type: 'image', asset: {_type: 'reference', _ref: aid}}
+                            ? {
+                                _type: 'image',
+                                asset: {_type: 'reference', _ref: aid},
+                                // crop/hotspot bilgisi varsa kopyala ki kırpma kaybolmasın
+                                ...(m?.image?.crop ? {crop: m.image.crop} : {}),
+                                ...(m?.image?.hotspot ? {hotspot: m.image.hotspot} : {}),
+                              }
                             : undefined
-                    const sourceKey = m?._key || genKey()
+                          const sourceKey = m?._key || genKey()
                           const toAdd: any = {
                             _type: 'productMaterial',
                             name: m?.name,
-                      _key: sourceKey,
+                            _key: sourceKey,
                           }
                           if (imgObj) toAdd.image = imgObj
                           // prevent duplicate push
