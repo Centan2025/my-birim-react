@@ -498,42 +498,6 @@ const Footer = () => {
               </div>
             </ScrollReveal>
 
-            {/* Partnerler - mobilde en altta */}
-            <ScrollReveal delay={210} threshold={0.1} width="w-full" className="h-auto">
-              <div className="mt-10 lg:mt-0 flex items-center justify-center flex-wrap gap-6 mb-0">
-                {(content.partners || content.partnerNames || []).map((partner, index) => {
-                  const partnerName = typeof partner === 'string' ? partner : t(partner.name)
-                  const partnerLogo = typeof partner === 'object' ? partner.logo : undefined
-                  const partnerUrl = typeof partner === 'object' ? partner.url : undefined
-
-                  const partnerContent = partnerLogo ? (
-                    <img
-                      src={partnerLogo}
-                      alt={partnerName}
-                      className="h-8 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
-                    />
-                  ) : (
-                    <span className="font-semibold text-gray-300 opacity-70 hover:opacity-100 transition-opacity duration-200">
-                      {partnerName}
-                    </span>
-                  )
-
-                  return partnerUrl ? (
-                    <a
-                      key={index}
-                      href={partnerUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group"
-                    >
-                      {partnerContent}
-                    </a>
-                  ) : (
-                    <span key={index}>{partnerContent}</span>
-                  )
-                })}
-              </div>
-            </ScrollReveal>
           </div>
 
           {/* Desktop düzen */}
@@ -638,7 +602,7 @@ const Footer = () => {
           </div>
           {/* Sosyal medya linkleri ve email formu - aynı üst hizasında */}
           {/* Sosyal medya linkleri ve email formu - Desktop'ta justify-between ile ayrılır */}
-          <div className="mt-4 lg:mt-8 flex flex-col lg:flex-row flex-wrap items-center lg:items-start justify-center lg:justify-between gap-6 lg:gap-0">
+          <div className="mt-8 lg:mt-8 flex flex-col lg:flex-row flex-wrap items-center lg:items-start justify-center lg:justify-between gap-6 lg:gap-0">
             {/* Sosyal medya linkleri */}
             <ScrollReveal delay={120} threshold={0.1} width="w-auto" className="h-auto">
               <div className="w-full lg:w-auto flex justify-center lg:justify-start space-x-4">
@@ -746,6 +710,55 @@ const Footer = () => {
                   ))}
               </div>
             </ScrollReveal>
+
+            {/* Mobil: Sosyal medya ikonlarının altındaki çizgi ile partner logoları */}
+            <div className="w-full lg:hidden">
+              <ScrollReveal delay={210} threshold={0.1} width="w-full" className="h-auto">
+                <div className="mt-2 flex flex-col items-center justify-center space-y-6 w-full">
+                  {/* Üst çizgi (sosyal medya altı) */}
+                  <div className="w-full border-t border-gray-700" />
+
+                  {/* Partnerler - çizgiler arasında, butonlar/logolar */}
+                  <div className="flex items-center justify-center flex-wrap gap-6">
+                    {(content.partners || content.partnerNames || []).map((partner, index) => {
+                      const partnerName = typeof partner === 'string' ? partner : t(partner.name)
+                      const partnerLogo = typeof partner === 'object' ? partner.logo : undefined
+                      const partnerUrl = typeof partner === 'object' ? partner.url : undefined
+
+                      const partnerContent = partnerLogo ? (
+                        <img
+                          src={partnerLogo}
+                          alt={partnerName}
+                          className="h-8 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
+                        />
+                      ) : (
+                        <span className="font-semibold text-gray-300 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                          {partnerName}
+                        </span>
+                      )
+
+                      return partnerUrl ? (
+                        <a
+                          key={index}
+                          href={partnerUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group"
+                        >
+                          {partnerContent}
+                        </a>
+                      ) : (
+                        <span key={index}>{partnerContent}</span>
+                      )
+                    })}
+                  </div>
+
+                  {/* Alt çizgi (partnerler altı) */}
+                  <div className="w-full border-t border-gray-700" />
+                </div>
+              </ScrollReveal>
+            </div>
+
             {/* Email abonelik formu - sadece desktop'ta */}
             <ScrollReveal delay={150} threshold={0.1} width="w-full lg:w-auto" className="h-auto">
               <div className="hidden lg:flex lg:flex-1 lg:justify-end">
@@ -757,7 +770,7 @@ const Footer = () => {
               sol: telif, sağ: yasal düğmeler */}
           <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
             <div
-              className="mt-4 lg:mt-10 border-t border-gray-600 lg:border-t-2 pt-8 w-full"
+              className="lg:mt-10 pt-2 lg:pt-8 w-full lg:border-t lg:border-t-2 lg:border-gray-600"
               style={{overflow: 'visible', width: '100%'}}
             >
               <div className="flex flex-col items-center justify-center gap-4 text-xs w-full lg:flex-row lg:items-start lg:justify-between">

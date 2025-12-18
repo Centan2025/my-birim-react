@@ -35,11 +35,12 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
   const dynamicHeightStyles =
     isMobile
       ? {
-          height: '25vh',
+          // Yüksekliği sabit tutmak yerine, minimum yükseklik veriyoruz.
+          // Böylece tarayıcı farklarından bağımsız olarak önceki content
+          // bloklarının üstüne binme riski azalır.
           minHeight: '25vh',
         }
       : {
-          height: '55vh',
           minHeight: '55vh',
         }
 
