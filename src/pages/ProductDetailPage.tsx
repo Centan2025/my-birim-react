@@ -559,7 +559,7 @@ export function ProductDetailPage() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // Desktop thumbnail seçimi: aktif çerçevenin kayarak gitmesi için ölçüm
+  // Thumbnail seçimi: aktif çerçevenin önceki seçiliden yenisine kayarak gitmesi için ölçüm
   useLayoutEffect(() => {
     if (typeof window === 'undefined') return
 
@@ -569,17 +569,14 @@ export function ProductDetailPage() {
       const scrollEl = thumbRef.current
       const indicatorEl = thumbIndicatorRef.current
 
-      if (!listEl || !targetEl || !indicatorEl || isMobile) {
+      if (!listEl || !targetEl || !indicatorEl) {
         setThumbIndicatorBox(prev => (prev.visible ? { ...prev, visible: false } : prev))
         return
       }
 
-      const scrollLeft = scrollEl?.scrollLeft ?? 0
-      const scrollTop = scrollEl?.scrollTop ?? 0
-
       setThumbIndicatorBox({
-        left: targetEl.offsetLeft - scrollLeft,
-        top: targetEl.offsetTop - scrollTop,
+        left: targetEl.offsetLeft,
+        top: targetEl.offsetTop,
         width: targetEl.offsetWidth,
         height: targetEl.offsetHeight,
         visible: true,
@@ -1256,26 +1253,24 @@ export function ProductDetailPage() {
                     ref={thumbListRef}
                     className="relative flex gap-3 min-w-max pb-2"
                   >
-                    {!isMobile && (
-                      <div
-                        ref={thumbIndicatorRef}
-                        aria-hidden="true"
-                        className="pointer-events-none absolute z-10 rounded-none border-[1.5px] border-gray-400 transition-[transform,width,height,opacity] duration-350 ease-[cubic-bezier(0.22,0.61,0.36,1)]"
-                        style={{
-                          transform: `translate3d(${thumbIndicatorBox.left}px, ${thumbIndicatorBox.top}px, 0)`,
-                          width: thumbIndicatorBox.width || 0,
-                          height: thumbIndicatorBox.height || 0,
-                          opacity: thumbIndicatorBox.visible ? 1 : 0,
-                        }}
-                      />
-                    )}
+                    <div
+                      ref={thumbIndicatorRef}
+                      aria-hidden="true"
+                      className="pointer-events-none absolute z-10 rounded-none border-[1.5px] border-gray-400 transition-[transform,width,height,opacity] duration-350 ease-[cubic-bezier(0.22,0.61,0.36,1)]"
+                      style={{
+                        transform: `translate3d(${thumbIndicatorBox.left}px, ${thumbIndicatorBox.top}px, 0)`,
+                        width: thumbIndicatorBox.width || 0,
+                        height: thumbIndicatorBox.height || 0,
+                        opacity: thumbIndicatorBox.visible ? 1 : 0,
+                      }}
+                    />
                     {bandMedia.map((m, idx) => (
                       <button
                         key={idx}
                         ref={el => {
                           thumbButtonsRef.current[idx] = el
                         }}
-                        className={`relative z-20 flex-shrink-0 w-24 h-24 overflow-hidden rounded-none border-2 transition-all duration-300 ${currentImageIndex === idx ? (isMobile ? 'border-gray-400 shadow-md' : 'border-transparent') : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}
+                        className={`relative z-20 flex-shrink-0 w-24 h-24 overflow-hidden rounded-none border-2 transition-all duration-300 ${currentImageIndex === idx ? 'border-transparent' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}
                         onClick={() => {
                           // Thumbnail tıklanınca hero sonsuz kaydırma index'ini
                           // ilgili slide'a hizala ve ana görsel index'ini güncelle.
@@ -2095,7 +2090,7 @@ export function ProductDetailPage() {
                               materialLightbox.images.length,
                           })
                         }}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-10 h-10 md:w-14 md:h-14"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-8 h-8 md:w-10 md:h-10"
                       style={{
                         backgroundColor: 'rgba(62, 60, 60, 0.5)',
                         color: '#d3caca',
@@ -2105,8 +2100,8 @@ export function ProductDetailPage() {
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          width="41"
-                          height="41"
+                          width="20"
+                          height="20"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
@@ -2126,7 +2121,7 @@ export function ProductDetailPage() {
                               (materialLightbox.currentIndex + 1) % materialLightbox.images.length,
                           })
                         }}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-10 h-10 md:w-14 md:h-14"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-8 h-8 md:w-10 md:h-10"
                       style={{
                         backgroundColor: 'rgba(62, 60, 60, 0.5)',
                         color: '#d3caca',
@@ -2136,8 +2131,8 @@ export function ProductDetailPage() {
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          width="41"
-                          height="41"
+                          width="20"
+                          height="20"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"

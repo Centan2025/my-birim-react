@@ -338,12 +338,7 @@ const mapAlternativeMedia = (
   // fallback to legacy alternativeImages
   return mapImages(row?.alternativeImages).map((u: string) => ({type: 'image', url: u}))
 }
-const mapMaterials = (
-  materials: {name?: LocalizedString; image?: SanityImageLike}[] | undefined
-): ProductMaterial[] =>
-  Array.isArray(materials)
-    ? materials.map(m => ({name: m?.name ?? '', image: mapImage(m?.image)}))
-    : []
+
 const mapDimensionImages = (
   dimImgs:
     | {
@@ -382,41 +377,122 @@ const mapDimensionImages = (
 interface SanityMaterialSelection {
   group?: {
     title?: LocalizedString
-    books?: {title?: LocalizedString; items?: {name?: LocalizedString; image?: SanityImageLike}[]}[]
+    books?: {
+      title?: LocalizedString
+      items?: {
+        _key?: string
+        name?: LocalizedString
+        image?: any
+      }[]
+    }[]
   }
-  materials?: {name?: LocalizedString; image?: SanityImageLike}[]
+  materials?: {
+    _key?: string
+    name?: LocalizedString
+    image?: any
+  }[]
+}
+
+// Ortak yardımcı: Bir Sanity image objesinden asset tabanlı stabil bir key üret
+const getAssetKey = (img: any): string | null => {
+  if (!img) return null
+  const asset = img.asset || img
+  const id = asset._id || asset._ref || asset.url
+  return id || null
+}
+
+// Tüm materialSelections içinden, seçili malzemeleri toplayıp
+// her zaman malzeme gruplarındaki (materialGroup.books.items) güncel crop/hotspot bilgisini kullan
+const mapMaterialsFromSelections = (
+  selections: SanityMaterialSelection[] | undefined
+): ProductMaterial[] => {
+  if (!Array.isArray(selections)) return []
+
+  const result: ProductMaterial[] = []
+  const seenKeys = new Set<string>()
+
+  for (const sel of selections || []) {
+    const books = sel.group?.books || []
+
+    // Grup tarafındaki tüm malzemeleri asset key'e göre lookup tablosuna al
+    const groupMaterialByKey = new Map<string, {name?: LocalizedString; image?: any}>()
+    for (const book of books) {
+      for (const item of book.items || []) {
+        const key = getAssetKey(item.image)
+        if (!key) continue
+        if (!groupMaterialByKey.has(key)) {
+          groupMaterialByKey.set(key, {name: item.name, image: item.image})
+        }
+      }
+    }
+
+    // Bu selection için seçili malzemeleri dolaş
+    for (const m of sel.materials || []) {
+      const key = getAssetKey(m.image)
+      if (!key || seenKeys.has(key)) continue
+
+      const source = groupMaterialByKey.get(key) || m
+      result.push({
+        name: (source.name ?? m.name ?? '') as LocalizedString,
+        // Her zaman mapImage ile URL üret; crop/hotspot bilgisi varsa burada devreye girer
+        image: mapImage(source.image),
+      })
+
+      seenKeys.add(key)
+    }
+  }
+
+  return result
 }
 
 const mapGroupedMaterials = (materialSelections: SanityMaterialSelection[]): ProductMaterialsGroup[] => {
-  return (materialSelections || [])
-    .map(s => {
-      const selectedMaterials = mapMaterials(s?.materials || [])
-      // Create a set of selected material keys for faster lookup
-      const selectedKeys = new Set(
-        selectedMaterials.map(sm => `${sm.image}|${JSON.stringify(sm.name)}`)
-      )
+  if (!Array.isArray(materialSelections)) return []
 
-      const groupBooks = (s?.group?.books || [])
+  return materialSelections
+    .map(sel => {
+      const groupTitle = (sel.group?.title ?? '') as LocalizedString
+      const books = sel.group?.books || []
+
+      // Seçili malzemelerin asset key set'i (product tarafındaki selections)
+      const selectedKeys = new Set<string>()
+      for (const m of sel.materials || []) {
+        const key = getAssetKey(m.image)
+        if (key) selectedKeys.add(key)
+      }
+
+      // Her kitap için, sadece seçili malzemeleri, malzeme grubundaki güncel crop/hotspot ile map et
+      const mappedBooks = books
         .map(book => {
-          const bookMaterials = mapMaterials(book?.items || [])
-          // Filter to only show materials that are selected for this product
-          const selectedBookMaterials = bookMaterials.filter(bm =>
-            selectedKeys.has(`${bm.image}|${JSON.stringify(bm.name)}`)
-          )
+          const materials: ProductMaterial[] = []
+
+          for (const item of (book.items || [])) {
+            const key = getAssetKey(item.image)
+            if (!key || !selectedKeys.has(key)) continue
+
+            materials.push({
+              name: (item.name ?? '') as LocalizedString,
+              image: mapImage(item.image),
+            })
+          }
+
           return {
-            bookTitle: (book?.title ?? '') as LocalizedString,
-            materials: selectedBookMaterials,
+            bookTitle: (book.title ?? '') as LocalizedString,
+            materials,
           }
         })
         .filter(b => b.materials.length > 0)
 
+      // Bu grup için, tüm kitaplardaki malzemeleri birleştir (backward compatibility için)
+      const allMaterials = mappedBooks.flatMap(b => b.materials)
+      if (allMaterials.length === 0) return null
+
       return {
-        groupTitle: (s?.group?.title ?? '') as LocalizedString,
-        books: groupBooks,
-        materials: selectedMaterials,
+        groupTitle,
+        books: mappedBooks,
+        materials: allMaterials,
       }
     })
-    .filter(g => g.materials.length > 0)
+    .filter((g): g is ProductMaterialsGroup => Boolean(g))
 }
 // Ürünlerde ölçü alanını boşlayarak normalize et
 const normalizeProduct = (p: Product): Product => ({
@@ -864,9 +940,7 @@ export const getProducts = async (): Promise<Product[]> => {
         currency: r.currency,
         sku: r.sku,
         stockStatus: r.stockStatus,
-        materials: mapMaterials(
-          (r.materialSelections || []).flatMap((s: any) => s?.materials || [])
-        ),
+        materials: mapMaterialsFromSelections(r.materialSelections),
         groupedMaterials: mapGroupedMaterials(r.materialSelections),
         mediaSectionTitle: r?.mediaSectionTitle,
         mediaSectionText: r?.mediaSectionText,
@@ -980,7 +1054,7 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
       currency: r.currency,
       sku: r.sku,
       stockStatus: r.stockStatus,
-      materials: mapMaterials((r.materialSelections || []).flatMap((s: any) => s?.materials || [])),
+      materials: mapMaterialsFromSelections(r.materialSelections),
       groupedMaterials: mapGroupedMaterials(r.materialSelections),
       mediaSectionTitle: r?.mediaSectionTitle,
       mediaSectionText: r?.mediaSectionText,
@@ -1065,9 +1139,7 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
         buyable: Boolean(r.buyable),
         price: r.price,
         currency: r.currency,
-        materials: mapMaterials(
-          (r.materialSelections || []).flatMap((s: any) => s?.materials || [])
-        ),
+        materials: mapMaterialsFromSelections(r.materialSelections),
         mediaSectionTitle: r?.mediaSectionTitle,
         mediaSectionText: r?.mediaSectionText,
         exclusiveContent: {
@@ -1152,9 +1224,7 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
         buyable: Boolean(r.buyable),
         price: r.price,
         currency: r.currency,
-        materials: mapMaterials(
-          (r.materialSelections || []).flatMap((s: any) => s?.materials || [])
-        ),
+        materials: mapMaterialsFromSelections(r.materialSelections),
         mediaSectionTitle: r?.mediaSectionTitle,
         mediaSectionText: r?.mediaSectionText,
         exclusiveContent: {
