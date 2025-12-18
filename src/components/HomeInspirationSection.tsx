@@ -1,4 +1,5 @@
-import React, { useRef } from 'react'
+import React, { useLayoutEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 
 import type { HomePageContent } from '../types'
@@ -22,6 +23,7 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
 }) => {
   const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
+  const portalRef = useRef<HTMLDivElement>(null)
 
   if (!inspiration || (!inspiration.backgroundImage && !inspiration.title && !inspiration.subtitle)) {
     return null
@@ -33,32 +35,126 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
   const dynamicHeightStyles =
     isMobile
       ? {
-          minHeight: '50vh',
+          height: '25vh',
+          minHeight: '25vh',
         }
       : {
           height: '66vh',
           minHeight: '66vh',
         }
 
+  useLayoutEffect(() => {
+    let animationFrameId: number;
+
+    const updateClipPath = () => {
+      const container = containerRef.current
+      const portalBg = portalRef.current
+
+      if (!container || !portalBg) return
+
+      const rect = container.getBoundingClientRect()
+      const windowHeight = window.innerHeight
+      const windowWidth = window.innerWidth
+
+      // Performans: Ekran dışındaysa işlemi durdur
+      if (rect.bottom < 0 || rect.top > windowHeight) {
+        portalBg.style.clipPath = 'inset(100% 0 0 0)' 
+        return
+      }
+
+      // HESAPLAMA (DÜZELTME BURADA):
+      // "-1" ve "-2" değerleri "Taşma Payı"dır (Bleed).
+      // Resmi kutudan biraz daha geniş keserek aradaki çizgileri ve beyaz boşlukları yutarız.
+      
+      const top = Math.max(0, rect.top - 1) // Üstten 1px daha az kes (yukarı taşsın)
+      const bottom = Math.max(0, windowHeight - rect.bottom - 2) // Alttan 2px daha az kes (aşağı taşsın)
+      const left = Math.max(0, rect.left)
+      const right = Math.max(0, windowWidth - rect.right)
+
+      portalBg.style.clipPath = `inset(${top}px ${right}px ${bottom}px ${left}px)`
+    }
+
+    const onScroll = () => {
+      cancelAnimationFrame(animationFrameId)
+      animationFrameId = requestAnimationFrame(updateClipPath)
+    }
+
+    updateClipPath()
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll, { passive: true })
+
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      cancelAnimationFrame(animationFrameId)
+    }
+  }, [])
+
   return (
     <>
-      {/* Arka planlı container (tüm cihazlarda aynı mantık) */}
-      <div
-        ref={containerRef}
-        className="relative w-full bg-black overflow-hidden"
-        style={{
-          ...dynamicHeightStyles,
-          backgroundImage: `url(${backgroundImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        }}
-      >
-        {/* Koyulaştırıcı overlay */}
-        <div className="absolute inset-0 bg-black/50" aria-hidden="true" />
+      <style>{`
+        footer {
+          position: relative !important;
+          z-index: 50 !important;
+        }
 
-        {/* İçerik */}
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl h-full flex flex-col justify-center items-center text-white text-center pointer-events-auto">
+        .portal-fixed-bg {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          z-index: 10; 
+          pointer-events: none;
+          background-size: cover;
+          background-position: center center;
+          clip-path: inset(100% 0 0 0);
+          will-change: clip-path;
+          transform: translateZ(0);
+          -webkit-transform: translateZ(0);
+        }
+
+        .inspiration-container {
+          position: relative;
+          z-index: 20; 
+          
+          /* TEKRAR SİYAH YAPTIK: */
+          /* Şeffaf (transparent) yapınca arkadaki beyaz body göründüğü için beyaz parlama oluyor. */
+          /* Siyah yaparsak, görselin tonuyla uyumlu olduğu için milisaniyelik gecikmeleri göz görmez. */
+          background-color: #000; 
+          
+          transform: translateZ(0);
+        }
+        
+        .inspiration-content {
+          position: relative;
+          z-index: 30;
+        }
+      `}</style>
+
+      {/* PORTAL: Sabit Görsel */}
+      {createPortal(
+        <div 
+          ref={portalRef}
+          className="portal-fixed-bg"
+          style={{
+            backgroundImage: `url(${backgroundImage})`,
+          }}
+        >
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/40" />
+        </div>,
+        document.body
+      )}
+      
+      {/* PLACEHOLDER: Container */}
+      <div 
+        ref={containerRef}
+        className="inspiration-container w-full"
+        style={dynamicHeightStyles}
+      >
+        <div className="inspiration-content container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl h-full flex flex-col justify-center items-center text-white text-center pointer-events-auto">
           <ScrollReveal delay={0} threshold={0.1} width="w-full" className="h-auto">
             <h2 className="text-4xl font-normal leading-relaxed">{t(inspiration.title)}</h2>
           </ScrollReveal>

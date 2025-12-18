@@ -566,7 +566,6 @@ export function ProductDetailPage() {
     const updateIndicator = () => {
       const listEl = thumbListRef.current
       const targetEl = thumbButtonsRef.current[currentImageIndex]
-      const scrollEl = thumbRef.current
       const indicatorEl = thumbIndicatorRef.current
 
       if (!listEl || !targetEl || !indicatorEl) {
