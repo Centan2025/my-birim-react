@@ -298,3 +298,30 @@ h6 {
   transform-origin: bottom center;
   animation: scroll-indicator-intro 0.5s ease-out forwards;
 }
+
+/* Vercel Toolbar'ı gizle - Production'da görünmemeli */
+[data-vercel-toolbar],
+[data-vercel-toolbar] *,
+.__vercel-toolbar,
+.__vercel-toolbar *,
+#vercel-toolbar,
+#vercel-toolbar *,
+iframe[src*="vercel"],
+iframe[src*="_vercel"],
+iframe[src*="__vercel"],
+div[class*="vercel"],
+div[class*="__vercel"],
+div[id*="vercel"],
+div[id*="__vercel"],
+button[class*="vercel"],
+button[class*="__vercel"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  position: fixed !important;
+  z-index: -9999 !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}

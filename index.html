@@ -150,7 +150,7 @@
         };
         
         // Prevent Sentry and Vercel feedback widgets from loading
-        // Block feedback.html, feedback.js, and Vercel instrument requests
+        // Block feedback.html, feedback.js, Vercel instrument requests, and Vercel toolbar
         var originalFetch = window.fetch;
         if (originalFetch) {
           window.fetch = function() {
@@ -159,7 +159,10 @@
               url.indexOf('feedback.html') !== -1 ||
               url.indexOf('feedback.js') !== -1 ||
               url.indexOf('/feedback') !== -1 ||
-              url.indexOf('instrument') !== -1
+              url.indexOf('instrument') !== -1 ||
+              url.indexOf('vercel') !== -1 ||
+              url.indexOf('_vercel') !== -1 ||
+              url.indexOf('__vercel') !== -1
             )) {
               // Return a resolved promise with empty response to avoid errors
               return Promise.resolve(new Response('', { status: 200 }));
@@ -168,14 +171,28 @@
           };
         }
         
-        // Also block script tags that load feedback or Vercel analytics
+        // Also block script tags that load feedback, Vercel analytics, or Vercel toolbar
         var observer = new MutationObserver(function(mutations) {
           mutations.forEach(function(mutation) {
             mutation.addedNodes.forEach(function(node) {
               if (node.nodeType === 1) { // Element node
                 if (node.tagName === 'SCRIPT' || node.tagName === 'IFRAME') {
                   var src = node.src || node.getAttribute('src') || '';
-                  if (src.indexOf('feedback') !== -1 || src.indexOf('instrument') !== -1) {
+                  if (src.indexOf('feedback') !== -1 || 
+                      src.indexOf('instrument') !== -1 ||
+                      src.indexOf('vercel') !== -1 ||
+                      src.indexOf('_vercel') !== -1) {
+                    node.remove();
+                  }
+                }
+                // Block Vercel Toolbar div elements
+                if (node.tagName === 'DIV' || node.tagName === 'BUTTON') {
+                  var className = node.className || '';
+                  var id = node.id || '';
+                  if (className.indexOf('vercel') !== -1 || 
+                      id.indexOf('vercel') !== -1 ||
+                      className.indexOf('__vercel') !== -1 ||
+                      id.indexOf('__vercel') !== -1) {
                     node.remove();
                   }
                 }

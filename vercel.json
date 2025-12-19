@@ -1,5 +1,6 @@
 {
   "outputDirectory": "dist",
+  "toolbar": false,
   "rewrites": [
     {
       "source": "/((?!assets/|img/|robots\\.txt|sitemap\\.xml|favicon\\.ico).*)",
