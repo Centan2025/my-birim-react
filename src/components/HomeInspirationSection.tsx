@@ -79,11 +79,10 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
         return
       }
 
-      // Desktop: önceki mantığı desktop için koruyoruz
-      const BUFFER = 60;
-
-      const top = Math.max(0, rect.top - BUFFER) 
-      const bottom = Math.max(0, windowHeight - rect.bottom - BUFFER)
+      // Desktop: üstten buffer, alttan buffer yok (content'leri kesmemek için)
+      const BUFFER_TOP = 60;
+      const top = Math.max(0, rect.top - BUFFER_TOP) 
+      const bottom = 0 // Alttan kesme yok, content'lerin üstüne binmesin
       
       const left = Math.max(0, rect.left)
       const right = Math.max(0, windowWidth - rect.right)
@@ -147,6 +146,7 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
           
           transform: translateZ(0);
         }
+
         
         .inspiration-content {
           position: relative;
@@ -173,7 +173,7 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
       {/* PLACEHOLDER: Container */}
       <div 
         ref={containerRef}
-        className="inspiration-container w-full"
+        className={`inspiration-container w-full ${!isMobile ? 'mt-24 md:mt-32 lg:mt-40' : ''}`}
         style={dynamicHeightStyles}
       >
         <div className="inspiration-content container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl h-full flex flex-col justify-center items-center text-white text-center pointer-events-auto">
