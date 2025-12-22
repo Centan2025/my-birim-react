@@ -1286,7 +1286,7 @@ export function ProductDetailPage() {
                     <div
                       ref={thumbIndicatorRef}
                       aria-hidden="true"
-                      className="pointer-events-none absolute z-10 rounded-none border-[1.5px] border-gray-400 transition-[transform,width,height,opacity] duration-350 ease-[cubic-bezier(0.22,0.61,0.36,1)]"
+                      className="pointer-events-none absolute z-10 rounded-none border-[1.5px] border-gray-300"
                       style={{
                         transform: `translate3d(${thumbIndicatorBox.left}px, ${thumbIndicatorBox.top}px, 0)`,
                         width: thumbIndicatorBox.width || 0,
