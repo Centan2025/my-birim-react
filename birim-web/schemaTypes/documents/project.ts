@@ -1,4 +1,4 @@
-import {defineField, defineType} from 'sanity'
+import { defineField, defineType } from 'sanity'
 
 export default defineType({
   name: 'project',
@@ -9,7 +9,7 @@ export default defineType({
       name: 'id',
       title: 'ID (Slug)',
       type: 'slug',
-      options: {source: (doc: any) => doc.title?.tr || doc.title?.en, maxLength: 96},
+      options: { source: (doc: any) => doc.title?.tr || doc.title?.en, maxLength: 96 },
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -49,7 +49,7 @@ export default defineType({
       name: 'cover',
       title: 'Kapak Görseli (Tüm Cihazlar)',
       type: 'image',
-      options: {hotspot: true},
+      options: { hotspot: true },
       description:
         'Tüm cihazlar için varsayılan kapak görseli. Mobil veya desktop versiyonu yoksa bu kullanılır. Önerilen çözünürlük: Desktop 1920x1080px (16:9), Mobil 1080x1920px (9:16).',
     }),
@@ -57,7 +57,7 @@ export default defineType({
       name: 'coverMobile',
       title: 'Kapak Görseli (Mobil)',
       type: 'image',
-      options: {hotspot: true},
+      options: { hotspot: true },
       description:
         'Mobil cihazlar için özel kapak görseli (opsiyonel). Yoksa varsayılan görsel kullanılır. Önerilen çözünürlük: 1080x1920px veya 768x1024px.',
     }),
@@ -65,11 +65,11 @@ export default defineType({
       name: 'coverDesktop',
       title: 'Kapak Görseli (Desktop)',
       type: 'image',
-      options: {hotspot: true},
+      options: { hotspot: true },
       description:
         'Desktop cihazlar için özel kapak görseli (opsiyonel). Yoksa varsayılan görsel kullanılır. Önerilen çözünürlük: 1920x1080px veya 1920x1200px.',
     }),
-    defineField({name: 'excerpt', title: 'Kısa Açıklama', type: 'localizedText'}),
+    defineField({ name: 'excerpt', title: 'Kısa Açıklama', type: 'localizedText' }),
     defineField({
       name: 'media',
       title: 'Medya (Görsel ve Video)',
@@ -84,9 +84,9 @@ export default defineType({
               type: 'string',
               options: {
                 list: [
-                  {title: 'Image', value: 'image'},
-                  {title: 'Video', value: 'video'},
-                  {title: 'YouTube', value: 'youtube'},
+                  { title: 'Image', value: 'image' },
+                  { title: 'Video', value: 'video' },
+                  { title: 'YouTube', value: 'youtube' },
                 ],
               },
               initialValue: 'image',
@@ -95,8 +95,8 @@ export default defineType({
               name: 'image',
               title: 'Görsel (Tüm Cihazlar)',
               type: 'image',
-              options: {hotspot: true},
-              hidden: ({parent}) => parent?.type !== 'image',
+              options: { hotspot: true },
+              hidden: ({ parent }) => parent?.type !== 'image',
               description:
                 'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
             }),
@@ -104,8 +104,8 @@ export default defineType({
               name: 'imageMobile',
               title: 'Görsel (Mobil)',
               type: 'image',
-              options: {hotspot: true},
-              hidden: ({parent}) => parent?.type !== 'image',
+              options: { hotspot: true },
+              hidden: ({ parent }) => parent?.type !== 'image',
               description:
                 'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
             }),
@@ -113,8 +113,8 @@ export default defineType({
               name: 'imageDesktop',
               title: 'Görsel (Desktop)',
               type: 'image',
-              options: {hotspot: true},
-              hidden: ({parent}) => parent?.type !== 'image',
+              options: { hotspot: true },
+              hidden: ({ parent }) => parent?.type !== 'image',
               description:
                 'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
             }),
@@ -125,7 +125,7 @@ export default defineType({
               options: {
                 accept: 'video/*',
               },
-              hidden: ({parent}) => parent?.type !== 'video',
+              hidden: ({ parent }) => parent?.type !== 'video',
               description:
                 'Tüm cihazlar için varsayılan video. Mobil veya desktop versiyonu yoksa bu kullanılır.',
             }),
@@ -136,7 +136,7 @@ export default defineType({
               options: {
                 accept: 'video/*',
               },
-              hidden: ({parent}) => parent?.type !== 'video',
+              hidden: ({ parent }) => parent?.type !== 'video',
               description:
                 'Mobil cihazlar için özel video (opsiyonel). Yoksa varsayılan video kullanılır.',
             }),
@@ -147,7 +147,7 @@ export default defineType({
               options: {
                 accept: 'video/*',
               },
-              hidden: ({parent}) => parent?.type !== 'video',
+              hidden: ({ parent }) => parent?.type !== 'video',
               description:
                 'Desktop cihazlar için özel video (opsiyonel). Yoksa varsayılan video kullanılır.',
             }),
@@ -155,7 +155,7 @@ export default defineType({
               name: 'url',
               title: 'Video URL (veya YouTube URL)',
               type: 'url',
-              hidden: ({parent}) =>
+              hidden: ({ parent }) =>
                 parent?.type === 'image' || (parent?.type === 'video' && parent?.videoFile),
               description:
                 'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.',
@@ -164,12 +164,12 @@ export default defineType({
         },
       ],
     }),
-    defineField({name: 'body', title: 'İçerik', type: 'localizedText'}),
+    defineField({ name: 'body', title: 'İçerik', type: 'localizedPortableText' }),
   ],
   preview: {
-    select: {title: 'title.tr', media: 'cover'},
-    prepare({title, media}) {
-      return {title: title || 'Proje', media}
+    select: { title: 'title.tr', media: 'cover' },
+    prepare({ title, media }) {
+      return { title: title || 'Proje', media }
     },
   },
 })

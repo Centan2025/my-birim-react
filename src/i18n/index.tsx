@@ -9,13 +9,13 @@ import {
 } from 'react'
 import tr from './locales/tr'
 import en from './locales/en'
-import {LocalizedString} from '../types'
-import {getLanguages, getTranslations} from '../services/cms'
+import { LocalizedString } from '../types'
+import { getLanguages, getTranslations } from '../services/cms'
 
 export type Locale = string
 
 // Base translations from files (fallback)
-const baseTranslations: Record<string, Record<string, string>> = {tr, en}
+const baseTranslations: Record<string, Record<string, string>> = { tr, en }
 
 interface II18nContext {
   locale: Locale
@@ -60,7 +60,7 @@ const getInitialLocaleSync = (): Locale => {
   return 'tr'
 }
 
-export const I18nProvider = ({children}: PropsWithChildren) => {
+export const I18nProvider = ({ children }: PropsWithChildren) => {
   const [supportedLocales, setSupportedLocales] = useState<string[]>([])
   const [locale, setLocaleState] = useState<Locale>(getInitialLocaleSync)
   const [loading, setLoading] = useState(true)
@@ -106,7 +106,7 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
   }
 
   const t = useCallback(
-    (keyOrObject: string | LocalizedString | undefined, ...args: (string | number)[]): string => {
+    (keyOrObject: string | LocalizedString | undefined, ...args: (string | number)[]): any => {
       if (typeof keyOrObject === 'string') {
         // Bazı anahtarlar için (ör. ana menü ve arama yerleri) CMS çevirisini değil,
         // dosya çevirisini tercih et ki TR/EN arasında net fark ve animasyon görülebilsin
@@ -128,7 +128,7 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
         const baseTranslation =
           baseTranslations[locale]?.[keyOrObject] || baseTranslations['tr']?.[keyOrObject]
         let translation = cmsTranslation || baseTranslation || keyOrObject
-        if (args.length > 0) {
+        if (args.length > 0 && typeof translation === 'string') {
           args.forEach((arg, index) => {
             translation = translation.replace(`{${index}}`, String(arg))
           })
@@ -137,23 +137,40 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
       }
 
       if (typeof keyOrObject === 'object' && keyOrObject !== null) {
-        const obj = keyOrObject as Record<string, string>
-        // Önce mevcut locale'i kontrol et (boş string değilse)
-        if (locale in obj && obj[locale] && typeof obj[locale] === 'string' && obj[locale].trim()) {
+        const obj = keyOrObject as Record<string, any>
+        // Önce mevcut locale'i kontrol et (boş string değilse veya diziyse)
+        if (
+          locale in obj &&
+          obj[locale] !== undefined &&
+          obj[locale] !== null &&
+          (typeof obj[locale] !== 'string' || obj[locale].trim())
+        ) {
           return obj[locale]
         }
         // Locale yoksa veya boşsa, 'tr' fallback'i kullan
-        if ('tr' in obj && obj['tr'] && typeof obj['tr'] === 'string' && obj['tr'].trim()) {
+        if (
+          'tr' in obj &&
+          obj['tr'] !== undefined &&
+          obj['tr'] !== null &&
+          (typeof obj['tr'] !== 'string' || obj['tr'].trim())
+        ) {
           return obj['tr']
         }
         // 'tr' de yoksa, 'en' fallback'i dene
-        if ('en' in obj && obj['en'] && typeof obj['en'] === 'string' && obj['en'].trim()) {
+        if (
+          'en' in obj &&
+          obj['en'] !== undefined &&
+          obj['en'] !== null &&
+          (typeof obj['en'] !== 'string' || obj['en'].trim())
+        ) {
           return obj['en']
         }
-        // Hiçbiri yoksa, object'teki ilk geçerli string değeri al
-        const firstValue = Object.values(obj).find(
-          (val): val is string => typeof val === 'string' && !!val.trim()
-        )
+        // Hiçbiri yoksa, object'teki ilk geçerli değeri al
+        const firstValue = Object.values(obj).find(val => {
+          if (val === undefined || val === null) return false
+          if (typeof val === 'string') return !!val.trim()
+          return true
+        })
         return firstValue || ''
       }
 

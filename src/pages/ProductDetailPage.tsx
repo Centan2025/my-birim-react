@@ -24,6 +24,7 @@ import { ProductDesignerSection } from '../components/ProductDesignerSection'
 import { ProductExclusiveContentSection } from '../components/ProductExclusiveContentSection'
 import { ProductMediaPanels } from '../components/ProductMediaPanels'
 import { ProductCard } from '../components/ProductCard'
+import PortableTextLite from '../components/PortableTextLite'
 
 const CloseIcon = () => (
   <svg
@@ -1434,9 +1435,18 @@ export function ProductDetailPage() {
               <div>
                 <h2 className="text-2xl md:text-4xl font-normal text-gray-700">{t(product.name)}</h2>
                 <ScrollReveal delay={200}>
-                  <p className="mt-3 text-gray-900 leading-relaxed max-w-2xl font-normal">
-                    {t(product.description)}
-                  </p>
+                  {(() => {
+                    const desc = t(product.description)
+                    return Array.isArray(desc) ? (
+                      <div className="mt-3 text-gray-900 leading-relaxed max-w-2xl font-normal">
+                        <PortableTextLite value={desc} />
+                      </div>
+                    ) : (
+                      <p className="mt-3 text-gray-900 leading-relaxed max-w-2xl font-normal">
+                        {desc}
+                      </p>
+                    )
+                  })()}
                 </ScrollReveal>
               </div>
 

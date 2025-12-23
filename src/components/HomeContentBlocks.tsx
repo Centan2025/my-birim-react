@@ -7,6 +7,7 @@ import ScrollReveal from './ScrollReveal'
 import { OptimizedImage } from './OptimizedImage'
 import { OptimizedVideo } from './OptimizedVideo'
 import { YouTubeBackground } from './YouTubeBackground'
+import PortableTextLite from './PortableTextLite'
 
 interface HomeContentBlocksProps {
   blocks: ContentBlock[]
@@ -122,9 +123,18 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   <div className={`container mx-auto px-6 sm:px-8 lg:px-4 pt-3 pb-6 flex flex-col ${textAlign === 'center' ? 'items-center' : textAlign === 'right' ? 'items-end' : 'items-start'}`}>
                     <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
                       <div className={`prose max-w-none ${textAlignClass}`}>
-                        <p className={`mt-3 text-gray-900 font-normal leading-relaxed max-w-2xl text-base md:text-lg ${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}>
-                          {t(block.description)}
-                        </p>
+                        {(() => {
+                          const desc = t(block.description)
+                          return Array.isArray(desc) ? (
+                            <div className={`${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'} max-w-2xl mt-3`}>
+                              <PortableTextLite value={desc} />
+                            </div>
+                          ) : (
+                            <p className={`mt-3 text-gray-900 font-normal leading-relaxed max-w-2xl text-base md:text-lg ${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}>
+                              {desc}
+                            </p>
+                          )
+                        })()}
                       </div>
                     </ScrollReveal>
                     {block.linkText && block.linkUrl && (
@@ -210,9 +220,18 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                               {t(block.title)}
                             </h2>
                           )}
-                          <p className={`mt-3 text-gray-900 font-normal leading-relaxed max-w-2xl text-base md:text-lg ${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}>
-                            {t(block.description)}
-                          </p>
+                          {(() => {
+                            const desc = t(block.description)
+                            return Array.isArray(desc) ? (
+                              <div className={`${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'} max-w-2xl mt-3`}>
+                                <PortableTextLite value={desc} />
+                              </div>
+                            ) : (
+                              <p className={`mt-3 text-gray-900 font-normal leading-relaxed max-w-2xl text-base md:text-lg ${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}>
+                                {desc}
+                              </p>
+                            )
+                          })()}
                         </div>
                       </ScrollReveal>
                       {block.linkText && block.linkUrl && (

@@ -12,6 +12,7 @@ import { analytics } from '../lib/analytics'
 import ScrollReveal from '../components/ScrollReveal'
 import { useSEO } from '../hooks/useSEO'
 import { useHeaderTheme } from '../context/HeaderThemeContext'
+import PortableTextLite from '../components/PortableTextLite'
 
 const getYouTubeId = (url: string): string | null => {
   if (!url) return null
@@ -392,8 +393,8 @@ export function ProjectDetailPage() {
   return (
     <div
       className={`min-h-screen bg-white transition-all duration-700 ease-out ${isPageVisible
-          ? 'opacity-100 translate-y-0'
-          : 'opacity-0 translate-y-20'
+        ? 'opacity-100 translate-y-0'
+        : 'opacity-0 translate-y-20'
         }`}
       style={{
         transform: isPageVisible ? 'translateY(0)' : 'translateY(80px)',
@@ -713,9 +714,18 @@ export function ProjectDetailPage() {
                   )}
                   {project.body && (
                     <ScrollReveal delay={300}>
-                      <div className="text-gray-900 leading-relaxed font-normal whitespace-pre-line">
-                        {t(project.body)}
-                      </div>
+                      {(() => {
+                        const bodyContent = t(project.body)
+                        return Array.isArray(bodyContent) ? (
+                          <div className="text-gray-900 leading-relaxed font-normal">
+                            <PortableTextLite value={bodyContent} />
+                          </div>
+                        ) : (
+                          <div className="text-gray-900 leading-relaxed font-normal whitespace-pre-line">
+                            {bodyContent}
+                          </div>
+                        )
+                      })()}
                     </ScrollReveal>
                   )}
                 </div>
