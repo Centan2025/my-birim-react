@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
-import React, { useState, useEffect, useMemo, useRef, useLayoutEffect } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 // FIX: Imported SiteSettings type to correctly type component state.
@@ -160,14 +160,6 @@ export function ProductDetailPage() {
   const [thumbDragStartX, setThumbDragStartX] = useState<number | null>(null)
   const thumbButtonsRef = useRef<(HTMLButtonElement | null)[]>([])
   const thumbListRef = useRef<HTMLDivElement | null>(null)
-  const thumbIndicatorRef = useRef<HTMLDivElement | null>(null)
-  const [thumbIndicatorBox, setThumbIndicatorBox] = useState<{
-    left: number
-    top: number
-    width: number
-    height: number
-    visible: boolean
-  }>({ left: 0, top: 0, width: 0, height: 0, visible: false })
   const [thumbScrollStart, setThumbScrollStart] = useState<number>(0)
   const scrollLockRef = useRef<number>(0)
   const closeBtnAnimStyle: React.CSSProperties = {
@@ -571,41 +563,6 @@ export function ProductDetailPage() {
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
-
-  // Thumbnail seçimi: aktif çerçevenin önceki seçiliden yenisine kayarak gitmesi için ölçüm
-  useLayoutEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const updateIndicator = () => {
-      const listEl = thumbListRef.current
-      const targetEl = thumbButtonsRef.current[currentImageIndex]
-      const indicatorEl = thumbIndicatorRef.current
-
-      if (!listEl || !targetEl || !indicatorEl) {
-        setThumbIndicatorBox(prev => (prev.visible ? { ...prev, visible: false } : prev))
-        return
-      }
-
-      setThumbIndicatorBox({
-        left: targetEl.offsetLeft,
-        top: targetEl.offsetTop,
-        width: targetEl.offsetWidth,
-        height: targetEl.offsetHeight,
-        visible: true,
-      })
-    }
-
-    updateIndicator()
-
-    window.addEventListener('resize', updateIndicator)
-    const scrollEl = thumbRef.current
-    scrollEl?.addEventListener('scroll', updateIndicator, { passive: true })
-
-    return () => {
-      window.removeEventListener('resize', updateIndicator)
-      scrollEl?.removeEventListener('scroll', updateIndicator)
-    }
-  }, [currentImageIndex, bandMedia.length, isMobile])
 
   // HomePage hero medya mantığına benzer drag + sonsuz kayma sistemi
   const dragStartY = useRef<number>(0)
@@ -1256,8 +1213,8 @@ export function ProductDetailPage() {
           </div>
           {/* Divider and Thumbnails under hero */}
           <section className="container mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Üst/alt çizgileri tek yerde tanımla: aynı renk/kalınlık */}
-            <div className="mt-1 md:mt-2 border-y border-gray-300 py-3">
+            {/* Alt ayrım çizgisi + thumbnail şeridi */}
+            <div className="mt-1 md:mt-2 border-b border-gray-300 py-3">
               {/* Hide scrollbar with custom class; enable drag scroll */}
               <div className="relative select-none">
                 <div
@@ -1283,24 +1240,13 @@ export function ProductDetailPage() {
                     ref={thumbListRef}
                     className="relative flex gap-3 min-w-max pb-2"
                   >
-                    <div
-                      ref={thumbIndicatorRef}
-                      aria-hidden="true"
-                      className="pointer-events-none absolute z-10 rounded-none border-[1.5px] border-gray-300"
-                      style={{
-                        transform: `translate3d(${thumbIndicatorBox.left}px, ${thumbIndicatorBox.top}px, 0)`,
-                        width: thumbIndicatorBox.width || 0,
-                        height: thumbIndicatorBox.height || 0,
-                        opacity: thumbIndicatorBox.visible ? 1 : 0,
-                      }}
-                    />
                     {bandMedia.map((m, idx) => (
                       <button
                         key={idx}
                         ref={el => {
                           thumbButtonsRef.current[idx] = el
                         }}
-                        className={`relative z-20 flex-shrink-0 w-24 h-24 overflow-hidden rounded-none border-2 transition-all duration-300 ${currentImageIndex === idx ? 'border-transparent' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}
+                        className={`relative z-20 flex-shrink-0 w-24 h-24 overflow-hidden rounded-none transition-all duration-300 ${currentImageIndex === idx ? 'opacity-100' : 'opacity-80 hover:opacity-100 hover:scale-105'}`}
                         onClick={() => {
                           // Thumbnail tıklanınca hero sonsuz kaydırma index'ini
                           // ilgili slide'a hizala ve ana görsel index'ini güncelle.
@@ -1313,39 +1259,49 @@ export function ProductDetailPage() {
                           setCurrentImageIndex(idx)
                         }}
                       >
-                        {m.type === 'image' ? (
-                          <OptimizedImage
-                            src={m.url}
-                            alt={`${t(product.name)} thumbnail ${idx + 1}`}
-                            className={`w-full h-full object-cover ${imageBorderClass}`}
-                            loading="lazy"
-                            quality={75}
-                          />
-                        ) : m.type === 'video' ? (
-                          <div className={`w-full h-full bg-black/60 ${imageBorderClass}`} />
-                        ) : (
-                          <OptimizedImage
-                            src={youTubeThumb(m.url)}
-                            alt={`youtube thumb ${idx + 1}`}
-                            className={`w-full h-full object-cover ${imageBorderClass}`}
-                            loading="lazy"
-                            quality={75}
-                          />
-                        )}
-                        {(m.type === 'video' || m.type === 'youtube') && (
-                          <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                            <span className="bg-white/85 text-gray-900 rounded-full w-10 h-10 flex items-center justify-center shadow">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                                fill="currentColor"
-                                className="w-5 h-5 ml-0.5"
-                              >
-                                <path d="M8 5v14l11-7z" />
-                              </svg>
+                        <div className="relative w-full h-full">
+                          {m.type === 'image' ? (
+                            <OptimizedImage
+                              src={m.url}
+                              alt={`${t(product.name)} thumbnail ${idx + 1}`}
+                              className={`w-full h-full object-cover ${imageBorderClass}`}
+                              loading="lazy"
+                              quality={75}
+                            />
+                          ) : m.type === 'video' ? (
+                            <div className={`w-full h-full bg-black/60 ${imageBorderClass}`} />
+                          ) : (
+                            <OptimizedImage
+                              src={youTubeThumb(m.url)}
+                              alt={`youtube thumb ${idx + 1}`}
+                              className={`w-full h-full object-cover ${imageBorderClass}`}
+                              loading="lazy"
+                              quality={75}
+                            />
+                          )}
+                          {(m.type === 'video' || m.type === 'youtube') && (
+                            <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                              <span className="bg-white/85 text-gray-900 rounded-full w-10 h-10 flex items-center justify-center shadow">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                  className="w-5 h-5 ml-0.5"
+                                >
+                                  <path d="M8 5v14l11-7z" />
+                                </svg>
+                              </span>
                             </span>
-                          </span>
-                        )}
+                          )}
+                          {/* Minimal active indicator - header menü alt çizgisi ile aynı mantık */}
+                          <div
+                            className="pointer-events-none absolute bottom-0 left-0 right-0 h-[2px] bg-gray-400 z-10 origin-left transition-transform duration-300 ease-out"
+                            style={{
+                              transform:
+                                currentImageIndex === idx ? 'scaleX(1)' : 'scaleX(0)',
+                            }}
+                          />
+                        </div>
                       </button>
                     ))}
                   </div>

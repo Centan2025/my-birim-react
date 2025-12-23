@@ -1163,7 +1163,7 @@ export function ProductDetailPage() {
                           }
                           setCurrentImageIndex(idx)
                         }}
-                        className={`relative flex-shrink-0 w-24 h-24 overflow-hidden border-2 transition-all duration-300 ${currentImageIndex === idx ? 'border-gray-400 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105'}`}
+                        className={`relative flex-shrink-0 w-24 h-24 overflow-hidden border-2 ${currentImageIndex === idx ? 'border-gray-400 shadow-md' : 'border-transparent opacity-80 hover:opacity-100 hover:scale-105 transition-opacity duration-300 transition-transform duration-300'}`}
                       >
                         {m.type === 'image' ? (
                           <OptimizedImage
