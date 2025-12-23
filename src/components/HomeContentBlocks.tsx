@@ -48,12 +48,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 
         const backgroundColor = block.backgroundColor === 'gray' ? 'bg-gray-100' : 'bg-white'
         const textAlign = block.textAlignment || 'left'
-        const textAlignClass =
-          textAlign === 'center'
-            ? 'text-center'
-            : textAlign === 'right'
-              ? 'text-right'
-              : 'text-left'
+        const textAlignClass = 'text-left'
 
         // Content alanları arasında dikey boşluk olmasın
         const sectionSpacingClass = 'py-0'
@@ -77,7 +72,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       duration={0.6}
                     >
                       <h2
-                        className={`text-2xl md:text-4xl lg:text-5xl font-oswald uppercase ${textAlignClass} text-gray-950`}
+                        className={`text-2xl md:text-4xl lg:text-5xl font-oswald uppercase ${textAlignClass} text-gray-950 px-4 lg:px-0`}
                         style={{
                           textShadow: '0 2px 4px rgba(0,0,0,0.1)',
                           fontFamily: '"Oswald", sans-serif',
@@ -98,9 +93,8 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   ) : block.mediaType === 'video' ? (
                     <OptimizedVideo
                       src={mediaUrl}
-                      className={`w-full h-auto max-w-full ${
-                        isMobile ? 'object-contain' : 'object-cover'
-                      }`}
+                      className={`w-full h-auto max-w-full ${isMobile ? 'object-contain' : 'object-cover'
+                        }`}
                       autoPlay
                       loop
                       muted
@@ -112,9 +106,8 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     <OptimizedImage
                       src={mediaUrl}
                       alt=""
-                      className={`w-full h-auto ${
-                        isMobile ? 'object-contain' : 'object-cover'
-                      } max-w-full block`}
+                      className={`w-full h-auto ${isMobile ? 'object-contain' : 'object-cover'
+                        } max-w-full block`}
                       loading="lazy"
                       quality={85}
                     />
@@ -123,7 +116,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 {hasDescription && (
                   <div className="container mx-auto px-2 sm:px-3 lg:px-4 pt-3 pb-6">
                     <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
-                      <div className={`prose max-w-none ${textAlignClass} px-4 sm:px-0`}>
+                      <div className={`prose max-w-none ${textAlignClass} px-4 lg:px-0`}>
                         <p className="mt-3 text-gray-900 font-normal leading-relaxed max-w-2xl text-base md:text-lg">
                           {t(block.description)}
                         </p>
@@ -131,7 +124,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     </ScrollReveal>
                     {block.linkText && block.linkUrl && (
                       <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto">
-                        <div className={`mt-6 ${textAlignClass}`}>
+                        <div className={`mt-6 ${textAlignClass} px-4 lg:px-0`}>
                           <Link
                             to={block.linkUrl}
                             className="group inline-flex items-center gap-x-3 text-gray-950 font-bold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
@@ -152,7 +145,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             ) : (
               <div className="container mx-auto px-2 sm:px-3 lg:px-4">
                 {hasTitle && (
-                  <div className={`pt-6 md:pt-8 pb-6 md:pb-8 ${textAlignClass}`}>
+                  <div className="pt-6 md:pt-8 pb-6 md:pb-8">
                     <ScrollReveal
                       delay={0}
                       threshold={0.1}
@@ -162,7 +155,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       duration={0.6}
                     >
                       <h2
-                        className="text-2xl md:text-4xl lg:text-5xl font-oswald uppercase text-gray-950"
+                        className={`text-2xl md:text-4xl lg:text-5xl font-oswald uppercase ${textAlignClass} text-gray-950 px-4 lg:px-0`}
                         style={{
                           textShadow: '0 2px 4px rgba(0,0,0,0.1)',
                           fontFamily: '"Oswald", sans-serif',
@@ -178,20 +171,18 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 <div
                   className={
                     hasTextContent
-                      ? `flex flex-col ${
-                          isLeft
-                            ? 'md:flex-row'
-                            : isRight
-                              ? 'md:flex-row-reverse'
-                              : 'md:flex-row items-center'
-                        } gap-4 md:gap-6`
+                      ? `flex flex-col ${isLeft
+                        ? 'md:flex-row'
+                        : isRight
+                          ? 'md:flex-row-reverse'
+                          : 'md:flex-row items-center'
+                      } gap-4 md:gap-6`
                       : 'flex flex-col items-center gap-4 md:gap-6'
                   }
                 >
                   <div
-                    className={`w-full ${
-                      !hasTextContent || isCenter ? 'md:w-full' : 'md:w-1/2'
-                    } overflow-visible`}
+                    className={`w-full ${!hasTextContent || isCenter ? 'md:w-full' : 'md:w-1/2'
+                      } overflow-visible`}
                   >
                     <ScrollReveal delay={50} threshold={0.1} width="w-full" className="h-auto">
                       {block.mediaType === 'youtube' ? (
@@ -201,9 +192,8 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       ) : block.mediaType === 'video' ? (
                         <OptimizedVideo
                           src={mediaUrl}
-                          className={`w-full h-auto ${imageBorderClass} max-w-full ${
-                            isMobile ? 'object-contain' : 'object-cover'
-                          }`}
+                          className={`w-full h-auto ${imageBorderClass} max-w-full ${isMobile ? 'object-contain' : 'object-cover'
+                            }`}
                           autoPlay
                           loop
                           muted
@@ -215,9 +205,8 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                         <OptimizedImage
                           src={mediaUrl}
                           alt=""
-                          className={`w-full h-auto ${imageBorderClass} ${
-                            isMobile ? 'object-contain' : 'object-cover'
-                          } max-w-full block`}
+                          className={`w-full h-auto ${imageBorderClass} ${isMobile ? 'object-contain' : 'object-cover'
+                            } max-w-full block`}
                           loading="lazy"
                           quality={85}
                         />
@@ -227,7 +216,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   {hasDescription && (
                     <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'}`}>
                       <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
-                        <div className={`prose max-w-none ${textAlignClass} px-4 sm:px-0`}>
+                        <div className={`prose max-w-none ${textAlignClass} px-4 lg:px-0`}>
                           <p className="mt-3 text-gray-900 font-normal leading-relaxed max-w-2xl text-base md:text-lg">
                             {t(block.description)}
                           </p>
@@ -235,7 +224,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       </ScrollReveal>
                       {block.linkText && block.linkUrl && (
                         <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto">
-                          <div className={`mt-6 ${textAlignClass}`}>
+                          <div className={`mt-6 ${textAlignClass} px-4 lg:px-0`}>
                             <Link
                               to={block.linkUrl}
                               className="group inline-flex items-center gap-x-3 text-gray-950 font-bold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"

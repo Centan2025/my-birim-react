@@ -506,15 +506,15 @@ export function ProductDetailPage() {
         urlMobile?: string
         urlDesktop?: string
       }[] = mainImageUrl
-        ? [
-          {
-            type: 'image' as const,
-            url: mainImageUrl,
-            urlMobile: mainImageMobile,
-            urlDesktop: mainImageDesktop,
-          },
-        ]
-        : []
+          ? [
+            {
+              type: 'image' as const,
+              url: mainImageUrl,
+              urlMobile: mainImageMobile,
+              urlDesktop: mainImageDesktop,
+            },
+          ]
+          : []
       const merged = [...head, ...rawAltMedia]
       // tekilleştir (aynı url tekrar etmesin)
       const seen = new Set<string>()
@@ -771,21 +771,21 @@ export function ProductDetailPage() {
   }
   const currentLightboxItems: (
     | {
-        type: 'image' | 'video' | 'youtube'
-        url: string
-        urlMobile?: string
-        urlDesktop?: string
-        title?: LocalizedString
-        description?: LocalizedString
-        link?: string
-        linkText?: LocalizedString
-      }
+      type: 'image' | 'video' | 'youtube'
+      url: string
+      urlMobile?: string
+      urlDesktop?: string
+      title?: LocalizedString
+      description?: LocalizedString
+      link?: string
+      linkText?: LocalizedString
+    }
     | {
-        type: 'image' | 'video' | 'youtube'
-        url: string
-        urlMobile?: string
-        urlDesktop?: string
-      }
+      type: 'image' | 'video' | 'youtube'
+      url: string
+      urlMobile?: string
+      urlDesktop?: string
+    }
   )[] =
     lightboxSource === 'panel'
       ? Array.isArray(product?.media)
@@ -1189,7 +1189,7 @@ export function ProductDetailPage() {
                     })
                     setIsFullscreenOpen(true)
                   }}
-                className="group flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
+                  className="group flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
                   aria-label="Büyüt"
                 >
                   <svg
@@ -1246,7 +1246,7 @@ export function ProductDetailPage() {
                         ref={el => {
                           thumbButtonsRef.current[idx] = el
                         }}
-                        className={`relative z-20 flex-shrink-0 w-24 h-24 overflow-hidden rounded-none transition-all duration-300 ${currentImageIndex === idx ? 'opacity-100' : 'opacity-80 hover:opacity-100 hover:scale-105'}`}
+                        className={`relative z-20 flex-shrink-0 w-24 h-24 rounded-none transition-all duration-300 ${currentImageIndex === idx ? 'opacity-100' : 'opacity-80 hover:opacity-100 hover:scale-105'}`}
                         onClick={() => {
                           // Thumbnail tıklanınca hero sonsuz kaydırma index'ini
                           // ilgili slide'a hizala ve ana görsel index'ini güncelle.
@@ -1295,7 +1295,7 @@ export function ProductDetailPage() {
                           )}
                           {/* Minimal active indicator - header menü alt çizgisi ile aynı mantık */}
                           <div
-                            className="pointer-events-none absolute bottom-0 left-0 right-0 h-[2px] bg-gray-400 z-10 origin-left transition-transform duration-300 ease-out"
+                            className="pointer-events-none absolute -bottom-2 left-0 right-0 h-[3px] bg-gray-800 z-[30] origin-center transition-transform duration-300 ease-out"
                             style={{
                               transform:
                                 currentImageIndex === idx ? 'scaleX(1)' : 'scaleX(0)',
@@ -1729,19 +1729,19 @@ export function ProductDetailPage() {
                 color: '#d3caca'
               }}
             >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="28"
-                        height="28"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="16 20 8 12 16 4" />
-                      </svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="16 20 8 12 16 4" />
+              </svg>
             </button>
             <button
               onClick={nextImage}
@@ -1753,19 +1753,19 @@ export function ProductDetailPage() {
                 color: '#d3caca'
               }}
             >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="28"
-                        height="28"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="8 20 16 12 8 4" />
-                      </svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="8 20 16 12 8 4" />
+              </svg>
             </button>
             <div className="relative w-screen max-w-screen-2xl h-[80vh] p-2 overflow-hidden">
               <button
@@ -1955,14 +1955,14 @@ export function ProductDetailPage() {
                 className="relative flex items-center justify-center max-w-[90vw] max-h-[90vh] border border-gray-300 shadow-2xl overflow-hidden bg-transparent"
                 onClick={e => e.stopPropagation()}
               >
-      <button
-        onClick={() => setDimLightbox(null)}
-        className="absolute top-4 right-4 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/60 bg-white/70 backdrop-blur-md shadow-lg flex items-center justify-center text-gray-700 hover:bg-white hover:text-gray-900 transition-colors"
-        style={closeBtnAnimStyle}
-        aria-label="Close"
-      >
-        <CloseIcon />
-      </button>
+                <button
+                  onClick={() => setDimLightbox(null)}
+                  className="absolute top-4 right-4 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/60 bg-white/70 backdrop-blur-md shadow-lg flex items-center justify-center text-gray-700 hover:bg-white hover:text-gray-900 transition-colors"
+                  style={closeBtnAnimStyle}
+                  aria-label="Close"
+                >
+                  <CloseIcon />
+                </button>
                 <div className="relative w-full h-full flex items-center justify-center">
                   {dimLightbox.images.length > 1 && (
                     <>
@@ -1984,19 +1984,19 @@ export function ProductDetailPage() {
                         }}
                         aria-label="Previous"
                       >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="28"
-                        height="28"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="16 20 8 12 16 4" />
-                      </svg>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="28"
+                          height="28"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polyline points="16 20 8 12 16 4" />
+                        </svg>
                       </button>
                       <button
                         onClick={e => {
@@ -2015,19 +2015,19 @@ export function ProductDetailPage() {
                         }}
                         aria-label="Next"
                       >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="28"
-                        height="28"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="8 20 16 12 8 4" />
-                      </svg>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="28"
+                          height="28"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polyline points="8 20 16 12 8 4" />
+                        </svg>
                       </button>
                     </>
                   )}
@@ -2075,7 +2075,7 @@ export function ProductDetailPage() {
                 <div className="relative w-full h-full flex items-center justify-center">
                   {materialLightbox.images.length > 1 && (
                     <>
-                    <button
+                      <button
                         onClick={e => {
                           e.stopPropagation()
                           setMaterialLightbox({
@@ -2085,12 +2085,12 @@ export function ProductDetailPage() {
                               materialLightbox.images.length,
                           })
                         }}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-8 h-8 md:w-10 md:h-10"
-                      style={{
-                        backgroundColor: 'rgba(62, 60, 60, 0.5)',
-                        color: '#d3caca',
-                        ...arrowInLeft,
-                      }}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-8 h-8 md:w-10 md:h-10"
+                        style={{
+                          backgroundColor: 'rgba(62, 60, 60, 0.5)',
+                          color: '#d3caca',
+                          ...arrowInLeft,
+                        }}
                         aria-label="Previous"
                       >
                         <svg
@@ -2107,7 +2107,7 @@ export function ProductDetailPage() {
                           <polyline points="16 20 8 12 16 4" />
                         </svg>
                       </button>
-                    <button
+                      <button
                         onClick={e => {
                           e.stopPropagation()
                           setMaterialLightbox({
@@ -2116,12 +2116,12 @@ export function ProductDetailPage() {
                               (materialLightbox.currentIndex + 1) % materialLightbox.images.length,
                           })
                         }}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-8 h-8 md:w-10 md:h-10"
-                      style={{
-                        backgroundColor: 'rgba(62, 60, 60, 0.5)',
-                        color: '#d3caca',
-                        ...arrowInRight,
-                      }}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-8 h-8 md:w-10 md:h-10"
+                        style={{
+                          backgroundColor: 'rgba(62, 60, 60, 0.5)',
+                          color: '#d3caca',
+                          ...arrowInRight,
+                        }}
                         aria-label="Next"
                       >
                         <svg
@@ -2144,17 +2144,17 @@ export function ProductDetailPage() {
                     (() => {
                       const currentImage = materialLightbox.images[materialLightbox.currentIndex]
                       if (!currentImage) return null
-                    return (
-                      <div className="flex items-center justify-center">
-                        <OptimizedImage
-                          src={currentImage.image}
-                          alt={currentImage.name}
-                          className="max-h-[82vh] max-w-[88vw] object-contain"
-                          loading="eager"
-                          quality={95}
-                        />
-                      </div>
-                    )
+                      return (
+                        <div className="flex items-center justify-center">
+                          <OptimizedImage
+                            src={currentImage.image}
+                            alt={currentImage.name}
+                            className="max-h-[82vh] max-w-[88vw] object-contain"
+                            loading="eager"
+                            quality={95}
+                          />
+                        </div>
+                      )
                     })()}
                 </div>
               </div>
