@@ -80,7 +80,7 @@ export function HomePage() {
         setMobileHeroHeight(null)
       }
     }
-    
+
     if (typeof window !== 'undefined' && !mobileHeroHeight) {
       setMobileHeroHeight(window.innerHeight)
     }
@@ -203,8 +203,8 @@ export function HomePage() {
             }
             @media (max-width: 1023px) {
               .hero-page-container-mobile {
-                width: 100vw !important;
-                max-width: 100vw !important;
+                width: 100% !important;
+                max-width: 100% !important;
                 margin-left: 0 !important;
                 margin-right: 0 !important;
                 padding-left: 0 !important;
@@ -223,9 +223,9 @@ export function HomePage() {
                 max-height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
               }
               .hero-main-container-mobile {
-                width: 100vw !important;
-                max-width: 100vw !important;
-                min-width: 100vw !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 100% !important;
                 margin-left: 0 !important;
                 margin-right: 0 !important;
                 padding: 0 !important;
@@ -295,9 +295,9 @@ export function HomePage() {
               .hero-slide-mobile video.absolute,
               .hero-slide-mobile video.inset-0 {
                 display: block !important;
-                width: 100vw !important;
-                min-width: 100vw !important;
-                max-width: 100vw !important;
+                width: 100% !important;
+                min-width: 100% !important;
+                max-width: 100% !important;
                 height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
                 min-height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
                 max-height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
@@ -315,16 +315,16 @@ export function HomePage() {
                 box-sizing: border-box !important;
               }
               .hero-slide-mobile video.w-full {
-                width: 100vw !important;
+                width: 100% !important;
               }
               .hero-slide-mobile .w-full {
-                width: 100vw !important;
+                width: 100% !important;
               }
               .hero-slide-mobile img,
               .hero-slide-mobile img[style] {
-                width: 100vw !important;
-                min-width: 100vw !important;
-                max-width: 100vw !important;
+                width: 100% !important;
+                min-width: 100% !important;
+                max-width: 100% !important;
                 height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
                 min-height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
                 max-height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
@@ -342,8 +342,8 @@ export function HomePage() {
                 box-sizing: border-box !important;
               }
               .hero-slide-mobile > div[class*="absolute"][class*="bg-black"] {
-                width: 100vw !important;
-                max-width: 100vw !important;
+                width: 100% !important;
+                max-width: 100% !important;
                 left: 0 !important;
                 right: 0 !important;
                 margin-left: 0 !important;
@@ -356,9 +356,9 @@ export function HomePage() {
               }
               .hero-slide-mobile iframe,
               .hero-slide-mobile iframe[style] {
-                width: 100vw !important;
-                max-width: 100vw !important;
-                min-width: 100vw !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 100% !important;
                 height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
                 min-height: ${mobileHeroHeight ? `${mobileHeroHeight}px` : '100vh'} !important;
                 left: 0 !important;

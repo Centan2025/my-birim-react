@@ -48,7 +48,12 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 
         const backgroundColor = block.backgroundColor === 'gray' ? 'bg-gray-100' : 'bg-white'
         const textAlign = block.textAlignment || 'left'
-        const textAlignClass = 'text-left'
+        const textAlignClass =
+          textAlign === 'center'
+            ? 'text-center'
+            : textAlign === 'right'
+              ? 'text-right'
+              : 'text-left'
 
         // Content alanları arasında dikey boşluk olmasın
         const sectionSpacingClass = 'py-0'
@@ -62,7 +67,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             {isFullWidth ? (
               <div className="w-full overflow-hidden">
                 {hasTitle && (
-                  <div className="container mx-auto px-2 sm:px-3 lg:px-4 pt-6 md:pt-8 pb-6 md:pb-8">
+                  <div className={`container mx-auto px-6 sm:px-8 lg:px-4 pt-6 md:pt-8 pb-6 md:pb-8 flex flex-col ${textAlign === 'center' ? 'items-center' : textAlign === 'right' ? 'items-end' : 'items-start'}`}>
                     <ScrollReveal
                       delay={0}
                       threshold={0.1}
@@ -72,7 +77,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       duration={0.6}
                     >
                       <h2
-                        className={`text-2xl md:text-4xl lg:text-5xl font-oswald uppercase ${textAlignClass} text-gray-950 px-4 lg:px-0`}
+                        className={`text-2xl md:text-4xl lg:text-5xl font-oswald uppercase ${textAlignClass} text-gray-950 max-w-4xl ${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}
                         style={{
                           textShadow: '0 2px 4px rgba(0,0,0,0.1)',
                           fontFamily: '"Oswald", sans-serif',
@@ -114,20 +119,20 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   )}
                 </ScrollReveal>
                 {hasDescription && (
-                  <div className="container mx-auto px-2 sm:px-3 lg:px-4 pt-3 pb-6">
+                  <div className={`container mx-auto px-6 sm:px-8 lg:px-4 pt-3 pb-6 flex flex-col ${textAlign === 'center' ? 'items-center' : textAlign === 'right' ? 'items-end' : 'items-start'}`}>
                     <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
-                      <div className={`prose max-w-none ${textAlignClass} px-4 lg:px-0`}>
-                        <p className="mt-3 text-gray-900 font-normal leading-relaxed max-w-2xl text-base md:text-lg">
+                      <div className={`prose max-w-none ${textAlignClass}`}>
+                        <p className={`mt-3 text-gray-900 font-normal leading-relaxed max-w-2xl text-base md:text-lg ${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}>
                           {t(block.description)}
                         </p>
                       </div>
                     </ScrollReveal>
                     {block.linkText && block.linkUrl && (
                       <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto">
-                        <div className={`mt-6 ${textAlignClass} px-4 lg:px-0`}>
+                        <div className={`mt-6 ${textAlignClass} flex ${textAlign === 'center' ? 'justify-center' : textAlign === 'right' ? 'justify-end' : 'justify-start'}`}>
                           <Link
                             to={block.linkUrl}
-                            className="group inline-flex items-center gap-x-3 text-gray-950 font-bold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
+                            className={`group inline-flex items-center gap-x-3 text-gray-950 font-bold py-3 ${textAlign === 'right' ? 'pl-5 pr-0' : 'pl-0 pr-5'} text-sm md:text-lg rounded-lg`}
                           >
                             <span className="inline-flex items-end gap-x-3 border-b border-transparent md:group-hover:border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
                               <span className="group-hover:text-gray-500 leading-none font-bold tracking-[0.05em] uppercase">
@@ -143,31 +148,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 )}
               </div>
             ) : (
-              <div className="container mx-auto px-2 sm:px-3 lg:px-4">
-                {hasTitle && (
-                  <div className="pt-6 md:pt-8 pb-6 md:pb-8">
-                    <ScrollReveal
-                      delay={0}
-                      threshold={0.1}
-                      width="w-full"
-                      className="h-auto"
-                      distance={50}
-                      duration={0.6}
-                    >
-                      <h2
-                        className={`text-2xl md:text-4xl lg:text-5xl font-oswald uppercase ${textAlignClass} text-gray-950 px-4 lg:px-0`}
-                        style={{
-                          textShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                          fontFamily: '"Oswald", sans-serif',
-                          fontWeight: 300,
-                          letterSpacing: '0.1em',
-                        }}
-                      >
-                        {t(block.title)}
-                      </h2>
-                    </ScrollReveal>
-                  </div>
-                )}
+              <div className="container mx-auto px-6 sm:px-8 lg:px-4">
                 <div
                   className={
                     hasTextContent
@@ -214,20 +195,32 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     </ScrollReveal>
                   </div>
                   {hasDescription && (
-                    <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'}`}>
+                    <div className={`w-full ${isCenter ? 'md:w-full' : 'md:w-1/2'} flex flex-col ${textAlign === 'center' ? 'items-center' : textAlign === 'right' ? 'items-end' : 'items-start'}`}>
                       <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
-                        <div className={`prose max-w-none ${textAlignClass} px-4 lg:px-0`}>
-                          <p className="mt-3 text-gray-900 font-normal leading-relaxed max-w-2xl text-base md:text-lg">
+                        <div className={`prose max-w-none ${textAlignClass}`}>
+                          {hasTitle && (
+                            <h2
+                              className={`text-2xl md:text-3xl lg:text-4xl font-oswald uppercase text-gray-950 mb-4 ${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}
+                              style={{
+                                fontFamily: '"Oswald", sans-serif',
+                                fontWeight: 300,
+                                letterSpacing: '0.1em',
+                              }}
+                            >
+                              {t(block.title)}
+                            </h2>
+                          )}
+                          <p className={`mt-3 text-gray-900 font-normal leading-relaxed max-w-2xl text-base md:text-lg ${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}>
                             {t(block.description)}
                           </p>
                         </div>
                       </ScrollReveal>
                       {block.linkText && block.linkUrl && (
                         <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto">
-                          <div className={`mt-6 ${textAlignClass} px-4 lg:px-0`}>
+                          <div className={`mt-6 ${textAlignClass} flex ${textAlign === 'center' ? 'justify-center' : textAlign === 'right' ? 'justify-end' : 'justify-start'}`}>
                             <Link
                               to={block.linkUrl}
-                              className="group inline-flex items-center gap-x-3 text-gray-950 font-bold py-3 pl-0 pr-5 text-sm md:text-lg rounded-lg"
+                              className={`group inline-flex items-center gap-x-3 text-gray-950 font-bold py-3 ${textAlign === 'right' ? 'pl-5 pr-0' : 'pl-0 pr-5'} text-sm md:text-lg rounded-lg`}
                             >
                               <span className="inline-flex items-end gap-x-3 border-b border-transparent md:group-hover:border-transparent group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
                                 <span className="group-hover:text-gray-500 leading-none font-bold tracking-[0.05em] uppercase">
