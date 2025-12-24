@@ -628,7 +628,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                                 to={media.buttonLink || '/'}
                                 className="group inline-flex items-center gap-x-3 text-white font-semibold py-2 pl-0 pr-4 text-[10px] md:text-lg rounded-lg"
                               >
-                                <span className="inline-flex items-center gap-x-3 border-b border-transparent group-hover:border-white pb-1 transition-all duration-300 ease-out">
+                                <span className="inline-flex items-center gap-x-3 border-b border-transparent md:group-hover:border-white pb-1 transition-all duration-300 ease-out">
                                   <span className="group-hover:text-gray-200">
                                     {t(media.buttonText || '')}
                                   </span>
@@ -652,7 +652,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
             <button
               type="button"
               onClick={goToPrevSlide}
-              className="group pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
+              className="group pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-lg"
               style={arrowInLeft}
               aria-label="Previous hero slide"
             >
@@ -663,10 +663,10 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="1.5"
+                strokeWidth="1"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="h-8 w-8 transition-transform duration-300 group-hover:-translate-x-0.5"
+                className="h-7 w-7 -ml-0.5 transition-transform duration-300 group-hover:-translate-x-0.5"
               >
                 <path d="M15 18l-6-6 6-6" />
               </svg>
@@ -674,7 +674,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
             <button
               type="button"
               onClick={goToNextSlide}
-              className="group pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
+              className="group pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-lg"
               style={arrowInRight}
               aria-label="Next hero slide"
             >
@@ -685,10 +685,10 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="1.5"
+                strokeWidth="1"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="h-8 w-8 transition-transform duration-300 group-hover:translate-x-0.5"
+                className="h-7 w-7 ml-0.5 transition-transform duration-300 group-hover:translate-x-0.5"
               >
                 <path d="M9 18l6-6-6-6" />
               </svg>

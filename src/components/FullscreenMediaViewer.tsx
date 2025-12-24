@@ -64,14 +64,14 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     const timer1 = setTimeout(() => {
       setIsVisible(true)
     }, 50)
-    
+
     // Buton animasyonu için gecikme - sağdan fade ile gelir
     const timer2 = setTimeout(() => {
       requestAnimationFrame(() => {
         setIsButtonVisible(true)
       })
     }, 400)
-    
+
     return () => {
       clearTimeout(timer1)
       clearTimeout(timer2)
@@ -696,7 +696,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
             <button
               type="button"
               onClick={handleClose}
-              className="p-2 rounded-full bg-black/30 hover:bg-black/50 outline-none focus:outline-none focus:ring-0 active:outline-none active:ring-0"
+              className="group flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-lg"
               style={{
                 opacity: isClosing ? 0 : (isButtonVisible ? 1 : 0.3),
                 transform: isButtonVisible && !isClosing ? 'translateX(0)' : 'translateX(100px)',
@@ -707,26 +707,22 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="32"
-                height="32"
+                width="24"
+                height="24"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="1.2"
+                strokeWidth="1"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className={`text-white transition-all duration-500 ease-in-out ${isButtonVisible && !isClosing
+                className={`h-7 w-7 transition-all duration-500 ease-in-out ${isButtonVisible && !isClosing
                   ? 'opacity-100 rotate-0'
-                  : isClosing
-                    ? 'opacity-0 rotate-90'
-                    : 'opacity-0 rotate-90'
+                  : 'opacity-0 rotate-90'
                   }`}
                 style={{
                   transform: isButtonVisible && !isClosing
                     ? 'rotate(0deg)'
-                    : isClosing
-                      ? 'rotate(90deg)'
-                      : 'rotate(90deg)',
+                    : 'rotate(90deg)',
                   transitionDelay: isClosing ? (isMobile ? '200ms' : '0ms') : '0ms',
                 }}
               >
@@ -792,16 +788,14 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
                   if (currentVisible.length > 0) {
                     const visibleIndex = currentVisible.indexOf(i)
                     if (visibleIndex >= 0) {
-                      // En alttaki görsel (currentVisible'deki son) önce gitsin
+                      // Birer birer kapanış: sondan başa doğru
                       const reverseIndex = currentVisible.length - 1 - visibleIndex
-                      animationDelay = reverseIndex * 75 // 150ms -> 75ms
+                      animationDelay = reverseIndex * 60
                     } else {
-                      // Desktop'ta görünmeyen görseller hemen gitsin
                       animationDelay = 0
                     }
                   } else {
-                    // Fallback: eski mantık
-                    animationDelay = (items.length - 1 - i) * 75 // 150ms -> 75ms
+                    animationDelay = (items.length - 1 - i) * 60
                   }
                 } else {
                   // Mobilde: kapanışta hesaplanan görünür görselleri kullan
@@ -812,20 +806,18 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
                   if (currentVisible.length > 0) {
                     const visibleIndex = currentVisible.indexOf(i)
                     if (visibleIndex >= 0) {
-                      // En alttaki görsel (currentVisible'deki son) önce gitsin
                       const reverseIndex = currentVisible.length - 1 - visibleIndex
-                      animationDelay = reverseIndex * 75 // 150ms -> 75ms
+                      animationDelay = reverseIndex * 60
                     } else {
-                      // Görünmeyen görseller hemen gitsin
                       animationDelay = 0
                     }
                   } else {
-                    // Fallback: eski mantık
-                    animationDelay = (items.length - 1 - i) * 75 // 150ms -> 75ms
+                    animationDelay = (items.length - 1 - i) * 60
                   }
                 }
               } else {
-                animationDelay = isVisible ? i * 150 : 0
+                // Birer birer açılış: baştan sona doğru
+                animationDelay = isVisible ? i * 100 : 0
               }
 
               // Desktop ve mobil landscape için sabit yükseklik hesapla
@@ -850,13 +842,13 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
                   ref={(el) => {
                     itemRefs.current[i] = el
                   }}
-                  className={`flex-shrink-0 flex items-center justify-center transition-all ease-out ${isVisible && !isClosing
-                    ? 'opacity-100 translate-y-0'
-                    : 'opacity-0 translate-y-8 md:translate-y-0'
+                  className={`flex-shrink-0 flex items-center justify-center transition-all cubic-bezier(0.23, 1, 0.32, 1) ${isVisible && !isClosing
+                    ? 'opacity-100 translate-y-0 scale-100'
+                    : 'opacity-0 translate-y-12 scale-95'
                     }`}
                   style={{
                     transitionDelay: `${animationDelay}ms`,
-                    transitionDuration: '250ms', // 400ms -> 250ms
+                    transitionDuration: '500ms',
                     height: fixedHeight,
                     minHeight: fixedHeight === 'auto' ? 'auto' : fixedHeight,
                     maxHeight: fixedHeight === 'auto' ? 'none' : fixedHeight,
@@ -940,22 +932,57 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
 
           {/* Sağa sola düğmeleri - altta ortada (sadece desktop'ta) */}
           {slideCount > 1 && (
-            <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-4 z-20" style={{ bottom: '32px' }}>
+            <div
+              className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-4 z-20"
+              style={{
+                bottom: '32px',
+                opacity: isButtonVisible && !isClosing ? 1 : 0,
+                transform: `translateX(-50%) ${isButtonVisible && !isClosing ? 'translateY(0)' : 'translateY(40px)'}`,
+                transition: 'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+                willChange: 'transform, opacity',
+              }}
+            >
               <button
                 type="button"
                 onClick={handleScrollLeft}
-                className="bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+                className="group flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-lg"
                 aria-label="Sol"
               >
-                ‹
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-7 w-7 -ml-0.5 transition-transform duration-300 group-hover:-translate-x-0.5"
+                >
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
               </button>
               <button
                 type="button"
                 onClick={handleScrollRight}
-                className="bg-black/35 hover:bg-black/55 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
+                className="group flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-lg"
                 aria-label="Sağ"
               >
-                ›
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-7 w-7 ml-0.5 transition-transform duration-300 group-hover:translate-x-0.5"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
               </button>
             </div>
           )}
@@ -965,7 +992,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
             <button
               type="button"
               onClick={handleScrollToTop}
-              className={`md:hidden absolute bottom-6 right-6 bg-black/70 hover:bg-black/90 text-white rounded-full p-4 transition-all duration-300 z-30 shadow-lg ${showScrollToTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+              className={`md:hidden absolute bottom-6 right-6 flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 z-30 shadow-lg ${showScrollToTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
                 }`}
               aria-label="Yukarı git"
             >
@@ -976,9 +1003,10 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="2"
+                strokeWidth="1"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                className="h-7 w-7 -mt-0.5"
               >
                 <path d="m18 15-6-6-6 6" />
               </svg>

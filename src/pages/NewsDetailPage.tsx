@@ -1,15 +1,16 @@
-import React, {useMemo, useEffect} from 'react'
-import {useParams, Link} from 'react-router-dom'
-import type {NewsMedia} from '../types'
-import {OptimizedImage} from '../components/OptimizedImage'
-import {OptimizedVideo} from '../components/OptimizedVideo'
-import {PageLoading} from '../components/LoadingSpinner'
-import {useTranslation} from '../i18n'
-import {useNewsItem, useNews} from '../hooks/useNews'
-import {useSiteSettings} from '../hooks/useSiteData'
-import {analytics} from '../lib/analytics'
-import {useSEO} from '../hooks/useSEO'
-import {addStructuredData, getArticleSchema} from '../lib/seo'
+import React, { useMemo, useEffect } from 'react'
+import { useParams, Link } from 'react-router-dom'
+import type { NewsMedia } from '../types'
+import { OptimizedImage } from '../components/OptimizedImage'
+import { OptimizedVideo } from '../components/OptimizedVideo'
+import { PageLoading } from '../components/LoadingSpinner'
+import { useTranslation } from '../i18n'
+import { useNewsItem, useNews } from '../hooks/useNews'
+import { useSiteSettings } from '../hooks/useSiteData'
+import { analytics } from '../lib/analytics'
+import { useSEO } from '../hooks/useSEO'
+import { addStructuredData, getArticleSchema } from '../lib/seo'
+import PortableTextLite from '../components/PortableTextLite'
 
 const getYouTubeId = (url: string): string | null => {
   if (!url) return null
@@ -27,9 +28,9 @@ const formatDate = (dateString: string): string => {
   return `${day}.${month}.${year}`
 }
 
-const MediaComponent: React.FC<{media: NewsMedia}> = ({media}) => {
-  const {t} = useTranslation()
-  const {data: settings} = useSiteSettings()
+const MediaComponent: React.FC<{ media: NewsMedia }> = ({ media }) => {
+  const { t } = useTranslation()
+  const { data: settings } = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
 
   const renderMedia = () => {
@@ -56,7 +57,7 @@ const MediaComponent: React.FC<{media: NewsMedia}> = ({media}) => {
           media.url.includes('cdn.sanity.io/files'))
       if (isVideoFile) {
         return (
-          <div className="relative w-full" style={{paddingTop: '56.25%' /* 16:9 Aspect Ratio */}}>
+          <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16:9 Aspect Ratio */ }}>
             <OptimizedVideo
               src={media.url}
               srcMobile={media.urlMobile}
@@ -72,7 +73,7 @@ const MediaComponent: React.FC<{media: NewsMedia}> = ({media}) => {
       }
       // URL ise iframe kullan (harici video servisleri için)
       return (
-        <div className="relative w-full" style={{paddingTop: '56.25%' /* 16:9 Aspect Ratio */}}>
+        <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16:9 Aspect Ratio */ }}>
           <iframe
             src={media.url}
             title={t(media.caption) || 'News video'}
@@ -87,7 +88,7 @@ const MediaComponent: React.FC<{media: NewsMedia}> = ({media}) => {
       const videoId = getYouTubeId(media.url)
       if (!videoId) return <p className="text-red-500 text-center">Geçersiz YouTube URL'si</p>
       return (
-        <div className="relative w-full" style={{paddingTop: '56.25%' /* 16:9 Aspect Ratio */}}>
+        <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16:9 Aspect Ratio */ }}>
           <iframe
             src={`https://www.youtube.com/embed/${videoId}?rel=0`}
             title={t(media.caption) || 'YouTube video player'}
@@ -148,20 +149,20 @@ const MinimalChevronRight = (props: React.SVGProps<SVGSVGElement>) => (
 )
 
 export function NewsDetailPage() {
-  const {newsId} = useParams<{newsId: string}>()
-  const {data: item, isLoading: loading} = useNewsItem(newsId)
-  const {data: allNews = []} = useNews()
-  const {t} = useTranslation()
-  const {data: settings} = useSiteSettings()
+  const { newsId } = useParams<{ newsId: string }>()
+  const { data: item, isLoading: loading } = useNewsItem(newsId)
+  const { data: allNews = [] } = useNews()
+  const { t } = useTranslation()
+  const { data: settings } = useSiteSettings()
   const showBottomPrevNext = Boolean(settings?.showProductPrevNext)
 
-  const {prevNews, nextNews} = useMemo(() => {
-    if (!item || allNews.length < 2) return {prevNews: null, nextNews: null}
+  const { prevNews, nextNews } = useMemo(() => {
+    if (!item || allNews.length < 2) return { prevNews: null, nextNews: null }
     const currentIndex = allNews.findIndex(n => n.id === item.id)
-    if (currentIndex === -1) return {prevNews: null, nextNews: null}
+    if (currentIndex === -1) return { prevNews: null, nextNews: null }
     const prev = currentIndex > 0 ? allNews[currentIndex - 1] : null
     const next = currentIndex < allNews.length - 1 ? allNews[currentIndex + 1] : null
-    return {prevNews: prev, nextNews: next}
+    return { prevNews: prev, nextNews: next }
   }, [item, allNews])
 
   // SEO ve Analytics: haber detay görüntüleme
@@ -272,8 +273,8 @@ export function NewsDetailPage() {
                 typeof item.mainImage === 'string'
                   ? item.mainImage
                   : (item.mainImage && typeof item.mainImage === 'object'
-                      ? item.mainImage.url
-                      : '') || ''
+                    ? item.mainImage.url
+                    : '') || ''
               }
               srcMobile={
                 typeof item.mainImage === 'object' && item.mainImage
@@ -304,7 +305,14 @@ export function NewsDetailPage() {
             </h1>
             <div className="flex items-center min-h-[200px]">
               <div className="prose prose-lg lg:prose-xl text-gray-900 max-w-none w-full px-4 sm:px-0 [&>p:first-child]:mt-0 [&>p:last-child]:mb-0">
-                <p className="font-normal">{t(item.content)}</p>
+                {(() => {
+                  const content = t(item.content)
+                  return Array.isArray(content) ? (
+                    <PortableTextLite value={content} />
+                  ) : (
+                    <p className="font-normal">{content}</p>
+                  )
+                })()}
               </div>
             </div>
           </div>

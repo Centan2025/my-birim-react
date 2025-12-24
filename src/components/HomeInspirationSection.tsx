@@ -35,14 +35,14 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
   const dynamicHeightStyles =
     isMobile
       ? {
-          // Yüksekliği sabit tutmak yerine, minimum yükseklik veriyoruz.
-          // Böylece tarayıcı farklarından bağımsız olarak önceki content
-          // bloklarının üstüne binme riski azalır.
-          minHeight: '25vh',
-        }
+        // Yüksekliği sabit tutmak yerine, minimum yükseklik veriyoruz.
+        // Böylece tarayıcı farklarından bağımsız olarak önceki content
+        // bloklarının üstüne binme riski azalır.
+        minHeight: '25vh',
+      }
       : {
-          minHeight: '55vh',
-        }
+        minHeight: '55vh',
+      }
 
   useLayoutEffect(() => {
     let animationFrameId: number;
@@ -59,7 +59,7 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
 
       // Eleman ekranda görünmüyorsa portal'ı tamamen gizle
       if (rect.bottom <= 0 || rect.top >= windowHeight) {
-        portalBg.style.clipPath = 'inset(100% 0 0 0)' 
+        portalBg.style.clipPath = 'inset(100% 0 0 0)'
         return
       }
 
@@ -81,9 +81,9 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
 
       // Desktop: üstten buffer, alttan buffer yok (content'leri kesmemek için)
       const BUFFER_TOP = 60;
-      const top = Math.max(0, rect.top - BUFFER_TOP) 
+      const top = Math.max(0, rect.top - BUFFER_TOP)
       const bottom = 0 // Alttan kesme yok, content'lerin üstüne binmesin
-      
+
       const left = Math.max(0, rect.left)
       const right = Math.max(0, windowWidth - rect.right)
 
@@ -157,7 +157,7 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
 
       {/* PORTAL: Sabit Görsel */}
       {createPortal(
-        <div 
+        <div
           ref={portalRef}
           className="portal-fixed-bg"
           style={{
@@ -169,9 +169,9 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
         </div>,
         document.body
       )}
-      
+
       {/* PLACEHOLDER: Container */}
-      <div 
+      <div
         ref={containerRef}
         className={`inspiration-container w-full ${!isMobile ? 'mt-24 md:mt-32 lg:mt-40' : ''}`}
         style={dynamicHeightStyles}
@@ -191,11 +191,10 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
                 to={inspiration.buttonLink || '/'}
                 className="group mt-8 inline-flex items-center gap-x-3 text-white font-semibold py-3 pl-0 pr-5 text-lg rounded-lg"
               >
-                <span className="inline-flex items-end gap-x-3 border-b border-transparent group-hover:border-white pb-1 transition-all duration-300 ease-out">
+                <span className="inline-flex items-end border-b border-transparent md:group-hover:border-white pb-1 transition-all duration-300 ease-out">
                   <span className="group-hover:text-gray-200 leading-none">
                     {t(inspiration.buttonText)}
                   </span>
-                  <span className="w-8 h-[1px] md:w-10 bg-current" />
                 </span>
               </Link>
             </ScrollReveal>

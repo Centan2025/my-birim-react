@@ -12,6 +12,7 @@ import { analytics } from '../lib/analytics'
 import ScrollReveal from '../components/ScrollReveal'
 import { useSEO } from '../hooks/useSEO'
 import { useHeaderTheme } from '../context/HeaderThemeContext'
+import PortableTextLite from '../components/PortableTextLite'
 
 const getYouTubeId = (url: string): string | null => {
   if (!url) return null
@@ -392,8 +393,8 @@ export function ProjectDetailPage() {
   return (
     <div
       className={`min-h-screen bg-white transition-all duration-700 ease-out ${isPageVisible
-          ? 'opacity-100 translate-y-0'
-          : 'opacity-0 translate-y-20'
+        ? 'opacity-100 translate-y-0'
+        : 'opacity-0 translate-y-20'
         }`}
       style={{
         transform: isPageVisible ? 'translateY(0)' : 'translateY(80px)',
@@ -620,7 +621,7 @@ export function ProjectDetailPage() {
                       })
                       setIsFullscreenOpen(true)
                     }}
-                    className="group flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
+                    className="group flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-lg"
                     aria-label="Büyüt"
                   >
                     <svg
@@ -630,10 +631,10 @@ export function ProjectDetailPage() {
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
-                      strokeWidth="1.5"
+                      strokeWidth="1"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className="h-6 w-6 md:h-7 md:w-7 transition-transform duration-500"
+                      className="h-7 w-7 transition-transform duration-500"
                     >
                       <line x1="12" y1="4" x2="12" y2="20" />
                       <line x1="4" y1="12" x2="20" y2="12" />
@@ -647,7 +648,7 @@ export function ProjectDetailPage() {
                 <button
                   type="button"
                   onClick={prev}
-                  className="group pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
+                  className="group pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-lg"
                   style={arrowInLeft}
                   aria-label={t('previous')}
                 >
@@ -658,10 +659,10 @@ export function ProjectDetailPage() {
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="1.5"
+                    strokeWidth="1"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-8 w-8 transition-transform duration-300 group-hover:-translate-x-0.5"
+                    className="h-7 w-7 -ml-0.5 transition-transform duration-300 group-hover:-translate-x-0.5"
                   >
                     <path d="M15 18l-6-6 6-6" />
                   </svg>
@@ -669,7 +670,7 @@ export function ProjectDetailPage() {
                 <button
                   type="button"
                   onClick={next}
-                  className="group pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/20 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-black/40 active:scale-95"
+                  className="group pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-lg"
                   style={arrowInRight}
                   aria-label={t('next')}
                 >
@@ -680,10 +681,10 @@ export function ProjectDetailPage() {
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="1.5"
+                    strokeWidth="1"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-8 w-8 transition-transform duration-300 group-hover:translate-x-0.5"
+                    className="h-7 w-7 ml-0.5 transition-transform duration-300 group-hover:translate-x-0.5"
                   >
                     <path d="M9 18l6-6-6-6" />
                   </svg>
@@ -713,9 +714,18 @@ export function ProjectDetailPage() {
                   )}
                   {project.body && (
                     <ScrollReveal delay={300}>
-                      <div className="text-gray-900 leading-relaxed font-normal whitespace-pre-line">
-                        {t(project.body)}
-                      </div>
+                      {(() => {
+                        const bodyContent = t(project.body)
+                        return Array.isArray(bodyContent) ? (
+                          <div className="text-gray-900 leading-relaxed font-normal">
+                            <PortableTextLite value={bodyContent} />
+                          </div>
+                        ) : (
+                          <div className="text-gray-900 leading-relaxed font-normal whitespace-pre-line">
+                            {bodyContent}
+                          </div>
+                        )
+                      })()}
                     </ScrollReveal>
                   )}
                 </div>

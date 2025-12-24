@@ -1,6 +1,6 @@
-import React, {useState, useEffect, useRef, useCallback} from 'react'
-import {Link, NavLink, useLocation} from 'react-router-dom'
-import type {Category, SiteSettings, Product, Designer, FooterContent} from '../types'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { Link, NavLink, useLocation } from 'react-router-dom'
+import type { Category, SiteSettings, Product, Designer, FooterContent } from '../types'
 import {
   getSiteSettings,
   getDesigners,
@@ -9,20 +9,20 @@ import {
   getFooterContent,
   subscribeEmail as subscribeEmailService,
 } from '../services/cms'
-import {useAuth} from '../App'
-import {SiteLogo} from './SiteLogo'
-import {HeaderProductsPanel} from './HeaderProductsPanel'
-import {HeaderMobileMenuInline} from './HeaderMobileMenuInline'
-import {HeaderMobileMenuOverlay} from './HeaderMobileMenuOverlay'
-import {HeaderSearchPanel} from './HeaderSearchPanel'
-import {UserIcon} from './HeaderShared'
-import {useTranslation} from '../i18n'
-import {useCart} from '../context/CartContext'
-import {useCategories} from '../hooks/useCategories'
-import {useProductsByCategory} from '../hooks/useProducts'
-import {useFocusTrap} from '../hooks/useFocusTrap'
-import {useHeaderScroll} from '../hooks/useHeaderScroll'
-import {useHeaderTheme} from '../context/HeaderThemeContext'
+import { useAuth } from '../App'
+import { SiteLogo } from './SiteLogo'
+import { HeaderProductsPanel } from './HeaderProductsPanel'
+import { HeaderMobileMenuInline } from './HeaderMobileMenuInline'
+import { HeaderMobileMenuOverlay } from './HeaderMobileMenuOverlay'
+import { HeaderSearchPanel } from './HeaderSearchPanel'
+import { UserIcon } from './HeaderShared'
+import { useTranslation } from '../i18n'
+import { useCart } from '../context/CartContext'
+import { useCategories } from '../hooks/useCategories'
+import { useProductsByCategory } from '../hooks/useProducts'
+import { useFocusTrap } from '../hooks/useFocusTrap'
+import { useHeaderScroll } from '../hooks/useHeaderScroll'
+import { useHeaderTheme } from '../context/HeaderThemeContext'
 
 const MenuIcon = () => (
   <svg
@@ -113,9 +113,9 @@ const ShoppingBagIcon = () => (
 // Diğer ikon bileşenleri HeaderShared içinde ortak kullanılıyor
 
 export function Header() {
-  const {t, setLocale, locale, supportedLocales} = useTranslation()
+  const { t, setLocale, locale, supportedLocales } = useTranslation()
   const location = useLocation()
-  const {data: categories = []} = useCategories()
+  const { data: categories = [] } = useCategories()
   const [isProductsOpen, setIsProductsOpen] = useState(false)
   const [isMobileProductsMenuOpen, setIsMobileProductsMenuOpen] = useState(false)
   const [isLangOpen, setIsLangOpen] = useState(false)
@@ -136,10 +136,10 @@ export function Header() {
   const mobileMenuCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const mobileLocaleTimeoutRef = useRef<number | null>(null)
   const [submenuOffset, setSubmenuOffset] = useState(0)
-  const {theme: headerTheme} = useHeaderTheme()
+  const { theme: headerTheme } = useHeaderTheme()
 
-  const {isLoggedIn} = useAuth()
-  const {cartCount, toggleCart} = useCart()
+  const { isLoggedIn } = useAuth()
+  const { cartCount, toggleCart } = useCart()
   const [headerOpacity, setHeaderOpacity] = useState(0)
   const [isHeaderVisible, setIsHeaderVisible] = useState(true)
   const lastScrollYRef = useRef(0)
@@ -177,7 +177,7 @@ export function Header() {
     products: Product[]
     designers: Designer[]
     categories: Category[]
-  }>({products: [], designers: [], categories: []})
+  }>({ products: [], designers: [], categories: [] })
   const [isSearching, setIsSearching] = useState(false)
   const [allData, setAllData] = useState<{
     products: Product[]
@@ -228,7 +228,7 @@ export function Header() {
   const closeSearch = useCallback(() => {
     setIsSearchOpen(false)
     setSearchQuery('')
-    setSearchResults({products: [], designers: [], categories: []})
+    setSearchResults({ products: [], designers: [], categories: [] })
 
     // Desktop'ta arama paneli kapanırken, eğer biz header opacity'yi değiştirdiysek geri al
     if (!isMobile && previousHeaderOpacityRef.current !== null) {
@@ -299,7 +299,7 @@ export function Header() {
     }
 
     applyPaletteBrightness()
-    window.addEventListener('scroll', applyPaletteBrightness, {passive: true})
+    window.addEventListener('scroll', applyPaletteBrightness, { passive: true })
     return () => window.removeEventListener('scroll', applyPaletteBrightness)
   }, [headerTheme.brightness])
 
@@ -550,10 +550,10 @@ export function Header() {
   // heroBrightness değiştiğinde ref'i güncelle ve opacity'yi ayarla
   useEffect(() => {
     heroBrightnessRef.current = heroBrightness
-    
+
     // Products menüsü açıkken opacity'yi değiştirme
     if (isProductsOpen) return
-    
+
     // Sayfa en üstteyken (scrollY <= 10) opacity'yi ayarla
     if (window.scrollY <= 10) {
       // Projeler, haberler ve tasarımcılar sayfalarını kontrol et (ana sayfa ve detay sayfası)
@@ -564,25 +564,25 @@ export function Header() {
       const isNewsDetail = path.match(/^\/news\/[^/]+$/)
       const isDesignersList = path === '/designers' || path === '/designers/'
       const isDesignerDetail = path.match(/^\/designer\/[^/]+$/)
-      
+
       // Projeler, haberler ve tasarımcılar ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
       if (isProjectsList || isProjectDetail || isNewsList || isNewsDetail || isDesignersList || isDesignerDetail) {
         setHeaderOpacity(0.7)
         return
       }
-      
+
       if (isDarkHeroPage()) {
         setHeaderOpacity(0)
         return
       }
-      
+
       // Beyaz arka planlı detay sayfalarında (ürün) her zaman yarı şeffaf
       // Çünkü hero görseli koyu olsa bile arka plan beyaz
       if (isWhiteBackgroundPage()) {
         setHeaderOpacity(0.7)
         return
       }
-      
+
       // Diğer sayfalar için heroBrightness'a bak
       if (heroBrightness !== null) {
         if (heroBrightness >= 0.7) {
@@ -613,7 +613,7 @@ export function Header() {
         const isNewsDetail = path.match(/^\/news\/[^/]+$/)
         const isDesignersList = path === '/designers' || path === '/designers/'
         const isDesignerDetail = path.match(/^\/designer\/[^/]+$/)
-        
+
         // Projeler, haberler ve tasarımcılar ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
         if (isProjectsList || isProjectDetail || isNewsList || isNewsDetail || isDesignersList || isDesignerDetail) {
           setHeaderOpacity(0.7)
@@ -624,7 +624,7 @@ export function Header() {
         }
       }
     }, 100)
-    
+
     return () => clearTimeout(timer)
   }, [location.pathname, isDarkHeroPage, isLightBackgroundPage, isWhiteBackgroundPage])
 
@@ -641,7 +641,7 @@ export function Header() {
       const isNewsDetail = path.match(/^\/news\/[^/]+$/)
       const isDesignersList = path === '/designers' || path === '/designers/'
       const isDesignerDetail = path.match(/^\/designer\/[^/]+$/)
-      
+
       // Projeler, haberler ve tasarımcılar ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
       if (isProjectsList || isProjectDetail || isNewsList || isNewsDetail || isDesignersList || isDesignerDetail) {
         setHeaderOpacity(0.7)
@@ -660,16 +660,16 @@ export function Header() {
     const handleHeaderVisibility = () => {
       const currentY = window.scrollY
       const lastY = lastScrollForHeader.current
-      
+
       // Sayfa en üstündeyken her zaman görünür
       if (currentY < 150) {
         setIsHeaderVisible(true)
         lastScrollForHeader.current = currentY
         return
       }
-      
+
       const diff = currentY - lastY
-      
+
       // Sadece belirgin scroll hareketlerine tepki ver (15px+)
       if (Math.abs(diff) > 15) {
         if (diff > 0) {
@@ -683,7 +683,7 @@ export function Header() {
       }
     }
 
-    window.addEventListener('scroll', handleHeaderVisibility, {passive: true})
+    window.addEventListener('scroll', handleHeaderVisibility, { passive: true })
     return () => window.removeEventListener('scroll', handleHeaderVisibility)
   }, [isMobile])
 
@@ -785,7 +785,7 @@ export function Header() {
 
   // Mobil menü kapalıyken odaklanılmasını tamamen engelle (inert davranışı)
   useEffect(() => {
-    const menuEl = mobileMenuRef.current as (HTMLElement & {inert?: boolean}) | null
+    const menuEl = mobileMenuRef.current as (HTMLElement & { inert?: boolean }) | null
     if (!menuEl) return
 
     try {
@@ -798,7 +798,7 @@ export function Header() {
   // Hover edilen kategorinin ürünlerini yükle (eğer menuImage yoksa)
   const hoveredCategory = categories.find(c => c.id === hoveredCategoryId)
   const shouldFetchProducts = hoveredCategoryId && hoveredCategory && !hoveredCategory.menuImage
-  const {data: hoveredCategoryProducts = []} = useProductsByCategory(
+  const { data: hoveredCategoryProducts = [] } = useProductsByCategory(
     shouldFetchProducts ? hoveredCategoryId : undefined
   )
 
@@ -859,7 +859,7 @@ export function Header() {
 
   useEffect(() => {
     const onResize = () => updateSubmenuOffset()
-    window.addEventListener('resize', onResize, {passive: true})
+    window.addEventListener('resize', onResize, { passive: true })
     return () => window.removeEventListener('resize', onResize)
   }, [updateSubmenuOffset])
 
@@ -879,7 +879,7 @@ export function Header() {
       setIsSearching(true)
       Promise.all([getProducts(), getDesigners(), getCategories()])
         .then(([products, designers, categories]) => {
-          setAllData({products, designers, categories})
+          setAllData({ products, designers, categories })
           setIsSearching(false)
         })
         .catch(() => {
@@ -891,7 +891,7 @@ export function Header() {
   // Debounced search effect
   useEffect(() => {
     if (searchQuery.length < 2) {
-      setSearchResults({products: [], designers: [], categories: []})
+      setSearchResults({ products: [], designers: [], categories: [] })
       return
     }
 
@@ -901,7 +901,7 @@ export function Header() {
     const handler = setTimeout(() => {
       const lowercasedQuery = normalizeSearchText(searchQuery).trim()
       if (!lowercasedQuery) {
-        setSearchResults({products: [], designers: [], categories: []})
+        setSearchResults({ products: [], designers: [], categories: [] })
         setIsSearching(false)
         return
       }
@@ -1017,12 +1017,12 @@ export function Header() {
   const iconClasses =
     'text-white hover:text-gray-200 transition-all duration-300 transform hover:scale-125'
 
-  const mobileMenuLinks: {to: string; label: string}[] = [
-    {to: '/designers', label: (t('designers') || '').toLocaleUpperCase('en')},
-    {to: '/projects', label: (t('projects') || 'Projeler').toLocaleUpperCase('en')},
-    {to: '/news', label: (t('news') || '').toLocaleUpperCase('en')},
-    {to: '/about', label: (t('about') || '').toLocaleUpperCase('en')},
-    {to: '/contact', label: (t('contact') || '').toLocaleUpperCase('en')},
+  const mobileMenuLinks: { to: string; label: string }[] = [
+    { to: '/designers', label: (t('designers') || '').toLocaleUpperCase('en') },
+    { to: '/projects', label: (t('projects') || 'Projeler').toLocaleUpperCase('en') },
+    { to: '/news', label: (t('news') || '').toLocaleUpperCase('en') },
+    { to: '/about', label: (t('about') || '').toLocaleUpperCase('en') },
+    { to: '/contact', label: (t('contact') || '').toLocaleUpperCase('en') },
   ]
 
   // Mobil overlay menü kapanırken önce yazıların kaybolup sonra panelin animasyonla kapanması için (biraz daha hızlı)
@@ -1073,7 +1073,7 @@ export function Header() {
     children: React.ReactNode
     onMouseEnter?: () => void
     onClick?: () => void
-  }> = ({to, children, onMouseEnter, onClick}) => {
+  }> = ({ to, children, onMouseEnter, onClick }) => {
     const baseStyle = {
       fontSize: '0.875rem',
       fontWeight: 600,
@@ -1087,7 +1087,7 @@ export function Header() {
         onMouseEnter={onMouseEnter}
         onClick={onClick}
         className={`relative group py-2 ${navLinkClasses}`}
-        style={({isActive}) => ({...(isActive ? activeLinkClasses : {}), ...baseStyle})}
+        style={({ isActive }) => ({ ...(isActive ? activeLinkClasses : {}), ...baseStyle })}
       >
         <span
           className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase header-nav-text"
@@ -1122,7 +1122,7 @@ export function Header() {
 
   const renderHeaderStyles = () => (
     <style>
-        {`
+      {`
           .hide-scrollbar::-webkit-scrollbar { display: none; }
           .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
           
@@ -1269,24 +1269,24 @@ export function Header() {
         className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-150 ease-out ${
           // Scroll yönüne göre header'ı gizle/göster (mobil ve desktop)
           isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
-        } ${
+          } ${
           // Overlay mobil menü açıkken header ile panelin tam aynı renkte görünmesi için özel sınıf
           isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing) ? 'overlay-menu-open' : ''
-        }`}
+          }`}
       >
         <div
           className={`${isOverlayMobileMenu || (isProductsOpen && !isMobile) ? '' : 'overflow-hidden'} ${
             // Header yüksekliği: mobil ve desktop için sabit yükseklik - her zaman
             isMobile ? 'h-[3.5rem] min-h-[3.5rem] max-h-[3.5rem]' : 'h-[5rem] min-h-[5rem] max-h-[5rem]'
-          } ${
+            } ${
             // Arka plan blur'ü: opacity 0 ise blur'ü kaldır (Products açıkken blur aktif)
             headerOpacity <= 0 && !isProductsOpen ? '' : 'backdrop-blur-lg'
-          } ${
+            } ${
             // Sadece menü açıldığında transition ve max-height değişimi
             isProductsOpen || (isMobileMenuOpen && !isOverlayMobileMenu)
               ? 'transition-all duration-700 ease-in-out'
               : ''
-          }`}
+            }`}
           style={{
             backgroundColor: (() => {
               // Ürün detay sayfasında arka plan rengini kontrol etme - sabit değer kullan
@@ -1296,18 +1296,18 @@ export function Header() {
                 // Ürün detay sayfasında header opacity'ye göre sabit değer
                 return `rgba(0, 0, 0, ${Math.max(headerOpacity, 0.7)})`
               }
-              
+
               // Desktop'ta Products dropdown açıkken yarı şeffaf arka plan
               if (isProductsOpen && !isMobile) {
                 return 'rgba(0, 0, 0, 0.85)'
               }
-              
+
               // Koyu hero olan sayfalarda en üstteyken şeffaf
               const isDarkHero = path === '/' || path === '' || path.includes('about')
               if (isDarkHero && window.scrollY <= 10 && headerOpacity <= 0) {
                 return 'transparent'
               }
-              
+
               // Overlay mobil menü AÇIKKEN veya kapanma animasyonu sürerken
               // header'ı da mobil menü paneli ile aynı daha koyu gri yap
               if (isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)) {
@@ -1319,13 +1319,13 @@ export function Header() {
                 // Sayfa arka plan rengini kontrol et (brightness hesaplanamadığında)
                 const getPageBackgroundColor = () => {
                   try {
-                  // Açık renkli sayfaları route'a göre kontrol et
-                  // NOT: /about sayfası hero bölümü koyu olduğu için buradan çıkarıldı
-                  const lightPages = ['/privacy', '/terms', '/cookies', '/kvkk']
-                  if (lightPages.some(page => location.pathname.includes(page))) {
-                    return 0.85 // Açık renkli sayfalar için yüksek luminance
-                  }
-                    
+                    // Açık renkli sayfaları route'a göre kontrol et
+                    // NOT: /about sayfası hero bölümü koyu olduğu için buradan çıkarıldı
+                    const lightPages = ['/privacy', '/terms', '/cookies', '/kvkk']
+                    if (lightPages.some(page => location.pathname.includes(page))) {
+                      return 0.85 // Açık renkli sayfalar için yüksek luminance
+                    }
+
                     // Header'ın hemen altındaki elementi kontrol et
                     const headerElement = headerContainerRef.current
                     if (headerElement) {
@@ -1349,7 +1349,7 @@ export function Header() {
                         element = element.nextElementSibling as HTMLElement
                       }
                     }
-                    
+
                     // Fallback: main veya body'yi kontrol et
                     const body = document.body
                     const main = document.querySelector('main')
@@ -1431,7 +1431,7 @@ export function Header() {
                   if (lightPages.some(page => location.pathname.includes(page))) {
                     return 0.85 // Açık renkli sayfalar için yüksek luminance
                   }
-                  
+
                   // Header'ın hemen altındaki elementi kontrol et
                   const headerElement = headerContainerRef.current
                   if (headerElement) {
@@ -1455,7 +1455,7 @@ export function Header() {
                       element = element.nextElementSibling as HTMLElement
                     }
                   }
-                  
+
                   // Fallback: main veya body'yi kontrol et
                   const body = document.body
                   const main = document.querySelector('main')
@@ -1525,7 +1525,7 @@ export function Header() {
 
               return `rgba(0, 0, 0, ${baseOpacity})`
             })(),
-            transition: isProductsOpen || (isMobileMenuOpen && !isOverlayMobileMenu) 
+            transition: isProductsOpen || (isMobileMenuOpen && !isOverlayMobileMenu)
               ? 'background-color 0.2s ease-out, max-height 0.7s ease-in-out'
               : 'background-color 0.2s ease-out',
             // Overlay mobil menü AÇIKKEN blur'ü tamamen kapat ki panel ile header aynı tonda görünsün
@@ -1546,12 +1546,12 @@ export function Header() {
               headerOpacity <= 0 || isProductsOpen || isSearchOpen ? 'none' : undefined,
             pointerEvents: 'auto',
             // Desktop'ta header yüksekliği her zaman sabit - products dropdown overflow ile gösterilir
-            height: isMobileMenuOpen && !isOverlayMobileMenu 
-              ? 'auto' 
+            height: isMobileMenuOpen && !isOverlayMobileMenu
+              ? 'auto'
               : (isMobile ? '3.5rem' : '5rem'),
             minHeight: isMobile ? '3.5rem' : '5rem',
-            maxHeight: isMobileMenuOpen && !isOverlayMobileMenu 
-              ? '40rem' 
+            maxHeight: isMobileMenuOpen && !isOverlayMobileMenu
+              ? '40rem'
               : (isMobile ? '3.5rem' : '5rem'),
             // Products dropdown için overflow visible
             overflow: isProductsOpen && !isMobile ? 'visible' : undefined,
@@ -1561,7 +1561,7 @@ export function Header() {
           <nav className="px-2 sm:px-4 lg:px-6 h-full flex items-center" ref={navRef}>
             {/* Üst satır: logo ve menü düğmeleri dikeyde tam ortalı */}
             <div className="relative flex w-full h-full items-center lg:grid lg:grid-cols-[1fr_auto_1fr] lg:items-center">
-              {/* Sol taraf - Menü düğmeleri (desktop) ve arama + logo (mobil) */}
+              {/* Sol taraf - Arama + sol menü (desktop) ve arama + logo (mobil) */}
               <div className="flex flex-1 items-center lg:justify-start">
                 {/* Mobil Arama - Solda */}
                 {isMobile && (
@@ -1580,20 +1580,18 @@ export function Header() {
                     {/* Search → X arasında yumuşak geçiş animasyonu */}
                     <span className="relative flex items-center justify-center w-6 h-6">
                       <span
-                        className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${
-                          isSearchOpen
+                        className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${isSearchOpen
                             ? 'opacity-0 scale-75 rotate-90'
                             : 'opacity-100 scale-100 rotate-0'
-                        }`}
+                          }`}
                       >
                         <SearchIcon />
                       </span>
                       <span
-                        className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${
-                          isSearchOpen
+                        className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${isSearchOpen
                             ? 'opacity-100 scale-100 rotate-0'
                             : 'opacity-0 scale-75 -rotate-90'
-                        }`}
+                          }`}
                       >
                         <CloseIcon />
                       </span>
@@ -1607,8 +1605,61 @@ export function Header() {
                     <SiteLogo logoUrl={settings?.logoUrl} className="w-32 h-5" />
                   </Link>
                 </div>
-                {/* Desktop Menü */}
-                <div className="hidden lg:flex lg:items-center lg:space-x-8">
+                {/* Desktop Arama (masaüstü) - Sol tarafta */}
+                {!isMobile && (
+                  <button
+                    ref={searchButtonRef}
+                    onClick={() => {
+                      // Desktop: Header tamamen şeffafsa (veya neredeyse şeffafsa) arama açıldığında
+                      // geçici olarak yarı şeffaf yap; kapanırken eski değere döndür.
+                      if (
+                        !isSearchOpen &&
+                        headerOpacity <= 0.05 &&
+                        previousHeaderOpacityRef.current === null
+                      ) {
+                        previousHeaderOpacityRef.current = headerOpacity
+                        setHeaderOpacity(0.7)
+                      }
+
+                      if (isSearchOpen) {
+                        closeSearch()
+                      } else {
+                        setIsSearchOpen(true)
+                      }
+                    }}
+                    className={`${iconClasses} hidden lg:inline-flex mr-12`}
+                    aria-label={
+                      isSearchOpen
+                        ? t('close_search') || 'Aramayı kapat'
+                        : t('open_search') || 'Ara'
+                    }
+                    aria-expanded={isSearchOpen}
+                    aria-controls="search-panel"
+                  >
+                    {/* Search → X arasında yumuşak geçiş animasyonu */}
+                    <span className="relative flex items-center justify-center w-6 h-6">
+                      <span
+                        className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${isSearchOpen
+                            ? 'opacity-0 scale-75 rotate-90'
+                            : 'opacity-100 scale-100 rotate-0'
+                          }`}
+                      >
+                        <SearchIcon />
+                      </span>
+                      <span
+                        className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${isSearchOpen
+                            ? 'opacity-100 scale-100 rotate-0'
+                            : 'opacity-0 scale-75 -rotate-90'
+                          }`}
+                      >
+                        <CloseIcon />
+                      </span>
+                    </span>
+                  </button>
+                )}
+
+                {/* Desktop Menü - Logo'nun solundaki linkler (aramadan uzak, araları açılmış) */}
+                <div className="hidden lg:flex lg:items-center lg:space-x-5 xl:space-x-7">
                   <div
                     ref={productsButtonRef}
                     className="relative"
@@ -1659,6 +1710,20 @@ export function Header() {
                   >
                     {t('projects') || 'Projeler'}
                   </NavItem>
+                </div>
+              </div>
+
+              {/* Orta - Logo (Desktop) */}
+              <div className="hidden lg:flex items-center justify-center">
+                <Link to="/" className="flex items-center gap-3 text-white transition-colors">
+                  <SiteLogo logoUrl={settings?.logoUrl} className="w-32 md:w-72 h-6 md:h-10" />
+                </Link>
+              </div>
+
+              {/* Sağ taraf - Logo'nun sağındaki linkler + ikonlar */}
+              <div className="flex flex-1 items-center justify-end space-x-4 lg:justify-end">
+                {/* Desktop Menü - Logo'nun sağındaki linkler (dil bölümünden uzak, araları açılmış) */}
+                <div className="hidden lg:flex lg:items-center lg:space-x-5 xl:space-x-7 mr-12">
                   <NavItem
                     to="/news"
                     onMouseEnter={handleCloseProducts}
@@ -1681,73 +1746,8 @@ export function Header() {
                     {t('contact')}
                   </NavItem>
                 </div>
-              </div>
-
-              {/* Orta - Logo (Desktop) */}
-              <div className="hidden lg:flex items-center justify-center">
-                <Link to="/" className="flex items-center gap-3 text-white transition-colors">
-                  <SiteLogo logoUrl={settings?.logoUrl} className="w-32 md:w-72 h-6 md:h-10" />
-                </Link>
-              </div>
-
-              {/* Sağ taraf - İkonlar */}
-              <div className="flex flex-1 items-center justify-end space-x-4 lg:justify-end">
-                {/* Desktop Arama - Dil seçeneklerinin solunda */}
-                {!isMobile && (
-                  <button
-                    ref={searchButtonRef}
-                    onClick={() => {
-                      // Desktop: Header tamamen şeffafsa (veya neredeyse şeffafsa) arama açıldığında
-                      // geçici olarak yarı şeffaf yap; kapanırken eski değere döndür.
-                      if (
-                        !isSearchOpen &&
-                        headerOpacity <= 0.05 &&
-                        previousHeaderOpacityRef.current === null
-                      ) {
-                        previousHeaderOpacityRef.current = headerOpacity
-                        setHeaderOpacity(0.7)
-                      }
-
-                      if (isSearchOpen) {
-                        closeSearch()
-                      } else {
-                        setIsSearchOpen(true)
-                      }
-                    }}
-                    className={`${iconClasses} hidden md:inline-flex`}
-                    aria-label={
-                      isSearchOpen
-                        ? t('close_search') || 'Aramayı kapat'
-                        : t('open_search') || 'Ara'
-                    }
-                    aria-expanded={isSearchOpen}
-                    aria-controls="search-panel"
-                  >
-                    {/* Search → X arasında yumuşak geçiş animasyonu */}
-                    <span className="relative flex items-center justify-center w-6 h-6">
-                      <span
-                        className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${
-                          isSearchOpen
-                            ? 'opacity-0 scale-75 rotate-90'
-                            : 'opacity-100 scale-100 rotate-0'
-                        }`}
-                      >
-                        <SearchIcon />
-                      </span>
-                      <span
-                        className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${
-                          isSearchOpen
-                            ? 'opacity-100 scale-100 rotate-0'
-                            : 'opacity-0 scale-75 -rotate-90'
-                        }`}
-                      >
-                        <CloseIcon />
-                      </span>
-                    </span>
-                  </button>
-                )}
                 {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
-                  <div className="hidden md:flex items-center gap-0">
+                  <div className="hidden lg:flex items-center gap-0">
                     {supportedLocales.map(langCode => {
                       const isActive = locale === langCode
                       return (
@@ -1755,22 +1755,19 @@ export function Header() {
                           key={langCode}
                           onClick={() => setLocale(langCode)}
                           aria-pressed={isActive}
-                          aria-label={`${
-                            t('switch_language') || 'Dil değiştir'
-                          } - ${langCode.toUpperCase()}`}
-                          className={`group relative px-1.5 py-1.5 text-[0.9rem] uppercase tracking-[0.25em] transition-colors duration-200 ${
-                            isActive
+                          aria-label={`${t('switch_language') || 'Dil değiştir'
+                            } - ${langCode.toUpperCase()}`}
+                          className={`group relative px-1.5 py-1.5 text-[0.9rem] uppercase tracking-[0.25em] transition-colors duration-200 ${isActive
                               ? 'text-white font-light'
                               : 'text-gray-400/90 hover:text-white font-light'
-                          }`}
-                          style={{fontFamily: 'Inter, sans-serif', letterSpacing: '0.25em'}}
+                            }`}
+                          style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.25em' }}
                         >
                           <span className="relative inline-block">
                             {langCode.toUpperCase()}
                             <span
-                              className={`absolute -bottom-1 left-0 w-full h-[3px] bg-white transition-transform duration-300 ease-out origin-center ${
-                                isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
-                              }`}
+                              className={`absolute -bottom-1 left-0 w-full h-[3px] bg-white transition-transform duration-300 ease-out origin-center ${isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                                }`}
                             ></span>
                           </span>
                         </button>
@@ -1834,21 +1831,18 @@ export function Header() {
                       <div className="flex flex-col gap-1.5 items-start w-6">
                         {/* Üst Çizgi: 45 derece döner ve aşağı iner */}
                         <span
-                          className={`h-0.5 w-6 bg-white transition-all duration-300 ${
-                            isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''
-                          }`}
+                          className={`h-0.5 w-6 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''
+                            }`}
                         ></span>
                         {/* Orta Çizgi: Kaybolur */}
                         <span
-                          className={`h-0.5 w-6 bg-white transition-all duration-300 ${
-                            isMobileMenuOpen ? 'opacity-0' : ''
-                          }`}
+                          className={`h-0.5 w-6 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''
+                            }`}
                         ></span>
                         {/* Alt Çizgi: -45 derece döner ve yukarı çıkar */}
                         <span
-                          className={`h-0.5 w-6 bg-white transition-all duration-300 ${
-                            isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''
-                          }`}
+                          className={`h-0.5 w-6 bg-white transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''
+                            }`}
                         ></span>
                       </div>
                     </button>

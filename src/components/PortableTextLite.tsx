@@ -1,8 +1,8 @@
 import React from 'react'
-import {sanitizeText, sanitizeUrl} from '../lib/sanitize'
+import { sanitizeText, sanitizeUrl } from '../lib/sanitize'
 
-type Span = {_type: 'span'; text: string; marks?: string[]}
-type MarkDef = {_key?: string; _type?: string; href?: string}
+type Span = { _type: 'span'; text: string; marks?: string[] }
+type MarkDef = { _key?: string; _type?: string; href?: string }
 type Block = {
   _type?: string
   style?: string
@@ -47,12 +47,12 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
   })
 }
 
-export default function PortableTextLite({value}: {value: Block[] | undefined}) {
+export default function PortableTextLite({ value }: { value: Block[] | undefined }) {
   if (!Array.isArray(value) || value.length === 0) return null
 
   // Group lists
   const nodes: React.ReactNode[] = []
-  let listBuffer: {type: 'ul' | 'ol'; items: React.ReactNode[]} | null = null
+  let listBuffer: { type: 'ul' | 'ol'; items: React.ReactNode[] } | null = null
 
   let listCounter = 0
   const flushList = () => {
@@ -83,7 +83,7 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
       )
       if (!listBuffer || listBuffer.type !== type) {
         flushList()
-        listBuffer = {type, items: [item]}
+        listBuffer = { type, items: [item] }
       } else {
         listBuffer.items.push(item)
       }
@@ -95,19 +95,19 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
       const content = renderInline(block.children as Span[], block.markDefs || [])
       if (style === 'h1')
         nodes.push(
-          <h1 className="text-3xl font-light my-4" key={blockKey}>
+          <h1 className="text-2xl md:text-3xl font-light my-4" key={blockKey}>
             {content}
           </h1>
         )
       else if (style === 'h2')
         nodes.push(
-          <h2 className="text-2xl font-light my-4" key={blockKey}>
+          <h2 className="text-xl md:text-2xl font-light my-4" key={blockKey}>
             {content}
           </h2>
         )
       else if (style === 'h3')
         nodes.push(
-          <h3 className="text-xl font-light my-3" key={blockKey}>
+          <h3 className="text-lg md:text-xl font-light my-3" key={blockKey}>
             {content}
           </h3>
         )
