@@ -707,9 +707,18 @@ export function ProjectDetailPage() {
                 <div className="max-w-4xl mx-auto space-y-4 px-4 sm:px-0">
                   {project.excerpt && (
                     <ScrollReveal delay={200}>
-                      <p className="text-lg text-gray-900 leading-relaxed font-normal">
-                        {t(project.excerpt)}
-                      </p>
+                      {(() => {
+                        const excerptContent = t(project.excerpt)
+                        return Array.isArray(excerptContent) ? (
+                          <div className="text-lg text-gray-900 leading-relaxed font-normal">
+                            <PortableTextLite value={excerptContent} />
+                          </div>
+                        ) : (
+                          <p className="text-lg text-gray-900 leading-relaxed font-normal">
+                            {excerptContent}
+                          </p>
+                        )
+                      })()}
                     </ScrollReveal>
                   )}
                   {project.body && (

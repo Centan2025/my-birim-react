@@ -79,8 +79,8 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
         return
       }
 
-      // Desktop: üstten buffer, alttan buffer yok (content'leri kesmemek için)
-      const BUFFER_TOP = 60;
+      // Desktop: buffer yok, content'leri kesmemek için
+      const BUFFER_TOP = 0;
       const top = Math.max(0, rect.top - BUFFER_TOP)
       const bottom = 0 // Alttan kesme yok, content'lerin üstüne binmesin
 
@@ -173,7 +173,7 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
       {/* PLACEHOLDER: Container */}
       <div
         ref={containerRef}
-        className={`inspiration-container w-full ${!isMobile ? 'mt-24 md:mt-32 lg:mt-40' : ''}`}
+        className="inspiration-container w-full"
         style={dynamicHeightStyles}
       >
         <div className="inspiration-content container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl h-full flex flex-col justify-center items-center text-white text-center pointer-events-auto">
@@ -191,8 +191,8 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
                 to={inspiration.buttonLink || '/'}
                 className="group mt-8 inline-flex items-center gap-x-3 text-white font-semibold py-3 pl-0 pr-5 text-lg rounded-lg"
               >
-                <span className="inline-flex items-end border-b border-transparent md:group-hover:border-white pb-1 transition-all duration-300 ease-out">
-                  <span className="group-hover:text-gray-200 leading-none">
+                <span className="inline-flex justify-center transition-all duration-500 ease-out">
+                  <span className="leading-none transition-all duration-500 ease-out md:group-hover:tracking-[0.12em] md:group-hover:text-gray-200">
                     {t(inspiration.buttonText)}
                   </span>
                 </span>

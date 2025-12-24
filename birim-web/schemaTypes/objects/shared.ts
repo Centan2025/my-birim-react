@@ -823,12 +823,8 @@ export const contentBlock = defineType({
       name: 'titleFont',
       title: 'Başlık Fontu',
       type: 'string',
-      options: {
-        list: [
-          { title: 'Varsayılan (Oswald)', value: 'normal' },
-          { title: 'Serif', value: 'serif' },
-          { title: 'Mono', value: 'mono' },
-        ],
+      components: {
+        input: FontSelectorInput,
       },
       initialValue: 'normal',
       description: 'Başlık için font stili seçin.',

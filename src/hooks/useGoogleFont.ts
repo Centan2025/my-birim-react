@@ -23,7 +23,7 @@ export function useGoogleFont(fontName: string | undefined) {
     // Google Fonts URL'ini oluştur
     // Font adındaki boşlukları + ile değiştir
     const fontFamily = fontName.replace(/\s+/g, '+')
-    const href = `https://fonts.googleapis.com/css2?family=${fontFamily}:wght@300;400;500;600;700&display=swap`
+    const href = `https://fonts.googleapis.com/css2?family=${fontFamily}:wght@200;300;400;500;600;700&display=swap`
 
     // Link elementi oluştur ve ekle
     const link = document.createElement('link')
@@ -89,7 +89,7 @@ export function useGoogleFonts(fontNames: (string | undefined)[]) {
       }
 
       const fontFamily = fontName.replace(/\s+/g, '+')
-      const href = `https://fonts.googleapis.com/css2?family=${fontFamily}:wght@300;400;500;600;700&display=swap`
+      const href = `https://fonts.googleapis.com/css2?family=${fontFamily}:wght@200;300;400;500;600;700&display=swap`
 
       const link = document.createElement('link')
       link.id = fontId

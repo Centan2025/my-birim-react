@@ -8,6 +8,7 @@ import { OptimizedImage } from './OptimizedImage'
 import { OptimizedVideo } from './OptimizedVideo'
 import { YouTubeBackground } from './YouTubeBackground'
 import PortableTextLite from './PortableTextLite'
+import { useGoogleFonts } from '../hooks/useGoogleFont'
 
 interface HomeContentBlocksProps {
   blocks: ContentBlock[]
@@ -21,6 +22,11 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
   imageBorderClass,
 }) => {
   const { t } = useTranslation()
+
+  // Tüm bloklardaki fontları topla ve yükle
+  const allFonts = blocks.map(b => b.titleFont).filter(Boolean) as string[]
+  useGoogleFonts(allFonts)
+
   if (!blocks || blocks.length === 0) {
     return null
   }
@@ -58,6 +64,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 
         const textPosition = block.textPosition || 'below'
         const titlePosition = block.titlePosition || 'below'
+        const titleFont = block.titleFont || 'normal'
 
         const titleElement = hasTitle && (
           <ScrollReveal
@@ -69,11 +76,14 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             duration={0.6}
           >
             <h2
-              className={`${isFullWidth ? 'text-3xl md:text-5xl lg:text-6xl' : 'text-3xl md:text-4xl lg:text-5xl'} font-oswald uppercase ${textAlignClass} text-gray-950 max-w-4xl mb-4 ${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}
+              className={`${isFullWidth ? 'text-3xl md:text-5xl lg:text-6xl' : 'text-3xl md:text-4xl lg:text-5xl'} uppercase ${textAlignClass} text-gray-950 max-w-4xl mb-4 ${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}
               style={{
                 textShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                fontFamily: '"Oswald", sans-serif',
-                fontWeight: 300,
+                fontFamily: titleFont === 'normal' ? '"Oswald", sans-serif' :
+                  titleFont === 'serif' ? 'serif' :
+                    titleFont === 'mono' ? 'monospace' :
+                      `"${titleFont}", sans-serif`,
+                fontWeight: (titleFont === 'normal' || titleFont === 'Oswald') ? 200 : 'inherit',
                 letterSpacing: '0.1em',
               }}
             >
@@ -89,12 +99,15 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 <div className={`prose max-w-none ${textAlignClass}`}>
                   {(() => {
                     const desc = t(block.description)
+                    const widthClass = textAlign === 'center' ? 'max-w-4xl' : 'max-w-2xl'
+                    const marginClass = textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'
+
                     return Array.isArray(desc) ? (
-                      <div className={`${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'} max-w-2xl mt-3`}>
+                      <div className={`${marginClass} ${widthClass} mt-3`}>
                         <PortableTextLite value={desc} />
                       </div>
                     ) : (
-                      <p className={`mt-3 text-gray-900 font-normal leading-relaxed max-w-2xl text-base md:text-lg ${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}>
+                      <p className={`mt-3 text-gray-900 font-normal leading-relaxed ${widthClass} text-base md:text-lg ${marginClass}`}>
                         {desc}
                       </p>
                     )
@@ -109,8 +122,8 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     to={block.linkUrl}
                     className={`group inline-flex items-center gap-x-3 text-gray-950 font-bold py-3 ${textAlign === 'right' ? 'pl-5 pr-0' : 'pl-0 pr-5'} text-sm md:text-lg rounded-lg`}
                   >
-                    <span className="inline-flex items-end border-b border-transparent md:group-hover:border-gray-900 pb-1 transition-all duration-300 ease-out">
-                      <span className="group-hover:text-gray-500 leading-none font-bold tracking-[0.05em] uppercase">
+                    <span className="inline-flex justify-center transition-all duration-500 ease-out">
+                      <span className="leading-none font-bold tracking-[0.05em] uppercase transition-all duration-500 ease-out md:group-hover:tracking-[0.12em] md:group-hover:text-gray-600">
                         {t(block.linkText)}
                       </span>
                     </span>
@@ -121,16 +134,22 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           </div>
         )
 
+        const mediaWidthClass = isFullWidth
+          ? 'w-full'
+          : isCenter
+            ? 'w-full max-w-[92%] md:max-w-[85%] lg:max-w-[80%] mx-auto'
+            : 'w-full max-w-[94%] mx-auto'
+
         const mediaContent = (
           <ScrollReveal delay={50} threshold={0.1} width={(isFullWidth || isCenter) ? "w-full" : "w-auto"} className={`h-auto ${(isFullWidth || isCenter) ? 'w-full' : ''} ${isCenter ? 'mx-auto' : ''}`}>
             {block.mediaType === 'youtube' ? (
-              <div className={`relative ${isFullWidth ? 'w-full' : 'w-full max-w-[94%] mx-auto'} aspect-video overflow-hidden`}>
+              <div className={`relative ${mediaWidthClass} aspect-video overflow-hidden`}>
                 <YouTubeBackground url={mediaUrl} />
               </div>
             ) : block.mediaType === 'video' ? (
               <OptimizedVideo
                 src={mediaUrl}
-                className={`${isFullWidth ? 'w-full h-auto max-w-full' : `w-full h-auto ${imageBorderClass} max-w-[94%] mx-auto`} ${isMobile ? 'object-contain' : 'object-cover'}`}
+                className={`${isFullWidth ? 'w-full h-auto max-w-full' : `${mediaWidthClass} ${imageBorderClass}`} ${isMobile ? 'object-contain' : 'object-cover'}`}
                 autoPlay
                 loop
                 muted
@@ -142,7 +161,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               <OptimizedImage
                 src={mediaUrl}
                 alt=""
-                className={`${isFullWidth ? 'w-full h-auto' : `w-full h-auto ${imageBorderClass} max-w-[94%] mx-auto`} ${isMobile ? 'object-contain' : 'object-cover'} block`}
+                className={`${isFullWidth ? 'w-full h-auto' : `${mediaWidthClass} ${imageBorderClass}`} ${isMobile ? 'object-contain' : 'object-cover'} block`}
                 loading="lazy"
                 quality={85}
               />
@@ -170,7 +189,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         return (
           <section
             key={index}
-            className={`content-block-wrapper ${sectionSpacingClass} ${backgroundColor}`}
+            className={`content-block-wrapper relative z-20 ${sectionSpacingClass} ${backgroundColor}`}
             data-block-index={index}
           >
             {(isFullWidth || isCenter) ? (

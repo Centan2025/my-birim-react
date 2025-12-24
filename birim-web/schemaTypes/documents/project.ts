@@ -69,7 +69,7 @@ export default defineType({
       description:
         'Desktop cihazlar için özel kapak görseli (opsiyonel). Yoksa varsayılan görsel kullanılır. Önerilen çözünürlük: 1920x1080px veya 1920x1200px.',
     }),
-    defineField({ name: 'excerpt', title: 'Kısa Açıklama', type: 'localizedText' }),
+    defineField({ name: 'excerpt', title: 'Kısa Açıklama', type: 'localizedPortableText' }),
     defineField({
       name: 'media',
       title: 'Medya (Görsel ve Video)',
