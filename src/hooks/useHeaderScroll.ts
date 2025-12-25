@@ -1,4 +1,4 @@
-import {useEffect, MutableRefObject} from 'react'
+import { useEffect, MutableRefObject } from 'react'
 
 type MenuState = {
   isLangOpen: boolean
@@ -71,8 +71,8 @@ export function useHeaderScroll({
 
       // Mobil davranış
       if (isMobile) {
-        if (menuOpen || searchOpen) {
-          setHeaderOpacity(menuOpen ? 0.75 : 0.7)
+        if (menuOpen) {
+          setHeaderOpacity(0.75)
           setIsHeaderVisible(true)
           lastScrollYRef.current = currentScrollY
           return
@@ -208,13 +208,9 @@ export function useHeaderScroll({
             }
           }
         }
-        lastScrollYRef.current = currentScrollY
       } else {
-        if (searchOpen) {
-          setIsHeaderVisible(true)
-        }
-
-        lastScrollYRef.current = currentScrollY
+        // Desktop'ta arama açıkken header'ı zorla görünür tutma kısıtlaması kaldırıldı.
+        // Böylece scroll yapıldığında header normal gizlenme mantığını izleyebilir.
 
         const path = locationPathname
         const isProjectsList = path === '/projects' || path === '/projects/'
@@ -250,20 +246,14 @@ export function useHeaderScroll({
       }
 
       const scrollDelta = Math.abs(currentScrollY - lastScrollYRef.current)
-      if (scrollDelta > 3) {
-        if (isMobile) {
-          if (scrollTimeoutRef.current) {
-            clearTimeout(scrollTimeoutRef.current)
-          }
-          if (langOpen) setIsLangOpen(false)
-          if (productsOpen) setIsProductsOpen(false)
-          if (searchOpen) closeSearch()
-        } else {
-          if (searchOpen) closeSearch()
-          if (langOpen) setIsLangOpen(false)
-          if (productsOpen) setIsProductsOpen(false)
-        }
+      if (scrollDelta > 5) {
+        if (langOpen) setIsLangOpen(false)
+        if (productsOpen) setIsProductsOpen(false)
+        if (searchOpen) closeSearch()
       }
+
+      // Update last scroll position at the very end
+      lastScrollYRef.current = currentScrollY
     }
 
     const throttledHandleScroll = () => {
@@ -353,7 +343,7 @@ export function useHeaderScroll({
     const initializeScrollListener = () => {
       scrollListener = handleScrollWithEnd
       handleScroll()
-      window.addEventListener('scroll', handleScrollWithEnd, {passive: true})
+      window.addEventListener('scroll', handleScrollWithEnd, { passive: true })
     }
 
     initializeScrollListener()

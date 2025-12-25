@@ -170,6 +170,8 @@ export function Header() {
     isMobile && settings && settings.mobileHeaderAnimation === 'overlay'
   )
   const [isMobileMenuClosing, setIsMobileMenuClosing] = useState(false)
+  const [headerScale, setHeaderScale] = useState(1)
+
 
   // Search states
   const [searchQuery, setSearchQuery] = useState('')
@@ -230,8 +232,8 @@ export function Header() {
     setSearchQuery('')
     setSearchResults({ products: [], designers: [], categories: [] })
 
-    // Desktop'ta arama paneli kapanırken, eğer biz header opacity'yi değiştirdiysek geri al
-    if (!isMobile && previousHeaderOpacityRef.current !== null) {
+    // Arama paneli kapanırken, eğer biz header opacity'yi değiştirdiysek geri al
+    if (previousHeaderOpacityRef.current !== null) {
       setHeaderOpacity(previousHeaderOpacityRef.current)
       previousHeaderOpacityRef.current = null
     }
@@ -701,6 +703,19 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleHeaderVisibility)
   }, [isMobile])
 
+  // Header her zaman tam boyutta - scaling yok
+  useEffect(() => {
+    setHeaderScale(1)
+  }, [isMobile])
+
+  // Header kaybolduğunda products dropdown'ı kapat
+  useEffect(() => {
+    if (!isHeaderVisible && isProductsOpen) {
+      setIsProductsOpen(false)
+    }
+  }, [isHeaderVisible, isProductsOpen])
+
+
   // Menü state'leri değiştiğinde ref'i güncelle (scroll handler stale closure'dan kaçınmak için)
   useEffect(() => {
     menuStateRef.current = {
@@ -1022,14 +1037,22 @@ export function Header() {
   }
 
   const navLinkClasses =
-    'tracking-wider uppercase text-gray-200 hover:text-white transition-colors duration-300 header-nav-item'
+    'tracking-wider uppercase text-gray-300 hover:text-white transition-colors duration-300 header-nav-item'
   const activeLinkClasses = {
     color: 'white',
     textShadow: '0 0 5px rgba(255,255,255,0.5)',
     opacity: 1,
   }
+  const iconBaseSize = 'clamp(22px, 1.2rem + 0.4vw, 30px)'
   const iconClasses =
-    'text-white hover:text-gray-200 transition-all duration-300 transform hover:scale-125'
+    'text-gray-300 hover:text-white transition-all duration-300 transform hover:scale-125'
+  const sharedIconStyle = {
+    width: iconBaseSize,
+    height: iconBaseSize,
+    display: isMobile ? 'none' : 'flex', // Only apply flex on desktop to avoid forcing visibility
+    alignItems: 'center',
+    justifyContent: 'center'
+  }
 
   const mobileMenuLinks: { to: string; label: string }[] = [
     { to: '/designers', label: (t('designers') || '').toLocaleUpperCase('en') },
@@ -1089,7 +1112,7 @@ export function Header() {
     onClick?: () => void
   }> = ({ to, children, onMouseEnter, onClick }) => {
     const baseStyle = {
-      fontSize: '0.875rem',
+      fontSize: 'clamp(10px, 0.2rem + 0.7vw, 14px)', // Aggressive scaling
       fontWeight: 600,
       letterSpacing: '0.05em',
       fontFamily: 'inherit',
@@ -1100,12 +1123,12 @@ export function Header() {
         to={to}
         onMouseEnter={onMouseEnter}
         onClick={onClick}
-        className={`relative group py-2 ${navLinkClasses}`}
-        style={({ isActive }) => ({ ...(isActive ? activeLinkClasses : {}), ...baseStyle })}
+        className={`relative group flex items-center py-2 ${navLinkClasses}`}
+        style={({ isActive }) => ({ ...(isActive ? activeLinkClasses : {}), ...baseStyle, display: 'flex', alignItems: 'center' })}
       >
         <span
-          className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase header-nav-text"
-          style={baseStyle}
+          className="relative flex items-center transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase header-nav-text"
+          style={{ ...baseStyle, display: 'flex', alignItems: 'center' }}
         >
           {children}
           <span className="absolute -bottom-1 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
@@ -1137,9 +1160,23 @@ export function Header() {
   const renderHeaderStyles = () => (
     <style>
       {`
-          .hide-scrollbar::-webkit-scrollbar { display: none; }
-          .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-          
+           .hide-scrollbar::-webkit-scrollbar { display: none; }
+           .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+           
+            .header-scroll-transition {
+              transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), 
+                          opacity 0.6s ease-out, 
+                          scale 0.7s cubic-bezier(0.16, 1, 0.3, 1) !important;
+              will-change: transform, opacity, scale;
+            }
+
+            .header-layout-transition {
+              transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            }
+
+            .header-layout-transition-delayed {
+              transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.05s !important;
+            }
           @keyframes crossFade {
             0% {
               opacity: 0;
@@ -1186,7 +1223,7 @@ export function Header() {
           header nav a[href*="/about"],
           header nav a[href*="/contact"],
           header nav a[href*="/categories"] {
-            font-size: 0.875rem !important;
+            font-size: clamp(10px, 0.2rem + 0.7vw, 14px) !important;
             font-weight: 600 !important;
             letter-spacing: 0.05em !important;
           }
@@ -1202,7 +1239,7 @@ export function Header() {
           header nav a[href*="/about"] span,
           header nav a[href*="/contact"] span,
           header nav a[href*="/categories"] span {
-            font-size: 0.875rem !important;
+            font-size: clamp(10px, 0.2rem + 0.7vw, 14px) !important;
             font-weight: 600 !important;
             letter-spacing: 0.05em !important;
             line-height: 1.25rem !important;
@@ -1280,13 +1317,14 @@ export function Header() {
     <>
       {renderHeaderStyles()}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-150 ease-out ${
-          // Scroll yönüne göre header'ı gizle/göster (mobil ve desktop)
-          isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
-          } ${
+        className={`fixed top-0 left-0 right-0 z-50 header-scroll-transition ${
           // Overlay mobil menü açıkken header ile panelin tam aynı renkte görünmesi için özel sınıf
           isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing) ? 'overlay-menu-open' : ''
           }`}
+        style={{
+          transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-100%)',
+          // Opacity ve scale dış kapsayıcıdan kaldırıldı (sınırların görünmemesi için)
+        }}
       >
         <div
           className={`${isOverlayMobileMenu || (isProductsOpen && !isMobile) ? '' : 'overflow-hidden'} ${
@@ -1572,18 +1610,42 @@ export function Header() {
           }}
           ref={headerContainerRef}
         >
-          <nav className="container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center" ref={navRef}>
+          <nav
+            className="mx-auto h-full flex items-center w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] px-4 md:px-8 lg:px-0 header-scroll-transition header-layout-transition"
+            ref={navRef}
+            style={{
+              transform: !isMobile ? `scale(${headerScale})` : undefined,
+              opacity: isHeaderVisible ? 1 : 0,
+              scale: isHeaderVisible ? '1' : '0.94',
+              transformOrigin: 'top center',
+              transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), scale 0.3s cubic-bezier(0.4, 0, 0.2, 1), all 0.8s cubic-bezier(0.23, 1, 0.32, 1)',
+            }}
+          >
             {/* Üst satır: logo ve menü düğmeleri dikeyde tam ortalı */}
-            <div className="relative flex w-full h-full items-center lg:grid lg:grid-cols-[1fr_auto_1fr] lg:items-center">
+            <div className="relative flex w-full h-full items-center lg:grid lg:grid-cols-[1fr_auto_1fr] lg:items-center header-layout-transition">
               {/* Sol taraf - Arama + sol menü (desktop) ve arama + logo (mobil) */}
-              {/* lg:pr-6 (küçük ekranlar için), xl:pr-16, 2xl:pr-24 */}
-<div className="flex flex-1 items-center lg:justify-between lg:pr-6 xl:pr-16 2xl:pr-24">
+              <div className="flex flex-1 items-center lg:justify-between header-layout-transition">
                 {/* Mobil Arama - Solda */}
                 {isMobile && (
                   <button
                     ref={searchButtonRef}
-                    onClick={() => (isSearchOpen ? closeSearch() : setIsSearchOpen(true))}
-                    className={`${iconClasses} absolute left-3 top-1/2 -translate-y-1/2`}
+                    onClick={() => {
+                      if (isSearchOpen) {
+                        closeSearch()
+                      } else {
+                        // Header tamamen şeffafsa (veya neredeyse şeffafsa) arama açıldığında
+                        // geçici olarak yarı şeffaf yap; kapanırken eski değere döndür.
+                        if (
+                          headerOpacity <= 0.05 &&
+                          previousHeaderOpacityRef.current === null
+                        ) {
+                          previousHeaderOpacityRef.current = headerOpacity
+                          setHeaderOpacity(0.7)
+                        }
+                        setIsSearchOpen(true)
+                      }
+                    }}
+                    className="group p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center text-white"
                     aria-label={
                       isSearchOpen
                         ? t('close_search') || 'Aramayı kapat'
@@ -1643,6 +1705,7 @@ export function Header() {
                       }
                     }}
                     className={`${iconClasses} hidden lg:inline-flex`}
+                    style={sharedIconStyle}
                     aria-label={
                       isSearchOpen
                         ? t('close_search') || 'Aramayı kapat'
@@ -1673,7 +1736,7 @@ export function Header() {
                   </button>
                 )}
 
-                {/* Desktop Menü - Logo'nun solundaki linkler (aramadan uzak, araları açılmış) */}
+                {/* Desktop Menü - Logo'nun solundaki linkler (eşit aralıklarla dağıtılmış) */}
                 <div
                   ref={productsButtonRef}
                   className="relative hidden lg:block"
@@ -1685,7 +1748,7 @@ export function Header() {
                     className={`group flex items-center space-x-1 py-2 ${navLinkClasses}`}
                     onClick={() => setIsProductsOpen(false)}
                     style={{
-                      fontSize: '0.875rem',
+                      fontSize: 'clamp(11px, 0.4rem + 0.5vw, 14px)',
                       fontWeight: 600,
                       letterSpacing: '0.05em',
                       fontFamily: 'inherit',
@@ -1695,7 +1758,7 @@ export function Header() {
                     <span
                       className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase header-nav-text"
                       style={{
-                        fontSize: '0.875rem',
+                        fontSize: 'clamp(0.7rem, 0.5rem + 0.3vw, 0.875rem)',
                         fontWeight: 600,
                         letterSpacing: '0.05em',
                         fontFamily: 'inherit',
@@ -1710,7 +1773,7 @@ export function Header() {
                     <ChevronDownIcon />
                   </Link>
                 </div>
-                <div className="hidden lg:block">
+                <div className="hidden lg:flex items-center">
                   <NavItem
                     to="/designers"
                     onMouseEnter={handleCloseProducts}
@@ -1719,7 +1782,7 @@ export function Header() {
                     {t('designers')}
                   </NavItem>
                 </div>
-                <div className="hidden lg:block">
+                <div className="hidden lg:flex items-center">
                   <NavItem
                     to="/projects"
                     onMouseEnter={handleCloseProducts}
@@ -1728,20 +1791,31 @@ export function Header() {
                     {t('projects') || 'Projeler'}
                   </NavItem>
                 </div>
+
+                {/* Görünmez çapa: Boşluğu 4'e bölmek için 5. nokta (Logo sınırı) */}
+                <div className="hidden lg:block w-0" aria-hidden="true" />
               </div>
 
               {/* Orta - Logo (Desktop) */}
-              <div className="hidden lg:flex items-center justify-center">
+              <div className="hidden lg:flex items-center justify-center header-layout-transition-delayed">
                 <Link to="/" className="flex items-center gap-3 text-white transition-colors">
-                  <SiteLogo logoUrl={settings?.logoUrl} className="w-32 md:w-72 h-6 md:h-10" />
+                  <div
+                    style={{
+                      width: 'clamp(110px, 10vw + 50px, 288px)', // Smaller minimum to avoid collision
+                    }}
+                  >
+                    <SiteLogo logoUrl={settings?.logoUrl} className="w-full h-auto" />
+                  </div>
                 </Link>
               </div>
 
               {/* Sağ taraf - Logo'nun sağındaki linkler + ikonlar */}
-              {/* lg:pl-6 (küçük ekranlar için), xl:pl-16, 2xl:pl-24 */}
-<div className="flex flex-1 items-center justify-end lg:justify-between lg:pl-6 xl:pl-16 2xl:pl-24">
-                {/* Desktop Menü - Logo'nun sağındaki linkler (Logo ve Dil/Üye arasına eşit dağıtılmış) */}
-                <div className="hidden lg:block">
+              <div className="flex flex-1 items-center justify-end lg:justify-between header-layout-transition">
+                {/* Görünmez çapa: Boşluğu 4'e bölmek için 1. nokta (Logo sınırı) */}
+                <div className="hidden lg:block w-0" aria-hidden="true" />
+
+                {/* Desktop Menü - Logo'nun sağındaki linkler (eşit aralıklarla dağıtılmış) */}
+                <div className="hidden lg:flex items-center">
                   <NavItem
                     to="/news"
                     onMouseEnter={handleCloseProducts}
@@ -1750,7 +1824,7 @@ export function Header() {
                     {t('news')}
                   </NavItem>
                 </div>
-                <div className="hidden lg:block">
+                <div className="hidden lg:flex items-center">
                   <NavItem
                     to="/about"
                     onMouseEnter={handleCloseProducts}
@@ -1759,7 +1833,7 @@ export function Header() {
                     {t('about')}
                   </NavItem>
                 </div>
-                <div className="hidden lg:block">
+                <div className="hidden lg:flex items-center">
                   <NavItem
                     to="/contact"
                     onMouseEnter={handleCloseProducts}
@@ -1770,38 +1844,38 @@ export function Header() {
                 </div>
 
                 <div className="hidden lg:flex items-center space-x-4">
-                  {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
-                    <div className="flex items-center gap-0">
-                      {supportedLocales.map(langCode => {
-                        const isActive = locale === langCode
-                        return (
+                  <div className="flex items-center" style={{ fontSize: 'clamp(11px, 0.4rem + 0.5vw, 15px)' }}>
+                    {supportedLocales.map((langCode, index) => {
+                      const isLast = index === supportedLocales.length - 1
+                      const isActive = locale === langCode
+                      return (
+                        <React.Fragment key={langCode}>
                           <button
-                            key={langCode}
                             onClick={() => setLocale(langCode)}
-                            aria-pressed={isActive}
-                            aria-label={`${t('switch_language') || 'Dil değiştir'
-                              } - ${langCode.toUpperCase()}`}
-                            className={`group relative px-1.5 py-1.5 text-[0.9rem] uppercase tracking-[0.25em] transition-colors duration-200 ${isActive
-                              ? 'text-white font-light'
-                              : 'text-gray-400/90 hover:text-white font-light'
+                            className={`relative transition-all duration-300 uppercase ${isActive
+                              ? 'text-gray-300'
+                              : 'text-gray-400 hover:text-gray-200'
                               }`}
-                            style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.25em' }}
+                            style={{
+                              fontWeight: 100,
+                              fontFamily: "'Jura', 'Neue Montreal', sans-serif",
+                              letterSpacing: '0.25em',
+                              transform: 'scale(0.9, 1.35)',
+                              transformOrigin: 'center center',
+                              display: 'inline-block'
+                            }}
                           >
-                            <span className="relative inline-block">
-                              {langCode.toUpperCase()}
-                              <span
-                                className={`absolute -bottom-1 left-0 w-full h-[3px] bg-white transition-transform duration-300 ease-out origin-center ${isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
-                                  }`}
-                              ></span>
-                            </span>
+                            {langCode}
                           </button>
-                        )
-                      })}
-                    </div>
-                  )}
+                          {!isLast && <span className="mx-1 text-gray-400">|</span>}
+                        </React.Fragment>
+                      )
+                    })}
+                  </div>
                   <NavLink
                     to={isLoggedIn ? '/profile' : '/login'}
                     className={`${iconClasses}`}
+                    style={sharedIconStyle}
                     aria-label={isLoggedIn ? t('profile') || 'Profil' : t('login') || 'Giriş Yap'}
                   >
                     <UserIcon />
@@ -1810,6 +1884,7 @@ export function Header() {
                     <button
                       onClick={toggleCart}
                       className={`relative ${iconClasses}`}
+                      style={sharedIconStyle}
                       aria-label={`${t('cart') || 'Sepet'}${cartCount > 0 ? ` (${cartCount} ${t('items') || 'ürün'})` : ''}`}
                       aria-expanded={false}
                     >
@@ -1844,7 +1919,7 @@ export function Header() {
                           headerVisibilityLastChanged.current = Date.now()
                         }
                       }}
-                      className="group p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center"
+                      className="group p-2 -mr-2 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center"
                       aria-label={
                         isMobileMenuOpen
                           ? t('close_menu') || 'Menüyü kapat'
@@ -1853,7 +1928,7 @@ export function Header() {
                       aria-expanded={isMobileMenuOpen}
                       aria-controls="mobile-menu"
                     >
-                      <div className="flex flex-col gap-1.5 items-start w-6">
+                      <div className="flex flex-col gap-1.5 items-center w-6">
                         {/* Üst Çizgi: 45 derece döner ve aşağı iner */}
                         <span
                           className={`h-0.5 w-6 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''
@@ -1887,7 +1962,7 @@ export function Header() {
                           headerVisibilityLastChanged.current = Date.now()
                         }
                       }}
-                      className={`${iconClasses} flex items-center justify-center`}
+                      className="group p-2 -mr-2 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center"
                       aria-label={
                         isMobileMenuOpen
                           ? t('close_menu') || 'Menüyü kapat'

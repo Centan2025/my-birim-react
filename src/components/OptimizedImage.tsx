@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, { useState } from 'react'
 
 interface OptimizedImageProps {
   src: string
@@ -53,7 +53,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   // engellemek için custom attribute'u lowercase olarak enjekte ediyoruz.
   const fetchPriorityAttr =
     fetchPriority && fetchPriority !== 'auto'
-      ? ({fetchpriority: fetchPriority} as Record<string, string>)
+      ? ({ fetchpriority: fetchPriority } as Record<string, string>)
       : {}
 
   // Placeholder (çok küçük, gri renk)
@@ -127,7 +127,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     return (
       <div
         className={`bg-gray-200 flex items-center justify-center ${className}`}
-        style={{width, height}}
+        style={{ width, height }}
       >
         <span className="text-gray-400 text-sm">Görsel yüklenemedi</span>
       </div>
@@ -145,6 +145,15 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     urlObj.searchParams.set('q', quality.toString())
     return urlObj.toString()
   }
+
+  // Strip layout relevant classes from inner img to prevent nested constraints
+  // Keep mx-auto for centering, only remove max-w- and w- to prevent double scaling
+  const innerImgClassName = className
+    .split(' ')
+    .filter(c => !c.startsWith('max-w-') && !c.startsWith('w-'))
+    .join(' ')
+
+
 
   // Art Direction ile picture elementi kullan
   if (useArtDirection) {
@@ -216,8 +225,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             width={width}
             height={height}
             loading={loading}
-          {...fetchPriorityAttr}
-            className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ${className}`}
+            {...fetchPriorityAttr}
+            className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full h-full ${innerImgClassName}`}
             draggable={draggable}
             onLoad={handleLoad}
             onError={handleError}
@@ -263,7 +272,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           {...fetchPriorityAttr}
           srcSet={responsiveSrcSet || undefined}
           sizes={responsiveSrcSet ? defaultSizes : undefined}
-          className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ${className}`}
+          className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full h-full ${innerImgClassName}`}
           draggable={draggable}
           onLoad={handleLoad}
           onError={handleError}

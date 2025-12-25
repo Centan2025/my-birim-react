@@ -137,11 +137,16 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         const mediaWidthClass = isFullWidth
           ? 'w-full'
           : isCenter
-            ? 'w-full max-w-[92%] md:max-w-[85%] lg:max-w-[80%] mx-auto'
+            ? 'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto'
             : 'w-full max-w-[94%] mx-auto'
 
         const mediaContent = (
-          <ScrollReveal delay={50} threshold={0.1} width={(isFullWidth || isCenter) ? "w-full" : "w-auto"} className={`h-auto ${(isFullWidth || isCenter) ? 'w-full' : ''} ${isCenter ? 'mx-auto' : ''}`}>
+          <ScrollReveal
+            delay={50}
+            threshold={0.1}
+            width={(isFullWidth || isCenter) ? "w-full" : "w-auto"}
+            className={`h-auto ${(isFullWidth || isCenter) ? 'w-full' : ''} ${isCenter ? 'flex justify-center' : ''}`}
+          >
             {block.mediaType === 'youtube' ? (
               <div className={`relative ${mediaWidthClass} aspect-video overflow-hidden`}>
                 <YouTubeBackground url={mediaUrl} />

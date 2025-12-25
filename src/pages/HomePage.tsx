@@ -130,7 +130,7 @@ export function HomePage() {
 
   return (
     <div
-      className={`bg-gray-100 text-gray-900 ${isMobile ? 'hero-page-container-mobile' : ''}`}
+      className={`bg-white text-gray-900 ${isMobile ? 'hero-page-container-mobile' : ''}`}
       style={
         isMobile && viewportWidth > 0
           ? {
@@ -381,8 +381,8 @@ export function HomePage() {
         <div className="relative h-[50vh] w-full bg-gray-900" />
       )}
 
-      {/* Hero Altı Gri Bant */}
-      <section className="w-full bg-gray-100 h-10 md:h-12" />
+      {/* Hero Altı Beyaz Bant */}
+      <section className="w-full bg-white h-10 md:h-12" />
 
       {/* Content Blocks Section */}
       {content?.contentBlocks && content.contentBlocks.length > 0 && (
