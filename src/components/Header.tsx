@@ -1558,11 +1558,11 @@ export function Header() {
           }}
           ref={headerContainerRef}
         >
-          <nav className="px-2 sm:px-4 lg:px-6 h-full flex items-center" ref={navRef}>
+          <nav className="container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center" ref={navRef}>
             {/* Üst satır: logo ve menü düğmeleri dikeyde tam ortalı */}
             <div className="relative flex w-full h-full items-center lg:grid lg:grid-cols-[1fr_auto_1fr] lg:items-center">
               {/* Sol taraf - Arama + sol menü (desktop) ve arama + logo (mobil) */}
-              <div className="flex flex-1 items-center lg:justify-start">
+              <div className="flex flex-1 items-center lg:justify-between lg:pr-24">
                 {/* Mobil Arama - Solda */}
                 {isMobile && (
                   <button
@@ -1581,16 +1581,16 @@ export function Header() {
                     <span className="relative flex items-center justify-center w-6 h-6">
                       <span
                         className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${isSearchOpen
-                            ? 'opacity-0 scale-75 rotate-90'
-                            : 'opacity-100 scale-100 rotate-0'
+                          ? 'opacity-0 scale-75 rotate-90'
+                          : 'opacity-100 scale-100 rotate-0'
                           }`}
                       >
                         <SearchIcon />
                       </span>
                       <span
                         className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${isSearchOpen
-                            ? 'opacity-100 scale-100 rotate-0'
-                            : 'opacity-0 scale-75 -rotate-90'
+                          ? 'opacity-100 scale-100 rotate-0'
+                          : 'opacity-0 scale-75 -rotate-90'
                           }`}
                       >
                         <CloseIcon />
@@ -1627,7 +1627,7 @@ export function Header() {
                         setIsSearchOpen(true)
                       }
                     }}
-                    className={`${iconClasses} hidden lg:inline-flex mr-12`}
+                    className={`${iconClasses} hidden lg:inline-flex`}
                     aria-label={
                       isSearchOpen
                         ? t('close_search') || 'Aramayı kapat'
@@ -1640,16 +1640,16 @@ export function Header() {
                     <span className="relative flex items-center justify-center w-6 h-6">
                       <span
                         className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${isSearchOpen
-                            ? 'opacity-0 scale-75 rotate-90'
-                            : 'opacity-100 scale-100 rotate-0'
+                          ? 'opacity-0 scale-75 rotate-90'
+                          : 'opacity-100 scale-100 rotate-0'
                           }`}
                       >
                         <SearchIcon />
                       </span>
                       <span
                         className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${isSearchOpen
-                            ? 'opacity-100 scale-100 rotate-0'
-                            : 'opacity-0 scale-75 -rotate-90'
+                          ? 'opacity-100 scale-100 rotate-0'
+                          : 'opacity-0 scale-75 -rotate-90'
                           }`}
                       >
                         <CloseIcon />
@@ -1659,17 +1659,26 @@ export function Header() {
                 )}
 
                 {/* Desktop Menü - Logo'nun solundaki linkler (aramadan uzak, araları açılmış) */}
-                <div className="hidden lg:flex lg:items-center lg:space-x-5 xl:space-x-7">
-                  <div
-                    ref={productsButtonRef}
-                    className="relative"
-                    onMouseEnter={handleProductsEnter}
-                    onMouseLeave={handleProductsLeave}
+                <div
+                  ref={productsButtonRef}
+                  className="relative hidden lg:block"
+                  onMouseEnter={handleProductsEnter}
+                  onMouseLeave={handleProductsLeave}
+                >
+                  <Link
+                    to="/categories"
+                    className={`group flex items-center space-x-1 py-2 ${navLinkClasses}`}
+                    onClick={() => setIsProductsOpen(false)}
+                    style={{
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      letterSpacing: '0.05em',
+                      fontFamily: 'inherit',
+                      lineHeight: '1.25rem',
+                    }}
                   >
-                    <Link
-                      to="/categories"
-                      className={`group flex items-center space-x-1 py-2 ${navLinkClasses}`}
-                      onClick={() => setIsProductsOpen(false)}
+                    <span
+                      className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase header-nav-text"
                       style={{
                         fontSize: '0.875rem',
                         fontWeight: 600,
@@ -1678,24 +1687,15 @@ export function Header() {
                         lineHeight: '1.25rem',
                       }}
                     >
+                      {t('products')}
                       <span
-                        className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase header-nav-text"
-                        style={{
-                          fontSize: '0.875rem',
-                          fontWeight: 600,
-                          letterSpacing: '0.05em',
-                          fontFamily: 'inherit',
-                          lineHeight: '1.25rem',
-                        }}
-                      >
-                        {t('products')}
-                        <span
-                          className={`absolute -bottom-1 left-0 w-full h-[3px] bg-white transition-transform duration-300 ease-out origin-center ${isProductsOpen ? 'scale-x-0 opacity-0' : 'transform scale-x-0 group-hover:scale-x-100'}`}
-                        ></span>
-                      </span>
-                      <ChevronDownIcon />
-                    </Link>
-                  </div>
+                        className={`absolute -bottom-1 left-0 w-full h-[3px] bg-white transition-transform duration-300 ease-out origin-center ${isProductsOpen ? 'scale-x-0 opacity-0' : 'transform scale-x-0 group-hover:scale-x-100'}`}
+                      ></span>
+                    </span>
+                    <ChevronDownIcon />
+                  </Link>
+                </div>
+                <div className="hidden lg:block">
                   <NavItem
                     to="/designers"
                     onMouseEnter={handleCloseProducts}
@@ -1703,6 +1703,8 @@ export function Header() {
                   >
                     {t('designers')}
                   </NavItem>
+                </div>
+                <div className="hidden lg:block">
                   <NavItem
                     to="/projects"
                     onMouseEnter={handleCloseProducts}
@@ -1721,9 +1723,9 @@ export function Header() {
               </div>
 
               {/* Sağ taraf - Logo'nun sağındaki linkler + ikonlar */}
-              <div className="flex flex-1 items-center justify-end space-x-4 lg:justify-end">
-                {/* Desktop Menü - Logo'nun sağındaki linkler (dil bölümünden uzak, araları açılmış) */}
-                <div className="hidden lg:flex lg:items-center lg:space-x-5 xl:space-x-7 mr-12">
+              <div className="flex flex-1 items-center justify-end lg:justify-between lg:pl-24">
+                {/* Desktop Menü - Logo'nun sağındaki linkler (Logo ve Dil/Üye arasına eşit dağıtılmış) */}
+                <div className="hidden lg:block">
                   <NavItem
                     to="/news"
                     onMouseEnter={handleCloseProducts}
@@ -1731,6 +1733,8 @@ export function Header() {
                   >
                     {t('news')}
                   </NavItem>
+                </div>
+                <div className="hidden lg:block">
                   <NavItem
                     to="/about"
                     onMouseEnter={handleCloseProducts}
@@ -1738,6 +1742,8 @@ export function Header() {
                   >
                     {t('about')}
                   </NavItem>
+                </div>
+                <div className="hidden lg:block">
                   <NavItem
                     to="/contact"
                     onMouseEnter={handleCloseProducts}
@@ -1746,60 +1752,63 @@ export function Header() {
                     {t('contact')}
                   </NavItem>
                 </div>
-                {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
-                  <div className="hidden lg:flex items-center gap-0">
-                    {supportedLocales.map(langCode => {
-                      const isActive = locale === langCode
-                      return (
-                        <button
-                          key={langCode}
-                          onClick={() => setLocale(langCode)}
-                          aria-pressed={isActive}
-                          aria-label={`${t('switch_language') || 'Dil değiştir'
-                            } - ${langCode.toUpperCase()}`}
-                          className={`group relative px-1.5 py-1.5 text-[0.9rem] uppercase tracking-[0.25em] transition-colors duration-200 ${isActive
+
+                <div className="hidden lg:flex items-center space-x-4">
+                  {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
+                    <div className="flex items-center gap-0">
+                      {supportedLocales.map(langCode => {
+                        const isActive = locale === langCode
+                        return (
+                          <button
+                            key={langCode}
+                            onClick={() => setLocale(langCode)}
+                            aria-pressed={isActive}
+                            aria-label={`${t('switch_language') || 'Dil değiştir'
+                              } - ${langCode.toUpperCase()}`}
+                            className={`group relative px-1.5 py-1.5 text-[0.9rem] uppercase tracking-[0.25em] transition-colors duration-200 ${isActive
                               ? 'text-white font-light'
                               : 'text-gray-400/90 hover:text-white font-light'
-                            }`}
-                          style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.25em' }}
-                        >
-                          <span className="relative inline-block">
-                            {langCode.toUpperCase()}
-                            <span
-                              className={`absolute -bottom-1 left-0 w-full h-[3px] bg-white transition-transform duration-300 ease-out origin-center ${isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
-                                }`}
-                            ></span>
-                          </span>
-                        </button>
-                      )
-                    })}
-                  </div>
-                )}
-                <NavLink
-                  to={isLoggedIn ? '/profile' : '/login'}
-                  className={`${iconClasses} hidden lg:inline-flex`}
-                  aria-label={isLoggedIn ? t('profile') || 'Profil' : t('login') || 'Giriş Yap'}
-                >
-                  <UserIcon />
-                </NavLink>
-                {settings?.showCartButton === true && (
-                  <button
-                    onClick={toggleCart}
-                    className={`relative ${iconClasses}`}
-                    aria-label={`${t('cart') || 'Sepet'}${cartCount > 0 ? ` (${cartCount} ${t('items') || 'ürün'})` : ''}`}
-                    aria-expanded={false}
+                              }`}
+                            style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.25em' }}
+                          >
+                            <span className="relative inline-block">
+                              {langCode.toUpperCase()}
+                              <span
+                                className={`absolute -bottom-1 left-0 w-full h-[3px] bg-white transition-transform duration-300 ease-out origin-center ${isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                                  }`}
+                              ></span>
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                  <NavLink
+                    to={isLoggedIn ? '/profile' : '/login'}
+                    className={`${iconClasses}`}
+                    aria-label={isLoggedIn ? t('profile') || 'Profil' : t('login') || 'Giriş Yap'}
                   >
-                    <ShoppingBagIcon />
-                    {cartCount > 0 && (
-                      <span
-                        className="absolute -top-1 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"
-                        aria-hidden="true"
-                      >
-                        {cartCount}
-                      </span>
-                    )}
-                  </button>
-                )}
+                    <UserIcon />
+                  </NavLink>
+                  {settings?.showCartButton === true && (
+                    <button
+                      onClick={toggleCart}
+                      className={`relative ${iconClasses}`}
+                      aria-label={`${t('cart') || 'Sepet'}${cartCount > 0 ? ` (${cartCount} ${t('items') || 'ürün'})` : ''}`}
+                      aria-expanded={false}
+                    >
+                      <ShoppingBagIcon />
+                      {cartCount > 0 && (
+                        <span
+                          className="absolute -top-1 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"
+                          aria-hidden="true"
+                        >
+                          {cartCount}
+                        </span>
+                      )}
+                    </button>
+                  )}
+                </div>
                 <div className="lg:hidden flex items-center">
                   {/* Settings yüklenene kadar hamburger butonunu gizle - böylece yanlış stil gösterilmez */}
                   {!settings ? null : isOverlayMobileMenu ? (
