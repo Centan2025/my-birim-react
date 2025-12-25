@@ -507,6 +507,12 @@ export function Header() {
     return path === '/' || path === '' || path.includes('about')
   }, [location.pathname])
 
+  // Products sayfasını kontrol et
+  const isProductsPage = useCallback(() => {
+    const path = location.pathname
+    return path.startsWith('/products')
+  }, [location.pathname])
+
   // Açık arka planlı sayfaları kontrol et (hero olmayan)
   const isLightBackgroundPage = useCallback(() => {
     const path = location.pathname
@@ -576,6 +582,14 @@ export function Header() {
         return
       }
 
+      // Products sayfası için koyu hero kontrolü
+      if (isProductsPage()) {
+        if (heroBrightness !== null && heroBrightness < 0.6) {
+          setHeaderOpacity(0)
+          return
+        }
+      }
+
       // Beyaz arka planlı detay sayfalarında (ürün) her zaman yarı şeffaf
       // Çünkü hero görseli koyu olsa bile arka plan beyaz
       if (isWhiteBackgroundPage()) {
@@ -599,7 +613,7 @@ export function Header() {
         setHeaderOpacity(0.7)
       }
     }
-  }, [heroBrightness, location.pathname, isProductsOpen, isDarkHeroPage, isWhiteBackgroundPage])
+  }, [heroBrightness, location.pathname, isProductsOpen, isDarkHeroPage, isWhiteBackgroundPage, isProductsPage])
 
   // Sayfa değiştiğinde header opacity'yi ayarla
   useEffect(() => {
@@ -1562,7 +1576,8 @@ export function Header() {
             {/* Üst satır: logo ve menü düğmeleri dikeyde tam ortalı */}
             <div className="relative flex w-full h-full items-center lg:grid lg:grid-cols-[1fr_auto_1fr] lg:items-center">
               {/* Sol taraf - Arama + sol menü (desktop) ve arama + logo (mobil) */}
-              <div className="flex flex-1 items-center lg:justify-between lg:pr-24">
+              {/* lg:pr-6 (küçük ekranlar için), xl:pr-16, 2xl:pr-24 */}
+<div className="flex flex-1 items-center lg:justify-between lg:pr-6 xl:pr-16 2xl:pr-24">
                 {/* Mobil Arama - Solda */}
                 {isMobile && (
                   <button
@@ -1723,7 +1738,8 @@ export function Header() {
               </div>
 
               {/* Sağ taraf - Logo'nun sağındaki linkler + ikonlar */}
-              <div className="flex flex-1 items-center justify-end lg:justify-between lg:pl-24">
+              {/* lg:pl-6 (küçük ekranlar için), xl:pl-16, 2xl:pl-24 */}
+<div className="flex flex-1 items-center justify-end lg:justify-between lg:pl-6 xl:pl-16 2xl:pl-24">
                 {/* Desktop Menü - Logo'nun sağındaki linkler (Logo ve Dil/Üye arasına eşit dağıtılmış) */}
                 <div className="hidden lg:block">
                   <NavItem
