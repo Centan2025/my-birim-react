@@ -568,7 +568,7 @@ export function ProjectDetailPage() {
                             }
                             setIdx(index)
                           }}
-                          className={`relative rounded-full transition-all duration-500 ease-in-out group ${areDotsVisible ? 'animate-dot-height-grow' : 'h-0.5'
+                          className={`relative rounded-none transition-all duration-500 ease-in-out group ${areDotsVisible ? 'animate-dot-height-grow' : 'h-0.5'
                             } ${isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
                             } ${areDotsVisible
                               ? 'translate-x-0 opacity-100'
@@ -585,7 +585,7 @@ export function ProjectDetailPage() {
                           {isActive && (
                             <div
                               key={`${normalizedSlideIndex}-${index}`}
-                              className="absolute top-0 left-0 h-full rounded-full bg-white animate-fill-line"
+                              className="absolute top-0 left-0 h-full rounded-none bg-white animate-fill-line"
                             ></div>
                           )}
                         </button>

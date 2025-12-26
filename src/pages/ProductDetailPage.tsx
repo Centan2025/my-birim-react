@@ -1137,7 +1137,7 @@ export function ProductDetailPage() {
                           }
                           setCurrentImageIndex(index)
                         }}
-                        className={`relative rounded-full transition-all duration-500 ease-in-out group ${areDotsVisible ? 'animate-dot-height-grow' : 'h-0.5'
+                        className={`relative rounded-none transition-all duration-500 ease-in-out group ${areDotsVisible ? 'animate-dot-height-grow' : 'h-0.5'
                           } ${isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
                           } ${areDotsVisible
                             ? 'translate-x-0 opacity-100'
@@ -1154,7 +1154,7 @@ export function ProductDetailPage() {
                         {isActive && (
                           <div
                             key={`${normalizedSlideIndex}-${index}`}
-                            className="absolute top-0 left-0 h-full rounded-full bg-white animate-fill-line"
+                            className="absolute top-0 left-0 h-full rounded-none bg-white animate-fill-line"
                           ></div>
                         )}
                       </button>
@@ -1731,13 +1731,7 @@ export function ProductDetailPage() {
           >
             <button
               onClick={prevImageFn}
-              className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-20"
-              style={{
-                width: '54px',
-                height: '54px',
-                backgroundColor: 'rgba(62, 60, 60, 0.5)',
-                color: '#d3caca'
-              }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 bg-white/90 text-gray-950 backdrop-blur-md z-20 shadow-lg border border-black/5 w-12 h-12 md:w-14 md:h-14"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -1755,13 +1749,7 @@ export function ProductDetailPage() {
             </button>
             <button
               onClick={nextImage}
-              className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-20"
-              style={{
-                width: '54px',
-                height: '54px',
-                backgroundColor: 'rgba(62, 60, 60, 0.5)',
-                color: '#d3caca'
-              }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 bg-white/90 text-gray-950 backdrop-blur-md z-20 shadow-lg border border-black/5 w-12 h-12 md:w-14 md:h-14"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -1780,7 +1768,7 @@ export function ProductDetailPage() {
             <div className="relative w-screen max-w-screen-2xl h-[80vh] p-2 overflow-hidden">
               <button
                 onClick={closeLightbox}
-                className="absolute top-2 right-2 text-white hover:opacity-75 transition-opacity z-[80] bg-black/50 rounded-full p-2"
+                className="absolute top-4 right-4 z-[80] w-10 h-10 md:w-12 md:h-12 rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-lg flex items-center justify-center"
               >
                 <CloseIcon />
               </button>
@@ -1967,7 +1955,7 @@ export function ProductDetailPage() {
               >
                 <button
                   onClick={() => setDimLightbox(null)}
-                  className="absolute top-4 right-4 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/60 bg-white/70 backdrop-blur-md shadow-lg flex items-center justify-center text-gray-700 hover:bg-white hover:text-gray-900 transition-colors"
+                  className="absolute top-4 right-4 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-lg flex items-center justify-center"
                   style={closeBtnAnimStyle}
                   aria-label="Close"
                 >
@@ -1986,12 +1974,8 @@ export function ProductDetailPage() {
                               dimLightbox.images.length,
                           })
                         }}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-10 h-10 md:w-14 md:h-14"
-                        style={{
-                          backgroundColor: 'rgba(62, 60, 60, 0.5)',
-                          color: '#d3caca',
-                          ...arrowInLeft,
-                        }}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 bg-white/90 text-gray-950 backdrop-blur-md z-10 w-10 h-10 md:w-14 md:h-14 shadow-lg border border-black/5"
+                        style={arrowInLeft}
                         aria-label="Previous"
                       >
                         <svg
@@ -2017,12 +2001,8 @@ export function ProductDetailPage() {
                               (dimLightbox.currentIndex + 1) % dimLightbox.images.length,
                           })
                         }}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-10 h-10 md:w-14 md:h-14"
-                        style={{
-                          backgroundColor: 'rgba(62, 60, 60, 0.5)',
-                          color: '#d3caca',
-                          ...arrowInRight,
-                        }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 bg-white/90 text-gray-950 backdrop-blur-md z-10 w-10 h-10 md:w-14 md:h-14 shadow-lg border border-black/5"
+                        style={arrowInRight}
                         aria-label="Next"
                       >
                         <svg
@@ -2076,7 +2056,7 @@ export function ProductDetailPage() {
               >
                 <button
                   onClick={() => setMaterialLightbox(null)}
-                  className="absolute top-3 right-3 z-20 w-10 h-10 md:w-11 md:h-11 rounded-full border border-white/60 bg-white/70 backdrop-blur-md shadow-lg flex items-center justify-center text-gray-700 hover:bg-white hover:text-gray-900 transition-colors"
+                  className="absolute top-3 right-3 z-20 w-10 h-10 md:w-11 md:h-11 rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-lg flex items-center justify-center"
                   style={closeBtnAnimStyle}
                   aria-label="Close"
                 >
@@ -2095,12 +2075,8 @@ export function ProductDetailPage() {
                               materialLightbox.images.length,
                           })
                         }}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-8 h-8 md:w-10 md:h-10"
-                        style={{
-                          backgroundColor: 'rgba(62, 60, 60, 0.5)',
-                          color: '#d3caca',
-                          ...arrowInLeft,
-                        }}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 bg-white/90 text-gray-950 backdrop-blur-md z-10 w-8 h-8 md:w-10 md:h-10 shadow-lg border border-black/5"
+                        style={arrowInLeft}
                         aria-label="Previous"
                       >
                         <svg
@@ -2126,12 +2102,8 @@ export function ProductDetailPage() {
                               (materialLightbox.currentIndex + 1) % materialLightbox.images.length,
                           })
                         }}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-8 h-8 md:w-10 md:h-10"
-                        style={{
-                          backgroundColor: 'rgba(62, 60, 60, 0.5)',
-                          color: '#d3caca',
-                          ...arrowInRight,
-                        }}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 bg-white/90 text-gray-950 backdrop-blur-md z-10 w-8 h-8 md:w-10 md:h-10 shadow-lg border border-black/5"
+                        style={arrowInRight}
                         aria-label="Next"
                       >
                         <svg
