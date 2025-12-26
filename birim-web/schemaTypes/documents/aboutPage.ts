@@ -1,4 +1,4 @@
-import {defineField, defineType} from 'sanity'
+import { defineField, defineType } from 'sanity'
 
 export default defineType({
   name: 'aboutPage',
@@ -9,22 +9,31 @@ export default defineType({
       name: 'heroImage',
       title: 'Hero Görseli',
       type: 'image',
-      options: {hotspot: true},
+      options: { hotspot: true },
       description:
         'Hakkımızda sayfası hero alanı için geniş görsel. Önerilen çözünürlük: Desktop 1920x1080px (16:9), Mobil 1080x1920px (9:16).',
     }),
-    defineField({name: 'heroTitle', title: 'Hero Başlığı', type: 'localizedString'}),
-    defineField({name: 'heroSubtitle', title: 'Hero Alt Başlığı', type: 'localizedString'}),
+    defineField({ name: 'heroTitle', title: 'Hero Başlığı', type: 'localizedString' }),
+    defineField({ name: 'heroSubtitle', title: 'Hero Alt Başlığı', type: 'localizedString' }),
     // Özel üçlü bölüm: Tarihçe / Kimlik / Kalite
     defineField({
       name: 'historySection',
       title: 'Tarihçe Bölümü',
       type: 'object',
       fields: [
+        defineField({ name: 'title', title: 'Bölüm Başlığı', type: 'localizedString' }),
         defineField({
           name: 'content',
           title: 'Tarihçe Metni',
-          type: 'localizedText',
+          type: 'localizedPortableText',
+        }),
+        defineField({ name: 'image', title: 'Ana Görsel', type: 'image', options: { hotspot: true } }),
+        defineField({
+          name: 'media',
+          title: 'Medya Galerisi',
+          type: 'array',
+          of: [{ type: 'productPanelMediaItem' }],
+          description: 'Bölüm için ek görseller veya videolar.',
         }),
       ],
     }),
@@ -33,10 +42,19 @@ export default defineType({
       title: 'Kimlik Bölümü',
       type: 'object',
       fields: [
+        defineField({ name: 'title', title: 'Bölüm Başlığı', type: 'localizedString' }),
         defineField({
           name: 'content',
           title: 'Kimlik Metni',
-          type: 'localizedText',
+          type: 'localizedPortableText',
+        }),
+        defineField({ name: 'image', title: 'Ana Görsel', type: 'image', options: { hotspot: true } }),
+        defineField({
+          name: 'media',
+          title: 'Medya Galerisi',
+          type: 'array',
+          of: [{ type: 'productPanelMediaItem' }],
+          description: 'Bölüm için ek görseller veya videolar.',
         }),
       ],
     }),
@@ -45,10 +63,19 @@ export default defineType({
       title: 'Kalite Bölümü',
       type: 'object',
       fields: [
+        defineField({ name: 'title', title: 'Bölüm Başlığı', type: 'localizedString' }),
         defineField({
           name: 'content',
           title: 'Kalite Metni',
-          type: 'localizedText',
+          type: 'localizedPortableText',
+        }),
+        defineField({ name: 'image', title: 'Ana Görsel', type: 'image', options: { hotspot: true } }),
+        defineField({
+          name: 'media',
+          title: 'Medya Galerisi',
+          type: 'array',
+          of: [{ type: 'productPanelMediaItem' }],
+          description: 'Bölüm için ek görseller veya videolar.',
         }),
       ],
     }),
@@ -60,17 +87,17 @@ export default defineType({
         {
           type: 'object',
           fields: [
-            defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
-            defineField({name: 'description', title: 'Açıklama', type: 'localizedString'}),
+            defineField({ name: 'title', title: 'Başlık', type: 'localizedString' }),
+            defineField({ name: 'description', title: 'Açıklama', type: 'localizedString' }),
           ],
         },
       ],
     }),
   ],
   preview: {
-    select: {media: 'heroImage'},
-    prepare({media}) {
-      return {title: 'Hakkımızda', media}
+    select: { media: 'heroImage' },
+    prepare({ media }) {
+      return { title: 'Hakkımızda', media }
     },
   },
 })

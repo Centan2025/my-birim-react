@@ -337,9 +337,9 @@ export interface AboutPageContent {
   storyImage: string
   valuesTitle: LocalizedString
   values: { title: LocalizedString; description: LocalizedString }[]
-  historySection?: { content?: LocalizedString }
-  identitySection?: { content?: LocalizedString }
-  qualitySection?: { content?: LocalizedString }
+  historySection?: { title?: LocalizedString; content?: LocalizedString; image?: string; media?: NewsMedia[] }
+  identitySection?: { title?: LocalizedString; content?: LocalizedString; image?: string; media?: NewsMedia[] }
+  qualitySection?: { title?: LocalizedString; content?: LocalizedString; image?: string; media?: NewsMedia[] }
 }
 
 /**

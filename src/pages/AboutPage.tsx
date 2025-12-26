@@ -1,69 +1,56 @@
-import React, {useState, useEffect, useRef} from 'react'
-import {getAboutPageContent} from '../services/cms'
-import type {AboutPageContent} from '../types'
-import {OptimizedImage} from '../components/OptimizedImage'
-import {PageLoading} from '../components/LoadingSpinner'
-import {useTranslation} from '../i18n'
-import {Breadcrumbs} from '../components/Breadcrumbs'
-import {useSEO} from '../hooks/useSEO'
-import {useHeaderTheme} from '../context/HeaderThemeContext'
+import React, { useState, useEffect } from 'react'
+import { getAboutPageContent } from '../services/cms'
+import type { AboutPageContent, NewsMedia } from '../types'
+import { OptimizedImage } from '../components/OptimizedImage'
+import { PageLoading } from '../components/LoadingSpinner'
+import { useTranslation } from '../i18n'
+import { Breadcrumbs } from '../components/Breadcrumbs'
+import { useSEO } from '../hooks/useSEO'
+import { useHeaderTheme } from '../context/HeaderThemeContext'
+import ScrollReveal from '../components/ScrollReveal'
+import PortableTextLite from '../components/PortableTextLite'
 
-const CrossFadeText: React.FC<{text: string; triggerKey: number}> = ({text, triggerKey}) => {
-  const [currentText, setCurrentText] = useState(text)
-  const [previousText, setPreviousText] = useState(text)
-  const [isAnimating, setIsAnimating] = useState(false)
-  const hasMountedRef = useRef(false)
-
-  useEffect(() => {
-    // İlk mount'ta animasyon oynatma
-    if (!hasMountedRef.current) {
-      hasMountedRef.current = true
-      setCurrentText(text)
-      setPreviousText(text)
-      return
-    }
-
-    setPreviousText(currentText)
-    setCurrentText(text)
-    setIsAnimating(true)
-
-    const timeout = window.setTimeout(() => {
-      setIsAnimating(false)
-    }, 500)
-
-    return () => {
-      window.clearTimeout(timeout)
-    }
-  }, [triggerKey])
-
-  if (!isAnimating) {
-    return <>{currentText}</>
-  }
+// Alt Medya Galerisi Bileşeni - Ekranı sağdan sola kaplayan tam genişlik (breakout) yapı
+const MediaGallery = ({ media, alt }: { media?: NewsMedia[]; alt: string }) => {
+  if (!media || media.length === 0) return null
 
   return (
-    <span className="relative inline-block">
-      <span className="block cross-fade-text-out">{previousText}</span>
-      <span className="block absolute inset-0 cross-fade-text-in">{currentText}</span>
-    </span>
+    <div className="mt-20 relative left-1/2 right-1/2 -mx-[50vw] w-screen overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
+        {media.map((m, idx) => (
+          <ScrollReveal key={idx} delay={idx * 100} distance={20} threshold={0.1}>
+            <div className="relative aspect-video overflow-hidden bg-gray-50">
+              {m.type === 'video' ? (
+                <video
+                  src={m.url}
+                  className="w-full h-full object-cover"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                />
+              ) : (
+                <OptimizedImage
+                  src={m.url}
+                  alt={`${alt} gallery ${idx + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </div>
+          </ScrollReveal>
+        ))}
+      </div>
+    </div>
   )
 }
 
 export function AboutPage() {
   const [content, setContent] = useState<AboutPageContent | null>(null)
   const [loading, setLoading] = useState(true)
-  const {t} = useTranslation()
-  const [activeSection, setActiveSection] = useState<'history' | 'identity' | 'quality' | null>(
-    null
-  )
-  const [sectionChangeId, setSectionChangeId] = useState(0)
-  const tabsContainerRef = useRef<HTMLDivElement | null>(null)
-  const historyBtnRef = useRef<HTMLButtonElement | null>(null)
-  const identityBtnRef = useRef<HTMLButtonElement | null>(null)
-  const qualityBtnRef = useRef<HTMLButtonElement | null>(null)
-  const [indicatorStyle, setIndicatorStyle] = useState<{left: number; width: number} | null>(null)
-  const {setFromPalette, reset} = useHeaderTheme()
+  const { t } = useTranslation()
+  const { setFromPalette, reset } = useHeaderTheme()
 
-  // SEO - hook'lar her zaman en üstte ve koşulsuz olmalı
+  // SEO
   const heroImageUrl =
     typeof content?.heroImage === 'object' ? content?.heroImage?.url : content?.heroImage
 
@@ -78,14 +65,6 @@ export function AboutPage() {
     locale: 'tr_TR',
     section: 'About',
   })
-
-  // Sayfa içeriği yüklendiğinde varsayılan olarak "Tarihçe" sekmesini seç
-  useEffect(() => {
-    if (!activeSection && content) {
-      setActiveSection('history')
-      setSectionChangeId(id => id + 1)
-    }
-  }, [activeSection, content])
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -118,35 +97,6 @@ export function AboutPage() {
     return () => reset()
   }, [content?.heroImage, reset, setFromPalette])
 
-  // Aktif sekmeye göre altındaki gri highlight alanını butonların gerçek genişliğine göre hizala
-  useEffect(() => {
-    const updateIndicator = () => {
-      if (!activeSection || !tabsContainerRef.current) {
-        setIndicatorStyle(null)
-        return
-      }
-
-      let btn: HTMLButtonElement | null = null
-      if (activeSection === 'history') btn = historyBtnRef.current
-      else if (activeSection === 'identity') btn = identityBtnRef.current
-      else if (activeSection === 'quality') btn = qualityBtnRef.current
-
-      if (!btn) {
-        setIndicatorStyle(null)
-        return
-      }
-
-      setIndicatorStyle({
-        left: btn.offsetLeft,
-        width: btn.offsetWidth,
-      })
-    }
-
-    updateIndicator()
-    window.addEventListener('resize', updateIndicator)
-    return () => window.removeEventListener('resize', updateIndicator)
-  }, [activeSection])
-
   if (loading || !content) {
     return (
       <div className="pt-24">
@@ -157,160 +107,163 @@ export function AboutPage() {
 
   return (
     <div className="bg-white animate-fade-in-up-subtle">
-      <style>
-        {`
-          @keyframes aboutTextFadeIn {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
-          }
-          @keyframes aboutTextFadeOut {
-            0% { opacity: 1; }
-            100% { opacity: 0; }
-          }
-          .cross-fade-text-in {
-            animation: aboutTextFadeIn 0.5s ease-in-out forwards;
-          }
-          .cross-fade-text-out {
-            animation: aboutTextFadeOut 0.5s ease-in-out forwards;
-          }
-        `}
-      </style>
       {/* Hero Section */}
-      <div className="relative h-[50vh] bg-gray-800 text-white flex items-center justify-center overflow-hidden">
+      <div className="relative h-[70vh] min-h-[500px] bg-gray-900 text-white flex items-center justify-center overflow-hidden">
         {content.heroImage && (
-          <div className="absolute inset-0 w-full h-full">
+          <div className="absolute inset-0 w-full h-full scale-105 animate-slow-zoom">
             <OptimizedImage
               src={heroImageUrl || ''}
               alt={t(content.heroTitle)}
-              className="w-full h-full opacity-40"
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center',
-              }}
+              className="w-full h-full opacity-60 object-cover"
               width={1920}
-              height={800}
+              height={1080}
               loading="eager"
               quality={90}
             />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/20" />
           </div>
         )}
-        <div className="relative z-10 text-center px-4">
-          <h1 className="text-4xl md:text-6xl font-light tracking-tighter uppercase">
-            {t(content.heroTitle)}
-          </h1>
-          <p className="mt-4 text-lg md:text-xl text-gray-200 max-w-3xl mx-auto font-light">
-            {t(content.heroSubtitle)}
-          </p>
+        <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
+          <ScrollReveal delay={100} duration={1.2} distance={30}>
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tighter uppercase leading-none">
+              {t(content.heroTitle)}
+            </h1>
+          </ScrollReveal>
+          <ScrollReveal delay={300} duration={1.2} distance={40}>
+            <p className="mt-8 text-lg md:text-2xl text-gray-200 max-w-2xl mx-auto font-light leading-relaxed">
+              {t(content.heroSubtitle)}
+            </p>
+          </ScrollReveal>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-16">
-        <Breadcrumbs
-          className="mb-6"
-          items={[
-            {label: t('homepage'), to: '/'},
-            {label: t('about')},
-          ]}
-        />
-        {/* Üçlü özel içerik bölümü: TARİHÇE, KİMLİK, KALİTE (tıklanabilir, ortak metin alanı) */}
-        <div className="mt-8 md:mt-10 mb-16 md:mb-24">
-          <div className="flex flex-col items-center">
-            <div className="w-full md:w-auto">
-              <div
-                ref={tabsContainerRef}
-                className="relative inline-flex w-full max-w-4xl justify-center border-b border-gray-300"
-              >
-                {/* Seçili düğme için kayan gri arka plan + kenarlık */}
-                {activeSection && indicatorStyle && (
-                  <div
-                    className="absolute inset-y-0 bg-gray-200 border border-gray-400 transition-all duration-300 ease-out pointer-events-none"
-                    style={{
-                      left: indicatorStyle.left,
-                      width: indicatorStyle.width,
-                    }}
-                  />
-                )}
-                <div className="relative z-10 flex flex-row w-full">
-              <button
-                ref={historyBtnRef}
-                type="button"
-                onClick={() => {
-                  setActiveSection(prev => {
-                    const next = prev === 'history' ? null : 'history'
-                    if (next) {
-                      setSectionChangeId(id => id + 1)
-                    }
-                    return next
-                  })
-                }}
-                className={`flex-1 px-4 md:px-6 py-2 md:py-3 text-xs md:text-sm tracking-[0.25em] uppercase transition-colors duration-200 ${
-                  activeSection === 'history' ? 'text-black' : 'text-gray-800 hover:text-black'
-                }`}
-              >
-                TARİHÇE
-              </button>
-              <button
-                ref={identityBtnRef}
-                type="button"
-                onClick={() => {
-                  setActiveSection(prev => {
-                    const next = prev === 'identity' ? null : 'identity'
-                    if (next) {
-                      setSectionChangeId(id => id + 1)
-                    }
-                    return next
-                  })
-                }}
-                className={`flex-1 px-4 md:px-6 py-2 md:py-3 text-xs md:text-sm tracking-[0.25em] uppercase transition-colors duration-200 ${
-                  activeSection === 'identity' ? 'text-black' : 'text-gray-800 hover:text-black'
-                }`}
-              >
-                KİMLİK
-              </button>
-              <button
-                ref={qualityBtnRef}
-                type="button"
-                onClick={() => {
-                  setActiveSection(prev => {
-                    const next = prev === 'quality' ? null : 'quality'
-                    if (next) {
-                      setSectionChangeId(id => id + 1)
-                    }
-                    return next
-                  })
-                }}
-                className={`flex-1 px-4 md:px-6 py-2 md:py-3 text-xs md:text-sm tracking-[0.25em] uppercase transition-colors duration-200 ${
-                  activeSection === 'quality' ? 'text-black' : 'text-gray-800 hover:text-black'
-                }`}
-              >
-                KALİTE
-              </button>
+      {/* Main Content Sections */}
+      <div className="bg-white overflow-hidden pb-32 font-light">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 text-[11px] sm:text-[12px]">
+          <Breadcrumbs
+            className="mb-12"
+            items={[
+              { label: t('homepage'), to: '/' },
+              { label: t('about') },
+            ]}
+          />
+        </div>
+
+        {/* 1. SECTION: HISTORY */}
+        {content.historySection && (
+          <div className="pb-32">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex flex-col lg:flex-row items-start gap-12 lg:gap-20">
+                <div className="flex-1 lg:max-w-xl">
+                  <ScrollReveal threshold={0.2} distance={40}>
+                    <h2 className="text-3xl md:text-5xl font-light text-gray-900 mb-8 tracking-tight">
+                      {t(content.historySection.title)}
+                    </h2>
+                    <div className="prose prose-lg text-gray-600 leading-relaxed font-light">
+                      {Array.isArray(t(content.historySection.content)) ? (
+                        <PortableTextLite value={t(content.historySection.content) as any} />
+                      ) : (
+                        <p>{t(content.historySection.content)}</p>
+                      )}
+                    </div>
+                  </ScrollReveal>
+                </div>
+                <div className="flex-1 w-full lg:w-auto">
+                  <ScrollReveal threshold={0.2} delay={200} duration={1} distance={20}>
+                    <div className="relative aspect-[4/5] overflow-hidden">
+                      <OptimizedImage
+                        src={content.historySection.image || content.storyImage || ''}
+                        alt="History"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </ScrollReveal>
                 </div>
               </div>
+              {/* Alt Medyalar (Full Width) */}
+              <MediaGallery media={content.historySection.media} alt="History" />
             </div>
-
-            {activeSection && (
-              <div className="mt-8 max-w-3xl mx-auto text-center">
-                <p className="text-sm md:text-base lg:text-lg text-gray-600 leading-relaxed font-light">
-                  <CrossFadeText
-                    text={
-                      activeSection === 'history' && content.historySection?.content
-                        ? t(content.historySection.content)
-                        : activeSection === 'identity' && content.identitySection?.content
-                          ? t(content.identitySection.content)
-                          : activeSection === 'quality' && content.qualitySection?.content
-                            ? t(content.qualitySection.content)
-                            : ''
-                    }
-                    triggerKey={sectionChangeId}
-                  />
-                </p>
-              </div>
-            )}
           </div>
-        </div>
+        )}
+
+        {/* 2. SECTION: IDENTITY (Gray Background Breakout) */}
+        {content.identitySection && (
+          <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-gray-50 py-32">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex flex-col-reverse lg:flex-row items-start gap-12 lg:gap-20 text-left">
+                <div className="flex-1 w-full lg:w-auto">
+                  <ScrollReveal threshold={0.2} duration={1} distance={20}>
+                    <div className="relative aspect-video overflow-hidden">
+                      <OptimizedImage
+                        src={content.identitySection.image || ''}
+                        alt="Identity"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </ScrollReveal>
+                </div>
+                <div className="flex-1 lg:max-w-xl">
+                  <ScrollReveal threshold={0.2} distance={40}>
+                    <h2 className="text-3xl md:text-5xl font-light text-gray-900 mb-8 tracking-tight">
+                      {t(content.identitySection.title)}
+                    </h2>
+                    <div className="prose prose-lg text-gray-600 leading-relaxed font-light">
+                      {Array.isArray(t(content.identitySection.content)) ? (
+                        <PortableTextLite value={t(content.identitySection.content) as any} />
+                      ) : (
+                        <p>{t(content.identitySection.content)}</p>
+                      )}
+                    </div>
+                  </ScrollReveal>
+                </div>
+              </div>
+              {/* Alt Medyalar (Full Width) */}
+              <MediaGallery media={content.identitySection.media} alt="Identity" />
+            </div>
+          </div>
+        )}
+
+        {/* 3. SECTION: QUALITY */}
+        {content.qualitySection && (
+          <div className="pt-32 pb-24">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="max-w-7xl mx-auto">
+                <ScrollReveal threshold={0.2} distance={40}>
+                  <h2 className="text-4xl md:text-6xl font-light text-gray-900 mb-16 tracking-tight text-center">
+                    {t(content.qualitySection.title)}
+                  </h2>
+                </ScrollReveal>
+
+                <div className="flex flex-col lg:flex-row gap-16 lg:gap-24 items-start text-left">
+                  <div className="lg:w-1/3">
+                    <ScrollReveal threshold={0.2} distance={50} delay={100}>
+                      <div className="prose prose-lg text-gray-600 leading-relaxed font-light">
+                        {Array.isArray(t(content.qualitySection.content)) ? (
+                          <PortableTextLite value={t(content.qualitySection.content) as any} />
+                        ) : (
+                          <p>{t(content.qualitySection.content)}</p>
+                        )}
+                      </div>
+                    </ScrollReveal>
+                  </div>
+                  <div className="lg:w-2/3 w-full">
+                    <ScrollReveal threshold={0.2} delay={200} duration={1} distance={20}>
+                      <div className="relative aspect-video lg:aspect-[16/9] overflow-hidden">
+                        <OptimizedImage
+                          src={content.qualitySection.image || ''}
+                          alt="Quality"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </ScrollReveal>
+                  </div>
+                </div>
+                {/* Alt Medyalar (Full Width) */}
+                <MediaGallery media={content.qualitySection.media} alt="Quality" />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

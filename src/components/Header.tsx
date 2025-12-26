@@ -170,7 +170,6 @@ export function Header() {
     isMobile && settings && settings.mobileHeaderAnimation === 'overlay'
   )
   const [isMobileMenuClosing, setIsMobileMenuClosing] = useState(false)
-  const [headerScale, setHeaderScale] = useState(1)
 
 
   // Search states
@@ -701,11 +700,6 @@ export function Header() {
 
     window.addEventListener('scroll', handleHeaderVisibility, { passive: true })
     return () => window.removeEventListener('scroll', handleHeaderVisibility)
-  }, [isMobile])
-
-  // Header her zaman tam boyutta - scaling yok
-  useEffect(() => {
-    setHeaderScale(1)
   }, [isMobile])
 
   // Header kaybolduğunda products dropdown'ı kapat
@@ -1614,11 +1608,11 @@ export function Header() {
             className="mx-auto h-full flex items-center w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] px-4 md:px-8 lg:px-0 header-scroll-transition header-layout-transition"
             ref={navRef}
             style={{
-              transform: !isMobile ? `scale(${headerScale})` : undefined,
+              transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-20px)',
               opacity: isHeaderVisible ? 1 : 0,
-              scale: isHeaderVisible ? '1' : '0.94',
+              scale: isHeaderVisible ? '1' : '0.8',
               transformOrigin: 'top center',
-              transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), scale 0.3s cubic-bezier(0.4, 0, 0.2, 1), all 0.8s cubic-bezier(0.23, 1, 0.32, 1)',
+              transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), scale 0.4s cubic-bezier(0.4, 0, 0.2, 1), all 0.8s cubic-bezier(0.23, 1, 0.32, 1)',
             }}
           >
             {/* Üst satır: logo ve menü düğmeleri dikeyde tam ortalı */}

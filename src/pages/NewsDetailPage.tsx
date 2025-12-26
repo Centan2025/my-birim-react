@@ -4,6 +4,7 @@ import type { NewsMedia } from '../types'
 import { OptimizedImage } from '../components/OptimizedImage'
 import { OptimizedVideo } from '../components/OptimizedVideo'
 import { PageLoading } from '../components/LoadingSpinner'
+import { Breadcrumbs } from '../components/Breadcrumbs'
 import { useTranslation } from '../i18n'
 import { useNewsItem, useNews } from '../hooks/useNews'
 import { useSiteSettings } from '../hooks/useSiteData'
@@ -231,80 +232,67 @@ export function NewsDetailPage() {
     return <div className="pt-28 text-center">{t('news_not_found')}</div>
   }
 
-  // By adding a `key` prop here, we ensure that React treats navigations
-  // between different news items as distinct components, automatically resetting state.
   return (
     <div key={newsId} className="bg-white animate-fade-in-up-subtle">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-0">
-        <div className="max-w-4xl mx-auto">
-          {/* Breadcrumbs - diğer sayfalarla aynı renk/stil */}
-          <nav className="mb-8 text-[11px] sm:text-[12px] text-gray-700" aria-label="Breadcrumb">
-            <ol className="list-none p-0 inline-flex items-center">
-              <li>
-                <Link
-                  to="/"
-                  className="uppercase underline underline-offset-4 text-gray-900 hover:text-gray-900"
-                >
-                  {t('homepage')}
-                </Link>
-              </li>
-              <li className="mx-2 font-light text-gray-400">|</li>
-              <li>
-                <Link
-                  to="/news"
-                  className="uppercase underline underline-offset-4 text-gray-900 hover:text-gray-900"
-                >
-                  {t('news')}
-                </Link>
-              </li>
-              <li className="mx-2 font-light text-gray-400">|</li>
-              <li className="text-gray-700">{t(item.title)}</li>
-            </ol>
-          </nav>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
+        <div className="w-full">
+          {/* Breadcrumbs - diğer sayfalarla aynı hizalama */}
+          <Breadcrumbs
+            className="mb-8"
+            items={[
+              { label: t('homepage'), to: '/' },
+              { label: t('news'), to: '/news' },
+              { label: t(item.title) },
+            ]}
+          />
 
-          <article>
-            <div className="mt-6 md:mt-8 mb-6">
-              <p className="text-sm text-gray-500 mb-3 font-light">{formatDate(item.date)}</p>
-              <div className="h-px bg-gray-300"></div>
-            </div>
-
-            <OptimizedImage
-              src={
-                typeof item.mainImage === 'string'
-                  ? item.mainImage
-                  : (item.mainImage && typeof item.mainImage === 'object'
-                    ? item.mainImage.url
-                    : '') || ''
-              }
-              srcMobile={
-                typeof item.mainImage === 'object' && item.mainImage
-                  ? item.mainImage.urlMobile
-                  : undefined
-              }
-              srcDesktop={
-                typeof item.mainImage === 'object' && item.mainImage
-                  ? item.mainImage.urlDesktop
-                  : undefined
-              }
-              alt={t(item.title)}
-              className={`w-full h-auto object-cover mb-6 ${settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'}`}
-              width={1200}
-              height={675}
-              loading="eager"
-              quality={90}
-            />
-          </article>
-        </div>
-      </div>
-
-      <div className="bg-gray-100 w-full pt-6 pb-8">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl md:text-4xl font-normal tracking-tight text-gray-700 mb-4">
-              {t(item.title)}
-            </h1>
-            <div className="flex items-center min-h-[200px]">
-              <div className="prose prose-lg lg:prose-xl text-gray-900 max-w-none w-full px-4 sm:px-0 [&>p:first-child]:mt-0 [&>p:last-child]:mb-0">
+            <article>
+              <div className="mt-6 md:mt-8 mb-6">
+                <p className="text-sm text-gray-500 mb-3 font-light">{formatDate(item.date)}</p>
+                {/* Başlık altındaki gri çizgi – tam ekran (proje sayfasıyla aynı) */}
+                <div className="mt-2 md:mt-3 lg:mt-2 relative left-1/2 right-1/2 -mx-[50vw] w-screen">
+                  <div className="h-px bg-gray-300 w-full"></div>
+                </div>
+              </div>
+
+              <OptimizedImage
+                src={
+                  typeof item.mainImage === 'string'
+                    ? item.mainImage
+                    : (item.mainImage && typeof item.mainImage === 'object'
+                      ? item.mainImage.url
+                      : '') || ''
+                }
+                srcMobile={
+                  typeof item.mainImage === 'object' && item.mainImage
+                    ? item.mainImage.urlMobile
+                    : undefined
+                }
+                srcDesktop={
+                  typeof item.mainImage === 'object' && item.mainImage
+                    ? item.mainImage.urlDesktop
+                    : undefined
+                }
+                alt={t(item.title)}
+                className={`w-full h-auto object-cover mb-6 ${settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'}`}
+                width={1200}
+                height={675}
+                loading="eager"
+                quality={90}
+              />
+            </article>
+          </div>
+        </div>
+
+        {/* Gray content area with breakout pattern - matches ProjectDetailPage */}
+        <div className="mt-8 relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-gray-100">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
+            <div className="max-w-4xl mx-auto">
+              <h1 className="text-3xl md:text-4xl font-normal tracking-tight text-gray-700 mb-6">
+                {t(item.title)}
+              </h1>
+              <div className="prose prose-lg lg:prose-xl text-gray-900 max-w-none w-full px-4 sm:px-0">
                 {(() => {
                   const content = t(item.content)
                   return Array.isArray(content) ? (
@@ -314,58 +302,52 @@ export function NewsDetailPage() {
                   )
                 })()}
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="max-w-4xl mx-auto">
-          <article>
-            <div className="mt-12">
-              {item.media.map((media, index) => (
-                <MediaComponent key={index} media={media} />
-              ))}
-            </div>
-          </article>
-        </div>
-      </div>
-
-      {/* Bottom Prev / Next controls */}
-      {showBottomPrevNext && (prevNews || nextNews) && (
-        <div className="bg-white border-t border-gray-200">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex-1">
-                {prevNews ? (
-                  <Link
-                    to={`/news/${prevNews.id}`}
-                    className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
-                    aria-label="Previous news"
-                  >
-                    <MinimalChevronLeft className="w-12 h-12 md:w-16 md:h-16" />
-                  </Link>
-                ) : (
-                  <span />
-                )}
-              </div>
-              <div className="flex-1 text-right">
-                {nextNews ? (
-                  <Link
-                    to={`/news/${nextNews.id}`}
-                    className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
-                    aria-label="Next news"
-                  >
-                    <MinimalChevronRight className="w-12 h-12 md:w-16 md:h-16" />
-                  </Link>
-                ) : (
-                  <span />
-                )}
+              <div className="mt-12 space-y-12">
+                {item.media.map((media, index) => (
+                  <MediaComponent key={index} media={media} />
+                ))}
               </div>
             </div>
           </div>
         </div>
-      )}
+
+        {/* Bottom Prev / Next controls - footer'ın hemen üzerinde, project sayfasındaki gibi hizalı */}
+        {showBottomPrevNext && (prevNews || nextNews) && (
+          <div className="bg-white border-t border-gray-200 mt-0">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1">
+                  {prevNews ? (
+                    <Link
+                      to={`/news/${prevNews.id}`}
+                      className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
+                      aria-label="Previous news"
+                    >
+                      <MinimalChevronLeft className="w-12 h-12 md:w-16 md:h-16" />
+                    </Link>
+                  ) : (
+                    <span />
+                  )}
+                </div>
+                <div className="flex-1 text-right">
+                  {nextNews ? (
+                    <Link
+                      to={`/news/${nextNews.id}`}
+                      className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
+                      aria-label="Next news"
+                    >
+                      <MinimalChevronRight className="w-12 h-12 md:w-16 md:h-16" />
+                    </Link>
+                  ) : (
+                    <span />
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

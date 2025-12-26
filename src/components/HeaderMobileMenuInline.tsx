@@ -1,8 +1,8 @@
 import React from 'react'
-import {NavLink} from 'react-router-dom'
-import type {Category, SiteSettings} from '../types'
-import type {MutableRefObject} from 'react'
-import {CrossFadeText, HeaderTranslateFn, UserIcon} from './HeaderShared'
+import { NavLink } from 'react-router-dom'
+import type { Category, SiteSettings } from '../types'
+import type { MutableRefObject } from 'react'
+import { CrossFadeText, HeaderTranslateFn, UserIcon } from './HeaderShared'
 
 interface HeaderMobileMenuInlineProps {
   isOpen: boolean
@@ -48,7 +48,7 @@ export const HeaderMobileMenuInline: React.FC<HeaderMobileMenuInlineProps> = ({
       ref={node => {
         if (node) {
           (mobileMenuRef as MutableRefObject<HTMLDivElement | null>).current = node
-          ;(mobileMenuFocusTrap as MutableRefObject<HTMLElement | null>).current = node
+            ; (mobileMenuFocusTrap as MutableRefObject<HTMLElement | null>).current = node
         }
       }}
       id="mobile-menu"
@@ -70,11 +70,10 @@ export const HeaderMobileMenuInline: React.FC<HeaderMobileMenuInlineProps> = ({
                       onLocaleChange(langCode)
                     }}
                     aria-pressed={isActive}
-                    className={`group relative px-2 py-1 text-[0.85rem] uppercase tracking-[0.2em] transition-colors duration-200 ${
-                      isActive
-                        ? 'text-white font-light'
-                        : 'text-gray-400/90 hover:text-white font-light'
-                    }`}
+                    className={`group relative px-2 py-1 text-[0.85rem] uppercase tracking-[0.2em] transition-colors duration-200 ${isActive
+                      ? 'text-white font-light'
+                      : 'text-gray-400/90 hover:text-white font-light'
+                      }`}
                     style={{
                       fontFamily: 'Inter, sans-serif',
                       letterSpacing: '0.2em',
@@ -107,9 +106,8 @@ export const HeaderMobileMenuInline: React.FC<HeaderMobileMenuInlineProps> = ({
             >
               <CrossFadeText text={t('products')} triggerKey={locale} />
               <svg
-                className={`w-5 h-5 transition-transform duration-300 ${
-                  isMobileProductsMenuOpen ? 'rotate-180' : ''
-                }`}
+                className={`w-5 h-5 transition-transform duration-300 ${isMobileProductsMenuOpen ? 'rotate-180' : ''
+                  }`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -119,9 +117,8 @@ export const HeaderMobileMenuInline: React.FC<HeaderMobileMenuInlineProps> = ({
             </button>
             {/* Alt menü - kategoriler ve Hepsini Gör */}
             <div
-              className={`overflow-hidden transition-all duration-700 ease-in-out ${
-                isMobileProductsMenuOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
-              }`}
+              className={`overflow-hidden transition-all duration-700 ease-in-out ${isMobileProductsMenuOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+                }`}
             >
               <div className="pl-6 pb-2 flex flex-col">
                 {categories.map((category, index) => (
@@ -158,9 +155,8 @@ export const HeaderMobileMenuInline: React.FC<HeaderMobileMenuInlineProps> = ({
           </div>
           <NavLink
             to="/designers"
-            className={`flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10 transition-transform ${
-              isMobileProductsMenuOpen ? 'translate-y-0' : 'translate-y-0'
-            }`}
+            className={`flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10 transition-transform ${isMobileProductsMenuOpen ? 'translate-y-0' : 'translate-y-0'
+              }`}
             onClick={onCloseAll}
           >
             <CrossFadeText text={t('designers')} triggerKey={locale} />

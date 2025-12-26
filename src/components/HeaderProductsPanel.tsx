@@ -1,7 +1,7 @@
 import React from 'react'
-import {NavLink} from 'react-router-dom'
-import type {Category, Product} from '../types'
-import type {HeaderTranslateFn} from './HeaderShared'
+import { NavLink } from 'react-router-dom'
+import type { Category, Product } from '../types'
+import type { HeaderTranslateFn } from './HeaderShared'
 
 interface HeaderProductsPanelProps {
   isOpen: boolean
@@ -31,11 +31,10 @@ export const HeaderProductsPanel: React.FC<HeaderProductsPanelProps> = ({
   return (
     // Ürün kategorileri paneli - header içinde genişleyip daralır
     <div
-      className={`hidden lg:block transition-all duration-500 ease-in-out ${
-        isOpen
-          ? 'opacity-100 translate-y-0 max-h-[800px]'
-          : 'opacity-0 -translate-y-2 max-h-0 overflow-hidden'
-      }`}
+      className={`hidden lg:block transition-all duration-500 ease-in-out ${isOpen
+        ? 'opacity-100 translate-y-0 max-h-[800px]'
+        : 'opacity-0 -translate-y-2 max-h-0 overflow-hidden'
+        }`}
       style={{
         backgroundColor: isOpen ? 'rgba(0, 0, 0, 0.85)' : 'transparent',
         backdropFilter: isOpen ? 'blur(16px)' : 'none',
@@ -45,23 +44,20 @@ export const HeaderProductsPanel: React.FC<HeaderProductsPanelProps> = ({
       onMouseLeave={onLeave}
     >
       {/* Beyaz ayırıcı çizgi */}
-      <div
-        className="h-[1px] bg-white/60 mx-4"
-        style={{marginLeft: submenuOffset}}
-      ></div>
+      <div className="w-full border-t border-white/50"></div>
 
       <div
         className="pt-4 pb-3 grid grid-cols-[auto_1fr] gap-24"
-        style={{paddingLeft: submenuOffset, paddingRight: '5rem'}}
+        style={{ paddingLeft: submenuOffset, paddingRight: '5rem' }}
       >
         {/* Sol taraf - Kategoriler */}
-        <div className="overflow-y-auto hide-scrollbar pr-6 pl-4">
+        <div className="overflow-y-auto hide-scrollbar pr-6">
           <div className="flex flex-col gap-3">
             {categories.map(category => (
               <NavLink
                 key={category.id}
                 to={`/products/${category.id}`}
-                className="group relative px-1 py-2 text-sm font-semibold uppercase text-gray-200 hover:text-white transition-colors duration-300"
+                className="group relative px-0 py-2 text-sm font-semibold uppercase text-gray-200 hover:text-white transition-colors duration-300"
                 onClick={onClose}
                 onMouseEnter={() => onHoveredCategoryChange(category.id)}
               >
@@ -151,15 +147,11 @@ export const HeaderProductsPanel: React.FC<HeaderProductsPanelProps> = ({
         </div>
       </div>
 
-      {/* Tüm Modeller butonu - boydan boya çizgi ile */}
-      <div
-        className="border-t border-white/80 mx-4 mt-3"
-        style={{marginLeft: submenuOffset}}
-      ></div>
-      <div className="pt-3 pb-3" style={{paddingLeft: submenuOffset, paddingRight: '5rem'}}>
+      <div className="w-full border-t border-white/50 mt-3"></div>
+      <div className="pt-3 pb-3" style={{ paddingLeft: submenuOffset, paddingRight: '5rem' }}>
         <NavLink
           to="/products"
-          className="group relative inline-block px-1 py-2 text-sm font-bold uppercase text-white hover:text-gray-200 transition-colors duration-300"
+          className="group relative inline-block px-0 py-2 text-sm font-bold uppercase text-white hover:text-gray-200 transition-colors duration-300"
           onClick={onClose}
         >
           <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase">

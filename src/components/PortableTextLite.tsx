@@ -95,21 +95,39 @@ export default function PortableTextLite({ value }: { value: Block[] | undefined
       const content = renderInline(block.children as Span[], block.markDefs || [])
       if (style === 'h1')
         nodes.push(
-          <h1 className="text-2xl md:text-3xl font-light my-4" key={blockKey}>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl my-8 leading-tight" key={blockKey}>
             {content}
           </h1>
         )
       else if (style === 'h2')
         nodes.push(
-          <h2 className="text-xl md:text-2xl font-light my-4" key={blockKey}>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl my-6 leading-snug" key={blockKey}>
             {content}
           </h2>
         )
       else if (style === 'h3')
         nodes.push(
-          <h3 className="text-lg md:text-xl font-light my-3" key={blockKey}>
+          <h3 className="text-2xl md:text-3xl lg:text-4xl my-5" key={blockKey}>
             {content}
           </h3>
+        )
+      else if (style === 'h4')
+        nodes.push(
+          <h4 className="text-xl md:text-2xl lg:text-3xl my-4" key={blockKey}>
+            {content}
+          </h4>
+        )
+      else if (style === 'h5')
+        nodes.push(
+          <h5 className="text-lg md:text-xl lg:text-2xl my-3" key={blockKey}>
+            {content}
+          </h5>
+        )
+      else if (style === 'h6')
+        nodes.push(
+          <h6 className="text-base md:text-lg lg:text-xl my-2 font-medium" key={blockKey}>
+            {content}
+          </h6>
         )
       else
         nodes.push(

@@ -68,6 +68,29 @@ body {
   font-weight: 300;
 }
 
+/* Barlow Condensed Thin 100 utility - Refined for Rich Text support */
+.font-roboto-thin,
+.font-roboto-thin * {
+  font-family: 'Barlow Condensed', sans-serif !important;
+  letter-spacing: 0.05em !important;
+}
+
+.font-roboto-thin {
+  font-weight: 100;
+  font-size: 1.05em;
+}
+
+/* Allow headings to be slightly bolder (300) even in a Thin utility for hierarchy */
+.font-roboto-thin h1,
+.font-roboto-thin h2,
+.font-roboto-thin h3,
+.font-roboto-thin h4,
+.font-roboto-thin h5,
+.font-roboto-thin h6 {
+  font-weight: 300 !important;
+  color: inherit !important;
+}
+
 /* Tüm başlıklar Oswald fontu ile */
 h1,
 h2,
@@ -195,6 +218,7 @@ h6 {
     opacity: 0;
     transform: translateX(60px);
   }
+
   100% {
     opacity: 1;
     transform: translateX(0);
@@ -210,14 +234,17 @@ h6 {
     opacity: 0;
     transform: translateY(-10px) scale(0.5);
   }
+
   10% {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
+
   90% {
     opacity: 1;
     transform: translateY(40px) scale(1);
   }
+
   100% {
     opacity: 0;
     transform: translateY(50px) scale(0.5);
@@ -234,16 +261,19 @@ h6 {
     transform: translateY(44px) scale(1.26);
     filter: drop-shadow(0 0 26px rgba(255, 255, 255, 0.95));
   }
+
   55% {
     opacity: 1;
     transform: translateY(-14px) scale(1.16);
     filter: drop-shadow(0 0 32px rgba(255, 255, 255, 0.8));
   }
+
   75% {
     opacity: 1;
     transform: translateY(4px) scale(1.04);
     filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.55));
   }
+
   100% {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -257,19 +287,22 @@ h6 {
 }
 
 @keyframes falling-dot {
-  0% { 
-    transform: translateY(0); 
-    opacity: 0; 
+  0% {
+    transform: translateY(0);
+    opacity: 0;
   }
-  10% { 
-    opacity: 0.8; 
+
+  10% {
+    opacity: 0.8;
   }
-  80% { 
-    opacity: 0.4; 
+
+  80% {
+    opacity: 0.4;
   }
-  100% { 
-    transform: translateY(40px); 
-    opacity: 0; 
+
+  100% {
+    transform: translateY(40px);
+    opacity: 0;
   }
 }
 

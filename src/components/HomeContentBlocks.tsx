@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 
 import { ContentBlock } from '../types'
@@ -22,6 +22,16 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
   imageBorderClass,
 }) => {
   const { t } = useTranslation()
+  const [playMobileArrowIntro, setPlayMobileArrowIntro] = useState(false)
+  const hasPlayedMobileArrowIntro = useRef(false)
+
+  // Mobilde sol ok intro animasyonu
+  useEffect(() => {
+    if (!isMobile || hasPlayedMobileArrowIntro.current) return
+    hasPlayedMobileArrowIntro.current = true
+    setPlayMobileArrowIntro(true)
+  }, [isMobile])
+
 
   // Tüm bloklardaki fontları topla ve yükle
   const allFonts = blocks.map(b => b.titleFont).filter(Boolean) as string[]
@@ -103,11 +113,11 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     const marginClass = textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'
 
                     return Array.isArray(desc) ? (
-                      <div className={`${marginClass} ${widthClass} mt-3`}>
+                      <div className={`${marginClass} ${widthClass} mt-3 font-roboto-thin text-gray-800`}>
                         <PortableTextLite value={desc} />
                       </div>
                     ) : (
-                      <p className={`mt-3 text-gray-900 font-normal leading-relaxed ${widthClass} text-base md:text-lg ${marginClass}`}>
+                      <p className={`mt-3 text-gray-800 font-roboto-thin leading-relaxed ${widthClass} text-lg md:text-xl ${marginClass}`}>
                         {desc}
                       </p>
                     )
@@ -123,7 +133,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     className={`group inline-flex items-center gap-x-3 text-gray-950 font-bold py-3 ${textAlign === 'right' ? 'pl-5 pr-0' : 'pl-0 pr-5'} text-sm md:text-lg rounded-lg`}
                   >
                     <span className="inline-flex justify-center transition-all duration-500 ease-out">
-                      <span className="leading-none font-bold tracking-[0.05em] uppercase transition-all duration-500 ease-out md:group-hover:tracking-[0.12em] md:group-hover:text-gray-600">
+                      <span className="leading-none font-bold tracking-[0.05em] transition-all duration-500 ease-out md:group-hover:tracking-[0.12em] md:group-hover:text-gray-600">
                         {t(block.linkText)}
                       </span>
                     </span>
@@ -170,6 +180,34 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 loading="lazy"
                 quality={85}
               />
+            )}
+            {/* Mobile Scroll Indicator - Sadece ok (HomeHero ile aynı) */}
+            {isMobile && (
+              <div
+                className={`absolute left-8 z-30 pointer-events-none mix-blend-difference ${playMobileArrowIntro ? 'animate-hero-mobile-left-arrow-intro' : ''}`}
+                style={{
+                  bottom: '16px',
+                }}
+              >
+                <div className="flex flex-col items-center">
+                  <div className="mt-0.5">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="opacity-70"
+                    >
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
             )}
           </ScrollReveal>
         )

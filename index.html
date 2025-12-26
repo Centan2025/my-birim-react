@@ -1,257 +1,71 @@
 <!DOCTYPE html>
 <html lang="tr">
-  <head>
-    <!-- Early error handlers - MUST be first to catch all errors -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <script>
-      (function() {
-        'use strict';
-        
-        // Patch Storage API immediately
-        try {
-          if (window.Storage && window.Storage.prototype) {
-            var StorageProto = window.Storage.prototype;
-            var BLOCK_SUBSTRING = 'Access to storage is not allowed';
-            
-            var wrapMethod = function(methodName) {
-              var original = StorageProto[methodName];
-              if (typeof original !== 'function') return;
-              if (StorageProto[methodName].__patched) return;
-              
-              StorageProto[methodName] = function() {
-                try {
-                  return original.apply(this, arguments);
-                } catch (err) {
-                  var msg = err && err.message ? String(err.message) : String(err || '');
-                  if (typeof msg === 'string' && msg.indexOf(BLOCK_SUBSTRING) !== -1) {
-                    if (methodName === 'getItem' || methodName === 'key') {
-                      return null;
-                    }
-                    return undefined;
-                  }
-                  throw err;
-                }
-              };
-              StorageProto[methodName].__patched = true;
-            };
-            
-            wrapMethod('getItem');
-            wrapMethod('setItem');
-            wrapMethod('removeItem');
-            wrapMethod('clear');
-            wrapMethod('key');
-          }
-        } catch (e) {
-          // Silently fail if patching doesn't work
-        }
-        
-        // Global promise rejection handler - use capture phase and be very aggressive
-        var unhandledRejectionHandler = function(event) {
-          var errorMessage = '';
-          if (event && event.reason) {
-            if (event.reason.message) {
-              errorMessage = String(event.reason.message);
-            } else if (event.reason.toString) {
-              errorMessage = String(event.reason.toString());
-            } else {
-              errorMessage = String(event.reason || '');
-            }
-          }
-          
-          // Check for known non-critical errors
-          if (typeof errorMessage === 'string' && (
-            errorMessage.indexOf('Could not fetch session') !== -1 ||
-            errorMessage.indexOf('Access to storage is not allowed') !== -1 ||
-            errorMessage.indexOf('Access to storage') !== -1
-          )) {
-            if (event.preventDefault) event.preventDefault();
-            if (event.stopPropagation) event.stopPropagation();
-            if (event.stopImmediatePropagation) event.stopImmediatePropagation();
-            return false;
-          }
-        };
-        
-        // Add multiple listeners to catch all cases
-        window.addEventListener('unhandledrejection', unhandledRejectionHandler, true);
-        window.addEventListener('unhandledrejection', unhandledRejectionHandler, false);
-        
-        // Also set onunhandledrejection as fallback
-        if (window.onunhandledrejection === null || !window.onunhandledrejection) {
-          window.onunhandledrejection = unhandledRejectionHandler;
-        }
-        
-        // Global error handler - use capture phase and be very aggressive
-        var errorHandler = function(event) {
-          var errorMessage = '';
-          if (event) {
-            errorMessage = event.message || (event.error && event.error.message) || String(event.error || '');
-          }
-          
-          // Check for known non-critical errors
-          if (typeof errorMessage === 'string' && (
-            errorMessage.indexOf('Could not fetch session') !== -1 ||
-            errorMessage.indexOf('Access to storage is not allowed') !== -1 ||
-            errorMessage.indexOf('Access to storage') !== -1
-          )) {
-            if (event.preventDefault) event.preventDefault();
-            if (event.stopPropagation) event.stopPropagation();
-            if (event.stopImmediatePropagation) event.stopImmediatePropagation();
-            return false;
-          }
-        };
-        
-        // Add multiple listeners to catch all cases
-        window.addEventListener('error', errorHandler, true);
-        window.addEventListener('error', errorHandler, false);
-        
-        // Also set onerror as fallback
-        if (window.onerror === null || !window.onerror) {
-          window.onerror = function(message, source, lineno, colno, error) {
-            var errorMessage = typeof message === 'string' ? message : (error && error.message) || String(message || '');
-            if (typeof errorMessage === 'string' && (
-              errorMessage.indexOf('Could not fetch session') !== -1 ||
-              errorMessage.indexOf('Access to storage is not allowed') !== -1 ||
-              errorMessage.indexOf('Access to storage') !== -1
-            )) {
-              return true;
-            }
-            return false;
-          };
-        }
-        
-        // Filter console.error - must be early
-        var originalError = console.error;
-        console.error = function() {
-          var message = Array.prototype.join.call(arguments, ' ');
-          if (typeof message === 'string' && (
-            message.indexOf('Access to storage is not allowed') !== -1 ||
-            message.indexOf('Could not fetch session') !== -1 ||
-            (message.indexOf('Uncaught (in promise)') !== -1 && 
-             (message.indexOf('Access to storage') !== -1 || message.indexOf('Could not fetch session') !== -1))
-          )) {
-            return;
-          }
-          originalError.apply(console, arguments);
-        };
-        
-        // Filter console.warn for Zustand
-        var originalWarn = console.warn;
-        console.warn = function() {
-          var message = Array.prototype.join.call(arguments, ' ');
-          if (typeof message === 'string' && message.indexOf('[DEPRECATED] Default export is deprecated') !== -1) {
-            return;
-          }
-          originalWarn.apply(console, arguments);
-        };
-        
-        // Prevent Sentry and Vercel feedback widgets from loading
-        // Block feedback.html, feedback.js, Vercel instrument requests, and Vercel toolbar
-        var originalFetch = window.fetch;
-        if (originalFetch) {
-          window.fetch = function() {
-            var url = arguments[0];
-            if (typeof url === 'string' && (
-              url.indexOf('feedback.html') !== -1 ||
-              url.indexOf('feedback.js') !== -1 ||
-              url.indexOf('/feedback') !== -1 ||
-              url.indexOf('instrument') !== -1 ||
-              url.indexOf('vercel') !== -1 ||
-              url.indexOf('_vercel') !== -1 ||
-              url.indexOf('__vercel') !== -1
-            )) {
-              // Return a resolved promise with empty response to avoid errors
-              return Promise.resolve(new Response('', { status: 200 }));
-            }
-            return originalFetch.apply(this, arguments);
-          };
-        }
-        
-        // Also block script tags that load feedback, Vercel analytics, or Vercel toolbar
-        var observer = new MutationObserver(function(mutations) {
-          mutations.forEach(function(mutation) {
-            mutation.addedNodes.forEach(function(node) {
-              if (node.nodeType === 1) { // Element node
-                if (node.tagName === 'SCRIPT' || node.tagName === 'IFRAME') {
-                  var src = node.src || node.getAttribute('src') || '';
-                  if (src.indexOf('feedback') !== -1 || 
-                      src.indexOf('instrument') !== -1 ||
-                      src.indexOf('vercel') !== -1 ||
-                      src.indexOf('_vercel') !== -1) {
-                    node.remove();
-                  }
-                }
-                // Block Vercel Toolbar div elements
-                if (node.tagName === 'DIV' || node.tagName === 'BUTTON') {
-                  var className = node.className || '';
-                  var id = node.id || '';
-                  if (className.indexOf('vercel') !== -1 || 
-                      id.indexOf('vercel') !== -1 ||
-                      className.indexOf('__vercel') !== -1 ||
-                      id.indexOf('__vercel') !== -1) {
-                    node.remove();
-                  }
-                }
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BIRIM</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Jura:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Oswald:wght@200;300;400;500;600;700&family=Barlow+Condensed:wght@100;300;400&display=swap"
+    rel="stylesheet" />
+
+  <!-- Early error handlers and storage patches -->
+  <script>
+    (function () {
+      'use strict';
+      try {
+        if (window.Storage && window.Storage.prototype) {
+          var StorageProto = window.Storage.prototype;
+          var BLOCK_SUBSTRING = 'Access to storage is not allowed';
+          ['getItem', 'setItem', 'removeItem', 'clear', 'key'].forEach(function (method) {
+            var original = StorageProto[method];
+            StorageProto[method] = function () {
+              try { return original.apply(this, arguments); }
+              catch (err) {
+                var msg = String(err && err.message || err || '');
+                if (msg.indexOf(BLOCK_SUBSTRING) !== -1) return method === 'getItem' || method === 'key' ? null : undefined;
+                throw err;
               }
-            });
-          });
-        });
-        
-        // Start observing when DOM is ready
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', function() {
-            observer.observe(document.body || document.documentElement, {
-              childList: true,
-              subtree: true
-            });
-          });
-        } else {
-          observer.observe(document.body || document.documentElement, {
-            childList: true,
-            subtree: true
+            };
           });
         }
-      })();
+      } catch (e) { }
+
+      var errorHandler = function (event) {
+        var msg = String(event.message || (event.error && event.error.message) || event.reason || '');
+        if (msg.indexOf('Access to storage') !== -1 || msg.indexOf('Could not fetch session') !== -1) {
+          if (event.preventDefault) event.preventDefault();
+          return true;
+        }
+      };
+      window.addEventListener('error', errorHandler, true);
+      window.addEventListener('unhandledrejection', errorHandler, true);
+    })();
+  </script>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "react": "https://aistudiocdn.com/react@^19.2.0",
+        "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+        "react/": "https://aistudiocdn.com/react@^19.2.0/",
+        "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.5",
+        "@google/genai": "https://aistudiocdn.com/@google/genai@^1.28.0",
+        "vite": "https://aistudiocdn.com/vite@^7.1.12",
+        "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.0"
+      }
+    }
     </script>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BIRIM</title>
-    <meta name="description" content="BIRIM - Modern tasarım ve mimari çözümler" />
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="BIRIM" />
-    <meta property="og:locale" content="tr_TR" />
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    
-    <!-- Fonts: Jura (primary) + Inter fallback + Bebas Neue -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Jura:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Oswald:wght@200;300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <script type="importmap">
-{
-  "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.5",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.28.0",
-    "vite": "https://aistudiocdn.com/vite@^7.1.12",
-    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.0"
-  }
-}
-</script>
 </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/index.tsx"></script>
-  </body>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/index.tsx"></script>
+</body>
+
 </html>

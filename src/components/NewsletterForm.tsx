@@ -1,16 +1,16 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
-import {subscribeEmail} from '../services/cms'
-import {analytics} from '../lib/analytics'
-import {useTranslation} from '../i18n'
+import { subscribeEmail } from '../services/cms'
+import { analytics } from '../lib/analytics'
+import { useTranslation } from '../i18n'
 
 interface NewsletterFormProps {
   variant?: 'mobile' | 'desktop'
   className?: string
 }
 
-export const NewsletterForm: React.FC<NewsletterFormProps> = ({variant = 'mobile', className}) => {
-  const {t} = useTranslation()
+export const NewsletterForm: React.FC<NewsletterFormProps> = ({ variant = 'mobile', className }) => {
+  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState<string | null>(null)
@@ -30,18 +30,18 @@ export const NewsletterForm: React.FC<NewsletterFormProps> = ({variant = 'mobile
         const raw = window.localStorage.getItem('birim_newsletter_subscribers')
         const list: string[] = raw ? JSON.parse(raw) : []
         if (list.includes(normalizedEmail)) {
-      setStatus('success')
-      const alreadyMessage = t('newsletter_already_subscribed') || 'Bu e-posta adresi zaten aboneliğe kayıtlı.'
-      setMessage(alreadyMessage)
-      // Mesajı 3 saniye sonra otomatik kaldır
-      if (messageTimeoutRef.current) {
-        clearTimeout(messageTimeoutRef.current)
-      }
-      messageTimeoutRef.current = setTimeout(() => {
-        setMessage(null)
-        setStatus('idle')
-      }, 3000)
-      return
+          setStatus('success')
+          const alreadyMessage = t('newsletter_already_subscribed') || 'Bu e-posta adresi zaten aboneliğe kayıtlı.'
+          setMessage(alreadyMessage)
+          // Mesajı 3 saniye sonra otomatik kaldır
+          if (messageTimeoutRef.current) {
+            clearTimeout(messageTimeoutRef.current)
+          }
+          messageTimeoutRef.current = setTimeout(() => {
+            setMessage(null)
+            setStatus('idle')
+          }, 3000)
+          return
         }
       }
     } catch {
@@ -58,7 +58,7 @@ export const NewsletterForm: React.FC<NewsletterFormProps> = ({variant = 'mobile
       // Backend bazı durumlarda "zaten kayıtlı" uyarısını normal dönüşte verebilir;
       // bu yüzden hem dönüş değerine hem de hata mesajlarına bakıyoruz.
       const normalizedMessage = String(
-        (result as {message?: string} | null | undefined)?.message || ''
+        (result as { message?: string } | null | undefined)?.message || ''
       ).toLowerCase()
       const isAlready =
         normalizedMessage.includes('zaten aboneliğe kayıtlı') ||
@@ -167,9 +167,8 @@ export const NewsletterForm: React.FC<NewsletterFormProps> = ({variant = 'mobile
   return (
     <form
       onSubmit={handleSubmit}
-      className={`${isDesktop ? 'flex flex-col items-end' : 'flex flex-col items-center'} ${
-        className || ''
-      }`}
+      className={`${isDesktop ? 'flex flex-col items-end' : 'flex flex-col items-center'} ${className || ''
+        }`}
     >
       {variant === 'mobile' && (
         <p className="text-sm text-gray-300 mb-4 text-center">{t('subscribe_prompt')}</p>
@@ -202,15 +201,15 @@ export const NewsletterForm: React.FC<NewsletterFormProps> = ({variant = 'mobile
               ? 'w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[14px] text-left'
               : 'w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[15px] text-left'
           }
-          style={{outline: 'none', boxShadow: 'none'}}
+          style={{ outline: 'none', boxShadow: 'none' }}
         />
         <button
           type="submit"
           disabled={status === 'loading'}
           className={
             isDesktop
-              ? 'px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-xs font-bold uppercase tracking-[0.25em] whitespace-nowrap'
-              : 'px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-xs font-bold uppercase tracking-[0.25em] whitespace-nowrap'
+              ? 'px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-xs font-bold tracking-[0.25em] whitespace-nowrap'
+              : 'px-0 py-1 bg-transparent border-0 text-gray-300 hover:text-white transition-colors duration-200 text-xs font-bold tracking-[0.25em] whitespace-nowrap'
           }
         >
           {status === 'loading' ? t('subscribing') || '...' : t('subscribe')}
@@ -226,9 +225,8 @@ export const NewsletterForm: React.FC<NewsletterFormProps> = ({variant = 'mobile
       >
         {message && (
           <p
-            className={`text-[11px] md:text-xs leading-snug ${
-              status === 'error' ? 'text-red-400' : 'text-gray-200'
-            } animate-fade-in`}
+            className={`text-[11px] md:text-xs leading-snug ${status === 'error' ? 'text-red-400' : 'text-gray-200'
+              } animate-fade-in`}
             style={{
               animation: 'fadeIn 0.3s ease-in',
             }}

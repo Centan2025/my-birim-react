@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef } from 'react'
+import React, { useLayoutEffect, useRef, useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 
@@ -24,6 +24,16 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
   const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
   const portalRef = useRef<HTMLDivElement>(null)
+
+  const [playMobileArrowIntro, setPlayMobileArrowIntro] = useState(false)
+  const hasPlayedMobileArrowIntro = useRef(false)
+
+  // Mobilde sol ok intro animasyonu
+  useEffect(() => {
+    if (!isMobile || hasPlayedMobileArrowIntro.current) return
+    hasPlayedMobileArrowIntro.current = true
+    setPlayMobileArrowIntro(true)
+  }, [isMobile])
 
   const hasInspiration =
     Boolean(inspiration) &&
@@ -200,6 +210,35 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
             </ScrollReveal>
           )}
         </div>
+
+        {/* Mobile Scroll Indicator - Sadece ok (HomeHero ile aynı) */}
+        {isMobile && (
+          <div
+            className={`absolute left-8 z-30 pointer-events-none mix-blend-difference ${playMobileArrowIntro ? 'animate-hero-mobile-left-arrow-intro' : ''}`}
+            style={{
+              bottom: '16px',
+            }}
+          >
+            <div className="flex flex-col items-center">
+              <div className="mt-0.5">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="opacity-70"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   )

@@ -929,11 +929,11 @@ export function ProductDetailPage() {
         {/* FULL-WIDTH HERO IMAGE */}
         <header className="relative w-full">
           <div
-            className="relative w-full h-[60vh] md:h-[70vh] overflow-hidden cursor-grab active:cursor-grabbing"
+            className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing"
             style={{
-              height: '60vh',
-              minHeight: '60vh',
-              maxHeight: '60vh',
+              height: isMobile ? '60vh' : '70vh',
+              minHeight: isMobile ? '60vh' : '70vh',
+              maxHeight: isMobile ? '60vh' : '70vh',
             }}
             onMouseDown={handleHeroDragStart}
             onMouseMove={handleHeroDragMove}
@@ -971,7 +971,7 @@ export function ProductDetailPage() {
                         srcMobile={m.urlMobile}
                         srcDesktop={m.urlDesktop}
                         alt={`${t(product.name)} ${index + 1}`}
-                        className={`w-full h-full object-contain ${imageBorderClass}`}
+                        className={`w-full h-full object-cover ${imageBorderClass}`}
                         width={1600}
                         height={900}
                         loading={shouldEagerLoad ? 'eager' : 'lazy'}
@@ -983,7 +983,7 @@ export function ProductDetailPage() {
                         src={m.url}
                         srcMobile={m.urlMobile}
                         srcDesktop={m.urlDesktop}
-                        className={`w-full h-full object-contain ${imageBorderClass}`}
+                        className={`w-full h-full object-cover ${imageBorderClass}`}
                         autoPlay={isActiveSlide}
                         muted
                         loop
@@ -1006,28 +1006,7 @@ export function ProductDetailPage() {
             </div>
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent pointer-events-none" />
 
-            {/* overlay breadcrumbs top-left */}
-            <nav className="absolute top-4 left-4 text-sm text-white/80">
-              <ol className="list-none p-0 inline-flex items-center gap-2">
-                <li>
-                  <Link to="/" className="hover:text-white uppercase underline underline-offset-4">
-                    {t('homepage')}
-                  </Link>
-                </li>
-                {category && (
-                  <>
-                    <li className="opacity-70">/</li>
-                    <li>
-                      <Link to={`/products/${category.id}`} className="hover:text-white">
-                        {t(category.name)}
-                      </Link>
-                    </li>
-                  </>
-                )}
-                <li className="opacity-70">/</li>
-                <li className="text-white">{t(product.name)}</li>
-              </ol>
-            </nav>
+
 
             <div className="absolute bottom-10 md:bottom-10 left-6 md:left-10 text-white">
               <div style={{
@@ -1296,7 +1275,7 @@ export function ProductDetailPage() {
                           )}
                           {/* Minimal active indicator - header menü alt çizgisi ile aynı mantık */}
                           <div
-                            className="pointer-events-none absolute -bottom-2 left-0 right-0 h-[3px] bg-gray-800 z-[30] origin-center transition-transform duration-300 ease-out"
+                            className="pointer-events-none absolute -bottom-2 left-0 right-0 h-[3px] bg-gray-500 z-[30] origin-center transition-transform duration-300 ease-out"
                             style={{
                               transform:
                                 currentImageIndex === idx ? 'scaleX(1)' : 'scaleX(0)',
@@ -1395,7 +1374,7 @@ export function ProductDetailPage() {
                 <li>
                   <Link
                     to="/"
-                    className="uppercase underline underline-offset-4 text-gray-900 hover:text-gray-900"
+                    className="underline underline-offset-4 text-gray-900 hover:text-gray-900"
                   >
                     {t('homepage')}
                   </Link>
@@ -1406,7 +1385,7 @@ export function ProductDetailPage() {
                     <li>
                       <Link
                         to={`/products/${category.id}`}
-                        className="uppercase underline underline-offset-4 text-gray-900 hover:text-gray-900"
+                        className="underline underline-offset-4 text-gray-900 hover:text-gray-900"
                       >
                         {t(category.name)}
                       </Link>
