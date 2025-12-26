@@ -1,4 +1,4 @@
-import React from 'react'
+import { ReactNode, Fragment } from 'react'
 import { sanitizeText, sanitizeUrl } from '../lib/sanitize'
 
 type Span = { _type: 'span'; text: string; marks?: string[] }
@@ -17,7 +17,7 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
   return spans.map((s, i) => {
     // Sanitize text content to prevent XSS
     const sanitizedText = sanitizeText(s.text)
-    let el: React.ReactNode = sanitizedText
+    let el: ReactNode = sanitizedText
     // marks mapping kept minimal (strong/em emphasis and links)
     if (s.marks && s.marks.length) {
       s.marks.forEach(m => {
@@ -43,7 +43,7 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
         }
       })
     }
-    return <React.Fragment key={i}>{el}</React.Fragment>
+    return <Fragment key={i}>{el}</Fragment>
   })
 }
 
@@ -51,8 +51,8 @@ export default function PortableTextLite({ value }: { value: Block[] | undefined
   if (!Array.isArray(value) || value.length === 0) return null
 
   // Group lists
-  const nodes: React.ReactNode[] = []
-  let listBuffer: { type: 'ul' | 'ol'; items: React.ReactNode[] } | null = null
+  const nodes: ReactNode[] = []
+  let listBuffer: { type: 'ul' | 'ol'; items: ReactNode[] } | null = null
 
   let listCounter = 0
   const flushList = () => {

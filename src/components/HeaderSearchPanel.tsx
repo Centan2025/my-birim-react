@@ -1,7 +1,7 @@
-import React, {RefObject} from 'react'
-import {Link} from 'react-router-dom'
-import type {Category, Designer, Product} from '../types'
-import type {HeaderTranslateFn} from './HeaderShared'
+import { RefObject, FC } from 'react'
+import { Link } from 'react-router-dom'
+import type { Category, Designer, Product } from '../types'
+import type { HeaderTranslateFn } from './HeaderShared'
 
 interface SearchResults {
   products: Product[]
@@ -31,7 +31,7 @@ interface HeaderSearchPanelProps {
   searchInputRef: RefObject<HTMLInputElement>
 }
 
-export const HeaderSearchPanel: React.FC<HeaderSearchPanelProps> = ({
+export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
   isOpen,
   isMobile,
   isHeaderVisible,
@@ -85,11 +85,10 @@ export const HeaderSearchPanel: React.FC<HeaderSearchPanelProps> = ({
         id="search-panel"
         role="search"
         aria-label={t('search') || 'Ara'}
-        className={`fixed left-0 right-0 z-[100] bg-black/80 backdrop-blur-lg transition-opacity duration-300 ease-out ${
-          isOpen
+        className={`fixed left-0 right-0 z-[100] bg-black/80 backdrop-blur-lg transition-opacity duration-300 ease-out ${isOpen
             ? 'opacity-100 pointer-events-auto'
             : 'opacity-0 pointer-events-none'
-        }`}
+          }`}
         style={{
           // Paneli tam olarak header'ın altından başlat
           top: isHeaderVisible ? `${headerHeight}px` : '0px',
@@ -105,19 +104,16 @@ export const HeaderSearchPanel: React.FC<HeaderSearchPanelProps> = ({
                 placeholder={t('search_placeholder') || ''}
                 id="global-search-input"
                 name="global-search"
-                className={`w-full bg-transparent text-white outline-none transition-colors duration-300 pr-10 ${
-                  isMobile ? 'text-lg pb-2' : 'text-2xl pb-3'
-                }`}
+                className={`w-full bg-transparent text-white outline-none transition-colors duration-300 pr-10 ${isMobile ? 'text-lg pb-2' : 'text-2xl pb-3'
+                  }`}
                 value={searchQuery}
                 onChange={e => onSearchQueryChange(e.target.value)}
               />
               {/* Alt çizgi: header desktop menü alt çizgisine benzer, ortadan iki yana büyüyen animasyon */}
               <div
-                className={`pointer-events-none absolute left-0 right-0 ${
-                  isMobile ? 'bottom-[0px]' : 'bottom-[2px]'
-                } h-px bg-gray-500 transform origin-center transition-transform duration-300 ease-out ${
-                  isOpen ? 'scale-x-100' : 'scale-x-0'
-                }`}
+                className={`pointer-events-none absolute left-0 right-0 ${isMobile ? 'bottom-[0px]' : 'bottom-[2px]'
+                  } h-px bg-gray-500 transform origin-center transition-transform duration-300 ease-out ${isOpen ? 'scale-x-100' : 'scale-x-0'
+                  }`}
               />
 
               {searchQuery.length > 0 && (
@@ -137,122 +133,122 @@ export const HeaderSearchPanel: React.FC<HeaderSearchPanelProps> = ({
               )}
             </div>
 
-          {searchQuery.length > 0 && (
-            <div className="mt-6 max-h-[50vh] overflow-y-auto pr-2">
-              {isSearching && <p className="text-center text-gray-300">{t('searching')}</p>}
+            {searchQuery.length > 0 && (
+              <div className="mt-6 max-h-[50vh] overflow-y-auto pr-2">
+                {isSearching && <p className="text-center text-gray-300">{t('searching')}</p>}
 
-              {!isSearching &&
-                searchQuery.length > 1 &&
-                searchResults.products.length === 0 &&
-                searchResults.designers.length === 0 &&
-                searchResults.categories.length === 0 && (
-                  <p className="text-center text-gray-300">
-                    {t('search_no_results', searchQuery)}
-                  </p>
+                {!isSearching &&
+                  searchQuery.length > 1 &&
+                  searchResults.products.length === 0 &&
+                  searchResults.designers.length === 0 &&
+                  searchResults.categories.length === 0 && (
+                    <p className="text-center text-gray-300">
+                      {t('search_no_results', searchQuery)}
+                    </p>
+                  )}
+
+                {searchResults.products.length > 0 && (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-3 pl-3">
+                      {t('products')}
+                    </h3>
+                    <div className="space-y-2">
+                      {searchResults.products.map(product => {
+                        const designerNameSource =
+                          allData?.designers.find(d => d.id === product.designerId)?.name
+                        const designerName = designerNameSource
+                          ? t(designerNameSource)
+                          : ''
+                        return (
+                          <Link
+                            key={product.id}
+                            to={`/product/${product.id}`}
+                            onClick={closeSearch}
+                            className="flex items-center p-3 hover:bg-white/10 rounded-md transition-colors duration-200"
+                          >
+                            <img
+                              src={
+                                typeof product.mainImage === 'string'
+                                  ? product.mainImage
+                                  : product.mainImage?.url || ''
+                              }
+                              alt={t(product.name)}
+                              className="w-12 h-12 object-cover rounded-md mr-4 flex-shrink-0"
+                            />
+                            <div>
+                              <p className="font-semibold text-white">{t(product.name)}</p>
+                              {designerName && (
+                                <p className="text-sm text-gray-400">{designerName}</p>
+                              )}
+                            </div>
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  </div>
                 )}
 
-              {searchResults.products.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-3 pl-3">
-                    {t('products')}
-                  </h3>
-                  <div className="space-y-2">
-                    {searchResults.products.map(product => {
-                      const designerNameSource =
-                        allData?.designers.find(d => d.id === product.designerId)?.name
-                      const designerName = designerNameSource
-                        ? t(designerNameSource)
-                        : ''
-                      return (
+                {searchResults.categories.length > 0 && (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-3 pl-3">
+                      {t('categories')}
+                    </h3>
+                    <div className="space-y-2">
+                      {searchResults.categories.map(category => (
                         <Link
-                          key={product.id}
-                          to={`/product/${product.id}`}
+                          key={category.id}
+                          to={`/products/${category.id}`}
+                          onClick={closeSearch}
+                          className="flex items-center p-3 hover:bg-white/10 rounded-md transition-colors duration-200"
+                        >
+                          <img
+                            src={category.heroImage}
+                            alt={t(category.name)}
+                            className="w-12 h-12 object-cover rounded-md mr-4 flex-shrink-0"
+                          />
+                          <div>
+                            <p className="font-semibold text-white">{t(category.name)}</p>
+                            <p className="text-sm text-gray-400">{t('category')}</p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {searchResults.designers.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-3 pl-3">
+                      {t('designers')}
+                    </h3>
+                    <div className="space-y-2">
+                      {searchResults.designers.map(designer => (
+                        <Link
+                          key={designer.id}
+                          to={`/designer/${designer.id}`}
                           onClick={closeSearch}
                           className="flex items-center p-3 hover:bg-white/10 rounded-md transition-colors duration-200"
                         >
                           <img
                             src={
-                              typeof product.mainImage === 'string'
-                                ? product.mainImage
-                                : product.mainImage?.url || ''
+                              typeof designer.image === 'string'
+                                ? designer.image
+                                : designer.image?.url || ''
                             }
-                            alt={t(product.name)}
-                            className="w-12 h-12 object-cover rounded-md mr-4 flex-shrink-0"
+                            alt={t(designer.name)}
+                            className="w-12 h-12 object-cover rounded-full mr-4 flex-shrink-0"
                           />
                           <div>
-                            <p className="font-semibold text-white">{t(product.name)}</p>
-                            {designerName && (
-                              <p className="text-sm text-gray-400">{designerName}</p>
-                            )}
+                            <p className="font-semibold text-white">{t(designer.name)}</p>
+                            <p className="text-sm text-gray-400">{t('designer')}</p>
                           </div>
                         </Link>
-                      )
-                    })}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
-
-              {searchResults.categories.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-3 pl-3">
-                    {t('categories')}
-                  </h3>
-                  <div className="space-y-2">
-                    {searchResults.categories.map(category => (
-                      <Link
-                        key={category.id}
-                        to={`/products/${category.id}`}
-                        onClick={closeSearch}
-                        className="flex items-center p-3 hover:bg-white/10 rounded-md transition-colors duration-200"
-                      >
-                        <img
-                          src={category.heroImage}
-                          alt={t(category.name)}
-                          className="w-12 h-12 object-cover rounded-md mr-4 flex-shrink-0"
-                        />
-                        <div>
-                          <p className="font-semibold text-white">{t(category.name)}</p>
-                          <p className="text-sm text-gray-400">{t('category')}</p>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {searchResults.designers.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-3 pl-3">
-                    {t('designers')}
-                  </h3>
-                  <div className="space-y-2">
-                    {searchResults.designers.map(designer => (
-                      <Link
-                        key={designer.id}
-                        to={`/designer/${designer.id}`}
-                        onClick={closeSearch}
-                        className="flex items-center p-3 hover:bg-white/10 rounded-md transition-colors duration-200"
-                      >
-                        <img
-                          src={
-                            typeof designer.image === 'string'
-                              ? designer.image
-                              : designer.image?.url || ''
-                          }
-                          alt={t(designer.name)}
-                          className="w-12 h-12 object-cover rounded-full mr-4 flex-shrink-0"
-                        />
-                        <div>
-                          <p className="font-semibold text-white">{t(designer.name)}</p>
-                          <p className="text-sm text-gray-400">{t('designer')}</p>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

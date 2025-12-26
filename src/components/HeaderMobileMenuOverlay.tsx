@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, FC, MutableRefObject } from 'react'
 import { NavLink } from 'react-router-dom'
 import type { Category, FooterContent, SiteSettings } from '../types'
-import type { MutableRefObject } from 'react'
 import {
   CrossFadeText,
   DynamicIcon,
@@ -38,7 +37,7 @@ interface HeaderMobileMenuOverlayProps {
   mobileMenuFocusTrap: MutableRefObject<HTMLElement | null>
 }
 
-export const HeaderMobileMenuOverlay: React.FC<HeaderMobileMenuOverlayProps> = props => {
+export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props => {
   const {
     isOverlayMobileMenu,
     isMobileMenuOpen,

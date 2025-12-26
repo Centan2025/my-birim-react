@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, FC, FormEventHandler } from 'react'
 
 import { subscribeEmail } from '../services/cms'
 import { analytics } from '../lib/analytics'
@@ -9,14 +9,14 @@ interface NewsletterFormProps {
   className?: string
 }
 
-export const NewsletterForm: React.FC<NewsletterFormProps> = ({ variant = 'mobile', className }) => {
+export const NewsletterForm: FC<NewsletterFormProps> = ({ variant = 'mobile', className }) => {
   const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState<string | null>(null)
   const messageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async e => {
+  const handleSubmit: FormEventHandler<HTMLFormElement> = async e => {
     e.preventDefault()
     if (!email) return
 

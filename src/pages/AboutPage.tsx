@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { getAboutPageContent } from '../services/cms'
 import type { AboutPageContent, NewsMedia } from '../types'
 import { OptimizedImage } from '../components/OptimizedImage'

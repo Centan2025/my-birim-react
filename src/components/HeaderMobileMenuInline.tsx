@@ -1,7 +1,6 @@
-import React from 'react'
+import { FC, MutableRefObject } from 'react'
 import { NavLink } from 'react-router-dom'
 import type { Category, SiteSettings } from '../types'
-import type { MutableRefObject } from 'react'
 import { CrossFadeText, HeaderTranslateFn, UserIcon } from './HeaderShared'
 
 interface HeaderMobileMenuInlineProps {
@@ -23,7 +22,7 @@ interface HeaderMobileMenuInlineProps {
   mobileMenuFocusTrap: MutableRefObject<HTMLElement | null>
 }
 
-export const HeaderMobileMenuInline: React.FC<HeaderMobileMenuInlineProps> = ({
+export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
   isOpen,
   isMobileProductsMenuOpen,
   categories,

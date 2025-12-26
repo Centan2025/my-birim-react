@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect } from 'react'
+import { useMemo, useEffect, FC, SVGProps } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import type { NewsMedia } from '../types'
 import { OptimizedImage } from '../components/OptimizedImage'
@@ -29,7 +29,7 @@ const formatDate = (dateString: string): string => {
   return `${day}.${month}.${year}`
 }
 
-const MediaComponent: React.FC<{ media: NewsMedia }> = ({ media }) => {
+const MediaComponent: FC<{ media: NewsMedia }> = ({ media }) => {
   const { t } = useTranslation()
   const { data: settings } = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
@@ -115,7 +115,7 @@ const MediaComponent: React.FC<{ media: NewsMedia }> = ({ media }) => {
   )
 }
 
-const MinimalChevronLeft = (props: React.SVGProps<SVGSVGElement>) => (
+const MinimalChevronLeft = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="48"
@@ -132,7 +132,7 @@ const MinimalChevronLeft = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 )
 
-const MinimalChevronRight = (props: React.SVGProps<SVGSVGElement>) => (
+const MinimalChevronRight = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="48"

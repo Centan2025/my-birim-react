@@ -1,4 +1,4 @@
-import React from 'react'
+import { FC } from 'react'
 import { NavLink } from 'react-router-dom'
 import type { Category, Product } from '../types'
 import type { HeaderTranslateFn } from './HeaderShared'
@@ -16,7 +16,7 @@ interface HeaderProductsPanelProps {
   t: HeaderTranslateFn
 }
 
-export const HeaderProductsPanel: React.FC<HeaderProductsPanelProps> = ({
+export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
   isOpen,
   categories,
   hoveredCategoryId,

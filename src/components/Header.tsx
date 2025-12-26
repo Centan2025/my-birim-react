@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, FC, Fragment, useCallback, ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import type { Category, SiteSettings, Product, Designer, FooterContent } from '../types'
 import {
@@ -1099,9 +1099,9 @@ export function Header() {
     }
   }, [isMobileMenuOpen, isOverlayMobileMenu, isMobile, mobileMenuCloseDelay])
 
-  const NavItem: React.FC<{
+  const NavItem: FC<{
     to: string
-    children: React.ReactNode
+    children: ReactNode
     onMouseEnter?: () => void
     onClick?: () => void
   }> = ({ to, children, onMouseEnter, onClick }) => {
@@ -1843,7 +1843,7 @@ export function Header() {
                       const isLast = index === supportedLocales.length - 1
                       const isActive = locale === langCode
                       return (
-                        <React.Fragment key={langCode}>
+                        <Fragment key={langCode}>
                           <button
                             onClick={() => setLocale(langCode)}
                             className={`relative transition-all duration-300 uppercase ${isActive
@@ -1862,7 +1862,7 @@ export function Header() {
                             {langCode}
                           </button>
                           {!isLast && <span className="mx-1 text-gray-400">|</span>}
-                        </React.Fragment>
+                        </Fragment>
                       )
                     })}
                   </div>
