@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState, useEffect } from 'react'
+import React, { useLayoutEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 
@@ -25,15 +25,7 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
   const containerRef = useRef<HTMLDivElement>(null)
   const portalRef = useRef<HTMLDivElement>(null)
 
-  const [playMobileArrowIntro, setPlayMobileArrowIntro] = useState(false)
-  const hasPlayedMobileArrowIntro = useRef(false)
 
-  // Mobilde sol ok intro animasyonu
-  useEffect(() => {
-    if (!isMobile || hasPlayedMobileArrowIntro.current) return
-    hasPlayedMobileArrowIntro.current = true
-    setPlayMobileArrowIntro(true)
-  }, [isMobile])
 
   const hasInspiration =
     Boolean(inspiration) &&
@@ -188,10 +180,10 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
       >
         <div className="inspiration-content container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl h-full flex flex-col justify-center items-center text-white text-center pointer-events-auto">
           <ScrollReveal delay={0} threshold={0.1} width="w-full" className="h-auto">
-            <h2 className="text-4xl font-normal leading-relaxed">{t(inspiration.title)}</h2>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-normal leading-relaxed">{t(inspiration.title)}</h2>
           </ScrollReveal>
           <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
-            <p className="mt-4 text-lg text-gray-100 max-w-2xl mx-auto font-normal leading-relaxed">
+            <p className="mt-4 text-xl md:text-2xl lg:text-3xl text-gray-100 max-w-2xl mx-auto font-normal leading-relaxed">
               {t(inspiration.subtitle)}
             </p>
           </ScrollReveal>
@@ -199,7 +191,7 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
             <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto">
               <Link
                 to={inspiration.buttonLink || '/'}
-                className="group mt-8 inline-flex items-center gap-x-3 text-white font-semibold py-3 pl-0 pr-5 text-lg rounded-lg"
+                className="group mt-8 inline-flex items-center gap-x-3 text-white font-semibold py-4 px-10 text-xl md:text-2xl rounded-none border border-white/30 hover:border-white hover:bg-white/10 transition-all duration-300"
               >
                 <span className="inline-flex justify-center transition-all duration-500 ease-out">
                   <span className="leading-none transition-all duration-500 ease-out md:group-hover:tracking-[0.12em] md:group-hover:text-gray-200">
@@ -211,34 +203,7 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
           )}
         </div>
 
-        {/* Mobile Scroll Indicator - Sadece ok (HomeHero ile aynı) */}
-        {isMobile && (
-          <div
-            className={`absolute left-8 z-30 pointer-events-none mix-blend-difference ${playMobileArrowIntro ? 'animate-hero-mobile-left-arrow-intro' : ''}`}
-            style={{
-              bottom: '16px',
-            }}
-          >
-            <div className="flex flex-col items-center">
-              <div className="mt-0.5">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="opacity-70"
-                >
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
-              </div>
-            </div>
-          </div>
-        )}
+
       </div>
     </>
   )

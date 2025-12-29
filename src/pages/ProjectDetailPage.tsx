@@ -421,7 +421,7 @@ export function ProjectDetailPage() {
         />
         <div className="mt-6 md:mt-8 mb-4 md:mb-6 lg:mb-6">
           <h1
-            className="text-4xl font-light tracking-tight text-gray-900"
+            className="text-4xl md:text-5xl lg:text-6xl font-light tracking-tight text-gray-900"
             style={{
               transform: isTitleVisible ? 'translateX(0)' : 'translateX(-40px)',
               opacity: isTitleVisible ? 1 : 0,
@@ -432,7 +432,7 @@ export function ProjectDetailPage() {
           </h1>
           {project.date && (
             <p
-              className="text-sm text-gray-500 mt-2 font-light"
+              className="text-base md:text-lg lg:text-xl text-gray-500 mt-2 font-light"
               style={{
                 transform: isLocationVisible ? 'translateX(0)' : 'translateX(-40px)',
                 opacity: isLocationVisible ? 1 : 0,
@@ -710,11 +710,11 @@ export function ProjectDetailPage() {
                       {(() => {
                         const excerptContent = t(project.excerpt)
                         return Array.isArray(excerptContent) ? (
-                          <div className="text-lg text-gray-900 leading-relaxed font-normal">
+                          <div className="text-xl md:text-2xl lg:text-3xl text-gray-900 leading-relaxed font-normal">
                             <PortableTextLite value={excerptContent} />
                           </div>
                         ) : (
-                          <p className="text-lg text-gray-900 leading-relaxed font-normal">
+                          <p className="text-xl md:text-2xl lg:text-3xl text-gray-900 leading-relaxed font-normal">
                             {excerptContent}
                           </p>
                         )
@@ -726,11 +726,11 @@ export function ProjectDetailPage() {
                       {(() => {
                         const bodyContent = t(project.body)
                         return Array.isArray(bodyContent) ? (
-                          <div className="text-gray-900 leading-relaxed font-normal">
+                          <div className="text-lg md:text-xl lg:text-2xl text-gray-900 leading-relaxed font-normal">
                             <PortableTextLite value={bodyContent} />
                           </div>
                         ) : (
-                          <div className="text-gray-900 leading-relaxed font-normal whitespace-pre-line">
+                          <div className="text-lg md:text-xl lg:text-2xl text-gray-900 leading-relaxed font-normal whitespace-pre-line">
                             {bodyContent}
                           </div>
                         )

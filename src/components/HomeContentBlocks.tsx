@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
 
 import { ContentBlock } from '../types'
@@ -22,15 +22,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
   imageBorderClass,
 }) => {
   const { t } = useTranslation()
-  const [playMobileArrowIntro, setPlayMobileArrowIntro] = useState(false)
-  const hasPlayedMobileArrowIntro = useRef(false)
 
-  // Mobilde sol ok intro animasyonu
-  useEffect(() => {
-    if (!isMobile || hasPlayedMobileArrowIntro.current) return
-    hasPlayedMobileArrowIntro.current = true
-    setPlayMobileArrowIntro(true)
-  }, [isMobile])
 
 
   // Tüm bloklardaki fontları topla ve yükle
@@ -86,7 +78,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             duration={0.6}
           >
             <h2
-              className={`${isFullWidth ? 'text-3xl md:text-5xl lg:text-6xl' : 'text-3xl md:text-4xl lg:text-5xl'} uppercase ${textAlignClass} text-gray-950 max-w-4xl mb-4 ${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}
+              className={`${isFullWidth ? 'text-4xl md:text-6xl lg:text-7xl' : 'text-3xl md:text-5xl lg:text-6xl'} uppercase ${textAlignClass} text-gray-950 max-w-4xl mb-4 ${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}
               style={{
                 textShadow: '0 2px 4px rgba(0,0,0,0.1)',
                 fontFamily: titleFont === 'normal' ? '"Oswald", sans-serif' :
@@ -113,11 +105,11 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     const marginClass = textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'
 
                     return Array.isArray(desc) ? (
-                      <div className={`${marginClass} ${widthClass} mt-3 font-roboto-thin text-gray-800`}>
+                      <div className={`${marginClass} ${widthClass} mt-3 font-roboto-thin text-gray-800 text-lg md:text-xl lg:text-2xl`}>
                         <PortableTextLite value={desc} />
                       </div>
                     ) : (
-                      <p className={`mt-3 text-gray-800 font-roboto-thin leading-relaxed ${widthClass} text-lg md:text-xl ${marginClass}`}>
+                      <p className={`mt-3 text-gray-800 font-roboto-thin leading-relaxed ${widthClass} text-xl md:text-2xl lg:text-3xl ${marginClass}`}>
                         {desc}
                       </p>
                     )
@@ -130,7 +122,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 <div className={`mt-6 ${textAlignClass} flex ${textAlign === 'center' ? 'justify-center' : textAlign === 'right' ? 'justify-end' : 'justify-start'}`}>
                   <Link
                     to={block.linkUrl}
-                    className={`group inline-flex items-center gap-x-3 text-gray-950 font-bold py-3 ${textAlign === 'right' ? 'pl-5 pr-0' : 'pl-0 pr-5'} text-sm md:text-lg rounded-lg`}
+                    className={`group inline-flex items-center gap-x-3 text-gray-950 font-bold py-3 px-8 text-base md:text-xl lg:text-2xl rounded-none border border-gray-950/30 hover:border-gray-950 hover:bg-gray-950/5 transition-all duration-300`}
                   >
                     <span className="inline-flex justify-center transition-all duration-500 ease-out">
                       <span className="leading-none font-bold tracking-[0.05em] transition-all duration-500 ease-out md:group-hover:tracking-[0.12em] md:group-hover:text-gray-600">
@@ -181,34 +173,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 quality={85}
               />
             )}
-            {/* Mobile Scroll Indicator - Sadece ok (HomeHero ile aynı) */}
-            {isMobile && (
-              <div
-                className={`absolute left-8 z-30 pointer-events-none mix-blend-difference ${playMobileArrowIntro ? 'animate-hero-mobile-left-arrow-intro' : ''}`}
-                style={{
-                  bottom: '16px',
-                }}
-              >
-                <div className="flex flex-col items-center">
-                  <div className="mt-0.5">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="white"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="opacity-70"
-                    >
-                      <path d="M6 9l6 6 6-6" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-            )}
+
           </ScrollReveal>
         )
 

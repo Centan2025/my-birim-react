@@ -1411,16 +1411,16 @@ export function ProductDetailPage() {
               )}
 
               <div>
-                <h2 className="text-2xl md:text-4xl font-normal text-gray-700">{t(product.name)}</h2>
+                <h2 className="text-3xl md:text-5xl lg:text-6xl font-normal text-gray-700">{t(product.name)}</h2>
                 <ScrollReveal delay={200}>
                   {(() => {
                     const desc = t(product.description)
                     return Array.isArray(desc) ? (
-                      <div className="mt-3 text-gray-900 leading-relaxed max-w-2xl font-normal">
+                      <div className="mt-3 text-lg md:text-xl lg:text-2xl text-gray-900 leading-relaxed max-w-2xl font-normal">
                         <PortableTextLite value={desc} />
                       </div>
                     ) : (
-                      <p className="mt-3 text-gray-900 leading-relaxed max-w-2xl font-normal">
+                      <p className="mt-3 text-lg md:text-xl lg:text-2xl text-gray-900 leading-relaxed max-w-2xl font-normal">
                         {desc}
                       </p>
                     )
