@@ -304,9 +304,8 @@ export default function PortableTextLite({ value }: { value: Block[] | undefined
     }
 
     if (block._type === 'youtube' && block.url) {
-      // eslint-disable-next-line no-useless-escape
       const videoId = block.url.match(
-        /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
+        new RegExp('(?:youtube\\.com\\/(?:[^\\/]+\\/.+\\/|(?:v|e(?:mbed)?)\\/|.*[?&]v=)|youtu\\.be\\/)([^"&?\\/\\s]{11})')
       )?.[1]
       if (videoId) {
         nodes.push(

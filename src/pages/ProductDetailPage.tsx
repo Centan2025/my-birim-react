@@ -934,6 +934,8 @@ export function ProductDetailPage() {
               minHeight: isMobile ? '60vh' : '70vh',
               maxHeight: isMobile ? '60vh' : '70vh',
             }}
+            role="region"
+            aria-label="Product Image Carousel"
             onMouseDown={handleHeroDragStart}
             onMouseMove={handleHeroDragMove}
             onMouseUp={handleHeroDragEnd}
@@ -1199,6 +1201,9 @@ export function ProductDetailPage() {
                 <div
                   ref={thumbRef}
                   className="hide-scrollbar overflow-x-auto cursor-grab active:cursor-grabbing"
+                  role="region"
+                  aria-label="Thumbnail Slider"
+                  tabIndex={0}
                   onMouseDown={e => {
                     setThumbDragStartX(e.clientX)
                     setThumbScrollStart(thumbRef.current ? thumbRef.current.scrollLeft : 0)
@@ -1977,10 +1982,21 @@ export function ProductDetailPage() {
             <div
               className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center"
               onClick={() => setDimLightbox(null)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+                  e.preventDefault()
+                  setDimLightbox(null)
+                }
+              }}
             >
               <div
                 className="relative flex items-center justify-center max-w-[90vw] max-h-[90vh] border border-gray-300 shadow-2xl overflow-hidden bg-transparent"
                 onClick={e => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Dimension View"
               >
                 <button
                   onClick={() => setDimLightbox(null)}
@@ -2078,10 +2094,21 @@ export function ProductDetailPage() {
             <div
               className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center"
               onClick={() => setMaterialLightbox(null)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+                  e.preventDefault()
+                  setMaterialLightbox(null)
+                }
+              }}
             >
               <div
                 className="relative flex items-center justify-center max-w-[90vw] max-h-[90vh] border border-gray-300 shadow-2xl overflow-hidden bg-transparent"
                 onClick={e => e.stopPropagation()}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Material View"
               >
                 <button
                   onClick={() => setMaterialLightbox(null)}
