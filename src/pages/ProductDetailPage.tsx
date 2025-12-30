@@ -1657,14 +1657,14 @@ export function ProductDetailPage() {
                     ) : (
                       /* Flat fallback: grouped malzeme yoksa product.materials listesini göster */
                       <div className="flex flex-wrap gap-6">
-                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+
                         {flatMaterials.map((material: any, index: number) => (
                           <div
                             key={index}
                             className="text-center group cursor-pointer"
                             title={t(material.name)}
                             onClick={() => {
-                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                               setMaterialLightbox({
                                 images: flatMaterials.map((m: any) => ({
                                   image: m.image,
@@ -1678,7 +1678,7 @@ export function ProductDetailPage() {
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault()
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                                 setMaterialLightbox({
                                   images: flatMaterials.map((m: any) => ({
                                     image: m.image,

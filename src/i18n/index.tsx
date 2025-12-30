@@ -99,14 +99,14 @@ export const I18nProvider = ({ children }: PropsWithChildren) => {
     }
   }, [locale, loading])
 
-  const setLocale = (newLocale: Locale) => {
+  const setLocale = useCallback((newLocale: Locale) => {
     if (supportedLocales.includes(newLocale)) {
       setLocaleState(newLocale)
     }
-  }
+  }, [supportedLocales])
 
   const t = useCallback(
-    (keyOrObject: string | LocalizedString | undefined, ...args: (string | number)[]): any => {
+    (keyOrObject: string | LocalizedString | undefined, ...args: (string | number)[]): string => {
       if (typeof keyOrObject === 'string') {
         // Bazı anahtarlar için (ör. ana menü ve arama yerleri) CMS çevirisini değil,
         // dosya çevirisini tercih et ki TR/EN arasında net fark ve animasyon görülebilsin
@@ -137,7 +137,7 @@ export const I18nProvider = ({ children }: PropsWithChildren) => {
       }
 
       if (typeof keyOrObject === 'object' && keyOrObject !== null) {
-        const obj = keyOrObject as Record<string, any>
+        const obj = keyOrObject as Record<string, string | undefined>
         // Önce mevcut locale'i kontrol et (boş string değilse veya diziyse)
         if (
           locale in obj &&
@@ -186,7 +186,7 @@ export const I18nProvider = ({ children }: PropsWithChildren) => {
       t,
       supportedLocales,
     }),
-    [locale, t, supportedLocales, cmsTranslations]
+    [locale, t, supportedLocales, cmsTranslations, setLocale]
   )
 
   // Uygulamanın beyaz ekrana düşmemesi için loading sırasında da render etmeye devam et

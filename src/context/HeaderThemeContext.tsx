@@ -1,5 +1,5 @@
-import {createContext, useContext, useMemo, useState, useCallback, PropsWithChildren} from 'react'
-import type {SanityImagePalette} from '../types'
+import { createContext, useContext, useMemo, useState, useCallback, PropsWithChildren } from 'react'
+import type { SanityImagePalette } from '../types'
 
 type HeaderThemeMode = 'light' | 'dark'
 
@@ -40,8 +40,8 @@ const hexToLuminance = (hex?: string): number | null => {
   return Number.isFinite(luminance) ? Math.min(1, Math.max(0, luminance)) : null
 }
 
-export const HeaderThemeProvider = ({children}: PropsWithChildren) => {
-  const [theme, setTheme] = useState<HeaderThemeState>({brightness: null})
+export const HeaderThemeProvider = ({ children }: PropsWithChildren) => {
+  const [theme, setTheme] = useState<HeaderThemeState>({ brightness: null })
 
   const setFromPalette = useCallback((palette?: SanityImagePalette) => {
     const bg = palette?.dominant?.background
@@ -68,7 +68,7 @@ export const HeaderThemeProvider = ({children}: PropsWithChildren) => {
     }))
   }, [])
 
-  const reset = useCallback(() => setTheme({brightness: null}), [])
+  const reset = useCallback(() => setTheme({ brightness: null }), [])
 
   const value = useMemo<HeaderThemeContextValue>(
     () => ({

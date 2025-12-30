@@ -236,7 +236,7 @@ export function Header() {
       setHeaderOpacity(previousHeaderOpacityRef.current)
       previousHeaderOpacityRef.current = null
     }
-  }, [isMobile])
+  }, [])
 
   useEffect(() => {
     getSiteSettings().then(setSettings)
@@ -489,7 +489,7 @@ export function Header() {
       clearTimeout(timeoutId)
       clearInterval(intervalId)
     }
-  }, [isMobile, location.pathname])
+  }, [isMobile, location.pathname, headerTheme.brightness])
 
   // Mobil kontrolü
   useEffect(() => {
@@ -641,7 +641,7 @@ export function Header() {
     }, 100)
 
     return () => clearTimeout(timer)
-  }, [location.pathname, isDarkHeroPage, isLightBackgroundPage, isWhiteBackgroundPage])
+  }, [location.pathname, isDarkHeroPage, isLightBackgroundPage, isWhiteBackgroundPage, isProductsOpen])
 
   // Products menüsü açılınca header'ı yarı şeffaf yap
   useEffect(() => {

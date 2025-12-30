@@ -135,7 +135,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
       setCurrentSlide(nextSlide)
     }
     setDraggedX(0)
-  }, [currentSlide, heroMedia.length, slideCount])
+  }, [currentSlide, heroMedia.length])
 
   const goToPrevSlide = useCallback(() => {
     const count = heroMedia.length || 1
