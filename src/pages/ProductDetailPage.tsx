@@ -1542,6 +1542,7 @@ export function ProductDetailPage() {
                               {(Array.isArray(books[activeBookIndex]?.materials)
                                 ? books[activeBookIndex].materials
                                 : []
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                               ).map((material: any, index: number) => (
                                 <div
                                   key={index}
@@ -1553,6 +1554,7 @@ export function ProductDetailPage() {
                                       : []
 
                                     setMaterialLightbox({
+                                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                       images: allMaterials.map((m: any) => ({
                                         image: m.image,
                                         name: t(m.name),
@@ -1570,6 +1572,7 @@ export function ProductDetailPage() {
                                         : []
 
                                       setMaterialLightbox({
+                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                         images: allMaterials.map((m: any) => ({
                                           image: m.image,
                                           name: t(m.name),
@@ -1658,6 +1661,7 @@ export function ProductDetailPage() {
                       /* Flat fallback: grouped malzeme yoksa product.materials listesini göster */
                       <div className="flex flex-wrap gap-6">
 
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                         {flatMaterials.map((material: any, index: number) => (
                           <div
                             key={index}
@@ -1666,6 +1670,7 @@ export function ProductDetailPage() {
                             onClick={() => {
 
                               setMaterialLightbox({
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                 images: flatMaterials.map((m: any) => ({
                                   image: m.image,
                                   name: t(m.name),
@@ -1680,6 +1685,7 @@ export function ProductDetailPage() {
                                 e.preventDefault()
 
                                 setMaterialLightbox({
+                                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                   images: flatMaterials.map((m: any) => ({
                                     image: m.image,
                                     name: t(m.name),

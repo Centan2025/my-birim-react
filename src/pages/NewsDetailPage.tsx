@@ -218,7 +218,7 @@ export function NewsDetailPage() {
     })
 
     addStructuredData(schema, 'news-article-schema')
-  }, [item, newsTitle, newsDescription, mainImageUrl, settings?.logoUrl])
+  }, [item, newsTitle, newsDescription, mainImageUrl, settings?.logoUrl, t])
 
   if (loading) {
     return (

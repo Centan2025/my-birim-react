@@ -161,7 +161,10 @@ export function AboutPage() {
                     </h2>
                     <div className="prose prose-lg text-gray-600 leading-relaxed font-light">
                       {Array.isArray(t(content.historySection.content)) ? (
-                        <PortableTextLite value={t(content.historySection.content) as any} />
+                        <>
+                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                          <PortableTextLite value={t(content.historySection.content) as any} />
+                        </>
                       ) : (
                         <p>{t(content.historySection.content)}</p>
                       )}
@@ -209,7 +212,10 @@ export function AboutPage() {
                     </h2>
                     <div className="prose prose-lg text-gray-600 leading-relaxed font-light">
                       {Array.isArray(t(content.identitySection.content)) ? (
-                        <PortableTextLite value={t(content.identitySection.content) as any} />
+                        <>
+                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                          <PortableTextLite value={t(content.identitySection.content) as any} />
+                        </>
                       ) : (
                         <p>{t(content.identitySection.content)}</p>
                       )}
@@ -239,7 +245,10 @@ export function AboutPage() {
                     <ScrollReveal threshold={0.2} distance={50} delay={100}>
                       <div className="prose prose-lg text-gray-600 leading-relaxed font-light">
                         {Array.isArray(t(content.qualitySection.content)) ? (
-                          <PortableTextLite value={t(content.qualitySection.content) as any} />
+                          <>
+                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                            <PortableTextLite value={t(content.qualitySection.content) as any} />
+                          </>
                         ) : (
                           <p>{t(content.qualitySection.content)}</p>
                         )}
