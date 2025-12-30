@@ -158,7 +158,7 @@ export default function PortableTextLite({ value }: { value: Block[] | undefined
       ) {
         // PAIR DETECTED
         nodes.push(
-          <div key={`pair-${blockKey}`} className="flex flex-row gap-4 my-2 clear-both">
+          <div key={`pair-${blockKey}`} className="flex flex-row gap-2 my-2 clear-both">
             <figure className="flex-1">
               <OptimizedImage
                 src={urlFor(block.asset).url() || ''}
