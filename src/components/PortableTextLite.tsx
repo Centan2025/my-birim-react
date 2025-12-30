@@ -158,7 +158,7 @@ export default function PortableTextLite({ value }: { value: Block[] | undefined
       ) {
         // PAIR DETECTED
         nodes.push(
-          <div key={`pair-${blockKey}`} className="flex flex-col md:flex-row gap-4 my-10 clear-both">
+          <div key={`pair-${blockKey}`} className="flex flex-row gap-4 my-2 clear-both">
             <figure className="flex-1">
               <OptimizedImage
                 src={urlFor(block.asset).url() || ''}
@@ -288,7 +288,7 @@ export default function PortableTextLite({ value }: { value: Block[] | undefined
               : 'w-full'
 
       nodes.push(
-        <figure key={blockKey} className={`my-10 clear-both ${layoutClass}`}>
+        <figure key={blockKey} className={`my-2 clear-both ${layoutClass}`}>
           <OptimizedImage
             src={urlFor(block.asset).url() || ''}
             alt={block.alt || ''}

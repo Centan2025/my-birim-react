@@ -179,16 +179,16 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
         style={dynamicHeightStyles}
       >
         <div className="inspiration-content container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl h-full flex flex-col justify-center items-center text-white text-center pointer-events-auto">
-          <ScrollReveal delay={0} threshold={0.1} width="w-full" className="h-auto" initialScale={0.95}>
+          <ScrollReveal delay={0} threshold={0.1} width="w-full" className="h-auto">
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-normal leading-relaxed">{t(inspiration.title)}</h2>
           </ScrollReveal>
-          <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto" initialScale={0.95}>
+          <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
             <p className="mt-4 text-xl md:text-2xl lg:text-3xl text-gray-100 max-w-2xl mx-auto font-normal leading-relaxed">
               {t(inspiration.subtitle)}
             </p>
           </ScrollReveal>
           {inspiration.buttonText && (
-            <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto" initialScale={0.95}>
+            <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto">
               <Link
                 to={inspiration.buttonLink || '/'}
                 className="group mt-8 inline-flex items-center gap-x-3 text-white font-semibold py-4 px-10 text-xl md:text-2xl rounded-none border border-white/30 hover:border-white hover:bg-white/10 transition-all duration-300"

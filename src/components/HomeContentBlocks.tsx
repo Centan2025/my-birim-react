@@ -76,7 +76,6 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             className="h-auto"
             distance={50}
             duration={0.6}
-            initialScale={0.95}
           >
             <h2
               className={`${isFullWidth ? 'text-4xl md:text-6xl lg:text-7xl' : 'text-3xl md:text-5xl lg:text-6xl'} uppercase ${textAlignClass} text-gray-950 max-w-4xl mb-4 ${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}
@@ -98,7 +97,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         const bodyElement = (hasDescription || (block.linkText && block.linkUrl)) && (
           <div className="w-full">
             {hasDescription && (
-              <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto" initialScale={0.95}>
+              <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
                 <div className={`prose max-w-none ${textAlignClass}`}>
                   {(() => {
                     const desc = t(block.description)
@@ -119,7 +118,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               </ScrollReveal>
             )}
             {block.linkText && block.linkUrl && (
-              <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto" initialScale={0.95}>
+              <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto">
                 <div className={`mt-6 ${textAlignClass} flex ${textAlign === 'center' ? 'justify-center' : textAlign === 'right' ? 'justify-end' : 'justify-start'}`}>
                   <Link
                     to={block.linkUrl}
@@ -149,7 +148,6 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             threshold={0.1}
             width={(isFullWidth || isCenter) ? "w-full" : "w-auto"}
             className={`h-auto ${(isFullWidth || isCenter) ? 'w-full' : ''} ${isCenter ? 'flex justify-center' : ''}`}
-            initialScale={0.95}
           >
             {block.mediaType === 'youtube' ? (
               <div className={`relative ${mediaWidthClass} aspect-video overflow-hidden`}>
