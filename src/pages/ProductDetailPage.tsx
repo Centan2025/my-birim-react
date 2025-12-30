@@ -1541,6 +1541,24 @@ export function ProductDetailPage() {
                                       currentIndex: index,
                                     })
                                   }}
+                                  role="button"
+                                  tabIndex={0}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                      e.preventDefault()
+                                      const allMaterials = Array.isArray(books[activeBookIndex]?.materials)
+                                        ? books[activeBookIndex].materials
+                                        : []
+                                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                      setMaterialLightbox({
+                                        images: allMaterials.map((m: any) => ({
+                                          image: m.image,
+                                          name: t(m.name),
+                                        })),
+                                        currentIndex: index,
+                                      })
+                                    }
+                                  }}
                                 >
                                   <OptimizedImage
                                     src={material.image}
@@ -1582,6 +1600,24 @@ export function ProductDetailPage() {
                                       currentIndex: index,
                                     })
                                   }}
+                                  role="button"
+                                  tabIndex={0}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                      e.preventDefault()
+                                      const allMaterials = Array.isArray(grouped[safeActiveIndex]?.materials)
+                                        ? grouped[safeActiveIndex].materials
+                                        : []
+                                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                      setMaterialLightbox({
+                                        images: allMaterials.map((m: any) => ({
+                                          image: m.image,
+                                          name: t(m.name),
+                                        })),
+                                        currentIndex: index,
+                                      })
+                                    }
+                                  }}
                                 >
                                   <OptimizedImage
                                     src={material.image}
@@ -1617,6 +1653,21 @@ export function ProductDetailPage() {
                                 })),
                                 currentIndex: index,
                               })
+                            }}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault()
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                setMaterialLightbox({
+                                  images: flatMaterials.map((m: any) => ({
+                                    image: m.image,
+                                    name: t(m.name),
+                                  })),
+                                  currentIndex: index,
+                                })
+                              }
                             }}
                           >
                             <OptimizedImage

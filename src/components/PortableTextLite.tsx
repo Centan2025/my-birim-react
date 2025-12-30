@@ -161,7 +161,7 @@ export default function PortableTextLite({ value }: { value: Block[] | undefined
           <div key={`pair-${blockKey}`} className="flex flex-row gap-2 my-2 clear-both">
             <figure className="flex-1">
               <OptimizedImage
-                src={urlFor(block.asset).url() || ''}
+                src={urlFor(block).url() || ''}
                 alt={block.alt || ''}
                 className="w-full h-auto shadow-sm"
               />
@@ -173,7 +173,7 @@ export default function PortableTextLite({ value }: { value: Block[] | undefined
             </figure>
             <figure className="flex-1">
               <OptimizedImage
-                src={urlFor(nextBlock.asset).url() || ''}
+                src={urlFor(nextBlock).url() || ''}
                 alt={nextBlock.alt || ''}
                 className="w-full h-auto shadow-sm"
               />
@@ -290,7 +290,7 @@ export default function PortableTextLite({ value }: { value: Block[] | undefined
       nodes.push(
         <figure key={blockKey} className={`my-2 clear-both ${layoutClass}`}>
           <OptimizedImage
-            src={urlFor(block.asset).url() || ''}
+            src={urlFor(block).url() || ''}
             alt={block.alt || ''}
             className="w-full h-auto shadow-sm"
           />
@@ -304,6 +304,7 @@ export default function PortableTextLite({ value }: { value: Block[] | undefined
     }
 
     if (block._type === 'youtube' && block.url) {
+      // eslint-disable-next-line no-useless-escape
       const videoId = block.url.match(
         /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/
       )?.[1]
