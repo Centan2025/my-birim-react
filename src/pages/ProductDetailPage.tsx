@@ -927,7 +927,7 @@ export function ProductDetailPage() {
         {(() => null)()}
         {/* FULL-WIDTH HERO IMAGE */}
         <header className="relative w-full">
-          {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+          {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
           <div
             className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing"
             style={{
@@ -1204,7 +1204,7 @@ export function ProductDetailPage() {
             <div className="mt-1 md:mt-2 border-b border-gray-300 py-3">
               {/* Hide scrollbar with custom class; enable drag scroll */}
               <div className="relative select-none">
-                {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+                {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
                 <div
                   ref={thumbRef}
                   className="hide-scrollbar overflow-x-auto cursor-grab active:cursor-grabbing"
