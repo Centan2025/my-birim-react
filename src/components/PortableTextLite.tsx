@@ -21,12 +21,14 @@ type Block = {
   level?: number
   _key?: string
   // For custom objects
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   asset?: any
   alt?: string
   caption?: string
   layout?: 'full' | 'center' | 'left' | 'right'
   url?: string
   style_type?: string // for divider or cta
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   text?: any // for cta (localized)
   link?: string // for cta
 }

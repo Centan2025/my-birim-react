@@ -1538,7 +1538,7 @@ export function ProductDetailPage() {
 
                             {/* Seçili kartelaya ait malzemeler */}
                             <div className="flex flex-wrap gap-6">
-                              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+
                               {(Array.isArray(books[activeBookIndex]?.materials)
                                 ? books[activeBookIndex].materials
                                 : []
@@ -1551,7 +1551,7 @@ export function ProductDetailPage() {
                                     const allMaterials = Array.isArray(books[activeBookIndex]?.materials)
                                       ? books[activeBookIndex].materials
                                       : []
-                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                                     setMaterialLightbox({
                                       images: allMaterials.map((m: any) => ({
                                         image: m.image,
@@ -1568,7 +1568,7 @@ export function ProductDetailPage() {
                                       const allMaterials = Array.isArray(books[activeBookIndex]?.materials)
                                         ? books[activeBookIndex].materials
                                         : []
-                                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                                       setMaterialLightbox({
                                         images: allMaterials.map((m: any) => ({
                                           image: m.image,
@@ -1597,7 +1597,7 @@ export function ProductDetailPage() {
                           /* Fallback: if no books, show materials directly */
                           <>
                             <div className="flex flex-wrap gap-6">
-                              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+
                               {(Array.isArray(grouped[safeActiveIndex]?.materials)
                                 ? grouped[safeActiveIndex].materials
                                 : []
@@ -1610,7 +1610,7 @@ export function ProductDetailPage() {
                                     const allMaterials = Array.isArray(grouped[safeActiveIndex]?.materials)
                                       ? grouped[safeActiveIndex].materials
                                       : []
-                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                                     setMaterialLightbox({
                                       images: allMaterials.map((m: any) => ({
                                         image: m.image,
@@ -1627,7 +1627,7 @@ export function ProductDetailPage() {
                                       const allMaterials = Array.isArray(grouped[safeActiveIndex]?.materials)
                                         ? grouped[safeActiveIndex].materials
                                         : []
-                                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                                       setMaterialLightbox({
                                         images: allMaterials.map((m: any) => ({
                                           image: m.image,
