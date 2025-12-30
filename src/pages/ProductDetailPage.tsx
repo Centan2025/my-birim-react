@@ -927,7 +927,7 @@ export function ProductDetailPage() {
         {(() => null)()}
         {/* FULL-WIDTH HERO IMAGE */}
         <header className="relative w-full">
-          {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
+          {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
           <div
             className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing"
             style={{
@@ -944,6 +944,7 @@ export function ProductDetailPage() {
             onTouchStart={handleHeroDragStart}
             onTouchMove={handleHeroDragMove}
             onTouchEnd={handleHeroDragEnd}
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
             tabIndex={0}
             onKeyDown={(e) => {
               if (e.key === 'ArrowLeft') heroPrev()
@@ -1204,12 +1205,13 @@ export function ProductDetailPage() {
             <div className="mt-1 md:mt-2 border-b border-gray-300 py-3">
               {/* Hide scrollbar with custom class; enable drag scroll */}
               <div className="relative select-none">
-                {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
+                {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
                 <div
                   ref={thumbRef}
                   className="hide-scrollbar overflow-x-auto cursor-grab active:cursor-grabbing"
                   role="region"
                   aria-label="Thumbnail Slider"
+                  // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
                   tabIndex={0}
                   onMouseDown={e => {
                     setThumbDragStartX(e.clientX)
