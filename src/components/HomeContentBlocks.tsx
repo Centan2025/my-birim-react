@@ -122,10 +122,10 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 <div className={`mt-6 ${textAlignClass} flex ${textAlign === 'center' ? 'justify-center' : textAlign === 'right' ? 'justify-end' : 'justify-start'}`}>
                   <Link
                     to={block.linkUrl}
-                    className={`group inline-flex items-center gap-x-3 text-gray-950 font-bold py-3 px-8 text-base md:text-xl lg:text-2xl rounded-none border border-gray-950/30 hover:border-gray-950 hover:bg-gray-950/5 transition-all duration-300`}
+                    className={`group inline-flex items-center gap-x-3 text-gray-950 font-bold py-3 px-8 text-base md:text-xl lg:text-2xl rounded-none border border-gray-950/30 hover:border-gray-950 transition-all duration-300`}
                   >
                     <span className="inline-flex justify-center transition-all duration-500 ease-out">
-                      <span className="leading-none font-bold tracking-[0.05em] transition-all duration-500 ease-out md:group-hover:tracking-[0.12em] md:group-hover:text-gray-600">
+                      <span className="leading-none font-bold tracking-[0.05em] transition-all duration-500 ease-out md:group-hover:tracking-[0.12em]">
                         {t(block.linkText)}
                       </span>
                     </span>
