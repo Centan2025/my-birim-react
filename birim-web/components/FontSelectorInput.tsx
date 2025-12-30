@@ -71,13 +71,13 @@ const SelectorWrapper = styled.div`
   width: 100%;
 `
 
-const DropdownTrigger = styled.div<{ isOpen: boolean; hasValue: boolean }>`
+const DropdownTrigger = styled.div<{ $isOpen: boolean; $hasValue: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
   background: white;
-  border: 1px solid ${(props) => (props.isOpen ? '#4285f4' : '#d1d5db')};
+  border: 1px solid ${(props) => (props.$isOpen ? '#4285f4' : '#d1d5db')};
   border-radius: 0.5rem;
   cursor: pointer;
   transition: all 0.2s;
@@ -88,7 +88,7 @@ const DropdownTrigger = styled.div<{ isOpen: boolean; hasValue: boolean }>`
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
 
-  ${(props) => props.isOpen && `
+  ${(props) => props.$isOpen && `
     box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
   `}
 `
@@ -179,18 +179,18 @@ const CategoryHeader = styled.div`
   letter-spacing: 0.05em;
 `
 
-const FontItem = styled.div<{ isSelected: boolean }>`
+const FontItem = styled.div<{ $isSelected: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem;
   border-radius: 0.375rem;
   cursor: pointer;
-  background: ${(props) => (props.isSelected ? '#eff6ff' : 'transparent')};
+  background: ${(props) => (props.$isSelected ? '#eff6ff' : 'transparent')};
   transition: background 0.15s;
 
   &:hover {
-    background: ${(props) => (props.isSelected ? '#dbeafe' : '#f3f4f6')};
+    background: ${(props) => (props.$isSelected ? '#dbeafe' : '#f3f4f6')};
   }
 `
 
@@ -359,8 +359,8 @@ export default function FontSelectorInput(props: StringInputProps) {
     <Container>
       <SelectorWrapper>
         <DropdownTrigger
-          isOpen={isOpen}
-          hasValue={!!value}
+          $isOpen={isOpen}
+          $hasValue={!!value}
           onClick={() => setIsOpen(!isOpen)}
         >
           <SelectedFontInfo>
@@ -406,7 +406,7 @@ export default function FontSelectorInput(props: StringInputProps) {
                   {filteredFonts[category].map(font => (
                     <FontItem
                       key={font.name}
-                      isSelected={value === font.name}
+                      $isSelected={value === font.name}
                       onClick={() => handleSelect(font.name)}
                     >
                       <FontItemMain>

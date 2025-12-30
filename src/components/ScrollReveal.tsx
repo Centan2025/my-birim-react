@@ -9,6 +9,7 @@ interface ScrollRevealProps {
   direction?: 'up' | 'left'
   distance?: number
   duration?: number
+  initialScale?: number
 }
 
 const ScrollReveal: React.FC<ScrollRevealProps> = ({
@@ -20,6 +21,7 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
   direction = 'up',
   distance = 30,
   duration = 0.25,
+  initialScale = 1,
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const elementRef = useRef<HTMLDivElement>(null)
@@ -64,7 +66,7 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
       className={`${width} ${className}`}
       style={{
         opacity: isVisible ? 1 : 0,
-        transform: isVisible ? 'translateY(0)' : translateDirection,
+        transform: isVisible ? 'translate(0, 0) scale(1)' : `${translateDirection} scale(${initialScale})`,
         transition: `opacity ${duration}s ease-out ${delay}ms, transform ${duration}s ease-out ${delay}ms`,
         willChange: 'opacity, transform',
       }}
