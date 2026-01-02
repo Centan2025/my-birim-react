@@ -125,7 +125,7 @@ export function ProductDetailPage() {
   // FIX: Removed usage of non-existent `useSiteSettings` hook and now use the local `siteSettings` state.
   const imageBorderClass =
     siteSettings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
-  const [activeMaterialGroup, setActiveMaterialGroup] = useState<number>(0)
+  const [activeMaterialGroup, setActiveMaterialGroup] = useState<number | null>(null)
   const [activeBookIndex, setActiveBookIndex] = useState<number>(0)
   const [isDragging, setIsDragging] = useState(false)
   const [dragStartX, setDragStartX] = useState<number>(0)
@@ -529,11 +529,14 @@ export function ProductDetailPage() {
   })()
   const firstImageIndex = useMemo(() => bandMedia.findIndex(m => m.type === 'image'), [bandMedia])
 
-  const safeActiveIndex = Math.min(
-    Math.max(activeMaterialGroup, 0),
-    Math.max(mergedGroups.length - 1, 0)
-  )
-  const activeGroup = Array.isArray(mergedGroups) ? mergedGroups[safeActiveIndex] : undefined
+  const safeActiveIndex =
+    activeMaterialGroup === null
+      ? 0
+      : Math.min(Math.max(activeMaterialGroup, 0), Math.max(mergedGroups.length - 1, 0))
+  const activeGroup =
+    activeMaterialGroup !== null && Array.isArray(mergedGroups)
+      ? mergedGroups[safeActiveIndex]
+      : undefined
   const books = Array.isArray(activeGroup?.books) ? activeGroup.books : []
   const hasMaterialGroups = Array.isArray(mergedGroups) && mergedGroups.length > 0
   const flatMaterials =
@@ -1518,55 +1521,38 @@ export function ProductDetailPage() {
                         </div>
 
                         {/* Swatch books (kartelalar) yatay sekmeler */}
-                        {books.length > 0 ? (
-                          <>
-                            <div className="flex flex-wrap gap-0 border-b border-gray-200 mb-6">
-                              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                              {books.map((book: any, idx: number) => (
-                                <button
-                                  key={idx}
-                                  onClick={() => setActiveBookIndex(idx)}
-                                  className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeBookIndex === idx
-                                    ? 'bg-white text-gray-800 border-gray-500'
-                                    : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
-                                    }`}
-                                >
-                                  {t(book.bookTitle)}
-                                </button>
-                              ))}
-                            </div>
+                        {activeMaterialGroup !== null ? (
+                          books.length > 0 ? (
+                            <>
+                              <div className="flex flex-wrap gap-0 border-b border-gray-200 mb-6">
+                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                {books.map((book: any, idx: number) => (
+                                  <button
+                                    key={idx}
+                                    onClick={() => setActiveBookIndex(idx)}
+                                    className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeBookIndex === idx
+                                      ? 'bg-white text-gray-800 border-gray-500'
+                                      : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
+                                      }`}
+                                  >
+                                    {t(book.bookTitle)}
+                                  </button>
+                                ))}
+                              </div>
 
-                            {/* Seçili kartelaya ait malzemeler */}
-                            <div className="flex flex-wrap gap-6">
+                              {/* Seçili kartelaya ait malzemeler */}
+                              <div className="flex flex-wrap gap-6">
 
-                              {(Array.isArray(books[activeBookIndex]?.materials)
-                                ? books[activeBookIndex].materials
-                                : []
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                              ).map((material: any, index: number) => (
-                                <div
-                                  key={index}
-                                  className="text-center group cursor-pointer"
-                                  title={t(material.name)}
-                                  onClick={() => {
-                                    const allMaterials = Array.isArray(books[activeBookIndex]?.materials)
-                                      ? books[activeBookIndex].materials
-                                      : []
-
-                                    setMaterialLightbox({
-                                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                      images: allMaterials.map((m: any) => ({
-                                        image: m.image,
-                                        name: t(m.name),
-                                      })),
-                                      currentIndex: index,
-                                    })
-                                  }}
-                                  role="button"
-                                  tabIndex={0}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter' || e.key === ' ') {
-                                      e.preventDefault()
+                                {(Array.isArray(books[activeBookIndex]?.materials)
+                                  ? books[activeBookIndex].materials
+                                  : []
+                                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                ).map((material: any, index: number) => (
+                                  <div
+                                    key={index}
+                                    className="text-center group cursor-pointer"
+                                    title={t(material.name)}
+                                    onClick={() => {
                                       const allMaterials = Array.isArray(books[activeBookIndex]?.materials)
                                         ? books[activeBookIndex].materials
                                         : []
@@ -1579,54 +1565,55 @@ export function ProductDetailPage() {
                                         })),
                                         currentIndex: index,
                                       })
-                                    }
-                                  }}
-                                >
-                                  <OptimizedImage
-                                    src={material.image}
-                                    alt={t(material.name)}
-                                    className={`w-28 h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md ${imageBorderClass}`}
-                                    loading="lazy"
-                                    quality={80}
-                                  />
-                                  <p className="mt-3 text-xs md:text-sm text-gray-600 font-thin tracking-wider max-w-[120px] break-words">
-                                    {t(material.name)}
-                                  </p>
-                                </div>
-                              ))}
-                            </div>
-                          </>
-                        ) : (
-                          /* Fallback: if no books, show materials directly */
-                          <>
-                            <div className="flex flex-wrap gap-6">
+                                    }}
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault()
+                                        const allMaterials = Array.isArray(books[activeBookIndex]?.materials)
+                                          ? books[activeBookIndex].materials
+                                          : []
 
-                              {(Array.isArray(grouped[safeActiveIndex]?.materials)
-                                ? grouped[safeActiveIndex].materials
-                                : []
-                              ).map((material: any, index: number) => (
-                                <div
-                                  key={index}
-                                  className="text-center group cursor-pointer"
-                                  title={t(material.name)}
-                                  onClick={() => {
-                                    const allMaterials = Array.isArray(grouped[safeActiveIndex]?.materials)
-                                      ? grouped[safeActiveIndex].materials
-                                      : []
+                                        setMaterialLightbox({
+                                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                          images: allMaterials.map((m: any) => ({
+                                            image: m.image,
+                                            name: t(m.name),
+                                          })),
+                                          currentIndex: index,
+                                        })
+                                      }
+                                    }}
+                                  >
+                                    <OptimizedImage
+                                      src={material.image}
+                                      alt={t(material.name)}
+                                      className={`w-28 h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md ${imageBorderClass}`}
+                                      loading="lazy"
+                                      quality={80}
+                                    />
+                                    <p className="mt-3 text-xs md:text-sm text-gray-600 font-thin tracking-wider max-w-[120px] break-words">
+                                      {t(material.name)}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            </>
+                          ) : (
+                            /* Fallback: if no books, show materials directly */
+                            <>
+                              <div className="flex flex-wrap gap-6">
 
-                                    setMaterialLightbox({
-                                      images: allMaterials.map((m: any) => ({
-                                        image: m.image,
-                                        name: t(m.name),
-                                      })),
-                                      currentIndex: index,
-                                    })
-                                  }}
-                                  role="button"
-                                  tabIndex={0}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter' || e.key === ' ') {
-                                      e.preventDefault()
+                                {(Array.isArray(grouped[safeActiveIndex]?.materials)
+                                  ? grouped[safeActiveIndex].materials
+                                  : []
+                                ).map((material: any, index: number) => (
+                                  <div
+                                    key={index}
+                                    className="text-center group cursor-pointer"
+                                    title={t(material.name)}
+                                    onClick={() => {
                                       const allMaterials = Array.isArray(grouped[safeActiveIndex]?.materials)
                                         ? grouped[safeActiveIndex].materials
                                         : []
@@ -1638,24 +1625,41 @@ export function ProductDetailPage() {
                                         })),
                                         currentIndex: index,
                                       })
-                                    }
-                                  }}
-                                >
-                                  <OptimizedImage
-                                    src={material.image}
-                                    alt={t(material.name)}
-                                    className={`w-28 h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md ${imageBorderClass}`}
-                                    loading="lazy"
-                                    quality={80}
-                                  />
-                                  <p className="mt-3 text-xs md:text-sm text-gray-600 font-thin tracking-wider max-w-[120px] break-words">
-                                    {t(material.name)}
-                                  </p>
-                                </div>
-                              ))}
-                            </div>
-                          </>
-                        )}
+                                    }}
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault()
+                                        const allMaterials = Array.isArray(grouped[safeActiveIndex]?.materials)
+                                          ? grouped[safeActiveIndex].materials
+                                          : []
+
+                                        setMaterialLightbox({
+                                          images: allMaterials.map((m: any) => ({
+                                            image: m.image,
+                                            name: t(m.name),
+                                          })),
+                                          currentIndex: index,
+                                        })
+                                      }
+                                    }}
+                                  >
+                                    <OptimizedImage
+                                      src={material.image}
+                                      alt={t(material.name)}
+                                      className={`w-28 h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md ${imageBorderClass}`}
+                                      loading="lazy"
+                                      quality={80}
+                                    />
+                                    <p className="mt-3 text-xs md:text-sm text-gray-600 font-thin tracking-wider max-w-[120px] break-words">
+                                      {t(material.name)}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            </>
+                          )}
                       </>
                     ) : (
                       /* Flat fallback: grouped malzeme yoksa product.materials listesini göster */
@@ -1720,8 +1724,18 @@ export function ProductDetailPage() {
                 <ScrollReveal delay={500} threshold={0.05}>
                   <div className="pt-6 border-t border-gray-200">
                     <button
-                      onClick={() => addToCart(product)}
-                      className="group w-20 h-20 flex items-center justify-center bg-gray-900 text-white rounded-full hover:bg-gray-700 transition-all duration-300 ease-in-out transform hover:scale-110 active:scale-100 hover:shadow-lg"
+                      onClick={() => {
+                        // Eğer malzeme grupları varsa ve seçim yapılmamışsa uyar
+                        if (hasMaterialGroups && activeMaterialGroup === null) {
+                          alert(t('please_select_price_group') || 'Lütfen önce bir fiyat grubu seçiniz.')
+                          return
+                        }
+                        addToCart(product)
+                      }}
+                      className={`group w-20 h-20 flex items-center justify-center rounded-full transition-all duration-300 ease-in-out transform hover:scale-110 active:scale-100 hover:shadow-lg ${hasMaterialGroups && activeMaterialGroup === null
+                        ? 'bg-gray-400 cursor-not-allowed opacity-70'
+                        : 'bg-gray-900 text-white hover:bg-gray-700'
+                        }`}
                       aria-label={t('add_to_cart')}
                     >
                       <TransparentShoppingBagIcon />

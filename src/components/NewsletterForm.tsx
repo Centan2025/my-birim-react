@@ -36,11 +36,11 @@ export const NewsletterForm: FC<NewsletterFormProps> = ({ variant = 'mobile', cl
     messageTimeoutRef.current = setTimeout(() => {
       setIsMessageVisible(false)
 
-      // Fade-out animasyonu (300ms) bitince mesajı sil
+      // Fade-out animasyonu (1000ms) bitince mesajı sil
       hideTimeoutRef.current = setTimeout(() => {
         setMessage(null)
         setStatus('idle')
-      }, 300)
+      }, 1000)
     }, 3000)
   }
 
@@ -206,10 +206,10 @@ export const NewsletterForm: FC<NewsletterFormProps> = ({ variant = 'mobile', cl
       >
         {message && (
           <p
-            className={`text-[11px] md:text-xs leading-snug transition-all duration-300 ease-in-out transform ${status === 'error' ? 'text-red-400' : 'text-gray-200'
+            className={`text-[11px] md:text-xs leading-snug transition-all duration-1000 ease-in-out transform ${status === 'error' ? 'text-red-400' : 'text-gray-200'
               } ${isMessageVisible
                 ? 'opacity-100 translate-y-0'
-                : 'opacity-0 -translate-y-2'
+                : 'opacity-0 -translate-y-4'
               }`}
           >
             {message}
