@@ -18,7 +18,7 @@ const MediaGallery = ({ media, alt }: { media?: NewsMedia[]; alt: string }) => {
     <div className="mt-20 relative left-1/2 right-1/2 -mx-[50vw] w-screen overflow-hidden">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
         {media.map((m, idx) => (
-          <ScrollReveal key={idx} delay={idx * 100} distance={20} threshold={0.1}>
+          <ScrollReveal key={idx} delay={idx * 100} distance={10} threshold={0.1}>
             <div className="relative aspect-video overflow-hidden bg-gray-50">
               {m.type === 'video' ? (
                 <video
@@ -124,12 +124,12 @@ export function AboutPage() {
           </div>
         )}
         <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
-          <ScrollReveal delay={100} duration={1.2} distance={30}>
+          <ScrollReveal delay={100} duration={1.2} distance={15}>
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tighter uppercase leading-none">
               {t(content.heroTitle)}
             </h1>
           </ScrollReveal>
-          <ScrollReveal delay={300} duration={1.2} distance={40}>
+          <ScrollReveal delay={300} duration={1.2} distance={20}>
             <p className="mt-8 text-lg md:text-2xl text-gray-200 max-w-2xl mx-auto font-light leading-relaxed">
               {t(content.heroSubtitle)}
             </p>
@@ -155,7 +155,7 @@ export function AboutPage() {
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex flex-col lg:flex-row items-start gap-12 lg:gap-20">
                 <div className="flex-1 lg:max-w-xl">
-                  <ScrollReveal threshold={0.2} distance={40}>
+                  <ScrollReveal threshold={0.2} distance={20}>
                     <h2 className="text-3xl md:text-5xl font-light text-gray-900 mb-8 tracking-tight">
                       {t(content.historySection.title)}
                     </h2>
@@ -172,7 +172,7 @@ export function AboutPage() {
                   </ScrollReveal>
                 </div>
                 <div className="flex-1 w-full lg:w-auto">
-                  <ScrollReveal threshold={0.2} delay={200} duration={1} distance={20}>
+                  <ScrollReveal threshold={0.2} delay={200} duration={1} distance={10}>
                     <div className="relative aspect-[4/5] overflow-hidden">
                       <OptimizedImage
                         src={content.historySection.image || content.storyImage || ''}
@@ -195,7 +195,7 @@ export function AboutPage() {
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex flex-col-reverse lg:flex-row items-start gap-12 lg:gap-20 text-left">
                 <div className="flex-1 w-full lg:w-auto">
-                  <ScrollReveal threshold={0.2} duration={1} distance={20}>
+                  <ScrollReveal threshold={0.2} duration={1} distance={10}>
                     <div className="relative aspect-video overflow-hidden">
                       <OptimizedImage
                         src={content.identitySection.image || ''}
@@ -206,7 +206,7 @@ export function AboutPage() {
                   </ScrollReveal>
                 </div>
                 <div className="flex-1 lg:max-w-xl">
-                  <ScrollReveal threshold={0.2} distance={40}>
+                  <ScrollReveal threshold={0.2} distance={20}>
                     <h2 className="text-3xl md:text-5xl font-light text-gray-900 mb-8 tracking-tight">
                       {t(content.identitySection.title)}
                     </h2>
@@ -234,7 +234,7 @@ export function AboutPage() {
           <div className="pt-32 pb-24">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <div className="max-w-7xl mx-auto">
-                <ScrollReveal threshold={0.2} distance={40}>
+                <ScrollReveal threshold={0.2} distance={20}>
                   <h2 className="text-4xl md:text-6xl font-light text-gray-900 mb-16 tracking-tight text-center">
                     {t(content.qualitySection.title)}
                   </h2>
@@ -242,7 +242,7 @@ export function AboutPage() {
 
                 <div className="flex flex-col lg:flex-row gap-16 lg:gap-24 items-start text-left">
                   <div className="lg:w-1/3">
-                    <ScrollReveal threshold={0.2} distance={50} delay={100}>
+                    <ScrollReveal threshold={0.2} distance={25} delay={100}>
                       <div className="prose prose-lg text-gray-600 leading-relaxed font-light">
                         {Array.isArray(t(content.qualitySection.content)) ? (
                           <>
@@ -256,7 +256,7 @@ export function AboutPage() {
                     </ScrollReveal>
                   </div>
                   <div className="lg:w-2/3 w-full">
-                    <ScrollReveal threshold={0.2} delay={200} duration={1} distance={20}>
+                    <ScrollReveal threshold={0.2} delay={200} duration={1} distance={10}>
                       <div className="relative aspect-video lg:aspect-[16/9] overflow-hidden">
                         <OptimizedImage
                           src={content.qualitySection.image || ''}

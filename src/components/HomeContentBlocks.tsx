@@ -74,7 +74,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             threshold={0.1}
             width="w-full"
             className="h-auto"
-            distance={25}
+            distance={15}
             duration={0.6}
           >
             <h2
