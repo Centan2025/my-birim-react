@@ -292,7 +292,7 @@ export function NewsDetailPage() {
               <h1 className="text-3xl md:text-4xl font-normal tracking-tight text-gray-700 mb-6">
                 {t(item.title)}
               </h1>
-              <div className="prose prose-lg lg:prose-xl text-gray-900 max-w-none w-full">
+              <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl max-w-none w-full">
                 {(() => {
                   const content = t(item.content)
                   return Array.isArray(content) ? (
