@@ -74,8 +74,8 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             threshold={0.1}
             width="w-full"
             className="h-auto"
-            distance={50}
-            duration={0.6}
+            distance={30}
+            duration={0.8}
           >
             <h2
               className={`${isFullWidth ? 'text-4xl md:text-6xl lg:text-7xl' : 'text-3xl md:text-5xl lg:text-6xl'} uppercase ${textAlignClass} text-gray-950 max-w-4xl mb-4 ${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}
