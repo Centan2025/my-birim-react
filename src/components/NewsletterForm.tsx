@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, FC, FormEventHandler } from 'react'
-
 import { subscribeEmail } from '../services/cms'
 import { analytics } from '../lib/analytics'
 import { useTranslation } from '../i18n'
@@ -14,7 +13,36 @@ export const NewsletterForm: FC<NewsletterFormProps> = ({ variant = 'mobile', cl
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState<string | null>(null)
+  const [isMessageVisible, setIsMessageVisible] = useState(false)
+
   const messageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const showMessage = (msg: string, type: 'success' | 'error') => {
+    // Önceki zamanlayıcıları temizle
+    if (messageTimeoutRef.current) clearTimeout(messageTimeoutRef.current)
+    if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current)
+
+    setMessage(msg)
+    setStatus(type)
+
+    // Fade-in efekti için önce görünmez yapıp bir sonraki tickte görünür yapıyoruz
+    setIsMessageVisible(false)
+    setTimeout(() => {
+      setIsMessageVisible(true)
+    }, 10)
+
+    // 3 saniye sonra fade-out başlat
+    messageTimeoutRef.current = setTimeout(() => {
+      setIsMessageVisible(false)
+
+      // Fade-out animasyonu (300ms) bitince mesajı sil
+      hideTimeoutRef.current = setTimeout(() => {
+        setMessage(null)
+        setStatus('idle')
+      }, 300)
+    }, 3000)
+  }
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async e => {
     e.preventDefault()
@@ -30,17 +58,8 @@ export const NewsletterForm: FC<NewsletterFormProps> = ({ variant = 'mobile', cl
         const raw = window.localStorage.getItem('birim_newsletter_subscribers')
         const list: string[] = raw ? JSON.parse(raw) : []
         if (list.includes(normalizedEmail)) {
-          setStatus('success')
           const alreadyMessage = t('newsletter_already_subscribed') || 'Bu e-posta adresi zaten aboneliğe kayıtlı.'
-          setMessage(alreadyMessage)
-          // Mesajı 3 saniye sonra otomatik kaldır
-          if (messageTimeoutRef.current) {
-            clearTimeout(messageTimeoutRef.current)
-          }
-          messageTimeoutRef.current = setTimeout(() => {
-            setMessage(null)
-            setStatus('idle')
-          }, 3000)
+          showMessage(alreadyMessage, 'success')
           return
         }
       }
@@ -49,7 +68,7 @@ export const NewsletterForm: FC<NewsletterFormProps> = ({ variant = 'mobile', cl
     }
 
     setStatus('loading')
-    setMessage(null)
+    // Mesajı hemen sıfırlamıyoruz, showMessage zaten halledecek
 
     try {
       const result = await subscribeEmail(email)
@@ -65,20 +84,11 @@ export const NewsletterForm: FC<NewsletterFormProps> = ({ variant = 'mobile', cl
         normalizedMessage.includes('zaten kayıtlı') ||
         normalizedMessage.includes('already subscribed')
 
-      setStatus('success')
       const finalMessage = isAlready
         ? t('newsletter_already_subscribed') || 'Bu e-posta adresi zaten aboneliğe kayıtlı.'
         : t('newsletter_success') || 'E-posta aboneliğiniz başarıyla oluşturuldu.'
 
-      setMessage(finalMessage)
-      // Mesajı 3 saniye sonra otomatik kaldır
-      if (messageTimeoutRef.current) {
-        clearTimeout(messageTimeoutRef.current)
-      }
-      messageTimeoutRef.current = setTimeout(() => {
-        setMessage(null)
-        setStatus('idle')
-      }, 3000)
+      showMessage(finalMessage, 'success')
 
       // Başarılı abonelikte (veya zaten kayıtlıysa) e-postayı localStorage'a yaz
       try {
@@ -104,51 +114,24 @@ export const NewsletterForm: FC<NewsletterFormProps> = ({ variant = 'mobile', cl
 
       if (errorMessage === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
         // Token yokken local storage'a yazılan durum
-        setStatus('success')
         const localMessage = t('newsletter_success_local') ||
           "E-posta aboneliğiniz kaydedildi. CMS'de görünmesi için VITE_SANITY_TOKEN ekleyin."
-        setMessage(localMessage)
+        showMessage(localMessage, 'success')
         analytics.trackUserAction('newsletter_subscribe', email)
         setEmail('')
-        // Mesajı 3 saniye sonra otomatik kaldır
-        if (messageTimeoutRef.current) {
-          clearTimeout(messageTimeoutRef.current)
-        }
-        messageTimeoutRef.current = setTimeout(() => {
-          setMessage(null)
-          setStatus('idle')
-        }, 3000)
       } else if (
         errorMessage.includes('zaten aboneliğe kayıtlı') ||
         errorMessage.includes('zaten kayıtlı') ||
         errorMessage.toLowerCase().includes('already subscribed')
       ) {
         // E-posta zaten CMS'de veya localde kayıtlıysa
-        setStatus('success')
         const alreadyMessage = t('newsletter_already_subscribed') || 'Bu e-posta adresi zaten aboneliğe kayıtlı.'
-        setMessage(alreadyMessage)
-        // Mesajı 3 saniye sonra otomatik kaldır
-        if (messageTimeoutRef.current) {
-          clearTimeout(messageTimeoutRef.current)
-        }
-        messageTimeoutRef.current = setTimeout(() => {
-          setMessage(null)
-          setStatus('idle')
-        }, 3000)
+        showMessage(alreadyMessage, 'success')
       } else {
-        setStatus('error')
         const errorMsg = errorMessage ||
           t('newsletter_error') ||
           "Bir hata oluştu. Lütfen daha sonra tekrar deneyin."
-        setMessage(errorMsg)
-        // Mesajı 3 saniye sonra otomatik kaldır
-        if (messageTimeoutRef.current) {
-          clearTimeout(messageTimeoutRef.current)
-        }
-        messageTimeoutRef.current = setTimeout(() => {
-          setMessage(null)
-          setStatus('idle')
-        }, 3000)
+        showMessage(errorMsg, 'error')
       }
     }
   }
@@ -156,9 +139,8 @@ export const NewsletterForm: FC<NewsletterFormProps> = ({ variant = 'mobile', cl
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
-      if (messageTimeoutRef.current) {
-        clearTimeout(messageTimeoutRef.current)
-      }
+      if (messageTimeoutRef.current) clearTimeout(messageTimeoutRef.current)
+      if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current)
     }
   }, [])
 
@@ -185,14 +167,13 @@ export const NewsletterForm: FC<NewsletterFormProps> = ({ variant = 'mobile', cl
           value={email}
           onChange={e => {
             setEmail(e.target.value)
-            // Kullanıcı e-postayı düzenlemeye başladığında önceki mesajı temizle
+            // Kullanıcı e-postayı düzenlemeye başladığında mesajı hemen temizle
             if (message) {
-              if (messageTimeoutRef.current) {
-                clearTimeout(messageTimeoutRef.current)
-                messageTimeoutRef.current = null
-              }
+              if (messageTimeoutRef.current) clearTimeout(messageTimeoutRef.current)
+              if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current)
               setMessage(null)
               setStatus('idle')
+              setIsMessageVisible(false)
             }
           }}
           placeholder={t('email_placeholder')}
@@ -225,31 +206,16 @@ export const NewsletterForm: FC<NewsletterFormProps> = ({ variant = 'mobile', cl
       >
         {message && (
           <p
-            className={`text-[11px] md:text-xs leading-snug ${status === 'error' ? 'text-red-400' : 'text-gray-200'
-              } animate-fade-in`}
-            style={{
-              animation: 'fadeIn 0.3s ease-in',
-            }}
+            className={`text-[11px] md:text-xs leading-snug transition-all duration-300 ease-in-out transform ${status === 'error' ? 'text-red-400' : 'text-gray-200'
+              } ${isMessageVisible
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 -translate-y-2'
+              }`}
           >
             {message}
           </p>
         )}
       </div>
-      <style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-5px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fade-in {
-          animation: fadeIn 0.3s ease-in;
-        }
-      `}</style>
     </form>
   )
 }
