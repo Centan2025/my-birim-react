@@ -1659,7 +1659,7 @@ export function ProductDetailPage() {
                                 ))}
                               </div>
                             </>
-                          ) : (
+                          )) : (
                           <div className="py-8 text-left text-gray-500 font-light">
                             {t('please_select_price_group') || 'Lütfen kartelaları görüntülemek için bir fiyat grubu seçiniz.'}
                           </div>
