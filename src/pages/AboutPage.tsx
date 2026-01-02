@@ -159,7 +159,7 @@ export function AboutPage() {
                     <h2 className="text-3xl md:text-5xl font-light text-gray-900 mb-8 tracking-tight">
                       {t(content.historySection.title)}
                     </h2>
-                    <div className="prose prose-lg text-gray-600 leading-relaxed font-light">
+                    <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
                       {Array.isArray(t(content.historySection.content)) ? (
                         <>
                           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
@@ -210,7 +210,7 @@ export function AboutPage() {
                     <h2 className="text-3xl md:text-5xl font-light text-gray-900 mb-8 tracking-tight">
                       {t(content.identitySection.title)}
                     </h2>
-                    <div className="prose prose-lg text-gray-600 leading-relaxed font-light">
+                    <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
                       {Array.isArray(t(content.identitySection.content)) ? (
                         <>
                           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
@@ -243,7 +243,7 @@ export function AboutPage() {
                 <div className="flex flex-col lg:flex-row gap-16 lg:gap-24 items-start text-left">
                   <div className="lg:w-1/3">
                     <ScrollReveal threshold={0.2} distance={25} delay={100}>
-                      <div className="prose prose-lg text-gray-600 leading-relaxed font-light">
+                      <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
                         {Array.isArray(t(content.qualitySection.content)) ? (
                           <>
                             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}

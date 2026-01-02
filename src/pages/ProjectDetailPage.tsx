@@ -710,11 +710,11 @@ export function ProjectDetailPage() {
                       {(() => {
                         const excerptContent = t(project.excerpt)
                         return Array.isArray(excerptContent) ? (
-                          <div className="text-xl md:text-2xl lg:text-3xl text-gray-900 leading-relaxed font-normal">
+                          <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
                             <PortableTextLite value={excerptContent} />
                           </div>
                         ) : (
-                          <p className="text-xl md:text-2xl lg:text-3xl text-gray-900 leading-relaxed font-normal">
+                          <p className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
                             {excerptContent}
                           </p>
                         )
@@ -726,11 +726,11 @@ export function ProjectDetailPage() {
                       {(() => {
                         const bodyContent = t(project.body)
                         return Array.isArray(bodyContent) ? (
-                          <div className="text-lg md:text-xl lg:text-2xl text-gray-900 leading-relaxed font-normal">
+                          <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
                             <PortableTextLite value={bodyContent} />
                           </div>
                         ) : (
-                          <div className="text-lg md:text-xl lg:text-2xl text-gray-900 leading-relaxed font-normal whitespace-pre-line">
+                          <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl whitespace-pre-line">
                             {bodyContent}
                           </div>
                         )

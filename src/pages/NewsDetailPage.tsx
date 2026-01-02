@@ -298,7 +298,7 @@ export function NewsDetailPage() {
                   return Array.isArray(content) ? (
                     <PortableTextLite value={content} />
                   ) : (
-                    <p className="font-normal">{content}</p>
+                    <p className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">{content}</p>
                   )
                 })()}
               </div>
