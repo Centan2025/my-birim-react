@@ -167,15 +167,15 @@ export function ProductDetailPage() {
   }
 
   const arrowInLeft: React.CSSProperties = {
-    transform: 'translateX(-40px)',
+    transform: 'scale(0)',
     opacity: 0,
-    animation: 'arrow-in-left 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms forwards',
+    animation: 'arrow-scale-in 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms forwards',
   }
 
   const arrowInRight: React.CSSProperties = {
-    transform: 'translateX(40px)',
+    transform: 'scale(0)',
     opacity: 0,
-    animation: 'arrow-in-right 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 200ms forwards',
+    animation: 'arrow-scale-in 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 200ms forwards',
   }
 
   // Işık kutuları açıkken hem body hem html scroll'unu kilitle, pozisyonu koru
@@ -242,16 +242,12 @@ export function ProductDetailPage() {
     style.id = id
     style.textContent = `
       @keyframes close-in {
-        from { opacity: 0; transform: translateX(100px) rotate(90deg); }
-        to { opacity: 1; transform: translateX(0) rotate(0deg); }
+        from { opacity: 0; transform: scale(0); }
+        to { opacity: 1; transform: scale(1); }
       }
-      @keyframes arrow-in-left {
-        from { opacity: 0; transform: translateX(-40px); }
-        to { opacity: 1; transform: translateX(0); }
-      }
-      @keyframes arrow-in-right {
-        from { opacity: 0; transform: translateX(40px); }
-        to { opacity: 1; transform: translateX(0); }
+      @keyframes arrow-scale-in {
+        from { opacity: 0; transform: scale(0); }
+        to { opacity: 1; transform: scale(1); }
       }
     `
     document.head.appendChild(style)
@@ -1112,7 +1108,6 @@ export function ProductDetailPage() {
                     // Ortadaki dot'tan başlayarak sağa ve sola doğru animasyon
                     const centerIndex = Math.floor(bandMedia.length / 2)
                     const distanceFromCenter = Math.abs(index - centerIndex)
-                    const isLeft = index < centerIndex
                     const animationDelay = distanceFromCenter * 50
 
                     return (
@@ -1127,17 +1122,11 @@ export function ProductDetailPage() {
                           }
                           setCurrentImageIndex(index)
                         }}
-                        className={`relative rounded-none transition-all duration-500 ease-in-out group ${areDotsVisible ? 'animate-dot-height-grow' : 'h-0.5'
+                        className={`relative h-2 rounded-none transition-all duration-500 ease-in-out group ${areDotsVisible ? 'animate-dot-grow' : 'opacity-0 scale-0'
                           } ${isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
-                          } ${areDotsVisible
-                            ? 'translate-x-0 opacity-100'
-                            : isLeft
-                              ? '-translate-x-[150%] opacity-0'
-                              : 'translate-x-[250%] opacity-0'
                           }`}
                         style={{
                           transitionDelay: `${animationDelay}ms`,
-                          ...(areDotsVisible ? {} : { height: '0.0625rem' }),
                         }}
                         aria-label={`Görsel ${index + 1}`}
                       >
@@ -1160,11 +1149,8 @@ export function ProductDetailPage() {
                 className="absolute bottom-3 right-3 md:bottom-4 md:right-4 z-20"
                 style={{
                   opacity: isFullscreenButtonVisible ? 1 : 0,
-                  transform: isFullscreenButtonVisible
-                    ? 'translateX(0) rotate(0deg)'
-                    : 'translateX(80px) rotate(90deg)',
-                  transition:
-                    'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
+                  transition: 'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
                   willChange: 'transform, opacity',
                 }}
               >
@@ -1433,16 +1419,16 @@ export function ProductDetailPage() {
               )}
 
               <div>
-                <h2 className="text-3xl md:text-5xl lg:text-6xl font-normal text-gray-700">{t(product.name)}</h2>
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900">{t(product.name)}</h2>
                 <ScrollReveal delay={200}>
                   {(() => {
                     const desc = t(product.description)
                     return Array.isArray(desc) ? (
-                      <div className="mt-3 text-lg md:text-xl lg:text-2xl text-gray-900 leading-relaxed max-w-2xl font-normal">
+                      <div className="mt-4 text-lg md:text-xl text-gray-900 leading-relaxed max-w-3xl font-roboto-thin">
                         <PortableTextLite value={desc} />
                       </div>
                     ) : (
-                      <p className="mt-3 text-lg md:text-xl lg:text-2xl text-gray-900 leading-relaxed max-w-2xl font-normal">
+                      <p className="mt-4 text-lg md:text-xl text-gray-900 leading-relaxed max-w-3xl font-roboto-thin">
                         {desc}
                       </p>
                     )

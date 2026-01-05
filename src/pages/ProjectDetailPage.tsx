@@ -90,14 +90,14 @@ export function ProjectDetailPage() {
   const [areDotsVisible, setAreDotsVisible] = useState(false)
   const [isPageVisible, setIsPageVisible] = useState(false)
   const arrowInLeft: CSSProperties = {
-    transform: 'translateX(-40px)',
+    transform: 'scale(0)',
     opacity: 0,
-    animation: 'proj-arrow-in-left 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms forwards',
+    animation: 'proj-arrow-scale-in 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms forwards',
   }
   const arrowInRight: CSSProperties = {
-    transform: 'translateX(40px)',
+    transform: 'scale(0)',
     opacity: 0,
-    animation: 'proj-arrow-in-right 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 200ms forwards',
+    animation: 'proj-arrow-scale-in 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 200ms forwards',
   }
 
   // Header temasını kapak görseli paletinden besle
@@ -401,13 +401,9 @@ export function ProjectDetailPage() {
       }}
     >
       <style>{`
-        @keyframes proj-arrow-in-left {
-          from { opacity: 0; transform: translateX(-40px); }
-          to { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes proj-arrow-in-right {
-          from { opacity: 0; transform: translateX(40px); }
-          to { opacity: 1; transform: translateX(0); }
+        @keyframes proj-arrow-scale-in {
+          from { opacity: 0; transform: scale(0); }
+          to { opacity: 1; transform: scale(1); }
         }
       `}</style>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24">
@@ -553,7 +549,6 @@ export function ProjectDetailPage() {
                       // Ortadaki dot'tan başlayarak sağa ve sola doğru animasyon
                       const centerIndex = Math.floor(allMedia.length / 2)
                       const distanceFromCenter = Math.abs(index - centerIndex)
-                      const isLeft = index < centerIndex
                       const animationDelay = distanceFromCenter * 50
 
                       return (
@@ -568,17 +563,11 @@ export function ProjectDetailPage() {
                             }
                             setIdx(index)
                           }}
-                          className={`relative rounded-none transition-all duration-500 ease-in-out group ${areDotsVisible ? 'animate-dot-height-grow' : 'h-0.5'
+                          className={`relative h-2 rounded-none transition-all duration-500 ease-in-out group ${areDotsVisible ? 'animate-dot-grow' : 'opacity-0 scale-0'
                             } ${isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
-                            } ${areDotsVisible
-                              ? 'translate-x-0 opacity-100'
-                              : isLeft
-                                ? '-translate-x-[150%] opacity-0'
-                                : 'translate-x-[250%] opacity-0'
                             }`}
                           style={{
                             transitionDelay: `${animationDelay}ms`,
-                            ...(areDotsVisible ? {} : { height: '0.0625rem' }),
                           }}
                           aria-label={`Görsel ${index + 1}`}
                         >
@@ -602,8 +591,8 @@ export function ProjectDetailPage() {
                   style={{
                     opacity: isFullscreenButtonVisible ? 1 : 0,
                     transform: isFullscreenButtonVisible
-                      ? 'translateX(0) rotate(0deg)'
-                      : 'translateX(80px) rotate(90deg)',
+                      ? 'scale(1)'
+                      : 'scale(0)',
                     transition:
                       'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
                     willChange: 'transform, opacity',

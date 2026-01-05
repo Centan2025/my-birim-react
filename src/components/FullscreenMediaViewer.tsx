@@ -698,8 +698,8 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
               onClick={handleClose}
               className="group flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-lg"
               style={{
-                opacity: isClosing ? 0 : (isButtonVisible ? 1 : 0.3),
-                transform: isButtonVisible && !isClosing ? 'translateX(0)' : 'translateX(100px)',
+                opacity: isClosing ? 0 : (isButtonVisible ? 1 : 0),
+                transform: isButtonVisible && !isClosing ? 'scale(1)' : 'scale(0)',
                 transition: 'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
                 willChange: 'transform, opacity',
               }}
