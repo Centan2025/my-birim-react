@@ -68,6 +68,22 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         const titlePosition = block.titlePosition || 'below'
         const titleFont = block.titleFont || 'normal'
 
+        const getButtonPositionClasses = (pos?: string) => {
+          switch (pos) {
+            case 'top-left':
+              return 'top-4 left-4 md:top-8 md:left-8 justify-start items-start'
+            case 'top-right':
+              return 'top-4 right-4 md:top-8 md:right-8 justify-end items-start'
+            case 'bottom-left':
+              return 'bottom-4 left-4 md:bottom-8 md:left-8 justify-start items-end'
+            case 'bottom-right':
+              return 'bottom-4 right-4 md:bottom-8 md:right-8 justify-end items-end'
+            case 'center':
+            default:
+              return 'inset-0 justify-center items-center'
+          }
+        }
+
         const titleElement = hasTitle && (
           <ScrollReveal
             delay={0}
@@ -117,18 +133,24 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 </div>
               </ScrollReveal>
             )}
-            {block.linkText && block.linkUrl && (
+            {block.linkText && block.linkUrl && !block.showButtonOnMedia && (
               <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto">
                 <div className={`mt-6 ${textAlignClass} flex ${textAlign === 'center' ? 'justify-center' : textAlign === 'right' ? 'justify-end' : 'justify-start'}`}>
                   <Link
                     to={block.linkUrl}
-                    className={`group inline-flex items-center gap-x-3 text-gray-950 font-bold py-3 px-8 text-base md:text-xl lg:text-2xl rounded-none border border-gray-950/30 hover:border-gray-950 transition-all duration-300`}
+                    className={`group inline-flex items-center gap-x-6 text-gray-950 font-bold py-4 text-base md:text-xl lg:text-2xl transition-all duration-300`}
                   >
+                    {/* Sol Çizgi */}
+                    <span className="w-12 md:w-16 h-[1px] bg-gray-950/30 group-hover:w-20 md:group-hover:w-24 group-hover:bg-gray-950 transition-all duration-500 ease-out self-end mb-1" />
+
                     <span className="inline-flex justify-center transition-all duration-500 ease-out">
-                      <span className="leading-none font-bold tracking-[0.05em] transition-all duration-500 ease-out md:group-hover:tracking-[0.12em]">
+                      <span className="leading-none font-bold tracking-[0.05em] transition-all duration-500 ease-out md:group-hover:tracking-[0.15em]">
                         {t(block.linkText)}
                       </span>
                     </span>
+
+                    {/* Sağ Çizgi */}
+                    <span className="w-12 md:w-16 h-[1px] bg-gray-950/30 group-hover:w-20 md:group-hover:w-24 group-hover:bg-gray-950 transition-all duration-500 ease-out self-end mb-1" />
                   </Link>
                 </div>
               </ScrollReveal>
@@ -152,26 +174,90 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             {block.mediaType === 'youtube' ? (
               <div className={`relative ${mediaWidthClass} aspect-video overflow-hidden`}>
                 <YouTubeBackground url={mediaUrl} />
+                {block.showButtonOnMedia && block.linkText && block.linkUrl && (
+                  <div className={`absolute z-30 flex pointer-events-none p-2 md:p-8 ${getButtonPositionClasses(block.buttonPositionOnMedia)}`}>
+                    <Link
+                      to={block.linkUrl}
+                      className="group pointer-events-auto inline-flex items-center gap-x-4 md:gap-x-6 text-white font-bold py-4 px-4 md:px-8 transition-all duration-300 bg-transparent hover:bg-transparent"
+                    >
+                      {/* Sol Çizgi - Sadece Desktop */}
+                      <span className="hidden md:block w-12 md:w-16 h-[1px] bg-white/40 group-hover:w-20 md:group-hover:w-24 group-hover:bg-white transition-all duration-500 ease-out self-end mb-1" />
+
+                      <span className="inline-flex justify-center transition-all duration-500 ease-out">
+                        <span className="leading-none font-bold tracking-[0.05em] transition-all duration-500 ease-out md:group-hover:tracking-[0.15em]">
+                          {t(block.linkText)}
+                        </span>
+                      </span>
+
+                      {/* Sağ Çizgi - Sadece Desktop */}
+                      <span className="hidden md:block w-12 md:w-16 h-[1px] bg-white/40 group-hover:w-20 md:group-hover:w-24 group-hover:bg-white transition-all duration-500 ease-out self-end mb-1" />
+                    </Link>
+                  </div>
+                )}
               </div>
             ) : block.mediaType === 'video' ? (
-              <OptimizedVideo
-                src={mediaUrl}
-                className={`${isFullWidth ? 'w-full h-auto max-w-full' : `${mediaWidthClass} ${imageBorderClass}`} ${isMobile ? 'object-contain' : 'object-cover'}`}
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload="auto"
-                loading="lazy"
-              />
+              <div className="relative w-full h-full">
+                <OptimizedVideo
+                  src={mediaUrl}
+                  className={`${isFullWidth ? 'w-full h-auto max-w-full' : `${mediaWidthClass} ${imageBorderClass}`} ${isMobile ? 'object-contain' : 'object-cover'}`}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="auto"
+                  loading="lazy"
+                />
+                {block.showButtonOnMedia && block.linkText && block.linkUrl && (
+                  <div className={`absolute z-30 flex pointer-events-none p-2 md:p-8 ${getButtonPositionClasses(block.buttonPositionOnMedia)}`}>
+                    <Link
+                      to={block.linkUrl}
+                      className="group pointer-events-auto inline-flex items-center gap-x-4 md:gap-x-6 text-white font-bold py-4 px-4 md:px-8 transition-all duration-300 bg-transparent hover:bg-transparent"
+                    >
+                      {/* Sol Çizgi - Sadece Desktop */}
+                      <span className="hidden md:block w-12 md:w-16 h-[1px] bg-white/40 group-hover:w-20 md:group-hover:w-24 group-hover:bg-white transition-all duration-500 ease-out self-end mb-1" />
+
+                      <span className="inline-flex justify-center transition-all duration-500 ease-out">
+                        <span className="leading-none font-bold tracking-[0.05em] transition-all duration-500 ease-out md:group-hover:tracking-[0.15em]">
+                          {t(block.linkText)}
+                        </span>
+                      </span>
+
+                      {/* Sağ Çizgi - Sadece Desktop */}
+                      <span className="hidden md:block w-12 md:w-16 h-[1px] bg-white/40 group-hover:w-20 md:group-hover:w-24 group-hover:bg-white transition-all duration-500 ease-out self-end mb-1" />
+                    </Link>
+                  </div>
+                )}
+              </div>
             ) : (
-              <OptimizedImage
-                src={mediaUrl}
-                alt=""
-                className={`${isFullWidth ? 'w-full h-auto' : `${mediaWidthClass} ${imageBorderClass}`} ${isMobile ? 'object-contain' : 'object-cover'} block`}
-                loading="lazy"
-                quality={85}
-              />
+              <div className="relative w-full h-full">
+                <OptimizedImage
+                  src={mediaUrl}
+                  alt=""
+                  className={`${isFullWidth ? 'w-full h-auto' : `${mediaWidthClass} ${imageBorderClass}`} ${isMobile ? 'object-contain' : 'object-cover'} block`}
+                  loading="lazy"
+                  quality={85}
+                />
+                {block.showButtonOnMedia && block.linkText && block.linkUrl && (
+                  <div className={`absolute z-30 flex pointer-events-none p-2 md:p-8 ${getButtonPositionClasses(block.buttonPositionOnMedia)}`}>
+                    <Link
+                      to={block.linkUrl}
+                      className="group pointer-events-auto inline-flex items-center gap-x-4 md:gap-x-6 text-white font-bold py-4 px-4 md:px-8 transition-all duration-300 bg-transparent hover:bg-transparent"
+                    >
+                      {/* Sol Çizgi - Sadece Desktop */}
+                      <span className="hidden md:block w-12 md:w-16 h-[1px] bg-white/40 group-hover:w-20 md:group-hover:w-24 group-hover:bg-white transition-all duration-500 ease-out self-end mb-1" />
+
+                      <span className="inline-flex justify-center transition-all duration-500 ease-out">
+                        <span className="leading-none font-bold tracking-[0.05em] transition-all duration-500 ease-out md:group-hover:tracking-[0.15em]">
+                          {t(block.linkText)}
+                        </span>
+                      </span>
+
+                      {/* Sağ Çizgi - Sadece Desktop */}
+                      <span className="hidden md:block w-12 md:w-16 h-[1px] bg-white/40 group-hover:w-20 md:group-hover:w-24 group-hover:bg-white transition-all duration-500 ease-out self-end mb-1" />
+                    </Link>
+                  </div>
+                )}
+              </div>
             )}
 
           </ScrollReveal>

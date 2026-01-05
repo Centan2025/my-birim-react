@@ -191,13 +191,19 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
             <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto">
               <Link
                 to={inspiration.buttonLink || '/'}
-                className="group mt-8 inline-flex items-center gap-x-3 text-white font-semibold py-4 px-10 text-xl md:text-2xl rounded-none border border-white/30 hover:border-white hover:bg-white/10 transition-all duration-300"
+                className="group mt-8 inline-flex items-center gap-x-8 text-white font-semibold py-4 text-xl md:text-2xl transition-all duration-300"
               >
+                {/* Sol Çizgi */}
+                <span className="w-12 md:w-20 h-[1px] bg-white/30 group-hover:w-20 md:group-hover:w-28 group-hover:bg-white transition-all duration-500 ease-out self-end mb-1" />
+
                 <span className="inline-flex justify-center transition-all duration-500 ease-out">
-                  <span className="leading-none transition-all duration-500 ease-out md:group-hover:tracking-[0.12em] md:group-hover:text-gray-200">
+                  <span className="leading-none transition-all duration-500 ease-out md:group-hover:tracking-[0.15em] md:group-hover:text-gray-200">
                     {t(inspiration.buttonText)}
                   </span>
                 </span>
+
+                {/* Sağ Çizgi */}
+                <span className="w-12 md:w-20 h-[1px] bg-white/30 group-hover:w-20 md:group-hover:w-28 group-hover:bg-white transition-all duration-500 ease-out self-end mb-1" />
               </Link>
             </ScrollReveal>
           )}

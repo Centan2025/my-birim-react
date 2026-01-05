@@ -215,7 +215,7 @@ export const heroMediaItem = defineType({
         'Tüm cihazlar için varsayılan video. Mobil veya desktop versiyonu yoksa bu kullanılır.',
       validation: (Rule) =>
         Rule.custom((file, context) => {
-          const parent = context.parent as { type?: string }
+          const parent = context.parent as any
           if (parent?.type === 'video' && !file && !parent?.url) {
             return 'Video dosyası veya URL gerekli'
           }
@@ -912,6 +912,32 @@ export const contentBlock = defineType({
       },
       initialValue: 'white',
       description: 'İçerik bloğunun arka plan rengi (varsayılan: Beyaz)',
+    }),
+    defineField({
+      name: 'showButtonOnMedia',
+      title: 'Butonu Medya Üzerinde Göster',
+      type: 'boolean',
+      description: 'Aktif edilirse buton metin alanında değil, resim/video üzerinde seçilen konumda görünür.',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'buttonPositionOnMedia',
+      title: 'Butonun Medya Üzerindeki Konumu',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Merkez', value: 'center' },
+          { title: 'Sol Üst', value: 'top-left' },
+          { title: 'Sağ Üst', value: 'top-right' },
+          { title: 'Sol Alt', value: 'bottom-left' },
+          { title: 'Sağ Alt', value: 'bottom-right' },
+        ],
+        layout: 'radio',
+        direction: 'horizontal',
+      },
+      initialValue: 'center',
+      hidden: ({ parent }) => !parent?.showButtonOnMedia,
+      description: 'Butonun medya (resim/video) üzerindeki duracağı konumu seçin.',
     }),
   ],
 })

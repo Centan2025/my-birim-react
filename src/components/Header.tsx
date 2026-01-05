@@ -501,11 +501,11 @@ export function Header() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  // Koyu hero olan sayfaları kontrol et
+  // Şeffaf hero olması gereken sayfaları kontrol et
   const isDarkHeroPage = useCallback(() => {
     const path = location.pathname
-    // HashRouter'da path / veya /about gibi gelir
-    return path === '/' || path === '' || path.includes('about')
+    const isProductDetail = path.match(/^\/product\/[^/]+$/)
+    return path === '/' || path === '' || path.includes('about') || isProductDetail
   }, [location.pathname])
 
   // Products sayfasını kontrol et
@@ -542,16 +542,14 @@ export function Header() {
     )
   }, [location.pathname])
 
-  // Beyaz arka planlı sayfa (detay sayfaları)
+  // Beyaz arka planlı sayfa (detay sayfaları - hero'su OLMAYANLAR)
   const isWhiteBackgroundPage = useCallback(() => {
     const path = location.pathname
-    // Proje detay, haberler detay, ürün detay ve tasarımcı detay sayfaları beyaz arka planlı
-    // NOT: Ürün detay route'u /product/:productId şeklinde (tekil)
+    // Haberler detay, proje detay ve tasarımcı detay sayfaları beyaz arka planlı
     const isProjectDetail = path.match(/^\/projects\/[^/]+$/)
-    const isProductDetail = path.match(/^\/product\/[^/]+$/)
     const isNewsDetail = path.match(/^\/news\/[^/]+$/)
     const isDesignerDetail = path.match(/^\/designer\/[^/]+$/)
-    return isProjectDetail || isProductDetail || isNewsDetail || isDesignerDetail
+    return isProjectDetail || isNewsDetail || isDesignerDetail
   }, [location.pathname])
 
   // heroBrightness değiştiğinde ref'i güncelle ve opacity'yi ayarla
@@ -563,42 +561,19 @@ export function Header() {
 
     // Sayfa en üstteyken (scrollY <= 10) opacity'yi ayarla
     if (window.scrollY <= 10) {
-      // Projeler, haberler ve tasarımcılar sayfalarını kontrol et (ana sayfa ve detay sayfası)
+      // Projeler, haberler ve tasarımcılar ana sayfalarında her zaman yarı şeffaf (listeler)
       const path = location.pathname
       const isProjectsList = path === '/projects' || path === '/projects/'
       const isProjectDetail = path.match(/^\/projects\/[^/]+$/)
       const isNewsList = path === '/news' || path === '/news/'
-      const isNewsDetail = path.match(/^\/news\/[^/]+$/)
       const isDesignersList = path === '/designers' || path === '/designers/'
-      const isDesignerDetail = path.match(/^\/designer\/[^/]+$/)
 
-      // Projeler, haberler ve tasarımcılar ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
-      if (isProjectsList || isProjectDetail || isNewsList || isNewsDetail || isDesignersList || isDesignerDetail) {
+      if (isProjectsList || isProjectDetail || isNewsList || isDesignersList) {
         setHeaderOpacity(0.7)
         return
       }
 
-      if (isDarkHeroPage()) {
-        setHeaderOpacity(0)
-        return
-      }
-
-      // Products sayfası için koyu hero kontrolü
-      if (isProductsPage()) {
-        if (heroBrightness !== null && heroBrightness < 0.6) {
-          setHeaderOpacity(0)
-          return
-        }
-      }
-
-      // Beyaz arka planlı detay sayfalarında (ürün) her zaman yarı şeffaf
-      // Çünkü hero görseli koyu olsa bile arka plan beyaz
-      if (isWhiteBackgroundPage()) {
-        setHeaderOpacity(0.7)
-        return
-      }
-
-      // Diğer sayfalar için heroBrightness'a bak
+      // Diğer sayfalar için önce heroBrightness'a bak (varsa en doğru bilgi budur)
       if (heroBrightness !== null) {
         if (heroBrightness >= 0.7) {
           setHeaderOpacity(0.75)
@@ -610,9 +585,28 @@ export function Header() {
         } else {
           setHeaderOpacity(0)
         }
-      } else {
-        setHeaderOpacity(0.7)
+        return
       }
+
+      if (isDarkHeroPage()) {
+        setHeaderOpacity(0)
+        return
+      }
+
+      // Products sayfası için koyu hero kontrolü (heroBrightness undefined ise)
+      if (isProductsPage()) {
+        // Brightness yoksa şeffaf başlasın (varsayım)
+        setHeaderOpacity(0)
+        return
+      }
+
+      // Beyaz arka planlı detay sayfalarında (ürün) her zaman yarı şeffaf
+      if (isWhiteBackgroundPage()) {
+        setHeaderOpacity(0.7)
+        return
+      }
+
+      setHeaderOpacity(0.7)
     }
   }, [heroBrightness, location.pathname, isProductsOpen, isDarkHeroPage, isWhiteBackgroundPage, isProductsPage])
 
@@ -620,22 +614,18 @@ export function Header() {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (window.scrollY <= 10 && !isProductsOpen) {
-        // Projeler, haberler ve tasarımcılar sayfalarını kontrol et (ana sayfa ve detay sayfası)
         const path = location.pathname
         const isProjectsList = path === '/projects' || path === '/projects/'
         const isProjectDetail = path.match(/^\/projects\/[^/]+$/)
         const isNewsList = path === '/news' || path === '/news/'
-        const isNewsDetail = path.match(/^\/news\/[^/]+$/)
         const isDesignersList = path === '/designers' || path === '/designers/'
-        const isDesignerDetail = path.match(/^\/designer\/[^/]+$/)
 
-        // Projeler, haberler ve tasarımcılar ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
-        if (isProjectsList || isProjectDetail || isNewsList || isNewsDetail || isDesignersList || isDesignerDetail) {
+        if (isProjectsList || isProjectDetail || isNewsList || isDesignersList) {
           setHeaderOpacity(0.7)
         } else if (isDarkHeroPage()) {
           setHeaderOpacity(0)
         } else if (isLightBackgroundPage() || isWhiteBackgroundPage()) {
-          setHeaderOpacity(0.7) // Açık/beyaz arka planlı sayfalarda yarı şeffaf
+          setHeaderOpacity(0.7)
         }
       }
     }, 100)
@@ -648,17 +638,13 @@ export function Header() {
     if (isProductsOpen) {
       setHeaderOpacity(0.85)
     } else if (window.scrollY <= 10) {
-      // Projeler, haberler ve tasarımcılar sayfalarını kontrol et (ana sayfa ve detay sayfası)
       const path = location.pathname
       const isProjectsList = path === '/projects' || path === '/projects/'
       const isProjectDetail = path.match(/^\/projects\/[^/]+$/)
       const isNewsList = path === '/news' || path === '/news/'
-      const isNewsDetail = path.match(/^\/news\/[^/]+$/)
       const isDesignersList = path === '/designers' || path === '/designers/'
-      const isDesignerDetail = path.match(/^\/designer\/[^/]+$/)
 
-      // Projeler, haberler ve tasarımcılar ana sayfası ve detay sayfasında her zaman yarı şeffaf (renk kontrolü yapma)
-      if (isProjectsList || isProjectDetail || isNewsList || isNewsDetail || isDesignersList || isDesignerDetail) {
+      if (isProjectsList || isProjectDetail || isNewsList || isDesignersList) {
         setHeaderOpacity(0.7)
       } else if (isDarkHeroPage()) {
         setHeaderOpacity(0)
@@ -1538,33 +1524,46 @@ export function Header() {
                   // Orta-açık arka plan → biraz daha koyu
                   baseOpacity = Math.max(baseOpacity, 0.7)
                 } else if (heroBrightness <= 0.25) {
-                  // Çok koyu arka plan → header biraz daha şeffaf kalabilir
-                  baseOpacity = Math.min(baseOpacity, 0.5)
+                  // Çok koyu arka plan - sayfa başındaysa tam şeffaf yap
+                  if (headerOpacity <= 0.1) {
+                    baseOpacity = 0
+                  } else {
+                    baseOpacity = Math.min(baseOpacity, 0.5)
+                  }
                 }
               } else {
                 // Parlaklık bilgisi yoksa sayfa arka plan rengini kontrol et
-                const pageBgLuminance = getPageBackgroundColor()
-                if (pageBgLuminance !== null) {
-                  // Sayfa arka planı açık renkliyse header'ı koyu yap (düğmeler görünsün)
-                  if (pageBgLuminance >= 0.7) {
-                    baseOpacity = 0.9
-                  } else if (pageBgLuminance >= 0.5) {
-                    baseOpacity = Math.max(baseOpacity, 0.8)
+
+                // ÖNEMLİ: Eğer bu sayfa bir "DarkHeroPage" ise (hero görseli olan detay/anasayfa vb.)
+                // ve header henüz görünür/scroll edilmemişse (opacity ~0),
+                // sayfa arka plan rengini (muhtemelen beyaz content) YOK SAYMALIYIZ.
+                // Aksi takdirde beyaz arka planı görüp header'ı siyah (0.9 opacity) yapıyor.
+                if (isDarkHeroPage() && headerOpacity <= 0.25) {
+                  baseOpacity = 0
+                } else {
+                  const pageBgLuminance = getPageBackgroundColor()
+                  if (pageBgLuminance !== null) {
+                    // Sayfa arka planı açık renkliyse header'ı koyu yap (düğmeler görünsün)
+                    if (pageBgLuminance >= 0.7) {
+                      baseOpacity = 0.9
+                    } else if (pageBgLuminance >= 0.5) {
+                      baseOpacity = Math.max(baseOpacity, 0.8)
+                    } else {
+                      // Koyu arka plan - tam şeffaf kalabilir
+                      if (headerOpacity <= 0.25) {
+                        baseOpacity = 0
+                      } else {
+                        baseOpacity = Math.max(baseOpacity, 0.4)
+                      }
+                    }
                   } else {
-                    // Koyu arka plan - tam şeffaf kalabilir
+                    // Brightness ve pageBgLuminance bilgisi yoksa headerOpacity'ye göre karar ver
+                    // Koyu sayfalarda tam şeffaf kalabilir
                     if (headerOpacity <= 0.25) {
                       baseOpacity = 0
                     } else {
                       baseOpacity = Math.max(baseOpacity, 0.4)
                     }
-                  }
-                } else {
-                  // Brightness ve pageBgLuminance bilgisi yoksa headerOpacity'ye göre karar ver
-                  // Koyu sayfalarda tam şeffaf kalabilir
-                  if (headerOpacity <= 0.25) {
-                    baseOpacity = 0
-                  } else {
-                    baseOpacity = Math.max(baseOpacity, 0.4)
                   }
                 }
               }

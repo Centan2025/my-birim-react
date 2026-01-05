@@ -93,24 +93,16 @@ export function useHeaderScroll({
           } else {
             const path = locationPathname
             const isProjectsList = path === '/projects' || path === '/projects/'
-            const isProjectDetailPage = path.match(/^\/projects\/[^/]+$/)
+            const isProjectDetail = path.match(/^\/projects\/[^/]+$/)
             const isNewsList = path === '/news' || path === '/news/'
-            const isNewsDetailPage = path.match(/^\/news\/[^/]+$/)
             const isDesignersList = path === '/designers' || path === '/designers/'
-            const isDesignerDetailPage = path.match(/^\/designer\/[^/]+$/)
-            const isProductDetailPage = path.match(/^\/product\/[^/]+$/)
 
             if (
               isProjectsList ||
-              isProjectDetailPage ||
+              isProjectDetail ||
               isNewsList ||
-              isNewsDetailPage ||
-              isDesignersList ||
-              isDesignerDetailPage
+              isDesignersList
             ) {
-              setHeaderOpacity(0.7)
-              opacitySetByHandleScrollRef.current = true
-            } else if (isProductDetailPage) {
               setHeaderOpacity(0.7)
               opacitySetByHandleScrollRef.current = true
             } else if (currentHeroBrightness !== null) {
@@ -171,19 +163,15 @@ export function useHeaderScroll({
         } else {
           const path = locationPathname
           const isProjectsList = path === '/projects' || path === '/projects/'
-          const isProjectDetailPage = path.match(/^\/projects\/[^/]+$/)
+          const isProjectDetail = path.match(/^\/projects\/[^/]+$/)
           const isNewsList = path === '/news' || path === '/news/'
-          const isNewsDetailPage = path.match(/^\/news\/[^/]+$/)
           const isDesignersList = path === '/designers' || path === '/designers/'
-          const isDesignerDetailPage = path.match(/^\/designer\/[^/]+$/)
 
           if (
             isProjectsList ||
-            isProjectDetailPage ||
+            isProjectDetail ||
             isNewsList ||
-            isNewsDetailPage ||
-            isDesignersList ||
-            isDesignerDetailPage
+            isDesignersList
           ) {
             setHeaderOpacity(0.7)
             opacitySetByHandleScrollRef.current = true
@@ -214,19 +202,15 @@ export function useHeaderScroll({
 
         const path = locationPathname
         const isProjectsList = path === '/projects' || path === '/projects/'
-        const isProjectDetailPage = path.match(/^\/projects\/[^/]+$/)
+        const isProjectDetail = path.match(/^\/projects\/[^/]+$/)
         const isNewsList = path === '/news' || path === '/news/'
-        const isNewsDetailPage = path.match(/^\/news\/[^/]+$/)
         const isDesignersList = path === '/designers' || path === '/designers/'
-        const isDesignerDetailPage = path.match(/^\/designer\/[^/]+$/)
 
         if (
           isProjectsList ||
-          isProjectDetailPage ||
+          isProjectDetail ||
           isNewsList ||
-          isNewsDetailPage ||
-          isDesignersList ||
-          isDesignerDetailPage
+          isDesignersList
         ) {
           setHeaderOpacity(0.7)
           opacitySetByHandleScrollRef.current = true
@@ -288,17 +272,13 @@ export function useHeaderScroll({
         const isProjectsList = path === '/projects' || path === '/projects/'
         const isProjectDetail = path.match(/^\/projects\/[^/]+$/)
         const isNewsList = path === '/news' || path === '/news/'
-        const isNewsDetail = path.match(/^\/news\/[^/]+$/)
         const isDesignersList = path === '/designers' || path === '/designers/'
-        const isDesignerDetail = path.match(/^\/designer\/[^/]+$/)
 
         if (
           isProjectsList ||
           isProjectDetail ||
           isNewsList ||
-          isNewsDetail ||
-          isDesignersList ||
-          isDesignerDetail
+          isDesignersList
         ) {
           setHeaderOpacity(0.7)
         } else {

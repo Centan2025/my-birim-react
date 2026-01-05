@@ -294,6 +294,10 @@ export interface ContentBlock {
   titlePosition?: 'above' | 'below'
   /** Order for sorting blocks */
   order?: number
+  /** Toggles button visibility over media */
+  showButtonOnMedia?: boolean
+  /** Position of the button on media */
+  buttonPositionOnMedia?: 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
 }
 
 /**
