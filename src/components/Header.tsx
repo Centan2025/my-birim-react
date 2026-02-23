@@ -1227,60 +1227,7 @@ export function Header() {
                   return `rgba(0, 0, 0, ${darkOpacity})`
                 }
 
-                // Parlaklık bilgisi yoksa sayfa arka plan rengini kontrol et
-                const pageBgLuminance = (() => {
-                  try {
-                    // Açık renkli sayfaları route'a göre kontrol et
-                    // NOT: /about sayfası hero bölümü koyu olduğu için buradan çıkarıldı
-                    const lightPages = ['/privacy', '/terms', '/cookies', '/kvkk']
-                    if (lightPages.some(page => location.pathname.includes(page))) {
-                      return 0.85 // Açık renkli sayfalar için yüksek luminance
-                    }
 
-                    // Header'ın hemen altındaki elementi kontrol et
-                    const headerElement = headerContainerRef.current
-                    if (headerElement) {
-                      let element = headerElement.nextElementSibling as HTMLElement
-                      // İlk görünür elementi bul
-                      while (element) {
-                        const style = window.getComputedStyle(element)
-                        if (style.display !== 'none' && style.visibility !== 'hidden') {
-                          const bgColor = style.backgroundColor
-                          if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
-                            const rgbMatch = bgColor.match(/\d+/g)
-                            if (rgbMatch && rgbMatch.length >= 3) {
-                              const r = parseInt(rgbMatch[0] || '0')
-                              const g = parseInt(rgbMatch[1] || '0')
-                              const b = parseInt(rgbMatch[2] || '0')
-                              const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-                              return luminance
-                            }
-                          }
-                        }
-                        element = element.nextElementSibling as HTMLElement
-                      }
-                    }
-
-                    // Fallback: main veya body'yi kontrol et
-                    const body = document.body
-                    const main = document.querySelector('main')
-                    const computedStyle = window.getComputedStyle(main || body)
-                    const bgColor = computedStyle.backgroundColor
-                    if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
-                      const rgbMatch = bgColor.match(/\d+/g)
-                      if (rgbMatch && rgbMatch.length >= 3) {
-                        const r = parseInt(rgbMatch[0] || '0')
-                        const g = parseInt(rgbMatch[1] || '0')
-                        const b = parseInt(rgbMatch[2] || '0')
-                        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-                        return luminance
-                      }
-                    }
-                  } catch (e) {
-                    // Hata durumunda null döndür
-                  }
-                  return null
-                })()
 
                 // Parlaklık ölçüldüyse, tamamen ona göre karar ver
                 if (heroBrightness !== null) {
