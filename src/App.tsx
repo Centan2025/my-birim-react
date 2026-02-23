@@ -295,12 +295,12 @@ const MainLayout: React.FC = () => {
       <SkipLink />
       <Header />
       <CartSidebar />
-<main
-  id="main-content"
-  className="flex-grow"
-  style={{ overflowX: 'hidden', position: 'relative', zIndex: 5 }}
-  tabIndex={-1}
->
+      <main
+        id="main-content"
+        className="flex-grow"
+        style={{ overflowX: 'hidden', position: 'relative', zIndex: 5 }}
+        tabIndex={-1}
+      >
         <TopBanner />
         <Suspense fallback={<PageLoader />}>
           <PageTransition key={location.pathname}>
@@ -627,6 +627,13 @@ const Footer = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="group text-gray-300/80 hover:text-white transition-colors duration-300 ease-out"
+                        onClick={() => {
+                          analytics.event({
+                            action: 'outbound_click',
+                            category: 'Social',
+                            label: link.name
+                          })
+                        }}
                       >
                         <div className="w-10 h-10 flex items-center justify-center transition-transform duration-300 ease-out group-hover:scale-110">
                           {(() => {
@@ -777,7 +784,7 @@ const Footer = () => {
           <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
             <div
               className="lg:mt-10 pt-2 lg:pt-8 w-full lg:border-t lg:border-t-2 lg:border-gray-600"
-              style={{overflow: 'visible', width: '100%'}}
+              style={{ overflow: 'visible', width: '100%' }}
             >
               <div className="flex flex-col items-center justify-center gap-4 text-xs w-full lg:flex-row lg:items-start lg:justify-between">
                 {/* Sol: Telif metni */}
@@ -834,7 +841,7 @@ const Footer = () => {
                                 const isInternalLink =
                                   url.startsWith('/') && !url.startsWith('//') && !isHttp
                                 const commonClasses =
-                                'text-gray-300 hover:text-gray-100 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm'
+                                  'text-gray-300 hover:text-gray-100 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm'
 
                                 return (
                                   <span className="legal-link-wrapper">

@@ -72,7 +72,11 @@ export const NewsletterForm: FC<NewsletterFormProps> = ({ variant = 'mobile', cl
 
     try {
       const result = await subscribeEmail(email)
-      analytics.trackUserAction('newsletter_subscribe', email)
+      analytics.event({
+        action: 'sign_up',
+        category: 'Newsletter',
+        label: email
+      })
 
       // Backend bazı durumlarda "zaten kayıtlı" uyarısını normal dönüşte verebilir;
       // bu yüzden hem dönüş değerine hem de hata mesajlarına bakıyoruz.

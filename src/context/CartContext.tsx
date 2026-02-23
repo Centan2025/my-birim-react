@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
-import {createContext, useContext, useState, useEffect, PropsWithChildren} from 'react'
-import type {Product, CartItem} from '../types'
-import {analytics} from '../lib/analytics'
+import { createContext, useContext, useState, useEffect, PropsWithChildren } from 'react'
+import type { Product, CartItem } from '../types'
+import { analytics } from '../lib/analytics'
 
 interface CartContextType {
   cartItems: CartItem[]
@@ -26,7 +26,7 @@ export const useCart = () => {
   return context
 }
 
-export const CartProvider = ({children}: PropsWithChildren) => {
+export const CartProvider = ({ children }: PropsWithChildren) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
 
@@ -64,28 +64,43 @@ export const CartProvider = ({children}: PropsWithChildren) => {
 
       if (existingItem) {
         return prevItems.map(item =>
-          item.product.id === product.id ? {...item, quantity: newQuantity} : item
+          item.product.id === product.id ? { ...item, quantity: newQuantity } : item
         )
       }
-      return [...prevItems, {product, quantity: newQuantity}]
+      return [...prevItems, { product, quantity: newQuantity }]
     })
     openCart()
   }
 
   const removeFromCart = (productId: string) => {
+    const itemToRemove = cartItems.find(item => item.product.id === productId)
+    if (itemToRemove) {
+      analytics.trackEcommerce('remove_from_cart', itemToRemove.product.id, itemToRemove.product.price)
+    }
     setCartItems(prevItems => prevItems.filter(item => item.product.id !== productId))
   }
 
   const updateQuantity = (productId: string, quantity: number) => {
     setCartItems(prevItems => {
       if (quantity <= 0) {
+        const itemToRemove = prevItems.find(item => item.product.id === productId)
+        if (itemToRemove) {
+          analytics.trackEcommerce('remove_from_cart', itemToRemove.product.id, itemToRemove.product.price)
+        }
         return prevItems.filter(item => item.product.id !== productId)
       }
-      return prevItems.map(item => (item.product.id === productId ? {...item, quantity} : item))
+      return prevItems.map(item => (item.product.id === productId ? { ...item, quantity } : item))
     })
   }
 
   const clearCart = () => {
+    if (cartItems.length > 0) {
+      analytics.event({
+        action: 'clear_cart',
+        category: 'ecommerce',
+        label: `Cleared ${cartItems.length} items`
+      })
+    }
     setCartItems([])
   }
 

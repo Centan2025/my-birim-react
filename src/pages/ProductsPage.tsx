@@ -29,6 +29,8 @@ const ChevronDownIcon = () => (
   </svg>
 )
 
+import { analytics } from '../lib/analytics'
+
 export function ProductsPage() {
   const { categoryId } = useParams<{ categoryId: string }>()
   const [isSortOpen, setIsSortOpen] = useState(false)
@@ -51,6 +53,16 @@ export function ProductsPage() {
   // Use category products if categoryId exists, otherwise use all products
   const products = categoryId ? categoryProducts : allProducts
   const loading = categoryId ? categoryProductsLoading : allProductsLoading
+
+  useEffect(() => {
+    if (!loading && products.length > 0) {
+      analytics.event({
+        action: 'view_item_list',
+        category: 'ecommerce',
+        label: categoryId ? `Category: ${categoryId}` : 'All Products'
+      })
+    }
+  }, [loading, products.length, categoryId])
 
   // Dışarı tıklayınca sort menüsünü kapat
   useEffect(() => {

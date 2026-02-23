@@ -677,7 +677,7 @@ export function ProductDetailPage() {
   useEffect(() => {
     if (!product) return
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    analytics.trackEcommerce('view_product', product.id, (product as any)?.price || 0)
+    analytics.trackEcommerce('view_item', product.id, (product as any)?.price || 0)
   }, [product])
 
   // Hero geçişi bittiğinde cloned slide'lardan gerçek slide'a "snap" et (animasyonsuz)
