@@ -1,4 +1,5 @@
-import {defineField, defineType} from 'sanity'
+import React from 'react'
+import { defineField, defineType } from 'sanity'
 
 export default defineType({
   name: 'siteSettings',
@@ -9,8 +10,13 @@ export default defineType({
       name: 'logo',
       title: 'Logo',
       type: 'image',
-      options: {hotspot: true},
+      options: { hotspot: true },
       description: 'Site logosu. Önerilen: SVG veya en az 512x512px PNG (şeffaf arka planlı).',
+    }),
+    defineField({
+      name: 'logoR2',
+      title: 'Logo (R2)',
+      type: 'r2Asset',
     }),
     defineField({
       name: 'topBannerText',
@@ -58,8 +64,8 @@ export default defineType({
       type: 'string',
       options: {
         list: [
-          {title: 'Düz (Köşeler Keskin)', value: 'square'},
-          {title: 'Yuvarlatılmış (Köşeler Yuvarlak)', value: 'rounded'},
+          { title: 'Düz (Köşeler Keskin)', value: 'square' },
+          { title: 'Yuvarlatılmış (Köşeler Yuvarlak)', value: 'rounded' },
         ],
         layout: 'radio',
       },
@@ -83,8 +89,8 @@ export default defineType({
                   .regex(/^[a-z]{2}$/)
                   .error('2 harf küçük dil kodu girin (örn. tr)'),
             },
-            {name: 'title', title: 'Dil Başlığı (örn. Türkçe)', type: 'string'},
-            {name: 'visible', title: 'Webte Göster', type: 'boolean', initialValue: true},
+            { name: 'title', title: 'Dil Başlığı (örn. Türkçe)', type: 'string' },
+            { name: 'visible', title: 'Webte Göster', type: 'boolean', initialValue: true },
           ],
         },
       ],
@@ -96,8 +102,8 @@ export default defineType({
       type: 'string',
       options: {
         list: [
-          {title: 'Varsayılan (Birim)', value: 'default'},
-          {title: 'Tam Ekran Overlay (Animasyonlu)', value: 'overlay'},
+          { title: 'Varsayılan (Birim)', value: 'default' },
+          { title: 'Tam Ekran Overlay (Animasyonlu)', value: 'overlay' },
         ],
         layout: 'radio',
       },
@@ -106,9 +112,18 @@ export default defineType({
     }),
   ],
   preview: {
-    select: {media: 'logo'},
-    prepare({media}) {
-      return {title: 'Site Ayarları', media}
+    select: { media: 'logo', r2Url: 'logoR2.url' },
+    prepare({ media, r2Url }) {
+      return {
+        title: 'Site Ayarları',
+        media: media || (r2Url ? (
+          <img
+            src={r2Url}
+            alt="Logo"
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          />
+        ) : undefined)
+      }
     },
   },
 })

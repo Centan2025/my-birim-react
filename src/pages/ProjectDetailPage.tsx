@@ -222,6 +222,10 @@ export function ProjectDetailPage() {
     project && project.cover && typeof project.cover === 'object'
       ? project.cover.urlDesktop
       : undefined
+  const coverFallback =
+    project && project.cover && typeof project.cover === 'object'
+      ? project.cover.fallbackUrl
+      : undefined
 
   // Use cover image + media array (images and videos)
   const mediaArray = (project?.media || []).map(m => ({
@@ -229,6 +233,7 @@ export function ProjectDetailPage() {
     url: m.url,
     urlMobile: m.urlMobile,
     urlDesktop: m.urlDesktop,
+    fallbackUrl: m.fallbackUrl,
     image: m.image || (m.type === 'image' ? m.url : undefined),
   }))
 
@@ -240,6 +245,7 @@ export function ProjectDetailPage() {
         url: coverUrl,
         urlMobile: coverMobile,
         urlDesktop: coverDesktop,
+        fallbackUrl: coverFallback,
         image: coverUrl,
       },
     ]
@@ -450,6 +456,7 @@ export function ProjectDetailPage() {
               src={coverUrl}
               srcMobile={coverMobile}
               srcDesktop={coverDesktop}
+              fallbackSrc={coverFallback}
               alt={t(project.title)}
               className={`absolute inset-0 w-full h-full object-contain mx-auto ${imageBorderClass}`}
               loading="eager"
@@ -494,6 +501,7 @@ export function ProjectDetailPage() {
                           src={m.url}
                           srcMobile={m.urlMobile}
                           srcDesktop={m.urlDesktop}
+                          fallbackSrc={m.fallbackUrl}
                           alt="project"
                           className={`w-full h-full object-contain mx-auto ${imageBorderClass}`}
                           loading="eager"
@@ -698,13 +706,20 @@ export function ProjectDetailPage() {
                     <ScrollReveal delay={200}>
                       {(() => {
                         const excerptContent = t(project.excerpt)
-                        return Array.isArray(excerptContent) ? (
-                          <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
-                            <PortableTextLite value={excerptContent} />
-                          </div>
-                        ) : (
+                        const isPortable = Array.isArray(excerptContent) || (typeof excerptContent === 'object' && excerptContent !== null && (excerptContent as any)._type === 'block')
+
+                        if (isPortable) {
+                          const blocks = Array.isArray(excerptContent) ? excerptContent : [excerptContent]
+                          return (
+                            <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
+                              <PortableTextLite value={blocks} />
+                            </div>
+                          )
+                        }
+
+                        return (
                           <p className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
-                            {excerptContent}
+                            {excerptContent as string}
                           </p>
                         )
                       })()}
@@ -714,13 +729,20 @@ export function ProjectDetailPage() {
                     <ScrollReveal delay={300}>
                       {(() => {
                         const bodyContent = t(project.body)
-                        return Array.isArray(bodyContent) ? (
-                          <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
-                            <PortableTextLite value={bodyContent} />
-                          </div>
-                        ) : (
+                        const isPortable = Array.isArray(bodyContent) || (typeof bodyContent === 'object' && bodyContent !== null && (bodyContent as any)._type === 'block')
+
+                        if (isPortable) {
+                          const blocks = Array.isArray(bodyContent) ? bodyContent : [bodyContent]
+                          return (
+                            <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
+                              <PortableTextLite value={blocks} />
+                            </div>
+                          )
+                        }
+
+                        return (
                           <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl whitespace-pre-line">
-                            {bodyContent}
+                            {bodyContent as string}
                           </div>
                         )
                       })()}
@@ -744,6 +766,7 @@ export function ProjectDetailPage() {
                       {m.type === 'image' && (
                         <OptimizedImage
                           src={m.url}
+                          fallbackSrc={m.fallbackUrl}
                           alt={`thumb-${i}`}
                           className="w-full aspect-video object-contain"
                           loading="lazy"

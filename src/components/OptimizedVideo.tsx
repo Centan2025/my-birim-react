@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, {useState, useRef, useCallback} from 'react'
+import React, { useState, useRef, useCallback } from 'react'
 
 interface OptimizedVideoProps {
   src: string
@@ -66,7 +66,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       // MEDIA_ERR_NETWORK (2): Ağ hatası
       // MEDIA_ERR_DECODE (3): Video decode edilemedi
       // MEDIA_ERR_SRC_NOT_SUPPORTED (4): Video formatı desteklenmiyor veya URL geçersiz
-      
+
       console.error('Video yükleme hatası:', {
         code: error.code,
         message: error.message,
@@ -78,11 +78,11 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
           4: 'MEDIA_ERR_SRC_NOT_SUPPORTED'
         }[error.code]
       })
-      
+
       // Sadece gerçek yükleme hatalarını yakala
-      if (error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED || 
-          error.code === MediaError.MEDIA_ERR_NETWORK ||
-          error.code === MediaError.MEDIA_ERR_DECODE) {
+      if (error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED ||
+        error.code === MediaError.MEDIA_ERR_NETWORK ||
+        error.code === MediaError.MEDIA_ERR_DECODE) {
         setHasError(true)
         onError?.()
         return
@@ -112,7 +112,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
             }
           })
         },
-        {rootMargin: '50px'}
+        { rootMargin: '50px' }
       )
 
       observer.observe(videoRef.current)
@@ -166,6 +166,25 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     return undefined
   }, [posterMobile, posterDesktop, poster, getPosterForScreen])
 
+  // Handle autoPlay prop changes (for carousel/slider scenarios)
+  React.useEffect(() => {
+    if (videoRef.current) {
+      if (autoPlay) {
+        // Try to play the video
+        const playPromise = videoRef.current.play()
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            // Auto-play was prevented (usually needs user interaction)
+            console.warn('Video autoplay prevented:', error)
+          })
+        }
+      } else {
+        // Pause the video when not active
+        videoRef.current.pause()
+      }
+    }
+  }, [autoPlay])
+
   // Video yükleme durumunu kontrol et
   React.useEffect(() => {
     if (videoRef.current) {
@@ -196,7 +215,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
 
   if (hasError) {
     return (
-      <div className={`bg-gray-200 flex items-center justify-center ${className}`} style={{minHeight: '200px'}}>
+      <div className={`bg-gray-200 flex items-center justify-center ${className}`} style={{ minHeight: '200px' }}>
         <div className="text-center p-4">
           <span className="text-gray-400 text-sm block mb-2">Video yüklenemedi</span>
           <span className="text-gray-300 text-xs block">URL: {src || srcMobile || srcDesktop || 'Belirtilmemiş'}</span>

@@ -41,6 +41,7 @@ const MediaComponent: FC<{ media: NewsMedia }> = ({ media }) => {
           src={media.url}
           srcMobile={media.urlMobile}
           srcDesktop={media.urlDesktop}
+          fallbackSrc={media.fallbackUrl}
           alt={t(media.caption) || ''}
           className={`w-full h-auto object-cover ${imageBorderClass}`}
           loading="lazy"
@@ -169,10 +170,9 @@ export function NewsDetailPage() {
   // SEO ve Analytics: haber detay görüntüleme
   const newsTitle = item ? t(item.title) : ''
   const newsDescription = item ? t(item.content) || newsTitle : ''
-  const mainImageUrl =
-    item && typeof item.mainImage === 'string'
-      ? item.mainImage
-      : (item?.mainImage && typeof item.mainImage === 'object' ? item.mainImage.url : '') || undefined
+  const mainImageObj = typeof item?.mainImage === 'object' ? item.mainImage : null
+  const mainImageUrl = mainImageObj ? mainImageObj.url : (typeof item?.mainImage === 'string' ? item.mainImage : undefined)
+  const mainImageFallback = mainImageObj?.fallbackUrl
 
   useSEO({
     title: newsTitle ? `BIRIM - ${t('news') || 'Haberler'} - ${newsTitle}` : 'BIRIM - Haberler',
@@ -257,23 +257,10 @@ export function NewsDetailPage() {
               </div>
 
               <OptimizedImage
-                src={
-                  typeof item.mainImage === 'string'
-                    ? item.mainImage
-                    : (item.mainImage && typeof item.mainImage === 'object'
-                      ? item.mainImage.url
-                      : '') || ''
-                }
-                srcMobile={
-                  typeof item.mainImage === 'object' && item.mainImage
-                    ? item.mainImage.urlMobile
-                    : undefined
-                }
-                srcDesktop={
-                  typeof item.mainImage === 'object' && item.mainImage
-                    ? item.mainImage.urlDesktop
-                    : undefined
-                }
+                src={mainImageUrl || ''}
+                srcMobile={mainImageObj?.urlMobile}
+                srcDesktop={mainImageObj?.urlDesktop}
+                fallbackSrc={mainImageFallback}
                 alt={t(item.title)}
                 className={`w-full h-auto object-cover mb-6 ${settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'}`}
                 width={1200}
@@ -295,10 +282,17 @@ export function NewsDetailPage() {
               <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl max-w-none w-full">
                 {(() => {
                   const content = t(item.content)
-                  return Array.isArray(content) ? (
-                    <PortableTextLite value={content} />
-                  ) : (
-                    <p className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">{content}</p>
+                  const isPortableText = Array.isArray(content) || (typeof content === 'object' && content !== null && (content as any)._type === 'block')
+
+                  if (isPortableText) {
+                    const blocks = Array.isArray(content) ? content : [content]
+                    return <PortableTextLite value={blocks} />
+                  }
+
+                  return (
+                    <p className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
+                      {content as string}
+                    </p>
                   )
                 })()}
               </div>

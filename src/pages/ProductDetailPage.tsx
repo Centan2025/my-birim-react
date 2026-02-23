@@ -463,21 +463,16 @@ export function ProductDetailPage() {
     url: string
     urlMobile?: string
     urlDesktop?: string
+    fallbackUrl?: string
   }[] = product?.alternativeMedia || []
   // Helper: mainImage string veya object olabilir
-  const mainImageUrl = product?.mainImage
-    ? typeof product.mainImage === 'string'
-      ? product.mainImage
-      : product.mainImage.url
-    : ''
-  const mainImageMobile =
-    product?.mainImage && typeof product.mainImage === 'object'
-      ? product.mainImage.urlMobile
-      : undefined
-  const mainImageDesktop =
-    product?.mainImage && typeof product.mainImage === 'object'
-      ? product.mainImage.urlDesktop
-      : undefined
+  const mainImageObj = typeof product?.mainImage === 'object' ? product.mainImage : undefined
+  const mainImageUrl = mainImageObj ? mainImageObj.url : (typeof product?.mainImage === 'string' ? product.mainImage : '')
+  const mainImageMobile = mainImageObj?.urlMobile
+  const mainImageDesktop = mainImageObj?.urlDesktop
+  const mainImageFallback = mainImageObj?.fallbackUrl
+  const mainImageCrop = mainImageObj?.crop
+  const mainImageHotspot = mainImageObj?.hotspot
 
   const fallbackImages = (() => {
     const ai = Array.isArray(product?.alternativeImages)
@@ -494,6 +489,9 @@ export function ProductDetailPage() {
     url: string
     urlMobile?: string
     urlDesktop?: string
+    fallbackUrl?: string
+    crop?: any
+    hotspot?: any
   }[] = (() => {
     if (rawAltMedia.length) {
       const head: {
@@ -501,6 +499,9 @@ export function ProductDetailPage() {
         url: string
         urlMobile?: string
         urlDesktop?: string
+        fallbackUrl?: string
+        crop?: any
+        hotspot?: any
       }[] = mainImageUrl
           ? [
             {
@@ -508,6 +509,9 @@ export function ProductDetailPage() {
               url: mainImageUrl,
               urlMobile: mainImageMobile,
               urlDesktop: mainImageDesktop,
+              fallbackUrl: mainImageFallback,
+              crop: mainImageCrop,
+              hotspot: mainImageHotspot,
             },
           ]
           : []
@@ -977,6 +981,7 @@ export function ProductDetailPage() {
                         src={m.url}
                         srcMobile={m.urlMobile}
                         srcDesktop={m.urlDesktop}
+                        fallbackSrc={m.fallbackUrl}
                         alt={`${t(product.name)} ${index + 1}`}
                         className={`w-full h-full object-cover ${imageBorderClass}`}
                         width={1600}
@@ -984,9 +989,12 @@ export function ProductDetailPage() {
                         loading={shouldEagerLoad ? 'eager' : 'lazy'}
                         fetchPriority={shouldEagerLoad ? 'high' : 'low'}
                         quality={90}
+                        crop={m.crop}
+                        hotspot={m.hotspot}
                       />
                     ) : m.type === 'video' ? (
                       <OptimizedVideo
+                        key={`video-${index}-${m.url}`}
                         src={m.url}
                         srcMobile={m.urlMobile}
                         srcDesktop={m.urlDesktop}
@@ -1250,13 +1258,23 @@ export function ProductDetailPage() {
                           {m.type === 'image' ? (
                             <OptimizedImage
                               src={m.url}
+                              fallbackSrc={m.fallbackUrl}
                               alt={`${t(product.name)} thumbnail ${idx + 1}`}
                               className={`w-full h-full object-cover ${imageBorderClass}`}
                               loading="lazy"
                               quality={75}
+                              crop={m.crop}
+                              hotspot={m.hotspot}
                             />
                           ) : m.type === 'video' ? (
-                            <div className={`w-full h-full bg-black/60 ${imageBorderClass}`} />
+                            <video
+                              src={m.url}
+                              className={`w-full h-full object-cover ${imageBorderClass}`}
+                              muted
+                              playsInline
+                              preload="metadata"
+                              style={{ pointerEvents: 'none' }}
+                            />
                           ) : (
                             <OptimizedImage
                               src={youTubeThumb(m.url)}
@@ -1366,6 +1384,8 @@ export function ProductDetailPage() {
               url: m.url,
               urlMobile: m.urlMobile,
               urlDesktop: m.urlDesktop,
+              crop: m.crop,
+              hotspot: m.hotspot,
             }))}
             initialIndex={currentImageIndex}
             onClose={() => setIsFullscreenOpen(false)}
@@ -1423,11 +1443,18 @@ export function ProductDetailPage() {
                 <ScrollReveal delay={200}>
                   {(() => {
                     const desc = t(product.description)
-                    return Array.isArray(desc) ? (
-                      <div className="mt-4 text-lg md:text-xl text-gray-900 leading-relaxed max-w-3xl font-roboto-thin">
-                        <PortableTextLite value={desc} />
-                      </div>
-                    ) : (
+                    const isPortableText = Array.isArray(desc) || (typeof desc === 'object' && desc !== null && (desc as any)._type === 'block')
+
+                    if (isPortableText) {
+                      const blocks = Array.isArray(desc) ? desc : [desc]
+                      return (
+                        <div className="mt-4 text-lg md:text-xl text-gray-900 leading-relaxed max-w-3xl font-roboto-thin">
+                          <PortableTextLite value={blocks} />
+                        </div>
+                      )
+                    }
+
+                    return (
                       <p className="mt-4 text-lg md:text-xl text-gray-900 leading-relaxed max-w-3xl font-roboto-thin">
                         {desc}
                       </p>
@@ -1449,6 +1476,7 @@ export function ProductDetailPage() {
                             image: string
                             imageMobile?: string
                             imageDesktop?: string
+                            fallbackImage?: string
                             title?: LocalizedString
                           },
                           idx: number
@@ -1462,6 +1490,7 @@ export function ProductDetailPage() {
                                 src={dimImg.image}
                                 srcMobile={dimImg.imageMobile}
                                 srcDesktop={dimImg.imageDesktop}
+                                fallbackSrc={dimImg.fallbackImage}
                                 alt={dimImg.title ? t(dimImg.title) : `${t('dimensions')} ${idx + 1}`}
                                 className={`w-full h-40 object-contain group-hover:scale-[1.03] transition-transform duration-700 ease-in-out ${imageBorderClass}`}
                                 loading="lazy"

@@ -16,9 +16,10 @@ import termsOfService from './documents/termsOfService'
 import kvkkPolicy from './documents/kvkkPolicy'
 import translations from './documents/translations'
 
-import {localizedString} from './objects/localizedString'
-import {localizedText} from './objects/localizedText'
-import {localizedPortableText} from './objects/localizedPortableText'
+import { localizedString } from './objects/localizedString'
+import { localizedText } from './objects/localizedText'
+import { localizedPortableText } from './objects/localizedPortableText'
+import r2Asset from './objects/r2Asset'
 import {
   productDimensionDetail,
   productDimensionSet,
@@ -64,6 +65,7 @@ export const schemaTypes = [
   localizedString,
   localizedText,
   localizedPortableText,
+  r2Asset,
   productDimensionDetail,
   productDimensionSet,
   productDimensionImage,

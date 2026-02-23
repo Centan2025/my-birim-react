@@ -1,18 +1,18 @@
 import React from 'react'
-import {Link} from 'react-router-dom'
-import type {Designer} from '../types'
-import {OptimizedImage} from '../components/OptimizedImage'
-import {PageLoading} from '../components/LoadingSpinner'
-import {useTranslation} from '../i18n'
-import {useDesigners} from '../hooks/useDesigners'
-import {useSiteSettings} from '../hooks/useSiteData'
-import {Breadcrumbs} from '../components/Breadcrumbs'
+import { Link } from 'react-router-dom'
+import type { Designer } from '../types'
+import { OptimizedImage } from '../components/OptimizedImage'
+import { PageLoading } from '../components/LoadingSpinner'
+import { useTranslation } from '../i18n'
+import { useDesigners } from '../hooks/useDesigners'
+import { useSiteSettings } from '../hooks/useSiteData'
+import { Breadcrumbs } from '../components/Breadcrumbs'
 import ScrollReveal from '../components/ScrollReveal'
-import {useSEO} from '../hooks/useSEO'
+import { useSEO } from '../hooks/useSEO'
 
-const DesignerCard: React.FC<{designer: Designer}> = ({designer}) => {
-  const {t} = useTranslation()
-  const {data: settings} = useSiteSettings()
+const DesignerCard: React.FC<{ designer: Designer }> = ({ designer }) => {
+  const { t } = useTranslation()
+  const { data: settings } = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   return (
     <Link to={`/designer/${designer.id}`} className="group flex flex-col h-full text-center">
@@ -25,6 +25,7 @@ const DesignerCard: React.FC<{designer: Designer}> = ({designer}) => {
           srcDesktop={
             typeof designer.image === 'object' ? designer.image.urlDesktop : designer.imageDesktop
           }
+          fallbackSrc={typeof designer.image === 'object' ? designer.image.fallbackUrl : undefined}
           alt={t(designer.name)}
           className={`w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-[1.03] filter grayscale ${imageBorderClass}`}
           loading="lazy"
@@ -41,8 +42,8 @@ const DesignerCard: React.FC<{designer: Designer}> = ({designer}) => {
 }
 
 export function DesignersPage() {
-  const {data: designers = [], isLoading: loading} = useDesigners()
-  const {t} = useTranslation()
+  const { data: designers = [], isLoading: loading } = useDesigners()
+  const { t } = useTranslation()
 
   // SEO meta
   useSEO({
@@ -68,8 +69,8 @@ export function DesignersPage() {
         <Breadcrumbs
           className="mb-6"
           items={[
-            {label: t('homepage'), to: '/'},
-            {label: t('designers')},
+            { label: t('homepage'), to: '/' },
+            { label: t('designers') },
           ]}
         />
         <div className="text-center mt-6 md:mt-8 mb-12">
@@ -79,9 +80,9 @@ export function DesignersPage() {
         {designers.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8 items-stretch">
             {designers.map((designer, index) => (
-              <ScrollReveal 
-                key={designer.id} 
-                delay={index < 12 ? index * 20 : 0} 
+              <ScrollReveal
+                key={designer.id}
+                delay={index < 12 ? index * 20 : 0}
                 threshold={0.01}
               >
                 <DesignerCard designer={designer} />

@@ -1,17 +1,17 @@
-import {useState, useMemo, useEffect, useRef} from 'react'
-import {useParams} from 'react-router-dom'
-import {ProductCard} from '../components/ProductCard'
-import {OptimizedImage} from '../components/OptimizedImage'
-import {PageLoading} from '../components/LoadingSpinner'
-import {useTranslation} from '../i18n'
-import {Breadcrumbs} from '../components/Breadcrumbs'
-import {useProducts, useProductsByCategory} from '../hooks/useProducts'
-import {useCategory, useCategories} from '../hooks/useCategories'
-import {useSiteSettings} from '../hooks/useSiteData'
-import type {Product} from '../types'
+import { useState, useMemo, useEffect, useRef } from 'react'
+import { useParams } from 'react-router-dom'
+import { ProductCard } from '../components/ProductCard'
+import { OptimizedImage } from '../components/OptimizedImage'
+import { PageLoading } from '../components/LoadingSpinner'
+import { useTranslation } from '../i18n'
+import { Breadcrumbs } from '../components/Breadcrumbs'
+import { useProducts, useProductsByCategory } from '../hooks/useProducts'
+import { useCategory, useCategories } from '../hooks/useCategories'
+import { useSiteSettings } from '../hooks/useSiteData'
+import type { Product } from '../types'
 import ScrollReveal from '../components/ScrollReveal'
-import {useSEO} from '../hooks/useSEO'
-import {useHeaderTheme} from '../context/HeaderThemeContext'
+import { useSEO } from '../hooks/useSEO'
+import { useHeaderTheme } from '../context/HeaderThemeContext'
 
 const ChevronDownIcon = () => (
   <svg
@@ -30,23 +30,23 @@ const ChevronDownIcon = () => (
 )
 
 export function ProductsPage() {
-  const {categoryId} = useParams<{categoryId: string}>()
+  const { categoryId } = useParams<{ categoryId: string }>()
   const [isSortOpen, setIsSortOpen] = useState(false)
   const [sortBy, setSortBy] = useState('year-desc') // Default sort by newest
-  const {t} = useTranslation()
-  const {data: settings} = useSiteSettings()
+  const { t } = useTranslation()
+  const { data: settings } = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const sortRef = useRef<HTMLDivElement | null>(null)
 
   // React Query hooks - always call both, use enabled to control
-  const {data: allProductsData, isLoading: allProductsLoading} = useProducts()
-  const {data: categoryProductsData, isLoading: categoryProductsLoading} =
+  const { data: allProductsData, isLoading: allProductsLoading } = useProducts()
+  const { data: categoryProductsData, isLoading: categoryProductsLoading } =
     useProductsByCategory(categoryId)
   const allProducts = useMemo(() => allProductsData ?? [], [allProductsData])
   const categoryProducts = useMemo(() => categoryProductsData ?? [], [categoryProductsData])
-  const {data: category} = useCategory(categoryId)
-  const {data: categories = []} = useCategories()
-  const {setFromPalette, reset} = useHeaderTheme()
+  const { data: category } = useCategory(categoryId)
+  const { data: categories = [] } = useCategories()
+  const { setFromPalette, reset } = useHeaderTheme()
 
   // Use category products if categoryId exists, otherwise use all products
   const products = categoryId ? categoryProducts : allProducts
@@ -139,7 +139,7 @@ export function ProductsPage() {
   const pageDescription = category
     ? t(category.subtitle) || pageTitle
     : t('all_products_subtitle') || pageTitle
-  const heroImageUrl = category?.heroImage
+  const heroImageUrl = typeof category?.heroImage === 'object' ? category.heroImage.url : category?.heroImage
 
   useSEO({
     title: `BIRIM - ${pageTitle}`,
@@ -183,26 +183,34 @@ export function ProductsPage() {
       {/* Category Hero Image */}
       <div className="relative h-[450px] animate-fade-in-down">
         <div className="absolute inset-0">
-          <OptimizedImage
-            src={category?.heroImage || 'https://picsum.photos/seed/default/1920/1080'}
-            alt={t(category?.name) || t('products')}
-            className={`w-full h-full object-cover ${imageBorderClass}`}
-            loading="eager"
-            quality={90}
-          />
+          {(() => {
+            const heroImage = category?.heroImage
+            const url = typeof heroImage === 'object' ? heroImage.url : (heroImage || 'https://picsum.photos/seed/default/1920/1080')
+            const fallback = typeof heroImage === 'object' ? heroImage.fallbackUrl : undefined
+            return (
+              <OptimizedImage
+                src={url}
+                fallbackSrc={fallback}
+                alt={t(category?.name) || t('products')}
+                className={`w-full h-full object-cover ${imageBorderClass}`}
+                loading="eager"
+                quality={90}
+              />
+            )
+          })()}
           <div className="absolute inset-0 bg-black/40"></div>
         </div>
         <div className="relative h-full flex items-center justify-center text-center text-white pt-20">
           <div>
             <h1
               className="text-4xl md:text-6xl font-light tracking-tighter uppercase"
-              style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}
+              style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}
             >
               {category ? t(category.name) : t('view_all')}
             </h1>
             <p
               className="mt-4 text-lg max-w-2xl mx-auto font-light"
-              style={{textShadow: '0 1px 3px rgba(0,0,0,0.5)'}}
+              style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}
             >
               {category ? t(category.subtitle) : t('all_products_subtitle')}
             </p>
@@ -216,11 +224,11 @@ export function ProductsPage() {
           items={
             category
               ? [
-                  {label: t('homepage'), to: '/'},
-                  {label: t('products'), to: '/products'},
-                  {label: t(category.name)},
-                ]
-              : [{label: t('homepage'), to: '/'}, {label: t('products')}]
+                { label: t('homepage'), to: '/' },
+                { label: t('products'), to: '/products' },
+                { label: t(category.name) },
+              ]
+              : [{ label: t('homepage'), to: '/' }, { label: t('products') }]
           }
         />
         {/* Sort Controls */}
@@ -258,13 +266,13 @@ export function ProductsPage() {
             // Eğer kategori seçili değilse (tüm ürünler), kategorilere göre grupla ve başlık göster
             (() => {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const productsByCategory = new Map<string, {category: any, products: Product[]}>()
-              
+              const productsByCategory = new Map<string, { category: any, products: Product[] }>()
+
               sortedProducts.forEach(product => {
                 const catId = product.categoryId || 'uncategorized'
                 if (!productsByCategory.has(catId)) {
                   const category = categories.find(c => c.id === catId)
-                  productsByCategory.set(catId, {category, products: []})
+                  productsByCategory.set(catId, { category, products: [] })
                 }
                 productsByCategory.get(catId)!.products.push(product)
               })
@@ -284,15 +292,15 @@ export function ProductsPage() {
               return (
                 <div>
                   {sortedCategoryIds.map(catId => {
-                    const {category, products} = productsByCategory.get(catId)!
+                    const { category, products } = productsByCategory.get(catId)!
                     const categoryName = category ? t(category.name) : catId
                     const startIndex = productIndex
                     productIndex += products.length
-                    
+
                     return (
                       <div key={catId} className="mb-16">
                         {/* Category Title */}
-                        <h2 
+                        <h2
                           className="font-oswald text-4xl md:text-5xl lg:text-6xl uppercase text-gray-900 mb-8"
                           style={{
                             fontFamily: '"Oswald", sans-serif',
@@ -305,9 +313,9 @@ export function ProductsPage() {
                         {/* Products Grid */}
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
                           {products.map((product, idx) => (
-                            <ScrollReveal 
-                              key={product.id} 
-                              delay={startIndex + idx < 12 ? (startIndex + idx) * 20 : 0} 
+                            <ScrollReveal
+                              key={product.id}
+                              delay={startIndex + idx < 12 ? (startIndex + idx) * 20 : 0}
                               threshold={0.01}
                             >
                               <ProductCard product={product} variant="light" />
@@ -324,9 +332,9 @@ export function ProductsPage() {
             // Eğer kategori seçiliyse, normal grid göster
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
               {sortedProducts.map((product, index) => (
-                <ScrollReveal 
-                  key={product.id} 
-                  delay={index < 12 ? index * 20 : 0} 
+                <ScrollReveal
+                  key={product.id}
+                  delay={index < 12 ? index * 20 : 0}
                   threshold={0.01}
                 >
                   <ProductCard product={product} variant="light" />

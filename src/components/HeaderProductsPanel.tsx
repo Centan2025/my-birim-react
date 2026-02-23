@@ -89,8 +89,9 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
             let imageClass = 'w-full h-full object-cover'
 
             // Önce menuImage'i kontrol et
-            if (hoveredCategory.menuImage) {
-              imageUrl = hoveredCategory.menuImage
+            const menuImg = hoveredCategory.menuImage
+            if (menuImg) {
+              imageUrl = typeof menuImg === 'string' ? menuImg : menuImg.url
             } else {
               // menuImage yoksa ilk ürün görselini göster
               const products = categoryProducts.get(hoveredCategory.id)

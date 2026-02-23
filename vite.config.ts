@@ -1,7 +1,7 @@
-import {defineConfig} from 'vite'
+import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import {visualizer} from 'rollup-plugin-visualizer'
-import {removeConsole} from './vite-plugin-remove-console'
+import { visualizer } from 'rollup-plugin-visualizer'
+import { removeConsole } from './vite-plugin-remove-console'
 import path from 'path'
 
 // https://vitejs.dev/config/
@@ -9,15 +9,15 @@ export default defineConfig({
   plugins: [
     react(),
     // Remove console.log in production builds (keep error and warn)
-    removeConsole({exclude: ['error', 'warn']}),
+    removeConsole({ exclude: ['error', 'warn'] }),
     // Bundle analyzer - only when ANALYZE env var is set
     process.env.ANALYZE === 'true' &&
-      visualizer({
-        open: true,
-        filename: 'dist/stats.html',
-        gzipSize: true,
-        brotliSize: true,
-      }),
+    visualizer({
+      open: true,
+      filename: 'dist/stats.html',
+      gzipSize: true,
+      brotliSize: true,
+    }),
   ].filter(Boolean),
   resolve: {
     alias: {
@@ -25,12 +25,12 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    port: 3001,
     hmr: {
-      port: 3000,
+      port: 3001,
       host: 'localhost',
-      // HMR WebSocket'ini doğrudan aynı porttan kullan (3001'e bağlanmaya çalışma)
-      clientPort: 3000,
+      // HMR WebSocket'ini doğrudan aynı porttan kullan
+      clientPort: 3001,
     },
     watch: {
       // Gereksiz dosya değişikliklerini ignore et

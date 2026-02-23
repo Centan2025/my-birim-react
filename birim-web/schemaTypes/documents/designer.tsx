@@ -1,3 +1,4 @@
+import React from 'react'
 import { defineField, defineType } from 'sanity'
 import { orderRankField } from '@sanity/orderable-document-list'
 
@@ -10,7 +11,7 @@ export default defineType({
       name: 'id',
       title: 'ID (Slug)',
       type: 'slug',
-      options: { source: (doc) => doc.name?.tr || doc.name?.en, maxLength: 96 },
+      options: { source: (doc: any) => doc.name?.tr || doc.name?.en, maxLength: 96 },
       validation: (Rule) => Rule.required(),
     }),
     orderRankField({ type: 'designer' }),
@@ -30,12 +31,22 @@ export default defineType({
         'Tüm cihazlar için varsayılan tasarımcı görseli. Mobil veya desktop versiyonu yoksa bu kullanılır. Önerilen çözünürlük: 600x800px veya 800x1000px (dikey portre).',
     }),
     defineField({
+      name: 'imageR2',
+      title: 'Görsel (R2) - Tüm Cihazlar',
+      type: 'r2Asset',
+    }),
+    defineField({
       name: 'imageMobile',
       title: 'Görsel (Mobil)',
       type: 'image',
       options: { hotspot: true },
       description:
         'Mobil cihazlar için özel tasarımcı görseli (opsiyonel). Yoksa varsayılan görsel kullanılır. Önerilen çözünürlük: 600x800px.',
+    }),
+    defineField({
+      name: 'imageMobileR2',
+      title: 'Görsel (R2) - Mobil',
+      type: 'r2Asset',
     }),
     defineField({
       name: 'imageDesktop',
@@ -45,11 +56,25 @@ export default defineType({
       description:
         'Desktop cihazlar için özel tasarımcı görseli (opsiyonel). Yoksa varsayılan görsel kullanılır. Önerilen çözünürlük: 800x1000px.',
     }),
+    defineField({
+      name: 'imageDesktopR2',
+      title: 'Görsel (R2) - Desktop',
+      type: 'r2Asset',
+    }),
   ],
   preview: {
-    select: { title: 'name.tr', media: 'image' },
-    prepare({ title, media }) {
-      return { title: title || 'Tasarımcı', media }
+    select: { title: 'name.tr', media: 'image', r2Url: 'imageR2.url' },
+    prepare({ title, media, r2Url }) {
+      return {
+        title: title || 'Tasarımcı',
+        media: media || (r2Url ? (
+          <img
+            src={r2Url}
+            alt={title || 'Tasarımcı'}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        ) : undefined)
+      }
     },
   },
 })

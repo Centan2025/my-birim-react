@@ -1,10 +1,13 @@
-import {OptimizedImage} from './OptimizedImage'
+import { OptimizedImage } from './OptimizedImage'
 import ScrollReveal from './ScrollReveal'
-import type {LocalizedString, Product} from '../types'
+import type { LocalizedString, Product } from '../types'
 
 interface ProductMediaItem {
   type: 'image' | 'video' | 'youtube'
   url: string
+  urlMobile?: string
+  urlDesktop?: string
+  fallbackUrl?: string
   title?: LocalizedString | string
 }
 
@@ -35,7 +38,7 @@ export function ProductMediaPanels({
   const media = product.media || []
   const sectionTitle =
     product?.mediaSectionTitle &&
-    String(product.mediaSectionTitle).trim().length > 0
+      String(product.mediaSectionTitle).trim().length > 0
       ? t(product.mediaSectionTitle)
       : 'Projeler'
 
@@ -53,6 +56,9 @@ export function ProductMediaPanels({
                 {m.type === 'image' ? (
                   <OptimizedImage
                     src={m.url}
+                    srcMobile={m.urlMobile}
+                    srcDesktop={m.urlDesktop}
+                    fallbackSrc={m.fallbackUrl}
                     alt={`media-${idx}`}
                     className={`w-full h-full object-cover ${imageBorderClass}`}
                     loading="lazy"

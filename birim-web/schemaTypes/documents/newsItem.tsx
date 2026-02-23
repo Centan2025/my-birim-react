@@ -1,3 +1,4 @@
+import React from 'react'
 import { defineField, defineType } from 'sanity'
 
 export default defineType({
@@ -50,6 +51,11 @@ export default defineType({
         'Tüm cihazlar için varsayılan haber kapak görseli. Mobil veya desktop versiyonu yoksa bu kullanılır. Önerilen çözünürlük: Desktop 1600x900px (16:9), Mobil 1080x1350px (4:5).',
     }),
     defineField({
+      name: 'mainImageR2',
+      title: 'Kapak Görseli (R2)',
+      type: 'r2Asset',
+    }),
+    defineField({
       name: 'mainImageMobile',
       title: 'Kapak Görseli (Mobil)',
       type: 'image',
@@ -58,12 +64,22 @@ export default defineType({
         'Mobil cihazlar için özel kapak görseli (opsiyonel). Yoksa varsayılan görsel kullanılır. Önerilen çözünürlük: 1080x1350px veya 768x1024px.',
     }),
     defineField({
+      name: 'mainImageMobileR2',
+      title: 'Kapak Görseli (R2) - Mobil',
+      type: 'r2Asset',
+    }),
+    defineField({
       name: 'mainImageDesktop',
       title: 'Kapak Görseli (Desktop)',
       type: 'image',
       options: { hotspot: true },
       description:
         'Desktop cihazlar için özel kapak görseli (opsiyonel). Yoksa varsayılan görsel kullanılır. Önerilen çözünürlük: 1600x900px veya 1920x1080px.',
+    }),
+    defineField({
+      name: 'mainImageDesktopR2',
+      title: 'Kapak Görseli (R2) - Desktop',
+      type: 'r2Asset',
     }),
     defineField({
       name: 'media',
@@ -98,6 +114,12 @@ export default defineType({
                 'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
             }),
             defineField({
+              name: 'imageR2',
+              title: 'Görsel (R2) - Tüm Cihazlar',
+              type: 'r2Asset',
+              hidden: ({ parent }) => parent?.type !== 'image',
+            }),
+            defineField({
               name: 'imageMobile',
               title: 'Görsel (Mobil)',
               type: 'image',
@@ -107,6 +129,12 @@ export default defineType({
                 'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
             }),
             defineField({
+              name: 'imageMobileR2',
+              title: 'Görsel (R2) - Mobil',
+              type: 'r2Asset',
+              hidden: ({ parent }) => parent?.type !== 'image',
+            }),
+            defineField({
               name: 'imageDesktop',
               title: 'Görsel (Desktop)',
               type: 'image',
@@ -114,6 +142,12 @@ export default defineType({
               hidden: ({ parent }) => parent?.type !== 'image',
               description:
                 'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+            }),
+            defineField({
+              name: 'imageDesktopR2',
+              title: 'Görsel (R2) - Desktop',
+              type: 'r2Asset',
+              hidden: ({ parent }) => parent?.type !== 'image',
             }),
             defineField({
               name: 'videoFile',
@@ -127,6 +161,12 @@ export default defineType({
                 'Tüm cihazlar için varsayılan video. Mobil veya desktop versiyonu yoksa bu kullanılır.',
             }),
             defineField({
+              name: 'videoFileR2',
+              title: 'Video Dosyası (R2) - Tüm Cihazlar',
+              type: 'r2Asset',
+              hidden: ({ parent }) => parent?.type !== 'video',
+            }),
+            defineField({
               name: 'videoFileMobile',
               title: 'Video Dosyası (Mobil)',
               type: 'file',
@@ -138,6 +178,12 @@ export default defineType({
                 'Mobil cihazlar için özel video (opsiyonel). Yoksa varsayılan video kullanılır.',
             }),
             defineField({
+              name: 'videoFileMobileR2',
+              title: 'Video Dosyası (R2) - Mobil',
+              type: 'r2Asset',
+              hidden: ({ parent }) => parent?.type !== 'video',
+            }),
+            defineField({
               name: 'videoFileDesktop',
               title: 'Video Dosyası (Desktop)',
               type: 'file',
@@ -147,6 +193,12 @@ export default defineType({
               hidden: ({ parent }) => parent?.type !== 'video',
               description:
                 'Desktop cihazlar için özel video (opsiyonel). Yoksa varsayılan video kullanılır.',
+            }),
+            defineField({
+              name: 'videoFileDesktopR2',
+              title: 'Video Dosyası (R2) - Desktop',
+              type: 'r2Asset',
+              hidden: ({ parent }) => parent?.type !== 'video',
             }),
             defineField({
               name: 'url',
@@ -164,9 +216,18 @@ export default defineType({
     }),
   ],
   preview: {
-    select: { title: 'title.tr', media: 'mainImage' },
-    prepare({ title, media }) {
-      return { title: title || 'Haber', media }
+    select: { title: 'title.tr', media: 'mainImage', r2Url: 'mainImageR2.url' },
+    prepare({ title, media, r2Url }) {
+      return {
+        title: title || 'Haber',
+        media: media || (r2Url ? (
+          <img
+            src={r2Url}
+            alt={title || 'Haber'}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        ) : undefined)
+      }
     },
   },
 })

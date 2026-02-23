@@ -19,6 +19,7 @@ import type {
   TermsOfService,
   KvkkPolicy,
   SanityImagePalette,
+  R2ImageMetadata,
 } from '../types'
 import { createClient } from '@sanity/client'
 import groq from 'groq'
@@ -98,6 +99,8 @@ const ENABLE_LOCAL_FALLBACK =
     (import.meta as any).env?.VITE_ENABLE_LOCAL_FALLBACK ?? defaultEnableFallback
   ).toLowerCase() !== 'false'
 
+const R2_DOMAIN = import.meta.env['VITE_R2_DOMAIN'] || ''
+
 const sanity = useSanity
   ? createClient({
     projectId: SANITY_PROJECT_ID,
@@ -140,7 +143,29 @@ const mapImage = (
   }
 ): string => {
   if (!img) return ''
-  if (typeof img === 'string') return img
+  if (typeof img === 'string') {
+    const isMigration = img.startsWith('migration/') || img.startsWith('/migration/')
+    if (isMigration && R2_DOMAIN) {
+      const cleanPath = img.startsWith('/') ? img.substring(1) : img
+      return `${R2_DOMAIN}/${cleanPath}`
+    }
+    return img
+  }
+
+  // R2 Check (Prioritized for nested r2Asset or direct R2 object)
+  let rawUrl = (img as any)?.r2Asset?.url || (img as any)?.url
+
+  if (rawUrl) {
+    const isMigration = rawUrl.startsWith('migration/') || rawUrl.startsWith('/migration/')
+    if (isMigration && R2_DOMAIN) {
+      const cleanPath = rawUrl.startsWith('/') ? rawUrl.substring(1) : rawUrl
+      return `${R2_DOMAIN}/${cleanPath}`
+    }
+    // Eğer img.url varsa ama Sanity CDN değilse ve R2 domain ise, veya direkt URL ise döndür
+    if (typeof rawUrl === 'string' && (rawUrl.includes('r2.dev') || rawUrl.includes('cdn.sanity.io') || rawUrl.startsWith('http'))) {
+      return rawUrl
+    }
+  }
 
   const hasBuilderMeta =
     (img as any)?.crop || (img as any)?.hotspot || (img as any)?.asset?._ref || (img as any)?.asset?._id
@@ -160,6 +185,22 @@ const mapImage = (
   }
 }
 
+// R2 metadata extraction helper
+const mapR2Metadata = (img: any): R2ImageMetadata => {
+  if (!img) return {}
+  const crop = (img.cropX !== undefined && img.cropWidth !== undefined) ? {
+    x: img.cropX,
+    y: img.cropY || 0,
+    width: img.cropWidth,
+    height: img.cropHeight || 1
+  } : undefined
+  const hotspot = (img.hotspotX !== undefined && img.hotspotY !== undefined) ? {
+    x: img.hotspotX,
+    y: img.hotspotY
+  } : undefined
+  return { crop, hotspot }
+}
+
 const mapImages = (imgs: SanityImageLike[] | undefined): string[] =>
   Array.isArray(imgs) ? imgs.map(i => mapImage(i)).filter(Boolean) : []
 
@@ -174,12 +215,18 @@ const extractPalette = (
 }
 
 // Medya satırı için Sanity modeli (sadece ihtiyaç duyulan alanlar)
+// Medya satırı için Sanity modeli (sadece ihtiyaç duyulan alanlar)
 interface SanityProductMediaItem {
   type?: 'image' | 'video' | 'youtube' | string
   url?: string
   image?: SanityImageLike
   imageMobile?: SanityImageLike
   imageDesktop?: SanityImageLike
+  // R2 Fields
+  imageR2?: { url?: string }
+  imageMobileR2?: { url?: string }
+  imageDesktopR2?: { url?: string }
+
   title?: LocalizedString
   description?: LocalizedString
   link?: string
@@ -187,6 +234,10 @@ interface SanityProductMediaItem {
   videoFile?: { asset?: SanityFileAsset }
   videoFileMobile?: { asset?: SanityFileAsset }
   videoFileDesktop?: { asset?: SanityFileAsset }
+  // Sibling R2 fields for video
+  videoFileR2?: { url?: string }
+  videoFileMobileR2?: { url?: string }
+  videoFileDesktopR2?: { url?: string }
 }
 
 // Helper: Medya URL'ini map et (mobil/desktop desteği ile)
@@ -195,6 +246,14 @@ const mapMediaUrl = (m: SanityProductMediaItem, isMobile?: boolean, isDesktop?: 
   let url = ''
 
   if (type === 'image') {
+    // 1. R2 Check (Prioritized)
+    const r2Url = isMobile ? m?.imageMobileR2?.url : (isDesktop ? m?.imageDesktopR2?.url : m?.imageR2?.url)
+    if (r2Url) {
+      if (r2Url.startsWith('migration/') && R2_DOMAIN) return `${R2_DOMAIN}/${r2Url}`
+      return r2Url
+    }
+
+    // 2. Fallback to Sanity
     // Art Direction: Önce mobil/desktop'a özel görseli kontrol et
     if (isMobile && m?.imageMobile) {
       url = mapImage(m.imageMobile)
@@ -204,6 +263,13 @@ const mapMediaUrl = (m: SanityProductMediaItem, isMobile?: boolean, isDesktop?: 
       url = mapImage(m.image)
     }
   } else if (type === 'video') {
+    // 1. R2 Check (Prioritized)
+    const r2Url = isMobile ? m?.videoFileMobileR2?.url : (isDesktop ? m?.videoFileDesktopR2?.url : m?.videoFileR2?.url)
+    if (r2Url) {
+      if (r2Url.startsWith('migration/') && R2_DOMAIN) return `${R2_DOMAIN}/${r2Url}`
+      return r2Url
+    }
+
     // Art Direction: Önce mobil/desktop'a özel videoyu kontrol et
     if (isMobile && m?.videoFileMobile?.asset) {
       if (m.videoFileMobile.asset.url) {
@@ -252,6 +318,8 @@ const mapProductMedia = (
   description?: LocalizedString
   link?: string
   linkText?: LocalizedString
+  crop?: R2ImageMetadata['crop']
+  hotspot?: R2ImageMetadata['hotspot']
 }[] => {
   const mediaArr: SanityProductMediaItem[] = Array.isArray(row?.media) ? row.media : []
   const fromMedia = mediaArr
@@ -264,6 +332,10 @@ const mapProductMedia = (
       const url = mapMediaUrl(m) // Varsayılan URL
       const urlMobile = mapMediaUrl(m, true, false) // Mobil URL (varsa)
       const urlDesktop = mapMediaUrl(m, false, true) // Desktop URL (varsa)
+      const fallbackUrl = (m?.imageR2?.url || m?.videoFileR2?.url) ? mapMediaUrl({ ...m, imageR2: undefined, videoFileR2: undefined, imageMobileR2: undefined, videoFileMobileR2: undefined, imageDesktopR2: undefined, videoFileDesktopR2: undefined }) : undefined
+
+      // Extract metadata from R2 image if available
+      const metadata = m?.imageR2 ? mapR2Metadata(m.imageR2) : {}
 
       const title = m?.title
       const description = m?.description
@@ -276,11 +348,14 @@ const mapProductMedia = (
         url: string
         urlMobile?: string
         urlDesktop?: string
+        fallbackUrl?: string
         title?: LocalizedString
         description?: LocalizedString
         link?: string
         linkText?: LocalizedString
-      } = { type, url, title, description, link, linkText }
+        crop?: R2ImageMetadata['crop']
+        hotspot?: R2ImageMetadata['hotspot']
+      } = { type, url, fallbackUrl, title, description, link, linkText, ...metadata }
       if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
       if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
 
@@ -295,6 +370,8 @@ const mapProductMedia = (
       description?: LocalizedString
       link?: string
       linkText?: LocalizedString
+      crop?: R2ImageMetadata['crop']
+      hotspot?: R2ImageMetadata['hotspot']
     } => !!m && !!m.url)
   // Fallback kaldırıldı: Eğer hiç medya eklenmemişse boş array döndür
   return fromMedia
@@ -307,6 +384,9 @@ const mapAlternativeMedia = (
   url: string
   urlMobile?: string
   urlDesktop?: string
+  fallbackUrl?: string
+  crop?: R2ImageMetadata['crop']
+  hotspot?: R2ImageMetadata['hotspot']
 }[] => {
   const alt = Array.isArray(row?.alternativeMedia) ? row.alternativeMedia : []
   if (alt.length)
@@ -320,6 +400,10 @@ const mapAlternativeMedia = (
         const url = mapMediaUrl(m) // Varsayılan URL
         const urlMobile = mapMediaUrl(m, true, false) // Mobil URL (varsa)
         const urlDesktop = mapMediaUrl(m, false, true) // Desktop URL (varsa)
+        const fallbackUrl = (m?.imageR2?.url || m?.videoFileR2?.url) ? mapMediaUrl({ ...m, imageR2: undefined, videoFileR2: undefined, imageMobileR2: undefined, videoFileMobileR2: undefined, imageDesktopR2: undefined, videoFileDesktopR2: undefined }) : undefined
+
+        // Extract metadata from R2 image if available
+        const metadata = m?.imageR2 ? mapR2Metadata(m.imageR2) : {}
 
         // Sadece urlMobile veya urlDesktop varsa ekle
         const result: {
@@ -327,7 +411,10 @@ const mapAlternativeMedia = (
           url: string
           urlMobile?: string
           urlDesktop?: string
-        } = { type, url }
+          fallbackUrl?: string
+          crop?: R2ImageMetadata['crop']
+          hotspot?: R2ImageMetadata['hotspot']
+        } = { type, url, fallbackUrl, ...metadata }
         if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
         if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
 
@@ -339,6 +426,9 @@ const mapAlternativeMedia = (
           url: string
           urlMobile?: string
           urlDesktop?: string
+          fallbackUrl?: string
+          crop?: R2ImageMetadata['crop']
+          hotspot?: R2ImageMetadata['hotspot']
         } => !!m && !!m.url
       )
   // fallback to legacy alternativeImages
@@ -349,30 +439,37 @@ const mapDimensionImages = (
   dimImgs:
     | {
       image?: SanityImageLike
+      imageR2?: { url?: string }
       imageMobile?: SanityImageLike
+      imageMobileR2?: { url?: string }
       imageDesktop?: SanityImageLike
+      imageDesktopR2?: { url?: string }
       title?: LocalizedString
     }[]
     | undefined
-): { image: string; imageMobile?: string; imageDesktop?: string; title?: LocalizedString }[] => {
+): { image: string; imageMobile?: string; imageDesktop?: string; fallbackImage?: string; title?: LocalizedString }[] => {
   if (!Array.isArray(dimImgs)) return []
   return dimImgs
     .map(di => {
-      const image = mapImage(di?.image)
-      const imageMobile = di?.imageMobile ? mapImage(di.imageMobile) : undefined
-      const imageDesktop = di?.imageDesktop ? mapImage(di.imageDesktop) : undefined
+      const image = mapImage(di?.imageR2 || di?.image)
+      const fallbackImage = di?.imageR2?.url ? mapImage(di?.image) : undefined
+
+      const imgMobile = di?.imageMobileR2?.url ? mapImage(di?.imageMobileR2) : (di?.imageMobile ? mapImage(di.imageMobile) : undefined)
+      const imgDesktop = di?.imageDesktopR2?.url ? mapImage(di?.imageDesktopR2) : (di?.imageDesktop ? mapImage(di.imageDesktop) : undefined)
 
       const result: {
         image: string
         imageMobile?: string
         imageDesktop?: string
+        fallbackImage?: string
         title?: LocalizedString
       } = {
         image,
+        fallbackImage,
         title: di?.title,
       }
-      if (imageMobile && imageMobile !== image) result.imageMobile = imageMobile
-      if (imageDesktop && imageDesktop !== image) result.imageDesktop = imageDesktop
+      if (imgMobile && imgMobile !== image) result.imageMobile = imgMobile
+      if (imgDesktop && imgDesktop !== image) result.imageDesktop = imgDesktop
 
       return result
     })
@@ -705,13 +802,14 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
       const q = groq`*[_type == "siteSettings" && !(_id in path("drafts.**"))] 
         | order(_updatedAt desc)[0]{
           ...,
-          logo
+          logo,
+          logoR2
         }`
       // Site ayarları için CDN önbelleğini atla - değişiklikler hemen yansısın
       const s = await sanity.withConfig({ useCdn: false }).fetch(q)
       // Backward compatible defaults
       return {
-        logoUrl: s?.logo ? mapImage(s.logo) : s?.logoUrl || '',
+        logoUrl: s?.logoR2?.url || (s?.logo ? mapImage(s.logo) : s?.logoUrl || ''),
         topBannerText: s?.topBannerText || '',
         showProductPrevNext: Boolean(s?.showProductPrevNext ?? false),
         showRelatedProducts: s?.showRelatedProducts !== false,
@@ -756,14 +854,22 @@ export const updateSiteSettings = async (settings: SiteSettings): Promise<void> 
 // Categories
 export const getCategories = async (): Promise<Category[]> => {
   if (useSanity && sanity) {
-    const query = groq`*[_type == "category"] | order(orderRank asc) { "id": id.current, name, subtitle, heroImage, menuImage }`
+    const query = groq`*[_type == "category"] | order(orderRank asc) { 
+      "id": id.current, 
+      name, 
+      subtitle, 
+      heroImage, 
+      heroImageR2,
+      menuImage,
+      menuImageR2
+    }`
     const rows = await sanity.fetch(query)
     return rows.map((r: any) => ({
       id: r.id,
       name: r.name,
       subtitle: r.subtitle,
-      heroImage: mapImage(r.heroImage),
-      menuImage: mapImage(r.menuImage),
+      heroImage: r.heroImageR2?.url ? { url: mapImage(r.heroImageR2), fallbackUrl: mapImage(r.heroImage) } : mapImage(r.heroImage),
+      menuImage: r.menuImageR2?.url ? { url: mapImage(r.menuImageR2), fallbackUrl: mapImage(r.menuImage) } : mapImage(r.menuImage),
     }))
   }
   await delay(SIMULATED_DELAY)
@@ -801,21 +907,33 @@ export const getDesigners = async (): Promise<Designer[]> => {
           name, 
           bio, 
           image, 
+          imageR2,
           imageMobile, 
-          imageDesktop 
+          imageMobileR2,
+          imageDesktop,
+          imageDesktopR2
         }`
     const rows = await sanity.fetch(query)
     return rows.map((r: any) => {
-      const image = mapImage(r.image)
-      const imageMobile = r.imageMobile ? mapImage(r.imageMobile) : undefined
-      const imageDesktop = r.imageDesktop ? mapImage(r.imageDesktop) : undefined
+      const imageFinal = mapImage(r.imageR2 || r.image)
+      const fallbackUrl = r.imageR2?.url ? mapImage(r.image) : undefined
+
+      const imageMobile = r.imageMobileR2?.url ? mapImage(r.imageMobileR2) : (r.imageMobile ? mapImage(r.imageMobile) : undefined)
+      const imageDesktop = r.imageDesktopR2?.url ? mapImage(r.imageDesktopR2) : (r.imageDesktop ? mapImage(r.imageDesktop) : undefined)
       return {
         id: r.id,
         name: r.name,
         bio: r.bio,
-        image,
-        imageMobile: imageMobile && imageMobile !== image ? imageMobile : undefined,
-        imageDesktop: imageDesktop && imageDesktop !== image ? imageDesktop : undefined,
+        image: r.imageR2?.url
+          ? {
+            url: imageFinal,
+            urlMobile: imageMobile && imageMobile !== imageFinal ? imageMobile : undefined,
+            urlDesktop: imageDesktop && imageDesktop !== imageFinal ? imageDesktop : undefined,
+            fallbackUrl,
+          }
+          : imageFinal,
+        imageMobile: imageMobile && imageMobile !== imageFinal ? imageMobile : undefined,
+        imageDesktop: imageDesktop && imageDesktop !== imageFinal ? imageDesktop : undefined,
       }
     })
   }
@@ -824,17 +942,35 @@ export const getDesigners = async (): Promise<Designer[]> => {
 }
 export const getDesignerById = async (id: string): Promise<Designer | undefined> => {
   if (useSanity && sanity) {
-    const query = groq`*[_type == "designer" && id.current == $id][0]{ "id": id.current, name, bio, image, imageMobile, imageDesktop }`
+    const query = groq`*[_type == "designer" && id.current == $id][0]{ 
+      "id": id.current, 
+      name, 
+      bio, 
+      image,
+      imageR2, 
+      imageMobile, 
+      imageMobileR2,
+      imageDesktop,
+      imageDesktopR2
+    }`
     const r = await sanity.fetch(query, { id })
     if (!r) return undefined
-    const image = mapImage(r.image)
-    const imageMobile = r.imageMobile ? mapImage(r.imageMobile) : undefined
-    const imageDesktop = r.imageDesktop ? mapImage(r.imageDesktop) : undefined
+    const image = r.imageR2?.url || mapImage(r.image)
+    const fallbackUrl = r.imageR2?.url ? mapImage(r.image) : undefined
+    const imageMobile = r.imageMobileR2?.url || (r.imageMobile ? mapImage(r.imageMobile) : undefined)
+    const imageDesktop = r.imageDesktopR2?.url || (r.imageDesktop ? mapImage(r.imageDesktop) : undefined)
     return {
       id: r.id,
       name: r.name,
       bio: r.bio,
-      image,
+      image: r.imageR2?.url
+        ? {
+          url: image,
+          urlMobile: imageMobile && imageMobile !== image ? imageMobile : undefined,
+          urlDesktop: imageDesktop && imageDesktop !== image ? imageDesktop : undefined,
+          fallbackUrl,
+        }
+        : image,
       imageMobile: imageMobile && imageMobile !== image ? imageMobile : undefined,
       imageDesktop: imageDesktop && imageDesktop !== image ? imageDesktop : undefined,
     }
@@ -878,17 +1014,20 @@ export const getProducts = async (): Promise<Product[]> => {
             ...,
             asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
           },
+          mainImageR2,
           mainImageMobile{
             ...,
             asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
           },
+          mainImageMobileR2,
           mainImageDesktop{
             ...,
             asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
           },
+          mainImageDesktopR2,
           alternativeImages,
-          alternativeMedia[]{ type, url, image, imageMobile, imageDesktop, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
-          media[]{ type, url, image, imageMobile, imageDesktop, title, description, link, linkText, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
+          alternativeMedia[]{ type, url, image, imageR2, imageMobile, imageMobileR2, imageDesktop, imageDesktopR2, videoFile{asset->{url, _ref, _id}}, videoFileR2, videoFileMobile{asset->{url, _ref, _id}}, videoFileMobileR2, videoFileDesktop{asset->{url, _ref, _id}}, videoFileDesktopR2 },
+          media[]{ type, url, image, imageR2, imageMobile, imageMobileR2, imageDesktop, imageDesktopR2, title, description, link, linkText, videoFile{asset->{url, _ref, _id}}, videoFileR2, videoFileMobile{asset->{url, _ref, _id}}, videoFileMobileR2, videoFileDesktop{asset->{url, _ref, _id}}, videoFileDesktopR2 },
           mediaSectionTitle,
           mediaSectionText,
           showMediaPanels,
@@ -921,7 +1060,7 @@ export const getProducts = async (): Promise<Product[]> => {
               }
             }
           },
-          dimensionImages[]{ image, imageMobile, imageDesktop, title },
+          dimensionImages[]{ image, imageR2, imageMobile, imageMobileR2, imageDesktop, imageDesktopR2, title },
           exclusiveContent,
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
@@ -937,6 +1076,25 @@ export const getProducts = async (): Promise<Product[]> => {
         isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
         description: r.description,
         mainImage: (() => {
+          // 1. R2 Priority
+          if (r.mainImageR2?.url) {
+            const img = mapImage(r.mainImageR2)
+            const imgMobile = r.mainImageMobileR2?.url ? mapImage(r.mainImageMobileR2) : (r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined)
+            const imgDesktop = r.mainImageDesktopR2?.url ? mapImage(r.mainImageDesktopR2) : (r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined)
+            const palette = extractPalette(r.mainImage)
+            const fallbackUrl = mapImage(r.mainImage)
+            const metadata = mapR2Metadata(r.mainImageR2)
+            return {
+              url: img,
+              urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
+              urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
+              palette,
+              fallbackUrl,
+              ...metadata
+            }
+          }
+
+          // 2. Sanity Fallback
           const img = mapImage(r.mainImage)
           const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
           const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
@@ -967,11 +1125,11 @@ export const getProducts = async (): Promise<Product[]> => {
           images: mapImages(r?.exclusiveContent?.images),
           drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({
             name: d?.name,
-            url: toFileUrl(d?.file?.asset),
+            url: d?.fileR2?.url || toFileUrl(d?.file?.asset),
           })),
           models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({
             name: m?.name,
-            url: toFileUrl(m?.file?.asset),
+            url: m?.fileR2?.url || toFileUrl(m?.file?.asset),
           })),
         },
       })
@@ -992,17 +1150,20 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
             ...,
             asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
           },
+          mainImageR2,
           mainImageMobile{
             ...,
             asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
           },
+          mainImageMobileR2,
           mainImageDesktop{
             ...,
             asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
           },
+          mainImageDesktopR2,
           alternativeImages,
-          alternativeMedia[]{ type, url, image, imageMobile, imageDesktop, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
-          media[]{ type, url, image, imageMobile, imageDesktop, title, description, link, linkText, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
+          alternativeMedia[]{ type, url, image, imageR2, imageMobile, imageMobileR2, imageDesktop, imageDesktopR2, videoFile{asset->{url, _ref, _id}}, videoFileR2, videoFileMobile{asset->{url, _ref, _id}}, videoFileMobileR2, videoFileDesktop{asset->{url, _ref, _id}}, videoFileDesktopR2 },
+          media[]{ type, url, image, imageR2, imageMobile, imageMobileR2, imageDesktop, imageDesktopR2, title, description, link, linkText, videoFile{asset->{url, _ref, _id}}, videoFileR2, videoFileMobile{asset->{url, _ref, _id}}, videoFileMobileR2, videoFileDesktop{asset->{url, _ref, _id}}, videoFileDesktopR2 },
           mediaSectionTitle,
           mediaSectionText,
           showMediaPanels,
@@ -1035,7 +1196,7 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
               }
             }
           },
-          dimensionImages[]{ image, imageMobile, imageDesktop, title },
+          dimensionImages[]{ image, imageR2, imageMobile, imageMobileR2, imageDesktop, imageDesktopR2, title },
           exclusiveContent,
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
@@ -1051,6 +1212,22 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
       isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
       description: r.description,
       mainImage: (() => {
+        if (r.mainImageR2?.url) {
+          const img = mapImage(r.mainImageR2)
+          const imgMobile = r.mainImageMobileR2?.url ? mapImage(r.mainImageMobileR2) : (r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined)
+          const imgDesktop = r.mainImageDesktopR2?.url ? mapImage(r.mainImageDesktopR2) : (r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined)
+          const palette = extractPalette(r.mainImage)
+          const fallbackUrl = mapImage(r.mainImage)
+          const metadata = mapR2Metadata(r.mainImageR2)
+          return {
+            url: img,
+            urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
+            urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
+            palette,
+            fallbackUrl,
+            ...metadata
+          }
+        }
         const img = mapImage(r.mainImage)
         const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
         const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
@@ -1081,11 +1258,11 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
         images: mapImages(r?.exclusiveContent?.images),
         drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({
           name: d?.name,
-          url: toFileUrl(d?.file?.asset),
+          url: d?.fileR2?.url || toFileUrl(d?.file?.asset),
         })),
         models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({
           name: m?.name,
-          url: toFileUrl(m?.file?.asset),
+          url: m?.fileR2?.url || toFileUrl(m?.file?.asset),
         })),
       },
     })
@@ -1105,17 +1282,20 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
             ...,
             asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
           },
+          mainImageR2,
           mainImageMobile{
             ...,
             asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
           },
+          mainImageMobileR2,
           mainImageDesktop{
             ...,
             asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
           },
+          mainImageDesktopR2,
           alternativeImages,
-          alternativeMedia[]{ type, url, image, imageMobile, imageDesktop, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
-          media[]{ type, url, image, imageMobile, imageDesktop, title, description, link, linkText, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
+          alternativeMedia[]{ type, url, image, imageR2, imageMobile, imageMobileR2, imageDesktop, imageDesktopR2, videoFile{asset->{url, _ref, _id}}, videoFileR2, videoFileMobile{asset->{url, _ref, _id}}, videoFileMobileR2, videoFileDesktop{asset->{url, _ref, _id}}, videoFileDesktopR2 },
+          media[]{ type, url, image, imageR2, imageMobile, imageMobileR2, imageDesktop, imageDesktopR2, title, description, link, linkText, videoFile{asset->{url, _ref, _id}}, videoFileR2, videoFileMobile{asset->{url, _ref, _id}}, videoFileMobileR2, videoFileDesktop{asset->{url, _ref, _id}}, videoFileDesktopR2 },
           mediaSectionTitle,
           mediaSectionText,
           showMediaPanels,
@@ -1123,7 +1303,7 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
           price,
           currency,
           materialSelections[]{ materials },
-          dimensionImages[]{ image, imageMobile, imageDesktop, title },
+          dimensionImages[]{ image, imageR2, imageMobile, imageMobileR2, imageDesktop, imageDesktopR2, title },
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
         }`
@@ -1138,6 +1318,22 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
         isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
         description: r.description,
         mainImage: (() => {
+          if (r.mainImageR2?.url) {
+            const img = mapImage(r.mainImageR2)
+            const imgMobile = r.mainImageMobileR2?.url ? mapImage(r.mainImageMobileR2) : (r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined)
+            const imgDesktop = r.mainImageDesktopR2?.url ? mapImage(r.mainImageDesktopR2) : (r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined)
+            const palette = extractPalette(r.mainImage)
+            const fallbackUrl = mapImage(r.mainImage)
+            const metadata = mapR2Metadata(r.mainImageR2)
+            return {
+              url: img,
+              urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
+              urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
+              palette,
+              fallbackUrl,
+              ...metadata
+            }
+          }
           const img = mapImage(r.mainImage)
           const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
           const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
@@ -1165,11 +1361,11 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
           images: mapImages(r?.exclusiveContent?.images),
           drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({
             name: d?.name,
-            url: toFileUrl(d?.file?.asset),
+            url: d?.fileR2?.url || toFileUrl(d?.file?.asset),
           })),
           models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({
             name: m?.name,
-            url: toFileUrl(m?.file?.asset),
+            url: m?.fileR2?.url || toFileUrl(m?.file?.asset),
           })),
         },
       })
@@ -1190,17 +1386,20 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
             ...,
             asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
           },
+          mainImageR2,
           mainImageMobile{
             ...,
             asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
           },
+          mainImageMobileR2,
           mainImageDesktop{
             ...,
             asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
           },
+          mainImageDesktopR2,
           alternativeImages,
-          alternativeMedia[]{ type, url, image, imageMobile, imageDesktop, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
-          media[]{ type, url, image, imageMobile, imageDesktop, title, description, link, linkText, videoFile{asset->{url, _ref, _id}}, videoFileMobile{asset->{url, _ref, _id}}, videoFileDesktop{asset->{url, _ref, _id}} },
+          alternativeMedia[]{ type, url, image, imageR2, imageMobile, imageMobileR2, imageDesktop, imageDesktopR2, videoFile{asset->{url, _ref, _id}}, videoFileR2, videoFileMobile{asset->{url, _ref, _id}}, videoFileMobileR2, videoFileDesktop{asset->{url, _ref, _id}}, videoFileDesktopR2 },
+          media[]{ type, url, image, imageR2, imageMobile, imageMobileR2, imageDesktop, imageDesktopR2, title, description, link, linkText, videoFile{asset->{url, _ref, _id}}, videoFileR2, videoFileMobile{asset->{url, _ref, _id}}, videoFileMobileR2, videoFileDesktop{asset->{url, _ref, _id}}, videoFileDesktopR2 },
           mediaSectionTitle,
           mediaSectionText,
           showMediaPanels,
@@ -1208,7 +1407,7 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
           price,
           currency,
           materialSelections[]{ materials },
-          dimensionImages[]{ image, imageMobile, imageDesktop, title },
+          dimensionImages[]{ image, imageR2, imageMobile, imageMobileR2, imageDesktop, imageDesktopR2, title },
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
         }`
@@ -1223,6 +1422,22 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
         isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
         description: r.description,
         mainImage: (() => {
+          if (r.mainImageR2?.url) {
+            const img = mapImage(r.mainImageR2)
+            const imgMobile = r.mainImageMobileR2?.url ? mapImage(r.mainImageMobileR2) : (r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined)
+            const imgDesktop = r.mainImageDesktopR2?.url ? mapImage(r.mainImageDesktopR2) : (r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined)
+            const palette = extractPalette(r.mainImage)
+            const fallbackUrl = mapImage(r.mainImage)
+            const metadata = mapR2Metadata(r.mainImageR2)
+            return {
+              url: img,
+              urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
+              urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
+              palette,
+              fallbackUrl,
+              ...metadata
+            }
+          }
           const img = mapImage(r.mainImage)
           const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
           const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
@@ -1250,11 +1465,11 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
           images: mapImages(r?.exclusiveContent?.images),
           drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({
             name: d?.name,
-            url: toFileUrl(d?.file?.asset),
+            url: d?.fileR2?.url || toFileUrl(d?.file?.asset),
           })),
           models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({
             name: m?.name,
-            url: toFileUrl(m?.file?.asset),
+            url: m?.fileR2?.url || toFileUrl(m?.file?.asset),
           })),
         },
       })
@@ -1295,55 +1510,86 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
               ...,
               asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}
             },
+            heroImageR2,
             historySection{
               ...,
               image{ asset->{url, _ref, _id} },
+              imageR2,
               media[]{
                 ...,
                 image{ ..., asset->{url, _ref, _id} },
-                videoFile{ ..., asset->{url, _ref, _id} }
+                imageR2,
+                imageMobile{ ..., asset->{url, _ref, _id} },
+                imageMobileR2,
+                imageDesktop{ ..., asset->{url, _ref, _id} },
+                imageDesktopR2,
+                videoFile{ ..., asset->{url, _ref, _id} },
+                videoFileR2
               }
             },
             identitySection{
               ...,
               image{ asset->{url, _ref, _id} },
+              imageR2,
               media[]{
                 ...,
                 image{ ..., asset->{url, _ref, _id} },
-                videoFile{ ..., asset->{url, _ref, _id} }
+                imageR2,
+                imageMobile{ ..., asset->{url, _ref, _id} },
+                imageMobileR2,
+                imageDesktop{ ..., asset->{url, _ref, _id} },
+                imageDesktopR2,
+                videoFile{ ..., asset->{url, _ref, _id} },
+                videoFileR2
               }
             },
             qualitySection{
               ...,
               image{ asset->{url, _ref, _id} },
+              imageR2,
               media[]{
                 ...,
                 image{ ..., asset->{url, _ref, _id} },
-                videoFile{ ..., asset->{url, _ref, _id} }
+                imageR2,
+                imageMobile{ ..., asset->{url, _ref, _id} },
+                imageMobileR2,
+                imageDesktop{ ..., asset->{url, _ref, _id} },
+                imageDesktopR2,
+                videoFile{ ..., asset->{url, _ref, _id} },
+                videoFileR2
               }
             }
         }`
     const data = await sanity.fetch(q)
     if (data) {
       // Normalize images
-      if (data.heroImage) {
+      if (data.heroImageR2?.url || data.heroImage) {
+        const url = data.heroImageR2?.url || mapImage(data.heroImage)
+        const fallbackUrl = data.heroImageR2?.url ? mapImage(data.heroImage) : undefined
         data.heroImage = {
-          url: mapImage(data.heroImage),
+          url,
           palette: extractPalette(data.heroImage),
+          fallbackUrl,
         }
       }
 
       // Map media for sections
       if (data.historySection) {
-        data.historySection.image = data.historySection.image ? mapImage(data.historySection.image) : undefined
+        const url = data.historySection.imageR2?.url || mapImage(data.historySection.image)
+        const fallbackUrl = data.historySection.imageR2?.url ? mapImage(data.historySection.image) : undefined
+        data.historySection.image = { url, fallbackUrl }
         data.historySection.media = mapProductMedia(data.historySection)
       }
       if (data.identitySection) {
-        data.identitySection.image = data.identitySection.image ? mapImage(data.identitySection.image) : undefined
+        const url = data.identitySection.imageR2?.url || mapImage(data.identitySection.image)
+        const fallbackUrl = data.identitySection.imageR2?.url ? mapImage(data.identitySection.image) : undefined
+        data.identitySection.image = { url, fallbackUrl }
         data.identitySection.media = mapProductMedia(data.identitySection)
       }
       if (data.qualitySection) {
-        data.qualitySection.image = data.qualitySection.image ? mapImage(data.qualitySection.image) : undefined
+        const url = data.qualitySection.imageR2?.url || mapImage(data.qualitySection.image)
+        const fallbackUrl = data.qualitySection.imageR2?.url ? mapImage(data.qualitySection.image) : undefined
+        data.qualitySection.image = { url, fallbackUrl }
         data.qualitySection.media = mapProductMedia(data.qualitySection)
       }
 
@@ -1434,8 +1680,11 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             heroMedia[]{
                 ...,
                 image{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}} },
+                imageR2,
                 imageMobile{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}} },
+                imageMobileR2,
                 imageDesktop{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}} },
+                imageDesktopR2,
                 videoFile{
                     asset->{url, _ref, _id}
                 },
@@ -1450,6 +1699,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
                 ...,
                 titleFont,
                 image,
+                imageR2,
                 videoFile{
                     asset->{url, _ref, _id}
                 }
@@ -1457,13 +1707,17 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             inspirationSection{
                 ...,
                 backgroundImage{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}} },
+                backgroundImageR2,
                 backgroundImageMobile{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}} },
-                backgroundImageDesktop{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}} }
+                backgroundImageMobileR2,
+                backgroundImageDesktop{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}} },
+                backgroundImageDesktopR2
             }
         }`
       const data = await sanity.fetch(q)
       if (data?.heroMedia) {
         data.heroMedia = data.heroMedia.map((m: any) => {
+          // mapMediaUrl updated to use R2 fields automatically
           const url = mapMediaUrl(m)
           const urlMobile = mapMediaUrl(m, true, false)
           const urlDesktop = mapMediaUrl(m, false, true)
@@ -1480,9 +1734,12 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
       if (data?.contentBlocks) {
         data.contentBlocks = data.contentBlocks.map((b: any) => {
           let url = b.url
-          if (b.mediaType === 'image' && b.image) {
-            return { ...b, image: mapImage(b.image), url: undefined }
-          } else if (b.mediaType === 'video' && b.videoFile?.asset?.url) {
+          if (b.mediaType === 'image') {
+            // R2 Priority for Content Blocks
+            const imgUrl = b.imageR2?.url || (b.image ? mapImage(b.image) : undefined)
+            if (imgUrl) return { ...b, image: imgUrl, url: undefined }
+          }
+          if (b.mediaType === 'video' && b.videoFile?.asset?.url) {
             url = b.videoFile.asset.url
           } else if (b.mediaType === 'video' && b.videoFile?.asset?._id) {
             const fileId = b.videoFile.asset._id.replace('file-', '')
@@ -1495,13 +1752,15 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
         })
       }
       if (data?.inspirationSection) {
-        const bgImg = mapImage(data.inspirationSection.backgroundImage)
-        const bgImgMobile = data.inspirationSection.backgroundImageMobile
-          ? mapImage(data.inspirationSection.backgroundImageMobile)
-          : undefined
-        const bgImgDesktop = data.inspirationSection.backgroundImageDesktop
-          ? mapImage(data.inspirationSection.backgroundImageDesktop)
-          : undefined
+        // R2 Priority for Inspiration Section
+        const bgImg = data.inspirationSection.backgroundImageR2?.url || mapImage(data.inspirationSection.backgroundImage)
+
+        const bgImgMobile = data.inspirationSection.backgroundImageMobileR2?.url ||
+          (data.inspirationSection.backgroundImageMobile ? mapImage(data.inspirationSection.backgroundImageMobile) : undefined)
+
+        const bgImgDesktop = data.inspirationSection.backgroundImageDesktopR2?.url ||
+          (data.inspirationSection.backgroundImageDesktop ? mapImage(data.inspirationSection.backgroundImageDesktop) : undefined)
+
         const palette = extractPalette(data.inspirationSection.backgroundImage)
         data.inspirationSection.backgroundImage = {
           url: bgImg,
@@ -1626,18 +1885,27 @@ export const getNews = async (): Promise<NewsItem[]> => {
           sortOrder,
           content, 
           mainImage,
+          mainImageR2,
           mainImageMobile,
-          mainImageDesktop, 
+          mainImageMobileR2,
+          mainImageDesktop,
+          mainImageDesktopR2,
           media[]{
             type,
             url,
             caption,
             image,
+            imageR2,
             imageMobile,
+            imageMobileR2,
             imageDesktop,
+            imageDesktopR2,
             videoFile{asset->{url, _ref, _id}},
+            videoFileR2,
             videoFileMobile{asset->{url, _ref, _id}},
-            videoFileDesktop{asset->{url, _ref, _id}}
+            videoFileMobileR2,
+            videoFileDesktop{asset->{url, _ref, _id}},
+            videoFileDesktopR2
           }
         }`
     const rows = await sanity.fetch(q)
@@ -1650,14 +1918,16 @@ export const getNews = async (): Promise<NewsItem[]> => {
       sortOrder: r.sortOrder,
       content: r.content,
       mainImage: (() => {
-        const img = mapImage(r.mainImage)
-        const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
-        const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
+        const img = mapImage(r.mainImageR2 || r.mainImage)
+        const imgMobile = r.mainImageMobileR2?.url ? mapImage(r.mainImageMobileR2) : (r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined)
+        const imgDesktop = r.mainImageDesktopR2?.url ? mapImage(r.mainImageDesktopR2) : (r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined)
+        const fallbackUrl = r.mainImageR2?.url ? mapImage(r.mainImage) : undefined
         // Art Direction için object döndür
         return {
           url: img,
           urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
           urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
+          fallbackUrl,
         }
       })(),
       media: (r.media || [])
@@ -1665,8 +1935,9 @@ export const getNews = async (): Promise<NewsItem[]> => {
           const url = mapMediaUrl(m)
           const urlMobile = mapMediaUrl(m, true, false)
           const urlDesktop = mapMediaUrl(m, false, true)
+          const fallbackUrl = (m?.imageR2?.url || m?.videoFileR2?.url) ? mapMediaUrl({ ...m, imageR2: undefined, videoFileR2: undefined, imageMobileR2: undefined, videoFileMobileR2: undefined, imageDesktopR2: undefined, videoFileDesktopR2: undefined }) : undefined
 
-          const result: any = { type: m.type, url, caption: m.caption }
+          const result: any = { type: m.type, url, caption: m.caption, fallbackUrl }
           if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
           if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
 
@@ -1686,18 +1957,27 @@ export const getNewsById = async (id: string): Promise<NewsItem | undefined> => 
           date, 
           content, 
           mainImage,
+          mainImageR2,
           mainImageMobile,
-          mainImageDesktop, 
+          mainImageMobileR2,
+          mainImageDesktop,
+          mainImageDesktopR2,
           media[]{
             type,
             url,
             caption,
             image,
+            imageR2,
             imageMobile,
+            imageMobileR2,
             imageDesktop,
+            imageDesktopR2,
             videoFile{asset->{url, _ref, _id}},
+            videoFileR2,
             videoFileMobile{asset->{url, _ref, _id}},
-            videoFileDesktop{asset->{url, _ref, _id}}
+            videoFileMobileR2,
+            videoFileDesktop{asset->{url, _ref, _id}},
+            videoFileDesktopR2
           }
         }`
     const r = await sanity.fetch(q, { id })
@@ -1708,14 +1988,16 @@ export const getNewsById = async (id: string): Promise<NewsItem | undefined> => 
       date: r.date,
       content: r.content,
       mainImage: (() => {
-        const img = mapImage(r.mainImage)
-        const imgMobile = r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined
-        const imgDesktop = r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined
+        const img = mapImage(r.mainImageR2 || r.mainImage)
+        const imgMobile = r.mainImageMobileR2?.url ? mapImage(r.mainImageMobileR2) : (r.mainImageMobile ? mapImage(r.mainImageMobile) : undefined)
+        const imgDesktop = r.mainImageDesktopR2?.url ? mapImage(r.mainImageDesktopR2) : (r.mainImageDesktop ? mapImage(r.mainImageDesktop) : undefined)
+        const fallbackUrl = r.mainImageR2?.url ? mapImage(r.mainImage) : undefined
         // Art Direction için object döndür
         return {
           url: img,
           urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
           urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
+          fallbackUrl,
         }
       })(),
       media: (r.media || [])
@@ -1723,8 +2005,9 @@ export const getNewsById = async (id: string): Promise<NewsItem | undefined> => 
           const url = mapMediaUrl(m)
           const urlMobile = mapMediaUrl(m, true, false)
           const urlDesktop = mapMediaUrl(m, false, true)
+          const fallbackUrl = (m?.imageR2?.url || m?.videoFileR2?.url) ? mapMediaUrl({ ...m, imageR2: undefined, videoFileR2: undefined, imageMobileR2: undefined, videoFileMobileR2: undefined, imageDesktopR2: undefined, videoFileDesktopR2: undefined }) : undefined
 
-          const result: any = { type: m.type, url, caption: m.caption }
+          const result: any = { type: m.type, url, caption: m.caption, fallbackUrl }
           if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
           if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
 
@@ -1771,32 +2054,36 @@ export const getProjects = async (): Promise<Project[]> => {
         isPublished,
         sortOrder,
         cover{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, 
+        coverR2,
         coverMobile{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, 
+        coverMobileR2,
         coverDesktop{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, 
+        coverDesktopR2,
         excerpt 
       }`
     const rows = await sanity.fetch(q)
-    return rows.map((r: any) => {
-      const cover = mapImage(r.cover)
-      const coverMobile = r.coverMobile ? mapImage(r.coverMobile) : undefined
-      const coverDesktop = r.coverDesktop ? mapImage(r.coverDesktop) : undefined
-      const palette = extractPalette(r.cover)
-      return {
-        id: r.id,
-        title: r.title,
-        date: r.date,
-        publishAt: r.publishAt,
-        isPublished: r.isPublished,
-        sortOrder: r.sortOrder,
-        cover: {
-          url: cover,
-          urlMobile: coverMobile && coverMobile !== cover ? coverMobile : undefined,
-          urlDesktop: coverDesktop && coverDesktop !== cover ? coverDesktop : undefined,
-          palette,
-        },
-        excerpt: r.excerpt,
-      }
-    })
+    return rows.map((r: any) => ({
+      id: r.id,
+      title: r.title,
+      date: r.date,
+      publishAt: r.publishAt,
+      isPublished: r.isPublished,
+      sortOrder: r.sortOrder,
+      cover: (() => {
+        const url = mapImage(r.coverR2 || r.cover)
+        const urlMobile = r.coverMobileR2?.url ? mapImage(r.coverMobileR2) : (r.coverMobile ? mapImage(r.coverMobile) : undefined)
+        const urlDesktop = r.coverDesktopR2?.url ? mapImage(r.coverDesktopR2) : (r.coverDesktop ? mapImage(r.coverDesktop) : undefined)
+        const fallbackUrl = r.coverR2?.url ? mapImage(r.cover) : undefined
+        return {
+          url,
+          urlMobile: urlMobile && urlMobile !== url ? urlMobile : undefined,
+          urlDesktop: urlDesktop && urlDesktop !== url ? urlDesktop : undefined,
+          palette: extractPalette(r.cover),
+          fallbackUrl,
+        }
+      })(),
+      excerpt: r.excerpt,
+    }))
   }
   return []
 }
@@ -1807,19 +2094,29 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
       title, 
       date, 
       cover{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, 
+      coverR2,
       coverMobile{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, 
+      coverMobileR2,
       coverDesktop{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, 
+      coverDesktopR2,
       excerpt, 
       body, 
       media[]{
         type,
         url,
+        caption,
         image,
+        imageR2,
         imageMobile,
+        imageMobileR2,
         imageDesktop,
+        imageDesktopR2,
         videoFile{asset->{url, _ref, _id}},
+        videoFileR2,
         videoFileMobile{asset->{url, _ref, _id}},
-        videoFileDesktop{asset->{url, _ref, _id}}
+        videoFileMobileR2,
+        videoFileDesktop{asset->{url, _ref, _id}},
+        videoFileDesktopR2
       }
     }`
     const r = await sanity.fetch(q, { id })
@@ -1845,15 +2142,16 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
       title: r.title,
       date: r.date,
       cover: (() => {
-        const cover = mapImage(r.cover)
-        const coverMobile = r.coverMobile ? mapImage(r.coverMobile) : undefined
-        const coverDesktop = r.coverDesktop ? mapImage(r.coverDesktop) : undefined
-        const palette = extractPalette(r.cover)
+        const url = mapImage(r.coverR2 || r.cover)
+        const urlMobile = r.coverMobileR2?.url ? mapImage(r.coverMobileR2) : (r.coverMobile ? mapImage(r.coverMobile) : undefined)
+        const urlDesktop = r.coverDesktopR2?.url ? mapImage(r.coverDesktopR2) : (r.coverDesktop ? mapImage(r.coverDesktop) : undefined)
+        const fallbackUrl = r.coverR2?.url ? mapImage(r.cover) : undefined
         return {
-          url: cover,
-          urlMobile: coverMobile && coverMobile !== cover ? coverMobile : undefined,
-          urlDesktop: coverDesktop && coverDesktop !== cover ? coverDesktop : undefined,
-          palette,
+          url,
+          urlMobile: urlMobile && urlMobile !== url ? urlMobile : undefined,
+          urlDesktop: urlDesktop && urlDesktop !== url ? urlDesktop : undefined,
+          palette: extractPalette(r.cover),
+          fallbackUrl,
         }
       })(),
       excerpt: r.excerpt,

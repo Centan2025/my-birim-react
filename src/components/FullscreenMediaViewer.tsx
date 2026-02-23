@@ -3,11 +3,15 @@ import { createPortal } from 'react-dom'
 import { OptimizedImage } from './OptimizedImage'
 import { OptimizedVideo } from './OptimizedVideo'
 
+import { R2ImageMetadata } from '../types'
+
 type MediaItem = {
   type: 'image' | 'video' | 'youtube'
   url: string
   urlMobile?: string
   urlDesktop?: string
+  crop?: R2ImageMetadata['crop']
+  hotspot?: R2ImageMetadata['hotspot']
 }
 
 interface FullscreenMediaViewerProps {
@@ -21,6 +25,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   initialIndex = 0,
   onClose,
 }) => {
+  /* Removed incorrect JSX block */
   const [isClosing, setIsClosing] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
   const [isButtonVisible, setIsButtonVisible] = useState(false)
@@ -885,6 +890,8 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
                       }}
                       loading="eager"
                       quality={95}
+                      crop={item.crop}
+                      hotspot={item.hotspot}
                     />
                   ) : item.type === 'video' ? (
                     <OptimizedVideo

@@ -1,3 +1,4 @@
+import React from 'react'
 import { defineField, defineType } from 'sanity'
 
 export default defineType({
@@ -12,6 +13,11 @@ export default defineType({
       options: { hotspot: true },
       description:
         'Hakkımızda sayfası hero alanı için geniş görsel. Önerilen çözünürlük: Desktop 1920x1080px (16:9), Mobil 1080x1920px (9:16).',
+    }),
+    defineField({
+      name: 'heroImageR2',
+      title: 'Hero Görseli (R2)',
+      type: 'r2Asset',
     }),
     defineField({ name: 'heroTitle', title: 'Hero Başlığı', type: 'localizedString' }),
     defineField({ name: 'heroSubtitle', title: 'Hero Alt Başlığı', type: 'localizedString' }),
@@ -28,6 +34,7 @@ export default defineType({
           type: 'localizedPortableText',
         }),
         defineField({ name: 'image', title: 'Ana Görsel', type: 'image', options: { hotspot: true } }),
+        defineField({ name: 'imageR2', title: 'Ana Görsel (R2)', type: 'r2Asset' }),
         defineField({
           name: 'media',
           title: 'Medya Galerisi',
@@ -49,6 +56,7 @@ export default defineType({
           type: 'localizedPortableText',
         }),
         defineField({ name: 'image', title: 'Ana Görsel', type: 'image', options: { hotspot: true } }),
+        defineField({ name: 'imageR2', title: 'Ana Görsel (R2)', type: 'r2Asset' }),
         defineField({
           name: 'media',
           title: 'Medya Galerisi',
@@ -70,6 +78,7 @@ export default defineType({
           type: 'localizedPortableText',
         }),
         defineField({ name: 'image', title: 'Ana Görsel', type: 'image', options: { hotspot: true } }),
+        defineField({ name: 'imageR2', title: 'Ana Görsel (R2)', type: 'r2Asset' }),
         defineField({
           name: 'media',
           title: 'Medya Galerisi',
@@ -95,9 +104,18 @@ export default defineType({
     }),
   ],
   preview: {
-    select: { media: 'heroImage' },
-    prepare({ media }) {
-      return { title: 'Hakkımızda', media }
+    select: { media: 'heroImage', r2Url: 'heroImageR2.url' },
+    prepare({ media, r2Url }) {
+      return {
+        title: 'Hakkımızda',
+        media: media || (r2Url ? (
+          <img
+            src={r2Url}
+            alt="Hakkımızda"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        ) : undefined)
+      }
     },
   },
 })

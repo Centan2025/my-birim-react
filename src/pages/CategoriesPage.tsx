@@ -1,21 +1,21 @@
-import {Link} from 'react-router-dom'
-import {useEffect, useMemo} from 'react'
-import {OptimizedImage} from '../components/OptimizedImage'
-import {PageLoading} from '../components/LoadingSpinner'
-import {useTranslation} from '../i18n'
-import {useCategories} from '../hooks/useCategories'
-import {useProducts} from '../hooks/useProducts'
-import {useSiteSettings} from '../hooks/useSiteData'
+import { Link } from 'react-router-dom'
+import { useEffect, useMemo } from 'react'
+import { OptimizedImage } from '../components/OptimizedImage'
+import { PageLoading } from '../components/LoadingSpinner'
+import { useTranslation } from '../i18n'
+import { useCategories } from '../hooks/useCategories'
+import { useProducts } from '../hooks/useProducts'
+import { useSiteSettings } from '../hooks/useSiteData'
 import ScrollReveal from '../components/ScrollReveal'
-import {useSEO} from '../hooks/useSEO'
-import {useHeaderTheme} from '../context/HeaderThemeContext'
+import { useSEO } from '../hooks/useSEO'
+import { useHeaderTheme } from '../context/HeaderThemeContext'
 
 export function CategoriesPage() {
-  const {data: categories = [], isLoading: loading} = useCategories()
-  const {data: allProducts = []} = useProducts()
-  const {t} = useTranslation()
-  const {data: settings} = useSiteSettings()
-  const {setFromPalette, reset} = useHeaderTheme()
+  const { data: categories = [], isLoading: loading } = useCategories()
+  const { data: allProducts = [] } = useProducts()
+  const { t } = useTranslation()
+  const { data: settings } = useSiteSettings()
+  const { setFromPalette, reset } = useHeaderTheme()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const pageTitle = `BIRIM - ${t('categories') || t('products') || 'Kategoriler'}`
 
@@ -31,7 +31,7 @@ export function CategoriesPage() {
   const categoriesWithImages = useMemo(() => {
     return categories.map(category => {
       // Eğer kategori görseli varsa onu kullan
-      if (category.heroImage && category.heroImage.trim() !== '') {
+      if (category.heroImage) {
         return { ...category, displayImage: category.heroImage }
       }
 
@@ -45,22 +45,13 @@ export function CategoriesPage() {
       for (const product of categoryProducts) {
         if (!product || !product.mainImage) continue
 
-        // mainImage string veya object olabilir
-        let productImage = ''
-        if (typeof product.mainImage === 'string') {
-          productImage = product.mainImage.trim()
-        } else if (product.mainImage && typeof product.mainImage === 'object') {
-          productImage = (product.mainImage.url || '').trim()
-        }
-
+        // mainImage string veya object olabilir (src/types.ts'de tanımlı)
         // Görsel bulunduysa kullan
-        if (productImage && productImage !== '') {
-          return { ...category, displayImage: productImage }
-        }
+        return { ...category, displayImage: product.mainImage }
       }
 
-      // Hiç görsel yoksa boş string döndür
-      return { ...category, displayImage: '' }
+      // Hiç görsel yoksa null döndür
+      return { ...category, displayImage: null }
     })
   }, [categories, allProducts])
 
@@ -114,7 +105,7 @@ export function CategoriesPage() {
             </h1>
             <p
               className="mt-4 text-lg max-w-2xl mx-auto"
-              style={{textShadow: '0 1px 3px rgba(0,0,0,0.5)'}}
+              style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}
             >
               {t('products_page_subtitle')}
             </p>
@@ -127,9 +118,9 @@ export function CategoriesPage() {
         {categoriesWithImages.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12">
             {categoriesWithImages.map((category, index) => (
-              <ScrollReveal 
-                key={category.id} 
-                delay={index < 12 ? index * 20 : 0} 
+              <ScrollReveal
+                key={category.id}
+                delay={index < 12 ? index * 20 : 0}
                 threshold={0.01}
               >
                 <Link
@@ -139,7 +130,10 @@ export function CategoriesPage() {
                   <div className={`relative h-[600px] overflow-hidden ${imageBorderClass}`}>
                     {category.displayImage && (
                       <OptimizedImage
-                        src={category.displayImage}
+                        src={typeof category.displayImage === 'string' ? category.displayImage : category.displayImage.url}
+                        srcMobile={typeof category.displayImage === 'object' ? category.displayImage.urlMobile : undefined}
+                        srcDesktop={typeof category.displayImage === 'object' ? category.displayImage.urlDesktop : undefined}
+                        fallbackSrc={typeof category.displayImage === 'object' ? category.displayImage.fallbackUrl : undefined}
                         alt={t(category.name)}
                         className={`w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-[1.03] ${imageBorderClass}`}
                         loading="lazy"

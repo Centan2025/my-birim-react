@@ -1,15 +1,36 @@
-import {Link} from 'react-router-dom'
-import {OptimizedImage} from './OptimizedImage'
+import { Link } from 'react-router-dom'
+import { OptimizedImage } from './OptimizedImage'
 import ScrollReveal from './ScrollReveal'
-import type {Designer, LocalizedString} from '../types'
+import type { Designer, LocalizedString } from '../types'
 
 interface ProductDesignerSectionProps {
   designer: Designer | null
   t: (value: string | LocalizedString) => string
 }
 
-export function ProductDesignerSection({designer, t}: ProductDesignerSectionProps) {
+// Helper to extract plain text from Portable Text blocks
+function toPlainText(blocks: any): string {
+  if (!blocks) return ''
+  if (typeof blocks === 'string') return blocks
+  if (Array.isArray(blocks)) {
+    return blocks
+      .map(block => {
+        if (block._type !== 'block' || !block.children) {
+          return ''
+        }
+        return block.children.map((child: any) => child.text).join('')
+      })
+      .join('\n\n')
+  }
+  return ''
+}
+
+export function ProductDesignerSection({ designer, t }: ProductDesignerSectionProps) {
   if (!designer) return null
+
+  // Safely extract bio text
+  const bioText = toPlainText(t(designer.bio))
+  const isLongText = bioText.length > 400
 
   return (
     <ScrollReveal delay={400} threshold={0.05}>
@@ -39,8 +60,8 @@ export function ProductDesignerSection({designer, t}: ProductDesignerSectionProp
             <div className="w-full">
               <h3 className="text-2xl font-normal text-gray-700">{t(designer.name)}</h3>
               <p className="mt-4 text-gray-800 font-normal leading-relaxed">
-                {t(designer.bio).slice(0, 400)}
-                {t(designer.bio).length > 400 ? '…' : ''}
+                {bioText.slice(0, 400)}
+                {isLongText ? '…' : ''}
               </p>
               <Link
                 to={`/designer/${designer.id}`}

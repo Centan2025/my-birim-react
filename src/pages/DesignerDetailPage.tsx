@@ -100,6 +100,7 @@ export function DesignerDetailPage() {
                   ? designer.image.urlDesktop
                   : designer.imageDesktop
               }
+              fallbackSrc={typeof designer.image === 'object' ? designer.image.fallbackUrl : undefined}
               alt={t(designer.name)}
               className={`w-80 h-96 md:w-96 md:h-[32rem] object-cover shadow-none md:shadow-none filter grayscale ${imageBorderClass}`}
               loading="eager"
@@ -109,8 +110,8 @@ export function DesignerDetailPage() {
           <div className="text-left w-full">
             <div className="max-w-2xl px-4 sm:px-0 md:px-0 md:mx-0">
               <h1 className={`text-4xl font-normal text-gray-700 ${isTitleVisible
-                  ? 'translate-x-0 opacity-100'
-                  : '-translate-x-[150%] opacity-0'
+                ? 'translate-x-0 opacity-100'
+                : '-translate-x-[150%] opacity-0'
                 }`} style={{
                   transition: 'transform 700ms ease-out, opacity 1200ms ease-out'
                 }}>{t(designer.name)}</h1>

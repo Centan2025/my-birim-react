@@ -32,6 +32,9 @@ const MediaGallery = ({ media, alt }: { media?: NewsMedia[]; alt: string }) => {
               ) : (
                 <OptimizedImage
                   src={m.url}
+                  srcMobile={m.urlMobile}
+                  srcDesktop={m.urlDesktop}
+                  fallbackSrc={m.fallbackUrl}
                   alt={`${alt} gallery ${idx + 1}`}
                   className="w-full h-full object-cover"
                 />
@@ -51,8 +54,9 @@ export function AboutPage() {
   const { setFromPalette, reset } = useHeaderTheme()
 
   // SEO
-  const heroImageUrl =
-    typeof content?.heroImage === 'object' ? content?.heroImage?.url : content?.heroImage
+  const heroImageObj = typeof content?.heroImage === 'object' ? content.heroImage : null
+  const heroImageUrl = heroImageObj ? heroImageObj.url : (typeof content?.heroImage === 'string' ? content.heroImage : '')
+  const heroImageFallback = heroImageObj?.fallbackUrl
 
   useSEO({
     title: `BIRIM - ${t('about') || 'Hakkımızda'}`,
@@ -113,6 +117,7 @@ export function AboutPage() {
           <div className="absolute inset-0 w-full h-full scale-105 animate-slow-zoom">
             <OptimizedImage
               src={heroImageUrl || ''}
+              fallbackSrc={heroImageFallback}
               alt={t(content.heroTitle)}
               className="w-full h-full opacity-60 object-cover"
               width={1920}
@@ -160,25 +165,36 @@ export function AboutPage() {
                       {t(content.historySection.title)}
                     </h2>
                     <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
-                      {Array.isArray(t(content.historySection.content)) ? (
-                        <>
-                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                          <PortableTextLite value={t(content.historySection.content) as any} />
-                        </>
-                      ) : (
-                        <p>{t(content.historySection.content)}</p>
-                      )}
+                      {(() => {
+                        const historyContent = t(content.historySection.content)
+                        const isPortable = Array.isArray(historyContent) || (typeof historyContent === 'object' && historyContent !== null && (historyContent as any)._type === 'block')
+
+                        if (isPortable) {
+                          const blocks = Array.isArray(historyContent) ? historyContent : [historyContent]
+                          return <PortableTextLite value={blocks as any} />
+                        }
+
+                        return <p>{historyContent as string}</p>
+                      })()}
                     </div>
                   </ScrollReveal>
                 </div>
                 <div className="flex-1 w-full lg:w-auto">
                   <ScrollReveal threshold={0.2} delay={200} duration={1} distance={10}>
                     <div className="relative aspect-[4/5] overflow-hidden">
-                      <OptimizedImage
-                        src={content.historySection.image || content.storyImage || ''}
-                        alt="History"
-                        className="w-full h-full object-cover"
-                      />
+                      {(() => {
+                        const img = content.historySection?.image
+                        const url = typeof img === 'object' ? img.url : (img || content.storyImage || '')
+                        const fallback = typeof img === 'object' ? img.fallbackUrl : undefined
+                        return (
+                          <OptimizedImage
+                            src={url}
+                            fallbackSrc={fallback}
+                            alt="History"
+                            className="w-full h-full object-cover"
+                          />
+                        )
+                      })()}
                     </div>
                   </ScrollReveal>
                 </div>
@@ -197,11 +213,19 @@ export function AboutPage() {
                 <div className="flex-1 w-full lg:w-auto">
                   <ScrollReveal threshold={0.2} duration={1} distance={10}>
                     <div className="relative aspect-video overflow-hidden">
-                      <OptimizedImage
-                        src={content.identitySection.image || ''}
-                        alt="Identity"
-                        className="w-full h-full object-cover"
-                      />
+                      {(() => {
+                        const img = content.identitySection?.image
+                        const url = typeof img === 'object' ? img.url : (img || '')
+                        const fallback = typeof img === 'object' ? img.fallbackUrl : undefined
+                        return (
+                          <OptimizedImage
+                            src={url}
+                            fallbackSrc={fallback}
+                            alt="Identity"
+                            className="w-full h-full object-cover"
+                          />
+                        )
+                      })()}
                     </div>
                   </ScrollReveal>
                 </div>
@@ -258,11 +282,19 @@ export function AboutPage() {
                   <div className="lg:w-2/3 w-full">
                     <ScrollReveal threshold={0.2} delay={200} duration={1} distance={10}>
                       <div className="relative aspect-video lg:aspect-[16/9] overflow-hidden">
-                        <OptimizedImage
-                          src={content.qualitySection.image || ''}
-                          alt="Quality"
-                          className="w-full h-full object-cover"
-                        />
+                        {(() => {
+                          const img = content.qualitySection?.image
+                          const url = typeof img === 'object' ? img.url : (img || '')
+                          const fallback = typeof img === 'object' ? img.fallbackUrl : undefined
+                          return (
+                            <OptimizedImage
+                              src={url}
+                              fallbackSrc={fallback}
+                              alt="Quality"
+                              className="w-full h-full object-cover"
+                            />
+                          )
+                        })()}
                       </div>
                     </ScrollReveal>
                   </div>

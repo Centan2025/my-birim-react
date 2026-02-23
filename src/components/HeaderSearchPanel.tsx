@@ -86,8 +86,8 @@ export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
         role="search"
         aria-label={t('search') || 'Ara'}
         className={`fixed left-0 right-0 z-[100] bg-black/80 backdrop-blur-lg transition-opacity duration-300 ease-out ${isOpen
-            ? 'opacity-100 pointer-events-auto'
-            : 'opacity-0 pointer-events-none'
+          ? 'opacity-100 pointer-events-auto'
+          : 'opacity-0 pointer-events-none'
           }`}
         style={{
           // Paneli tam olarak header'ın altından başlat
@@ -202,7 +202,11 @@ export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
                           className="flex items-center p-3 hover:bg-white/10 rounded-md transition-colors duration-200"
                         >
                           <img
-                            src={category.heroImage}
+                            src={
+                              typeof category.heroImage === 'string'
+                                ? category.heroImage
+                                : category.heroImage?.url || ''
+                            }
                             alt={t(category.name)}
                             className="w-12 h-12 object-cover rounded-md mr-4 flex-shrink-0"
                           />
