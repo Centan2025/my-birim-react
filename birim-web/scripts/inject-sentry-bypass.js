@@ -4,9 +4,9 @@ const path = require('path')
 const indexHtmlPath = path.join(__dirname, '..', 'dist', 'index.html')
 
 if (fs.existsSync(indexHtmlPath)) {
-    let html = fs.readFileSync(indexHtmlPath, 'utf8')
+  let html = fs.readFileSync(indexHtmlPath, 'utf8')
 
-    const proxyScript = `
+  const proxyScript = `
 <script>
 // Monkey-patch to silently swallow Sentry ingest errors caused by Adblockers in Sanity Studio
 if (typeof window !== 'undefined') {
@@ -42,18 +42,36 @@ if (typeof window !== 'undefined') {
       }
     }
   };
+
+  const originalSendBeacon = navigator.sendBeacon;
+  navigator.sendBeacon = function (url, data) {
+    if (typeof url === 'string' && (url.includes('sentry.io') || url.includes('ingest.us.sentry.io'))) {
+      return true; // Pretend it succeeded
+    }
+    return originalSendBeacon.call(navigator, url, data);
+  };
+
+  window.addEventListener('unhandledrejection', function(event) {
+    const reason = event.reason;
+    if (reason && reason.message) {
+      const msg = reason.message.toLowerCase();
+      if (msg.includes('sentry') || msg.includes('net::err_name_not_resolved')) {
+        event.preventDefault(); // Stop it from surfacing as an unhandled rejection and crashing the app
+      }
+    }
+  });
 }
 </script>
 `
 
-    // Inject right after <head>
-    if (!html.includes('Monkey-patch to silently swallow Sentry')) {
-        html = html.replace('<head>', '<head>' + proxyScript)
-        fs.writeFileSync(indexHtmlPath, html, 'utf8')
-        console.log('Successfully injected Sentry Adblocker bypass into index.html')
-    } else {
-        console.log('Sentry bypass already injected.')
-    }
+  // Inject right after <head>
+  if (!html.includes('Monkey-patch to silently swallow Sentry')) {
+    html = html.replace('<head>', '<head>' + proxyScript)
+    fs.writeFileSync(indexHtmlPath, html, 'utf8')
+    console.log('Successfully injected Sentry Adblocker bypass into index.html')
+  } else {
+    console.log('Sentry bypass already injected.')
+  }
 } else {
-    console.log('dist/index.html not found, skipping Sentry bypass injection.')
+  console.log('dist/index.html not found, skipping Sentry bypass injection.')
 }
