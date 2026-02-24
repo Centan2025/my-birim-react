@@ -29,7 +29,11 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
     Boolean(inspiration) &&
     Boolean(inspiration.backgroundImage || inspiration.title || inspiration.subtitle)
 
-  const backgroundImage = isMobile && bgImageMobile ? bgImageMobile : bgImageDesktop || bgImageUrl
+  // Desktop: bgImageDesktop → bgImageUrl → bgImageMobile (en az biri mutlaka gösterilmeli)
+  // Mobile: bgImageMobile → bgImageUrl → bgImageDesktop
+  const backgroundImage = isMobile
+    ? bgImageMobile || bgImageUrl || bgImageDesktop || ''
+    : bgImageDesktop || bgImageUrl || bgImageMobile || ''
 
   const dynamicHeightStyles = isMobile
     ? {

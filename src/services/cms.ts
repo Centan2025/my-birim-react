@@ -1716,10 +1716,12 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
           : undefined
 
         const palette = extractPalette(data.inspirationSection.backgroundImageR2)
+        // Fallback: Eğer genel bgImg yoksa, desktop veya mobile'dan al
+        const finalBgImg = bgImg || bgImgDesktop || bgImgMobile || ''
         data.inspirationSection.backgroundImage = {
-          url: bgImg,
-          urlMobile: bgImgMobile && bgImgMobile !== bgImg ? bgImgMobile : undefined,
-          urlDesktop: bgImgDesktop && bgImgDesktop !== bgImg ? bgImgDesktop : undefined,
+          url: finalBgImg,
+          urlMobile: bgImgMobile && bgImgMobile !== finalBgImg ? bgImgMobile : undefined,
+          urlDesktop: bgImgDesktop && bgImgDesktop !== finalBgImg ? bgImgDesktop : undefined,
           palette,
         }
       }
