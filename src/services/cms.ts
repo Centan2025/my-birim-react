@@ -1550,7 +1550,8 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
                 backgroundImageDesktopR2{..., metadata{palette{dominant{background,foreground}}} }
             }
         }`
-      const data = await sanity.fetch(q)
+      // CDN cache'i bypass et — CMS'teki hero değişiklikleri anında yansısın
+      const data = await sanity.withConfig({ useCdn: false }).fetch(q)
       if (data?.heroMedia) {
         data.heroMedia = data.heroMedia.map((m: any) => {
           // mapMediaUrl updated to use R2 fields automatically
