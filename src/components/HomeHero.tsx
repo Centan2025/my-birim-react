@@ -332,22 +332,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
 
     autoPlayIntervalRef.current = setInterval(() => {
       if (isDragging || isTransitioning) return
-      if (content?.heroAutoPlay !== true) {
-        if (autoPlayIntervalRef.current) {
-          clearInterval(autoPlayIntervalRef.current)
-          autoPlayIntervalRef.current = null
-        }
-        return
-      }
-
-      const count = heroMedia.length
-      setCurrentSlide(prev => {
-        const next = prev + 1
-        if (next >= count) {
-          return 0
-        }
-        return next
-      })
+      goToNextSlide()
     }, 5000)
 
     return () => {
@@ -356,37 +341,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
         autoPlayIntervalRef.current = null
       }
     }
-  }, [heroMedia, content?.heroAutoPlay, isDragging, isTransitioning])
-
-  // Klonlardan gerçek slide'a geçiş kontrolü (otomatik geçiş için)
-  useEffect(() => {
-    if (!heroMedia || heroMedia.length === 0) return
-    const count = heroMedia.length || 1
-    if (count <= 1 || isDragging || isTransitioning) return
-
-    if (currentSlide >= count) {
-      const timer = setTimeout(() => {
-        setIsTransitioning(true)
-        setTimeout(() => {
-          setCurrentSlide(0)
-          setIsTransitioning(false)
-        }, 10)
-      }, 650)
-      return () => clearTimeout(timer)
-    }
-
-    if (currentSlide < 0) {
-      const timer = setTimeout(() => {
-        setIsTransitioning(true)
-        setTimeout(() => {
-          setCurrentSlide(count - 1)
-          setIsTransitioning(false)
-        }, 10)
-      }, 650)
-      return () => clearTimeout(timer)
-    }
-    return undefined
-  }, [currentSlide, heroMedia, isDragging, isTransitioning])
+  }, [heroMedia, content?.heroAutoPlay, isDragging, isTransitioning, goToNextSlide])
 
   // Hero text animasyonu - slide değiştiğinde soldan gel
   useEffect(() => {
