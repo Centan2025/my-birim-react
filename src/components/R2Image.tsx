@@ -34,7 +34,7 @@ const getR2Url = (
   options: {width?: number; height?: number; quality?: number},
   crop?: {x: number; y: number; w: number; h: number; origW: number; origH: number}
 ) => {
-  const domain = import.meta.env['VITE_R2_DOMAIN']
+  const domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
   if (!domain) return undefined
 
   // .r2.dev ve .workers.dev domainleri image resizing desteklemez

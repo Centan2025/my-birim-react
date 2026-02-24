@@ -121,8 +121,11 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   // R2 URL Rewriter: .r2.dev URL'lerini custom domain'e çevir
   const rewriteUrl = (url: string | undefined): string => {
     if (!url) return ''
-    const r2Domain = import.meta.env['VITE_R2_DOMAIN']
-    const r2Origin = import.meta.env['VITE_R2_ORIGIN_DOMAIN']
+    const r2Domain =
+      import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
+    const r2Origin =
+      import.meta.env['VITE_R2_ORIGIN_DOMAIN'] ||
+      'https://pub-5e705b2a702d4bb1a3631c558917599d.r2.dev'
     // Origin -> Custom domain rewrite
     if (r2Origin && r2Domain && r2Origin !== r2Domain && url.startsWith(r2Origin)) {
       return url.replace(r2Origin, r2Domain)
@@ -166,7 +169,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
     // 2. Cloudflare R2 / Image Resizing
     // VITE_R2_DOMAIN kontrolü (örn: https://assets.birim.com)
-    const r2Domain = import.meta.env['VITE_R2_DOMAIN']
+    const r2Domain =
+      import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
     // .r2.dev ve .workers.dev domainleri image resizing desteklemez, direkt döndür.
     const skipImageResizing = r2Domain?.includes('.r2.dev') || r2Domain?.includes('.workers.dev')
 
@@ -220,7 +224,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     }
 
     // R2 Logic
-    const r2Domain = import.meta.env['VITE_R2_DOMAIN']
+    const r2Domain =
+      import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
     if (r2Domain && baseUrl.startsWith(r2Domain)) {
       if (r2Domain.includes('.r2.dev') || r2Domain.includes('.workers.dev')) return '' // srcset desteği yok (image resizing kapalı)
 
@@ -279,7 +284,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       return urlObj.toString()
     }
     // Cloudflare R2
-    const r2Domain = import.meta.env['VITE_R2_DOMAIN']
+    const r2Domain =
+      import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
     if (r2Domain && url && url.startsWith(r2Domain)) {
       if (r2Domain.includes('.r2.dev') || r2Domain.includes('.workers.dev')) return '' // no image resizing support
 

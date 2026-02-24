@@ -99,9 +99,10 @@ const ENABLE_LOCAL_FALLBACK =
     (import.meta as any).env?.VITE_ENABLE_LOCAL_FALLBACK ?? defaultEnableFallback
   ).toLowerCase() !== 'false'
 
-const R2_DOMAIN = import.meta.env['VITE_R2_DOMAIN'] || ''
+const R2_DOMAIN = import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
 // The original .r2.dev domain that assets were uploaded with (for URL rewriting)
-const R2_ORIGIN_DOMAIN = import.meta.env['VITE_R2_ORIGIN_DOMAIN'] || ''
+const R2_ORIGIN_DOMAIN =
+  import.meta.env['VITE_R2_ORIGIN_DOMAIN'] || 'https://pub-5e705b2a702d4bb1a3631c558917599d.r2.dev'
 
 /**
  * R2 URL Rewriter: .r2.dev URL'lerini custom domain'e çevirir.
