@@ -1,29 +1,11 @@
-import React, { useCallback, useState, useRef, useEffect } from 'react'
-import {
-    Box,
-    Button,
-    Card,
-    Flex,
-    Stack,
-    Text,
-    useToast,
-    Inline,
-    Spinner,
-    Dialog
-} from '@sanity/ui'
-import {
-    UploadIcon,
-    TrashIcon,
-    CheckmarkIcon,
-    EditIcon,
-    CropIcon,
-    CloseIcon
-} from '@sanity/icons'
-import { ObjectInputProps, set, unset, useFormValue } from 'sanity'
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import React, {useCallback, useState, useRef, useEffect} from 'react'
+import {Box, Button, Card, Flex, Stack, Text, useToast, Inline, Spinner, Dialog} from '@sanity/ui'
+import {UploadIcon, TrashIcon, CheckmarkIcon, EditIcon, CropIcon, CloseIcon} from '@sanity/icons'
+import {ObjectInputProps, set, unset, useFormValue} from 'sanity'
+import {S3Client, PutObjectCommand} from '@aws-sdk/client-s3'
 import imageCompression from 'browser-image-compression'
 import styled from 'styled-components'
-import ReactCrop, { type Crop, type PixelCrop, type PercentCrop } from 'react-image-crop'
+import ReactCrop, {type Crop, type PixelCrop, type PercentCrop} from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
 // R2 Configuration from Environment Variables
@@ -34,18 +16,17 @@ const R2_BUCKET_NAME = process.env.SANITY_STUDIO_R2_BUCKET_NAME || 'birim-web'
 const R2_DOMAIN = process.env.SANITY_STUDIO_R2_DOMAIN
 
 const r2Client = new S3Client({
-    region: 'auto',
-    endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-    credentials: {
-        accessKeyId: R2_ACCESS_KEY_ID || '',
-        secretAccessKey: R2_SECRET_ACCESS_KEY || '',
-    },
+  region: 'auto',
+  endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: R2_ACCESS_KEY_ID || '',
+    secretAccessKey: R2_SECRET_ACCESS_KEY || '',
+  },
 })
 
-const DropZone = styled(Card) <{ $isDragging: boolean; $hasValue: boolean }>`
+const DropZone = styled(Card)<{$isDragging: boolean; $hasValue: boolean}>`
   border: 2px dashed
-    ${(props) =>
-        props.$isDragging ? 'var(--card-focus-ring-color)' : 'var(--card-border-color)'};
+    ${(props) => (props.$isDragging ? 'var(--card-focus-ring-color)' : 'var(--card-border-color)')};
   border-radius: 8px;
   position: relative;
   transition: all 0.2s ease;
@@ -72,7 +53,7 @@ const HiddenInput = styled.input`
   display: none;
 `
 
-const HotspotIndicator = styled.div<{ $left: string; $top: string }>`
+const HotspotIndicator = styled.div<{$left: string; $top: string}>`
   position: absolute;
   left: ${(props) => props.$left};
   top: ${(props) => props.$top};
@@ -83,9 +64,9 @@ const HotspotIndicator = styled.div<{ $left: string; $top: string }>`
   border-radius: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   z-index: 10;
-  
+
   &::after {
     content: '';
     position: absolute;
@@ -112,7 +93,7 @@ const TipMessage = styled.div`
   bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0,0,0,0.7);
+  background: rgba(0, 0, 0, 0.7);
   color: white;
   padding: 4px 12px;
   border-radius: 12px;
@@ -123,485 +104,555 @@ const TipMessage = styled.div`
 `
 
 const CropOverlayCSS = styled.div`
-    .ReactCrop {
-        max-height: 70vh;
-    }
-    .ReactCrop__image {
-        max-height: 70vh;
-        object-fit: contain;
-    }
+  .ReactCrop {
+    max-height: 70vh;
+  }
+  .ReactCrop__image {
+    max-height: 70vh;
+    object-fit: contain;
+  }
 `
 
 // Helper: Slugify (copied from MediaImportTool)
 function slugify(text: string): string {
-    const turkishMap: Record<string, string> = {
-        ç: 'c', Ç: 'c', ğ: 'g', Ğ: 'g', ı: 'i', I: 'i', İ: 'i', i: 'i',
-        ö: 'o', Ö: 'o', ş: 's', Ş: 's', ü: 'u', Ü: 'u'
-    }
-    let result = text
-    Object.entries(turkishMap).forEach(([tr, en]) => {
-        result = result.replace(new RegExp(tr, 'g'), en)
-    })
-    return result
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9_]+/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-+|-+$/g, '')
+  const turkishMap: Record<string, string> = {
+    ç: 'c',
+    Ç: 'c',
+    ğ: 'g',
+    Ğ: 'g',
+    ı: 'i',
+    I: 'i',
+    İ: 'i',
+    i: 'i',
+    ö: 'o',
+    Ö: 'o',
+    ş: 's',
+    Ş: 's',
+    ü: 'u',
+    Ü: 'u',
+  }
+  let result = text
+  Object.entries(turkishMap).forEach(([tr, en]) => {
+    result = result.replace(new RegExp(tr, 'g'), en)
+  })
+  return result
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9_]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '')
 }
 
 export default function R2AssetInput(props: ObjectInputProps) {
-    const { value, onChange } = props
-    const toast = useToast()
-    const [isDragging, setIsDragging] = useState(false)
-    const [isUploading, setIsUploading] = useState(false)
-    const [isEditMode, setIsEditMode] = useState(false)
+  const {value, onChange} = props
+  const toast = useToast()
+  const [isDragging, setIsDragging] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [isEditMode, setIsEditMode] = useState(false)
 
-    // Crop state
-    const [crop, setCrop] = useState<Crop>()
+  // Crop state
+  const [crop, setCrop] = useState<Crop>()
 
-    // Ref for image click calculation
-    const imageRef = useRef<HTMLImageElement>(null)
-    const modalImageRef = useRef<HTMLImageElement>(null)
+  // Ref for image click calculation
+  const imageRef = useRef<HTMLImageElement>(null)
+  const modalImageRef = useRef<HTMLImageElement>(null)
 
-    // Get full document to determine upload path
-    const sanityDocument = useFormValue([]) as any
-    const docType = sanityDocument?._type
+  // Get full document to determine upload path
+  const sanityDocument = useFormValue([]) as any
+  const docType = sanityDocument?._type
 
-    const asset = value as any
-    const hasValue = !!asset?.url
+  const asset = value as any
+  const hasValue = !!asset?.url
 
-    // Check if uploaded file is a video
-    const isVideo = asset?.mimeType?.startsWith('video/')
+  // Rewrite .r2.dev preview URLs to Worker CDN for fast loading
+  const rewritePreviewUrl = (url: string | undefined): string => {
+    if (!url) return ''
+    if (R2_DOMAIN && !R2_DOMAIN.includes('.r2.dev') && url.includes('.r2.dev')) {
+      try {
+        const parsed = new URL(url)
+        const path = parsed.pathname.startsWith('/')
+          ? parsed.pathname.substring(1)
+          : parsed.pathname
+        return `${R2_DOMAIN}/${path}`
+      } catch {
+        return url
+      }
+    }
+    return url
+  }
+  const previewUrl = rewritePreviewUrl(asset?.url)
 
-    const hotspotX = asset?.hotspotX
-    const hotspotY = asset?.hotspotY
-    const hasHotspot = typeof hotspotX === 'number' && typeof hotspotY === 'number'
+  // Check if uploaded file is a video
+  const isVideo = asset?.mimeType?.startsWith('video/')
 
-    const cropX = asset?.cropX
-    const cropY = asset?.cropY
-    const cropWidth = asset?.cropWidth
-    const cropHeight = asset?.cropHeight
-    const hasCrop = typeof cropX === 'number' && cropWidth > 0
+  const hotspotX = asset?.hotspotX
+  const hotspotY = asset?.hotspotY
+  const hasHotspot = typeof hotspotX === 'number' && typeof hotspotY === 'number'
 
-    // Init crop state from asset
-    useEffect(() => {
-        if (isEditMode) {
-            if (hasCrop) {
-                // Restore existing crop
-                setCrop({
-                    unit: '%',
-                    x: cropX * 100,
-                    y: cropY * 100,
-                    width: cropWidth * 100,
-                    height: cropHeight * 100
-                })
-            } else {
-                // No crop exists, start with undefined
-                setCrop(undefined)
-            }
+  const cropX = asset?.cropX
+  const cropY = asset?.cropY
+  const cropWidth = asset?.cropWidth
+  const cropHeight = asset?.cropHeight
+  const hasCrop = typeof cropX === 'number' && cropWidth > 0
+
+  // Init crop state from asset
+  useEffect(() => {
+    if (isEditMode) {
+      if (hasCrop) {
+        // Restore existing crop
+        setCrop({
+          unit: '%',
+          x: cropX * 100,
+          y: cropY * 100,
+          width: cropWidth * 100,
+          height: cropHeight * 100,
+        })
+      } else {
+        // No crop exists, start with undefined
+        setCrop(undefined)
+      }
+    }
+  }, [isEditMode]) // Only run when edit mode toggles
+
+  const handleUpload = useCallback(
+    async (file: File) => {
+      if (!file) return
+
+      setIsUploading(true)
+      try {
+        // 1. Compression (only for images)
+        let processedFile: File | Blob = file
+        const isImage = file.type.startsWith('image/')
+
+        if (isImage && !file.type.includes('gif') && !file.type.includes('svg')) {
+          const options = {
+            maxSizeMB: 0.8,
+            maxWidthOrHeight: 2560,
+            useWebWorker: true,
+            fileType: 'image/webp' as any,
+          }
+          processedFile = await imageCompression(file, options)
         }
-    }, [isEditMode]) // Only run when edit mode toggles
 
+        // 2. Determine R2 Path
+        let folderPath = 'uploads'
+        if (docType === 'product') {
+          const modelId = sanityDocument?.id?.current || 'unknown-product'
+          folderPath = `products/${modelId}`
+        } else if (docType === 'designer') {
+          const designerId =
+            sanityDocument?.id?.current || slugify(sanityDocument?.name?.tr || 'unknown-designer')
+          folderPath = `designers/${designerId}`
+        } else if (docType === 'project') {
+          const projectId =
+            sanityDocument?.id?.current || slugify(sanityDocument?.title?.tr || 'unknown-project')
+          folderPath = `projects/${projectId}`
+        } else if (docType === 'newsItem') {
+          const newsId =
+            sanityDocument?.id?.current || slugify(sanityDocument?.title?.tr || 'unknown-news')
+          folderPath = `news/${newsId}`
+        } else if (docType === 'materialGroup') {
+          folderPath = `materials/${slugify(sanityDocument?.title?.tr || 'unknown-group')}`
+        }
 
-    const handleUpload = useCallback(
-        async (file: File) => {
-            if (!file) return
+        // 3. Prepare Filename
+        let fileName = file.name
+        if (isImage && !file.name.toLowerCase().endsWith('.webp')) {
+          fileName = file.name.replace(/\.[^/.]+$/, '') + '.webp'
+        }
+        const key = `${folderPath}/${Date.now()}-${fileName}`
 
-            setIsUploading(true)
-            try {
-                // 1. Compression (only for images)
-                let processedFile: File | Blob = file
-                const isImage = file.type.startsWith('image/')
+        // 4. Upload to R2
+        const arrayBuffer = await processedFile.arrayBuffer()
+        await r2Client.send(
+          new PutObjectCommand({
+            Bucket: R2_BUCKET_NAME,
+            Key: key,
+            Body: new Uint8Array(arrayBuffer),
+            ContentType: isImage ? 'image/webp' : file.type,
+          }),
+        )
 
-                if (isImage && !file.type.includes('gif') && !file.type.includes('svg')) {
-                    const options = {
-                        maxSizeMB: 0.8,
-                        maxWidthOrHeight: 2560,
-                        useWebWorker: true,
-                        fileType: 'image/webp' as any,
-                    }
-                    processedFile = await imageCompression(file, options)
-                }
+        const finalUrl = `${R2_DOMAIN}/${key}`
 
-                // 2. Determine R2 Path
-                let folderPath = 'uploads'
-                if (docType === 'product') {
-                    const modelId = sanityDocument?.id?.current || 'unknown-product'
-                    folderPath = `products/${modelId}`
-                } else if (docType === 'designer') {
-                    const designerId = sanityDocument?.id?.current || slugify(sanityDocument?.name?.tr || 'unknown-designer')
-                    folderPath = `designers/${designerId}`
-                } else if (docType === 'project') {
-                    const projectId = sanityDocument?.id?.current || slugify(sanityDocument?.title?.tr || 'unknown-project')
-                    folderPath = `projects/${projectId}`
-                } else if (docType === 'newsItem') {
-                    const newsId = sanityDocument?.id?.current || slugify(sanityDocument?.title?.tr || 'unknown-news')
-                    folderPath = `news/${newsId}`
-                } else if (docType === 'materialGroup') {
-                    folderPath = `materials/${slugify(sanityDocument?.title?.tr || 'unknown-group')}`
-                }
+        // 5. Get Dimensions
+        let width, height
+        if (isImage) {
+          const img = new Image()
+          img.src = URL.createObjectURL(file)
+          await new Promise((resolve) => {
+            img.onload = resolve
+            img.onerror = resolve
+          })
+          width = img.width
+          height = img.height
+        }
 
-                // 3. Prepare Filename
-                let fileName = file.name
-                if (isImage && !file.name.toLowerCase().endsWith('.webp')) {
-                    fileName = file.name.replace(/\.[^/.]+$/, '') + '.webp'
-                }
-                const key = `${folderPath}/${Date.now()}-${fileName}`
+        // 6. Update Sanity
+        const assetValue = {
+          _type: 'r2Asset',
+          url: finalUrl,
+          path: key,
+          width,
+          height,
+          mimeType: isImage ? 'image/webp' : file.type,
+          alt: file.name.replace(/\.[^/.]+$/, ''),
+          // Default center hotspot
+          hotspotX: 0.5,
+          hotspotY: 0.5,
+        }
 
-                // 4. Upload to R2
-                const arrayBuffer = await processedFile.arrayBuffer()
-                await r2Client.send(
-                    new PutObjectCommand({
-                        Bucket: R2_BUCKET_NAME,
-                        Key: key,
-                        Body: new Uint8Array(arrayBuffer),
-                        ContentType: isImage ? 'image/webp' : file.type,
-                    })
-                )
-
-                const finalUrl = `${R2_DOMAIN}/${key}`
-
-                // 5. Get Dimensions
-                let width, height
-                if (isImage) {
-                    const img = new Image()
-                    img.src = URL.createObjectURL(file)
-                    await new Promise((resolve) => {
-                        img.onload = resolve
-                        img.onerror = resolve
-                    })
-                    width = img.width
-                    height = img.height
-                }
-
-                // 6. Update Sanity
-                const assetValue = {
-                    _type: 'r2Asset',
-                    url: finalUrl,
-                    path: key,
-                    width,
-                    height,
-                    mimeType: isImage ? 'image/webp' : file.type,
-                    alt: file.name.replace(/\.[^/.]+$/, ''),
-                    // Default center hotspot
-                    hotspotX: 0.5,
-                    hotspotY: 0.5
-                }
-
-                onChange(set(assetValue))
-
-                toast.push({
-                    status: 'success',
-                    title: 'Yüklendi',
-                    description: `R2'ye başarıyla yüklendi: ${fileName}`,
-                })
-            } catch (error: any) {
-                console.error('R2 Upload Error:', error)
-                toast.push({
-                    status: 'error',
-                    title: 'Yükleme Hatası',
-                    description: error.message,
-                })
-            } finally {
-                setIsUploading(false)
-                setIsDragging(false)
-            }
-        },
-        [docType, sanityDocument, onChange, toast]
-    )
-
-    const handleImageClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-        if (!imageRef.current || !hasValue) return
-        if (isEditMode) return // Don't set hotspot in edit mode
-
-        // Sadece sol tık ile çalışsın
-        if (e.button !== 0) return
-
-        const rect = imageRef.current.getBoundingClientRect()
-        const x = e.clientX - rect.left
-        const y = e.clientY - rect.top
-
-        // Normalize coordinates (0-1)
-        const relativeX = Math.max(0, Math.min(1, x / rect.width))
-        const relativeY = Math.max(0, Math.min(1, y / rect.height))
-
-        // Update Sanity value directly
-        onChange(set({
-            ...asset,
-            hotspotX: Number(relativeX.toFixed(4)),
-            hotspotY: Number(relativeY.toFixed(4))
-        }))
+        onChange(set(assetValue))
 
         toast.push({
-            status: 'info',
-            title: 'Odaklandı',
-            description: `Odak noktası güncellendi: ${relativeX.toFixed(2)}, ${relativeY.toFixed(2)}`
+          status: 'success',
+          title: 'Yüklendi',
+          description: `R2'ye başarıyla yüklendi: ${fileName}`,
         })
-
-        e.stopPropagation()
-    }, [asset, hasValue, onChange, toast, isEditMode])
-
-    const handleSaveCrop = () => {
-        if (crop) {
-            // Convert to percentage if it's in pixels
-            // We MUST use the dimensions of the image currently being cropped (modal image), not the preview thumbnail
-            let finalCrop = { ...crop }
-
-            // If unit is px and we have the modal image ref, convert to %
-            if (crop.unit === 'px' && modalImageRef.current) {
-                const width = modalImageRef.current.width
-                const height = modalImageRef.current.height
-
-                if (width > 0 && height > 0) {
-                    finalCrop = {
-                        unit: '%',
-                        x: (crop.x / width) * 100,
-                        y: (crop.y / height) * 100,
-                        width: (crop.width / width) * 100,
-                        height: (crop.height / height) * 100
-                    }
-                }
-            }
-
-            onChange(set({
-                ...asset,
-                cropX: Number((finalCrop.x / 100).toFixed(4)),
-                cropY: Number((finalCrop.y / 100).toFixed(4)),
-                cropWidth: Number((finalCrop.width / 100).toFixed(4)),
-                cropHeight: Number((finalCrop.height / 100).toFixed(4))
-            }))
-            toast.push({ status: 'success', title: 'Kırpma Kaydedildi' })
-        } else {
-            // Clear crop
-            const { cropX, cropY, cropWidth, cropHeight, ...rest } = asset
-            // ... same clear logic ...
-            onChange([
-                unset(['cropX']),
-                unset(['cropY']),
-                unset(['cropWidth']),
-                unset(['cropHeight'])
-            ])
-            toast.push({ status: 'info', title: 'Kırpma Sıfırlandı' })
-        }
-        setIsEditMode(false)
-    }
-
-    const handleDragOver = (e: React.DragEvent) => {
-        e.preventDefault()
-        setIsDragging(true)
-    }
-
-    const handleDragLeave = (e: React.DragEvent) => {
-        e.preventDefault()
+      } catch (error: any) {
+        console.error('R2 Upload Error:', error)
+        toast.push({
+          status: 'error',
+          title: 'Yükleme Hatası',
+          description: error.message,
+        })
+      } finally {
+        setIsUploading(false)
         setIsDragging(false)
-    }
+      }
+    },
+    [docType, sanityDocument, onChange, toast],
+  )
 
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault()
-        setIsDragging(false)
-        const files = e.dataTransfer.files
-        if (files && files.length > 0) {
-            handleUpload(files[0])
+  const handleImageClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!imageRef.current || !hasValue) return
+      if (isEditMode) return // Don't set hotspot in edit mode
+
+      // Sadece sol tık ile çalışsın
+      if (e.button !== 0) return
+
+      const rect = imageRef.current.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const y = e.clientY - rect.top
+
+      // Normalize coordinates (0-1)
+      const relativeX = Math.max(0, Math.min(1, x / rect.width))
+      const relativeY = Math.max(0, Math.min(1, y / rect.height))
+
+      // Update Sanity value directly
+      onChange(
+        set({
+          ...asset,
+          hotspotX: Number(relativeX.toFixed(4)),
+          hotspotY: Number(relativeY.toFixed(4)),
+        }),
+      )
+
+      toast.push({
+        status: 'info',
+        title: 'Odaklandı',
+        description: `Odak noktası güncellendi: ${relativeX.toFixed(2)}, ${relativeY.toFixed(2)}`,
+      })
+
+      e.stopPropagation()
+    },
+    [asset, hasValue, onChange, toast, isEditMode],
+  )
+
+  const handleSaveCrop = () => {
+    if (crop) {
+      // Convert to percentage if it's in pixels
+      // We MUST use the dimensions of the image currently being cropped (modal image), not the preview thumbnail
+      let finalCrop = {...crop}
+
+      // If unit is px and we have the modal image ref, convert to %
+      if (crop.unit === 'px' && modalImageRef.current) {
+        const width = modalImageRef.current.width
+        const height = modalImageRef.current.height
+
+        if (width > 0 && height > 0) {
+          finalCrop = {
+            unit: '%',
+            x: (crop.x / width) * 100,
+            y: (crop.y / height) * 100,
+            width: (crop.width / width) * 100,
+            height: (crop.height / height) * 100,
+          }
         }
-    }
+      }
 
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files
-        if (files && files.length > 0) {
-            handleUpload(files[0])
-        }
+      onChange(
+        set({
+          ...asset,
+          cropX: Number((finalCrop.x / 100).toFixed(4)),
+          cropY: Number((finalCrop.y / 100).toFixed(4)),
+          cropWidth: Number((finalCrop.width / 100).toFixed(4)),
+          cropHeight: Number((finalCrop.height / 100).toFixed(4)),
+        }),
+      )
+      toast.push({status: 'success', title: 'Kırpma Kaydedildi'})
+    } else {
+      // Clear crop
+      const {cropX, cropY, cropWidth, cropHeight, ...rest} = asset
+      // ... same clear logic ...
+      onChange([unset(['cropX']), unset(['cropY']), unset(['cropWidth']), unset(['cropHeight'])])
+      toast.push({status: 'info', title: 'Kırpma Sıfırlandı'})
     }
+    setIsEditMode(false)
+  }
 
-    const handleClear = (e: React.MouseEvent) => {
-        e.stopPropagation()
-        if (window.confirm('Bu görseli kaldırmak istediğinize emin misiniz? (R2\'den silinmez, sadece kaydı temizlenir)')) {
-            onChange(unset())
-        }
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const files = e.dataTransfer.files
+    if (files && files.length > 0) {
+      handleUpload(files[0])
     }
+  }
 
-    return (
-        <Stack space={3}>
-            <DropZone
-                padding={hasValue ? 2 : 4}
-                $isDragging={isDragging}
-                $hasValue={hasValue}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={(e) => {
-                    if (e.target === e.currentTarget && !isEditMode) {
-                        document.getElementById(props.id)?.click()
-                    }
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files && files.length > 0) {
+      handleUpload(files[0])
+    }
+  }
+
+  const handleClear = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (
+      window.confirm(
+        "Bu görseli kaldırmak istediğinize emin misiniz? (R2'den silinmez, sadece kaydı temizlenir)",
+      )
+    ) {
+      onChange(unset())
+    }
+  }
+
+  return (
+    <Stack space={3}>
+      <DropZone
+        padding={hasValue ? 2 : 4}
+        $isDragging={isDragging}
+        $hasValue={hasValue}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={(e) => {
+          if (e.target === e.currentTarget && !isEditMode) {
+            document.getElementById(props.id)?.click()
+          }
+        }}
+      >
+        <HiddenInput
+          id={props.id}
+          type="file"
+          accept="image/*,video/*"
+          onChange={handleFileSelect}
+        />
+
+        {isUploading ? (
+          <Flex align="center" justify="center" direction="column" padding={4} gap={3}>
+            <Spinner size={3} />
+            <Text size={1} muted>
+              R2'ye yükleniyor...
+            </Text>
+          </Flex>
+        ) : hasValue ? (
+          <Box style={{position: 'relative'}}>
+            {isVideo ? (
+              // Video Preview
+              <Box
+                style={{
+                  position: 'relative',
+                  borderRadius: '4px',
+                  overflow: 'hidden',
+                  background: '#000',
                 }}
-            >
-                <HiddenInput
-                    id={props.id}
-                    type="file"
-                    accept="image/*,video/*"
-                    onChange={handleFileSelect}
+              >
+                <video
+                  src={previewUrl}
+                  controls
+                  style={{
+                    width: '100%',
+                    maxHeight: '400px',
+                    display: 'block',
+                    borderRadius: '4px',
+                  }}
+                >
+                  Tarayıcınız video oynatmayı desteklemiyor.
+                </video>
+              </Box>
+            ) : (
+              // Image Preview with Crop/Hotspot
+              <ImageContainer onClick={handleImageClick} onDoubleClick={(e) => e.stopPropagation()}>
+                <PreviewImage
+                  ref={imageRef}
+                  src={previewUrl}
+                  alt={asset.alt}
+                  draggable={false}
+                  style={{
+                    // Apply crop preview if cropped
+                    clipPath:
+                      hasCrop && !isEditMode
+                        ? `inset(${cropY * 100}% ${100 - (cropX + cropWidth) * 100}% ${100 - (cropY + cropHeight) * 100}% ${cropX * 100}%)`
+                        : undefined,
+                  }}
                 />
 
-                {isUploading ? (
-                    <Flex align="center" justify="center" direction="column" padding={4} gap={3}>
-                        <Spinner size={3} />
-                        <Text size={1} muted>R2'ye yükleniyor...</Text>
-                    </Flex>
-                ) : hasValue ? (
-                    <Box style={{ position: 'relative' }}>
-                        {isVideo ? (
-                            // Video Preview
-                            <Box style={{ position: 'relative', borderRadius: '4px', overflow: 'hidden', background: '#000' }}>
-                                <video
-                                    src={asset.url}
-                                    controls
-                                    style={{
-                                        width: '100%',
-                                        maxHeight: '400px',
-                                        display: 'block',
-                                        borderRadius: '4px'
-                                    }}
-                                >
-                                    Tarayıcınız video oynatmayı desteklemiyor.
-                                </video>
-                            </Box>
-                        ) : (
-                            // Image Preview with Crop/Hotspot
-                            <ImageContainer onClick={handleImageClick} onDoubleClick={(e) => e.stopPropagation()}>
-                                <PreviewImage
-                                    ref={imageRef}
-                                    src={asset.url}
-                                    alt={asset.alt}
-                                    draggable={false}
-                                    style={{
-                                        // Apply crop preview if cropped
-                                        clipPath: hasCrop && !isEditMode
-                                            ? `inset(${cropY * 100}% ${100 - (cropX + cropWidth) * 100}% ${100 - (cropY + cropHeight) * 100}% ${cropX * 100}%)`
-                                            : undefined
-                                    }}
-                                />
-
-                                {hasHotspot && !isEditMode && (
-                                    <HotspotIndicator
-                                        $left={`${hotspotX * 100}%`}
-                                        $top={`${hotspotY * 100}%`}
-                                    />
-                                )}
-
-                                {!isEditMode && (
-                                    <TipMessage>Kırpmak için "Düzenle", odaklamak için tıklayın</TipMessage>
-                                )}
-                            </ImageContainer>
-                        )}
-
-                        {/* Toolbar */}
-                        <Box style={{ position: 'absolute', top: 8, right: 8, zIndex: 20 }}>
-                            <Inline space={2}>
-                                {/* Only show Edit button for images */}
-                                {!isVideo && (
-                                    <Button
-                                        icon={CropIcon}
-                                        mode="ghost"
-                                        tone="primary"
-                                        fontSize={1}
-                                        padding={2}
-                                        text="Düzenle"
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            setIsEditMode(true)
-                                        }}
-                                    />
-                                )}
-                                <Button
-                                    icon={TrashIcon}
-                                    tone="critical"
-                                    fontSize={1}
-                                    padding={2}
-                                    onClick={handleClear}
-                                    title="Kaldır"
-                                />
-                            </Inline>
-                        </Box>
-
-                        <Box padding={2}>
-                            <Stack space={2}>
-                                <Flex align="center" gap={2}>
-                                    <CheckmarkIcon style={{ color: 'green' }} />
-                                    <Text size={1} weight="semibold" style={{ color: 'green' }}>R2 Üzerinde Yayında</Text>
-                                    {!isVideo && hasCrop && <Text size={1} muted>| ✂️ Kırpıldı</Text>}
-                                    {!isVideo && hasHotspot && <Text size={1} muted>| 🎯 Odak: %{(hotspotX * 100).toFixed(0)}, %{(hotspotY * 100).toFixed(0)}</Text>}
-                                    {isVideo && <Text size={1} muted>| 🎬 Video</Text>}
-                                </Flex>
-                            </Stack>
-                        </Box>
-                    </Box>
-                ) : (
-                    <Flex align="center" justify="center" direction="column" gap={3} style={{ pointerEvents: 'none' }}>
-                        <Text size={4}><UploadIcon /></Text>
-                        <Stack space={2} style={{ textAlign: 'center' }}>
-                            <Text weight="bold" size={2}>
-                                {isDragging ? 'Buraya Bırakın' : 'Görseli Sürükleyin veya Seçin'}
-                            </Text>
-                            <Text size={1} muted>
-                                Dosya otomatik olarak WebP'ye dönüştürülüp R2'ye yüklenecektir.
-                            </Text>
-                        </Stack>
-                    </Flex>
+                {hasHotspot && !isEditMode && (
+                  <HotspotIndicator $left={`${hotspotX * 100}%`} $top={`${hotspotY * 100}%`} />
                 )}
-            </DropZone>
 
-            {/* Edit Modal */}
-            {isEditMode && (
-                <Dialog
-                    header="Görsel Düzenle (Kırp)"
-                    id="crop-dialog"
-                    onClose={() => setIsEditMode(false)}
-                    width={2}
-                    zOffset={1000}
-                >
-                    <Box padding={4}>
-                        <Stack space={4}>
-                            <Text size={1} muted>Kırpmak istediğiniz alanı seçin. Değişiklikler R2 dosyasını etkilemez, sadece gösterimi değiştirir.</Text>
-
-                            <Box style={{ background: '#000', borderRadius: '4px', overflow: 'hidden', display: 'flex', justifyContent: 'center' }}>
-                                <CropOverlayCSS>
-                                    <ReactCrop crop={crop} onChange={(c) => setCrop(c)} aspect={undefined}>
-                                        <img
-                                            ref={modalImageRef}
-                                            src={asset.url}
-                                            alt="Crop Preview"
-                                            style={{ maxHeight: '70vh', maxWidth: '100%' }}
-                                            onLoad={(e) => {
-                                                // Ensure correct initial load
-                                                // const { naturalWidth, naturalHeight } = e.currentTarget
-                                            }}
-                                        />
-                                    </ReactCrop>
-                                </CropOverlayCSS>
-                            </Box>
-
-                            <Flex justify="flex-end" gap={3}>
-                                <Button
-                                    text="İptal"
-                                    mode="ghost"
-                                    onClick={() => setIsEditMode(false)}
-                                />
-                                <Button
-                                    text="Kırpmayı Sıfırla"
-                                    mode="ghost"
-                                    tone="critical"
-                                    onClick={() => setCrop(undefined)}
-                                />
-                                <Button
-                                    text="Kaydet ve Uygula"
-                                    tone="primary"
-                                    onClick={handleSaveCrop}
-                                />
-                            </Flex>
-                        </Stack>
-                    </Box>
-                </Dialog>
+                {!isEditMode && (
+                  <TipMessage>Kırpmak için "Düzenle", odaklamak için tıklayın</TipMessage>
+                )}
+              </ImageContainer>
             )}
-        </Stack>
-    )
+
+            {/* Toolbar */}
+            <Box style={{position: 'absolute', top: 8, right: 8, zIndex: 20}}>
+              <Inline space={2}>
+                {/* Only show Edit button for images */}
+                {!isVideo && (
+                  <Button
+                    icon={CropIcon}
+                    mode="ghost"
+                    tone="primary"
+                    fontSize={1}
+                    padding={2}
+                    text="Düzenle"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setIsEditMode(true)
+                    }}
+                  />
+                )}
+                <Button
+                  icon={TrashIcon}
+                  tone="critical"
+                  fontSize={1}
+                  padding={2}
+                  onClick={handleClear}
+                  title="Kaldır"
+                />
+              </Inline>
+            </Box>
+
+            <Box padding={2}>
+              <Stack space={2}>
+                <Flex align="center" gap={2}>
+                  <CheckmarkIcon style={{color: 'green'}} />
+                  <Text size={1} weight="semibold" style={{color: 'green'}}>
+                    R2 Üzerinde Yayında
+                  </Text>
+                  {!isVideo && hasCrop && (
+                    <Text size={1} muted>
+                      | ✂️ Kırpıldı
+                    </Text>
+                  )}
+                  {!isVideo && hasHotspot && (
+                    <Text size={1} muted>
+                      | 🎯 Odak: %{(hotspotX * 100).toFixed(0)}, %{(hotspotY * 100).toFixed(0)}
+                    </Text>
+                  )}
+                  {isVideo && (
+                    <Text size={1} muted>
+                      | 🎬 Video
+                    </Text>
+                  )}
+                </Flex>
+              </Stack>
+            </Box>
+          </Box>
+        ) : (
+          <Flex
+            align="center"
+            justify="center"
+            direction="column"
+            gap={3}
+            style={{pointerEvents: 'none'}}
+          >
+            <Text size={4}>
+              <UploadIcon />
+            </Text>
+            <Stack space={2} style={{textAlign: 'center'}}>
+              <Text weight="bold" size={2}>
+                {isDragging ? 'Buraya Bırakın' : 'Görseli Sürükleyin veya Seçin'}
+              </Text>
+              <Text size={1} muted>
+                Dosya otomatik olarak WebP'ye dönüştürülüp R2'ye yüklenecektir.
+              </Text>
+            </Stack>
+          </Flex>
+        )}
+      </DropZone>
+
+      {/* Edit Modal */}
+      {isEditMode && (
+        <Dialog
+          header="Görsel Düzenle (Kırp)"
+          id="crop-dialog"
+          onClose={() => setIsEditMode(false)}
+          width={2}
+          zOffset={1000}
+        >
+          <Box padding={4}>
+            <Stack space={4}>
+              <Text size={1} muted>
+                Kırpmak istediğiniz alanı seçin. Değişiklikler R2 dosyasını etkilemez, sadece
+                gösterimi değiştirir.
+              </Text>
+
+              <Box
+                style={{
+                  background: '#000',
+                  borderRadius: '4px',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  justifyContent: 'center',
+                }}
+              >
+                <CropOverlayCSS>
+                  <ReactCrop crop={crop} onChange={(c) => setCrop(c)} aspect={undefined}>
+                    <img
+                      ref={modalImageRef}
+                      src={previewUrl}
+                      alt="Crop Preview"
+                      style={{maxHeight: '70vh', maxWidth: '100%'}}
+                      onLoad={(e) => {
+                        // Ensure correct initial load
+                        // const { naturalWidth, naturalHeight } = e.currentTarget
+                      }}
+                    />
+                  </ReactCrop>
+                </CropOverlayCSS>
+              </Box>
+
+              <Flex justify="flex-end" gap={3}>
+                <Button text="İptal" mode="ghost" onClick={() => setIsEditMode(false)} />
+                <Button
+                  text="Kırpmayı Sıfırla"
+                  mode="ghost"
+                  tone="critical"
+                  onClick={() => setCrop(undefined)}
+                />
+                <Button text="Kaydet ve Uygula" tone="primary" onClick={handleSaveCrop} />
+              </Flex>
+            </Stack>
+          </Box>
+        </Dialog>
+      )}
+    </Stack>
+  )
 }

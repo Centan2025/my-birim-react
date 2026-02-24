@@ -14,53 +14,7 @@
     href="https://fonts.googleapis.com/css2?family=Jura:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Oswald:wght@200;300;400;500;600;700&family=Barlow+Condensed:wght@100;300;400&display=swap"
     rel="stylesheet" />
 
-  <!-- Early error handlers and storage patches -->
-  <script>
-    (function () {
-      'use strict';
-      try {
-        if (window.Storage && window.Storage.prototype) {
-          var StorageProto = window.Storage.prototype;
-          var BLOCK_SUBSTRING = 'Access to storage is not allowed';
-          ['getItem', 'setItem', 'removeItem', 'clear', 'key'].forEach(function (method) {
-            var original = StorageProto[method];
-            StorageProto[method] = function () {
-              try { return original.apply(this, arguments); }
-              catch (err) {
-                var msg = String(err && err.message || err || '');
-                if (msg.indexOf(BLOCK_SUBSTRING) !== -1) return method === 'getItem' || method === 'key' ? null : undefined;
-                throw err;
-              }
-            };
-          });
-        }
-      } catch (e) { }
 
-      var errorHandler = function (event) {
-        var msg = String(event.message || (event.error && event.error.message) || event.reason || '');
-        if (msg.indexOf('Access to storage') !== -1 || msg.indexOf('Could not fetch session') !== -1) {
-          if (event.preventDefault) event.preventDefault();
-          return true;
-        }
-      };
-      window.addEventListener('error', errorHandler, true);
-      window.addEventListener('unhandledrejection', errorHandler, true);
-    })();
-  </script>
-
-  <script type="importmap">
-    {
-      "imports": {
-        "react": "https://aistudiocdn.com/react@^19.2.0",
-        "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-        "react/": "https://aistudiocdn.com/react@^19.2.0/",
-        "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.5",
-        "@google/genai": "https://aistudiocdn.com/@google/genai@^1.28.0",
-        "vite": "https://aistudiocdn.com/vite@^7.1.12",
-        "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.0"
-      }
-    }
-    </script>
 </head>
 
 <body>

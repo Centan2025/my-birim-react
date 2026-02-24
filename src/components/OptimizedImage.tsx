@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { R2ImageMetadata } from '../types'
+import React, {useState, useEffect, useRef} from 'react'
+import {R2ImageMetadata} from '../types'
 
 /**
  * srcset attribute'ünde boşluklar ayırıcıdır — URL'deki boşlukları %20 ile encode ederek
@@ -67,6 +67,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
   const [usingFallback, setUsingFallback] = useState(false)
+  const imgRef = useRef<HTMLImageElement>(null)
 
   // src değiştiğinde state'i sıfırla
   useEffect(() => {
@@ -75,11 +76,19 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     setUsingFallback(false)
   }, [src, srcMobile, srcDesktop])
 
+  // Cache'den yüklenen görselleri yakalama — back navigation'da onLoad tetiklenmez
+  useEffect(() => {
+    const img = imgRef.current
+    if (img && img.complete && img.naturalWidth > 0) {
+      setIsLoaded(true)
+    }
+  })
+
   // React henüz fetchPriority prop'unu DOM attribute olarak tanımıyor; uyarıyı
   // engellemek için custom attribute'u lowercase olarak enjekte ediyoruz.
   const fetchPriorityAttr =
     fetchPriority && fetchPriority !== 'auto'
-      ? ({ fetchpriority: fetchPriority } as Record<string, string>)
+      ? ({fetchpriority: fetchPriority} as Record<string, string>)
       : {}
 
   // Placeholder (çok küçük, gri renk)
@@ -94,7 +103,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const handleError = () => {
     // Eğer fallback varsa ve henüz kullanmıyorsak, ona geç
     if (fallbackSrc && !usingFallback) {
-      console.warn('OptimizedImage: R2 visual failed or unavailable, switching to Sanity fallback.', src)
+      console.warn(
+        'OptimizedImage: R2 visual failed or unavailable, switching to Sanity fallback.',
+        src
+      )
       setUsingFallback(true)
       // Hata durumunu resetle, çünkü yeni bir deneme yapıyoruz
       setHasError(false)
@@ -106,11 +118,35 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     onError?.()
   }
 
+  // R2 URL Rewriter: .r2.dev URL'lerini custom domain'e çevir
+  const rewriteUrl = (url: string | undefined): string => {
+    if (!url) return ''
+    const r2Domain = import.meta.env['VITE_R2_DOMAIN']
+    const r2Origin = import.meta.env['VITE_R2_ORIGIN_DOMAIN']
+    // Origin -> Custom domain rewrite
+    if (r2Origin && r2Domain && r2Origin !== r2Domain && url.startsWith(r2Origin)) {
+      return url.replace(r2Origin, r2Domain)
+    }
+    // Generic .r2.dev -> custom domain rewrite
+    if (r2Domain && !r2Domain.includes('.r2.dev') && url.includes('.r2.dev')) {
+      try {
+        const parsed = new URL(url)
+        const path = parsed.pathname.startsWith('/')
+          ? parsed.pathname.substring(1)
+          : parsed.pathname
+        return `${r2Domain}/${path}`
+      } catch {
+        return url
+      }
+    }
+    return url
+  }
+
   // fallback modundaysak sadece fallbackSrc'yi optimize etmeye çalış (Sanity ise)
   // Değilse normal src'yi kullan.
-  const activeSrc = usingFallback && fallbackSrc ? fallbackSrc : src
-  const activeMobileSrc = usingFallback ? undefined : (srcMobile || src)
-  const activeDesktopSrc = usingFallback ? undefined : (srcDesktop || src)
+  const activeSrc = rewriteUrl(usingFallback && fallbackSrc ? fallbackSrc : src)
+  const activeMobileSrc = usingFallback ? undefined : rewriteUrl(srcMobile || src)
+  const activeDesktopSrc = usingFallback ? undefined : rewriteUrl(srcDesktop || src)
 
   // Sanity image URL'lerini ve R2 URL'lerini optimize et
   const getOptimizedUrl = (url: string): string => {
@@ -131,11 +167,11 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     // 2. Cloudflare R2 / Image Resizing
     // VITE_R2_DOMAIN kontrolü (örn: https://assets.birim.com)
     const r2Domain = import.meta.env['VITE_R2_DOMAIN']
-    // .r2.dev domainleri image resizing desteklemez, direkt döndür.
-    const isR2Dev = r2Domain?.includes('.r2.dev')
+    // .r2.dev ve .workers.dev domainleri image resizing desteklemez, direkt döndür.
+    const skipImageResizing = r2Domain?.includes('.r2.dev') || r2Domain?.includes('.workers.dev')
 
     if (r2Domain && url.startsWith(r2Domain) && !url.includes('/cdn-cgi/image/')) {
-      if (isR2Dev) return url
+      if (skipImageResizing) return url
 
       // Cloudflare URL format: /cdn-cgi/image/format=auto,width=XXX,height=YYY/path/to/image
       const params = []
@@ -186,7 +222,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     // R2 Logic
     const r2Domain = import.meta.env['VITE_R2_DOMAIN']
     if (r2Domain && baseUrl.startsWith(r2Domain)) {
-      if (r2Domain.includes('.r2.dev')) return '' // .r2.dev'de srcset desteği yok (image resizing kapalı)
+      if (r2Domain.includes('.r2.dev') || r2Domain.includes('.workers.dev')) return '' // srcset desteği yok (image resizing kapalı)
 
       // Cloudflare URL builder helper for local usage inside map
       const buildR2 = (w: number) => {
@@ -198,12 +234,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         }
 
         // Remove domain to get path
-        let path = baseUrl.replace(r2Domain + '/', '')
+        const path = baseUrl.replace(r2Domain + '/', '')
         return encodeSrcSetUrl(`${r2Domain}/cdn-cgi/image/${params.join(',')}/${path}`)
       }
-      return sizes
-        .map(w => `${buildR2(w)} ${w}w`)
-        .join(', ')
+      return sizes.map(w => `${buildR2(w)} ${w}w`).join(', ')
     }
 
     return ''
@@ -216,7 +250,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const useArtDirection = Boolean((srcMobile || srcDesktop) && !usingFallback)
 
   // Hotspot varsa style'a object-position ekle
-  const imgStyle: React.CSSProperties = { ...style }
+  const imgStyle: React.CSSProperties = {...style}
   if (hotspot) {
     imgStyle.objectPosition = `${hotspot.x * 100}% ${hotspot.y * 100}%`
   }
@@ -225,7 +259,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     return (
       <div
         className={`bg-gray-200 flex items-center justify-center ${className}`}
-        style={{ width, height }}
+        style={{width, height}}
       >
         <span className="text-gray-400 text-sm">Görsel yüklenemedi</span>
       </div>
@@ -247,7 +281,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     // Cloudflare R2
     const r2Domain = import.meta.env['VITE_R2_DOMAIN']
     if (r2Domain && url && url.startsWith(r2Domain)) {
-      if (r2Domain.includes('.r2.dev')) return '' // .r2.dev doesn't support format conversion
+      if (r2Domain.includes('.r2.dev') || r2Domain.includes('.workers.dev')) return '' // no image resizing support
 
       const params = []
       if (width) params.push(`width=${width}`)
@@ -261,7 +295,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       params.push(`quality=${quality}`)
       params.push(`format=${imgFormat === 'jpg' ? 'jpeg' : imgFormat}`) // Cloudflare uses 'jpeg'
 
-      let path = url.replace(r2Domain + '/', '')
+      const path = url.replace(r2Domain + '/', '')
       return encodeSrcSetUrl(`${r2Domain}/cdn-cgi/image/${params.join(',')}/${path}`)
     }
     return encodeSrcSetUrl(url)
@@ -339,7 +373,14 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           )}
           {/* Fallback: Eğer mobil versiyonu yoksa desktop'u kullan, o da yoksa src'i kullan */}
           <img
-            src={activeMobileSrc ? optimizedMobileSrc : activeDesktopSrc ? optimizedDesktopSrc : optimizedSrc}
+            ref={imgRef}
+            src={
+              activeMobileSrc
+                ? optimizedMobileSrc
+                : activeDesktopSrc
+                  ? optimizedDesktopSrc
+                  : optimizedSrc
+            }
             alt={alt}
             width={width}
             height={height}
@@ -383,6 +424,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         />
         {/* Fallback image */}
         <img
+          ref={imgRef}
           src={optimizedSrc}
           alt={alt}
           width={width}

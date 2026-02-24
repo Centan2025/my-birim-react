@@ -21,7 +21,7 @@ import type {
   SanityImagePalette,
   R2ImageMetadata,
 } from '../types'
-import { createClient } from '@sanity/client'
+import {createClient} from '@sanity/client'
 import groq from 'groq'
 import imageUrlBuilder from '@sanity/image-url'
 import bcrypt from 'bcryptjs'
@@ -100,14 +100,54 @@ const ENABLE_LOCAL_FALLBACK =
   ).toLowerCase() !== 'false'
 
 const R2_DOMAIN = import.meta.env['VITE_R2_DOMAIN'] || ''
+// The original .r2.dev domain that assets were uploaded with (for URL rewriting)
+const R2_ORIGIN_DOMAIN = import.meta.env['VITE_R2_ORIGIN_DOMAIN'] || ''
+
+/**
+ * R2 URL Rewriter: .r2.dev URL'lerini custom domain'e çevirir.
+ * Sanity'deki dokümanlar eski .r2.dev URL'lerini içeriyor.
+ * Custom domain ayarlandığında bu fonksiyon otomatik olarak
+ * tüm URL'leri yeni domain'e çevirir.
+ *
+ * Ayrıca .r2.dev domain'lerini tespit edip R2_DOMAIN'e yönlendirir.
+ */
+const rewriteR2Url = (url: string | undefined): string => {
+  if (!url || typeof url !== 'string') return url || ''
+
+  // 1. Eğer R2_ORIGIN_DOMAIN tanımlı ve URL bu domain ile başlıyorsa, R2_DOMAIN'e çevir
+  if (
+    R2_ORIGIN_DOMAIN &&
+    R2_DOMAIN &&
+    R2_ORIGIN_DOMAIN !== R2_DOMAIN &&
+    url.startsWith(R2_ORIGIN_DOMAIN)
+  ) {
+    return url.replace(R2_ORIGIN_DOMAIN, R2_DOMAIN)
+  }
+
+  // 2. Genel .r2.dev URL'lerini R2_DOMAIN'e çevir (farklı bucket'lardan gelen URL'ler için)
+  if (R2_DOMAIN && !R2_DOMAIN.includes('.r2.dev') && url.includes('.r2.dev')) {
+    // URL'den path'i çıkar: https://pub-xxx.r2.dev/path/to/file -> path/to/file
+    try {
+      const parsedUrl = new URL(url)
+      const path = parsedUrl.pathname.startsWith('/')
+        ? parsedUrl.pathname.substring(1)
+        : parsedUrl.pathname
+      return `${R2_DOMAIN}/${path}`
+    } catch {
+      return url
+    }
+  }
+
+  return url
+}
 
 const sanity = useSanity
   ? createClient({
-    projectId: SANITY_PROJECT_ID,
-    dataset: SANITY_DATASET,
-    apiVersion: SANITY_API_VERSION,
-    useCdn: true,
-  })
+      projectId: SANITY_PROJECT_ID,
+      dataset: SANITY_DATASET,
+      apiVersion: SANITY_API_VERSION,
+      useCdn: true,
+    })
   : null
 
 // Mutations için authenticated client (token varsa)
@@ -115,14 +155,14 @@ const SANITY_TOKEN = import.meta.env['VITE_SANITY_TOKEN'] || ''
 const sanityMutations =
   useSanity && SANITY_TOKEN
     ? createClient({
-      projectId: SANITY_PROJECT_ID,
-      dataset: SANITY_DATASET,
-      apiVersion: SANITY_API_VERSION,
-      useCdn: false,
-      token: SANITY_TOKEN,
-      // Browser token uyarısını kapat (token sadece mutations için kullanılıyor)
-      ignoreBrowserTokenWarning: true,
-    })
+        projectId: SANITY_PROJECT_ID,
+        dataset: SANITY_DATASET,
+        apiVersion: SANITY_API_VERSION,
+        useCdn: false,
+        token: SANITY_TOKEN,
+        // Browser token uyarısını kapat (token sadece mutations için kullanılıyor)
+        ignoreBrowserTokenWarning: true,
+      })
     : null
 
 // Not: Sanity image builder kendi tiplerini kullanıyor; burada boundary olduğu için
@@ -131,7 +171,7 @@ const urlFor = (source: unknown) =>
   useSanity && sanity ? imageUrlBuilder(sanity).image(source as any) : null
 
 // Sanity image benzeri tip - string veya url alanı olan obje
-type SanityImageLike = string | { url?: string } | null | undefined
+type SanityImageLike = string | {url?: string} | null | undefined
 
 const mapImage = (
   img: SanityImageLike | undefined,
@@ -149,11 +189,11 @@ const mapImage = (
       const cleanPath = img.startsWith('/') ? img.substring(1) : img
       return `${R2_DOMAIN}/${cleanPath}`
     }
-    return img
+    return rewriteR2Url(img)
   }
 
   // R2 Check (Prioritized for nested r2Asset or direct R2 object)
-  let rawUrl = (img as any)?.r2Asset?.url || (img as any)?.url
+  const rawUrl = (img as any)?.r2Asset?.url || (img as any)?.url
 
   if (rawUrl) {
     const isMigration = rawUrl.startsWith('migration/') || rawUrl.startsWith('/migration/')
@@ -162,43 +202,59 @@ const mapImage = (
       return `${R2_DOMAIN}/${cleanPath}`
     }
     // Eğer img.url varsa ama Sanity CDN değilse ve R2 domain ise, veya direkt URL ise döndür
-    if (typeof rawUrl === 'string' && (rawUrl.includes('r2.dev') || rawUrl.includes('cdn.sanity.io') || rawUrl.startsWith('http'))) {
-      return rawUrl
+    if (
+      typeof rawUrl === 'string' &&
+      (rawUrl.includes('r2.dev') || rawUrl.includes('cdn.sanity.io') || rawUrl.startsWith('http'))
+    ) {
+      return rewriteR2Url(rawUrl)
     }
   }
 
   const hasBuilderMeta =
-    (img as any)?.crop || (img as any)?.hotspot || (img as any)?.asset?._ref || (img as any)?.asset?._id
+    (img as any)?.crop ||
+    (img as any)?.hotspot ||
+    (img as any)?.asset?._ref ||
+    (img as any)?.asset?._id
 
   // Eğer crop/hotspot/asset bilgisi yoksa ve doğrudan url geldiyse orijinali kullan.
-  if (img.url && !hasBuilderMeta) return img.url
+  if (img.url && !hasBuilderMeta) return rewriteR2Url(img.url)
 
   const b = urlFor && urlFor(img)
-  if (!b) return img.url || ''
+  if (!b) return rewriteR2Url(img.url) || ''
 
   try {
-    const { width = 1600, quality = 85, format = 'webp' } = options || {}
+    const {width = 1600, quality = 85, format = 'webp'} = options || {}
 
-    return b.width(width).quality(quality).format(format).auto('format').url() || img.url || ''
+    return (
+      b.width(width).quality(quality).format(format).auto('format').url() ||
+      rewriteR2Url(img.url) ||
+      ''
+    )
   } catch {
-    return img.url || ''
+    return rewriteR2Url(img.url) || ''
   }
 }
 
 // R2 metadata extraction helper
 const mapR2Metadata = (img: any): R2ImageMetadata => {
   if (!img) return {}
-  const crop = (img.cropX !== undefined && img.cropWidth !== undefined) ? {
-    x: img.cropX,
-    y: img.cropY || 0,
-    width: img.cropWidth,
-    height: img.cropHeight || 1
-  } : undefined
-  const hotspot = (img.hotspotX !== undefined && img.hotspotY !== undefined) ? {
-    x: img.hotspotX,
-    y: img.hotspotY
-  } : undefined
-  return { crop, hotspot }
+  const crop =
+    img.cropX !== undefined && img.cropWidth !== undefined
+      ? {
+          x: img.cropX,
+          y: img.cropY || 0,
+          width: img.cropWidth,
+          height: img.cropHeight || 1,
+        }
+      : undefined
+  const hotspot =
+    img.hotspotX !== undefined && img.hotspotY !== undefined
+      ? {
+          x: img.hotspotX,
+          y: img.hotspotY,
+        }
+      : undefined
+  return {crop, hotspot}
 }
 
 const mapImages = (imgs: SanityImageLike[] | undefined): string[] =>
@@ -206,10 +262,10 @@ const mapImages = (imgs: SanityImageLike[] | undefined): string[] =>
 
 // Sanity palette metadata'yı güvenli şekilde çek
 const extractPalette = (
-  img: SanityImageLike | { asset?: { metadata?: { palette?: SanityImagePalette } } }
+  img: SanityImageLike | {asset?: {metadata?: {palette?: SanityImagePalette}}}
 ): SanityImagePalette | undefined => {
   if (typeof img === 'object' && img !== null && 'asset' in img) {
-    return (img as { asset?: { metadata?: { palette?: SanityImagePalette } } }).asset?.metadata?.palette
+    return (img as {asset?: {metadata?: {palette?: SanityImagePalette}}}).asset?.metadata?.palette
   }
   return undefined
 }
@@ -219,9 +275,9 @@ interface SanityProductMediaItem {
   type?: 'image' | 'video' | 'youtube' | string
   url?: string
   // R2 Fields
-  imageR2?: { url?: string }
-  imageMobileR2?: { url?: string }
-  imageDesktopR2?: { url?: string }
+  imageR2?: {url?: string}
+  imageMobileR2?: {url?: string}
+  imageDesktopR2?: {url?: string}
 
   title?: LocalizedString
   description?: LocalizedString
@@ -229,51 +285,76 @@ interface SanityProductMediaItem {
   linkText?: LocalizedString
 
   // Sibling R2 fields for video
-  videoFileR2?: { url?: string }
-  videoFileMobileR2?: { url?: string }
-  videoFileDesktopR2?: { url?: string }
+  videoFileR2?: {url?: string}
+  videoFileMobileR2?: {url?: string}
+  videoFileDesktopR2?: {url?: string}
 }
 
 // Helper: Medya URL'ini map et (mobil/desktop desteği ile)
-const mapMediaUrl = (m: SanityProductMediaItem, isMobile?: boolean, isDesktop?: boolean): string => {
+const mapMediaUrl = (
+  m: SanityProductMediaItem,
+  isMobile?: boolean,
+  isDesktop?: boolean
+): string => {
   const type = m?.type
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const raw = m as any
 
   if (type === 'image') {
     // R2 priority
-    const r2Url = isMobile ? m?.imageMobileR2?.url : (isDesktop ? m?.imageDesktopR2?.url : m?.imageR2?.url)
+    const r2Url = isMobile
+      ? m?.imageMobileR2?.url
+      : isDesktop
+        ? m?.imageDesktopR2?.url
+        : m?.imageR2?.url
     if (r2Url) {
       if (r2Url.startsWith('migration/') && R2_DOMAIN) return `${R2_DOMAIN}/${r2Url}`
-      return r2Url
+      return rewriteR2Url(r2Url)
     }
     // Fallback: legacy Sanity image or direct url field
-    const legacyImg = isMobile ? raw?.imageMobile : (isDesktop ? raw?.imageDesktop : raw?.image)
+    const legacyImg = isMobile ? raw?.imageMobile : isDesktop ? raw?.imageDesktop : raw?.image
     if (legacyImg) {
       const mapped = mapImage(legacyImg)
       if (mapped) return mapped
     }
-    return m?.url || ''
+    return rewriteR2Url(m?.url) || ''
   } else if (type === 'video') {
     // R2 priority
-    const r2Url = isMobile ? m?.videoFileMobileR2?.url : (isDesktop ? m?.videoFileDesktopR2?.url : m?.videoFileR2?.url)
+    const r2Url = isMobile
+      ? m?.videoFileMobileR2?.url
+      : isDesktop
+        ? m?.videoFileDesktopR2?.url
+        : m?.videoFileR2?.url
     if (r2Url) {
       if (r2Url.startsWith('migration/') && R2_DOMAIN) return `${R2_DOMAIN}/${r2Url}`
-      return r2Url
+      return rewriteR2Url(r2Url)
+    }
+    // Mobile/Desktop yoksa generic R2'yi dene
+    if ((isMobile || isDesktop) && m?.videoFileR2?.url) {
+      const genericR2 = m.videoFileR2.url
+      if (genericR2.startsWith('migration/') && R2_DOMAIN) return `${R2_DOMAIN}/${genericR2}`
+      return rewriteR2Url(genericR2)
     }
     // Fallback: legacy Sanity video file asset or direct url field
-    const legacyVideo = isMobile ? raw?.videoFileMobile : (isDesktop ? raw?.videoFileDesktop : raw?.videoFile)
-    if (legacyVideo?.asset?.url) return legacyVideo.asset.url
-    return m?.url || ''
+    const legacyVideo = isMobile
+      ? raw?.videoFileMobile
+      : isDesktop
+        ? raw?.videoFileDesktop
+        : raw?.videoFile
+    if (legacyVideo?.asset?.url) return rewriteR2Url(legacyVideo.asset.url)
+    // url field'ı YouTube ise video olarak dönme
+    const fallbackUrl = m?.url || ''
+    if (fallbackUrl.includes('youtube.com') || fallbackUrl.includes('youtu.be')) return ''
+    return rewriteR2Url(fallbackUrl) || ''
   }
 
   // YouTube or other types: use url field directly
   return m?.url || ''
 }
 
-const mapProductMedia = (
-  row: { media?: SanityProductMediaItem[] | null | undefined }
-): {
+const mapProductMedia = (row: {
+  media?: SanityProductMediaItem[] | null | undefined
+}): {
   type: 'image' | 'video' | 'youtube'
   url: string
   urlMobile?: string
@@ -317,31 +398,36 @@ const mapProductMedia = (
         linkText?: LocalizedString
         crop?: R2ImageMetadata['crop']
         hotspot?: R2ImageMetadata['hotspot']
-      } = { type, url, title, description, link, linkText, ...metadata }
+      } = {type, url, title, description, link, linkText, ...metadata}
       if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
       if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
 
       return result
     })
-    .filter((m): m is {
-      type: 'image' | 'video' | 'youtube'
-      url: string
-      urlMobile?: string
-      urlDesktop?: string
-      title?: LocalizedString
-      description?: LocalizedString
-      link?: string
-      linkText?: LocalizedString
-      crop?: R2ImageMetadata['crop']
-      hotspot?: R2ImageMetadata['hotspot']
-    } => !!m && !!m.url)
+    .filter(
+      (
+        m
+      ): m is {
+        type: 'image' | 'video' | 'youtube'
+        url: string
+        urlMobile?: string
+        urlDesktop?: string
+        title?: LocalizedString
+        description?: LocalizedString
+        link?: string
+        linkText?: LocalizedString
+        crop?: R2ImageMetadata['crop']
+        hotspot?: R2ImageMetadata['hotspot']
+      } => !!m && !!m.url
+    )
   // Fallback kaldırıldı: Eğer hiç medya eklenmemişse boş array döndür
   return fromMedia
 }
 
-const mapAlternativeMedia = (
-  row: { alternativeMedia?: SanityProductMediaItem[] | null; alternativeImages?: SanityImageLike[] }
-): {
+const mapAlternativeMedia = (row: {
+  alternativeMedia?: SanityProductMediaItem[] | null
+  alternativeImages?: SanityImageLike[]
+}): {
   type: 'image' | 'video' | 'youtube'
   url: string
   urlMobile?: string
@@ -374,14 +460,16 @@ const mapAlternativeMedia = (
           urlDesktop?: string
           crop?: R2ImageMetadata['crop']
           hotspot?: R2ImageMetadata['hotspot']
-        } = { type, url, ...metadata }
+        } = {type, url, ...metadata}
         if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
         if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
 
         return result
       })
       .filter(
-        (m): m is {
+        (
+          m
+        ): m is {
           type: 'image' | 'video' | 'youtube'
           url: string
           urlMobile?: string
@@ -392,19 +480,19 @@ const mapAlternativeMedia = (
         } => !!m && !!m.url
       )
   // fallback to legacy alternativeImages
-  return mapImages(row?.alternativeImages).map((u: string) => ({ type: 'image', url: u }))
+  return mapImages(row?.alternativeImages).map((u: string) => ({type: 'image', url: u}))
 }
 
 const mapDimensionImages = (
   dimImgs:
     | {
-      imageR2?: { url?: string }
-      imageMobileR2?: { url?: string }
-      imageDesktopR2?: { url?: string }
-      title?: LocalizedString
-    }[]
+        imageR2?: {url?: string}
+        imageMobileR2?: {url?: string}
+        imageDesktopR2?: {url?: string}
+        title?: LocalizedString
+      }[]
     | undefined
-): { image: string; imageMobile?: string; imageDesktop?: string; title?: LocalizedString }[] => {
+): {image: string; imageMobile?: string; imageDesktop?: string; title?: LocalizedString}[] => {
   if (!Array.isArray(dimImgs)) return []
   return dimImgs
     .map(di => {
@@ -451,10 +539,12 @@ interface SanityMaterialSelection {
 }
 
 // Ortak yardımcı: Bir Sanity image objesinden asset tabanlı stabil bir key üret
-const getAssetKey = (img: SanityImageLike | { asset?: { _ref?: string; _id?: string } }): string | null => {
+const getAssetKey = (
+  img: SanityImageLike | {asset?: {_ref?: string; _id?: string}}
+): string | null => {
   if (!img) return null
   const assetObj = typeof img === 'object' && img !== null && 'asset' in img ? img.asset : img
-  const asset = assetObj as { _ref?: string; _id?: string } | null
+  const asset = assetObj as {_ref?: string; _id?: string} | null
   if (!asset) return null
   const id = asset._id || asset._ref
   return id || null
@@ -474,13 +564,13 @@ const mapMaterialsFromSelections = (
     const books = sel.group?.books || []
 
     // Grup tarafındaki tüm malzemeleri asset key'e göre lookup tablosuna al
-    const groupMaterialByKey = new Map<string, { name?: LocalizedString; image?: any }>()
+    const groupMaterialByKey = new Map<string, {name?: LocalizedString; image?: any}>()
     for (const book of books) {
       for (const item of book.items || []) {
         const key = getAssetKey(item.image)
         if (!key) continue
         if (!groupMaterialByKey.has(key)) {
-          groupMaterialByKey.set(key, { name: item.name, image: item.image })
+          groupMaterialByKey.set(key, {name: item.name, image: item.image})
         }
       }
     }
@@ -504,7 +594,9 @@ const mapMaterialsFromSelections = (
   return result
 }
 
-const mapGroupedMaterials = (materialSelections: SanityMaterialSelection[]): ProductMaterialsGroup[] => {
+const mapGroupedMaterials = (
+  materialSelections: SanityMaterialSelection[]
+): ProductMaterialsGroup[] => {
   if (!Array.isArray(materialSelections)) return []
 
   return materialSelections
@@ -524,7 +616,7 @@ const mapGroupedMaterials = (materialSelections: SanityMaterialSelection[]): Pro
         .map(book => {
           const materials: ProductMaterial[] = []
 
-          for (const item of (book.items || [])) {
+          for (const item of book.items || []) {
             const key = getAssetKey(item.image)
             if (!key || !selectedKeys.has(key)) continue
 
@@ -559,17 +651,17 @@ const normalizeProduct = (p: Product): Product => ({
   // legacy cleanups
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dimensionImages: Array.isArray((p as any).dimensionImages)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ? (p as any).dimensionImages.map((di: any) =>
-      typeof di === 'string'
-        ? { image: di } // eski string array formatı için backward compatibility
-        : di
-    )
+    ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (p as any).dimensionImages.map((di: any) =>
+        typeof di === 'string'
+          ? {image: di} // eski string array formatı için backward compatibility
+          : di
+      )
     : [],
 })
 
 let storage: Storage
-const memoryStore: { [key: string]: string } = {}
+const memoryStore: {[key: string]: string} = {}
 
 // Storage erişimini güvenli hâle getir:
 // - SSR'de `window` olmadığı için localStorage kullanma
@@ -686,7 +778,7 @@ export const getTranslations = async (): Promise<Record<string, Record<string, s
       if (Array.isArray(results)) {
         results.forEach((item: TranslationItem) => {
           if (item.language && item.strings) {
-            const normalized: Record<string, string> = { ...item.strings }
+            const normalized: Record<string, string> = {...item.strings}
             // Şema alanı 'models_3d' ise, frontend anahtarı '3d_models' bekliyor -> eşle
             if (normalized['models_3d'] && !normalized['3d_models']) {
               normalized['3d_models'] = normalized['models_3d']
@@ -720,15 +812,15 @@ export const getLanguages = async (): Promise<string[]> => {
           visible: boolean
         }
         const normalized: LanguageItem[] = langs
-          .map((l: string | { code?: string; visible?: boolean }): LanguageItem | null => {
-            if (typeof l === 'string') return { code: l, visible: true }
+          .map((l: string | {code?: string; visible?: boolean}): LanguageItem | null => {
+            if (typeof l === 'string') return {code: l, visible: true}
             const code = String(l?.code || '').toLowerCase()
             if (!code) return null
             const visible = l?.visible !== false
-            return { code, visible }
+            return {code, visible}
           })
           .filter((l): l is LanguageItem => l !== null)
-        const visibleCodes = normalized.filter((l) => l.visible).map((l) => l.code)
+        const visibleCodes = normalized.filter(l => l.visible).map(l => l.code)
         const merged = [...base, ...visibleCodes]
         return Array.from(new Set(merged))
       }
@@ -760,7 +852,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
           logoR2
         }`
       // Site ayarları için CDN önbelleğini atla - değişiklikler hemen yansısın
-      const s = await sanity.withConfig({ useCdn: false }).fetch(q)
+      const s = await sanity.withConfig({useCdn: false}).fetch(q)
       // Backward compatible defaults
       return {
         logoUrl: s?.logoR2?.url || (s?.logo ? mapImage(s.logo) : s?.logoUrl || ''),
@@ -822,8 +914,8 @@ export const getCategories = async (): Promise<Category[]> => {
       id: r.id,
       name: r.name,
       subtitle: r.subtitle,
-      heroImage: r.heroImageR2?.url ? { url: mapImage(r.heroImageR2) } : mapImage(r.heroImage),
-      menuImage: r.menuImageR2?.url ? { url: mapImage(r.menuImageR2) } : mapImage(r.menuImage),
+      heroImage: r.heroImageR2?.url ? {url: mapImage(r.heroImageR2)} : mapImage(r.heroImage),
+      menuImage: r.menuImageR2?.url ? {url: mapImage(r.menuImageR2)} : mapImage(r.menuImage),
     }))
   }
   await delay(SIMULATED_DELAY)
@@ -860,13 +952,14 @@ export const getDesigners = async (): Promise<Designer[]> => {
           "id": id.current, 
           name, 
           bio, 
+          image,
           imageR2,
           imageMobileR2,
           imageDesktopR2
         }`
     const rows = await sanity.fetch(query)
     return rows.map((r: any) => {
-      const imageFinal = mapImage(r.imageR2)
+      const imageFinal = mapImage(r.imageR2) || mapImage(r.image)
 
       const imageMobile = r.imageMobileR2?.url ? mapImage(r.imageMobileR2) : undefined
       const imageDesktop = r.imageDesktopR2?.url ? mapImage(r.imageDesktopR2) : undefined
@@ -893,13 +986,14 @@ export const getDesignerById = async (id: string): Promise<Designer | undefined>
       "id": id.current, 
       name, 
       bio, 
+      image,
       imageR2, 
       imageMobileR2,
       imageDesktopR2
     }`
-    const r = await sanity.fetch(query, { id })
+    const r = await sanity.fetch(query, {id})
     if (!r) return undefined
-    const image = r.imageR2?.url || ''
+    const image = mapImage(r.imageR2) || mapImage(r.image) || ''
     const imageMobile = r.imageMobileR2?.url || undefined
     const imageDesktop = r.imageDesktopR2?.url || undefined
     return {
@@ -1026,7 +1120,7 @@ export const getProducts = async (): Promise<Product[]> => {
             urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
             urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
             palette,
-            ...metadata
+            ...metadata,
           }
         })(),
         alternativeMedia: mapAlternativeMedia(r),
@@ -1118,7 +1212,7 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
         }`
-    const r = await sanity.fetch(query, { id })
+    const r = await sanity.fetch(query, {id})
     if (!r) return undefined
     return normalizeProduct({
       id: r.id,
@@ -1139,7 +1233,7 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
           urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
           palette,
-          ...metadata
+          ...metadata,
         }
       })(),
       alternativeMedia: mapAlternativeMedia(r),
@@ -1208,7 +1302,7 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
         }`
-    const rows = await sanity.fetch(query, { categoryId })
+    const rows = await sanity.fetch(query, {categoryId})
     return rows.map((r: any) =>
       normalizeProduct({
         id: r.id,
@@ -1229,7 +1323,7 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
             urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
             urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
             palette,
-            ...metadata
+            ...metadata,
           }
         })(),
         alternativeMedia: mapAlternativeMedia(r),
@@ -1296,7 +1390,7 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
         }`
-    const rows = await sanity.fetch(query, { designerId })
+    const rows = await sanity.fetch(query, {designerId})
     return rows.map((r: any) =>
       normalizeProduct({
         id: r.id,
@@ -1317,7 +1411,7 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
             urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
             urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
             palette,
-            ...metadata
+            ...metadata,
           }
         })(),
         alternativeMedia: mapAlternativeMedia(r),
@@ -1433,22 +1527,28 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
           url,
           palette: extractPalette(data.heroImageR2),
         }
+      } else if (data.heroImage?.asset) {
+        const url = mapImage(data.heroImage)
+        data.heroImage = {
+          url,
+          palette: extractPalette(data.heroImage),
+        }
       }
 
       // Map media for sections
       if (data.historySection) {
-        const url = mapImage(data.historySection.imageR2)
-        data.historySection.image = { url }
+        const url = mapImage(data.historySection.imageR2) || mapImage(data.historySection.image)
+        data.historySection.image = {url}
         data.historySection.media = mapProductMedia(data.historySection)
       }
       if (data.identitySection) {
-        const url = mapImage(data.identitySection.imageR2)
-        data.identitySection.image = { url }
+        const url = mapImage(data.identitySection.imageR2) || mapImage(data.identitySection.image)
+        data.identitySection.image = {url}
         data.identitySection.media = mapProductMedia(data.identitySection)
       }
       if (data.qualitySection) {
-        const url = mapImage(data.qualitySection.imageR2)
-        data.qualitySection.image = { url }
+        const url = mapImage(data.qualitySection.imageR2) || mapImage(data.qualitySection.image)
+        data.qualitySection.image = {url}
         data.qualitySection.media = mapProductMedia(data.qualitySection)
       }
 
@@ -1487,7 +1587,9 @@ export const getContactPageContent = async (): Promise<ContactPageContent> => {
                 media[]{
                     type,
                     url,
+                    image{..., asset->{url, _ref, _id}},
                     imageR2,
+                    videoFile{..., asset->{url, _ref, _id}},
                     videoFileR2
                 }
             }
@@ -1499,15 +1601,18 @@ export const getContactPageContent = async (): Promise<ContactPageContent> => {
           const processedMedia = loc.media
             .map((mediaItem: any) => {
               let mediaUrl = mediaItem.url
-              if (mediaItem.type === 'image' && mediaItem.imageR2?.url) {
-                mediaUrl = mapImage(mediaItem.imageR2)
-              } else if (mediaItem.type === 'video' && mediaItem.videoFileR2?.url) {
-                mediaUrl = mediaItem.videoFileR2.url
+              if (mediaItem.type === 'image') {
+                mediaUrl = mapImage(mediaItem.imageR2) || mapImage(mediaItem.image) || mediaItem.url
+              } else if (mediaItem.type === 'video') {
+                mediaUrl =
+                  (mediaItem.videoFileR2?.url ? rewriteR2Url(mediaItem.videoFileR2.url) : null) ||
+                  mediaItem.videoFile?.asset?.url ||
+                  mediaItem.url
               }
-              return { ...mediaItem, url: mediaUrl }
+              return {...mediaItem, url: mediaUrl}
             })
             .filter((m: any) => m.url) // URL'si olmayan medyaları filtrele
-          return { ...loc, media: processedMedia }
+          return {...loc, media: processedMedia}
         }
         return loc
       })
@@ -1551,22 +1656,37 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             }
         }`
       // CDN cache'i bypass et — CMS'teki hero değişiklikleri anında yansısın
-      const data = await sanity.withConfig({ useCdn: false }).fetch(q)
+      const data = await sanity.withConfig({useCdn: false}).fetch(q)
       if (data?.heroMedia) {
-        data.heroMedia = data.heroMedia.map((m: any) => {
-          // mapMediaUrl updated to use R2 fields automatically
-          const url = mapMediaUrl(m)
-          const urlMobile = mapMediaUrl(m, true, false)
-          const urlDesktop = mapMediaUrl(m, false, true)
-          const palette = extractPalette(m.imageR2)
+        data.heroMedia = data.heroMedia
+          .map((m: any) => {
+            // mapMediaUrl updated to use R2 fields automatically
+            const url = mapMediaUrl(m)
+            const urlMobile = mapMediaUrl(m, true, false)
+            const urlDesktop = mapMediaUrl(m, false, true)
+            const palette = extractPalette(m.imageR2)
 
-          const result: any = { ...m, url }
-          if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
-          if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
-          if (palette) result.palette = palette
+            // YouTube URL'si video type ile gelebilir - otomatik düzelt
+            let type = m.type
+            if (
+              type === 'video' &&
+              url &&
+              (url.includes('youtube.com') || url.includes('youtu.be'))
+            ) {
+              type = 'youtube'
+            }
 
-          return result
-        })
+            const result: any = {...m, url, type}
+            if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
+            if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
+            if (palette) result.palette = palette
+
+            return result
+          })
+          .filter((m: any) => {
+            // URL'si olmayan veya boş olan item'ları filtrele
+            return m.url && m.url.trim() !== ''
+          })
       }
       if (data?.contentBlocks) {
         data.contentBlocks = data.contentBlocks.map((b: any) => {
@@ -1574,21 +1694,25 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
           if (b.mediaType === 'image') {
             // R2 Priority for Content Blocks
             const imgUrl = b.imageR2?.url ? mapImage(b.imageR2) : undefined
-            if (imgUrl) return { ...b, image: imgUrl, url: undefined }
+            if (imgUrl) return {...b, image: imgUrl, url: undefined}
           }
           if (b.mediaType === 'video' && b.videoFileR2?.url) {
             url = b.videoFileR2.url
           }
-          return { ...b, image: undefined, url }
+          return {...b, image: undefined, url}
         })
       }
       if (data?.inspirationSection) {
         // R2 Priority for Inspiration Section
         const bgImg = mapImage(data.inspirationSection.backgroundImageR2)
 
-        const bgImgMobile = data.inspirationSection.backgroundImageMobileR2?.url ? mapImage(data.inspirationSection.backgroundImageMobileR2) : undefined
+        const bgImgMobile = data.inspirationSection.backgroundImageMobileR2?.url
+          ? mapImage(data.inspirationSection.backgroundImageMobileR2)
+          : undefined
 
-        const bgImgDesktop = data.inspirationSection.backgroundImageDesktopR2?.url ? mapImage(data.inspirationSection.backgroundImageDesktopR2) : undefined
+        const bgImgDesktop = data.inspirationSection.backgroundImageDesktopR2?.url
+          ? mapImage(data.inspirationSection.backgroundImageDesktopR2)
+          : undefined
 
         const palette = extractPalette(data.inspirationSection.backgroundImageR2)
         data.inspirationSection.backgroundImage = {
@@ -1713,6 +1837,7 @@ export const getNews = async (): Promise<NewsItem[]> => {
           isPublished,
           sortOrder,
           content, 
+          mainImage{..., asset->{url, _ref, _id}},
           mainImageR2,
           mainImageMobileR2,
           mainImageDesktopR2,
@@ -1738,7 +1863,7 @@ export const getNews = async (): Promise<NewsItem[]> => {
       sortOrder: r.sortOrder,
       content: r.content,
       mainImage: (() => {
-        const img = mapImage(r.mainImageR2)
+        const img = mapImage(r.mainImageR2) || mapImage(r.mainImage)
         const imgMobile = r.mainImageMobileR2?.url ? mapImage(r.mainImageMobileR2) : undefined
         const imgDesktop = r.mainImageDesktopR2?.url ? mapImage(r.mainImageDesktopR2) : undefined
         return {
@@ -1753,7 +1878,7 @@ export const getNews = async (): Promise<NewsItem[]> => {
           const urlMobile = mapMediaUrl(m, true, false)
           const urlDesktop = mapMediaUrl(m, false, true)
 
-          const result: any = { type: m.type, url, caption: m.caption }
+          const result: any = {type: m.type, url, caption: m.caption}
           if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
           if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
 
@@ -1772,6 +1897,7 @@ export const getNewsById = async (id: string): Promise<NewsItem | undefined> => 
           title, 
           date, 
           content, 
+          mainImage{..., asset->{url, _ref, _id}},
           mainImageR2,
           mainImageMobileR2,
           mainImageDesktopR2,
@@ -1779,15 +1905,17 @@ export const getNewsById = async (id: string): Promise<NewsItem | undefined> => 
             type,
             url,
             caption,
+            image{..., asset->{url, _ref, _id}},
             imageR2,
             imageMobileR2,
             imageDesktopR2,
+            videoFile{..., asset->{url, _ref, _id}},
             videoFileR2,
             videoFileMobileR2,
             videoFileDesktopR2
           }
         }`
-    const r = await sanity.fetch(q, { id })
+    const r = await sanity.fetch(q, {id})
     if (!r) return undefined
     return {
       id: r.id,
@@ -1795,7 +1923,7 @@ export const getNewsById = async (id: string): Promise<NewsItem | undefined> => 
       date: r.date,
       content: r.content,
       mainImage: (() => {
-        const img = mapImage(r.mainImageR2)
+        const img = mapImage(r.mainImageR2) || mapImage(r.mainImage)
         const imgMobile = r.mainImageMobileR2?.url ? mapImage(r.mainImageMobileR2) : undefined
         const imgDesktop = r.mainImageDesktopR2?.url ? mapImage(r.mainImageDesktopR2) : undefined
         return {
@@ -1810,7 +1938,7 @@ export const getNewsById = async (id: string): Promise<NewsItem | undefined> => 
           const urlMobile = mapMediaUrl(m, true, false)
           const urlDesktop = mapMediaUrl(m, false, true)
 
-          const result: any = { type: m.type, url, caption: m.caption }
+          const result: any = {type: m.type, url, caption: m.caption}
           if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
           if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
 
@@ -1856,6 +1984,7 @@ export const getProjects = async (): Promise<Project[]> => {
         publishAt,
         isPublished,
         sortOrder,
+        cover{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}},
         coverR2{..., metadata{palette{dominant{background,foreground}}}},
         coverMobileR2{..., metadata{palette{dominant{background,foreground}}}},
         coverDesktopR2{..., metadata{palette{dominant{background,foreground}}}},
@@ -1870,14 +1999,14 @@ export const getProjects = async (): Promise<Project[]> => {
       isPublished: r.isPublished,
       sortOrder: r.sortOrder,
       cover: (() => {
-        const url = mapImage(r.coverR2)
+        const url = mapImage(r.coverR2) || mapImage(r.cover)
         const urlMobile = r.coverMobileR2?.url ? mapImage(r.coverMobileR2) : undefined
         const urlDesktop = r.coverDesktopR2?.url ? mapImage(r.coverDesktopR2) : undefined
         return {
           url,
           urlMobile: urlMobile && urlMobile !== url ? urlMobile : undefined,
           urlDesktop: urlDesktop && urlDesktop !== url ? urlDesktop : undefined,
-          palette: extractPalette(r.coverR2),
+          palette: extractPalette(r.coverR2) || extractPalette(r.cover),
         }
       })(),
       excerpt: r.excerpt,
@@ -1903,15 +2032,19 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
         type,
         url,
         caption,
+        image{..., asset->{url, _ref, _id}},
         imageR2,
+        imageMobile{..., asset->{url, _ref, _id}},
         imageMobileR2,
+        imageDesktop{..., asset->{url, _ref, _id}},
         imageDesktopR2,
+        videoFile{..., asset->{url, _ref, _id}},
         videoFileR2,
         videoFileMobileR2,
         videoFileDesktopR2
       }
     }`
-    const r = await sanity.fetch(q, { id })
+    const r = await sanity.fetch(q, {id})
     if (!r) return undefined
 
     const media = (r.media || [])
@@ -1921,7 +2054,7 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
         const urlMobile = mapMediaUrl(m, true, false)
         const urlDesktop = mapMediaUrl(m, false, true)
 
-        const result: any = { type, url, image: type === 'image' ? url : undefined }
+        const result: any = {type, url, image: type === 'image' ? url : undefined}
         if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
         if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
 
@@ -1934,14 +2067,22 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
       title: r.title,
       date: r.date,
       cover: (() => {
-        const url = mapImage(r.coverR2)
-        const urlMobile = r.coverMobileR2?.url ? mapImage(r.coverMobileR2) : undefined
-        const urlDesktop = r.coverDesktopR2?.url ? mapImage(r.coverDesktopR2) : undefined
+        const url = mapImage(r.coverR2) || mapImage(r.cover)
+        const urlMobile = r.coverMobileR2?.url
+          ? mapImage(r.coverMobileR2)
+          : r.coverMobile
+            ? mapImage(r.coverMobile)
+            : undefined
+        const urlDesktop = r.coverDesktopR2?.url
+          ? mapImage(r.coverDesktopR2)
+          : r.coverDesktop
+            ? mapImage(r.coverDesktop)
+            : undefined
         return {
           url,
           urlMobile: urlMobile && urlMobile !== url ? urlMobile : undefined,
           urlDesktop: urlDesktop && urlDesktop !== url ? urlDesktop : undefined,
-          palette: extractPalette(r.coverR2),
+          palette: extractPalette(r.coverR2) || extractPalette(r.cover),
         }
       })(),
       excerpt: r.excerpt,
@@ -2061,7 +2202,7 @@ export const subscribeEmail = async (email: string): Promise<User> => {
       // Sanity hatası varsa hatayı fırlat
       let errorMessage = 'E-posta aboneliği yapılırken bir hata oluştu. Lütfen tekrar deneyin.'
 
-      const errorObj = error as { message?: string; statusCode?: number }
+      const errorObj = error as {message?: string; statusCode?: number}
       if (errorObj.message?.includes('permission') || errorObj.statusCode === 403) {
         errorMessage =
           'İZİN HATASI: Sanity token\'ınızın "Editor" veya "Admin" yetkisi olduğundan emin olun.'
@@ -2174,7 +2315,7 @@ export const registerUser = async (
           // Sanity hatası varsa hatayı fırlat (local storage'a düşme)
           let errorMessage = 'Üye kaydı güncellenirken bir hata oluştu. Lütfen tekrar deneyin.'
 
-          const errorObj = error as { message?: string }
+          const errorObj = error as {message?: string}
           if (errorObj.message?.includes('permission')) {
             errorMessage =
               'İZİN HATASI: Sanity token\'ınızın "Editor" veya "Admin" yetkisi olduğundan emin olun. Üye bilgileri CMS\'de görünmeyecektir.'
@@ -2242,7 +2383,7 @@ export const registerUser = async (
       // Sanity hatası varsa hatayı fırlat (local storage'a düşme)
       let errorMessage = 'Üye kaydı yapılırken bir hata oluştu. Lütfen tekrar deneyin.'
 
-      const errorObj = error as { message?: string }
+      const errorObj = error as {message?: string}
       if (errorObj.message?.includes('permission')) {
         errorMessage =
           'İZİN HATASI: Sanity token\'ınızın "Editor" veya "Admin" yetkisi olduğundan emin olun. Üye bilgileri CMS\'de görünmeyecektir.'
@@ -2268,7 +2409,7 @@ export const registerUser = async (
       if (existingUser.userType === 'email_subscriber') {
         // Email subscriber'ı full member'a yükselt
         const passwordHash = await hashPassword(password)
-        const userPasswords = getItem<{ [email: string]: string }>('birim_user_passwords') || {}
+        const userPasswords = getItem<{[email: string]: string}>('birim_user_passwords') || {}
         userPasswords[normEmail] = passwordHash
         setItem('birim_user_passwords', userPasswords)
 
@@ -2310,7 +2451,7 @@ export const registerUser = async (
     }
 
     // Store password hash separately (in real app, don't store in localStorage)
-    const userPasswords = getItem<{ [email: string]: string }>('birim_user_passwords') || {}
+    const userPasswords = getItem<{[email: string]: string}>('birim_user_passwords') || {}
     userPasswords[normEmail] = passwordHash
     setItem('birim_user_passwords', userPasswords)
 
@@ -2339,7 +2480,7 @@ export const loginUser = async (email: string, password: string): Promise<User |
         createdAt,
         password
       }`,
-      { email: normEmail }
+      {email: normEmail}
     )
 
     if (!user || !user.password) {
@@ -2370,7 +2511,7 @@ export const loginUser = async (email: string, password: string): Promise<User |
   // Local storage fallback
   await delay(SIMULATED_DELAY)
   const users = getItem<User[]>(KEYS.USERS || 'birim_users') || []
-  const userPasswords = getItem<{ [email: string]: string }>('birim_user_passwords') || {}
+  const userPasswords = getItem<{[email: string]: string}>('birim_user_passwords') || {}
 
   const user = users.find(u => normalizeEmail(u.email) === normEmail && u.isActive)
   if (!user) {
@@ -2406,7 +2547,7 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
         isActive,
         createdAt
       }`,
-      { email: normEmail }
+      {email: normEmail}
     )
 
     if (!user) {
@@ -2450,7 +2591,7 @@ export const getUserById = async (id: string): Promise<User | null> => {
         verificationToken,
         createdAt
       }`,
-      { id }
+      {id}
     )
 
     if (!user) {
@@ -2494,7 +2635,7 @@ export const verifyUserByToken = async (token: string): Promise<User | null> => 
         verificationToken,
         createdAt
       }`
-    const user = await sanity.fetch<any>(query, { vtoken: token })
+    const user = await sanity.fetch<any>(query, {vtoken: token})
 
     if (!user) return null
 
