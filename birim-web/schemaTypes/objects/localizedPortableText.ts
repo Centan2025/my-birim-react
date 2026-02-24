@@ -1,4 +1,5 @@
 import {defineType, defineField} from 'sanity'
+import PortableTextImagePreview from '../../components/PortableTextImagePreview'
 
 /**
  * Zengin Metin (Portable Text) Editor Yapılandırması
@@ -111,16 +112,14 @@ const portableTextBlocks = [
         initialValue: 'full',
       },
     ],
+    components: {
+      preview: PortableTextImagePreview,
+    },
     preview: {
       select: {
+        imageR2: 'imageR2',
         caption: 'caption',
         alt: 'alt',
-      },
-      prepare({alt, caption}: {alt?: string; caption?: string}) {
-        return {
-          title: caption || alt || 'Görsel (R2)',
-          subtitle: 'R2 Görsel',
-        }
       },
     },
   },

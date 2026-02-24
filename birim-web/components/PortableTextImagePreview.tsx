@@ -1,0 +1,40 @@
+import React from 'react'
+
+export default function PortableTextImagePreview(props: any) {
+  const url = props.imageR2?.url || props.value?.imageR2?.url
+  const title = props.caption || props.alt || props.title || 'Görsel (R2)'
+
+  return (
+    <div style={{display: 'flex', flexDirection: 'column', padding: '0.5rem'}}>
+      {url ? (
+        <img
+          src={url}
+          alt={title}
+          style={{
+            width: '100%',
+            height: 'auto',
+            maxHeight: '400px',
+            objectFit: 'contain',
+            backgroundColor: '#f3f4f6',
+            borderRadius: '4px',
+          }}
+        />
+      ) : (
+        <div
+          style={{
+            padding: '2rem',
+            backgroundColor: '#f3f4f6',
+            textAlign: 'center',
+            borderRadius: '4px',
+            color: '#6b7280',
+          }}
+        >
+          Lütfen bir görsel seçin
+        </div>
+      )}
+      <div style={{marginTop: '0.5rem', fontWeight: 600, fontSize: '14px', textAlign: 'center'}}>
+        {title}
+      </div>
+    </div>
+  )
+}
