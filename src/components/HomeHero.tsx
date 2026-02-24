@@ -120,16 +120,14 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
       setCurrentSlide(nextSlide)
       transitionTimeoutRef.current = setTimeout(() => {
         setIsTransitioning(true)
-        requestAnimationFrame(() => {
+        innerTimeoutRef.current = setTimeout(() => {
           setCurrentSlide(0)
-          requestAnimationFrame(() => {
-            innerTimeoutRef.current = setTimeout(() => {
-              setIsTransitioning(false)
-              transitionTimeoutRef.current = null
-              innerTimeoutRef.current = null
-            }, 16)
-          })
-        })
+          setTimeout(() => {
+            setIsTransitioning(false)
+            transitionTimeoutRef.current = null
+            innerTimeoutRef.current = null
+          }, 40)
+        }, 40)
       }, 600)
     } else {
       setCurrentSlide(nextSlide)
@@ -155,16 +153,14 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
       setCurrentSlide(prevSlide)
       transitionTimeoutRef.current = setTimeout(() => {
         setIsTransitioning(true)
-        requestAnimationFrame(() => {
+        innerTimeoutRef.current = setTimeout(() => {
           setCurrentSlide(slideCount - 1)
-          requestAnimationFrame(() => {
-            innerTimeoutRef.current = setTimeout(() => {
-              setIsTransitioning(false)
-              transitionTimeoutRef.current = null
-              innerTimeoutRef.current = null
-            }, 16)
-          })
-        })
+          setTimeout(() => {
+            setIsTransitioning(false)
+            transitionTimeoutRef.current = null
+            innerTimeoutRef.current = null
+          }, 40)
+        }, 40)
       }, 600)
     } else {
       setCurrentSlide(prevSlide)
