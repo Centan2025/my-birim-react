@@ -1,3 +1,4 @@
+import React from 'react'
 import {defineField, defineType} from 'sanity'
 import {localizedString} from './localizedString'
 import MaterialSelectionInput from '../../components/MaterialSelectionInput'
@@ -233,6 +234,34 @@ export const heroMediaItem = defineType({
     defineField({name: 'buttonText', title: 'Buton Metni', type: 'localizedString'}),
     defineField({name: 'buttonLink', title: 'Buton Bağlantısı', type: 'string'}),
   ],
+  preview: {
+    select: {
+      type: 'type',
+      title: 'title.tr',
+      subtitle: 'subtitle.tr',
+      imageUrl: 'imageR2.url',
+    },
+    prepare(selection: any) {
+      const {type, title, subtitle, imageUrl} = selection
+      let mediaTitle = title
+      if (!mediaTitle) {
+        mediaTitle =
+          type === 'image'
+            ? 'Resim Medyası'
+            : type === 'video'
+              ? 'Video Medyası'
+              : 'YouTube Medyası'
+      }
+      return {
+        title: mediaTitle,
+        subtitle: subtitle || (type === 'image' ? 'Resim' : type === 'video' ? 'Video' : 'YouTube'),
+        media:
+          type === 'image' && imageUrl
+            ? React.createElement('img', {src: imageUrl, style: {objectFit: 'cover'}})
+            : undefined,
+      }
+    },
+  },
 })
 
 // Simpler media item for Alternative Media on product detail
