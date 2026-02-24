@@ -1,6 +1,6 @@
 import React from 'react'
-import { defineField, defineType } from 'sanity'
-import { orderRankField } from '@sanity/orderable-document-list'
+import {defineField, defineType} from 'sanity'
+import {orderRankField} from '@sanity/orderable-document-list'
 
 export default defineType({
   name: 'designer',
@@ -11,17 +11,17 @@ export default defineType({
       name: 'id',
       title: 'ID (Slug)',
       type: 'slug',
-      options: { source: (doc: any) => doc.name?.tr || doc.name?.en, maxLength: 96 },
+      options: {source: (doc: any) => doc.name?.tr || doc.name?.en, maxLength: 96},
       validation: (Rule) => Rule.required(),
     }),
-    orderRankField({ type: 'designer' }),
+    orderRankField({type: 'designer'}),
     defineField({
       name: 'name',
       title: 'Ad',
       type: 'localizedString',
       validation: (Rule) => Rule.required(),
     }),
-    defineField({ name: 'bio', title: 'Biyografi', type: 'localizedPortableText' }),
+    defineField({name: 'bio', title: 'Biyografi', type: 'localizedPortableText'}),
     defineField({
       name: 'imageR2',
       title: 'Görsel (Tüm Cihazlar)',
@@ -39,17 +39,28 @@ export default defineType({
     }),
   ],
   preview: {
-    select: { title: 'name.tr', r2Url: 'imageR2.url' },
-    prepare({ title, r2Url }) {
+    select: {title: 'name.tr', r2Url: 'imageR2.url'},
+    prepare({title, r2Url}) {
+      let finalUrl = r2Url
+      const domain = process.env.SANITY_STUDIO_R2_DOMAIN
+      if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
+        try {
+          const parsed = new URL(finalUrl)
+          const path = parsed.pathname.startsWith('/')
+            ? parsed.pathname.substring(1)
+            : parsed.pathname
+          finalUrl = `${domain}/${path}`
+        } catch (e) {}
+      }
       return {
         title: title || 'Tasarımcı',
-        media: r2Url ? (
+        media: finalUrl ? (
           <img
-            src={r2Url}
+            src={finalUrl}
             alt={title || 'Tasarımcı'}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            style={{width: '100%', height: '100%', objectFit: 'cover'}}
           />
-        ) : undefined
+        ) : undefined,
       }
     },
   },

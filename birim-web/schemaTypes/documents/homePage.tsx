@@ -1,5 +1,5 @@
 import React from 'react'
-import { defineField, defineType } from 'sanity'
+import {defineField, defineType} from 'sanity'
 
 export default defineType({
   name: 'homePage',
@@ -10,7 +10,7 @@ export default defineType({
       name: 'heroMedia',
       title: 'Hero Medya',
       type: 'array',
-      of: [{ type: 'heroMediaItem' }],
+      of: [{type: 'heroMediaItem'}],
     }),
     defineField({
       name: 'heroAutoPlay',
@@ -19,12 +19,12 @@ export default defineType({
       description: 'Hero medyanın otomatik olarak geçiş yapmasını sağlar',
       initialValue: true,
     }),
-    defineField({ name: 'isHeroTextVisible', title: 'Hero Metnini Göster', type: 'boolean' }),
+    defineField({name: 'isHeroTextVisible', title: 'Hero Metnini Göster', type: 'boolean'}),
     defineField({
       name: 'contentBlocks',
       title: 'İçerik Blokları',
       type: 'array',
-      of: [{ type: 'contentBlock' }],
+      of: [{type: 'contentBlock'}],
       description: 'Hero bölümünün altında görünecek içerik blokları',
     }),
     defineField({
@@ -47,25 +47,36 @@ export default defineType({
           title: 'Arka Plan Görseli (Desktop)',
           type: 'r2Asset',
         }),
-        defineField({ name: 'title', title: 'Başlık', type: 'localizedString' }),
-        defineField({ name: 'subtitle', title: 'Alt Başlık', type: 'localizedString' }),
-        defineField({ name: 'buttonText', title: 'Buton Metni', type: 'localizedString' }),
-        defineField({ name: 'buttonLink', title: 'Buton Bağlantısı', type: 'string' }),
+        defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
+        defineField({name: 'subtitle', title: 'Alt Başlık', type: 'localizedString'}),
+        defineField({name: 'buttonText', title: 'Buton Metni', type: 'localizedString'}),
+        defineField({name: 'buttonLink', title: 'Buton Bağlantısı', type: 'string'}),
       ],
     }),
   ],
   preview: {
-    select: { r2Url: 'heroMedia.0.imageR2.url' },
-    prepare({ r2Url }) {
+    select: {r2Url: 'heroMedia.0.imageR2.url'},
+    prepare({r2Url}) {
+      let finalUrl = r2Url
+      const domain = process.env.SANITY_STUDIO_R2_DOMAIN
+      if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
+        try {
+          const parsed = new URL(finalUrl)
+          const path = parsed.pathname.startsWith('/')
+            ? parsed.pathname.substring(1)
+            : parsed.pathname
+          finalUrl = `${domain}/${path}`
+        } catch (e) {}
+      }
       return {
         title: 'Ana Sayfa',
-        media: r2Url ? (
+        media: finalUrl ? (
           <img
-            src={r2Url}
+            src={finalUrl}
             alt="Ana Sayfa"
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            style={{width: '100%', height: '100%', objectFit: 'cover'}}
           />
-        ) : undefined
+        ) : undefined,
       }
     },
   },

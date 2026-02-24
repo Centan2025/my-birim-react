@@ -1,5 +1,5 @@
 import React from 'react'
-import { defineField, defineType } from 'sanity'
+import {defineField, defineType} from 'sanity'
 
 export default defineType({
   name: 'newsItem',
@@ -10,7 +10,7 @@ export default defineType({
       name: 'id',
       title: 'ID (Slug)',
       type: 'slug',
-      options: { source: (doc: any) => doc.title?.tr || doc.title?.en, maxLength: 96 },
+      options: {source: (doc: any) => doc.title?.tr || doc.title?.en, maxLength: 96},
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -19,7 +19,7 @@ export default defineType({
       type: 'localizedString',
       validation: (Rule) => Rule.required(),
     }),
-    defineField({ name: 'date', title: 'Tarih (Görünecek Tarih)', type: 'datetime' }),
+    defineField({name: 'date', title: 'Tarih (Görünecek Tarih)', type: 'datetime'}),
     defineField({
       name: 'isPublished',
       title: 'Yayında Göster',
@@ -41,7 +41,7 @@ export default defineType({
       description:
         'Küçük sayı önce gelir. Boş bırakırsanız tarih alanına göre (yeniden eskiye) sıralanır.',
     }),
-    defineField({ name: 'content', title: 'İçerik', type: 'localizedPortableText' }),
+    defineField({name: 'content', title: 'İçerik', type: 'localizedPortableText'}),
     defineField({
       name: 'mainImageR2',
       title: 'Kapak Görseli (Tüm Cihazlar)',
@@ -73,9 +73,9 @@ export default defineType({
               type: 'string',
               options: {
                 list: [
-                  { title: 'Image', value: 'image' },
-                  { title: 'Video', value: 'video' },
-                  { title: 'YouTube', value: 'youtube' },
+                  {title: 'Image', value: 'image'},
+                  {title: 'Video', value: 'video'},
+                  {title: 'YouTube', value: 'youtube'},
                 ],
               },
               initialValue: 'image',
@@ -84,64 +84,75 @@ export default defineType({
               name: 'imageR2',
               title: 'Görsel (Tüm Cihazlar)',
               type: 'r2Asset',
-              hidden: ({ parent }) => parent?.type !== 'image',
+              hidden: ({parent}) => parent?.type !== 'image',
             }),
             defineField({
               name: 'imageMobileR2',
               title: 'Görsel (Mobil)',
               type: 'r2Asset',
-              hidden: ({ parent }) => parent?.type !== 'image',
+              hidden: ({parent}) => parent?.type !== 'image',
             }),
             defineField({
               name: 'imageDesktopR2',
               title: 'Görsel (Desktop)',
               type: 'r2Asset',
-              hidden: ({ parent }) => parent?.type !== 'image',
+              hidden: ({parent}) => parent?.type !== 'image',
             }),
             defineField({
               name: 'videoFileR2',
               title: 'Video Dosyası (Tüm Cihazlar)',
               type: 'r2Asset',
-              hidden: ({ parent }) => parent?.type !== 'video',
+              hidden: ({parent}) => parent?.type !== 'video',
             }),
             defineField({
               name: 'videoFileMobileR2',
               title: 'Video Dosyası (Mobil)',
               type: 'r2Asset',
-              hidden: ({ parent }) => parent?.type !== 'video',
+              hidden: ({parent}) => parent?.type !== 'video',
             }),
             defineField({
               name: 'videoFileDesktopR2',
               title: 'Video Dosyası (Desktop)',
               type: 'r2Asset',
-              hidden: ({ parent }) => parent?.type !== 'video',
+              hidden: ({parent}) => parent?.type !== 'video',
             }),
             defineField({
               name: 'url',
               title: 'Video URL (veya YouTube URL)',
               type: 'url',
-              hidden: ({ parent }) => parent?.type === 'image',
+              hidden: ({parent}) => parent?.type === 'image',
               description:
                 'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.',
             }),
-            defineField({ name: 'caption', title: 'Açıklama', type: 'localizedString' }),
+            defineField({name: 'caption', title: 'Açıklama', type: 'localizedString'}),
           ],
         },
       ],
     }),
   ],
   preview: {
-    select: { title: 'title.tr', r2Url: 'mainImageR2.url' },
-    prepare({ title, r2Url }) {
+    select: {title: 'title.tr', r2Url: 'mainImageR2.url'},
+    prepare({title, r2Url}) {
+      let finalUrl = r2Url
+      const domain = process.env.SANITY_STUDIO_R2_DOMAIN
+      if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
+        try {
+          const parsed = new URL(finalUrl)
+          const path = parsed.pathname.startsWith('/')
+            ? parsed.pathname.substring(1)
+            : parsed.pathname
+          finalUrl = `${domain}/${path}`
+        } catch (e) {}
+      }
       return {
         title: title || 'Haber',
-        media: r2Url ? (
+        media: finalUrl ? (
           <img
-            src={r2Url}
+            src={finalUrl}
             alt={title || 'Haber'}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            style={{width: '100%', height: '100%', objectFit: 'cover'}}
           />
-        ) : undefined
+        ) : undefined,
       }
     },
   },

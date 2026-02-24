@@ -62,6 +62,32 @@ export const productDimensionImage = defineType({
       description: 'Görselin altında görünecek başlık',
     }),
   ],
+  preview: {
+    select: {
+      title: 'title.tr',
+      imageUrl: 'imageR2.url',
+    },
+    prepare(selection: any) {
+      const {title, imageUrl} = selection
+      let finalUrl = imageUrl
+      const domain = process.env.SANITY_STUDIO_R2_DOMAIN
+      if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
+        try {
+          const parsed = new URL(finalUrl)
+          const path = parsed.pathname.startsWith('/')
+            ? parsed.pathname.substring(1)
+            : parsed.pathname
+          finalUrl = `${domain}/${path}`
+        } catch (e) {}
+      }
+      return {
+        title: title || 'İsimsiz Ölçü Görseli',
+        media: finalUrl
+          ? React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
+          : undefined,
+      }
+    },
+  },
 })
 
 export const productMaterial = defineType({
@@ -72,6 +98,32 @@ export const productMaterial = defineType({
     defineField({name: 'name', title: 'Ad', type: 'localizedString'}),
     defineField({name: 'imageR2', title: 'Görsel', type: 'r2Asset'}),
   ],
+  preview: {
+    select: {
+      title: 'name.tr',
+      imageUrl: 'imageR2.url',
+    },
+    prepare(selection: any) {
+      const {title, imageUrl} = selection
+      let finalUrl = imageUrl
+      const domain = process.env.SANITY_STUDIO_R2_DOMAIN
+      if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
+        try {
+          const parsed = new URL(finalUrl)
+          const path = parsed.pathname.startsWith('/')
+            ? parsed.pathname.substring(1)
+            : parsed.pathname
+          finalUrl = `${domain}/${path}`
+        } catch (e) {}
+      }
+      return {
+        title: title || 'İsimsiz Malzeme',
+        media: finalUrl
+          ? React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
+          : undefined,
+      }
+    },
+  },
 })
 
 export const materialSwatchBook = defineType({
@@ -101,7 +153,19 @@ export const downloadableItem = defineType({
   fields: [
     defineField({name: 'name', title: 'Ad', type: 'localizedString'}),
     defineField({name: 'fileR2', title: 'Dosya', type: 'r2Asset'}),
+    defineField({name: 'fileR2', title: 'Dosya', type: 'r2Asset'}),
   ],
+  preview: {
+    select: {
+      title: 'name.tr',
+    },
+    prepare(selection: any) {
+      return {
+        title: selection.title || 'İsimsiz Dosya',
+        media: () => '📄',
+      }
+    },
+  },
 })
 
 export const exclusiveContent = defineType({
@@ -339,9 +403,36 @@ export const productSimpleMediaItem = defineType({
       title: 'Video URL (veya YouTube URL)',
       type: 'url',
       hidden: ({parent}) => parent?.type === 'image',
-      description: 'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.',
     }),
   ],
+  preview: {
+    select: {
+      type: 'type',
+      imageUrl: 'imageR2.url',
+    },
+    prepare(selection: any) {
+      const {type, imageUrl} = selection
+      let finalUrl = imageUrl
+      const domain = process.env.SANITY_STUDIO_R2_DOMAIN
+      if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
+        try {
+          const parsed = new URL(finalUrl)
+          const path = parsed.pathname.startsWith('/')
+            ? parsed.pathname.substring(1)
+            : parsed.pathname
+          finalUrl = `${domain}/${path}`
+        } catch (e) {}
+      }
+      return {
+        title:
+          type === 'image' ? 'Resim Öğesi' : type === 'video' ? 'Video Öğesi' : 'YouTube Öğesi',
+        media:
+          type === 'image' && finalUrl
+            ? React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
+            : undefined,
+      }
+    },
+  },
 })
 
 // Panel medyası (Alt Medya): sadece başlık, görüntü/video/YouTube
@@ -423,9 +514,43 @@ export const productPanelMediaItem = defineType({
       name: 'linkText',
       title: 'Link Metni',
       type: 'localizedString',
-      description: 'Link için gösterilecek metin (link URL doluysa gösterilir)',
     }),
   ],
+  preview: {
+    select: {
+      type: 'type',
+      title: 'title.tr',
+      imageUrl: 'imageR2.url',
+    },
+    prepare(selection: any) {
+      const {type, title, imageUrl} = selection
+      let finalUrl = imageUrl
+      const domain = process.env.SANITY_STUDIO_R2_DOMAIN
+      if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
+        try {
+          const parsed = new URL(finalUrl)
+          const path = parsed.pathname.startsWith('/')
+            ? parsed.pathname.substring(1)
+            : parsed.pathname
+          finalUrl = `${domain}/${path}`
+        } catch (e) {}
+      }
+      const mediaTitle =
+        title ||
+        (type === 'image'
+          ? 'Resim Medyası'
+          : type === 'video'
+            ? 'Video Medyası'
+            : 'YouTube Medyası')
+      return {
+        title: mediaTitle,
+        media:
+          type === 'image' && finalUrl
+            ? React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
+            : undefined,
+      }
+    },
+  },
 })
 
 export const footerPartner = defineType({
@@ -593,6 +718,38 @@ export const contactLocationMedia = defineType({
       description: 'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.',
     }),
   ],
+  preview: {
+    select: {
+      type: 'type',
+      imageUrl: 'imageR2.url',
+    },
+    prepare(selection: any) {
+      const {type, imageUrl} = selection
+      let finalUrl = imageUrl
+      const domain = process.env.SANITY_STUDIO_R2_DOMAIN
+      if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
+        try {
+          const parsed = new URL(finalUrl)
+          const path = parsed.pathname.startsWith('/')
+            ? parsed.pathname.substring(1)
+            : parsed.pathname
+          finalUrl = `${domain}/${path}`
+        } catch (e) {}
+      }
+      return {
+        title:
+          type === 'image'
+            ? 'Resim Medyası'
+            : type === 'video'
+              ? 'Video Medyası'
+              : 'YouTube Medyası',
+        media:
+          type === 'image' && finalUrl
+            ? React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
+            : undefined,
+      }
+    },
+  },
 })
 
 // Product-specific: group-based material selection

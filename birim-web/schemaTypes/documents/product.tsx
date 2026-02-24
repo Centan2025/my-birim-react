@@ -1,5 +1,5 @@
 import React from 'react'
-import { defineField, defineType } from 'sanity'
+import {defineField, defineType} from 'sanity'
 
 export default defineType({
   name: 'product',
@@ -10,7 +10,7 @@ export default defineType({
       name: 'id',
       title: 'ID (Slug)',
       type: 'slug',
-      options: { source: (doc: any) => doc?.name?.tr || doc?.name?.en, maxLength: 96 },
+      options: {source: (doc: any) => doc?.name?.tr || doc?.name?.en, maxLength: 96},
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -23,15 +23,15 @@ export default defineType({
       name: 'designer',
       title: 'Tasarımcı',
       type: 'reference',
-      to: [{ type: 'designer' }],
+      to: [{type: 'designer'}],
     }),
     defineField({
       name: 'category',
       title: 'Kategori',
       type: 'reference',
-      to: [{ type: 'category' }],
+      to: [{type: 'category'}],
     }),
-    defineField({ name: 'year', title: 'Yıl', type: 'number' }),
+    defineField({name: 'year', title: 'Yıl', type: 'number'}),
     defineField({
       name: 'isPublished',
       title: 'Yayında Göster',
@@ -54,7 +54,7 @@ export default defineType({
       description:
         'Kategori içindeki özel sıralama için. Küçük sayı önce gelir. Boş bırakırsanız yıl alanına göre sıralanır.',
     }),
-    defineField({ name: 'description', title: 'Açıklama', type: 'localizedPortableText' }),
+    defineField({name: 'description', title: 'Açıklama', type: 'localizedPortableText'}),
     // R2 Migration Field
     defineField({
       name: 'mainImageR2',
@@ -82,22 +82,22 @@ export default defineType({
       name: 'alternativeMedia',
       title: 'Alternatif Medya (Görsel/Video/YouTube)',
       type: 'array',
-      of: [{ type: 'productSimpleMediaItem' }],
+      of: [{type: 'productSimpleMediaItem'}],
       description: 'Ana görselin altındaki bantta gösterilecek görsel/video/YouTube ögeleri',
     }),
-    defineField({ name: 'buyable', title: 'Satın Alınabilir', type: 'boolean' }),
-    defineField({ name: 'price', title: 'Fiyat', type: 'number' }),
-    defineField({ name: 'currency', title: 'Para Birimi', type: 'string' }),
-    defineField({ name: 'sku', title: 'Stok Kodu (SKU)', type: 'string' }),
+    defineField({name: 'buyable', title: 'Satın Alınabilir', type: 'boolean'}),
+    defineField({name: 'price', title: 'Fiyat', type: 'number'}),
+    defineField({name: 'currency', title: 'Para Birimi', type: 'string'}),
+    defineField({name: 'sku', title: 'Stok Kodu (SKU)', type: 'string'}),
     defineField({
       name: 'stockStatus',
       title: 'Stok Durumu',
       type: 'string',
       options: {
         list: [
-          { title: 'Stokta', value: 'in_stock' },
-          { title: 'Stok Dışı', value: 'out_of_stock' },
-          { title: 'Preorder', value: 'preorder' },
+          {title: 'Stokta', value: 'in_stock'},
+          {title: 'Stok Dışı', value: 'out_of_stock'},
+          {title: 'Preorder', value: 'preorder'},
         ],
       },
     }),
@@ -105,7 +105,7 @@ export default defineType({
       name: 'dimensionImages',
       title: 'Ölçü Görselleri',
       type: 'array',
-      of: [{ type: 'productDimensionImage' }],
+      of: [{type: 'productDimensionImage'}],
       description:
         'Ürünün ölçülerini gösteren teknik çizim veya şema görselleri. Her görselin altında bir başlık gösterilecektir. Bu görseller ürün detay sayfasında malzemelerden önce gösterilecektir.',
     }),
@@ -113,7 +113,7 @@ export default defineType({
       name: 'materialSelections',
       title: 'Malzeme Seçimleri',
       type: 'array',
-      of: [{ type: 'productMaterialSelection' }],
+      of: [{type: 'productMaterialSelection'}],
       description:
         'Bir veya birden fazla grubu seçin ve her gruptan kullanılacak malzemeleri işaretleyin.',
     }),
@@ -123,12 +123,12 @@ export default defineType({
       type: 'boolean',
       initialValue: true,
     }),
-    defineField({ name: 'exclusiveContent', title: 'Özel İçerik', type: 'exclusiveContent' }),
+    defineField({name: 'exclusiveContent', title: 'Özel İçerik', type: 'exclusiveContent'}),
     defineField({
       name: 'media',
       title: 'Alt Medya (Görsel/Video/YouTube)',
       type: 'array',
-      of: [{ type: 'productPanelMediaItem' }],
+      of: [{type: 'productPanelMediaItem'}],
       description:
         'Sayfa altındaki medya panelleri. Görüntü, video veya YouTube bağlantısı ekleyin.',
     }),
@@ -152,17 +152,28 @@ export default defineType({
     }),
   ],
   preview: {
-    select: { title: 'name.tr', r2Url: 'mainImageR2.url' },
-    prepare({ title, r2Url }) {
+    select: {title: 'name.tr', r2Url: 'mainImageR2.url'},
+    prepare({title, r2Url}) {
+      let finalUrl = r2Url
+      const domain = process.env.SANITY_STUDIO_R2_DOMAIN
+      if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
+        try {
+          const parsed = new URL(finalUrl)
+          const path = parsed.pathname.startsWith('/')
+            ? parsed.pathname.substring(1)
+            : parsed.pathname
+          finalUrl = `${domain}/${path}`
+        } catch (e) {}
+      }
       return {
         title: title || 'Ürün',
-        media: r2Url ? (
+        media: finalUrl ? (
           <img
-            src={r2Url}
+            src={finalUrl}
             alt={title || 'Ürün'}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            style={{width: '100%', height: '100%', objectFit: 'cover'}}
           />
-        ) : undefined
+        ) : undefined,
       }
     },
   },
