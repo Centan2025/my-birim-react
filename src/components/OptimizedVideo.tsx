@@ -168,20 +168,24 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
 
   // Handle autoPlay prop changes (for carousel/slider scenarios)
   React.useEffect(() => {
-    if (videoRef.current) {
-      if (autoPlay) {
-        // Try to play the video
-        const playPromise = videoRef.current.play()
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            // Auto-play was prevented (usually needs user interaction)
+    const video = videoRef.current
+    if (!video) return
+
+    if (autoPlay) {
+      // Try to play the video
+      const playPromise = video.play()
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          // If play is interrupted by a pause() call, it throws an AbortError.
+          // We can safely ignore AbortErrors to avoid console spam.
+          if (error.name !== 'AbortError') {
             console.warn('Video autoplay prevented:', error)
-          })
-        }
-      } else {
-        // Pause the video when not active
-        videoRef.current.pause()
+          }
+        })
       }
+    } else {
+      // Pause the video when not active
+      video.pause()
     }
   }, [autoPlay])
 
@@ -222,6 +226,11 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
         </div>
       </div>
     )
+  }
+
+  // Don't render a video element if there's no source at all
+  if (!src && !srcMobile && !srcDesktop) {
+    return null
   }
 
   // Art Direction kullanılıyorsa, video src'i dinamik olarak ayarla

@@ -32,7 +32,6 @@ const NewsCard: React.FC<{ item: NewsItem }> = ({ item }) => {
         src={typeof item.mainImage === 'string' ? item.mainImage : item.mainImage?.url || ''}
         srcMobile={typeof item.mainImage === 'object' ? item.mainImage.urlMobile : undefined}
         srcDesktop={typeof item.mainImage === 'object' ? item.mainImage.urlDesktop : undefined}
-        fallbackSrc={typeof item.mainImage === 'object' ? item.mainImage.fallbackUrl : undefined}
         alt={t(item.title)}
         className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-[1.03] ${imageBorderClass}`}
         width={800}

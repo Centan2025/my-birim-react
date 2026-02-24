@@ -33,42 +33,18 @@ export default defineType({
       type: 'object',
       fields: [
         defineField({
-          name: 'backgroundImage',
-          title: 'Arka Plan Görseli (Tüm Cihazlar)',
-          type: 'image',
-          options: { hotspot: true },
-          description:
-            'Tüm cihazlar için varsayılan arka plan görseli. Mobil veya desktop versiyonu yoksa bu kullanılır. Önerilen çözünürlük: Desktop 1920x1080px, Mobil 1080x1920px.',
-        }),
-        defineField({
           name: 'backgroundImageR2',
-          title: 'Arka Plan Görseli (R2) - Tüm Cihazlar',
+          title: 'Arka Plan Görseli (Tüm Cihazlar)',
           type: 'r2Asset',
-        }),
-        defineField({
-          name: 'backgroundImageMobile',
-          title: 'Arka Plan Görseli (Mobil)',
-          type: 'image',
-          options: { hotspot: true },
-          description:
-            'Mobil cihazlar için özel arka plan görseli (opsiyonel). Yoksa varsayılan görsel kullanılır. Önerilen çözünürlük: 1080x1920px (dikey).',
         }),
         defineField({
           name: 'backgroundImageMobileR2',
-          title: 'Arka Plan Görseli (R2) - Mobil',
+          title: 'Arka Plan Görseli (Mobil)',
           type: 'r2Asset',
         }),
         defineField({
-          name: 'backgroundImageDesktop',
-          title: 'Arka Plan Görseli (Desktop)',
-          type: 'image',
-          options: { hotspot: true },
-          description:
-            'Desktop cihazlar için özel arka plan görseli (opsiyonel). Yoksa varsayılan görsel kullanılır. Önerilen çözünürlük: 1920x1080px veya 1920x1200px.',
-        }),
-        defineField({
           name: 'backgroundImageDesktopR2',
-          title: 'Arka Plan Görseli (R2) - Desktop',
+          title: 'Arka Plan Görseli (Desktop)',
           type: 'r2Asset',
         }),
         defineField({ name: 'title', title: 'Başlık', type: 'localizedString' }),
@@ -79,17 +55,17 @@ export default defineType({
     }),
   ],
   preview: {
-    select: { media: 'heroMedia.0.image', r2Url: 'heroMedia.0.imageR2.url' },
-    prepare({ media, r2Url }) {
+    select: { r2Url: 'heroMedia.0.imageR2.url' },
+    prepare({ r2Url }) {
       return {
         title: 'Ana Sayfa',
-        media: media || (r2Url ? (
+        media: r2Url ? (
           <img
             src={r2Url}
             alt="Ana Sayfa"
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
-        ) : undefined)
+        ) : undefined
       }
     },
   },

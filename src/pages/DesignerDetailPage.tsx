@@ -100,7 +100,6 @@ export function DesignerDetailPage() {
                   ? designer.image.urlDesktop
                   : designer.imageDesktop
               }
-              fallbackSrc={typeof designer.image === 'object' ? designer.image.fallbackUrl : undefined}
               alt={t(designer.name)}
               className={`w-80 h-96 md:w-96 md:h-[32rem] object-cover shadow-none md:shadow-none filter grayscale ${imageBorderClass}`}
               loading="eager"

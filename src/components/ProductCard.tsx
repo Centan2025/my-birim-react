@@ -30,8 +30,6 @@ export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'li
     typeof product.mainImage === 'object' ? product.mainImage.urlMobile : undefined
   const mainImageDesktop =
     typeof product.mainImage === 'object' ? product.mainImage.urlDesktop : undefined
-  const fallbackSrc =
-    typeof product.mainImage === 'object' ? product.mainImage.fallbackUrl : undefined
 
   return (
     <Link
@@ -54,7 +52,6 @@ export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'li
             src={mainImageUrl}
             srcMobile={mainImageMobile}
             srcDesktop={mainImageDesktop}
-            fallbackSrc={fallbackSrc}
             alt={t(product.name)}
             className="w-full h-full object-contain transition-transform duration-700 ease-in-out group-hover:scale-[1.03]"
             loading="lazy"
@@ -64,8 +61,8 @@ export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'li
         <div className="px-2.5 py-2 sm:px-3 sm:py-2">
           <h3
             className={`text-base sm:text-lg tracking-tight font-semibold ${isLight
-                ? 'text-gray-800 group-hover:text-gray-900'
-                : 'text-gray-900 group-hover:text-black'
+              ? 'text-gray-800 group-hover:text-gray-900'
+              : 'text-gray-900 group-hover:text-black'
               }`}
           >
             {t(product.name)}

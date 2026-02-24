@@ -198,11 +198,9 @@ export function ProductsPage() {
           {(() => {
             const heroImage = category?.heroImage
             const url = typeof heroImage === 'object' ? heroImage.url : (heroImage || 'https://picsum.photos/seed/default/1920/1080')
-            const fallback = typeof heroImage === 'object' ? heroImage.fallbackUrl : undefined
             return (
               <OptimizedImage
                 src={url}
-                fallbackSrc={fallback}
                 alt={t(category?.name) || t('products')}
                 className={`w-full h-full object-cover ${imageBorderClass}`}
                 loading="eager"

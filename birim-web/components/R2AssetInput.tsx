@@ -72,10 +72,10 @@ const HiddenInput = styled.input`
   display: none;
 `
 
-const HotspotIndicator = styled.div<{ left: string; top: string }>`
+const HotspotIndicator = styled.div<{ $left: string; $top: string }>`
   position: absolute;
-  left: ${(props) => props.left};
-  top: ${(props) => props.top};
+  left: ${(props) => props.$left};
+  top: ${(props) => props.$top};
   width: 20px;
   height: 20px;
   background-color: rgba(240, 62, 47, 0.8);
@@ -483,8 +483,8 @@ export default function R2AssetInput(props: ObjectInputProps) {
 
                                 {hasHotspot && !isEditMode && (
                                     <HotspotIndicator
-                                        left={`${hotspotX * 100}%`}
-                                        top={`${hotspotY * 100}%`}
+                                        $left={`${hotspotX * 100}%`}
+                                        $top={`${hotspotY * 100}%`}
                                     />
                                 )}
 

@@ -133,7 +133,6 @@ export function CategoriesPage() {
                         src={typeof category.displayImage === 'string' ? category.displayImage : category.displayImage.url}
                         srcMobile={typeof category.displayImage === 'object' ? category.displayImage.urlMobile : undefined}
                         srcDesktop={typeof category.displayImage === 'object' ? category.displayImage.urlDesktop : undefined}
-                        fallbackSrc={typeof category.displayImage === 'object' ? category.displayImage.fallbackUrl : undefined}
                         alt={t(category.name)}
                         className={`w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-[1.03] ${imageBorderClass}`}
                         loading="lazy"

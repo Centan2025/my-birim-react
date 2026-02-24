@@ -34,7 +34,6 @@ const MediaGallery = ({ media, alt }: { media?: NewsMedia[]; alt: string }) => {
                   src={m.url}
                   srcMobile={m.urlMobile}
                   srcDesktop={m.urlDesktop}
-                  fallbackSrc={m.fallbackUrl}
                   alt={`${alt} gallery ${idx + 1}`}
                   className="w-full h-full object-cover"
                 />
@@ -56,7 +55,6 @@ export function AboutPage() {
   // SEO
   const heroImageObj = typeof content?.heroImage === 'object' ? content.heroImage : null
   const heroImageUrl = heroImageObj ? heroImageObj.url : (typeof content?.heroImage === 'string' ? content.heroImage : '')
-  const heroImageFallback = heroImageObj?.fallbackUrl
 
   useSEO({
     title: `BIRIM - ${t('about') || 'Hakkımızda'}`,
@@ -117,7 +115,6 @@ export function AboutPage() {
           <div className="absolute inset-0 w-full h-full scale-105 animate-slow-zoom">
             <OptimizedImage
               src={heroImageUrl || ''}
-              fallbackSrc={heroImageFallback}
               alt={t(content.heroTitle)}
               className="w-full h-full opacity-60 object-cover"
               width={1920}
@@ -185,11 +182,9 @@ export function AboutPage() {
                       {(() => {
                         const img = content.historySection?.image
                         const url = typeof img === 'object' ? img.url : (img || content.storyImage || '')
-                        const fallback = typeof img === 'object' ? img.fallbackUrl : undefined
                         return (
                           <OptimizedImage
                             src={url}
-                            fallbackSrc={fallback}
                             alt="History"
                             className="w-full h-full object-cover"
                           />
@@ -216,11 +211,9 @@ export function AboutPage() {
                       {(() => {
                         const img = content.identitySection?.image
                         const url = typeof img === 'object' ? img.url : (img || '')
-                        const fallback = typeof img === 'object' ? img.fallbackUrl : undefined
                         return (
                           <OptimizedImage
                             src={url}
-                            fallbackSrc={fallback}
                             alt="Identity"
                             className="w-full h-full object-cover"
                           />
@@ -285,11 +278,9 @@ export function AboutPage() {
                         {(() => {
                           const img = content.qualitySection?.image
                           const url = typeof img === 'object' ? img.url : (img || '')
-                          const fallback = typeof img === 'object' ? img.fallbackUrl : undefined
                           return (
                             <OptimizedImage
                               src={url}
-                              fallbackSrc={fallback}
                               alt="Quality"
                               className="w-full h-full object-cover"
                             />

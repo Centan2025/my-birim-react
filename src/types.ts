@@ -75,9 +75,9 @@ export interface Category {
   /** Localized subtitle or short description for the category page. */
   subtitle: LocalizedString
   /** URL for the hero image displayed on the category page. */
-  heroImage: string | { url: string; urlMobile?: string; urlDesktop?: string; fallbackUrl?: string }
+  heroImage: string | { url: string; urlMobile?: string; urlDesktop?: string }
   /** URL for the menu image displayed in the products dropdown menu. */
-  menuImage?: string | { url: string; urlMobile?: string; urlDesktop?: string; fallbackUrl?: string }
+  menuImage?: string | { url: string; urlMobile?: string; urlDesktop?: string }
 }
 
 /**
@@ -91,7 +91,7 @@ export interface Designer {
   /** Localized biography of the designer. */
   bio: LocalizedString
   /** URL for the designer's portrait or representative image. */
-  image: string | { url: string; urlMobile?: string; urlDesktop?: string; fallbackUrl?: string }
+  image: string | { url: string; urlMobile?: string; urlDesktop?: string }
   /** Art Direction: Mobil için görsel URL (opsiyonel) */
   imageMobile?: string
   /** Art Direction: Desktop için görsel URL (opsiyonel) */
@@ -166,16 +166,13 @@ export interface Product {
   /** URL for the main display image of the product. */
   mainImage:
   | string
-  | { url: string; urlMobile?: string; urlDesktop?: string; palette?: SanityImagePalette; fallbackUrl?: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot'] }
-  /** Array of URLs for alternative product images. */
-  alternativeImages: string[] // legacy
+  | { url: string; urlMobile?: string; urlDesktop?: string; palette?: SanityImagePalette; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot'] }
   /** Mixed alternative media for the band under hero. */
   alternativeMedia?: {
     type: 'image' | 'video' | 'youtube'
     url: string
     urlMobile?: string // Art Direction: Mobil için URL
     urlDesktop?: string // Art Direction: Desktop için URL
-    fallbackUrl?: string // R2 yüklenemezse kullanılacak Sanity URL'si
     crop?: R2ImageMetadata['crop']
     hotspot?: R2ImageMetadata['hotspot']
   }[]
@@ -185,7 +182,6 @@ export interface Product {
     url: string
     urlMobile?: string // Art Direction: Mobil için URL
     urlDesktop?: string // Art Direction: Desktop için URL
-    fallbackUrl?: string // R2 yüklenemezse kullanılacak Sanity URL'si
     title?: LocalizedString
     description?: LocalizedString
     link?: string
@@ -204,7 +200,6 @@ export interface Product {
     image: string
     imageMobile?: string
     imageDesktop?: string
-    fallbackImage?: string // R2 yüklenemezse kullanılacak Sanity URL'si
     title?: LocalizedString
   }[]
   /** Indicates if the product can be purchased directly. */
@@ -353,7 +348,7 @@ export interface HomePageContent {
  * Defines the content structure for the About Us page.
  */
 export interface AboutPageContent {
-  heroImage: string | { url: string; palette?: SanityImagePalette; fallbackUrl?: string }
+  heroImage: string | { url: string; palette?: SanityImagePalette }
   heroTitle: LocalizedString
   heroSubtitle: LocalizedString
   storyTitle: LocalizedString
@@ -362,9 +357,9 @@ export interface AboutPageContent {
   storyImage: string
   valuesTitle: LocalizedString
   values: { title: LocalizedString; description: LocalizedString }[]
-  historySection?: { title?: LocalizedString; content?: LocalizedString; image?: string | { url: string; fallbackUrl?: string }; media?: NewsMedia[] }
-  identitySection?: { title?: LocalizedString; content?: LocalizedString; image?: string | { url: string; fallbackUrl?: string }; media?: NewsMedia[] }
-  qualitySection?: { title?: LocalizedString; content?: LocalizedString; image?: string | { url: string; fallbackUrl?: string }; media?: NewsMedia[] }
+  historySection?: { title?: LocalizedString; content?: LocalizedString; image?: string | { url: string }; media?: NewsMedia[] }
+  identitySection?: { title?: LocalizedString; content?: LocalizedString; image?: string | { url: string }; media?: NewsMedia[] }
+  qualitySection?: { title?: LocalizedString; content?: LocalizedString; image?: string | { url: string }; media?: NewsMedia[] }
 }
 
 /**
@@ -427,7 +422,7 @@ export interface NewsItem {
   /** Localized main content/body of the news item. */
   content: LocalizedString
   /** URL for the main image used on the news list page card. */
-  mainImage: string | { url: string; urlMobile?: string; urlDesktop?: string; fallbackUrl?: string }
+  mainImage: string | { url: string; urlMobile?: string; urlDesktop?: string }
   /** Array of media items (images, videos) within the article. */
   media: NewsMedia[]
   /** Whether this news item is published on the site. */
@@ -452,8 +447,6 @@ export interface NewsMedia {
   urlDesktop?: string
   /** Optional localized caption for the media. */
   caption?: LocalizedString
-  /** Optional fallback URL for R2 assets. */
-  fallbackUrl?: string
 }
 
 // --- Footer Content Models ---
@@ -558,7 +551,7 @@ export interface CartItem {
 export interface Project {
   id: string
   title: LocalizedString
-  cover: string | { url: string; urlMobile?: string; urlDesktop?: string; palette?: SanityImagePalette; fallbackUrl?: string }
+  cover: string | { url: string; urlMobile?: string; urlDesktop?: string; palette?: SanityImagePalette }
   date?: LocalizedString
   excerpt?: LocalizedString
   media?: {
@@ -567,7 +560,6 @@ export interface Project {
     urlMobile?: string // Art Direction: Mobil için URL
     urlDesktop?: string // Art Direction: Desktop için URL
     image?: string
-    fallbackUrl?: string
   }[]
   body?: LocalizedString
   /** Whether this project is published on the site. */

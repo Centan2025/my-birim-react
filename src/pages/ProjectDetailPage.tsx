@@ -222,10 +222,7 @@ export function ProjectDetailPage() {
     project && project.cover && typeof project.cover === 'object'
       ? project.cover.urlDesktop
       : undefined
-  const coverFallback =
-    project && project.cover && typeof project.cover === 'object'
-      ? project.cover.fallbackUrl
-      : undefined
+
 
   // Use cover image + media array (images and videos)
   const mediaArray = (project?.media || []).map(m => ({
@@ -233,7 +230,6 @@ export function ProjectDetailPage() {
     url: m.url,
     urlMobile: m.urlMobile,
     urlDesktop: m.urlDesktop,
-    fallbackUrl: m.fallbackUrl,
     image: m.image || (m.type === 'image' ? m.url : undefined),
   }))
 
@@ -245,7 +241,6 @@ export function ProjectDetailPage() {
         url: coverUrl,
         urlMobile: coverMobile,
         urlDesktop: coverDesktop,
-        fallbackUrl: coverFallback,
         image: coverUrl,
       },
     ]
@@ -456,7 +451,6 @@ export function ProjectDetailPage() {
               src={coverUrl}
               srcMobile={coverMobile}
               srcDesktop={coverDesktop}
-              fallbackSrc={coverFallback}
               alt={t(project.title)}
               className={`absolute inset-0 w-full h-full object-contain mx-auto ${imageBorderClass}`}
               loading="eager"
@@ -501,7 +495,6 @@ export function ProjectDetailPage() {
                           src={m.url}
                           srcMobile={m.urlMobile}
                           srcDesktop={m.urlDesktop}
-                          fallbackSrc={m.fallbackUrl}
                           alt="project"
                           className={`w-full h-full object-contain mx-auto ${imageBorderClass}`}
                           loading="eager"
@@ -766,7 +759,6 @@ export function ProjectDetailPage() {
                       {m.type === 'image' && (
                         <OptimizedImage
                           src={m.url}
-                          fallbackSrc={m.fallbackUrl}
                           alt={`thumb-${i}`}
                           className="w-full aspect-video object-contain"
                           loading="lazy"

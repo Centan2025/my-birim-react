@@ -347,11 +347,9 @@ export function ProductDetailPage() {
         setMainImage(mainImgUrl)
       }
     } else {
-      const altImgs = Array.isArray(product.alternativeImages) ? product.alternativeImages : []
       const mainImgUrl =
         typeof product.mainImage === 'string' ? product.mainImage : product.mainImage?.url || ''
-      const allImgs = [mainImgUrl, ...altImgs].filter(Boolean)
-      setMainImage(allImgs[0] || '')
+      setMainImage(mainImgUrl || '')
       setCurrentImageIndex(0)
     }
   }, [product])
@@ -463,25 +461,18 @@ export function ProductDetailPage() {
     url: string
     urlMobile?: string
     urlDesktop?: string
-    fallbackUrl?: string
   }[] = product?.alternativeMedia || []
   // Helper: mainImage string veya object olabilir
   const mainImageObj = typeof product?.mainImage === 'object' ? product.mainImage : undefined
   const mainImageUrl = mainImageObj ? mainImageObj.url : (typeof product?.mainImage === 'string' ? product.mainImage : '')
   const mainImageMobile = mainImageObj?.urlMobile
   const mainImageDesktop = mainImageObj?.urlDesktop
-  const mainImageFallback = mainImageObj?.fallbackUrl
   const mainImageCrop = mainImageObj?.crop
   const mainImageHotspot = mainImageObj?.hotspot
 
   const fallbackImages = (() => {
-    const ai = Array.isArray(product?.alternativeImages)
-      ? product.alternativeImages
-      : []
-    const arw = [mainImageUrl, ...ai]
-    return Array.isArray(arw)
-      ? arw.filter(Boolean).map((u: string) => ({ type: 'image' as const, url: u }))
-      : []
+    const arw = [mainImageUrl]
+    return arw.filter(Boolean).map((u: string) => ({ type: 'image' as const, url: u }))
   })()
   // Bant medyası: alternatif medya varsa, ana görseli en başa ekle
   const bandMedia: {
@@ -489,7 +480,6 @@ export function ProductDetailPage() {
     url: string
     urlMobile?: string
     urlDesktop?: string
-    fallbackUrl?: string
     crop?: any
     hotspot?: any
   }[] = (() => {
@@ -499,7 +489,6 @@ export function ProductDetailPage() {
         url: string
         urlMobile?: string
         urlDesktop?: string
-        fallbackUrl?: string
         crop?: any
         hotspot?: any
       }[] = mainImageUrl
@@ -509,7 +498,6 @@ export function ProductDetailPage() {
               url: mainImageUrl,
               urlMobile: mainImageMobile,
               urlDesktop: mainImageDesktop,
-              fallbackUrl: mainImageFallback,
               crop: mainImageCrop,
               hotspot: mainImageHotspot,
             },
@@ -981,7 +969,6 @@ export function ProductDetailPage() {
                         src={m.url}
                         srcMobile={m.urlMobile}
                         srcDesktop={m.urlDesktop}
-                        fallbackSrc={m.fallbackUrl}
                         alt={`${t(product.name)} ${index + 1}`}
                         className={`w-full h-full object-cover ${imageBorderClass}`}
                         width={1600}
@@ -1258,7 +1245,6 @@ export function ProductDetailPage() {
                           {m.type === 'image' ? (
                             <OptimizedImage
                               src={m.url}
-                              fallbackSrc={m.fallbackUrl}
                               alt={`${t(product.name)} thumbnail ${idx + 1}`}
                               className={`w-full h-full object-cover ${imageBorderClass}`}
                               loading="lazy"

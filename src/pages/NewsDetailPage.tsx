@@ -41,7 +41,6 @@ const MediaComponent: FC<{ media: NewsMedia }> = ({ media }) => {
           src={media.url}
           srcMobile={media.urlMobile}
           srcDesktop={media.urlDesktop}
-          fallbackSrc={media.fallbackUrl}
           alt={t(media.caption) || ''}
           className={`w-full h-auto object-cover ${imageBorderClass}`}
           loading="lazy"
@@ -172,7 +171,6 @@ export function NewsDetailPage() {
   const newsDescription = item ? t(item.content) || newsTitle : ''
   const mainImageObj = typeof item?.mainImage === 'object' ? item.mainImage : null
   const mainImageUrl = mainImageObj ? mainImageObj.url : (typeof item?.mainImage === 'string' ? item.mainImage : undefined)
-  const mainImageFallback = mainImageObj?.fallbackUrl
 
   useSEO({
     title: newsTitle ? `BIRIM - ${t('news') || 'Haberler'} - ${newsTitle}` : 'BIRIM - Haberler',
@@ -260,7 +258,6 @@ export function NewsDetailPage() {
                 src={mainImageUrl || ''}
                 srcMobile={mainImageObj?.urlMobile}
                 srcDesktop={mainImageObj?.urlDesktop}
-                fallbackSrc={mainImageFallback}
                 alt={t(item.title)}
                 className={`w-full h-auto object-cover mb-6 ${settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'}`}
                 width={1200}

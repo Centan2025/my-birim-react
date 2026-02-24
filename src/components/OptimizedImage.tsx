@@ -238,7 +238,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     // Cloudflare R2
     const r2Domain = import.meta.env['VITE_R2_DOMAIN']
     if (r2Domain && url && url.startsWith(r2Domain)) {
-      if (r2Domain.includes('.r2.dev')) return url
+      if (r2Domain.includes('.r2.dev')) return '' // .r2.dev doesn't support format conversion
 
       const params = []
       if (width) params.push(`width=${width}`)
@@ -283,7 +283,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             <source
               type="image/avif"
               media="(max-width: 768px)"
-              srcSet={generateSrcSet(srcMobile) || getFormatUrl(srcMobile, 'avif')}
+              srcSet={generateSrcSet(srcMobile) || getFormatUrl(srcMobile, 'avif') || undefined}
               sizes={defaultSizes}
             />
           )}
@@ -291,7 +291,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             <source
               type="image/avif"
               media="(min-width: 769px)"
-              srcSet={generateSrcSet(srcDesktop) || getFormatUrl(srcDesktop, 'avif')}
+              srcSet={generateSrcSet(srcDesktop) || getFormatUrl(srcDesktop, 'avif') || undefined}
               sizes={defaultSizes}
             />
           )}
@@ -300,7 +300,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             <source
               type="image/webp"
               media="(max-width: 768px)"
-              srcSet={generateSrcSet(srcMobile) || getFormatUrl(srcMobile, 'webp')}
+              srcSet={generateSrcSet(srcMobile) || getFormatUrl(srcMobile, 'webp') || undefined}
               sizes={defaultSizes}
             />
           )}
@@ -308,7 +308,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             <source
               type="image/webp"
               media="(min-width: 769px)"
-              srcSet={generateSrcSet(srcDesktop) || getFormatUrl(srcDesktop, 'webp')}
+              srcSet={generateSrcSet(srcDesktop) || getFormatUrl(srcDesktop, 'webp') || undefined}
               sizes={defaultSizes}
             />
           )}
@@ -316,7 +316,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           {srcMobile && optimizedMobileSrc && (
             <source
               media="(max-width: 768px)"
-              srcSet={generateSrcSet(srcMobile) || optimizedMobileSrc}
+              srcSet={generateSrcSet(srcMobile) || undefined}
               sizes={defaultSizes}
             />
           )}
@@ -324,7 +324,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           {srcDesktop && optimizedDesktopSrc && (
             <source
               media="(min-width: 769px)"
-              srcSet={generateSrcSet(srcDesktop) || optimizedDesktopSrc}
+              srcSet={generateSrcSet(srcDesktop) || undefined}
               sizes={defaultSizes}
             />
           )}
@@ -363,13 +363,13 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         {/* AVIF format (en iyi sıkıştırma) */}
         <source
           type="image/avif"
-          srcSet={responsiveSrcSet || getFormatUrl(activeSrc, 'avif')}
+          srcSet={responsiveSrcSet || getFormatUrl(activeSrc, 'avif') || undefined}
           sizes={responsiveSrcSet ? defaultSizes : undefined}
         />
         {/* WebP format (fallback) */}
         <source
           type="image/webp"
-          srcSet={responsiveSrcSet || getFormatUrl(activeSrc, 'webp')}
+          srcSet={responsiveSrcSet || getFormatUrl(activeSrc, 'webp') || undefined}
           sizes={responsiveSrcSet ? defaultSizes : undefined}
         />
         {/* Fallback image */}

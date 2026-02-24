@@ -7,7 +7,6 @@ interface ProductMediaItem {
   url: string
   urlMobile?: string
   urlDesktop?: string
-  fallbackUrl?: string
   title?: LocalizedString | string
 }
 
@@ -58,7 +57,6 @@ export function ProductMediaPanels({
                     src={m.url}
                     srcMobile={m.urlMobile}
                     srcDesktop={m.urlDesktop}
-                    fallbackSrc={m.fallbackUrl}
                     alt={`media-${idx}`}
                     className={`w-full h-full object-cover ${imageBorderClass}`}
                     loading="lazy"

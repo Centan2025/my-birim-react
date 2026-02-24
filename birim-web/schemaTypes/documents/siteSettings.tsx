@@ -7,15 +7,8 @@ export default defineType({
   type: 'document',
   fields: [
     defineField({
-      name: 'logo',
-      title: 'Logo',
-      type: 'image',
-      options: { hotspot: true },
-      description: 'Site logosu. Önerilen: SVG veya en az 512x512px PNG (şeffaf arka planlı).',
-    }),
-    defineField({
       name: 'logoR2',
-      title: 'Logo (R2)',
+      title: 'Logo',
       type: 'r2Asset',
     }),
     defineField({
@@ -112,17 +105,17 @@ export default defineType({
     }),
   ],
   preview: {
-    select: { media: 'logo', r2Url: 'logoR2.url' },
-    prepare({ media, r2Url }) {
+    select: { r2Url: 'logoR2.url' },
+    prepare({ r2Url }) {
       return {
         title: 'Site Ayarları',
-        media: media || (r2Url ? (
+        media: r2Url ? (
           <img
             src={r2Url}
             alt="Logo"
             style={{ width: '100%', height: '100%', objectFit: 'contain' }}
           />
-        ) : undefined)
+        ) : undefined
       }
     },
   },

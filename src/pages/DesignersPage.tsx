@@ -25,7 +25,6 @@ const DesignerCard: React.FC<{ designer: Designer }> = ({ designer }) => {
           srcDesktop={
             typeof designer.image === 'object' ? designer.image.urlDesktop : designer.imageDesktop
           }
-          fallbackSrc={typeof designer.image === 'object' ? designer.image.fallbackUrl : undefined}
           alt={t(designer.name)}
           className={`w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-[1.03] filter grayscale ${imageBorderClass}`}
           loading="lazy"

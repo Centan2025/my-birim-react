@@ -9,7 +9,7 @@ export default defineType({
         input: R2AssetInput
     },
     fields: [
-        defineField({ name: 'url', title: 'URL', type: 'url' }),
+        defineField({ name: 'url', title: 'URL', type: 'string' }),
         defineField({ name: 'path', title: 'R2 Path', type: 'string' }),
         defineField({ name: 'width', title: 'Width', type: 'number' }),
         defineField({ name: 'height', title: 'Height', type: 'number' }),

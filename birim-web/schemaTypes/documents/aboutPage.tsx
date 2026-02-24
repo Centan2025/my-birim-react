@@ -7,14 +7,6 @@ export default defineType({
   type: 'document',
   fields: [
     defineField({
-      name: 'heroImage',
-      title: 'Hero Görseli',
-      type: 'image',
-      options: { hotspot: true },
-      description:
-        'Hakkımızda sayfası hero alanı için geniş görsel. Önerilen çözünürlük: Desktop 1920x1080px (16:9), Mobil 1080x1920px (9:16).',
-    }),
-    defineField({
       name: 'heroImageR2',
       title: 'Hero Görseli (R2)',
       type: 'r2Asset',
@@ -33,7 +25,6 @@ export default defineType({
           title: 'Tarihçe Metni',
           type: 'localizedPortableText',
         }),
-        defineField({ name: 'image', title: 'Ana Görsel', type: 'image', options: { hotspot: true } }),
         defineField({ name: 'imageR2', title: 'Ana Görsel (R2)', type: 'r2Asset' }),
         defineField({
           name: 'media',
@@ -55,7 +46,6 @@ export default defineType({
           title: 'Kimlik Metni',
           type: 'localizedPortableText',
         }),
-        defineField({ name: 'image', title: 'Ana Görsel', type: 'image', options: { hotspot: true } }),
         defineField({ name: 'imageR2', title: 'Ana Görsel (R2)', type: 'r2Asset' }),
         defineField({
           name: 'media',
@@ -77,7 +67,6 @@ export default defineType({
           title: 'Kalite Metni',
           type: 'localizedPortableText',
         }),
-        defineField({ name: 'image', title: 'Ana Görsel', type: 'image', options: { hotspot: true } }),
         defineField({ name: 'imageR2', title: 'Ana Görsel (R2)', type: 'r2Asset' }),
         defineField({
           name: 'media',
@@ -104,17 +93,17 @@ export default defineType({
     }),
   ],
   preview: {
-    select: { media: 'heroImage', r2Url: 'heroImageR2.url' },
-    prepare({ media, r2Url }) {
+    select: { r2Url: 'heroImageR2.url' },
+    prepare({ r2Url }) {
       return {
         title: 'Hakkımızda',
-        media: media || (r2Url ? (
+        media: r2Url ? (
           <img
             src={r2Url}
             alt="Hakkımızda"
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
-        ) : undefined)
+        ) : undefined
       }
     },
   },

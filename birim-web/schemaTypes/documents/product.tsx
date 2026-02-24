@@ -55,50 +55,26 @@ export default defineType({
         'Kategori içindeki özel sıralama için. Küçük sayı önce gelir. Boş bırakırsanız yıl alanına göre sıralanır.',
     }),
     defineField({ name: 'description', title: 'Açıklama', type: 'localizedPortableText' }),
-    defineField({
-      name: 'mainImage',
-      title: 'Ana Görsel (Tüm Cihazlar)',
-      type: 'image',
-      options: { hotspot: true },
-      description:
-        'Tüm cihazlar için varsayılan ürün ana görseli. Mobil veya desktop versiyonu yoksa bu kullanılır. Önerilen çözünürlük: Desktop 1200x1200px veya 1200x1600px, Mobil 800x800px veya 800x1067px.',
-    }),
     // R2 Migration Field
     defineField({
       name: 'mainImageR2',
-      title: 'Ana Görsel (R2) - Tüm Cihazlar',
+      title: 'Ana Görsel (Tüm Cihazlar)',
       type: 'r2Asset',
       description: 'Cloudflare R2 üzerinde barındırılan ana görsel.',
     }),
 
-    defineField({
-      name: 'mainImageMobile',
-      title: 'Ana Görsel (Mobil)',
-      type: 'image',
-      options: { hotspot: true },
-      description:
-        'Mobil cihazlar için özel ürün ana görseli (opsiyonel). Yoksa varsayılan görsel kullanılır. Önerilen çözünürlük: 800x800px veya 800x1067px.',
-    }),
     // R2 Migration Field
     defineField({
       name: 'mainImageMobileR2',
-      title: 'Ana Görsel (R2) - Mobil',
+      title: 'Ana Görsel (Mobil)',
       type: 'r2Asset',
       description: 'Cloudflare R2 üzerinde barındırılan mobil görsel.',
     }),
 
-    defineField({
-      name: 'mainImageDesktop',
-      title: 'Ana Görsel (Desktop)',
-      type: 'image',
-      options: { hotspot: true },
-      description:
-        'Desktop cihazlar için özel ürün ana görseli (opsiyonel). Yoksa varsayılan görsel kullanılır. Önerilen çözünürlük: 1200x1200px veya 1200x1600px.',
-    }),
     // R2 Migration Field
     defineField({
       name: 'mainImageDesktopR2',
-      title: 'Ana Görsel (R2) - Desktop',
+      title: 'Ana Görsel (Desktop)',
       type: 'r2Asset',
       description: 'Cloudflare R2 üzerinde barındırılan desktop görsel.',
     }),
@@ -176,17 +152,17 @@ export default defineType({
     }),
   ],
   preview: {
-    select: { title: 'name.tr', media: 'mainImage', r2Url: 'mainImageR2.url' },
-    prepare({ title, media, r2Url }) {
+    select: { title: 'name.tr', r2Url: 'mainImageR2.url' },
+    prepare({ title, r2Url }) {
       return {
         title: title || 'Ürün',
-        media: media || (r2Url ? (
+        media: r2Url ? (
           <img
             src={r2Url}
             alt={title || 'Ürün'}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
-        ) : undefined)
+        ) : undefined
       }
     },
   },

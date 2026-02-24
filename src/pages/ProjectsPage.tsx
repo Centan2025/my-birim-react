@@ -21,7 +21,6 @@ const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
             src={typeof project.cover === 'string' ? project.cover : project.cover?.url || ''}
             srcMobile={typeof project.cover === 'object' ? project.cover.urlMobile : undefined}
             srcDesktop={typeof project.cover === 'object' ? project.cover.urlDesktop : undefined}
-            fallbackSrc={typeof project.cover === 'object' ? project.cover.fallbackUrl : undefined}
             alt={t(project.title)}
             className={`w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-[1.03] ${imageBorderClass}`}
             width={1600}
