@@ -8,7 +8,7 @@
 import * as Sentry from '@sentry/react'
 
 const DEBUG_LOGS =
-  (import.meta.env as {VITE_DEBUG_LOGS?: string}).VITE_DEBUG_LOGS === 'true'
+  (import.meta.env as { VITE_DEBUG_LOGS?: string }).VITE_DEBUG_LOGS === 'true'
 
 interface ErrorContext {
   user?: {
@@ -73,7 +73,10 @@ class ErrorReporter {
               const errorMessage = event.exception.values?.[0]?.value || ''
               if (
                 errorMessage.includes('Could not fetch session') ||
-                errorMessage.includes('Access to storage is not allowed from this context')
+                errorMessage.includes('Access to storage is not allowed from this context') ||
+                errorMessage.includes('ERR_NAME_NOT_RESOLVED') ||
+                errorMessage.includes('Failed to fetch') ||
+                errorMessage.includes('Network Error')
               ) {
                 return null
               }
@@ -81,6 +84,25 @@ class ErrorReporter {
             return event
           },
         })
+
+        // Monkey-patch window.fetch temporarily to catch Sentry DSN resolution errors explicitly
+        // This stops net::ERR_NAME_NOT_RESOLVED from appearing as an unhandled error when adblockers block sentry
+        if (typeof window !== 'undefined') {
+          const originalFetch = window.fetch
+          window.fetch = async function (...args) {
+            try {
+              return await originalFetch.apply(this, args)
+            } catch (error) {
+              const url = typeof args[0] === 'string' ? args[0] : (args[0] instanceof Request ? args[0].url : '')
+              if (url.includes('sentry.io') && import.meta.env.PROD) {
+                // Silently swallow Sentry fetch errors (like adblocker or DNS failures)
+                return new Response(null, { status: 200 })
+              }
+              throw error
+            }
+          }
+        }
+
         if (import.meta.env.DEV && DEBUG_LOGS) {
           console.debug('[ErrorReporter] Sentry initialized')
         }
@@ -147,7 +169,7 @@ class ErrorReporter {
   /**
    * Set user context
    */
-  setUser(user: {id?: string; email?: string; name?: string}) {
+  setUser(user: { id?: string; email?: string; name?: string }) {
     if (this.dsn) {
       try {
         Sentry.setUser(user)
