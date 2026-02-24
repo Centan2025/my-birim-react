@@ -1228,24 +1228,26 @@ export function Header() {
                   return `rgba(0, 0, 0, ${darkOpacity})`
                 }
 
-                // Parlaklık ölçüldüyse, tamamen ona göre karar ver
-                if (heroBrightness !== null) {
-                  // Çok açık / beyaza yakın görseller - headerOpacity'den bağımsız minimum opacity
-                  if (heroBrightness >= 0.7) {
+                // Mobil: heroBrightness null = hero görseli yok veya henüz yüklenmedi
+                // Koyu hero sayfaları hariç, beyaz arka planlı sayfalarda koyu header
+                const isDarkHeroMobile = path === '/' || path === '' || path.includes('about')
+                if (!isDarkHeroMobile && window.scrollY <= 10) {
+                  // Sayfa arka plan rengini kontrol et
+                  const mainEl = document.querySelector('main')
+                  if (mainEl) {
+                    const bg = window.getComputedStyle(mainEl).backgroundColor
+                    if (bg && (bg.includes('255, 255, 255') || bg.includes('255,255,255'))) {
+                      return 'rgba(0, 0, 0, 0.85)'
+                    }
+                  }
+                  // Görsel bulunamadıysa ve arka plan da net değilse,
+                  // sayfanın body background'ına bak
+                  const bodyBg = window.getComputedStyle(document.body).backgroundColor
+                  if (
+                    bodyBg &&
+                    (bodyBg.includes('255, 255, 255') || bodyBg.includes('255,255,255'))
+                  ) {
                     return 'rgba(0, 0, 0, 0.85)'
-                  }
-                  // Açık arka plan - minimum opacity garantile
-                  if (heroBrightness >= 0.5) {
-                    return 'rgba(0, 0, 0, 0.75)'
-                  }
-                  // Orta ton arka plan – en az orta koyulukta olsun
-                  if (heroBrightness >= 0.35) {
-                    const safeOpacity = Math.max(headerOpacity, 0.65)
-                    return `rgba(0, 0, 0, ${safeOpacity})`
-                  }
-                  // Çok koyu arka plan – özellikle sayfanın en üstünde mümkün olduğunca şeffaf kalsın
-                  if (headerOpacity <= 0.25) {
-                    return 'transparent'
                   }
                 }
               }
@@ -1274,7 +1276,7 @@ export function Header() {
                     const bg = window.getComputedStyle(mainEl).backgroundColor
                     // rgb(255,255,255) veya rgba(255,255,255,1) gibi beyaz arka plan kontrolü
                     if (bg && (bg.includes('255, 255, 255') || bg.includes('255,255,255'))) {
-                      // Şeffaf veya beyaz arka plan — header koyu olsun
+                      // Beyaz arka plan — header koyu olsun
                       return 'rgba(0, 0, 0, 0.85)'
                     }
                   }
