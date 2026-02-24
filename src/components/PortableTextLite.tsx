@@ -31,6 +31,8 @@ type Block = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   text?: any // for cta (localized)
   link?: string // for cta
+  // For R2-based portableTextImage
+  imageR2?: {url?: string; path?: string; alt?: string}
 }
 
 function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
@@ -282,7 +284,35 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
       continue
     }
 
-    // Handle Custom Objects
+    // Handle Custom Objects - R2 portableTextImage (new)
+    if (block._type === 'portableTextImage' && block.imageR2?.url) {
+      const layoutClass =
+        block.layout === 'left'
+          ? 'md:float-left md:mr-8 md:mb-4 md:w-1/2'
+          : block.layout === 'right'
+            ? 'md:float-right md:ml-8 md:mb-4 md:w-1/2'
+            : block.layout === 'center'
+              ? 'mx-auto md:w-3/4'
+              : 'w-full'
+
+      nodes.push(
+        <figure key={blockKey} className={`my-2 clear-both ${layoutClass}`}>
+          <OptimizedImage
+            src={block.imageR2.url}
+            alt={block.alt || block.imageR2.alt || ''}
+            className="w-full h-auto shadow-sm"
+          />
+          {block.caption && (
+            <figcaption className="mt-3 text-sm text-gray-500 text-center italic">
+              {block.caption}
+            </figcaption>
+          )}
+        </figure>
+      )
+      continue
+    }
+
+    // Handle Custom Objects - Legacy Sanity native image
     if (block._type === 'image' && block.asset) {
       const layoutClass =
         block.layout === 'left'
