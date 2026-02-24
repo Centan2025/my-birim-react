@@ -50,10 +50,7 @@ export function ProductExclusiveContentSection({
 
   const canDownload = isLoggedIn && user?.userType === 'full_member'
 
-  const getExtraImageLabel = (
-    img: string | {url?: string; image?: string},
-    idx: number
-  ) => {
+  const getExtraImageLabel = (img: string | {url?: string; image?: string}, idx: number) => {
     // Şema tarafında sadece image olduğu için genelde URL string geliyor
     const url = typeof img === 'string' ? img : img?.url || img?.image || ''
     if (!url) return `Görsel ${idx + 1}`
@@ -178,5 +175,3 @@ export function ProductExclusiveContentSection({
     </ScrollReveal>
   )
 }
-
-

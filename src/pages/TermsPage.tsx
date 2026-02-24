@@ -24,15 +24,11 @@ export default function TermsPage() {
 
   const title = policy?.title ? t(policy.title) : 'Kullanım Şartları'
   const contentBlocks =
-    localizedContent?.[locale] ??
-    localizedContent?.['tr'] ??
-    localizedContent?.['en'] ??
-    undefined
+    localizedContent?.[locale] ?? localizedContent?.['tr'] ?? localizedContent?.['en'] ?? undefined
   useSEO({
     title: `BIRIM - ${title}`,
     description:
-      t('terms_description') ||
-      'BIRIM web sitesi ve hizmetlerinin kullanımına ilişkin şartlar.',
+      t('terms_description') || 'BIRIM web sitesi ve hizmetlerinin kullanımına ilişkin şartlar.',
     siteName: 'BIRIM',
     type: 'website',
     locale: 'tr_TR',

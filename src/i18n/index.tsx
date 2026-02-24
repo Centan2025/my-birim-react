@@ -9,13 +9,13 @@ import {
 } from 'react'
 import tr from './locales/tr'
 import en from './locales/en'
-import { LocalizedString } from '../types'
-import { getLanguages, getTranslations } from '../services/cms'
+import {LocalizedString} from '../types'
+import {getLanguages, getTranslations} from '../services/cms'
 
 export type Locale = string
 
 // Base translations from files (fallback)
-const baseTranslations: Record<string, Record<string, string>> = { tr, en }
+const baseTranslations: Record<string, Record<string, string>> = {tr, en}
 
 interface II18nContext {
   locale: Locale
@@ -60,7 +60,7 @@ const getInitialLocaleSync = (): Locale => {
   return 'tr'
 }
 
-export const I18nProvider = ({ children }: PropsWithChildren) => {
+export const I18nProvider = ({children}: PropsWithChildren) => {
   const [supportedLocales, setSupportedLocales] = useState<string[]>([])
   const [locale, setLocaleState] = useState<Locale>(getInitialLocaleSync)
   const [loading, setLoading] = useState(true)
@@ -99,11 +99,14 @@ export const I18nProvider = ({ children }: PropsWithChildren) => {
     }
   }, [locale, loading])
 
-  const setLocale = useCallback((newLocale: Locale) => {
-    if (supportedLocales.includes(newLocale)) {
-      setLocaleState(newLocale)
-    }
-  }, [supportedLocales])
+  const setLocale = useCallback(
+    (newLocale: Locale) => {
+      if (supportedLocales.includes(newLocale)) {
+        setLocaleState(newLocale)
+      }
+    },
+    [supportedLocales]
+  )
 
   const t = useCallback(
     (keyOrObject: string | LocalizedString | undefined, ...args: (string | number)[]): string => {

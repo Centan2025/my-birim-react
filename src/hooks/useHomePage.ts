@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
-import { getHomePageContent } from '@/services/cms'
+import {useQuery} from '@tanstack/react-query'
+import {getHomePageContent} from '@/services/cms'
 
 /**
  * Ana sayfa içeriğini getir
@@ -13,4 +13,3 @@ export function useHomePageContent() {
     refetchOnMount: 'always', // Ana sayfa önemli, her mount'ta kontrol et
   })
 }
-

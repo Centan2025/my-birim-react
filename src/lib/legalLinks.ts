@@ -97,5 +97,3 @@ export const resolveLegalLinkText = (
   // 3) Son çare: URL'yi ham haliyle döndür
   return url || ''
 }
-
-

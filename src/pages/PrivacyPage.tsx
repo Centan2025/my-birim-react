@@ -24,10 +24,7 @@ export default function PrivacyPage() {
 
   const title = policy?.title ? t(policy.title) : 'Gizlilik Politikası'
   const contentBlocks =
-    localizedContent?.[locale] ??
-    localizedContent?.['tr'] ??
-    localizedContent?.['en'] ??
-    undefined
+    localizedContent?.[locale] ?? localizedContent?.['tr'] ?? localizedContent?.['en'] ?? undefined
   useSEO({
     title: `BIRIM - ${title}`,
     description:

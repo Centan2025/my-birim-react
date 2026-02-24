@@ -1,6 +1,6 @@
 /**
  * React Query Client Configuration
- * 
+ *
  * API response caching için React Query yapılandırması
  */
 
@@ -14,7 +14,7 @@ export const queryClient = new QueryClient({
       if (import.meta.env.DEV) {
         console.error('[Query Error]', error, query)
       }
-      
+
       // Error reporting
       if (error instanceof Error) {
         errorReporter.captureException(error, {
@@ -36,7 +36,7 @@ export const queryClient = new QueryClient({
       if (import.meta.env.DEV) {
         console.error('[Mutation Error]', error, mutation)
       }
-      
+
       // Error reporting
       if (error instanceof Error) {
         errorReporter.captureException(error, {
@@ -95,5 +95,3 @@ export const queryClient = new QueryClient({
     },
   },
 })
-
-

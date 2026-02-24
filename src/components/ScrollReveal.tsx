@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 
 interface ScrollRevealProps {
   children: React.ReactNode
@@ -31,8 +31,8 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
     if (!element) return
 
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
+      entries => {
+        entries.forEach(entry => {
           if (entry.isIntersecting) {
             // Delay ile animasyonu başlat
             setTimeout(() => {
@@ -58,7 +58,8 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
     }
   }, [delay, threshold])
 
-  const translateDirection = direction === 'left' ? `translateX(-${distance}px)` : `translateY(${distance}px)`
+  const translateDirection =
+    direction === 'left' ? `translateX(-${distance}px)` : `translateY(${distance}px)`
 
   return (
     <div
@@ -66,7 +67,9 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
       className={`${width} ${className}`}
       style={{
         opacity: isVisible ? 1 : 0,
-        transform: isVisible ? 'translate(0, 0) scale(1)' : `${translateDirection} scale(${initialScale})`,
+        transform: isVisible
+          ? 'translate(0, 0) scale(1)'
+          : `${translateDirection} scale(${initialScale})`,
         transition: `opacity ${duration}s ease-out ${delay}ms, transform ${duration}s ease-out ${delay}ms`,
         willChange: 'opacity, transform',
       }}

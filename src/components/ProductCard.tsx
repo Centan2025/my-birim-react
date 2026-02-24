@@ -1,22 +1,22 @@
-import React, { useMemo } from 'react'
-import { Link } from 'react-router-dom'
-import type { Product, Designer } from '../types'
-import { OptimizedImage } from './OptimizedImage'
-import { useTranslation } from '../i18n'
-import { useSiteSettings } from '../App'
-import { analytics } from '../lib/analytics'
-import { useDesigners } from '../hooks/useDesigners'
+import React, {useMemo} from 'react'
+import {Link} from 'react-router-dom'
+import type {Product, Designer} from '../types'
+import {OptimizedImage} from './OptimizedImage'
+import {useTranslation} from '../i18n'
+import {useSiteSettings} from '../App'
+import {analytics} from '../lib/analytics'
+import {useDesigners} from '../hooks/useDesigners'
 
-export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'light' }> = ({
+export const ProductCard: React.FC<{product: Product; variant?: 'default' | 'light'}> = ({
   product,
   variant = 'default',
 }) => {
-  const { t } = useTranslation()
-  const { settings } = useSiteSettings()
+  const {t} = useTranslation()
+  const {settings} = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const isLight = variant === 'light'
 
-  const { data: designers = [] } = useDesigners()
+  const {data: designers = []} = useDesigners()
   const designerName = useMemo(() => {
     if (!product.designerId || !designers.length) return ''
     const designer = (designers as Designer[]).find(d => d.id === product.designerId)
@@ -60,10 +60,11 @@ export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'li
         </div>
         <div className="px-2.5 py-2 sm:px-3 sm:py-2">
           <h3
-            className={`text-base sm:text-lg tracking-tight font-semibold ${isLight
-              ? 'text-gray-800 group-hover:text-gray-900'
-              : 'text-gray-900 group-hover:text-black'
-              }`}
+            className={`text-base sm:text-lg tracking-tight font-semibold ${
+              isLight
+                ? 'text-gray-800 group-hover:text-gray-900'
+                : 'text-gray-900 group-hover:text-black'
+            }`}
           >
             {t(product.name)}
           </h3>

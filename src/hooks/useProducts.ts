@@ -31,7 +31,9 @@ export function useProduct(productId: string | undefined) {
       const product = await getProductById(productId)
       if (!product) {
         // React Query, queryFn'in undefined döndürmesini sevmiyor; bunun yerine anlamlı bir hata fırlatalım.
-        const err = new Error(`Product not found for id "${productId}"`) as Error & {status?: number}
+        const err = new Error(`Product not found for id "${productId}"`) as Error & {
+          status?: number
+        }
         err.status = 404
         throw err
       }
@@ -77,4 +79,3 @@ export function useProductsByDesigner(designerId: string | undefined) {
     refetchOnMount: 'always',
   })
 }
-

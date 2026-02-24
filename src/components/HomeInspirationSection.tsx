@@ -1,9 +1,9 @@
-import React, { useLayoutEffect, useRef } from 'react'
-import { createPortal } from 'react-dom'
-import { Link } from 'react-router-dom'
+import React, {useLayoutEffect, useRef} from 'react'
+import {createPortal} from 'react-dom'
+import {Link} from 'react-router-dom'
 
-import type { HomePageContent } from '../types'
-import { useTranslation } from '../i18n'
+import type {HomePageContent} from '../types'
+import {useTranslation} from '../i18n'
 import ScrollReveal from './ScrollReveal'
 
 interface HomeInspirationSectionProps {
@@ -21,33 +21,29 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
   bgImageMobile,
   bgImageDesktop,
 }) => {
-  const { t } = useTranslation()
+  const {t} = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
   const portalRef = useRef<HTMLDivElement>(null)
-
-
 
   const hasInspiration =
     Boolean(inspiration) &&
     Boolean(inspiration.backgroundImage || inspiration.title || inspiration.subtitle)
 
-  const backgroundImage =
-    isMobile && bgImageMobile ? bgImageMobile : bgImageDesktop || bgImageUrl
+  const backgroundImage = isMobile && bgImageMobile ? bgImageMobile : bgImageDesktop || bgImageUrl
 
-  const dynamicHeightStyles =
-    isMobile
-      ? {
+  const dynamicHeightStyles = isMobile
+    ? {
         // Yüksekliği sabit tutmak yerine, minimum yükseklik veriyoruz.
         // Böylece tarayıcı farklarından bağımsız olarak önceki content
         // bloklarının üstüne binme riski azalır.
         minHeight: '25vh',
       }
-      : {
+    : {
         minHeight: '55vh',
       }
 
   useLayoutEffect(() => {
-    let animationFrameId: number;
+    let animationFrameId: number
 
     const updateClipPath = () => {
       const container = containerRef.current
@@ -72,7 +68,7 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
 
       // Mobil: sadece üstten clip, altta boşluk kalmaz
       if (isMobile) {
-        const BUFFER_TOP = 5; // çok küçük bir tampon
+        const BUFFER_TOP = 5 // çok küçük bir tampon
         const top = Math.max(0, rect.top - BUFFER_TOP)
         const left = Math.max(0, rect.left)
         const right = Math.max(0, windowWidth - rect.right)
@@ -82,7 +78,7 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
       }
 
       // Desktop: buffer yok, content'leri kesmemek için
-      const BUFFER_TOP = 0;
+      const BUFFER_TOP = 0
       const top = Math.max(0, rect.top - BUFFER_TOP)
       const bottom = 0 // Alttan kesme yok, content'lerin üstüne binmesin
 
@@ -99,8 +95,8 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
 
     updateClipPath()
 
-    window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onScroll, { passive: true })
+    window.addEventListener('scroll', onScroll, {passive: true})
+    window.addEventListener('resize', onScroll, {passive: true})
 
     return () => {
       window.removeEventListener('scroll', onScroll)
@@ -173,14 +169,12 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
       )}
 
       {/* PLACEHOLDER: Container */}
-      <div
-        ref={containerRef}
-        className="inspiration-container w-full"
-        style={dynamicHeightStyles}
-      >
+      <div ref={containerRef} className="inspiration-container w-full" style={dynamicHeightStyles}>
         <div className="inspiration-content container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl h-full flex flex-col justify-center items-center text-white text-center pointer-events-auto">
           <ScrollReveal delay={0} threshold={0.1} width="w-full" className="h-auto">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-normal leading-relaxed">{t(inspiration.title)}</h2>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-normal leading-relaxed">
+              {t(inspiration.title)}
+            </h2>
           </ScrollReveal>
           <ScrollReveal delay={100} threshold={0.1} width="w-full" className="h-auto">
             <p className="mt-4 text-xl md:text-2xl lg:text-3xl text-gray-100 max-w-2xl mx-auto font-normal leading-relaxed">
@@ -208,8 +202,6 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
             </ScrollReveal>
           )}
         </div>
-
-
       </div>
     </>
   )

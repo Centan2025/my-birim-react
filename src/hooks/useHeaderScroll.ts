@@ -1,4 +1,4 @@
-import { useEffect, MutableRefObject } from 'react'
+import {useEffect, MutableRefObject} from 'react'
 
 type MenuState = {
   isLangOpen: boolean
@@ -97,12 +97,7 @@ export function useHeaderScroll({
             const isNewsList = path === '/news' || path === '/news/'
             const isDesignersList = path === '/designers' || path === '/designers/'
 
-            if (
-              isProjectsList ||
-              isProjectDetail ||
-              isNewsList ||
-              isDesignersList
-            ) {
+            if (isProjectsList || isProjectDetail || isNewsList || isDesignersList) {
               setHeaderOpacity(0.7)
               opacitySetByHandleScrollRef.current = true
             } else if (currentHeroBrightness !== null) {
@@ -167,12 +162,7 @@ export function useHeaderScroll({
           const isNewsList = path === '/news' || path === '/news/'
           const isDesignersList = path === '/designers' || path === '/designers/'
 
-          if (
-            isProjectsList ||
-            isProjectDetail ||
-            isNewsList ||
-            isDesignersList
-          ) {
+          if (isProjectsList || isProjectDetail || isNewsList || isDesignersList) {
             setHeaderOpacity(0.7)
             opacitySetByHandleScrollRef.current = true
           } else {
@@ -206,12 +196,7 @@ export function useHeaderScroll({
         const isNewsList = path === '/news' || path === '/news/'
         const isDesignersList = path === '/designers' || path === '/designers/'
 
-        if (
-          isProjectsList ||
-          isProjectDetail ||
-          isNewsList ||
-          isDesignersList
-        ) {
+        if (isProjectsList || isProjectDetail || isNewsList || isDesignersList) {
           setHeaderOpacity(0.7)
           opacitySetByHandleScrollRef.current = true
         } else {
@@ -274,12 +259,7 @@ export function useHeaderScroll({
         const isNewsList = path === '/news' || path === '/news/'
         const isDesignersList = path === '/designers' || path === '/designers/'
 
-        if (
-          isProjectsList ||
-          isProjectDetail ||
-          isNewsList ||
-          isDesignersList
-        ) {
+        if (isProjectsList || isProjectDetail || isNewsList || isDesignersList) {
           setHeaderOpacity(0.7)
         } else {
           const isProductsList =
@@ -323,7 +303,7 @@ export function useHeaderScroll({
     const initializeScrollListener = () => {
       scrollListener = handleScrollWithEnd
       handleScroll()
-      window.addEventListener('scroll', handleScrollWithEnd, { passive: true })
+      window.addEventListener('scroll', handleScrollWithEnd, {passive: true})
     }
 
     initializeScrollListener()
@@ -360,11 +340,3 @@ export function useHeaderScroll({
     setIsProductsOpen,
   ])
 }
-
-
-
-
-
-
-
-

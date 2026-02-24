@@ -30,4 +30,3 @@ export function useDesigner(designerId: string | undefined) {
     refetchOnMount: false,
   })
 }
-

@@ -1,4 +1,3 @@
-
 interface LoadingSpinnerProps {
   /** Loading mesajı */
   message?: string
@@ -28,10 +27,10 @@ export function LoadingSpinner({
   return (
     <div className={`${containerClass} ${className}`}>
       <div className="text-center">
-        <div className={`inline-block animate-spin rounded-full border-b-2 border-white ${spinnerSize} mb-4`}></div>
-        {message && (
-          <p className="text-gray-300 text-sm md:text-base">{message}</p>
-        )}
+        <div
+          className={`inline-block animate-spin rounded-full border-b-2 border-white ${spinnerSize} mb-4`}
+        ></div>
+        {message && <p className="text-gray-300 text-sm md:text-base">{message}</p>}
       </div>
     </div>
   )
@@ -59,4 +58,3 @@ export function PageLoading({message}: {message?: string}) {
     </div>
   )
 }
-

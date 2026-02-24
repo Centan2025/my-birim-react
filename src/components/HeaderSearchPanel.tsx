@@ -1,7 +1,7 @@
-import { RefObject, FC } from 'react'
-import { Link } from 'react-router-dom'
-import type { Category, Designer, Product } from '../types'
-import type { HeaderTranslateFn } from './HeaderShared'
+import {RefObject, FC} from 'react'
+import {Link} from 'react-router-dom'
+import type {Category, Designer, Product} from '../types'
+import type {HeaderTranslateFn} from './HeaderShared'
 
 interface SearchResults {
   products: Product[]
@@ -85,10 +85,9 @@ export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
         id="search-panel"
         role="search"
         aria-label={t('search') || 'Ara'}
-        className={`fixed left-0 right-0 z-[100] bg-black/80 backdrop-blur-lg transition-opacity duration-300 ease-out ${isOpen
-          ? 'opacity-100 pointer-events-auto'
-          : 'opacity-0 pointer-events-none'
-          }`}
+        className={`fixed left-0 right-0 z-[100] bg-black/80 backdrop-blur-lg transition-opacity duration-300 ease-out ${
+          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
         style={{
           // Paneli tam olarak header'ın altından başlat
           top: isHeaderVisible ? `${headerHeight}px` : '0px',
@@ -104,16 +103,19 @@ export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
                 placeholder={t('search_placeholder') || ''}
                 id="global-search-input"
                 name="global-search"
-                className={`w-full bg-transparent text-white outline-none transition-colors duration-300 pr-10 ${isMobile ? 'text-lg pb-2' : 'text-2xl pb-3'
-                  }`}
+                className={`w-full bg-transparent text-white outline-none transition-colors duration-300 pr-10 ${
+                  isMobile ? 'text-lg pb-2' : 'text-2xl pb-3'
+                }`}
                 value={searchQuery}
                 onChange={e => onSearchQueryChange(e.target.value)}
               />
               {/* Alt çizgi: header desktop menü alt çizgisine benzer, ortadan iki yana büyüyen animasyon */}
               <div
-                className={`pointer-events-none absolute left-0 right-0 ${isMobile ? 'bottom-[0px]' : 'bottom-[2px]'
-                  } h-px bg-gray-500 transform origin-center transition-transform duration-300 ease-out ${isOpen ? 'scale-x-100' : 'scale-x-0'
-                  }`}
+                className={`pointer-events-none absolute left-0 right-0 ${
+                  isMobile ? 'bottom-[0px]' : 'bottom-[2px]'
+                } h-px bg-gray-500 transform origin-center transition-transform duration-300 ease-out ${
+                  isOpen ? 'scale-x-100' : 'scale-x-0'
+                }`}
               />
 
               {searchQuery.length > 0 && (
@@ -125,9 +127,7 @@ export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
                 >
                   {/* Sade, ince beyaz çizgilerden oluşan X ikonu (biraz büyütülmüş) */}
                   <span className="relative w-5 h-5 birim-search-x-animate-in">
-                    <span
-                      className="absolute inset-0 before:absolute before:left-1/2 before:top-[3px] before:bottom-[3px] before:w-[1px] before:bg-white before:-translate-x-1/2 before:rotate-45 after:absolute after:left-1/2 after:top-[3px] after:bottom-[3px] after:w-[1px] after:bg-white after:-translate-x-1/2 after:-rotate-45 group-hover:before:bg-white/90 group-hover:after:bg-white/90 transition-colors"
-                    />
+                    <span className="absolute inset-0 before:absolute before:left-1/2 before:top-[3px] before:bottom-[3px] before:w-[1px] before:bg-white before:-translate-x-1/2 before:rotate-45 after:absolute after:left-1/2 after:top-[3px] after:bottom-[3px] after:w-[1px] after:bg-white after:-translate-x-1/2 after:-rotate-45 group-hover:before:bg-white/90 group-hover:after:bg-white/90 transition-colors" />
                   </span>
                 </button>
               )}
@@ -154,11 +154,10 @@ export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
                     </h3>
                     <div className="space-y-2">
                       {searchResults.products.map(product => {
-                        const designerNameSource =
-                          allData?.designers.find(d => d.id === product.designerId)?.name
-                        const designerName = designerNameSource
-                          ? t(designerNameSource)
-                          : ''
+                        const designerNameSource = allData?.designers.find(
+                          d => d.id === product.designerId
+                        )?.name
+                        const designerName = designerNameSource ? t(designerNameSource) : ''
                         return (
                           <Link
                             key={product.id}
@@ -259,5 +258,3 @@ export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
     </div>
   )
 }
-
-

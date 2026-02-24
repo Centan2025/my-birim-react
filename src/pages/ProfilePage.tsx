@@ -13,8 +13,7 @@ export function ProfilePage() {
   useSEO({
     title: pageTitle,
     description:
-      t('profile_description') ||
-      'Üye bilgilerinizi yönetin, özel içeriklere ve ürünlere erişin.',
+      t('profile_description') || 'Üye bilgilerinizi yönetin, özel içeriklere ve ürünlere erişin.',
     siteName: 'BIRIM',
     type: 'profile',
     locale: 'tr_TR',

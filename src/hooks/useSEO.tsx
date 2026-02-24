@@ -137,4 +137,3 @@ export const useSEO = ({title, description, image, type, siteName, url, locale}:
  * Site geneli için varsayılan başlık/site adı gibi değerleri günceller.
  */
 export const useSeoDefaults = () => useSeoContext().setSeoDefaults
-

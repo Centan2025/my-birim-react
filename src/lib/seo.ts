@@ -90,7 +90,7 @@ export const updateMetaTags = (data: SEOData): void => {
 
   // Tags (article için)
   if (data.tags && data.tags.length > 0) {
-    data.tags.forEach((tag) => {
+    data.tags.forEach(tag => {
       updateMetaTag('property', `article:tag`, tag)
     })
   }
@@ -257,5 +257,3 @@ export const getProductSchema = (data: {
     }),
   }
 }
-
-

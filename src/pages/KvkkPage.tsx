@@ -24,10 +24,7 @@ export default function KvkkPage() {
 
   const title = policy?.title ? t(policy.title) : 'KVKK Aydınlatma Metni'
   const contentBlocks =
-    localizedContent?.[locale] ??
-    localizedContent?.['tr'] ??
-    localizedContent?.['en'] ??
-    undefined
+    localizedContent?.[locale] ?? localizedContent?.['tr'] ?? localizedContent?.['en'] ?? undefined
   useSEO({
     title: `BIRIM - ${title}`,
     description:

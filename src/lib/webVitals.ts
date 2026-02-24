@@ -7,8 +7,7 @@ import {onCLS, onFID, onFCP, onLCP, onTTFB, onINP, Metric} from 'web-vitals'
 import {analytics} from './analytics'
 import {errorReporter} from './errorReporting'
 
-const DEBUG_LOGS =
-  (import.meta.env as {VITE_DEBUG_LOGS?: string}).VITE_DEBUG_LOGS === 'true'
+const DEBUG_LOGS = (import.meta.env as {VITE_DEBUG_LOGS?: string}).VITE_DEBUG_LOGS === 'true'
 
 interface WebVitalsConfig {
   /** Analytics'e gönderilecek mi? */

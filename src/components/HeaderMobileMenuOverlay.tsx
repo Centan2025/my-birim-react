@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, FC, MutableRefObject } from 'react'
-import { NavLink } from 'react-router-dom'
-import type { Category, FooterContent, SiteSettings } from '../types'
+import {useState, useEffect, useRef, FC, MutableRefObject} from 'react'
+import {NavLink} from 'react-router-dom'
+import type {Category, FooterContent, SiteSettings} from '../types'
 import {
   CrossFadeText,
   DynamicIcon,
@@ -21,7 +21,7 @@ interface HeaderMobileMenuOverlayProps {
   iconClasses: string
   categories: Category[]
   headerHeight: number
-  mobileMenuLinks: { to: string; label: string }[]
+  mobileMenuLinks: {to: string; label: string}[]
   mobileMenuCloseDelay: number
   subscribeEmail: string
   isMobileLocaleTransition: boolean
@@ -97,15 +97,16 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
     <div
       ref={node => {
         if (node) {
-          (mobileMenuRef as MutableRefObject<HTMLDivElement | null>).current = node
-            ; (mobileMenuFocusTrap as MutableRefObject<HTMLElement | null>).current = node
+          ;(mobileMenuRef as MutableRefObject<HTMLDivElement | null>).current = node
+          ;(mobileMenuFocusTrap as MutableRefObject<HTMLElement | null>).current = node
         }
       }}
       id="mobile-menu"
-      className={`mobile-menu-overlay fixed left-0 right-0 bottom-0 lg:hidden z-40 flex flex-col border-t border-white/10 text-white pb-8 px-6 transition-all duration-400 ease-[cubic-bezier(0.76,0,0.24,1)] ${isMobileMenuOpen
-        ? 'translate-y-0 opacity-100 pointer-events-auto'
-        : 'translate-y-2 opacity-0 pointer-events-none'
-        }`}
+      className={`mobile-menu-overlay fixed left-0 right-0 bottom-0 lg:hidden z-40 flex flex-col border-t border-white/10 text-white pb-8 px-6 transition-all duration-400 ease-[cubic-bezier(0.76,0,0.24,1)] ${
+        isMobileMenuOpen
+          ? 'translate-y-0 opacity-100 pointer-events-auto'
+          : 'translate-y-2 opacity-0 pointer-events-none'
+      }`}
       style={{
         top: `${headerHeight}px`,
         backgroundColor: '#111827', // Biraz daha koyu gri (Tailwind gray-900)
@@ -118,9 +119,10 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
       {/* Dil ve kullanıcı alanı */}
       {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
         <div
-          className={`mb-6 pt-4 pb-4 transition-all duration-400 ${isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
-            }`}
-          style={{ transitionDelay: isMobileMenuOpen ? '50ms' : '0ms' }}
+          className={`mb-6 pt-4 pb-4 transition-all duration-400 ${
+            isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+          }`}
+          style={{transitionDelay: isMobileMenuOpen ? '50ms' : '0ms'}}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -133,11 +135,12 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
                       onLocaleChange(langCode)
                     }}
                     aria-pressed={isActive}
-                    className={`group relative px-2.5 py-1.5 text-sm uppercase tracking-[0.2em] transition-all duration-200 ${isActive
-                      ? 'text-white font-light'
-                      : 'text-gray-400/90 hover:text-white font-light'
-                      } ${isActive ? 'scale-110' : 'scale-100'}`}
-                    style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.2em' }}
+                    className={`group relative px-2.5 py-1.5 text-sm uppercase tracking-[0.2em] transition-all duration-200 ${
+                      isActive
+                        ? 'text-white font-light'
+                        : 'text-gray-400/90 hover:text-white font-light'
+                    } ${isActive ? 'scale-110' : 'scale-100'}`}
+                    style={{fontFamily: 'Inter, sans-serif', letterSpacing: '0.2em'}}
                   >
                     <span className="relative inline-block transition-opacity transition-transform duration-200 ease-out">
                       {langCode.toUpperCase()}
@@ -158,7 +161,7 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
           {/* Tam ekran genişliğinde ayırıcı çizgi */}
           <div
             className="border-b border-white/20 mt-4 -mx-6"
-            style={{ width: 'calc(100% + 3rem)' }}
+            style={{width: 'calc(100% + 3rem)'}}
           ></div>
         </div>
       )}
@@ -170,15 +173,13 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
           <button
             onClick={onToggleProductsMenu}
             style={{
-              transitionDelay: `${isMobileMenuOpen
-                ? 0
-                : (mobileMenuLinks.length - 1) * 100
-                }ms`,
+              transitionDelay: `${isMobileMenuOpen ? 0 : (mobileMenuLinks.length - 1) * 100}ms`,
               fontWeight: 300,
               letterSpacing: '0.2em',
             }}
-            className={`group flex items-center justify-between w-full text-xl md:text-2xl font-light leading-tight text-white transition-all duration-400 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
-              }`}
+            className={`group flex items-center justify-between w-full text-xl md:text-2xl font-light leading-tight text-white transition-all duration-400 ${
+              isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
+            }`}
           >
             <span>
               <CrossFadeText
@@ -188,19 +189,26 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
               />
             </span>
             <svg
-              className={`w-6 h-6 transition-transform duration-300 ${isMobileProductsMenuOpen ? 'rotate-180' : ''
-                }`}
+              className={`w-6 h-6 transition-transform duration-300 ${
+                isMobileProductsMenuOpen ? 'rotate-180' : ''
+              }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </button>
           {/* Alt menü - kategoriler ve Hepsini Gör */}
           <div
-            className={`overflow-hidden transition-all duration-700 ease-in-out ${isMobileProductsMenuOpen ? 'max-h-[1000px] opacity-100 mt-4' : 'max-h-0 opacity-0'
-              }`}
+            className={`overflow-hidden transition-all duration-700 ease-in-out ${
+              isMobileProductsMenuOpen ? 'max-h-[1000px] opacity-100 mt-4' : 'max-h-0 opacity-0'
+            }`}
           >
             <div className="pl-6 flex flex-col gap-3">
               {categories.map((category, index) => (
@@ -212,8 +220,9 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
                     fontWeight: 300,
                     letterSpacing: '0.15em',
                   }}
-                  className={`group flex items-center justify-between text-xl md:text-2xl font-light leading-tight text-gray-300 hover:text-white transition-all duration-400 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
-                    }`}
+                  className={`group flex items-center justify-between text-xl md:text-2xl font-light leading-tight text-gray-300 hover:text-white transition-all duration-400 ${
+                    isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
+                  }`}
                   onClick={() => {
                     setIsMobileMenuOpen(false)
                     setIsMobileProductsMenuOpen(false)
@@ -234,8 +243,9 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
                   fontWeight: 300,
                   letterSpacing: '0.15em',
                 }}
-                className={`group flex items-center justify-between text-xl md:text-2xl font-light leading-tight text-gray-300 hover:text-white transition-all duration-400 border-t border-white/20 pt-3 mt-2 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
-                  }`}
+                className={`group flex items-center justify-between text-xl md:text-2xl font-light leading-tight text-gray-300 hover:text-white transition-all duration-400 border-t border-white/20 pt-3 mt-2 ${
+                  isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
+                }`}
                 onClick={() => {
                   setIsMobileMenuOpen(false)
                   setIsMobileProductsMenuOpen(false)
@@ -261,15 +271,15 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
             to={item.to}
             style={{
               // Açılırken yukarı doğru (ilk eleman en geç), kapanırken tersine (ilk eleman en erken)
-              transitionDelay: `${isMobileMenuOpen
-                ? (index + 1) * 100
-                : (mobileMenuLinks.length - 1 - index) * 100
-                }ms`,
+              transitionDelay: `${
+                isMobileMenuOpen ? (index + 1) * 100 : (mobileMenuLinks.length - 1 - index) * 100
+              }ms`,
               fontWeight: 300,
               letterSpacing: '0.2em',
             }}
-            className={`group flex items-center justify-between text-2xl md:text-3xl font-light leading-tight text-white transition-all duration-400 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
-              }`}
+            className={`group flex items-center justify-between text-2xl md:text-3xl font-light leading-tight text-white transition-all duration-400 ${
+              isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
+            }`}
             onClick={() => {
               // Ana menüde başka bir linke gidildiğinde hem ana menüyü hem ürünler alt menüsünü kapat
               onCloseAll()
@@ -288,14 +298,15 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
 
       {/* Alt kısım - Subscribe ve Sosyal Medya */}
       <div
-        className={`mt-auto pt-8 transition-all duration-400 ${isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-          }`}
-        style={{ transitionDelay: isMobileMenuOpen ? '300ms' : '0ms' }}
+        className={`mt-auto pt-8 transition-all duration-400 ${
+          isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+        }`}
+        style={{transitionDelay: isMobileMenuOpen ? '300ms' : '0ms'}}
       >
         {/* Ayırıcı çizgi - tam ekran genişliğinde */}
         <div
           className="border-t border-white/20 -mx-6 mb-6"
-          style={{ width: 'calc(100% + 3rem)' }}
+          style={{width: 'calc(100% + 3rem)'}}
         ></div>
 
         {/* Subscribe bölümü */}
@@ -316,7 +327,7 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
                 if (list.includes(normalizedEmail)) {
                   showToast(
                     t('newsletter_already_subscribed') ||
-                    'Bu e-posta adresi zaten aboneliğe kayıtlı.',
+                      'Bu e-posta adresi zaten aboneliğe kayıtlı.',
                     'success'
                   )
                   setSubscribeEmail('')
@@ -331,8 +342,8 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
               await subscribeEmailService(subscribeEmail)
               showToast(
                 t('newsletter_success') ||
-                t('subscribe_success') ||
-                'E-posta aboneliğiniz başarıyla oluşturuldu!',
+                  t('subscribe_success') ||
+                  'E-posta aboneliğiniz başarıyla oluşturuldu!',
                 'success'
               )
 
@@ -361,8 +372,8 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
               if (errorMessage === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
                 showToast(
                   t('newsletter_success_local') ||
-                  t('subscribe_success') ||
-                  'E-posta aboneliğiniz kaydedildi!',
+                    t('subscribe_success') ||
+                    'E-posta aboneliğiniz kaydedildi!',
                   'success'
                 )
                 setSubscribeEmail('')
@@ -373,14 +384,14 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
               ) {
                 showToast(
                   t('newsletter_already_subscribed') ||
-                  'Bu e-posta adresi zaten aboneliğe kayıtlı.',
+                    'Bu e-posta adresi zaten aboneliğe kayıtlı.',
                   'success'
                 )
               } else {
                 showToast(
                   errorMessage ||
-                  t('newsletter_error') ||
-                  'Bir hata oluştu. Lütfen daha sonra tekrar deneyin.',
+                    t('newsletter_error') ||
+                    'Bir hata oluştu. Lütfen daha sonra tekrar deneyin.',
                   'error'
                 )
               }
@@ -399,9 +410,10 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
               value={subscribeEmail}
               onChange={e => setSubscribeEmail(e.target.value)}
               placeholder={t('email_placeholder')}
-              className={`w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 transition-all duration-200 text-[15px] text-center ${isMobileLocaleTransition ? 'cross-fade-input' : ''
-                }`}
-              style={{ outline: 'none', boxShadow: 'none' }}
+              className={`w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 transition-all duration-200 text-[15px] text-center ${
+                isMobileLocaleTransition ? 'cross-fade-input' : ''
+              }`}
+              style={{outline: 'none', boxShadow: 'none'}}
             />
           </div>
           <button
@@ -437,8 +449,9 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
       {/* Toast mesajı - projenin koyu temasıyla uyumlu */}
       {toastMessage && (
         <div
-          className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-3 shadow-lg max-w-sm mx-auto animate-fade-in border-2 border-white/60 ${toastType === 'error' ? 'bg-red-900/95' : 'bg-gray-900/95'
-            }`}
+          className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-3 shadow-lg max-w-sm mx-auto animate-fade-in border-2 border-white/60 ${
+            toastType === 'error' ? 'bg-red-900/95' : 'bg-gray-900/95'
+          }`}
           style={{
             borderRadius: 0, // köşeleri düz
             color: 'white',
@@ -466,5 +479,3 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
     </div>
   )
 }
-
-

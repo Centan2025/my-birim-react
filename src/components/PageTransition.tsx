@@ -27,22 +27,22 @@ export const PageTransition: React.FC<PageTransitionProps> = ({children}) => {
     if (isProductDetail && isFromProducts) {
       // Yeni sayfa aşağıdan gelsin
       setIsEntering(true)
-      
+
       // Eski sayfayı yukarı kaydır
       const main = document.querySelector('main')
       if (main) {
         // Tüm sayfa içeriklerini bul (TopBanner hariç)
-        const pageContents = Array.from(main.children).filter(
-          (child) => {
-            const el = child as HTMLElement
-            return el.tagName !== 'SCRIPT' && 
-                   el.tagName !== 'DIV' && 
-                   !el.querySelector('[data-product-detail]') &&
-                   !el.id?.includes('top-banner')
-          }
-        ) as HTMLElement[]
-        
-        pageContents.forEach((content) => {
+        const pageContents = Array.from(main.children).filter(child => {
+          const el = child as HTMLElement
+          return (
+            el.tagName !== 'SCRIPT' &&
+            el.tagName !== 'DIV' &&
+            !el.querySelector('[data-product-detail]') &&
+            !el.id?.includes('top-banner')
+          )
+        }) as HTMLElement[]
+
+        pageContents.forEach(content => {
           if (content && !content.querySelector('[data-product-detail]')) {
             content.style.transition = 'transform 0.7s ease-out'
             content.style.transform = 'translateY(-100vh)'
@@ -68,17 +68,17 @@ export const PageTransition: React.FC<PageTransitionProps> = ({children}) => {
         // Cleanup - eski içeriği temizle
         const main = document.querySelector('main')
         if (main) {
-          const pageContents = Array.from(main.children).filter(
-            (child) => {
-              const el = child as HTMLElement
-              return el.tagName !== 'SCRIPT' && 
-                     el.tagName !== 'DIV' && 
-                     !el.querySelector('[data-product-detail]') &&
-                     !el.id?.includes('top-banner')
-            }
-          ) as HTMLElement[]
-          
-          pageContents.forEach((content) => {
+          const pageContents = Array.from(main.children).filter(child => {
+            const el = child as HTMLElement
+            return (
+              el.tagName !== 'SCRIPT' &&
+              el.tagName !== 'DIV' &&
+              !el.querySelector('[data-product-detail]') &&
+              !el.id?.includes('top-banner')
+            )
+          }) as HTMLElement[]
+
+          pageContents.forEach(content => {
             if (content && content.style.transform === 'translateY(-100vh)') {
               content.style.display = 'none'
             }
@@ -96,9 +96,7 @@ export const PageTransition: React.FC<PageTransitionProps> = ({children}) => {
   return (
     <div
       className={`transition-all duration-700 ease-out ${
-        isEntering
-          ? 'opacity-0 translate-y-20'
-          : 'opacity-100 translate-y-0'
+        isEntering ? 'opacity-0 translate-y-20' : 'opacity-100 translate-y-0'
       }`}
       style={{
         transform: isEntering ? 'translateY(80px)' : 'translateY(0)',
@@ -112,4 +110,3 @@ export const PageTransition: React.FC<PageTransitionProps> = ({children}) => {
     </div>
   )
 }
-

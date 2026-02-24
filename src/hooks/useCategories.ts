@@ -19,10 +19,9 @@ export function useCategories() {
  */
 export function useCategory(categoryId: string | undefined) {
   const {data: categories, ...rest} = useCategories()
-  
+
   return {
     ...rest,
     data: categories?.find(c => c.id === categoryId),
   }
 }
-

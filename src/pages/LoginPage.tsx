@@ -5,11 +5,7 @@ import {useTranslation} from '../i18n'
 import {registerUser, loginUser} from '../services/cms'
 import {loginRateLimiter, registerRateLimiter} from '../lib/rateLimiter'
 import {analytics} from '../lib/analytics'
-import {
-  validateLoginForm,
-  validateRegisterForm,
-  getPasswordStrength,
-} from '../lib/formValidation'
+import {validateLoginForm, validateRegisterForm, getPasswordStrength} from '../lib/formValidation'
 import {useSEO} from '../hooks/useSEO'
 
 export function LoginPage() {

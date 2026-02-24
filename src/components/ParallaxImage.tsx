@@ -28,7 +28,7 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
   const containerRef = useRef<HTMLDivElement>(null)
   const [offset, setOffset] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
-  
+
   // Sabit scale değeri - parallax sırasında boşlukların oluşmaması için
   const scale = 1.2
 
@@ -67,14 +67,14 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
         // Parallax hesaplama: Element'in viewport'a göre konumu
         // Element yukarı kaydıkça (rect.top azalır), görseli daha yavaş kaydır
         // Bu parallax efektini oluşturur
-        
+
         // Element'in viewport'un üstünden ne kadar uzakta olduğunu hesapla
         const distanceFromTop = rect.top
-        
+
         // Parallax offset: distanceFromTop'a göre görseli hareket ettir
         // Element yukarı kaydıkça görsel daha yavaş kayar (parallax efekti)
         const parallaxOffset = (windowHeight - distanceFromTop) * speed * 0.5
-        
+
         setOffset(parallaxOffset)
       } else {
         setOffset(0)
@@ -123,12 +123,9 @@ const ParallaxImage: React.FC<ParallaxImageProps> = ({
   // Parallax efekti: container overflow-hidden olmalı
   // Görselin transform ile hareket etmesi için container'dan daha büyük olması gerekir
   // Scale ile görseli büyüterek boşlukları önlüyoruz
-  
+
   return (
-    <div
-      ref={containerRef}
-      className={`relative overflow-hidden ${className}`}
-    >
+    <div ref={containerRef} className={`relative overflow-hidden ${className}`}>
       <div
         className="relative w-full will-change-transform"
         style={{

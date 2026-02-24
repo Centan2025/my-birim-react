@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom'
-import { OptimizedImage } from './OptimizedImage'
+import {Link} from 'react-router-dom'
+import {OptimizedImage} from './OptimizedImage'
 import ScrollReveal from './ScrollReveal'
-import type { Designer, LocalizedString } from '../types'
+import type {Designer, LocalizedString} from '../types'
 
 interface ProductDesignerSectionProps {
   designer: Designer | null
@@ -25,7 +25,7 @@ function toPlainText(blocks: any): string {
   return ''
 }
 
-export function ProductDesignerSection({ designer, t }: ProductDesignerSectionProps) {
+export function ProductDesignerSection({designer, t}: ProductDesignerSectionProps) {
   if (!designer) return null
 
   // Safely extract bio text
@@ -40,7 +40,9 @@ export function ProductDesignerSection({ designer, t }: ProductDesignerSectionPr
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
             <div className="w-full">
               <OptimizedImage
-                src={typeof designer.image === 'string' ? designer.image : designer.image?.url || ''}
+                src={
+                  typeof designer.image === 'string' ? designer.image : designer.image?.url || ''
+                }
                 srcMobile={
                   typeof designer.image === 'object'
                     ? designer.image.urlMobile
@@ -76,5 +78,3 @@ export function ProductDesignerSection({ designer, t }: ProductDesignerSectionPr
     </ScrollReveal>
   )
 }
-
-

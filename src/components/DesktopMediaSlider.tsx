@@ -10,10 +10,7 @@ interface DesktopMediaSliderProps {
   activeIndex: number
 }
 
-export const DesktopMediaSlider: React.FC<DesktopMediaSliderProps> = ({
-  items,
-  activeIndex,
-}) => {
+export const DesktopMediaSlider: React.FC<DesktopMediaSliderProps> = ({items, activeIndex}) => {
   const [slideIndex, setSlideIndex] = useState(() => {
     if (!items || items.length <= 1) return 0
     const safe = Math.max(0, Math.min(activeIndex, items.length - 1))
@@ -24,9 +21,7 @@ export const DesktopMediaSlider: React.FC<DesktopMediaSliderProps> = ({
   const slideCount = items.length
 
   const cloned = useMemo(() => {
-    const safeItems: MediaItem[] = (items || []).filter(
-      (m): m is MediaItem => Boolean(m)
-    )
+    const safeItems: MediaItem[] = (items || []).filter((m): m is MediaItem => Boolean(m))
 
     if (safeItems.length <= 1) return safeItems
 
@@ -58,9 +53,7 @@ export const DesktopMediaSlider: React.FC<DesktopMediaSliderProps> = ({
       if (m.videoFile?.asset?.url) return m.videoFile.asset.url
     }
     if (m.type === 'youtube' && m.url) {
-      const match = m.url.match(
-        /(?:youtube\.com\/.*[?&]v=|youtu\.be\/)([^"&?/\s]{11})/
-      )
+      const match = m.url.match(/(?:youtube\.com\/.*[?&]v=|youtu\.be\/)([^"&?/\s]{11})/)
       const id = match && match[1]
       return id ? `https://www.youtube.com/embed/${id}?autoplay=1` : m.url
     }
@@ -103,9 +96,7 @@ export const DesktopMediaSlider: React.FC<DesktopMediaSliderProps> = ({
           className="flex h-full w-full items-center justify-center"
           style={{
             width: `${totalSlides * 100}%`,
-            transform: `translateX(-${
-              (slideIndex * 100) / totalSlides
-            }%)`,
+            transform: `translateX(-${(slideIndex * 100) / totalSlides}%)`,
             transition: transitionEnabled ? 'transform 0.3s ease-out' : 'none',
           }}
           onTransitionEnd={handleTransitionEnd}
@@ -154,5 +145,3 @@ export const DesktopMediaSlider: React.FC<DesktopMediaSliderProps> = ({
     </div>
   )
 }
-
-

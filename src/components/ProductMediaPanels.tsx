@@ -1,6 +1,6 @@
-import { OptimizedImage } from './OptimizedImage'
+import {OptimizedImage} from './OptimizedImage'
 import ScrollReveal from './ScrollReveal'
-import type { LocalizedString, Product } from '../types'
+import type {LocalizedString, Product} from '../types'
 
 interface ProductMediaItem {
   type: 'image' | 'video' | 'youtube'
@@ -36,8 +36,7 @@ export function ProductMediaPanels({
 
   const media = product.media || []
   const sectionTitle =
-    product?.mediaSectionTitle &&
-      String(product.mediaSectionTitle).trim().length > 0
+    product?.mediaSectionTitle && String(product.mediaSectionTitle).trim().length > 0
       ? t(product.mediaSectionTitle)
       : 'Projeler'
 
@@ -88,9 +87,7 @@ export function ProductMediaPanels({
                   </span>
                 )}
               </button>
-              {m.title && (
-                <div className="px-1 pt-2 text-sm text-gray-600">{t(m.title)}</div>
-              )}
+              {m.title && <div className="px-1 pt-2 text-sm text-gray-600">{t(m.title)}</div>}
             </div>
           ))}
         </div>
@@ -98,5 +95,3 @@ export function ProductMediaPanels({
     </ScrollReveal>
   )
 }
-
-

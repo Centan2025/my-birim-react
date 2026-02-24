@@ -20,9 +20,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({items, className = ''})
         {items.map((item, index) => {
           const isLast = index === items.length - 1
           const label =
-            typeof item.label === 'string'
-              ? item.label.toLocaleUpperCase('tr-TR')
-              : item.label
+            typeof item.label === 'string' ? item.label.toLocaleUpperCase('tr-TR') : item.label
           return (
             <li key={index} className="flex items-center gap-1">
               {item.to && !isLast ? (
@@ -33,9 +31,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({items, className = ''})
                   {label}
                 </Link>
               ) : (
-                <span className={isLast ? 'text-gray-900' : 'text-gray-800'}>
-                  {label}
-                </span>
+                <span className={isLast ? 'text-gray-900' : 'text-gray-800'}>{label}</span>
               )}
               {!isLast && <span className="text-gray-400 mx-0.5 sm:mx-1">|</span>}
             </li>
@@ -45,5 +41,3 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({items, className = ''})
     </nav>
   )
 }
-
-

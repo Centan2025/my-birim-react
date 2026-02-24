@@ -1,17 +1,17 @@
-import { useState, useMemo, useEffect, useRef } from 'react'
-import { useParams } from 'react-router-dom'
-import { ProductCard } from '../components/ProductCard'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { PageLoading } from '../components/LoadingSpinner'
-import { useTranslation } from '../i18n'
-import { Breadcrumbs } from '../components/Breadcrumbs'
-import { useProducts, useProductsByCategory } from '../hooks/useProducts'
-import { useCategory, useCategories } from '../hooks/useCategories'
-import { useSiteSettings } from '../hooks/useSiteData'
-import type { Product } from '../types'
+import {useState, useMemo, useEffect, useRef} from 'react'
+import {useParams} from 'react-router-dom'
+import {ProductCard} from '../components/ProductCard'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {Breadcrumbs} from '../components/Breadcrumbs'
+import {useProducts, useProductsByCategory} from '../hooks/useProducts'
+import {useCategory, useCategories} from '../hooks/useCategories'
+import {useSiteSettings} from '../hooks/useSiteData'
+import type {Product} from '../types'
 import ScrollReveal from '../components/ScrollReveal'
-import { useSEO } from '../hooks/useSEO'
-import { useHeaderTheme } from '../context/HeaderThemeContext'
+import {useSEO} from '../hooks/useSEO'
+import {useHeaderTheme} from '../context/HeaderThemeContext'
 
 const ChevronDownIcon = () => (
   <svg
@@ -29,26 +29,26 @@ const ChevronDownIcon = () => (
   </svg>
 )
 
-import { analytics } from '../lib/analytics'
+import {analytics} from '../lib/analytics'
 
 export function ProductsPage() {
-  const { categoryId } = useParams<{ categoryId: string }>()
+  const {categoryId} = useParams<{categoryId: string}>()
   const [isSortOpen, setIsSortOpen] = useState(false)
   const [sortBy, setSortBy] = useState('year-desc') // Default sort by newest
-  const { t } = useTranslation()
-  const { data: settings } = useSiteSettings()
+  const {t} = useTranslation()
+  const {data: settings} = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const sortRef = useRef<HTMLDivElement | null>(null)
 
   // React Query hooks - always call both, use enabled to control
-  const { data: allProductsData, isLoading: allProductsLoading } = useProducts()
-  const { data: categoryProductsData, isLoading: categoryProductsLoading } =
+  const {data: allProductsData, isLoading: allProductsLoading} = useProducts()
+  const {data: categoryProductsData, isLoading: categoryProductsLoading} =
     useProductsByCategory(categoryId)
   const allProducts = useMemo(() => allProductsData ?? [], [allProductsData])
   const categoryProducts = useMemo(() => categoryProductsData ?? [], [categoryProductsData])
-  const { data: category } = useCategory(categoryId)
-  const { data: categories = [] } = useCategories()
-  const { setFromPalette, reset } = useHeaderTheme()
+  const {data: category} = useCategory(categoryId)
+  const {data: categories = []} = useCategories()
+  const {setFromPalette, reset} = useHeaderTheme()
 
   // Use category products if categoryId exists, otherwise use all products
   const products = categoryId ? categoryProducts : allProducts
@@ -59,7 +59,7 @@ export function ProductsPage() {
       analytics.event({
         action: 'view_item_list',
         category: 'ecommerce',
-        label: categoryId ? `Category: ${categoryId}` : 'All Products'
+        label: categoryId ? `Category: ${categoryId}` : 'All Products',
       })
     }
   }, [loading, products.length, categoryId])
@@ -151,7 +151,8 @@ export function ProductsPage() {
   const pageDescription = category
     ? t(category.subtitle) || pageTitle
     : t('all_products_subtitle') || pageTitle
-  const heroImageUrl = typeof category?.heroImage === 'object' ? category.heroImage.url : category?.heroImage
+  const heroImageUrl =
+    typeof category?.heroImage === 'object' ? category.heroImage.url : category?.heroImage
 
   useSEO({
     title: `BIRIM - ${pageTitle}`,
@@ -174,7 +175,12 @@ export function ProductsPage() {
     const candidate = sourceProducts.find(
       p => typeof p.mainImage === 'object' && p.mainImage !== null && 'palette' in p.mainImage
     )
-    if (candidate && typeof candidate.mainImage === 'object' && candidate.mainImage !== null && 'palette' in candidate.mainImage) {
+    if (
+      candidate &&
+      typeof candidate.mainImage === 'object' &&
+      candidate.mainImage !== null &&
+      'palette' in candidate.mainImage
+    ) {
       setFromPalette(candidate.mainImage.palette)
     } else {
       reset()
@@ -197,7 +203,10 @@ export function ProductsPage() {
         <div className="absolute inset-0">
           {(() => {
             const heroImage = category?.heroImage
-            const url = typeof heroImage === 'object' ? heroImage.url : (heroImage || 'https://picsum.photos/seed/default/1920/1080')
+            const url =
+              typeof heroImage === 'object'
+                ? heroImage.url
+                : heroImage || 'https://picsum.photos/seed/default/1920/1080'
             return (
               <OptimizedImage
                 src={url}
@@ -214,13 +223,13 @@ export function ProductsPage() {
           <div>
             <h1
               className="text-4xl md:text-6xl font-light tracking-tighter uppercase"
-              style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}
+              style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}
             >
               {category ? t(category.name) : t('view_all')}
             </h1>
             <p
               className="mt-4 text-lg max-w-2xl mx-auto font-light"
-              style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}
+              style={{textShadow: '0 1px 3px rgba(0,0,0,0.5)'}}
             >
               {category ? t(category.subtitle) : t('all_products_subtitle')}
             </p>
@@ -234,11 +243,11 @@ export function ProductsPage() {
           items={
             category
               ? [
-                { label: t('homepage'), to: '/' },
-                { label: t('products'), to: '/products' },
-                { label: t(category.name) },
-              ]
-              : [{ label: t('homepage'), to: '/' }, { label: t('products') }]
+                  {label: t('homepage'), to: '/'},
+                  {label: t('products'), to: '/products'},
+                  {label: t(category.name)},
+                ]
+              : [{label: t('homepage'), to: '/'}, {label: t('products')}]
           }
         />
         {/* Sort Controls */}
@@ -276,13 +285,13 @@ export function ProductsPage() {
             // Eğer kategori seçili değilse (tüm ürünler), kategorilere göre grupla ve başlık göster
             (() => {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const productsByCategory = new Map<string, { category: any, products: Product[] }>()
+              const productsByCategory = new Map<string, {category: any; products: Product[]}>()
 
               sortedProducts.forEach(product => {
                 const catId = product.categoryId || 'uncategorized'
                 if (!productsByCategory.has(catId)) {
                   const category = categories.find(c => c.id === catId)
-                  productsByCategory.set(catId, { category, products: [] })
+                  productsByCategory.set(catId, {category, products: []})
                 }
                 productsByCategory.get(catId)!.products.push(product)
               })
@@ -302,7 +311,7 @@ export function ProductsPage() {
               return (
                 <div>
                   {sortedCategoryIds.map(catId => {
-                    const { category, products } = productsByCategory.get(catId)!
+                    const {category, products} = productsByCategory.get(catId)!
                     const categoryName = category ? t(category.name) : catId
                     const startIndex = productIndex
                     productIndex += products.length
@@ -315,7 +324,7 @@ export function ProductsPage() {
                           style={{
                             fontFamily: '"Oswald", sans-serif',
                             fontWeight: 300,
-                            letterSpacing: '0.1em'
+                            letterSpacing: '0.1em',
                           }}
                         >
                           {categoryName}
@@ -342,11 +351,7 @@ export function ProductsPage() {
             // Eğer kategori seçiliyse, normal grid göster
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
               {sortedProducts.map((product, index) => (
-                <ScrollReveal
-                  key={product.id}
-                  delay={index < 12 ? index * 20 : 0}
-                  threshold={0.01}
-                >
+                <ScrollReveal key={product.id} delay={index < 12 ? index * 20 : 0} threshold={0.01}>
                   <ProductCard product={product} variant="light" />
                 </ScrollReveal>
               ))}
@@ -354,9 +359,7 @@ export function ProductsPage() {
           )
         ) : (
           <ScrollReveal delay={0} threshold={0.01}>
-            <p className="text-gray-600 text-center">
-              {t('no_products_in_category')}
-            </p>
+            <p className="text-gray-600 text-center">{t('no_products_in_category')}</p>
           </ScrollReveal>
         )}
       </div>

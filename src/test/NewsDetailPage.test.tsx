@@ -121,4 +121,3 @@ describe('NewsDetailPage', () => {
     expect(parsed.headline).toBe('Haber Başlığı')
   })
 })
-

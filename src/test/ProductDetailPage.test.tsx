@@ -1,7 +1,7 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { ProductDetailPage } from '@/pages/ProductDetailPage'
+import {describe, it, expect, vi} from 'vitest'
+import {render, screen} from '@testing-library/react'
+import {MemoryRouter, Route, Routes} from 'react-router-dom'
+import {ProductDetailPage} from '@/pages/ProductDetailPage'
 import * as productsHooks from '../hooks/useProducts'
 import * as designersHooks from '../hooks/useDesigners'
 import * as categoriesHooks from '../hooks/useCategories'
@@ -45,13 +45,13 @@ describe('ProductDetailPage', () => {
     vi.mocked(productsHooks.useProduct).mockReturnValue({
       data: {
         id: 'product-1',
-        name: { tr: 'Ürün 1' },
+        name: {tr: 'Ürün 1'},
         designerId: 'designer-1',
         categoryId: 'category-1',
         year: 2024,
         isPublished: true,
-        description: { tr: 'Ürün açıklaması' },
-        mainImage: { url: 'https://example.com/main.jpg' },
+        description: {tr: 'Ürün açıklaması'},
+        mainImage: {url: 'https://example.com/main.jpg'},
         alternativeMedia: [],
         media: [],
         showMediaPanels: false,
@@ -89,8 +89,8 @@ describe('ProductDetailPage', () => {
     vi.mocked(designersHooks.useDesigner).mockReturnValue({
       data: {
         id: 'designer-1',
-        name: { tr: 'Tasarımcı 1' },
-        bio: { tr: '' },
+        name: {tr: 'Tasarımcı 1'},
+        bio: {tr: ''},
         image: 'https://example.com/designer.jpg',
       },
       isLoading: false,

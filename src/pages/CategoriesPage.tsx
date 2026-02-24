@@ -1,21 +1,21 @@
-import { Link } from 'react-router-dom'
-import { useEffect, useMemo } from 'react'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { PageLoading } from '../components/LoadingSpinner'
-import { useTranslation } from '../i18n'
-import { useCategories } from '../hooks/useCategories'
-import { useProducts } from '../hooks/useProducts'
-import { useSiteSettings } from '../hooks/useSiteData'
+import {Link} from 'react-router-dom'
+import {useEffect, useMemo} from 'react'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {useCategories} from '../hooks/useCategories'
+import {useProducts} from '../hooks/useProducts'
+import {useSiteSettings} from '../hooks/useSiteData'
 import ScrollReveal from '../components/ScrollReveal'
-import { useSEO } from '../hooks/useSEO'
-import { useHeaderTheme } from '../context/HeaderThemeContext'
+import {useSEO} from '../hooks/useSEO'
+import {useHeaderTheme} from '../context/HeaderThemeContext'
 
 export function CategoriesPage() {
-  const { data: categories = [], isLoading: loading } = useCategories()
-  const { data: allProducts = [] } = useProducts()
-  const { t } = useTranslation()
-  const { data: settings } = useSiteSettings()
-  const { setFromPalette, reset } = useHeaderTheme()
+  const {data: categories = [], isLoading: loading} = useCategories()
+  const {data: allProducts = []} = useProducts()
+  const {t} = useTranslation()
+  const {data: settings} = useSiteSettings()
+  const {setFromPalette, reset} = useHeaderTheme()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const pageTitle = `BIRIM - ${t('categories') || t('products') || 'Kategoriler'}`
 
@@ -32,7 +32,7 @@ export function CategoriesPage() {
     return categories.map(category => {
       // Eğer kategori görseli varsa onu kullan
       if (category.heroImage) {
-        return { ...category, displayImage: category.heroImage }
+        return {...category, displayImage: category.heroImage}
       }
 
       // Kategori görseli yoksa, o kategoriye ait ürünlerden birinin görselini bul
@@ -47,11 +47,11 @@ export function CategoriesPage() {
 
         // mainImage string veya object olabilir (src/types.ts'de tanımlı)
         // Görsel bulunduysa kullan
-        return { ...category, displayImage: product.mainImage }
+        return {...category, displayImage: product.mainImage}
       }
 
       // Hiç görsel yoksa null döndür
-      return { ...category, displayImage: null }
+      return {...category, displayImage: null}
     })
   }, [categories, allProducts])
 
@@ -60,7 +60,12 @@ export function CategoriesPage() {
     const candidate = allProducts.find(
       p => typeof p.mainImage === 'object' && p.mainImage !== null && 'palette' in p.mainImage
     )
-    if (candidate && typeof candidate.mainImage === 'object' && candidate.mainImage !== null && 'palette' in candidate.mainImage) {
+    if (
+      candidate &&
+      typeof candidate.mainImage === 'object' &&
+      candidate.mainImage !== null &&
+      'palette' in candidate.mainImage
+    ) {
       setFromPalette(candidate.mainImage.palette)
     } else {
       reset()
@@ -98,14 +103,14 @@ export function CategoriesPage() {
                 textShadow: '0 2px 4px rgba(0,0,0,0.5)',
                 fontFamily: '"Oswald", sans-serif',
                 fontWeight: 300,
-                letterSpacing: '0.1em'
+                letterSpacing: '0.1em',
               }}
             >
               {t('products')}
             </h1>
             <p
               className="mt-4 text-lg max-w-2xl mx-auto"
-              style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}
+              style={{textShadow: '0 1px 3px rgba(0,0,0,0.5)'}}
             >
               {t('products_page_subtitle')}
             </p>
@@ -118,11 +123,7 @@ export function CategoriesPage() {
         {categoriesWithImages.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12">
             {categoriesWithImages.map((category, index) => (
-              <ScrollReveal
-                key={category.id}
-                delay={index < 12 ? index * 20 : 0}
-                threshold={0.01}
-              >
+              <ScrollReveal key={category.id} delay={index < 12 ? index * 20 : 0} threshold={0.01}>
                 <Link
                   to={`/products/${category.id}`}
                   className="group block overflow-hidden transition-all duration-300"
@@ -130,9 +131,21 @@ export function CategoriesPage() {
                   <div className={`relative h-[600px] overflow-hidden ${imageBorderClass}`}>
                     {category.displayImage && (
                       <OptimizedImage
-                        src={typeof category.displayImage === 'string' ? category.displayImage : category.displayImage.url}
-                        srcMobile={typeof category.displayImage === 'object' ? category.displayImage.urlMobile : undefined}
-                        srcDesktop={typeof category.displayImage === 'object' ? category.displayImage.urlDesktop : undefined}
+                        src={
+                          typeof category.displayImage === 'string'
+                            ? category.displayImage
+                            : category.displayImage.url
+                        }
+                        srcMobile={
+                          typeof category.displayImage === 'object'
+                            ? category.displayImage.urlMobile
+                            : undefined
+                        }
+                        srcDesktop={
+                          typeof category.displayImage === 'object'
+                            ? category.displayImage.urlDesktop
+                            : undefined
+                        }
                         alt={t(category.name)}
                         className={`w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-[1.03] ${imageBorderClass}`}
                         loading="lazy"
@@ -147,7 +160,7 @@ export function CategoriesPage() {
                           textShadow: '0 2px 4px rgba(0,0,0,0.5)',
                           fontFamily: '"Oswald", sans-serif',
                           fontWeight: 300,
-                          letterSpacing: '0.1em'
+                          letterSpacing: '0.1em',
                         }}
                       >
                         {t(category.name)}

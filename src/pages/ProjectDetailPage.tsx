@@ -1,17 +1,17 @@
-import { useMemo, useState, useEffect, CSSProperties } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { OptimizedVideo } from '../components/OptimizedVideo'
-import { FullscreenMediaViewer } from '../components/FullscreenMediaViewer'
-import { PageLoading } from '../components/LoadingSpinner'
-import { Breadcrumbs } from '../components/Breadcrumbs'
-import { useTranslation } from '../i18n'
-import { useProject, useProjects } from '../hooks/useProjects'
-import { useSiteSettings } from '../hooks/useSiteData'
-import { analytics } from '../lib/analytics'
+import {useMemo, useState, useEffect, CSSProperties} from 'react'
+import {useParams, Link} from 'react-router-dom'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {OptimizedVideo} from '../components/OptimizedVideo'
+import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
+import {PageLoading} from '../components/LoadingSpinner'
+import {Breadcrumbs} from '../components/Breadcrumbs'
+import {useTranslation} from '../i18n'
+import {useProject, useProjects} from '../hooks/useProjects'
+import {useSiteSettings} from '../hooks/useSiteData'
+import {analytics} from '../lib/analytics'
 import ScrollReveal from '../components/ScrollReveal'
-import { useSEO } from '../hooks/useSEO'
-import { useHeaderTheme } from '../context/HeaderThemeContext'
+import {useSEO} from '../hooks/useSEO'
+import {useHeaderTheme} from '../context/HeaderThemeContext'
 import PortableTextLite from '../components/PortableTextLite'
 
 const getYouTubeId = (url: string): string | null => {
@@ -61,12 +61,12 @@ const MinimalChevronRight = (props: React.SVGProps<SVGSVGElement>) => (
 )
 
 export function ProjectDetailPage() {
-  const { projectId } = useParams<{ projectId: string }>()
-  const { data: project, isLoading: loading } = useProject(projectId)
-  const { data: allProjects = [] } = useProjects()
-  const { t } = useTranslation()
-  const { data: settings } = useSiteSettings()
-  const { setFromPalette, reset } = useHeaderTheme()
+  const {projectId} = useParams<{projectId: string}>()
+  const {data: project, isLoading: loading} = useProject(projectId)
+  const {data: allProjects = []} = useProjects()
+  const {t} = useTranslation()
+  const {data: settings} = useSiteSettings()
+  const {setFromPalette, reset} = useHeaderTheme()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const showBottomPrevNext = Boolean(settings?.showProductPrevNext)
   const [idx, setIdx] = useState(0)
@@ -107,7 +107,10 @@ export function ProjectDetailPage() {
       return () => reset()
     }
     const palette =
-      project.cover && typeof project.cover === 'object' && project.cover !== null && 'palette' in project.cover
+      project.cover &&
+      typeof project.cover === 'object' &&
+      project.cover !== null &&
+      'palette' in project.cover
         ? project.cover.palette
         : undefined
     if (palette) {
@@ -118,13 +121,13 @@ export function ProjectDetailPage() {
     return () => reset()
   }, [project, reset, setFromPalette])
   // Prev/Next must be declared before any early returns to keep hooks order stable
-  const { prevProject, nextProject } = useMemo(() => {
-    if (!project || allProjects.length < 2) return { prevProject: null, nextProject: null }
+  const {prevProject, nextProject} = useMemo(() => {
+    if (!project || allProjects.length < 2) return {prevProject: null, nextProject: null}
     const currentIndex = allProjects.findIndex(p => p.id === project.id)
-    if (currentIndex === -1) return { prevProject: null, nextProject: null }
+    if (currentIndex === -1) return {prevProject: null, nextProject: null}
     const prev = currentIndex > 0 ? allProjects[currentIndex - 1] : null
     const next = currentIndex < allProjects.length - 1 ? allProjects[currentIndex + 1] : null
-    return { prevProject: prev, nextProject: next }
+    return {prevProject: prev, nextProject: next}
   }, [project, allProjects])
   // Sayfa animasyonu - ilk açılışta fade-in
   useEffect(() => {
@@ -149,7 +152,6 @@ export function ProjectDetailPage() {
       label: t(project.title), // ID yerine proje başlığı
     })
   }, [project, t])
-
 
   // Fullscreen buton animasyonu - sağdan fade ile gelir
   useEffect(() => {
@@ -223,7 +225,6 @@ export function ProjectDetailPage() {
       ? project.cover.urlDesktop
       : undefined
 
-
   // Use cover image + media array (images and videos)
   const mediaArray = (project?.media || []).map(m => ({
     type: m.type,
@@ -236,14 +237,14 @@ export function ProjectDetailPage() {
   // Cover görselini başa ekle (eğer varsa ve media array'inde yoksa)
   const coverMedia = coverUrl
     ? [
-      {
-        type: 'image' as const,
-        url: coverUrl,
-        urlMobile: coverMobile,
-        urlDesktop: coverDesktop,
-        image: coverUrl,
-      },
-    ]
+        {
+          type: 'image' as const,
+          url: coverUrl,
+          urlMobile: coverMobile,
+          urlDesktop: coverDesktop,
+          image: coverUrl,
+        },
+      ]
     : []
   // Cover'ı media array'inin başına ekle, ancak aynı URL'den varsa tekrar ekleme
   const existingUrls = new Set(mediaArray.map(m => m.url))
@@ -393,10 +394,9 @@ export function ProjectDetailPage() {
 
   return (
     <div
-      className={`min-h-screen bg-white transition-all duration-700 ease-out ${isPageVisible
-        ? 'opacity-100 translate-y-0'
-        : 'opacity-0 translate-y-20'
-        }`}
+      className={`min-h-screen bg-white transition-all duration-700 ease-out ${
+        isPageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+      }`}
       style={{
         transform: isPageVisible ? 'translateY(0)' : 'translateY(80px)',
       }}
@@ -411,9 +411,9 @@ export function ProjectDetailPage() {
         <Breadcrumbs
           className="mb-6"
           items={[
-            { label: t('homepage'), to: '/' },
-            { label: t('projects') || 'Projeler', to: '/projects' },
-            { label: t(project.title) },
+            {label: t('homepage'), to: '/'},
+            {label: t('projects') || 'Projeler', to: '/projects'},
+            {label: t(project.title)},
           ]}
         />
         <div className="mt-6 md:mt-8 mb-4 md:mb-6 lg:mb-6">
@@ -422,7 +422,7 @@ export function ProjectDetailPage() {
             style={{
               transform: isTitleVisible ? 'translateX(0)' : 'translateX(-40px)',
               opacity: isTitleVisible ? 1 : 0,
-              transition: 'transform 1000ms ease-out, opacity 1000ms ease-out'
+              transition: 'transform 1000ms ease-out, opacity 1000ms ease-out',
             }}
           >
             {t(project.title)}
@@ -433,7 +433,7 @@ export function ProjectDetailPage() {
               style={{
                 transform: isLocationVisible ? 'translateX(0)' : 'translateX(-40px)',
                 opacity: isLocationVisible ? 1 : 0,
-                transition: 'transform 1000ms ease-out, opacity 1000ms ease-out'
+                transition: 'transform 1000ms ease-out, opacity 1000ms ease-out',
               }}
             >
               {t(project.date)}
@@ -476,9 +476,11 @@ export function ProjectDetailPage() {
                 className="flex h-full"
                 style={{
                   width: `${totalSlides * 100}%`,
-                  transform: `translateX(calc(-${((slideCount <= 1 ? 0 : heroSlideIndex) * 100) / totalSlides
-                    }% + ${draggedX}px))`,
-                  transition: isDragging || !heroTransitionEnabled ? 'none' : 'transform 0.3s ease-out',
+                  transform: `translateX(calc(-${
+                    ((slideCount <= 1 ? 0 : heroSlideIndex) * 100) / totalSlides
+                  }% + ${draggedX}px))`,
+                  transition:
+                    isDragging || !heroTransitionEnabled ? 'none' : 'transform 0.3s ease-out',
                 }}
                 onTransitionEnd={handleHeroTransitionEnd}
               >
@@ -488,7 +490,7 @@ export function ProjectDetailPage() {
                     <div
                       key={i}
                       className="relative w-full h-full shrink-0"
-                      style={{ width: `${100 / totalSlides}%` }}
+                      style={{width: `${100 / totalSlides}%`}}
                     >
                       {m.type === 'image' && (
                         <OptimizedImage
@@ -502,7 +504,7 @@ export function ProjectDetailPage() {
                         />
                       )}
                       {m.type === 'video' && (
-                        <div style={{ paddingTop: '56.25%' }} className="w-full relative">
+                        <div style={{paddingTop: '56.25%'}} className="w-full relative">
                           <OptimizedVideo
                             src={m.url}
                             srcMobile={m.urlMobile}
@@ -516,7 +518,7 @@ export function ProjectDetailPage() {
                         </div>
                       )}
                       {m.type === 'youtube' && (
-                        <div style={{ paddingTop: '56.25%' }} className="w-full relative">
+                        <div style={{paddingTop: '56.25%'}} className="w-full relative">
                           <iframe
                             src={`https://www.youtube.com/embed/${getYouTubeId(m.url)}?rel=0`}
                             title="YouTube video player"
@@ -564,9 +566,9 @@ export function ProjectDetailPage() {
                             }
                             setIdx(index)
                           }}
-                          className={`relative h-2 rounded-none transition-all duration-500 ease-in-out group ${areDotsVisible ? 'animate-dot-grow' : 'opacity-0 scale-0'
-                            } ${isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
-                            }`}
+                          className={`relative h-2 rounded-none transition-all duration-500 ease-in-out group ${
+                            areDotsVisible ? 'animate-dot-grow' : 'opacity-0 scale-0'
+                          } ${isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'}`}
                           style={{
                             transitionDelay: `${animationDelay}ms`,
                           }}
@@ -591,9 +593,7 @@ export function ProjectDetailPage() {
                   className="absolute bottom-3 right-3 md:bottom-4 md:right-4 z-20"
                   style={{
                     opacity: isFullscreenButtonVisible ? 1 : 0,
-                    transform: isFullscreenButtonVisible
-                      ? 'scale(1)'
-                      : 'scale(0)',
+                    transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
                     transition:
                       'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
                     willChange: 'transform, opacity',
@@ -601,7 +601,7 @@ export function ProjectDetailPage() {
                 >
                   <button
                     type="button"
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation()
                       analytics.event({
                         category: 'media',
@@ -699,10 +699,16 @@ export function ProjectDetailPage() {
                     <ScrollReveal delay={200}>
                       {(() => {
                         const excerptContent = t(project.excerpt)
-                        const isPortable = Array.isArray(excerptContent) || (typeof excerptContent === 'object' && excerptContent !== null && (excerptContent as any)._type === 'block')
+                        const isPortable =
+                          Array.isArray(excerptContent) ||
+                          (typeof excerptContent === 'object' &&
+                            excerptContent !== null &&
+                            (excerptContent as any)._type === 'block')
 
                         if (isPortable) {
-                          const blocks = Array.isArray(excerptContent) ? excerptContent : [excerptContent]
+                          const blocks = Array.isArray(excerptContent)
+                            ? excerptContent
+                            : [excerptContent]
                           return (
                             <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
                               <PortableTextLite value={blocks} />
@@ -722,7 +728,11 @@ export function ProjectDetailPage() {
                     <ScrollReveal delay={300}>
                       {(() => {
                         const bodyContent = t(project.body)
-                        const isPortable = Array.isArray(bodyContent) || (typeof bodyContent === 'object' && bodyContent !== null && (bodyContent as any)._type === 'block')
+                        const isPortable =
+                          Array.isArray(bodyContent) ||
+                          (typeof bodyContent === 'object' &&
+                            bodyContent !== null &&
+                            (bodyContent as any)._type === 'block')
 
                         if (isPortable) {
                           const blocks = Array.isArray(bodyContent) ? bodyContent : [bodyContent]
@@ -745,7 +755,9 @@ export function ProjectDetailPage() {
               )}
 
               {allMedia.length > 0 && (
-                <div className={`grid grid-cols-2 gap-4 ${project.excerpt || project.body ? 'mt-10' : ''}`}>
+                <div
+                  className={`grid grid-cols-2 gap-4 ${project.excerpt || project.body ? 'mt-10' : ''}`}
+                >
                   {allMedia.map((m, i) => (
                     <button
                       key={i}

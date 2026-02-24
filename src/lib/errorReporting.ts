@@ -7,8 +7,7 @@
 
 import * as Sentry from '@sentry/react'
 
-const DEBUG_LOGS =
-  (import.meta.env as { VITE_DEBUG_LOGS?: string }).VITE_DEBUG_LOGS === 'true'
+const DEBUG_LOGS = (import.meta.env as {VITE_DEBUG_LOGS?: string}).VITE_DEBUG_LOGS === 'true'
 
 interface ErrorContext {
   user?: {
@@ -93,10 +92,15 @@ class ErrorReporter {
             try {
               return await originalFetch.apply(this, args)
             } catch (error) {
-              const url = typeof args[0] === 'string' ? args[0] : (args[0] instanceof Request ? args[0].url : '')
+              const url =
+                typeof args[0] === 'string'
+                  ? args[0]
+                  : args[0] instanceof Request
+                    ? args[0].url
+                    : ''
               if (url.includes('sentry.io') && import.meta.env.PROD) {
                 // Silently swallow Sentry fetch errors (like adblocker or DNS failures)
-                return new Response(null, { status: 200 })
+                return new Response(null, {status: 200})
               }
               throw error
             }
@@ -169,7 +173,7 @@ class ErrorReporter {
   /**
    * Set user context
    */
-  setUser(user: { id?: string; email?: string; name?: string }) {
+  setUser(user: {id?: string; email?: string; name?: string}) {
     if (this.dsn) {
       try {
         Sentry.setUser(user)

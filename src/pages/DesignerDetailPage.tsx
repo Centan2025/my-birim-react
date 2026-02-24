@@ -1,24 +1,24 @@
-import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { ProductCard } from '../components/ProductCard'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { PageLoading } from '../components/LoadingSpinner'
-import { useTranslation } from '../i18n'
-import { useDesigner } from '../hooks/useDesigners'
-import { useProductsByDesigner } from '../hooks/useProducts'
-import { useSiteSettings } from '../hooks/useSiteData'
-import { Breadcrumbs } from '../components/Breadcrumbs'
-import { analytics } from '../lib/analytics'
+import {useEffect, useState} from 'react'
+import {useParams} from 'react-router-dom'
+import {ProductCard} from '../components/ProductCard'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {useDesigner} from '../hooks/useDesigners'
+import {useProductsByDesigner} from '../hooks/useProducts'
+import {useSiteSettings} from '../hooks/useSiteData'
+import {Breadcrumbs} from '../components/Breadcrumbs'
+import {analytics} from '../lib/analytics'
 import ScrollReveal from '../components/ScrollReveal'
-import { useSEO } from '../hooks/useSEO'
+import {useSEO} from '../hooks/useSEO'
 import PortableTextLite from '../components/PortableTextLite'
 
 export function DesignerDetailPage() {
-  const { designerId } = useParams<{ designerId: string }>()
-  const { data: designer, isLoading: loading } = useDesigner(designerId)
-  const { data: products = [] } = useProductsByDesigner(designer?.id)
-  const { t } = useTranslation()
-  const { data: settings } = useSiteSettings()
+  const {designerId} = useParams<{designerId: string}>()
+  const {data: designer, isLoading: loading} = useDesigner(designerId)
+  const {data: products = []} = useProductsByDesigner(designer?.id)
+  const {t} = useTranslation()
+  const {data: settings} = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const [isTitleVisible, setIsTitleVisible] = useState(false)
   const designerName = designer ? t(designer.name) : ''
@@ -83,9 +83,9 @@ export function DesignerDetailPage() {
         <Breadcrumbs
           className="mb-8"
           items={[
-            { label: t('homepage'), to: '/' },
-            { label: t('designers'), to: '/designers' },
-            { label: t(designer.name) },
+            {label: t('homepage'), to: '/'},
+            {label: t('designers'), to: '/designers'},
+            {label: t(designer.name)},
           ]}
         />
         <div className="flex flex-col md:flex-row-reverse items-center md:items-start gap-8 md:gap-16 mt-6 md:mt-8 mb-12">
@@ -108,12 +108,16 @@ export function DesignerDetailPage() {
           </div>
           <div className="text-left w-full">
             <div className="max-w-2xl px-4 sm:px-0 md:px-0 md:mx-0">
-              <h1 className={`text-4xl font-normal text-gray-700 ${isTitleVisible
-                ? 'translate-x-0 opacity-100'
-                : '-translate-x-[150%] opacity-0'
-                }`} style={{
-                  transition: 'transform 700ms ease-out, opacity 1200ms ease-out'
-                }}>{t(designer.name)}</h1>
+              <h1
+                className={`text-4xl font-normal text-gray-700 ${
+                  isTitleVisible ? 'translate-x-0 opacity-100' : '-translate-x-[150%] opacity-0'
+                }`}
+                style={{
+                  transition: 'transform 700ms ease-out, opacity 1200ms ease-out',
+                }}
+              >
+                {t(designer.name)}
+              </h1>
               <ScrollReveal delay={200}>
                 {(() => {
                   const bio = t(designer.bio)

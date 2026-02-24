@@ -1,13 +1,13 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
-import type { NewsItem } from '../types'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { PageLoading } from '../components/LoadingSpinner'
-import { useTranslation } from '../i18n'
-import { Breadcrumbs } from '../components/Breadcrumbs'
-import { useNews } from '../hooks/useNews'
-import { useSiteSettings } from '../hooks/useSiteData'
-import { useSEO } from '../hooks/useSEO'
+import {Link} from 'react-router-dom'
+import type {NewsItem} from '../types'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {Breadcrumbs} from '../components/Breadcrumbs'
+import {useNews} from '../hooks/useNews'
+import {useSiteSettings} from '../hooks/useSiteData'
+import {useSEO} from '../hooks/useSEO'
 
 const formatDate = (dateString: string): string => {
   if (!dateString) return ''
@@ -18,9 +18,9 @@ const formatDate = (dateString: string): string => {
   return `${day}.${month}.${year}`
 }
 
-const NewsCard: React.FC<{ item: NewsItem }> = ({ item }) => {
-  const { t } = useTranslation()
-  const { data: settings } = useSiteSettings()
+const NewsCard: React.FC<{item: NewsItem}> = ({item}) => {
+  const {t} = useTranslation()
+  const {data: settings} = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
 
   return (
@@ -51,8 +51,8 @@ const NewsCard: React.FC<{ item: NewsItem }> = ({ item }) => {
 }
 
 export function NewsPage() {
-  const { data: news = [], isLoading: loading } = useNews()
-  const { t } = useTranslation()
+  const {data: news = [], isLoading: loading} = useNews()
+  const {t} = useTranslation()
 
   // SEO meta
   useSEO({
@@ -77,10 +77,7 @@ export function NewsPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
         <Breadcrumbs
           className="mb-6"
-          items={[
-            { label: t('homepage'), to: '/' },
-            { label: t('news') },
-          ]}
+          items={[{label: t('homepage'), to: '/'}, {label: t('news')}]}
         />
         <div className="text-center mt-6 md:mt-8 mb-16">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600 uppercase">
@@ -94,7 +91,7 @@ export function NewsPage() {
             news.map((item, index) => (
               <div
                 key={item.id}
-                style={{ animationDelay: `${index * 100}ms` }}
+                style={{animationDelay: `${index * 100}ms`}}
                 className="animate-fade-in-up-subtle h-full"
               >
                 <NewsCard item={item} />

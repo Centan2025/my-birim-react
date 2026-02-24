@@ -1,16 +1,16 @@
-import { useMemo, useEffect, FC, SVGProps } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import type { NewsMedia } from '../types'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { OptimizedVideo } from '../components/OptimizedVideo'
-import { PageLoading } from '../components/LoadingSpinner'
-import { Breadcrumbs } from '../components/Breadcrumbs'
-import { useTranslation } from '../i18n'
-import { useNewsItem, useNews } from '../hooks/useNews'
-import { useSiteSettings } from '../hooks/useSiteData'
-import { analytics } from '../lib/analytics'
-import { useSEO } from '../hooks/useSEO'
-import { addStructuredData, getArticleSchema } from '../lib/seo'
+import {useMemo, useEffect, FC, SVGProps} from 'react'
+import {useParams, Link} from 'react-router-dom'
+import type {NewsMedia} from '../types'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {OptimizedVideo} from '../components/OptimizedVideo'
+import {PageLoading} from '../components/LoadingSpinner'
+import {Breadcrumbs} from '../components/Breadcrumbs'
+import {useTranslation} from '../i18n'
+import {useNewsItem, useNews} from '../hooks/useNews'
+import {useSiteSettings} from '../hooks/useSiteData'
+import {analytics} from '../lib/analytics'
+import {useSEO} from '../hooks/useSEO'
+import {addStructuredData, getArticleSchema} from '../lib/seo'
 import PortableTextLite from '../components/PortableTextLite'
 
 const getYouTubeId = (url: string): string | null => {
@@ -29,9 +29,9 @@ const formatDate = (dateString: string): string => {
   return `${day}.${month}.${year}`
 }
 
-const MediaComponent: FC<{ media: NewsMedia }> = ({ media }) => {
-  const { t } = useTranslation()
-  const { data: settings } = useSiteSettings()
+const MediaComponent: FC<{media: NewsMedia}> = ({media}) => {
+  const {t} = useTranslation()
+  const {data: settings} = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
 
   const renderMedia = () => {
@@ -58,7 +58,7 @@ const MediaComponent: FC<{ media: NewsMedia }> = ({ media }) => {
           media.url.includes('cdn.sanity.io/files'))
       if (isVideoFile) {
         return (
-          <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16:9 Aspect Ratio */ }}>
+          <div className="relative w-full" style={{paddingTop: '56.25%' /* 16:9 Aspect Ratio */}}>
             <OptimizedVideo
               src={media.url}
               srcMobile={media.urlMobile}
@@ -74,7 +74,7 @@ const MediaComponent: FC<{ media: NewsMedia }> = ({ media }) => {
       }
       // URL ise iframe kullan (harici video servisleri için)
       return (
-        <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16:9 Aspect Ratio */ }}>
+        <div className="relative w-full" style={{paddingTop: '56.25%' /* 16:9 Aspect Ratio */}}>
           <iframe
             src={media.url}
             title={t(media.caption) || 'News video'}
@@ -89,7 +89,7 @@ const MediaComponent: FC<{ media: NewsMedia }> = ({ media }) => {
       const videoId = getYouTubeId(media.url)
       if (!videoId) return <p className="text-red-500 text-center">Geçersiz YouTube URL'si</p>
       return (
-        <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16:9 Aspect Ratio */ }}>
+        <div className="relative w-full" style={{paddingTop: '56.25%' /* 16:9 Aspect Ratio */}}>
           <iframe
             src={`https://www.youtube.com/embed/${videoId}?rel=0`}
             title={t(media.caption) || 'YouTube video player'}
@@ -150,27 +150,31 @@ const MinimalChevronRight = (props: SVGProps<SVGSVGElement>) => (
 )
 
 export function NewsDetailPage() {
-  const { newsId } = useParams<{ newsId: string }>()
-  const { data: item, isLoading: loading } = useNewsItem(newsId)
-  const { data: allNews = [] } = useNews()
-  const { t } = useTranslation()
-  const { data: settings } = useSiteSettings()
+  const {newsId} = useParams<{newsId: string}>()
+  const {data: item, isLoading: loading} = useNewsItem(newsId)
+  const {data: allNews = []} = useNews()
+  const {t} = useTranslation()
+  const {data: settings} = useSiteSettings()
   const showBottomPrevNext = Boolean(settings?.showProductPrevNext)
 
-  const { prevNews, nextNews } = useMemo(() => {
-    if (!item || allNews.length < 2) return { prevNews: null, nextNews: null }
+  const {prevNews, nextNews} = useMemo(() => {
+    if (!item || allNews.length < 2) return {prevNews: null, nextNews: null}
     const currentIndex = allNews.findIndex(n => n.id === item.id)
-    if (currentIndex === -1) return { prevNews: null, nextNews: null }
+    if (currentIndex === -1) return {prevNews: null, nextNews: null}
     const prev = currentIndex > 0 ? allNews[currentIndex - 1] : null
     const next = currentIndex < allNews.length - 1 ? allNews[currentIndex + 1] : null
-    return { prevNews: prev, nextNews: next }
+    return {prevNews: prev, nextNews: next}
   }, [item, allNews])
 
   // SEO ve Analytics: haber detay görüntüleme
   const newsTitle = item ? t(item.title) : ''
   const newsDescription = item ? t(item.content) || newsTitle : ''
   const mainImageObj = typeof item?.mainImage === 'object' ? item.mainImage : null
-  const mainImageUrl = mainImageObj ? mainImageObj.url : (typeof item?.mainImage === 'string' ? item.mainImage : undefined)
+  const mainImageUrl = mainImageObj
+    ? mainImageObj.url
+    : typeof item?.mainImage === 'string'
+      ? item.mainImage
+      : undefined
 
   useSEO({
     title: newsTitle ? `BIRIM - ${t('news') || 'Haberler'} - ${newsTitle}` : 'BIRIM - Haberler',
@@ -238,9 +242,9 @@ export function NewsDetailPage() {
           <Breadcrumbs
             className="mb-8"
             items={[
-              { label: t('homepage'), to: '/' },
-              { label: t('news'), to: '/news' },
-              { label: t(item.title) },
+              {label: t('homepage'), to: '/'},
+              {label: t('news'), to: '/news'},
+              {label: t(item.title)},
             ]}
           />
 
@@ -279,7 +283,11 @@ export function NewsDetailPage() {
               <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl max-w-none w-full">
                 {(() => {
                   const content = t(item.content)
-                  const isPortableText = Array.isArray(content) || (typeof content === 'object' && content !== null && (content as any)._type === 'block')
+                  const isPortableText =
+                    Array.isArray(content) ||
+                    (typeof content === 'object' &&
+                      content !== null &&
+                      (content as any)._type === 'block')
 
                   if (isPortableText) {
                     const blocks = Array.isArray(content) ? content : [content]

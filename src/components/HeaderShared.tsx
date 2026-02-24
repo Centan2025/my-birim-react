@@ -42,7 +42,9 @@ export const CrossFadeText: React.FC<{
   return (
     <span key={String(triggerKey)} className={`relative inline-block ${className}`}>
       <span className={`block cross-fade-text-in ${className}`}>{currentText}</span>
-      <span className={`block absolute inset-0 cross-fade-text-out ${className}`}>{previousText}</span>
+      <span className={`block absolute inset-0 cross-fade-text-out ${className}`}>
+        {previousText}
+      </span>
     </span>
   )
 }
@@ -84,5 +86,3 @@ export const ChevronRightIcon: React.FC = () => (
     <polyline points="9 6 15 12 9 18" />
   </svg>
 )
-
-

@@ -1,9 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
-import { OptimizedImage } from './OptimizedImage'
-import { OptimizedVideo } from './OptimizedVideo'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
+import {createPortal} from 'react-dom'
+import {OptimizedImage} from './OptimizedImage'
+import {OptimizedVideo} from './OptimizedVideo'
 
-import { R2ImageMetadata } from '../types'
+import {R2ImageMetadata} from '../types'
 
 type MediaItem = {
   type: 'image' | 'video' | 'youtube'
@@ -148,9 +148,10 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     setIsButtonVisible(false)
 
     // En üstteki görselin animasyonu bitince (en üstteki görselin delay + duration)
-    const visibleCount = closingVisibleIndicesRef.current.length > 0
-      ? closingVisibleIndicesRef.current.length
-      : currentVisible.length
+    const visibleCount =
+      closingVisibleIndicesRef.current.length > 0
+        ? closingVisibleIndicesRef.current.length
+        : currentVisible.length
     const topItemDelay = visibleCount > 0 ? (visibleCount - 1) * 75 : (items.length - 1) * 75 // 100ms -> 75ms
     const imageAnimationDuration = 250 // Hızlandırıldı: 400 -> 250
     const totalImageAnimation = topItemDelay + imageAnimationDuration
@@ -170,7 +171,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    window.scrollTo({ top: 0, behavior: 'auto' })
+    window.scrollTo({top: 0, behavior: 'auto'})
     const previousBodyOverflow = document.body.style.overflow
     const previousHtmlOverflow = document.documentElement.style.overflow
 
@@ -183,7 +184,6 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       document.documentElement.style.overflow = previousHtmlOverflow
     }
   }, [])
-
 
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const itemRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -239,7 +239,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
         const targetLeft = targetRef.offsetLeft - container.offsetLeft
         container.scrollTo({
           left: targetLeft,
-          behavior: 'smooth'
+          behavior: 'smooth',
         })
       }
 
@@ -280,7 +280,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
         const targetLeft = targetRef.offsetLeft - container.offsetLeft
         container.scrollTo({
           left: targetLeft,
-          behavior: 'smooth'
+          behavior: 'smooth',
         })
       }
 
@@ -291,7 +291,6 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       }, 300)
     }
   }
-
 
   // Görünür görselleri tespit et (mobilde scroll pozisyonuna göre)
   useEffect(() => {
@@ -389,33 +388,36 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     })
   }
 
-  const scrollToIndex = useCallback((index: number) => {
-    if (!scrollContainerRef.current) return
-    const container = scrollContainerRef.current
+  const scrollToIndex = useCallback(
+    (index: number) => {
+      if (!scrollContainerRef.current) return
+      const container = scrollContainerRef.current
 
-    // Desktop'ta artık sabit genişlik yok, o yüzden index'e göre scroll yapmak için
-    // ilgili elemanın offsetLeft değerini kullanmalıyız
-    if (!isMobile) {
-      const targetEl = itemRefs.current[index]
-      if (targetEl) {
-        container.scrollTo({
-          left: targetEl.offsetLeft,
-          behavior: 'smooth',
-        })
+      // Desktop'ta artık sabit genişlik yok, o yüzden index'e göre scroll yapmak için
+      // ilgili elemanın offsetLeft değerini kullanmalıyız
+      if (!isMobile) {
+        const targetEl = itemRefs.current[index]
+        if (targetEl) {
+          container.scrollTo({
+            left: targetEl.offsetLeft,
+            behavior: 'smooth',
+          })
+        }
+        return
       }
-      return
-    }
 
-    // Her görselin genişliği: calc(98vw - 2rem), gap görseller arasında
-    const gap = 6 // Desktop'ta görseller arası boşluk (px)
-    const itemWidth = window.innerWidth * 0.98 - 32 // 98vw - 2rem (32px)
-    const itemWithGap = itemWidth + gap // Görsel genişliği + gap
-    const scrollPosition = index * itemWithGap
-    container.scrollTo({
-      left: scrollPosition,
-      behavior: 'smooth',
-    })
-  }, [isMobile])
+      // Her görselin genişliği: calc(98vw - 2rem), gap görseller arasında
+      const gap = 6 // Desktop'ta görseller arası boşluk (px)
+      const itemWidth = window.innerWidth * 0.98 - 32 // 98vw - 2rem (32px)
+      const itemWithGap = itemWidth + gap // Görsel genişliği + gap
+      const scrollPosition = index * itemWithGap
+      container.scrollTo({
+        left: scrollPosition,
+        behavior: 'smooth',
+      })
+    },
+    [isMobile]
+  )
 
   const handleScrollLeft = () => {
     if (!scrollContainerRef.current) return
@@ -425,7 +427,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     if (!isMobile) {
       container.scrollBy({
         left: -window.innerWidth / 2,
-        behavior: 'smooth'
+        behavior: 'smooth',
       })
       return
     }
@@ -437,9 +439,10 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     const currentScroll = container.scrollLeft
     const targetScroll = Math.floor(currentScroll / itemWithGap) * itemWithGap
     // Eğer zaten tam hizalıysa, bir önceki görsele git
-    const scrollTo = Math.abs(currentScroll - targetScroll) < 10
-      ? Math.max(0, targetScroll - itemWithGap)
-      : targetScroll
+    const scrollTo =
+      Math.abs(currentScroll - targetScroll) < 10
+        ? Math.max(0, targetScroll - itemWithGap)
+        : targetScroll
     container.scrollTo({
       left: scrollTo,
       behavior: 'smooth',
@@ -454,7 +457,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     if (!isMobile) {
       container.scrollBy({
         left: window.innerWidth / 2,
-        behavior: 'smooth'
+        behavior: 'smooth',
       })
       return
     }
@@ -466,9 +469,10 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     const currentScroll = container.scrollLeft
     const targetScroll = Math.ceil(currentScroll / itemWithGap) * itemWithGap
     // Eğer zaten tam hizalıysa, bir sonraki görsele git
-    const scrollTo = Math.abs(currentScroll - targetScroll) < 10
-      ? Math.min(container.scrollWidth - container.clientWidth, targetScroll + itemWithGap)
-      : targetScroll
+    const scrollTo =
+      Math.abs(currentScroll - targetScroll) < 10
+        ? Math.min(container.scrollWidth - container.clientWidth, targetScroll + itemWithGap)
+        : targetScroll
     container.scrollTo({
       left: scrollTo,
       behavior: 'smooth',
@@ -525,7 +529,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
           const targetLeft = targetRef.offsetLeft - container.offsetLeft
           container.scrollTo({
             left: targetLeft,
-            behavior: 'smooth'
+            behavior: 'smooth',
           })
         }
 
@@ -564,13 +568,12 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       }
     }
 
-    container.addEventListener('wheel', handleWheel, { passive: false })
+    container.addEventListener('wheel', handleWheel, {passive: false})
 
     return () => {
       container.removeEventListener('wheel', handleWheel)
     }
   }, [isMobile])
-
 
   // Header, TopBanner, Footer ve diğer üstteki/altteki elementleri tamamen gizle
   useEffect(() => {
@@ -579,7 +582,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
 
     const hideElement = (selector: string) => {
       const elements = document.querySelectorAll(selector)
-      elements.forEach((el) => {
+      elements.forEach(el => {
         if (el) {
           const htmlEl = el as HTMLElement
           htmlEl.style.setProperty('display', 'none', 'important')
@@ -617,7 +620,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       // Tüm elementleri geri getir
       const showElement = (selector: string) => {
         const elements = document.querySelectorAll(selector)
-        elements.forEach((el) => {
+        elements.forEach(el => {
           if (el) {
             const htmlEl = el as HTMLElement
             htmlEl.style.removeProperty('display')
@@ -669,8 +672,9 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     >
       {/* İçerik için opacity animasyonu - tam ekran */}
       <div
-        className={`w-full relative transition-opacity duration-500 ease-in-out ${isVisible ? 'opacity-100' : 'opacity-0'
-          }`}
+        className={`w-full relative transition-opacity duration-500 ease-in-out ${
+          isVisible ? 'opacity-100' : 'opacity-0'
+        }`}
         style={{
           width: '100%',
           height: '100vh',
@@ -703,9 +707,10 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
               onClick={handleClose}
               className="group flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-lg"
               style={{
-                opacity: isClosing ? 0 : (isButtonVisible ? 1 : 0),
+                opacity: isClosing ? 0 : isButtonVisible ? 1 : 0,
                 transform: isButtonVisible && !isClosing ? 'scale(1)' : 'scale(0)',
-                transition: 'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+                transition:
+                  'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
                 willChange: 'transform, opacity',
               }}
               aria-label="Kapat"
@@ -720,14 +725,11 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
                 strokeWidth="1"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className={`h-7 w-7 transition-all duration-500 ease-in-out ${isButtonVisible && !isClosing
-                  ? 'opacity-100 rotate-0'
-                  : 'opacity-0 rotate-90'
-                  }`}
+                className={`h-7 w-7 transition-all duration-500 ease-in-out ${
+                  isButtonVisible && !isClosing ? 'opacity-100 rotate-0' : 'opacity-0 rotate-90'
+                }`}
                 style={{
-                  transform: isButtonVisible && !isClosing
-                    ? 'rotate(0deg)'
-                    : 'rotate(90deg)',
+                  transform: isButtonVisible && !isClosing ? 'rotate(0deg)' : 'rotate(90deg)',
                   transitionDelay: isClosing ? (isMobile ? '200ms' : '0ms') : '0ms',
                 }}
               >
@@ -740,8 +742,9 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
           {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
           <div
             ref={scrollContainerRef}
-            className={`w-full overflow-y-auto md:overflow-y-hidden md:overflow-x-auto flex ${isMobile && isLandscape ? 'flex-row' : isMobile ? 'flex-col' : 'flex-row'
-              } items-start md:items-stretch px-0 md:px-4 md:cursor-grab md:select-none`}
+            className={`w-full overflow-y-auto md:overflow-y-hidden md:overflow-x-auto flex ${
+              isMobile && isLandscape ? 'flex-row' : isMobile ? 'flex-col' : 'flex-row'
+            } items-start md:items-stretch px-0 md:px-4 md:cursor-grab md:select-none`}
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
@@ -749,13 +752,13 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
               height: isMobile ? '100vh' : '100%',
               maxHeight: isMobile ? '100vh' : '100%',
               minHeight: isMobile ? '100vh' : '100%',
-              paddingTop: isMobile && isLandscape ? '4px' : (isMobile ? '0' : '8px'),
-              paddingBottom: isMobile && isLandscape ? '4px' : (isMobile ? '0' : '8px'),
-              gap: isMobile && isLandscape ? '4px' : (isMobile ? '0' : '6px'),
+              paddingTop: isMobile && isLandscape ? '4px' : isMobile ? '0' : '8px',
+              paddingBottom: isMobile && isLandscape ? '4px' : isMobile ? '0' : '8px',
+              gap: isMobile && isLandscape ? '4px' : isMobile ? '0' : '6px',
               boxSizing: 'border-box',
-              cursor: isDragging && !isMobile ? 'grabbing' : (!isMobile ? 'grab' : 'default'),
-              overflowY: isMobile && isLandscape ? 'hidden' : (isMobile ? 'auto' : 'hidden'),
-              overflowX: isMobile && isLandscape ? 'auto' : (isMobile ? 'hidden' : 'auto'),
+              cursor: isDragging && !isMobile ? 'grabbing' : !isMobile ? 'grab' : 'default',
+              overflowY: isMobile && isLandscape ? 'hidden' : isMobile ? 'auto' : 'hidden',
+              overflowX: isMobile && isLandscape ? 'auto' : isMobile ? 'hidden' : 'auto',
               // Add scroll-snap for desktop and mobile landscape
               scrollSnapType: (isMobile && isLandscape) || !isMobile ? 'x mandatory' : 'none',
             }}
@@ -786,9 +789,10 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
                 // Desktop'ta görünmeyen görseller için delay 0
                 if (!isMobile) {
                   // Desktop'ta görünür görselleri kontrol et
-                  const currentVisible = closingVisibleIndicesRef.current.length > 0
-                    ? closingVisibleIndicesRef.current
-                    : visibleIndices
+                  const currentVisible =
+                    closingVisibleIndicesRef.current.length > 0
+                      ? closingVisibleIndicesRef.current
+                      : visibleIndices
 
                   if (currentVisible.length > 0) {
                     const visibleIndex = currentVisible.indexOf(i)
@@ -804,9 +808,10 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
                   }
                 } else {
                   // Mobilde: kapanışta hesaplanan görünür görselleri kullan
-                  const currentVisible = closingVisibleIndicesRef.current.length > 0
-                    ? closingVisibleIndicesRef.current
-                    : visibleIndices
+                  const currentVisible =
+                    closingVisibleIndicesRef.current.length > 0
+                      ? closingVisibleIndicesRef.current
+                      : visibleIndices
 
                   if (currentVisible.length > 0) {
                     const visibleIndex = currentVisible.indexOf(i)
@@ -826,31 +831,34 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
               }
 
               // Desktop ve mobil landscape için sabit yükseklik hesapla
-              const fixedHeight = isMobile && isLandscape
-                ? 'calc(100vh - 12px)'
-                : !isMobile
-                  ? 'calc(100vh - 16px)'
-                  : 'auto'
+              const fixedHeight =
+                isMobile && isLandscape
+                  ? 'calc(100vh - 12px)'
+                  : !isMobile
+                    ? 'calc(100vh - 16px)'
+                    : 'auto'
 
               // Desktop ve mobil landscape için genişlik hesapla
               // Mobil landscape'ta container genişliği görselin aspect ratio'suna göre otomatik hesaplanacak
               // Desktop'ta da artık auto (yan yana dizilim için)
-              const itemWidth = isMobile && isLandscape
-                ? 'auto'
-                : !isMobile
-                  ? 'auto' // Eski: 'calc(98vw - 2rem)' -> Yeni: 'auto'
-                  : '100%'
+              const itemWidth =
+                isMobile && isLandscape
+                  ? 'auto'
+                  : !isMobile
+                    ? 'auto' // Eski: 'calc(98vw - 2rem)' -> Yeni: 'auto'
+                    : '100%'
 
               return (
                 <div
                   key={i}
-                  ref={(el) => {
+                  ref={el => {
                     itemRefs.current[i] = el
                   }}
-                  className={`flex-shrink-0 flex items-center justify-center transition-all cubic-bezier(0.23, 1, 0.32, 1) ${isVisible && !isClosing
-                    ? 'opacity-100 translate-y-0 scale-100'
-                    : 'opacity-0 translate-y-12 scale-95'
-                    }`}
+                  className={`flex-shrink-0 flex items-center justify-center transition-all cubic-bezier(0.23, 1, 0.32, 1) ${
+                    isVisible && !isClosing
+                      ? 'opacity-100 translate-y-0 scale-100'
+                      : 'opacity-0 translate-y-12 scale-95'
+                  }`}
                   style={{
                     transitionDelay: `${animationDelay}ms`,
                     transitionDuration: '500ms',
@@ -858,9 +866,10 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
                     minHeight: fixedHeight === 'auto' ? 'auto' : fixedHeight,
                     maxHeight: fixedHeight === 'auto' ? 'none' : fixedHeight,
                     width: itemWidth,
-                    minWidth: isMobile && isLandscape ? '0' : (!isMobile ? '0' : '100%'), // Desktop minWidth 0
-                    maxWidth: isMobile && isLandscape ? 'none' : (!isMobile ? 'none' : '100%'), // Desktop maxWidth none
-                    marginTop: isMobile && isLandscape ? '0' : (isMobile ? (i === 0 ? '0' : '2px') : '0'),
+                    minWidth: isMobile && isLandscape ? '0' : !isMobile ? '0' : '100%', // Desktop minWidth 0
+                    maxWidth: isMobile && isLandscape ? 'none' : !isMobile ? 'none' : '100%', // Desktop maxWidth none
+                    marginTop:
+                      isMobile && isLandscape ? '0' : isMobile ? (i === 0 ? '0' : '2px') : '0',
                     marginBottom: isMobile && isLandscape ? '0' : '0',
                     boxSizing: 'border-box',
                     overflow: 'hidden',
@@ -882,9 +891,12 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
                         height: fixedHeight === 'auto' ? 'auto' : '100%',
                         maxHeight: fixedHeight === 'auto' ? 'none' : '100%',
                         maxWidth: 'none',
-                        width: isMobile && isLandscape
-                          ? 'auto'
-                          : (fixedHeight === 'auto' ? '100%' : 'fit-content'), // Desktop: fit-content to wrap image width
+                        width:
+                          isMobile && isLandscape
+                            ? 'auto'
+                            : fixedHeight === 'auto'
+                              ? '100%'
+                              : 'fit-content', // Desktop: fit-content to wrap image width
                         minWidth: isMobile && isLandscape ? '0' : 'auto',
                         display: 'block',
                       }}
@@ -903,9 +915,12 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
                         height: fixedHeight === 'auto' ? 'auto' : '100%',
                         maxHeight: fixedHeight === 'auto' ? 'none' : '100%',
                         maxWidth: 'none',
-                        width: isMobile && isLandscape
-                          ? 'auto'
-                          : (fixedHeight === 'auto' ? '100%' : 'fit-content'), // Desktop: fit-content
+                        width:
+                          isMobile && isLandscape
+                            ? 'auto'
+                            : fixedHeight === 'auto'
+                              ? '100%'
+                              : 'fit-content', // Desktop: fit-content
                         minWidth: isMobile && isLandscape ? '0' : 'auto',
                         display: 'block',
                       }}
@@ -925,7 +940,12 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
                       frameBorder="0"
                       style={{
                         height: fixedHeight === 'auto' ? '60vh' : '100%',
-                        width: isMobile && isLandscape ? 'auto' : (fixedHeight === 'auto' ? '100%' : 'auto'), // Desktop'ta auto
+                        width:
+                          isMobile && isLandscape
+                            ? 'auto'
+                            : fixedHeight === 'auto'
+                              ? '100%'
+                              : 'auto', // Desktop'ta auto
                         maxWidth: isMobile && isLandscape ? 'none' : 'none', // Desktop'ta none
                         minWidth: isMobile && isLandscape ? '0' : 'auto',
                         aspectRatio: '16/9', // YouTube için aspect ratio
@@ -945,7 +965,8 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
                 bottom: '32px',
                 opacity: isButtonVisible && !isClosing ? 1 : 0,
                 transform: `translateX(-50%) ${isButtonVisible && !isClosing ? 'translateY(0)' : 'translateY(40px)'}`,
-                transition: 'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+                transition:
+                  'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
                 willChange: 'transform, opacity',
               }}
             >
@@ -999,8 +1020,11 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
             <button
               type="button"
               onClick={handleScrollToTop}
-              className={`md:hidden absolute bottom-6 right-6 flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 z-30 shadow-lg ${showScrollToTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-                }`}
+              className={`md:hidden absolute bottom-6 right-6 flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 z-30 shadow-lg ${
+                showScrollToTop
+                  ? 'opacity-100 translate-y-0'
+                  : 'opacity-0 translate-y-4 pointer-events-none'
+              }`}
               aria-label="Yukarı git"
             >
               <svg
@@ -1025,4 +1049,3 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     document.body
   )
 }
-

@@ -17,10 +17,7 @@ export default function CookiesPage() {
   const title = policy?.title ? t(policy.title) : 'Çerez Politikası'
   const localizedContent = policy?.content as Record<string, unknown> | undefined
   const contentBlocks =
-    localizedContent?.[locale] ??
-    localizedContent?.['tr'] ??
-    localizedContent?.['en'] ??
-    undefined
+    localizedContent?.[locale] ?? localizedContent?.['tr'] ?? localizedContent?.['en'] ?? undefined
 
   useSEO({
     title: `BIRIM - ${title}`,

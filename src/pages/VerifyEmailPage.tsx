@@ -9,9 +9,7 @@ export function VerifyEmailPage() {
   const auth = useAuth()
   const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying')
 
-  const searchParams = new URLSearchParams(
-    location.search || location.hash.split('?')[1] || ''
-  )
+  const searchParams = new URLSearchParams(location.search || location.hash.split('?')[1] || '')
   const token = searchParams.get('token') || ''
 
   useSEO({
@@ -102,5 +100,3 @@ export function VerifyEmailPage() {
     </div>
   )
 }
-
-

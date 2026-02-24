@@ -1,17 +1,17 @@
-import { useState, useEffect } from 'react'
-import { getAboutPageContent } from '../services/cms'
-import type { AboutPageContent, NewsMedia } from '../types'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { PageLoading } from '../components/LoadingSpinner'
-import { useTranslation } from '../i18n'
-import { Breadcrumbs } from '../components/Breadcrumbs'
-import { useSEO } from '../hooks/useSEO'
-import { useHeaderTheme } from '../context/HeaderThemeContext'
+import {useState, useEffect} from 'react'
+import {getAboutPageContent} from '../services/cms'
+import type {AboutPageContent, NewsMedia} from '../types'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {Breadcrumbs} from '../components/Breadcrumbs'
+import {useSEO} from '../hooks/useSEO'
+import {useHeaderTheme} from '../context/HeaderThemeContext'
 import ScrollReveal from '../components/ScrollReveal'
 import PortableTextLite from '../components/PortableTextLite'
 
 // Alt Medya Galerisi Bileşeni - Ekranı sağdan sola kaplayan tam genişlik (breakout) yapı
-const MediaGallery = ({ media, alt }: { media?: NewsMedia[]; alt: string }) => {
+const MediaGallery = ({media, alt}: {media?: NewsMedia[]; alt: string}) => {
   if (!media || media.length === 0) return null
 
   return (
@@ -49,18 +49,21 @@ const MediaGallery = ({ media, alt }: { media?: NewsMedia[]; alt: string }) => {
 export function AboutPage() {
   const [content, setContent] = useState<AboutPageContent | null>(null)
   const [loading, setLoading] = useState(true)
-  const { t } = useTranslation()
-  const { setFromPalette, reset } = useHeaderTheme()
+  const {t} = useTranslation()
+  const {setFromPalette, reset} = useHeaderTheme()
 
   // SEO
   const heroImageObj = typeof content?.heroImage === 'object' ? content.heroImage : null
-  const heroImageUrl = heroImageObj ? heroImageObj.url : (typeof content?.heroImage === 'string' ? content.heroImage : '')
+  const heroImageUrl = heroImageObj
+    ? heroImageObj.url
+    : typeof content?.heroImage === 'string'
+      ? content.heroImage
+      : ''
 
   useSEO({
     title: `BIRIM - ${t('about') || 'Hakkımızda'}`,
     description:
-      (content && (t(content.heroSubtitle) || t(content.storyTitle))) ||
-      'BIRIM hakkında bilgiler',
+      (content && (t(content.heroSubtitle) || t(content.storyTitle))) || 'BIRIM hakkında bilgiler',
     image: heroImageUrl,
     type: 'article',
     siteName: 'BIRIM',
@@ -87,7 +90,9 @@ export function AboutPage() {
       reset()
     } else {
       const palette =
-        typeof content.heroImage === 'object' && content.heroImage !== null && 'palette' in content.heroImage
+        typeof content.heroImage === 'object' &&
+        content.heroImage !== null &&
+        'palette' in content.heroImage
           ? content.heroImage.palette
           : undefined
       if (palette) {
@@ -144,10 +149,7 @@ export function AboutPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 text-[11px] sm:text-[12px]">
           <Breadcrumbs
             className="mb-12"
-            items={[
-              { label: t('homepage'), to: '/' },
-              { label: t('about') },
-            ]}
+            items={[{label: t('homepage'), to: '/'}, {label: t('about')}]}
           />
         </div>
 
@@ -164,10 +166,16 @@ export function AboutPage() {
                     <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
                       {(() => {
                         const historyContent = t(content.historySection.content)
-                        const isPortable = Array.isArray(historyContent) || (typeof historyContent === 'object' && historyContent !== null && (historyContent as any)._type === 'block')
+                        const isPortable =
+                          Array.isArray(historyContent) ||
+                          (typeof historyContent === 'object' &&
+                            historyContent !== null &&
+                            (historyContent as any)._type === 'block')
 
                         if (isPortable) {
-                          const blocks = Array.isArray(historyContent) ? historyContent : [historyContent]
+                          const blocks = Array.isArray(historyContent)
+                            ? historyContent
+                            : [historyContent]
                           return <PortableTextLite value={blocks as any} />
                         }
 
@@ -181,7 +189,8 @@ export function AboutPage() {
                     <div className="relative aspect-[4/5] overflow-hidden">
                       {(() => {
                         const img = content.historySection?.image
-                        const url = typeof img === 'object' ? img.url : (img || content.storyImage || '')
+                        const url =
+                          typeof img === 'object' ? img.url : img || content.storyImage || ''
                         return (
                           <OptimizedImage
                             src={url}
@@ -210,7 +219,7 @@ export function AboutPage() {
                     <div className="relative aspect-video overflow-hidden">
                       {(() => {
                         const img = content.identitySection?.image
-                        const url = typeof img === 'object' ? img.url : (img || '')
+                        const url = typeof img === 'object' ? img.url : img || ''
                         return (
                           <OptimizedImage
                             src={url}
@@ -277,7 +286,7 @@ export function AboutPage() {
                       <div className="relative aspect-video lg:aspect-[16/9] overflow-hidden">
                         {(() => {
                           const img = content.qualitySection?.image
-                          const url = typeof img === 'object' ? img.url : (img || '')
+                          const url = typeof img === 'object' ? img.url : img || ''
                           return (
                             <OptimizedImage
                               src={url}

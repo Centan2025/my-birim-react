@@ -8,68 +8,68 @@ import React, {
   Suspense,
   lazy,
 } from 'react'
-import { HashRouter, Routes, Route, useLocation, Link } from 'react-router-dom'
+import {HashRouter, Routes, Route, useLocation, Link} from 'react-router-dom'
 
-import { Header } from './components/Header'
-import { getFooterContent, getSiteSettings } from './services/cms'
-import type { FooterContent, SiteSettings, User } from './types'
-import { SiteLogo } from './components/SiteLogo'
-import { I18nProvider, useTranslation } from './i18n'
-import { CartProvider } from './context/CartContext'
-import { HeaderThemeProvider } from './context/HeaderThemeContext'
-import { CartSidebar } from './components/CartSidebar'
+import {Header} from './components/Header'
+import {getFooterContent, getSiteSettings} from './services/cms'
+import type {FooterContent, SiteSettings, User} from './types'
+import {SiteLogo} from './components/SiteLogo'
+import {I18nProvider, useTranslation} from './i18n'
+import {CartProvider} from './context/CartContext'
+import {HeaderThemeProvider} from './context/HeaderThemeContext'
+import {CartSidebar} from './components/CartSidebar'
 import CookieBanner from './components/CookieBanner'
-import { SkipLink } from './components/SkipLink'
-import { errorReporter } from './lib/errorReporting'
-import { analytics } from './lib/analytics'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClient } from './lib/queryClient'
+import {SkipLink} from './components/SkipLink'
+import {errorReporter} from './lib/errorReporting'
+import {analytics} from './lib/analytics'
+import {QueryClientProvider} from '@tanstack/react-query'
+import {queryClient} from './lib/queryClient'
 import ScrollReveal from './components/ScrollReveal'
-import { resolveLegalLinkText } from './lib/legalLinks'
-import { NewsletterForm } from './components/NewsletterForm'
-import { SEOProvider, useSeoDefaults } from './hooks/useSEO'
-import { PageTransition } from './components/PageTransition'
+import {resolveLegalLinkText} from './lib/legalLinks'
+import {NewsletterForm} from './components/NewsletterForm'
+import {SEOProvider, useSeoDefaults} from './hooks/useSEO'
+import {PageTransition} from './components/PageTransition'
 
 // Lazy load pages for code splitting
-const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })))
+const HomePage = lazy(() => import('./pages/HomePage').then(m => ({default: m.HomePage})))
 const CategoriesPage = lazy(() =>
-  import('./pages/CategoriesPage').then(m => ({ default: m.CategoriesPage }))
+  import('./pages/CategoriesPage').then(m => ({default: m.CategoriesPage}))
 )
 const ProductsPage = lazy(() =>
-  import('./pages/ProductsPage').then(m => ({ default: m.ProductsPage }))
+  import('./pages/ProductsPage').then(m => ({default: m.ProductsPage}))
 )
 const ProductDetailPage = lazy(() =>
-  import('./pages/ProductDetailPage').then(m => ({ default: m.ProductDetailPage }))
+  import('./pages/ProductDetailPage').then(m => ({default: m.ProductDetailPage}))
 )
 const DesignersPage = lazy(() =>
-  import('./pages/DesignersPage').then(m => ({ default: m.DesignersPage }))
+  import('./pages/DesignersPage').then(m => ({default: m.DesignersPage}))
 )
 const DesignerDetailPage = lazy(() =>
-  import('./pages/DesignerDetailPage').then(m => ({ default: m.DesignerDetailPage }))
+  import('./pages/DesignerDetailPage').then(m => ({default: m.DesignerDetailPage}))
 )
-const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })))
-const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })))
-const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })))
-const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({ default: m.ProfilePage })))
-const NewsPage = lazy(() => import('./pages/NewsPage').then(m => ({ default: m.NewsPage })))
+const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({default: m.AboutPage})))
+const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({default: m.ContactPage})))
+const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({default: m.LoginPage})))
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then(m => ({default: m.ProfilePage})))
+const NewsPage = lazy(() => import('./pages/NewsPage').then(m => ({default: m.NewsPage})))
 const NewsDetailPage = lazy(() =>
-  import('./pages/NewsDetailPage').then(m => ({ default: m.NewsDetailPage }))
+  import('./pages/NewsDetailPage').then(m => ({default: m.NewsDetailPage}))
 )
 const CookiesPage = lazy(() => import('./pages/CookiesPage'))
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
 const TermsPage = lazy(() => import('./pages/TermsPage'))
 const KvkkPage = lazy(() => import('./pages/KvkkPage'))
 const ProjectsPage = lazy(() =>
-  import('./pages/ProjectsPage').then(m => ({ default: m.ProjectsPage }))
+  import('./pages/ProjectsPage').then(m => ({default: m.ProjectsPage}))
 )
 const ProjectDetailPage = lazy(() =>
-  import('./pages/ProjectDetailPage').then(m => ({ default: m.ProjectDetailPage }))
+  import('./pages/ProjectDetailPage').then(m => ({default: m.ProjectDetailPage}))
 )
 const VerifyEmailPage = lazy(() =>
-  import('./pages/VerifyEmailPage').then(m => ({ default: m.VerifyEmailPage }))
+  import('./pages/VerifyEmailPage').then(m => ({default: m.VerifyEmailPage}))
 )
 const ComingSoonPage = lazy(() =>
-  import('./pages/ComingSoonPage').then(m => ({ default: m.ComingSoonPage }))
+  import('./pages/ComingSoonPage').then(m => ({default: m.ComingSoonPage}))
 )
 
 // Loading fallback component
@@ -83,8 +83,8 @@ const PageLoader = () => (
 )
 
 // Helper component to render SVG strings safely
-const DynamicIcon: React.FC<{ svgString: string }> = ({ svgString }) => (
-  <div dangerouslySetInnerHTML={{ __html: svgString }} />
+const DynamicIcon: React.FC<{svgString: string}> = ({svgString}) => (
+  <div dangerouslySetInnerHTML={{__html: svgString}} />
 )
 
 interface AuthContextType {
@@ -118,7 +118,7 @@ export function useSiteSettings() {
   return context
 }
 
-const SiteSettingsProvider = ({ children }: PropsWithChildren) => {
+const SiteSettingsProvider = ({children}: PropsWithChildren) => {
   const [settings, setSettings] = useState<SiteSettings | null>(null)
   const setSeoDefaults = useSeoDefaults()
 
@@ -139,10 +139,10 @@ const SiteSettingsProvider = ({ children }: PropsWithChildren) => {
     }
   }, [setSeoDefaults, settings?.topBannerText])
 
-  return <SiteSettingsContext.Provider value={{ settings }}>{children}</SiteSettingsContext.Provider>
+  return <SiteSettingsContext.Provider value={{settings}}>{children}</SiteSettingsContext.Provider>
 }
 
-const AuthProvider = ({ children }: PropsWithChildren) => {
+const AuthProvider = ({children}: PropsWithChildren) => {
   const [user, setUser] = useState<User | null>(null)
 
   // Load user from localStorage on mount
@@ -210,14 +210,14 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
 }
 
 const ScrollToTop = () => {
-  const { pathname } = useLocation()
-  const { t } = useTranslation()
+  const {pathname} = useLocation()
+  const {t} = useTranslation()
 
   // Sadece rota değişiminde en üste kaydır; dil değişiminde mevcut pozisyonu koru
   useEffect(() => {
     // Route değişiminde yukarıya yumuşak kaydır
     if (typeof window !== 'undefined' && 'scrollBehavior' in document.documentElement.style) {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      window.scrollTo({top: 0, behavior: 'smooth'})
     } else {
       window.scrollTo(0, 0)
     }
@@ -298,7 +298,7 @@ const MainLayout: React.FC = () => {
       <main
         id="main-content"
         className="flex-grow"
-        style={{ overflowX: 'hidden', position: 'relative', zIndex: 5 }}
+        style={{overflowX: 'hidden', position: 'relative', zIndex: 5}}
         tabIndex={-1}
       >
         <TopBanner />
@@ -358,7 +358,7 @@ const BackToTopButton: React.FC = () => {
     }
 
     handleScroll()
-    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('scroll', handleScroll, {passive: true})
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -367,7 +367,7 @@ const BackToTopButton: React.FC = () => {
   return (
     <button
       type="button"
-      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}
       aria-label="Sayfanın en üstüne dön"
       className="fixed bottom-6 right-6 z-40 w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-full bg-black/40 text-white shadow-md backdrop-blur hover:bg-black/60 transition-all duration-200"
     >
@@ -382,7 +382,7 @@ const TopBanner = () => null
 const Footer = () => {
   const [content, setContent] = useState<FooterContent | null>(null)
   const [settings, setSettings] = useState<SiteSettings | null>(null)
-  const { t, setLocale, locale, supportedLocales } = useTranslation()
+  const {t, setLocale, locale, supportedLocales} = useTranslation()
 
   useEffect(() => {
     Promise.all([getFooterContent(), getSiteSettings()]).then(([footerData, settingsData]) => {
@@ -395,13 +395,16 @@ const Footer = () => {
 
   return (
     <>
-      <footer
-        className="bg-gray-800 text-gray-400"
-        style={{ position: 'relative', zIndex: 5 }}
-      >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6 lg:py-12" style={{ overflow: 'visible' }}>
+      <footer className="bg-gray-800 text-gray-400" style={{position: 'relative', zIndex: 5}}>
+        <div
+          className="container mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6 lg:py-12"
+          style={{overflow: 'visible'}}
+        >
           {/* Mobil düzen */}
-          <div className="lg:hidden flex flex-col items-center justify-center space-y-6 w-full" style={{ maxWidth: '100%', marginLeft: 'auto', marginRight: 'auto' }}>
+          <div
+            className="lg:hidden flex flex-col items-center justify-center space-y-6 w-full"
+            style={{maxWidth: '100%', marginLeft: 'auto', marginRight: 'auto'}}
+          >
             {/* Logo - ortada üstte */}
             <ScrollReveal delay={0} threshold={0.1} width="w-full" className="h-auto">
               <Link to="/" className="text-white flex justify-center w-full">
@@ -469,14 +472,17 @@ const Footer = () => {
             {/* Dil seçenekleri */}
             <ScrollReveal delay={120} threshold={0.1} width="w-full" className="h-auto">
               <div className="flex items-center justify-center gap-3 w-full">
-                {supportedLocales.map((langCode) => {
+                {supportedLocales.map(langCode => {
                   const isActive = locale === langCode
                   return (
                     <button
                       key={langCode}
                       onClick={() => setLocale(langCode)}
-                      className={`text-xs uppercase tracking-wider transition-colors duration-200 ${isActive ? 'text-white font-bold' : 'text-gray-400 hover:text-white font-thin'
-                        }`}
+                      className={`text-xs uppercase tracking-wider transition-colors duration-200 ${
+                        isActive
+                          ? 'text-white font-bold'
+                          : 'text-gray-400 hover:text-white font-thin'
+                      }`}
                     >
                       {langCode.toUpperCase()}
                     </button>
@@ -503,7 +509,6 @@ const Footer = () => {
                 </ScrollReveal>
               </div>
             </ScrollReveal>
-
           </div>
 
           {/* Desktop düzen */}
@@ -631,7 +636,7 @@ const Footer = () => {
                           analytics.event({
                             action: 'outbound_click',
                             category: 'Social',
-                            label: link.name
+                            label: link.name,
                           })
                         }}
                       >
@@ -775,7 +780,10 @@ const Footer = () => {
             {/* Email abonelik formu - sadece desktop'ta */}
             <ScrollReveal delay={150} threshold={0.1} width="w-full lg:w-auto" className="h-auto">
               <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-                <NewsletterForm variant="desktop" className="flex w-full lg:w-auto lg:justify-end" />
+                <NewsletterForm
+                  variant="desktop"
+                  className="flex w-full lg:w-auto lg:justify-end"
+                />
               </div>
             </ScrollReveal>
           </div>
@@ -784,7 +792,7 @@ const Footer = () => {
           <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
             <div
               className="lg:mt-10 pt-2 lg:pt-8 w-full lg:border-t lg:border-t-2 lg:border-gray-600"
-              style={{ overflow: 'visible', width: '100%' }}
+              style={{overflow: 'visible', width: '100%'}}
             >
               <div className="flex flex-col items-center justify-center gap-4 text-xs w-full lg:flex-row lg:items-start lg:justify-between">
                 {/* Sol: Telif metni */}
@@ -884,7 +892,7 @@ const AppContent = () => {
   // Maintenance mode kontrolü - öncelikle CMS'den, yoksa environment variable'dan
   // Development modunda (dev server) maintenance mode devre dışı
   // Production'da aktif olabilir, ancak ?bypass=secret ile bypass edilebilir
-  const { settings } = useSiteSettings()
+  const {settings} = useSiteSettings()
   const maintenanceModeFromCMS = settings?.maintenanceMode ?? false
   // Tip güvenliği için string index kullan, ama Vite prod build'de gerçek değeri enjekte eder
   const maintenanceModeFromEnv = import.meta.env['VITE_MAINTENANCE_MODE'] === 'true'
@@ -915,25 +923,25 @@ const AppContent = () => {
 
   const debugInfo =
     typeof window !== 'undefined' &&
-      (window.location.search.includes('bypass') || window.location.hash.includes('bypass'))
+    (window.location.search.includes('bypass') || window.location.hash.includes('bypass'))
       ? {
-        isProduction,
-        maintenanceModeFromCMS,
-        maintenanceModeFromEnv,
-        maintenanceModeEnabled,
-        allowedBypassSecrets,
-        bypassParam,
-        isMaintenanceMode,
-      }
+          isProduction,
+          maintenanceModeFromCMS,
+          maintenanceModeFromEnv,
+          maintenanceModeEnabled,
+          allowedBypassSecrets,
+          bypassParam,
+          isMaintenanceMode,
+        }
       : null
 
   return (
-    <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <HashRouter future={{v7_startTransition: true, v7_relativeSplatPath: true}}>
       <div className="flex flex-col min-h-screen">
         <ScrollToTop />
         {isMaintenanceMode ? (
           // Maintenance mode aktifse sadece ComingSoonPage göster
-          <main className="flex-grow" style={{ overflowX: 'hidden' }}>
+          <main className="flex-grow" style={{overflowX: 'hidden'}}>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="*" element={<ComingSoonPage />} />

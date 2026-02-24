@@ -1,18 +1,18 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
-import type { Designer } from '../types'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { PageLoading } from '../components/LoadingSpinner'
-import { useTranslation } from '../i18n'
-import { useDesigners } from '../hooks/useDesigners'
-import { useSiteSettings } from '../hooks/useSiteData'
-import { Breadcrumbs } from '../components/Breadcrumbs'
+import {Link} from 'react-router-dom'
+import type {Designer} from '../types'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {useDesigners} from '../hooks/useDesigners'
+import {useSiteSettings} from '../hooks/useSiteData'
+import {Breadcrumbs} from '../components/Breadcrumbs'
 import ScrollReveal from '../components/ScrollReveal'
-import { useSEO } from '../hooks/useSEO'
+import {useSEO} from '../hooks/useSEO'
 
-const DesignerCard: React.FC<{ designer: Designer }> = ({ designer }) => {
-  const { t } = useTranslation()
-  const { data: settings } = useSiteSettings()
+const DesignerCard: React.FC<{designer: Designer}> = ({designer}) => {
+  const {t} = useTranslation()
+  const {data: settings} = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   return (
     <Link to={`/designer/${designer.id}`} className="group flex flex-col h-full text-center">
@@ -41,8 +41,8 @@ const DesignerCard: React.FC<{ designer: Designer }> = ({ designer }) => {
 }
 
 export function DesignersPage() {
-  const { data: designers = [], isLoading: loading } = useDesigners()
-  const { t } = useTranslation()
+  const {data: designers = [], isLoading: loading} = useDesigners()
+  const {t} = useTranslation()
 
   // SEO meta
   useSEO({
@@ -67,10 +67,7 @@ export function DesignersPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
         <Breadcrumbs
           className="mb-6"
-          items={[
-            { label: t('homepage'), to: '/' },
-            { label: t('designers') },
-          ]}
+          items={[{label: t('homepage'), to: '/'}, {label: t('designers')}]}
         />
         <div className="text-center mt-6 md:mt-8 mb-12">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600">{t('designers')}</h1>
@@ -79,11 +76,7 @@ export function DesignersPage() {
         {designers.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8 items-stretch">
             {designers.map((designer, index) => (
-              <ScrollReveal
-                key={designer.id}
-                delay={index < 12 ? index * 20 : 0}
-                threshold={0.01}
-              >
+              <ScrollReveal key={designer.id} delay={index < 12 ? index * 20 : 0} threshold={0.01}>
                 <DesignerCard designer={designer} />
               </ScrollReveal>
             ))}

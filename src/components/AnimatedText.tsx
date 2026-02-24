@@ -26,7 +26,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
       if (!ref.current) return
       const rect = ref.current.getBoundingClientRect()
       const isInViewport = rect.top < window.innerHeight + 100 && rect.bottom > -100
-      
+
       if (isInViewport) {
         setIsVisible(true)
         return true
@@ -43,7 +43,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
     const target = ref.current
 
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         const entry = entries[0]
         if (entry && entry.isIntersecting) {
           setIsVisible(true)
@@ -81,8 +81,8 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
               ? 'opacity-100 translate-x-0'
               : 'opacity-0 -translate-x-40'
             : isVisible
-            ? 'opacity-100 translate-y-0'
-            : 'opacity-0 translate-y-32'
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-32'
 
         return (
           <span
@@ -102,4 +102,3 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
 }
 
 export default AnimatedText
-

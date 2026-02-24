@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import {useEffect} from 'react'
 
 /**
  * Google Fonts'u dinamik olarak yükler
@@ -72,7 +72,7 @@ export function useGoogleFonts(fontNames: (string | undefined)[]) {
 
     // Standart fontları filtrele
     const googleFonts = fontNames.filter(
-      (font) => font && font !== 'normal' && font !== 'serif' && font !== 'mono'
+      font => font && font !== 'normal' && font !== 'serif' && font !== 'mono'
     ) as string[]
 
     if (googleFonts.length === 0) return
@@ -81,7 +81,7 @@ export function useGoogleFonts(fontNames: (string | undefined)[]) {
     const uniqueFonts = [...new Set(googleFonts)]
 
     // Her font için yükleme işlemi
-    uniqueFonts.forEach((fontName) => {
+    uniqueFonts.forEach(fontName => {
       const fontId = `google-font-${fontName.replace(/\s+/g, '-').toLowerCase()}`
       const existingLink = document.getElementById(fontId)
       if (existingLink) {
@@ -119,4 +119,3 @@ export function useGoogleFonts(fontNames: (string | undefined)[]) {
     }
   }, [fontNames])
 }
-

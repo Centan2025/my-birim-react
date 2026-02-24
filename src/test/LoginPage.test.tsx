@@ -261,4 +261,3 @@ describe('LoginPage', () => {
     expect(screen.getByText('Hoş Geldiniz')).toBeInTheDocument()
   })
 })
-

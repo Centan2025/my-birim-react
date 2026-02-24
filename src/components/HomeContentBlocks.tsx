@@ -1,14 +1,14 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import {Link} from 'react-router-dom'
 
-import { ContentBlock } from '../types'
-import { useTranslation } from '../i18n'
+import {ContentBlock} from '../types'
+import {useTranslation} from '../i18n'
 import ScrollReveal from './ScrollReveal'
-import { OptimizedImage } from './OptimizedImage'
-import { OptimizedVideo } from './OptimizedVideo'
-import { YouTubeBackground } from './YouTubeBackground'
+import {OptimizedImage} from './OptimizedImage'
+import {OptimizedVideo} from './OptimizedVideo'
+import {YouTubeBackground} from './YouTubeBackground'
 import PortableTextLite from './PortableTextLite'
-import { useGoogleFonts } from '../hooks/useGoogleFont'
+import {useGoogleFonts} from '../hooks/useGoogleFont'
 
 interface HomeContentBlocksProps {
   blocks: ContentBlock[]
@@ -21,9 +21,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
   isMobile,
   imageBorderClass,
 }) => {
-  const { t } = useTranslation()
-
-
+  const {t} = useTranslation()
 
   // Tüm bloklardaki fontları topla ve yükle
   const allFonts = blocks.map(b => b.titleFont).filter(Boolean) as string[]
@@ -97,11 +95,15 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               className={`${isFullWidth ? 'text-4xl md:text-6xl lg:text-7xl' : 'text-3xl md:text-5xl lg:text-6xl'} uppercase ${textAlignClass} text-gray-950 max-w-4xl mb-4 ${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}
               style={{
                 textShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                fontFamily: titleFont === 'normal' ? '"Oswald", sans-serif' :
-                  titleFont === 'serif' ? 'serif' :
-                    titleFont === 'mono' ? 'monospace' :
-                      `"${titleFont}", sans-serif`,
-                fontWeight: (titleFont === 'normal' || titleFont === 'Oswald') ? 200 : 'inherit',
+                fontFamily:
+                  titleFont === 'normal'
+                    ? '"Oswald", sans-serif'
+                    : titleFont === 'serif'
+                      ? 'serif'
+                      : titleFont === 'mono'
+                        ? 'monospace'
+                        : `"${titleFont}", sans-serif`,
+                fontWeight: titleFont === 'normal' || titleFont === 'Oswald' ? 200 : 'inherit',
                 letterSpacing: '0.1em',
               }}
             >
@@ -118,14 +120,23 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   {(() => {
                     const desc = t(block.description)
                     const widthClass = textAlign === 'center' ? 'max-w-4xl' : 'max-w-2xl'
-                    const marginClass = textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'
+                    const marginClass =
+                      textAlign === 'center'
+                        ? 'mx-auto'
+                        : textAlign === 'right'
+                          ? 'ml-auto'
+                          : 'mr-auto'
 
                     return Array.isArray(desc) ? (
-                      <div className={`${marginClass} ${widthClass} mt-3 font-roboto-thin text-gray-950 text-xl md:text-2xl lg:text-3xl`}>
+                      <div
+                        className={`${marginClass} ${widthClass} mt-3 font-roboto-thin text-gray-950 text-xl md:text-2xl lg:text-3xl`}
+                      >
                         <PortableTextLite value={desc} />
                       </div>
                     ) : (
-                      <p className={`mt-3 text-gray-950 font-roboto-thin leading-relaxed ${widthClass} text-2xl md:text-3xl lg:text-4xl ${marginClass}`}>
+                      <p
+                        className={`mt-3 text-gray-950 font-roboto-thin leading-relaxed ${widthClass} text-2xl md:text-3xl lg:text-4xl ${marginClass}`}
+                      >
                         {desc}
                       </p>
                     )
@@ -135,7 +146,9 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             )}
             {block.linkText && block.linkUrl && !block.showButtonOnMedia && (
               <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto">
-                <div className={`mt-6 ${textAlignClass} flex ${textAlign === 'center' ? 'justify-center' : textAlign === 'right' ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  className={`mt-6 ${textAlignClass} flex ${textAlign === 'center' ? 'justify-center' : textAlign === 'right' ? 'justify-end' : 'justify-start'}`}
+                >
                   <Link
                     to={block.linkUrl}
                     className={`group inline-flex items-center gap-x-6 text-gray-950 font-bold py-4 text-base md:text-xl lg:text-2xl transition-all duration-300`}
@@ -168,14 +181,16 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           <ScrollReveal
             delay={50}
             threshold={0.1}
-            width={(isFullWidth || isCenter) ? "w-full" : "w-auto"}
-            className={`h-auto ${(isFullWidth || isCenter) ? 'w-full' : ''} ${isCenter ? 'flex justify-center' : ''}`}
+            width={isFullWidth || isCenter ? 'w-full' : 'w-auto'}
+            className={`h-auto ${isFullWidth || isCenter ? 'w-full' : ''} ${isCenter ? 'flex justify-center' : ''}`}
           >
             {block.mediaType === 'youtube' ? (
               <div className={`relative ${mediaWidthClass} aspect-video overflow-hidden`}>
                 <YouTubeBackground url={mediaUrl} />
                 {block.showButtonOnMedia && block.linkText && block.linkUrl && (
-                  <div className={`absolute z-30 flex pointer-events-none p-2 md:p-8 ${getButtonPositionClasses(block.buttonPositionOnMedia)}`}>
+                  <div
+                    className={`absolute z-30 flex pointer-events-none p-2 md:p-8 ${getButtonPositionClasses(block.buttonPositionOnMedia)}`}
+                  >
                     <Link
                       to={block.linkUrl}
                       className="group pointer-events-auto inline-flex items-center gap-x-4 md:gap-x-6 text-white font-bold py-4 px-4 md:px-8 transition-all duration-300 bg-transparent hover:bg-transparent"
@@ -208,7 +223,9 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   loading="lazy"
                 />
                 {block.showButtonOnMedia && block.linkText && block.linkUrl && (
-                  <div className={`absolute z-30 flex pointer-events-none p-2 md:p-8 ${getButtonPositionClasses(block.buttonPositionOnMedia)}`}>
+                  <div
+                    className={`absolute z-30 flex pointer-events-none p-2 md:p-8 ${getButtonPositionClasses(block.buttonPositionOnMedia)}`}
+                  >
                     <Link
                       to={block.linkUrl}
                       className="group pointer-events-auto inline-flex items-center gap-x-4 md:gap-x-6 text-white font-bold py-4 px-4 md:px-8 transition-all duration-300 bg-transparent hover:bg-transparent"
@@ -238,7 +255,9 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   quality={85}
                 />
                 {block.showButtonOnMedia && block.linkText && block.linkUrl && (
-                  <div className={`absolute z-30 flex pointer-events-none p-2 md:p-8 ${getButtonPositionClasses(block.buttonPositionOnMedia)}`}>
+                  <div
+                    className={`absolute z-30 flex pointer-events-none p-2 md:p-8 ${getButtonPositionClasses(block.buttonPositionOnMedia)}`}
+                  >
                     <Link
                       to={block.linkUrl}
                       className="group pointer-events-auto inline-flex items-center gap-x-4 md:gap-x-6 text-white font-bold py-4 px-4 md:px-8 transition-all duration-300 bg-transparent hover:bg-transparent"
@@ -259,19 +278,22 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 )}
               </div>
             )}
-
           </ScrollReveal>
         )
 
         const textContentAbove = (
-          <div className={`${(isFullWidth || isCenter) ? 'max-w-[94%] mx-auto px-4 md:px-0 pt-6 md:pt-8 pb-3' : 'w-full mx-auto mb-4'} flex flex-col ${textAlign === 'center' ? 'items-center text-center' : textAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}>
+          <div
+            className={`${isFullWidth || isCenter ? 'max-w-[94%] mx-auto px-4 md:px-0 pt-6 md:pt-8 pb-3' : 'w-full mx-auto mb-4'} flex flex-col ${textAlign === 'center' ? 'items-center text-center' : textAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
+          >
             {titlePosition === 'above' && titleElement}
             {textPosition === 'above' && bodyElement}
           </div>
         )
 
         const textContentBelow = (
-          <div className={`${(isFullWidth || isCenter) ? 'max-w-[94%] mx-auto px-4 md:px-0 pt-3 pb-6 md:pb-8' : 'w-full mx-auto mt-4'} flex flex-col ${textAlign === 'center' ? 'items-center text-center' : textAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}>
+          <div
+            className={`${isFullWidth || isCenter ? 'max-w-[94%] mx-auto px-4 md:px-0 pt-3 pb-6 md:pb-8' : 'w-full mx-auto mt-4'} flex flex-col ${textAlign === 'center' ? 'items-center text-center' : textAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
+          >
             {titlePosition === 'below' && titleElement}
             {textPosition === 'below' && bodyElement}
           </div>
@@ -286,7 +308,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             className={`content-block-wrapper relative z-20 ${sectionSpacingClass} ${backgroundColor}`}
             data-block-index={index}
           >
-            {(isFullWidth || isCenter) ? (
+            {isFullWidth || isCenter ? (
               <div className="w-full overflow-hidden flex flex-col items-center">
                 {(titlePosition === 'above' || textPosition === 'above') && textContentAbove}
                 {mediaContent}
@@ -297,18 +319,20 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 <div
                   className={
                     hasTextContent
-                      ? `flex flex-col ${isLeft
-                        ? 'md:flex-row'
-                        : isRight
-                          ? 'md:flex-row-reverse'
-                          : 'md:flex-row items-center'
-                      } gap-4 md:gap-6`
+                      ? `flex flex-col ${
+                          isLeft
+                            ? 'md:flex-row'
+                            : isRight
+                              ? 'md:flex-row-reverse'
+                              : 'md:flex-row items-center'
+                        } gap-4 md:gap-6`
                       : 'flex flex-col items-center gap-4 md:gap-6'
                   }
                 >
                   <div
-                    className={`w-full ${!hasTextContent ? 'md:w-full flex flex-col items-center' : 'md:w-1/2'
-                      } overflow-visible`}
+                    className={`w-full ${
+                      !hasTextContent ? 'md:w-full flex flex-col items-center' : 'md:w-1/2'
+                    } overflow-visible`}
                   >
                     {mediaContent}
                   </div>
@@ -327,5 +351,3 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
     </>
   )
 }
-
-

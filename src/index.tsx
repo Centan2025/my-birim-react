@@ -8,8 +8,7 @@ import {initWebVitals} from './lib/webVitals'
 import {validateEnv, checkRequiredEnv} from './lib/envValidation'
 import './index.css'
 
-const DEBUG_LOGS =
-  (import.meta.env as {VITE_DEBUG_LOGS?: string}).VITE_DEBUG_LOGS === 'true'
+const DEBUG_LOGS = (import.meta.env as {VITE_DEBUG_LOGS?: string}).VITE_DEBUG_LOGS === 'true'
 
 type PatchedStorageMethod = ((this: Storage, ...args: unknown[]) => unknown) & {__patched?: boolean}
 
@@ -31,8 +30,7 @@ if (typeof window !== 'undefined') {
           try {
             return original.apply(this, args)
           } catch (err) {
-            const msg =
-              err instanceof Error ? err.message : String((err as unknown) ?? '')
+            const msg = err instanceof Error ? err.message : String((err as unknown) ?? '')
             if (typeof msg === 'string' && msg.includes(BLOCK_SUBSTRING)) {
               // Return appropriate default values
               if (methodName === 'getItem' || methodName === 'key') {
@@ -65,7 +63,10 @@ if (typeof window !== 'undefined') {
   console.warn = (...args: unknown[]) => {
     const message = args.map(String).join(' ')
     // Filter out Zustand deprecation warnings (from Sentry or other dependencies)
-    if (typeof message === 'string' && message.includes('[DEPRECATED] Default export is deprecated')) {
+    if (
+      typeof message === 'string' &&
+      message.includes('[DEPRECATED] Default export is deprecated')
+    ) {
       return
     }
     // Call original warn for other messages
@@ -93,33 +94,33 @@ if (typeof window !== 'undefined') {
 
   // Global unhandled promise rejection handler - must be set early
   // Use addEventListener for better compatibility and earlier execution
-  window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
-    const errorMessage =
-      event.reason?.message ||
-      event.reason?.toString() ||
-      String(event.reason || '')
-    
-    // Silently ignore known non-critical errors
-    if (
-      typeof errorMessage === 'string' &&
-      (errorMessage.includes('Could not fetch session') ||
-        errorMessage.includes('Access to storage is not allowed from this context') ||
-        errorMessage.includes('Access to storage is not allowed'))
-    ) {
-      event.preventDefault()
-      event.stopPropagation()
-      return
-    }
-  }, true) // Use capture phase for earlier execution
+  window.addEventListener(
+    'unhandledrejection',
+    (event: PromiseRejectionEvent) => {
+      const errorMessage =
+        event.reason?.message || event.reason?.toString() || String(event.reason || '')
+
+      // Silently ignore known non-critical errors
+      if (
+        typeof errorMessage === 'string' &&
+        (errorMessage.includes('Could not fetch session') ||
+          errorMessage.includes('Access to storage is not allowed from this context') ||
+          errorMessage.includes('Access to storage is not allowed'))
+      ) {
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
+    },
+    true
+  ) // Use capture phase for earlier execution
 
   // Also set onunhandledrejection as fallback
   const originalUnhandledRejection = window.onunhandledrejection
   window.onunhandledrejection = (event: PromiseRejectionEvent) => {
     const errorMessage =
-      event.reason?.message ||
-      event.reason?.toString() ||
-      String(event.reason || '')
-    
+      event.reason?.message || event.reason?.toString() || String(event.reason || '')
+
     // Silently ignore known non-critical errors
     if (
       typeof errorMessage === 'string' &&
@@ -130,7 +131,7 @@ if (typeof window !== 'undefined') {
       event.preventDefault()
       return
     }
-    
+
     // Call original handler if exists
     if (originalUnhandledRejection) {
       originalUnhandledRejection.call(window, event)
@@ -139,24 +140,25 @@ if (typeof window !== 'undefined') {
 
   // Also handle uncaught errors that might be related
   // Use addEventListener for better compatibility
-  window.addEventListener('error', (event: ErrorEvent) => {
-    const errorMessage =
-      event.message ||
-      event.error?.message ||
-      String(event.error || '')
-    
-    // Silently ignore known non-critical errors
-    if (
-      typeof errorMessage === 'string' &&
-      (errorMessage.includes('Could not fetch session') ||
-        errorMessage.includes('Access to storage is not allowed') ||
-        errorMessage.includes('Access to storage is not allowed from this context'))
-    ) {
-      event.preventDefault()
-      event.stopPropagation()
-      return
-    }
-  }, true) // Use capture phase for earlier execution
+  window.addEventListener(
+    'error',
+    (event: ErrorEvent) => {
+      const errorMessage = event.message || event.error?.message || String(event.error || '')
+
+      // Silently ignore known non-critical errors
+      if (
+        typeof errorMessage === 'string' &&
+        (errorMessage.includes('Could not fetch session') ||
+          errorMessage.includes('Access to storage is not allowed') ||
+          errorMessage.includes('Access to storage is not allowed from this context'))
+      ) {
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
+    },
+    true
+  ) // Use capture phase for earlier execution
 
   // Also set onerror as fallback
   const originalErrorHandler = window.onerror
@@ -168,10 +170,8 @@ if (typeof window !== 'undefined') {
     error?: Error
   ): boolean => {
     const errorMessage =
-      typeof message === 'string'
-        ? message
-        : error?.message || String(message || '')
-    
+      typeof message === 'string' ? message : error?.message || String(message || '')
+
     // Silently ignore known non-critical errors
     if (
       typeof errorMessage === 'string' &&
@@ -181,17 +181,10 @@ if (typeof window !== 'undefined') {
     ) {
       return true // Prevent default error handling
     }
-    
+
     // Call original handler if exists
     if (originalErrorHandler) {
-      const result = originalErrorHandler.call(
-        window,
-        message,
-        source,
-        lineno,
-        colno,
-        error
-      )
+      const result = originalErrorHandler.call(window, message, source, lineno, colno, error)
       return result === true
     }
     return false

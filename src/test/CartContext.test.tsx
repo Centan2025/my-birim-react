@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
-import { CartProvider, useCart } from '@/context/CartContext'
-import type { Product } from '@/types'
+import {describe, it, expect, beforeEach, vi} from 'vitest'
+import {render, screen, act} from '@testing-library/react'
+import {CartProvider, useCart} from '@/context/CartContext'
+import type {Product} from '@/types'
 
 // Test component that uses the cart
 const TestComponent = () => {
@@ -20,8 +20,8 @@ const TestComponent = () => {
 
   const mockProduct: Product = {
     id: 'test-product-1',
-    name: { tr: 'Test Ürün', en: 'Test Product' },
-    description: { tr: 'Test açıklama', en: 'Test description' },
+    name: {tr: 'Test Ürün', en: 'Test Product'},
+    description: {tr: 'Test açıklama', en: 'Test description'},
     designerId: 'designer-1',
     categoryId: 'category-1',
     year: 2024,
@@ -244,8 +244,8 @@ describe('CartContext', () => {
       {
         product: {
           id: 'saved-product',
-          name: { tr: 'Kaydedilmiş Ürün', en: 'Saved Product' },
-          description: { tr: 'Açıklama', en: 'Description' },
+          name: {tr: 'Kaydedilmiş Ürün', en: 'Saved Product'},
+          description: {tr: 'Açıklama', en: 'Description'},
           designerId: 'designer-1',
           categoryId: 'category-1',
           year: 2024,
@@ -292,7 +292,7 @@ describe('CartContext', () => {
 describe('useCart hook', () => {
   it('throws error when used outside CartProvider', () => {
     // Suppress console.error for this test
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
     expect(() => {
       render(<TestComponent />)
@@ -301,5 +301,3 @@ describe('useCart hook', () => {
     consoleSpy.mockRestore()
   })
 })
-
-
