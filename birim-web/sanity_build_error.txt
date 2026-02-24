@@ -1,0 +1,23 @@
+
+> birim-web@1.0.0 build
+> sanity build
+
+i Building with auto-updates enabled
+
+Including the following environment variables as part of the JavaScript bundle:
+- SANITY_STUDIO_R2_ACCESS_KEY_ID
+- SANITY_STUDIO_R2_ACCOUNT_ID
+- SANITY_STUDIO_R2_BUCKET_NAME
+- SANITY_STUDIO_R2_DOMAIN
+- SANITY_STUDIO_R2_SECRET_ACCESS_KEY
+
+- Clean output folder
+✓ Clean output folder (6ms)
+- Build Sanity Studio
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+✓ Build Sanity Studio (6617ms)
+
+> birim-web@1.0.0 postbuild
+> node scripts/inject-sentry-bypass.js
+
+Successfully injected Sentry Adblocker bypass into index.html

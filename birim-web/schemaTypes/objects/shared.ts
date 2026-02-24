@@ -252,12 +252,27 @@ export const heroMediaItem = defineType({
               ? 'Video Medyası'
               : 'YouTube Medyası'
       }
+
+      let finalUrl = imageUrl
+      const domain = process.env.SANITY_STUDIO_R2_DOMAIN
+      if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
+        try {
+          const parsed = new URL(finalUrl)
+          const path = parsed.pathname.startsWith('/')
+            ? parsed.pathname.substring(1)
+            : parsed.pathname
+          finalUrl = `${domain}/${path}`
+        } catch (e) {
+          // ignore
+        }
+      }
+
       return {
         title: mediaTitle,
         subtitle: subtitle || (type === 'image' ? 'Resim' : type === 'video' ? 'Video' : 'YouTube'),
         media:
-          type === 'image' && imageUrl
-            ? React.createElement('img', {src: imageUrl, style: {objectFit: 'cover'}})
+          type === 'image' && finalUrl
+            ? React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
             : undefined,
       }
     },
@@ -821,4 +836,49 @@ export const contentBlock = defineType({
       description: 'Butonun medya (resim/video) üzerindeki duracağı konumu seçin.',
     }),
   ],
+  preview: {
+    select: {
+      title: 'title.tr',
+      mediaType: 'mediaType',
+      imageUrl: 'imageR2.url',
+      backgroundColor: 'backgroundColor',
+    },
+    prepare(selection: any) {
+      const {title, mediaType, imageUrl, backgroundColor} = selection
+
+      let finalUrl = imageUrl
+      const domain = process.env.SANITY_STUDIO_R2_DOMAIN
+      if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
+        try {
+          const parsed = new URL(finalUrl)
+          const path = parsed.pathname.startsWith('/')
+            ? parsed.pathname.substring(1)
+            : parsed.pathname
+          finalUrl = `${domain}/${path}`
+        } catch (e) {
+          // ignore
+        }
+      }
+
+      let mediaTitle = title
+      if (!mediaTitle) {
+        mediaTitle =
+          mediaType === 'image'
+            ? 'Resim Bloğu'
+            : mediaType === 'video'
+              ? 'Video Bloğu'
+              : mediaType === 'youtube'
+                ? 'YouTube Bloğu'
+                : 'Metin Bloğu'
+      }
+      return {
+        title: mediaTitle,
+        subtitle: `Arka Plan: ${backgroundColor === 'white' ? 'Beyaz' : 'Gri'}`,
+        media:
+          mediaType === 'image' && finalUrl
+            ? React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
+            : undefined,
+      }
+    },
+  },
 })

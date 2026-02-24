@@ -1,7 +1,19 @@
 import React from 'react'
 
 export default function PortableTextImagePreview(props: any) {
-  const url = props.imageR2?.url || props.value?.imageR2?.url
+  let url = props.imageR2?.url || props.value?.imageR2?.url
+  const domain = process.env.SANITY_STUDIO_R2_DOMAIN
+
+  // Rewrite .r2.dev to the custom worker domain if needed
+  if (url && domain && url.includes('.r2.dev') && !domain.includes('.r2.dev')) {
+    try {
+      const parsed = new URL(url)
+      const path = parsed.pathname.startsWith('/') ? parsed.pathname.substring(1) : parsed.pathname
+      url = `${domain}/${path}`
+    } catch (e) {
+      // ignore
+    }
+  }
   const title = props.caption || props.alt || props.title || 'Görsel (R2)'
 
   return (
