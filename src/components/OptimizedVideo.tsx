@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, { useState, useRef, useCallback } from 'react'
+import React, {useState, useRef, useCallback} from 'react'
 
 interface OptimizedVideoProps {
   src: string
@@ -52,6 +52,34 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
   const [hasError, setHasError] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
 
+  // R2 URL Rewriter: .r2.dev URL'lerini Workers CDN'e çevir
+  const rewriteUrl = (url: string | undefined): string | undefined => {
+    if (!url) return url
+    const r2Domain = 'https://birim-assets.web-birim.workers.dev'
+    const r2Origin = 'https://pub-5e705b2a702d4bb1a3631c558917599d.r2.dev'
+    if (url.startsWith(r2Origin)) {
+      return url.replace(r2Origin, r2Domain)
+    }
+    // Genel .r2.dev URL'lerini de yakala
+    if (url.includes('.r2.dev')) {
+      try {
+        const parsedUrl = new URL(url)
+        const path = parsedUrl.pathname.startsWith('/')
+          ? parsedUrl.pathname.substring(1)
+          : parsedUrl.pathname
+        return `${r2Domain}/${path}`
+      } catch {
+        return url
+      }
+    }
+    return url
+  }
+
+  // Tüm src'leri rewrite et (readonly props değiştirilemez, yeni değişkenler oluştur)
+  const rwSrc = rewriteUrl(src) || src
+  const rwSrcMobile = rewriteUrl(srcMobile)
+  const rwSrcDesktop = rewriteUrl(srcDesktop)
+
   const handleLoadedData = () => {
     setIsLoaded(true)
     onLoad?.()
@@ -75,14 +103,16 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
           1: 'MEDIA_ERR_ABORTED',
           2: 'MEDIA_ERR_NETWORK',
           3: 'MEDIA_ERR_DECODE',
-          4: 'MEDIA_ERR_SRC_NOT_SUPPORTED'
-        }[error.code]
+          4: 'MEDIA_ERR_SRC_NOT_SUPPORTED',
+        }[error.code],
       })
 
       // Sadece gerçek yükleme hatalarını yakala
-      if (error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED ||
+      if (
+        error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED ||
         error.code === MediaError.MEDIA_ERR_NETWORK ||
-        error.code === MediaError.MEDIA_ERR_DECODE) {
+        error.code === MediaError.MEDIA_ERR_DECODE
+      ) {
         setHasError(true)
         onError?.()
         return
@@ -93,7 +123,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     // Error event'i geldi ama error objesi yoksa, muhtemelen cache hatası
     // Bu durumda video yine de çalışabilir, bu yüzden görmezden gel
     console.warn('Video error event tetiklendi ama error objesi yok:', {
-      videoSrc: videoElement?.src || videoElement?.currentSrc
+      videoSrc: videoElement?.src || videoElement?.currentSrc,
     })
   }
 
@@ -112,7 +142,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
             }
           })
         },
-        { rootMargin: '50px' }
+        {rootMargin: '50px'}
       )
 
       observer.observe(videoRef.current)
@@ -123,9 +153,9 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
   }, [loading, preload])
 
   // Art Direction: srcMobile veya srcDesktop varsa kullan, yoksa src'i kullan
-  const mobileSrc = srcMobile || src
-  const desktopSrc = srcDesktop || src
-  const useArtDirection = Boolean(srcMobile || srcDesktop)
+  const mobileSrc = rwSrcMobile || rwSrc
+  const desktopSrc = rwSrcDesktop || rwSrc
+  const useArtDirection = Boolean(rwSrcMobile || rwSrcDesktop)
 
   // Poster için de Art Direction desteği
   const getPosterForScreen = useCallback((): string | undefined => {
@@ -141,10 +171,10 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
   const getVideoSrc = (): string => {
     if (typeof window !== 'undefined') {
       const isMobile = window.innerWidth <= 768
-      if (isMobile && srcMobile) return mobileSrc
-      if (!isMobile && srcDesktop) return desktopSrc
+      if (isMobile && rwSrcMobile) return mobileSrc
+      if (!isMobile && rwSrcDesktop) return desktopSrc
     }
-    return src
+    return rwSrc
   }
 
   // Poster'ı dinamik olarak güncelle
@@ -215,21 +245,26 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       }
     }
     return undefined
-  }, [src, srcMobile, srcDesktop])
+  }, [rwSrc, rwSrcMobile, rwSrcDesktop])
 
   if (hasError) {
     return (
-      <div className={`bg-gray-200 flex items-center justify-center ${className}`} style={{ minHeight: '200px' }}>
+      <div
+        className={`bg-gray-200 flex items-center justify-center ${className}`}
+        style={{minHeight: '200px'}}
+      >
         <div className="text-center p-4">
           <span className="text-gray-400 text-sm block mb-2">Video yüklenemedi</span>
-          <span className="text-gray-300 text-xs block">URL: {src || srcMobile || srcDesktop || 'Belirtilmemiş'}</span>
+          <span className="text-gray-300 text-xs block">
+            URL: {rwSrc || rwSrcMobile || rwSrcDesktop || 'Belirtilmemiş'}
+          </span>
         </div>
       </div>
     )
   }
 
   // Don't render a video element if there's no source at all
-  if (!src && !srcMobile && !srcDesktop) {
+  if (!rwSrc && !rwSrcMobile && !rwSrcDesktop) {
     return null
   }
 
@@ -249,7 +284,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
         className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ${className}`}
         style={style}
         onLoadedData={handleLoadedData}
-        onError={(e) => {
+        onError={e => {
           // İlk hata source tag'lerinden gelirse, direkt src'i dene
           const video = e.currentTarget
           if (!video.src && videoSrc) {
@@ -262,9 +297,9 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
         onCanPlay={handleLoadedData}
       >
         {/* Mobil için video source */}
-        {srcMobile && <source src={mobileSrc} type="video/mp4" media="(max-width: 768px)" />}
+        {rwSrcMobile && <source src={mobileSrc} type="video/mp4" media="(max-width: 768px)" />}
         {/* Desktop için video source */}
-        {srcDesktop && <source src={desktopSrc} type="video/mp4" media="(min-width: 769px)" />}
+        {rwSrcDesktop && <source src={desktopSrc} type="video/mp4" media="(min-width: 769px)" />}
         {/* Fallback source */}
         <source src={videoSrc} type="video/mp4" />
       </video>
@@ -286,11 +321,11 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ${className}`}
       style={style}
       onLoadedData={handleLoadedData}
-      onError={(e) => {
+      onError={e => {
         // İlk hata source tag'inden gelirse, direkt src'i dene
         const video = e.currentTarget
-        if (video.src !== src && src) {
-          video.src = src
+        if (video.src !== rwSrc && rwSrc) {
+          video.src = rwSrc
           video.load()
         } else {
           handleError(e)
@@ -298,7 +333,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       }}
       onCanPlay={handleLoadedData}
     >
-      <source src={src} type="video/mp4" />
+      <source src={rwSrc} type="video/mp4" />
       {/* Fallback: Eğer source çalışmazsa, video element'inin src'i kullanılacak */}
     </video>
   )
