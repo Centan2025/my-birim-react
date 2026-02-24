@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { R2ImageMetadata } from '../types'
 
+/**
+ * srcset attribute'ünde boşluklar ayırıcıdır — URL'deki boşlukları %20 ile encode ederek
+ * "pomelli-image (9).webp" benzeri dosya isimlerinde kırılmayı önler.
+ */
+const encodeSrcSetUrl = (url: string): string => {
+  if (!url) return url
+  return url.replace(/ /g, '%20')
+}
+
 interface OptimizedImageProps {
   src: string
   alt: string
@@ -116,7 +125,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       urlObj.searchParams.set('q', quality.toString())
       urlObj.searchParams.set('fm', format)
       urlObj.searchParams.set('auto', 'format')
-      return urlObj.toString()
+      return encodeSrcSetUrl(urlObj.toString())
     }
 
     // 2. Cloudflare R2 / Image Resizing
@@ -145,10 +154,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       const path = url.replace(r2Domain + '/', '')
 
       // Construct: https://assets.birim.com/cdn-cgi/image/.../path
-      return `${r2Domain}/cdn-cgi/image/${params.join(',')}/${path}`
+      return encodeSrcSetUrl(`${r2Domain}/cdn-cgi/image/${params.join(',')}/${path}`)
     }
 
-    return url
+    return encodeSrcSetUrl(url)
   }
 
   // Optimize edilmiş URL'ler
@@ -190,7 +199,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
         // Remove domain to get path
         let path = baseUrl.replace(r2Domain + '/', '')
-        return `${r2Domain}/cdn-cgi/image/${params.join(',')}/${path}`
+        return encodeSrcSetUrl(`${r2Domain}/cdn-cgi/image/${params.join(',')}/${path}`)
       }
       return sizes
         .map(w => `${buildR2(w)} ${w}w`)
@@ -253,9 +262,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       params.push(`format=${imgFormat === 'jpg' ? 'jpeg' : imgFormat}`) // Cloudflare uses 'jpeg'
 
       let path = url.replace(r2Domain + '/', '')
-      return `${r2Domain}/cdn-cgi/image/${params.join(',')}/${path}`
+      return encodeSrcSetUrl(`${r2Domain}/cdn-cgi/image/${params.join(',')}/${path}`)
     }
-    return url
+    return encodeSrcSetUrl(url)
   }
 
   // Strip layout relevant classes from inner img to prevent nested constraints
