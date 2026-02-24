@@ -1,5 +1,5 @@
-import { defineField, defineType } from 'sanity'
-import { localizedString } from './localizedString'
+import {defineField, defineType} from 'sanity'
+import {localizedString} from './localizedString'
 import MaterialSelectionInput from '../../components/MaterialSelectionInput'
 import FontSelectorInput from '../../components/FontSelectorInput'
 
@@ -8,8 +8,8 @@ export const productDimensionDetail = defineType({
   title: 'Ürün Ölçü Detayı',
   type: 'object',
   fields: [
-    defineField({ name: 'label', title: 'Etiket', type: 'localizedString' }),
-    defineField({ name: 'value', title: 'Değer', type: 'string' }),
+    defineField({name: 'label', title: 'Etiket', type: 'localizedString'}),
+    defineField({name: 'value', title: 'Değer', type: 'string'}),
   ],
 })
 
@@ -22,7 +22,7 @@ export const productDimensionSet = defineType({
       name: 'details',
       title: 'Detaylar',
       type: 'array',
-      of: [{ type: 'productDimensionDetail' }],
+      of: [{type: 'productDimensionDetail'}],
     }),
   ],
 })
@@ -37,19 +37,22 @@ export const productDimensionImage = defineType({
       title: 'Görsel (Tüm Cihazlar)',
       type: 'r2Asset',
       validation: (Rule) => Rule.required(),
-      description: 'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+      description:
+        'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
     }),
     defineField({
       name: 'imageMobileR2',
       title: 'Görsel (Mobil)',
       type: 'r2Asset',
-      description: 'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+      description:
+        'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
     }),
     defineField({
       name: 'imageDesktopR2',
       title: 'Görsel (Desktop)',
       type: 'r2Asset',
-      description: 'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+      description:
+        'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
     }),
     defineField({
       name: 'title',
@@ -65,8 +68,8 @@ export const productMaterial = defineType({
   title: 'Ürün Malzemesi',
   type: 'object',
   fields: [
-    defineField({ name: 'name', title: 'Ad', type: 'localizedString' }),
-    defineField({ name: 'imageR2', title: 'Görsel', type: 'r2Asset' }),
+    defineField({name: 'name', title: 'Ad', type: 'localizedString'}),
+    defineField({name: 'imageR2', title: 'Görsel', type: 'r2Asset'}),
   ],
 })
 
@@ -85,7 +88,7 @@ export const materialSwatchBook = defineType({
       name: 'items',
       title: 'Malzemeler',
       type: 'array',
-      of: [{ type: 'productMaterial' }],
+      of: [{type: 'productMaterial'}],
     }),
   ],
 })
@@ -95,8 +98,8 @@ export const downloadableItem = defineType({
   title: 'İndirilebilir Öğe',
   type: 'object',
   fields: [
-    defineField({ name: 'name', title: 'Ad', type: 'localizedString' }),
-    defineField({ name: 'fileR2', title: 'Dosya', type: 'r2Asset' }),
+    defineField({name: 'name', title: 'Ad', type: 'localizedString'}),
+    defineField({name: 'fileR2', title: 'Dosya', type: 'r2Asset'}),
   ],
 })
 
@@ -109,13 +112,13 @@ export const exclusiveContent = defineType({
       name: 'drawings',
       title: 'Teknik Çizimler',
       type: 'array',
-      of: [{ type: 'downloadableItem' }],
+      of: [{type: 'downloadableItem'}],
     }),
     defineField({
       name: 'models3d',
       title: '3D Modeller',
       type: 'array',
-      of: [{ type: 'downloadableItem' }],
+      of: [{type: 'downloadableItem'}],
     }),
   ],
 })
@@ -152,9 +155,9 @@ export const heroMediaItem = defineType({
       type: 'string',
       options: {
         list: [
-          { title: 'Image', value: 'image' },
-          { title: 'Video', value: 'video' },
-          { title: 'YouTube', value: 'youtube' },
+          {title: 'Image', value: 'image'},
+          {title: 'Video', value: 'video'},
+          {title: 'YouTube', value: 'youtube'},
         ],
       },
       initialValue: 'image',
@@ -164,71 +167,71 @@ export const heroMediaItem = defineType({
       name: 'imageR2',
       title: 'Görsel (Tüm Cihazlar)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'image',
+      hidden: ({parent}) => parent?.type !== 'image',
     }),
     // Art Direction: Mobil için görsel
     defineField({
       name: 'imageMobileR2',
       title: 'Görsel (Mobil)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'image',
+      hidden: ({parent}) => parent?.type !== 'image',
     }),
     // Art Direction: Desktop için görsel
     defineField({
       name: 'imageDesktopR2',
       title: 'Görsel (Desktop)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'image',
+      hidden: ({parent}) => parent?.type !== 'image',
     }),
     // For video, allow file upload
     defineField({
       name: 'videoFileR2',
       title: 'Video Dosyası (Tüm Cihazlar)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'video',
+      hidden: ({parent}) => parent?.type !== 'video',
     }),
     // Art Direction: Mobil için video
     defineField({
       name: 'videoFileMobileR2',
       title: 'Video Dosyası (Mobil)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'video',
+      hidden: ({parent}) => parent?.type !== 'video',
     }),
     // Art Direction: Desktop için video
     defineField({
       name: 'videoFileDesktopR2',
       title: 'Video Dosyası (Desktop)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'video',
+      hidden: ({parent}) => parent?.type !== 'video',
     }),
     // For video/youtube or external image, allow URL
     defineField({
       name: 'url',
       title: 'Video URL (veya YouTube URL)',
       type: 'url',
-      hidden: ({ parent }) =>
+      hidden: ({parent}) =>
         parent?.type === 'image' || (parent?.type === 'video' && parent?.videoFile),
       description: 'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.',
     }),
-    defineField({ name: 'title', title: 'Başlık', type: 'localizedString' }),
-    defineField({ name: 'subtitle', title: 'Alt Başlık', type: 'localizedString' }),
+    defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
+    defineField({name: 'subtitle', title: 'Alt Başlık', type: 'localizedString'}),
     defineField({
       name: 'textPosition',
       title: 'Metin Konumu',
       type: 'string',
       options: {
         list: [
-          { title: 'Merkez', value: 'center' },
-          { title: 'Sol', value: 'left' },
-          { title: 'Sağ', value: 'right' },
+          {title: 'Merkez', value: 'center'},
+          {title: 'Sol', value: 'left'},
+          {title: 'Sağ', value: 'right'},
         ],
       },
       initialValue: 'center',
       description: 'Metinlerin hero medya üzerindeki konumu',
     }),
-    defineField({ name: 'isButtonVisible', title: 'Butonu Göster', type: 'boolean' }),
-    defineField({ name: 'buttonText', title: 'Buton Metni', type: 'localizedString' }),
-    defineField({ name: 'buttonLink', title: 'Buton Bağlantısı', type: 'string' }),
+    defineField({name: 'isButtonVisible', title: 'Butonu Göster', type: 'boolean'}),
+    defineField({name: 'buttonText', title: 'Buton Metni', type: 'localizedString'}),
+    defineField({name: 'buttonLink', title: 'Buton Bağlantısı', type: 'string'}),
   ],
 })
 
@@ -244,9 +247,9 @@ export const productSimpleMediaItem = defineType({
       type: 'string',
       options: {
         list: [
-          { title: 'Image', value: 'image' },
-          { title: 'Video', value: 'video' },
-          { title: 'YouTube', value: 'youtube' },
+          {title: 'Image', value: 'image'},
+          {title: 'Video', value: 'video'},
+          {title: 'YouTube', value: 'youtube'},
         ],
       },
       initialValue: 'image',
@@ -255,43 +258,43 @@ export const productSimpleMediaItem = defineType({
       name: 'imageR2',
       title: 'Görsel (Tüm Cihazlar)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'image',
+      hidden: ({parent}) => parent?.type !== 'image',
     }),
     defineField({
       name: 'imageMobileR2',
       title: 'Görsel (Mobil)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'image',
+      hidden: ({parent}) => parent?.type !== 'image',
     }),
     defineField({
       name: 'imageDesktopR2',
       title: 'Görsel (Desktop)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'image',
+      hidden: ({parent}) => parent?.type !== 'image',
     }),
     defineField({
       name: 'videoFileR2',
       title: 'Video Dosyası (Tüm Cihazlar)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'video',
+      hidden: ({parent}) => parent?.type !== 'video',
     }),
     defineField({
       name: 'videoFileMobileR2',
       title: 'Video Dosyası (Mobil)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'video',
+      hidden: ({parent}) => parent?.type !== 'video',
     }),
     defineField({
       name: 'videoFileDesktopR2',
       title: 'Video Dosyası (Desktop)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'video',
+      hidden: ({parent}) => parent?.type !== 'video',
     }),
     defineField({
       name: 'url',
       title: 'Video URL (veya YouTube URL)',
       type: 'url',
-      hidden: ({ parent }) => parent?.type === 'image',
+      hidden: ({parent}) => parent?.type === 'image',
       description: 'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.',
     }),
   ],
@@ -309,9 +312,9 @@ export const productPanelMediaItem = defineType({
       type: 'string',
       options: {
         list: [
-          { title: 'Image', value: 'image' },
-          { title: 'Video', value: 'video' },
-          { title: 'YouTube', value: 'youtube' },
+          {title: 'Image', value: 'image'},
+          {title: 'Video', value: 'video'},
+          {title: 'YouTube', value: 'youtube'},
         ],
       },
       initialValue: 'image',
@@ -320,46 +323,46 @@ export const productPanelMediaItem = defineType({
       name: 'imageR2',
       title: 'Görsel (Tüm Cihazlar)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'image',
+      hidden: ({parent}) => parent?.type !== 'image',
     }),
     defineField({
       name: 'imageMobileR2',
       title: 'Görsel (Mobil)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'image',
+      hidden: ({parent}) => parent?.type !== 'image',
     }),
     defineField({
       name: 'imageDesktopR2',
       title: 'Görsel (Desktop)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'image',
+      hidden: ({parent}) => parent?.type !== 'image',
     }),
     defineField({
       name: 'videoFileR2',
       title: 'Video Dosyası (Tüm Cihazlar)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'video',
+      hidden: ({parent}) => parent?.type !== 'video',
     }),
     defineField({
       name: 'videoFileMobileR2',
       title: 'Video Dosyası (Mobil)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'video',
+      hidden: ({parent}) => parent?.type !== 'video',
     }),
     defineField({
       name: 'videoFileDesktopR2',
       title: 'Video Dosyası (Desktop)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'video',
+      hidden: ({parent}) => parent?.type !== 'video',
     }),
     defineField({
       name: 'url',
       title: 'Video URL (veya YouTube URL)',
       type: 'url',
-      hidden: ({ parent }) => parent?.type === 'image',
+      hidden: ({parent}) => parent?.type === 'image',
       description: 'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.',
     }),
-    defineField({ name: 'title', title: 'Başlık', type: 'localizedString' }),
+    defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
     defineField({
       name: 'description',
       title: 'Açıklama',
@@ -392,8 +395,8 @@ export const footerPartner = defineType({
       type: 'localizedString',
       description: 'Logo yoksa gösterilecek metin',
     }),
-    defineField({ name: 'logoR2', title: 'Logo', type: 'r2Asset' }),
-    defineField({ name: 'url', title: 'Link URL', type: 'url' }),
+    defineField({name: 'logoR2', title: 'Logo', type: 'r2Asset'}),
+    defineField({name: 'url', title: 'Link URL', type: 'url'}),
   ],
 })
 
@@ -402,8 +405,8 @@ export const footerLink = defineType({
   title: 'Altbilgi Bağlantısı',
   type: 'object',
   fields: [
-    defineField({ name: 'text', title: 'Metin', type: 'localizedString' }),
-    defineField({ name: 'url', title: 'URL', type: 'url' }),
+    defineField({name: 'text', title: 'Metin', type: 'localizedString'}),
+    defineField({name: 'url', title: 'URL', type: 'url'}),
   ],
 })
 
@@ -412,12 +415,12 @@ export const footerLinkColumn = defineType({
   title: 'Altbilgi Bağlantı Sütunu',
   type: 'object',
   fields: [
-    defineField({ name: 'title', title: 'Başlık', type: 'localizedString' }),
+    defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
     defineField({
       name: 'links',
       title: 'Bağlantılar',
       type: 'array',
-      of: [{ type: 'footerLink' }],
+      of: [{type: 'footerLink'}],
     }),
   ],
 })
@@ -427,10 +430,10 @@ export const socialLink = defineType({
   title: 'Sosyal Bağlantı',
   type: 'object',
   fields: [
-    defineField({ name: 'name', title: 'Ad', type: 'string' }),
-    defineField({ name: 'url', title: 'URL', type: 'url' }),
-    defineField({ name: 'svgIcon', title: 'SVG İkon', type: 'text' }),
-    defineField({ name: 'isEnabled', title: 'Aktif', type: 'boolean' }),
+    defineField({name: 'name', title: 'Ad', type: 'string'}),
+    defineField({name: 'url', title: 'URL', type: 'url'}),
+    defineField({name: 'svgIcon', title: 'SVG İkon', type: 'text'}),
+    defineField({name: 'isEnabled', title: 'Aktif', type: 'boolean'}),
   ],
 })
 
@@ -439,7 +442,7 @@ export const legalLink = defineType({
   title: 'Yasal Bağlantı',
   type: 'object',
   fields: [
-    defineField({ name: 'text', title: 'Metin', type: 'localizedString' }),
+    defineField({name: 'text', title: 'Metin', type: 'localizedString'}),
     defineField({
       name: 'url',
       title: 'URL',
@@ -448,7 +451,7 @@ export const legalLink = defineType({
         'İç link için: /cookies, /about gibi. Dış link için: https://example.com gibi tam URL.',
       validation: (Rule) => Rule.required(),
     }),
-    defineField({ name: 'isVisible', title: 'Görünür', type: 'boolean', initialValue: true }),
+    defineField({name: 'isVisible', title: 'Görünür', type: 'boolean', initialValue: true}),
   ],
 })
 
@@ -457,22 +460,22 @@ export const contactLocation = defineType({
   title: 'Lokasyon',
   type: 'object',
   fields: [
-    defineField({ name: 'type', title: 'Tür (Showroom, Fabrika vb.)', type: 'localizedString' }),
-    defineField({ name: 'title', title: 'Başlık', type: 'localizedString' }),
-    defineField({ name: 'address', title: 'Adres', type: 'string' }),
-    defineField({ name: 'phone', title: 'Telefon', type: 'string' }),
-    defineField({ name: 'email', title: 'E-posta', type: 'string' }),
+    defineField({name: 'type', title: 'Tür (Showroom, Fabrika vb.)', type: 'localizedString'}),
+    defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
+    defineField({name: 'address', title: 'Adres', type: 'string'}),
+    defineField({name: 'phone', title: 'Telefon', type: 'string'}),
+    defineField({name: 'email', title: 'E-posta', type: 'string'}),
     defineField({
       name: 'mapEmbedUrl',
       title: 'Google Maps Embed URL',
       type: 'string',
-      description: 'Google Maps embed linki veya normal harita URL\'si',
+      description: "Google Maps embed linki veya normal harita URL'si",
     }),
     defineField({
       name: 'media',
       title: 'Lokasyon Medyaları',
       type: 'array',
-      of: [{ type: 'contactLocationMedia' }],
+      of: [{type: 'contactLocationMedia'}],
       description: 'Lokasyon için bant şeklinde gösterilecek medyalar',
     }),
     defineField({
@@ -495,9 +498,9 @@ export const contactLocationMedia = defineType({
       type: 'string',
       options: {
         list: [
-          { title: 'Image', value: 'image' },
-          { title: 'Video', value: 'video' },
-          { title: 'YouTube', value: 'youtube' },
+          {title: 'Image', value: 'image'},
+          {title: 'Video', value: 'video'},
+          {title: 'YouTube', value: 'youtube'},
         ],
       },
       initialValue: 'image',
@@ -506,43 +509,43 @@ export const contactLocationMedia = defineType({
       name: 'imageR2',
       title: 'Görsel (Tüm Cihazlar)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'image',
+      hidden: ({parent}) => parent?.type !== 'image',
     }),
     defineField({
       name: 'imageMobileR2',
       title: 'Görsel (Mobil)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'image',
+      hidden: ({parent}) => parent?.type !== 'image',
     }),
     defineField({
       name: 'imageDesktopR2',
       title: 'Görsel (Desktop)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'image',
+      hidden: ({parent}) => parent?.type !== 'image',
     }),
     defineField({
       name: 'videoFileR2',
       title: 'Video Dosyası (Tüm Cihazlar)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'video',
+      hidden: ({parent}) => parent?.type !== 'video',
     }),
     defineField({
       name: 'videoFileMobileR2',
       title: 'Video Dosyası (Mobil)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'video',
+      hidden: ({parent}) => parent?.type !== 'video',
     }),
     defineField({
       name: 'videoFileDesktopR2',
       title: 'Video Dosyası (Desktop)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.type !== 'video',
+      hidden: ({parent}) => parent?.type !== 'video',
     }),
     defineField({
       name: 'url',
       title: 'Video URL (veya YouTube URL)',
       type: 'url',
-      hidden: ({ parent }) => parent?.type === 'image',
+      hidden: ({parent}) => parent?.type === 'image',
       description: 'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.',
     }),
   ],
@@ -561,14 +564,14 @@ export const productMaterialSelection = defineType({
       name: 'group',
       title: 'Malzeme Grubu',
       type: 'reference',
-      to: [{ type: 'materialGroup' }],
+      to: [{type: 'materialGroup'}],
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'materials',
       title: 'Seçilen Malzemeler',
       type: 'array',
-      of: [{ type: 'productMaterial' }],
+      of: [{type: 'productMaterial'}],
       description: 'Seçilen gruptan bu ürün için kullanılacak malzemeler',
     }),
   ],
@@ -585,9 +588,9 @@ export const contentBlock = defineType({
       type: 'string',
       options: {
         list: [
-          { title: 'Görsel', value: 'image' },
-          { title: 'Video', value: 'video' },
-          { title: 'YouTube', value: 'youtube' },
+          {title: 'Görsel', value: 'image'},
+          {title: 'Video', value: 'video'},
+          {title: 'YouTube', value: 'youtube'},
         ],
       },
       initialValue: 'image',
@@ -596,19 +599,19 @@ export const contentBlock = defineType({
       name: 'imageR2',
       title: 'Görsel (Tüm Cihazlar)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.mediaType !== 'image',
+      hidden: ({parent}) => parent?.mediaType !== 'image',
     }),
     defineField({
       name: 'imageMobileR2',
       title: 'Görsel (Mobil)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.mediaType !== 'image',
+      hidden: ({parent}) => parent?.mediaType !== 'image',
     }),
     defineField({
       name: 'imageDesktopR2',
       title: 'Görsel (Desktop)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.mediaType !== 'image',
+      hidden: ({parent}) => parent?.mediaType !== 'image',
     }),
     // Görsel konumu – doğrudan görsel alanlarının altında
     defineField({
@@ -617,10 +620,10 @@ export const contentBlock = defineType({
       type: 'string',
       options: {
         list: [
-          { title: 'Sol', value: 'left' },
-          { title: 'Sağ', value: 'right' },
-          { title: 'Orta', value: 'center' },
-          { title: 'Tam Genişlik', value: 'full' },
+          {title: 'Sol', value: 'left'},
+          {title: 'Sağ', value: 'right'},
+          {title: 'Orta', value: 'center'},
+          {title: 'Tam Genişlik', value: 'full'},
         ],
         layout: 'radio',
         direction: 'horizontal',
@@ -632,25 +635,25 @@ export const contentBlock = defineType({
       name: 'videoFileR2',
       title: 'Video Dosyası (Tüm Cihazlar)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.mediaType !== 'video',
+      hidden: ({parent}) => parent?.mediaType !== 'video',
     }),
     defineField({
       name: 'videoFileMobileR2',
       title: 'Video Dosyası (Mobil)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.mediaType !== 'video',
+      hidden: ({parent}) => parent?.mediaType !== 'video',
     }),
     defineField({
       name: 'videoFileDesktopR2',
       title: 'Video Dosyası (Desktop)',
       type: 'r2Asset',
-      hidden: ({ parent }) => parent?.mediaType !== 'video',
+      hidden: ({parent}) => parent?.mediaType !== 'video',
     }),
     defineField({
       name: 'url',
       title: 'Video URL (veya YouTube URL)',
       type: 'url',
-      hidden: ({ parent }) => parent?.mediaType === 'image',
+      hidden: ({parent}) => parent?.mediaType === 'image',
       description: 'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.',
     }),
     defineField({
@@ -675,8 +678,8 @@ export const contentBlock = defineType({
       type: 'string',
       options: {
         list: [
-          { title: 'Altta', value: 'below' },
-          { title: 'Üstte', value: 'above' },
+          {title: 'Altta', value: 'below'},
+          {title: 'Üstte', value: 'above'},
         ],
         layout: 'radio',
         direction: 'horizontal',
@@ -696,8 +699,8 @@ export const contentBlock = defineType({
       type: 'string',
       options: {
         list: [
-          { title: 'Altta', value: 'below' },
-          { title: 'Üstte', value: 'above' },
+          {title: 'Altta', value: 'below'},
+          {title: 'Üstte', value: 'above'},
         ],
         layout: 'radio',
         direction: 'horizontal',
@@ -711,9 +714,9 @@ export const contentBlock = defineType({
       type: 'string',
       options: {
         list: [
-          { title: 'Sol', value: 'left' },
-          { title: 'Orta', value: 'center' },
-          { title: 'Sağ', value: 'right' },
+          {title: 'Sol', value: 'left'},
+          {title: 'Orta', value: 'center'},
+          {title: 'Sağ', value: 'right'},
         ],
         layout: 'radio',
         direction: 'horizontal',
@@ -744,8 +747,8 @@ export const contentBlock = defineType({
       type: 'string',
       options: {
         list: [
-          { title: 'Beyaz', value: 'white' },
-          { title: 'Gri', value: 'gray' },
+          {title: 'Beyaz', value: 'white'},
+          {title: 'Gri', value: 'gray'},
         ],
         layout: 'radio',
         direction: 'horizontal',
@@ -754,10 +757,19 @@ export const contentBlock = defineType({
       description: 'İçerik bloğunun arka plan rengi (varsayılan: Beyaz)',
     }),
     defineField({
+      name: 'spacingBottom',
+      title: 'Alt Boşluk (px)',
+      type: 'number',
+      description: 'Bu bloğun altına eklenecek boşluk (piksel). Varsayılan: 0',
+      initialValue: 0,
+      validation: (Rule) => Rule.min(0).max(200),
+    }),
+    defineField({
       name: 'showButtonOnMedia',
       title: 'Butonu Medya Üzerinde Göster',
       type: 'boolean',
-      description: 'Aktif edilirse buton metin alanında değil, resim/video üzerinde seçilen konumda görünür.',
+      description:
+        'Aktif edilirse buton metin alanında değil, resim/video üzerinde seçilen konumda görünür.',
       initialValue: false,
     }),
     defineField({
@@ -766,17 +778,17 @@ export const contentBlock = defineType({
       type: 'string',
       options: {
         list: [
-          { title: 'Merkez', value: 'center' },
-          { title: 'Sol Üst', value: 'top-left' },
-          { title: 'Sağ Üst', value: 'top-right' },
-          { title: 'Sol Alt', value: 'bottom-left' },
-          { title: 'Sağ Alt', value: 'bottom-right' },
+          {title: 'Merkez', value: 'center'},
+          {title: 'Sol Üst', value: 'top-left'},
+          {title: 'Sağ Üst', value: 'top-right'},
+          {title: 'Sol Alt', value: 'bottom-left'},
+          {title: 'Sağ Alt', value: 'bottom-right'},
         ],
         layout: 'radio',
         direction: 'horizontal',
       },
       initialValue: 'center',
-      hidden: ({ parent }) => !parent?.showButtonOnMedia,
+      hidden: ({parent}) => !parent?.showButtonOnMedia,
       description: 'Butonun medya (resim/video) üzerindeki duracağı konumu seçin.',
     }),
   ],

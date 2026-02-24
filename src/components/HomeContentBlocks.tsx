@@ -299,13 +299,14 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           </div>
         )
 
-        // Content alanları arasında dikey boşluk olmasın
-        const sectionSpacingClass = 'py-0'
+        // Content alanları arasında dikey boşluk olmasın (Sanity'den ayarlanabilir)
+        const bottomSpacing = block.spacingBottom || 0
 
         return (
           <section
             key={index}
-            className={`content-block-wrapper relative z-20 ${sectionSpacingClass} ${backgroundColor}`}
+            className={`content-block-wrapper relative z-20 ${backgroundColor}`}
+            style={{paddingBottom: bottomSpacing > 0 ? `${bottomSpacing}px` : undefined}}
             data-block-index={index}
           >
             {isFullWidth || isCenter ? (
