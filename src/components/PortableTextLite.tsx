@@ -151,40 +151,49 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
     flushList()
 
     // Handle Image Pairing Logic (Side by Side for consecutive left/right images)
-    if (
-      block._type === 'image' &&
-      block.asset &&
-      (block.layout === 'left' || block.layout === 'right')
-    ) {
+    const isImageBlock = (b: Block) =>
+      (b._type === 'image' && b.asset) || (b._type === 'portableTextImage' && b.imageR2?.url)
+    const getImageSrc = (b: Block) =>
+      b._type === 'portableTextImage' && b.imageR2?.url
+        ? b.imageR2.url
+        : b.asset
+          ? urlFor(b).url() || ''
+          : ''
+    const getImageAlt = (b: Block) => b.alt || b.imageR2?.alt || ''
+
+    if (isImageBlock(block) && (block.layout === 'left' || block.layout === 'right')) {
       const nextBlock = value[idx + 1]
       if (
         nextBlock &&
-        nextBlock._type === 'image' &&
-        nextBlock.asset &&
+        isImageBlock(nextBlock) &&
         (nextBlock.layout === 'left' || nextBlock.layout === 'right') &&
         nextBlock.layout !== block.layout
       ) {
-        // PAIR DETECTED
+        // PAIR DETECTED — eşit yükseklik için aspect-ratio container + object-cover
         nodes.push(
-          <div key={`pair-${blockKey}`} className="flex flex-row gap-2 my-2 clear-both">
-            <figure className="flex-1">
-              <OptimizedImage
-                src={urlFor(block).url() || ''}
-                alt={block.alt || ''}
-                className="w-full h-auto shadow-sm"
-              />
+          <div key={`pair-${blockKey}`} className="grid grid-cols-2 gap-2 my-2 clear-both">
+            <figure className="flex flex-col">
+              <div className="relative w-full aspect-[4/3] overflow-hidden">
+                <OptimizedImage
+                  src={getImageSrc(block)}
+                  alt={getImageAlt(block)}
+                  className="absolute inset-0 w-full h-full object-cover shadow-sm"
+                />
+              </div>
               {block.caption && (
                 <figcaption className="mt-3 text-sm text-gray-500 text-center italic">
                   {block.caption}
                 </figcaption>
               )}
             </figure>
-            <figure className="flex-1">
-              <OptimizedImage
-                src={urlFor(nextBlock).url() || ''}
-                alt={nextBlock.alt || ''}
-                className="w-full h-auto shadow-sm"
-              />
+            <figure className="flex flex-col">
+              <div className="relative w-full aspect-[4/3] overflow-hidden">
+                <OptimizedImage
+                  src={getImageSrc(nextBlock)}
+                  alt={getImageAlt(nextBlock)}
+                  className="absolute inset-0 w-full h-full object-cover shadow-sm"
+                />
+              </div>
               {nextBlock.caption && (
                 <figcaption className="mt-3 text-sm text-gray-500 text-center italic">
                   {nextBlock.caption}
