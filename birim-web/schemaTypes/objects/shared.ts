@@ -153,7 +153,6 @@ export const downloadableItem = defineType({
   fields: [
     defineField({name: 'name', title: 'Ad', type: 'localizedString'}),
     defineField({name: 'fileR2', title: 'Dosya', type: 'r2Asset'}),
-    defineField({name: 'fileR2', title: 'Dosya', type: 'r2Asset'}),
   ],
   preview: {
     select: {
