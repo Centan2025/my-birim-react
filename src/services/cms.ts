@@ -115,31 +115,34 @@ const R2_ORIGIN_DOMAIN =
 const rewriteR2Url = (url: string | undefined): string => {
   if (!url || typeof url !== 'string') return url || ''
 
+  let result = url
+
   // 1. Eğer R2_ORIGIN_DOMAIN tanımlı ve URL bu domain ile başlıyorsa, R2_DOMAIN'e çevir
   if (
     R2_ORIGIN_DOMAIN &&
     R2_DOMAIN &&
     R2_ORIGIN_DOMAIN !== R2_DOMAIN &&
-    url.startsWith(R2_ORIGIN_DOMAIN)
+    result.startsWith(R2_ORIGIN_DOMAIN)
   ) {
-    return url.replace(R2_ORIGIN_DOMAIN, R2_DOMAIN)
+    result = result.replace(R2_ORIGIN_DOMAIN, R2_DOMAIN)
   }
 
   // 2. Genel .r2.dev URL'lerini R2_DOMAIN'e çevir (farklı bucket'lardan gelen URL'ler için)
-  if (R2_DOMAIN && !R2_DOMAIN.includes('.r2.dev') && url.includes('.r2.dev')) {
+  if (R2_DOMAIN && !R2_DOMAIN.includes('.r2.dev') && result.includes('.r2.dev')) {
     // URL'den path'i çıkar: https://pub-xxx.r2.dev/path/to/file -> path/to/file
     try {
-      const parsedUrl = new URL(url)
+      const parsedUrl = new URL(result)
       const path = parsedUrl.pathname.startsWith('/')
         ? parsedUrl.pathname.substring(1)
         : parsedUrl.pathname
-      return `${R2_DOMAIN}/${path}`
+      result = `${R2_DOMAIN}/${path}`
     } catch {
-      return url
+      // parse hatası - URL'yi olduğu gibi bırak
     }
   }
 
-  return url
+  // 3. URL'deki boşlukları encode et (dosya adlarında boşluk olabiliyor)
+  return result.replace(/ /g, '%20')
 }
 
 const sanity = useSanity
@@ -188,7 +191,7 @@ const mapImage = (
     const isMigration = img.startsWith('migration/') || img.startsWith('/migration/')
     if (isMigration && R2_DOMAIN) {
       const cleanPath = img.startsWith('/') ? img.substring(1) : img
-      return `${R2_DOMAIN}/${cleanPath}`
+      return `${R2_DOMAIN}/${cleanPath}`.replace(/ /g, '%20')
     }
     return rewriteR2Url(img)
   }
@@ -200,7 +203,7 @@ const mapImage = (
     const isMigration = rawUrl.startsWith('migration/') || rawUrl.startsWith('/migration/')
     if (isMigration && R2_DOMAIN) {
       const cleanPath = rawUrl.startsWith('/') ? rawUrl.substring(1) : rawUrl
-      return `${R2_DOMAIN}/${cleanPath}`
+      return `${R2_DOMAIN}/${cleanPath}`.replace(/ /g, '%20')
     }
     // Eğer img.url varsa ama Sanity CDN değilse ve R2 domain ise, veya direkt URL ise döndür
     if (
@@ -309,7 +312,8 @@ const mapMediaUrl = (
         ? m?.imageDesktopR2?.url
         : m?.imageR2?.url
     if (r2Url) {
-      if (r2Url.startsWith('migration/') && R2_DOMAIN) return `${R2_DOMAIN}/${r2Url}`
+      if (r2Url.startsWith('migration/') && R2_DOMAIN)
+        return `${R2_DOMAIN}/${r2Url}`.replace(/ /g, '%20')
       return rewriteR2Url(r2Url)
     }
     // Fallback: legacy Sanity image or direct url field
@@ -327,13 +331,15 @@ const mapMediaUrl = (
         ? m?.videoFileDesktopR2?.url
         : m?.videoFileR2?.url
     if (r2Url) {
-      if (r2Url.startsWith('migration/') && R2_DOMAIN) return `${R2_DOMAIN}/${r2Url}`
+      if (r2Url.startsWith('migration/') && R2_DOMAIN)
+        return `${R2_DOMAIN}/${r2Url}`.replace(/ /g, '%20')
       return rewriteR2Url(r2Url)
     }
     // Mobile/Desktop yoksa generic R2'yi dene
     if ((isMobile || isDesktop) && m?.videoFileR2?.url) {
       const genericR2 = m.videoFileR2.url
-      if (genericR2.startsWith('migration/') && R2_DOMAIN) return `${R2_DOMAIN}/${genericR2}`
+      if (genericR2.startsWith('migration/') && R2_DOMAIN)
+        return `${R2_DOMAIN}/${genericR2}`.replace(/ /g, '%20')
       return rewriteR2Url(genericR2)
     }
     // Fallback: legacy Sanity video file asset or direct url field
