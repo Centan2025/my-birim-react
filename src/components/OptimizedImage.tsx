@@ -333,7 +333,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           <img
             src={placeholder}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover blur-sm"
+            className="absolute inset-0 w-full h-full object-cover"
             aria-hidden="true"
           />
         )}
@@ -422,7 +422,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         <img
           src={placeholder}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover blur-sm"
+          className="absolute inset-0 w-full h-full object-cover"
           aria-hidden="true"
         />
       )}
