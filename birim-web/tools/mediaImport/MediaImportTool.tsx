@@ -1031,8 +1031,7 @@ export default function MediaImportTool() {
                       width: r2Url.width,
                       height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes
                     }
                   }
 
@@ -1665,8 +1664,7 @@ async function updateDesignerImages(
       if (r2Url) {
         updates.imageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes }
         unsetFields.push('image') // Sanitydeki görseli kaldır
         hasChanges = true
       }
@@ -1681,8 +1679,7 @@ async function updateDesignerImages(
       if (r2Url) {
         updates.imageMobileR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes }
         unsetFields.push('imageMobile')
         hasChanges = true
       }
@@ -1697,8 +1694,7 @@ async function updateDesignerImages(
       if (r2Url) {
         updates.imageDesktopR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes }
         unsetFields.push('imageDesktop')
         hasChanges = true
       }
@@ -2081,8 +2077,7 @@ async function updateProductImages(client: any, productId: string, product: any)
           width: r2Url.width,
           height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes
         }
         unsetFields.push('mainImage')
         hasChanges = true
@@ -2106,8 +2101,7 @@ async function updateProductImages(client: any, productId: string, product: any)
             width: r2Url.width,
             height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes
           }
           unsetFields.push('mainImage')
           hasChanges = true
@@ -2136,8 +2130,7 @@ async function updateProductImages(client: any, productId: string, product: any)
           width: r2Url.width,
           height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes
         }
         unsetFields.push('mainImageMobile')
         hasChanges = true
@@ -2166,8 +2159,7 @@ async function updateProductImages(client: any, productId: string, product: any)
           width: r2Url.width,
           height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes
         }
         unsetFields.push('mainImageDesktop')
         hasChanges = true
@@ -2286,8 +2278,7 @@ async function updateProductImages(client: any, productId: string, product: any)
           } else {
             updatedItem.imageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes }
             updatedItem.image = null
           }
           syncedAlternativeMedia.push(updatedItem)
@@ -2332,8 +2323,7 @@ async function updateProductImages(client: any, productId: string, product: any)
                 width: r2Url.width,
                 height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes
               }
             })
           }
@@ -2424,8 +2414,7 @@ async function updateProductImages(client: any, productId: string, product: any)
               width: r2Url.width,
               height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes
             }
             hasChanges = true
           }
@@ -2450,8 +2439,7 @@ async function updateProductImages(client: any, productId: string, product: any)
               width: r2Url.width,
               height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes
             }
             hasChanges = true
             console.log(`   ✅ Mobil ölçü görseli R2'ye yüklendi: ${group.mobile.name}`)
@@ -2478,8 +2466,7 @@ async function updateProductImages(client: any, productId: string, product: any)
               width: r2Url.width,
               height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes
             }
             hasChanges = true
             console.log(`   ✅ Desktop ölçü görseli R2'ye yüklendi: ${group.desktop.name}`)
@@ -2580,8 +2567,7 @@ async function updateProductImages(client: any, productId: string, product: any)
                 width: r2Url.width,
                 height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes
               }
             }
           }
@@ -2607,8 +2593,7 @@ async function updateProductImages(client: any, productId: string, product: any)
                   width: r2Url.width,
                   height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes
                 }
               }
             }
@@ -2631,8 +2616,7 @@ async function updateProductImages(client: any, productId: string, product: any)
                   width: r2Url.width,
                   height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes
                 }
               }
             }
@@ -2699,8 +2683,7 @@ async function updateProductImages(client: any, productId: string, product: any)
             _key: `extra-${Date.now()}-${Math.random()}`,
             r2Asset: { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes }
           })
           hasExclusiveChanges = true
         } else if (existing) {
@@ -2923,8 +2906,7 @@ async function updateProjectMedia(client: any, projectId: string, project: any) 
       if (r2Url) {
         updates.coverR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes }
         unsetFields.push('cover')
         hasChanges = true
       }
@@ -2942,8 +2924,7 @@ async function updateProjectMedia(client: any, projectId: string, project: any) 
         if (r2Url) {
           updates.coverR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes }
           unsetFields.push('cover')
           hasChanges = true
         }
@@ -2963,8 +2944,7 @@ async function updateProjectMedia(client: any, projectId: string, project: any) 
       if (r2Url) {
         updates.coverMobileR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes }
         unsetFields.push('coverMobile')
         hasChanges = true
       }
@@ -2982,8 +2962,7 @@ async function updateProjectMedia(client: any, projectId: string, project: any) 
       if (r2Url) {
         updates.coverDesktopR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes }
         unsetFields.push('coverDesktop')
         hasChanges = true
       }
@@ -3035,8 +3014,7 @@ async function updateProjectMedia(client: any, projectId: string, project: any) 
         } else {
           item.imageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes }
         }
         syncedMedia.push(item)
         hasChanges = true
@@ -3112,8 +3090,7 @@ async function updateCategoryImages(
           width: r2Url.width,
           height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes
         }
         unsetFields.push('heroImage')
         hasChanges = true
@@ -3136,8 +3113,7 @@ async function updateCategoryImages(
           width: r2Url.width,
           height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes
         }
         unsetFields.push('menuImage')
         hasChanges = true
@@ -3204,8 +3180,7 @@ async function updateNewsItemMedia(client: any, newsId: string, news: any) {
       if (r2Url) {
         updates.mainImageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes }
         unsetFields.push('mainImage')
         hasChanges = true
       }
@@ -3219,8 +3194,7 @@ async function updateNewsItemMedia(client: any, newsId: string, news: any) {
       if (r2Url) {
         updates.mainImageMobileR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes }
         unsetFields.push('mainImageMobile')
         hasChanges = true
       }
@@ -3237,8 +3211,7 @@ async function updateNewsItemMedia(client: any, newsId: string, news: any) {
       if (r2Url) {
         updates.mainImageDesktopR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes }
         unsetFields.push('mainImageDesktop')
         hasChanges = true
       }
@@ -3285,8 +3258,7 @@ async function updateNewsItemMedia(client: any, newsId: string, news: any) {
         } else {
           item.imageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes }
         }
         syncedMedia.push(item)
         hasChanges = true
@@ -3321,8 +3293,7 @@ async function updateAboutPageMedia(client: any, aboutId: string, aboutData: any
       if (r2Url) {
         updates.heroImageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes }
         unsetFields.push('heroImage')
         hasChanges = true
       }
@@ -3340,8 +3311,7 @@ async function updateAboutPageMedia(client: any, aboutId: string, aboutData: any
         if (r2Url) {
           updates[`${sectionName}.imageR2`] = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
                       hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
-                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes }
           unsetFields.push(`${sectionName}.image`)
           hasChanges = true
         }
