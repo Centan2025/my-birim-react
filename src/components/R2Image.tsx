@@ -1,5 +1,5 @@
-import React, {useMemo} from 'react'
-import {urlFor} from '../lib/imageUrl'
+import React, { useMemo } from 'react'
+import { urlFor } from '../lib/imageUrl'
 
 interface R2Asset {
   url: string
@@ -14,6 +14,7 @@ interface R2Asset {
   cropY?: number
   cropWidth?: number
   cropHeight?: number
+  hasResponsiveSizes?: boolean
 }
 
 // Removed unused SanityImage interface
@@ -31,14 +32,14 @@ interface R2ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 // Cloudflare Image Resizing URL Builder
 const getR2Url = (
   path: string,
-  options: {width?: number; height?: number; quality?: number},
-  crop?: {x: number; y: number; w: number; h: number; origW: number; origH: number}
+  options: { width?: number; height?: number; quality?: number },
+  crop?: { x: number; y: number; w: number; h: number; origW: number; origH: number }
 ) => {
   const domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
   if (!domain) return undefined
 
-  // .r2.dev ve .workers.dev domainleri image resizing desteklemez
-  const skipImageResizing = domain.includes('.r2.dev') || domain.includes('.workers.dev')
+  // .r2.dev ve .workers.dev (ve free plan custom domain) domainleri image resizing desteklemez
+  const skipImageResizing = domain.includes('.r2.dev') || domain.includes('.workers.dev') || domain.includes('assets.birim.com')
   if (skipImageResizing) {
     return `${domain}/${path}`
   }
@@ -80,28 +81,44 @@ export const R2Image: React.FC<R2ImageProps> = ({
   const cropData =
     hasCrop && source
       ? {
-          x: source.cropX || 0,
-          y: source.cropY || 0,
-          w: source.cropWidth || 1,
-          h: source.cropHeight || 1,
-          origW: source.width,
-          origH: source.height,
-        }
+        x: source.cropX || 0,
+        y: source.cropY || 0,
+        w: source.cropWidth || 1,
+        h: source.cropHeight || 1,
+        origW: source.width,
+        origH: source.height,
+      }
       : undefined
 
   // 1. Try R2 Source First
   const r2Src = useMemo(() => {
     if (!source || !source.path) return undefined
-    return getR2Url(source.path, {width, height, quality}, cropData)
+    return getR2Url(source.path, { width, height, quality }, cropData)
   }, [source, width, height, quality, cropData])
 
   // 2. Generate SrcSet for R2
   const r2SrcSet = useMemo(() => {
     if (!source || !source.path) return undefined
+    const domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
+    const skipImageResizing = domain.includes('.r2.dev') || domain.includes('.workers.dev') || domain.includes('assets.birim.com')
+
+    if (skipImageResizing) {
+      if (source.hasResponsiveSizes) {
+        const cleanUrl = `${domain}/${source.path}`
+        return [
+          `${cleanUrl.replace(/\.webp$/, '-400w.webp')} 400w`,
+          `${cleanUrl.replace(/\.webp$/, '-800w.webp')} 800w`,
+          `${cleanUrl.replace(/\.webp$/, '-1600w.webp')} 1600w`,
+          `${cleanUrl} 2560w`
+        ].join(', ')
+      }
+      return undefined
+    }
+
     const widths = [640, 750, 828, 1080, 1200, 1920, 2048, 3840]
     return widths
       .map(w => {
-        const url = getR2Url(source.path, {width: w, quality}, cropData)
+        const url = getR2Url(source.path, { width: w, quality }, cropData)
         return url ? `${url} ${w}w` : null
       })
       .filter(Boolean)
@@ -156,7 +173,7 @@ export const R2Image: React.FC<R2ImageProps> = ({
       width={width}
       height={height}
       className={className}
-      style={{objectFit: 'cover', ...style}}
+      style={{ objectFit: 'cover', ...style }}
       loading="lazy"
       decoding="async"
       {...props}

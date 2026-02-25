@@ -21,7 +21,7 @@ import type {
   SanityImagePalette,
   R2ImageMetadata,
 } from '../types'
-import {createClient} from '@sanity/client'
+import { createClient } from '@sanity/client'
 import groq from 'groq'
 import imageUrlBuilder from '@sanity/image-url'
 import bcrypt from 'bcryptjs'
@@ -112,7 +112,7 @@ const R2_ORIGIN_DOMAIN =
  *
  * Ayrıca .r2.dev domain'lerini tespit edip R2_DOMAIN'e yönlendirir.
  */
-const rewriteR2Url = (url: string | undefined): string => {
+const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boolean): string => {
   if (!url || typeof url !== 'string') return url || ''
 
   let result = url
@@ -142,16 +142,22 @@ const rewriteR2Url = (url: string | undefined): string => {
   }
 
   // 3. URL'deki boşlukları encode et (dosya adlarında boşluk olabiliyor)
-  return result.replace(/ /g, '%20')
+  result = result.replace(/ /g, '%20')
+
+  if (hasResponsiveSizes && !result.includes('rs=1')) {
+    result += result.includes('?') ? '&rs=1' : '?rs=1'
+  }
+
+  return result
 }
 
 const sanity = useSanity
   ? createClient({
-      projectId: SANITY_PROJECT_ID,
-      dataset: SANITY_DATASET,
-      apiVersion: SANITY_API_VERSION,
-      useCdn: true,
-    })
+    projectId: SANITY_PROJECT_ID,
+    dataset: SANITY_DATASET,
+    apiVersion: SANITY_API_VERSION,
+    useCdn: true,
+  })
   : null
 
 // Mutations için authenticated client (token varsa)
@@ -159,14 +165,14 @@ const SANITY_TOKEN = import.meta.env['VITE_SANITY_TOKEN'] || ''
 const sanityMutations =
   useSanity && SANITY_TOKEN
     ? createClient({
-        projectId: SANITY_PROJECT_ID,
-        dataset: SANITY_DATASET,
-        apiVersion: SANITY_API_VERSION,
-        useCdn: false,
-        token: SANITY_TOKEN,
-        // Browser token uyarısını kapat (token sadece mutations için kullanılıyor)
-        ignoreBrowserTokenWarning: true,
-      })
+      projectId: SANITY_PROJECT_ID,
+      dataset: SANITY_DATASET,
+      apiVersion: SANITY_API_VERSION,
+      useCdn: false,
+      token: SANITY_TOKEN,
+      // Browser token uyarısını kapat (token sadece mutations için kullanılıyor)
+      ignoreBrowserTokenWarning: true,
+    })
     : null
 
 // Not: Sanity image builder kendi tiplerini kullanıyor; burada boundary olduğu için
@@ -175,7 +181,7 @@ const urlFor = (source: unknown) =>
   useSanity && sanity ? imageUrlBuilder(sanity).image(source as any) : null
 
 // Sanity image benzeri tip - string veya url alanı olan obje
-type SanityImageLike = string | {url?: string} | null | undefined
+type SanityImageLike = string | { url?: string } | null | undefined
 
 const mapImage = (
   img: SanityImageLike | undefined,
@@ -198,19 +204,22 @@ const mapImage = (
 
   // R2 Check (Prioritized for nested r2Asset or direct R2 object)
   const rawUrl = (img as any)?.r2Asset?.url || (img as any)?.url
+  const hasResponsiveSizes = Boolean((img as any)?.r2Asset?.hasResponsiveSizes || (img as any)?.hasResponsiveSizes)
 
   if (rawUrl) {
     const isMigration = rawUrl.startsWith('migration/') || rawUrl.startsWith('/migration/')
     if (isMigration && R2_DOMAIN) {
       const cleanPath = rawUrl.startsWith('/') ? rawUrl.substring(1) : rawUrl
-      return `${R2_DOMAIN}/${cleanPath}`.replace(/ /g, '%20')
+      let res = `${R2_DOMAIN}/${cleanPath}`.replace(/ /g, '%20')
+      if (hasResponsiveSizes) res += res.includes('?') ? '&rs=1' : '?rs=1'
+      return res
     }
     // Eğer img.url varsa ama Sanity CDN değilse ve R2 domain ise, veya direkt URL ise döndür
     if (
       typeof rawUrl === 'string' &&
       (rawUrl.includes('r2.dev') || rawUrl.includes('cdn.sanity.io') || rawUrl.startsWith('http'))
     ) {
-      return rewriteR2Url(rawUrl)
+      return rewriteR2Url(rawUrl, hasResponsiveSizes)
     }
   }
 
@@ -221,21 +230,21 @@ const mapImage = (
     (img as any)?.asset?._id
 
   // Eğer crop/hotspot/asset bilgisi yoksa ve doğrudan url geldiyse orijinali kullan.
-  if (img.url && !hasBuilderMeta) return rewriteR2Url(img.url)
+  if (img.url && !hasBuilderMeta) return rewriteR2Url(img.url, hasResponsiveSizes)
 
   const b = urlFor && urlFor(img)
-  if (!b) return rewriteR2Url(img.url) || ''
+  if (!b) return rewriteR2Url(img.url, hasResponsiveSizes) || ''
 
   try {
-    const {width = 1600, quality = 85, format = 'webp'} = options || {}
+    const { width = 1600, quality = 85, format = 'webp' } = options || {}
 
     return (
       b.width(width).quality(quality).format(format).auto('format').url() ||
-      rewriteR2Url(img.url) ||
+      rewriteR2Url(img.url, hasResponsiveSizes) ||
       ''
     )
   } catch {
-    return rewriteR2Url(img.url) || ''
+    return rewriteR2Url(img.url, hasResponsiveSizes) || ''
   }
 }
 
@@ -245,20 +254,20 @@ const mapR2Metadata = (img: any): R2ImageMetadata => {
   const crop =
     img.cropX !== undefined && img.cropWidth !== undefined
       ? {
-          x: img.cropX,
-          y: img.cropY || 0,
-          width: img.cropWidth,
-          height: img.cropHeight || 1,
-        }
+        x: img.cropX,
+        y: img.cropY || 0,
+        width: img.cropWidth,
+        height: img.cropHeight || 1,
+      }
       : undefined
   const hotspot =
     img.hotspotX !== undefined && img.hotspotY !== undefined
       ? {
-          x: img.hotspotX,
-          y: img.hotspotY,
-        }
+        x: img.hotspotX,
+        y: img.hotspotY,
+      }
       : undefined
-  return {crop, hotspot}
+  return { crop, hotspot }
 }
 
 const mapImages = (imgs: SanityImageLike[] | undefined): string[] =>
@@ -266,10 +275,10 @@ const mapImages = (imgs: SanityImageLike[] | undefined): string[] =>
 
 // Sanity palette metadata'yı güvenli şekilde çek
 const extractPalette = (
-  img: SanityImageLike | {asset?: {metadata?: {palette?: SanityImagePalette}}}
+  img: SanityImageLike | { asset?: { metadata?: { palette?: SanityImagePalette } } }
 ): SanityImagePalette | undefined => {
   if (typeof img === 'object' && img !== null && 'asset' in img) {
-    return (img as {asset?: {metadata?: {palette?: SanityImagePalette}}}).asset?.metadata?.palette
+    return (img as { asset?: { metadata?: { palette?: SanityImagePalette } } }).asset?.metadata?.palette
   }
   return undefined
 }
@@ -279,9 +288,9 @@ interface SanityProductMediaItem {
   type?: 'image' | 'video' | 'youtube' | string
   url?: string
   // R2 Fields
-  imageR2?: {url?: string}
-  imageMobileR2?: {url?: string}
-  imageDesktopR2?: {url?: string}
+  imageR2?: { url?: string }
+  imageMobileR2?: { url?: string }
+  imageDesktopR2?: { url?: string }
 
   title?: LocalizedString
   description?: LocalizedString
@@ -289,9 +298,9 @@ interface SanityProductMediaItem {
   linkText?: LocalizedString
 
   // Sibling R2 fields for video
-  videoFileR2?: {url?: string}
-  videoFileMobileR2?: {url?: string}
-  videoFileDesktopR2?: {url?: string}
+  videoFileR2?: { url?: string }
+  videoFileMobileR2?: { url?: string }
+  videoFileDesktopR2?: { url?: string }
 }
 
 // Helper: Medya URL'ini map et (mobil/desktop desteği ile)
@@ -311,10 +320,22 @@ const mapMediaUrl = (
       : isDesktop
         ? m?.imageDesktopR2?.url
         : m?.imageR2?.url
+
+    const hasResponsiveSizes = Boolean(
+      isMobile
+        ? (m?.imageMobileR2 as any)?.hasResponsiveSizes
+        : isDesktop
+          ? (m?.imageDesktopR2 as any)?.hasResponsiveSizes
+          : (m?.imageR2 as any)?.hasResponsiveSizes
+    )
+
     if (r2Url) {
-      if (r2Url.startsWith('migration/') && R2_DOMAIN)
-        return `${R2_DOMAIN}/${r2Url}`.replace(/ /g, '%20')
-      return rewriteR2Url(r2Url)
+      if (r2Url.startsWith('migration/') && R2_DOMAIN) {
+        let res = `${R2_DOMAIN}/${r2Url}`.replace(/ /g, '%20')
+        if (hasResponsiveSizes) res += res.includes('?') ? '&rs=1' : '?rs=1'
+        return res
+      }
+      return rewriteR2Url(r2Url, hasResponsiveSizes)
     }
     // Fallback: legacy Sanity image or direct url field
     const legacyImg = isMobile ? raw?.imageMobile : isDesktop ? raw?.imageDesktop : raw?.image
@@ -405,7 +426,7 @@ const mapProductMedia = (row: {
         linkText?: LocalizedString
         crop?: R2ImageMetadata['crop']
         hotspot?: R2ImageMetadata['hotspot']
-      } = {type, url, title, description, link, linkText, ...metadata}
+      } = { type, url, title, description, link, linkText, ...metadata }
       if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
       if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
 
@@ -467,7 +488,7 @@ const mapAlternativeMedia = (row: {
           urlDesktop?: string
           crop?: R2ImageMetadata['crop']
           hotspot?: R2ImageMetadata['hotspot']
-        } = {type, url, ...metadata}
+        } = { type, url, ...metadata }
         if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
         if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
 
@@ -487,19 +508,19 @@ const mapAlternativeMedia = (row: {
         } => !!m && !!m.url
       )
   // fallback to legacy alternativeImages
-  return mapImages(row?.alternativeImages).map((u: string) => ({type: 'image', url: u}))
+  return mapImages(row?.alternativeImages).map((u: string) => ({ type: 'image', url: u }))
 }
 
 const mapDimensionImages = (
   dimImgs:
     | {
-        imageR2?: {url?: string}
-        imageMobileR2?: {url?: string}
-        imageDesktopR2?: {url?: string}
-        title?: LocalizedString
-      }[]
+      imageR2?: { url?: string }
+      imageMobileR2?: { url?: string }
+      imageDesktopR2?: { url?: string }
+      title?: LocalizedString
+    }[]
     | undefined
-): {image: string; imageMobile?: string; imageDesktop?: string; title?: LocalizedString}[] => {
+): { image: string; imageMobile?: string; imageDesktop?: string; title?: LocalizedString }[] => {
   if (!Array.isArray(dimImgs)) return []
   return dimImgs
     .map(di => {
@@ -547,11 +568,11 @@ interface SanityMaterialSelection {
 
 // Ortak yardımcı: Bir Sanity image objesinden asset tabanlı stabil bir key üret
 const getAssetKey = (
-  img: SanityImageLike | {asset?: {_ref?: string; _id?: string}}
+  img: SanityImageLike | { asset?: { _ref?: string; _id?: string } }
 ): string | null => {
   if (!img) return null
   const assetObj = typeof img === 'object' && img !== null && 'asset' in img ? img.asset : img
-  const asset = assetObj as {_ref?: string; _id?: string} | null
+  const asset = assetObj as { _ref?: string; _id?: string } | null
   if (!asset) return null
   const id = asset._id || asset._ref
   return id || null
@@ -571,13 +592,13 @@ const mapMaterialsFromSelections = (
     const books = sel.group?.books || []
 
     // Grup tarafındaki tüm malzemeleri asset key'e göre lookup tablosuna al
-    const groupMaterialByKey = new Map<string, {name?: LocalizedString; image?: any}>()
+    const groupMaterialByKey = new Map<string, { name?: LocalizedString; image?: any }>()
     for (const book of books) {
       for (const item of book.items || []) {
         const key = getAssetKey(item.image)
         if (!key) continue
         if (!groupMaterialByKey.has(key)) {
-          groupMaterialByKey.set(key, {name: item.name, image: item.image})
+          groupMaterialByKey.set(key, { name: item.name, image: item.image })
         }
       }
     }
@@ -659,16 +680,16 @@ const normalizeProduct = (p: Product): Product => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dimensionImages: Array.isArray((p as any).dimensionImages)
     ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (p as any).dimensionImages.map((di: any) =>
-        typeof di === 'string'
-          ? {image: di} // eski string array formatı için backward compatibility
-          : di
-      )
+    (p as any).dimensionImages.map((di: any) =>
+      typeof di === 'string'
+        ? { image: di } // eski string array formatı için backward compatibility
+        : di
+    )
     : [],
 })
 
 let storage: Storage
-const memoryStore: {[key: string]: string} = {}
+const memoryStore: { [key: string]: string } = {}
 
 // Storage erişimini güvenli hâle getir:
 // - SSR'de `window` olmadığı için localStorage kullanma
@@ -785,7 +806,7 @@ export const getTranslations = async (): Promise<Record<string, Record<string, s
       if (Array.isArray(results)) {
         results.forEach((item: TranslationItem) => {
           if (item.language && item.strings) {
-            const normalized: Record<string, string> = {...item.strings}
+            const normalized: Record<string, string> = { ...item.strings }
             // Şema alanı 'models_3d' ise, frontend anahtarı '3d_models' bekliyor -> eşle
             if (normalized['models_3d'] && !normalized['3d_models']) {
               normalized['3d_models'] = normalized['models_3d']
@@ -819,12 +840,12 @@ export const getLanguages = async (): Promise<string[]> => {
           visible: boolean
         }
         const normalized: LanguageItem[] = langs
-          .map((l: string | {code?: string; visible?: boolean}): LanguageItem | null => {
-            if (typeof l === 'string') return {code: l, visible: true}
+          .map((l: string | { code?: string; visible?: boolean }): LanguageItem | null => {
+            if (typeof l === 'string') return { code: l, visible: true }
             const code = String(l?.code || '').toLowerCase()
             if (!code) return null
             const visible = l?.visible !== false
-            return {code, visible}
+            return { code, visible }
           })
           .filter((l): l is LanguageItem => l !== null)
         const visibleCodes = normalized.filter(l => l.visible).map(l => l.code)
@@ -859,7 +880,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
           logoR2
         }`
       // Site ayarları için CDN önbelleğini atla - değişiklikler hemen yansısın
-      const s = await sanity.withConfig({useCdn: false}).fetch(q)
+      const s = await sanity.withConfig({ useCdn: false }).fetch(q)
       // Backward compatible defaults
       return {
         logoUrl: s?.logoR2?.url || (s?.logo ? mapImage(s.logo) : s?.logoUrl || ''),
@@ -921,8 +942,8 @@ export const getCategories = async (): Promise<Category[]> => {
       id: r.id,
       name: r.name,
       subtitle: r.subtitle,
-      heroImage: r.heroImageR2?.url ? {url: mapImage(r.heroImageR2)} : mapImage(r.heroImage),
-      menuImage: r.menuImageR2?.url ? {url: mapImage(r.menuImageR2)} : mapImage(r.menuImage),
+      heroImage: r.heroImageR2?.url ? { url: mapImage(r.heroImageR2) } : mapImage(r.heroImage),
+      menuImage: r.menuImageR2?.url ? { url: mapImage(r.menuImageR2) } : mapImage(r.menuImage),
     }))
   }
   await delay(SIMULATED_DELAY)
@@ -998,7 +1019,7 @@ export const getDesignerById = async (id: string): Promise<Designer | undefined>
       imageMobileR2,
       imageDesktopR2
     }`
-    const r = await sanity.fetch(query, {id})
+    const r = await sanity.fetch(query, { id })
     if (!r) return undefined
     const image = mapImage(r.imageR2) || mapImage(r.image) || ''
     const imageMobile = r.imageMobileR2?.url || undefined
@@ -1219,7 +1240,7 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
         }`
-    const r = await sanity.fetch(query, {id})
+    const r = await sanity.fetch(query, { id })
     if (!r) return undefined
     return normalizeProduct({
       id: r.id,
@@ -1309,7 +1330,7 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
         }`
-    const rows = await sanity.fetch(query, {categoryId})
+    const rows = await sanity.fetch(query, { categoryId })
     return rows.map((r: any) =>
       normalizeProduct({
         id: r.id,
@@ -1397,7 +1418,7 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
           designer->{ "designerId": id.current },
           category->{ "categoryId": id.current },
         }`
-    const rows = await sanity.fetch(query, {designerId})
+    const rows = await sanity.fetch(query, { designerId })
     return rows.map((r: any) =>
       normalizeProduct({
         id: r.id,
@@ -1545,17 +1566,17 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
       // Map media for sections
       if (data.historySection) {
         const url = mapImage(data.historySection.imageR2) || mapImage(data.historySection.image)
-        data.historySection.image = {url}
+        data.historySection.image = { url }
         data.historySection.media = mapProductMedia(data.historySection)
       }
       if (data.identitySection) {
         const url = mapImage(data.identitySection.imageR2) || mapImage(data.identitySection.image)
-        data.identitySection.image = {url}
+        data.identitySection.image = { url }
         data.identitySection.media = mapProductMedia(data.identitySection)
       }
       if (data.qualitySection) {
         const url = mapImage(data.qualitySection.imageR2) || mapImage(data.qualitySection.image)
-        data.qualitySection.image = {url}
+        data.qualitySection.image = { url }
         data.qualitySection.media = mapProductMedia(data.qualitySection)
       }
 
@@ -1616,10 +1637,10 @@ export const getContactPageContent = async (): Promise<ContactPageContent> => {
                   mediaItem.videoFile?.asset?.url ||
                   mediaItem.url
               }
-              return {...mediaItem, url: mediaUrl}
+              return { ...mediaItem, url: mediaUrl }
             })
             .filter((m: any) => m.url) // URL'si olmayan medyaları filtrele
-          return {...loc, media: processedMedia}
+          return { ...loc, media: processedMedia }
         }
         return loc
       })
@@ -1663,7 +1684,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             }
         }`
       // CDN cache'i bypass et — CMS'teki hero değişiklikleri anında yansısın
-      const data = await sanity.withConfig({useCdn: false}).fetch(q)
+      const data = await sanity.withConfig({ useCdn: false }).fetch(q)
       if (data?.heroMedia) {
         data.heroMedia = data.heroMedia
           .map((m: any) => {
@@ -1683,7 +1704,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
               type = 'youtube'
             }
 
-            const result: any = {...m, url, type}
+            const result: any = { ...m, url, type }
             if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
             if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
             if (palette) result.palette = palette
@@ -1701,12 +1722,12 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
           if (b.mediaType === 'image') {
             // R2 Priority for Content Blocks
             const imgUrl = b.imageR2?.url ? mapImage(b.imageR2) : undefined
-            if (imgUrl) return {...b, image: imgUrl, url: undefined}
+            if (imgUrl) return { ...b, image: imgUrl, url: undefined }
           }
           if (b.mediaType === 'video' && b.videoFileR2?.url) {
-            url = b.videoFileR2.url
+            url = rewriteR2Url(b.videoFileR2.url)
           }
-          return {...b, image: undefined, url}
+          return { ...b, image: undefined, url }
         })
       }
       if (data?.inspirationSection) {
@@ -1887,7 +1908,7 @@ export const getNews = async (): Promise<NewsItem[]> => {
           const urlMobile = mapMediaUrl(m, true, false)
           const urlDesktop = mapMediaUrl(m, false, true)
 
-          const result: any = {type: m.type, url, caption: m.caption}
+          const result: any = { type: m.type, url, caption: m.caption }
           if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
           if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
 
@@ -1924,7 +1945,7 @@ export const getNewsById = async (id: string): Promise<NewsItem | undefined> => 
             videoFileDesktopR2
           }
         }`
-    const r = await sanity.fetch(q, {id})
+    const r = await sanity.fetch(q, { id })
     if (!r) return undefined
     return {
       id: r.id,
@@ -1947,7 +1968,7 @@ export const getNewsById = async (id: string): Promise<NewsItem | undefined> => 
           const urlMobile = mapMediaUrl(m, true, false)
           const urlDesktop = mapMediaUrl(m, false, true)
 
-          const result: any = {type: m.type, url, caption: m.caption}
+          const result: any = { type: m.type, url, caption: m.caption }
           if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
           if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
 
@@ -2053,7 +2074,7 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
         videoFileDesktopR2
       }
     }`
-    const r = await sanity.fetch(q, {id})
+    const r = await sanity.fetch(q, { id })
     if (!r) return undefined
 
     const media = (r.media || [])
@@ -2063,7 +2084,7 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
         const urlMobile = mapMediaUrl(m, true, false)
         const urlDesktop = mapMediaUrl(m, false, true)
 
-        const result: any = {type, url, image: type === 'image' ? url : undefined}
+        const result: any = { type, url, image: type === 'image' ? url : undefined }
         if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
         if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
 
@@ -2211,7 +2232,7 @@ export const subscribeEmail = async (email: string): Promise<User> => {
       // Sanity hatası varsa hatayı fırlat
       let errorMessage = 'E-posta aboneliği yapılırken bir hata oluştu. Lütfen tekrar deneyin.'
 
-      const errorObj = error as {message?: string; statusCode?: number}
+      const errorObj = error as { message?: string; statusCode?: number }
       if (errorObj.message?.includes('permission') || errorObj.statusCode === 403) {
         errorMessage =
           'İZİN HATASI: Sanity token\'ınızın "Editor" veya "Admin" yetkisi olduğundan emin olun.'
@@ -2324,7 +2345,7 @@ export const registerUser = async (
           // Sanity hatası varsa hatayı fırlat (local storage'a düşme)
           let errorMessage = 'Üye kaydı güncellenirken bir hata oluştu. Lütfen tekrar deneyin.'
 
-          const errorObj = error as {message?: string}
+          const errorObj = error as { message?: string }
           if (errorObj.message?.includes('permission')) {
             errorMessage =
               'İZİN HATASI: Sanity token\'ınızın "Editor" veya "Admin" yetkisi olduğundan emin olun. Üye bilgileri CMS\'de görünmeyecektir.'
@@ -2392,7 +2413,7 @@ export const registerUser = async (
       // Sanity hatası varsa hatayı fırlat (local storage'a düşme)
       let errorMessage = 'Üye kaydı yapılırken bir hata oluştu. Lütfen tekrar deneyin.'
 
-      const errorObj = error as {message?: string}
+      const errorObj = error as { message?: string }
       if (errorObj.message?.includes('permission')) {
         errorMessage =
           'İZİN HATASI: Sanity token\'ınızın "Editor" veya "Admin" yetkisi olduğundan emin olun. Üye bilgileri CMS\'de görünmeyecektir.'
@@ -2418,7 +2439,7 @@ export const registerUser = async (
       if (existingUser.userType === 'email_subscriber') {
         // Email subscriber'ı full member'a yükselt
         const passwordHash = await hashPassword(password)
-        const userPasswords = getItem<{[email: string]: string}>('birim_user_passwords') || {}
+        const userPasswords = getItem<{ [email: string]: string }>('birim_user_passwords') || {}
         userPasswords[normEmail] = passwordHash
         setItem('birim_user_passwords', userPasswords)
 
@@ -2460,7 +2481,7 @@ export const registerUser = async (
     }
 
     // Store password hash separately (in real app, don't store in localStorage)
-    const userPasswords = getItem<{[email: string]: string}>('birim_user_passwords') || {}
+    const userPasswords = getItem<{ [email: string]: string }>('birim_user_passwords') || {}
     userPasswords[normEmail] = passwordHash
     setItem('birim_user_passwords', userPasswords)
 
@@ -2489,7 +2510,7 @@ export const loginUser = async (email: string, password: string): Promise<User |
         createdAt,
         password
       }`,
-      {email: normEmail}
+      { email: normEmail }
     )
 
     if (!user || !user.password) {
@@ -2520,7 +2541,7 @@ export const loginUser = async (email: string, password: string): Promise<User |
   // Local storage fallback
   await delay(SIMULATED_DELAY)
   const users = getItem<User[]>(KEYS.USERS || 'birim_users') || []
-  const userPasswords = getItem<{[email: string]: string}>('birim_user_passwords') || {}
+  const userPasswords = getItem<{ [email: string]: string }>('birim_user_passwords') || {}
 
   const user = users.find(u => normalizeEmail(u.email) === normEmail && u.isActive)
   if (!user) {
@@ -2556,7 +2577,7 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
         isActive,
         createdAt
       }`,
-      {email: normEmail}
+      { email: normEmail }
     )
 
     if (!user) {
@@ -2600,7 +2621,7 @@ export const getUserById = async (id: string): Promise<User | null> => {
         verificationToken,
         createdAt
       }`,
-      {id}
+      { id }
     )
 
     if (!user) {
@@ -2644,7 +2665,7 @@ export const verifyUserByToken = async (token: string): Promise<User | null> => 
         verificationToken,
         createdAt
       }`
-    const user = await sanity.fetch<any>(query, {vtoken: token})
+    const user = await sanity.fetch<any>(query, { vtoken: token })
 
     if (!user) return null
 

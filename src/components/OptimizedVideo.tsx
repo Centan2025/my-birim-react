@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, {useState, useRef, useCallback} from 'react'
+import React, { useState, useRef, useCallback } from 'react'
 
 interface OptimizedVideoProps {
   src: string
@@ -52,33 +52,10 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
   const [hasError, setHasError] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
 
-  // R2 URL Rewriter: .r2.dev URL'lerini Workers CDN'e çevir
-  const rewriteUrl = (url: string | undefined): string | undefined => {
-    if (!url) return url
-    const r2Domain = 'https://birim-assets.web-birim.workers.dev'
-    const r2Origin = 'https://pub-5e705b2a702d4bb1a3631c558917599d.r2.dev'
-    if (url.startsWith(r2Origin)) {
-      return url.replace(r2Origin, r2Domain)
-    }
-    // Genel .r2.dev URL'lerini de yakala
-    if (url.includes('.r2.dev')) {
-      try {
-        const parsedUrl = new URL(url)
-        const path = parsedUrl.pathname.startsWith('/')
-          ? parsedUrl.pathname.substring(1)
-          : parsedUrl.pathname
-        return `${r2Domain}/${path}`
-      } catch {
-        return url
-      }
-    }
-    return url
-  }
-
-  // Tüm src'leri rewrite et (readonly props değiştirilemez, yeni değişkenler oluştur)
-  const rwSrc = rewriteUrl(src) || src
-  const rwSrcMobile = rewriteUrl(srcMobile)
-  const rwSrcDesktop = rewriteUrl(srcDesktop)
+  // src zaten cms.ts tarafından rewrite edilerek geliyor (BUG-1 düzeltildi)
+  const rwSrc = src
+  const rwSrcMobile = srcMobile
+  const rwSrcDesktop = srcDesktop
 
   const handleLoadedData = () => {
     setIsLoaded(true)
@@ -142,7 +119,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
             }
           })
         },
-        {rootMargin: '50px'}
+        { rootMargin: '50px' }
       )
 
       observer.observe(videoRef.current)
@@ -251,7 +228,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     return (
       <div
         className={`bg-gray-200 flex items-center justify-center ${className}`}
-        style={{minHeight: '200px'}}
+        style={{ minHeight: '200px' }}
       >
         <div className="text-center p-4">
           <span className="text-gray-400 text-sm block mb-2">Video yüklenemedi</span>

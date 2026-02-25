@@ -131,37 +131,72 @@ interface SummaryData {
 }
 
 // R2 Upload Helper
-const uploadToR2 = async (file: File, path: string): Promise<{ url: string; width?: number; height?: number } | null> => {
+const uploadToR2 = async (file: File, path: string): Promise<{ url: string; width?: number; height?: number; hasResponsiveSizes?: boolean } | null> => {
   try {
-    // Sıkıştır (sadece görsel ise)
-    const processedFile = isImageFile(file.name) ? await compressImage(file) : file
+    const isImage = isImageFile(file.name)
+    let processedFile: File | Blob = file
+    let isResponsive = false
 
-    const arrayBuffer = await processedFile.arrayBuffer()
-    const buffer = new Uint8Array(arrayBuffer)
-
-    // WebP uzantısını ekle eğer sıkıştırıldıysa
+    // WebP uzantısını ekle
     let fileName = file.name
-    if (isImageFile(file.name) && !file.name.toLowerCase().endsWith('.webp')) {
+    if (isImage && !file.name.toLowerCase().endsWith('.webp')) {
       fileName = file.name.replace(/\.[^/.]+$/, '') + '.webp'
     }
 
     const key = `${path}/${fileName}`
 
-    await r2Client.send(
-      new PutObjectCommand({
-        Bucket: R2_BUCKET_NAME,
-        Key: key,
-        Body: buffer,
-        ContentType: isImageFile(file.name) ? 'image/webp' : file.type,
-      })
-    )
+    if (isImage) {
+      isResponsive = true
+      const sizes = [
+        { width: 2560, suffix: '', maxSizeMB: 0.8 },
+        { width: 1600, suffix: '-1600w', maxSizeMB: 0.5 },
+        { width: 800, suffix: '-800w', maxSizeMB: 0.2 },
+        { width: 400, suffix: '-400w', maxSizeMB: 0.1 },
+      ]
 
-    // Görsel boyutlarını al (opsiyonel)
+      const uploadPromises = sizes.map(async (size) => {
+        const options = {
+          maxSizeMB: size.maxSizeMB,
+          maxWidthOrHeight: size.width,
+          useWebWorker: true,
+          fileType: 'image/webp' as any,
+        }
+        const compressedBlob = await compressImageChunk(file, options)
+        if (size.suffix === '') {
+          processedFile = compressedBlob
+        }
+
+        const currentKey = size.suffix ? key.replace(/\.webp$/, `${size.suffix}.webp`) : key
+        const arrayBuffer = await compressedBlob.arrayBuffer()
+        return r2Client.send(
+          new PutObjectCommand({
+            Bucket: R2_BUCKET_NAME,
+            Key: currentKey,
+            Body: new Uint8Array(arrayBuffer),
+            ContentType: 'image/webp',
+          })
+        )
+      })
+
+      await Promise.all(uploadPromises)
+    } else {
+      const arrayBuffer = await processedFile.arrayBuffer()
+      await r2Client.send(
+        new PutObjectCommand({
+          Bucket: R2_BUCKET_NAME,
+          Key: key,
+          Body: new Uint8Array(arrayBuffer),
+          ContentType: file.type,
+        })
+      )
+    }
+
+    // Görsel boyutlarını al
     let dimensions = {}
-    if (isImageFile(file.name)) {
+    if (isImage) {
       try {
         const img = new Image()
-        img.src = URL.createObjectURL(file)
+        img.src = URL.createObjectURL(processedFile)
         await new Promise((resolve) => {
           img.onload = resolve
           img.onerror = resolve
@@ -174,6 +209,7 @@ const uploadToR2 = async (file: File, path: string): Promise<{ url: string; widt
 
     return {
       url: `${R2_DOMAIN}/${key}`,
+      hasResponsiveSizes: isResponsive,
       ...dimensions
     }
   } catch (error: any) {
@@ -181,6 +217,19 @@ const uploadToR2 = async (file: File, path: string): Promise<{ url: string; widt
     return null
   }
 }
+
+// Internal helper for multiple compressions
+const compressImageChunk = async (file: File, options: any): Promise<File | Blob> => {
+  if (!isImageFile(file.name) || file.type.includes('gif') || file.type.includes('svg')) {
+    return file
+  }
+  try {
+    return await imageCompression(file, options)
+  } catch (error) {
+    return file
+  }
+}
+
 
 export default function MediaImportTool() {
   const client = useClient({ apiVersion: '2025-01-01' })
@@ -980,7 +1029,10 @@ export default function MediaImportTool() {
                       _type: 'r2Asset',
                       url: r2Url.url,
                       width: r2Url.width,
-                      height: r2Url.height
+                      height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
                     }
                   }
 
@@ -1611,7 +1663,10 @@ async function updateDesignerImages(
       const r2Url = await uploadToR2(generalImage, `designers/${slugify(designer.name)}`)
 
       if (r2Url) {
-        updates.imageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height }
+        updates.imageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
         unsetFields.push('image') // Sanitydeki görseli kaldır
         hasChanges = true
       }
@@ -1624,7 +1679,10 @@ async function updateDesignerImages(
       const r2Url = await uploadToR2(mobileImage, `designers/${slugify(designer.name)}`)
 
       if (r2Url) {
-        updates.imageMobileR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height }
+        updates.imageMobileR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
         unsetFields.push('imageMobile')
         hasChanges = true
       }
@@ -1637,7 +1695,10 @@ async function updateDesignerImages(
       const r2Url = await uploadToR2(desktopImage, `designers/${slugify(designer.name)}`)
 
       if (r2Url) {
-        updates.imageDesktopR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height }
+        updates.imageDesktopR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
         unsetFields.push('imageDesktop')
         hasChanges = true
       }
@@ -2018,7 +2079,10 @@ async function updateProductImages(client: any, productId: string, product: any)
           _type: 'r2Asset',
           url: r2Url.url,
           width: r2Url.width,
-          height: r2Url.height
+          height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
         }
         unsetFields.push('mainImage')
         hasChanges = true
@@ -2040,7 +2104,10 @@ async function updateProductImages(client: any, productId: string, product: any)
             _type: 'r2Asset',
             url: r2Url.url,
             width: r2Url.width,
-            height: r2Url.height
+            height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
           }
           unsetFields.push('mainImage')
           hasChanges = true
@@ -2067,7 +2134,10 @@ async function updateProductImages(client: any, productId: string, product: any)
           _type: 'r2Asset',
           url: r2Url.url,
           width: r2Url.width,
-          height: r2Url.height
+          height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
         }
         unsetFields.push('mainImageMobile')
         hasChanges = true
@@ -2094,7 +2164,10 @@ async function updateProductImages(client: any, productId: string, product: any)
           _type: 'r2Asset',
           url: r2Url.url,
           width: r2Url.width,
-          height: r2Url.height
+          height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
         }
         unsetFields.push('mainImageDesktop')
         hasChanges = true
@@ -2207,11 +2280,14 @@ async function updateProductImages(client: any, productId: string, product: any)
         if (r2Url) {
           const updatedItem = { ...existingItem }
           if (isVideo) {
-            updatedItem.videoFileR2 = { _type: 'r2Asset', url: r2Url.url }
+            updatedItem.videoFileR2 = { _type: 'r2Asset', url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes }
             // Eski asset alanlarını temizle
             updatedItem.videoFile = null
           } else {
-            updatedItem.imageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height }
+            updatedItem.imageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
             updatedItem.image = null
           }
           syncedAlternativeMedia.push(updatedItem)
@@ -2237,7 +2313,7 @@ async function updateProductImages(client: any, productId: string, product: any)
               type: 'video',
               videoFileR2: {
                 _type: 'r2Asset',
-                url: r2Url.url
+                url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes
               }
             })
           }
@@ -2254,7 +2330,10 @@ async function updateProductImages(client: any, productId: string, product: any)
                 _type: 'r2Asset',
                 url: r2Url.url,
                 width: r2Url.width,
-                height: r2Url.height
+                height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
               }
             })
           }
@@ -2343,7 +2422,10 @@ async function updateProductImages(client: any, productId: string, product: any)
               _type: 'r2Asset',
               url: r2Url.url,
               width: r2Url.width,
-              height: r2Url.height
+              height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
             }
             hasChanges = true
           }
@@ -2366,7 +2448,10 @@ async function updateProductImages(client: any, productId: string, product: any)
               _type: 'r2Asset',
               url: r2Url.url,
               width: r2Url.width,
-              height: r2Url.height
+              height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
             }
             hasChanges = true
             console.log(`   ✅ Mobil ölçü görseli R2'ye yüklendi: ${group.mobile.name}`)
@@ -2391,7 +2476,10 @@ async function updateProductImages(client: any, productId: string, product: any)
               _type: 'r2Asset',
               url: r2Url.url,
               width: r2Url.width,
-              height: r2Url.height
+              height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
             }
             hasChanges = true
             console.log(`   ✅ Desktop ölçü görseli R2'ye yüklendi: ${group.desktop.name}`)
@@ -2479,7 +2567,7 @@ async function updateProductImages(client: any, productId: string, product: any)
             if (r2Url) {
               panelItem.videoFileR2 = {
                 _type: 'r2Asset',
-                url: r2Url.url
+                url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes
               }
             }
           } else {
@@ -2490,7 +2578,10 @@ async function updateProductImages(client: any, productId: string, product: any)
                 _type: 'r2Asset',
                 url: r2Url.url,
                 width: r2Url.width,
-                height: r2Url.height
+                height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
               }
             }
           }
@@ -2504,7 +2595,7 @@ async function updateProductImages(client: any, productId: string, product: any)
               console.log(`   🎬 Mobil alt medya videosu R2'ye yükleniyor: ${mobileFile.file.name}`)
               const r2Url = await uploadToR2(mobileFile.file, `products/${slugify(product.categoryName)}/${product.modelId}/panels`)
               if (r2Url) {
-                panelItem.videoFileMobileR2 = { _type: 'r2Asset', url: r2Url.url }
+                panelItem.videoFileMobileR2 = { _type: 'r2Asset', url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes }
               }
             } else {
               console.log(`   📸 Mobil alt medya görseli R2'ye yükleniyor: ${mobileFile.file.name}`)
@@ -2514,7 +2605,10 @@ async function updateProductImages(client: any, productId: string, product: any)
                   _type: 'r2Asset',
                   url: r2Url.url,
                   width: r2Url.width,
-                  height: r2Url.height
+                  height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
                 }
               }
             }
@@ -2525,7 +2619,7 @@ async function updateProductImages(client: any, productId: string, product: any)
               console.log(`   🎬 Desktop alt medya videosu R2'ye yükleniyor: ${desktopFile.file.name}`)
               const r2Url = await uploadToR2(desktopFile.file, `products/${slugify(product.categoryName)}/${product.modelId}/panels`)
               if (r2Url) {
-                panelItem.videoFileDesktopR2 = { _type: 'r2Asset', url: r2Url.url }
+                panelItem.videoFileDesktopR2 = { _type: 'r2Asset', url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes }
               }
             } else {
               console.log(`   📸 Desktop alt medya görseli R2'ye yükleniyor: ${desktopFile.file.name}`)
@@ -2535,7 +2629,10 @@ async function updateProductImages(client: any, productId: string, product: any)
                   _type: 'r2Asset',
                   url: r2Url.url,
                   width: r2Url.width,
-                  height: r2Url.height
+                  height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
                 }
               }
             }
@@ -2600,7 +2697,10 @@ async function updateProductImages(client: any, productId: string, product: any)
           newImages.push({
             _type: 'image',
             _key: `extra-${Date.now()}-${Math.random()}`,
-            r2Asset: { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height }
+            r2Asset: { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
           })
           hasExclusiveChanges = true
         } else if (existing) {
@@ -2642,7 +2742,7 @@ async function updateProductImages(client: any, productId: string, product: any)
             _type: 'downloadableItem',
             _key: `drawing-${Date.now()}-${Math.random()}`,
             name: { tr: baseName, en: baseName },
-            fileR2: { _type: 'r2Asset', url: r2Url.url }
+            fileR2: { _type: 'r2Asset', url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes }
           })
           hasExclusiveChanges = true
         } else if (existing) {
@@ -2684,7 +2784,7 @@ async function updateProductImages(client: any, productId: string, product: any)
             _type: 'downloadableItem',
             _key: `model-${Date.now()}-${Math.random()}`,
             name: { tr: baseName, en: baseName },
-            fileR2: { _type: 'r2Asset', url: r2Url.url }
+            fileR2: { _type: 'r2Asset', url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes }
           })
           hasExclusiveChanges = true
         } else if (existing) {
@@ -2821,7 +2921,10 @@ async function updateProjectMedia(client: any, projectId: string, project: any) 
       console.log(`   📸 Kapak görseli R2'ye yükleniyor: ${coverFile.name}`)
       const r2Url = await uploadToR2(coverFile, `projects/${slugify(project.projectName)}`)
       if (r2Url) {
-        updates.coverR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height }
+        updates.coverR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
         unsetFields.push('cover')
         hasChanges = true
       }
@@ -2837,7 +2940,10 @@ async function updateProjectMedia(client: any, projectId: string, project: any) 
         console.log(`   ⚠️ Kapak yok, ilk görsel R2 kapak olarak kullanılıyor: ${firstImage.name}`)
         const r2Url = await uploadToR2(firstImage, `projects/${slugify(project.projectName)}`)
         if (r2Url) {
-          updates.coverR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height }
+          updates.coverR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
           unsetFields.push('cover')
           hasChanges = true
         }
@@ -2855,7 +2961,10 @@ async function updateProjectMedia(client: any, projectId: string, project: any) 
       console.log(`   📱 Mobil kapak görseli R2'ye yükleniyor: ${coverMobileFile.name}`)
       const r2Url = await uploadToR2(coverMobileFile, `projects/${slugify(project.projectName)}`)
       if (r2Url) {
-        updates.coverMobileR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height }
+        updates.coverMobileR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
         unsetFields.push('coverMobile')
         hasChanges = true
       }
@@ -2871,7 +2980,10 @@ async function updateProjectMedia(client: any, projectId: string, project: any) 
       console.log(`   💻 Desktop kapak görseli R2'ye yükleniyor: ${coverDesktopFile.name}`)
       const r2Url = await uploadToR2(coverDesktopFile, `projects/${slugify(project.projectName)}`)
       if (r2Url) {
-        updates.coverDesktopR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height }
+        updates.coverDesktopR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
         unsetFields.push('coverDesktop')
         hasChanges = true
       }
@@ -2919,9 +3031,12 @@ async function updateProjectMedia(client: any, projectId: string, project: any) 
           type: isVideo ? 'video' : 'image',
         }
         if (isVideo) {
-          item.videoFileR2 = { _type: 'r2Asset', url: r2Url.url }
+          item.videoFileR2 = { _type: 'r2Asset', url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes }
         } else {
-          item.imageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height }
+          item.imageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
         }
         syncedMedia.push(item)
         hasChanges = true
@@ -2995,7 +3110,10 @@ async function updateCategoryImages(
           _type: 'r2Asset',
           url: r2Url.url,
           width: r2Url.width,
-          height: r2Url.height
+          height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
         }
         unsetFields.push('heroImage')
         hasChanges = true
@@ -3016,7 +3134,10 @@ async function updateCategoryImages(
           _type: 'r2Asset',
           url: r2Url.url,
           width: r2Url.width,
-          height: r2Url.height
+          height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes
         }
         unsetFields.push('menuImage')
         hasChanges = true
@@ -3081,7 +3202,10 @@ async function updateNewsItemMedia(client: any, newsId: string, news: any) {
       console.log(`   📸 Haber kapak R2'ye yükleniyor: ${coverMain.name}`)
       const r2Url = await uploadToR2(coverMain, `news/${news.newsId}`)
       if (r2Url) {
-        updates.mainImageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height }
+        updates.mainImageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
         unsetFields.push('mainImage')
         hasChanges = true
       }
@@ -3093,7 +3217,10 @@ async function updateNewsItemMedia(client: any, newsId: string, news: any) {
       console.log(`   📱 Haber mobil kapak R2'ye yükleniyor: ${coverMobile.name}`)
       const r2Url = await uploadToR2(coverMobile, `news/${news.newsId}`)
       if (r2Url) {
-        updates.mainImageMobileR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height }
+        updates.mainImageMobileR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
         unsetFields.push('mainImageMobile')
         hasChanges = true
       }
@@ -3108,7 +3235,10 @@ async function updateNewsItemMedia(client: any, newsId: string, news: any) {
       console.log(`   💻 Haber desktop kapak R2'ye yükleniyor: ${coverDesktop.name}`)
       const r2Url = await uploadToR2(coverDesktop, `news/${news.newsId}`)
       if (r2Url) {
-        updates.mainImageDesktopR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height }
+        updates.mainImageDesktopR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
         unsetFields.push('mainImageDesktop')
         hasChanges = true
       }
@@ -3151,9 +3281,12 @@ async function updateNewsItemMedia(client: any, newsId: string, news: any) {
           type: isVid ? 'video' : 'image',
         }
         if (isVid) {
-          item.videoFileR2 = { _type: 'r2Asset', url: r2Url.url }
+          item.videoFileR2 = { _type: 'r2Asset', url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes }
         } else {
-          item.imageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height }
+          item.imageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
         }
         syncedMedia.push(item)
         hasChanges = true
@@ -3186,7 +3319,10 @@ async function updateAboutPageMedia(client: any, aboutId: string, aboutData: any
     if (!doc.heroImageR2 || doc.heroImage) {
       const r2Url = await uploadToR2(file, 'about/hero')
       if (r2Url) {
-        updates.heroImageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height }
+        updates.heroImageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
         unsetFields.push('heroImage')
         hasChanges = true
       }
@@ -3202,7 +3338,10 @@ async function updateAboutPageMedia(client: any, aboutId: string, aboutData: any
         console.log(`   📸 Hakkımızda ${sectionName} R2'ye yükleniyor: ${mainFile.name}`)
         const r2Url = await uploadToR2(mainFile, `about/${sectionName}`)
         if (r2Url) {
-          updates[`${sectionName}.imageR2`] = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height }
+          updates[`${sectionName}.imageR2`] = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes,
+                      hasResponsiveSizes: r2Url.hasResponsiveSizes, hasResponsiveSizes: r2Url.hasResponsiveSizes }
           unsetFields.push(`${sectionName}.image`)
           hasChanges = true
         }

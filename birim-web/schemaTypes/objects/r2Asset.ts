@@ -21,5 +21,6 @@ export default defineType({
         defineField({ name: 'cropY', title: 'Crop Y', type: 'number' }),
         defineField({ name: 'cropWidth', title: 'Crop Width', type: 'number' }),
         defineField({ name: 'cropHeight', title: 'Crop Height', type: 'number' }),
+        defineField({ name: 'hasResponsiveSizes', title: 'Has Responsive Sizes', type: 'boolean', initialValue: false }),
     ],
 })

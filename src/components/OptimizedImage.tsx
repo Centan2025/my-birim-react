@@ -1,5 +1,5 @@
-import React, {useState, useEffect, useRef} from 'react'
-import {R2ImageMetadata} from '../types'
+import React, { useState, useEffect, useRef } from 'react'
+import { R2ImageMetadata } from '../types'
 
 /**
  * srcset attribute'ünde boşluklar ayırıcıdır — URL'deki boşlukları %20 ile encode ederek
@@ -88,7 +88,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   // engellemek için custom attribute'u lowercase olarak enjekte ediyoruz.
   const fetchPriorityAttr =
     fetchPriority && fetchPriority !== 'auto'
-      ? ({fetchpriority: fetchPriority} as Record<string, string>)
+      ? ({ fetchpriority: fetchPriority } as Record<string, string>)
       : {}
 
   // Placeholder (çok küçük, gri renk)
@@ -172,10 +172,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     const r2Domain =
       import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
     // .r2.dev ve .workers.dev domainleri image resizing desteklemez, direkt döndür.
-    const skipImageResizing = r2Domain?.includes('.r2.dev') || r2Domain?.includes('.workers.dev')
+    const skipImageResizing = r2Domain?.includes('.r2.dev') || r2Domain?.includes('.workers.dev') || r2Domain?.includes('assets.birim.com')
 
     if (r2Domain && url.startsWith(r2Domain) && !url.includes('/cdn-cgi/image/')) {
-      if (skipImageResizing) return url
+      if (skipImageResizing) return url.replace('?rs=1', '').replace('&rs=1', '')
 
       // Cloudflare URL format: /cdn-cgi/image/format=auto,width=XXX,height=YYY/path/to/image
       const params = []
@@ -227,7 +227,18 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     const r2Domain =
       import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
     if (r2Domain && baseUrl.startsWith(r2Domain)) {
-      if (r2Domain.includes('.r2.dev') || r2Domain.includes('.workers.dev')) return '' // srcset desteği yok (image resizing kapalı)
+      if (r2Domain.includes('.r2.dev') || r2Domain.includes('.workers.dev') || r2Domain.includes('assets.birim.com')) {
+        if (baseUrl.includes('rs=1')) {
+          const cleanUrl = baseUrl.replace('?rs=1', '').replace('&rs=1', '')
+          return [
+            `${cleanUrl.replace(/\.webp$/, '-400w.webp')} 400w`,
+            `${cleanUrl.replace(/\.webp$/, '-800w.webp')} 800w`,
+            `${cleanUrl.replace(/\.webp$/, '-1600w.webp')} 1600w`,
+            `${cleanUrl} 2560w`
+          ].join(', ')
+        }
+        return '' // srcset desteği yok (image resizing kapalı)
+      }
 
       // Cloudflare URL builder helper for local usage inside map
       const buildR2 = (w: number) => {
@@ -255,7 +266,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const useArtDirection = Boolean((srcMobile || srcDesktop) && !usingFallback)
 
   // Hotspot varsa style'a object-position ekle
-  const imgStyle: React.CSSProperties = {...style}
+  const imgStyle: React.CSSProperties = { ...style }
   if (hotspot) {
     imgStyle.objectPosition = `${hotspot.x * 100}% ${hotspot.y * 100}%`
   }
@@ -264,7 +275,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     return (
       <div
         className={`bg-gray-200 flex items-center justify-center ${className}`}
-        style={{width, height}}
+        style={{ width, height }}
       >
         <span className="text-gray-400 text-sm">Görsel yüklenemedi</span>
       </div>
@@ -287,7 +298,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     const r2Domain =
       import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
     if (r2Domain && url && url.startsWith(r2Domain)) {
-      if (r2Domain.includes('.r2.dev') || r2Domain.includes('.workers.dev')) return '' // no image resizing support
+      if (r2Domain.includes('.r2.dev') || r2Domain.includes('.workers.dev') || r2Domain.includes('assets.birim.com')) return '' // no image resizing support
 
       const params = []
       if (width) params.push(`width=${width}`)
