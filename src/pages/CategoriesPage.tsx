@@ -1,21 +1,21 @@
-import {Link} from 'react-router-dom'
-import {useEffect, useMemo} from 'react'
-import {OptimizedImage} from '../components/OptimizedImage'
-import {PageLoading} from '../components/LoadingSpinner'
-import {useTranslation} from '../i18n'
-import {useCategories} from '../hooks/useCategories'
-import {useProducts} from '../hooks/useProducts'
-import {useSiteSettings} from '../hooks/useSiteData'
+import { Link } from 'react-router-dom'
+import { useEffect, useMemo } from 'react'
+import { OptimizedImage } from '../components/OptimizedImage'
+import { PageLoading } from '../components/LoadingSpinner'
+import { useTranslation } from '../i18n'
+import { useCategories } from '../hooks/useCategories'
+import { useProducts } from '../hooks/useProducts'
+import { useSiteSettings } from '../hooks/useSiteData'
 import ScrollReveal from '../components/ScrollReveal'
-import {useSEO} from '../hooks/useSEO'
-import {useHeaderTheme} from '../context/HeaderThemeContext'
+import { useSEO } from '../hooks/useSEO'
+import { useHeaderTheme } from '../context/HeaderThemeContext'
 
 export function CategoriesPage() {
-  const {data: categories = [], isLoading: loading} = useCategories()
-  const {data: allProducts = []} = useProducts()
-  const {t} = useTranslation()
-  const {data: settings} = useSiteSettings()
-  const {setFromPalette, reset} = useHeaderTheme()
+  const { data: categories = [], isLoading: loading } = useCategories()
+  const { data: allProducts = [] } = useProducts()
+  const { t } = useTranslation()
+  const { data: settings } = useSiteSettings()
+  const { reset } = useHeaderTheme()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const pageTitle = `BIRIM - ${t('categories') || t('products') || 'Kategoriler'}`
 
@@ -27,51 +27,36 @@ export function CategoriesPage() {
     locale: 'tr_TR',
   })
 
-  // Her kategori için görsel belirle: heroImage yoksa kategoriye ait bir ürünün görselini kullan
+  // Ürünleri kategori ID'sine gore haritalayarak aramalari O(N) karmasikligina dusur
+  const categoryImageMap = useMemo(() => {
+    const map = new Map<string, any>()
+    for (const product of allProducts) {
+      if (product && product.categoryId && product.mainImage && !map.has(product.categoryId)) {
+        map.set(product.categoryId, product.mainImage)
+      }
+    }
+    return map
+  }, [allProducts])
+
+  // Her kategori için görsel belirle: heroImage yoksa haritadan bul
   const categoriesWithImages = useMemo(() => {
     return categories.map(category => {
       // Eğer kategori görseli varsa onu kullan
       if (category.heroImage) {
-        return {...category, displayImage: category.heroImage}
+        return { ...category, displayImage: category.heroImage }
       }
 
-      // Kategori görseli yoksa, o kategoriye ait ürünlerden birinin görselini bul
-      const categoryProducts = allProducts.filter(p => {
-        // categoryId kontrolü - hem string hem de undefined/null kontrolü
-        return p && p.categoryId && p.categoryId === category.id
-      })
-
-      // Tüm ürünleri kontrol et, görseli olan ilk ürünü bul
-      for (const product of categoryProducts) {
-        if (!product || !product.mainImage) continue
-
-        // mainImage string veya object olabilir (src/types.ts'de tanımlı)
-        // Görsel bulunduysa kullan
-        return {...category, displayImage: product.mainImage}
-      }
-
-      // Hiç görsel yoksa null döndür
-      return {...category, displayImage: null}
+      // Kategori görseli yoksa, harita uzerindeki urun görselini kullan
+      const displayImage = categoryImageMap.get(category.id) || null
+      return { ...category, displayImage }
     })
-  }, [categories, allProducts])
+  }, [categories, categoryImageMap])
 
-  // Header temasını mevcut ürünlerden birinin paletinden besle (kategoriler listesi için)
+  // Header temasını varsayılana sıfırla (Kategoriler dizini için rastgele renk atamasını kaldır)
   useEffect(() => {
-    const candidate = allProducts.find(
-      p => typeof p.mainImage === 'object' && p.mainImage !== null && 'palette' in p.mainImage
-    )
-    if (
-      candidate &&
-      typeof candidate.mainImage === 'object' &&
-      candidate.mainImage !== null &&
-      'palette' in candidate.mainImage
-    ) {
-      setFromPalette(candidate.mainImage.palette)
-    } else {
-      reset()
-    }
+    reset()
     return () => reset()
-  }, [allProducts, setFromPalette, reset])
+  }, [reset])
 
   if (loading) {
     return (
@@ -98,19 +83,12 @@ export function CategoriesPage() {
         <div className="relative h-full flex items-center justify-center text-center text-white pt-20">
           <div>
             <h1
-              className="text-4xl md:text-6xl font-oswald uppercase"
-              style={{
-                textShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                fontFamily: '"Oswald", sans-serif',
-                fontWeight: 300,
-                letterSpacing: '0.1em',
-              }}
+              className="text-4xl md:text-6xl font-oswald font-light tracking-[0.1em] uppercase drop-shadow-md"
             >
               {t('products')}
             </h1>
             <p
-              className="mt-4 text-lg max-w-2xl mx-auto"
-              style={{textShadow: '0 1px 3px rgba(0,0,0,0.5)'}}
+              className="mt-4 text-lg max-w-2xl mx-auto drop-shadow-md"
             >
               {t('products_page_subtitle')}
             </p>
@@ -155,13 +133,7 @@ export function CategoriesPage() {
                     <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-300"></div>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <h2
-                        className="text-4xl md:text-5xl lg:text-6xl font-oswald text-white uppercase"
-                        style={{
-                          textShadow: '0 2px 4px rgba(0,0,0,0.5)',
-                          fontFamily: '"Oswald", sans-serif',
-                          fontWeight: 300,
-                          letterSpacing: '0.1em',
-                        }}
+                        className="text-4xl md:text-5xl lg:text-6xl font-oswald font-light tracking-[0.1em] text-white uppercase drop-shadow-md"
                       >
                         {t(category.name)}
                       </h2>

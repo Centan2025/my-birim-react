@@ -1,13 +1,13 @@
-import React, {useState, useEffect, useMemo, useRef} from 'react'
-import {getContactPageContent} from '../services/cms'
-import type {ContactPageContent, ContactLocation} from '../types'
-import {OptimizedImage} from '../components/OptimizedImage'
-import {PageLoading} from '../components/LoadingSpinner'
-import {useTranslation} from '../i18n'
-import {analytics} from '../lib/analytics'
-import {Breadcrumbs} from '../components/Breadcrumbs'
-import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
-import {useSEO} from '../hooks/useSEO'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
+import { getContactPageContent } from '../services/cms'
+import type { ContactPageContent, ContactLocation } from '../types'
+import { OptimizedImage } from '../components/OptimizedImage'
+import { PageLoading } from '../components/LoadingSpinner'
+import { useTranslation } from '../i18n'
+import { analytics } from '../lib/analytics'
+import { Breadcrumbs } from '../components/Breadcrumbs'
+import { FullscreenMediaViewer } from '../components/FullscreenMediaViewer'
+import { useSEO } from '../hooks/useSEO'
 
 const getYouTubeId = (url: string): string | null => {
   const match = url.match(
@@ -120,8 +120,8 @@ const LocationCard: React.FC<{
   location: ContactLocation
   isSelected: boolean
   onSelect: () => void
-}> = ({location, isSelected, onSelect}) => {
-  const {t} = useTranslation()
+}> = ({ location, isSelected, onSelect }) => {
+  const { t } = useTranslation()
 
   return (
     <div
@@ -146,9 +146,8 @@ const LocationCard: React.FC<{
           onSelect()
         }
       }}
-      className={`p-4 cursor-pointer w-full max-w-full transition-all duration-300 ${
-        isSelected ? 'bg-gray-200' : 'hover:bg-gray-100'
-      }`}
+      className={`p-4 cursor-pointer w-full max-w-full transition-all duration-300 ${isSelected ? 'bg-gray-200' : 'hover:bg-gray-100'
+        }`}
     >
       <h3 className="text-xl font-light text-gray-500">{t(location.title)}</h3>
       <p className="mt-2 text-gray-500 flex items-start gap-2 font-light">
@@ -178,7 +177,7 @@ export function ContactPage() {
   const thumbRef = useRef<HTMLDivElement | null>(null)
   const [thumbDragStartX, setThumbDragStartX] = useState<number | null>(null)
   const [thumbScrollStart, setThumbScrollStart] = useState<number>(0)
-  const {t} = useTranslation()
+  const { t } = useTranslation()
 
   // SEO meta
   useSEO({
@@ -206,16 +205,16 @@ export function ContactPage() {
 
   // Fix: Ensure useMemo always returns a consistently typed object to avoid type inference issues.
   // FIX: Explicitly setting the return type for useMemo to avoid type inference issues with Object.entries downstream.
-  const locationGroups = useMemo((): Record<string, ContactLocation[]> => {
-    const groups: Record<string, ContactLocation[]> = {}
+  const locationGroupsMap = useMemo(() => {
+    const map = new Map<string, ContactLocation[]>()
     for (const loc of content?.locations || []) {
       const type = t(loc.type) || t('other_location_type')
-      if (!groups[type]) {
-        groups[type] = []
+      if (!map.has(type)) {
+        map.set(type, [])
       }
-      groups[type].push(loc)
+      map.get(type)!.push(loc)
     }
-    return groups
+    return map
   }, [content, t])
 
   // Seçili lokasyonun medyalarını al
@@ -258,9 +257,9 @@ export function ContactPage() {
           return {
             type: m.type,
             url,
-          } as {type: 'image' | 'video' | 'youtube'; url: string}
+          } as { type: 'image' | 'video' | 'youtube'; url: string }
         })
-        .filter(Boolean) as {type: 'image' | 'video' | 'youtube'; url: string}[],
+        .filter(Boolean) as { type: 'image' | 'video' | 'youtube'; url: string }[],
     [selectedLocationMedia]
   )
 
@@ -293,16 +292,12 @@ export function ContactPage() {
 
     return (
       <>
-        <style>{`
-          .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-          .hide-scrollbar::-webkit-scrollbar { display: none; }
-        `}</style>
         <div className="relative select-none">
           {/* Mouse ile yatay sürükleme için; klavye ile etkileşim gerekmiyor */}
           {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
           <div
             ref={thumbRef}
-            className="hide-scrollbar overflow-x-auto cursor-grab active:cursor-grabbing w-full max-w-full"
+            className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing w-full max-w-full"
             onMouseDown={e => {
               setThumbDragStartX(e.clientX)
               setThumbScrollStart(thumbRef.current ? thumbRef.current.scrollLeft : 0)
@@ -457,7 +452,7 @@ export function ContactPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
         <Breadcrumbs
           className="mb-6"
-          items={[{label: t('homepage'), to: '/'}, {label: t('contact')}]}
+          items={[{ label: t('homepage'), to: '/' }, { label: t('contact') }]}
         />
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600 uppercase">
@@ -471,13 +466,12 @@ export function ContactPage() {
 
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-stretch">
           <div className="bg-white p-6 shadow-sm border border-gray-300 space-y-8 w-full overflow-x-hidden h-full">
-            {/* FIX: Refactored to use Object.keys to avoid potential type inference issues with Object.entries in some TypeScript environments. */}
-            {Object.keys(locationGroups).map(type => (
+            {Array.from(locationGroupsMap.entries()).map(([type, locs]) => (
               <div key={type}>
                 <h2 className="text-2xl font-light text-gray-600 mb-2">{type}</h2>
                 <div className="h-px bg-gray-300 mb-6 w-full"></div>
                 <div className="space-y-4">
-                  {(locationGroups[type] || []).map((loc, index) => (
+                  {locs.map((loc, index) => (
                     <LocationCard
                       key={index}
                       location={loc}
@@ -506,7 +500,7 @@ export function ContactPage() {
                 src={convertGoogleMapsUrlToEmbed(selectedLocation.mapEmbedUrl)}
                 width="100%"
                 height="100%"
-                style={{border: 0}}
+                style={{ border: 0 }}
                 className="w-full h-full"
                 allow="fullscreen"
                 loading="lazy"

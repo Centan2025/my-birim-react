@@ -1,14 +1,14 @@
 import React from 'react'
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
-import {ContentBlock} from '../types'
-import {useTranslation} from '../i18n'
+import { ContentBlock } from '../types'
+import { useTranslation } from '../i18n'
 import ScrollReveal from './ScrollReveal'
-import {OptimizedImage} from './OptimizedImage'
-import {OptimizedVideo} from './OptimizedVideo'
-import {YouTubeBackground} from './YouTubeBackground'
+import { OptimizedImage } from './OptimizedImage'
+import { OptimizedVideo } from './OptimizedVideo'
+import { YouTubeBackground } from './YouTubeBackground'
 import PortableTextLite from './PortableTextLite'
-import {useGoogleFonts} from '../hooks/useGoogleFont'
+import { useGoogleFonts } from '../hooks/useGoogleFont'
 
 interface HomeContentBlocksProps {
   blocks: ContentBlock[]
@@ -21,7 +21,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
   isMobile,
   imageBorderClass,
 }) => {
-  const {t} = useTranslation()
+  const { t } = useTranslation()
 
   // Tüm bloklardaki fontları topla ve yükle
   const allFonts = blocks.map(b => b.titleFont).filter(Boolean) as string[]
@@ -177,6 +177,10 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             ? 'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto'
             : 'w-full max-w-[94%] mx-auto'
 
+        const isButtonWhite = block.buttonColor === 'white'
+        const buttonTextColorClass = isButtonWhite ? 'text-white' : 'text-gray-950'
+        const buttonLineClass = isButtonWhite ? 'bg-white/40 group-hover:bg-white' : 'bg-gray-950/40 group-hover:bg-gray-950'
+
         const mediaContent = (
           <ScrollReveal
             delay={50}
@@ -193,10 +197,10 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   >
                     <Link
                       to={block.linkUrl}
-                      className="group pointer-events-auto inline-flex items-center gap-x-4 md:gap-x-6 text-white font-bold py-4 px-4 md:px-8 transition-all duration-300 bg-transparent hover:bg-transparent"
+                      className={`group pointer-events-auto inline-flex items-center gap-x-4 md:gap-x-6 ${buttonTextColorClass} font-bold py-4 px-4 md:px-8 transition-all duration-300 bg-transparent hover:bg-transparent`}
                     >
                       {/* Sol Çizgi - Sadece Desktop */}
-                      <span className="hidden md:block w-12 md:w-16 h-[1px] bg-white/40 group-hover:w-20 md:group-hover:w-24 group-hover:bg-white transition-all duration-500 ease-out self-end mb-1" />
+                      <span className={`hidden md:block w-12 md:w-16 h-[1px] ${buttonLineClass} group-hover:w-20 md:group-hover:w-24 transition-all duration-500 ease-out self-end mb-1`} />
 
                       <span className="inline-flex justify-center transition-all duration-500 ease-out">
                         <span className="leading-none font-bold tracking-[0.05em] transition-all duration-500 ease-out md:group-hover:tracking-[0.15em]">
@@ -205,7 +209,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       </span>
 
                       {/* Sağ Çizgi - Sadece Desktop */}
-                      <span className="hidden md:block w-12 md:w-16 h-[1px] bg-white/40 group-hover:w-20 md:group-hover:w-24 group-hover:bg-white transition-all duration-500 ease-out self-end mb-1" />
+                      <span className={`hidden md:block w-12 md:w-16 h-[1px] ${buttonLineClass} group-hover:w-20 md:group-hover:w-24 transition-all duration-500 ease-out self-end mb-1`} />
                     </Link>
                   </div>
                 )}
@@ -228,10 +232,10 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   >
                     <Link
                       to={block.linkUrl}
-                      className="group pointer-events-auto inline-flex items-center gap-x-4 md:gap-x-6 text-white font-bold py-4 px-4 md:px-8 transition-all duration-300 bg-transparent hover:bg-transparent"
+                      className={`group pointer-events-auto inline-flex items-center gap-x-4 md:gap-x-6 ${buttonTextColorClass} font-bold py-4 px-4 md:px-8 transition-all duration-300 bg-transparent hover:bg-transparent`}
                     >
                       {/* Sol Çizgi - Sadece Desktop */}
-                      <span className="hidden md:block w-12 md:w-16 h-[1px] bg-white/40 group-hover:w-20 md:group-hover:w-24 group-hover:bg-white transition-all duration-500 ease-out self-end mb-1" />
+                      <span className={`hidden md:block w-12 md:w-16 h-[1px] ${buttonLineClass} group-hover:w-20 md:group-hover:w-24 transition-all duration-500 ease-out self-end mb-1`} />
 
                       <span className="inline-flex justify-center transition-all duration-500 ease-out">
                         <span className="leading-none font-bold tracking-[0.05em] transition-all duration-500 ease-out md:group-hover:tracking-[0.15em]">
@@ -240,7 +244,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       </span>
 
                       {/* Sağ Çizgi - Sadece Desktop */}
-                      <span className="hidden md:block w-12 md:w-16 h-[1px] bg-white/40 group-hover:w-20 md:group-hover:w-24 group-hover:bg-white transition-all duration-500 ease-out self-end mb-1" />
+                      <span className={`hidden md:block w-12 md:w-16 h-[1px] ${buttonLineClass} group-hover:w-20 md:group-hover:w-24 transition-all duration-500 ease-out self-end mb-1`} />
                     </Link>
                   </div>
                 )}
@@ -260,10 +264,10 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   >
                     <Link
                       to={block.linkUrl}
-                      className="group pointer-events-auto inline-flex items-center gap-x-4 md:gap-x-6 text-white font-bold py-4 px-4 md:px-8 transition-all duration-300 bg-transparent hover:bg-transparent"
+                      className={`group pointer-events-auto inline-flex items-center gap-x-4 md:gap-x-6 ${buttonTextColorClass} font-bold py-4 px-4 md:px-8 transition-all duration-300 bg-transparent hover:bg-transparent`}
                     >
                       {/* Sol Çizgi - Sadece Desktop */}
-                      <span className="hidden md:block w-12 md:w-16 h-[1px] bg-white/40 group-hover:w-20 md:group-hover:w-24 group-hover:bg-white transition-all duration-500 ease-out self-end mb-1" />
+                      <span className={`hidden md:block w-12 md:w-16 h-[1px] ${buttonLineClass} group-hover:w-20 md:group-hover:w-24 transition-all duration-500 ease-out self-end mb-1`} />
 
                       <span className="inline-flex justify-center transition-all duration-500 ease-out">
                         <span className="leading-none font-bold tracking-[0.05em] transition-all duration-500 ease-out md:group-hover:tracking-[0.15em]">
@@ -272,7 +276,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       </span>
 
                       {/* Sağ Çizgi - Sadece Desktop */}
-                      <span className="hidden md:block w-12 md:w-16 h-[1px] bg-white/40 group-hover:w-20 md:group-hover:w-24 group-hover:bg-white transition-all duration-500 ease-out self-end mb-1" />
+                      <span className={`hidden md:block w-12 md:w-16 h-[1px] ${buttonLineClass} group-hover:w-20 md:group-hover:w-24 transition-all duration-500 ease-out self-end mb-1`} />
                     </Link>
                   </div>
                 )}
@@ -306,7 +310,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           <section
             key={index}
             className={`content-block-wrapper relative z-20 ${backgroundColor}`}
-            style={{paddingBottom: bottomSpacing > 0 ? `${bottomSpacing}px` : undefined}}
+            style={{ paddingBottom: bottomSpacing > 0 ? `${bottomSpacing}px` : undefined }}
             data-block-index={index}
           >
             {isFullWidth || isCenter ? (
@@ -320,20 +324,18 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 <div
                   className={
                     hasTextContent
-                      ? `flex flex-col ${
-                          isLeft
-                            ? 'md:flex-row'
-                            : isRight
-                              ? 'md:flex-row-reverse'
-                              : 'md:flex-row items-center'
-                        } gap-4 md:gap-6`
+                      ? `flex flex-col ${isLeft
+                        ? 'md:flex-row'
+                        : isRight
+                          ? 'md:flex-row-reverse'
+                          : 'md:flex-row items-center'
+                      } gap-4 md:gap-6`
                       : 'flex flex-col items-center gap-4 md:gap-6'
                   }
                 >
                   <div
-                    className={`w-full ${
-                      !hasTextContent ? 'md:w-full flex flex-col items-center' : 'md:w-1/2'
-                    } overflow-visible`}
+                    className={`w-full ${!hasTextContent ? 'md:w-full flex flex-col items-center' : 'md:w-1/2'
+                      } overflow-visible`}
                   >
                     {mediaContent}
                   </div>

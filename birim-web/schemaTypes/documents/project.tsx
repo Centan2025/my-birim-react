@@ -1,5 +1,6 @@
 import React from 'react'
 import {defineField, defineType} from 'sanity'
+import { getPreviewUrl } from '../utils/previewUrl'
 
 export default defineType({
   name: 'project',
@@ -136,17 +137,7 @@ export default defineType({
   preview: {
     select: {title: 'title.tr', r2Url: 'coverR2.url'},
     prepare({title, r2Url}) {
-      let finalUrl = r2Url
-      const domain = process.env.SANITY_STUDIO_R2_DOMAIN
-      if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
-        try {
-          const parsed = new URL(finalUrl)
-          const path = parsed.pathname.startsWith('/')
-            ? parsed.pathname.substring(1)
-            : parsed.pathname
-          finalUrl = `${domain}/${path}`
-        } catch (e) {}
-      }
+      let finalUrl = getPreviewUrl(r2Url)
       return {
         title: title || 'Proje',
         media: finalUrl ? (

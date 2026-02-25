@@ -1,28 +1,28 @@
-import React, {useState, useEffect, useMemo, useRef} from 'react'
-import {createPortal} from 'react-dom'
-import {useParams, Link, useNavigate} from 'react-router-dom'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
+import { createPortal } from 'react-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 // FIX: Imported SiteSettings type to correctly type component state.
-import type {LocalizedString} from '../types'
-import {useAuth} from '../App'
-import {OptimizedImage} from '../components/OptimizedImage'
-import {OptimizedVideo} from '../components/OptimizedVideo'
-import {PageLoading} from '../components/LoadingSpinner'
-import {useTranslation} from '../i18n'
-import {useCart} from '../context/CartContext'
-import {useSEO} from '../hooks/useSEO'
-import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
-import {addStructuredData, getProductSchema} from '../lib/seo'
-import {analytics} from '../lib/analytics'
-import {useProduct, useProductsByCategory} from '../hooks/useProducts'
-import {useDesigner} from '../hooks/useDesigners'
-import {useCategories} from '../hooks/useCategories'
-import {useSiteSettings} from '../hooks/useSiteData'
-import {useHeaderTheme} from '../context/HeaderThemeContext'
+import type { LocalizedString } from '../types'
+import { useAuth } from '../App'
+import { OptimizedImage } from '../components/OptimizedImage'
+import { OptimizedVideo } from '../components/OptimizedVideo'
+import { PageLoading } from '../components/LoadingSpinner'
+import { useTranslation } from '../i18n'
+import { useCart } from '../context/CartContext'
+import { useSEO } from '../hooks/useSEO'
+import { FullscreenMediaViewer } from '../components/FullscreenMediaViewer'
+import { addStructuredData, getProductSchema } from '../lib/seo'
+import { analytics } from '../lib/analytics'
+import { useProduct, useProductsByCategory } from '../hooks/useProducts'
+import { useDesigner } from '../hooks/useDesigners'
+import { useCategories } from '../hooks/useCategories'
+import { useSiteSettings } from '../hooks/useSiteData'
+import { useHeaderTheme } from '../context/HeaderThemeContext'
 import ScrollReveal from '../components/ScrollReveal'
-import {ProductDesignerSection} from '../components/ProductDesignerSection'
-import {ProductExclusiveContentSection} from '../components/ProductExclusiveContentSection'
-import {ProductMediaPanels} from '../components/ProductMediaPanels'
-import {ProductCard} from '../components/ProductCard'
+import { ProductDesignerSection } from '../components/ProductDesignerSection'
+import { ProductExclusiveContentSection } from '../components/ProductExclusiveContentSection'
+import { ProductMediaPanels } from '../components/ProductMediaPanels'
+import { ProductCard } from '../components/ProductCard'
 import PortableTextLite from '../components/PortableTextLite'
 
 const CloseIcon = () => (
@@ -95,18 +95,18 @@ const MinimalChevronRight = (props: React.SVGProps<SVGSVGElement>) => (
 )
 
 export function ProductDetailPage() {
-  const {productId} = useParams<{productId: string}>()
+  const { productId } = useParams<{ productId: string }>()
   const navigate = useNavigate()
 
   // React Query hooks
-  const {data: product, isLoading: productLoading} = useProduct(productId)
-  const {data: siteSettings} = useSiteSettings()
-  const {data: allCategories = []} = useCategories()
-  const {setFromPalette, reset} = useHeaderTheme()
+  const { data: product, isLoading: productLoading } = useProduct(productId)
+  const { data: siteSettings } = useSiteSettings()
+  const { data: allCategories = [] } = useCategories()
+  const { setFromPalette, reset } = useHeaderTheme()
 
   // Designer ve category'yi product'tan al
-  const {data: designer} = useDesigner(product?.designerId)
-  const {data: siblingProducts = []} = useProductsByCategory(product?.categoryId)
+  const { data: designer } = useDesigner(product?.designerId)
+  const { data: siblingProducts = [] } = useProductsByCategory(product?.categoryId)
   const category = useMemo(
     () => allCategories.find(c => c.id === product?.categoryId),
     [allCategories, product?.categoryId]
@@ -119,9 +119,9 @@ export function ProductDetailPage() {
   const [lightboxSource, setLightboxSource] = useState<'band' | 'panel'>('band')
   const youTubePlayerRef = useRef<HTMLIFrameElement | null>(null)
   const [ytPlaying, setYtPlaying] = useState<boolean>(false)
-  const {isLoggedIn, user} = useAuth()
-  const {t, locale} = useTranslation()
-  const {addToCart} = useCart()
+  const { isLoggedIn, user } = useAuth()
+  const { t, locale } = useTranslation()
+  const { addToCart } = useCart()
   // FIX: Removed usage of non-existent `useSiteSettings` hook and now use the local `siteSettings` state.
   const imageBorderClass =
     siteSettings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
@@ -148,11 +148,11 @@ export function ProductDetailPage() {
   const [areDotsVisible, setAreDotsVisible] = useState(false)
   const [isPageVisible, setIsPageVisible] = useState(false)
   const [dimLightbox, setDimLightbox] = useState<{
-    images: {image: string; title?: LocalizedString}[]
+    images: { image: string; title?: LocalizedString }[]
     currentIndex: number
   } | null>(null)
   const [materialLightbox, setMaterialLightbox] = useState<{
-    images: {image: string; name: string}[]
+    images: { image: string; name: string }[]
     currentIndex: number
   } | null>(null)
   // Thumbnails horizontal drag/scroll
@@ -264,8 +264,8 @@ export function ProductDetailPage() {
     }
     const palette =
       typeof product.mainImage === 'object' &&
-      product.mainImage !== null &&
-      'palette' in product.mainImage
+        product.mainImage !== null &&
+        'palette' in product.mainImage
         ? product.mainImage.palette
         : undefined
     setFromPalette(palette)
@@ -362,8 +362,8 @@ export function ProductDetailPage() {
     product && typeof product.mainImage === 'string'
       ? product.mainImage
       : (product?.mainImage && typeof product.mainImage === 'object'
-          ? product.mainImage.url
-          : '') || ''
+        ? product.mainImage.url
+        : '') || ''
   const categoryNameForSeo = category ? t(category.name) : ''
   const seoTitle = productName
     ? categoryNameForSeo
@@ -392,14 +392,14 @@ export function ProductDetailPage() {
     })
     addStructuredData(productSchema, 'product-schema')
   }, [product, designer, productName, productDescription, productImage, t])
-  const {prevProduct, nextProduct} = useMemo(() => {
-    if (!product || siblingProducts.length < 2) return {prevProduct: null, nextProduct: null}
+  const { prevProduct, nextProduct } = useMemo(() => {
+    if (!product || siblingProducts.length < 2) return { prevProduct: null, nextProduct: null }
     const currentIndex = siblingProducts.findIndex(p => p.id === product.id)
-    if (currentIndex === -1) return {prevProduct: null, nextProduct: null}
+    if (currentIndex === -1) return { prevProduct: null, nextProduct: null }
     const prev = currentIndex > 0 ? siblingProducts[currentIndex - 1] : null
     const next =
       currentIndex < siblingProducts.length - 1 ? siblingProducts[currentIndex + 1] : null
-    return {prevProduct: prev, nextProduct: next}
+    return { prevProduct: prev, nextProduct: next }
   }, [product, siblingProducts])
   // Bottom prev/next visibility from CMS settings
   const showBottomPrevNext = Boolean(siteSettings?.showProductPrevNext)
@@ -419,11 +419,10 @@ export function ProductDetailPage() {
   }, [product])
 
   const mergedGroups = useMemo(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const map = new Map<string, any>()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ;(grouped || []).forEach((g: any) => {
-      const key = JSON.stringify(g.groupTitle || '')
+    for (const g of grouped || []) {
+      const gTitle = g?.groupTitle || ''
+      const key = typeof gTitle === 'string' ? gTitle : JSON.stringify(gTitle)
       if (!map.has(key)) {
         map.set(key, {
           groupTitle: g.groupTitle,
@@ -432,24 +431,31 @@ export function ProductDetailPage() {
         })
       } else {
         const agg = map.get(key)
-        // kitapları başlıklarına göre birleştir
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const byTitle = new Map<string, any>()
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ;[...(agg.books || []), ...(g.books || [])].forEach((b: any) => {
-          const bKey = JSON.stringify(b.bookTitle || '')
-          if (!byTitle.has(bKey)) byTitle.set(bKey, {bookTitle: b.bookTitle, materials: []})
+        // Process books into temporary map
+        for (const b of [...(agg.books || []), ...(g.books || [])]) {
+          const bTitle = b?.bookTitle || ''
+          const bKey = typeof bTitle === 'string' ? bTitle : JSON.stringify(bTitle)
+          if (!byTitle.has(bKey)) {
+            byTitle.set(bKey, { bookTitle: b.bookTitle, materials: [] })
+          }
           const entry = byTitle.get(bKey)
-          entry.materials = [...entry.materials, ...(Array.isArray(b.materials) ? b.materials : [])]
-        })
+          if (Array.isArray(b.materials)) {
+            // Only push items if they exist to prevent memory explosion
+            for (const mat of b.materials) {
+              entry.materials.push(mat)
+            }
+          }
+        }
         agg.books = Array.from(byTitle.values())
-        agg.materials = [
-          ...(agg.materials || []),
-          ...(Array.isArray(g.materials) ? g.materials : []),
-        ]
+        if (Array.isArray(g.materials)) {
+          for (const m of g.materials) {
+            agg.materials.push(m)
+          }
+        }
         map.set(key, agg)
       }
-    })
+    }
     return Array.from(map.values())
   }, [grouped])
 
@@ -474,7 +480,7 @@ export function ProductDetailPage() {
 
   const fallbackImages = (() => {
     const arw = [mainImageUrl]
-    return arw.filter(Boolean).map((u: string) => ({type: 'image' as const, url: u}))
+    return arw.filter(Boolean).map((u: string) => ({ type: 'image' as const, url: u }))
   })()
   // Bant medyası: alternatif medya varsa, ana görseli en başa ekle
   const bandMedia: {
@@ -494,7 +500,7 @@ export function ProductDetailPage() {
         crop?: any
         hotspot?: any
       }[] = mainImageUrl
-        ? [
+          ? [
             {
               type: 'image' as const,
               url: mainImageUrl,
@@ -504,7 +510,7 @@ export function ProductDetailPage() {
               hotspot: mainImageHotspot,
             },
           ]
-        : []
+          : []
       const merged = [...head, ...rawAltMedia]
       // tekilleştir (aynı url tekrar etmesin)
       const seen = new Set<string>()
@@ -764,21 +770,21 @@ export function ProductDetailPage() {
   }
   const currentLightboxItems: (
     | {
-        type: 'image' | 'video' | 'youtube'
-        url: string
-        urlMobile?: string
-        urlDesktop?: string
-        title?: LocalizedString
-        description?: LocalizedString
-        link?: string
-        linkText?: LocalizedString
-      }
+      type: 'image' | 'video' | 'youtube'
+      url: string
+      urlMobile?: string
+      urlDesktop?: string
+      title?: LocalizedString
+      description?: LocalizedString
+      link?: string
+      linkText?: LocalizedString
+    }
     | {
-        type: 'image' | 'video' | 'youtube'
-        url: string
-        urlMobile?: string
-        urlDesktop?: string
-      }
+      type: 'image' | 'video' | 'youtube'
+      url: string
+      urlMobile?: string
+      urlDesktop?: string
+    }
   )[] =
     lightboxSource === 'panel' ? (Array.isArray(product?.media) ? product.media : []) : bandMedia
   const nextImage = () => {
@@ -816,7 +822,7 @@ export function ProductDetailPage() {
   }
   const toYouTubeEmbed = (
     url: string,
-    {autoplay = true, controls = false}: {autoplay?: boolean; controls?: boolean} = {}
+    { autoplay = true, controls = false }: { autoplay?: boolean; controls?: boolean } = {}
   ): string => {
     const id = getYouTubeId(url)
     if (!id) return url
@@ -843,9 +849,8 @@ export function ProductDetailPage() {
 
   return (
     <div
-      className={`min-h-screen transition-all duration-700 ease-out ${
-        isPageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
-      }`}
+      className={`min-h-screen transition-all duration-700 ease-out ${isPageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+        }`}
       style={{
         transform: isPageVisible ? 'translateY(0)' : 'translateY(80px)',
         backgroundColor: 'white',
@@ -911,8 +916,6 @@ export function ProductDetailPage() {
           }
         `}
         </style>
-        {/* helpers */}
-        {(() => null)()}
         {/* FULL-WIDTH HERO IMAGE */}
         <header className="relative w-full">
           {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
@@ -943,9 +946,8 @@ export function ProductDetailPage() {
               className="flex h-full"
               style={{
                 width: `${totalHeroSlides * 100}%`,
-                transform: `translateX(calc(-${
-                  (heroSlideIndex * 100) / totalHeroSlides
-                }% + ${draggedX}px))`,
+                transform: `translateX(calc(-${(heroSlideIndex * 100) / totalHeroSlides
+                  }% + ${draggedX}px))`,
                 transition: heroTransitionEnabled ? 'transform 0.3s ease-out' : 'none',
               }}
               onTransitionEnd={handleHeroTransitionEnd}
@@ -959,7 +961,7 @@ export function ProductDetailPage() {
                   <div
                     key={index}
                     className="relative h-full shrink-0 bg-white flex items-center justify-center"
-                    style={{width: `${100 / totalHeroSlides}%`}}
+                    style={{ width: `${100 / totalHeroSlides}%` }}
                   >
                     {m.type === 'image' ? (
                       <OptimizedImage
@@ -994,7 +996,7 @@ export function ProductDetailPage() {
                       <iframe
                         className="w-full h-full"
                         title="youtube-player"
-                        src={toYouTubeEmbed(m.url, {autoplay: isActiveSlide})}
+                        src={toYouTubeEmbed(m.url, { autoplay: isActiveSlide })}
                         allow="autoplay; encrypted-media; fullscreen"
                         frameBorder="0"
                       />
@@ -1117,9 +1119,8 @@ export function ProductDetailPage() {
                           }
                           setCurrentImageIndex(index)
                         }}
-                        className={`relative h-2 rounded-none transition-all duration-500 ease-in-out group ${
-                          areDotsVisible ? 'animate-dot-grow' : 'opacity-0 scale-0'
-                        } ${isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'}`}
+                        className={`relative h-2 rounded-none transition-all duration-500 ease-in-out group ${areDotsVisible ? 'animate-dot-grow' : 'opacity-0 scale-0'
+                          } ${isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'}`}
                         style={{
                           transitionDelay: `${animationDelay}ms`,
                         }}
@@ -1193,7 +1194,7 @@ export function ProductDetailPage() {
                 {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
                 <div
                   ref={thumbRef}
-                  className="hide-scrollbar overflow-x-auto cursor-grab active:cursor-grabbing"
+                  className="scrollbar-hide overflow-x-auto cursor-grab active:cursor-grabbing max-lg:overflow-y-visible"
                   role="region"
                   aria-label="Thumbnail Slider"
                   // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
@@ -1216,9 +1217,9 @@ export function ProductDetailPage() {
                   onKeyDown={e => {
                     if (!thumbRef.current) return
                     if (e.key === 'ArrowLeft')
-                      thumbRef.current.scrollBy({left: -50, behavior: 'smooth'})
+                      thumbRef.current.scrollBy({ left: -50, behavior: 'smooth' })
                     if (e.key === 'ArrowRight')
-                      thumbRef.current.scrollBy({left: 50, behavior: 'smooth'})
+                      thumbRef.current.scrollBy({ left: 50, behavior: 'smooth' })
                   }}
                 >
                   <div ref={thumbListRef} className="relative flex gap-3 min-w-max pb-2">
@@ -1259,7 +1260,7 @@ export function ProductDetailPage() {
                               muted
                               playsInline
                               preload="metadata"
-                              style={{pointerEvents: 'none'}}
+                              style={{ pointerEvents: 'none' }}
                             />
                           ) : (
                             <OptimizedImage
@@ -1301,7 +1302,7 @@ export function ProductDetailPage() {
                   aria-label="scroll-left"
                   onClick={() => {
                     if (thumbRef.current)
-                      thumbRef.current.scrollBy({left: -240, behavior: 'smooth'})
+                      thumbRef.current.scrollBy({ left: -240, behavior: 'smooth' })
                   }}
                   className="absolute top-1/2 -translate-y-1/2 flex items-center justify-center rounded transition-transform hover:scale-105 active:scale-95 z-10"
                   style={{
@@ -1329,7 +1330,7 @@ export function ProductDetailPage() {
                 <button
                   aria-label="scroll-right"
                   onClick={() => {
-                    if (thumbRef.current) thumbRef.current.scrollBy({left: 240, behavior: 'smooth'})
+                    if (thumbRef.current) thumbRef.current.scrollBy({ left: 240, behavior: 'smooth' })
                   }}
                   className="absolute top-1/2 -translate-y-1/2 flex items-center justify-center rounded transition-transform hover:scale-105 active:scale-95 z-10"
                   style={{
@@ -1379,7 +1380,7 @@ export function ProductDetailPage() {
         )}
 
         {/* DETAILS BELOW */}
-        <main className="bg-gray-100">
+        <main className="bg-gray-100 max-lg:touch-pan-y max-lg:overflow-visible max-lg:h-auto">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 lg:pt-12 pb-12">
             {/* Breadcrumbs - desktop ve mobile (artık gray alanda) */}
             <nav className="mb-8 text-[11px] sm:text-[12px] text-gray-700" aria-label="Breadcrumb">
@@ -1473,7 +1474,7 @@ export function ProductDetailPage() {
                         ) => (
                           <div key={idx} className="flex flex-col items-center">
                             <button
-                              onClick={() => setDimLightbox({images: dimImages, currentIndex: idx})}
+                              onClick={() => setDimLightbox({ images: dimImages, currentIndex: idx })}
                               className="group border border-gray-200 transition-transform duration-200 p-3 bg-white rounded-none"
                             >
                               <OptimizedImage
@@ -1518,11 +1519,10 @@ export function ProductDetailPage() {
                               <button
                                 key={idx}
                                 onClick={() => setActiveMaterialGroup(idx)}
-                                className={`px-5 py-3 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${
-                                  activeMaterialGroup === idx
-                                    ? 'bg-white text-gray-800 border-gray-500'
-                                    : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
-                                }`}
+                                className={`px-5 py-3 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeMaterialGroup === idx
+                                  ? 'bg-white text-gray-800 border-gray-500'
+                                  : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
+                                  }`}
                               >
                                 {t(g.groupTitle)}
                               </button>
@@ -1540,11 +1540,10 @@ export function ProductDetailPage() {
                                   <button
                                     key={idx}
                                     onClick={() => setActiveBookIndex(idx)}
-                                    className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${
-                                      activeBookIndex === idx
-                                        ? 'bg-white text-gray-800 border-gray-500'
-                                        : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
-                                    }`}
+                                    className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeBookIndex === idx
+                                      ? 'bg-white text-gray-800 border-gray-500'
+                                      : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
+                                      }`}
                                   >
                                     {t(book.bookTitle)}
                                   </button>
@@ -1756,11 +1755,10 @@ export function ProductDetailPage() {
                         }
                         addToCart(product)
                       }}
-                      className={`group w-20 h-20 flex items-center justify-center rounded-full transition-all duration-300 ease-in-out transform hover:scale-110 active:scale-100 hover:shadow-lg ${
-                        hasMaterialGroups && activeMaterialGroup === null
-                          ? 'bg-gray-400 cursor-not-allowed opacity-70'
-                          : 'bg-gray-900 text-white hover:bg-gray-700'
-                      }`}
+                      className={`group w-20 h-20 flex items-center justify-center rounded-full transition-all duration-300 ease-in-out transform hover:scale-110 active:scale-100 hover:shadow-lg ${hasMaterialGroups && activeMaterialGroup === null
+                        ? 'bg-gray-400 cursor-not-allowed opacity-70'
+                        : 'bg-gray-900 text-white hover:bg-gray-700'
+                        }`}
                       aria-label={t('add_to_cart')}
                     >
                       <TransparentShoppingBagIcon />
@@ -1820,7 +1818,7 @@ export function ProductDetailPage() {
         {isLightboxOpen && (
           <div
             className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center"
-            style={{animationDuration: '0.2s'}}
+            style={{ animationDuration: '0.2s' }}
           >
             <button
               onClick={prevImageFn}
@@ -1898,7 +1896,7 @@ export function ProductDetailPage() {
                     })}
                     allow="autoplay; encrypted-media; fullscreen"
                     frameBorder="0"
-                    style={{pointerEvents: 'auto'}}
+                    style={{ pointerEvents: 'auto' }}
                   />
                   <button
                     onClick={() => {

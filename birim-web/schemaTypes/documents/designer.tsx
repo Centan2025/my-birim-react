@@ -1,6 +1,7 @@
 import React from 'react'
 import {defineField, defineType} from 'sanity'
 import {orderRankField} from '@sanity/orderable-document-list'
+import { getPreviewUrl } from '../utils/previewUrl'
 
 export default defineType({
   name: 'designer',
@@ -41,17 +42,7 @@ export default defineType({
   preview: {
     select: {title: 'name.tr', r2Url: 'imageR2.url'},
     prepare({title, r2Url}) {
-      let finalUrl = r2Url
-      const domain = process.env.SANITY_STUDIO_R2_DOMAIN
-      if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
-        try {
-          const parsed = new URL(finalUrl)
-          const path = parsed.pathname.startsWith('/')
-            ? parsed.pathname.substring(1)
-            : parsed.pathname
-          finalUrl = `${domain}/${path}`
-        } catch (e) {}
-      }
+      let finalUrl = getPreviewUrl(r2Url)
       return {
         title: title || 'Tasarımcı',
         media: finalUrl ? (
