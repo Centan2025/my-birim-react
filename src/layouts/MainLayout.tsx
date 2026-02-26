@@ -7,6 +7,8 @@ import CookieBanner from '../components/CookieBanner'
 import { PageTransition } from '../components/PageTransition'
 import { PageLoader } from '../components/PageLoader'
 import { Footer } from '../components/Footer'
+import { ErrorBoundary } from '../components/ErrorBoundary'
+import { PageErrorFallback } from '../components/PageErrorFallback'
 
 // Lazy load pages for code splitting
 const HomePage = lazy(() => import('../pages/HomePage').then(m => ({ default: m.HomePage })))
@@ -50,6 +52,20 @@ const ResetPasswordPage = lazy(() =>
     import('../pages/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage }))
 )
 
+/**
+ * Sayfa bazlı ErrorBoundary sarmalayıcı.
+ * Her route'u bağımsız olarak hata yönetimine alır.
+ * Bir sayfada hata oluşsa bile diğer sayfalar çalışır.
+ */
+const PageBoundary: React.FC<{ children: React.ReactNode; pageName?: string }> = ({
+    children,
+    pageName,
+}) => (
+    <ErrorBoundary fallback={<PageErrorFallback pageName={pageName} />}>
+        {children}
+    </ErrorBoundary>
+)
+
 export const MainLayout: React.FC = () => {
     const location = useLocation()
 
@@ -67,27 +83,146 @@ export const MainLayout: React.FC = () => {
                 <Suspense fallback={<PageLoader />}>
                     <PageTransition key={location.pathname}>
                         <Routes>
-                            <Route path="/" element={<HomePage />} />
-                            <Route path="/categories" element={<CategoriesPage />} />
-                            <Route path="/products" element={<ProductsPage />} />
-                            <Route path="/products/:categoryId" element={<ProductsPage />} />
-                            <Route path="/product/:productId" element={<ProductDetailPage />} />
-                            <Route path="/designers" element={<DesignersPage />} />
-                            <Route path="/designer/:designerId" element={<DesignerDetailPage />} />
-                            <Route path="/projects" element={<ProjectsPage />} />
-                            <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
-                            <Route path="/about" element={<AboutPage />} />
-                            <Route path="/contact" element={<ContactPage />} />
-                            <Route path="/login" element={<LoginPage />} />
-                            <Route path="/profile" element={<ProfilePage />} />
-                            <Route path="/verify-email" element={<VerifyEmailPage />} />
-                            <Route path="/reset-password" element={<ResetPasswordPage />} />
-                            <Route path="/news" element={<NewsPage />} />
-                            <Route path="/news/:newsId" element={<NewsDetailPage />} />
-                            <Route path="/cookies" element={<CookiesPage />} />
-                            <Route path="/privacy" element={<PrivacyPage />} />
-                            <Route path="/terms" element={<TermsPage />} />
-                            <Route path="/kvkk" element={<KvkkPage />} />
+                            <Route
+                                path="/"
+                                element={
+                                    <PageBoundary pageName="Ana Sayfa">
+                                        <HomePage />
+                                    </PageBoundary>
+                                }
+                            />
+                            <Route
+                                path="/categories"
+                                element={
+                                    <PageBoundary pageName="Kategoriler">
+                                        <CategoriesPage />
+                                    </PageBoundary>
+                                }
+                            />
+                            <Route
+                                path="/products"
+                                element={
+                                    <PageBoundary pageName="Ürünler">
+                                        <ProductsPage />
+                                    </PageBoundary>
+                                }
+                            />
+                            <Route
+                                path="/products/:categoryId"
+                                element={
+                                    <PageBoundary pageName="Ürünler">
+                                        <ProductsPage />
+                                    </PageBoundary>
+                                }
+                            />
+                            <Route
+                                path="/product/:productId"
+                                element={
+                                    <PageBoundary pageName="Ürün Detayı">
+                                        <ProductDetailPage />
+                                    </PageBoundary>
+                                }
+                            />
+                            <Route
+                                path="/designers"
+                                element={
+                                    <PageBoundary pageName="Tasarımcılar">
+                                        <DesignersPage />
+                                    </PageBoundary>
+                                }
+                            />
+                            <Route
+                                path="/designer/:designerId"
+                                element={
+                                    <PageBoundary pageName="Tasarımcı">
+                                        <DesignerDetailPage />
+                                    </PageBoundary>
+                                }
+                            />
+                            <Route
+                                path="/projects"
+                                element={
+                                    <PageBoundary pageName="Projeler">
+                                        <ProjectsPage />
+                                    </PageBoundary>
+                                }
+                            />
+                            <Route
+                                path="/projects/:projectId"
+                                element={
+                                    <PageBoundary pageName="Proje">
+                                        <ProjectDetailPage />
+                                    </PageBoundary>
+                                }
+                            />
+                            <Route
+                                path="/about"
+                                element={
+                                    <PageBoundary pageName="Hakkımızda">
+                                        <AboutPage />
+                                    </PageBoundary>
+                                }
+                            />
+                            <Route
+                                path="/contact"
+                                element={
+                                    <PageBoundary pageName="İletişim">
+                                        <ContactPage />
+                                    </PageBoundary>
+                                }
+                            />
+                            <Route
+                                path="/login"
+                                element={
+                                    <PageBoundary pageName="Giriş / Üyelik">
+                                        <LoginPage />
+                                    </PageBoundary>
+                                }
+                            />
+                            <Route
+                                path="/profile"
+                                element={
+                                    <PageBoundary pageName="Profil">
+                                        <ProfilePage />
+                                    </PageBoundary>
+                                }
+                            />
+                            <Route
+                                path="/verify-email"
+                                element={
+                                    <PageBoundary pageName="E-posta Doğrulama">
+                                        <VerifyEmailPage />
+                                    </PageBoundary>
+                                }
+                            />
+                            <Route
+                                path="/reset-password"
+                                element={
+                                    <PageBoundary pageName="Şifre Sıfırlama">
+                                        <ResetPasswordPage />
+                                    </PageBoundary>
+                                }
+                            />
+                            <Route
+                                path="/news"
+                                element={
+                                    <PageBoundary pageName="Haberler">
+                                        <NewsPage />
+                                    </PageBoundary>
+                                }
+                            />
+                            <Route
+                                path="/news/:newsId"
+                                element={
+                                    <PageBoundary pageName="Haber">
+                                        <NewsDetailPage />
+                                    </PageBoundary>
+                                }
+                            />
+                            <Route path="/cookies" element={<PageBoundary><CookiesPage /></PageBoundary>} />
+                            <Route path="/privacy" element={<PageBoundary><PrivacyPage /></PageBoundary>} />
+                            <Route path="/terms" element={<PageBoundary><TermsPage /></PageBoundary>} />
+                            <Route path="/kvkk" element={<PageBoundary><KvkkPage /></PageBoundary>} />
                         </Routes>
                     </PageTransition>
                 </Suspense>

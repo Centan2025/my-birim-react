@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:vercel": "vercel dev",
+    "api:server": "node local-api-server.mjs",
+    "dev:full": "start \"API Server\" node local-api-server.mjs && vite",
     "build": "tsc && vite build && npm run generate-sitemap && npm run generate-robots",
     "preview": "vite preview",
     "import-media": "cd tools/media-importer && npm install && npm run import --",
@@ -78,7 +81,9 @@
     "tsx": "^4.20.6",
     "typescript": "^5.2.2",
     "vite": "^7.2.4",
+    "vite-plugin-pwa": "^1.2.0",
     "vitest": "^4.0.14",
-    "web-vitals": "^4.2.4"
+    "web-vitals": "^4.2.4",
+    "workbox-window": "^7.4.0"
   }
 }

@@ -1,5 +1,6 @@
 import React from 'react'
 import type { LocalizedString } from '../types'
+import { sanitizeHtml } from '../lib/sanitize'
 
 // Ortak çeviri fonksiyonu tipi (Header ve alt bileşenlerde)
 export type HeaderTranslateFn = (
@@ -51,7 +52,7 @@ export const CrossFadeText: React.FC<{
 
 // Header dışındaki bileşenlerde de kullanılabilen DynamicIcon
 export const DynamicIcon: React.FC<{ svgString: string }> = ({ svgString }) => (
-  <div dangerouslySetInnerHTML={{ __html: svgString }} />
+  <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(svgString) }} />
 )
 
 export const UserIcon = () => (

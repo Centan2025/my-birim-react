@@ -55,7 +55,7 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                             {(Array.isArray(mergedGroups) ? mergedGroups : []).map(
                                 (g: any, idx: number) => (
                                     <button
-                                        key={idx}
+                                        key={`group-${idx}`}
                                         onClick={() => onSetActiveMaterialGroup(idx)}
                                         className={`px-5 py-3 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeMaterialGroup === idx
                                             ? 'bg-white text-gray-800 border-gray-500'
@@ -75,7 +75,7 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                                     <div className="flex flex-wrap gap-0 border-b border-gray-200 mb-6">
                                         {books.map((book: any, idx: number) => (
                                             <button
-                                                key={idx}
+                                                key={`book-${idx}`}
                                                 onClick={() => onSetActiveBookIndex(idx)}
                                                 className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeBookIndex === idx
                                                     ? 'bg-white text-gray-800 border-gray-500'
@@ -137,7 +137,7 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                                         : []
                                     ).map((material: any, index: number) => (
                                         <div
-                                            key={index}
+                                            key={`mat-${index}-${material.image || index}`}
                                             className="text-center group cursor-pointer"
                                             title={t(material.name)}
                                             onClick={() => {
@@ -184,7 +184,7 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                     <div className="flex flex-wrap gap-6">
                         {flatMaterials.map((material, index) => (
                             <div
-                                key={index}
+                                key={`matflat-${index}-${material.image || index}`}
                                 className="text-center group cursor-pointer"
                                 title={t(material.name)}
                                 onClick={() =>

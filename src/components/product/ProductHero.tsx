@@ -128,7 +128,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                         const isActiveSlide = heroSlideIndex === index
                         return (
                             <div
-                                key={index}
+                                key={`slide-${index}-${m.url || index}`}
                                 className="relative h-full shrink-0 bg-white flex items-center justify-center"
                                 style={{ width: `${100 / totalHeroSlides}%` }}
                             >
@@ -276,7 +276,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
 
                                 return (
                                     <button
-                                        key={index}
+                                        key={`dot-${index}`}
                                         onClick={() => {
                                             if (slideCount > 1) {
                                                 onSetTransitionEnabled(false)

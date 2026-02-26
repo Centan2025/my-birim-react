@@ -7,7 +7,7 @@
 
 import * as Sentry from '@sentry/react'
 
-const DEBUG_LOGS = (import.meta.env as {VITE_DEBUG_LOGS?: string}).VITE_DEBUG_LOGS === 'true'
+const DEBUG_LOGS = (import.meta.env as { VITE_DEBUG_LOGS?: string }).VITE_DEBUG_LOGS === 'true'
 
 interface ErrorContext {
   user?: {
@@ -36,6 +36,8 @@ class ErrorReporter {
         Sentry.init({
           dsn: this.dsn,
           environment: (import.meta.env.MODE as string | undefined) || 'development',
+          // Sentry'nin kendi tunnel seçeneği — adblocker bypass için monkey-patch gerekmez
+          // tunnel: '/api/sentry-tunnel',  // Opsiyonel: Vercel API route ise aktif edilebilir
           // Disable default integrations and only include what we need
           defaultIntegrations: false,
           integrations: [
@@ -44,68 +46,33 @@ class ErrorReporter {
               maskAllText: true,
               blockAllMedia: true,
             }),
-            // Explicitly exclude feedback widget to prevent storage errors
           ].filter(Boolean),
           // Performance Monitoring
-          tracesSampleRate: (import.meta.env.PROD as boolean | undefined) ? 0.1 : 1.0, // 10 percent in production, 100 percent in dev
+          tracesSampleRate: (import.meta.env.PROD as boolean | undefined) ? 0.1 : 1.0,
           // Session Replay
           replaysSessionSampleRate: (import.meta.env.PROD as boolean | undefined) ? 0.1 : 1.0,
-          replaysOnErrorSampleRate: 1.0, // Always record replays on errors
+          replaysOnErrorSampleRate: 1.0,
           // Ignore known non-critical errors
           ignoreErrors: [
-            // Sentry session fetch errors
             'Could not fetch session',
-            // Storage access errors (handled by our code)
             'Access to storage is not allowed from this context',
+            // Adblocker/DNS hatalarını sessizce yoksay (monkey-patch'e gerek kalmadan)
+            'ERR_NAME_NOT_RESOLVED',
+            'Failed to fetch',
+            'NetworkError',
+            'Network Error',
+            'Load failed',
           ],
-          // Filter out localhost errors in production
           beforeSend(event) {
-            // Don't send errors from localhost in production
             if (
               (import.meta.env.PROD as boolean | undefined) &&
               window.location.hostname === 'localhost'
             ) {
               return null
             }
-            // Filter out known non-critical errors
-            if (event.exception) {
-              const errorMessage = event.exception.values?.[0]?.value || ''
-              if (
-                errorMessage.includes('Could not fetch session') ||
-                errorMessage.includes('Access to storage is not allowed from this context') ||
-                errorMessage.includes('ERR_NAME_NOT_RESOLVED') ||
-                errorMessage.includes('Failed to fetch') ||
-                errorMessage.includes('Network Error')
-              ) {
-                return null
-              }
-            }
             return event
           },
         })
-
-        // Monkey-patch window.fetch temporarily to catch Sentry DSN resolution errors explicitly
-        // This stops net::ERR_NAME_NOT_RESOLVED from appearing as an unhandled error when adblockers block sentry
-        if (typeof window !== 'undefined') {
-          const originalFetch = window.fetch
-          window.fetch = async function (...args) {
-            try {
-              return await originalFetch.apply(this, args)
-            } catch (error) {
-              const url =
-                typeof args[0] === 'string'
-                  ? args[0]
-                  : args[0] instanceof Request
-                    ? args[0].url
-                    : ''
-              if (url.includes('sentry.io') && import.meta.env.PROD) {
-                // Silently swallow Sentry fetch errors (like adblocker or DNS failures)
-                return new Response(null, {status: 200})
-              }
-              throw error
-            }
-          }
-        }
 
         if (import.meta.env.DEV && DEBUG_LOGS) {
           console.debug('[ErrorReporter] Sentry initialized')
@@ -173,7 +140,7 @@ class ErrorReporter {
   /**
    * Set user context
    */
-  setUser(user: {id?: string; email?: string; name?: string}) {
+  setUser(user: { id?: string; email?: string; name?: string }) {
     if (this.dsn) {
       try {
         Sentry.setUser(user)
