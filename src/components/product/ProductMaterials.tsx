@@ -2,7 +2,7 @@ import React from 'react'
 import { OptimizedImage } from '../OptimizedImage'
 import { useTranslation } from '../../i18n'
 import ScrollReveal from '../ScrollReveal'
-import type { LocalizedString } from '../../types'
+
 
 interface ProductMaterialsProps {
     mergedGroups: any[]

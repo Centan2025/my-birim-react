@@ -31,11 +31,16 @@ const CloseIcon = () => (
 )
 
 const toYouTubeEmbed = (url: string, { autoplay = false, controls = false } = {}) => {
+    if (!url) return ''
     let id = ''
-    if (url.includes('youtube.com/watch?v=')) id = url.split('v=')[1].split('&')[0]
-    else if (url.includes('youtu.be/')) id = url.split('youtu.be/')[1].split('?')[0]
-    else if (url.includes('youtube.com/embed/')) id = url.split('embed/')[1].split('?')[0]
-    return `https://www.youtube.com/embed/${id}?autoplay=${autoplay ? 1 : 0}&mute=1&controls=${controls ? 1 : 0}&playlist=${id}&loop=1`
+    if (url.includes('youtube.com/watch?v=')) {
+        id = url.split('v=')[1]?.split('&')[0] || ''
+    } else if (url.includes('youtu.be/')) {
+        id = url.split('youtu.be/')[1]?.split('?')[0] || ''
+    } else if (url.includes('youtube.com/embed/')) {
+        id = url.split('embed/')[1]?.split('?')[0] || ''
+    }
+    return id ? `https://www.youtube.com/embed/${id}?autoplay=${autoplay ? 1 : 0}&mute=1&controls=${controls ? 1 : 0}&playlist=${id}&loop=1` : ''
 }
 
 export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
