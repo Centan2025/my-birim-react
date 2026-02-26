@@ -1,31 +1,32 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { useAuth } from '../App'
-import { PageLoading } from '../components/LoadingSpinner'
-import { useTranslation } from '../i18n'
-import { useCart } from '../context/CartContext'
-import { useSEO } from '../hooks/useSEO'
-import { FullscreenMediaViewer } from '../components/FullscreenMediaViewer'
-import { addStructuredData, getProductSchema } from '../lib/seo'
-import { analytics } from '../lib/analytics'
-import { useProduct, useProductsByCategory } from '../hooks/useProducts'
-import { useDesigner } from '../hooks/useDesigners'
-import { useCategories } from '../hooks/useCategories'
-import { useSiteSettings } from '../hooks/useSiteData'
-import { useHeaderTheme } from '../context/HeaderThemeContext'
-import { ProductDesignerSection } from '../components/ProductDesignerSection'
-import { ProductExclusiveContentSection } from '../components/ProductExclusiveContentSection'
-import { ProductMediaPanels } from '../components/ProductMediaPanels'
+import {useState, useEffect, useMemo} from 'react'
+import {useParams, useNavigate} from 'react-router-dom'
+import {useAuth} from '../App'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {useCart} from '../context/CartContext'
+import {useSEO} from '../hooks/useSEO'
+import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
+import {addStructuredData, getProductSchema} from '../lib/seo'
+import {analytics} from '../lib/analytics'
+import {useProduct, useProductsByCategory} from '../hooks/useProducts'
+import {useDesigner} from '../hooks/useDesigners'
+import {useCategories} from '../hooks/useCategories'
+import {useSiteSettings} from '../hooks/useSiteData'
+import {useProductHero} from '../hooks/useProductHero'
+import {useHeaderTheme} from '../context/HeaderThemeContext'
+import {ProductDesignerSection} from '../components/ProductDesignerSection'
+import {ProductExclusiveContentSection} from '../components/ProductExclusiveContentSection'
+import {ProductMediaPanels} from '../components/ProductMediaPanels'
 
 // Modular components
-import { ProductHero } from '../components/product/ProductHero'
-import { ProductThumbnails } from '../components/product/ProductThumbnails'
-import { ProductInfo } from '../components/product/ProductInfo'
-import { ProductMaterials } from '../components/product/ProductMaterials'
-import { ProductDimensions } from '../components/product/ProductDimensions'
-import { ProductBottomNav } from '../components/product/ProductBottomNav'
-import { ProductRelated } from '../components/product/ProductRelated'
-import { ProductMediaLightbox } from '../components/product/ProductMediaLightbox'
+import {ProductHero} from '../components/product/ProductHero'
+import {ProductThumbnails} from '../components/product/ProductThumbnails'
+import {ProductInfo} from '../components/product/ProductInfo'
+import {ProductMaterials} from '../components/product/ProductMaterials'
+import {ProductDimensions} from '../components/product/ProductDimensions'
+import {ProductBottomNav} from '../components/product/ProductBottomNav'
+import {ProductRelated} from '../components/product/ProductRelated'
+import {ProductMediaLightbox} from '../components/product/ProductMediaLightbox'
 
 const TransparentShoppingBagIcon = () => (
   <svg
@@ -46,17 +47,17 @@ const TransparentShoppingBagIcon = () => (
 )
 
 export function ProductDetailPage() {
-  const { productId } = useParams<{ productId: string }>()
+  const {productId} = useParams<{productId: string}>()
   const navigate = useNavigate()
 
   // React Query hooks
-  const { data: product, isLoading: productLoading } = useProduct(productId)
-  const { data: siteSettings } = useSiteSettings()
-  const { data: allCategories = [] } = useCategories()
-  const { setFromPalette, reset } = useHeaderTheme()
+  const {data: product, isLoading: productLoading} = useProduct(productId)
+  const {data: siteSettings} = useSiteSettings()
+  const {data: allCategories = []} = useCategories()
+  const {setFromPalette, reset} = useHeaderTheme()
 
-  const { data: designer } = useDesigner(product?.designerId)
-  const { data: siblingProducts = [] } = useProductsByCategory(product?.categoryId)
+  const {data: designer} = useDesigner(product?.designerId)
+  const {data: siblingProducts = []} = useProductsByCategory(product?.categoryId)
   const category = useMemo(
     () => allCategories.find(c => c.id === product?.categoryId),
     [allCategories, product?.categoryId]
@@ -65,38 +66,44 @@ export function ProductDetailPage() {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false)
   const [lightboxImageIndex, setLightboxImageIndex] = useState(0)
   const [lightboxSource, setLightboxSource] = useState<'band' | 'panel'>('band')
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragStartX, setDragStartX] = useState<number>(0)
-  const [draggedX, setDraggedX] = useState<number>(0)
-  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0)
-  const [heroSlideIndex, setHeroSlideIndex] = useState<number>(1)
-  const [heroTransitionEnabled, setHeroTransitionEnabled] = useState(true)
-  const [isMobile, setIsMobile] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 1024 : false))
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 1024 : false
+  )
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
   const [isFullscreenButtonVisible, setIsFullscreenButtonVisible] = useState(false)
   const [isTitleVisible, setIsTitleVisible] = useState(false)
   const [isDesignerVisible, setIsDesignerVisible] = useState(false)
   const [areDotsVisible, setAreDotsVisible] = useState(false)
-  const [dimLightbox, setDimLightbox] = useState<{ images: any[]; currentIndex: number } | null>(null)
-  const [materialLightbox, setMaterialLightbox] = useState<{ images: any[]; currentIndex: number } | null>(null)
+  const [dimLightbox, setDimLightbox] = useState<{images: any[]; currentIndex: number} | null>(null)
+  const [materialLightbox, setMaterialLightbox] = useState<{
+    images: any[]
+    currentIndex: number
+  } | null>(null)
   const [activeMaterialGroup, setActiveMaterialGroup] = useState<number | null>(null)
   const [activeBookIndex, setActiveBookIndex] = useState<number>(0)
 
-  const { isLoggedIn, user } = useAuth()
-  const { t, locale } = useTranslation()
-  const { addToCart } = useCart()
-
-  const DRAG_THRESHOLD = 50
-  const dragStartY = useRef<number>(0)
+  const {isLoggedIn, user} = useAuth()
+  const {t, locale} = useTranslation()
+  const {addToCart} = useCart()
 
   // Derived values
-  const imageBorderClass = siteSettings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
+  const imageBorderClass =
+    siteSettings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
 
   const bandMedia = useMemo(() => {
     if (!product) return []
     const altMedia = product.alternativeMedia || []
-    const mainUrl = typeof product.mainImage === 'string' ? product.mainImage : product.mainImage?.url || ''
-    const head = mainUrl ? [{ type: 'image' as const, url: mainUrl, ...((typeof product.mainImage === 'object' ? product.mainImage : {}) as any) }] : []
+    const mainUrl =
+      typeof product.mainImage === 'string' ? product.mainImage : product.mainImage?.url || ''
+    const head = mainUrl
+      ? [
+          {
+            type: 'image' as const,
+            url: mainUrl,
+            ...((typeof product.mainImage === 'object' ? product.mainImage : {}) as any),
+          },
+        ]
+      : []
     const merged = [...head, ...altMedia]
     const seen = new Set<string>()
     return merged.filter(m => {
@@ -108,7 +115,6 @@ export function ProductDetailPage() {
   }, [product])
 
   const slideCount = bandMedia.length
-  const totalHeroSlides = slideCount > 1 ? slideCount + 2 : slideCount
   const heroMedia = useMemo(() => {
     if (slideCount <= 1) return bandMedia
     const first = bandMedia[0]
@@ -116,13 +122,16 @@ export function ProductDetailPage() {
     return [last, ...bandMedia, first]
   }, [bandMedia, slideCount])
 
+  const heroHook = useProductHero(slideCount)
+
   // Effects
   useEffect(() => {
     if (!product) {
       reset()
       return
     }
-    const palette = typeof product.mainImage === 'object' ? (product.mainImage as any)?.palette : undefined
+    const palette =
+      typeof product.mainImage === 'object' ? (product.mainImage as any)?.palette : undefined
     setFromPalette(palette)
     return () => reset()
   }, [product, reset, setFromPalette])
@@ -131,7 +140,10 @@ export function ProductDetailPage() {
     if (!product) return
     const productName = t(product.name)
     const productDescription = t(product.description) || productName
-    const productImage = typeof product.mainImage === 'string' ? product.mainImage : (product.mainImage as any)?.url || ''
+    const productImage =
+      typeof product.mainImage === 'string'
+        ? product.mainImage
+        : (product.mainImage as any)?.url || ''
     const catName = category ? t(category.name) : ''
     const seoTitle = catName ? `${catName} - ${productName}` : productName
 
@@ -148,9 +160,16 @@ export function ProductDetailPage() {
   }, [product, designer, category, t])
 
   useSEO({
-    title: product ? (category ? `${t(category.name)} - ${t(product.name)}` : t(product.name)) : 'BIRIM',
+    title: product
+      ? category
+        ? `${t(category.name)} - ${t(product.name)}`
+        : t(product.name)
+      : 'BIRIM',
     description: product ? t(product.description) : 'BIRIM - Modern tasarım ve mimari çözümler',
-    image: typeof product?.mainImage === 'string' ? product.mainImage : (product?.mainImage as any)?.url || '',
+    image:
+      typeof product?.mainImage === 'string'
+        ? product.mainImage
+        : (product?.mainImage as any)?.url || '',
     type: 'product',
     siteName: 'BIRIM',
     locale: 'tr_TR',
@@ -174,84 +193,19 @@ export function ProductDetailPage() {
     setTimeout(() => setAreDotsVisible(true), 500)
   }, [product])
 
-  useEffect(() => {
-    if (product && bandMedia.length > 0) {
-      setCurrentImageIndex(0)
-      setHeroSlideIndex(slideCount > 1 ? 1 : 0)
-    }
-  }, [product, bandMedia.length, slideCount])
-
-  // Handlers
-  const heroNext = () => {
-    if (slideCount <= 1 || !heroTransitionEnabled) return
-    setHeroSlideIndex(prev => prev + 1)
-    setCurrentImageIndex(prev => (prev + 1) % slideCount)
-  }
-
-  const heroPrev = () => {
-    if (slideCount <= 1 || !heroTransitionEnabled) return
-    setHeroSlideIndex(prev => prev - 1)
-    setCurrentImageIndex(prev => (prev - 1 + slideCount) % slideCount)
-  }
-
-  const handleHeroTransitionEnd = () => {
-    if (slideCount <= 1 || !heroTransitionEnabled) return
-    if (heroSlideIndex === totalHeroSlides - 1) {
-      setHeroTransitionEnabled(false)
-      setHeroSlideIndex(1)
-    } else if (heroSlideIndex === 0) {
-      setHeroTransitionEnabled(false)
-      setHeroSlideIndex(totalHeroSlides - 2)
-    }
-  }
-
-  useEffect(() => {
-    if (!heroTransitionEnabled) {
-      const id = requestAnimationFrame(() => setHeroTransitionEnabled(true))
-      return () => cancelAnimationFrame(id)
-    }
-    return undefined
-  }, [heroTransitionEnabled])
-
-  const handleHeroDragStart = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
-    if (e.target instanceof HTMLElement && e.target.closest('a, button')) return
-    const x = 'touches' in e ? e.touches[0]?.clientX : e.clientX
-    const y = 'touches' in e ? e.touches[0]?.clientY : e.clientY
-
-    if (x === undefined || y === undefined) return
-
-    setIsDragging(true)
-    setDragStartX(x)
-    dragStartY.current = y
-    setDraggedX(0)
-  }
-
-  const handleHeroDragMove = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
-    if (!isDragging) return
-    const x = 'touches' in e ? e.touches[0]?.clientX : e.clientX
-    const y = 'touches' in e ? e.touches[0]?.clientY : e.clientY
-
-    if (x === undefined || y === undefined) return
-
-    const deltaX = Math.abs(x - dragStartX)
-    const deltaY = Math.abs(y - dragStartY.current)
-    if (deltaY > deltaX && deltaY > 10) {
-      setIsDragging(false)
-      return
-    }
-    setDraggedX(x - dragStartX)
-  }
-
-  const handleHeroDragEnd = () => {
-    if (!isDragging) return
-    setIsDragging(false)
-    if (draggedX < -DRAG_THRESHOLD) heroNext()
-    else if (draggedX > DRAG_THRESHOLD) heroPrev()
-    setDraggedX(0)
-  }
-
-  if (productLoading) return <div className="pt-20"><PageLoading message={t('loading')} /></div>
-  if (!product) return <div className="pt-20 text-center"><p className="text-gray-600">{t('product_not_found')}</p></div>
+  // Exclude effect as useProductHero handles resetting currentImageIndex by watching slideCount
+  if (productLoading)
+    return (
+      <div className="pt-20">
+        <PageLoading message={t('loading')} />
+      </div>
+    )
+  if (!product)
+    return (
+      <div className="pt-20 text-center">
+        <p className="text-gray-600">{t('product_not_found')}</p>
+      </div>
+    )
 
   const relatedProducts = siblingProducts.filter(p => p.id !== product.id).slice(0, 4)
   const showRelatedProducts = siteSettings?.showRelatedProducts !== false
@@ -262,7 +216,11 @@ export function ProductDetailPage() {
     for (const g of productGrouped) {
       const key = typeof g.groupTitle === 'string' ? g.groupTitle : JSON.stringify(g.groupTitle)
       if (!groupedMap.has(key)) {
-        groupedMap.set(key, { ...g, books: [...(g.books || [])], materials: [...(g.materials || [])] })
+        groupedMap.set(key, {
+          ...g,
+          books: [...(g.books || [])],
+          materials: [...(g.materials || [])],
+        })
       } else {
         const existing = groupedMap.get(key)
         existing.books = [...existing.books, ...(g.books || [])]
@@ -275,7 +233,10 @@ export function ProductDetailPage() {
   const productIdForNav = product.id
   const currentIdxInSiblings = siblingProducts.findIndex(p => p.id === productIdForNav)
   const prevProduct = currentIdxInSiblings > 0 ? siblingProducts[currentIdxInSiblings - 1] : null
-  const nextProduct = currentIdxInSiblings < siblingProducts.length - 1 ? siblingProducts[currentIdxInSiblings + 1] : null
+  const nextProduct =
+    currentIdxInSiblings < siblingProducts.length - 1
+      ? siblingProducts[currentIdxInSiblings + 1]
+      : null
 
   return (
     <div data-product-detail className="min-h-screen bg-white">
@@ -293,38 +254,38 @@ export function ProductDetailPage() {
         designer={designer}
         heroMedia={heroMedia}
         slideCount={slideCount}
-        totalHeroSlides={totalHeroSlides}
-        heroSlideIndex={heroSlideIndex}
-        draggedX={draggedX}
-        heroTransitionEnabled={heroTransitionEnabled}
+        totalHeroSlides={heroHook.totalHeroSlides}
+        heroSlideIndex={heroHook.heroSlideIndex}
+        draggedX={heroHook.draggedX}
+        heroTransitionEnabled={heroHook.heroTransitionEnabled}
         isMobile={isMobile}
         isTitleVisible={isTitleVisible}
         isDesignerVisible={isDesignerVisible}
         areDotsVisible={areDotsVisible}
         isFullscreenButtonVisible={isFullscreenButtonVisible}
         imageBorderClass={imageBorderClass}
-        currentImageIndex={currentImageIndex}
-        onNext={heroNext}
-        onPrev={heroPrev}
-        onDragStart={handleHeroDragStart}
-        onDragMove={handleHeroDragMove}
-        onDragEnd={handleHeroDragEnd}
-        onTransitionEnd={handleHeroTransitionEnd}
+        currentImageIndex={heroHook.currentImageIndex}
+        onNext={heroHook.heroNext}
+        onPrev={heroHook.heroPrev}
+        onDragStart={heroHook.handleHeroDragStart}
+        onDragMove={heroHook.handleHeroDragMove}
+        onDragEnd={heroHook.handleHeroDragEnd}
+        onTransitionEnd={heroHook.handleHeroTransitionEnd}
         onOpenFullscreen={() => setIsFullscreenOpen(true)}
-        onSetSlideIndex={setHeroSlideIndex}
-        onSetCurrentImageIndex={setCurrentImageIndex}
-        onSetTransitionEnabled={setHeroTransitionEnabled}
+        onSetSlideIndex={heroHook.setHeroSlideIndex}
+        onSetCurrentImageIndex={heroHook.setCurrentImageIndex}
+        onSetTransitionEnabled={heroHook.setHeroTransitionEnabled}
       />
 
       <ProductThumbnails
         productName={product.name}
         bandMedia={bandMedia}
-        currentImageIndex={currentImageIndex}
+        currentImageIndex={heroHook.currentImageIndex}
         imageBorderClass={imageBorderClass}
-        onSelect={(idx) => {
-          setHeroTransitionEnabled(false)
-          setHeroSlideIndex(idx + 1)
-          setCurrentImageIndex(idx)
+        onSelect={idx => {
+          heroHook.setHeroTransitionEnabled(true)
+          heroHook.setHeroSlideIndex(idx + 1)
+          heroHook.setCurrentImageIndex(idx)
         }}
       />
 
@@ -336,7 +297,7 @@ export function ProductDetailPage() {
             <ProductDimensions
               dimImages={product.dimensionImages?.filter(di => di?.image) || []}
               imageBorderClass={imageBorderClass}
-              onOpenLightbox={(imgs, idx) => setDimLightbox({ images: imgs, currentIndex: idx })}
+              onOpenLightbox={(imgs, idx) => setDimLightbox({images: imgs, currentIndex: idx})}
             />
 
             <ProductMaterials
@@ -348,7 +309,9 @@ export function ProductDetailPage() {
               imageBorderClass={imageBorderClass}
               onSetActiveMaterialGroup={setActiveMaterialGroup}
               onSetActiveBookIndex={setActiveBookIndex}
-              onOpenMaterialLightbox={(imgs, idx) => setMaterialLightbox({ images: imgs, currentIndex: idx })}
+              onOpenMaterialLightbox={(imgs, idx) =>
+                setMaterialLightbox({images: imgs, currentIndex: idx})
+              }
             />
 
             <ProductDesignerSection designer={designer || null} t={t} />
@@ -356,7 +319,11 @@ export function ProductDetailPage() {
             {product.buyable && (
               <div className="pt-6 border-t border-gray-200">
                 <button
-                  onClick={() => (mergedGroups.length > 0 && activeMaterialGroup === null) ? alert(t('please_select_price_group')) : addToCart(product)}
+                  onClick={() =>
+                    mergedGroups.length > 0 && activeMaterialGroup === null
+                      ? alert(t('please_select_price_group'))
+                      : addToCart(product)
+                  }
                   className={`group w-20 h-20 flex items-center justify-center rounded-full transition-all duration-300 transform hover:scale-110 active:scale-100 hover:shadow-lg ${mergedGroups.length > 0 && activeMaterialGroup === null ? 'bg-gray-400 cursor-not-allowed opacity-70' : 'bg-gray-900 text-white hover:bg-gray-700'}`}
                 >
                   <TransparentShoppingBagIcon />
@@ -365,30 +332,39 @@ export function ProductDetailPage() {
             )}
 
             {product.exclusiveContent && (
-              <ProductExclusiveContentSection exclusiveContent={product.exclusiveContent} isLoggedIn={isLoggedIn} user={user} navigate={navigate} t={t} />
+              <ProductExclusiveContentSection
+                exclusiveContent={product.exclusiveContent}
+                isLoggedIn={isLoggedIn}
+                user={user}
+                navigate={navigate}
+                t={t}
+              />
             )}
 
             <ProductRelated products={relatedProducts} show={showRelatedProducts} />
           </div>
 
-          {Array.isArray(product?.media) && product.media.length > 0 && product.showMediaPanels !== false && (
-            <ProductMediaPanels
-              product={product}
-              imageBorderClass={imageBorderClass}
-              youTubeThumb={(url) => {
-                let id = ''
-                if (url.includes('v=')) id = url.split('v=')[1]?.split('&')[0] || ''
-                else if (url.includes('youtu.be/')) id = url.split('youtu.be/')[1]?.split('?')[0] || ''
-                return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : ''
-              }}
-              openPanelLightbox={(idx) => {
-                setLightboxSource('panel')
-                setLightboxImageIndex(idx)
-                setIsLightboxOpen(true)
-              }}
-              t={t}
-            />
-          )}
+          {Array.isArray(product?.media) &&
+            product.media.length > 0 &&
+            product.showMediaPanels !== false && (
+              <ProductMediaPanels
+                product={product}
+                imageBorderClass={imageBorderClass}
+                youTubeThumb={url => {
+                  let id = ''
+                  if (url.includes('v=')) id = url.split('v=')[1]?.split('&')[0] || ''
+                  else if (url.includes('youtu.be/'))
+                    id = url.split('youtu.be/')[1]?.split('?')[0] || ''
+                  return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : ''
+                }}
+                openPanelLightbox={idx => {
+                  setLightboxSource('panel')
+                  setLightboxImageIndex(idx)
+                  setIsLightboxOpen(true)
+                }}
+                t={t}
+              />
+            )}
         </div>
       </main>
 
@@ -400,19 +376,40 @@ export function ProductDetailPage() {
 
       {isFullscreenOpen && bandMedia.length > 0 && (
         <FullscreenMediaViewer
-          items={bandMedia.map(m => ({ type: m.type, url: m.url, urlMobile: m.urlMobile, urlDesktop: m.urlDesktop, crop: m.crop, hotspot: m.hotspot }))}
-          initialIndex={currentImageIndex}
+          items={bandMedia.map(m => ({
+            type: m.type,
+            url: m.url,
+            urlMobile: m.urlMobile,
+            urlDesktop: m.urlDesktop,
+            crop: m.crop,
+            hotspot: m.hotspot,
+          }))}
+          initialIndex={heroHook.currentImageIndex}
           onClose={() => setIsFullscreenOpen(false)}
         />
       )}
 
       {isLightboxOpen && (
         <ProductMediaLightbox
-          items={lightboxSource === 'panel' ? (product.media || []) : bandMedia}
+          items={lightboxSource === 'panel' ? product.media || [] : bandMedia}
           currentIndex={lightboxImageIndex}
           onClose={() => setIsLightboxOpen(false)}
-          onNext={() => setLightboxImageIndex(prev => (prev + 1) % (lightboxSource === 'panel' ? (product.media?.length || 0) : bandMedia.length))}
-          onPrev={() => setLightboxImageIndex(prev => (prev - 1 + (lightboxSource === 'panel' ? (product.media?.length || 0) : bandMedia.length)) % (lightboxSource === 'panel' ? (product.media?.length || 0) : bandMedia.length))}
+          onNext={() =>
+            setLightboxImageIndex(
+              prev =>
+                (prev + 1) %
+                (lightboxSource === 'panel' ? product.media?.length || 0 : bandMedia.length)
+            )
+          }
+          onPrev={() =>
+            setLightboxImageIndex(
+              prev =>
+                (prev -
+                  1 +
+                  (lightboxSource === 'panel' ? product.media?.length || 0 : bandMedia.length)) %
+                (lightboxSource === 'panel' ? product.media?.length || 0 : bandMedia.length)
+            )
+          }
           showMetadata={lightboxSource === 'panel'}
         />
       )}
@@ -422,8 +419,20 @@ export function ProductDetailPage() {
           items={dimLightbox.images}
           currentIndex={dimLightbox.currentIndex}
           onClose={() => setDimLightbox(null)}
-          onNext={() => setDimLightbox({ ...dimLightbox, currentIndex: (dimLightbox.currentIndex + 1) % dimLightbox.images.length })}
-          onPrev={() => setDimLightbox({ ...dimLightbox, currentIndex: (dimLightbox.currentIndex - 1 + dimLightbox.images.length) % dimLightbox.images.length })}
+          onNext={() =>
+            setDimLightbox({
+              ...dimLightbox,
+              currentIndex: (dimLightbox.currentIndex + 1) % dimLightbox.images.length,
+            })
+          }
+          onPrev={() =>
+            setDimLightbox({
+              ...dimLightbox,
+              currentIndex:
+                (dimLightbox.currentIndex - 1 + dimLightbox.images.length) %
+                dimLightbox.images.length,
+            })
+          }
         />
       )}
 
@@ -432,8 +441,20 @@ export function ProductDetailPage() {
           items={materialLightbox.images}
           currentIndex={materialLightbox.currentIndex}
           onClose={() => setMaterialLightbox(null)}
-          onNext={() => setMaterialLightbox({ ...materialLightbox, currentIndex: (materialLightbox.currentIndex + 1) % materialLightbox.images.length })}
-          onPrev={() => setMaterialLightbox({ ...materialLightbox, currentIndex: (materialLightbox.currentIndex - 1 + materialLightbox.images.length) % materialLightbox.images.length })}
+          onNext={() =>
+            setMaterialLightbox({
+              ...materialLightbox,
+              currentIndex: (materialLightbox.currentIndex + 1) % materialLightbox.images.length,
+            })
+          }
+          onPrev={() =>
+            setMaterialLightbox({
+              ...materialLightbox,
+              currentIndex:
+                (materialLightbox.currentIndex - 1 + materialLightbox.images.length) %
+                materialLightbox.images.length,
+            })
+          }
         />
       )}
     </div>
