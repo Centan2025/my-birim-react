@@ -1,15 +1,15 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { ProductDetailPage } from '@/pages/ProductDetailPage'
+import {describe, it, expect, vi} from 'vitest'
+import {render, screen} from '@testing-library/react'
+import {MemoryRouter, Route, Routes} from 'react-router-dom'
+import {ProductDetailPage} from '@/pages/ProductDetailPage'
 import * as productsHooks from '../hooks/useProducts'
 import * as designersHooks from '../hooks/useDesigners'
 import * as categoriesHooks from '../hooks/useCategories'
 import * as siteHooks from '../hooks/useSiteData'
-import { HeaderThemeProvider } from '../context/HeaderThemeContext'
-import { AuthContext } from '../App'
-import { SEOProvider } from '../hooks/useSEO'
-import { HelmetProvider } from 'react-helmet-async'
+import {HeaderThemeProvider} from '../context/HeaderThemeContext'
+import {AuthContext} from '../App'
+import {SEOProvider} from '../hooks/useSEO'
+import {HelmetProvider} from 'react-helmet-async'
 
 // Hooks'u mockla
 vi.mock('../hooks/useProducts')
@@ -64,13 +64,13 @@ describe('ProductDetailPage', () => {
     vi.mocked(productsHooks.useProduct).mockReturnValue({
       data: {
         id: 'product-1',
-        name: { tr: 'Ürün 1' },
+        name: {tr: 'Ürün 1'},
         designerId: 'designer-1',
         categoryId: 'category-1',
         year: 2024,
         isPublished: true,
-        description: { tr: 'Ürün açıklaması' },
-        mainImage: { url: 'https://example.com/main.jpg' },
+        description: {tr: 'Ürün açıklaması'},
+        mainImage: {url: 'https://example.com/main.jpg'},
         alternativeMedia: [],
         media: [],
         showMediaPanels: false,
@@ -108,8 +108,8 @@ describe('ProductDetailPage', () => {
     vi.mocked(designersHooks.useDesigner).mockReturnValue({
       data: {
         id: 'designer-1',
-        name: { tr: 'Tasarımcı 1' },
-        bio: { tr: '' },
+        name: {tr: 'Tasarımcı 1'},
+        bio: {tr: ''},
         image: 'https://example.com/designer.jpg',
       },
       isLoading: false,
@@ -124,7 +124,7 @@ describe('ProductDetailPage', () => {
 
     renderWithRouter('/products/product-1')
 
-    expect(screen.getByText('Ürün 1')).toBeInTheDocument()
+    expect(screen.getAllByText('Ürün 1')[0]).toBeInTheDocument()
     expect(screen.getByText('Ürün açıklaması')).toBeInTheDocument()
   })
 })
