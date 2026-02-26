@@ -44,6 +44,9 @@
     "src/test",
     "src/**/*.test.ts",
     "src/**/*.test.tsx",
+    "sanity.config.ts",
+    "sanity.cli.ts",
+    "deskStructure.ts",
     "birim-web/**",
     "birrim-web/**",
     "birim-web-1/**"
