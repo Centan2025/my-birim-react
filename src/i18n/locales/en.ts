@@ -123,7 +123,8 @@ export default {
   weak: 'Weak',
   medium: 'Medium',
   strong: 'Strong',
-  password_hint: 'Password must be at least 8 characters and include uppercase/lowercase letters and numbers',
+  password_hint:
+    'Password must be at least 8 characters and include uppercase/lowercase letters and numbers',
   too_many_attempts: 'Too many attempts. Please try again in {0} minutes.',
   contact_meta_title: 'BIRIM - Contact',
   contact_meta_description_default: 'BIRIM contact and showroom information',
@@ -142,13 +143,16 @@ export default {
   login_required_desc: 'You need to be a member to access this page.',
   account_info: 'Account Information',
   registration_date: 'Registration Date',
-  email_not_verified: 'You have not verified your email address yet. Please check your inbox and click the verification link. Your access to exclusive content will be limited until verification is complete.',
+  email_not_verified:
+    'You have not verified your email address yet. Please check your inbox and click the verification link. Your access to exclusive content will be limited until verification is complete.',
   exclusive_access: 'Exclusive Content Access',
-  exclusive_access_desc: 'As a member, you can access exclusive product content (technical drawings, 3D models, special images).',
+  exclusive_access_desc:
+    'As a member, you can access exclusive product content (technical drawings, 3D models, special images).',
   view_products: 'View Products',
   delete_account: 'Delete Account',
   deleting: 'Deleting...',
-  delete_account_confirm: 'Are you sure you want to delete your account and all associated data? This action cannot be undone and you will be unsubscribed from all email lists.',
+  delete_account_confirm:
+    'Are you sure you want to delete your account and all associated data? This action cannot be undone and you will be unsubscribed from all email lists.',
   account_deleted: 'Your account has been successfully deleted.',
   account_delete_error: 'An error occurred while deleting your account. Please try again later.',
   reset_password: 'Reset Password',

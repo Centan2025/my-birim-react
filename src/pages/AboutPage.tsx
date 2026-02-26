@@ -1,17 +1,17 @@
-import { useState, useEffect } from 'react'
-import { getAboutPageContent } from '../services/cms'
-import type { AboutPageContent, NewsMedia } from '../types'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { PageLoading } from '../components/LoadingSpinner'
-import { useTranslation } from '../i18n'
-import { Breadcrumbs } from '../components/Breadcrumbs'
-import { useSEO } from '../hooks/useSEO'
-import { useHeaderTheme } from '../context/HeaderThemeContext'
+import {useState, useEffect} from 'react'
+import {getAboutPageContent} from '../services/cms'
+import type {AboutPageContent, NewsMedia} from '../types'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {Breadcrumbs} from '../components/Breadcrumbs'
+import {useSEO} from '../hooks/useSEO'
+import {useHeaderTheme} from '../context/HeaderThemeContext'
 import ScrollReveal from '../components/ScrollReveal'
 import PortableTextLite from '../components/PortableTextLite'
 
 // Alt Medya Galerisi Bileşeni - Ekranı sağdan sola kaplayan tam genişlik (breakout) yapı
-const MediaGallery = ({ media, alt }: { media?: NewsMedia[]; alt: string }) => {
+const MediaGallery = ({media, alt}: {media?: NewsMedia[]; alt: string}) => {
   if (!media || media.length === 0) return null
 
   return (
@@ -49,8 +49,8 @@ const MediaGallery = ({ media, alt }: { media?: NewsMedia[]; alt: string }) => {
 export function AboutPage() {
   const [content, setContent] = useState<AboutPageContent | null>(null)
   const [loading, setLoading] = useState(true)
-  const { t } = useTranslation()
-  const { setFromPalette, reset } = useHeaderTheme()
+  const {t} = useTranslation()
+  const {setFromPalette, reset} = useHeaderTheme()
 
   // SEO
   const heroImageObj = typeof content?.heroImage === 'object' ? content.heroImage : null
@@ -63,7 +63,8 @@ export function AboutPage() {
   useSEO({
     title: `BIRIM - ${t('about') || 'Hakkımızda'}`,
     description:
-      (content && (t(content.heroSubtitle) || t(content.storyTitle))) || t('about_meta_description_default'),
+      (content && (t(content.heroSubtitle) || t(content.storyTitle))) ||
+      t('about_meta_description_default'),
     image: heroImageUrl,
     type: 'article',
     siteName: 'BIRIM',
@@ -91,8 +92,8 @@ export function AboutPage() {
     } else {
       const palette =
         typeof content.heroImage === 'object' &&
-          content.heroImage !== null &&
-          'palette' in content.heroImage
+        content.heroImage !== null &&
+        'palette' in content.heroImage
           ? content.heroImage.palette
           : undefined
       if (palette) {
@@ -150,7 +151,7 @@ export function AboutPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 text-[11px] sm:text-[12px]">
           <Breadcrumbs
             className="mb-12"
-            items={[{ label: t('homepage'), to: '/' }, { label: t('about') }]}
+            items={[{label: t('homepage'), to: '/'}, {label: t('about')}]}
           />
         </div>
 

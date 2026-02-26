@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook, act, waitFor } from '@testing-library/react'
-import { useHeaderSearch } from '../hooks/useHeaderSearch'
+import {describe, it, expect, vi, beforeEach} from 'vitest'
+import {renderHook, act, waitFor} from '@testing-library/react'
+import {useHeaderSearch} from '../hooks/useHeaderSearch'
 
 // Stable mock functions
 const mockT = vi.fn((val: any) => (typeof val === 'string' ? val : val?.tr || val?.en || ''))
@@ -13,18 +13,18 @@ vi.mock('../i18n', () => ({
 }))
 
 const mockProducts = [
-  { id: 'p1', name: { tr: 'Masa' }, designerId: 'd1', categoryId: 'c1' },
-  { id: 'p2', name: { tr: 'Sandalye' }, designerId: 'd2', categoryId: 'c2' }
+  {id: 'p1', name: {tr: 'Masa'}, designerId: 'd1', categoryId: 'c1'},
+  {id: 'p2', name: {tr: 'Sandalye'}, designerId: 'd2', categoryId: 'c2'},
 ]
 
 const mockDesigners = [
-  { id: 'd1', name: { tr: 'Ali Veli' } },
-  { id: 'd2', name: { tr: 'Mehmet Can' } }
+  {id: 'd1', name: {tr: 'Ali Veli'}},
+  {id: 'd2', name: {tr: 'Mehmet Can'}},
 ]
 
 const mockCategories = [
-  { id: 'c1', name: { tr: 'Ofis' } },
-  { id: 'c2', name: { tr: 'Ev' } }
+  {id: 'c1', name: {tr: 'Ofis'}},
+  {id: 'c2', name: {tr: 'Ev'}},
 ]
 
 vi.mock('../services/cms', () => ({
@@ -33,7 +33,7 @@ vi.mock('../services/cms', () => ({
   getCategories: vi.fn(),
 }))
 
-import { getProducts, getDesigners, getCategories } from '../services/cms'
+import {getProducts, getDesigners, getCategories} from '../services/cms'
 
 describe('useHeaderSearch - veri ile arama', () => {
   beforeEach(() => {
@@ -44,7 +44,7 @@ describe('useHeaderSearch - veri ile arama', () => {
   })
 
   it('arama modalı açıldığında verileri çeker', async () => {
-    const { result } = renderHook(() => useHeaderSearch(true))
+    const {result} = renderHook(() => useHeaderSearch(true))
 
     // isSearching true olur
     expect(result.current.isSearching).toBe(true)
@@ -59,7 +59,7 @@ describe('useHeaderSearch - veri ile arama', () => {
 
   it('sorgu yazıldığında ürünleri filtreler (debounce sonrası)', async () => {
     vi.useFakeTimers()
-    const { result } = renderHook(() => useHeaderSearch(true))
+    const {result} = renderHook(() => useHeaderSearch(true))
 
     // Verilerin dolmasını bekle
     await act(async () => {
@@ -83,15 +83,19 @@ describe('useHeaderSearch - veri ile arama', () => {
 
   it('tasarımcı adına göre arama yapar', async () => {
     vi.useFakeTimers()
-    const { result } = renderHook(() => useHeaderSearch(true))
+    const {result} = renderHook(() => useHeaderSearch(true))
 
-    await act(async () => { await vi.runAllTimersAsync() })
+    await act(async () => {
+      await vi.runAllTimersAsync()
+    })
 
     act(() => {
       result.current.setSearchQuery('ali')
     })
 
-    await act(async () => { await vi.advanceTimersByTimeAsync(300) })
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300)
+    })
 
     expect(result.current.searchResults.designers).toHaveLength(1)
     expect(result.current.searchResults.products).toHaveLength(1) // Ali'nin ürünü de çıkmalı

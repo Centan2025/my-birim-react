@@ -1,14 +1,14 @@
 import React from 'react'
-import { motion } from 'framer-motion'
-import { Link } from 'react-router-dom'
-import type { NewsItem } from '../types'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { PageLoading } from '../components/LoadingSpinner'
-import { useTranslation } from '../i18n'
-import { Breadcrumbs } from '../components/Breadcrumbs'
-import { useNews } from '../hooks/useNews'
-import { useSiteSettings } from '../hooks/useSiteData'
-import { useSEO } from '../hooks/useSEO'
+import {motion} from 'framer-motion'
+import {Link} from 'react-router-dom'
+import type {NewsItem} from '../types'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {Breadcrumbs} from '../components/Breadcrumbs'
+import {useNews} from '../hooks/useNews'
+import {useSiteSettings} from '../hooks/useSiteData'
+import {useSEO} from '../hooks/useSEO'
 
 const formatDate = (dateString: string): string => {
   if (!dateString) return ''
@@ -19,9 +19,9 @@ const formatDate = (dateString: string): string => {
   return `${day}.${month}.${year}`
 }
 
-const NewsCard: React.FC<{ item: NewsItem }> = ({ item }) => {
-  const { t } = useTranslation()
-  const { data: settings } = useSiteSettings()
+const NewsCard: React.FC<{item: NewsItem}> = ({item}) => {
+  const {t} = useTranslation()
+  const {data: settings} = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
 
   return (
@@ -52,8 +52,8 @@ const NewsCard: React.FC<{ item: NewsItem }> = ({ item }) => {
 }
 
 export function NewsPage() {
-  const { data: news = [], isLoading: loading } = useNews()
-  const { t } = useTranslation()
+  const {data: news = [], isLoading: loading} = useNews()
+  const {t} = useTranslation()
 
   // SEO meta
   useSEO({
@@ -78,7 +78,7 @@ export function NewsPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
         <Breadcrumbs
           className="mb-6"
-          items={[{ label: t('homepage'), to: '/' }, { label: t('news') }]}
+          items={[{label: t('homepage'), to: '/'}, {label: t('news')}]}
         />
         <div className="text-center mt-6 md:mt-8 mb-16">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600 uppercase">
@@ -113,14 +113,14 @@ export function NewsPage() {
                     rotate: 0,
                     scale: 1,
                   }}
-                  viewport={{ once: true, amount: 0.1 }}
+                  viewport={{once: true, amount: 0.1}}
                   transition={{
                     duration: 0.9,
                     delay: index * 0.12,
                     ease: [0.16, 1, 0.3, 1],
                   }}
                   className="h-full"
-                  style={{ willChange: 'transform, opacity' }}
+                  style={{willChange: 'transform, opacity'}}
                 >
                   <NewsCard item={item} />
                 </motion.div>

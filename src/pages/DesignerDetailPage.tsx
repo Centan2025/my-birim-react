@@ -1,32 +1,32 @@
-import { useEffect, useState, useRef } from 'react'
-import { useParams, useLocation } from 'react-router-dom'
-import { ProductCard } from '../components/ProductCard'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { PageLoading } from '../components/LoadingSpinner'
-import { useTranslation } from '../i18n'
-import { useDesigner } from '../hooks/useDesigners'
-import { useProductsByDesigner } from '../hooks/useProducts'
-import { useSiteSettings } from '../hooks/useSiteData'
-import { Breadcrumbs } from '../components/Breadcrumbs'
-import { analytics } from '../lib/analytics'
+import {useEffect, useState, useRef} from 'react'
+import {useParams, useLocation} from 'react-router-dom'
+import {ProductCard} from '../components/ProductCard'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {useDesigner} from '../hooks/useDesigners'
+import {useProductsByDesigner} from '../hooks/useProducts'
+import {useSiteSettings} from '../hooks/useSiteData'
+import {Breadcrumbs} from '../components/Breadcrumbs'
+import {analytics} from '../lib/analytics'
 import ScrollReveal from '../components/ScrollReveal'
-import { useSEO } from '../hooks/useSEO'
+import {useSEO} from '../hooks/useSEO'
 import PortableTextLite from '../components/PortableTextLite'
 
-import { useCardTransition } from '../context/CardTransitionContext'
+import {useCardTransition} from '../context/CardTransitionContext'
 
 export function DesignerDetailPage() {
-  const { designerId } = useParams<{ designerId: string }>()
+  const {designerId} = useParams<{designerId: string}>()
   const location = useLocation()
   const fromCard = location.state?.fromCard
 
-  const { data: designer, isLoading: loading } = useDesigner(designerId)
-  const { data: products = [] } = useProductsByDesigner(designer?.id)
-  const { t } = useTranslation()
-  const { setTargetRect, phase } = useCardTransition()
+  const {data: designer, isLoading: loading} = useDesigner(designerId)
+  const {data: products = []} = useProductsByDesigner(designer?.id)
+  const {t} = useTranslation()
+  const {setTargetRect, phase} = useCardTransition()
   const imageRef = useRef<HTMLDivElement>(null)
 
-  const { data: settings } = useSiteSettings()
+  const {data: settings} = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const [isTitleVisible, setIsTitleVisible] = useState(false)
 
@@ -42,7 +42,7 @@ export function DesignerDetailPage() {
             left: rect.left,
             width: rect.width,
             height: rect.height,
-            borderRadius: imageBorderClass === 'rounded-lg' ? '8px' : '0px'
+            borderRadius: imageBorderClass === 'rounded-lg' ? '8px' : '0px',
           })
         }
       }
@@ -50,7 +50,7 @@ export function DesignerDetailPage() {
       // First immediate measurement
       updateRect()
 
-      // Continuous measurement during the first 1 second of expansion 
+      // Continuous measurement during the first 1 second of expansion
       // to handle scroll-to-top and layout shifts
       const interval = setInterval(updateRect, 32) // ~30fps tracking
       const timeout = setTimeout(() => clearInterval(interval), 1000)
@@ -62,7 +62,7 @@ export function DesignerDetailPage() {
         window.removeEventListener('resize', updateRect)
       }
     }
-    return () => { }
+    return () => {}
   }, [loading, designer, setTargetRect, imageBorderClass])
 
   const designerName = designer ? t(designer.name) : ''
@@ -127,9 +127,9 @@ export function DesignerDetailPage() {
         <Breadcrumbs
           className="mb-8"
           items={[
-            { label: t('homepage'), to: '/' },
-            { label: t('designers'), to: '/designers' },
-            { label: t(designer.name) },
+            {label: t('homepage'), to: '/'},
+            {label: t('designers'), to: '/designers'},
+            {label: t(designer.name)},
           ]}
         />
         <div className="flex flex-col md:flex-row-reverse items-center md:items-start gap-8 md:gap-16 mt-6 md:mt-8 mb-12">
@@ -153,8 +153,9 @@ export function DesignerDetailPage() {
           <div className="text-left w-full">
             <div className="max-w-2xl px-4 sm:px-0 md:px-0 md:mx-0">
               <h1
-                className={`text-4xl font-normal text-gray-700 ${isTitleVisible ? 'translate-x-0 opacity-100' : '-translate-x-[150%] opacity-0'
-                  }`}
+                className={`text-4xl font-normal text-gray-700 ${
+                  isTitleVisible ? 'translate-x-0 opacity-100' : '-translate-x-[150%] opacity-0'
+                }`}
                 style={{
                   transition: 'transform 700ms ease-out, opacity 1200ms ease-out',
                 }}

@@ -1,15 +1,15 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../App'
-import { useTranslation } from '../i18n'
-import { Link } from 'react-router-dom'
-import { useSEO } from '../hooks/useSEO'
-import { deleteUserAccount } from '../services/cms'
+import {useState} from 'react'
+import {useNavigate} from 'react-router-dom'
+import {useAuth} from '../App'
+import {useTranslation} from '../i18n'
+import {Link} from 'react-router-dom'
+import {useSEO} from '../hooks/useSEO'
+import {deleteUserAccount} from '../services/cms'
 
 export function ProfilePage() {
   const auth = useAuth()
   const navigate = useNavigate()
-  const { t, locale } = useTranslation()
+  const {t, locale} = useTranslation()
   const pageTitle = `BIRIM - ${t('profile')}`
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -111,7 +111,9 @@ export function ProfilePage() {
                     </div>
                   )}
                   <div aria-label={t('registration_date')} className="space-y-1">
-                    <p className="block text-sm font-medium text-gray-700">{t('registration_date')}</p>
+                    <p className="block text-sm font-medium text-gray-700">
+                      {t('registration_date')}
+                    </p>
                     <p className="text-sm text-gray-900">
                       {new Date(auth.user.createdAt).toLocaleDateString(dateLocale, {
                         year: 'numeric',
@@ -125,10 +127,10 @@ export function ProfilePage() {
 
               {auth.user.isVerified !== false && (
                 <div className="border-b border-gray-200 pb-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('exclusive_access')}</h2>
-                  <p className="text-sm text-gray-600 mb-4">
-                    {t('exclusive_access_desc')}
-                  </p>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                    {t('exclusive_access')}
+                  </h2>
+                  <p className="text-sm text-gray-600 mb-4">{t('exclusive_access_desc')}</p>
                   <Link
                     to="/products"
                     className="inline-block bg-gray-800 text-white font-semibold py-2 px-6 rounded-none hover:bg-gray-700 transition-colors duration-200"

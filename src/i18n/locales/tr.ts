@@ -141,13 +141,16 @@ export default {
   login_required_desc: 'Bu sayfaya erişmek için üye olmanız gerekiyor.',
   account_info: 'Hesap Bilgileri',
   registration_date: 'Kayıt Tarihi',
-  email_not_verified: 'E-posta adresinizi henüz doğrulamadınız. Lütfen gelen kutunuzu kontrol edin ve doğrulama linkine tıklayın. Doğrulama tamamlanana kadar özel içeriklere erişiminiz kısıtlı olacaktır.',
+  email_not_verified:
+    'E-posta adresinizi henüz doğrulamadınız. Lütfen gelen kutunuzu kontrol edin ve doğrulama linkine tıklayın. Doğrulama tamamlanana kadar özel içeriklere erişiminiz kısıtlı olacaktır.',
   exclusive_access: 'Özel İçerik Erişimi',
-  exclusive_access_desc: 'Üye olduğunuz için ürünlerin özel içeriklerine (teknik çizimler, 3D modeller, özel görseller) erişebilirsiniz.',
+  exclusive_access_desc:
+    'Üye olduğunuz için ürünlerin özel içeriklerine (teknik çizimler, 3D modeller, özel görseller) erişebilirsiniz.',
   view_products: 'Ürünleri Görüntüle',
   delete_account: 'Üyeliği Sil (Ayrıl)',
   deleting: 'Siliniyor...',
-  delete_account_confirm: 'Hesabınızı (üyeliğinizi) ve size ait tüm bilgileri silmek istediğinize emin misiniz? Bu işlem geri alınamaz ve tüm e-posta üyeliklerinden de çıkış yapmış olacaksınız.',
+  delete_account_confirm:
+    'Hesabınızı (üyeliğinizi) ve size ait tüm bilgileri silmek istediğinize emin misiniz? Bu işlem geri alınamaz ve tüm e-posta üyeliklerinden de çıkış yapmış olacaksınız.',
   account_deleted: 'Hesabınız başarıyla silinmiştir.',
   account_delete_error: 'Hesap silinirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.',
   reset_password: 'Şifre Sıfırlama',

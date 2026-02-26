@@ -1,31 +1,31 @@
-import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { useAuth } from '../App'
-import { PageLoading } from '../components/LoadingSpinner'
-import { useTranslation } from '../i18n'
-import { useSEO } from '../hooks/useSEO'
-import { FullscreenMediaViewer } from '../components/FullscreenMediaViewer'
-import { addStructuredData, getProductSchema } from '../lib/seo'
-import { analytics } from '../lib/analytics'
-import { useProductDetail } from '../hooks/useProductDetail'
-import { useLightbox } from '../hooks/useLightbox'
-import { ProductDesignerSection } from '../components/ProductDesignerSection'
-import { ProductExclusiveContentSection } from '../components/ProductExclusiveContentSection'
-import { ProductMediaPanels } from '../components/ProductMediaPanels'
+import {useState, useEffect} from 'react'
+import {useParams, useNavigate} from 'react-router-dom'
+import {useAuth} from '../App'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {useSEO} from '../hooks/useSEO'
+import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
+import {addStructuredData, getProductSchema} from '../lib/seo'
+import {analytics} from '../lib/analytics'
+import {useProductDetail} from '../hooks/useProductDetail'
+import {useLightbox} from '../hooks/useLightbox'
+import {ProductDesignerSection} from '../components/ProductDesignerSection'
+import {ProductExclusiveContentSection} from '../components/ProductExclusiveContentSection'
+import {ProductMediaPanels} from '../components/ProductMediaPanels'
 
 // Modular components
-import { ProductHero } from '../components/product/ProductHero'
-import { ProductThumbnails } from '../components/product/ProductThumbnails'
-import { ProductInfo } from '../components/product/ProductInfo'
-import { ProductMaterials } from '../components/product/ProductMaterials'
-import { ProductDimensions } from '../components/product/ProductDimensions'
-import { ProductBottomNav } from '../components/product/ProductBottomNav'
-import { ProductRelated } from '../components/product/ProductRelated'
-import { ProductMediaLightbox } from '../components/product/ProductMediaLightbox'
-import { ProductAddToCart } from '../components/product/ProductAddToCart'
+import {ProductHero} from '../components/product/ProductHero'
+import {ProductThumbnails} from '../components/product/ProductThumbnails'
+import {ProductInfo} from '../components/product/ProductInfo'
+import {ProductMaterials} from '../components/product/ProductMaterials'
+import {ProductDimensions} from '../components/product/ProductDimensions'
+import {ProductBottomNav} from '../components/product/ProductBottomNav'
+import {ProductRelated} from '../components/product/ProductRelated'
+import {ProductMediaLightbox} from '../components/product/ProductMediaLightbox'
+import {ProductAddToCart} from '../components/product/ProductAddToCart'
 
 export function ProductDetailPage() {
-  const { productId } = useParams<{ productId: string }>()
+  const {productId} = useParams<{productId: string}>()
   const navigate = useNavigate()
 
   // All data, derived state, and responsive detection
@@ -75,8 +75,8 @@ export function ProductDetailPage() {
   const [isDesignerVisible, setIsDesignerVisible] = useState(false)
   const [areDotsVisible, setAreDotsVisible] = useState(false)
 
-  const { isLoggedIn, user } = useAuth()
-  const { t, locale } = useTranslation()
+  const {isLoggedIn, user} = useAuth()
+  const {t, locale} = useTranslation()
 
   // SEO & Analytics
   useSEO({

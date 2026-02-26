@@ -471,8 +471,8 @@ h6 {
 }
 
 /* Force opacity for shared elements during transition to avoid "bel belli olmuyor" due to initial fade-in */
-[style*="view-transition-name"] picture img,
-[style*="view-transition-name"] img {
+[style*='view-transition-name'] picture img,
+[style*='view-transition-name'] img {
   opacity: 1 !important;
   transition: none !important;
 }

@@ -1,13 +1,13 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import {describe, it, expect, vi} from 'vitest'
+import {render, screen} from '@testing-library/react'
 import '@testing-library/jest-dom'
-import { BrowserRouter } from 'react-router-dom'
-import { HomePage } from '../pages/HomePage'
+import {BrowserRouter} from 'react-router-dom'
+import {HomePage} from '../pages/HomePage'
 import * as homeHook from '../hooks/useHomePage'
 import * as siteHook from '../hooks/useSiteData'
-import { HeaderThemeProvider } from '../context/HeaderThemeContext'
-import { SEOProvider } from '../hooks/useSEO'
-import { HelmetProvider } from 'react-helmet-async'
+import {HeaderThemeProvider} from '../context/HeaderThemeContext'
+import {SEOProvider} from '../hooks/useSEO'
+import {HelmetProvider} from 'react-helmet-async'
 
 // Cart context mock'u
 vi.mock('@/context/CartContext', () => ({
