@@ -2,7 +2,6 @@
   "outputDirectory": "dist",
   "buildCommand": "npm run build",
   "installCommand": "npm install",
-  "framework": null,
   "rewrites": [
     {
       "source": "/((?!assets/|img/|robots\\.txt|sitemap\\.xml|favicon\\.ico).*)",
