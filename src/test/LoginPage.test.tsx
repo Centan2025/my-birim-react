@@ -1,26 +1,26 @@
-import {describe, it, expect, beforeEach, vi} from 'vitest'
-import {render, screen, waitFor, act} from '@testing-library/react'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import {BrowserRouter} from 'react-router-dom'
-import {LoginPage} from '@/pages/LoginPage'
+import { BrowserRouter } from 'react-router-dom'
+import { LoginPage } from '@/pages/LoginPage'
 import * as cms from '@/services/cms'
 import * as rateLimiter from '@/lib/rateLimiter'
+import { SEOProvider } from '../hooks/useSEO'
+import { HelmetProvider } from 'react-helmet-async'
 
 // Mock dependencies
 vi.mock('@/services/cms')
 vi.mock('@/lib/rateLimiter')
 
+import { AuthContext } from '../App'
+
 // Mock useAuth with a factory function
-const mockUseAuth = vi.fn(() => ({
+const mockAuthValue = {
   isLoggedIn: false,
   login: vi.fn(),
   logout: vi.fn(),
   user: null as any,
-}))
-
-vi.mock('../../App', () => ({
-  useAuth: () => mockUseAuth(),
-}))
+}
 
 // i18n mock with proper translations
 const translations: Record<string, string> = {
@@ -44,7 +44,7 @@ const translations: Record<string, string> = {
   logout: 'Çıkış Yap',
 }
 
-vi.mock('../../i18n', () => ({
+vi.mock('../i18n', () => ({
   useTranslation: () => ({
     t: (key: string) => translations[key] || key,
     locale: 'tr',
@@ -61,11 +61,17 @@ vi.mock('react-router-dom', async () => {
   }
 })
 
-const renderLoginPage = () => {
+const renderLoginPage = (authValue = mockAuthValue) => {
   return render(
-    <BrowserRouter>
-      <LoginPage />
-    </BrowserRouter>
+    <HelmetProvider>
+      <AuthContext.Provider value={authValue}>
+        <SEOProvider>
+          <BrowserRouter>
+            <LoginPage />
+          </BrowserRouter>
+        </SEOProvider>
+      </AuthContext.Provider>
+    </HelmetProvider>
   )
 }
 
@@ -92,7 +98,7 @@ describe('LoginPage', () => {
     expect(screen.getByLabelText('E-posta')).toBeInTheDocument()
     expect(screen.getByLabelText('Şifre')).toBeInTheDocument()
     // Submit button'u bul (type="submit" olan)
-    const submitButtons = screen.getAllByRole('button', {name: 'Giriş Yap'})
+    const submitButtons = screen.getAllByRole('button', { name: 'Giriş Yap' })
     const submitButton = submitButtons.find(btn => btn.getAttribute('type') === 'submit')
     expect(submitButton).toBeInTheDocument()
   })
@@ -101,7 +107,7 @@ describe('LoginPage', () => {
     const user = userEvent.setup()
     renderLoginPage()
 
-    const registerTab = screen.getByRole('button', {name: 'Üye Ol'})
+    const registerTab = screen.getByRole('button', { name: 'Üye Ol' })
     await act(async () => {
       await user.click(registerTab)
     })
@@ -129,7 +135,7 @@ describe('LoginPage', () => {
 
     const emailInput = screen.getByLabelText('E-posta')
     const passwordInput = screen.getByLabelText('Şifre')
-    const submitButtons = screen.getAllByRole('button', {name: 'Giriş Yap'})
+    const submitButtons = screen.getAllByRole('button', { name: 'Giriş Yap' })
     const submitButton = submitButtons.find(btn => (btn as HTMLButtonElement).type === 'submit')!
 
     await act(async () => {
@@ -146,13 +152,13 @@ describe('LoginPage', () => {
   it('handles login error', async () => {
     const user = userEvent.setup()
     const mockLogin = vi.mocked(cms.loginUser)
-    mockLogin.mockResolvedValue(null)
+    mockLogin.mockRejectedValue(new Error('Geçersiz'))
 
     renderLoginPage()
 
     const emailInput = screen.getByLabelText('E-posta')
     const passwordInput = screen.getByLabelText('Şifre')
-    const submitButtons = screen.getAllByRole('button', {name: 'Giriş Yap'})
+    const submitButtons = screen.getAllByRole('button', { name: 'Giriş Yap' })
     const submitButton = submitButtons.find(btn => (btn as HTMLButtonElement).type === 'submit')!
 
     await act(async () => {
@@ -178,7 +184,7 @@ describe('LoginPage', () => {
 
     const emailInput = screen.getByLabelText('E-posta')
     const passwordInput = screen.getByLabelText('Şifre')
-    const submitButtons = screen.getAllByRole('button', {name: 'Giriş Yap'})
+    const submitButtons = screen.getAllByRole('button', { name: 'Giriş Yap' })
     const submitButton = submitButtons.find(btn => (btn as HTMLButtonElement).type === 'submit')!
 
     await act(async () => {
@@ -209,7 +215,7 @@ describe('LoginPage', () => {
     renderLoginPage()
 
     // Switch to register mode
-    const registerTab = screen.getByRole('button', {name: 'Üye Ol'})
+    const registerTab = screen.getByRole('button', { name: 'Üye Ol' })
     await act(async () => {
       await user.click(registerTab)
     })
@@ -217,7 +223,7 @@ describe('LoginPage', () => {
     const emailInput = screen.getByLabelText('E-posta')
     const passwordInput = screen.getByLabelText('Şifre')
     const nameInput = screen.getByLabelText(/ad soyad/i)
-    const submitButtons = screen.getAllByRole('button', {name: 'Üye Ol'})
+    const submitButtons = screen.getAllByRole('button', { name: 'Üye Ol' })
     const submitButton = submitButtons.find(btn => (btn as HTMLButtonElement).type === 'submit')!
 
     await act(async () => {
@@ -239,7 +245,7 @@ describe('LoginPage', () => {
   })
 
   it('shows logged in state when user is authenticated', () => {
-    mockUseAuth.mockReturnValue({
+    const authVal = {
       isLoggedIn: true,
       user: {
         _id: 'user-1',
@@ -253,9 +259,9 @@ describe('LoginPage', () => {
       },
       login: vi.fn(),
       logout: vi.fn(),
-    })
+    }
 
-    renderLoginPage()
+    renderLoginPage(authVal as any)
 
     // "Hoş Geldiniz" metni i18n'den geliyor, mock'da "already_logged_in" key'i var
     expect(screen.getByText('Hoş Geldiniz')).toBeInTheDocument()

@@ -317,6 +317,7 @@ export default function R2AssetInput(props: ObjectInputProps) {
 
         // 6. Update Sanity
         const assetValue = {
+          ...asset,
           _type: 'r2Asset',
           url: finalUrl,
           path: key,

@@ -1,5 +1,5 @@
 import React from 'react'
-import type {LocalizedString} from '../types'
+import type { LocalizedString } from '../types'
 
 // Ortak çeviri fonksiyonu tipi (Header ve alt bileşenlerde)
 export type HeaderTranslateFn = (
@@ -12,7 +12,7 @@ export const CrossFadeText: React.FC<{
   text: string
   className?: string
   triggerKey?: string | number
-}> = ({text, className = '', triggerKey}) => {
+}> = ({ text, className = '', triggerKey }) => {
   const [currentText, setCurrentText] = React.useState(text)
   const [previousText, setPreviousText] = React.useState(text)
   const [isAnimating, setIsAnimating] = React.useState(false)
@@ -50,8 +50,8 @@ export const CrossFadeText: React.FC<{
 }
 
 // Header dışındaki bileşenlerde de kullanılabilen DynamicIcon
-export const DynamicIcon: React.FC<{svgString: string}> = ({svgString}) => (
-  <div dangerouslySetInnerHTML={{__html: svgString}} />
+export const DynamicIcon: React.FC<{ svgString: string }> = ({ svgString }) => (
+  <div dangerouslySetInnerHTML={{ __html: svgString }} />
 )
 
 export const UserIcon = () => (
@@ -61,6 +61,23 @@ export const UserIcon = () => (
     height="24"
     viewBox="0 0 24 24"
     fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+    <circle cx="12" cy="7" r="4"></circle>
+  </svg>
+)
+
+export const UserLoggedInIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="currentColor"
     stroke="currentColor"
     strokeWidth="1.5"
     strokeLinecap="round"

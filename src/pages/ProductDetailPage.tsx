@@ -535,6 +535,15 @@ export function ProductDetailPage() {
       : undefined
   const books = Array.isArray(activeGroup?.books) ? activeGroup.books : []
   const hasMaterialGroups = Array.isArray(mergedGroups) && mergedGroups.length > 0
+
+  useEffect(() => {
+    if (hasMaterialGroups) {
+      setActiveMaterialGroup(0)
+    } else {
+      setActiveMaterialGroup(null)
+    }
+  }, [product?.id, hasMaterialGroups])
+
   const flatMaterials =
     Array.isArray(product?.materials) && product.materials.length > 0 ? product.materials : []
   // FIX: Safely access `dimensionImages` (now added to Product type) and provide a fallback array to prevent errors when it's undefined.
@@ -1513,7 +1522,7 @@ export function ProductDetailPage() {
                       <>
                         {/* Group tabs - similar to image design */}
                         <div className="flex flex-wrap gap-0 border-t border-b border-gray-400 mb-6 bg-gray-200">
-                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                          { }
                           {(Array.isArray(mergedGroups) ? mergedGroups : []).map(
                             (g: any, idx: number) => (
                               <button

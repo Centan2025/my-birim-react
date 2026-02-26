@@ -1,6 +1,6 @@
-import type {NavigateFunction} from 'react-router-dom'
+import type { NavigateFunction } from 'react-router-dom'
 import ScrollReveal from './ScrollReveal'
-import type {LocalizedString, User} from '../types'
+import type { LocalizedString, User } from '../types'
 
 interface ExclusiveDownloadItem {
   url: string
@@ -8,7 +8,7 @@ interface ExclusiveDownloadItem {
 }
 
 interface ExclusiveContent {
-  images?: Array<string | {url?: string; image?: string}>
+  images?: Array<string | { url?: string; image?: string }>
   drawings?: ExclusiveDownloadItem[]
   models3d?: ExclusiveDownloadItem[]
 }
@@ -48,19 +48,23 @@ export function ProductExclusiveContentSection({
 }: ExclusiveContentSectionProps) {
   if (!exclusiveContent) return null
 
-  const canDownload = isLoggedIn && user?.userType === 'full_member'
+  const canDownload = isLoggedIn && user?.userType === 'full_member' && user?.isVerified
 
-  const getExtraImageLabel = (img: string | {url?: string; image?: string}, idx: number) => {
-    // Şema tarafında sadece image olduğu için genelde URL string geliyor
-    const url = typeof img === 'string' ? img : img?.url || img?.image || ''
-    if (!url) return `Görsel ${idx + 1}`
-    try {
-      const parts = url.split('/')
-      const last = parts[parts.length - 1] || ''
-      return decodeURIComponent(last)
-    } catch {
-      return `Görsel ${idx + 1}`
+  const handleDownloadClick = (e: React.MouseEvent<HTMLAnchorElement>, _url: string) => {
+    if (!canDownload) {
+      e.preventDefault()
+      // Kullanıcı kayıtlı ama email doğrulamadıysa
+      if (isLoggedIn && user && !user.isVerified) {
+        alert("Email adresiniz henüz doğrulanmamış. Lütfen email kutunuzu kontrol ederek hesabınızı doğrulayın.")
+        return
+      }
+      navigate('/login')
+      return
     }
+  }
+
+  const getExtraImageLabel = (_img: string | { url?: string; image?: string }, idx: number) => {
+    return `Ek Görsel ${idx + 1}`
   }
 
   return (
@@ -85,6 +89,7 @@ export function ProductExclusiveContentSection({
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={(e) => handleDownloadClick(e, url)}
                         className="flex items-center gap-2 px-3 py-2 rounded-none border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 transition-colors"
                       >
                         <span className="shrink-0 text-gray-600 group-hover:text-gray-900">
@@ -113,12 +118,7 @@ export function ProductExclusiveContentSection({
                     <a
                       href={doc.url}
                       download
-                      onClick={e => {
-                        if (!canDownload) {
-                          e.preventDefault()
-                          navigate('/login')
-                        }
-                      }}
+                      onClick={(e) => handleDownloadClick(e, doc.url)}
                       className="flex items-center gap-2 px-3 py-2 rounded-none border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 transition-colors"
                     >
                       <span className="shrink-0 text-gray-600 group-hover:text-gray-900">
@@ -146,12 +146,7 @@ export function ProductExclusiveContentSection({
                     <a
                       href={model.url}
                       download
-                      onClick={e => {
-                        if (!canDownload) {
-                          e.preventDefault()
-                          navigate('/login')
-                        }
-                      }}
+                      onClick={(e) => handleDownloadClick(e, model.url)}
                       className="flex items-center gap-2 px-3 py-2 rounded-none border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 transition-colors"
                     >
                       <span className="shrink-0 text-gray-600 group-hover:text-gray-900">

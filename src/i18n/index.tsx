@@ -9,13 +9,13 @@ import {
 } from 'react'
 import tr from './locales/tr'
 import en from './locales/en'
-import {LocalizedString} from '../types'
-import {getLanguages, getTranslations} from '../services/cms'
+import { LocalizedString } from '../types'
+import { getLanguages, getTranslations } from '../services/cms'
 
 export type Locale = string
 
 // Base translations from files (fallback)
-const baseTranslations: Record<string, Record<string, string>> = {tr, en}
+const baseTranslations: Record<string, Record<string, string>> = { tr, en }
 
 interface II18nContext {
   locale: Locale
@@ -24,7 +24,7 @@ interface II18nContext {
   supportedLocales: string[]
 }
 
-const I18nContext = createContext<II18nContext | null>(null)
+export const I18nContext = createContext<II18nContext | null>(null)
 
 const getInitialLocale = (locales: string[]): Locale => {
   if (locales.length === 0) return 'tr'
@@ -60,7 +60,7 @@ const getInitialLocaleSync = (): Locale => {
   return 'tr'
 }
 
-export const I18nProvider = ({children}: PropsWithChildren) => {
+export const I18nProvider = ({ children }: PropsWithChildren) => {
   const [supportedLocales, setSupportedLocales] = useState<string[]>([])
   const [locale, setLocaleState] = useState<Locale>(getInitialLocaleSync)
   const [loading, setLoading] = useState(true)

@@ -113,7 +113,7 @@ class Analytics {
               event.preventDefault()
               // Safari vb. için ekstra güvenlik
               if ('returnValue' in event) {
-                ;(event as ErrorEvent & {returnValue: boolean}).returnValue = false
+                (event as ErrorEvent & {returnValue: boolean}).returnValue = false
               }
 
               if (DEBUG_LOGS) {

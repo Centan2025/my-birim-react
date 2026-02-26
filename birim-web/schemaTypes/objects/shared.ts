@@ -174,6 +174,12 @@ export const exclusiveContent = defineType({
   type: 'object',
   fields: [
     defineField({
+      name: 'images',
+      title: 'Ek Görseller',
+      type: 'array',
+      of: [{ type: 'r2Asset' }],
+    }),
+    defineField({
       name: 'drawings',
       title: 'Teknik Çizimler',
       type: 'array',

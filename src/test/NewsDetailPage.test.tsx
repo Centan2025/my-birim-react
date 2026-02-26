@@ -1,12 +1,13 @@
-import {describe, it, expect, vi} from 'vitest'
-import {render, screen} from '@testing-library/react'
-import {MemoryRouter, Routes, Route} from 'react-router-dom'
-import {HelmetProvider} from 'react-helmet-async'
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { HelmetProvider } from 'react-helmet-async'
 
-import {NewsDetailPage} from '@/pages/NewsDetailPage'
+import { NewsDetailPage } from '@/pages/NewsDetailPage'
 import * as newsHooks from '../hooks/useNews'
 import * as siteHooks from '../hooks/useSiteData'
-import {SEOProvider} from '../hooks/useSEO'
+import { SEOProvider } from '../hooks/useSEO'
+import { I18nContext } from '../i18n'
 
 // Hooks'u mockla
 vi.mock('../hooks/useNews')
@@ -32,13 +33,20 @@ vi.mock('../../i18n', () => ({
 const renderWithRouter = (initialPath: string) => {
   return render(
     <HelmetProvider>
-      <SEOProvider>
-        <MemoryRouter initialEntries={[initialPath]}>
-          <Routes>
-            <Route path="/news/:newsId" element={<NewsDetailPage />} />
-          </Routes>
-        </MemoryRouter>
-      </SEOProvider>
+      <I18nContext.Provider value={{
+        t: (key: any) => (typeof key === 'string' ? key : key?.tr || ''),
+        locale: 'tr',
+        setLocale: vi.fn(),
+        supportedLocales: ['tr', 'en']
+      }}>
+        <SEOProvider>
+          <MemoryRouter initialEntries={[initialPath]}>
+            <Routes>
+              <Route path="/news/:newsId" element={<NewsDetailPage />} />
+            </Routes>
+          </MemoryRouter>
+        </SEOProvider>
+      </I18nContext.Provider>
     </HelmetProvider>
   )
 }
@@ -48,10 +56,10 @@ describe('NewsDetailPage', () => {
     vi.mocked(newsHooks.useNewsItem).mockReturnValue({
       data: {
         id: 'news-1',
-        title: {tr: 'Haber Başlığı'},
+        title: { tr: 'Haber Başlığı' },
         date: '2025-01-01T00:00:00.000Z',
-        content: {tr: 'Haber içeriği'},
-        mainImage: {url: 'https://example.com/news.jpg'},
+        content: { tr: 'Haber içeriği' },
+        mainImage: { url: 'https://example.com/news.jpg' },
         media: [],
         isPublished: true,
       },
@@ -84,10 +92,10 @@ describe('NewsDetailPage', () => {
     vi.mocked(newsHooks.useNewsItem).mockReturnValue({
       data: {
         id: 'news-1',
-        title: {tr: 'Haber Başlığı'},
+        title: { tr: 'Haber Başlığı' },
         date: '2025-01-01T00:00:00.000Z',
-        content: {tr: 'Haber içeriği'},
-        mainImage: {url: 'https://example.com/news.jpg'},
+        content: { tr: 'Haber içeriği' },
+        mainImage: { url: 'https://example.com/news.jpg' },
         media: [],
         isPublished: true,
       },

@@ -1,14 +1,17 @@
-import {useNavigate} from 'react-router-dom'
-import {useAuth} from '../App'
-import {useTranslation} from '../i18n'
-import {Link} from 'react-router-dom'
-import {useSEO} from '../hooks/useSEO'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../App'
+import { useTranslation } from '../i18n'
+import { Link } from 'react-router-dom'
+import { useSEO } from '../hooks/useSEO'
+import { deleteUserAccount } from '../services/cms'
 
 export function ProfilePage() {
   const auth = useAuth()
   const navigate = useNavigate()
-  const {t} = useTranslation()
+  const { t } = useTranslation()
   const pageTitle = `BIRIM - ${t('profile') || 'Üye Paneli'}`
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useSEO({
     title: pageTitle,
@@ -39,6 +42,27 @@ export function ProfilePage() {
   const handleLogout = () => {
     auth.logout()
     navigate('/')
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!auth.user) return
+    if (window.confirm('Hesabınızı (üyeliğinizi) ve size ait tüm bilgileri silmek istediğinize emin misiniz? Bu işlem geri alınamaz ve tüm e-posta üyeliklerinden de çıkış yapmış olacaksınız.')) {
+      setIsDeleting(true)
+      try {
+        const success = await deleteUserAccount(auth.user._id)
+        if (success) {
+          auth.logout()
+          navigate('/')
+          alert('Hesabınız başarıyla silinmiştir.')
+        } else {
+          alert('Hesap silinirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.')
+        }
+      } catch (error) {
+        alert('Hesap silinirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.')
+      } finally {
+        setIsDeleting(false)
+      }
+    }
   }
 
   return (
@@ -116,12 +140,19 @@ export function ProfilePage() {
                 </div>
               )}
 
-              <div>
+              <div className="flex gap-4 items-center">
                 <button
                   onClick={handleLogout}
-                  className="bg-red-600 text-white font-semibold py-2 px-6 rounded-none hover:bg-red-700 transition-colors duration-200"
+                  className="bg-gray-800 text-white font-semibold py-2 px-6 rounded-none hover:bg-gray-700 transition-colors duration-200"
                 >
                   {t('logout') || 'Çıkış Yap'}
+                </button>
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={isDeleting}
+                  className="bg-red-600 text-white font-semibold py-2 px-6 rounded-none hover:bg-red-700 transition-colors duration-200 disabled:opacity-50"
+                >
+                  {isDeleting ? 'Siliniyor...' : 'Üyeliği Sil (Ayrıl)'}
                 </button>
               </div>
             </div>

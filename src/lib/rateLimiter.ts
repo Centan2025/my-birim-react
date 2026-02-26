@@ -146,24 +146,24 @@ class RateLimiter {
   }
 }
 
-// Login için rate limiter (5 deneme / 15 dakika)
+// Login için rate limiter (50 deneme / 1 dakika)
 export const loginRateLimiter = new RateLimiter({
-  maxAttempts: 5,
-  windowMs: 15 * 60 * 1000, // 15 dakika
+  maxAttempts: 50,
+  windowMs: 60 * 1000, // 1 dakika
   keyPrefix: 'rate_limit_login',
 })
 
-// Register için rate limiter (3 deneme / 1 saat)
+// Register için rate limiter (100 deneme / 1 dakika)
 export const registerRateLimiter = new RateLimiter({
-  maxAttempts: 3,
-  windowMs: 60 * 60 * 1000, // 1 saat
+  maxAttempts: 100,
+  windowMs: 60 * 1000, // 1 dakika
   keyPrefix: 'rate_limit_register',
 })
 
-// Email subscription için rate limiter (10 deneme / 1 saat)
+// Email subscription için rate limiter (100 deneme / 1 dakika)
 export const emailSubscriptionRateLimiter = new RateLimiter({
-  maxAttempts: 10,
-  windowMs: 60 * 60 * 1000, // 1 saat
+  maxAttempts: 100,
+  windowMs: 60 * 1000, // 1 dakika
   keyPrefix: 'rate_limit_email_sub',
 })
 

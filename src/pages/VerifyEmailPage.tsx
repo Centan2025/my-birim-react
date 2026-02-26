@@ -1,7 +1,7 @@
-import {useEffect, useState} from 'react'
-import {useLocation, useNavigate, Link} from 'react-router-dom'
-import {useAuth} from '../App'
-import {useSEO} from '../hooks/useSEO'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../App'
+import { useSEO } from '../hooks/useSEO'
 
 export function VerifyEmailPage() {
   const location = useLocation()
@@ -10,7 +10,10 @@ export function VerifyEmailPage() {
   const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying')
 
   const searchParams = new URLSearchParams(location.search || location.hash.split('?')[1] || '')
-  const token = searchParams.get('token') || ''
+  let token = searchParams.get('token') || ''
+  if (token.includes('#')) {
+    token = token.split('#')[0] || ''
+  }
 
   useSEO({
     title: 'BIRIM - E-posta Doğrulama',
@@ -30,7 +33,7 @@ export function VerifyEmailPage() {
       }
 
       try {
-        const {verifyUserByToken} = await import('../services/cms')
+        const { verifyUserByToken } = await import('../services/cms')
         const user = await verifyUserByToken(token)
         if (!user) {
           if (!cancelled) setStatus('error')
