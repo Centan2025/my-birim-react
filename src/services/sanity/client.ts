@@ -25,17 +25,10 @@ export const sanity = useSanity
     })
     : null
 
-export const SANITY_TOKEN = import.meta.env['VITE_SANITY_TOKEN'] || ''
-export const sanityMutations = useSanity && SANITY_TOKEN
-    ? createClient({
-        projectId: SANITY_PROJECT_ID,
-        dataset: SANITY_DATASET,
-        apiVersion: SANITY_API_VERSION,
-        useCdn: false,
-        token: SANITY_TOKEN,
-        ignoreBrowserTokenWarning: true,
-    })
-    : null
+// SANITY_TOKEN artık sadece server-side (Vercel API) tarafında kullanılmaktadır.
+// Güvenlik nedeniyle VITE_ prefix'i kaldırıldı ve tarayıcıya sızması engellendi.
+export const SANITY_TOKEN = ''
+export const sanityMutations = null
 
 export const urlFor = (source: unknown) =>
     useSanity && sanity ? imageUrlBuilder(sanity).image(source as any) : null

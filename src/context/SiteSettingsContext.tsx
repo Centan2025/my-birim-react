@@ -1,11 +1,13 @@
-/* eslint-disable react-refresh/only-export-components */
-import { useState, useContext, createContext, PropsWithChildren, useEffect } from 'react'
+import { useContext, createContext, PropsWithChildren, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { getSiteSettings } from '../services/cms'
 import { useSeoDefaults } from '../hooks/useSEO'
 import type { SiteSettings } from '../types'
 
 interface SiteSettingsContextType {
     settings: SiteSettings | null
+    isLoading: boolean
+    error: Error | null
 }
 
 const SiteSettingsContext = createContext<SiteSettingsContextType | null>(null)
@@ -19,12 +21,13 @@ export function useSiteSettings() {
 }
 
 export const SiteSettingsProvider = ({ children }: PropsWithChildren) => {
-    const [settings, setSettings] = useState<SiteSettings | null>(null)
     const setSeoDefaults = useSeoDefaults()
 
-    useEffect(() => {
-        getSiteSettings().then(setSettings)
-    }, [])
+    const { data: settings, isLoading, error } = useQuery({
+        queryKey: ['siteSettings'],
+        queryFn: getSiteSettings,
+        staleTime: 1000 * 60 * 30, // 30 dakika cache
+    })
 
     useEffect(() => {
         if (
@@ -40,7 +43,7 @@ export const SiteSettingsProvider = ({ children }: PropsWithChildren) => {
     }, [setSeoDefaults, settings?.topBannerText])
 
     return (
-        <SiteSettingsContext.Provider value={{ settings }}>
+        <SiteSettingsContext.Provider value={{ settings: settings || null, isLoading, error: error as Error | null }}>
             {children}
         </SiteSettingsContext.Provider>
     )

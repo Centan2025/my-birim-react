@@ -1,0 +1,56 @@
+import React from 'react'
+import { OptimizedImage } from '../OptimizedImage'
+import { useTranslation } from '../../i18n'
+import ScrollReveal from '../ScrollReveal'
+import type { LocalizedString } from '../../types'
+
+interface ProductDimensionsProps {
+    dimImages: any[]
+    imageBorderClass: string
+    onOpenLightbox: (images: any[], index: number) => void
+}
+
+export const ProductDimensions: React.FC<ProductDimensionsProps> = ({
+    dimImages,
+    imageBorderClass,
+    onOpenLightbox,
+}) => {
+    const { t } = useTranslation()
+
+    if (!dimImages || dimImages.length === 0) return null
+
+    return (
+        <ScrollReveal delay={200} threshold={0.05}>
+            <div className="pb-4">
+                <h2 className="text-xl font-light text-gray-600">{t('dimensions')}</h2>
+                <div className="h-px bg-gray-300 my-4" />
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                    {dimImages.map((dimImg, idx) => (
+                        <div key={idx} className="flex flex-col items-center">
+                            <button
+                                onClick={() => onOpenLightbox(dimImages, idx)}
+                                className="group border border-gray-200 transition-transform duration-200 p-3 bg-white rounded-none w-full"
+                            >
+                                <OptimizedImage
+                                    src={dimImg.image}
+                                    srcMobile={dimImg.imageMobile}
+                                    srcDesktop={dimImg.imageDesktop}
+                                    fallbackSrc={dimImg.fallbackImage}
+                                    alt={dimImg.title ? t(dimImg.title) : `${t('dimensions')} ${idx + 1}`}
+                                    className={`w-full h-40 object-contain group-hover:scale-[1.03] transition-transform duration-700 ease-in-out ${imageBorderClass}`}
+                                    loading="lazy"
+                                    quality={85}
+                                />
+                            </button>
+                            {dimImg.title && (
+                                <p className="mt-2 text-sm text-gray-600 text-center font-medium">
+                                    {t(dimImg.title)}
+                                </p>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </ScrollReveal>
+    )
+}

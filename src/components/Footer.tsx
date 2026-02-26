@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
-import { getFooterContent, getSiteSettings } from '../services/cms'
-import type { FooterContent, SiteSettings } from '../types'
+import { useQuery } from '@tanstack/react-query'
+import { getFooterContent } from '../services/cms'
+import { useSiteSettings } from '../context/SiteSettingsContext'
+import type { FooterContent } from '../types'
 import { SiteLogo } from './SiteLogo'
 import { useTranslation } from '../i18n'
 import { analytics } from '../lib/analytics'
@@ -16,18 +18,16 @@ const DynamicIcon: React.FC<{ svgString: string }> = ({ svgString }) => (
 )
 
 export const Footer = () => {
-    const [content, setContent] = useState<FooterContent | null>(null)
-    const [settings, setSettings] = useState<SiteSettings | null>(null)
+    const { settings } = useSiteSettings()
     const { t, setLocale, locale, supportedLocales } = useTranslation()
 
-    useEffect(() => {
-        Promise.all([getFooterContent(), getSiteSettings()]).then(([footerData, settingsData]) => {
-            setContent(footerData)
-            setSettings(settingsData)
-        })
-    }, [])
+    const { data: content, isLoading } = useQuery({
+        queryKey: ['footerContent', locale],
+        queryFn: getFooterContent,
+        staleTime: 1000 * 60 * 30, // 30 dakika cache
+    })
 
-    if (!content || !settings) return null
+    if (isLoading || !content || !settings) return null
 
     return (
         <>
