@@ -239,16 +239,94 @@ export const getProducts = async (): Promise<Product[]> => {
 }
 
 export const getProductById = async (id: string): Promise<Product | undefined> => {
-    const products = await getProducts()
-    return products.find(p => p.id === id)
+    // N+1 sorgu önlemek için GROQ filtreli tekil sorgu
+    if (useSanity && sanity) {
+        const query = groq`*[_type == "product" && id.current == $id && (!defined(isPublished) || isPublished == true)][0]{ ${productQueryString} }`
+        const r = await sanity.fetch(query, { id })
+        if (!r) return undefined
+        return normalizeProduct({
+            id: r.id, name: r.name, designerId: r.designer?.designerId || '', categoryId: r.category?.categoryId || '',
+            year: r.year, isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
+            description: r.description,
+            mainImage: {
+                url: mapImage(r.mainImageR2),
+                palette: extractPalette(r.mainImageR2),
+                ...mapR2Metadata(r.mainImageR2)
+            },
+            alternativeMedia: mapAlternativeMedia(r),
+            media: mapProductMedia(r),
+            showMediaPanels: Boolean(r?.showMediaPanels),
+            dimensionImages: mapDimensionImages(r?.dimensionImages),
+            buyable: Boolean(r.buyable), price: r.price, currency: r.currency, sku: r.sku, stockStatus: r.stockStatus,
+            materials: mapMaterialsFromSelections(r.materialSelections),
+            groupedMaterials: mapGroupedMaterials(r.materialSelections),
+            mediaSectionTitle: r?.mediaSectionTitle, mediaSectionText: r?.mediaSectionText,
+            exclusiveContent: {
+                images: mapImages(r?.exclusiveContent?.images),
+                drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({
+                    name: d?.name,
+                    url: d?.fileR2?.url || toFileUrl(d?.file?.asset),
+                })),
+                models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({
+                    name: m?.name,
+                    url: m?.fileR2?.url || toFileUrl(m?.file?.asset),
+                })),
+            },
+        })
+    }
+    // localStorage fallback
+    await delay(SIMULATED_DELAY)
+    return (getItem<Product[]>(KEYS.PRODUCTS) || []).map(normalizeProduct).find(p => p.id === id)
 }
 
 export const getProductsByCategoryId = async (categoryId: string): Promise<Product[]> => {
-    const products = await getProducts()
-    return products.filter(p => p.categoryId === categoryId)
+    // N+1 sorgu önlemek için GROQ filtreli sorgu
+    if (useSanity && sanity) {
+        const query = groq`*[_type == "product" && category->id.current == $categoryId && (!defined(isPublished) || isPublished == true)] | order(year desc){ ${productQueryString} }`
+        const rows = await sanity.fetch(query, { categoryId })
+        return rows.map((r: any) => normalizeProduct({
+            id: r.id, name: r.name, designerId: r.designer?.designerId || '', categoryId: r.category?.categoryId || '',
+            year: r.year, isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
+            description: r.description,
+            mainImage: { url: mapImage(r.mainImageR2), palette: extractPalette(r.mainImageR2), ...mapR2Metadata(r.mainImageR2) },
+            alternativeMedia: mapAlternativeMedia(r), media: mapProductMedia(r),
+            showMediaPanels: Boolean(r?.showMediaPanels), dimensionImages: mapDimensionImages(r?.dimensionImages),
+            buyable: Boolean(r.buyable), price: r.price, currency: r.currency, sku: r.sku, stockStatus: r.stockStatus,
+            materials: mapMaterialsFromSelections(r.materialSelections), groupedMaterials: mapGroupedMaterials(r.materialSelections),
+            mediaSectionTitle: r?.mediaSectionTitle, mediaSectionText: r?.mediaSectionText,
+            exclusiveContent: {
+                images: mapImages(r?.exclusiveContent?.images),
+                drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: d?.fileR2?.url || toFileUrl(d?.file?.asset) })),
+                models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({ name: m?.name, url: m?.fileR2?.url || toFileUrl(m?.file?.asset) })),
+            },
+        }))
+    }
+    await delay(SIMULATED_DELAY)
+    return (getItem<Product[]>(KEYS.PRODUCTS) || []).map(normalizeProduct).filter(p => p.categoryId === categoryId)
 }
 
 export const getProductsByDesignerId = async (designerId: string): Promise<Product[]> => {
-    const products = await getProducts()
-    return products.filter(p => p.designerId === designerId)
+    // N+1 sorgu önlemek için GROQ filtreli sorgu
+    if (useSanity && sanity) {
+        const query = groq`*[_type == "product" && designer->id.current == $designerId && (!defined(isPublished) || isPublished == true)] | order(year desc){ ${productQueryString} }`
+        const rows = await sanity.fetch(query, { designerId })
+        return rows.map((r: any) => normalizeProduct({
+            id: r.id, name: r.name, designerId: r.designer?.designerId || '', categoryId: r.category?.categoryId || '',
+            year: r.year, isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
+            description: r.description,
+            mainImage: { url: mapImage(r.mainImageR2), palette: extractPalette(r.mainImageR2), ...mapR2Metadata(r.mainImageR2) },
+            alternativeMedia: mapAlternativeMedia(r), media: mapProductMedia(r),
+            showMediaPanels: Boolean(r?.showMediaPanels), dimensionImages: mapDimensionImages(r?.dimensionImages),
+            buyable: Boolean(r.buyable), price: r.price, currency: r.currency, sku: r.sku, stockStatus: r.stockStatus,
+            materials: mapMaterialsFromSelections(r.materialSelections), groupedMaterials: mapGroupedMaterials(r.materialSelections),
+            mediaSectionTitle: r?.mediaSectionTitle, mediaSectionText: r?.mediaSectionText,
+            exclusiveContent: {
+                images: mapImages(r?.exclusiveContent?.images),
+                drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({ name: d?.name, url: d?.fileR2?.url || toFileUrl(d?.file?.asset) })),
+                models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({ name: m?.name, url: m?.fileR2?.url || toFileUrl(m?.file?.asset) })),
+            },
+        }))
+    }
+    await delay(SIMULATED_DELAY)
+    return (getItem<Product[]>(KEYS.PRODUCTS) || []).map(normalizeProduct).filter(p => p.designerId === designerId)
 }

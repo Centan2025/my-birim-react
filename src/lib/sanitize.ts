@@ -18,26 +18,21 @@ export const sanitizeHtml = (dirty: string, options?: import('dompurify').Config
   }
   const sanitized = DOMPurify.sanitize(dirty, {
     ALLOWED_TAGS: [
-      'p',
-      'br',
-      'strong',
-      'em',
-      'u',
-      'h1',
-      'h2',
-      'h3',
-      'h4',
-      'h5',
-      'h6',
-      'ul',
-      'ol',
-      'li',
-      'a',
-      'blockquote',
-      'code',
-      'pre',
+      'p', 'br', 'strong', 'em', 'u',
+      'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+      'ul', 'ol', 'li', 'a', 'blockquote', 'code', 'pre',
+      // SVG ikonları için
+      'svg', 'path', 'circle', 'rect', 'ellipse', 'line', 'polyline',
+      'polygon', 'g', 'defs', 'use', 'title', 'desc',
     ],
-    ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
+    ALLOWED_ATTR: [
+      'href', 'target', 'rel', 'class',
+      // SVG attribute'ları
+      'xmlns', 'viewBox', 'width', 'height', 'fill', 'stroke',
+      'stroke-width', 'stroke-linecap', 'stroke-linejoin',
+      'd', 'cx', 'cy', 'r', 'rx', 'ry', 'x', 'y', 'x1', 'y1', 'x2', 'y2',
+      'points', 'transform', 'clip-path', 'id', 'aria-hidden',
+    ],
     ALLOW_DATA_ATTR: false,
     ...options,
   })
@@ -53,7 +48,7 @@ export const sanitizeText = (dirty: string): string => {
   if (typeof window === 'undefined') {
     return dirty
   }
-  return DOMPurify.sanitize(dirty, {ALLOWED_TAGS: []})
+  return DOMPurify.sanitize(dirty, { ALLOWED_TAGS: [] })
 }
 
 /**

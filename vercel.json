@@ -29,6 +29,19 @@
         {
           "key": "Permissions-Policy",
           "value": "camera=(), microphone=(), geolocation=()"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://ssl.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' https://cdn.sanity.io https://birim-assets.web-birim.workers.dev https://pub-5e705b2a702d4bb1a3631c558917599d.r2.dev https://www.google-analytics.com https://www.googletagmanager.com data: blob:; connect-src 'self' https://*.sanity.io wss://*.sanity.io https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://o*.ingest.sentry.io; media-src 'self' https://birim-assets.web-birim.workers.dev https://pub-5e705b2a702d4bb1a3631c558917599d.r2.dev blob:; frame-src https://www.youtube.com https://youtube.com; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
         }
       ]
     },
@@ -38,6 +51,15 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/img/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
         }
       ]
     }

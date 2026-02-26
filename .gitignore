@@ -27,3 +27,19 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Geliştirme sürecinde oluşan geçici dosyalar
+*_report*.txt
+lint_*.txt
+eslint_*.txt
+eslint_report.txt
+tsc-errors.txt
+sanity_out*.json
+fix_*.cjs
+patch_*.cjs
+strategy_notes.md
+test-email.js
+test-env.js
+dummy
+*.github
+coverage/
