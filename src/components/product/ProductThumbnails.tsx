@@ -8,16 +8,20 @@ interface ProductThumbnailsProps {
     bandMedia: any[]
     currentImageIndex: number
     imageBorderClass: string
-    slideCount: number
     onSelect: (index: number) => void
 }
 
 const youTubeThumb = (url: string) => {
+    if (!url) return ''
     let id = ''
-    if (url.includes('youtube.com/watch?v=')) id = url.split('v=')[1].split('&')[0]
-    else if (url.includes('youtu.be/')) id = url.split('youtu.be/')[1].split('?')[0]
-    else if (url.includes('youtube.com/embed/')) id = url.split('embed/')[1].split('?')[0]
-    return `https://img.youtube.com/vi/${id}/mqdefault.jpg`
+    if (url.includes('youtube.com/watch?v=')) {
+        id = url.split('v=')[1]?.split('&')[0] || ''
+    } else if (url.includes('youtu.be/')) {
+        id = url.split('youtu.be/')[1]?.split('?')[0] || ''
+    } else if (url.includes('youtube.com/embed/')) {
+        id = url.split('embed/')[1]?.split('?')[0] || ''
+    }
+    return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : ''
 }
 
 export const ProductThumbnails: React.FC<ProductThumbnailsProps> = ({
@@ -25,7 +29,6 @@ export const ProductThumbnails: React.FC<ProductThumbnailsProps> = ({
     bandMedia,
     currentImageIndex,
     imageBorderClass,
-    slideCount,
     onSelect,
 }) => {
     const { t } = useTranslation()

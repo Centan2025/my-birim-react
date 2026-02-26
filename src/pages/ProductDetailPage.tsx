@@ -215,8 +215,11 @@ export function ProductDetailPage() {
 
   const handleHeroDragStart = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     if (e.target instanceof HTMLElement && e.target.closest('a, button')) return
-    const x = 'touches' in e ? e.touches[0].clientX : e.clientX
-    const y = 'touches' in e ? e.touches[0].clientY : e.clientY
+    const x = 'touches' in e ? e.touches[0]?.clientX : e.clientX
+    const y = 'touches' in e ? e.touches[0]?.clientY : e.clientY
+
+    if (x === undefined || y === undefined) return
+
     setIsDragging(true)
     setDragStartX(x)
     dragStartY.current = y
@@ -225,8 +228,11 @@ export function ProductDetailPage() {
 
   const handleHeroDragMove = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     if (!isDragging) return
-    const x = 'touches' in e ? e.touches[0].clientX : e.clientX
-    const y = 'touches' in e ? e.touches[0].clientY : e.clientY
+    const x = 'touches' in e ? e.touches[0]?.clientX : e.clientX
+    const y = 'touches' in e ? e.touches[0]?.clientY : e.clientY
+
+    if (x === undefined || y === undefined) return
+
     const deltaX = Math.abs(x - dragStartX)
     const deltaY = Math.abs(y - dragStartY.current)
     if (deltaY > deltaX && deltaY > 10) {
@@ -315,7 +321,6 @@ export function ProductDetailPage() {
         bandMedia={bandMedia}
         currentImageIndex={currentImageIndex}
         imageBorderClass={imageBorderClass}
-        slideCount={slideCount}
         onSelect={(idx) => {
           setHeroTransitionEnabled(false)
           setHeroSlideIndex(idx + 1)
@@ -406,8 +411,8 @@ export function ProductDetailPage() {
           items={lightboxSource === 'panel' ? (product.media || []) : bandMedia}
           currentIndex={lightboxImageIndex}
           onClose={() => setIsLightboxOpen(false)}
-          onNext={() => setLightboxImageIndex(prev => (prev + 1) % (lightboxSource === 'panel' ? product.media!.length : bandMedia.length))}
-          onPrev={() => setLightboxImageIndex(prev => (prev - 1 + (lightboxSource === 'panel' ? product.media!.length : bandMedia.length)) % (lightboxSource === 'panel' ? product.media!.length : bandMedia.length))}
+          onNext={() => setLightboxImageIndex(prev => (prev + 1) % (lightboxSource === 'panel' ? (product.media?.length || 0) : bandMedia.length))}
+          onPrev={() => setLightboxImageIndex(prev => (prev - 1 + (lightboxSource === 'panel' ? (product.media?.length || 0) : bandMedia.length)) % (lightboxSource === 'panel' ? (product.media?.length || 0) : bandMedia.length))}
           showMetadata={lightboxSource === 'panel'}
         />
       )}
