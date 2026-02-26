@@ -43,3 +43,5 @@ test-env.js
 dummy
 *.github
 coverage/
+.vercel
+.env*.local

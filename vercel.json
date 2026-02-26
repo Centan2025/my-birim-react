@@ -63,5 +63,6 @@
         }
       ]
     }
-  ]
+  ],
+  "devCommand": "npm run dev"
 }

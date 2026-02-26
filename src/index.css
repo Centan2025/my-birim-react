@@ -63,7 +63,14 @@ body {
 
 .font-gotham,
 .font-gotham * {
-  font-family: 'Gotham', 'Jura', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+  font-family:
+    'Gotham',
+    'Jura',
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
     sans-serif;
   font-weight: 300;
 }
@@ -139,6 +146,24 @@ h6 {
 
 .animate-fade-in-up {
   animation: fade-in-up 0.8s ease-out forwards;
+}
+
+@keyframes fade-in-panel {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+    filter: blur(4px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.animate-fade-in-panel {
+  animation: fade-in-panel 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Footer - animasyon yok */
@@ -339,15 +364,15 @@ h6 {
 .__vercel-toolbar *,
 #vercel-toolbar,
 #vercel-toolbar *,
-iframe[src*="vercel"],
-iframe[src*="_vercel"],
-iframe[src*="__vercel"],
-div[class*="vercel"],
-div[class*="__vercel"],
-div[id*="vercel"],
-div[id*="__vercel"],
-button[class*="vercel"],
-button[class*="__vercel"] {
+iframe[src*='vercel'],
+iframe[src*='_vercel'],
+iframe[src*='__vercel'],
+div[class*='vercel'],
+div[class*='__vercel'],
+div[id*='vercel'],
+div[id*='__vercel'],
+button[class*='vercel'],
+button[class*='__vercel'] {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
