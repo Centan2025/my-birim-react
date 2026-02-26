@@ -1,5 +1,5 @@
 import groq from 'groq'
-import type { SiteSettings } from '../../types'
+import type { SiteSettings, CookiesPolicy, PrivacyPolicy, TermsOfService, KvkkPolicy, FooterContent } from '../../types'
 import { sanity, useSanity, mapImage } from './client'
 
 const SIMULATED_DELAY = 200
@@ -86,6 +86,11 @@ export const getLanguages = async (): Promise<string[]> => {
     return Array.from(new Set(fromLocal.length ? [...base, ...fromLocal] : base))
 }
 
+export const updateLanguages = async (languages: string[]): Promise<void> => {
+    await delay(SIMULATED_DELAY)
+    setItem(KEYS.LANGUAGES, languages)
+}
+
 export const getSiteSettings = async (): Promise<SiteSettings> => {
     if (useSanity && sanity) {
         try {
@@ -119,4 +124,68 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
         maintenanceMode: Boolean(s?.maintenanceMode ?? false),
         mobileHeaderAnimation: s?.mobileHeaderAnimation === 'overlay' ? 'overlay' : 'default',
     }
+}
+
+export const updateSiteSettings = async (settings: SiteSettings): Promise<void> => {
+    await delay(SIMULATED_DELAY)
+    setItem(KEYS.SITE_SETTINGS, settings)
+}
+
+export const getTranslations = async (): Promise<Record<string, Record<string, string>>> => {
+    if (useSanity && sanity) {
+        try {
+            const q = groq`*[_type == "uiTranslations" && !(_id in path("drafts.**"))] | order(_updatedAt desc){ language, strings }`
+            const noCacheClient = sanity.withConfig({ useCdn: false })
+            const results = await noCacheClient.fetch(q)
+            const translationsMap: Record<string, Record<string, string>> = {}
+            if (Array.isArray(results)) {
+                results.forEach((item: any) => {
+                    if (item.language && item.strings) {
+                        const normalized: Record<string, string> = { ...item.strings }
+                        if (normalized['models_3d'] && !normalized['3d_models']) normalized['3d_models'] = normalized['models_3d']
+                        if (!translationsMap[item.language]) translationsMap[item.language] = normalized
+                    }
+                })
+            }
+            return translationsMap
+        } catch { return {} }
+    }
+    return {}
+}
+
+export const getCookiesPolicy = async (): Promise<CookiesPolicy | null> => {
+    if (useSanity && sanity) return await sanity.fetch(groq`*[_type == "cookiesPolicy"][0]{ title, content, updatedAt }`) || null
+    return null
+}
+
+export const getPrivacyPolicy = async (): Promise<PrivacyPolicy | null> => {
+    if (useSanity && sanity) return await sanity.fetch(groq`*[_type == "privacyPolicy"][0]{ title, content, updatedAt }`) || null
+    return null
+}
+
+export const getTermsOfService = async (): Promise<TermsOfService | null> => {
+    if (useSanity && sanity) return await sanity.fetch(groq`*[_type == "termsOfService"][0]{ title, content, updatedAt }`) || null
+    return null
+}
+
+export const getKvkkPolicy = async (): Promise<KvkkPolicy | null> => {
+    if (useSanity && sanity) return await sanity.fetch(groq`*[_type == "kvkkPolicy"][0]{ title, content, updatedAt }`) || null
+    return null
+}
+
+export const getFooterContent = async (): Promise<FooterContent> => {
+    if (useSanity && sanity) {
+        const data = await sanity.fetch(groq`*[_type == "footer"][0]{ ..., partners[]{ ..., logoR2 }, legalLinks[] }`)
+        if (data?.partners) data.partners = data.partners.map((p: any) => ({ ...p, logo: mapImage(p.logoR2) }))
+        if (!Array.isArray(data?.legalLinks)) data.legalLinks = []
+        return data
+    }
+    const data = getItem<FooterContent>(KEYS.FOOTER)
+    if (data && !Array.isArray(data.legalLinks)) data.legalLinks = []
+    return data || ({} as FooterContent)
+}
+
+export const updateFooterContent = async (content: FooterContent): Promise<void> => {
+    await delay(SIMULATED_DELAY)
+    setItem(KEYS.FOOTER, content)
 }

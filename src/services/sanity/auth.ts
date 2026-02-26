@@ -187,3 +187,51 @@ export const resetPassword = async (token: string, newPassword: string): Promise
     }
     throw new Error('Sanity Mutations not set up.')
 }
+
+export const getUserByEmail = async (email: string): Promise<User | null> => {
+    const normEmail = normalizeEmail(email)
+    if (useSanity && sanity) return await sanity.fetch(groq`*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]{ ..., isVerified }`, { email: normEmail }) || null
+    return getItem<User[]>(KEYS.USERS)?.find(u => normalizeEmail(u.email) === normEmail) || null
+}
+
+export const getUserById = async (id: string): Promise<User | null> => {
+    if (useSanity && sanity) return await sanity.fetch(groq`*[_type == "user" && _id == $id][0]{ ..., isVerified }`, { id }) || null
+    return getItem<User[]>(KEYS.USERS)?.find(u => u._id === id) || null
+}
+
+export const verifyUserByToken = async (token: string): Promise<User | null> => {
+    if (useSanity && sanityMutations) {
+        const user = await (sanityMutations.fetch as any)(groq`*[_type == "user" && verificationToken == $token][0]`, { token })
+        if (!user) return null
+
+        if (!user.isVerified) {
+            await sanityMutations.patch(user._id).set({ isVerified: true }).unset(['verificationToken']).commit()
+        }
+
+        return {
+            _id: user._id,
+            email: user.email,
+            name: user.name,
+            company: user.company,
+            profession: user.profession,
+            country: user.country,
+            userType: user.userType as any,
+            isActive: user.isActive,
+            isVerified: true,
+            createdAt: user.createdAt || user._createdAt
+        }
+    }
+    return null
+}
+
+export const deleteUserAccount = async (id: string): Promise<boolean> => {
+    if (useSanity && sanityMutations) {
+        try {
+            await sanityMutations.delete(id)
+            return true
+        } catch {
+            return false
+        }
+    }
+    return false
+}

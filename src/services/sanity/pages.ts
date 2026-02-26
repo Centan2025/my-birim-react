@@ -151,3 +151,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
     if (data && !Array.isArray(data.featuredProductIds)) data.featuredProductIds = []
     return data || ({} as HomePageContent)
 }
+
+export const updateAboutPageContent = async (): Promise<void> => { }
+export const updateContactPageContent = async (): Promise<void> => { }
+export const updateHomePageContent = async (): Promise<void> => { }

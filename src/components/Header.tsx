@@ -1,11 +1,8 @@
 import { useState, useEffect, useRef, FC, Fragment, useCallback, ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import type { Category, SiteSettings, Product, Designer, FooterContent } from '../types'
+import type { SiteSettings, Product, FooterContent } from '../types'
 import {
   getSiteSettings,
-  getDesigners,
-  getProducts,
-  getCategories,
   getFooterContent,
   subscribeEmail as subscribeEmailService,
 } from '../services/cms'
@@ -23,94 +20,9 @@ import { useProductsByCategory } from '../hooks/useProducts'
 import { useFocusTrap } from '../hooks/useFocusTrap'
 import { useHeaderScroll } from '../hooks/useHeaderScroll'
 import { useHeaderTheme } from '../context/HeaderThemeContext'
-
-const MenuIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <line x1="4" x2="20" y1="12" y2="12" />
-    <line x1="4" x2="20" y1="6" y2="6" />
-    <line x1="4" x2="20" y1="18" y2="18" />
-  </svg>
-)
-
-const ChevronDownIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="m6 9 6 6 6-6" />
-  </svg>
-)
-
-const SearchIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="11" cy="11" r="8"></circle>
-    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-  </svg>
-)
-
-const CloseIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <line x1="18" y1="6" x2="6" y2="18"></line>
-    <line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg>
-)
-
-const ShoppingBagIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-2z"></path>
-    <line x1="3" y1="6" x2="21" y2="6"></line>
-    <path d="M16 10a4 4 0 0 1-8 0"></path>
-  </svg>
-)
-
-// Diğer ikon bileşenleri HeaderShared içinde ortak kullanılıyor
+import { useHeaderSearch } from '../hooks/useHeaderSearch'
+import { useHeroBrightness } from '../hooks/useHeroBrightness'
+import { MenuIcon, ChevronDownIcon, SearchIcon, CloseIcon, ShoppingBagIcon } from './HeaderIcons'
 
 export function Header() {
   const { t, setLocale, locale, supportedLocales } = useTranslation()
@@ -150,8 +62,7 @@ export function Header() {
   const [isMobile, setIsMobile] = useState(false)
   const [headerHeight, setHeaderHeight] = useState(56) // 3.5rem = 56px (mobil için varsayılan)
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [heroBrightness, setHeroBrightness] = useState<number | null>(null)
-  const heroBrightnessRef = useRef<number | null>(null)
+
   const opacitySetByHandleScrollRef = useRef(false) // handleScroll tarafından opacity ayarlandı mı kontrolü için
   // Menü state'lerini ref olarak da tut (scroll handler için)
   const menuStateRef = useRef({
@@ -171,67 +82,35 @@ export function Header() {
   )
   const [isMobileMenuClosing, setIsMobileMenuClosing] = useState(false)
 
-  // Search states
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<{
-    products: Product[]
-    designers: Designer[]
-    categories: Category[]
-  }>({ products: [], designers: [], categories: [] })
-  const [isSearching, setIsSearching] = useState(false)
-  const [allData, setAllData] = useState<{
-    products: Product[]
-    designers: Designer[]
-    categories: Category[]
-  } | null>(null)
-
-  // Footer content for social links and subscribe
-  const [footerContent, setFooterContent] = useState<FooterContent | null>(null)
-  const [subscribeEmail, setSubscribeEmailState] = useState('')
-  const handleHeaderSubscribeEmail = useCallback(async (email: string): Promise<void> => {
-    await subscribeEmailService(email)
-  }, [])
-
-  // Locale duyarlı, Türkçe'ye uygun arama normalize helper'ı
-  const normalizeSearchText = useCallback(
-    (value: string): string => {
-      if (!value) return ''
-
-      // Locale'e göre lower-case
-      let lower: string
-      try {
-        // Türkçe ise mutlaka 'tr' locale kullan
-        if (locale === 'tr' || locale === 'tr-TR') {
-          lower = value.toLocaleLowerCase('tr')
-        } else {
-          lower = value.toLocaleLowerCase()
-        }
-      } catch {
-        // Her ihtimale karşı fallback
-        lower = value.toLowerCase()
-      }
-
-      // Unicode normalizasyonu ve aksan / işaret temizliği
-      // (İ → i, I → ı vb. gibi durumlarda olası noktalama/aksan farklarını sadeleştirir)
-      try {
-        return lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      } catch {
-        return lower
-      }
-    },
-    [locale]
-  )
+  // Search logic hook
+  const {
+    searchQuery,
+    setSearchQuery,
+    searchResults,
+    isSearching,
+    allData,
+    internalCloseSearch,
+  } = useHeaderSearch(isSearchOpen)
 
   const closeSearch = useCallback(() => {
     setIsSearchOpen(false)
-    setSearchQuery('')
-    setSearchResults({ products: [], designers: [], categories: [] })
+    internalCloseSearch()
 
     // Arama paneli kapanırken, eğer biz header opacity'yi değiştirdiysek geri al
     if (previousHeaderOpacityRef.current !== null) {
       setHeaderOpacity(previousHeaderOpacityRef.current)
       previousHeaderOpacityRef.current = null
     }
+  }, [internalCloseSearch])
+
+  // Hero brightness hook
+  const { heroBrightness, heroBrightnessRef } = useHeroBrightness(isMobile, location.pathname, headerTheme.brightness)
+
+  // Footer content for social links and subscribe
+  const [footerContent, setFooterContent] = useState<FooterContent | null>(null)
+  const [subscribeEmail, setSubscribeEmailState] = useState('')
+  const handleHeaderSubscribeEmail = useCallback(async (email: string): Promise<void> => {
+    await subscribeEmailService(email)
   }, [])
 
   useEffect(() => {
@@ -245,7 +124,9 @@ export function Header() {
     currentRouteRef.current = location.pathname
 
     // Sayfa değiştiğinde brightness'i hemen sıfırla
-    setHeroBrightness(null)
+    // This is now handled by useHeroBrightness hook internally
+    // setHeroBrightness(null)
+
     // Scroll pozisyonunu sıfırla (ScrollToTop component'i bunu yapıyor ama biz de garantilemek için)
     lastScrollYRef.current = 0
     // Flag'i sıfırla (route değiştiğinde)
@@ -275,216 +156,6 @@ export function Header() {
     return () => clearTimeout(timeoutId)
   }, [location.pathname, isMobile])
 
-  // Context'ten gelen tema parlaklığı varsa, scroll durumuna göre uygula
-  useEffect(() => {
-    if (headerTheme.brightness === null) {
-      setHeroBrightness(null)
-      heroBrightnessRef.current = null
-      return
-    }
-
-    const applyPaletteBrightness = () => {
-      if (window.scrollY > 0) {
-        setHeroBrightness(null)
-        heroBrightnessRef.current = null
-      } else {
-        setHeroBrightness(headerTheme.brightness)
-        heroBrightnessRef.current = headerTheme.brightness
-      }
-    }
-
-    applyPaletteBrightness()
-    window.addEventListener('scroll', applyPaletteBrightness, { passive: true })
-    return () => window.removeEventListener('scroll', applyPaletteBrightness)
-  }, [headerTheme.brightness])
-
-  // Sayfanın üst kısmındaki görselin parlaklığını kontrol et (tüm cihazlarda, sadece en üstteyken)
-  useEffect(() => {
-    // Context'ten parlaklık sağlandıysa tarayıcıda hesaplama yapma
-    if (headerTheme.brightness !== null) return
-
-    // Sadece sayfa en üstteyken parlaklığı hesapla
-    if (window.scrollY > 0) {
-      setHeroBrightness(null)
-      return
-    }
-
-    // Route değiştiğinde brightness'i sıfırla ve hesaplamayı durdur
-    const currentPath = location.pathname
-    let isCancelled = false
-
-    const checkTopImageBrightness = () => {
-      // Route değiştiyse hesaplamayı durdur
-      if (location.pathname !== currentPath) {
-        isCancelled = true
-        return
-      }
-
-      // Scroll pozisyonu değiştiyse (artık 0 değilse) durdur
-      if (window.scrollY > 0) {
-        setHeroBrightness(null)
-        return
-      }
-      // Sayfanın en üst kısmındaki görseli bul (viewport'un üst kısmı)
-      // Önce hero section'ı kontrol et
-      let activeMedia: HTMLImageElement | HTMLVideoElement | null = null
-
-      // 1. Hero section'daki görseli kontrol et
-      const heroContainer = document.querySelector('.hero-scroll-container')
-      if (heroContainer) {
-        const slides = heroContainer.querySelectorAll('.hero-slide-mobile, [class*="hero-slide"]')
-        for (const slide of Array.from(slides)) {
-          const img = slide.querySelector('img') as HTMLImageElement
-          const video = slide.querySelector('video') as HTMLVideoElement
-
-          if (img && img.complete) {
-            activeMedia = img
-            break
-          } else if (video && video.readyState >= 2) {
-            activeMedia = video
-            break
-          }
-        }
-      }
-
-      // 2. Hero section yoksa, main element'in ilk görselini bul
-      if (!activeMedia) {
-        const main = document.querySelector('main')
-        if (main) {
-          // Main'in ilk section veya div'ini bul
-          const firstSection = main.querySelector('section, div, img, video') as HTMLElement
-          if (firstSection) {
-            // İlk img veya video'yu bul
-            const img = firstSection.querySelector('img') as HTMLImageElement
-            const video = firstSection.querySelector('video') as HTMLVideoElement
-
-            if (img && img.complete && img.offsetTop < 500) {
-              // Viewport'un üst kısmında
-              activeMedia = img
-            } else if (video && video.readyState >= 2 && video.offsetTop < 500) {
-              activeMedia = video
-            }
-          }
-        }
-      }
-
-      // 3. Hala bulamadıysak, viewport'un üst kısmındaki tüm img/video'ları kontrol et
-      if (!activeMedia) {
-        const allImages = document.querySelectorAll('img, video')
-        for (const media of Array.from(allImages)) {
-          const rect = media.getBoundingClientRect()
-          // Viewport'un üst 500px'inde olan ve yüklenmiş görseli bul
-          if (rect.top >= 0 && rect.top < 500 && rect.left >= 0 && rect.left < window.innerWidth) {
-            if (media instanceof HTMLImageElement && media.complete) {
-              activeMedia = media
-              break
-            } else if (media instanceof HTMLVideoElement && media.readyState >= 2) {
-              activeMedia = media
-              break
-            }
-          }
-        }
-      }
-
-      if (!activeMedia) {
-        if (!isCancelled) {
-          setHeroBrightness(null)
-        }
-        return
-      }
-
-      // Route değiştiyse hesaplamayı durdur
-      if (location.pathname !== currentPath || isCancelled) {
-        return
-      }
-
-      // Canvas kullanarak görselin parlaklığını hesapla
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-      if (!ctx) return
-
-      canvas.width = Math.min(activeMedia.width || activeMedia.offsetWidth || 100, 200)
-      canvas.height = Math.min(activeMedia.height || activeMedia.offsetHeight || 100, 200)
-
-      try {
-        ctx.drawImage(activeMedia, 0, 0, canvas.width, canvas.height)
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-        const data = imageData.data
-
-        // Route değiştiyse hesaplamayı durdur (async işlem sırasında)
-        if (location.pathname !== currentPath || isCancelled) {
-          return
-        }
-
-        // Ortalama parlaklığı hesapla
-        let totalBrightness = 0
-        let pixelCount = 0
-
-        // Her 10. pikseli örnekle (performans için)
-        const sampleRate = 10
-        for (let i = 0; i < data.length; i += 4 * sampleRate) {
-          // Route değiştiyse hesaplamayı durdur
-          if (location.pathname !== currentPath || isCancelled) {
-            return
-          }
-
-          const r = data[i]
-          const g = data[i + 1]
-          const b = data[i + 2]
-          // Luminance formülü: 0.299*R + 0.587*G + 0.114*B
-          if (r !== undefined && g !== undefined && b !== undefined) {
-            const brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-            totalBrightness += brightness
-            pixelCount++
-          }
-        }
-
-        // Route değiştiyse sonucu kaydetme
-        if (location.pathname !== currentPath || isCancelled) {
-          return
-        }
-
-        if (pixelCount > 0) {
-          const avgBrightness = totalBrightness / pixelCount
-          setHeroBrightness(avgBrightness)
-        } else {
-          setHeroBrightness(null)
-        }
-      } catch (e) {
-        // Route değiştiyse hata işleme yapma
-        if (location.pathname !== currentPath || isCancelled) {
-          return
-        }
-
-        // CORS hatası veya başka bir hata - sessizce handle et
-        // Cross-origin görseller için brightness hesaplanamaz, bu normal
-        const errorMessage = e instanceof Error ? e.message : String(e)
-        if (
-          e instanceof DOMException ||
-          errorMessage.includes('tainted') ||
-          errorMessage.includes('SecurityError') ||
-          errorMessage.includes('cross-origin')
-        ) {
-          setHeroBrightness(null)
-        } else {
-          setHeroBrightness(null)
-        }
-      }
-    }
-
-    // Görsel yüklendikten sonra kontrol et - sayfa geçişlerinde daha hızlı
-    // Route değiştiğinde hemen kontrol et (sayfa geçişlerinde)
-    const immediateTimeoutId = setTimeout(checkTopImageBrightness, 100)
-    const timeoutId = setTimeout(checkTopImageBrightness, 500)
-    const intervalId = setInterval(checkTopImageBrightness, 2000) // Her 2 saniyede bir kontrol et
-
-    return () => {
-      clearTimeout(immediateTimeoutId)
-      clearTimeout(timeoutId)
-      clearInterval(intervalId)
-    }
-  }, [isMobile, location.pathname, headerTheme.brightness])
-
   // Mobil kontrolü
   useEffect(() => {
     const checkMobile = () => {
@@ -494,14 +165,6 @@ export function Header() {
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
-
-  // Şeffaf hero olması gereken sayfaları kontrol et (hala useHeaderScroll içinde import edilmiş heroBrightness vs için gerekebilir veya silinebilir,
-  // ama loglara göre `isDarkHeroPage` kullanıldığı bir yer yoksa onu da sileceğiz, şimdilik dursun çünkü bir yerlerde kullanılıyor olabilir.
-  // UPDATE: isDarkHeroPage is still mapped in the dependency array somewhere? Actually the useEffects are gone, so let's remove it if it's unused.
-  // Wait, I only removed lines 555-655. Let's remove them directly to satisfy the linter.)
-
-  // Opacity calculations on scroll and route change are now entirely managed by useHeaderScroll.ts.
-  // The redundant useEffects that were causing conflicts have been removed.
 
   // Desktop header visibility - throttle olmadan anında tepki
   useEffect(() => {
@@ -654,9 +317,9 @@ export function Header() {
 
   // Hover edilen kategorinin ürünlerini yükle (eğer menuImage yoksa)
   const hoveredCategory = categories.find(c => c.id === hoveredCategoryId)
-  const shouldFetchProducts = hoveredCategoryId && hoveredCategory && !hoveredCategory.menuImage
+  const shouldFetchProductData = hoveredCategoryId && hoveredCategory && !hoveredCategory.menuImage
   const { data: hoveredCategoryProducts = [] } = useProductsByCategory(
-    shouldFetchProducts ? hoveredCategoryId : undefined
+    shouldFetchProductData ? hoveredCategoryId : undefined
   )
 
   useEffect(() => {
@@ -729,80 +392,6 @@ export function Header() {
       }, 100)
     }
   }, [isSearchOpen])
-
-  // Fetch all data for search when the search modal is opened for the first time.
-  useEffect(() => {
-    if (isSearchOpen && !allData) {
-      setIsSearching(true)
-      Promise.all([getProducts(), getDesigners(), getCategories()])
-        .then(([products, designers, categories]) => {
-          setAllData({ products, designers, categories })
-          setIsSearching(false)
-        })
-        .catch(() => {
-          setIsSearching(false)
-        })
-    }
-  }, [isSearchOpen, allData])
-
-  // Debounced search effect
-  useEffect(() => {
-    if (searchQuery.length < 2) {
-      setSearchResults({ products: [], designers: [], categories: [] })
-      return
-    }
-
-    if (!allData) return
-
-    setIsSearching(true)
-    const handler = setTimeout(() => {
-      const lowercasedQuery = normalizeSearchText(searchQuery).trim()
-      if (!lowercasedQuery) {
-        setSearchResults({ products: [], designers: [], categories: [] })
-        setIsSearching(false)
-        return
-      }
-
-      // Arama kelimelerini ayır (örn: "kanepe su" -> ["kanepe", "su"])
-      const searchTerms = lowercasedQuery.split(/\s+/).filter(term => term.length > 0)
-
-      // Ürünleri filtrele - ürün adı, kategori adı veya tasarımcı adına göre
-      const filteredProducts = allData.products.filter(p => {
-        const productName = normalizeSearchText(t(p.name))
-        const category = allData.categories.find(c => c.id === p.categoryId)
-        const categoryName = category ? normalizeSearchText(t(category.name)) : ''
-        const designer = allData.designers.find(d => d.id === p.designerId)
-        const designerName = designer ? normalizeSearchText(t(designer.name)) : ''
-
-        // Tüm aranabilir metin
-        const searchableText = `${productName} ${categoryName} ${designerName}`
-
-        // Tüm arama terimleri eşleşmeli (AND mantığı)
-        return searchTerms.every(term => searchableText.includes(term))
-      })
-
-      const filteredDesigners = allData.designers.filter(d => {
-        const designerName = normalizeSearchText(t(d.name))
-        return searchTerms.every(term => designerName.includes(term))
-      })
-
-      const filteredCategories = allData.categories.filter(c => {
-        const categoryName = normalizeSearchText(t(c.name))
-        return searchTerms.every(term => categoryName.includes(term))
-      })
-
-      setSearchResults({
-        products: filteredProducts,
-        designers: filteredDesigners,
-        categories: filteredCategories,
-      })
-      setIsSearching(false)
-    }, 300) // 300ms debounce
-
-    return () => {
-      clearTimeout(handler)
-    }
-  }, [searchQuery, allData, t, normalizeSearchText])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
@@ -1373,16 +962,16 @@ export function Header() {
                     <span className="relative flex items-center justify-center w-6 h-6">
                       <span
                         className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${isSearchOpen
-                            ? 'opacity-0 scale-75 rotate-90'
-                            : 'opacity-100 scale-100 rotate-0'
+                          ? 'opacity-0 scale-75 rotate-90'
+                          : 'opacity-100 scale-100 rotate-0'
                           }`}
                       >
                         <SearchIcon />
                       </span>
                       <span
                         className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${isSearchOpen
-                            ? 'opacity-100 scale-100 rotate-0'
-                            : 'opacity-0 scale-75 -rotate-90'
+                          ? 'opacity-100 scale-100 rotate-0'
+                          : 'opacity-0 scale-75 -rotate-90'
                           }`}
                       >
                         <CloseIcon />
@@ -1433,16 +1022,16 @@ export function Header() {
                     <span className="relative flex items-center justify-center w-6 h-6">
                       <span
                         className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${isSearchOpen
-                            ? 'opacity-0 scale-75 rotate-90'
-                            : 'opacity-100 scale-100 rotate-0'
+                          ? 'opacity-0 scale-75 rotate-90'
+                          : 'opacity-100 scale-100 rotate-0'
                           }`}
                       >
                         <SearchIcon />
                       </span>
                       <span
                         className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${isSearchOpen
-                            ? 'opacity-100 scale-100 rotate-0'
-                            : 'opacity-0 scale-75 -rotate-90'
+                          ? 'opacity-100 scale-100 rotate-0'
+                          : 'opacity-0 scale-75 -rotate-90'
                           }`}
                       >
                         <CloseIcon />
