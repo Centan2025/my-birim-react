@@ -23,14 +23,13 @@ export function useProducts() {
 /**
  * ID'ye göre ürün getir
  */
-export function useProduct(productId: string | undefined) {
+export function useProduct(productId: string | undefined, initialData?: any) {
   return useQuery({
     queryKey: ['product', productId],
     queryFn: async () => {
       if (!productId) throw new Error('Product ID is required')
       const product = await getProductById(productId)
       if (!product) {
-        // React Query, queryFn'in undefined döndürmesini sevmiyor; bunun yerine anlamlı bir hata fırlatalım.
         const err = new Error(`Product not found for id "${productId}"`) as Error & {
           status?: number
         }
@@ -40,9 +39,10 @@ export function useProduct(productId: string | undefined) {
       return product
     },
     enabled: !!productId,
-    staleTime: 10 * 60 * 1000, // 10 dakika - detay sayfası daha az değişir
-    gcTime: 30 * 60 * 1000, // 30 dakika - detay sayfaları daha uzun cache'lenebilir
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
     refetchOnMount: 'always',
+    initialData,
   })
 }
 

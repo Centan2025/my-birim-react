@@ -181,8 +181,8 @@ export function ContactPage() {
 
   // SEO meta
   useSEO({
-    title: `BIRIM - ${t('contact') || 'İletişim'}`,
-    description: t(content?.subtitle) || 'BIRIM iletişim ve showroom bilgileri',
+    title: t('contact_meta_title') || `BIRIM - ${t('contact')}`,
+    description: t(content?.subtitle) || t('contact_meta_description_default'),
     type: 'website',
     siteName: 'BIRIM',
     locale: 'tr_TR',

@@ -1,12 +1,12 @@
-import React, {useEffect, useState} from 'react'
-import {useNavigate, Link} from 'react-router-dom'
-import {useAuth} from '../App'
-import {useTranslation} from '../i18n'
-import {registerUser, loginUser} from '../services/cms'
-import {loginRateLimiter, registerRateLimiter} from '../lib/rateLimiter'
-import {analytics} from '../lib/analytics'
-import {validateLoginForm, validateRegisterForm, getPasswordStrength} from '../lib/formValidation'
-import {useSEO} from '../hooks/useSEO'
+import React, { useEffect, useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../App'
+import { useTranslation } from '../i18n'
+import { registerUser, loginUser } from '../services/cms'
+import { loginRateLimiter, registerRateLimiter } from '../lib/rateLimiter'
+import { analytics } from '../lib/analytics'
+import { validateLoginForm, validateRegisterForm, getPasswordStrength } from '../lib/formValidation'
+import { useSEO } from '../hooks/useSEO'
 
 export function LoginPage() {
   const [isLoginMode, setIsLoginMode] = useState(true)
@@ -25,17 +25,17 @@ export function LoginPage() {
   )
   const auth = useAuth()
   const navigate = useNavigate()
-  const {t} = useTranslation()
+  const { t } = useTranslation()
   const pageTitle = isLoginMode
-    ? `BIRIM - ${t('login') || 'Giriş'}`
-    : `BIRIM - ${t('register') || 'Üyelik'}`
+    ? `BIRIM - ${t('login')}`
+    : `BIRIM - ${t('sign_up')}`
 
   useSEO({
     title: pageTitle,
     description:
       t('login_subtitle') ||
-      t('register') ||
-      'BIRIM üyelik ve giriş sayfası. Tasarım ve mimari ürünlere erişin.',
+      t('register_subtitle') ||
+      t('home_meta_description'),
     siteName: 'BIRIM',
     type: 'website',
     locale: 'tr_TR',
@@ -44,7 +44,7 @@ export function LoginPage() {
   // Eğer kullanıcı zaten giriş yaptıysa, /login'e geldiğinde direkt profiline yönlendir
   useEffect(() => {
     if (auth.isLoggedIn) {
-      navigate('/profile', {replace: true})
+      navigate('/profile', { replace: true })
     }
   }, [auth.isLoggedIn, navigate])
 
@@ -67,7 +67,7 @@ export function LoginPage() {
         navigator.geolocation.getCurrentPosition(
           async pos => {
             try {
-              const {latitude, longitude} = pos.coords
+              const { latitude, longitude } = pos.coords
               const resp = await fetch(
                 `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=tr`
               )
@@ -160,7 +160,7 @@ export function LoginPage() {
 
     if (!rateLimitResult.allowed) {
       const minutes = Math.ceil((rateLimitResult.resetTime - Date.now()) / 60000)
-      setError(`Çok fazla deneme yapıldı. Lütfen ${minutes} dakika sonra tekrar deneyin.`)
+      setError(t('too_many_attempts', String(minutes)))
       setIsLoading(false)
       return
     }
@@ -242,10 +242,10 @@ export function LoginPage() {
         {/* Header */}
         <div className="text-center">
           <h2 className="text-4xl font-light text-gray-900 mb-2 tracking-tight">
-            {isLoginMode ? 'Hoş Geldiniz' : 'Üye Olun'}
+            {isLoginMode ? t('welcome_back') : t('sign_up')}
           </h2>
           <p className="text-sm text-gray-500">
-            {isLoginMode ? 'Hesabınıza giriş yapın' : 'Yeni hesap oluşturun'}
+            {isLoginMode ? t('login_subtitle') : t('register_subtitle')}
           </p>
         </div>
 
@@ -264,11 +264,10 @@ export function LoginPage() {
                 setValidationErrors({})
                 setPasswordStrength(null)
               }}
-              className={`flex-1 py-4 text-center font-medium text-sm transition-all duration-300 relative ${
-                isLoginMode ? 'text-gray-900 bg-white' : 'text-gray-500 hover:text-gray-700'
-              }`}
+              className={`flex-1 py-4 text-center font-medium text-sm transition-all duration-300 relative ${isLoginMode ? 'text-gray-900 bg-white' : 'text-gray-500 hover:text-gray-700'
+                }`}
             >
-              {t('login') || 'Giriş Yap'}
+              {t('login')}
               {isLoginMode && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900"></span>
               )}
@@ -287,11 +286,10 @@ export function LoginPage() {
                 setValidationErrors({})
                 setPasswordStrength(null)
               }}
-              className={`flex-1 py-4 text-center font-medium text-sm transition-all duration-300 relative ${
-                !isLoginMode ? 'text-gray-900 bg-white' : 'text-gray-500 hover:text-gray-700'
-              }`}
+              className={`flex-1 py-4 text-center font-medium text-sm transition-all duration-300 relative ${!isLoginMode ? 'text-gray-900 bg-white' : 'text-gray-500 hover:text-gray-700'
+                }`}
             >
-              Üye Ol
+              {t('sign_up')}
               {!isLoginMode && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900"></span>
               )}
@@ -323,15 +321,14 @@ export function LoginPage() {
                         setEmail(e.target.value)
                         if (validationErrors['email']) {
                           setValidationErrors(prev => {
-                            const newErrors = {...prev}
+                            const newErrors = { ...prev }
                             delete newErrors['email']
                             return newErrors
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${
-                        validationErrors['email'] ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${validationErrors['email'] ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="E-posta adresiniz"
                     />
                     {validationErrors['email'] && (
@@ -356,15 +353,14 @@ export function LoginPage() {
                         setPassword(e.target.value)
                         if (validationErrors['password']) {
                           setValidationErrors(prev => {
-                            const newErrors = {...prev}
+                            const newErrors = { ...prev }
                             delete newErrors['password']
                             return newErrors
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${
-                        validationErrors['password'] ? 'border-red-500' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${validationErrors['password'] ? 'border-red-500' : 'border-gray-300'
+                        }`}
                       placeholder="••••••••"
                     />
                     {validationErrors['password'] && (
@@ -376,7 +372,7 @@ export function LoginPage() {
                       to="/reset-password"
                       className="text-xs text-gray-500 hover:text-gray-900 underline"
                     >
-                      {t('forgot_password') || 'Şifremi Unuttum'}
+                      {t('forgot_password')}
                     </Link>
                   </div>
                 </div>
@@ -419,10 +415,10 @@ export function LoginPage() {
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         ></path>
                       </svg>
-                      Giriş yapılıyor...
+                      {t('logging_in')}
                     </>
                   ) : (
-                    t('login') || 'Giriş Yap'
+                    t('login')
                   )}
                 </button>
               </form>
@@ -436,7 +432,7 @@ export function LoginPage() {
                 <div className="space-y-5">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                      Ad Soyad
+                      {t('full_name')}
                     </label>
                     <input
                       id="name"
@@ -448,16 +444,15 @@ export function LoginPage() {
                         setName(e.target.value)
                         if (validationErrors['name']) {
                           setValidationErrors(prev => {
-                            const newErrors = {...prev}
+                            const newErrors = { ...prev }
                             delete newErrors['name']
                             return newErrors
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${
-                        validationErrors['name'] ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="Adınız Soyadınız"
+                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${validationErrors['name'] ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                      placeholder={t('full_name_placeholder')}
                     />
                     {validationErrors['name'] && (
                       <p className="mt-1 text-sm text-red-600">{validationErrors['name']}</p>
@@ -481,16 +476,15 @@ export function LoginPage() {
                         setEmail(e.target.value)
                         if (validationErrors['email']) {
                           setValidationErrors(prev => {
-                            const newErrors = {...prev}
+                            const newErrors = { ...prev }
                             delete newErrors['email']
                             return newErrors
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${
-                        validationErrors['email'] ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="E-posta adresiniz"
+                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${validationErrors['email'] ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                      placeholder={t('email_placeholder')}
                     />
                     {validationErrors['email'] && (
                       <p className="mt-1 text-sm text-red-600">{validationErrors['email']}</p>
@@ -517,15 +511,14 @@ export function LoginPage() {
                           setPasswordStrength(newPassword ? getPasswordStrength(newPassword) : null)
                           if (validationErrors['password']) {
                             setValidationErrors(prev => {
-                              const newErrors = {...prev}
+                              const newErrors = { ...prev }
                               delete newErrors['password']
                               return newErrors
                             })
                           }
                         }}
-                        className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${
-                          validationErrors['password'] ? 'border-red-500' : 'border-gray-300'
-                        }`}
+                        className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${validationErrors['password'] ? 'border-red-500' : 'border-gray-300'
+                          }`}
                         placeholder="••••••••"
                       />
                       {validationErrors['password'] && (
@@ -536,44 +529,39 @@ export function LoginPage() {
                           <div className="flex items-center gap-2 mb-1">
                             <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                               <div
-                                className={`h-full transition-all duration-300 ${
-                                  passwordStrength === 'weak'
-                                    ? 'bg-red-500 w-1/3'
-                                    : passwordStrength === 'medium'
-                                      ? 'bg-yellow-500 w-2/3'
-                                      : 'bg-green-500 w-full'
-                                }`}
+                                className={`h-full transition-all duration-300 ${passwordStrength === 'weak'
+                                  ? 'bg-red-500 w-1/3'
+                                  : passwordStrength === 'medium'
+                                    ? 'bg-yellow-500 w-2/3'
+                                    : 'bg-green-500 w-full'
+                                  }`}
                               ></div>
                             </div>
                             <span
-                              className={`text-xs font-medium ${
-                                passwordStrength === 'weak'
-                                  ? 'text-red-600'
-                                  : passwordStrength === 'medium'
-                                    ? 'text-yellow-600'
-                                    : 'text-green-600'
-                              }`}
+                              className={`text-xs font-medium ${passwordStrength === 'weak'
+                                ? 'text-red-600'
+                                : passwordStrength === 'medium'
+                                  ? 'text-yellow-600'
+                                  : 'text-green-600'
+                                }`}
                             >
                               {passwordStrength === 'weak'
-                                ? 'Zayıf'
+                                ? t('weak')
                                 : passwordStrength === 'medium'
-                                  ? 'Orta'
-                                  : 'Güçlü'}
+                                  ? t('medium')
+                                  : t('strong')}
                             </span>
                           </div>
                           <p className="text-xs text-gray-500">
-                            Şifre en az 8 karakter olmalı ve büyük/küçük harf, rakam içermelidir
+                            {t('password_hint')}
                           </p>
                         </div>
                       )}
                     </div>
                   </div>
                   <div>
-                    <label
-                      htmlFor="company"
-                      className="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                      Firma
+                    <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('company')}
                     </label>
                     <input
                       id="company"
@@ -585,27 +573,23 @@ export function LoginPage() {
                         setCompany(e.target.value)
                         if (validationErrors['company']) {
                           setValidationErrors(prev => {
-                            const newErrors = {...prev}
+                            const newErrors = { ...prev }
                             delete newErrors['company']
                             return newErrors
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${
-                        validationErrors['company'] ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="Firma Adı"
+                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${validationErrors['company'] ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                      placeholder={t('company_placeholder')}
                     />
                     {validationErrors['company'] && (
                       <p className="mt-1 text-sm text-red-600">{validationErrors['company']}</p>
                     )}
                   </div>
                   <div>
-                    <label
-                      htmlFor="profession"
-                      className="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                      Meslek
+                    <label htmlFor="profession" className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('profession')}
                     </label>
                     <input
                       id="profession"
@@ -617,27 +601,23 @@ export function LoginPage() {
                         setProfession(e.target.value)
                         if (validationErrors['profession']) {
                           setValidationErrors(prev => {
-                            const newErrors = {...prev}
+                            const newErrors = { ...prev }
                             delete newErrors['profession']
                             return newErrors
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${
-                        validationErrors['profession'] ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="Mesleğiniz"
+                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${validationErrors['profession'] ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                      placeholder={t('profession_placeholder')}
                     />
                     {validationErrors['profession'] && (
                       <p className="mt-1 text-sm text-red-600">{validationErrors['profession']}</p>
                     )}
                   </div>
                   <div>
-                    <label
-                      htmlFor="country"
-                      className="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                      Ülke
+                    <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-2">
+                      {t('country')}
                     </label>
                     <input
                       id="country"
@@ -648,16 +628,15 @@ export function LoginPage() {
                         setCountry(e.target.value)
                         if (validationErrors['country']) {
                           setValidationErrors(prev => {
-                            const newErrors = {...prev}
+                            const newErrors = { ...prev }
                             delete newErrors['country']
                             return newErrors
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${
-                        validationErrors['country'] ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="Ülkeniz"
+                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200 outline-none text-gray-900 placeholder-gray-400 ${validationErrors['country'] ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                      placeholder={t('country_placeholder')}
                     />
                     {validationErrors['country'] && (
                       <p className="mt-1 text-sm text-red-600">{validationErrors['country']}</p>
@@ -703,10 +682,10 @@ export function LoginPage() {
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         ></path>
                       </svg>
-                      Kayıt yapılıyor...
+                      {t('signing_up')}
                     </>
                   ) : (
-                    'Üye Ol'
+                    t('sign_up')
                   )}
                 </button>
               </form>
@@ -716,11 +695,11 @@ export function LoginPage() {
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-500">
-          Üye olarak{' '}
+          {t('register_benefit_prefix')}
           <Link to="/products" className="font-medium text-gray-900 hover:text-gray-700 underline">
-            özel içeriklere
-          </Link>{' '}
-          erişebilirsiniz.
+            {t('register_benefit_link')}
+          </Link>
+          {t('register_benefit_suffix')}
         </p>
       </div>
     </div>

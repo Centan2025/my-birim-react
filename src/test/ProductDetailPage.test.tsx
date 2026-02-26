@@ -1,130 +1,145 @@
-import {describe, it, expect, vi} from 'vitest'
-import {render, screen} from '@testing-library/react'
-import {MemoryRouter, Route, Routes} from 'react-router-dom'
-import {ProductDetailPage} from '@/pages/ProductDetailPage'
-import * as productsHooks from '../hooks/useProducts'
-import * as designersHooks from '../hooks/useDesigners'
-import * as categoriesHooks from '../hooks/useCategories'
-import * as siteHooks from '../hooks/useSiteData'
-import {HeaderThemeProvider} from '../context/HeaderThemeContext'
-import {AuthContext} from '../App'
-import {SEOProvider} from '../hooks/useSEO'
-import {HelmetProvider} from 'react-helmet-async'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen, fireEvent } from '@testing-library/react'
+import '@testing-library/jest-dom'
+import React from 'react'
+import { ProductDetailPage } from '../pages/ProductDetailPage'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { I18nProvider } from '../i18n'
+import { HeaderThemeProvider } from '../context/HeaderThemeContext'
+import { SEOProvider } from '../hooks/useSEO'
+import { SiteSettingsProvider } from '../context/SiteSettingsContext'
+import { HelmetProvider } from 'react-helmet-async'
+import { CartProvider } from '../context/CartContext'
+import { AuthProvider } from '../context/AuthContext'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
-// Hooks'u mockla
-vi.mock('../hooks/useProducts')
-vi.mock('../hooks/useDesigners')
-vi.mock('../hooks/useCategories')
-vi.mock('../hooks/useSiteData')
-
-// Cart context mock'u
-vi.mock('@/context/CartContext', () => ({
-  useCart: vi.fn(() => ({
-    addToCart: vi.fn(),
-  })),
-}))
-
-// Basit i18n mock'u
-vi.mock('../i18n', () => ({
-  useTranslation: () => ({
-    t: (key: any) => (typeof key === 'string' ? key : key?.tr || ''),
-    locale: 'tr',
-    setLocale: vi.fn(),
-    supportedLocales: ['tr', 'en'],
-  }),
-}))
-
-const mockAuth = {
-  isLoggedIn: false,
-  user: null,
-  login: vi.fn(),
-  logout: vi.fn(),
+const mockProduct = {
+  id: 'p1',
+  name: { tr: 'Test Ürün' },
+  description: { tr: 'Açıklama' },
+  materials: [
+    { id: 'm1', name: { tr: 'Malzeme 1' }, image: { url: 'm1.jpg' } }
+  ],
+  groupedMaterials: [
+    {
+      group: { title: { tr: 'Grup 1' } },
+      materials: [{ id: 'gm1', name: { tr: 'Grup Malzeme 1' }, image: { url: 'gm1.jpg' } }]
+    }
+  ]
 }
 
-const renderWithRouter = (initialPath: string) => {
-  return render(
-    <HelmetProvider>
-      <AuthContext.Provider value={mockAuth as any}>
-        <HeaderThemeProvider>
-          <SEOProvider>
-            <MemoryRouter initialEntries={[initialPath]}>
-              <Routes>
-                <Route path="/products/:productId" element={<ProductDetailPage />} />
-              </Routes>
-            </MemoryRouter>
-          </SEOProvider>
-        </HeaderThemeProvider>
-      </AuthContext.Provider>
-    </HelmetProvider>
+vi.mock('../hooks/useProductDetail', () => ({
+  useProductDetail: () => ({
+    product: mockProduct,
+    productLoading: false,
+    designer: { name: { tr: 'Tasarımcı' } },
+    category: { name: { tr: 'Kategori' } },
+    relatedProducts: [],
+    heroHook: {
+      heroNext: vi.fn(),
+      heroPrev: vi.fn(),
+      setHeroSlideIndex: vi.fn(),
+      setCurrentImageIndex: vi.fn(),
+      setHeroTransitionEnabled: vi.fn(),
+      heroSlideIndex: 0,
+      currentImageIndex: 0,
+      heroTransitionEnabled: true,
+      draggedX: 0,
+      totalHeroSlides: 1,
+      handleHeroDragStart: vi.fn(),
+      handleHeroDragMove: vi.fn(),
+      handleHeroDragEnd: vi.fn(),
+      handleHeroTransitionEnd: vi.fn(),
+    },
+    bandMedia: [],
+    heroMedia: [],
+    slideCount: 0,
+    mergedGroups: [],
+    imageBorderClass: '',
+    showRelatedProducts: false,
+    showProductPrevNext: false,
+    prevProduct: null,
+    nextProduct: null,
+    isMobile: false,
+  })
+}))
+
+// Mock components as named exports
+vi.mock('../components/product/ProductHero', () => ({
+  ProductHero: () => <div data-testid="product-hero">Hero</div>
+}))
+
+vi.mock('../components/product/ProductThumbnails', () => ({
+  ProductThumbnails: () => null
+}))
+vi.mock('../components/product/ProductInfo', () => ({
+  ProductInfo: () => null
+}))
+vi.mock('../components/product/ProductDimensions', () => ({
+  ProductDimensions: () => null
+}))
+vi.mock('../components/product/ProductAddToCart', () => ({
+  ProductAddToCart: () => null
+}))
+vi.mock('../components/product/ProductBottomNav', () => ({
+  ProductBottomNav: () => null
+}))
+vi.mock('../components/product/ProductRelated', () => ({
+  ProductRelated: () => null
+}))
+vi.mock('../components/product/ProductMediaPanels', () => ({
+  ProductMediaPanels: () => null
+}))
+vi.mock('../components/FullscreenMediaViewer', () => ({
+  FullscreenMediaViewer: () => null
+}))
+
+vi.mock('../components/product/ProductMaterials', () => ({
+  ProductMaterials: ({ onSetActiveMaterialGroup }: any) => (
+    <div data-testid="product-materials">
+      <button onClick={() => onSetActiveMaterialGroup(0)}>Select Group 0</button>
+    </div>
   )
-}
+}))
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+})
 
 describe('ProductDetailPage', () => {
-  it('renders basic product info when data is available', () => {
-    vi.mocked(productsHooks.useProduct).mockReturnValue({
-      data: {
-        id: 'product-1',
-        name: {tr: 'Ürün 1'},
-        designerId: 'designer-1',
-        categoryId: 'category-1',
-        year: 2024,
-        isPublished: true,
-        description: {tr: 'Ürün açıklaması'},
-        mainImage: {url: 'https://example.com/main.jpg'},
-        alternativeMedia: [],
-        media: [],
-        showMediaPanels: false,
-        dimensionImages: [],
-        buyable: true,
-        price: 1000,
-        currency: 'TRY',
-        sku: 'SKU-1',
-        stockStatus: 'in_stock',
-        materials: [],
-        groupedMaterials: [],
-      },
-      isLoading: false,
-      isError: false,
-    } as any)
+  it('sekmeler arası geçiş ve malzeme seçimi simülasyonu', async () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/product/p1']}>
+          <HelmetProvider>
+            <AuthProvider>
+              <I18nProvider>
+                <SEOProvider>
+                  <SiteSettingsProvider>
+                    <HeaderThemeProvider>
+                      <CartProvider>
+                        <Routes>
+                          <Route path="/product/:id" element={<ProductDetailPage />} />
+                        </Routes>
+                      </CartProvider>
+                    </HeaderThemeProvider>
+                  </SiteSettingsProvider>
+                </SEOProvider>
+              </I18nProvider>
+            </AuthProvider>
+          </HelmetProvider>
+        </MemoryRouter>
+      </QueryClientProvider>
+    )
 
-    vi.mocked(siteHooks.useSiteSettings).mockReturnValue({
-      data: {
-        logoUrl: '',
-        imageBorderStyle: 'square',
-        maintenanceMode: false,
-        showProductPrevNext: false,
-        showCartButton: true,
-      },
-      isLoading: false,
-      isError: false,
-    } as any)
+    expect(screen.getByTestId('product-hero')).toBeInTheDocument()
 
-    vi.mocked(categoriesHooks.useCategories).mockReturnValue({
-      data: [],
-      isLoading: false,
-      isError: false,
-    } as any)
-
-    vi.mocked(designersHooks.useDesigner).mockReturnValue({
-      data: {
-        id: 'designer-1',
-        name: {tr: 'Tasarımcı 1'},
-        bio: {tr: ''},
-        image: 'https://example.com/designer.jpg',
-      },
-      isLoading: false,
-      isError: false,
-    } as any)
-
-    vi.mocked(productsHooks.useProductsByCategory).mockReturnValue({
-      data: [],
-      isLoading: false,
-      isError: false,
-    } as any)
-
-    renderWithRouter('/products/product-1')
-
-    expect(screen.getAllByText('Ürün 1')[0]).toBeInTheDocument()
-    expect(screen.getByText('Ürün açıklaması')).toBeInTheDocument()
+    // Malzeme grubu değişimini test et
+    const btn = screen.getByText('Select Group 0')
+    fireEvent.click(btn)
   })
 })

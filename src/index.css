@@ -357,6 +357,130 @@ h6 {
   animation: scroll-indicator-intro 0.5s ease-out forwards;
 }
 
+@keyframes news-reveal-0 {
+  0% {
+    opacity: 0;
+    transform: translate(-30px, 40px) rotate(-3deg);
+    filter: blur(5px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+    filter: blur(0);
+  }
+}
+
+@keyframes news-reveal-1 {
+  0% {
+    opacity: 0;
+    transform: translate(20px, 60px) rotate(2deg) scale(0.95);
+    filter: blur(6px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes news-reveal-2 {
+  0% {
+    opacity: 0;
+    transform: translate(0, 50px) scale(0.95);
+    filter: blur(8px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes news-reveal-3 {
+  0% {
+    opacity: 0;
+    transform: translate(30px, -20px) rotate(3deg);
+    filter: blur(4px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+    filter: blur(0);
+  }
+}
+
+@keyframes news-reveal-4 {
+  0% {
+    opacity: 0;
+    transform: translate(-20px, -30px) rotate(-2deg) scale(1.02);
+    filter: blur(5px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    filter: blur(0);
+  }
+}
+
+.animate-news-card-0 {
+  opacity: 0;
+  animation: news-reveal-0 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity, filter;
+}
+
+.animate-news-card-1 {
+  opacity: 0;
+  animation: news-reveal-1 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity, filter;
+}
+
+.animate-news-card-2 {
+  opacity: 0;
+  animation: news-reveal-2 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity, filter;
+}
+
+.animate-news-card-3 {
+  opacity: 0;
+  animation: news-reveal-3 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity, filter;
+}
+
+.animate-news-card-4 {
+  opacity: 0;
+  animation: news-reveal-4 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity, filter;
+}
+
+.smooth-hover {
+  transition: all 1s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  will-change: transform, filter, opacity;
+}
+
+/* Vercel Toolbar'ı gizle - Production'da görünmemeli */
+/* View Transitions API Customization */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.8s;
+  animation-timing-function: cubic-bezier(0.1, 1, 0.2, 1);
+}
+
+/* Force opacity for shared elements during transition to avoid "bel belli olmuyor" due to initial fade-in */
+[style*="view-transition-name"] picture img,
+[style*="view-transition-name"] img {
+  opacity: 1 !important;
+  transition: none !important;
+}
+
+[style*='view-transition-name'] {
+  backface-visibility: hidden;
+}
+
 /* Vercel Toolbar'ı gizle - Production'da görünmemeli */
 [data-vercel-toolbar],
 [data-vercel-toolbar] *,

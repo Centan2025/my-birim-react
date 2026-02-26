@@ -16,6 +16,7 @@ export function useProductHero(slideCount: number) {
   // Reset indices when slide count changes
   useEffect(() => {
     if (slideCount > 0) {
+      setHeroTransitionEnabled(false) // Disable transition to snap instantly
       setCurrentImageIndex(0)
       setHeroSlideIndex(slideCount > 1 ? 1 : 0)
     }

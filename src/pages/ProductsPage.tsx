@@ -147,15 +147,15 @@ export function ProductsPage() {
 
   // SEO meta
   const categoryName = category ? t(category.name) : ''
-  const pageTitle = categoryName || t('products') || 'Ürünler'
+  const pageTitle = categoryName || t('products')
   const pageDescription = category
     ? t(category.subtitle) || pageTitle
-    : t('all_products_subtitle') || pageTitle
+    : t('all_products_subtitle') || t('products_meta_description_default')
   const heroImageUrl =
     typeof category?.heroImage === 'object' ? category.heroImage.url : category?.heroImage
 
   useSEO({
-    title: `BIRIM - ${pageTitle}`,
+    title: t('products_meta_title') || `BIRIM - ${pageTitle}`,
     description: pageDescription,
     image: heroImageUrl,
     type: 'website',
@@ -314,7 +314,7 @@ export function ProductsPage() {
                           {products.map((product, idx) => (
                             <ScrollReveal
                               key={product.id}
-                              delay={startIndex + idx < 12 ? (startIndex + idx) * 20 : 0}
+                              delay={startIndex + idx < 12 ? (startIndex + idx) * 100 : 0}
                               threshold={0.01}
                             >
                               <ProductCard product={product} variant="light" />
@@ -331,7 +331,7 @@ export function ProductsPage() {
             // Eğer kategori seçiliyse, normal grid göster
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
               {sortedProducts.map((product, index) => (
-                <ScrollReveal key={product.id} delay={index < 12 ? index * 20 : 0} threshold={0.01}>
+                <ScrollReveal key={product.id} delay={index < 12 ? index * 100 : 0} threshold={0.01}>
                   <ProductCard product={product} variant="light" />
                 </ScrollReveal>
               ))}

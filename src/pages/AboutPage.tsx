@@ -63,7 +63,7 @@ export function AboutPage() {
   useSEO({
     title: `BIRIM - ${t('about') || 'Hakkımızda'}`,
     description:
-      (content && (t(content.heroSubtitle) || t(content.storyTitle))) || 'BIRIM hakkında bilgiler',
+      (content && (t(content.heroSubtitle) || t(content.storyTitle))) || t('about_meta_description_default'),
     image: heroImageUrl,
     type: 'article',
     siteName: 'BIRIM',

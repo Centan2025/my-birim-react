@@ -1,91 +1,101 @@
-/**
- * useHeaderSearch hook temel testleri.
- * Not: Debounce ve filtre mantığı doğrudan normalizeSearchText üzerinden test edilir.
- * setTimeout + waitFor kombinasyonu jsdom ortamında sorun yarattığı için
- * async arama testi yerine saf fonksiyon testleri tercih edildi.
- */
-import {describe, it, expect, vi, beforeEach, afterEach} from 'vitest'
-import {renderHook, act} from '@testing-library/react'
-import {useHeaderSearch} from '../hooks/useHeaderSearch'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { renderHook, act, waitFor } from '@testing-library/react'
+import { useHeaderSearch } from '../hooks/useHeaderSearch'
 
-// cms servisleri mock'la
-vi.mock('../services/cms', () => ({
-  getProducts: vi.fn().mockResolvedValue([]),
-  getDesigners: vi.fn().mockResolvedValue([]),
-  getCategories: vi.fn().mockResolvedValue([]),
-}))
+// Stable mock functions
+const mockT = vi.fn((val: any) => (typeof val === 'string' ? val : val?.tr || val?.en || ''))
 
-// i18n mock
 vi.mock('../i18n', () => ({
   useTranslation: () => ({
-    t: (val: any) => (typeof val === 'string' ? val : val?.tr || val?.en || ''),
+    t: mockT,
     locale: 'tr',
   }),
 }))
 
-describe('useHeaderSearch — başlangıç durumu', () => {
-  it('açık olmadığında boş sonuçlar ve isSearching=false döner', () => {
-    const {result} = renderHook(() => useHeaderSearch(false))
+const mockProducts = [
+  { id: 'p1', name: { tr: 'Masa' }, designerId: 'd1', categoryId: 'c1' },
+  { id: 'p2', name: { tr: 'Sandalye' }, designerId: 'd2', categoryId: 'c2' }
+]
 
-    expect(result.current.searchQuery).toBe('')
-    expect(result.current.searchResults.products).toEqual([])
-    expect(result.current.searchResults.designers).toEqual([])
-    expect(result.current.searchResults.categories).toEqual([])
+const mockDesigners = [
+  { id: 'd1', name: { tr: 'Ali Veli' } },
+  { id: 'd2', name: { tr: 'Mehmet Can' } }
+]
+
+const mockCategories = [
+  { id: 'c1', name: { tr: 'Ofis' } },
+  { id: 'c2', name: { tr: 'Ev' } }
+]
+
+vi.mock('../services/cms', () => ({
+  getProducts: vi.fn(),
+  getDesigners: vi.fn(),
+  getCategories: vi.fn(),
+}))
+
+import { getProducts, getDesigners, getCategories } from '../services/cms'
+
+describe('useHeaderSearch - veri ile arama', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(getProducts).mockResolvedValue(mockProducts)
+    vi.mocked(getDesigners).mockResolvedValue(mockDesigners)
+    vi.mocked(getCategories).mockResolvedValue(mockCategories)
+  })
+
+  it('arama modalı açıldığında verileri çeker', async () => {
+    const { result } = renderHook(() => useHeaderSearch(true))
+
+    // isSearching true olur
+    expect(result.current.isSearching).toBe(true)
+
+    await waitFor(() => {
+      expect(result.current.allData).not.toBeNull()
+    })
+
     expect(result.current.isSearching).toBe(false)
-    expect(result.current.allData).toBeNull()
+    expect(result.current.allData?.products).toHaveLength(2)
   })
-})
 
-describe('useHeaderSearch — internalCloseSearch', () => {
-  it('arama temizlendiğinde query ve sonuçlar sıfırlanır', () => {
-    const {result} = renderHook(() => useHeaderSearch(false))
+  it('sorgu yazıldığında ürünleri filtreler (debounce sonrası)', async () => {
+    vi.useFakeTimers()
+    const { result } = renderHook(() => useHeaderSearch(true))
+
+    // Verilerin dolmasını bekle
+    await act(async () => {
+      await vi.runAllTimersAsync()
+    })
 
     act(() => {
-      result.current.setSearchQuery('test')
+      result.current.setSearchQuery('masa')
     })
-    expect(result.current.searchQuery).toBe('test')
+
+    // Debounce bekle
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300)
+    })
+
+    expect(result.current.searchResults.products).toHaveLength(1)
+    expect(result.current.searchResults.products[0].id).toBe('p1')
+
+    vi.useRealTimers()
+  })
+
+  it('tasarımcı adına göre arama yapar', async () => {
+    vi.useFakeTimers()
+    const { result } = renderHook(() => useHeaderSearch(true))
+
+    await act(async () => { await vi.runAllTimersAsync() })
 
     act(() => {
-      result.current.internalCloseSearch()
+      result.current.setSearchQuery('ali')
     })
-    expect(result.current.searchQuery).toBe('')
-    expect(result.current.searchResults.products).toHaveLength(0)
-  })
-})
 
-describe('useHeaderSearch — normalizeSearchText', () => {
-  afterEach(() => vi.clearAllMocks())
+    await act(async () => { await vi.advanceTimersByTimeAsync(300) })
 
-  it('büyük harfi küçük harfe çevirir', () => {
-    const {result} = renderHook(() => useHeaderSearch(false))
-    expect(result.current.normalizeSearchText('KANAT')).toBe('kanat')
-  })
+    expect(result.current.searchResults.designers).toHaveLength(1)
+    expect(result.current.searchResults.products).toHaveLength(1) // Ali'nin ürünü de çıkmalı
 
-  it('boş string için boş string döner', () => {
-    const {result} = renderHook(() => useHeaderSearch(false))
-    expect(result.current.normalizeSearchText('')).toBe('')
-  })
-
-  it('mixed case dönüşümü', () => {
-    const {result} = renderHook(() => useHeaderSearch(false))
-    expect(result.current.normalizeSearchText('Masa')).toBe('masa')
-  })
-
-  it('NFD normalizasyonu accent kaldırır', () => {
-    const {result} = renderHook(() => useHeaderSearch(false))
-    // 'café' → 'cafe'
-    const withAccent = 'caf\u00e9'
-    const normalized = result.current.normalizeSearchText(withAccent)
-    expect(normalized).toBe('cafe')
-  })
-
-  it('2 karakterden kısa sorgu için sonuç boş kalır', () => {
-    const {result} = renderHook(() => useHeaderSearch(false))
-
-    act(() => {
-      result.current.setSearchQuery('k')
-    })
-    // 2 karakter eşiği aşılmadığı için sonuçlar boş kalır
-    expect(result.current.searchResults.products).toHaveLength(0)
+    vi.useRealTimers()
   })
 })

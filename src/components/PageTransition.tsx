@@ -1,112 +1,121 @@
-import React, {useEffect, useState, useRef} from 'react'
+import React, {useEffect} from 'react'
 import {useLocation} from 'react-router-dom'
+import {motion} from 'framer-motion'
+import {useCardTransition} from '../context/CardTransitionContext'
 
 interface PageTransitionProps {
   children: React.ReactNode
 }
 
+/**
+ * Returns a push direction based on the current route.
+ */
+function getDirection(pathname: string): 'left' | 'right' | 'up' | 'down' {
+  if (pathname === '/') return 'up'
+  if (pathname.startsWith('/product/')) return 'right'
+  if (pathname.startsWith('/products')) return 'right'
+  if (pathname.startsWith('/categories')) return 'right'
+  if (pathname.startsWith('/designer/')) return 'right'
+  if (pathname.startsWith('/designers')) return 'right'
+  if (pathname.startsWith('/news/')) return 'right'
+  if (pathname.startsWith('/news')) return 'down'
+  if (pathname.startsWith('/project')) return 'left'
+  if (pathname.startsWith('/about')) return 'down'
+  if (pathname.startsWith('/contact')) return 'down'
+  if (pathname.startsWith('/login')) return 'up'
+  if (pathname.startsWith('/profile')) return 'up'
+  return 'right'
+}
+
+function getEnterFrom(dir: 'left' | 'right' | 'up' | 'down') {
+  switch (dir) {
+    case 'left':
+      return {x: '-100%', y: 0}
+    case 'right':
+      return {x: '100%', y: 0}
+    case 'up':
+      return {x: 0, y: '-100%'}
+    case 'down':
+      return {x: 0, y: '100%'}
+  }
+}
+
+function getExitTo(dir: 'left' | 'right' | 'up' | 'down') {
+  switch (dir) {
+    case 'left':
+      return {x: '100%', y: 0}
+    case 'right':
+      return {x: '-100%', y: 0}
+    case 'up':
+      return {x: 0, y: '100%'}
+    case 'down':
+      return {x: 0, y: '-100%'}
+  }
+}
+
 export const PageTransition: React.FC<PageTransitionProps> = ({children}) => {
   const location = useLocation()
-  const [isEntering, setIsEntering] = useState(false)
-  const prevPathRef = useRef(location.pathname)
-  const isFirstMount = useRef(true)
+  const {isExpanding} = useCardTransition()
+  const direction = getDirection(location.pathname)
+  const enterFrom = getEnterFrom(direction)
+  const exitTo = getExitTo(direction)
 
   useEffect(() => {
-    // İlk mount'ta animasyon yapma
-    if (isFirstMount.current) {
-      isFirstMount.current = false
-      prevPathRef.current = location.pathname
-      return undefined
-    }
-
-    // Sadece gerçek sayfa değişikliğinde animasyon yap
-    const isProductDetail = location.pathname.includes('/product/')
-    const wasProductDetail = prevPathRef.current.includes('/product/')
-    const isFromProducts = prevPathRef.current.includes('/products') && !wasProductDetail
-
-    if (isProductDetail && isFromProducts) {
-      // Yeni sayfa aşağıdan gelsin
-      setIsEntering(true)
-
-      // Eski sayfayı yukarı kaydır
-      const main = document.querySelector('main')
-      if (main) {
-        // Tüm sayfa içeriklerini bul (TopBanner hariç)
-        const pageContents = Array.from(main.children).filter(child => {
-          const el = child as HTMLElement
-          return (
-            el.tagName !== 'SCRIPT' &&
-            el.tagName !== 'DIV' &&
-            !el.querySelector('[data-product-detail]') &&
-            !el.id?.includes('top-banner')
-          )
-        }) as HTMLElement[]
-
-        pageContents.forEach(content => {
-          if (content && !content.querySelector('[data-product-detail]')) {
-            content.style.transition = 'transform 0.7s ease-out'
-            content.style.transform = 'translateY(-100vh)'
-            content.style.position = 'absolute'
-            content.style.top = '0'
-            content.style.left = '0'
-            content.style.right = '0'
-            content.style.width = '100%'
-            content.style.zIndex = '1'
-          }
-        })
-      }
-
-      // Yeni sayfayı göster
-      const timer = setTimeout(() => {
-        setIsEntering(false)
-      }, 50)
-
-      prevPathRef.current = location.pathname
-
-      return () => {
-        clearTimeout(timer)
-        // Cleanup - eski içeriği temizle
-        const main = document.querySelector('main')
-        if (main) {
-          const pageContents = Array.from(main.children).filter(child => {
-            const el = child as HTMLElement
-            return (
-              el.tagName !== 'SCRIPT' &&
-              el.tagName !== 'DIV' &&
-              !el.querySelector('[data-product-detail]') &&
-              !el.id?.includes('top-banner')
-            )
-          }) as HTMLElement[]
-
-          pageContents.forEach(content => {
-            if (content && content.style.transform === 'translateY(-100vh)') {
-              content.style.display = 'none'
-            }
-          })
-        }
-      }
-    } else {
-      // Normal geçiş - animasyon yapma
-      setIsEntering(false)
-      prevPathRef.current = location.pathname
-      return undefined
-    }
+    window.scrollTo({top: 0, left: 0, behavior: 'instant'})
   }, [location.pathname])
 
+  const isCardEntry = isExpanding || location.state?.fromCard
+
   return (
-    <div
-      className={`transition-all duration-700 ease-out ${
-        isEntering ? 'opacity-0 translate-y-20' : 'opacity-100 translate-y-0'
-      }`}
-      style={{
-        transform: isEntering ? 'translateY(80px)' : 'translateY(0)',
+    <motion.div
+      initial={
+        isCardEntry
+          ? {opacity: 0, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10}
+          : {...enterFrom, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10}
+      }
+      animate={{
+        x: 0,
+        y: 0,
+        opacity: 1,
         position: 'relative',
-        zIndex: 2,
-        minHeight: '100vh',
-        backgroundColor: 'white',
+        zIndex: 1,
+        transition: isCardEntry
+          ? {duration: 0.8, ease: [0.22, 1, 0.36, 1]}
+          : {
+              duration: 1.6,
+              ease: [0.12, 0.8, 0.2, 1],
+            },
       }}
+      exit={
+        isCardEntry
+          ? {
+              opacity: 0,
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 0,
+              transition: {duration: 0.8, ease: [0.22, 1, 0.36, 1]},
+            }
+          : {
+              ...exitTo,
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 0,
+              transition: {
+                duration: 1.6,
+                ease: [0.12, 0.8, 0.2, 1],
+              },
+            }
+      }
+      className="w-full min-h-screen bg-white"
+      style={{willChange: isCardEntry ? 'opacity' : 'transform'}}
     >
       {children}
-    </div>
+    </motion.div>
   )
 }

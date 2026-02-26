@@ -25,13 +25,8 @@ export const subscribeEmail = async (email: string): Promise<User> => {
     if (!normEmail) throw new Error('Geçerli bir e-posta adresi girin')
 
     if (useSanity) {
-        try {
-            const data = await apiFetch('subscribe', { email: normEmail })
-            return data.user
-        } catch (error: any) {
-            // Local fallback if desired, but usually we want to know if it failed
-            throw error
-        }
+        const data = await apiFetch('subscribe', { email: normEmail })
+        return data.user
     }
 
     // Local Storage Fallback (Demo purposes)

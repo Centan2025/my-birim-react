@@ -1,18 +1,19 @@
-import {describe, it, expect, beforeEach, vi} from 'vitest'
-import {render, screen, waitFor, act} from '@testing-library/react'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { render, screen, waitFor, act, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import {BrowserRouter} from 'react-router-dom'
-import {LoginPage} from '@/pages/LoginPage'
+import '@testing-library/jest-dom'
+import { BrowserRouter } from 'react-router-dom'
+import { LoginPage } from '@/pages/LoginPage'
 import * as cms from '@/services/cms'
 import * as rateLimiter from '@/lib/rateLimiter'
-import {SEOProvider} from '../hooks/useSEO'
-import {HelmetProvider} from 'react-helmet-async'
+import { SEOProvider } from '../hooks/useSEO'
+import { HelmetProvider } from 'react-helmet-async'
 
 // Mock dependencies
 vi.mock('@/services/cms')
 vi.mock('@/lib/rateLimiter')
 
-import {AuthContext} from '../App'
+import { AuthContext } from '../App'
 
 // Mock useAuth with a factory function
 const mockAuthValue = {
@@ -41,7 +42,18 @@ const translations: Record<string, string> = {
   products_menu: 'Ürünler menüsü',
   view_all: 'Tümünü Gör',
   already_logged_in: 'Hoş Geldiniz',
+  welcome_back: 'Hoş Geldiniz',
+  sign_up: 'Üye Ol',
   logout: 'Çıkış Yap',
+  register: 'Kayıt Ol',
+  full_name: 'Ad Soyad',
+  company: 'Firma',
+  profession: 'Meslek',
+  country: 'Ülke',
+  forgot_password: 'Şifremi Unuttum',
+  no_account: 'Hesabınız yok mu?',
+  have_account: 'Zaten hesabınız var mı?',
+  too_many_attempts: 'Çok fazla deneme',
 }
 
 vi.mock('../i18n', () => ({
@@ -98,7 +110,7 @@ describe('LoginPage', () => {
     expect(screen.getByLabelText('E-posta')).toBeInTheDocument()
     expect(screen.getByLabelText('Şifre')).toBeInTheDocument()
     // Submit button'u bul (type="submit" olan)
-    const submitButtons = screen.getAllByRole('button', {name: 'Giriş Yap'})
+    const submitButtons = screen.getAllByRole('button', { name: 'Giriş Yap' })
     const submitButton = submitButtons.find(btn => btn.getAttribute('type') === 'submit')
     expect(submitButton).toBeInTheDocument()
   })
@@ -107,7 +119,7 @@ describe('LoginPage', () => {
     const user = userEvent.setup()
     renderLoginPage()
 
-    const registerTab = screen.getByRole('button', {name: 'Üye Ol'})
+    const registerTab = screen.getByRole('button', { name: 'Üye Ol' })
     await act(async () => {
       await user.click(registerTab)
     })
@@ -135,7 +147,7 @@ describe('LoginPage', () => {
 
     const emailInput = screen.getByLabelText('E-posta')
     const passwordInput = screen.getByLabelText('Şifre')
-    const submitButtons = screen.getAllByRole('button', {name: 'Giriş Yap'})
+    const submitButtons = screen.getAllByRole('button', { name: 'Giriş Yap' })
     const submitButton = submitButtons.find(btn => (btn as HTMLButtonElement).type === 'submit')!
 
     await act(async () => {
@@ -158,7 +170,7 @@ describe('LoginPage', () => {
 
     const emailInput = screen.getByLabelText('E-posta')
     const passwordInput = screen.getByLabelText('Şifre')
-    const submitButtons = screen.getAllByRole('button', {name: 'Giriş Yap'})
+    const submitButtons = screen.getAllByRole('button', { name: 'Giriş Yap' })
     const submitButton = submitButtons.find(btn => (btn as HTMLButtonElement).type === 'submit')!
 
     await act(async () => {
@@ -184,7 +196,7 @@ describe('LoginPage', () => {
 
     const emailInput = screen.getByLabelText('E-posta')
     const passwordInput = screen.getByLabelText('Şifre')
-    const submitButtons = screen.getAllByRole('button', {name: 'Giriş Yap'})
+    const submitButtons = screen.getAllByRole('button', { name: 'Giriş Yap' })
     const submitButton = submitButtons.find(btn => (btn as HTMLButtonElement).type === 'submit')!
 
     await act(async () => {
@@ -215,7 +227,7 @@ describe('LoginPage', () => {
     renderLoginPage()
 
     // Switch to register mode
-    const registerTab = screen.getByRole('button', {name: 'Üye Ol'})
+    const registerTab = screen.getByRole('button', { name: 'Üye Ol' })
     await act(async () => {
       await user.click(registerTab)
     })
@@ -224,7 +236,7 @@ describe('LoginPage', () => {
     const passwordInput = screen.getByLabelText('Şifre')
     const nameInput = screen.getByLabelText(/ad soyad/i)
     const countryInput = screen.getByLabelText(/ülke/i)
-    const submitButtons = screen.getAllByRole('button', {name: 'Üye Ol'})
+    const submitButtons = screen.getAllByRole('button', { name: 'Üye Ol' })
     const submitButton = submitButtons.find(btn => (btn as HTMLButtonElement).type === 'submit')!
 
     await act(async () => {
@@ -244,6 +256,29 @@ describe('LoginPage', () => {
         '',
         'Turkey'
       )
+    })
+  })
+
+  it('shows validation errors for empty fields on register', async () => {
+    const user = userEvent.setup()
+    renderLoginPage()
+
+    // Switch to register mode
+    const registerTab = screen.getByRole('button', { name: 'Üye Ol' })
+    await act(async () => {
+      await user.click(registerTab)
+    })
+
+    await act(async () => {
+      const forms = document.querySelectorAll('form')
+      const registerForm = forms[0]
+      if (registerForm) fireEvent.submit(registerForm)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText('E-posta adresi gereklidir')).toBeInTheDocument()
+      expect(screen.getByText('Ad soyad gereklidir')).toBeInTheDocument()
+      expect(screen.getByText('Ülke gereklidir')).toBeInTheDocument()
     })
   })
 

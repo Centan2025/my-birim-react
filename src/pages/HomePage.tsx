@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from '../i18n'
 import { useSiteSettings } from '../hooks/useSiteData'
 import { useHomePageContent } from '../hooks/useHomePage'
 import { HomeHero } from '../components/HomeHero'
@@ -24,19 +25,20 @@ export function HomePage() {
     }
     return 0
   })
+  const { t } = useTranslation()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
 
   // SEO
   const seoData = useMemo(
     () => ({
-      title: 'BIRIM - Ana Sayfa',
-      description: 'BIRIM - Modern tasarım ve mimari çözümler',
+      title: t('home_meta_title') || 'BIRIM - Ana Sayfa',
+      description: t('home_meta_description') || 'BIRIM - Modern tasarım ve mimari çözümler',
       image: content?.heroMedia?.[0]?.url || undefined,
       type: 'website' as const,
       siteName: 'BIRIM',
       locale: 'tr_TR',
     }),
-    [content?.heroMedia]
+    [content?.heroMedia, t]
   )
 
   useSEO(seoData)
