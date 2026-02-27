@@ -61,8 +61,10 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
   const exitTo = getExitTo(direction)
 
   useEffect(() => {
+    // slideOver geçişinde scroll pozisyonunu koru (eski sayfa yerinde kalmalı)
+    if (location.state?.slideOver) return
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
-  }, [location.pathname])
+  }, [location.pathname, location.state?.slideOver])
 
   const isCardEntry = isExpanding || location.state?.fromCard
   const isSlideOver = location.state?.slideOver === true
