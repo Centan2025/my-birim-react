@@ -1,31 +1,32 @@
-import {useState, useEffect} from 'react'
-import {useParams, useNavigate} from 'react-router-dom'
-import {useAuth} from '../App'
-import {PageLoading} from '../components/LoadingSpinner'
-import {useTranslation} from '../i18n'
-import {useSEO} from '../hooks/useSEO'
-import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
-import {addStructuredData, getProductSchema} from '../lib/seo'
-import {analytics} from '../lib/analytics'
-import {useProductDetail} from '../hooks/useProductDetail'
-import {useLightbox} from '../hooks/useLightbox'
-import {ProductDesignerSection} from '../components/ProductDesignerSection'
-import {ProductExclusiveContentSection} from '../components/ProductExclusiveContentSection'
-import {ProductMediaPanels} from '../components/ProductMediaPanels'
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { useAuth } from '../App'
+import { PageLoading } from '../components/LoadingSpinner'
+import { useTranslation } from '../i18n'
+import { useSEO } from '../hooks/useSEO'
+import { FullscreenMediaViewer } from '../components/FullscreenMediaViewer'
+import { addStructuredData, getProductSchema } from '../lib/seo'
+import { analytics } from '../lib/analytics'
+import { useProductDetail } from '../hooks/useProductDetail'
+import { useLightbox } from '../hooks/useLightbox'
+import { ProductDesignerSection } from '../components/ProductDesignerSection'
+import { ProductExclusiveContentSection } from '../components/ProductExclusiveContentSection'
+import { ProductMediaPanels } from '../components/ProductMediaPanels'
 
 // Modular components
-import {ProductHero} from '../components/product/ProductHero'
-import {ProductThumbnails} from '../components/product/ProductThumbnails'
-import {ProductInfo} from '../components/product/ProductInfo'
-import {ProductMaterials} from '../components/product/ProductMaterials'
-import {ProductDimensions} from '../components/product/ProductDimensions'
-import {ProductBottomNav} from '../components/product/ProductBottomNav'
-import {ProductRelated} from '../components/product/ProductRelated'
-import {ProductMediaLightbox} from '../components/product/ProductMediaLightbox'
-import {ProductAddToCart} from '../components/product/ProductAddToCart'
+import { ProductHero } from '../components/product/ProductHero'
+import { ProductThumbnails } from '../components/product/ProductThumbnails'
+import { ProductInfo } from '../components/product/ProductInfo'
+import { ProductMaterials } from '../components/product/ProductMaterials'
+import { ProductDimensions } from '../components/product/ProductDimensions'
+import { ProductBottomNav } from '../components/product/ProductBottomNav'
+import { ProductRelated } from '../components/product/ProductRelated'
+import { ProductMediaLightbox } from '../components/product/ProductMediaLightbox'
+import { ProductAddToCart } from '../components/product/ProductAddToCart'
+import { useCardTransition } from '../context/CardTransitionContext'
 
 export function ProductDetailPage() {
-  const {productId} = useParams<{productId: string}>()
+  const { productId } = useParams<{ productId: string }>()
   const navigate = useNavigate()
 
   // All data, derived state, and responsive detection
@@ -47,6 +48,8 @@ export function ProductDetailPage() {
     prevProduct,
     nextProduct,
   } = useProductDetail(productId)
+
+  const { phase } = useCardTransition()
 
   // Lightbox state (reusable hook for each lightbox)
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
@@ -74,9 +77,11 @@ export function ProductDetailPage() {
   const [isTitleVisible, setIsTitleVisible] = useState(false)
   const [isDesignerVisible, setIsDesignerVisible] = useState(false)
   const [areDotsVisible, setAreDotsVisible] = useState(false)
+  const [isThumbnailsVisible, setIsThumbnailsVisible] = useState(() => !((window.history.state?.usr as any)?.fromCard))
+  const [isMainContentVisible, setIsMainContentVisible] = useState(() => !((window.history.state?.usr as any)?.fromCard))
 
-  const {isLoggedIn, user} = useAuth()
-  const {t, locale} = useTranslation()
+  const { isLoggedIn, user } = useAuth()
+  const { t, locale } = useTranslation()
 
   // SEO & Analytics
   useSEO({
@@ -118,30 +123,54 @@ export function ProductDetailPage() {
     addStructuredData(productSchema, 'product-schema')
   }, [product, designer, category, t])
 
-  // Entrance animations
+  // Entrance animations - Synced with phase if coming from card
   useEffect(() => {
     if (!product) return
+
     const fromCard = (window.history.state?.usr as any)?.fromCard
 
-    setIsFullscreenButtonVisible(false)
-    setIsDesignerVisible(false)
-    setIsTitleVisible(false)
-    setAreDotsVisible(false)
+    if (!fromCard) {
+      // Standard page load animations
+      setIsFullscreenButtonVisible(false)
+      setIsDesignerVisible(false)
+      setIsTitleVisible(false)
+      setAreDotsVisible(false)
+      setIsThumbnailsVisible(true)
+      setIsMainContentVisible(true)
 
-    if (fromCard) {
-      // Fast track animations if coming from card
-      setTimeout(() => setIsFullscreenButtonVisible(true), 100)
-      setTimeout(() => setIsDesignerVisible(true), 50)
-      setTimeout(() => setIsTitleVisible(true), 200)
-      setTimeout(() => setAreDotsVisible(true), 100)
-    } else {
-      // Standard animations
       setTimeout(() => setIsFullscreenButtonVisible(true), 500)
       setTimeout(() => setIsDesignerVisible(true), 400)
-      setTimeout(() => setIsTitleVisible(true), 700)
+      setTimeout(() => setIsTitleVisible(true), 600)
       setTimeout(() => setAreDotsVisible(true), 500)
     }
   }, [product])
+
+  useEffect(() => {
+    const fromCard = (window.history.state?.usr as any)?.fromCard
+    if (fromCard && product) {
+      if (phase === 'animating') {
+        // Keep hidden initially to avoid them being overlapped by the transitioning image (z-index 9999)
+        setIsFullscreenButtonVisible(false)
+        setIsDesignerVisible(false)
+        setIsTitleVisible(false)
+        setAreDotsVisible(false)
+        setIsThumbnailsVisible(false)
+        setIsMainContentVisible(false)
+
+        // Make thumbnails start appearing much earlier in the animation
+        setTimeout(() => setIsThumbnailsVisible(true), 150)
+        setTimeout(() => setIsMainContentVisible(true), 350)
+      } else if (phase === 'holding' || phase === 'fading' || phase === null) {
+        // Arrived at destination! Fade elements in now.
+        setIsMainContentVisible(true)
+        setIsThumbnailsVisible(true) // Ensure thumbnails are visible if it arrived too early
+        setTimeout(() => setIsFullscreenButtonVisible(true), 0)
+        setTimeout(() => setIsDesignerVisible(true), 100)
+        setTimeout(() => setIsTitleVisible(true), 150)
+        setTimeout(() => setAreDotsVisible(true), 250)
+      }
+    }
+  }, [phase, product])
 
   // Loading / Not found
   if (productLoading)
@@ -196,23 +225,40 @@ export function ProductDetailPage() {
         onSetTransitionEnabled={heroHook.setHeroTransitionEnabled}
       />
 
-      <ProductThumbnails
-        productName={product.name}
-        bandMedia={bandMedia}
-        currentImageIndex={heroHook.currentImageIndex}
-        imageBorderClass={imageBorderClass}
-        onSelect={idx => {
-          heroHook.setHeroTransitionEnabled(true)
-          heroHook.setHeroSlideIndex(idx + 1)
-          heroHook.setCurrentImageIndex(idx)
-        }}
-      />
+      <div
+        className={`transition-all duration-700 ease-out ${!isThumbnailsVisible
+          ? 'opacity-0 translate-y-8'
+          : 'opacity-100 translate-y-0'
+          }`}
+      >
+        <ProductThumbnails
+          productName={product.name}
+          bandMedia={bandMedia}
+          currentImageIndex={heroHook.currentImageIndex}
+          imageBorderClass={imageBorderClass}
+          onSelect={idx => {
+            heroHook.setHeroTransitionEnabled(true)
+            heroHook.setHeroSlideIndex(idx + 1)
+            heroHook.setCurrentImageIndex(idx)
+          }}
+        />
+      </div>
 
-      <main className="bg-gray-100 pb-12">
+      <main
+        className={`bg-gray-100 pb-12 transition-all duration-700 ease-out ${!isMainContentVisible
+          ? 'opacity-0 translate-y-12'
+          : 'opacity-100 translate-y-0 delay-75'
+          }`}
+      >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 lg:pt-12">
           <ProductInfo product={product} category={category} locale={locale} />
 
-          <div className="mt-12 space-y-16">
+          <div
+            className={`mt-12 space-y-16 transition-all duration-700 ease-out ${!isMainContentVisible
+              ? 'opacity-0 translate-y-12'
+              : 'opacity-100 translate-y-0 delay-150'
+              }`}
+          >
             <ProductDimensions
               dimImages={product.dimensionImages?.filter((di: any) => di?.image) || []}
               imageBorderClass={imageBorderClass}
@@ -252,34 +298,48 @@ export function ProductDetailPage() {
             <ProductRelated products={relatedProducts} show={showRelatedProducts} />
           </div>
 
-          {Array.isArray(product?.media) &&
-            product.media.length > 0 &&
-            product.showMediaPanels !== false && (
-              <ProductMediaPanels
-                product={product}
-                imageBorderClass={imageBorderClass}
-                youTubeThumb={url => {
-                  let id = ''
-                  if (url.includes('v=')) id = url.split('v=')[1]?.split('&')[0] || ''
-                  else if (url.includes('youtu.be/'))
-                    id = url.split('youtu.be/')[1]?.split('?')[0] || ''
-                  return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : ''
-                }}
-                openPanelLightbox={idx => {
-                  setLightboxSource('panel')
-                  mediaLightbox.open(product.media || [], idx)
-                }}
-                t={t}
-              />
-            )}
+          <div
+            className={`transition-all duration-700 ease-out ${!isMainContentVisible
+              ? 'opacity-0 translate-y-12'
+              : 'opacity-100 translate-y-0 delay-200'
+              }`}
+          >
+            {Array.isArray(product?.media) &&
+              product.media.length > 0 &&
+              product.showMediaPanels !== false && (
+                <ProductMediaPanels
+                  product={product}
+                  imageBorderClass={imageBorderClass}
+                  youTubeThumb={url => {
+                    let id = ''
+                    if (url.includes('v=')) id = url.split('v=')[1]?.split('&')[0] || ''
+                    else if (url.includes('youtu.be/'))
+                      id = url.split('youtu.be/')[1]?.split('?')[0] || ''
+                    return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : ''
+                  }}
+                  openPanelLightbox={idx => {
+                    setLightboxSource('panel')
+                    mediaLightbox.open(product.media || [], idx)
+                  }}
+                  t={t}
+                />
+              )}
+          </div>
         </div>
       </main>
 
-      <ProductBottomNav
-        prevProduct={prevProduct}
-        nextProduct={nextProduct}
-        show={showProductPrevNext}
-      />
+      <div
+        className={`transition-all duration-700 ease-out ${!isMainContentVisible
+          ? 'opacity-0 translate-y-12'
+          : 'opacity-100 translate-y-0 delay-300'
+          }`}
+      >
+        <ProductBottomNav
+          prevProduct={prevProduct}
+          nextProduct={nextProduct}
+          show={showProductPrevNext}
+        />
+      </div>
 
       {/* Fullscreen viewer */}
       {isFullscreenOpen && bandMedia.length > 0 && (

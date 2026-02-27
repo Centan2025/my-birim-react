@@ -1,20 +1,20 @@
-import {Link} from 'react-router-dom'
-import {useQuery} from '@tanstack/react-query'
-import {getFooterContent} from '../services/cms'
-import {useSiteSettings} from '../context/SiteSettingsContext'
-import {SiteLogo} from './SiteLogo'
-import {useTranslation} from '../i18n'
-import {analytics} from '../lib/analytics'
+import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { getFooterContent } from '../services/cms'
+import { useSiteSettings } from '../context/SiteSettingsContext'
+import { SiteLogo } from './SiteLogo'
+import { useTranslation } from '../i18n'
+import { analytics } from '../lib/analytics'
 import ScrollReveal from './ScrollReveal'
-import {resolveLegalLinkText} from '../lib/legalLinks'
-import {NewsletterForm} from './NewsletterForm'
-import {SocialIcon} from './SocialIcon'
+import { resolveLegalLinkText } from '../lib/legalLinks'
+import { NewsletterForm } from './NewsletterForm'
+import { SocialIcon } from './SocialIcon'
 
 export const Footer = () => {
-  const {settings, isLoading: isSettingsLoading} = useSiteSettings()
-  const {t, setLocale, locale, supportedLocales} = useTranslation()
+  const { settings, isLoading: isSettingsLoading } = useSiteSettings()
+  const { t, setLocale, locale, supportedLocales } = useTranslation()
 
-  const {data: content, isLoading: isFooterLoading} = useQuery({
+  const { data: content, isLoading: isFooterLoading } = useQuery({
     queryKey: ['footerContent', locale],
     queryFn: getFooterContent,
     staleTime: 1000 * 60 * 30, // 30 dakika cache
@@ -26,72 +26,107 @@ export const Footer = () => {
 
   return (
     <>
-      <footer
-        className="bg-gray-800 text-gray-400 py-12 lg:py-16"
-        style={{position: 'relative', zIndex: 5}}
-      >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Top Row: Logo and navigation */}
-          <div className="flex flex-col lg:flex-row lg:justify-between items-center lg:items-start gap-10 lg:gap-16 mb-12">
-            {/* Logo Column */}
-            <ScrollReveal delay={0} threshold={0.1}>
-              <div className="flex flex-col items-center lg:items-start">
-                <Link to="/" className="text-white mb-4">
-                  <SiteLogo logoUrl={settings.logoUrl} className="h-6 lg:h-5 w-auto" />
-                </Link>
-                {/* Language Selector (Desktop remains here, Mobile moves below for better flow) */}
-                <div className="hidden lg:flex items-center gap-3 mt-4">
-                  {supportedLocales.map(langCode => {
-                    const isActive = locale === langCode
-                    return (
-                      <button
-                        key={langCode}
-                        onClick={() => setLocale(langCode)}
-                        className={`text-[10px] uppercase tracking-[0.2em] transition-all duration-300 ${
-                          isActive
-                            ? 'text-white font-medium border-b border-white'
-                            : 'text-gray-500 hover:text-white font-light'
-                        }`}
-                      >
-                        {langCode.toUpperCase()}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
+      <footer className="bg-gray-800 text-gray-400" style={{ position: 'relative', zIndex: 5 }}>
+        <div
+          className="container mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6 lg:py-12"
+          style={{ overflow: 'visible' }}
+        >
+          {/* Mobil düzen */}
+          <div
+            className="lg:hidden flex flex-col items-center justify-center space-y-6 w-full"
+            style={{ maxWidth: '100%', marginLeft: 'auto', marginRight: 'auto' }}
+          >
+            {/* Logo - ortada üstte */}
+            <ScrollReveal delay={0} threshold={0.1} width="w-full" className="h-auto">
+              <Link to="/" className="text-white flex justify-center w-full">
+                <SiteLogo logoUrl={settings.logoUrl} className="h-6 w-auto mx-auto" />
+              </Link>
             </ScrollReveal>
 
-            {/* Navigation Links */}
-            <nav className="flex flex-col lg:flex-row flex-wrap items-center lg:justify-end gap-x-8 gap-y-4 lg:gap-y-0 text-sm font-semibold uppercase tracking-wider text-gray-300 text-center lg:text-right">
+            {/* Menü düğmeleri - alt alta ortada */}
+            <nav className="flex flex-col items-center space-y-3 w-full">
               {[
-                {to: '/products', label: t('view_all')},
-                {to: '/designers', label: t('designers')},
-                {to: '/projects', label: t('projects') || 'Projeler'},
-                {to: '/news', label: t('news')},
-                {to: '/about', label: t('about')},
-                {to: '/contact', label: t('contact')},
+                { to: '/products', label: t('view_all') },
+                { to: '/designers', label: t('designers') },
+                { to: '/projects', label: t('projects') || 'Projeler' },
+                { to: '/news', label: t('news') },
+                { to: '/about', label: t('about') },
+                { to: '/contact', label: t('contact') },
               ].map((link, idx) => (
-                <ScrollReveal key={link.to} delay={15 + idx * 15} threshold={0.1}>
+                <ScrollReveal
+                  key={link.to}
+                  delay={15 + idx * 15}
+                  threshold={0.1}
+                  width="w-full"
+                  className="h-auto"
+                >
                   <Link
                     to={link.to}
-                    className="group relative hover:text-white transition-colors duration-300"
+                    className="flex justify-center items-center text-lg font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
                   >
-                    <span className="relative inline-block py-1">
-                      {link.label}
-                      <span className="absolute bottom-0 left-0 w-full h-[1px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-left"></span>
-                    </span>
+                    {link.label}
                   </Link>
                 </ScrollReveal>
               ))}
             </nav>
+
+            {/* İnce çizgi */}
+            <ScrollReveal delay={105} threshold={0.1} width="w-full" className="h-auto">
+              <div className="w-full border-t border-gray-700"></div>
+            </ScrollReveal>
+
+            {/* Dil seçenekleri */}
+            <ScrollReveal delay={120} threshold={0.1} width="w-full" className="h-auto">
+              <div className="flex items-center justify-center gap-3 w-full">
+                {supportedLocales.map(langCode => {
+                  const isActive = locale === langCode
+                  return (
+                    <button
+                      key={langCode}
+                      onClick={() => setLocale(langCode)}
+                      className={`text-xs uppercase tracking-wider transition-colors duration-200 ${isActive
+                          ? 'text-white font-bold'
+                          : 'text-gray-400 hover:text-white font-thin'
+                        }`}
+                    >
+                      {langCode.toUpperCase()}
+                    </button>
+                  )
+                })}
+              </div>
+            </ScrollReveal>
+
+            {/* İnce çizgi */}
+            <ScrollReveal delay={135} threshold={0.1} width="w-full" className="h-auto">
+              <div className="w-full border-t border-gray-700"></div>
+            </ScrollReveal>
+
+            {/* Email abonelik formu - mobilde en altta ortalanmış */}
+            <ScrollReveal delay={150} threshold={0.1} width="w-full" className="h-auto">
+              <div className="w-full flex justify-center !mt-8 lg:!mt-6">
+                <ScrollReveal
+                  delay={165}
+                  threshold={0.1}
+                  width="w-full"
+                  className="h-auto w-full flex flex-col items-center justify-center"
+                >
+                  <NewsletterForm variant="mobile" className="flex flex-col items-center w-full" />
+                </ScrollReveal>
+              </div>
+            </ScrollReveal>
           </div>
 
-          {/* Middle Row: Partners, Socials and Newsletter */}
-          <div className="flex flex-col lg:flex-row items-center lg:items-center justify-between gap-12 lg:gap-16 border-t border-gray-700/50 pt-12 pb-8">
-            {/* Partners - Left on Desktop, Centered on Mobile */}
-            <ScrollReveal delay={120} threshold={0.1} className="w-full lg:w-auto">
-              <div className="flex flex-col items-center lg:items-start gap-4">
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-8 lg:gap-10">
+          {/* Desktop düzen */}
+          <div className="hidden lg:flex flex-wrap items-start gap-8 lg:gap-16">
+            {/* Sol taraf: Logo ve partner yazıları (sola hizalı) */}
+            <div className="w-full lg:w-auto">
+              <ScrollReveal delay={0} threshold={0.1} width="w-auto" className="h-auto">
+                <div className="text-white mb-4">
+                  <SiteLogo logoUrl={settings.logoUrl} className="h-4 w-auto" />
+                </div>
+              </ScrollReveal>
+              <ScrollReveal delay={15} threshold={0.1} width="w-full" className="h-auto">
+                <div className="flex items-center flex-wrap gap-6 mb-4">
                   {(content.partners || []).map((partner, index) => {
                     const partnerName = typeof partner === 'string' ? partner : t(partner.name)
                     const partnerLogo = typeof partner === 'object' ? partner.logo : undefined
@@ -101,10 +136,10 @@ export const Footer = () => {
                       <img
                         src={partnerLogo}
                         alt={partnerName}
-                        className="h-7 lg:h-6 w-auto object-contain opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500"
+                        className="h-8 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
                       />
                     ) : (
-                      <span className="font-light text-xs tracking-widest text-gray-400 uppercase opacity-70 hover:opacity-100 transition-opacity duration-300">
+                      <span className="font-semibold text-gray-300 opacity-70 hover:opacity-100 transition-opacity duration-200">
                         {partnerName}
                       </span>
                     )
@@ -124,118 +159,239 @@ export const Footer = () => {
                     )
                   })}
                 </div>
-              </div>
-            </ScrollReveal>
+              </ScrollReveal>
+            </div>
 
-            {/* Social Icons & Newsletter */}
-            <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16 w-full lg:w-auto">
-              {/* Social Icons */}
-              <div className="flex justify-center space-x-1">
+            {/* Orta: Menü düğmeleri (sağa hizalı üstte) */}
+            <div className="flex-1 flex justify-end">
+              <nav className="flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold uppercase tracking-wider text-gray-300 items-center justify-end">
+                {[
+                  { to: '/products', label: t('view_all') },
+                  { to: '/designers', label: t('designers') },
+                  { to: '/projects', label: t('projects') || 'Projeler' },
+                  { to: '/news', label: t('news') },
+                  { to: '/about', label: t('about') },
+                  { to: '/contact', label: t('contact') },
+                ].map((link, idx) => (
+                  <ScrollReveal
+                    key={link.to}
+                    delay={30 + idx * 15}
+                    threshold={0.1}
+                    width="w-auto"
+                    className="h-auto"
+                  >
+                    <Link to={link.to} className="group relative hover:text-white">
+                      <span className="relative inline-block">
+                        {link.label}
+                        <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-200 ease-out origin-center"></span>
+                      </span>
+                    </Link>
+                  </ScrollReveal>
+                ))}
+              </nav>
+            </div>
+          </div>
+
+          {/* Sosyal medya linkleri ve email formu - Desktop'ta justify-between ile ayrılır */}
+          <div className="mt-8 lg:mt-8 flex flex-col lg:flex-row flex-wrap items-center lg:items-start justify-center lg:justify-between gap-6 lg:gap-0">
+            {/* Sosyal medya linkleri */}
+            <ScrollReveal delay={120} threshold={0.1} width="w-auto" className="h-auto">
+              <div className="w-full lg:w-auto flex justify-center lg:justify-start space-x-1">
                 {(content.socialLinks || [])
                   .filter(link => link.isEnabled)
                   .map((link, index) => (
-                    <ScrollReveal key={link.name} delay={135 + index * 15} threshold={0.1}>
+                    <ScrollReveal
+                      key={link.name}
+                      delay={135 + index * 15}
+                      threshold={0.1}
+                      width="w-auto"
+                      className="h-auto"
+                    >
                       <a
                         href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group text-gray-400 hover:text-white transition-all duration-300"
-                        onClick={() =>
+                        className="group text-gray-300/80 hover:text-white transition-colors duration-300 ease-out"
+                        onClick={() => {
                           analytics.event({
                             action: 'outbound_click',
                             category: 'Social',
                             label: link.name,
                           })
-                        }
+                        }}
                       >
-                        <div className="w-10 h-10 flex items-center justify-center transition-transform duration-500 ease-out group-hover:scale-110">
+                        <div className="w-10 h-10 flex items-center justify-center transition-transform duration-300 ease-out group-hover:scale-110">
                           <SocialIcon
                             name={link.name}
                             svgString={link.svgIcon}
-                            className="w-5 h-5"
+                            className="w-6 h-6"
                           />
                         </div>
                       </a>
                     </ScrollReveal>
                   ))}
               </div>
+            </ScrollReveal>
 
-              {/* Newsletter Form */}
-              <ScrollReveal delay={180} threshold={0.1} className="w-full lg:w-auto">
-                <NewsletterForm
-                  variant={window.innerWidth < 1024 ? 'mobile' : 'desktop'}
-                  className="flex w-full lg:w-auto justify-center lg:justify-end"
-                />
-              </ScrollReveal>
-            </div>
-          </div>
+            {/* Mobil: Sosyal medya ikonlarının altındaki çizgi ile partner logoları */}
+            <div className="w-full lg:hidden">
+              <ScrollReveal delay={210} threshold={0.1} width="w-full" className="h-auto">
+                <div className="mt-2 flex flex-col items-center justify-center space-y-6 w-full">
+                  {/* Üst çizgi (sosyal medya altı) */}
+                  <div className="w-full border-t border-gray-700" />
 
-          {/* Bottom Row: Language Selector (Mobile), Copyright and Legal */}
-          <div className="mt-8 pt-8 border-t border-gray-700/30">
-            {/* Mobile Language Selector */}
-            <div className="lg:hidden flex items-center justify-center gap-4 mb-8">
-              {supportedLocales.map(langCode => {
-                const isActive = locale === langCode
-                return (
-                  <button
-                    key={langCode}
-                    onClick={() => setLocale(langCode)}
-                    className={`text-[10px] uppercase tracking-[0.2em] transition-all duration-300 ${
-                      isActive
-                        ? 'text-white font-medium border-b border-white'
-                        : 'text-gray-500 hover:text-white font-light'
-                    }`}
-                  >
-                    {langCode.toUpperCase()}
-                  </button>
-                )
-              })}
-            </div>
+                  {/* Partnerler - çizgiler arasında, butonlar/logolar */}
+                  <div className="flex items-center justify-center flex-wrap gap-6">
+                    {(content.partners || []).map((partner, index) => {
+                      const partnerName =
+                        typeof partner === 'string' ? partner : t(partner.name)
+                      const partnerLogo =
+                        typeof partner === 'object' ? partner.logo : undefined
+                      const partnerUrl =
+                        typeof partner === 'object' ? partner.url : undefined
 
-            <div className="flex flex-col lg:flex-row items-center lg:justify-between gap-6 text-[10px] uppercase tracking-[0.1em] text-gray-500">
-              {/* Copyright */}
-              <ScrollReveal delay={200} threshold={0} className="order-2 lg:order-1">
-                <div className="text-center lg:text-left font-light">
-                  <p>{t(content.copyrightText)}</p>
-                </div>
-              </ScrollReveal>
+                      const partnerContent = partnerLogo ? (
+                        <img
+                          src={partnerLogo}
+                          alt={partnerName}
+                          className="h-8 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-200"
+                        />
+                      ) : (
+                        <span className="font-semibold text-gray-300 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                          {partnerName}
+                        </span>
+                      )
 
-              {/* Legal Links */}
-              {content.legalLinks && content.legalLinks.length > 0 && (
-                <div className="flex flex-wrap justify-center lg:justify-end gap-x-6 gap-y-3 order-1 lg:order-2">
-                  {content.legalLinks
-                    .filter(link => link?.isVisible)
-                    .map((link, index) => {
-                      const url = typeof link?.url === 'string' ? link.url : ''
-                      const linkText = resolveLegalLinkText(link, locale, t)
-                      const isHttp = /^https?:\/\//.test(url)
-                      const isInternalLink = url.startsWith('/') && !url.startsWith('//') && !isHttp
-                      const commonClasses =
-                        'hover:text-white transition-colors duration-300 font-light'
-
-                      return (
-                        <ScrollReveal key={`legal-${index}`} delay={215 + index * 15} threshold={0}>
-                          {isInternalLink ? (
-                            <Link to={url} className={commonClasses}>
-                              {linkText}
-                            </Link>
-                          ) : (
-                            <a
-                              href={url}
-                              className={commonClasses}
-                              target={isHttp ? '_blank' : undefined}
-                              rel={isHttp ? 'noopener noreferrer' : undefined}
-                            >
-                              {linkText}
-                            </a>
-                          )}
-                        </ScrollReveal>
+                      return partnerUrl ? (
+                        <a
+                          key={`partner-mobile-${index}`}
+                          href={partnerUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group"
+                        >
+                          {partnerContent}
+                        </a>
+                      ) : (
+                        <span key={`partner-mobile-${index}`}>{partnerContent}</span>
                       )
                     })}
+                  </div>
+
+                  {/* Alt çizgi (partnerler altı) */}
+                  <div className="w-full border-t border-gray-700" />
                 </div>
-              )}
+              </ScrollReveal>
             </div>
+
+            {/* Email abonelik formu - sadece desktop'ta */}
+            <ScrollReveal
+              delay={150}
+              threshold={0.1}
+              width="w-full lg:w-auto"
+              className="h-auto"
+            >
+              <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+                <NewsletterForm
+                  variant="desktop"
+                  className="flex w-full lg:w-auto lg:justify-end"
+                />
+              </div>
+            </ScrollReveal>
           </div>
+
+          {/* Yasal linkler ve telif metni - mobilde alt alta, desktop'ta aynı satırda
+              sol: telif, sağ: yasal düğmeler */}
+          <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
+            <div
+              className="lg:mt-10 pt-2 lg:pt-8 w-full lg:border-t lg:border-t-2 lg:border-gray-600"
+              style={{ overflow: 'visible', width: '100%' }}
+            >
+              <div className="flex flex-col items-center justify-center gap-4 text-xs w-full lg:flex-row lg:items-start lg:justify-between">
+                {/* Sol: Telif metni */}
+                <div className="text-center lg:text-left">
+                  <p>{t(content.copyrightText)}</p>
+                </div>
+
+                {/* Sağ: Yasal linkler */}
+                {content.legalLinks && content.legalLinks.length > 0 && (
+                  <div
+                    id="mobile-legal-links-stack"
+                    className="legal-links-inner flex flex-col w-full md:w-auto md:flex-row md:flex-wrap md:items-center items-center justify-center md:justify-center lg:justify-end lg:self-end lg:items-end gap-y-2 md:gap-x-4 md:gap-y-0"
+                    style={{
+                      overflow: 'visible',
+                      maxWidth: '100%',
+                      minWidth: 0,
+                      flexShrink: 0,
+                      flexGrow: 0,
+                      marginLeft: 'auto',
+                      marginRight: 0,
+                      textAlign: 'center',
+                    }}
+                  >
+                    {content.legalLinks
+                      .filter(link => link?.isVisible)
+                      .map((link, index) => {
+                        const url = typeof link?.url === 'string' ? link.url : ''
+                        const linkText = resolveLegalLinkText(link, locale, t)
+
+                        // Diğer footer öğeleri gibi her yasal linke de ScrollReveal animasyonu ekle
+                        return (
+                          <ScrollReveal
+                            key={`legal-${index}`}
+                            delay={195 + index * 15}
+                            threshold={0}
+                            width="w-auto"
+                            className="h-auto"
+                          >
+                            {!url ? (
+                              <span
+                                className="opacity-80 select-none text-gray-400"
+                                style={{
+                                  whiteSpace: 'nowrap',
+                                  overflow: 'visible',
+                                  textOverflow: 'clip',
+                                  maxWidth: 'none',
+                                }}
+                              >
+                                {linkText}
+                              </span>
+                            ) : (
+                              (() => {
+                                const isHttp = /^https?:\/\//.test(url)
+                                const isInternalLink =
+                                  url.startsWith('/') && !url.startsWith('//') && !isHttp
+                                const commonClasses =
+                                  'text-gray-300 hover:text-gray-100 transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:rounded-sm'
+
+                                return (
+                                  <span className="legal-link-wrapper">
+                                    {isInternalLink ? (
+                                      <Link to={url} className={commonClasses}>
+                                        {linkText}
+                                      </Link>
+                                    ) : (
+                                      <a
+                                        href={url}
+                                        className={commonClasses}
+                                        target={isHttp ? '_blank' : undefined}
+                                        rel={isHttp ? 'noopener noreferrer' : undefined}
+                                      >
+                                        {linkText}
+                                      </a>
+                                    )}
+                                  </span>
+                                )
+                              })()
+                            )}
+                          </ScrollReveal>
+                        )
+                      })}
+                  </div>
+                )}
+              </div>
+            </div>
+          </ScrollReveal>
         </div>
       </footer>
       {/* Mobilde footer'dan sonra ekstra padding - scroll bounce beyaz alanını önler */}
