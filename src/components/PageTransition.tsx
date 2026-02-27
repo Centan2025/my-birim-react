@@ -175,10 +175,15 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
     exit: (custom: any) => {
       // ─── slideOver geçişi: arka plan sayfası TAMAMEN STATİK kalacak ───
       if (custom.nextIsSlideOver) {
-        // Hiçbir transform, opacity veya position değişikliği yok.
         // Sayfa olduğu yerde, olduğu scroll'da donmuş kalır.
-        // Tasarımcı sayfası fixed olarak üzerine biner.
-        return {}
+        // Tasarımcı sayfası wrapper düzeyinde fixed olarak üzerine biner.
+        // Duration; slideOver animasyonundan uzun olmalı ki sayfa unmount olmasın.
+        return {
+          opacity: 1,
+          x: 0,
+          y: 0,
+          transition: { duration: 1.5 }
+        }
       }
 
       // Eğer genel geçişler kapalıysa hemen kaldır

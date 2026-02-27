@@ -79,9 +79,15 @@ const PageTransitionWrapper = React.forwardRef<HTMLDivElement, { location: any }
   ({ location: liveLocation }, ref) => {
     // Lokasyonu ilk mount anındaki haliyle donduruyoruz.
     const [frozenLocation] = useState(liveLocation)
+    const isSlideOver = (frozenLocation.state as any)?.slideOver === true
+
+    // slideOver olan sayfa fixed olarak render edilmeli ki arka planı etkilemesin
+    const wrapperStyle: React.CSSProperties = isSlideOver
+      ? { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 20 }
+      : {}
 
     return (
-      <div ref={ref} className="flex-grow flex flex-col">
+      <div ref={ref} className={isSlideOver ? '' : 'flex-grow flex flex-col'} style={wrapperStyle}>
         <PageTransition>
           <Suspense fallback={<PageLoading />}>
             <Routes location={frozenLocation}>
