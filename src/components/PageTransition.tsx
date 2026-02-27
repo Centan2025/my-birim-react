@@ -66,9 +66,6 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
   const nextIsSlideOver = (currentLocation.state as any)?.slideOver === true
     && currentLocation.pathname !== mountStateRef.current.pathname
 
-  // Eğer ayarlar yüklenmemişse (refresh anı), animasyon yapma. 
-  // Aksi takdirde ayar neyse ona bak.
-  // Çıkan sayfanın da animasyon yapması gerekir eğer sonraki sayfa bir slideOver ise.
   const shouldAnimate = !settingsLoading && (enablePageTransitions || isSpecialEntry || nextIsSlideOver)
 
   const direction = getDirection(mountStateRef.current.pathname)
@@ -121,7 +118,7 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
   }, [currentLocation.pathname, currentLocation.state, isPresent])
 
-  // ── slideOver giriş: sağdan kayarak gelir ──
+  // ── slideOver giriş: sağdan kayarak gelir (TAMAMEN FIXED) ──
   if (mySlideOver) {
     return (
       <motion.div
@@ -155,10 +152,9 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
 
 
   // ── Variantlar ──
-  // Variant fonksiyonları exit başladığı andaki window.scrollY değerini yakalar
   const pageVariants: Variants = {
     initial: (custom: any) => {
-      if (!custom.shouldAnimate) return { opacity: 1, x: 0, y: 0, position: 'relative' }
+      if (!custom.shouldAnimate) return { opacity: 1, x: 0, y: 0 }
       if (custom.isCardEntry) {
         return { opacity: 0, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10 }
       }
@@ -177,25 +173,21 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
           : { duration: 1.6, ease: [0.12, 0.8, 0.2, 1] },
     }),
     exit: (custom: any) => {
-      // Eğer özel bir geçiş değilse ve ayarlar kapalıysa hemen yok et.
-      // Ancak bir sonraki sayfa 'slideOver' ise bu sayfa arka planda görünür kalmalı.
-      if (!custom.shouldAnimate && !custom.nextIsSlideOver) {
+      // ─── slideOver geçişi: arka plan sayfası TAMAMEN STATİK kalacak ───
+      if (custom.nextIsSlideOver) {
+        // Hiçbir transform, opacity veya position değişikliği yok.
+        // Sayfa olduğu yerde, olduğu scroll'da donmuş kalır.
+        // Tasarımcı sayfası fixed olarak üzerine biner.
+        return {}
+      }
+
+      // Eğer genel geçişler kapalıysa hemen kaldır
+      if (!custom.shouldAnimate) {
         return { opacity: 0, transition: { duration: 0 } }
       }
 
       // Çıkış anındaki scroll pozisyonu
       const sY = scrollPositionRef.current
-
-      if (custom.nextIsSlideOver) {
-        // Alttaki sayfa (Ürün Detay) olduğu gibi yerinde kalsın, hiçbir hareket yapmasın.
-        return {
-          opacity: 1,
-          x: 0,
-          y: 0,
-          scale: 1,
-          transition: { duration: 0.1 }
-        }
-      }
 
       const exitBase: any = {
         position: 'fixed' as const,
@@ -237,11 +229,9 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
       animate="animate"
       exit="exit"
       layout={false}
-      className="w-full h-full min-h-screen flex-grow flex flex-col bg-white"
+      className="w-full flex-grow flex flex-col bg-white"
       style={{
         overflowX: 'hidden',
-        transformOrigin: 'top left',
-        backfaceVisibility: 'hidden',
       }}
     >
       <div className="flex-grow flex flex-col w-full relative">
@@ -250,4 +240,3 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
     </motion.div>
   )
 }
-
