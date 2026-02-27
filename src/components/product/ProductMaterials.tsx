@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { motion } from 'framer-motion'
 import { OptimizedImage } from '../OptimizedImage'
 import { useTranslation } from '../../i18n'
 import ScrollReveal from '../ScrollReveal'
@@ -22,54 +22,25 @@ const AnimatedContent: React.FC<{ animKey: string; children: React.ReactNode }> 
   animKey,
   children,
 }) => {
-  const [displayKey, setDisplayKey] = useState(animKey)
-  const [isAnimating, setIsAnimating] = useState(false)
-  const [currentChildren, setCurrentChildren] = useState(children)
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    if (animKey !== displayKey) {
-      // Fade out
-      setIsAnimating(true)
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
-      timeoutRef.current = setTimeout(() => {
-        // Swap content and fade in
-        setCurrentChildren(children)
-        setDisplayKey(animKey)
-        // Trigger reflow then fade in
-        requestAnimationFrame(() => {
-          setIsAnimating(false)
-        })
-      }, 200) // fade-out süresi
-    } else {
-      setCurrentChildren(children)
-    }
-
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    }
-  }, [animKey, displayKey, children])
-
   return (
-    <div
-      className={`transition-all duration-300 ease-out ${isAnimating ? 'opacity-0 translate-y-3' : 'opacity-100 translate-y-0'
-        }`}
+    <motion.div
+      key={animKey}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
     >
-      {currentChildren}
-    </div>
+      {children}
+    </motion.div>
   )
 }
 
 const MaterialCard: React.FC<{
   material: any
-  index: number
   imageBorderClass: string
   t: (v: any) => string
   onClick: () => void
-  animDelay: number
-}> = ({ material, index, imageBorderClass, t, onClick, animDelay }) => (
+}> = ({ material, imageBorderClass, t, onClick }) => (
   <div
-    key={index}
     className="text-center group cursor-pointer"
     title={t(material.name)}
     onClick={onClick}
@@ -78,10 +49,6 @@ const MaterialCard: React.FC<{
     }}
     role="button"
     tabIndex={0}
-    style={{
-      animationDelay: `${animDelay}ms`,
-      animation: 'materialFadeIn 0.4s ease-out both',
-    }}
   >
     <OptimizedImage
       src={material.image}
@@ -148,8 +115,8 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                   key={`group-${idx}`}
                   onClick={() => onSetActiveMaterialGroup(idx)}
                   className={`px-5 py-3 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeMaterialGroup === idx
-                      ? 'bg-white text-gray-800 border-gray-500'
-                      : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
+                    ? 'bg-white text-gray-800 border-gray-500'
+                    : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
                     }`}
                 >
                   {t(g.groupTitle)}
@@ -169,8 +136,8 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                           key={`book-${idx}`}
                           onClick={() => onSetActiveBookIndex(idx)}
                           className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeBookIndex === idx
-                              ? 'bg-white text-gray-800 border-gray-500'
-                              : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
+                            ? 'bg-white text-gray-800 border-gray-500'
+                            : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
                             }`}
                         >
                           {t(book.bookTitle)}
@@ -188,10 +155,8 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                           <MaterialCard
                             key={`mat-${index}-${material.image || index}`}
                             material={material}
-                            index={index}
                             imageBorderClass={imageBorderClass}
                             t={t}
-                            animDelay={index * 30}
                             onClick={() => {
                               const allMaterials = Array.isArray(books[activeBookIndex]?.materials)
                                 ? books[activeBookIndex].materials
@@ -213,10 +178,8 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                       <MaterialCard
                         key={`mat-${index}-${material.image || index}`}
                         material={material}
-                        index={index}
                         imageBorderClass={imageBorderClass}
                         t={t}
-                        animDelay={index * 30}
                         onClick={() => {
                           const allMaterials = Array.isArray(grouped[safeActiveIndex]?.materials)
                             ? grouped[safeActiveIndex].materials
@@ -242,10 +205,8 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
               <MaterialCard
                 key={`matflat-${index}-${material.image || index}`}
                 material={material}
-                index={index}
                 imageBorderClass={imageBorderClass}
                 t={t}
-                animDelay={index * 30}
                 onClick={() =>
                   onOpenMaterialLightbox(getMaterialsForLightbox(flatMaterials), index)
                 }

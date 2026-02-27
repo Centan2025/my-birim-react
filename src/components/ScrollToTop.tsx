@@ -20,14 +20,11 @@ export const ScrollToTop = () => {
         if (pathname === prevPathname) return
 
         // slideOver geçişinde scroll pozisyonunu kesinlikle koru
-        if (state?.slideOver) return
+        const historyState = window.history.state?.usr as any
+        if (state?.slideOver || historyState?.slideOver) return
 
-        // Route değişiminde yukarıya yumuşak kaydır
-        if (typeof window !== 'undefined' && 'scrollBehavior' in document.documentElement.style) {
-            window.scrollTo({ top: 0, behavior: 'smooth' })
-        } else {
-            window.scrollTo(0, 0)
-        }
+        // Route değişiminde yukarıya ANINDA aktar (smooth animasyonlar çakışabiliyor)
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
 
         // Dinamik detay sayfaları için
         // başlık ve pageview takibini ilgili sayfa bileşenleri yapıyor.

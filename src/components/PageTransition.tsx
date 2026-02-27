@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, useIsPresent, Variants } from 'framer-motion'
 import { useCardTransition } from '../context/CardTransitionContext'
+import { useSiteSettings } from '../context/SiteSettingsContext'
 
 interface PageTransitionProps {
   children: React.ReactNode
@@ -46,8 +47,7 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
   const currentLocation = useLocation()
   const { isExpanding } = useCardTransition()
 
-  // Mount-time state sabitlenir — useLocation() güncel döndürür ama
-  // bu component'in kendi animasyonu mount anındaki state'e göre belirlenir
+  // Mount-time state sabitlenir
   const mountStateRef = useRef({
     slideOver: (currentLocation.state as any)?.slideOver === true,
     fromCard: (currentLocation.state as any)?.fromCard === true,
@@ -58,22 +58,68 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
   const myFromCard = mountStateRef.current.fromCard
   const myIsCardEntry = isExpanding || myFromCard
 
+  const { settings, isLoading: settingsLoading } = useSiteSettings()
+  const enablePageTransitions = settings?.enablePageTransitions ?? true
+
+  const isSpecialEntry = myIsCardEntry || mySlideOver
+  const isPresent = useIsPresent()
+  const nextIsSlideOver = (currentLocation.state as any)?.slideOver === true
+    && currentLocation.pathname !== mountStateRef.current.pathname
+
+  // Eğer ayarlar yüklenmemişse (refresh anı), animasyon yapma. 
+  // Aksi takdirde ayar neyse ona bak.
+  // Çıkan sayfanın da animasyon yapması gerekir eğer sonraki sayfa bir slideOver ise.
+  const shouldAnimate = !settingsLoading && (enablePageTransitions || isSpecialEntry || nextIsSlideOver)
+
   const direction = getDirection(mountStateRef.current.pathname)
   const enterFrom = getEnterFrom(direction)
-  const exitTo = getExitTo(direction)
 
-  // slideOver giriş animasyonu tamamlandığında fixed→relative geçişi
+  const scrollPositionRef = useRef(0)
+  useEffect(() => {
+    if (!isPresent) return
+    const handleScroll = () => {
+      scrollPositionRef.current = window.scrollY
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    scrollPositionRef.current = window.scrollY
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [isPresent])
+
+  // ── Sıçramayı Önleyici Body Kilitleme ──
+  useEffect(() => {
+    if (!isPresent) {
+      const scrollHeight = document.documentElement.scrollHeight
+      const scrollY = scrollPositionRef.current
+      const body = document.body
+
+      const originalHeight = body.style.height
+      const originalOverflow = body.style.overflow
+
+      // Body yüksekliğini koru ki scroll sıfırlanmasın
+      body.style.height = `${scrollHeight}px`
+
+      return () => {
+        body.style.height = originalHeight
+        body.style.overflow = originalOverflow
+
+        if (nextIsSlideOver) {
+          window.scrollTo({ top: scrollY, behavior: 'instant' })
+        }
+      }
+    }
+    return undefined
+  }, [isPresent, nextIsSlideOver])
+
+  // slideOver animasyon durumu
   const [slideAnimDone, setSlideAnimDone] = useState(false)
 
-  // Scroll-to-top
+  // Scroll-to-top: slideOver durumunda atla
   useEffect(() => {
+    if (!isPresent) return // Çıkan sayfa scrollu etkilememeli
     const state = currentLocation.state as any
-    // Üstümüze slideOver geliyorsa scroll'u KORU
-    if (state?.slideOver && currentLocation.pathname !== mountStateRef.current.pathname) {
-      return
-    }
+    if (state?.slideOver) return
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
-  }, [currentLocation.pathname, currentLocation.state])
+  }, [currentLocation.pathname, currentLocation.state, isPresent])
 
   // ── slideOver giriş: sağdan kayarak gelir ──
   if (mySlideOver) {
@@ -107,55 +153,101 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
     )
   }
 
-  // ── Normal exit animasyonları ──
-  // Üstümüze slideOver geliyorsa → sayfada HİÇBİR ŞEY değişmez, sadece bekle
-  const nextIsSlideOver = (currentLocation.state as any)?.slideOver === true
-    && currentLocation.pathname !== mountStateRef.current.pathname
 
-  // slideOver exit: SIFIR görsel değişiklik, sadece bekleme süresi
-  const slideOverExit = {
-    opacity: 1, // Değişmez! Sayfa olduğu gibi kalır
-    transition: { duration: 0.7 },
+  // ── Variantlar ──
+  // Variant fonksiyonları exit başladığı andaki window.scrollY değerini yakalar
+  const pageVariants: Variants = {
+    initial: (custom: any) => {
+      if (!custom.shouldAnimate) return { opacity: 1, x: 0, y: 0, position: 'relative' }
+      if (custom.isCardEntry) {
+        return { opacity: 0, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10 }
+      }
+      return { ...custom.enterFrom, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10 }
+    },
+    animate: (custom: any) => ({
+      x: 0,
+      y: 0,
+      opacity: 1,
+      position: 'relative',
+      zIndex: 1,
+      transition: !custom.shouldAnimate
+        ? { duration: 0 }
+        : custom.isCardEntry
+          ? { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
+          : { duration: 1.6, ease: [0.12, 0.8, 0.2, 1] },
+    }),
+    exit: (custom: any) => {
+      // Eğer özel bir geçiş değilse ve ayarlar kapalıysa hemen yok et.
+      // Ancak bir sonraki sayfa 'slideOver' ise bu sayfa arka planda görünür kalmalı.
+      if (!custom.shouldAnimate && !custom.nextIsSlideOver) {
+        return { opacity: 0, transition: { duration: 0 } }
+      }
+
+      // Çıkış anındaki scroll pozisyonu
+      const sY = scrollPositionRef.current
+
+      if (custom.nextIsSlideOver) {
+        // Alttaki sayfa (Ürün Detay) olduğu gibi yerinde kalsın, hiçbir hareket yapmasın.
+        return {
+          opacity: 1,
+          x: 0,
+          y: 0,
+          scale: 1,
+          transition: { duration: 0.1 }
+        }
+      }
+
+      const exitBase: any = {
+        position: 'fixed' as const,
+        top: -sY,
+        left: 0,
+        right: 0,
+        width: '100%',
+        zIndex: 0,
+        overflow: 'hidden',
+        transition: {
+          duration: custom.isCardEntry ? 0.8 : 1.6,
+          ease: custom.isCardEntry ? [0.22, 1, 0.36, 1] : [0.12, 0.8, 0.2, 1],
+          top: { duration: 0 },
+        },
+      }
+
+      if (custom.isCardEntry) {
+        return { ...exitBase, opacity: 0 }
+      }
+
+      const dir = getDirection(custom.pathname)
+      const exitTo = getExitTo(dir)
+
+      return { ...exitBase, ...exitTo }
+    },
   }
-
-  const normalExit = myIsCardEntry
-    ? {
-      opacity: 0,
-      position: 'fixed' as const,
-      top: 0, left: 0, right: 0, bottom: 0,
-      zIndex: 0,
-      transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
-    }
-    : {
-      ...exitTo,
-      position: 'fixed' as const,
-      top: 0, left: 0, right: 0, bottom: 0,
-      zIndex: 0,
-      transition: { duration: 1.6, ease: [0.12, 0.8, 0.2, 1] as [number, number, number, number] },
-    }
 
   return (
     <motion.div
-      initial={
-        myIsCardEntry
-          ? { opacity: 0, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10 }
-          : { ...enterFrom, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10 }
-      }
-      animate={{
-        x: 0,
-        y: 0,
-        opacity: 1,
-        position: 'relative',
-        zIndex: 1,
-        transition: myIsCardEntry
-          ? { duration: 0.8, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }
-          : { duration: 1.6, ease: [0.12, 0.8, 0.2, 1] as [number, number, number, number] },
+      custom={{
+        shouldAnimate,
+        isCardEntry: myIsCardEntry,
+        enterFrom,
+        nextIsSlideOver,
+        pathname: mountStateRef.current.pathname,
       }}
-      exit={nextIsSlideOver ? slideOverExit : normalExit}
-      className="w-full min-h-screen bg-white"
-      style={{ willChange: myIsCardEntry ? 'opacity' : 'transform' }}
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      layout={false}
+      className="w-full h-full min-h-screen flex-grow flex flex-col bg-white"
+      style={{
+        overflowX: 'hidden',
+        transformOrigin: 'top left',
+        backfaceVisibility: 'hidden',
+      }}
     >
-      {children}
+      <div className="flex-grow flex flex-col w-full relative">
+        {children}
+      </div>
     </motion.div>
   )
 }
+

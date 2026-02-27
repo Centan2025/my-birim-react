@@ -1,5 +1,5 @@
 import React from 'react'
-import {motion, Variants} from 'framer-motion'
+import { motion, Variants } from 'framer-motion'
 
 interface ScrollRevealProps {
   children: React.ReactNode
@@ -29,17 +29,17 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
   const getInitialTranslate = () => {
     switch (direction) {
       case 'up':
-        return {y: distance}
+        return { y: distance }
       case 'down':
-        return {y: -distance}
+        return { y: -distance }
       case 'left':
-        return {x: distance}
+        return { x: distance }
       case 'right':
-        return {x: -distance}
+        return { x: -distance }
       case 'none':
         return {}
       default:
-        return {y: distance}
+        return { y: distance }
     }
   }
 
@@ -68,10 +68,10 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
     <motion.div
       initial="hidden"
       whileInView="visible"
-      viewport={{once, amount: threshold}}
+      viewport={{ once, amount: threshold }}
       variants={variants}
       className={`${width} ${className}`}
-      style={{willChange: 'transform, opacity, filter'}}
+      style={{ willChange: 'transform, opacity, filter' }}
     >
       {children}
     </motion.div>

@@ -107,6 +107,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
                 languages: Array.isArray(s?.languages) ? s.languages : undefined,
                 maintenanceMode: Boolean(s?.maintenanceMode ?? false),
                 mobileHeaderAnimation: s?.mobileHeaderAnimation === 'overlay' ? 'overlay' : 'default',
+                enablePageTransitions: s?.enablePageTransitions !== false,
             }
         } catch {
             // Ignore
@@ -123,6 +124,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
         imageBorderStyle: s?.imageBorderStyle === 'rounded' || s?.imageBorderStyle === 'square' ? s.imageBorderStyle : 'square',
         maintenanceMode: Boolean(s?.maintenanceMode ?? false),
         mobileHeaderAnimation: s?.mobileHeaderAnimation === 'overlay' ? 'overlay' : 'default',
+        enablePageTransitions: s?.enablePageTransitions !== false,
     }
 }
 

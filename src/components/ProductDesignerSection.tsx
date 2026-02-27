@@ -68,7 +68,7 @@ export function ProductDesignerSection({ designer, t }: ProductDesignerSectionPr
               </p>
               <button
                 type="button"
-                onClick={() => navigate(`/designer/${designer.id}`, { state: { slideOver: true } })}
+                onClick={() => navigate(`/designer/${designer.id}`, { state: { slideOver: true, designer } })}
                 className="inline-block mt-6 text-gray-600 font-light underline underline-offset-4 hover:text-gray-800 cursor-pointer bg-transparent border-none p-0"
               >
                 {t('discover_the_designer')}

@@ -59,6 +59,8 @@ export interface SiteSettings {
   maintenanceMode?: boolean
   /** Mobile header / hamburger menu animation style. */
   mobileHeaderAnimation?: 'default' | 'overlay'
+  /** Toggles global page transition animations. */
+  enablePageTransitions?: boolean
 }
 
 // --- Core Data Models ---

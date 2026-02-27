@@ -26,7 +26,11 @@ import { ProductAddToCart } from '../components/product/ProductAddToCart'
 import { useCardTransition } from '../context/CardTransitionContext'
 
 export function ProductDetailPage() {
-  const { productId } = useParams<{ productId: string }>()
+  const { productId: liveId } = useParams<{ productId: string }>()
+  // Sayfa geçişlerinde param sıfırlandığı için ilk id'yi kilitliyoruz
+  const [frozenId] = useState(liveId)
+  const productId = frozenId || liveId
+
   const navigate = useNavigate()
 
   // All data, derived state, and responsive detection
@@ -48,9 +52,7 @@ export function ProductDetailPage() {
     prevProduct,
     nextProduct,
   } = useProductDetail(productId)
-
   const { phase } = useCardTransition()
-
   // Lightbox state (reusable hook for each lightbox)
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
   const [lightboxSource, setLightboxSource] = useState<'band' | 'panel'>('band')
@@ -173,18 +175,20 @@ export function ProductDetailPage() {
   }, [phase, product])
 
   // Loading / Not found
-  if (productLoading)
+  if (productLoading && !product)
     return (
       <div className="pt-20">
         <PageLoading message={t('loading')} />
       </div>
     )
-  if (!product)
+
+  if (!product) {
     return (
       <div className="pt-20 text-center">
         <p className="text-gray-600">{t('product_not_found')}</p>
       </div>
     )
+  }
 
   return (
     <div data-product-detail className="min-h-screen bg-white">
