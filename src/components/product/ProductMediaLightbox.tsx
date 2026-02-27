@@ -1,8 +1,8 @@
-import React, {useRef} from 'react'
-import {createPortal} from 'react-dom'
-import {OptimizedImage} from '../OptimizedImage'
-import {OptimizedVideo} from '../OptimizedVideo'
-import {useTranslation} from '../../i18n'
+import React, { useRef, useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
+import { OptimizedImage } from '../OptimizedImage'
+import { OptimizedVideo } from '../OptimizedVideo'
+import { useTranslation } from '../../i18n'
 
 interface ProductMediaLightboxProps {
   items: any[]
@@ -30,7 +30,7 @@ const CloseIcon = () => (
   </svg>
 )
 
-const toYouTubeEmbed = (url: string, {autoplay = false, controls = false} = {}) => {
+const toYouTubeEmbed = (url: string, { autoplay = false, controls = false } = {}) => {
   if (!url) return ''
   let id = ''
   if (url.includes('youtube.com/watch?v=')) {
@@ -53,8 +53,31 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
   onPrev,
   showMetadata = false,
 }) => {
-  const {t} = useTranslation()
+  const { t } = useTranslation()
   const youTubePlayerRef = useRef<HTMLIFrameElement | null>(null)
+  const [isVisible, setIsVisible] = useState(false)
+
+  // Açılış animasyonu: mount sonrası hemen tetikle
+  useEffect(() => {
+    // Bir sonraki frame'de animasyonu başlat
+    const raf = requestAnimationFrame(() => {
+      setIsVisible(true)
+    })
+    // Body scroll'u kilitle
+    document.body.style.overflow = 'hidden'
+    return () => {
+      cancelAnimationFrame(raf)
+      document.body.style.overflow = ''
+    }
+  }, [])
+
+  // Kapanış animasyonu
+  const handleClose = () => {
+    setIsVisible(false)
+    setTimeout(() => {
+      onClose()
+    }, 300) // Animasyon süresiyle eşleşmeli
+  }
 
   const currentItem = items[currentIndex]
   if (!currentItem) return null
@@ -66,12 +89,16 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center"
-      onClick={onClose}
+      className={`fixed inset-0 z-[100] flex items-center justify-center transition-all duration-300 ease-out ${isVisible ? 'bg-black/80 backdrop-blur-sm' : 'bg-black/0 backdrop-blur-none'
+        }`}
+      onClick={handleClose}
       onKeyDown={e => {
-        if (e.key === 'Escape') onClose()
+        if (e.key === 'Escape') handleClose()
+        if (e.key === 'ArrowLeft') onPrev()
+        if (e.key === 'ArrowRight') onNext()
       }}
       role="presentation"
+      tabIndex={0}
     >
       {/* Prev Button */}
       {items.length > 1 && (
@@ -80,7 +107,8 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
             e.stopPropagation()
             onPrev()
           }}
-          className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 bg-white/90 text-gray-950 backdrop-blur-md z-20 shadow-lg border border-black/5 w-12 h-12 md:w-14 md:h-14"
+          className={`absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 bg-white/90 text-gray-950 backdrop-blur-md z-20 shadow-lg border border-black/5 w-12 h-12 md:w-14 md:h-14 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
+            }`}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -105,7 +133,8 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
             e.stopPropagation()
             onNext()
           }}
-          className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 bg-white/90 text-gray-950 backdrop-blur-md z-20 shadow-lg border border-black/5 w-12 h-12 md:w-14 md:h-14"
+          className={`absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 bg-white/90 text-gray-950 backdrop-blur-md z-20 shadow-lg border border-black/5 w-12 h-12 md:w-14 md:h-14 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
+            }`}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -123,50 +152,62 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
         </button>
       )}
 
-      <div className="relative w-screen max-w-screen-2xl h-[80vh] p-2 flex items-center justify-center">
+      {/* İçerik - tam ekran dikey ortalama */}
+      <div
+        className={`relative w-screen h-screen flex items-center justify-center p-4 md:p-8 transition-all duration-300 ease-out ${isVisible
+            ? 'opacity-100 scale-100'
+            : 'opacity-0 scale-90'
+          }`}
+        onClick={e => e.stopPropagation()}
+      >
         {/* Close Button */}
         <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-[80] w-10 h-10 md:w-12 md:h-12 rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-lg flex items-center justify-center"
+          onClick={handleClose}
+          className={`absolute top-4 right-4 md:top-6 md:right-6 z-[80] w-10 h-10 md:w-12 md:h-12 rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-lg flex items-center justify-center ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
+            }`}
         >
           <CloseIcon />
         </button>
 
-        {type === 'image' ? (
-          <OptimizedImage
-            src={url}
-            alt="Enlarged view"
-            className="max-w-full max-h-full object-contain"
-            loading="eager"
-            quality={95}
-          />
-        ) : type === 'video' ? (
-          <OptimizedVideo
-            src={url}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="max-w-full max-h-full object-contain"
-            preload="auto"
-            loading="eager"
-          />
-        ) : (
-          <div className="relative w-full h-full flex items-center justify-center">
-            <iframe
-              ref={youTubePlayerRef}
-              className="w-full h-full max-w-5xl"
-              title="youtube-player"
-              src={toYouTubeEmbed(url, {autoplay: true})}
-              allow="autoplay; encrypted-media; fullscreen"
-              frameBorder="0"
+        {/* Medya içeriği - tam dikey ortalama */}
+        <div className="w-full h-full max-w-screen-2xl max-h-[90vh] flex items-center justify-center">
+          {type === 'image' ? (
+            <OptimizedImage
+              src={url}
+              alt="Enlarged view"
+              className="max-w-full max-h-[85vh] object-contain"
+              loading="eager"
+              quality={95}
             />
-          </div>
-        )}
+          ) : type === 'video' ? (
+            <OptimizedVideo
+              src={url}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="max-w-full max-h-[85vh] object-contain"
+              preload="auto"
+              loading="eager"
+            />
+          ) : (
+            <div className="relative w-full h-full flex items-center justify-center">
+              <iframe
+                ref={youTubePlayerRef}
+                className="w-full h-full max-w-5xl"
+                title="youtube-player"
+                src={toYouTubeEmbed(url, { autoplay: true })}
+                allow="autoplay; encrypted-media; fullscreen"
+                frameBorder="0"
+              />
+            </div>
+          )}
+        </div>
 
         {/* Metadata Overlay */}
         {showMetadata && (
-          <div className="absolute bottom-2 left-2 max-w-md p-6 text-white z-[70] pointer-events-none">
+          <div className={`absolute bottom-6 left-6 max-w-md p-6 text-white z-[70] pointer-events-none transition-all duration-300 delay-150 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            }`}>
             {title && <h3 className="text-xl font-light mb-2">{t(title)}</h3>}
             {currentItem.description && (
               <p className="text-sm text-white/90 leading-relaxed mb-3">
