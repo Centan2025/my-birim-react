@@ -160,7 +160,7 @@ export function ProductDetailPage() {
         // Make thumbnails start appearing much earlier in the animation
         setTimeout(() => setIsThumbnailsVisible(true), 150)
         setTimeout(() => setIsMainContentVisible(true), 350)
-      } else if (phase === 'holding' || phase === 'fading' || phase === null) {
+      } else if (phase === 'holding' || phase === 'fading' || phase === null || phase === 'none') {
         // Arrived at destination! Fade elements in now.
         setIsMainContentVisible(true)
         setIsThumbnailsVisible(true) // Ensure thumbnails are visible if it arrived too early
