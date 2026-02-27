@@ -10,8 +10,9 @@ export const ScrollToTop = () => {
 
     // Sadece rota değişiminde en üste kaydır; dil değişiminde mevcut pozisyonu koru
     useEffect(() => {
-        // slideOver geçişinde scroll pozisyonunu koru
-        if (location.state?.slideOver) return
+        // slideOver geçişinde scroll pozisyonunu kesinlikle koru
+        const state = location.state as any
+        if (state?.slideOver) return
 
         // Route değişiminde yukarıya yumuşak kaydır
         if (typeof window !== 'undefined' && 'scrollBehavior' in document.documentElement.style) {
@@ -79,7 +80,7 @@ export const ScrollToTop = () => {
 
         // Google Analytics pageview (sadece statik sayfalar için)
         analytics.pageview(pathname, finalTitle)
-    }, [pathname, t])
+    }, [pathname, t, location.state])
 
     return null
 }

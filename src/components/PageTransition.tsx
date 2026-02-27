@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useCardTransition } from '../context/CardTransitionContext'
@@ -60,11 +60,23 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
   const enterFrom = getEnterFrom(direction)
   const exitTo = getExitTo(direction)
 
+  // Mevcut scroll pozisyonunu ref'te sakla — exit animasyonunda kullanılacak
+  const scrollYRef = useRef(0)
+  useEffect(() => {
+    const handleScroll = () => {
+      scrollYRef.current = window.scrollY
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    scrollYRef.current = window.scrollY
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   useEffect(() => {
     // slideOver geçişinde scroll pozisyonunu koru (eski sayfa yerinde kalmalı)
-    if (location.state?.slideOver) return
+    const state = location.state as any
+    if (state?.slideOver) return
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
-  }, [location.pathname, location.state?.slideOver])
+  }, [location.pathname, location.state])
 
   const isCardEntry = isExpanding || location.state?.fromCard
   const isSlideOver = location.state?.slideOver === true
@@ -147,10 +159,9 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
           : {
             ...exitTo,
             position: 'fixed',
-            top: 0,
+            top: -scrollYRef.current,
             left: 0,
             right: 0,
-            bottom: 0,
             zIndex: 0,
             transition: {
               duration: 1.6,
