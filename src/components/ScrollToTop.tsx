@@ -4,11 +4,15 @@ import { useTranslation } from '../i18n'
 import { analytics } from '../lib/analytics'
 
 export const ScrollToTop = () => {
-    const { pathname } = useLocation()
+    const location = useLocation()
+    const { pathname } = location
     const { t } = useTranslation()
 
     // Sadece rota değişiminde en üste kaydır; dil değişiminde mevcut pozisyonu koru
     useEffect(() => {
+        // slideOver geçişinde scroll pozisyonunu koru
+        if (location.state?.slideOver) return
+
         // Route değişiminde yukarıya yumuşak kaydır
         if (typeof window !== 'undefined' && 'scrollBehavior' in document.documentElement.style) {
             window.scrollTo({ top: 0, behavior: 'smooth' })

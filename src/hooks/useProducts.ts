@@ -1,4 +1,4 @@
-import {useQuery} from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import {
   getProducts,
   getProductById,
@@ -39,9 +39,10 @@ export function useProduct(productId: string | undefined, initialData?: any) {
       return product
     },
     enabled: !!productId,
-    staleTime: 10 * 60 * 1000,
+    staleTime: 30 * 1000, // 30 saniye - CMS değişiklikleri hızlıca yansısın
     gcTime: 30 * 60 * 1000,
     refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
     initialData,
   })
 }
