@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useCardTransition } from '../context/CardTransitionContext'
@@ -46,16 +46,14 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
   const currentLocation = useLocation()
   const { isExpanding } = useCardTransition()
 
-  // Mount-time state: bu component hangi state ile oluşturuldu?
-  // Bunu ref'te saklıyoruz çünkü useLocation() her zaman GÜNCEL location'ı döndürür.
-  // Eski sayfa bile yeni URL'nin state'ini görür — bu yüzden ref ile mount-time'ı sabitliyoruz.
+  // Mount-time state sabitlenir — useLocation() güncel döndürür ama
+  // bu component'in kendi animasyonu mount anındaki state'e göre belirlenir
   const mountStateRef = useRef({
     slideOver: (currentLocation.state as any)?.slideOver === true,
     fromCard: (currentLocation.state as any)?.fromCard === true,
     pathname: currentLocation.pathname,
   })
 
-  // Bu component'in kendi giriş animasyonu mount-time state'e göre belirlenir
   const mySlideOver = mountStateRef.current.slideOver
   const myFromCard = mountStateRef.current.fromCard
   const myIsCardEntry = isExpanding || myFromCard
@@ -64,94 +62,77 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
   const enterFrom = getEnterFrom(direction)
   const exitTo = getExitTo(direction)
 
-  // Scroll-to-top: Sadece bu sayfa slideOver değilse ve
-  // üzerimize slideOver gelen bir sayfa yoksa scroll yap
+  // slideOver giriş animasyonu tamamlandığında fixed→relative geçişi
+  const [slideAnimDone, setSlideAnimDone] = useState(false)
+
+  // Scroll-to-top
   useEffect(() => {
-    const myState = mountStateRef.current
-    // Bu sayfa slideOver ile açıldıysa, designer sayfasının kendi scroll'u olsun
-    if (myState.slideOver) {
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
+    const state = currentLocation.state as any
+    // Üstümüze slideOver geliyorsa scroll'u KORU
+    if (state?.slideOver && currentLocation.pathname !== mountStateRef.current.pathname) {
       return
-    }
-    // Eğer üstümüze slideOver bir sayfa geliyorsa, scroll'umuzu koruyalım
-    const navState = currentLocation.state as any
-    if (navState?.slideOver && currentLocation.pathname !== myState.pathname) {
-      return // Scroll'u KORU
     }
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
   }, [currentLocation.pathname, currentLocation.state])
 
-  // slideOver giriş: sağdan kayarak gelir, eski sayfanın üstüne biner
+  // ── slideOver giriş: sağdan kayarak gelir ──
   if (mySlideOver) {
     return (
       <motion.div
-        initial={{
-          x: '100%',
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 20,
-          overflow: 'auto',
-        }}
+        initial={{ x: '100%' }}
         animate={{
           x: 0,
-          position: 'relative',
-          zIndex: 1,
-          overflow: 'visible',
-          transition: {
-            duration: 0.7,
-            ease: [0.25, 1, 0.5, 1],
-          },
+          transition: { duration: 0.7, ease: [0.25, 1, 0.5, 1] as [number, number, number, number] },
         }}
         exit={{
           opacity: 0,
-          zIndex: 0,
-          transition: { duration: 0.4, ease: 'easeOut' },
+          transition: { duration: 0.3 },
         }}
+        onAnimationComplete={() => setSlideAnimDone(true)}
         className="w-full min-h-screen bg-white"
-        style={{ willChange: 'transform', boxShadow: '-8px 0 30px rgba(0,0,0,0.15)' }}
+        style={{
+          position: slideAnimDone ? 'relative' : 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: slideAnimDone ? 'auto' : 0,
+          zIndex: slideAnimDone ? 1 : 20,
+          overflowY: slideAnimDone ? 'visible' : 'auto',
+          willChange: 'transform',
+          boxShadow: slideAnimDone ? 'none' : '-8px 0 30px rgba(0,0,0,0.15)',
+        }}
       >
         {children}
       </motion.div>
     )
   }
 
-  // Normal giriş animasyonu
-  // Exit animasyonu: eğer ÜSTÜMÜZe slideOver geliyorsa, yerinde kal + fade out
-  // (position: fixed YAPMA — scroll pozisyonu bozulur)
+  // ── Normal exit animasyonları ──
+  // Üstümüze slideOver geliyorsa → sayfada HİÇBİR ŞEY değişmez, sadece bekle
   const nextIsSlideOver = (currentLocation.state as any)?.slideOver === true
     && currentLocation.pathname !== mountStateRef.current.pathname
+
+  // slideOver exit: SIFIR görsel değişiklik, sadece bekleme süresi
+  const slideOverExit = {
+    opacity: 1, // Değişmez! Sayfa olduğu gibi kalır
+    transition: { duration: 0.7 },
+  }
 
   const normalExit = myIsCardEntry
     ? {
       opacity: 0,
       position: 'fixed' as const,
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
+      top: 0, left: 0, right: 0, bottom: 0,
       zIndex: 0,
       transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
     }
     : {
       ...exitTo,
       position: 'fixed' as const,
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
+      top: 0, left: 0, right: 0, bottom: 0,
       zIndex: 0,
       transition: { duration: 1.6, ease: [0.12, 0.8, 0.2, 1] as [number, number, number, number] },
     }
-
-  // slideOver geliyorsa: eski sayfa yerinde kalsın, sadece fade out
-  const slideOverExit = {
-    opacity: 0,
-    zIndex: 0,
-    transition: { duration: 0.7, ease: 'easeOut' as const },
-  }
 
   return (
     <motion.div
@@ -167,8 +148,8 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
         position: 'relative',
         zIndex: 1,
         transition: myIsCardEntry
-          ? { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
-          : { duration: 1.6, ease: [0.12, 0.8, 0.2, 1] },
+          ? { duration: 0.8, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }
+          : { duration: 1.6, ease: [0.12, 0.8, 0.2, 1] as [number, number, number, number] },
       }}
       exit={nextIsSlideOver ? slideOverExit : normalExit}
       className="w-full min-h-screen bg-white"
