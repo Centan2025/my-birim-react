@@ -1,7 +1,7 @@
-import {Link} from 'react-router-dom'
-import {OptimizedImage} from './OptimizedImage'
+import { useNavigate } from 'react-router-dom'
+import { OptimizedImage } from './OptimizedImage'
 import ScrollReveal from './ScrollReveal'
-import type {Designer, LocalizedString} from '../types'
+import type { Designer, LocalizedString } from '../types'
 
 interface ProductDesignerSectionProps {
   designer: Designer | null
@@ -25,7 +25,8 @@ function toPlainText(blocks: any): string {
   return ''
 }
 
-export function ProductDesignerSection({designer, t}: ProductDesignerSectionProps) {
+export function ProductDesignerSection({ designer, t }: ProductDesignerSectionProps) {
+  const navigate = useNavigate()
   if (!designer) return null
 
   // Safely extract bio text
@@ -65,12 +66,13 @@ export function ProductDesignerSection({designer, t}: ProductDesignerSectionProp
                 {bioText.slice(0, 400)}
                 {isLongText ? '…' : ''}
               </p>
-              <Link
-                to={`/designer/${designer.id}`}
-                className="inline-block mt-6 text-gray-600 font-light underline underline-offset-4 hover:text-gray-800"
+              <button
+                type="button"
+                onClick={() => navigate(`/designer/${designer.id}`, { state: { slideOver: true } })}
+                className="inline-block mt-6 text-gray-600 font-light underline underline-offset-4 hover:text-gray-800 cursor-pointer bg-transparent border-none p-0"
               >
                 {t('discover_the_designer')}
-              </Link>
+              </button>
             </div>
           </div>
         </div>
