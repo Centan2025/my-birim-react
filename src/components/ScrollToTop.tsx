@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useTranslation } from '../i18n'
 import { analytics } from '../lib/analytics'
@@ -8,10 +8,18 @@ export const ScrollToTop = () => {
     const { pathname } = location
     const { t } = useTranslation()
 
-    // Sadece rota değişiminde en üste kaydır; dil değişiminde mevcut pozisyonu koru
+    // Önceki pathname'i takip et
+    const prevPathnameRef = useRef(pathname)
+
     useEffect(() => {
-        // slideOver geçişinde scroll pozisyonunu kesinlikle koru
         const state = location.state as any
+        const prevPathname = prevPathnameRef.current
+        prevPathnameRef.current = pathname
+
+        // Aynı pathname ise hiçbir şey yapma (dil değişimi gibi)
+        if (pathname === prevPathname) return
+
+        // slideOver geçişinde scroll pozisyonunu kesinlikle koru
         if (state?.slideOver) return
 
         // Route değişiminde yukarıya yumuşak kaydır
@@ -21,7 +29,7 @@ export const ScrollToTop = () => {
             window.scrollTo(0, 0)
         }
 
-        // Dinamik detay sayfaları (ürün, proje, haber, tasarımcı) için
+        // Dinamik detay sayfaları için
         // başlık ve pageview takibini ilgili sayfa bileşenleri yapıyor.
         const isDynamicDetail =
             pathname.startsWith('/product/') ||
