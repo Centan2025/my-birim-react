@@ -98,8 +98,10 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
     <div
       ref={node => {
         if (node) {
-          ;(mobileMenuRef as MutableRefObject<HTMLDivElement | null>).current = node
-          ;(mobileMenuFocusTrap as MutableRefObject<HTMLElement | null>).current = node
+          const mRef = mobileMenuRef as MutableRefObject<HTMLDivElement | null>
+          mRef.current = node
+          const focusRef = mobileMenuFocusTrap as MutableRefObject<HTMLElement | null>
+          focusRef.current = node
         }
       }}
       id="mobile-menu"

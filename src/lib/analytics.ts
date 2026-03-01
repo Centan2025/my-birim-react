@@ -111,9 +111,9 @@ class Analytics {
               // Bazı tarayıcılarda senkron hatalar "Uncaught Error: Access to storage is not allowed..."
               // olarak geliyor; bunları da bastırıyoruz ki GA açık kalırken konsol kirlenmesin.
               event.preventDefault()
-              // Safari vb. için ekstra güvenlik
               if ('returnValue' in event) {
-                ;(event as ErrorEvent & {returnValue: boolean}).returnValue = false
+                const errEvent = event as ErrorEvent & {returnValue: boolean}
+                errEvent.returnValue = false
               }
 
               if (DEBUG_LOGS) {
