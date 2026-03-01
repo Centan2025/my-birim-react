@@ -7,7 +7,7 @@
 
 import * as Sentry from '@sentry/react'
 
-const DEBUG_LOGS = (import.meta.env as { VITE_DEBUG_LOGS?: string }).VITE_DEBUG_LOGS === 'true'
+const DEBUG_LOGS = (import.meta.env as {VITE_DEBUG_LOGS?: string}).VITE_DEBUG_LOGS === 'true'
 
 interface ErrorContext {
   user?: {
@@ -140,7 +140,7 @@ class ErrorReporter {
   /**
    * Set user context
    */
-  setUser(user: { id?: string; email?: string; name?: string }) {
+  setUser(user: {id?: string; email?: string; name?: string}) {
     if (this.dsn) {
       try {
         Sentry.setUser(user)

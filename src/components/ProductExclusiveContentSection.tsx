@@ -1,6 +1,6 @@
-import type { NavigateFunction } from 'react-router-dom'
+import type {NavigateFunction} from 'react-router-dom'
 import ScrollReveal from './ScrollReveal'
-import type { LocalizedString, User } from '../types'
+import type {LocalizedString, User} from '../types'
 
 interface ExclusiveDownloadItem {
   url: string
@@ -8,7 +8,7 @@ interface ExclusiveDownloadItem {
 }
 
 interface ExclusiveContent {
-  images?: Array<string | { url?: string; image?: string }>
+  images?: Array<string | {url?: string; image?: string}>
   drawings?: ExclusiveDownloadItem[]
   models3d?: ExclusiveDownloadItem[]
 }
@@ -55,7 +55,9 @@ export function ProductExclusiveContentSection({
       e.preventDefault()
       // Kullanıcı kayıtlı ama email doğrulamadıysa
       if (isLoggedIn && user && !user.isVerified) {
-        alert("Email adresiniz henüz doğrulanmamış. Lütfen email kutunuzu kontrol ederek hesabınızı doğrulayın.")
+        alert(
+          'Email adresiniz henüz doğrulanmamış. Lütfen email kutunuzu kontrol ederek hesabınızı doğrulayın.'
+        )
         return
       }
       navigate('/login')
@@ -63,7 +65,7 @@ export function ProductExclusiveContentSection({
     }
   }
 
-  const getExtraImageLabel = (_img: string | { url?: string; image?: string }, idx: number) => {
+  const getExtraImageLabel = (_img: string | {url?: string; image?: string}, idx: number) => {
     return `Ek Görsel ${idx + 1}`
   }
 
@@ -89,7 +91,7 @@ export function ProductExclusiveContentSection({
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        onClick={(e) => handleDownloadClick(e, url)}
+                        onClick={e => handleDownloadClick(e, url)}
                         className="flex items-center gap-2 px-3 py-2 rounded-none border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 transition-colors"
                       >
                         <span className="shrink-0 text-gray-600 group-hover:text-gray-900">
@@ -118,7 +120,7 @@ export function ProductExclusiveContentSection({
                     <a
                       href={doc.url}
                       download
-                      onClick={(e) => handleDownloadClick(e, doc.url)}
+                      onClick={e => handleDownloadClick(e, doc.url)}
                       className="flex items-center gap-2 px-3 py-2 rounded-none border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 transition-colors"
                     >
                       <span className="shrink-0 text-gray-600 group-hover:text-gray-900">
@@ -146,7 +148,7 @@ export function ProductExclusiveContentSection({
                     <a
                       href={model.url}
                       download
-                      onClick={(e) => handleDownloadClick(e, model.url)}
+                      onClick={e => handleDownloadClick(e, model.url)}
                       className="flex items-center gap-2 px-3 py-2 rounded-none border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 transition-colors"
                     >
                       <span className="shrink-0 text-gray-600 group-hover:text-gray-900">

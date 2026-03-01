@@ -126,7 +126,9 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
     const valueGroupId = (value as any)?.group?._ref
     // Değer başka gruba aitken bu grubu cache'leme
     if (valueGroupId && valueGroupId !== selectedGroupId) return
-    const mats: Material[] = Array.isArray((value as any)?.materials) ? (value as any).materials : []
+    const mats: Material[] = Array.isArray((value as any)?.materials)
+      ? (value as any).materials
+      : []
     const nextIds = Array.from(localSelectedIds)
     const prev = groupCache[selectedGroupId]
     const prevIdsKey = prev?.ids?.join('|') || ''
@@ -140,7 +142,7 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
       prevIdsKey !== nextIdsKey ||
       prevMatKey !== nextMatKey
     if (!needsUpdate) return
-    setGroupCache(prevCache => ({
+    setGroupCache((prevCache) => ({
       ...prevCache,
       [selectedGroupId]: {
         materials: mats,
@@ -245,7 +247,9 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
 
           // Mevcut gruptaki seçimleri cache'le
           if (selectedGroupId) {
-            const currentMats: Material[] = Array.isArray(selectedMaterials) ? selectedMaterials : []
+            const currentMats: Material[] = Array.isArray(selectedMaterials)
+              ? selectedMaterials
+              : []
             setGroupCache((prev) => ({
               ...prev,
               [selectedGroupId]: {
@@ -347,7 +351,7 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
                   <input
                     type="checkbox"
                     checked={isChecked}
-                  onChange={(e) => {
+                    onChange={(e) => {
                       touchedRef.current = true
                       let nextArr = [...(selectedMaterials || [])]
                       const nextIds = new Set(localSelectedIds)

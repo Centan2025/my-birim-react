@@ -1,6 +1,6 @@
 import React from 'react'
-import type { LocalizedString } from '../types'
-import { sanitizeHtml } from '../lib/sanitize'
+import type {LocalizedString} from '../types'
+import {sanitizeHtml} from '../lib/sanitize'
 
 // Ortak çeviri fonksiyonu tipi (Header ve alt bileşenlerde)
 export type HeaderTranslateFn = (
@@ -13,7 +13,7 @@ export const CrossFadeText: React.FC<{
   text: string
   className?: string
   triggerKey?: string | number
-}> = ({ text, className = '', triggerKey }) => {
+}> = ({text, className = '', triggerKey}) => {
   const [currentText, setCurrentText] = React.useState(text)
   const [previousText, setPreviousText] = React.useState(text)
   const [isAnimating, setIsAnimating] = React.useState(false)
@@ -51,8 +51,8 @@ export const CrossFadeText: React.FC<{
 }
 
 // Header dışındaki bileşenlerde de kullanılabilen DynamicIcon
-export const DynamicIcon: React.FC<{ svgString: string }> = ({ svgString }) => (
-  <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(svgString) }} />
+export const DynamicIcon: React.FC<{svgString: string}> = ({svgString}) => (
+  <div dangerouslySetInnerHTML={{__html: sanitizeHtml(svgString)}} />
 )
 
 export const UserIcon = () => (

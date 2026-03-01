@@ -1,4 +1,4 @@
-import { defineCliConfig } from 'sanity/cli'
+import {defineCliConfig} from 'sanity/cli'
 import path from 'path'
 
 export default defineCliConfig({
@@ -14,7 +14,7 @@ export default defineCliConfig({
     autoUpdates: true,
     appId: 'uhq1n1x3jfninkphme61bf2x',
   },
-  vite: (config) => {
+  vite: config => {
     return {
       ...config,
       resolve: {
@@ -24,8 +24,8 @@ export default defineCliConfig({
           '@sentry/react': path.resolve(__dirname, './scripts/dummy-sentry.js'),
           '@sentry/browser': path.resolve(__dirname, './scripts/dummy-sentry.js'),
           '@sentry/core': path.resolve(__dirname, './scripts/dummy-sentry.js'),
-        }
-      }
+        },
+      },
     }
-  }
+  },
 })

@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
-import { useLocation, useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../App'
-import { useSEO } from '../hooks/useSEO'
+import {useEffect, useState} from 'react'
+import {useLocation, useNavigate, Link} from 'react-router-dom'
+import {useAuth} from '../App'
+import {useSEO} from '../hooks/useSEO'
 
 export function VerifyEmailPage() {
   const location = useLocation()
@@ -33,7 +33,7 @@ export function VerifyEmailPage() {
       }
 
       try {
-        const { verifyUserByToken } = await import('../services/cms')
+        const {verifyUserByToken} = await import('../services/cms')
         const user = await verifyUserByToken(token)
         if (!user) {
           if (!cancelled) setStatus('error')

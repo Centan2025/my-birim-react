@@ -1,21 +1,21 @@
-import { Link } from 'react-router-dom'
-import { useEffect, useMemo } from 'react'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { PageLoading } from '../components/LoadingSpinner'
-import { useTranslation } from '../i18n'
-import { useCategories } from '../hooks/useCategories'
-import { useProducts } from '../hooks/useProducts'
-import { useSiteSettings } from '../hooks/useSiteData'
+import {Link} from 'react-router-dom'
+import {useEffect, useMemo} from 'react'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {useCategories} from '../hooks/useCategories'
+import {useProducts} from '../hooks/useProducts'
+import {useSiteSettings} from '../hooks/useSiteData'
 import ScrollReveal from '../components/ScrollReveal'
-import { useSEO } from '../hooks/useSEO'
-import { useHeaderTheme } from '../context/HeaderThemeContext'
+import {useSEO} from '../hooks/useSEO'
+import {useHeaderTheme} from '../context/HeaderThemeContext'
 
 export function CategoriesPage() {
-  const { data: categories = [], isLoading: loading } = useCategories()
-  const { data: allProducts = [] } = useProducts()
-  const { t } = useTranslation()
-  const { data: settings } = useSiteSettings()
-  const { reset } = useHeaderTheme()
+  const {data: categories = [], isLoading: loading} = useCategories()
+  const {data: allProducts = []} = useProducts()
+  const {t} = useTranslation()
+  const {data: settings} = useSiteSettings()
+  const {reset} = useHeaderTheme()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const pageTitle = `BIRIM - ${t('categories') || t('products') || 'Kategoriler'}`
 
@@ -43,12 +43,12 @@ export function CategoriesPage() {
     return categories.map(category => {
       // Eğer kategori görseli varsa onu kullan
       if (category.heroImage) {
-        return { ...category, displayImage: category.heroImage }
+        return {...category, displayImage: category.heroImage}
       }
 
       // Kategori görseli yoksa, harita uzerindeki urun görselini kullan
       const displayImage = categoryImageMap.get(category.id) || null
-      return { ...category, displayImage }
+      return {...category, displayImage}
     })
   }, [categories, categoryImageMap])
 
@@ -82,14 +82,10 @@ export function CategoriesPage() {
         </div>
         <div className="relative h-full flex items-center justify-center text-center text-white pt-20">
           <div>
-            <h1
-              className="text-4xl md:text-6xl font-oswald font-light tracking-[0.1em] uppercase drop-shadow-md"
-            >
+            <h1 className="text-4xl md:text-6xl font-oswald font-light tracking-[0.1em] uppercase drop-shadow-md">
               {t('products')}
             </h1>
-            <p
-              className="mt-4 text-lg max-w-2xl mx-auto drop-shadow-md"
-            >
+            <p className="mt-4 text-lg max-w-2xl mx-auto drop-shadow-md">
               {t('products_page_subtitle')}
             </p>
           </div>
@@ -132,9 +128,7 @@ export function CategoriesPage() {
                     )}
                     <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-300"></div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <h2
-                        className="text-4xl md:text-5xl lg:text-6xl font-oswald font-light tracking-[0.1em] text-white uppercase drop-shadow-md"
-                      >
+                      <h2 className="text-4xl md:text-5xl lg:text-6xl font-oswald font-light tracking-[0.1em] text-white uppercase drop-shadow-md">
                         {t(category.name)}
                       </h2>
                     </div>

@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, { useState, useRef, useCallback } from 'react'
+import React, {useState, useRef, useCallback} from 'react'
 
 interface OptimizedVideoProps {
   src: string
@@ -119,7 +119,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
             }
           })
         },
-        { rootMargin: '50px' }
+        {rootMargin: '50px'}
       )
 
       observer.observe(videoRef.current)
@@ -228,7 +228,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     return (
       <div
         className={`bg-gray-200 flex items-center justify-center ${className}`}
-        style={{ minHeight: '200px' }}
+        style={{minHeight: '200px'}}
       >
         <div className="text-center p-4">
           <span className="text-gray-400 text-sm block mb-2">Video yüklenemedi</span>

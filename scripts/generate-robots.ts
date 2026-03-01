@@ -1,7 +1,7 @@
 /**
  * robots.txt Generator
  * Build zamanında robots.txt oluşturur
- * 
+ *
  * Kullanım: npm run generate-robots
  * veya build script'ine eklenebilir
  */
@@ -30,4 +30,3 @@ try {
   console.error('❌ robots.txt oluşturulurken hata:', error)
   process.exit(1)
 }
-

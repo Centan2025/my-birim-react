@@ -1,7 +1,7 @@
 /**
  * Sitemap Generator
  * Build zamanında sitemap.xml oluşturur
- * 
+ *
  * Kullanım: npm run generate-sitemap
  * veya build script'ine eklenebilir
  */
@@ -59,5 +59,3 @@ try {
   console.error('❌ Sitemap oluşturulurken hata:', error)
   process.exit(1)
 }
-
-

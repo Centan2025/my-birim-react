@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import {useState, useRef, useEffect, useCallback} from 'react'
 
 export function useProductHero(slideCount: number) {
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0)

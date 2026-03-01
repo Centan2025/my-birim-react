@@ -20,14 +20,14 @@ const transporter = nodemailer.createTransport({
 })
 
 app.post('/api/send-verification', async (req, res) => {
-  const { email, verificationUrl, logoUrl } = req.body || {}
+  const {email, verificationUrl, logoUrl} = req.body || {}
 
   if (!SMTP_PASSWORD) {
-    return res.status(500).json({ error: 'SMTP_PASSWORD environment variable is not set' })
+    return res.status(500).json({error: 'SMTP_PASSWORD environment variable is not set'})
   }
 
   if (!email || !verificationUrl) {
-    return res.status(400).json({ error: 'email and verificationUrl are required' })
+    return res.status(400).json({error: 'email and verificationUrl are required'})
   }
 
   // Logo URL'ini kontrol et ve logla
@@ -95,8 +95,9 @@ app.post('/api/send-verification', async (req, res) => {
                 <a href="${verificationUrl}" style="color:#1a1f3a; text-decoration: underline;">${verificationUrl}</a>
               </p>
             </div>
-            ${logoUrl
-          ? `
+            ${
+              logoUrl
+                ? `
             <div style="text-align: center; margin-top: 24px;">
               <img
                 src="${logoUrl}"
@@ -105,8 +106,8 @@ app.post('/api/send-verification', async (req, res) => {
               />
             </div>
             `
-          : ''
-        }
+                : ''
+            }
           </div>
         </body>
         </html>
@@ -115,23 +116,23 @@ app.post('/api/send-verification', async (req, res) => {
 
     // eslint-disable-next-line no-console
     console.log('✅ Verification email sent to', email)
-    res.json({ ok: true })
+    res.json({ok: true})
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('❌ Mail gönderim hatası:', err)
-    res.status(500).json({ error: 'Failed to send email' })
+    res.status(500).json({error: 'Failed to send email'})
   }
 })
 
 app.post('/api/send-password-reset', async (req, res) => {
-  const { email, resetUrl, logoUrl } = req.body || {}
+  const {email, resetUrl, logoUrl} = req.body || {}
 
   if (!SMTP_PASSWORD) {
-    return res.status(500).json({ error: 'SMTP_PASSWORD environment variable is not set' })
+    return res.status(500).json({error: 'SMTP_PASSWORD environment variable is not set'})
   }
 
   if (!email || !resetUrl) {
-    return res.status(400).json({ error: 'email and resetUrl are required' })
+    return res.status(400).json({error: 'email and resetUrl are required'})
   }
 
   console.log('[Email Server] Password reset requested for:', email)
@@ -189,10 +190,14 @@ app.post('/api/send-password-reset', async (req, res) => {
                 Eğer bu talebi siz yapmadıysanız, bu e-postayı dikkate almayabilirsiniz.
               </p>
             </div>
-            ${logoUrl ? `
+            ${
+              logoUrl
+                ? `
             <div style="text-align: center; margin-top: 24px;">
               <img src="${logoUrl}" alt="Birim Logo" style="height: 40px;" />
-            </div>` : ''}
+            </div>`
+                : ''
+            }
           </div>
         </body>
         </html>
@@ -200,10 +205,10 @@ app.post('/api/send-password-reset', async (req, res) => {
     })
 
     console.log('✅ Password reset email sent to', email)
-    res.json({ ok: true })
+    res.json({ok: true})
   } catch (err) {
     console.error('❌ Mail gönderim hatası:', err)
-    res.status(500).json({ error: 'Failed to send email' })
+    res.status(500).json({error: 'Failed to send email'})
   }
 })
 

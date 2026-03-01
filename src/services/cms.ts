@@ -4,7 +4,7 @@
  * This file has been refactored into smaller, more manageable services within the `sanity/` directory.
  * It now acts as a barrel file to export everything, ensuring that existing imports in the application
  * (e.g., `import { getProducts } from 'services/cms'`) continue to work without modification.
- * 
+ *
  * New code should ideally import directly from the relevant `sanity/*` module.
  */
 
@@ -26,9 +26,9 @@ export {
   mapImage,
   mapR2Metadata,
   mapImages,
-  extractPalette
+  extractPalette,
 } from './sanity/client'
-export type { SanityImageLike, SanityFileAsset, SanityProductMediaItem } from './sanity/client'
+export type {SanityImageLike, SanityFileAsset, SanityProductMediaItem} from './sanity/client'
 
 // Settings & Globals
 export {
@@ -44,34 +44,30 @@ export {
   getTermsOfService,
   getKvkkPolicy,
   getFooterContent,
-  updateFooterContent
+  updateFooterContent,
 } from './sanity/settings'
 
 // Designers & Categories
-export {
-  getCategories,
-  getDesigners,
-  getDesignerById
-} from './sanity/categories'
+export {getCategories, getDesigners, getDesignerById} from './sanity/categories'
 
-export const addCategory = async (): Promise<void> => { }
-export const updateCategory = async (): Promise<void> => { }
-export const deleteCategory = async (): Promise<void> => { }
-export const addDesigner = async (): Promise<void> => { }
-export const updateDesigner = async (): Promise<void> => { }
-export const deleteDesigner = async (): Promise<void> => { }
+export const addCategory = async (): Promise<void> => {}
+export const updateCategory = async (): Promise<void> => {}
+export const deleteCategory = async (): Promise<void> => {}
+export const addDesigner = async (): Promise<void> => {}
+export const updateDesigner = async (): Promise<void> => {}
+export const deleteDesigner = async (): Promise<void> => {}
 
 // Products
 export {
   getProducts,
   getProductById,
   getProductsByCategoryId,
-  getProductsByDesignerId
+  getProductsByDesignerId,
 } from './sanity/products'
 
-export const addProduct = async (): Promise<void> => { }
-export const updateProduct = async (): Promise<void> => { }
-export const deleteProduct = async (): Promise<void> => { }
+export const addProduct = async (): Promise<void> => {}
+export const updateProduct = async (): Promise<void> => {}
+export const deleteProduct = async (): Promise<void> => {}
 
 // Pages
 export {
@@ -80,20 +76,15 @@ export {
   getHomePageContent,
   updateAboutPageContent,
   updateContactPageContent,
-  updateHomePageContent
+  updateHomePageContent,
 } from './sanity/pages'
 
 // News & Projects
-export {
-  getNews,
-  getNewsById,
-  getProjects,
-  getProjectById
-} from './sanity/news'
+export {getNews, getNewsById, getProjects, getProjectById} from './sanity/news'
 
-export const addNews = async (): Promise<void> => { }
-export const updateNews = async (): Promise<void> => { }
-export const deleteNews = async (): Promise<void> => { }
+export const addNews = async (): Promise<void> => {}
+export const updateNews = async (): Promise<void> => {}
+export const deleteNews = async (): Promise<void> => {}
 
 // Auth & Users
 export {
@@ -106,5 +97,5 @@ export {
   getUserByEmail,
   getUserById,
   verifyUserByToken,
-  deleteUserAccount
+  deleteUserAccount,
 } from './sanity/auth'

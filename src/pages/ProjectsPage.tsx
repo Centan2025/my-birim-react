@@ -1,17 +1,17 @@
-import { Link } from 'react-router-dom'
-import type { Project } from '../types'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { PageLoading } from '../components/LoadingSpinner'
-import { useTranslation } from '../i18n'
-import { Breadcrumbs } from '../components/Breadcrumbs'
-import { useProjects } from '../hooks/useProjects'
-import { useSiteSettings } from '../hooks/useSiteData'
+import {Link} from 'react-router-dom'
+import type {Project} from '../types'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {Breadcrumbs} from '../components/Breadcrumbs'
+import {useProjects} from '../hooks/useProjects'
+import {useSiteSettings} from '../hooks/useSiteData'
 import ScrollReveal from '../components/ScrollReveal'
-import { useSEO } from '../hooks/useSEO'
+import {useSEO} from '../hooks/useSEO'
 
-const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
-  const { t } = useTranslation()
-  const { data: settings } = useSiteSettings()
+const ProjectCard: React.FC<{project: Project}> = ({project}) => {
+  const {t} = useTranslation()
+  const {data: settings} = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   return (
     <Link to={`/projects/${project.id}`} className="group flex flex-col h-full text-center">
@@ -40,8 +40,8 @@ const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
 }
 
 export function ProjectsPage() {
-  const { data: projects = [], isLoading: loading } = useProjects()
-  const { t } = useTranslation()
+  const {data: projects = [], isLoading: loading} = useProjects()
+  const {t} = useTranslation()
 
   // SEO meta
   useSEO({
@@ -67,7 +67,7 @@ export function ProjectsPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
         <Breadcrumbs
           className="mb-6"
-          items={[{ label: t('homepage'), to: '/' }, { label: t('projects') || 'Projeler' }]}
+          items={[{label: t('homepage'), to: '/'}, {label: t('projects') || 'Projeler'}]}
         />
         <div className="text-center mt-6 md:mt-8 mb-12">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600">

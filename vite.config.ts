@@ -1,8 +1,8 @@
-import { defineConfig } from 'vite'
+import {defineConfig} from 'vite'
 import react from '@vitejs/plugin-react'
-import { visualizer } from 'rollup-plugin-visualizer'
-import { removeConsole } from './vite-plugin-remove-console'
-import { VitePWA } from 'vite-plugin-pwa'
+import {visualizer} from 'rollup-plugin-visualizer'
+import {removeConsole} from './vite-plugin-remove-console'
+import {VitePWA} from 'vite-plugin-pwa'
 import path from 'path'
 
 // https://vitejs.dev/config/
@@ -10,12 +10,12 @@ export default defineConfig({
   plugins: [
     react(),
     // Remove console.log in production builds (keep error and warn)
-    removeConsole({ exclude: ['error', 'warn'] }),
+    removeConsole({exclude: ['error', 'warn']}),
     // PWA desteği — service worker + web app manifest
     VitePWA({
       registerType: 'autoUpdate',
       // Dev modunda SW devre dışı (cache karmaşasını önler)
-      devOptions: { enabled: false },
+      devOptions: {enabled: false},
       includeAssets: ['favicon.ico', 'logo.png', 'apple-touch-icon.png'],
       manifest: {
         name: 'Birim',
@@ -54,8 +54,8 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'sanity-images',
-              expiration: { maxEntries: 100, maxAgeSeconds: 30 * 24 * 60 * 60 },
-              cacheableResponse: { statuses: [0, 200] },
+              expiration: {maxEntries: 100, maxAgeSeconds: 30 * 24 * 60 * 60},
+              cacheableResponse: {statuses: [0, 200]},
             },
           },
           {
@@ -63,8 +63,8 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'r2-assets',
-              expiration: { maxEntries: 150, maxAgeSeconds: 30 * 24 * 60 * 60 },
-              cacheableResponse: { statuses: [0, 200] },
+              expiration: {maxEntries: 150, maxAgeSeconds: 30 * 24 * 60 * 60},
+              cacheableResponse: {statuses: [0, 200]},
             },
           },
           {
@@ -72,8 +72,8 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'r2-cdn-assets',
-              expiration: { maxEntries: 150, maxAgeSeconds: 30 * 24 * 60 * 60 },
-              cacheableResponse: { statuses: [0, 200] },
+              expiration: {maxEntries: 150, maxAgeSeconds: 30 * 24 * 60 * 60},
+              cacheableResponse: {statuses: [0, 200]},
             },
           },
           {
@@ -88,8 +88,8 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'google-fonts-webfonts',
-              expiration: { maxEntries: 30, maxAgeSeconds: 365 * 24 * 60 * 60 },
-              cacheableResponse: { statuses: [0, 200] },
+              expiration: {maxEntries: 30, maxAgeSeconds: 365 * 24 * 60 * 60},
+              cacheableResponse: {statuses: [0, 200]},
             },
           },
         ],
@@ -97,12 +97,12 @@ export default defineConfig({
     }),
     // Bundle analyzer - only when ANALYZE env var is set
     process.env.ANALYZE === 'true' &&
-    visualizer({
-      open: true,
-      filename: 'dist/stats.html',
-      gzipSize: true,
-      brotliSize: true,
-    }),
+      visualizer({
+        open: true,
+        filename: 'dist/stats.html',
+        gzipSize: true,
+        brotliSize: true,
+      }),
   ].filter(Boolean),
   resolve: {
     alias: {

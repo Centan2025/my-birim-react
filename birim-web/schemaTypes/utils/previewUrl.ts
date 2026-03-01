@@ -7,7 +7,7 @@ export const getPreviewUrl = (url?: string): string => {
     if (typeof process !== 'undefined' && process.env && process.env.SANITY_STUDIO_R2_DOMAIN) {
       domain = process.env.SANITY_STUDIO_R2_DOMAIN
     }
-  } catch (e) { }
+  } catch (e) {}
 
   if (url.startsWith('/')) {
     url = url.substring(1)
@@ -20,11 +20,9 @@ export const getPreviewUrl = (url?: string): string => {
   if (url.includes('.r2.dev') && !domain.includes('.r2.dev')) {
     try {
       const parsed = new URL(url)
-      const path = parsed.pathname.startsWith('/')
-        ? parsed.pathname.substring(1)
-        : parsed.pathname
+      const path = parsed.pathname.startsWith('/') ? parsed.pathname.substring(1) : parsed.pathname
       return `${domain}/${path}`.replace(/ /g, '%20')
-    } catch (e) { }
+    } catch (e) {}
   }
 
   return url.replace(/ /g, '%20')

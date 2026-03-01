@@ -1,11 +1,11 @@
-import { useState, useEffect, useMemo } from 'react'
-import { useLocation } from 'react-router-dom'
-import { useProduct, useProductsByCategory } from './useProducts'
-import { useDesigner } from './useDesigners'
-import { useCategories } from './useCategories'
-import { useSiteSettings } from './useSiteData'
-import { useProductHero } from './useProductHero'
-import { useHeaderTheme } from '../context/HeaderThemeContext'
+import {useState, useEffect, useMemo} from 'react'
+import {useLocation} from 'react-router-dom'
+import {useProduct, useProductsByCategory} from './useProducts'
+import {useDesigner} from './useDesigners'
+import {useCategories} from './useCategories'
+import {useSiteSettings} from './useSiteData'
+import {useProductHero} from './useProductHero'
+import {useHeaderTheme} from '../context/HeaderThemeContext'
 
 /**
  * Encapsulates all data-fetching, derived state, and side effects
@@ -15,7 +15,7 @@ export function useProductDetail(productId: string | undefined, prefetchedProduc
   const location = useLocation()
 
   // React Query hooks
-  const { data: productData, isLoading: productLoading } = useProduct(
+  const {data: productData, isLoading: productLoading} = useProduct(
     productId,
     prefetchedProduct ?? location.state?.product
   )
@@ -28,18 +28,18 @@ export function useProductDetail(productId: string | undefined, prefetchedProduc
 
   const product = productData || frozenProduct
 
-  const { data: siteSettings } = useSiteSettings()
-  const { data: allCategories = [] } = useCategories()
-  const { setFromPalette, reset } = useHeaderTheme()
+  const {data: siteSettings} = useSiteSettings()
+  const {data: allCategories = []} = useCategories()
+  const {setFromPalette, reset} = useHeaderTheme()
 
-  const { data: designerData } = useDesigner(product?.designerId)
+  const {data: designerData} = useDesigner(product?.designerId)
   const [frozenDesigner, setFrozenDesigner] = useState<any>(null)
   useEffect(() => {
     if (designerData) setFrozenDesigner(designerData)
   }, [designerData])
   const designer = designerData || frozenDesigner
 
-  const { data: siblingProducts = [] } = useProductsByCategory(product?.categoryId)
+  const {data: siblingProducts = []} = useProductsByCategory(product?.categoryId)
   const category = useMemo(
     () => allCategories.find(c => c.id === product?.categoryId),
     [allCategories, product?.categoryId]
@@ -64,12 +64,12 @@ export function useProductDetail(productId: string | undefined, prefetchedProduc
       typeof product.mainImage === 'string' ? product.mainImage : product.mainImage?.url || ''
     const head = mainUrl
       ? [
-        {
-          type: 'image' as const,
-          url: mainUrl,
-          ...((typeof product.mainImage === 'object' ? product.mainImage : {}) as any),
-        },
-      ]
+          {
+            type: 'image' as const,
+            url: mainUrl,
+            ...((typeof product.mainImage === 'object' ? product.mainImage : {}) as any),
+          },
+        ]
       : []
     const merged = [...head, ...altMedia]
     const seen = new Set<string>()

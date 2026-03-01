@@ -1,5 +1,5 @@
 import React from 'react'
-import { defineField, defineType } from 'sanity'
+import {defineField, defineType} from 'sanity'
 
 export default defineType({
   name: 'contactPage',
@@ -10,13 +10,13 @@ export default defineType({
       name: 'locations',
       title: 'Lokasyonlar',
       type: 'array',
-      of: [{ type: 'contactLocation' }],
+      of: [{type: 'contactLocation'}],
       description: 'İletişim sayfasında listelenecek şubeler/lokasyonlar',
     }),
   ],
   preview: {
     prepare() {
-      return { title: 'İletişim Sayfası' }
+      return {title: 'İletişim Sayfası'}
     },
   },
 })

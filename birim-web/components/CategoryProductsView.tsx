@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react'
-import { useClient } from 'sanity'
-import { Card, Stack, Text, Spinner, Box, Flex, Heading } from '@sanity/ui'
-import { useRouter } from 'sanity/router'
+import React, {useEffect, useState} from 'react'
+import {useClient} from 'sanity'
+import {Card, Stack, Text, Spinner, Box, Flex, Heading} from '@sanity/ui'
+import {useRouter} from 'sanity/router'
 
 export function CategoryProductsView(props: any) {
   const [products, setProducts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const client = useClient({ apiVersion: '2024-01-01' })
+  const client = useClient({apiVersion: '2024-01-01'})
   const categoryId = props.document.displayed._id
   const router = useRouter()
 
@@ -22,7 +22,7 @@ export function CategoryProductsView(props: any) {
       "r2Url": mainImageR2.url
     }`
     client
-      .fetch(query, { categoryId, draftId, cleanId })
+      .fetch(query, {categoryId, draftId, cleanId})
       .then((data: any) => {
         setProducts(data)
         setLoading(false)
@@ -34,13 +34,13 @@ export function CategoryProductsView(props: any) {
   }, [categoryId, client])
 
   const handleProductClick = (productId: string) => {
-    router.navigateIntent('edit', { id: productId, type: 'product' })
+    router.navigateIntent('edit', {id: productId, type: 'product'})
   }
 
   if (loading) {
     return (
-      <Card padding={4} style={{ minHeight: '400px' }}>
-        <Flex align="center" justify="center" style={{ height: '100%' }}>
+      <Card padding={4} style={{minHeight: '400px'}}>
+        <Flex align="center" justify="center" style={{height: '100%'}}>
           <Spinner size={3} />
         </Flex>
       </Card>
@@ -48,7 +48,7 @@ export function CategoryProductsView(props: any) {
   }
 
   return (
-    <Card padding={4} style={{ minHeight: '400px', maxWidth: '800px', margin: '0 auto' }}>
+    <Card padding={4} style={{minHeight: '400px', maxWidth: '800px', margin: '0 auto'}}>
       <Stack space={4}>
         <Heading size={2}>Bu Kategorideki Modeller</Heading>
         <Card padding={3} radius={2} shadow={1} tone="primary">
@@ -85,7 +85,7 @@ export function CategoryProductsView(props: any) {
                 }}
               >
                 <Flex align="center" gap={3}>
-                  {(product.imageUrl || product.r2Url) ? (
+                  {product.imageUrl || product.r2Url ? (
                     <Box
                       style={{
                         width: '60px',
@@ -97,7 +97,11 @@ export function CategoryProductsView(props: any) {
                       }}
                     >
                       <img
-                        src={product.imageUrl ? `${product.imageUrl}?w=120&h=120&fit=crop` : product.r2Url}
+                        src={
+                          product.imageUrl
+                            ? `${product.imageUrl}?w=120&h=120&fit=crop`
+                            : product.r2Url
+                        }
                         alt={product.name?.tr || ''}
                         style={{
                           width: '100%',

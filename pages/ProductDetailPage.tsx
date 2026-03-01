@@ -1,26 +1,26 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events, @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect, useMemo, useRef } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import React, {useState, useEffect, useMemo, useRef} from 'react'
+import {useParams, Link, useNavigate} from 'react-router-dom'
 // FIX: Imported SiteSettings type to correctly type component state.
-import type { LocalizedString } from '../types'
-import { useAuth } from '../App'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { OptimizedVideo } from '../components/OptimizedVideo'
-import { PageLoading } from '../components/LoadingSpinner'
-import { useTranslation } from '../i18n'
-import { useCart } from '../context/CartContext'
-import { useSEO } from '../src/hooks/useSEO'
-import { FullscreenMediaViewer } from '../components/FullscreenMediaViewer'
-import { addStructuredData, getProductSchema } from '../src/lib/seo'
-import { analytics } from '../src/lib/analytics'
-import { useProduct, useProductsByCategory } from '../src/hooks/useProducts'
-import { useDesigner } from '../src/hooks/useDesigners'
-import { useCategories } from '../src/hooks/useCategories'
-import { useSiteSettings } from '../src/hooks/useSiteData'
+import type {LocalizedString} from '../types'
+import {useAuth} from '../App'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {OptimizedVideo} from '../components/OptimizedVideo'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {useCart} from '../context/CartContext'
+import {useSEO} from '../src/hooks/useSEO'
+import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
+import {addStructuredData, getProductSchema} from '../src/lib/seo'
+import {analytics} from '../src/lib/analytics'
+import {useProduct, useProductsByCategory} from '../src/hooks/useProducts'
+import {useDesigner} from '../src/hooks/useDesigners'
+import {useCategories} from '../src/hooks/useCategories'
+import {useSiteSettings} from '../src/hooks/useSiteData'
 import ScrollReveal from '../components/ScrollReveal'
-import { ProductDesignerSection } from '../components/ProductDesignerSection'
-import { ProductExclusiveContentSection } from '../components/ProductExclusiveContentSection'
-import { ProductMediaPanels } from '../components/ProductMediaPanels'
+import {ProductDesignerSection} from '../components/ProductDesignerSection'
+import {ProductExclusiveContentSection} from '../components/ProductExclusiveContentSection'
+import {ProductMediaPanels} from '../components/ProductMediaPanels'
 
 const CloseIcon = () => (
   <svg
@@ -92,17 +92,17 @@ const MinimalChevronRight = (props: React.SVGProps<SVGSVGElement>) => (
 )
 
 export function ProductDetailPage() {
-  const { productId } = useParams<{ productId: string }>()
+  const {productId} = useParams<{productId: string}>()
   const navigate = useNavigate()
 
   // React Query hooks
-  const { data: product, isLoading: productLoading } = useProduct(productId)
-  const { data: siteSettings } = useSiteSettings()
-  const { data: allCategories = [] } = useCategories()
+  const {data: product, isLoading: productLoading} = useProduct(productId)
+  const {data: siteSettings} = useSiteSettings()
+  const {data: allCategories = []} = useCategories()
 
   // Designer ve category'yi product'tan al
-  const { data: designer } = useDesigner(product?.designerId)
-  const { data: siblingProducts = [] } = useProductsByCategory(product?.categoryId)
+  const {data: designer} = useDesigner(product?.designerId)
+  const {data: siblingProducts = []} = useProductsByCategory(product?.categoryId)
   const category = useMemo(
     () => allCategories.find(c => c.id === product?.categoryId),
     [allCategories, product?.categoryId]
@@ -115,9 +115,9 @@ export function ProductDetailPage() {
   const [lightboxSource, setLightboxSource] = useState<'band' | 'panel'>('band')
   const youTubePlayerRef = useRef<HTMLIFrameElement | null>(null)
   const [ytPlaying, setYtPlaying] = useState<boolean>(false)
-  const { isLoggedIn, user } = useAuth()
-  const { t, locale } = useTranslation()
-  const { addToCart } = useCart()
+  const {isLoggedIn, user} = useAuth()
+  const {t, locale} = useTranslation()
+  const {addToCart} = useCart()
   // FIX: Removed usage of non-existent `useSiteSettings` hook and now use the local `siteSettings` state.
   const imageBorderClass =
     siteSettings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
@@ -144,11 +144,11 @@ export function ProductDetailPage() {
   const [areDotsVisible, setAreDotsVisible] = useState(false)
   const [isPageVisible, setIsPageVisible] = useState(false)
   const [dimLightbox, setDimLightbox] = useState<{
-    images: { image: string; title?: LocalizedString }[]
+    images: {image: string; title?: LocalizedString}[]
     currentIndex: number
   } | null>(null)
   const [materialLightbox, setMaterialLightbox] = useState<{
-    images: { image: string; name: string }[]
+    images: {image: string; name: string}[]
     currentIndex: number
   } | null>(null)
   // Thumbnails horizontal drag/scroll
@@ -272,7 +272,6 @@ export function ProductDetailPage() {
     setActiveBookIndex(0)
   }, [activeMaterialGroup])
 
-
   // Fullscreen buton animasyonu - sağdan fade ile gelir
   useEffect(() => {
     if (!product) return
@@ -351,8 +350,8 @@ export function ProductDetailPage() {
     product && typeof product.mainImage === 'string'
       ? product.mainImage
       : (product?.mainImage && typeof product.mainImage === 'object'
-        ? product.mainImage.url
-        : '') || ''
+          ? product.mainImage.url
+          : '') || ''
   const categoryNameForSeo = category ? t(category.name) : ''
   const seoTitle = productName
     ? categoryNameForSeo
@@ -381,14 +380,14 @@ export function ProductDetailPage() {
     })
     addStructuredData(productSchema, 'product-schema')
   }, [product, designer, productName, productDescription, productImage, t])
-  const { prevProduct, nextProduct } = useMemo(() => {
-    if (!product || siblingProducts.length < 2) return { prevProduct: null, nextProduct: null }
+  const {prevProduct, nextProduct} = useMemo(() => {
+    if (!product || siblingProducts.length < 2) return {prevProduct: null, nextProduct: null}
     const currentIndex = siblingProducts.findIndex(p => p.id === product.id)
-    if (currentIndex === -1) return { prevProduct: null, nextProduct: null }
+    if (currentIndex === -1) return {prevProduct: null, nextProduct: null}
     const prev = currentIndex > 0 ? siblingProducts[currentIndex - 1] : null
     const next =
       currentIndex < siblingProducts.length - 1 ? siblingProducts[currentIndex + 1] : null
-    return { prevProduct: prev, nextProduct: next }
+    return {prevProduct: prev, nextProduct: next}
   }, [product, siblingProducts])
   // Bottom prev/next visibility from CMS settings
   const showBottomPrevNext = Boolean(siteSettings?.showProductPrevNext)
@@ -401,32 +400,32 @@ export function ProductDetailPage() {
 
   const mergedGroups = useMemo(() => {
     const map = new Map<string, any>()
-      ; (grouped || []).forEach((g: any) => {
-        const key = JSON.stringify(g.groupTitle || '')
-        if (!map.has(key)) {
-          map.set(key, {
-            groupTitle: g.groupTitle,
-            books: Array.isArray(g.books) ? [...g.books] : [],
-            materials: Array.isArray(g.materials) ? [...g.materials] : [],
-          })
-        } else {
-          const agg = map.get(key)
-          // kitapları başlıklarına göre birleştir
-          const byTitle = new Map<string, any>()
-            ;[...(agg.books || []), ...(g.books || [])].forEach((b: any) => {
-              const bKey = JSON.stringify(b.bookTitle || '')
-              if (!byTitle.has(bKey)) byTitle.set(bKey, { bookTitle: b.bookTitle, materials: [] })
-              const entry = byTitle.get(bKey)
-              entry.materials = [...entry.materials, ...(Array.isArray(b.materials) ? b.materials : [])]
-            })
-          agg.books = Array.from(byTitle.values())
-          agg.materials = [
-            ...(agg.materials || []),
-            ...(Array.isArray(g.materials) ? g.materials : []),
-          ]
-          map.set(key, agg)
-        }
-      })
+    ;(grouped || []).forEach((g: any) => {
+      const key = JSON.stringify(g.groupTitle || '')
+      if (!map.has(key)) {
+        map.set(key, {
+          groupTitle: g.groupTitle,
+          books: Array.isArray(g.books) ? [...g.books] : [],
+          materials: Array.isArray(g.materials) ? [...g.materials] : [],
+        })
+      } else {
+        const agg = map.get(key)
+        // kitapları başlıklarına göre birleştir
+        const byTitle = new Map<string, any>()
+        ;[...(agg.books || []), ...(g.books || [])].forEach((b: any) => {
+          const bKey = JSON.stringify(b.bookTitle || '')
+          if (!byTitle.has(bKey)) byTitle.set(bKey, {bookTitle: b.bookTitle, materials: []})
+          const entry = byTitle.get(bKey)
+          entry.materials = [...entry.materials, ...(Array.isArray(b.materials) ? b.materials : [])]
+        })
+        agg.books = Array.from(byTitle.values())
+        agg.materials = [
+          ...(agg.materials || []),
+          ...(Array.isArray(g.materials) ? g.materials : []),
+        ]
+        map.set(key, agg)
+      }
+    })
     return Array.from(map.values())
   }, [grouped])
 
@@ -455,7 +454,7 @@ export function ProductDetailPage() {
       : []
     const arw = [mainImageUrl, ...ai]
     return Array.isArray(arw)
-      ? arw.filter(Boolean).map((u: string) => ({ type: 'image' as const, url: u }))
+      ? arw.filter(Boolean).map((u: string) => ({type: 'image' as const, url: u}))
       : []
   })()
   // Bant medyası: alternatif medya varsa, ana görseli en başa ekle
@@ -468,13 +467,13 @@ export function ProductDetailPage() {
     if (rawAltMedia.length) {
       const head: any[] = mainImageUrl
         ? [
-          {
-            type: 'image',
-            url: mainImageUrl,
-            urlMobile: mainImageMobile,
-            urlDesktop: mainImageDesktop,
-          },
-        ]
+            {
+              type: 'image',
+              url: mainImageUrl,
+              urlMobile: mainImageMobile,
+              urlDesktop: mainImageDesktop,
+            },
+          ]
         : []
       const merged = [...head, ...rawAltMedia]
       // tekilleştir (aynı url tekrar etmesin)
@@ -767,7 +766,7 @@ export function ProductDetailPage() {
   }
   const toYouTubeEmbed = (
     url: string,
-    { autoplay = true, controls = false }: { autoplay?: boolean; controls?: boolean } = {}
+    {autoplay = true, controls = false}: {autoplay?: boolean; controls?: boolean} = {}
   ): string => {
     const id = getYouTubeId(url)
     if (!id) return url
@@ -794,10 +793,9 @@ export function ProductDetailPage() {
 
   return (
     <div
-      className={`min-h-screen transition-all duration-700 ease-out ${isPageVisible
-        ? 'opacity-100 translate-y-0'
-        : 'opacity-0 translate-y-20'
-        }`}
+      className={`min-h-screen transition-all duration-700 ease-out ${
+        isPageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+      }`}
       style={{
         transform: isPageVisible ? 'translateY(0)' : 'translateY(80px)',
         backgroundColor: 'white',
@@ -886,8 +884,9 @@ export function ProductDetailPage() {
               className="flex h-full"
               style={{
                 width: `${totalHeroSlides * 100}%`,
-                transform: `translateX(calc(-${(heroSlideIndex * 100) / totalHeroSlides
-                  }% + ${draggedX}px))`,
+                transform: `translateX(calc(-${
+                  (heroSlideIndex * 100) / totalHeroSlides
+                }% + ${draggedX}px))`,
                 transition: heroTransitionEnabled ? 'transform 0.3s ease-out' : 'none',
               }}
               onTransitionEnd={handleHeroTransitionEnd}
@@ -898,7 +897,7 @@ export function ProductDetailPage() {
                   <div
                     key={index}
                     className="relative h-full shrink-0 bg-white flex items-center justify-center"
-                    style={{ width: `${100 / totalHeroSlides}%` }}
+                    style={{width: `${100 / totalHeroSlides}%`}}
                   >
                     {m.type === 'image' ? (
                       <OptimizedImage
@@ -929,7 +928,7 @@ export function ProductDetailPage() {
                       <iframe
                         className="w-full h-full"
                         title="youtube-player"
-                        src={toYouTubeEmbed(m.url, { autoplay: true })}
+                        src={toYouTubeEmbed(m.url, {autoplay: true})}
                         allow="autoplay; encrypted-media; fullscreen"
                         frameBorder="0"
                       />
@@ -964,21 +963,26 @@ export function ProductDetailPage() {
             </nav>
 
             <div className="absolute bottom-10 md:bottom-10 left-6 md:left-10 text-white">
-              <div style={{
-                transform: isTitleVisible ? 'translateX(0)' : 'translateX(-40px)',
-                opacity: isTitleVisible ? 1 : 0,
-                transition: 'transform 1000ms ease-out, opacity 1000ms ease-out'
-              }}>
+              <div
+                style={{
+                  transform: isTitleVisible ? 'translateX(0)' : 'translateX(-40px)',
+                  opacity: isTitleVisible ? 1 : 0,
+                  transition: 'transform 1000ms ease-out, opacity 1000ms ease-out',
+                }}
+              >
                 <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg">
                   {t(product.name)}
                 </h1>
               </div>
               {designer && (
-                <div className="mt-2 text-white/80" style={{
-                  transform: isDesignerVisible ? 'translateX(0)' : 'translateX(-40px)',
-                  opacity: isDesignerVisible ? 1 : 0,
-                  transition: 'transform 1000ms ease-out, opacity 1000ms ease-out'
-                }}>
+                <div
+                  className="mt-2 text-white/80"
+                  style={{
+                    transform: isDesignerVisible ? 'translateX(0)' : 'translateX(-40px)',
+                    opacity: isDesignerVisible ? 1 : 0,
+                    transition: 'transform 1000ms ease-out, opacity 1000ms ease-out',
+                  }}
+                >
                   <Link to={`/designer/${designer.id}`} className="hover:text-white">
                     {t(designer.name)}
                   </Link>{' '}
@@ -998,7 +1002,7 @@ export function ProductDetailPage() {
                 >
                   <span
                     className="flex items-center justify-center w-full h-full text-2xl leading-none md:text-3xl"
-                    style={{ transform: 'translateY(-2px)' }}
+                    style={{transform: 'translateY(-2px)'}}
                   >
                     ‹
                   </span>
@@ -1011,7 +1015,7 @@ export function ProductDetailPage() {
                 >
                   <span
                     className="flex items-center justify-center w-full h-full text-2xl leading-none md:text-3xl"
-                    style={{ transform: 'translateY(-2px)' }}
+                    style={{transform: 'translateY(-2px)'}}
                   >
                     ›
                   </span>
@@ -1053,17 +1057,18 @@ export function ProductDetailPage() {
                           }
                           setCurrentImageIndex(index)
                         }}
-                        className={`relative rounded-full transition-all duration-500 ease-in-out group ${areDotsVisible ? 'animate-dot-height-grow' : 'h-0.5'
-                          } ${isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
-                          } ${areDotsVisible
+                        className={`relative rounded-full transition-all duration-500 ease-in-out group ${
+                          areDotsVisible ? 'animate-dot-height-grow' : 'h-0.5'
+                        } ${isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'} ${
+                          areDotsVisible
                             ? 'translate-x-0 opacity-100'
                             : isLeft
                               ? '-translate-x-[150%] opacity-0'
                               : 'translate-x-[250%] opacity-0'
-                          }`}
+                        }`}
                         style={{
                           transitionDelay: `${animationDelay}ms`,
-                          ...(areDotsVisible ? {} : { height: '0.0625rem' }),
+                          ...(areDotsVisible ? {} : {height: '0.0625rem'}),
                         }}
                         aria-label={`Görsel ${index + 1}`}
                       >
@@ -1083,7 +1088,7 @@ export function ProductDetailPage() {
             {/* Fullscreen button - sadece görsel varsa göster */}
             {bandMedia.length > 0 && (
               <button
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation()
                   analytics.event({
                     category: 'media',
@@ -1206,7 +1211,8 @@ export function ProductDetailPage() {
                 <button
                   aria-label="scroll-left"
                   onClick={() => {
-                    if (thumbRef.current) thumbRef.current.scrollBy({ left: -240, behavior: 'smooth' })
+                    if (thumbRef.current)
+                      thumbRef.current.scrollBy({left: -240, behavior: 'smooth'})
                   }}
                   className="absolute top-1/2 -translate-y-1/2 flex items-center justify-center rounded transition-transform hover:scale-105 active:scale-95 z-10"
                   style={{
@@ -1214,7 +1220,7 @@ export function ProductDetailPage() {
                     width: '44px',
                     height: '44px',
                     backgroundColor: 'transparent',
-                    color: '#4b5563'
+                    color: '#4b5563',
                   }}
                 >
                   <svg
@@ -1234,7 +1240,7 @@ export function ProductDetailPage() {
                 <button
                   aria-label="scroll-right"
                   onClick={() => {
-                    if (thumbRef.current) thumbRef.current.scrollBy({ left: 240, behavior: 'smooth' })
+                    if (thumbRef.current) thumbRef.current.scrollBy({left: 240, behavior: 'smooth'})
                   }}
                   className="absolute top-1/2 -translate-y-1/2 flex items-center justify-center rounded transition-transform hover:scale-105 active:scale-95 z-10"
                   style={{
@@ -1242,7 +1248,7 @@ export function ProductDetailPage() {
                     width: '44px',
                     height: '44px',
                     backgroundColor: 'transparent',
-                    color: '#4b5563'
+                    color: '#4b5563',
                   }}
                 >
                   <svg
@@ -1288,7 +1294,10 @@ export function ProductDetailPage() {
             <nav className="mb-8 text-[11px] sm:text-[12px] text-gray-500" aria-label="Breadcrumb">
               <ol className="list-none p-0 inline-flex items-center">
                 <li>
-                  <Link to="/" className="hover:text-gray-800 uppercase underline underline-offset-4">
+                  <Link
+                    to="/"
+                    className="hover:text-gray-800 uppercase underline underline-offset-4"
+                  >
                     {t('homepage')}
                   </Link>
                 </li>
@@ -1325,7 +1334,9 @@ export function ProductDetailPage() {
               )}
 
               <div>
-                <h2 className="text-2xl md:text-4xl font-normal text-gray-700">{t(product.name)}</h2>
+                <h2 className="text-2xl md:text-4xl font-normal text-gray-700">
+                  {t(product.name)}
+                </h2>
                 <ScrollReveal delay={200}>
                   <p className="mt-3 text-gray-900 leading-relaxed max-w-2xl font-normal">
                     {t(product.description)}
@@ -1352,14 +1363,16 @@ export function ProductDetailPage() {
                         ) => (
                           <div key={idx} className="flex flex-col items-center">
                             <button
-                              onClick={() => setDimLightbox({ images: dimImages, currentIndex: idx })}
+                              onClick={() => setDimLightbox({images: dimImages, currentIndex: idx})}
                               className="group border border-gray-200 transition-transform duration-200 p-3 bg-white rounded-none"
                             >
                               <OptimizedImage
                                 src={dimImg.image}
                                 srcMobile={dimImg.imageMobile}
                                 srcDesktop={dimImg.imageDesktop}
-                                alt={dimImg.title ? t(dimImg.title) : `${t('dimensions')} ${idx + 1}`}
+                                alt={
+                                  dimImg.title ? t(dimImg.title) : `${t('dimensions')} ${idx + 1}`
+                                }
                                 className={`w-full h-40 object-contain group-hover:scale-[1.03] transition-transform duration-700 ease-in-out ${imageBorderClass}`}
                                 loading="lazy"
                                 quality={85}
@@ -1387,18 +1400,21 @@ export function ProductDetailPage() {
 
                     {/* Group tabs - similar to image design */}
                     <div className="flex flex-wrap gap-0 border-t border-b border-gray-400 mb-6 bg-gray-200">
-                      {(Array.isArray(mergedGroups) ? mergedGroups : []).map((g: any, idx: number) => (
-                        <button
-                          key={idx}
-                          onClick={() => setActiveMaterialGroup(idx)}
-                          className={`px-5 py-3 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeMaterialGroup === idx
-                            ? 'bg-white text-gray-800 border-gray-500'
-                            : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
+                      {(Array.isArray(mergedGroups) ? mergedGroups : []).map(
+                        (g: any, idx: number) => (
+                          <button
+                            key={idx}
+                            onClick={() => setActiveMaterialGroup(idx)}
+                            className={`px-5 py-3 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${
+                              activeMaterialGroup === idx
+                                ? 'bg-white text-gray-800 border-gray-500'
+                                : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
                             }`}
-                        >
-                          {t(g.groupTitle)}
-                        </button>
-                      ))}
+                          >
+                            {t(g.groupTitle)}
+                          </button>
+                        )
+                      )}
                     </div>
 
                     {/* Swatch books (kartelalar) yatay sekmeler */}
@@ -1409,10 +1425,11 @@ export function ProductDetailPage() {
                             <button
                               key={idx}
                               onClick={() => setActiveBookIndex(idx)}
-                              className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeBookIndex === idx
-                                ? 'bg-white text-gray-800 border-gray-500'
-                                : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
-                                }`}
+                              className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${
+                                activeBookIndex === idx
+                                  ? 'bg-white text-gray-800 border-gray-500'
+                                  : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
+                              }`}
                             >
                               {t(book.bookTitle)}
                             </button>
@@ -1430,7 +1447,9 @@ export function ProductDetailPage() {
                               className="text-center group cursor-pointer"
                               title={t(material.name)}
                               onClick={() => {
-                                const allMaterials = Array.isArray(books[activeBookIndex]?.materials)
+                                const allMaterials = Array.isArray(
+                                  books[activeBookIndex]?.materials
+                                )
                                   ? books[activeBookIndex].materials
                                   : []
                                 setMaterialLightbox({
@@ -1469,7 +1488,9 @@ export function ProductDetailPage() {
                               className="text-center group cursor-pointer"
                               title={t(material.name)}
                               onClick={() => {
-                                const allMaterials = Array.isArray(grouped[safeActiveIndex]?.materials)
+                                const allMaterials = Array.isArray(
+                                  grouped[safeActiveIndex]?.materials
+                                )
                                   ? grouped[safeActiveIndex].materials
                                   : []
                                 setMaterialLightbox({
@@ -1547,7 +1568,7 @@ export function ProductDetailPage() {
         {isLightboxOpen && (
           <div
             className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center"
-            style={{ animationDuration: '0.2s' }}
+            style={{animationDuration: '0.2s'}}
           >
             <button
               onClick={prevImageFn}
@@ -1556,7 +1577,7 @@ export function ProductDetailPage() {
                 width: '54px',
                 height: '54px',
                 backgroundColor: 'rgba(62, 60, 60, 0.5)',
-                color: '#d3caca'
+                color: '#d3caca',
               }}
             >
               <svg
@@ -1580,7 +1601,7 @@ export function ProductDetailPage() {
                 width: '54px',
                 height: '54px',
                 backgroundColor: 'rgba(62, 60, 60, 0.5)',
-                color: '#d3caca'
+                color: '#d3caca',
               }}
             >
               <svg
@@ -1636,7 +1657,7 @@ export function ProductDetailPage() {
                     })}
                     allow="autoplay; encrypted-media; fullscreen"
                     frameBorder="0"
-                    style={{ pointerEvents: 'auto' }}
+                    style={{pointerEvents: 'auto'}}
                   />
                   <button
                     onClick={() => {
@@ -1802,13 +1823,14 @@ export function ProductDetailPage() {
                             dimLightbox.images.length,
                         })
                       }}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-10 h-10 md:w-14 md:h-14"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-10 h-10 md:w-14 md:h-14"
                       style={{
-                          backgroundColor: 'rgba(62, 60, 60, 0.5)',
-                          color: '#d3caca',
-                          transform: 'translateX(-40px)',
-                          opacity: 0,
-                          animation: 'arrow-in-left 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms forwards'
+                        backgroundColor: 'rgba(62, 60, 60, 0.5)',
+                        color: '#d3caca',
+                        transform: 'translateX(-40px)',
+                        opacity: 0,
+                        animation:
+                          'arrow-in-left 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms forwards',
                       }}
                       aria-label="Previous"
                     >
@@ -1834,13 +1856,14 @@ export function ProductDetailPage() {
                           currentIndex: (dimLightbox.currentIndex + 1) % dimLightbox.images.length,
                         })
                       }}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-10 h-10 md:w-14 md:h-14"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform hover:scale-105 active:scale-95 backdrop-blur-sm z-10 w-10 h-10 md:w-14 md:h-14"
                       style={{
-                          backgroundColor: 'rgba(62, 60, 60, 0.5)',
-                          color: '#d3caca',
-                          transform: 'translateX(40px)',
-                          opacity: 0,
-                          animation: 'arrow-in-right 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 200ms forwards'
+                        backgroundColor: 'rgba(62, 60, 60, 0.5)',
+                        color: '#d3caca',
+                        transform: 'translateX(40px)',
+                        opacity: 0,
+                        animation:
+                          'arrow-in-right 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 200ms forwards',
                       }}
                       aria-label="Next"
                     >
@@ -1917,7 +1940,8 @@ export function ProductDetailPage() {
                         color: '#d3caca',
                         transform: 'translateX(-40px)',
                         opacity: 0,
-                        animation: 'arrow-in-left 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms forwards'
+                        animation:
+                          'arrow-in-left 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms forwards',
                       }}
                       aria-label="Previous"
                     >
@@ -1950,7 +1974,8 @@ export function ProductDetailPage() {
                         color: '#d3caca',
                         transform: 'translateX(40px)',
                         opacity: 0,
-                        animation: 'arrow-in-right 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 200ms forwards'
+                        animation:
+                          'arrow-in-right 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 200ms forwards',
                       }}
                       aria-label="Next"
                     >

@@ -48,7 +48,8 @@ export default defineType({
       name: 'country',
       title: 'Ülke',
       type: 'string',
-      description: 'Üyenin bulunduğu ülke. Kayıt formu konuma göre otomatik doldurur, gerekirse değiştirilebilir.',
+      description:
+        'Üyenin bulunduğu ülke. Kayıt formu konuma göre otomatik doldurur, gerekirse değiştirilebilir.',
     }),
     defineField({
       name: 'userType',
@@ -76,7 +77,8 @@ export default defineType({
       name: 'verificationToken',
       title: 'Doğrulama Tokenı',
       type: 'string',
-      description: 'Kullanıcıya gönderilen e-posta doğrulama linki için kullanılan tek seferlik token.',
+      description:
+        'Kullanıcıya gönderilen e-posta doğrulama linki için kullanılan tek seferlik token.',
       hidden: ({document}) => Boolean((document as any)?.isVerified),
     }),
     defineField({

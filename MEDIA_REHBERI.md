@@ -331,7 +331,6 @@ videoFileDesktop: { type: 'file', accept: 'video/*' }
 
 ```tsx
 import {OptimizedImage} from '../components/OptimizedImage'
-
 ;<OptimizedImage src={imageUrl} alt="Açıklama" className="w-full h-auto" />
 ```
 
@@ -380,7 +379,6 @@ import {OptimizedImage} from '../components/OptimizedImage'
 
 ```tsx
 import {OptimizedVideo} from '../components/OptimizedVideo'
-
 ;<OptimizedVideo src={videoUrl} className="w-full" controls />
 ```
 

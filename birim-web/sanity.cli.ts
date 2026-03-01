@@ -1,4 +1,4 @@
-import { defineCliConfig } from 'sanity/cli'
+import {defineCliConfig} from 'sanity/cli'
 import path from 'path'
 
 export default defineCliConfig({
@@ -24,8 +24,8 @@ export default defineCliConfig({
           '@sentry/react': path.resolve(__dirname, './scripts/dummy-sentry.js'),
           '@sentry/browser': path.resolve(__dirname, './scripts/dummy-sentry.js'),
           '@sentry/core': path.resolve(__dirname, './scripts/dummy-sentry.js'),
-        }
-      }
+        },
+      },
     }
-  }
+  },
 })

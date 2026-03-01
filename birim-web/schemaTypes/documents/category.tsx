@@ -1,7 +1,7 @@
 import React from 'react'
 import {defineField, defineType} from 'sanity'
 import {orderRankField} from '@sanity/orderable-document-list'
-import { getPreviewUrl } from '../utils/previewUrl'
+import {getPreviewUrl} from '../utils/previewUrl'
 
 export default defineType({
   name: 'category',
