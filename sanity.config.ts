@@ -20,7 +20,8 @@ if (typeof window !== 'undefined') {
   const originalXHR = window.XMLHttpRequest
   window.XMLHttpRequest = class extends originalXHR {
     open(method: string, url: string | URL, ...rest: any[]) {
-      ;(this as any)._sentryUrl = String(url)
+      const self = this as any
+      self._sentryUrl = String(url)
       // @ts-expect-error monkey patching XHR signature
       super.open(method, url, ...rest)
     }
