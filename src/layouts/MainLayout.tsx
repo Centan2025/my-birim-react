@@ -74,12 +74,7 @@ export const MainLayout: React.FC = () => {
       <SkipLink />
       <Header />
       <CartSidebar />
-      <main
-        id="main-content"
-        className="flex flex-col flex-grow"
-        style={{overflowX: 'hidden', position: 'relative'}}
-        tabIndex={-1}
-      >
+      <main id="main-content" className="flex flex-col flex-grow relative overflow-x-clip">
         <AnimatePresence mode="sync" initial={false}>
           <PageTransitionWrapper key={location.pathname} location={location} />
         </AnimatePresence>
