@@ -1,8 +1,9 @@
-import {useState, useRef, useEffect, useCallback} from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 
 export function useProductHero(slideCount: number) {
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0)
   const [heroSlideIndex, setHeroSlideIndex] = useState<number>(1)
+  const heroSlideIndexRef = useRef<number>(1)
   const [heroTransitionEnabled, setHeroTransitionEnabled] = useState(true)
 
   const [isDragging, setIsDragging] = useState(false)
@@ -13,14 +14,19 @@ export function useProductHero(slideCount: number) {
   const DRAG_THRESHOLD = 50
   const totalHeroSlides = slideCount > 1 ? slideCount + 2 : slideCount
 
+  const updateSlideIndex = useCallback((newVal: number) => {
+    heroSlideIndexRef.current = newVal
+    setHeroSlideIndex(newVal)
+  }, [])
+
   // Reset indices when slide count changes
   useEffect(() => {
     if (slideCount > 0) {
       setHeroTransitionEnabled(false) // Disable transition to snap instantly
       setCurrentImageIndex(0)
-      setHeroSlideIndex(slideCount > 1 ? 1 : 0)
+      updateSlideIndex(slideCount > 1 ? 1 : 0)
     }
-  }, [slideCount])
+  }, [slideCount, updateSlideIndex])
 
   // Transition recovery
   useEffect(() => {
@@ -33,26 +39,30 @@ export function useProductHero(slideCount: number) {
 
   const heroNext = useCallback(() => {
     if (slideCount <= 1 || !heroTransitionEnabled) return
-    setHeroSlideIndex(prev => prev + 1)
+    if (heroSlideIndexRef.current >= totalHeroSlides - 1) return // Sınırı aşmasını engelle
+
+    updateSlideIndex(heroSlideIndexRef.current + 1)
     setCurrentImageIndex(prev => (prev + 1) % slideCount)
-  }, [slideCount, heroTransitionEnabled])
+  }, [slideCount, heroTransitionEnabled, totalHeroSlides, updateSlideIndex])
 
   const heroPrev = useCallback(() => {
     if (slideCount <= 1 || !heroTransitionEnabled) return
-    setHeroSlideIndex(prev => prev - 1)
+    if (heroSlideIndexRef.current <= 0) return // Sınırı aşmasını engelle
+
+    updateSlideIndex(heroSlideIndexRef.current - 1)
     setCurrentImageIndex(prev => (prev - 1 + slideCount) % slideCount)
-  }, [slideCount, heroTransitionEnabled])
+  }, [slideCount, heroTransitionEnabled, updateSlideIndex])
 
   const handleHeroTransitionEnd = useCallback(() => {
     if (slideCount <= 1 || !heroTransitionEnabled) return
-    if (heroSlideIndex === totalHeroSlides - 1) {
+    if (heroSlideIndexRef.current === totalHeroSlides - 1) {
       setHeroTransitionEnabled(false)
-      setHeroSlideIndex(1)
-    } else if (heroSlideIndex === 0) {
+      updateSlideIndex(1)
+    } else if (heroSlideIndexRef.current === 0) {
       setHeroTransitionEnabled(false)
-      setHeroSlideIndex(totalHeroSlides - 2)
+      updateSlideIndex(totalHeroSlides - 2)
     }
-  }, [slideCount, heroTransitionEnabled, heroSlideIndex, totalHeroSlides])
+  }, [slideCount, heroTransitionEnabled, totalHeroSlides, updateSlideIndex])
 
   const handleHeroDragStart = useCallback(
     (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
@@ -101,7 +111,7 @@ export function useProductHero(slideCount: number) {
     currentImageIndex,
     setCurrentImageIndex,
     heroSlideIndex,
-    setHeroSlideIndex,
+    setHeroSlideIndex: updateSlideIndex,
     heroTransitionEnabled,
     setHeroTransitionEnabled,
     draggedX,

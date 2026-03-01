@@ -131,7 +131,9 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
           }}
           onTransitionEnd={onTransitionEnd}
         >
-          {heroMedia.map((m, index) => {
+          {Array.from({ length: totalHeroSlides }).map((_, index) => {
+            // Ensure index is mapped correctly back to the base `heroMedia` array
+            const m = heroMedia[index]
             if (!m) return null
             const shouldEagerLoad =
               (slideCount <= 1 && index === 0) || (slideCount > 1 && index === 1)
