@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react'
-import { getContactPageContent } from '../services/cms'
-import type { ContactPageContent, ContactLocation } from '../types'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { PageLoading } from '../components/LoadingSpinner'
-import { useTranslation } from '../i18n'
-import { analytics } from '../lib/analytics'
-import { Breadcrumbs } from '../components/Breadcrumbs'
-import { FullscreenMediaViewer } from '../components/FullscreenMediaViewer'
-import { useSEO } from '../hooks/useSEO'
+import React, {useState, useEffect, useMemo, useRef} from 'react'
+import {getContactPageContent} from '../services/cms'
+import type {ContactPageContent, ContactLocation} from '../types'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {analytics} from '../lib/analytics'
+import {Breadcrumbs} from '../components/Breadcrumbs'
+import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
+import {useSEO} from '../hooks/useSEO'
 
 const getYouTubeId = (url: string): string | null => {
   const match = url.match(
@@ -61,7 +61,11 @@ const convertGoogleMapsUrlToEmbed = (url: string): string => {
   if (placeMatch && placeMatch[1]) {
     let placeName = placeMatch[1]
     // Decode first to avoid double encoding in case it's already encoded
-    try { placeName = decodeURIComponent(placeName) } catch (e) { }
+    try {
+      placeName = decodeURIComponent(placeName)
+    } catch (e) {
+      /* ignore error */
+    }
     // Place name ile search yaparak embed oluştur (API keysiz kullanım)
     return `https://maps.google.com/maps?q=${encodeURIComponent(placeName)}&t=&z=14&ie=UTF8&iwloc=&output=embed`
   }
@@ -128,8 +132,8 @@ const LocationCard: React.FC<{
   location: ContactLocation
   isSelected: boolean
   onSelect: () => void
-}> = ({ location, isSelected, onSelect }) => {
-  const { t } = useTranslation()
+}> = ({location, isSelected, onSelect}) => {
+  const {t} = useTranslation()
 
   return (
     <div
@@ -154,8 +158,9 @@ const LocationCard: React.FC<{
           onSelect()
         }
       }}
-      className={`p-4 cursor-pointer w-full max-w-full transition-all duration-300 ${isSelected ? 'bg-gray-200' : 'hover:bg-gray-100'
-        }`}
+      className={`p-4 cursor-pointer w-full max-w-full transition-all duration-300 ${
+        isSelected ? 'bg-gray-200' : 'hover:bg-gray-100'
+      }`}
     >
       <h3 className="text-xl font-light text-gray-500">{t(location.title)}</h3>
       <p className="mt-2 text-gray-500 flex items-start gap-2 font-light">
@@ -185,7 +190,7 @@ export function ContactPage() {
   const thumbRef = useRef<HTMLDivElement | null>(null)
   const [thumbDragStartX, setThumbDragStartX] = useState<number | null>(null)
   const [thumbScrollStart, setThumbScrollStart] = useState<number>(0)
-  const { t } = useTranslation()
+  const {t} = useTranslation()
 
   // SEO meta
   useSEO({
@@ -265,9 +270,9 @@ export function ContactPage() {
           return {
             type: m.type,
             url,
-          } as { type: 'image' | 'video' | 'youtube'; url: string }
+          } as {type: 'image' | 'video' | 'youtube'; url: string}
         })
-        .filter(Boolean) as { type: 'image' | 'video' | 'youtube'; url: string }[],
+        .filter(Boolean) as {type: 'image' | 'video' | 'youtube'; url: string}[],
     [selectedLocationMedia]
   )
 
@@ -460,7 +465,7 @@ export function ContactPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
         <Breadcrumbs
           className="mb-6"
-          items={[{ label: t('homepage'), to: '/' }, { label: t('contact') }]}
+          items={[{label: t('homepage'), to: '/'}, {label: t('contact')}]}
         />
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600 uppercase">
@@ -508,7 +513,7 @@ export function ContactPage() {
                 src={convertGoogleMapsUrlToEmbed(selectedLocation.mapEmbedUrl)}
                 width="100%"
                 height="100%"
-                style={{ border: 0 }}
+                style={{border: 0}}
                 className="w-full h-full"
                 allow="fullscreen"
                 loading="lazy"
