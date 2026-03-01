@@ -65,27 +65,11 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
         return
       }
 
-      // --- KESİN ÇÖZÜM AYARI ---
-      // Desktop'ta hem üstten hem alttan kırpma ile çalışıyoruz,
-      // mobilde ise SENKRON problemlerini tamamen engellemek için
-      // sadece ÜSTTEN kırpma yapıyoruz, alttan hiç kırpmıyoruz.
-
-      // Mobil: sadece üstten clip, altta boşluk kalmaz
-      if (isMobile) {
-        const BUFFER_TOP = 5 // çok küçük bir tampon
-        const top = Math.max(0, rect.top - BUFFER_TOP)
-        const left = Math.max(0, rect.left)
-        const right = Math.max(0, windowWidth - rect.right)
-
-        portalBg.style.clipPath = `inset(${top}px ${right}px 0 ${left}px)`
-        return
-      }
-
-      // Desktop: buffer yok, content'leri kesmemek için
-      const BUFFER_TOP = 0
-      const top = Math.max(0, rect.top - BUFFER_TOP)
-      const bottom = 0 // Alttan kesme yok, content'lerin üstüne binmesin
-
+      // Desktop ve mobil ayırımı yapmaksızın:
+      // Portal yüksekliği daima `rect` alanına göre maskelenmeli.
+      // Eğer eleman pencere içine girmeye başlarsa (rect.top < windowHeight):
+      const top = Math.max(0, rect.top) // Üst taraf ekranın altındayken negatif olmaz
+      const bottom = Math.max(0, windowHeight - rect.bottom) // Alt taraf pencereden taşıyorsa görünmez kısmı kes
       const left = Math.max(0, rect.left)
       const right = Math.max(0, windowWidth - rect.right)
 
@@ -93,7 +77,7 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
     }
 
     const onScroll = () => {
-      cancelAnimationFrame(animationFrameId)
+      if (animationFrameId) cancelAnimationFrame(animationFrameId)
       animationFrameId = requestAnimationFrame(updateClipPath)
     }
 
