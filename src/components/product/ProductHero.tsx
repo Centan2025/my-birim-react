@@ -1,10 +1,10 @@
-import { Link, useLocation } from 'react-router-dom'
-import { OptimizedImage } from '../OptimizedImage'
-import { OptimizedVideo } from '../OptimizedVideo'
-import { useTranslation } from '../../i18n'
-import { motion } from 'framer-motion'
-import { useCardTransition } from '../../context/CardTransitionContext'
-import type { LocalizedString, Designer } from '../../types'
+import {Link, useLocation} from 'react-router-dom'
+import {OptimizedImage} from '../OptimizedImage'
+import {OptimizedVideo} from '../OptimizedVideo'
+import {useTranslation} from '../../i18n'
+import {motion} from 'framer-motion'
+import {useCardTransition} from '../../context/CardTransitionContext'
+import type {LocalizedString, Designer} from '../../types'
 
 interface ProductHeroProps {
   product: {
@@ -38,7 +38,7 @@ interface ProductHeroProps {
   onSetTransitionEnabled: (enabled: boolean) => void
 }
 
-const toYouTubeEmbed = (url: string, { autoplay = false } = {}) => {
+const toYouTubeEmbed = (url: string, {autoplay = false} = {}) => {
   if (!url) return ''
   let id = ''
   if (url.includes('youtube.com/watch?v=')) id = url.split('v=')[1]?.split('&')[0] || ''
@@ -76,26 +76,28 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
   onSetCurrentImageIndex,
   onSetTransitionEnabled,
 }) => {
-  const { t } = useTranslation()
+  const {t} = useTranslation()
   const location = useLocation()
-  const { isExpanding, phase } = useCardTransition()
+  const {isExpanding, phase} = useCardTransition()
   const fromCard = location.state?.fromCard || isExpanding
 
   const arrowInLeft: React.CSSProperties = {
     transform: areDotsVisible ? 'scale(1)' : 'scale(0)',
     opacity: areDotsVisible ? 1 : 0,
-    transition: 'transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms, opacity 600ms ease-out 120ms',
+    transition:
+      'transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms, opacity 600ms ease-out 120ms',
   }
 
   const arrowInRight: React.CSSProperties = {
     transform: areDotsVisible ? 'scale(1)' : 'scale(0)',
     opacity: areDotsVisible ? 1 : 0,
-    transition: 'transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 200ms, opacity 600ms ease-out 200ms',
+    transition:
+      'transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 200ms, opacity 600ms ease-out 200ms',
   }
 
   return (
     <header className="relative w-full">
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
+      {}
       <div
         className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing"
         style={{
@@ -122,8 +124,9 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
           className="flex h-full"
           style={{
             width: `${totalHeroSlides * 100}%`,
-            transform: `translateX(calc(-${(heroSlideIndex * 100) / totalHeroSlides
-              }% + ${draggedX}px))`,
+            transform: `translateX(calc(-${
+              (heroSlideIndex * 100) / totalHeroSlides
+            }% + ${draggedX}px))`,
             transition: heroTransitionEnabled
               ? 'transform 1s cubic-bezier(0.1, 1, 0.2, 1)'
               : 'none',
@@ -131,7 +134,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
           }}
           onTransitionEnd={onTransitionEnd}
         >
-          {Array.from({ length: totalHeroSlides }).map((_, index) => {
+          {Array.from({length: totalHeroSlides}).map((_, index) => {
             // Ensure index is mapped correctly back to the base `heroMedia` array
             const m = heroMedia[index]
             if (!m) return null
@@ -181,7 +184,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                   <iframe
                     className="w-full h-full"
                     title="youtube-player"
-                    src={toYouTubeEmbed(m.url, { autoplay: isActiveSlide })}
+                    src={toYouTubeEmbed(m.url, {autoplay: isActiveSlide})}
                     allow="autoplay; encrypted-media; fullscreen"
                     frameBorder="0"
                   />
@@ -191,9 +194,9 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
           })}
         </div>
         <motion.div
-          initial={{ opacity: fromCard ? 1 : 0 }}
-          animate={{ opacity: 1 }}
-          transition={fromCard ? { duration: 0 } : { duration: 1.8, ease: 'easeInOut' }}
+          initial={{opacity: fromCard ? 1 : 0}}
+          animate={{opacity: 1}}
+          transition={fromCard ? {duration: 0} : {duration: 1.8, ease: 'easeInOut'}}
           className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent pointer-events-none"
         />
 
@@ -289,7 +292,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                       ? 0
                       : heroSlideIndex - 1
 
-              return Array.from({ length: slideCount }).map((_, index) => {
+              return Array.from({length: slideCount}).map((_, index) => {
                 const isActive = index === normalizedSlideIndex
                 const centerIndex = Math.floor(slideCount / 2)
                 const distanceFromCenter = Math.abs(index - centerIndex)
@@ -307,8 +310,9 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                       }
                       onSetCurrentImageIndex(index)
                     }}
-                    className={`relative h-2 rounded-none transition-all duration-500 ease-in-out group ${areDotsVisible ? 'animate-dot-grow' : 'opacity-0 scale-0'
-                      } ${isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'}`}
+                    className={`relative h-2 rounded-none transition-all duration-500 ease-in-out group ${
+                      areDotsVisible ? 'animate-dot-grow' : 'opacity-0 scale-0'
+                    } ${isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'}`}
                     style={{
                       transitionDelay: `${animationDelay}ms`,
                     }}

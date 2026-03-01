@@ -363,7 +363,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
             slideCount={slideCount}
           />
 
-          {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/no-noninteractive-element-interactions */}
+          {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
           <div
             role="region"
             aria-label="Fullscreen media scroll container"
