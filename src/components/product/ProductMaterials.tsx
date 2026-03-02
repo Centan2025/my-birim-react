@@ -17,30 +17,30 @@ interface ProductMaterialsProps {
 
 const sideReveal: any = {
   container: {
-    hidden: { opacity: 0 },
-    visible: {
+    revealOff: { opacity: 0 },
+    revealOn: {
       opacity: 1,
       transition: { staggerChildren: 0.1 },
     },
   },
   item: {
-    hidden: { opacity: 0, x: -50 },
-    visible: {
+    revealOff: { opacity: 0, x: -50 },
+    revealOn: {
       opacity: 1,
       x: 0,
       transition: { type: 'spring', stiffness: 100, damping: 20 }
     },
   },
   wrapper: {
-    hidden: { scaleX: 0, transformOrigin: 'left' },
-    visible: {
+    revealOff: { scaleX: 0, transformOrigin: 'left' },
+    revealOn: {
       scaleX: 1,
       transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
     }
   },
   image: {
-    hidden: { opacity: 0, x: -20 },
-    visible: {
+    revealOff: { opacity: 0, x: -20 },
+    revealOn: {
       opacity: 1,
       x: 0,
       transition: { delay: 0.2, duration: 0.8 }
@@ -60,8 +60,8 @@ const AnimatedContent: React.FC<{ animKey: string; children: React.ReactNode; va
   return (
     <motion.div
       key={animKey}
-      initial={variants ? "hidden" : { opacity: 0, y: 10 }}
-      whileInView={variants ? "visible" : { opacity: 1, y: 0 }}
+      initial={variants ? "revealOff" : { opacity: 0, y: 10 }}
+      whileInView={variants ? "revealOn" : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={variants ? undefined : { duration: 0.4, ease: 'easeOut' }}
       variants={variants}
@@ -250,8 +250,8 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
         ) : (
           /* Flat materials fallback */
           <motion.div
-            initial="hidden"
-            whileInView="visible"
+            initial="revealOff"
+            whileInView="revealOn"
             viewport={{ once: true, margin: "-50px" }}
             variants={sideReveal.container}
             className="grid grid-cols-3 sm:flex sm:flex-wrap gap-3 md:gap-6"
