@@ -88,18 +88,17 @@ const MaterialCard: React.FC<{
     role="button"
     tabIndex={0}
   >
-    <div className="relative overflow-hidden w-full aspect-square sm:w-28 sm:h-28 md:w-32 md:h-32">
-      <motion.div variants={sideReveal.wrapper} className="absolute inset-0 bg-white z-10 origin-left" style={{ scaleX: 0 }} />
+    <motion.div variants={sideReveal.wrapper} className="relative overflow-hidden w-full aspect-square sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-sm shadow-sm">
       <motion.div variants={sideReveal.image} className="w-full h-full">
         <OptimizedImage
           src={material.image}
           alt={t(material.name)}
-          className={`w-full h-full object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md ${imageBorderClass}`}
+          className={`w-full h-full object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 group-hover:scale-105 ${imageBorderClass}`}
           loading="lazy"
           quality={80}
         />
       </motion.div>
-    </div>
+    </motion.div>
     <p className="mt-2 md:mt-3 text-[11px] leading-tight md:text-sm text-gray-600 font-thin tracking-wider w-full break-words">
       {t(material.name)}
     </p>
