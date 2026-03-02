@@ -38,7 +38,7 @@ export function useHeaderBackgroundColor({
 
     if (!isDarkHeroPage) {
       // Koyu hero bulunmayan sayfalarda her zaman siyah-transparan fon uygula
-      return `rgba(0, 0, 0, ${Math.max(headerOpacity, 0.85)})`
+      return `rgba(0, 0, 0, ${Math.max(headerOpacity, 0.65)})`
     }
 
     // Koyu hero görseli olan sayfalar (Ana Sayfa, Hakkımızda) için mevcut şeffaflık kuralları:
