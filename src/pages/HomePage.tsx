@@ -1,18 +1,18 @@
-import React, {useState, useEffect, useMemo} from 'react'
-import {useTranslation} from '../i18n'
-import {useSiteSettings} from '../hooks/useSiteData'
-import {useHomePageContent} from '../hooks/useHomePage'
-import {HomeHero} from '../components/HomeHero'
-import {useSEO} from '../hooks/useSEO'
-import {HomeContentBlocks} from '../components/HomeContentBlocks'
-import {HomeInspirationSection} from '../components/HomeInspirationSection'
-import {useHeaderTheme} from '../context/HeaderThemeContext'
-import type {HeroMediaItem} from '../types'
+import React, { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from '../i18n'
+import { useSiteSettings } from '../hooks/useSiteData'
+import { useHomePageContent } from '../hooks/useHomePage'
+import { HomeHero } from '../components/HomeHero'
+import { useSEO } from '../hooks/useSEO'
+import { HomeContentBlocks } from '../components/HomeContentBlocks'
+import { HomeInspirationSection } from '../components/HomeInspirationSection'
+import { useHeaderTheme } from '../context/HeaderThemeContext'
+import type { HeroMediaItem } from '../types'
 
 export function HomePage() {
-  const {data: content} = useHomePageContent()
-  const {data: settings} = useSiteSettings()
-  const {setFromPalette, reset} = useHeaderTheme()
+  const { data: content } = useHomePageContent()
+  const { data: settings } = useSiteSettings()
+  const { setFromPalette, reset } = useHeaderTheme()
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth < 1024
@@ -25,7 +25,7 @@ export function HomePage() {
     }
     return 0
   })
-  const {t} = useTranslation()
+  const { t } = useTranslation()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
 
   // SEO
@@ -136,14 +136,14 @@ export function HomePage() {
       style={
         isMobile && viewportWidth > 0
           ? {
-              width: `${viewportWidth}px`,
-              maxWidth: `${viewportWidth}px`,
-              overflowX: 'hidden',
-              margin: 0,
-              padding: 0,
-              left: 0,
-              right: 0,
-            }
+            width: `${viewportWidth}px`,
+            maxWidth: `${viewportWidth}px`,
+            overflowX: 'hidden',
+            margin: 0,
+            padding: 0,
+            left: 0,
+            right: 0,
+          }
           : {}
       }
     >
@@ -393,6 +393,11 @@ export function HomePage() {
           isMobile={isMobile}
           imageBorderClass={imageBorderClass}
         />
+      )}
+
+      {/* İlham Üstü Gri Bant */}
+      {inspiration && (
+        <section className="w-full bg-gray-100 h-12 md:h-20" />
       )}
 
       {/* Inspiration Section */}
