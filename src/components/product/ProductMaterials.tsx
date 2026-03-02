@@ -15,19 +15,56 @@ interface ProductMaterialsProps {
   onOpenMaterialLightbox: (images: any[], index: number) => void
 }
 
+const sideReveal: any = {
+  container: {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 },
+    },
+  },
+  item: {
+    hidden: { opacity: 0, x: -50 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { type: 'spring', stiffness: 100, damping: 20 }
+    },
+  },
+  wrapper: {
+    hidden: { scaleX: 0, transformOrigin: 'left' },
+    visible: {
+      scaleX: 1,
+      transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
+    }
+  },
+  image: {
+    hidden: { opacity: 0, x: -20 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { delay: 0.2, duration: 0.8 }
+    }
+  }
+}
+
 /**
  * Animated container that fades/slides content when `animKey` changes.
  */
-const AnimatedContent: React.FC<{ animKey: string; children: React.ReactNode }> = ({
+const AnimatedContent: React.FC<{ animKey: string; children: React.ReactNode; variants?: any; className?: string }> = ({
   animKey,
   children,
+  variants,
+  className
 }) => {
   return (
     <motion.div
       key={animKey}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
+      initial={variants ? "hidden" : { opacity: 0, y: 10 }}
+      animate={variants ? "visible" : { opacity: 1, y: 0 }}
+      transition={variants ? undefined : { duration: 0.4, ease: 'easeOut' }}
+      variants={variants}
+      className={className}
     >
       {children}
     </motion.div>
@@ -40,7 +77,8 @@ const MaterialCard: React.FC<{
   t: (v: any) => string
   onClick: () => void
 }> = ({ material, imageBorderClass, t, onClick }) => (
-  <div
+  <motion.div
+    variants={sideReveal.item}
     className="text-center group cursor-pointer flex flex-col items-center w-full sm:w-28 md:w-32"
     title={t(material.name)}
     onClick={onClick}
@@ -50,17 +88,22 @@ const MaterialCard: React.FC<{
     role="button"
     tabIndex={0}
   >
-    <OptimizedImage
-      src={material.image}
-      alt={t(material.name)}
-      className={`w-full aspect-square sm:w-28 sm:h-28 md:w-32 md:h-32 object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md ${imageBorderClass}`}
-      loading="lazy"
-      quality={80}
-    />
+    <div className="relative overflow-hidden w-full aspect-square sm:w-28 sm:h-28 md:w-32 md:h-32">
+      <motion.div variants={sideReveal.wrapper} className="absolute inset-0 bg-white z-10 origin-left" style={{ scaleX: 0 }} />
+      <motion.div variants={sideReveal.image} className="w-full h-full">
+        <OptimizedImage
+          src={material.image}
+          alt={t(material.name)}
+          className={`w-full h-full object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 shadow-sm group-hover:shadow-md ${imageBorderClass}`}
+          loading="lazy"
+          quality={80}
+        />
+      </motion.div>
+    </div>
     <p className="mt-2 md:mt-3 text-[11px] leading-tight md:text-sm text-gray-600 font-thin tracking-wider w-full break-words">
       {t(material.name)}
     </p>
-  </div>
+  </motion.div>
 )
 
 export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
@@ -146,31 +189,37 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                     </div>
 
                     {/* Materials with staggered animation */}
-                    <AnimatedContent animKey={`book-${safeActiveIndex}-${activeBookIndex}`}>
-                      <div className="grid grid-cols-3 sm:flex sm:flex-wrap gap-3 md:gap-6">
-                        {(Array.isArray(books[activeBookIndex]?.materials)
-                          ? books[activeBookIndex].materials
-                          : []
-                        ).map((material: any, index: number) => (
-                          <MaterialCard
-                            key={`mat-${index}-${material.image || index}`}
-                            material={material}
-                            imageBorderClass={imageBorderClass}
-                            t={t}
-                            onClick={() => {
-                              const allMaterials = Array.isArray(books[activeBookIndex]?.materials)
-                                ? books[activeBookIndex].materials
-                                : []
-                              onOpenMaterialLightbox(getMaterialsForLightbox(allMaterials), index)
-                            }}
-                          />
-                        ))}
-                      </div>
+                    <AnimatedContent
+                      animKey={`book-${safeActiveIndex}-${activeBookIndex}`}
+                      variants={sideReveal.container}
+                      className="grid grid-cols-3 sm:flex sm:flex-wrap gap-3 md:gap-6"
+                    >
+                      {(Array.isArray(books[activeBookIndex]?.materials)
+                        ? books[activeBookIndex].materials
+                        : []
+                      ).map((material: any, index: number) => (
+                        <MaterialCard
+                          key={`mat-${index}-${material.image || index}`}
+                          material={material}
+                          imageBorderClass={imageBorderClass}
+                          t={t}
+                          onClick={() => {
+                            const allMaterials = Array.isArray(books[activeBookIndex]?.materials)
+                              ? books[activeBookIndex].materials
+                              : []
+                            onOpenMaterialLightbox(getMaterialsForLightbox(allMaterials), index)
+                          }}
+                        />
+                      ))}
                     </AnimatedContent>
                   </>
                 ) : (
                   /* Fallback: Direct materials if no books */
-                  <div className="grid grid-cols-3 sm:flex sm:flex-wrap gap-3 md:gap-6">
+                  <AnimatedContent
+                    animKey={`group-direct-${safeActiveIndex}`}
+                    variants={sideReveal.container}
+                    className="grid grid-cols-3 sm:flex sm:flex-wrap gap-3 md:gap-6"
+                  >
                     {(Array.isArray(grouped[safeActiveIndex]?.materials)
                       ? grouped[safeActiveIndex].materials
                       : []
@@ -188,7 +237,7 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                         }}
                       />
                     ))}
-                  </div>
+                  </AnimatedContent>
                 )}
               </AnimatedContent>
             ) : (
@@ -200,7 +249,12 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
           </>
         ) : (
           /* Flat materials fallback */
-          <div className="grid grid-cols-3 sm:flex sm:flex-wrap gap-3 md:gap-6">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={sideReveal.container}
+            className="grid grid-cols-3 sm:flex sm:flex-wrap gap-3 md:gap-6"
+          >
             {flatMaterials.map((material, index) => (
               <MaterialCard
                 key={`matflat-${index}-${material.image || index}`}
@@ -212,7 +266,7 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                 }
               />
             ))}
-          </div>
+          </motion.div>
         )}
       </div>
     </ScrollReveal>
