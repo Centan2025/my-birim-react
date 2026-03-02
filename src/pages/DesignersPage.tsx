@@ -1,23 +1,23 @@
 import React from 'react'
-import {Link} from 'react-router-dom'
-import type {Designer} from '../types'
-import {OptimizedImage} from '../components/OptimizedImage'
-import {PageLoading} from '../components/LoadingSpinner'
-import {useTranslation} from '../i18n'
-import {useDesigners} from '../hooks/useDesigners'
-import {useSiteSettings} from '../hooks/useSiteData'
-import {Breadcrumbs} from '../components/Breadcrumbs'
+import { Link } from 'react-router-dom'
+import type { Designer } from '../types'
+import { OptimizedImage } from '../components/OptimizedImage'
+import { PageLoading } from '../components/LoadingSpinner'
+import { useTranslation } from '../i18n'
+import { useDesigners } from '../hooks/useDesigners'
+import { useSiteSettings } from '../hooks/useSiteData'
+import { Breadcrumbs } from '../components/Breadcrumbs'
 import ScrollReveal from '../components/ScrollReveal'
-import {useSEO} from '../hooks/useSEO'
+import { useSEO } from '../hooks/useSEO'
 
-import {useNavigate} from 'react-router-dom'
-import {useCardTransition} from '../context/CardTransitionContext'
+import { useNavigate } from 'react-router-dom'
+import { useCardTransition } from '../context/CardTransitionContext'
 
-const DesignerCard: React.FC<{designer: Designer}> = ({designer}) => {
-  const {t} = useTranslation()
+const DesignerCard: React.FC<{ designer: Designer }> = ({ designer }) => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
-  const {triggerExpand} = useCardTransition()
-  const {data: settings} = useSiteSettings()
+  const { triggerExpand } = useCardTransition()
+  const { data: settings } = useSiteSettings()
   const cardRef = React.useRef<HTMLDivElement>(null)
 
   const designerImageUrl =
@@ -29,6 +29,8 @@ const DesignerCard: React.FC<{designer: Designer}> = ({designer}) => {
 
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
 
+  const [isAnimating, setIsAnimating] = React.useState(false)
+
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault()
 
@@ -37,6 +39,8 @@ const DesignerCard: React.FC<{designer: Designer}> = ({designer}) => {
       navigate(`/designer/${designer.id}`)
       return
     }
+
+    setIsAnimating(true)
 
     const rect = imageContainer.getBoundingClientRect()
 
@@ -85,7 +89,7 @@ const DesignerCard: React.FC<{designer: Designer}> = ({designer}) => {
         showGradient: false, // Designers don't have hero gradient
       },
       () => {
-        navigate(`/designer/${designer.id}`, {state: {fromCard: true}})
+        navigate(`/designer/${designer.id}`, { state: { fromCard: true } })
       }
     )
   }
@@ -93,7 +97,7 @@ const DesignerCard: React.FC<{designer: Designer}> = ({designer}) => {
   return (
     <div className="group flex flex-col h-full text-center">
       <Link to={`/designer/${designer.id}`} onClick={handleClick} className="block h-full">
-        <div ref={cardRef} className={`overflow-hidden bg-white aspect-[3/4] ${imageBorderClass}`}>
+        <div ref={cardRef} className={`overflow-hidden bg-white aspect-[3/4] ${imageBorderClass}`} style={{ opacity: isAnimating ? 0 : 1 }}>
           <OptimizedImage
             src={designerImageUrl}
             srcMobile={designerImageMobile}
@@ -115,8 +119,8 @@ const DesignerCard: React.FC<{designer: Designer}> = ({designer}) => {
 }
 
 export function DesignersPage() {
-  const {data: designers = [], isLoading: loading} = useDesigners()
-  const {t} = useTranslation()
+  const { data: designers = [], isLoading: loading } = useDesigners()
+  const { t } = useTranslation()
 
   // SEO meta
   useSEO({
@@ -141,7 +145,7 @@ export function DesignersPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
         <Breadcrumbs
           className="mb-6"
-          items={[{label: t('homepage'), to: '/'}, {label: t('designers')}]}
+          items={[{ label: t('homepage'), to: '/' }, { label: t('designers') }]}
         />
         <div className="text-center mt-6 md:mt-8 mb-12">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600">{t('designers')}</h1>

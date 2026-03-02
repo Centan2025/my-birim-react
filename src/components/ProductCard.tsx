@@ -1,26 +1,26 @@
-import React, {useMemo, useRef} from 'react'
-import {Link, useNavigate} from 'react-router-dom'
-import type {Product, Designer} from '../types'
-import {OptimizedImage} from './OptimizedImage'
-import {useTranslation} from '../i18n'
-import {useSiteSettings} from '../App'
-import {analytics} from '../lib/analytics'
-import {useDesigners} from '../hooks/useDesigners'
-import {useCardTransition} from '../context/CardTransitionContext'
+import React, { useMemo, useRef } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import type { Product, Designer } from '../types'
+import { OptimizedImage } from './OptimizedImage'
+import { useTranslation } from '../i18n'
+import { useSiteSettings } from '../App'
+import { analytics } from '../lib/analytics'
+import { useDesigners } from '../hooks/useDesigners'
+import { useCardTransition } from '../context/CardTransitionContext'
 
-export const ProductCard: React.FC<{product: Product; variant?: 'default' | 'light'}> = ({
+export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'light' }> = ({
   product,
   variant = 'default',
 }) => {
-  const {t} = useTranslation()
+  const { t } = useTranslation()
   const navigate = useNavigate()
-  const {settings} = useSiteSettings()
+  const { settings } = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const isLight = variant === 'light'
   const cardRef = useRef<HTMLDivElement>(null)
-  const {triggerExpand} = useCardTransition()
+  const { triggerExpand } = useCardTransition()
 
-  const {data: designers = []} = useDesigners()
+  const { data: designers = [] } = useDesigners()
   const designerName = useMemo(() => {
     if (!product.designerId || !designers.length) return ''
     const designer = (designers as Designer[]).find(d => d.id === product.designerId)
@@ -35,6 +35,8 @@ export const ProductCard: React.FC<{product: Product; variant?: 'default' | 'lig
   const mainImageDesktop =
     typeof product.mainImage === 'object' ? product.mainImage.urlDesktop : undefined
 
+  const [isAnimating, setIsAnimating] = React.useState(false)
+
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault()
 
@@ -48,13 +50,15 @@ export const ProductCard: React.FC<{product: Product; variant?: 'default' | 'lig
     // Get the image container's bounding rect
     const imageContainer = cardRef.current
     if (!imageContainer) {
-      navigate(`/product/${product.id}`, {state: {product}})
+      navigate(`/product/${product.id}`, { state: { product } })
       return
     }
 
     const rect = imageContainer.getBoundingClientRect()
     const crop = typeof product.mainImage === 'object' ? product.mainImage.crop : undefined
     const hotspot = typeof product.mainImage === 'object' ? product.mainImage.hotspot : undefined
+
+    setIsAnimating(true)
 
     triggerExpand(
       {
@@ -71,7 +75,7 @@ export const ProductCard: React.FC<{product: Product; variant?: 'default' | 'lig
         initialBorderRadius: '0px',
       },
       () => {
-        navigate(`/product/${product.id}`, {state: {product, fromCard: true}})
+        navigate(`/product/${product.id}`, { state: { product, fromCard: true } })
       }
     )
   }
@@ -84,6 +88,7 @@ export const ProductCard: React.FC<{product: Product; variant?: 'default' | 'lig
           className="relative overflow-hidden aspect-square w-full flex items-center justify-center bg-white group-hover:scale-[1.04]"
           style={{
             transition: 'scale 0.9s cubic-bezier(0.25, 0.1, 0.25, 1)',
+            opacity: isAnimating ? 0 : 1,
           }}
         >
           <OptimizedImage
@@ -98,11 +103,10 @@ export const ProductCard: React.FC<{product: Product; variant?: 'default' | 'lig
         </div>
         <div className="px-2.5 py-2 sm:px-3 sm:py-2 transition-colors duration-500">
           <h3
-            className={`text-base sm:text-lg tracking-tight font-semibold ${
-              isLight
-                ? 'text-gray-800 group-hover:text-gray-900'
-                : 'text-gray-900 group-hover:text-black'
-            }`}
+            className={`text-base sm:text-lg tracking-tight font-semibold ${isLight
+              ? 'text-gray-800 group-hover:text-gray-900'
+              : 'text-gray-900 group-hover:text-black'
+              }`}
           >
             {t(product.name)}
           </h3>
