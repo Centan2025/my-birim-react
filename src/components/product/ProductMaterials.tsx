@@ -61,7 +61,8 @@ const AnimatedContent: React.FC<{ animKey: string; children: React.ReactNode; va
     <motion.div
       key={animKey}
       initial={variants ? "hidden" : { opacity: 0, y: 10 }}
-      animate={variants ? "visible" : { opacity: 1, y: 0 }}
+      whileInView={variants ? "visible" : { opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
       transition={variants ? undefined : { duration: 0.4, ease: 'easeOut' }}
       variants={variants}
       className={className}
@@ -250,7 +251,8 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
           /* Flat materials fallback */
           <motion.div
             initial="hidden"
-            animate="visible"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
             variants={sideReveal.container}
             className="grid grid-cols-3 sm:flex sm:flex-wrap gap-3 md:gap-6"
           >
