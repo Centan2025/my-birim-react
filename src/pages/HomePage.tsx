@@ -397,7 +397,7 @@ export function HomePage() {
 
       {/* İlham Üstü Gri Bant */}
       {inspiration && (
-        <section className="w-full bg-gray-100 h-12 md:h-20" />
+        <section className="w-full bg-gray-200 h-12 md:h-20" />
       )}
 
       {/* Inspiration Section */}

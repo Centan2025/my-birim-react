@@ -1,14 +1,14 @@
 import React from 'react'
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
-import {ContentBlock} from '../types'
-import {useTranslation} from '../i18n'
+import { ContentBlock } from '../types'
+import { useTranslation } from '../i18n'
 import ScrollReveal from './ScrollReveal'
-import {OptimizedImage} from './OptimizedImage'
-import {OptimizedVideo} from './OptimizedVideo'
-import {YouTubeBackground} from './YouTubeBackground'
+import { OptimizedImage } from './OptimizedImage'
+import { OptimizedVideo } from './OptimizedVideo'
+import { YouTubeBackground } from './YouTubeBackground'
 import PortableTextLite from './PortableTextLite'
-import {useGoogleFonts} from '../hooks/useGoogleFont'
+import { useGoogleFonts } from '../hooks/useGoogleFont'
 
 interface HomeContentBlocksProps {
   blocks: ContentBlock[]
@@ -21,7 +21,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
   isMobile,
   imageBorderClass,
 }) => {
-  const {t} = useTranslation()
+  const { t } = useTranslation()
 
   // Tüm bloklardaki fontları topla ve yükle
   const allFonts = blocks.map(b => b.titleFont).filter(Boolean) as string[]
@@ -324,7 +324,14 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           <section
             key={index}
             className={`content-block-wrapper relative z-20 ${backgroundColor}`}
-            style={{paddingBottom: bottomSpacing > 0 ? `${bottomSpacing}px` : undefined}}
+            style={{
+              paddingBottom:
+                index === sortedBlocks.length - 1
+                  ? 0
+                  : bottomSpacing > 0
+                    ? `${bottomSpacing}px`
+                    : undefined,
+            }}
             data-block-index={index}
           >
             {isFullWidth || isCenter ? (
@@ -338,20 +345,18 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 <div
                   className={
                     hasTextContent
-                      ? `flex flex-col ${
-                          isLeft
-                            ? 'md:flex-row'
-                            : isRight
-                              ? 'md:flex-row-reverse'
-                              : 'md:flex-row items-center'
-                        } gap-4 md:gap-6`
+                      ? `flex flex-col ${isLeft
+                        ? 'md:flex-row'
+                        : isRight
+                          ? 'md:flex-row-reverse'
+                          : 'md:flex-row items-center'
+                      } gap-4 md:gap-6`
                       : 'flex flex-col items-center gap-4 md:gap-6'
                   }
                 >
                   <div
-                    className={`w-full ${
-                      !hasTextContent ? 'md:w-full flex flex-col items-center' : 'md:w-1/2'
-                    } overflow-visible`}
+                    className={`w-full ${!hasTextContent ? 'md:w-full flex flex-col items-center' : 'md:w-1/2'
+                      } overflow-visible`}
                   >
                     {mediaContent}
                   </div>
