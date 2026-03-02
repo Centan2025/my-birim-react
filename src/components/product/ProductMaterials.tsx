@@ -62,7 +62,7 @@ const AnimatedContent: React.FC<{ animKey: string; children: React.ReactNode; va
       key={animKey}
       initial={variants ? "revealOff" : { opacity: 0, y: 10 }}
       whileInView={variants ? "revealOn" : { opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
+      viewport={{ once: true, amount: 0.1 }}
       transition={variants ? undefined : { duration: 0.4, ease: 'easeOut' }}
       variants={variants}
       className={className}
@@ -189,8 +189,10 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                     </div>
 
                     {/* Materials with staggered animation */}
-                    <AnimatedContent
-                      animKey={`book-${safeActiveIndex}-${activeBookIndex}`}
+                    <motion.div
+                      key={`book-${safeActiveIndex}-${activeBookIndex}`}
+                      initial="revealOff"
+                      animate="revealOn"
                       variants={sideReveal.container}
                       className="grid grid-cols-3 sm:flex sm:flex-wrap gap-3 md:gap-6"
                     >
@@ -211,12 +213,14 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                           }}
                         />
                       ))}
-                    </AnimatedContent>
+                    </motion.div>
                   </>
                 ) : (
                   /* Fallback: Direct materials if no books */
-                  <AnimatedContent
-                    animKey={`group-direct-${safeActiveIndex}`}
+                  <motion.div
+                    key={`group-direct-${safeActiveIndex}`}
+                    initial="revealOff"
+                    animate="revealOn"
                     variants={sideReveal.container}
                     className="grid grid-cols-3 sm:flex sm:flex-wrap gap-3 md:gap-6"
                   >
@@ -237,7 +241,7 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                         }}
                       />
                     ))}
-                  </AnimatedContent>
+                  </motion.div>
                 )}
               </AnimatedContent>
             ) : (
@@ -251,8 +255,7 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
           /* Flat materials fallback */
           <motion.div
             initial="revealOff"
-            whileInView="revealOn"
-            viewport={{ once: true, margin: "-50px" }}
+            animate="revealOn"
             variants={sideReveal.container}
             className="grid grid-cols-3 sm:flex sm:flex-wrap gap-3 md:gap-6"
           >

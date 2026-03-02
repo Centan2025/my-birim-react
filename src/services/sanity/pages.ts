@@ -1,7 +1,7 @@
 import groq from 'groq'
-import type {AboutPageContent, ContactPageContent, HomePageContent} from '../../types'
-import {sanity, useSanity, mapImage, mapMediaUrl, rewriteR2Url, extractPalette} from './client'
-import {getItem} from './settings'
+import type { AboutPageContent, ContactPageContent, HomePageContent } from '../../types'
+import { sanity, useSanity, mapImage, mapMediaUrl, rewriteR2Url, extractPalette, mapR2Metadata } from './client'
+import { getItem } from './settings'
 
 const SIMULATED_DELAY = 200
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms))
@@ -54,7 +54,7 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
           palette: extractPalette(data.heroImageR2),
         }
       } else if (data.heroImage?.asset) {
-        data.heroImage = {url: mapImage(data.heroImage), palette: extractPalette(data.heroImage)}
+        data.heroImage = { url: mapImage(data.heroImage), palette: extractPalette(data.heroImage) }
       }
       if (data.historySection) {
         data.historySection.image = {
@@ -102,10 +102,10 @@ export const getContactPageContent = async (): Promise<ContactPageContent> => {
                   mediaItem.videoFile?.asset?.url ||
                   mediaItem.url
               }
-              return {...mediaItem, url: mediaUrl}
+              return { ...mediaItem, url: mediaUrl }
             })
             .filter((m: any) => m.url)
-          return {...loc, media: processedMedia}
+          return { ...loc, media: processedMedia }
         }
         return loc
       })
@@ -125,7 +125,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             contentBlocks[]{ ..., titleFont, imageR2, videoFileR2 },
             inspirationSection{ ..., backgroundImageR2{..., metadata{palette{dominant{background,foreground}}} }, backgroundImageMobileR2{..., metadata{palette{dominant{background,foreground}}} }, backgroundImageDesktopR2{..., metadata{palette{dominant{background,foreground}}} } }
         }`
-      const data = await sanity.withConfig({useCdn: false}).fetch(q)
+      const data = await sanity.withConfig({ useCdn: false }).fetch(q)
       if (data?.heroMedia) {
         data.heroMedia = data.heroMedia
           .map((m: any) => {
@@ -140,7 +140,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
               (url.includes('youtube.com') || url.includes('youtu.be'))
             )
               type = 'youtube'
-            const result: any = {...m, url, type}
+            const result: any = { ...m, url, type }
             if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
             if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
             if (palette) result.palette = palette
@@ -153,12 +153,14 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
           let url = b.url
           if (b.mediaType === 'image') {
             const imgUrl = b.imageR2?.url ? mapImage(b.imageR2) : undefined
-            if (imgUrl) return {...b, image: imgUrl, url: undefined}
+            if (imgUrl) return { ...b, image: imgUrl, url: undefined }
           }
           if (b.mediaType === 'video' && b.videoFileR2?.url) {
             url = rewriteR2Url(b.videoFileR2.url)
           }
-          return {...b, image: undefined, url}
+          const crop = b.imageR2 ? mapR2Metadata(b.imageR2).crop : undefined
+          const hotspot = b.imageR2 ? mapR2Metadata(b.imageR2).hotspot : undefined
+          return { ...b, image: undefined, url, crop, hotspot }
         })
       }
       if (data?.inspirationSection) {
@@ -190,6 +192,6 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
   return data || ({} as HomePageContent)
 }
 
-export const updateAboutPageContent = async (): Promise<void> => {}
-export const updateContactPageContent = async (): Promise<void> => {}
-export const updateHomePageContent = async (): Promise<void> => {}
+export const updateAboutPageContent = async (): Promise<void> => { }
+export const updateContactPageContent = async (): Promise<void> => { }
+export const updateHomePageContent = async (): Promise<void> => { }

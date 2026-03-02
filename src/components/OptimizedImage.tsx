@@ -278,9 +278,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     imgStyle.objectPosition = `${hotspot.x * 100}% ${hotspot.y * 100}%`
   }
   if (crop) {
-    // Destekleyen tarayıcılarda (Chrome/Edge 104+) resmi CSS ile kırpmak için
-    ; (imgStyle as any).objectViewBox = `inset(${crop.y * 100}% ${100 - (crop.x + crop.width) * 100
-      }% ${100 - (crop.y + crop.height) * 100}% ${crop.x * 100}%)`
+    // clip-path: inset() ile kırpma — geniş tarayıcı desteği
+    imgStyle.clipPath = `inset(${crop.y * 100}% ${(1 - crop.x - crop.width) * 100
+      }% ${(1 - crop.y - crop.height) * 100}% ${crop.x * 100}%)`
   }
 
   if (hasError) {

@@ -1,9 +1,9 @@
-import React, {useLayoutEffect, useRef} from 'react'
-import {createPortal} from 'react-dom'
-import {Link} from 'react-router-dom'
+import React, { useLayoutEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
+import { Link } from 'react-router-dom'
 
-import type {HomePageContent} from '../types'
-import {useTranslation} from '../i18n'
+import type { HomePageContent } from '../types'
+import { useTranslation } from '../i18n'
 import ScrollReveal from './ScrollReveal'
 
 interface HomeInspirationSectionProps {
@@ -21,7 +21,7 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
   bgImageMobile,
   bgImageDesktop,
 }) => {
-  const {t} = useTranslation()
+  const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
   const portalRef = useRef<HTMLDivElement>(null)
 
@@ -37,17 +37,18 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
 
   const dynamicHeightStyles = isMobile
     ? {
-        // Yüksekliği sabit tutmak yerine, minimum yükseklik veriyoruz.
-        // Böylece tarayıcı farklarından bağımsız olarak önceki content
-        // bloklarının üstüne binme riski azalır.
-        minHeight: '25vh',
-      }
+      // Yüksekliği sabit tutmak yerine, minimum yükseklik veriyoruz.
+      // Böylece tarayıcı farklarından bağımsız olarak önceki content
+      // bloklarının üstüne binme riski azalır.
+      minHeight: '25vh',
+    }
     : {
-        minHeight: '55vh',
-      }
+      minHeight: '55vh',
+    }
 
   useLayoutEffect(() => {
-    let animationFrameId: number
+    let lastScrollY = window.scrollY
+    let animFrameId: number
 
     const updateClipPath = () => {
       const container = containerRef.current
@@ -65,31 +66,45 @@ export const HomeInspirationSection: React.FC<HomeInspirationSectionProps> = ({
         return
       }
 
-      // Desktop ve mobil ayırımı yapmaksızın:
-      // Portal yüksekliği daima `rect` alanına göre maskelenmeli.
-      // Eğer eleman pencere içine girmeye başlarsa (rect.top < windowHeight):
-      const top = Math.max(0, rect.top) // Üst taraf ekranın altındayken negatif olmaz
-      const bottom = Math.max(0, windowHeight - rect.bottom) // Alt taraf pencereden taşıyorsa görünmez kısmı kes
+      // Scroll yönünü tespit et ve yöne göre taşma payı ekle
+      const currentScrollY = window.scrollY
+      const scrollDelta = currentScrollY - lastScrollY
+      lastScrollY = currentScrollY
+
+      // Scroll yönüne göre: yukarı scroll → alt kenar taşmalı, aşağı scroll → üst kenar taşmalı
+      const baseMargin = 4
+      const dynamicMargin = Math.min(30, Math.abs(scrollDelta) * 0.8)
+
+      // Yukarı scrollda (scrollDelta < 0) bottom'a ekstra margin, 
+      // aşağı scrollda (scrollDelta > 0) top'a ekstra margin
+      const topMargin = baseMargin + (scrollDelta > 0 ? dynamicMargin : 0)
+      const bottomMargin = baseMargin + (scrollDelta < 0 ? dynamicMargin : 0)
+
+      const top = Math.max(0, rect.top - topMargin)
+      const bottom = Math.max(0, windowHeight - rect.bottom - bottomMargin)
       const left = Math.max(0, rect.left)
       const right = Math.max(0, windowWidth - rect.right)
 
       portalBg.style.clipPath = `inset(${top}px ${right}px ${bottom}px ${left}px)`
     }
 
+    // Çift güncelleme: hem scroll event'te hem de rAF ile güncelle
     const onScroll = () => {
-      if (animationFrameId) cancelAnimationFrame(animationFrameId)
-      animationFrameId = requestAnimationFrame(updateClipPath)
+      updateClipPath()
+      // rAF ile paint öncesi bir kez daha güncelle
+      cancelAnimationFrame(animFrameId)
+      animFrameId = requestAnimationFrame(updateClipPath)
     }
 
     updateClipPath()
 
-    window.addEventListener('scroll', onScroll, {passive: true})
-    window.addEventListener('resize', onScroll, {passive: true})
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll, { passive: true })
 
     return () => {
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onScroll)
-      cancelAnimationFrame(animationFrameId)
+      cancelAnimationFrame(animFrameId)
     }
   }, [isMobile])
 

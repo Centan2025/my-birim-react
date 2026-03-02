@@ -161,8 +161,8 @@ export const R2Image: React.FC<R2ImageProps> = ({
             ...style,
             ...(hasCrop
               ? {
-                objectViewBox: `inset(${source!.cropY! * 100}% ${100 - (source!.cropX! + source!.cropWidth!) * 100
-                  }% ${100 - (source!.cropY! + source!.cropHeight!) * 100}% ${source!.cropX! * 100
+                clipPath: `inset(${source!.cropY! * 100}% ${(1 - source!.cropX! - source!.cropWidth!) * 100
+                  }% ${(1 - source!.cropY! - source!.cropHeight!) * 100}% ${source!.cropX! * 100
                   }%)`,
               }
               : {}),

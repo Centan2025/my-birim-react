@@ -1,13 +1,14 @@
-import React, {useState, useEffect, useMemo, useRef} from 'react'
-import {getContactPageContent} from '../services/cms'
-import type {ContactPageContent, ContactLocation} from '../types'
-import {OptimizedImage} from '../components/OptimizedImage'
-import {PageLoading} from '../components/LoadingSpinner'
-import {useTranslation} from '../i18n'
-import {analytics} from '../lib/analytics'
-import {Breadcrumbs} from '../components/Breadcrumbs'
-import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
-import {useSEO} from '../hooks/useSEO'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
+import { motion } from 'framer-motion'
+import { getContactPageContent } from '../services/cms'
+import type { ContactPageContent, ContactLocation } from '../types'
+import { OptimizedImage } from '../components/OptimizedImage'
+import { PageLoading } from '../components/LoadingSpinner'
+import { useTranslation } from '../i18n'
+import { analytics } from '../lib/analytics'
+import { Breadcrumbs } from '../components/Breadcrumbs'
+import { FullscreenMediaViewer } from '../components/FullscreenMediaViewer'
+import { useSEO } from '../hooks/useSEO'
 
 const getYouTubeId = (url: string): string | null => {
   const match = url.match(
@@ -132,8 +133,8 @@ const LocationCard: React.FC<{
   location: ContactLocation
   isSelected: boolean
   onSelect: () => void
-}> = ({location, isSelected, onSelect}) => {
-  const {t} = useTranslation()
+}> = ({ location, isSelected, onSelect }) => {
+  const { t } = useTranslation()
 
   return (
     <div
@@ -158,9 +159,8 @@ const LocationCard: React.FC<{
           onSelect()
         }
       }}
-      className={`p-4 cursor-pointer w-full max-w-full transition-all duration-300 ${
-        isSelected ? 'bg-gray-200' : 'hover:bg-gray-100'
-      }`}
+      className={`p-4 cursor-pointer w-full max-w-full transition-all duration-300 ${isSelected ? 'bg-gray-200' : 'hover:bg-gray-100'
+        }`}
     >
       <h3 className="text-xl font-light text-gray-500">{t(location.title)}</h3>
       <p className="mt-2 text-gray-500 flex items-start gap-2 font-light">
@@ -190,7 +190,7 @@ export function ContactPage() {
   const thumbRef = useRef<HTMLDivElement | null>(null)
   const [thumbDragStartX, setThumbDragStartX] = useState<number | null>(null)
   const [thumbScrollStart, setThumbScrollStart] = useState<number>(0)
-  const {t} = useTranslation()
+  const { t } = useTranslation()
 
   // SEO meta
   useSEO({
@@ -270,9 +270,9 @@ export function ContactPage() {
           return {
             type: m.type,
             url,
-          } as {type: 'image' | 'video' | 'youtube'; url: string}
+          } as { type: 'image' | 'video' | 'youtube'; url: string }
         })
-        .filter(Boolean) as {type: 'image' | 'video' | 'youtube'; url: string}[],
+        .filter(Boolean) as { type: 'image' | 'video' | 'youtube'; url: string }[],
     [selectedLocationMedia]
   )
 
@@ -327,9 +327,29 @@ export function ContactPage() {
               thumbRef.current.scrollLeft = thumbScrollStart - delta
             }}
           >
-            <div className="flex gap-3 min-w-max pb-2">
+            <motion.div
+              key={`contact-media-${selectedLocationMedia.length}`}
+              className="flex gap-3 min-w-max pb-2"
+              initial="revealOff"
+              animate="revealOn"
+              variants={{
+                revealOff: { opacity: 0 },
+                revealOn: { opacity: 1, transition: { staggerChildren: 0.1 } }
+              }}
+            >
               {selectedLocationMedia.map((m, idx) => (
-                <div key={idx} className="relative flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24">
+                <motion.div
+                  key={idx}
+                  className="relative flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24"
+                  variants={{
+                    revealOff: { opacity: 0, x: -50 },
+                    revealOn: {
+                      opacity: 1,
+                      x: 0,
+                      transition: { type: 'spring', stiffness: 100, damping: 20 }
+                    }
+                  }}
+                >
                   <button
                     onClick={() => {
                       analytics.event({
@@ -342,46 +362,69 @@ export function ContactPage() {
                       // Tüm cihazlarda: ürün / proje detay sayfasındakiyle aynı tam ekran viewer
                       setIsFullscreenOpen(true)
                     }}
-                    className="relative w-full h-full overflow-hidden border-2 border-transparent opacity-80 hover:opacity-100 hover:scale-105 transition-all duration-300"
+                    className="relative w-full h-full border-2 border-transparent opacity-80 hover:opacity-100 hover:scale-105 transition-all duration-300"
                   >
-                    {m.type === 'image' ? (
-                      <OptimizedImage
-                        src={m.url || ''}
-                        alt={`Media ${idx + 1}`}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        quality={75}
-                        draggable={false}
-                      />
-                    ) : m.type === 'video' ? (
-                      <div className="w-full h-full bg-black/60" />
-                    ) : (
-                      <OptimizedImage
-                        src={youTubeThumb(m.url || '')}
-                        alt={`youtube thumb ${idx + 1}`}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        quality={75}
-                      />
-                    )}
-                    {(m.type === 'video' || m.type === 'youtube') && (
-                      <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                        <span className="bg-white/85 text-gray-900 w-10 h-10 flex items-center justify-center shadow">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            className="w-5 h-5 ml-0.5"
-                          >
-                            <path d="M8 5v14l11-7z" />
-                          </svg>
-                        </span>
-                      </span>
-                    )}
+                    <motion.div
+                      variants={{
+                        revealOff: { scaleX: 0, transformOrigin: 'left' },
+                        revealOn: {
+                          scaleX: 1,
+                          transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
+                        }
+                      }}
+                      className="relative overflow-hidden w-full h-full"
+                    >
+                      <motion.div
+                        variants={{
+                          revealOff: { opacity: 0, x: -20 },
+                          revealOn: {
+                            opacity: 1,
+                            x: 0,
+                            transition: { delay: 0.2, duration: 0.8 }
+                          }
+                        }}
+                        className="w-full h-full"
+                      >
+                        {m.type === 'image' ? (
+                          <OptimizedImage
+                            src={m.url || ''}
+                            alt={`Media ${idx + 1}`}
+                            className="w-full h-full object-cover shadow-sm"
+                            loading="lazy"
+                            quality={75}
+                            draggable={false}
+                          />
+                        ) : m.type === 'video' ? (
+                          <div className="w-full h-full bg-black/60 shadow-sm" />
+                        ) : (
+                          <OptimizedImage
+                            src={youTubeThumb(m.url || '')}
+                            alt={`youtube thumb ${idx + 1}`}
+                            className="w-full h-full object-cover shadow-sm"
+                            loading="lazy"
+                            quality={75}
+                          />
+                        )}
+                        {(m.type === 'video' || m.type === 'youtube') && (
+                          <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                            <span className="bg-white/85 text-gray-900 w-10 h-10 flex items-center justify-center shadow">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                className="w-5 h-5 ml-0.5"
+                              >
+                                <path d="M8 5v14l11-7z" />
+                              </svg>
+                            </span>
+                          </span>
+                        )}
+                      </motion.div>
+                    </motion.div>
                   </button>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
           {/* Scroll buttons */}
           {selectedLocationMedia.length > 6 && (
@@ -461,13 +504,24 @@ export function ContactPage() {
   }
 
   return (
-    <div className={`${isFullscreenOpen ? 'bg-white' : 'bg-gray-100'} animate-fade-in-up-subtle`}>
+    <div className={`${isFullscreenOpen ? 'bg-white' : 'bg-gray-100'}`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
-        <Breadcrumbs
-          className="mb-6"
-          items={[{label: t('homepage'), to: '/'}, {label: t('contact')}]}
-        />
-        <div className="text-center mb-12">
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <Breadcrumbs
+            className="mb-6"
+            items={[{ label: t('homepage'), to: '/' }, { label: t('contact') }]}
+          />
+        </motion.div>
+        <motion.div
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+        >
           <h1 className="text-3xl md:text-4xl font-light text-gray-600 uppercase">
             {t('contact')}
           </h1>
@@ -475,10 +529,15 @@ export function ContactPage() {
           <p className="mt-4 text-lg text-gray-500 max-w-3xl mx-auto font-light">
             {t(content.subtitle)}
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-stretch">
-          <div className="bg-white p-6 shadow-sm border border-gray-300 space-y-8 w-full overflow-x-hidden h-full">
+          <motion.div
+            className="bg-white p-6 shadow-sm border border-gray-300 space-y-8 w-full overflow-x-hidden h-full"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          >
             {Array.from(locationGroupsMap.entries()).map(([type, locs]) => (
               <div key={type}>
                 <h2 className="text-2xl font-light text-gray-600 mb-2">{type}</h2>
@@ -498,22 +557,32 @@ export function ContactPage() {
                 </div>
               </div>
             ))}
-          </div>
+          </motion.div>
 
           {/* Mobilde: haritanın üzerinde medya bandı */}
           {selectedLocationMedia.length > 0 && (
-            <div className="mt-4 border-y border-gray-300 py-2 md:hidden w-full overflow-x-hidden">
+            <motion.div
+              className="mt-4 border-y border-gray-300 py-2 md:hidden w-full overflow-x-hidden"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            >
               {renderSelectedLocationMediaStrip()}
-            </div>
+            </motion.div>
           )}
 
-          <div className="bg-white shadow-sm border border-gray-300 overflow-hidden h-full flex">
+          <motion.div
+            className="bg-white shadow-sm border border-gray-300 overflow-hidden h-full flex"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          >
             {selectedLocation?.mapEmbedUrl ? (
               <iframe
                 src={convertGoogleMapsUrlToEmbed(selectedLocation.mapEmbedUrl)}
                 width="100%"
                 height="100%"
-                style={{border: 0}}
+                style={{ border: 0 }}
                 className="w-full h-full"
                 allow="fullscreen"
                 loading="lazy"
@@ -526,14 +595,19 @@ export function ContactPage() {
                 <p>{t('map_not_available')}</p>
               </div>
             )}
-          </div>
+          </motion.div>
         </div>
 
         {/* Medya Bantı - Seçili lokasyonun medyaları (sadece desktop: haritanın altında tam genişlik) */}
         {selectedLocationMedia.length > 0 && (
-          <div className="mt-12 border-y border-gray-300 py-3 hidden md:block">
+          <motion.div
+            className="mt-12 border-y border-gray-300 py-3 hidden md:block"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          >
             {renderSelectedLocationMediaStrip()}
-          </div>
+          </motion.div>
         )}
       </div>
       {/* Tüm cihazlar için: ürün / proje detay sayfasındakiyle aynı tam ekran viewer */}

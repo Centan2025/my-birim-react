@@ -1,32 +1,32 @@
-import {useState, useEffect} from 'react'
-import {useParams, useNavigate} from 'react-router-dom'
-import {useAuth} from '../App'
-import {PageLoading} from '../components/LoadingSpinner'
-import {useTranslation} from '../i18n'
-import {useSEO} from '../hooks/useSEO'
-import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
-import {addStructuredData, getProductSchema} from '../lib/seo'
-import {analytics} from '../lib/analytics'
-import {useProductDetail} from '../hooks/useProductDetail'
-import {useLightbox} from '../hooks/useLightbox'
-import {ProductDesignerSection} from '../components/ProductDesignerSection'
-import {ProductExclusiveContentSection} from '../components/ProductExclusiveContentSection'
-import {ProductMediaPanels} from '../components/ProductMediaPanels'
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { useAuth } from '../App'
+import { PageLoading } from '../components/LoadingSpinner'
+import { useTranslation } from '../i18n'
+import { useSEO } from '../hooks/useSEO'
+import { FullscreenMediaViewer } from '../components/FullscreenMediaViewer'
+import { addStructuredData, getProductSchema } from '../lib/seo'
+import { analytics } from '../lib/analytics'
+import { useProductDetail } from '../hooks/useProductDetail'
+import { useLightbox } from '../hooks/useLightbox'
+import { ProductDesignerSection } from '../components/ProductDesignerSection'
+import { ProductExclusiveContentSection } from '../components/ProductExclusiveContentSection'
+import { ProductMediaPanels } from '../components/ProductMediaPanels'
 
 // Modular components
-import {ProductHero} from '../components/product/ProductHero'
-import {ProductThumbnails} from '../components/product/ProductThumbnails'
-import {ProductInfo} from '../components/product/ProductInfo'
-import {ProductMaterials} from '../components/product/ProductMaterials'
-import {ProductDimensions} from '../components/product/ProductDimensions'
-import {ProductBottomNav} from '../components/product/ProductBottomNav'
-import {ProductRelated} from '../components/product/ProductRelated'
-import {ProductMediaLightbox} from '../components/product/ProductMediaLightbox'
-import {ProductAddToCart} from '../components/product/ProductAddToCart'
-import {useCardTransition} from '../context/CardTransitionContext'
+import { ProductHero } from '../components/product/ProductHero'
+import { ProductThumbnails } from '../components/product/ProductThumbnails'
+import { ProductInfo } from '../components/product/ProductInfo'
+import { ProductMaterials } from '../components/product/ProductMaterials'
+import { ProductDimensions } from '../components/product/ProductDimensions'
+import { ProductBottomNav } from '../components/product/ProductBottomNav'
+import { ProductRelated } from '../components/product/ProductRelated'
+import { ProductMediaLightbox } from '../components/product/ProductMediaLightbox'
+import { ProductAddToCart } from '../components/product/ProductAddToCart'
+import { useCardTransition } from '../context/CardTransitionContext'
 
 export function ProductDetailPage() {
-  const {productId: liveId} = useParams<{productId: string}>()
+  const { productId: liveId } = useParams<{ productId: string }>()
   // Sayfa geçişlerinde param sıfırlandığı için ilk id'yi kilitliyoruz
   const [frozenId] = useState(liveId)
   const productId = frozenId || liveId
@@ -52,7 +52,7 @@ export function ProductDetailPage() {
     prevProduct,
     nextProduct,
   } = useProductDetail(productId)
-  const {phase} = useCardTransition()
+  const { phase } = useCardTransition()
   // Lightbox state (reusable hook for each lightbox)
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
   const [lightboxSource, setLightboxSource] = useState<'band' | 'panel'>('band')
@@ -74,20 +74,16 @@ export function ProductDetailPage() {
     }
   }, [mergedGroups])
 
-  // Animation visibility state
+  // Animation visibility state — all start hidden for entrance animation
   const [isFullscreenButtonVisible, setIsFullscreenButtonVisible] = useState(false)
   const [isTitleVisible, setIsTitleVisible] = useState(false)
   const [isDesignerVisible, setIsDesignerVisible] = useState(false)
   const [areDotsVisible, setAreDotsVisible] = useState(false)
-  const [isThumbnailsVisible, setIsThumbnailsVisible] = useState(
-    () => !(window.history.state?.usr as any)?.fromCard
-  )
-  const [isMainContentVisible, setIsMainContentVisible] = useState(
-    () => !(window.history.state?.usr as any)?.fromCard
-  )
+  const [isThumbnailsVisible, setIsThumbnailsVisible] = useState(false)
+  const [isMainContentVisible, setIsMainContentVisible] = useState(false)
 
-  const {isLoggedIn, user} = useAuth()
-  const {t, locale} = useTranslation()
+  const { isLoggedIn, user } = useAuth()
+  const { t, locale } = useTranslation()
 
   // SEO & Analytics
   useSEO({
@@ -136,18 +132,21 @@ export function ProductDetailPage() {
     const fromCard = (window.history.state?.usr as any)?.fromCard
 
     if (!fromCard) {
-      // Standard page load animations
+      // Standard page load / refresh: staggered entrance animation
       setIsFullscreenButtonVisible(false)
       setIsDesignerVisible(false)
       setIsTitleVisible(false)
       setAreDotsVisible(false)
-      setIsThumbnailsVisible(true)
-      setIsMainContentVisible(true)
+      setIsThumbnailsVisible(false)
+      setIsMainContentVisible(false)
 
-      setTimeout(() => setIsFullscreenButtonVisible(true), 500)
+      // Stagger all elements in
+      setTimeout(() => setIsThumbnailsVisible(true), 100)
+      setTimeout(() => setIsMainContentVisible(true), 250)
       setTimeout(() => setIsDesignerVisible(true), 400)
-      setTimeout(() => setIsTitleVisible(true), 600)
+      setTimeout(() => setIsFullscreenButtonVisible(true), 500)
       setTimeout(() => setAreDotsVisible(true), 500)
+      setTimeout(() => setIsTitleVisible(true), 600)
     }
   }, [product])
 
@@ -234,9 +233,8 @@ export function ProductDetailPage() {
       />
 
       <div
-        className={`transition-all duration-700 ease-out ${
-          !isThumbnailsVisible ? 'opacity-0 translate-y-8' : 'opacity-100 translate-y-0'
-        }`}
+        className={`transition-all duration-700 ease-out ${!isThumbnailsVisible ? 'opacity-0 translate-y-8' : 'opacity-100 translate-y-0'
+          }`}
       >
         <ProductThumbnails
           productName={product.name}
@@ -252,19 +250,17 @@ export function ProductDetailPage() {
       </div>
 
       <main
-        className={`bg-gray-100 pb-12 transition-all duration-700 ease-out ${
-          !isMainContentVisible ? 'opacity-0 translate-y-12' : 'opacity-100 translate-y-0 delay-75'
-        }`}
+        className={`bg-gray-100 pb-12 transition-all duration-700 ease-out ${!isMainContentVisible ? 'opacity-0 translate-y-12' : 'opacity-100 translate-y-0 delay-75'
+          }`}
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 lg:pt-12">
           <ProductInfo product={product} category={category} locale={locale} />
 
           <div
-            className={`mt-12 space-y-16 transition-all duration-700 ease-out ${
-              !isMainContentVisible
+            className={`mt-12 space-y-16 transition-all duration-700 ease-out ${!isMainContentVisible
                 ? 'opacity-0 translate-y-12'
                 : 'opacity-100 translate-y-0 delay-150'
-            }`}
+              }`}
           >
             <ProductDimensions
               dimImages={product.dimensionImages?.filter((di: any) => di?.image) || []}
@@ -306,11 +302,10 @@ export function ProductDetailPage() {
           </div>
 
           <div
-            className={`transition-all duration-700 ease-out ${
-              !isMainContentVisible
+            className={`transition-all duration-700 ease-out ${!isMainContentVisible
                 ? 'opacity-0 translate-y-12'
                 : 'opacity-100 translate-y-0 delay-200'
-            }`}
+              }`}
           >
             {Array.isArray(product?.media) &&
               product.media.length > 0 &&
@@ -337,9 +332,8 @@ export function ProductDetailPage() {
       </main>
 
       <div
-        className={`transition-all duration-700 ease-out ${
-          !isMainContentVisible ? 'opacity-0 translate-y-12' : 'opacity-100 translate-y-0 delay-300'
-        }`}
+        className={`transition-all duration-700 ease-out ${!isMainContentVisible ? 'opacity-0 translate-y-12' : 'opacity-100 translate-y-0 delay-300'
+          }`}
       >
         <ProductBottomNav
           prevProduct={prevProduct}

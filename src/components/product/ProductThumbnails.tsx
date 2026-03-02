@@ -1,7 +1,8 @@
-import React, {useRef, useState, useEffect} from 'react'
-import {OptimizedImage} from '../OptimizedImage'
-import {useTranslation} from '../../i18n'
-import type {LocalizedString} from '../../types'
+import React, { useRef, useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { OptimizedImage } from '../OptimizedImage'
+import { useTranslation } from '../../i18n'
+import type { LocalizedString } from '../../types'
 
 interface ProductThumbnailsProps {
   productName: LocalizedString
@@ -31,7 +32,7 @@ export const ProductThumbnails: React.FC<ProductThumbnailsProps> = ({
   imageBorderClass,
   onSelect,
 }) => {
-  const {t} = useTranslation()
+  const { t } = useTranslation()
   const thumbRef = useRef<HTMLDivElement | null>(null)
   const [thumbDragStartX, setThumbDragStartX] = useState<number | null>(null)
   const [thumbScrollStart, setThumbScrollStart] = useState<number>(0)
@@ -44,7 +45,7 @@ export const ProductThumbnails: React.FC<ProductThumbnailsProps> = ({
 
   const checkArrows = () => {
     if (!thumbRef.current) return
-    const {scrollLeft, scrollWidth, clientWidth} = thumbRef.current
+    const { scrollLeft, scrollWidth, clientWidth } = thumbRef.current
     setShowLeftArrow(scrollLeft > 0)
     setShowRightArrow(Math.ceil(scrollLeft + clientWidth) < scrollWidth)
     setIsCentering(scrollWidth <= clientWidth)
@@ -102,93 +103,126 @@ export const ProductThumbnails: React.FC<ProductThumbnailsProps> = ({
             }}
             onKeyDown={e => {
               if (!thumbRef.current) return
-              if (e.key === 'ArrowLeft') thumbRef.current.scrollBy({left: -50, behavior: 'smooth'})
-              if (e.key === 'ArrowRight') thumbRef.current.scrollBy({left: 50, behavior: 'smooth'})
+              if (e.key === 'ArrowLeft') thumbRef.current.scrollBy({ left: -50, behavior: 'smooth' })
+              if (e.key === 'ArrowRight') thumbRef.current.scrollBy({ left: 50, behavior: 'smooth' })
             }}
           >
-            <div
+            <motion.div
+              key={`thumbnails-${bandMedia.length}`}
               className={`relative flex gap-3 min-w-max pb-2 ${isCentering ? 'mx-auto w-fit' : ''}`}
+              initial="revealOff"
+              animate="revealOn"
+              variants={{
+                revealOff: { opacity: 0 },
+                revealOn: { opacity: 1, transition: { staggerChildren: 0.1 } }
+              }}
             >
               {bandMedia.map((m, idx) => (
-                <div
+                <motion.div
                   key={idx}
-                  style={{
-                    animation: `thumb-fade-in-right 0.6s cubic-bezier(0.1, 1, 0.2, 1) ${idx * 60}ms both`,
+                  variants={{
+                    revealOff: { opacity: 0, x: -50 },
+                    revealOn: {
+                      opacity: 1,
+                      x: 0,
+                      transition: { type: 'spring', stiffness: 100, damping: 20 }
+                    }
                   }}
+                  className="flex-shrink-0"
                 >
                   <button
                     ref={el => {
                       thumbButtonsRef.current[idx] = el
                     }}
-                    className={`relative z-20 flex-shrink-0 w-24 h-24 rounded-none transition-all duration-300 ${
-                      currentImageIndex === idx
-                        ? 'opacity-100'
-                        : 'opacity-80 hover:opacity-100 hover:scale-105'
-                    }`}
+                    className={`relative z-20 w-24 h-24 rounded-none transition-all duration-300 ${currentImageIndex === idx
+                      ? 'opacity-100'
+                      : 'opacity-80 hover:opacity-100 hover:scale-105'
+                      }`}
                     onClick={() => onSelect(idx)}
                   >
-                    <div className="relative w-full h-full">
-                      {m.type === 'image' ? (
-                        <OptimizedImage
-                          src={m.url}
-                          alt={`${t(productName)} thumbnail ${idx + 1}`}
-                          className={`w-full h-full object-cover ${imageBorderClass}`}
-                          loading="lazy"
-                          quality={75}
-                          crop={m.crop}
-                          hotspot={m.hotspot}
-                        />
-                      ) : m.type === 'video' ? (
-                        <video
-                          src={m.url}
-                          className={`w-full h-full object-cover ${imageBorderClass}`}
-                          muted
-                          playsInline
-                          preload="metadata"
-                          style={{pointerEvents: 'none'}}
-                        />
-                      ) : (
-                        <OptimizedImage
-                          src={youTubeThumb(m.url)}
-                          alt={`youtube thumb ${idx + 1}`}
-                          className={`w-full h-full object-cover ${imageBorderClass}`}
-                          loading="lazy"
-                          quality={75}
-                        />
-                      )}
-                      {(m.type === 'video' || m.type === 'youtube') && (
-                        <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                          <span className="bg-white/85 text-gray-900 rounded-full w-10 h-10 flex items-center justify-center shadow">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
-                              className="w-5 h-5 ml-0.5"
-                            >
-                              <path d="M8 5v14l11-7z" />
-                            </svg>
-                          </span>
-                        </span>
-                      )}
-                      {/* Minimal active indicator */}
-                      <div
-                        className="pointer-events-none absolute -bottom-2 left-0 right-0 h-[3px] bg-gray-500 z-[30] origin-center transition-transform duration-300 ease-out"
-                        style={{
-                          transform: currentImageIndex === idx ? 'scaleX(1)' : 'scaleX(0)',
+                    <motion.div
+                      variants={{
+                        revealOff: { scaleX: 0, transformOrigin: 'left' },
+                        revealOn: {
+                          scaleX: 1,
+                          transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
+                        }
+                      }}
+                      className="relative overflow-hidden w-full h-full shadow-sm"
+                    >
+                      <motion.div
+                        variants={{
+                          revealOff: { opacity: 0, x: -20 },
+                          revealOn: {
+                            opacity: 1,
+                            x: 0,
+                            transition: { delay: 0.2, duration: 0.8 }
+                          }
                         }}
-                      />
-                    </div>
+                        className="w-full h-full"
+                      >
+                        {m.type === 'image' ? (
+                          <OptimizedImage
+                            src={m.url}
+                            alt={`${t(productName)} thumbnail ${idx + 1}`}
+                            className={`w-full h-full object-cover ${imageBorderClass}`}
+                            loading="lazy"
+                            quality={75}
+                            crop={m.crop}
+                            hotspot={m.hotspot}
+                          />
+                        ) : m.type === 'video' ? (
+                          <video
+                            src={m.url}
+                            className={`w-full h-full object-cover ${imageBorderClass}`}
+                            muted
+                            playsInline
+                            preload="metadata"
+                            style={{ pointerEvents: 'none' }}
+                          />
+                        ) : (
+                          <OptimizedImage
+                            src={youTubeThumb(m.url)}
+                            alt={`youtube thumb ${idx + 1}`}
+                            className={`w-full h-full object-cover ${imageBorderClass}`}
+                            loading="lazy"
+                            quality={75}
+                          />
+                        )}
+                        {(m.type === 'video' || m.type === 'youtube') && (
+                          <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                            <span className="bg-white/85 text-gray-900 rounded-full w-10 h-10 flex items-center justify-center shadow">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                className="w-5 h-5 ml-0.5"
+                              >
+                                <path d="M8 5v14l11-7z" />
+                              </svg>
+                            </span>
+                          </span>
+                        )}
+                        {/* Minimal active indicator */}
+                        <div
+                          className="pointer-events-none absolute -bottom-2 left-0 right-0 h-[3px] bg-gray-500 z-[30] origin-center transition-transform duration-300 ease-out"
+                          style={{
+                            transform: currentImageIndex === idx ? 'scaleX(1)' : 'scaleX(0)',
+                          }}
+                        />
+                      </motion.div>
+                    </motion.div>
                   </button>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
           {/* Scroll buttons */}
           {!isMobile && showLeftArrow && (
             <button
               aria-label="scroll-left"
               onClick={() => {
-                if (thumbRef.current) thumbRef.current.scrollBy({left: -240, behavior: 'smooth'})
+                if (thumbRef.current) thumbRef.current.scrollBy({ left: -240, behavior: 'smooth' })
               }}
               className="absolute top-1/2 -translate-y-1/2 flex items-center justify-center rounded transition-transform hover:scale-105 active:scale-95 z-10"
               style={{
@@ -218,7 +252,7 @@ export const ProductThumbnails: React.FC<ProductThumbnailsProps> = ({
             <button
               aria-label="scroll-right"
               onClick={() => {
-                if (thumbRef.current) thumbRef.current.scrollBy({left: 240, behavior: 'smooth'})
+                if (thumbRef.current) thumbRef.current.scrollBy({ left: 240, behavior: 'smooth' })
               }}
               className="absolute top-1/2 -translate-y-1/2 flex items-center justify-center rounded transition-transform hover:scale-105 active:scale-95 z-10"
               style={{

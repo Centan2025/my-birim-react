@@ -32,9 +32,15 @@ export function useHeaderBackgroundColor({
       return 'rgba(0, 0, 0, 0.85)'
     }
 
-    // Ana sayfa ve hakkımızda dışındaki sayfaların genel fonu açık renk olduğu için
-    // header'ın (yazılar beyaz olduğu için) her zaman koyu fonla başlaması gerekiyor.
-    const isDarkHeroPage = path === '/' || path === '' || path.startsWith('/about')
+    // Üstte koyu hero görseli bulunan sayfalar: header tam şeffaf olmalı.
+    // Ana sayfa, hakkımızda, ürünler ana sayfası, alt kategori sayfaları ve kategoriler sayfası.
+    const isDarkHeroPage =
+      path === '/' ||
+      path === '' ||
+      path.startsWith('/about') ||
+      path === '/products' ||
+      path === '/categories' ||
+      /^\/products\/[^/]+$/.test(path)
 
     if (!isDarkHeroPage) {
       // Koyu hero bulunmayan sayfalarda her zaman siyah-transparan fon uygula

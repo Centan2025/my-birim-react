@@ -1,4 +1,4 @@
-import {useEffect, MutableRefObject} from 'react'
+import { useEffect, MutableRefObject } from 'react'
 
 type MenuState = {
   isLangOpen: boolean
@@ -53,6 +53,15 @@ export function useHeaderScroll({
     let rafId: number | null = null
     let lastScrollTime = 0
     const SCROLL_THROTTLE_MS = 50
+
+    // Üstte koyu hero görseli olan sayfalar (header tam şeffaf olmalı)
+    const isDarkHeroPage = (p: string) =>
+      p === '/' ||
+      p === '' ||
+      p.startsWith('/about') ||
+      p === '/products' ||
+      p === '/categories' ||
+      /^\/products\/[^/]+$/.test(p)
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY
@@ -121,35 +130,38 @@ export function useHeaderScroll({
               }
             } else {
               const path = locationPathname
-              const isProjectsList = path === '/projects' || path === '/projects/'
-              const isProductsList =
-                path === '/products' || path === '/products/' || path.match(/^\/products\/?$/)
-              const isProjectDetail = path.match(/^\/projects\/[^/]+$/)
-              const isProductDetail = path.match(/^\/product\/[^/]+$/)
-              const isNewsList = path === '/news' || path === '/news/'
-              const isNewsDetail = path.match(/^\/news\/[^/]+$/)
-              const isDesignersList = path === '/designers' || path === '/designers/'
-              const isDesignerDetail = path.match(/^\/designer\/[^/]+$/)
-              const isLightPage =
-                isProjectsList ||
-                isProductsList ||
-                isProjectDetail ||
-                isProductDetail ||
-                isNewsList ||
-                isNewsDetail ||
-                isDesignersList ||
-                isDesignerDetail ||
-                path.includes('contact') ||
-                path.includes('cart') ||
-                path.includes('favorites') ||
-                path.includes('profile') ||
-                path.includes('orders') ||
-                path.includes('search')
 
-              if (isLightPage) {
-                setHeaderOpacity(0.7)
-              } else {
+              // Koyu hero görseli olan sayfalar → scrollY 0'da tam şeffaf
+              if (isDarkHeroPage(path)) {
                 setHeaderOpacity(0)
+              } else {
+                const isProjectsList = path === '/projects' || path === '/projects/'
+                const isProjectDetail = path.match(/^\/projects\/[^/]+$/)
+                const isProductDetail = path.match(/^\/product\/[^/]+$/)
+                const isNewsList = path === '/news' || path === '/news/'
+                const isNewsDetail = path.match(/^\/news\/[^/]+$/)
+                const isDesignersList = path === '/designers' || path === '/designers/'
+                const isDesignerDetail = path.match(/^\/designer\/[^/]+$/)
+                const isLightPage =
+                  isProjectsList ||
+                  isProjectDetail ||
+                  isProductDetail ||
+                  isNewsList ||
+                  isNewsDetail ||
+                  isDesignersList ||
+                  isDesignerDetail ||
+                  path.includes('contact') ||
+                  path.includes('cart') ||
+                  path.includes('favorites') ||
+                  path.includes('profile') ||
+                  path.includes('orders') ||
+                  path.includes('search')
+
+                if (isLightPage) {
+                  setHeaderOpacity(0.7)
+                } else {
+                  setHeaderOpacity(0)
+                }
               }
               opacitySetByHandleScrollRef.current = true
             }
@@ -196,12 +208,14 @@ export function useHeaderScroll({
         const isNewsList = path === '/news' || path === '/news/'
         const isDesignersList = path === '/designers' || path === '/designers/'
 
+        // Hero görseli olmayan light page'lerde sabit opacity
         if (isProjectsList || isProjectDetail || isNewsList || isDesignersList) {
           setHeaderOpacity(0.7)
           opacitySetByHandleScrollRef.current = true
         } else {
+          // Koyu hero bulunan sayfalar dahil: scroll'a göre opacity artır
           const maxScroll = 200
-          let opacity = 0.1
+          let opacity = 0
 
           if (currentScrollY > 0) {
             opacity = Math.min(0.75, 0.1 + (currentScrollY / maxScroll) * 0.65)
@@ -303,7 +317,7 @@ export function useHeaderScroll({
     const initializeScrollListener = () => {
       scrollListener = handleScrollWithEnd
       handleScroll()
-      window.addEventListener('scroll', handleScrollWithEnd, {passive: true})
+      window.addEventListener('scroll', handleScrollWithEnd, { passive: true })
     }
 
     initializeScrollListener()

@@ -267,6 +267,8 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   className={`${isFullWidth ? 'w-full h-auto' : `${mediaWidthClass} ${imageBorderClass}`} ${isMobile ? 'object-contain' : 'object-cover'} block`}
                   loading="lazy"
                   quality={85}
+                  crop={block.crop}
+                  hotspot={block.hotspot}
                 />
                 {block.showButtonOnMedia && block.linkText && block.linkUrl && (
                   <div

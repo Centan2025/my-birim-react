@@ -1,63 +1,63 @@
-import React, {Suspense, lazy, useState} from 'react'
-import {Routes, Route, useLocation} from 'react-router-dom'
-import {AnimatePresence} from 'framer-motion'
-import {Header} from '../components/Header'
-import {Footer} from '../components/Footer'
-import {PageTransition} from '../components/PageTransition'
-import {CartSidebar} from '../components/CartSidebar'
+import React, { Suspense, lazy, useState } from 'react'
+import { Routes, Route, useLocation } from 'react-router-dom'
+import { AnimatePresence } from 'framer-motion'
+import { Header } from '../components/Header'
+import { Footer } from '../components/Footer'
+import { PageTransition } from '../components/PageTransition'
+import { CartSidebar } from '../components/CartSidebar'
 import CookieBanner from '../components/CookieBanner'
-import {PageLoading} from '../components/LoadingSpinner'
-import {ErrorBoundary} from '../components/ErrorBoundary'
-import {SkipLink} from '../components/SkipLink'
+import { PageLoading } from '../components/LoadingSpinner'
+import { ErrorBoundary } from '../components/ErrorBoundary'
+import { SkipLink } from '../components/SkipLink'
 
 // Lazy loaded pages
-const HomePage = lazy(() => import('../pages/HomePage').then(m => ({default: m.HomePage})))
+const HomePage = lazy(() => import('../pages/HomePage').then(m => ({ default: m.HomePage })))
 const CategoriesPage = lazy(() =>
-  import('../pages/CategoriesPage').then(m => ({default: m.CategoriesPage}))
+  import('../pages/CategoriesPage').then(m => ({ default: m.CategoriesPage }))
 )
 const ProductsPage = lazy(() =>
-  import('../pages/ProductsPage').then(m => ({default: m.ProductsPage}))
+  import('../pages/ProductsPage').then(m => ({ default: m.ProductsPage }))
 )
 const ProductDetailPage = lazy(() =>
-  import('../pages/ProductDetailPage').then(m => ({default: m.ProductDetailPage}))
+  import('../pages/ProductDetailPage').then(m => ({ default: m.ProductDetailPage }))
 )
 const DesignersPage = lazy(() =>
-  import('../pages/DesignersPage').then(m => ({default: m.DesignersPage}))
+  import('../pages/DesignersPage').then(m => ({ default: m.DesignersPage }))
 )
 const DesignerDetailPage = lazy(() =>
-  import('../pages/DesignerDetailPage').then(m => ({default: m.DesignerDetailPage}))
+  import('../pages/DesignerDetailPage').then(m => ({ default: m.DesignerDetailPage }))
 )
 const ProjectsPage = lazy(() =>
-  import('../pages/ProjectsPage').then(m => ({default: m.ProjectsPage}))
+  import('../pages/ProjectsPage').then(m => ({ default: m.ProjectsPage }))
 )
 const ProjectDetailPage = lazy(() =>
-  import('../pages/ProjectDetailPage').then(m => ({default: m.ProjectDetailPage}))
+  import('../pages/ProjectDetailPage').then(m => ({ default: m.ProjectDetailPage }))
 )
-const AboutPage = lazy(() => import('../pages/AboutPage').then(m => ({default: m.AboutPage})))
-const ContactPage = lazy(() => import('../pages/ContactPage').then(m => ({default: m.ContactPage})))
-const LoginPage = lazy(() => import('../pages/LoginPage').then(m => ({default: m.LoginPage})))
-const ProfilePage = lazy(() => import('../pages/ProfilePage').then(m => ({default: m.ProfilePage})))
+const AboutPage = lazy(() => import('../pages/AboutPage').then(m => ({ default: m.AboutPage })))
+const ContactPage = lazy(() => import('../pages/ContactPage').then(m => ({ default: m.ContactPage })))
+const LoginPage = lazy(() => import('../pages/LoginPage').then(m => ({ default: m.LoginPage })))
+const ProfilePage = lazy(() => import('../pages/ProfilePage').then(m => ({ default: m.ProfilePage })))
 const VerifyEmailPage = lazy(() =>
-  import('../pages/VerifyEmailPage').then(m => ({default: m.VerifyEmailPage}))
+  import('../pages/VerifyEmailPage').then(m => ({ default: m.VerifyEmailPage }))
 )
 const ResetPasswordPage = lazy(() =>
-  import('../pages/ResetPasswordPage').then(m => ({default: m.ResetPasswordPage}))
+  import('../pages/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage }))
 )
-const NewsPage = lazy(() => import('../pages/NewsPage').then(m => ({default: m.NewsPage})))
+const NewsPage = lazy(() => import('../pages/NewsPage').then(m => ({ default: m.NewsPage })))
 const NewsDetailPage = lazy(() =>
-  import('../pages/NewsDetailPage').then(m => ({default: m.NewsDetailPage}))
+  import('../pages/NewsDetailPage').then(m => ({ default: m.NewsDetailPage }))
 )
-const CookiesPage = lazy(() => import('../pages/CookiesPage').then(m => ({default: m.default})))
-const PrivacyPage = lazy(() => import('../pages/PrivacyPage').then(m => ({default: m.default})))
-const TermsPage = lazy(() => import('../pages/TermsPage').then(m => ({default: m.default})))
-const KvkkPage = lazy(() => import('../pages/KvkkPage').then(m => ({default: m.default})))
+const CookiesPage = lazy(() => import('../pages/CookiesPage').then(m => ({ default: m.default })))
+const PrivacyPage = lazy(() => import('../pages/PrivacyPage').then(m => ({ default: m.default })))
+const TermsPage = lazy(() => import('../pages/TermsPage').then(m => ({ default: m.default })))
+const KvkkPage = lazy(() => import('../pages/KvkkPage').then(m => ({ default: m.default })))
 
 interface PageBoundaryProps {
   children: React.ReactNode
   pageName?: string
 }
 
-const PageBoundary: React.FC<PageBoundaryProps> = ({children}) => (
+const PageBoundary: React.FC<PageBoundaryProps> = ({ children }) => (
   <ErrorBoundary>
     <div className="flex flex-col min-h-screen">
       <div className="flex-grow">{children}</div>
@@ -75,7 +75,7 @@ export const MainLayout: React.FC = () => {
       <Header />
       <CartSidebar />
       <main id="main-content" className="flex flex-col flex-grow relative overflow-x-clip">
-        <AnimatePresence mode="sync" initial={false}>
+        <AnimatePresence mode="sync" initial={true}>
           <PageTransitionWrapper key={location.pathname} location={location} />
         </AnimatePresence>
       </main>
@@ -88,8 +88,8 @@ export const MainLayout: React.FC = () => {
  * Bu wrapper, lokasyonu "capture" eder ve hapseder.
  * PageTransition exit yaparken bile kendi içindeki Routes'a eski lokasyonu verir.
  */
-const PageTransitionWrapper = React.forwardRef<HTMLDivElement, {location: any}>(
-  ({location: liveLocation}, ref) => {
+const PageTransitionWrapper = React.forwardRef<HTMLDivElement, { location: any }>(
+  ({ location: liveLocation }, ref) => {
     // Lokasyonu ilk mount anındaki haliyle donduruyoruz.
     const [frozenLocation] = useState(liveLocation)
     const isSlideOver = (frozenLocation.state as any)?.slideOver === true
