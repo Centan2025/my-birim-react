@@ -38,7 +38,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
       {sortedBlocks.map((block, index) => {
         const hasTitle = !!block.title
         const hasDescription = !!block.description
-        const hasTextContent = hasTitle || hasDescription
+        const hasTextContent = hasTitle || hasDescription || !!(block.linkText && block.linkUrl && !block.showButtonOnMedia)
 
         const getMediaUrl = () => {
           if (block.mediaType === 'image' && block.image) {
@@ -299,23 +299,31 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           </ScrollReveal>
         )
 
-        const textContentAbove = (
+        const hasTopContent =
+          (titlePosition === 'above' && hasTitle) ||
+          (textPosition === 'above' && (hasDescription || (block.linkText && block.linkUrl && !block.showButtonOnMedia)))
+
+        const hasBottomContent =
+          (titlePosition === 'below' && hasTitle) ||
+          (textPosition === 'below' && (hasDescription || (block.linkText && block.linkUrl && !block.showButtonOnMedia)))
+
+        const textContentAbove = hasTopContent ? (
           <div
             className={`${isFullWidth || isCenter ? 'max-w-[94%] mx-auto px-4 md:px-0 pt-6 md:pt-8 pb-3' : 'w-full mx-auto mb-4'} flex flex-col ${textAlign === 'center' ? 'items-center text-center' : textAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
           >
             {titlePosition === 'above' && titleElement}
             {textPosition === 'above' && bodyElement}
           </div>
-        )
+        ) : null
 
-        const textContentBelow = (
+        const textContentBelow = hasBottomContent ? (
           <div
             className={`${isFullWidth || isCenter ? 'max-w-[94%] mx-auto px-4 md:px-0 pt-3 pb-6 md:pb-8' : 'w-full mx-auto mt-4'} flex flex-col ${textAlign === 'center' ? 'items-center text-center' : textAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
           >
             {titlePosition === 'below' && titleElement}
             {textPosition === 'below' && bodyElement}
           </div>
-        )
+        ) : null
 
         // Content alanları arasında dikey boşluk olmasın (Sanity'den ayarlanabilir)
         const bottomSpacing = block.spacingBottom || 0
@@ -326,7 +334,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             className={`content-block-wrapper relative z-20 ${backgroundColor}`}
             style={{
               paddingBottom:
-                index === sortedBlocks.length - 1
+                !hasTextContent || index === sortedBlocks.length - 1
                   ? 0
                   : bottomSpacing > 0
                     ? `${bottomSpacing}px`
@@ -336,9 +344,9 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           >
             {isFullWidth || isCenter ? (
               <div className="w-full overflow-hidden flex flex-col items-center">
-                {(titlePosition === 'above' || textPosition === 'above') && textContentAbove}
+                {textContentAbove}
                 {mediaContent}
-                {(titlePosition === 'below' || textPosition === 'below') && textContentBelow}
+                {textContentBelow}
               </div>
             ) : (
               <div className="container mx-auto px-6 sm:px-8 lg:px-4">

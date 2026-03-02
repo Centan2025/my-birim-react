@@ -1,11 +1,11 @@
-import React, {useCallback, useState, useRef, useEffect} from 'react'
-import {Box, Button, Card, Flex, Stack, Text, useToast, Inline, Spinner, Dialog} from '@sanity/ui'
-import {UploadIcon, TrashIcon, CheckmarkIcon, EditIcon, CropIcon, CloseIcon} from '@sanity/icons'
-import {ObjectInputProps, set, unset, useFormValue} from 'sanity'
-import {S3Client, PutObjectCommand} from '@aws-sdk/client-s3'
+import React, { useCallback, useState, useRef, useEffect } from 'react'
+import { Box, Button, Card, Flex, Stack, Text, useToast, Inline, Spinner, Dialog } from '@sanity/ui'
+import { UploadIcon, TrashIcon, CheckmarkIcon, EditIcon, CropIcon, CloseIcon } from '@sanity/icons'
+import { ObjectInputProps, set, unset, useFormValue } from 'sanity'
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import imageCompression from 'browser-image-compression'
 import styled from 'styled-components'
-import ReactCrop, {type Crop, type PixelCrop, type PercentCrop} from 'react-image-crop'
+import ReactCrop, { type Crop, type PixelCrop, type PercentCrop } from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
 // R2 Configuration from Environment Variables
@@ -24,7 +24,7 @@ const r2Client = new S3Client({
   },
 })
 
-const DropZone = styled(Card)<{$isDragging: boolean; $hasValue: boolean}>`
+const DropZone = styled(Card) <{ $isDragging: boolean; $hasValue: boolean }>`
   border: 2px dashed
     ${(props) => (props.$isDragging ? 'var(--card-focus-ring-color)' : 'var(--card-border-color)')};
   border-radius: 8px;
@@ -40,10 +40,11 @@ const DropZone = styled(Card)<{$isDragging: boolean; $hasValue: boolean}>`
 `
 
 const PreviewImage = styled.img`
-  width: 100%;
-  height: auto;
+  max-width: 100%;
   max-height: 400px;
-  object-fit: contain;
+  width: auto;
+  height: auto;
+  margin: 0 auto;
   border-radius: 4px;
   display: block;
   user-select: none;
@@ -53,7 +54,7 @@ const HiddenInput = styled.input`
   display: none;
 `
 
-const HotspotIndicator = styled.div<{$left: string; $top: string}>`
+const HotspotIndicator = styled.div<{ $left: string; $top: string }>`
   position: absolute;
   left: ${(props) => props.$left};
   top: ${(props) => props.$top};
@@ -104,12 +105,17 @@ const TipMessage = styled.div`
 `
 
 const CropOverlayCSS = styled.div`
+  display: flex;
+  justify-content: center;
   .ReactCrop {
     max-height: 70vh;
   }
   .ReactCrop__image {
     max-height: 70vh;
-    object-fit: contain;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    display: block;
   }
 `
 
@@ -144,7 +150,7 @@ function slugify(text: string): string {
 }
 
 export default function R2AssetInput(props: ObjectInputProps) {
-  const {value, onChange} = props
+  const { value, onChange } = props
   const toast = useToast()
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
@@ -257,10 +263,10 @@ export default function R2AssetInput(props: ObjectInputProps) {
         if (isImage && !file.type.includes('gif') && !file.type.includes('svg')) {
           isResponsive = true
           const sizes = [
-            {width: 2560, suffix: '', maxSizeMB: 0.8},
-            {width: 1600, suffix: '-1600w', maxSizeMB: 0.5},
-            {width: 800, suffix: '-800w', maxSizeMB: 0.2},
-            {width: 400, suffix: '-400w', maxSizeMB: 0.1},
+            { width: 2560, suffix: '', maxSizeMB: 0.8 },
+            { width: 1600, suffix: '-1600w', maxSizeMB: 0.5 },
+            { width: 800, suffix: '-800w', maxSizeMB: 0.2 },
+            { width: 400, suffix: '-400w', maxSizeMB: 0.1 },
           ]
 
           const uploadPromises = sizes.map(async (size) => {
@@ -391,42 +397,22 @@ export default function R2AssetInput(props: ObjectInputProps) {
 
   const handleSaveCrop = () => {
     if (crop) {
-      // Convert to percentage if it's in pixels
-      // We MUST use the dimensions of the image currently being cropped (modal image), not the preview thumbnail
-      let finalCrop = {...crop}
-
-      // If unit is px and we have the modal image ref, convert to %
-      if (crop.unit === 'px' && modalImageRef.current) {
-        const width = modalImageRef.current.width
-        const height = modalImageRef.current.height
-
-        if (width > 0 && height > 0) {
-          finalCrop = {
-            unit: '%',
-            x: (crop.x / width) * 100,
-            y: (crop.y / height) * 100,
-            width: (crop.width / width) * 100,
-            height: (crop.height / height) * 100,
-          }
-        }
-      }
-
       onChange(
         set({
           ...asset,
-          cropX: Number((finalCrop.x / 100).toFixed(4)),
-          cropY: Number((finalCrop.y / 100).toFixed(4)),
-          cropWidth: Number((finalCrop.width / 100).toFixed(4)),
-          cropHeight: Number((finalCrop.height / 100).toFixed(4)),
+          cropX: Number((crop.x / 100).toFixed(4)),
+          cropY: Number((crop.y / 100).toFixed(4)),
+          cropWidth: Number((crop.width / 100).toFixed(4)),
+          cropHeight: Number((crop.height / 100).toFixed(4)),
         }),
       )
-      toast.push({status: 'success', title: 'Kırpma Kaydedildi'})
+      toast.push({ status: 'success', title: 'Kırpma Kaydedildi' })
     } else {
       // Clear crop
-      const {cropX, cropY, cropWidth, cropHeight, ...rest} = asset
+      const { cropX, cropY, cropWidth, cropHeight, ...rest } = asset
       // ... same clear logic ...
       onChange([unset(['cropX']), unset(['cropY']), unset(['cropWidth']), unset(['cropHeight'])])
-      toast.push({status: 'info', title: 'Kırpma Sıfırlandı'})
+      toast.push({ status: 'info', title: 'Kırpma Sıfırlandı' })
     }
     setIsEditMode(false)
   }
@@ -498,7 +484,7 @@ export default function R2AssetInput(props: ObjectInputProps) {
             </Text>
           </Flex>
         ) : hasValue ? (
-          <Box style={{position: 'relative'}}>
+          <Box style={{ position: 'relative' }}>
             {isVideo ? (
               // Video Preview
               <Box
@@ -550,7 +536,7 @@ export default function R2AssetInput(props: ObjectInputProps) {
             )}
 
             {/* Toolbar */}
-            <Box style={{position: 'absolute', top: 8, right: 8, zIndex: 20}}>
+            <Box style={{ position: 'absolute', top: 8, right: 8, zIndex: 20 }}>
               <Inline space={2}>
                 {/* Only show Edit button for images */}
                 {!isVideo && (
@@ -581,8 +567,8 @@ export default function R2AssetInput(props: ObjectInputProps) {
             <Box padding={2}>
               <Stack space={2}>
                 <Flex align="center" gap={2}>
-                  <CheckmarkIcon style={{color: 'green'}} />
-                  <Text size={1} weight="semibold" style={{color: 'green'}}>
+                  <CheckmarkIcon style={{ color: 'green' }} />
+                  <Text size={1} weight="semibold" style={{ color: 'green' }}>
                     R2 Üzerinde Yayında
                   </Text>
                   {!isVideo && hasCrop && (
@@ -610,12 +596,12 @@ export default function R2AssetInput(props: ObjectInputProps) {
             justify="center"
             direction="column"
             gap={3}
-            style={{pointerEvents: 'none'}}
+            style={{ pointerEvents: 'none' }}
           >
             <Text size={4}>
               <UploadIcon />
             </Text>
-            <Stack space={2} style={{textAlign: 'center'}}>
+            <Stack space={2} style={{ textAlign: 'center' }}>
               <Text weight="bold" size={2}>
                 {isDragging ? 'Buraya Bırakın' : 'Görseli Sürükleyin veya Seçin'}
               </Text>
@@ -653,16 +639,12 @@ export default function R2AssetInput(props: ObjectInputProps) {
                 }}
               >
                 <CropOverlayCSS>
-                  <ReactCrop crop={crop} onChange={(c) => setCrop(c)} aspect={undefined}>
+                  <ReactCrop crop={crop} onChange={(_, percentCrop) => setCrop(percentCrop)} aspect={undefined}>
                     <img
                       ref={modalImageRef}
                       src={previewUrl}
                       alt="Crop Preview"
-                      style={{maxHeight: '70vh', maxWidth: '100%'}}
-                      onLoad={(e) => {
-                        // Ensure correct initial load
-                        // const { naturalWidth, naturalHeight } = e.currentTarget
-                      }}
+                      style={{ maxHeight: '70vh', maxWidth: '100%' }}
                     />
                   </ReactCrop>
                 </CropOverlayCSS>

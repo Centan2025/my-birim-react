@@ -1,5 +1,5 @@
-import React, {useMemo} from 'react'
-import {urlFor} from '../lib/imageUrl'
+import React, { useMemo } from 'react'
+import { urlFor } from '../lib/imageUrl'
 
 interface R2Asset {
   url: string
@@ -32,8 +32,8 @@ interface R2ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 // Cloudflare Image Resizing URL Builder
 const getR2Url = (
   path: string,
-  options: {width?: number; height?: number; quality?: number},
-  crop?: {x: number; y: number; w: number; h: number; origW: number; origH: number}
+  options: { width?: number; height?: number; quality?: number },
+  crop?: { x: number; y: number; w: number; h: number; origW: number; origH: number }
 ) => {
   const domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
   if (!domain) return undefined
@@ -84,19 +84,19 @@ export const R2Image: React.FC<R2ImageProps> = ({
   const cropData =
     hasCrop && source
       ? {
-          x: source.cropX || 0,
-          y: source.cropY || 0,
-          w: source.cropWidth || 1,
-          h: source.cropHeight || 1,
-          origW: source.width,
-          origH: source.height,
-        }
+        x: source.cropX || 0,
+        y: source.cropY || 0,
+        w: source.cropWidth || 1,
+        h: source.cropHeight || 1,
+        origW: source.width,
+        origH: source.height,
+      }
       : undefined
 
   // 1. Try R2 Source First
   const r2Src = useMemo(() => {
     if (!source || !source.path) return undefined
-    return getR2Url(source.path, {width, height, quality}, cropData)
+    return getR2Url(source.path, { width, height, quality }, cropData)
   }, [source, width, height, quality, cropData])
 
   // 2. Generate SrcSet for R2
@@ -124,7 +124,7 @@ export const R2Image: React.FC<R2ImageProps> = ({
     const widths = [640, 750, 828, 1080, 1200, 1920, 2048, 3840]
     return widths
       .map(w => {
-        const url = getR2Url(source.path, {width: w, quality}, cropData)
+        const url = getR2Url(source.path, { width: w, quality }, cropData)
         return url ? `${url} ${w}w` : null
       })
       .filter(Boolean)
@@ -154,11 +154,20 @@ export const R2Image: React.FC<R2ImageProps> = ({
         width={width}
         height={height}
         className={className}
-        style={{
-          objectFit: 'cover',
-          objectPosition,
-          ...style,
-        }}
+        style={
+          {
+            objectFit: 'cover',
+            objectPosition,
+            ...style,
+            ...(hasCrop
+              ? {
+                objectViewBox: `inset(${source!.cropY! * 100}% ${100 - (source!.cropX! + source!.cropWidth!) * 100
+                  }% ${100 - (source!.cropY! + source!.cropHeight!) * 100}% ${source!.cropX! * 100
+                  }%)`,
+              }
+              : {}),
+          } as React.CSSProperties
+        }
         loading="lazy"
         decoding="async"
         {...props}
@@ -179,7 +188,7 @@ export const R2Image: React.FC<R2ImageProps> = ({
       width={width}
       height={height}
       className={className}
-      style={{objectFit: 'cover', ...style}}
+      style={{ objectFit: 'cover', ...style }}
       loading="lazy"
       decoding="async"
       {...props}

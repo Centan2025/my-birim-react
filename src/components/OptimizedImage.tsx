@@ -1,5 +1,5 @@
-import React, {useState, useEffect, useRef} from 'react'
-import {R2ImageMetadata} from '../types'
+import React, { useState, useEffect, useRef } from 'react'
+import { R2ImageMetadata } from '../types'
 
 /**
  * srcset attribute'ünde boşluklar ayırıcıdır — URL'deki boşlukları %20 ile encode ederek
@@ -88,7 +88,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   // engellemek için custom attribute'u lowercase olarak enjekte ediyoruz.
   const fetchPriorityAttr =
     fetchPriority && fetchPriority !== 'auto'
-      ? ({fetchpriority: fetchPriority} as Record<string, string>)
+      ? ({ fetchpriority: fetchPriority } as Record<string, string>)
       : {}
 
   // Placeholder (çok küçük, gri renk)
@@ -273,16 +273,21 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const useArtDirection = Boolean((srcMobile || srcDesktop) && !usingFallback)
 
   // Hotspot varsa style'a object-position ekle
-  const imgStyle: React.CSSProperties = {...style}
+  const imgStyle: React.CSSProperties = { ...style }
   if (hotspot) {
     imgStyle.objectPosition = `${hotspot.x * 100}% ${hotspot.y * 100}%`
+  }
+  if (crop) {
+    // Destekleyen tarayıcılarda (Chrome/Edge 104+) resmi CSS ile kırpmak için
+    ; (imgStyle as any).objectViewBox = `inset(${crop.y * 100}% ${100 - (crop.x + crop.width) * 100
+      }% ${100 - (crop.y + crop.height) * 100}% ${crop.x * 100}%)`
   }
 
   if (hasError) {
     return (
       <div
         className={`bg-gray-200 flex items-center justify-center ${className}`}
-        style={{width, height}}
+        style={{ width, height }}
       >
         <span className="text-gray-400 text-sm">Görsel yüklenemedi</span>
       </div>
