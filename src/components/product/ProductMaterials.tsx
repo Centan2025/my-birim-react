@@ -1,6 +1,6 @@
-import {motion} from 'framer-motion'
-import {OptimizedImage} from '../OptimizedImage'
-import {useTranslation} from '../../i18n'
+import { motion } from 'framer-motion'
+import { OptimizedImage } from '../OptimizedImage'
+import { useTranslation } from '../../i18n'
 import ScrollReveal from '../ScrollReveal'
 
 interface ProductMaterialsProps {
@@ -18,16 +18,16 @@ interface ProductMaterialsProps {
 /**
  * Animated container that fades/slides content when `animKey` changes.
  */
-const AnimatedContent: React.FC<{animKey: string; children: React.ReactNode}> = ({
+const AnimatedContent: React.FC<{ animKey: string; children: React.ReactNode }> = ({
   animKey,
   children,
 }) => {
   return (
     <motion.div
       key={animKey}
-      initial={{opacity: 0, y: 10}}
-      animate={{opacity: 1, y: 0}}
-      transition={{duration: 0.4, ease: 'easeOut'}}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
     >
       {children}
     </motion.div>
@@ -39,9 +39,9 @@ const MaterialCard: React.FC<{
   imageBorderClass: string
   t: (v: any) => string
   onClick: () => void
-}> = ({material, imageBorderClass, t, onClick}) => (
+}> = ({ material, imageBorderClass, t, onClick }) => (
   <div
-    className="text-center group cursor-pointer flex flex-col items-center w-full"
+    className="text-center group cursor-pointer flex flex-col items-center w-full sm:w-28 md:w-32"
     title={t(material.name)}
     onClick={onClick}
     onKeyDown={e => {
@@ -74,7 +74,7 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
   onSetActiveBookIndex,
   onOpenMaterialLightbox,
 }) => {
-  const {t} = useTranslation()
+  const { t } = useTranslation()
 
   const hasMaterialGroups = Array.isArray(mergedGroups) && mergedGroups.length > 0
   const safeActiveIndex =
@@ -114,11 +114,10 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                 <button
                   key={`group-${idx}`}
                   onClick={() => onSetActiveMaterialGroup(idx)}
-                  className={`px-5 py-3 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${
-                    activeMaterialGroup === idx
-                      ? 'bg-white text-gray-800 border-gray-500'
-                      : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
-                  }`}
+                  className={`px-5 py-3 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeMaterialGroup === idx
+                    ? 'bg-white text-gray-800 border-gray-500'
+                    : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
+                    }`}
                 >
                   {t(g.groupTitle)}
                 </button>
@@ -136,11 +135,10 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                         <button
                           key={`book-${idx}`}
                           onClick={() => onSetActiveBookIndex(idx)}
-                          className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${
-                            activeBookIndex === idx
-                              ? 'bg-white text-gray-800 border-gray-500'
-                              : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
-                          }`}
+                          className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeBookIndex === idx
+                            ? 'bg-white text-gray-800 border-gray-500'
+                            : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
+                            }`}
                         >
                           {t(book.bookTitle)}
                         </button>
