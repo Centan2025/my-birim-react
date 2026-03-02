@@ -143,6 +143,7 @@ export const CardTransitionProvider: React.FC<{ children: React.ReactNode }> = (
                     overflow: 'hidden',
                     borderRadius: state.rect.initialBorderRadius || '0px',
                     opacity: 1,
+                    backgroundColor: '#ffffff',
                   }
                   : undefined
               }
@@ -155,6 +156,7 @@ export const CardTransitionProvider: React.FC<{ children: React.ReactNode }> = (
                     width: state.heroTarget.width,
                     height: state.heroTarget.height,
                     borderRadius: state.heroTarget.borderRadius || '0px',
+                    backgroundColor: '#ffffff',
                     transition: {
                       duration: 0.8,
                       ease: [0.22, 1, 0.36, 1],
@@ -231,10 +233,10 @@ export const CardTransitionProvider: React.FC<{ children: React.ReactNode }> = (
                   hotspot={state.rect.hotspot}
                   alt=""
                   className={`w-full h-full ${state.rect.objectFit === 'cover'
-                      ? 'object-cover'
-                      : !state.rect.imageMobile
-                        ? 'max-md:object-contain md:object-cover'
-                        : 'object-cover'
+                    ? 'object-cover'
+                    : !state.rect.imageMobile
+                      ? 'max-md:object-contain md:object-cover'
+                      : 'object-cover'
                     }`}
                 />
                 {/* Synchronized gradient fade-in for Layer 2 */}
