@@ -1,13 +1,13 @@
 import React from 'react'
-import {Link} from 'react-router-dom'
-import type {NewsItem} from '../types'
-import {OptimizedImage} from '../components/OptimizedImage'
-import {PageLoading} from '../components/LoadingSpinner'
-import {useTranslation} from '../i18n'
-import {Breadcrumbs} from '../components/Breadcrumbs'
-import {useNews} from '../hooks/useNews'
-import {useSiteSettings} from '../hooks/useSiteData'
-import {useSEO} from '../hooks/useSEO'
+import { Link } from 'react-router-dom'
+import type { NewsItem } from '../types'
+import { OptimizedImage } from '../components/OptimizedImage'
+import { PageLoading } from '../components/LoadingSpinner'
+import { useTranslation } from '../i18n'
+import { Breadcrumbs } from '../components/Breadcrumbs'
+import { useNews } from '../hooks/useNews'
+import { useSiteSettings } from '../hooks/useSiteData'
+import { useSEO } from '../hooks/useSEO'
 import ScrollReveal from '../components/ScrollReveal'
 
 const formatDate = (dateString: string): string => {
@@ -19,9 +19,9 @@ const formatDate = (dateString: string): string => {
   return `${day}.${month}.${year}`
 }
 
-const NewsCard: React.FC<{item: NewsItem}> = ({item}) => {
-  const {t} = useTranslation()
-  const {data: settings} = useSiteSettings()
+const NewsCard: React.FC<{ item: NewsItem }> = ({ item }) => {
+  const { t } = useTranslation()
+  const { data: settings } = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
 
   return (
@@ -39,11 +39,13 @@ const NewsCard: React.FC<{item: NewsItem}> = ({item}) => {
         height={1000}
         loading="lazy"
         quality={85}
+        crop={typeof item.mainImage === 'object' ? (item.mainImage as any).crop : undefined}
+        hotspot={typeof item.mainImage === 'object' ? (item.mainImage as any).hotspot : undefined}
       />
       <div className="absolute inset-x-0 bottom-0 h-4/5 bg-gradient-to-t from-black/95 via-black/60 to-transparent"></div>
-      <div className="absolute bottom-0 left-0 px-6 pt-12 pb-0 w-full max-w-full box-border">
-        <p className="text-sm text-white/50">{formatDate(item.date)}</p>
-        <h2 className="text-3xl font-light mt-1 text-white/70 group-hover:text-white transition-colors duration-300 group-hover:underline break-words break-all">
+      <div className="absolute bottom-0 left-0 px-6 pt-12 pb-6 w-full max-w-full box-border">
+        <p className="text-[11px] text-white/50 mb-1">{formatDate(item.date)}</p>
+        <h2 className="text-3xl font-light text-white/70 group-hover:text-white transition-colors duration-300 break-words break-all">
           {t(item.title)}
         </h2>
       </div>
@@ -52,8 +54,8 @@ const NewsCard: React.FC<{item: NewsItem}> = ({item}) => {
 }
 
 export function NewsPage() {
-  const {data: news = [], isLoading: loading} = useNews()
-  const {t} = useTranslation()
+  const { data: news = [], isLoading: loading } = useNews()
+  const { t } = useTranslation()
 
   // SEO meta
   useSEO({
@@ -74,13 +76,17 @@ export function NewsPage() {
   }
 
   return (
-    <div className="bg-white animate-fade-in-up-subtle">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
-        <Breadcrumbs
-          className="mb-6"
-          items={[{label: t('homepage'), to: '/'}, {label: t('news')}]}
-        />
-        <div className="text-center mt-6 md:mt-8 mb-16">
+    <div className="bg-gray-100 animate-fade-in-up-subtle">
+      {/* Breadcrumb Band */}
+      <div className="w-full bg-white">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-20 md:pt-24 lg:pt-24 pb-4">
+          <Breadcrumbs
+            items={[{ label: t('homepage'), to: '/' }, { label: t('news') }]}
+          />
+        </div>
+      </div>
+      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-8 md:pt-12 pb-16">
+        <div className="text-center mb-16">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600 uppercase">
             {t('news_title')}
           </h1>

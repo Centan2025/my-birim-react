@@ -5,7 +5,6 @@ import { useHomePageContent } from '../hooks/useHomePage'
 import { HomeHero } from '../components/HomeHero'
 import { useSEO } from '../hooks/useSEO'
 import { HomeContentBlocks } from '../components/HomeContentBlocks'
-import { HomeInspirationSection } from '../components/HomeInspirationSection'
 import { useHeaderTheme } from '../context/HeaderThemeContext'
 import type { HeroMediaItem } from '../types'
 
@@ -108,27 +107,6 @@ export function HomePage() {
   }
 
   const heroMedia = Array.isArray(content.heroMedia) ? content.heroMedia : []
-  const inspiration = content.inspirationSection || {
-    backgroundImage: '',
-    title: '',
-    subtitle: '',
-    buttonText: '',
-    buttonLink: '/',
-  }
-
-  const bgImageUrl = inspiration.backgroundImage
-    ? typeof inspiration.backgroundImage === 'string'
-      ? inspiration.backgroundImage
-      : inspiration.backgroundImage.url
-    : ''
-  const bgImageMobile =
-    inspiration.backgroundImage && typeof inspiration.backgroundImage === 'object'
-      ? inspiration.backgroundImage.urlMobile
-      : undefined
-  const bgImageDesktop =
-    inspiration.backgroundImage && typeof inspiration.backgroundImage === 'object'
-      ? inspiration.backgroundImage.urlDesktop
-      : undefined
 
   return (
     <div
@@ -392,22 +370,6 @@ export function HomePage() {
           blocks={content.contentBlocks}
           isMobile={isMobile}
           imageBorderClass={imageBorderClass}
-        />
-      )}
-
-      {/* İlham Üstü Gri Bant */}
-      {inspiration && (
-        <section className="w-full bg-gray-200 h-12 md:h-20" />
-      )}
-
-      {/* Inspiration Section */}
-      {inspiration && (
-        <HomeInspirationSection
-          inspiration={inspiration}
-          isMobile={isMobile}
-          bgImageUrl={bgImageUrl}
-          bgImageMobile={bgImageMobile}
-          bgImageDesktop={bgImageDesktop}
         />
       )}
     </div>

@@ -286,6 +286,10 @@ export interface HeroMediaItem {
   publishAt?: string
   /** Optional manual sort order; smaller numbers appear first. */
   sortOrder?: number
+  /** Optional crop data from R2 asset */
+  crop?: R2ImageMetadata['crop']
+  /** Optional hotspot data from R2 asset */
+  hotspot?: R2ImageMetadata['hotspot']
 }
 
 /**
@@ -294,6 +298,7 @@ export interface HeroMediaItem {
 export interface ContentBlock {
   backgroundColor?: 'white' | 'gray'
   textAlignment?: 'left' | 'center' | 'right'
+  verticalAlignment?: 'top' | 'center' | 'bottom'
   /** Type of media: image, video, or youtube */
   mediaType: 'image' | 'video' | 'youtube'
   /** Image asset (for image type) */
@@ -348,14 +353,6 @@ export interface HomePageContent {
   featuredDesignerId: string
   /** Content blocks displayed after hero section */
   contentBlocks?: ContentBlock[]
-  /** Content for the 'Inspiration' section. */
-  inspirationSection: {
-    backgroundImage: string | { url: string; urlMobile?: string; urlDesktop?: string }
-    title: LocalizedString
-    subtitle: LocalizedString
-    buttonText: LocalizedString
-    buttonLink: string
-  }
 }
 
 /**

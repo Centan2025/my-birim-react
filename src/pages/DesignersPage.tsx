@@ -106,6 +106,8 @@ const DesignerCard: React.FC<{ designer: Designer }> = ({ designer }) => {
             className={`w-full h-full object-cover transform scale-100 grayscale brightness-90 group-hover:scale-[1.02] smooth-hover ${imageBorderClass}`}
             loading="lazy"
             quality={85}
+            crop={typeof designer.image === 'object' ? (designer.image as any).crop : undefined}
+            hotspot={typeof designer.image === 'object' ? (designer.image as any).hotspot : undefined}
           />
         </div>
         <div className="mt-4 min-h-[2.5rem] flex items-center justify-center">
@@ -142,12 +144,17 @@ export function DesignersPage() {
 
   return (
     <div className="bg-gray-100 animate-fade-in-up-subtle">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
-        <Breadcrumbs
-          className="mb-6"
-          items={[{ label: t('homepage'), to: '/' }, { label: t('designers') }]}
-        />
-        <div className="text-center mt-6 md:mt-8 mb-12">
+      {/* Breadcrumb Band */}
+      <div className="w-full bg-white">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-20 md:pt-24 lg:pt-24 pb-4">
+          <Breadcrumbs
+            items={[{ label: t('homepage'), to: '/' }, { label: t('designers') }]}
+          />
+        </div>
+      </div>
+
+      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-8 md:pt-12 pb-16">
+        <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600">{t('designers')}</h1>
           <div className="h-px bg-gray-300 mt-4 w-full"></div>
         </div>

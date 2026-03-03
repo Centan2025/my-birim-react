@@ -131,22 +131,15 @@ export const CardTransitionProvider: React.FC<{ children: React.ReactNode }> = (
           {state && (state.phase === 'animating' || state.phase === 'holding') && (
             <motion.div
               key="card-hero-expand"
-              initial={
-                state.phase === 'animating'
-                  ? {
-                    position: 'fixed',
-                    top: state.rect.top,
-                    left: state.rect.left,
-                    width: state.rect.width,
-                    height: state.rect.height,
-                    zIndex: 30,
-                    overflow: 'hidden',
-                    borderRadius: state.rect.initialBorderRadius || '0px',
-                    opacity: 1,
-                    backgroundColor: '#ffffff',
-                  }
-                  : undefined
-              }
+              initial={{
+                top: state.rect.top,
+                left: state.rect.left,
+                width: state.rect.width,
+                height: state.rect.height,
+                borderRadius: state.rect.initialBorderRadius || '0px',
+                opacity: 1,
+                backgroundColor: '#ffffff',
+              }}
               animate={
                 state.phase === 'animating'
                   ? {
@@ -164,6 +157,12 @@ export const CardTransitionProvider: React.FC<{ children: React.ReactNode }> = (
                   }
                   : {
                     // Holding — stay in place, fade out gently
+                    top: state.heroTarget.top,
+                    left: state.heroTarget.left,
+                    width: state.heroTarget.width,
+                    height: state.heroTarget.height,
+                    borderRadius: state.heroTarget.borderRadius || '0px',
+                    backgroundColor: '#ffffff',
                     opacity: 0,
                     transition: { duration: 0.5, ease: 'easeOut' },
                   }
@@ -178,7 +177,7 @@ export const CardTransitionProvider: React.FC<{ children: React.ReactNode }> = (
                   setState(null)
                 }
               }}
-              style={{ pointerEvents: 'none' }}
+              style={{ position: 'fixed', zIndex: 30, pointerEvents: 'none', overflow: 'hidden' }}
             >
               {/* Layer 1: Starts looking exactly like card, crossfades out */}
               <motion.div
@@ -232,7 +231,7 @@ export const CardTransitionProvider: React.FC<{ children: React.ReactNode }> = (
                   crop={state.rect.crop}
                   hotspot={state.rect.hotspot}
                   alt=""
-                  className={`w-full h-full ${state.rect.objectFit === 'cover'
+                  className={`w-full h-full ${state.rect.className || ''} ${state.rect.objectFit === 'cover'
                     ? 'object-cover'
                     : !state.rect.imageMobile
                       ? 'max-md:object-contain md:object-cover'

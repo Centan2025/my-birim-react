@@ -72,7 +72,7 @@ export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'li
         crop,
         hotspot,
         showGradient: true,
-        initialBorderRadius: '0px',
+        initialBorderRadius: imageBorderClass === 'rounded-lg' ? '8px' : '0px',
       },
       () => {
         navigate(`/product/${product.id}`, { state: { product, fromCard: true } })
@@ -85,7 +85,7 @@ export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'li
       <div className={`bg-white ${imageBorderClass} overflow-hidden`}>
         <div
           ref={cardRef}
-          className="relative overflow-hidden aspect-square w-full flex items-center justify-center bg-white group-hover:scale-[1.04]"
+          className="relative overflow-hidden aspect-square w-full flex items-center justify-center bg-white"
           style={{
             transition: 'scale 0.9s cubic-bezier(0.25, 0.1, 0.25, 1)',
             opacity: isAnimating ? 0 : 1,
@@ -96,9 +96,11 @@ export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'li
             srcMobile={mainImageMobile}
             srcDesktop={mainImageDesktop}
             alt={t(product.name)}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain transform transition-transform duration-700 group-hover:scale-[1.04]"
             loading="lazy"
             quality={85}
+            crop={typeof product.mainImage === 'object' ? product.mainImage.crop : undefined}
+            hotspot={typeof product.mainImage === 'object' ? product.mainImage.hotspot : undefined}
           />
         </div>
         <div className="px-2.5 py-2 sm:px-3 sm:py-2 transition-colors duration-500">

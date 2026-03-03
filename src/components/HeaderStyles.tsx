@@ -67,8 +67,9 @@ export function HeaderStyles() {
         header nav a[href*="/contact"],
         header nav a[href*="/categories"] {
           font-size: clamp(10px, 0.2rem + 0.7vw, 14px) !important;
-          font-weight: 600 !important;
+          font-weight: bold !important;
           letter-spacing: 0.05em !important;
+          font-family: 'Helvetica Neue LT', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
         }
 
         header nav .header-nav-text,
@@ -83,10 +84,11 @@ export function HeaderStyles() {
         header nav a[href*="/contact"] span,
         header nav a[href*="/categories"] span {
           font-size: clamp(10px, 0.2rem + 0.7vw, 14px) !important;
-          font-weight: 600 !important;
+          font-weight: bold !important;
           letter-spacing: 0.05em !important;
           line-height: 1.25rem !important;
           display: inline-block !important;
+          font-family: 'Helvetica Neue LT', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
         }
 
         /* React Router active state override */
@@ -94,21 +96,22 @@ export function HeaderStyles() {
         header nav a.active span,
         header nav a[aria-current="page"] span {
           font-size: 0.875rem !important;
-          font-weight: 600 !important;
+          font-weight: bold !important;
           letter-spacing: 0.05em !important;
           line-height: 1.25rem !important;
+          font-family: 'Helvetica Neue LT', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
         }
 
         /* Overlay mobile menu - fully opaque dark background */
         #mobile-menu.mobile-menu-overlay {
-          background-color: #111827 !important;
-          background: #111827 !important;
+          background-color: #101820 !important;
+          background: #101820 !important;
         }
 
         /* When overlay menu is open, force header to match */
         header.overlay-menu-open > div {
-          background-color: #111827 !important;
-          background: #111827 !important;
+          background-color: #101820 !important;
+          background: #101820 !important;
           backdrop-filter: none !important;
           -webkit-backdrop-filter: none !important;
         }

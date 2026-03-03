@@ -1,17 +1,17 @@
-import {Link} from 'react-router-dom'
-import type {Project} from '../types'
-import {OptimizedImage} from '../components/OptimizedImage'
-import {PageLoading} from '../components/LoadingSpinner'
-import {useTranslation} from '../i18n'
-import {Breadcrumbs} from '../components/Breadcrumbs'
-import {useProjects} from '../hooks/useProjects'
-import {useSiteSettings} from '../hooks/useSiteData'
+import { Link } from 'react-router-dom'
+import type { Project } from '../types'
+import { OptimizedImage } from '../components/OptimizedImage'
+import { PageLoading } from '../components/LoadingSpinner'
+import { useTranslation } from '../i18n'
+import { Breadcrumbs } from '../components/Breadcrumbs'
+import { useProjects } from '../hooks/useProjects'
+import { useSiteSettings } from '../hooks/useSiteData'
 import ScrollReveal from '../components/ScrollReveal'
-import {useSEO} from '../hooks/useSEO'
+import { useSEO } from '../hooks/useSEO'
 
-const ProjectCard: React.FC<{project: Project}> = ({project}) => {
-  const {t} = useTranslation()
-  const {data: settings} = useSiteSettings()
+const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
+  const { t } = useTranslation()
+  const { data: settings } = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   return (
     <Link to={`/projects/${project.id}`} className="group flex flex-col h-full text-center">
@@ -27,6 +27,8 @@ const ProjectCard: React.FC<{project: Project}> = ({project}) => {
             height={1000}
             loading="lazy"
             quality={85}
+            crop={typeof project.cover === 'object' ? (project.cover as any).crop : undefined}
+            hotspot={typeof project.cover === 'object' ? (project.cover as any).hotspot : undefined}
           />
         )}
       </div>
@@ -40,8 +42,8 @@ const ProjectCard: React.FC<{project: Project}> = ({project}) => {
 }
 
 export function ProjectsPage() {
-  const {data: projects = [], isLoading: loading} = useProjects()
-  const {t} = useTranslation()
+  const { data: projects = [], isLoading: loading } = useProjects()
+  const { t } = useTranslation()
 
   // SEO meta
   useSEO({
@@ -63,13 +65,17 @@ export function ProjectsPage() {
   }
 
   return (
-    <div className="bg-white animate-fade-in-up-subtle">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
-        <Breadcrumbs
-          className="mb-6"
-          items={[{label: t('homepage'), to: '/'}, {label: t('projects') || 'Projeler'}]}
-        />
-        <div className="text-center mt-6 md:mt-8 mb-12">
+    <div className="bg-gray-100 animate-fade-in-up-subtle">
+      {/* Breadcrumb Band */}
+      <div className="w-full bg-white">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-20 md:pt-24 lg:pt-24 pb-4">
+          <Breadcrumbs
+            items={[{ label: t('homepage'), to: '/' }, { label: t('projects') || 'Projeler' }]}
+          />
+        </div>
+      </div>
+      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-8 md:pt-12 pb-16">
+        <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-light text-gray-600">
             {t('projects') || 'Projeler'}
           </h1>

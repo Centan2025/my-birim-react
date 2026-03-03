@@ -1,12 +1,12 @@
 import groq from 'groq'
-import type {NewsItem, Project} from '../../types'
-import {sanity, useSanity, mapImage, mapMediaUrl, extractPalette} from './client'
-import {getItem} from './settings'
+import type { NewsItem, Project } from '../../types'
+import { sanity, useSanity, mapImage, mapMediaUrl, extractPalette, mapR2Metadata } from './client'
+import { getItem } from './settings'
 
 const SIMULATED_DELAY = 200
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms))
 
-const KEYS = {NEWS: 'birim_news'}
+const KEYS = { NEWS: 'birim_news' }
 
 export const getNews = async (): Promise<NewsItem[]> => {
   if (useSanity && sanity) {
@@ -24,10 +24,12 @@ export const getNews = async (): Promise<NewsItem[]> => {
         const img = mapImage(r.mainImageR2) || mapImage(r.mainImage)
         const imgMobile = r.mainImageMobileR2?.url ? mapImage(r.mainImageMobileR2) : undefined
         const imgDesktop = r.mainImageDesktopR2?.url ? mapImage(r.mainImageDesktopR2) : undefined
+        const metadata = r.mainImageR2 ? mapR2Metadata(r.mainImageR2) : {}
         return {
           url: img,
           urlMobile: imgMobile && imgMobile !== img ? imgMobile : undefined,
           urlDesktop: imgDesktop && imgDesktop !== img ? imgDesktop : undefined,
+          ...metadata,
         }
       })(),
       media: (r.media || [])
@@ -35,7 +37,8 @@ export const getNews = async (): Promise<NewsItem[]> => {
           const url = mapMediaUrl(m)
           const urlMobile = mapMediaUrl(m, true, false)
           const urlDesktop = mapMediaUrl(m, false, true)
-          const result: any = {type: m.type, url, caption: m.caption}
+          const metadata = m?.imageR2 ? mapR2Metadata(m.imageR2) : {}
+          const result: any = { type: m.type, url, caption: m.caption, ...metadata }
           if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
           if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
           return result
@@ -70,11 +73,13 @@ export const getProjects = async (): Promise<Project[]> => {
         const url = mapImage(r.coverR2) || mapImage(r.cover)
         const urlMobile = r.coverMobileR2?.url ? mapImage(r.coverMobileR2) : undefined
         const urlDesktop = r.coverDesktopR2?.url ? mapImage(r.coverDesktopR2) : undefined
+        const metadata = r.coverR2 ? mapR2Metadata(r.coverR2) : {}
         return {
           url,
           urlMobile: urlMobile && urlMobile !== url ? urlMobile : undefined,
           urlDesktop: urlDesktop && urlDesktop !== url ? urlDesktop : undefined,
           palette: extractPalette(r.coverR2) || extractPalette(r.cover),
+          ...metadata,
         }
       })(),
     }))
@@ -92,7 +97,7 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
       excerpt, body, 
       media[]{ type, url, caption, image{..., asset->{url, _ref, _id}}, imageR2, imageMobile{..., asset->{url, _ref, _id}}, imageMobileR2, imageDesktop{..., asset->{url, _ref, _id}}, imageDesktopR2, videoFile{..., asset->{url, _ref, _id}}, videoFileR2, videoFileMobileR2, videoFileDesktopR2 }
     }`
-    const r = await sanity.fetch(q, {id})
+    const r = await sanity.fetch(q, { id })
     if (!r) return undefined
 
     const media = (r.media || [])
@@ -101,7 +106,8 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
         const url = mapMediaUrl(m)
         const urlMobile = mapMediaUrl(m, true, false)
         const urlDesktop = mapMediaUrl(m, false, true)
-        const result: any = {type, url, image: type === 'image' ? url : undefined}
+        const metadata = m?.imageR2 ? mapR2Metadata(m.imageR2) : {}
+        const result: any = { type, url, image: type === 'image' ? url : undefined, ...metadata }
         if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
         if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
         return result

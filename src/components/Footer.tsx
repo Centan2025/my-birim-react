@@ -1,40 +1,40 @@
-import {Link} from 'react-router-dom'
-import {useQuery} from '@tanstack/react-query'
-import {getFooterContent} from '../services/cms'
-import {useSiteSettings} from '../context/SiteSettingsContext'
-import {SiteLogo} from './SiteLogo'
-import {useTranslation} from '../i18n'
-import {analytics} from '../lib/analytics'
+import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { getFooterContent } from '../services/cms'
+import { useSiteSettings } from '../context/SiteSettingsContext'
+import { SiteLogo } from './SiteLogo'
+import { useTranslation } from '../i18n'
+import { analytics } from '../lib/analytics'
 import ScrollReveal from './ScrollReveal'
-import {resolveLegalLinkText} from '../lib/legalLinks'
-import {NewsletterForm} from './NewsletterForm'
-import {SocialIcon} from './SocialIcon'
+import { resolveLegalLinkText } from '../lib/legalLinks'
+import { NewsletterForm } from './NewsletterForm'
+import { SocialIcon } from './SocialIcon'
 
 export const Footer = () => {
-  const {settings, isLoading: isSettingsLoading} = useSiteSettings()
-  const {t, setLocale, locale, supportedLocales} = useTranslation()
+  const { settings, isLoading: isSettingsLoading } = useSiteSettings()
+  const { t, setLocale, locale, supportedLocales } = useTranslation()
 
-  const {data: content, isLoading: isFooterLoading} = useQuery({
+  const { data: content, isLoading: isFooterLoading } = useQuery({
     queryKey: ['footerContent', locale],
     queryFn: getFooterContent,
     staleTime: 1000 * 60 * 30, // 30 dakika cache
   })
 
   if (isSettingsLoading || isFooterLoading || !settings || !content) {
-    return <footer className="bg-gray-800 h-20" /> // Minimal placeholder to avoid collapse
+    return <footer className="bg-[#101820] h-20" /> // Minimal placeholder to avoid collapse
   }
 
   return (
     <>
-      <footer className="bg-gray-800 text-gray-400" style={{position: 'relative', zIndex: 5}}>
+      <footer className="bg-[#101820] text-gray-400" style={{ position: 'relative', zIndex: 5 }}>
         <div
-          className="container mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6 lg:py-12"
-          style={{overflow: 'visible'}}
+          className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-10 pb-6 lg:py-12"
+          style={{ overflow: 'visible' }}
         >
           {/* Mobil düzen */}
           <div
             className="lg:hidden flex flex-col items-center justify-center space-y-6 w-full"
-            style={{maxWidth: '100%', marginLeft: 'auto', marginRight: 'auto'}}
+            style={{ maxWidth: '100%', marginLeft: 'auto', marginRight: 'auto' }}
           >
             {/* Logo - ortada üstte */}
             <ScrollReveal delay={0} threshold={0.1} width="w-full" className="h-auto">
@@ -46,12 +46,12 @@ export const Footer = () => {
             {/* Menü düğmeleri - alt alta ortada */}
             <nav className="flex flex-col items-center space-y-3 w-full">
               {[
-                {to: '/products', label: t('view_all')},
-                {to: '/designers', label: t('designers')},
-                {to: '/projects', label: t('projects') || 'Projeler'},
-                {to: '/news', label: t('news')},
-                {to: '/about', label: t('about')},
-                {to: '/contact', label: t('contact')},
+                { to: '/products', label: t('view_all') },
+                { to: '/designers', label: t('designers') },
+                { to: '/projects', label: t('projects') || 'Projeler' },
+                { to: '/news', label: t('news') },
+                { to: '/about', label: t('about') },
+                { to: '/contact', label: t('contact') },
               ].map((link, idx) => (
                 <ScrollReveal
                   key={link.to}
@@ -84,11 +84,10 @@ export const Footer = () => {
                     <button
                       key={langCode}
                       onClick={() => setLocale(langCode)}
-                      className={`text-xs uppercase tracking-wider transition-colors duration-200 ${
-                        isActive
-                          ? 'text-white font-bold'
-                          : 'text-gray-400 hover:text-white font-thin'
-                      }`}
+                      className={`text-xs uppercase tracking-wider transition-colors duration-200 ${isActive
+                        ? 'text-white font-bold'
+                        : 'text-gray-400 hover:text-white font-thin'
+                        }`}
                     >
                       {langCode.toUpperCase()}
                     </button>
@@ -167,12 +166,12 @@ export const Footer = () => {
             <div className="flex-1 flex justify-end">
               <nav className="flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold uppercase tracking-wider text-gray-300 items-center justify-end">
                 {[
-                  {to: '/products', label: t('view_all')},
-                  {to: '/designers', label: t('designers')},
-                  {to: '/projects', label: t('projects') || 'Projeler'},
-                  {to: '/news', label: t('news')},
-                  {to: '/about', label: t('about')},
-                  {to: '/contact', label: t('contact')},
+                  { to: '/products', label: t('view_all') },
+                  { to: '/designers', label: t('designers') },
+                  { to: '/projects', label: t('projects') || 'Projeler' },
+                  { to: '/news', label: t('news') },
+                  { to: '/about', label: t('about') },
+                  { to: '/contact', label: t('contact') },
                 ].map((link, idx) => (
                   <ScrollReveal
                     key={link.to}
@@ -298,7 +297,7 @@ export const Footer = () => {
           <ScrollReveal delay={180} threshold={0} width="w-full" className="h-auto">
             <div
               className="lg:mt-10 pt-2 lg:pt-8 w-full lg:border-t lg:border-t-2 lg:border-gray-600"
-              style={{overflow: 'visible', width: '100%'}}
+              style={{ overflow: 'visible', width: '100%' }}
             >
               <div className="flex flex-col items-center justify-center gap-4 text-xs w-full lg:flex-row lg:items-start lg:justify-between">
                 {/* Sol: Telif metni */}
@@ -388,7 +387,7 @@ export const Footer = () => {
         </div>
       </footer>
       {/* Mobilde footer'dan sonra ekstra padding - scroll bounce beyaz alanını önler */}
-      <div className="lg:hidden h-2 bg-gray-800" aria-hidden="true"></div>
+      <div className="lg:hidden h-2 bg-[#101820]" aria-hidden="true"></div>
     </>
   )
 }

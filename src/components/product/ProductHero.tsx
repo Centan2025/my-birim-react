@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { OptimizedImage } from '../OptimizedImage'
 import { OptimizedVideo } from '../OptimizedVideo'
@@ -78,8 +79,41 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
 }) => {
   const { t } = useTranslation()
   const location = useLocation()
-  const { isExpanding, phase } = useCardTransition()
+  const { isExpanding, phase, setTargetRect } = useCardTransition()
   const fromCard = location.state?.fromCard || isExpanding
+  const heroRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    if (phase === 'animating' && heroRef.current) {
+      const updateRect = () => {
+        if (heroRef.current) {
+          const rect = heroRef.current.getBoundingClientRect()
+          setTargetRect({
+            top: rect.top,
+            left: rect.left,
+            width: rect.width,
+            height: rect.height,
+            borderRadius: imageBorderClass === 'rounded-lg' ? '8px' : '0px',
+          })
+        }
+      }
+
+      // First immediate measurement
+      updateRect()
+
+      // Continuous measurement during the first 1 second of expansion
+      const interval = setInterval(updateRect, 32) // ~30fps tracking
+      const timeout = setTimeout(() => clearInterval(interval), 1000)
+
+      window.addEventListener('resize', updateRect)
+      return () => {
+        clearInterval(interval)
+        clearTimeout(timeout)
+        window.removeEventListener('resize', updateRect)
+      }
+    }
+    return undefined
+  }, [phase, setTargetRect, imageBorderClass])
 
   const arrowInLeft: React.CSSProperties = {
     transform: areDotsVisible ? 'scale(1)' : 'scale(0)',
@@ -96,7 +130,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
   }
 
   return (
-    <header className="relative w-full">
+    <header ref={heroRef} className="relative w-full">
       { }
       <div
         className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing"

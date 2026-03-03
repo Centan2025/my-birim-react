@@ -1,17 +1,17 @@
-import {useState, useEffect} from 'react'
-import {getAboutPageContent} from '../services/cms'
-import type {AboutPageContent, NewsMedia} from '../types'
-import {OptimizedImage} from '../components/OptimizedImage'
-import {PageLoading} from '../components/LoadingSpinner'
-import {useTranslation} from '../i18n'
-import {Breadcrumbs} from '../components/Breadcrumbs'
-import {useSEO} from '../hooks/useSEO'
-import {useHeaderTheme} from '../context/HeaderThemeContext'
+import { useState, useEffect } from 'react'
+import { getAboutPageContent } from '../services/cms'
+import type { AboutPageContent, NewsMedia } from '../types'
+import { OptimizedImage } from '../components/OptimizedImage'
+import { PageLoading } from '../components/LoadingSpinner'
+import { useTranslation } from '../i18n'
+import { Breadcrumbs } from '../components/Breadcrumbs'
+import { useSEO } from '../hooks/useSEO'
+import { useHeaderTheme } from '../context/HeaderThemeContext'
 import ScrollReveal from '../components/ScrollReveal'
 import PortableTextLite from '../components/PortableTextLite'
 
 // Alt Medya Galerisi Bileşeni - Ekranı sağdan sola kaplayan tam genişlik (breakout) yapı
-const MediaGallery = ({media, alt}: {media?: NewsMedia[]; alt: string}) => {
+const MediaGallery = ({ media, alt }: { media?: NewsMedia[]; alt: string }) => {
   if (!media || media.length === 0) return null
 
   return (
@@ -36,6 +36,8 @@ const MediaGallery = ({media, alt}: {media?: NewsMedia[]; alt: string}) => {
                   srcDesktop={m.urlDesktop}
                   alt={`${alt} gallery ${idx + 1}`}
                   className="w-full h-full object-cover"
+                  crop={(m as any).crop}
+                  hotspot={(m as any).hotspot}
                 />
               )}
             </div>
@@ -49,8 +51,8 @@ const MediaGallery = ({media, alt}: {media?: NewsMedia[]; alt: string}) => {
 export function AboutPage() {
   const [content, setContent] = useState<AboutPageContent | null>(null)
   const [loading, setLoading] = useState(true)
-  const {t} = useTranslation()
-  const {setFromPalette, reset} = useHeaderTheme()
+  const { t } = useTranslation()
+  const { setFromPalette, reset } = useHeaderTheme()
 
   // SEO
   const heroImageObj = typeof content?.heroImage === 'object' ? content.heroImage : null
@@ -92,8 +94,8 @@ export function AboutPage() {
     } else {
       const palette =
         typeof content.heroImage === 'object' &&
-        content.heroImage !== null &&
-        'palette' in content.heroImage
+          content.heroImage !== null &&
+          'palette' in content.heroImage
           ? content.heroImage.palette
           : undefined
       if (palette) {
@@ -114,7 +116,7 @@ export function AboutPage() {
   }
 
   return (
-    <div className="bg-white animate-fade-in-up-subtle">
+    <div className="bg-gray-100 animate-fade-in-up-subtle">
       {/* Hero Section */}
       <div className="relative h-[70vh] min-h-[500px] bg-gray-900 text-white flex items-center justify-center overflow-hidden">
         {content.heroImage && (
@@ -128,6 +130,8 @@ export function AboutPage() {
               loading="eager"
               sizes="100vw"
               quality={90}
+              crop={(heroImageObj as any)?.crop}
+              hotspot={(heroImageObj as any)?.hotspot}
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/20" />
           </div>
@@ -147,18 +151,18 @@ export function AboutPage() {
       </div>
 
       {/* Main Content Sections */}
-      <div className="bg-white overflow-hidden pb-32 font-light">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 text-[11px] sm:text-[12px]">
+      <div className="bg-gray-100 overflow-hidden pb-32 font-light">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-8 text-[11px] sm:text-[12px]">
           <Breadcrumbs
             className="mb-12"
-            items={[{label: t('homepage'), to: '/'}, {label: t('about')}]}
+            items={[{ label: t('homepage'), to: '/' }, { label: t('about') }]}
           />
         </div>
 
         {/* 1. SECTION: HISTORY */}
         {content.historySection && (
           <div className="pb-32">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
               <div className="flex flex-col lg:flex-row items-start gap-12 lg:gap-20">
                 <div className="flex-1 lg:max-w-xl">
                   <ScrollReveal threshold={0.2} distance={20}>
@@ -198,6 +202,8 @@ export function AboutPage() {
                             src={url}
                             alt="History"
                             className="w-full h-full object-cover"
+                            crop={typeof img === 'object' ? (img as any).crop : undefined}
+                            hotspot={typeof img === 'object' ? (img as any).hotspot : undefined}
                           />
                         )
                       })()}
@@ -214,7 +220,7 @@ export function AboutPage() {
         {/* 2. SECTION: IDENTITY (Gray Background Breakout) */}
         {content.identitySection && (
           <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-gray-50 py-32">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
               <div className="flex flex-col-reverse lg:flex-row items-start gap-12 lg:gap-20 text-left">
                 <div className="flex-1 w-full lg:w-auto">
                   <ScrollReveal threshold={0.2} duration={1} distance={10}>
@@ -227,6 +233,8 @@ export function AboutPage() {
                             src={url}
                             alt="Identity"
                             className="w-full h-full object-cover"
+                            crop={typeof img === 'object' ? (img as any).crop : undefined}
+                            hotspot={typeof img === 'object' ? (img as any).hotspot : undefined}
                           />
                         )
                       })()}
@@ -260,7 +268,7 @@ export function AboutPage() {
         {/* 3. SECTION: QUALITY */}
         {content.qualitySection && (
           <div className="pt-32 pb-24">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
               <div className="max-w-7xl mx-auto">
                 <ScrollReveal threshold={0.2} distance={20}>
                   <h2 className="text-4xl md:text-6xl font-light text-gray-900 mb-16 tracking-tight text-center">
@@ -294,6 +302,8 @@ export function AboutPage() {
                               src={url}
                               alt="Quality"
                               className="w-full h-full object-cover"
+                              crop={typeof img === 'object' ? (img as any).crop : undefined}
+                              hotspot={typeof img === 'object' ? (img as any).hotspot : undefined}
                             />
                           )
                         })()}

@@ -65,6 +65,12 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         const textPosition = block.textPosition || 'below'
         const titlePosition = block.titlePosition || 'below'
         const titleFont = block.titleFont || 'normal'
+        const verticalAlignClass =
+          block.verticalAlignment === 'top'
+            ? 'justify-start'
+            : block.verticalAlignment === 'bottom'
+              ? 'justify-end'
+              : 'justify-center'
 
         const getButtonPositionClasses = (pos?: string) => {
           switch (pos) {
@@ -173,9 +179,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 
         const mediaWidthClass = isFullWidth
           ? 'w-full'
-          : isCenter
-            ? 'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto'
-            : 'w-full max-w-[94%] mx-auto'
+          : 'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto'
 
         const isButtonWhite = block.buttonColor === 'white'
         const buttonTextColorClass = isButtonWhite ? 'text-white' : 'text-gray-950'
@@ -311,7 +315,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 
         const textContentAbove = hasTopContent ? (
           <div
-            className={`${isFullWidth || isCenter ? 'max-w-[94%] mx-auto px-4 md:px-0 pt-6 md:pt-8 pb-3' : 'w-full mx-auto mb-4'} flex flex-col ${textAlign === 'center' ? 'items-center text-center' : textAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
+            className={`${isFullWidth ? 'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-0 pt-6 md:pt-8 pb-3' : isCenter ? 'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto pt-6 md:pt-8 pb-3' : 'w-full mx-auto mb-4'} flex flex-col ${textAlign === 'center' ? 'items-center text-center' : textAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
           >
             {titlePosition === 'above' && titleElement}
             {textPosition === 'above' && bodyElement}
@@ -320,7 +324,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 
         const textContentBelow = hasBottomContent ? (
           <div
-            className={`${isFullWidth || isCenter ? 'max-w-[94%] mx-auto px-4 md:px-0 pt-3 pb-6 md:pb-8' : 'w-full mx-auto mt-4'} flex flex-col ${textAlign === 'center' ? 'items-center text-center' : textAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
+            className={`${isFullWidth ? 'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-0 pt-3 pb-6 md:pb-8' : isCenter ? 'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto pt-3 pb-6 md:pb-8' : 'w-full mx-auto mt-4'} flex flex-col ${textAlign === 'center' ? 'items-center text-center' : textAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
           >
             {titlePosition === 'below' && titleElement}
             {textPosition === 'below' && bodyElement}
@@ -351,15 +355,15 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 {textContentBelow}
               </div>
             ) : (
-              <div className="container mx-auto px-6 sm:px-8 lg:px-4">
+              <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
                 <div
                   className={
                     hasTextContent
                       ? `flex flex-col ${isLeft
-                        ? 'md:flex-row'
+                        ? 'md:flex-row md:items-start'
                         : isRight
-                          ? 'md:flex-row-reverse'
-                          : 'md:flex-row items-center'
+                          ? 'md:flex-row-reverse md:items-start'
+                          : 'md:flex-row md:items-start'
                       } gap-4 md:gap-6`
                       : 'flex flex-col items-center gap-4 md:gap-6'
                   }
@@ -371,7 +375,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     {mediaContent}
                   </div>
                   {hasTextContent && (
-                    <div className="w-full md:w-1/2 flex flex-col justify-center">
+                    <div className={`w-full md:w-1/2 flex flex-col ${verticalAlignClass}`}>
                       {titleElement}
                       {bodyElement}
                     </div>

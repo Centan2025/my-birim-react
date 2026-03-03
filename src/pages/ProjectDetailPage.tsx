@@ -1,17 +1,17 @@
-import {useMemo, useState, useEffect, CSSProperties} from 'react'
-import {useParams, Link} from 'react-router-dom'
-import {OptimizedImage} from '../components/OptimizedImage'
-import {OptimizedVideo} from '../components/OptimizedVideo'
-import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
-import {PageLoading} from '../components/LoadingSpinner'
-import {Breadcrumbs} from '../components/Breadcrumbs'
-import {useTranslation} from '../i18n'
-import {useProject, useProjects} from '../hooks/useProjects'
-import {useSiteSettings} from '../hooks/useSiteData'
-import {analytics} from '../lib/analytics'
+import { useMemo, useState, useEffect, CSSProperties } from 'react'
+import { useParams, Link } from 'react-router-dom'
+import { OptimizedImage } from '../components/OptimizedImage'
+import { OptimizedVideo } from '../components/OptimizedVideo'
+import { FullscreenMediaViewer } from '../components/FullscreenMediaViewer'
+import { PageLoading } from '../components/LoadingSpinner'
+import { Breadcrumbs } from '../components/Breadcrumbs'
+import { useTranslation } from '../i18n'
+import { useProject, useProjects } from '../hooks/useProjects'
+import { useSiteSettings } from '../hooks/useSiteData'
+import { analytics } from '../lib/analytics'
 import ScrollReveal from '../components/ScrollReveal'
-import {useSEO} from '../hooks/useSEO'
-import {useHeaderTheme} from '../context/HeaderThemeContext'
+import { useSEO } from '../hooks/useSEO'
+import { useHeaderTheme } from '../context/HeaderThemeContext'
 import PortableTextLite from '../components/PortableTextLite'
 
 const getYouTubeId = (url: string): string | null => {
@@ -61,12 +61,12 @@ const MinimalChevronRight = (props: React.SVGProps<SVGSVGElement>) => (
 )
 
 export function ProjectDetailPage() {
-  const {projectId} = useParams<{projectId: string}>()
-  const {data: project, isLoading: loading} = useProject(projectId)
-  const {data: allProjects = []} = useProjects()
-  const {t} = useTranslation()
-  const {data: settings} = useSiteSettings()
-  const {setFromPalette, reset} = useHeaderTheme()
+  const { projectId } = useParams<{ projectId: string }>()
+  const { data: project, isLoading: loading } = useProject(projectId)
+  const { data: allProjects = [] } = useProjects()
+  const { t } = useTranslation()
+  const { data: settings } = useSiteSettings()
+  const { setFromPalette, reset } = useHeaderTheme()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const showBottomPrevNext = Boolean(settings?.showProductPrevNext)
   const [idx, setIdx] = useState(0)
@@ -108,9 +108,9 @@ export function ProjectDetailPage() {
     }
     const palette =
       project.cover &&
-      typeof project.cover === 'object' &&
-      project.cover !== null &&
-      'palette' in project.cover
+        typeof project.cover === 'object' &&
+        project.cover !== null &&
+        'palette' in project.cover
         ? project.cover.palette
         : undefined
     if (palette) {
@@ -121,13 +121,13 @@ export function ProjectDetailPage() {
     return () => reset()
   }, [project, reset, setFromPalette])
   // Prev/Next must be declared before any early returns to keep hooks order stable
-  const {prevProject, nextProject} = useMemo(() => {
-    if (!project || allProjects.length < 2) return {prevProject: null, nextProject: null}
+  const { prevProject, nextProject } = useMemo(() => {
+    if (!project || allProjects.length < 2) return { prevProject: null, nextProject: null }
     const currentIndex = allProjects.findIndex(p => p.id === project.id)
-    if (currentIndex === -1) return {prevProject: null, nextProject: null}
+    if (currentIndex === -1) return { prevProject: null, nextProject: null }
     const prev = currentIndex > 0 ? allProjects[currentIndex - 1] : null
     const next = currentIndex < allProjects.length - 1 ? allProjects[currentIndex + 1] : null
-    return {prevProject: prev, nextProject: next}
+    return { prevProject: prev, nextProject: next }
   }, [project, allProjects])
   // Sayfa animasyonu - ilk açılışta fade-in
   useEffect(() => {
@@ -237,14 +237,14 @@ export function ProjectDetailPage() {
   // Cover görselini başa ekle (eğer varsa ve media array'inde yoksa)
   const coverMedia = coverUrl
     ? [
-        {
-          type: 'image' as const,
-          url: coverUrl,
-          urlMobile: coverMobile,
-          urlDesktop: coverDesktop,
-          image: coverUrl,
-        },
-      ]
+      {
+        type: 'image' as const,
+        url: coverUrl,
+        urlMobile: coverMobile,
+        urlDesktop: coverDesktop,
+        image: coverUrl,
+      },
+    ]
     : []
   // Cover'ı media array'inin başına ekle, ancak aynı URL'den varsa tekrar ekleme
   const existingUrls = new Set(mediaArray.map(m => m.url))
@@ -394,9 +394,8 @@ export function ProjectDetailPage() {
 
   return (
     <div
-      className={`min-h-screen bg-white transition-all duration-700 ease-out ${
-        isPageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
-      }`}
+      className={`min-h-screen bg-gray-100 transition-all duration-700 ease-out ${isPageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+        }`}
       style={{
         transform: isPageVisible ? 'translateY(0)' : 'translateY(80px)',
       }}
@@ -407,15 +406,20 @@ export function ProjectDetailPage() {
           to { opacity: 1; transform: scale(1); }
         }
       `}</style>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24">
-        <Breadcrumbs
-          className="mb-6"
-          items={[
-            {label: t('homepage'), to: '/'},
-            {label: t('projects') || 'Projeler', to: '/projects'},
-            {label: t(project.title)},
-          ]}
-        />
+      {/* Breadcrumb Band */}
+      <div className="w-full bg-white relative z-20">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-20 md:pt-24 lg:pt-24 pb-4">
+          <Breadcrumbs
+            items={[
+              { label: t('homepage'), to: '/' },
+              { label: t('projects') || 'Projeler', to: '/projects' },
+              { label: t(project.title) },
+            ]}
+          />
+        </div>
+      </div>
+
+      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-6 md:pt-8 lg:pt-8">
         <div className="mt-6 md:mt-8 mb-4 md:mb-6 lg:mb-6">
           <h1
             className="text-4xl md:text-5xl lg:text-6xl font-light tracking-tight text-gray-900"
@@ -476,9 +480,8 @@ export function ProjectDetailPage() {
                 className="flex h-full"
                 style={{
                   width: `${totalSlides * 100}%`,
-                  transform: `translateX(calc(-${
-                    ((slideCount <= 1 ? 0 : heroSlideIndex) * 100) / totalSlides
-                  }% + ${draggedX}px))`,
+                  transform: `translateX(calc(-${((slideCount <= 1 ? 0 : heroSlideIndex) * 100) / totalSlides
+                    }% + ${draggedX}px))`,
                   transition:
                     isDragging || !heroTransitionEnabled ? 'none' : 'transform 0.3s ease-out',
                 }}
@@ -490,7 +493,7 @@ export function ProjectDetailPage() {
                     <div
                       key={i}
                       className="relative w-full h-full shrink-0"
-                      style={{width: `${100 / totalSlides}%`}}
+                      style={{ width: `${100 / totalSlides}%` }}
                     >
                       {m.type === 'image' && (
                         <OptimizedImage
@@ -504,7 +507,7 @@ export function ProjectDetailPage() {
                         />
                       )}
                       {m.type === 'video' && (
-                        <div style={{paddingTop: '56.25%'}} className="w-full relative">
+                        <div style={{ paddingTop: '56.25%' }} className="w-full relative">
                           <OptimizedVideo
                             src={m.url}
                             srcMobile={m.urlMobile}
@@ -518,7 +521,7 @@ export function ProjectDetailPage() {
                         </div>
                       )}
                       {m.type === 'youtube' && (
-                        <div style={{paddingTop: '56.25%'}} className="w-full relative">
+                        <div style={{ paddingTop: '56.25%' }} className="w-full relative">
                           <iframe
                             src={`https://www.youtube.com/embed/${getYouTubeId(m.url)}?rel=0`}
                             title="YouTube video player"
@@ -566,9 +569,8 @@ export function ProjectDetailPage() {
                             }
                             setIdx(index)
                           }}
-                          className={`relative h-2 rounded-none transition-all duration-500 ease-in-out group ${
-                            areDotsVisible ? 'animate-dot-grow' : 'opacity-0 scale-0'
-                          } ${isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'}`}
+                          className={`relative h-2 rounded-none transition-all duration-500 ease-in-out group ${areDotsVisible ? 'animate-dot-grow' : 'opacity-0 scale-0'
+                            } ${isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'}`}
                           style={{
                             transitionDelay: `${animationDelay}ms`,
                           }}
@@ -691,10 +693,10 @@ export function ProjectDetailPage() {
         )}
         {(project.excerpt || project.body || allMedia.length > 0) && (
           <div className="mt-0 relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-gray-100">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+            <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-6 md:py-8">
               {/* Başlık ile aynı sol hizaya oturan içerik */}
               {(project.excerpt || project.body) && (
-                <div className="max-w-4xl mx-auto space-y-4 px-4 sm:px-0">
+                <div className="w-full space-y-4 px-4 sm:px-0">
                   {project.excerpt && (
                     <ScrollReveal delay={200}>
                       {(() => {
@@ -828,8 +830,8 @@ export function ProjectDetailPage() {
 
         {/* Bottom Prev / Next controls - footer'ın hemen üzerinde */}
         {showBottomPrevNext && (prevProject || nextProject) && (
-          <div className="bg-white border-t border-gray-200">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="bg-white border-t border-gray-200 relative z-20 w-screen left-1/2 right-1/2 -mx-[50vw]">
+            <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-6">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex-1">
                   {prevProject ? (

@@ -1,5 +1,5 @@
 import React from 'react'
-import {Link} from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 interface ProductNavProps {
   prevProduct: any | null
@@ -41,7 +41,7 @@ const MinimalChevronRight = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 )
 
-export const ProductBottomNav: React.FC<ProductNavProps> = ({prevProduct, nextProduct, show}) => {
+export const ProductBottomNav: React.FC<ProductNavProps> = ({ prevProduct, nextProduct, show }) => {
   if (!show || (!prevProduct && !nextProduct)) return null
 
   return (

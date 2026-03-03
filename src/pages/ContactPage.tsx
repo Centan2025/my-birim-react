@@ -505,17 +505,21 @@ export function ContactPage() {
 
   return (
     <div className={`${isFullscreenOpen ? 'bg-white' : 'bg-gray-100'}`}>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <Breadcrumbs
-            className="mb-6"
-            items={[{ label: t('homepage'), to: '/' }, { label: t('contact') }]}
-          />
-        </motion.div>
+      {/* Breadcrumb Band */}
+      <div className="w-full bg-white">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-20 md:pt-24 lg:pt-24 pb-4">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <Breadcrumbs
+              items={[{ label: t('homepage'), to: '/' }, { label: t('contact') }]}
+            />
+          </motion.div>
+        </div>
+      </div>
+      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-8 md:pt-12 pb-16">
         <motion.div
           className="text-center mb-12"
           initial={{ opacity: 0, y: 20 }}

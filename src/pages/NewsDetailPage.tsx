@@ -1,16 +1,16 @@
-import {useMemo, useEffect, FC, SVGProps} from 'react'
-import {useParams, Link} from 'react-router-dom'
-import type {NewsMedia} from '../types'
-import {OptimizedImage} from '../components/OptimizedImage'
-import {OptimizedVideo} from '../components/OptimizedVideo'
-import {PageLoading} from '../components/LoadingSpinner'
-import {Breadcrumbs} from '../components/Breadcrumbs'
-import {useTranslation} from '../i18n'
-import {useNewsItem, useNews} from '../hooks/useNews'
-import {useSiteSettings} from '../hooks/useSiteData'
-import {analytics} from '../lib/analytics'
-import {useSEO} from '../hooks/useSEO'
-import {addStructuredData, getArticleSchema} from '../lib/seo'
+import { useMemo, useEffect, FC, SVGProps } from 'react'
+import { useParams, Link } from 'react-router-dom'
+import type { NewsMedia } from '../types'
+import { OptimizedImage } from '../components/OptimizedImage'
+import { OptimizedVideo } from '../components/OptimizedVideo'
+import { PageLoading } from '../components/LoadingSpinner'
+import { Breadcrumbs } from '../components/Breadcrumbs'
+import { useTranslation } from '../i18n'
+import { useNewsItem, useNews } from '../hooks/useNews'
+import { useSiteSettings } from '../hooks/useSiteData'
+import { analytics } from '../lib/analytics'
+import { useSEO } from '../hooks/useSEO'
+import { addStructuredData, getArticleSchema } from '../lib/seo'
 import PortableTextLite from '../components/PortableTextLite'
 
 const getYouTubeId = (url: string): string | null => {
@@ -29,9 +29,9 @@ const formatDate = (dateString: string): string => {
   return `${day}.${month}.${year}`
 }
 
-const MediaComponent: FC<{media: NewsMedia}> = ({media}) => {
-  const {t} = useTranslation()
-  const {data: settings} = useSiteSettings()
+const MediaComponent: FC<{ media: NewsMedia }> = ({ media }) => {
+  const { t } = useTranslation()
+  const { data: settings } = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
 
   const renderMedia = () => {
@@ -45,6 +45,8 @@ const MediaComponent: FC<{media: NewsMedia}> = ({media}) => {
           className={`w-full h-auto object-cover ${imageBorderClass}`}
           loading="lazy"
           quality={85}
+          crop={(media as any).crop}
+          hotspot={(media as any).hotspot}
         />
       )
     }
@@ -58,7 +60,7 @@ const MediaComponent: FC<{media: NewsMedia}> = ({media}) => {
           media.url.includes('cdn.sanity.io/files'))
       if (isVideoFile) {
         return (
-          <div className="relative w-full" style={{paddingTop: '56.25%' /* 16:9 Aspect Ratio */}}>
+          <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16:9 Aspect Ratio */ }}>
             <OptimizedVideo
               src={media.url}
               srcMobile={media.urlMobile}
@@ -74,7 +76,7 @@ const MediaComponent: FC<{media: NewsMedia}> = ({media}) => {
       }
       // URL ise iframe kullan (harici video servisleri için)
       return (
-        <div className="relative w-full" style={{paddingTop: '56.25%' /* 16:9 Aspect Ratio */}}>
+        <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16:9 Aspect Ratio */ }}>
           <iframe
             src={media.url}
             title={t(media.caption) || 'News video'}
@@ -89,7 +91,7 @@ const MediaComponent: FC<{media: NewsMedia}> = ({media}) => {
       const videoId = getYouTubeId(media.url)
       if (!videoId) return <p className="text-red-500 text-center">Geçersiz YouTube URL'si</p>
       return (
-        <div className="relative w-full" style={{paddingTop: '56.25%' /* 16:9 Aspect Ratio */}}>
+        <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16:9 Aspect Ratio */ }}>
           <iframe
             src={`https://www.youtube.com/embed/${videoId}?rel=0`}
             title={t(media.caption) || 'YouTube video player'}
@@ -115,55 +117,62 @@ const MediaComponent: FC<{media: NewsMedia}> = ({media}) => {
   )
 }
 
-const MinimalChevronLeft = (props: SVGProps<SVGSVGElement>) => (
+/* Thin minimal arrow: horizontal line with angled tip, no bottom serifs */
+const ArrowLeft = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="48"
-    height="48"
+    width="28"
+    height="28"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="1"
+    strokeWidth="0.8"
     strokeLinecap="round"
     strokeLinejoin="round"
     {...props}
   >
-    <path d="m15 18-6-6 6-6" />
+    {/* angled tip */}
+    <path d="M8 6 2 12" />
+    {/* horizontal line */}
+    <path d="M2 12h20" />
   </svg>
 )
 
-const MinimalChevronRight = (props: SVGProps<SVGSVGElement>) => (
+const ArrowRight = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="48"
-    height="48"
+    width="28"
+    height="28"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="1"
+    strokeWidth="0.8"
     strokeLinecap="round"
     strokeLinejoin="round"
     {...props}
   >
-    <path d="m9 18 6-6-6-6" />
+    {/* angled tip */}
+    <path d="M16 6 22 12" />
+    {/* horizontal line */}
+    <path d="M22 12H2" />
   </svg>
 )
 
 export function NewsDetailPage() {
-  const {newsId} = useParams<{newsId: string}>()
-  const {data: item, isLoading: loading} = useNewsItem(newsId)
-  const {data: allNews = []} = useNews()
-  const {t} = useTranslation()
-  const {data: settings} = useSiteSettings()
+  const { newsId } = useParams<{ newsId: string }>()
+  const { data: item, isLoading: loading } = useNewsItem(newsId)
+  const { data: allNews = [] } = useNews()
+  const { t } = useTranslation()
+  const { data: settings } = useSiteSettings()
   const showBottomPrevNext = Boolean(settings?.showProductPrevNext)
 
-  const {prevNews, nextNews} = useMemo(() => {
-    if (!item || allNews.length < 2) return {prevNews: null, nextNews: null}
+  const { prevNews, nextNews } = useMemo(() => {
+    if (!item || allNews.length < 2) return { prevNews: null, nextNews: null }
     const currentIndex = allNews.findIndex(n => n.id === item.id)
-    if (currentIndex === -1) return {prevNews: null, nextNews: null}
+    if (currentIndex === -1) return { prevNews: null, nextNews: null }
     const prev = currentIndex > 0 ? allNews[currentIndex - 1] : null
     const next = currentIndex < allNews.length - 1 ? allNews[currentIndex + 1] : null
-    return {prevNews: prev, nextNews: next}
+    return { prevNews: prev, nextNews: next }
   }, [item, allNews])
 
   // SEO ve Analytics: haber detay görüntüleme
@@ -235,117 +244,111 @@ export function NewsDetailPage() {
   }
 
   return (
-    <div key={newsId} className="bg-white animate-fade-in-up-subtle">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
-        <div className="w-full">
-          {/* Breadcrumbs - diğer sayfalarla aynı hizalama */}
+    <div key={newsId} className="bg-gray-100 animate-fade-in-up-subtle">
+      {/* Breadcrumb Band */}
+      <div className="w-full bg-white relative z-20">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-20 md:pt-24 lg:pt-24 pb-4">
           <Breadcrumbs
-            className="mb-8"
             items={[
-              {label: t('homepage'), to: '/'},
-              {label: t('news'), to: '/news'},
-              {label: t(item.title)},
+              { label: t('homepage'), to: '/' },
+              { label: t('news'), to: '/news' },
+              { label: t(item.title) },
             ]}
           />
+        </div>
+      </div>
 
-          <div className="max-w-4xl mx-auto">
-            <article>
-              <div className="mt-6 md:mt-8 mb-6">
-                <p className="text-sm text-gray-500 mb-3 font-light">{formatDate(item.date)}</p>
-                {/* Başlık altındaki gri çizgi – tam ekran (proje sayfasıyla aynı) */}
-                <div className="mt-2 md:mt-3 lg:mt-2 relative left-1/2 right-1/2 -mx-[50vw] w-screen">
-                  <div className="h-px bg-gray-300 w-full"></div>
-                </div>
-              </div>
+      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-6 md:pt-8 pb-16">
+        {/* Prev / Next arrows at top of content block */}
+        {showBottomPrevNext && (prevNews || nextNews) && (
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              {prevNews ? (
+                <Link
+                  to={`/news/${prevNews.id}`}
+                  className="inline-flex items-center text-gray-400 hover:text-gray-800 transition-colors"
+                  aria-label="Previous news"
+                >
+                  <ArrowLeft className="w-7 h-7 md:w-8 md:h-8" />
+                </Link>
+              ) : (
+                <span className="w-7 h-7 md:w-8 md:h-8" />
+              )}
+            </div>
+            <div>
+              {nextNews ? (
+                <Link
+                  to={`/news/${nextNews.id}`}
+                  className="inline-flex items-center text-gray-400 hover:text-gray-800 transition-colors"
+                  aria-label="Next news"
+                >
+                  <ArrowRight className="w-7 h-7 md:w-8 md:h-8" />
+                </Link>
+              ) : (
+                <span className="w-7 h-7 md:w-8 md:h-8" />
+              )}
+            </div>
+          </div>
+        )}
 
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
+          {/* Sol Kolon: Görseller (Main Image + Media) */}
+          <div className="flex flex-col w-full overflow-hidden">
+            {mainImageUrl && (
               <OptimizedImage
                 src={mainImageUrl || ''}
                 srcMobile={mainImageObj?.urlMobile}
                 srcDesktop={mainImageObj?.urlDesktop}
                 alt={t(item.title)}
-                className={`w-full h-auto object-cover mb-6 ${settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'}`}
+                className={`w-full h-auto object-cover ${settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'}`}
                 width={1200}
                 height={675}
                 loading="eager"
                 quality={90}
+                crop={(mainImageObj as any)?.crop}
+                hotspot={(mainImageObj as any)?.hotspot}
               />
-            </article>
+            )}
+
+            <div className="flex flex-col">
+              {item.media && item.media.map((media, index) => (
+                <MediaComponent key={index} media={media} />
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Gray content area with breakout pattern - matches ProjectDetailPage */}
-        <div className="mt-8 relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-gray-100">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
-            <div className="max-w-4xl mx-auto">
-              <h1 className="text-3xl md:text-4xl font-normal tracking-tight text-gray-700 mb-6">
-                {t(item.title)}
-              </h1>
-              <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl max-w-none w-full">
-                {(() => {
-                  const content = t(item.content)
-                  const isPortableText =
-                    Array.isArray(content) ||
-                    (typeof content === 'object' &&
-                      content !== null &&
-                      (content as any)._type === 'block')
+          {/* Sağ Kolon: Detaylar ve İçerik */}
+          <div className="lg:sticky lg:top-32 flex flex-col w-full">
+            <p className="text-sm text-gray-500 mb-4 font-light">{formatDate(item.date)}</p>
+            <div className="h-px bg-gray-300 w-full mb-6"></div>
 
-                  if (isPortableText) {
-                    const blocks = Array.isArray(content) ? content : [content]
-                    return <PortableTextLite value={blocks} />
-                  }
+            <h1 className="text-3xl md:text-4xl font-normal tracking-tight text-gray-700 mb-8">
+              {t(item.title)}
+            </h1>
 
-                  return (
-                    <p className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
-                      {content as string}
-                    </p>
-                  )
-                })()}
-              </div>
+            <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl max-w-none w-full">
+              {(() => {
+                const content = t(item.content)
+                const isPortableText =
+                  Array.isArray(content) ||
+                  (typeof content === 'object' &&
+                    content !== null &&
+                    (content as any)._type === 'block')
 
-              <div className="mt-12 space-y-12">
-                {item.media.map((media, index) => (
-                  <MediaComponent key={index} media={media} />
-                ))}
-              </div>
+                if (isPortableText) {
+                  const blocks = Array.isArray(content) ? content : [content]
+                  return <PortableTextLite value={blocks} />
+                }
+
+                return (
+                  <p className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
+                    {content as string}
+                  </p>
+                )
+              })()}
             </div>
           </div>
         </div>
-
-        {/* Bottom Prev / Next controls - footer'ın hemen üzerinde, project sayfasındaki gibi hizalı */}
-        {showBottomPrevNext && (prevNews || nextNews) && (
-          <div className="bg-white border-t border-gray-200 mt-0">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex-1">
-                  {prevNews ? (
-                    <Link
-                      to={`/news/${prevNews.id}`}
-                      className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
-                      aria-label="Previous news"
-                    >
-                      <MinimalChevronLeft className="w-12 h-12 md:w-16 md:h-16" />
-                    </Link>
-                  ) : (
-                    <span />
-                  )}
-                </div>
-                <div className="flex-1 text-right">
-                  {nextNews ? (
-                    <Link
-                      to={`/news/${nextNews.id}`}
-                      className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
-                      aria-label="Next news"
-                    >
-                      <MinimalChevronRight className="w-12 h-12 md:w-16 md:h-16" />
-                    </Link>
-                  ) : (
-                    <span />
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )

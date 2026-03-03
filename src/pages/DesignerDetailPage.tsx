@@ -1,22 +1,22 @@
-import {useEffect, useState, useRef} from 'react'
-import {useParams, useLocation} from 'react-router-dom'
-import {ProductCard} from '../components/ProductCard'
-import {OptimizedImage} from '../components/OptimizedImage'
-import {PageLoading} from '../components/LoadingSpinner'
-import {useTranslation} from '../i18n'
-import {useDesigner} from '../hooks/useDesigners'
-import {useProductsByDesigner} from '../hooks/useProducts'
-import {useSiteSettings} from '../hooks/useSiteData'
-import {Breadcrumbs} from '../components/Breadcrumbs'
-import {analytics} from '../lib/analytics'
+import { useEffect, useState, useRef } from 'react'
+import { useParams, useLocation } from 'react-router-dom'
+import { ProductCard } from '../components/ProductCard'
+import { OptimizedImage } from '../components/OptimizedImage'
+import { PageLoading } from '../components/LoadingSpinner'
+import { useTranslation } from '../i18n'
+import { useDesigner } from '../hooks/useDesigners'
+import { useProductsByDesigner } from '../hooks/useProducts'
+import { useSiteSettings } from '../hooks/useSiteData'
+import { Breadcrumbs } from '../components/Breadcrumbs'
+import { analytics } from '../lib/analytics'
 import ScrollReveal from '../components/ScrollReveal'
-import {useSEO} from '../hooks/useSEO'
+import { useSEO } from '../hooks/useSEO'
 import PortableTextLite from '../components/PortableTextLite'
 
-import {useCardTransition} from '../context/CardTransitionContext'
+import { useCardTransition } from '../context/CardTransitionContext'
 
 export function DesignerDetailPage() {
-  const {designerId: liveId} = useParams<{designerId: string}>()
+  const { designerId: liveId } = useParams<{ designerId: string }>()
   // Sayfa geçişlerinde param sıfırlandığı için ilk id'yi kilitliyoruz
   const [frozenId] = useState(liveId)
   const designerId = frozenId || liveId
@@ -25,8 +25,8 @@ export function DesignerDetailPage() {
   const fromCard = location.state?.fromCard
   const initialDesignerData = location.state?.designer
 
-  const {data: designerData, isLoading: loading} = useDesigner(designerId, initialDesignerData)
-  const {data: productsData = []} = useProductsByDesigner(designerData?.id)
+  const { data: designerData, isLoading: loading } = useDesigner(designerId, initialDesignerData)
+  const { data: productsData = [] } = useProductsByDesigner(designerData?.id)
 
   // Veri dondurma: Geçiş anında veri kaybolmasını önler
   const [frozenDesigner, setFrozenDesigner] = useState<any>(null)
@@ -40,11 +40,11 @@ export function DesignerDetailPage() {
   const designer = designerData || frozenDesigner
   const products = productsData.length > 0 ? productsData : frozenProducts
 
-  const {t} = useTranslation()
-  const {setTargetRect, phase} = useCardTransition()
+  const { t } = useTranslation()
+  const { setTargetRect, phase } = useCardTransition()
   const imageRef = useRef<HTMLDivElement>(null)
 
-  const {data: settings} = useSiteSettings()
+  const { data: settings } = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const [isTitleVisible, setIsTitleVisible] = useState(false)
 
@@ -80,7 +80,7 @@ export function DesignerDetailPage() {
         window.removeEventListener('resize', updateRect)
       }
     }
-    return () => {}
+    return () => { }
   }, [loading, designer, setTargetRect, imageBorderClass])
 
   const designerName = designer ? t(designer.name) : ''
@@ -141,15 +141,19 @@ export function DesignerDetailPage() {
 
   return (
     <div className={`bg-gray-100 ${fromCard ? '' : 'animate-fade-in-up-subtle'}`}>
-      <div className="container mx-auto px-2 sm:px-2 lg:px-2 pt-20 md:pt-24 lg:pt-24 pb-16">
-        <Breadcrumbs
-          className="mb-8"
-          items={[
-            {label: t('homepage'), to: '/'},
-            {label: t('designers'), to: '/designers'},
-            {label: t(designer.name)},
-          ]}
-        />
+      {/* Breadcrumb Band */}
+      <div className="w-full bg-white relative z-20">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-20 md:pt-24 lg:pt-24 pb-4">
+          <Breadcrumbs
+            items={[
+              { label: t('homepage'), to: '/' },
+              { label: t('designers'), to: '/designers' },
+              { label: t(designer.name) },
+            ]}
+          />
+        </div>
+      </div>
+      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-12 md:py-16">
         <div className="flex flex-col md:flex-row-reverse items-center md:items-start gap-8 md:gap-16 mt-6 md:mt-8 mb-12">
           <div ref={imageRef} className="flex-shrink-0">
             <OptimizedImage
@@ -163,17 +167,18 @@ export function DesignerDetailPage() {
                   : designer.imageDesktop
               }
               alt={t(designer.name)}
-              className={`w-80 h-96 md:w-96 md:h-[32rem] object-cover shadow-none md:shadow-none filter grayscale ${imageBorderClass} ${phase === 'animating' ? 'opacity-0' : 'opacity-100'}`}
+              className={`w-80 h-96 md:w-96 md:h-[32rem] object-cover shadow-none md:shadow-none filter grayscale brightness-90 ${imageBorderClass} ${phase === 'animating' ? 'opacity-0' : 'opacity-100'}`}
               loading="eager"
               quality={90}
+              crop={typeof designer.image === 'object' ? (designer.image as any).crop : undefined}
+              hotspot={typeof designer.image === 'object' ? (designer.image as any).hotspot : undefined}
             />
           </div>
           <div className="text-left w-full">
             <div className="max-w-2xl px-4 sm:px-0 md:px-0 md:mx-0">
               <h1
-                className={`text-4xl font-normal text-gray-700 ${
-                  isTitleVisible ? 'translate-x-0 opacity-100' : '-translate-x-[150%] opacity-0'
-                }`}
+                className={`text-4xl font-normal text-gray-700 ${isTitleVisible ? 'translate-x-0 opacity-100' : '-translate-x-[150%] opacity-0'
+                  }`}
                 style={{
                   transition: 'transform 700ms ease-out, opacity 1200ms ease-out',
                 }}

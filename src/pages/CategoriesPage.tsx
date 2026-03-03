@@ -1,21 +1,21 @@
-import {Link} from 'react-router-dom'
-import {useEffect, useMemo} from 'react'
-import {OptimizedImage} from '../components/OptimizedImage'
-import {PageLoading} from '../components/LoadingSpinner'
-import {useTranslation} from '../i18n'
-import {useCategories} from '../hooks/useCategories'
-import {useProducts} from '../hooks/useProducts'
-import {useSiteSettings} from '../hooks/useSiteData'
+import { Link } from 'react-router-dom'
+import { useEffect, useMemo } from 'react'
+import { OptimizedImage } from '../components/OptimizedImage'
+import { PageLoading } from '../components/LoadingSpinner'
+import { useTranslation } from '../i18n'
+import { useCategories } from '../hooks/useCategories'
+import { useProducts } from '../hooks/useProducts'
+import { useSiteSettings } from '../hooks/useSiteData'
 import ScrollReveal from '../components/ScrollReveal'
-import {useSEO} from '../hooks/useSEO'
-import {useHeaderTheme} from '../context/HeaderThemeContext'
+import { useSEO } from '../hooks/useSEO'
+import { useHeaderTheme } from '../context/HeaderThemeContext'
 
 export function CategoriesPage() {
-  const {data: categories = [], isLoading: loading} = useCategories()
-  const {data: allProducts = []} = useProducts()
-  const {t} = useTranslation()
-  const {data: settings} = useSiteSettings()
-  const {reset} = useHeaderTheme()
+  const { data: categories = [], isLoading: loading } = useCategories()
+  const { data: allProducts = [] } = useProducts()
+  const { t } = useTranslation()
+  const { data: settings } = useSiteSettings()
+  const { reset } = useHeaderTheme()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const pageTitle = `BIRIM - ${t('categories') || t('products') || 'Kategoriler'}`
 
@@ -43,12 +43,12 @@ export function CategoriesPage() {
     return categories.map(category => {
       // Eğer kategori görseli varsa onu kullan
       if (category.heroImage) {
-        return {...category, displayImage: category.heroImage}
+        return { ...category, displayImage: category.heroImage }
       }
 
       // Kategori görseli yoksa, harita uzerindeki urun görselini kullan
       const displayImage = categoryImageMap.get(category.id) || null
-      return {...category, displayImage}
+      return { ...category, displayImage }
     })
   }, [categories, categoryImageMap])
 
@@ -93,7 +93,7 @@ export function CategoriesPage() {
       </div>
 
       {/* Categories Grid */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-16">
         {categoriesWithImages.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12">
             {categoriesWithImages.map((category, index) => (
@@ -124,6 +124,8 @@ export function CategoriesPage() {
                         className={`w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-[1.03] ${imageBorderClass}`}
                         loading="lazy"
                         quality={85}
+                        crop={typeof category.displayImage === 'object' ? (category.displayImage as any).crop : undefined}
+                        hotspot={typeof category.displayImage === 'object' ? (category.displayImage as any).hotspot : undefined}
                       />
                     )}
                     <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors duration-300"></div>

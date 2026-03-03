@@ -243,7 +243,7 @@ export function ProductDetailPage() {
           imageBorderClass={imageBorderClass}
           onSelect={idx => {
             heroHook.setHeroTransitionEnabled(true)
-            heroHook.setHeroSlideIndex(idx + 1)
+            heroHook.setHeroSlideIndex(slideCount > 1 ? idx + 1 : 0)
             heroHook.setCurrentImageIndex(idx)
           }}
         />
@@ -258,8 +258,8 @@ export function ProductDetailPage() {
 
           <div
             className={`mt-12 space-y-16 transition-all duration-700 ease-out ${!isMainContentVisible
-                ? 'opacity-0 translate-y-12'
-                : 'opacity-100 translate-y-0 delay-150'
+              ? 'opacity-0 translate-y-12'
+              : 'opacity-100 translate-y-0 delay-150'
               }`}
           >
             <ProductDimensions
@@ -303,8 +303,8 @@ export function ProductDetailPage() {
 
           <div
             className={`transition-all duration-700 ease-out ${!isMainContentVisible
-                ? 'opacity-0 translate-y-12'
-                : 'opacity-100 translate-y-0 delay-200'
+              ? 'opacity-0 translate-y-12'
+              : 'opacity-100 translate-y-0 delay-200'
               }`}
           >
             {Array.isArray(product?.media) &&

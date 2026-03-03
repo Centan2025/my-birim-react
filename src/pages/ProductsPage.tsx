@@ -1,17 +1,17 @@
-import {useState, useMemo, useEffect, useRef} from 'react'
-import {useParams} from 'react-router-dom'
-import {ProductCard} from '../components/ProductCard'
-import {OptimizedImage} from '../components/OptimizedImage'
-import {PageLoading} from '../components/LoadingSpinner'
-import {useTranslation} from '../i18n'
-import {Breadcrumbs} from '../components/Breadcrumbs'
-import {useProducts, useProductsByCategory} from '../hooks/useProducts'
-import {useCategory, useCategories} from '../hooks/useCategories'
-import {useSiteSettings} from '../hooks/useSiteData'
-import type {Product} from '../types'
+import { useState, useMemo, useEffect, useRef } from 'react'
+import { useParams } from 'react-router-dom'
+import { ProductCard } from '../components/ProductCard'
+import { OptimizedImage } from '../components/OptimizedImage'
+import { PageLoading } from '../components/LoadingSpinner'
+import { useTranslation } from '../i18n'
+import { Breadcrumbs } from '../components/Breadcrumbs'
+import { useProducts, useProductsByCategory } from '../hooks/useProducts'
+import { useCategory, useCategories } from '../hooks/useCategories'
+import { useSiteSettings } from '../hooks/useSiteData'
+import type { Product } from '../types'
 import ScrollReveal from '../components/ScrollReveal'
-import {useSEO} from '../hooks/useSEO'
-import {useHeaderTheme} from '../context/HeaderThemeContext'
+import { useSEO } from '../hooks/useSEO'
+import { useHeaderTheme } from '../context/HeaderThemeContext'
 
 const ChevronDownIcon = () => (
   <svg
@@ -29,26 +29,26 @@ const ChevronDownIcon = () => (
   </svg>
 )
 
-import {analytics} from '../lib/analytics'
+import { analytics } from '../lib/analytics'
 
 export function ProductsPage() {
-  const {categoryId} = useParams<{categoryId: string}>()
+  const { categoryId } = useParams<{ categoryId: string }>()
   const [isSortOpen, setIsSortOpen] = useState(false)
   const [sortBy, setSortBy] = useState('year-desc') // Default sort by newest
-  const {t} = useTranslation()
-  const {data: settings} = useSiteSettings()
+  const { t } = useTranslation()
+  const { data: settings } = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const sortRef = useRef<HTMLDivElement | null>(null)
 
   // React Query hooks - always call both, use enabled to control
-  const {data: allProductsData, isLoading: allProductsLoading} = useProducts()
-  const {data: categoryProductsData, isLoading: categoryProductsLoading} =
+  const { data: allProductsData, isLoading: allProductsLoading } = useProducts()
+  const { data: categoryProductsData, isLoading: categoryProductsLoading } =
     useProductsByCategory(categoryId)
   const allProducts = useMemo(() => allProductsData ?? [], [allProductsData])
   const categoryProducts = useMemo(() => categoryProductsData ?? [], [categoryProductsData])
-  const {data: category} = useCategory(categoryId)
-  const {data: categories = []} = useCategories()
-  const {reset} = useHeaderTheme()
+  const { data: category } = useCategory(categoryId)
+  const { data: categories = [] } = useCategories()
+  const { reset } = useHeaderTheme()
 
   // Use category products if categoryId exists, otherwise use all products
   const products = categoryId ? categoryProducts : allProducts
@@ -201,6 +201,8 @@ export function ProductsPage() {
                 className={`w-full h-full object-cover ${imageBorderClass}`}
                 loading="eager"
                 quality={90}
+                crop={typeof heroImage === 'object' ? (heroImage as any).crop : undefined}
+                hotspot={typeof heroImage === 'object' ? (heroImage as any).hotspot : undefined}
               />
             )
           })()}
@@ -218,31 +220,31 @@ export function ProductsPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-2 sm:px-2 lg:px-2 py-16">
-        <Breadcrumbs
-          className="mb-6"
-          items={
-            category
-              ? [
-                  {label: t('homepage'), to: '/'},
-                  {label: t('products'), to: '/products'},
-                  {label: t(category.name)},
+      {/* Breadcrumb and Sort Band */}
+      <div className="w-full bg-white relative z-20">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 flex flex-row flex-wrap items-center justify-between gap-4">
+          <Breadcrumbs
+            items={
+              category
+                ? [
+                  { label: t('homepage'), to: '/' },
+                  { label: t('products'), to: '/products' },
+                  { label: t(category.name) },
                 ]
-              : [{label: t('homepage'), to: '/'}, {label: t('products')}]
-          }
-        />
-        {/* Sort Controls */}
-        <div className="flex justify-end items-center mb-12">
+                : [{ label: t('homepage'), to: '/' }, { label: t('products') }]
+            }
+          />
+          {/* Sort Controls */}
           <div className="relative" ref={sortRef}>
             <button
               onClick={() => setIsSortOpen(!isSortOpen)}
-              className="flex items-center gap-2 text-sm font-light text-gray-500 hover:text-gray-600 transition-transform duration-300 transform hover:-translate-y-1 hover:scale-105"
+              className="flex items-center gap-2 text-[13px] sm:text-[15px] font-light text-gray-700 hover:text-gray-900 transition-transform duration-300 transform hover:-translate-y-1 hover:scale-105"
             >
               <span>{t('sort')}</span>
               <ChevronDownIcon />
             </button>
             {isSortOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 py-1 shadow-sm z-10">
+              <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 py-1 shadow-sm z-50">
                 <button
                   onClick={() => handleSortChange('year-desc')}
                   className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-100"
@@ -259,20 +261,22 @@ export function ProductsPage() {
             )}
           </div>
         </div>
+      </div>
 
+      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-12 md:py-16">
         {/* Product Grid */}
         {sortedProducts.length > 0 ? (
           !categoryId && allProducts.length > 0 ? (
             // Eğer kategori seçili değilse (tüm ürünler), kategorilere göre grupla ve başlık göster
             (() => {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const productsByCategory = new Map<string, {category: any; products: Product[]}>()
+              const productsByCategory = new Map<string, { category: any; products: Product[] }>()
 
               sortedProducts.forEach(product => {
                 const catId = product.categoryId || 'uncategorized'
                 if (!productsByCategory.has(catId)) {
                   const category = categories.find(c => c.id === catId)
-                  productsByCategory.set(catId, {category, products: []})
+                  productsByCategory.set(catId, { category, products: [] })
                 }
                 productsByCategory.get(catId)!.products.push(product)
               })
@@ -292,7 +296,7 @@ export function ProductsPage() {
               return (
                 <div>
                   {sortedCategoryIds.map(catId => {
-                    const {category, products} = productsByCategory.get(catId)!
+                    const { category, products } = productsByCategory.get(catId)!
                     const categoryName = category ? t(category.name) : catId
                     const startIndex = productIndex
                     productIndex += products.length

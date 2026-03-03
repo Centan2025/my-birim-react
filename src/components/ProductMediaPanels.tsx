@@ -1,6 +1,6 @@
-import {OptimizedImage} from './OptimizedImage'
+import { OptimizedImage } from './OptimizedImage'
 import ScrollReveal from './ScrollReveal'
-import type {LocalizedString, Product} from '../types'
+import type { LocalizedString, Product, R2ImageMetadata } from '../types'
 
 interface ProductMediaItem {
   type: 'image' | 'video' | 'youtube'
@@ -8,6 +8,8 @@ interface ProductMediaItem {
   urlMobile?: string
   urlDesktop?: string
   title?: LocalizedString | string
+  crop?: R2ImageMetadata['crop']
+  hotspot?: R2ImageMetadata['hotspot']
 }
 
 interface ProductWithMedia extends Product {
@@ -60,6 +62,8 @@ export function ProductMediaPanels({
                     className={`w-full h-full object-cover ${imageBorderClass}`}
                     loading="lazy"
                     quality={85}
+                    crop={m.crop}
+                    hotspot={m.hotspot}
                   />
                 ) : m.type === 'video' ? (
                   <div className={`w-full h-full bg-gray-300 ${imageBorderClass}`} />

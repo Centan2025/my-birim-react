@@ -67,6 +67,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
   const [usingFallback, setUsingFallback] = useState(false)
+  const [naturalDims, setNaturalDims] = useState<{ w: number, h: number } | null>(null)
   const imgRef = useRef<HTMLImageElement>(null)
 
   // src değiştiğinde state'i sıfırla
@@ -81,6 +82,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     const img = imgRef.current
     if (img && img.complete && img.naturalWidth > 0) {
       setIsLoaded(true)
+      if (img.naturalHeight > 0) {
+        setNaturalDims(prev => {
+          if (prev && prev.w === img.naturalWidth && prev.h === img.naturalHeight) return prev
+          return { w: img.naturalWidth, h: img.naturalHeight }
+        })
+      }
     }
   })
 
@@ -97,6 +104,11 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   const handleLoad = () => {
     setIsLoaded(true)
+    // Doğal boyutları yakala (crop layout hesaplaması için gerekli)
+    const img = imgRef.current
+    if (img && img.naturalWidth && img.naturalHeight) {
+      setNaturalDims({ w: img.naturalWidth, h: img.naturalHeight })
+    }
     onLoad?.()
   }
 
@@ -277,10 +289,58 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   if (hotspot) {
     imgStyle.objectPosition = `${hotspot.x * 100}% ${hotspot.y * 100}%`
   }
-  if (crop) {
-    // clip-path: inset() ile kırpma — geniş tarayıcı desteği
-    imgStyle.clipPath = `inset(${crop.y * 100}% ${(1 - crop.x - crop.width) * 100
-      }% ${(1 - crop.y - crop.height) * 100}% ${crop.x * 100}%)`
+
+  // Crop: İki farklı mod var:
+  // 1. "cover" modu: Görsel sabit boyutlu bir container'ı dolduruyor (hero, h-full, object-cover)
+  //    → Sadece object-position ile crop noktasını ayarla, wrapper ekleme
+  // 2. "layout" modu: Görsel doğal boyutunda (h-auto, içerik bloğu)
+  //    → overflow:hidden wrapper ile layout boyutunu kırpılmış alana küçült
+  const hasCrop = crop && crop.width > 0 && crop.height > 0 && (crop.width < 0.999 || crop.height < 0.999 || crop.x > 0.001 || crop.y > 0.001)
+  const isCoverMode = className.includes('h-full') || className.includes('h-screen') || !!height
+
+  // Cover modda sadece object-position uygula (doğru crop noktasına odaklan)
+  if (hasCrop && isCoverMode) {
+    const centerX = (crop.x + crop.width / 2) * 100
+    const centerY = (crop.y + crop.height / 2) * 100
+    imgStyle.objectPosition = `${centerX}% ${centerY}%`
+  }
+
+  // Layout modda overflow:hidden wrapper ile kırp
+  const useLayoutCrop = hasCrop && !isCoverMode
+  const renderCroppedContent = (pictureContent: React.ReactNode) => {
+    if (!useLayoutCrop) return pictureContent
+
+    // naturalDims yoksa (henüz yüklenmedi), görseli normal göster
+    // Yüklendikten sonra re-render ile doğru boyutla gösterilecek
+    if (!naturalDims) {
+      return pictureContent
+    }
+
+    // Doğal oranla kırpılmış alanın aspect ratio'sunu hesapla
+    const cropW = (naturalDims.w * crop.width)
+    const cropH = (naturalDims.h * crop.height)
+    const aspectRatio = cropW / cropH
+
+    return (
+      <div
+        style={{ aspectRatio: `${aspectRatio} / 1` }}
+        className="relative w-full overflow-hidden"
+        data-crop={JSON.stringify(crop)}
+      >
+        <div
+          style={{
+            width: `${(1 / crop.width) * 100}%`,
+            height: `${(1 / crop.height) * 100}%`,
+            transform: `translate(-${crop.x * 100}%, -${crop.y * 100}%)`,
+            position: 'absolute',
+            top: 0,
+            left: 0,
+          }}
+        >
+          {pictureContent}
+        </div>
+      </div>
+    )
   }
 
   if (hasError) {
@@ -337,6 +397,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   // Strip layout relevant classes from inner img to prevent nested constraints
   // Keep mx-auto for centering, only remove max-w- and w- to prevent double scaling
+  const isHeightDefined = className.includes('h-') || className.includes('aspect-')
   const innerImgClassName = className
     .split(' ')
     .filter(c => !c.startsWith('max-w-') && !c.startsWith('w-'))
@@ -344,6 +405,83 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   // Art Direction ile picture elementi kullan
   if (useArtDirection) {
+    const pictureElement = (
+      <picture>
+        {/* AVIF format (en iyi sıkıştırma) */}
+        {srcMobile && (
+          <source
+            type="image/avif"
+            media="(max-width: 768px)"
+            srcSet={generateSrcSet(srcMobile) || getFormatUrl(srcMobile, 'avif') || undefined}
+            sizes={defaultSizes}
+          />
+        )}
+        {srcDesktop && (
+          <source
+            type="image/avif"
+            media="(min-width: 769px)"
+            srcSet={generateSrcSet(srcDesktop) || getFormatUrl(srcDesktop, 'avif') || undefined}
+            sizes={defaultSizes}
+          />
+        )}
+        {/* WebP format (fallback) */}
+        {srcMobile && (
+          <source
+            type="image/webp"
+            media="(max-width: 768px)"
+            srcSet={generateSrcSet(srcMobile) || getFormatUrl(srcMobile, 'webp') || undefined}
+            sizes={defaultSizes}
+          />
+        )}
+        {srcDesktop && (
+          <source
+            type="image/webp"
+            media="(min-width: 769px)"
+            srcSet={generateSrcSet(srcDesktop) || getFormatUrl(srcDesktop, 'webp') || undefined}
+            sizes={defaultSizes}
+          />
+        )}
+        {/* Mobil için görsel (max-width: 768px) */}
+        {srcMobile && optimizedMobileSrc && (
+          <source
+            media="(max-width: 768px)"
+            srcSet={generateSrcSet(srcMobile) || undefined}
+            sizes={defaultSizes}
+          />
+        )}
+        {/* Desktop için görsel (min-width: 769px) */}
+        {srcDesktop && optimizedDesktopSrc && (
+          <source
+            media="(min-width: 769px)"
+            srcSet={generateSrcSet(srcDesktop) || undefined}
+            sizes={defaultSizes}
+          />
+        )}
+        {/* Fallback: Eğer mobil versiyonu yoksa desktop'u kullan, o da yoksa src'i kullan */}
+        <img
+          ref={imgRef}
+          src={
+            activeMobileSrc
+              ? optimizedMobileSrc
+              : activeDesktopSrc
+                ? optimizedDesktopSrc
+                : optimizedSrc
+          }
+          alt={alt}
+          width={width}
+          height={height}
+          loading={loading}
+          {...fetchPriorityAttr}
+          className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${isHeightDefined ? '' : 'h-auto'} ${innerImgClassName}`}
+          draggable={draggable}
+          onLoad={handleLoad}
+          onError={handleError}
+          decoding="async"
+          style={{ ...imgStyle, display: 'block' }}
+        />
+      </picture>
+    )
+
     return (
       <div className={`relative ${className}`} style={style}>
         {!isLoaded && (
@@ -354,85 +492,47 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             aria-hidden="true"
           />
         )}
-        <picture>
-          {/* AVIF format (en iyi sıkıştırma) */}
-          {srcMobile && (
-            <source
-              type="image/avif"
-              media="(max-width: 768px)"
-              srcSet={generateSrcSet(srcMobile) || getFormatUrl(srcMobile, 'avif') || undefined}
-              sizes={defaultSizes}
-            />
-          )}
-          {srcDesktop && (
-            <source
-              type="image/avif"
-              media="(min-width: 769px)"
-              srcSet={generateSrcSet(srcDesktop) || getFormatUrl(srcDesktop, 'avif') || undefined}
-              sizes={defaultSizes}
-            />
-          )}
-          {/* WebP format (fallback) */}
-          {srcMobile && (
-            <source
-              type="image/webp"
-              media="(max-width: 768px)"
-              srcSet={generateSrcSet(srcMobile) || getFormatUrl(srcMobile, 'webp') || undefined}
-              sizes={defaultSizes}
-            />
-          )}
-          {srcDesktop && (
-            <source
-              type="image/webp"
-              media="(min-width: 769px)"
-              srcSet={generateSrcSet(srcDesktop) || getFormatUrl(srcDesktop, 'webp') || undefined}
-              sizes={defaultSizes}
-            />
-          )}
-          {/* Mobil için görsel (max-width: 768px) */}
-          {srcMobile && optimizedMobileSrc && (
-            <source
-              media="(max-width: 768px)"
-              srcSet={generateSrcSet(srcMobile) || undefined}
-              sizes={defaultSizes}
-            />
-          )}
-          {/* Desktop için görsel (min-width: 769px) */}
-          {srcDesktop && optimizedDesktopSrc && (
-            <source
-              media="(min-width: 769px)"
-              srcSet={generateSrcSet(srcDesktop) || undefined}
-              sizes={defaultSizes}
-            />
-          )}
-          {/* Fallback: Eğer mobil versiyonu yoksa desktop'u kullan, o da yoksa src'i kullan */}
-          <img
-            ref={imgRef}
-            src={
-              activeMobileSrc
-                ? optimizedMobileSrc
-                : activeDesktopSrc
-                  ? optimizedDesktopSrc
-                  : optimizedSrc
-            }
-            alt={alt}
-            width={width}
-            height={height}
-            loading={loading}
-            {...fetchPriorityAttr}
-            className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full h-full ${innerImgClassName}`}
-            draggable={draggable}
-            onLoad={handleLoad}
-            onError={handleError}
-            decoding="async"
-            style={imgStyle}
-          />
-        </picture>
+        {renderCroppedContent(pictureElement)}
       </div>
     )
   }
 
   // Normal kullanım (Art Direction yok veya fallback)
+  const pictureElement = (
+    <picture>
+      {/* AVIF format (en iyi sıkıştırma) */}
+      <source
+        type="image/avif"
+        srcSet={responsiveSrcSet || getFormatUrl(activeSrc, 'avif') || undefined}
+        sizes={responsiveSrcSet ? defaultSizes : undefined}
+      />
+      {/* WebP format (fallback) */}
+      <source
+        type="image/webp"
+        srcSet={responsiveSrcSet || getFormatUrl(activeSrc, 'webp') || undefined}
+        sizes={responsiveSrcSet ? defaultSizes : undefined}
+      />
+      {/* Fallback image */}
+      <img
+        ref={imgRef}
+        src={optimizedSrc}
+        alt={alt}
+        width={width}
+        height={height}
+        loading={loading}
+        {...fetchPriorityAttr}
+        srcSet={responsiveSrcSet || undefined}
+        sizes={responsiveSrcSet ? defaultSizes : undefined}
+        className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${isHeightDefined ? '' : 'h-auto'} ${innerImgClassName}`}
+        draggable={draggable}
+        onLoad={handleLoad}
+        onError={handleError}
+        decoding="async"
+        style={{ ...imgStyle, display: 'block' }}
+      />
+    </picture>
+  )
+
   return (
     <div className={`relative ${className}`} style={style}>
       {!isLoaded && (
@@ -443,38 +543,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           aria-hidden="true"
         />
       )}
-      <picture>
-        {/* AVIF format (en iyi sıkıştırma) */}
-        <source
-          type="image/avif"
-          srcSet={responsiveSrcSet || getFormatUrl(activeSrc, 'avif') || undefined}
-          sizes={responsiveSrcSet ? defaultSizes : undefined}
-        />
-        {/* WebP format (fallback) */}
-        <source
-          type="image/webp"
-          srcSet={responsiveSrcSet || getFormatUrl(activeSrc, 'webp') || undefined}
-          sizes={responsiveSrcSet ? defaultSizes : undefined}
-        />
-        {/* Fallback image */}
-        <img
-          ref={imgRef}
-          src={optimizedSrc}
-          alt={alt}
-          width={width}
-          height={height}
-          loading={loading}
-          {...fetchPriorityAttr}
-          srcSet={responsiveSrcSet || undefined}
-          sizes={responsiveSrcSet ? defaultSizes : undefined}
-          className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full h-full ${innerImgClassName}`}
-          draggable={draggable}
-          onLoad={handleLoad}
-          onError={handleError}
-          decoding="async"
-          style={imgStyle}
-        />
-      </picture>
+      {renderCroppedContent(pictureElement)}
     </div>
   )
 }
