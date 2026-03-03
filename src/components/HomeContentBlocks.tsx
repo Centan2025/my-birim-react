@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { SVGProps } from 'react'
 import { Link } from 'react-router-dom'
 
 import { ContentBlock } from '../types'
@@ -9,6 +9,24 @@ import { OptimizedVideo } from './OptimizedVideo'
 import { YouTubeBackground } from './YouTubeBackground'
 import PortableTextLite from './PortableTextLite'
 import { useGoogleFonts } from '../hooks/useGoogleFont'
+
+const ArrowRight = (props: SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="28"
+    height="28"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="0.4"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M16 10 22 16" />
+    <path d="M22 16H2" />
+  </svg>
+)
 
 interface HomeContentBlocksProps {
   blocks: ContentBlock[]
@@ -157,19 +175,14 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 >
                   <Link
                     to={block.linkUrl}
-                    className={`group inline-flex items-center gap-x-6 text-gray-950 font-bold py-4 text-base md:text-xl lg:text-2xl transition-all duration-300`}
+                    className={`group inline-flex items-center gap-x-3 text-gray-950 font-bold py-4 text-base md:text-xl lg:text-2xl transition-all duration-300`}
                   >
-                    {/* Sol Çizgi */}
-                    <span className="w-12 md:w-16 h-[1px] bg-gray-950/30 group-hover:w-20 md:group-hover:w-24 group-hover:bg-gray-950 transition-all duration-500 ease-out self-end mb-1" />
-
                     <span className="inline-flex justify-center transition-all duration-500 ease-out">
-                      <span className="leading-none font-bold tracking-[0.05em] transition-all duration-500 ease-out md:group-hover:tracking-[0.15em]">
+                      <span className="font-bold tracking-[0.05em] transition-all duration-500 ease-out md:group-hover:tracking-[0.10em]">
                         {t(block.linkText)}
                       </span>
                     </span>
-
-                    {/* Sağ Çizgi */}
-                    <span className="w-12 md:w-16 h-[1px] bg-gray-950/30 group-hover:w-20 md:group-hover:w-24 group-hover:bg-gray-950 transition-all duration-500 ease-out self-end mb-1" />
+                    <ArrowRight className="w-6 h-6 md:w-8 md:h-8 transition-transform duration-500 ease-out group-hover:translate-x-2" />
                   </Link>
                 </div>
               </ScrollReveal>
@@ -183,9 +196,6 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 
         const isButtonWhite = block.buttonColor === 'white'
         const buttonTextColorClass = isButtonWhite ? 'text-white' : 'text-gray-950'
-        const buttonLineClass = isButtonWhite
-          ? 'bg-white/40 group-hover:bg-white'
-          : 'bg-gray-950/40 group-hover:bg-gray-950'
 
         const mediaContent = (
           <ScrollReveal
@@ -203,23 +213,14 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   >
                     <Link
                       to={block.linkUrl}
-                      className={`group pointer-events-auto inline-flex items-center gap-x-4 md:gap-x-6 ${buttonTextColorClass} font-bold py-4 px-4 md:px-8 transition-all duration-300 bg-transparent hover:bg-transparent`}
+                      className={`group pointer-events-auto inline-flex items-center gap-x-3 ${buttonTextColorClass} font-bold py-4 px-4 md:px-8 transition-all duration-300 bg-transparent hover:bg-transparent`}
                     >
-                      {/* Sol Çizgi - Sadece Desktop */}
-                      <span
-                        className={`hidden md:block w-12 md:w-16 h-[1px] ${buttonLineClass} group-hover:w-20 md:group-hover:w-24 transition-all duration-500 ease-out self-end mb-1`}
-                      />
-
                       <span className="inline-flex justify-center transition-all duration-500 ease-out">
-                        <span className="leading-none font-bold tracking-[0.05em] transition-all duration-500 ease-out md:group-hover:tracking-[0.15em]">
+                        <span className="font-bold tracking-[0.05em] transition-all duration-500 ease-out md:group-hover:tracking-[0.10em]">
                           {t(block.linkText)}
                         </span>
                       </span>
-
-                      {/* Sağ Çizgi - Sadece Desktop */}
-                      <span
-                        className={`hidden md:block w-12 md:w-16 h-[1px] ${buttonLineClass} group-hover:w-20 md:group-hover:w-24 transition-all duration-500 ease-out self-end mb-1`}
-                      />
+                      <ArrowRight className="w-6 h-6 md:w-8 md:h-8 transition-transform duration-500 ease-out group-hover:translate-x-2" />
                     </Link>
                   </div>
                 )}
@@ -242,23 +243,14 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   >
                     <Link
                       to={block.linkUrl}
-                      className={`group pointer-events-auto inline-flex items-center gap-x-4 md:gap-x-6 ${buttonTextColorClass} font-bold py-4 px-4 md:px-8 transition-all duration-300 bg-transparent hover:bg-transparent`}
+                      className={`group pointer-events-auto inline-flex items-center gap-x-3 ${buttonTextColorClass} font-bold py-4 px-4 md:px-8 transition-all duration-300 bg-transparent hover:bg-transparent`}
                     >
-                      {/* Sol Çizgi - Sadece Desktop */}
-                      <span
-                        className={`hidden md:block w-12 md:w-16 h-[1px] ${buttonLineClass} group-hover:w-20 md:group-hover:w-24 transition-all duration-500 ease-out self-end mb-1`}
-                      />
-
                       <span className="inline-flex justify-center transition-all duration-500 ease-out">
-                        <span className="leading-none font-bold tracking-[0.05em] transition-all duration-500 ease-out md:group-hover:tracking-[0.15em]">
+                        <span className="font-bold tracking-[0.05em] transition-all duration-500 ease-out md:group-hover:tracking-[0.10em]">
                           {t(block.linkText)}
                         </span>
                       </span>
-
-                      {/* Sağ Çizgi - Sadece Desktop */}
-                      <span
-                        className={`hidden md:block w-12 md:w-16 h-[1px] ${buttonLineClass} group-hover:w-20 md:group-hover:w-24 transition-all duration-500 ease-out self-end mb-1`}
-                      />
+                      <ArrowRight className="w-6 h-6 md:w-8 md:h-8 transition-transform duration-500 ease-out group-hover:translate-x-2" />
                     </Link>
                   </div>
                 )}
@@ -280,23 +272,14 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   >
                     <Link
                       to={block.linkUrl}
-                      className={`group pointer-events-auto inline-flex items-center gap-x-4 md:gap-x-6 ${buttonTextColorClass} font-bold py-4 px-4 md:px-8 transition-all duration-300 bg-transparent hover:bg-transparent`}
+                      className={`group pointer-events-auto inline-flex items-center gap-x-3 ${buttonTextColorClass} font-bold py-4 px-4 md:px-8 transition-all duration-300 bg-transparent hover:bg-transparent`}
                     >
-                      {/* Sol Çizgi - Sadece Desktop */}
-                      <span
-                        className={`hidden md:block w-12 md:w-16 h-[1px] ${buttonLineClass} group-hover:w-20 md:group-hover:w-24 transition-all duration-500 ease-out self-end mb-1`}
-                      />
-
                       <span className="inline-flex justify-center transition-all duration-500 ease-out">
-                        <span className="leading-none font-bold tracking-[0.05em] transition-all duration-500 ease-out md:group-hover:tracking-[0.15em]">
+                        <span className="font-bold tracking-[0.05em] transition-all duration-500 ease-out md:group-hover:tracking-[0.10em]">
                           {t(block.linkText)}
                         </span>
                       </span>
-
-                      {/* Sağ Çizgi - Sadece Desktop */}
-                      <span
-                        className={`hidden md:block w-12 md:w-16 h-[1px] ${buttonLineClass} group-hover:w-20 md:group-hover:w-24 transition-all duration-500 ease-out self-end mb-1`}
-                      />
+                      <ArrowRight className="w-6 h-6 md:w-8 md:h-8 transition-transform duration-500 ease-out group-hover:translate-x-2" />
                     </Link>
                   </div>
                 )}

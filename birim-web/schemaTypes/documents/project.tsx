@@ -1,6 +1,6 @@
 import React from 'react'
-import {defineField, defineType} from 'sanity'
-import {getPreviewUrl} from '../utils/previewUrl'
+import { defineField, defineType } from 'sanity'
+import { getPreviewUrl } from '../utils/previewUrl'
 
 export default defineType({
   name: 'project',
@@ -11,7 +11,7 @@ export default defineType({
       name: 'id',
       title: 'ID (Slug)',
       type: 'slug',
-      options: {source: (doc: any) => doc.title?.tr || doc.title?.en, maxLength: 96},
+      options: { source: (doc: any) => doc.title?.tr || doc.title?.en, maxLength: 96 },
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -48,6 +48,12 @@ export default defineType({
       description: 'Yer ve tarih bilgisini birlikte girin (örn: İstanbul + 15 Ocak 2024)',
     }),
     defineField({
+      name: 'projectCategory',
+      title: 'Proje Kategorisi',
+      type: 'localizedString',
+      description: 'Proje türü bilgisi (örn: Mimari & İç Mekan, Mobilya Tasarım, İç Mimarlık)',
+    }),
+    defineField({
       name: 'coverR2',
       title: 'Kapak Görseli (Tüm Cihazlar)',
       type: 'r2Asset',
@@ -62,81 +68,18 @@ export default defineType({
       title: 'Kapak Görseli (Desktop)',
       type: 'r2Asset',
     }),
-    defineField({name: 'excerpt', title: 'Kısa Açıklama', type: 'localizedPortableText'}),
+    defineField({ name: 'excerpt', title: 'Kısa Açıklama', type: 'localizedPortableText' }),
     defineField({
-      name: 'media',
-      title: 'Medya (Görsel ve Video)',
+      name: 'contentBlocks',
+      title: 'İçerik Blokları',
       type: 'array',
-      of: [
-        {
-          type: 'object',
-          fields: [
-            defineField({
-              name: 'type',
-              title: 'Tür',
-              type: 'string',
-              options: {
-                list: [
-                  {title: 'Image', value: 'image'},
-                  {title: 'Video', value: 'video'},
-                  {title: 'YouTube', value: 'youtube'},
-                ],
-              },
-              initialValue: 'image',
-            }),
-            defineField({
-              name: 'imageR2',
-              title: 'Görsel (Tüm Cihazlar)',
-              type: 'r2Asset',
-              hidden: ({parent}) => parent?.type !== 'image',
-            }),
-            defineField({
-              name: 'imageMobileR2',
-              title: 'Görsel (Mobil)',
-              type: 'r2Asset',
-              hidden: ({parent}) => parent?.type !== 'image',
-            }),
-            defineField({
-              name: 'imageDesktopR2',
-              title: 'Görsel (Desktop)',
-              type: 'r2Asset',
-              hidden: ({parent}) => parent?.type !== 'image',
-            }),
-            defineField({
-              name: 'videoFileR2',
-              title: 'Video Dosyası (Tüm Cihazlar)',
-              type: 'r2Asset',
-              hidden: ({parent}) => parent?.type !== 'video',
-            }),
-            defineField({
-              name: 'videoFileMobileR2',
-              title: 'Video Dosyası (Mobil)',
-              type: 'r2Asset',
-              hidden: ({parent}) => parent?.type !== 'video',
-            }),
-            defineField({
-              name: 'videoFileDesktopR2',
-              title: 'Video Dosyası (Desktop)',
-              type: 'r2Asset',
-              hidden: ({parent}) => parent?.type !== 'video',
-            }),
-            defineField({
-              name: 'url',
-              title: 'Video URL (veya YouTube URL)',
-              type: 'url',
-              hidden: ({parent}) => parent?.type === 'image',
-              description:
-                'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.',
-            }),
-          ],
-        },
-      ],
+      of: [{ type: 'contentBlock' }],
+      description: 'Proje detay sayfasında gösterilecek içerik blokları (ana sayfa ile aynı sistem)',
     }),
-    defineField({name: 'body', title: 'İçerik', type: 'localizedPortableText'}),
   ],
   preview: {
-    select: {title: 'title.tr', r2Url: 'coverR2.url'},
-    prepare({title, r2Url}) {
+    select: { title: 'title.tr', r2Url: 'coverR2.url' },
+    prepare({ title, r2Url }) {
       let finalUrl = getPreviewUrl(r2Url)
       return {
         title: title || 'Proje',
@@ -144,7 +87,7 @@ export default defineType({
           <img
             src={finalUrl}
             alt={title || 'Proje'}
-            style={{width: '100%', height: '100%', objectFit: 'cover'}}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         ) : undefined,
       }

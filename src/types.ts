@@ -581,6 +581,7 @@ export interface Project {
   | string
   | { url: string; urlMobile?: string; urlDesktop?: string; palette?: SanityImagePalette }
   date?: LocalizedString
+  projectCategory?: LocalizedString
   excerpt?: LocalizedString
   media?: {
     type: 'image' | 'video' | 'youtube'
@@ -590,6 +591,8 @@ export interface Project {
     image?: string
   }[]
   body?: LocalizedString
+  /** Content blocks displayed on project detail page (same system as homepage) */
+  contentBlocks?: ContentBlock[]
   /** Whether this project is published on the site. */
   isPublished?: boolean
   /** Optional scheduled publish date used for filtering/sorting. */

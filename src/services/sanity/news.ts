@@ -1,6 +1,6 @@
 import groq from 'groq'
 import type { NewsItem, Project } from '../../types'
-import { sanity, useSanity, mapImage, mapMediaUrl, extractPalette, mapR2Metadata } from './client'
+import { sanity, useSanity, mapImage, mapMediaUrl, rewriteR2Url, extractPalette, mapR2Metadata } from './client'
 import { getItem } from './settings'
 
 const SIMULATED_DELAY = 200
@@ -59,7 +59,7 @@ export const getProjects = async (): Promise<Project[]> => {
   if (useSanity && sanity) {
     const q = groq`*[_type=="project" && (isPublished != false) && (!defined(publishAt) || publishAt <= now())] 
       | order(coalesce(sortOrder, 999999) asc, coalesce(publishAt, _createdAt) desc){
-        "id": id.current, title, date, publishAt, isPublished, sortOrder,
+        "id": id.current, title, date, projectCategory, publishAt, isPublished, sortOrder,
         cover{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}},
         coverR2{..., metadata{palette{dominant{background,foreground}}}},
         coverMobileR2{..., metadata{palette{dominant{background,foreground}}}},
@@ -95,7 +95,8 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
       coverMobile{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, coverMobileR2,
       coverDesktop{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, coverDesktopR2,
       excerpt, body, 
-      media[]{ type, url, caption, image{..., asset->{url, _ref, _id}}, imageR2, imageMobile{..., asset->{url, _ref, _id}}, imageMobileR2, imageDesktop{..., asset->{url, _ref, _id}}, imageDesktopR2, videoFile{..., asset->{url, _ref, _id}}, videoFileR2, videoFileMobileR2, videoFileDesktopR2 }
+      media[]{ type, url, caption, image{..., asset->{url, _ref, _id}}, imageR2, imageMobile{..., asset->{url, _ref, _id}}, imageMobileR2, imageDesktop{..., asset->{url, _ref, _id}}, imageDesktopR2, videoFile{..., asset->{url, _ref, _id}}, videoFileR2, videoFileMobileR2, videoFileDesktopR2 },
+      contentBlocks[]{ ..., titleFont, imageR2, videoFileR2 }
     }`
     const r = await sanity.fetch(q, { id })
     if (!r) return undefined
@@ -114,6 +115,24 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
       })
       .filter((m: any) => m.url)
 
+    // Transform contentBlocks exactly like homepage
+    const contentBlocks = r.contentBlocks
+      ? r.contentBlocks.map((b: any) => {
+        let url = b.url
+        if (b.mediaType === 'image') {
+          const imgUrl = b.imageR2?.url ? mapImage(b.imageR2) : undefined
+          const imgMeta = b.imageR2 ? mapR2Metadata(b.imageR2) : {}
+          if (imgUrl) return { ...b, image: imgUrl, url: undefined, crop: imgMeta.crop, hotspot: imgMeta.hotspot }
+        }
+        if (b.mediaType === 'video' && b.videoFileR2?.url) {
+          url = rewriteR2Url(b.videoFileR2.url)
+        }
+        const crop = b.imageR2 ? mapR2Metadata(b.imageR2).crop : undefined
+        const hotspot = b.imageR2 ? mapR2Metadata(b.imageR2).hotspot : undefined
+        return { ...b, image: undefined, url, crop, hotspot }
+      })
+      : undefined
+
     return {
       id: r.id,
       title: r.title,
@@ -121,6 +140,7 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
       excerpt: r.excerpt,
       body: r.body,
       media: media.length > 0 ? media : undefined,
+      contentBlocks: contentBlocks && contentBlocks.length > 0 ? contentBlocks : undefined,
       cover: (() => {
         const url = mapImage(r.coverR2) || mapImage(r.cover)
         const urlMobile = r.coverMobileR2?.url
