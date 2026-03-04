@@ -208,6 +208,8 @@ export function ProjectDetailPage() {
     image: m.image || (m.type === 'image' ? m.url : undefined),
     crop: (m as any).crop,
     hotspot: (m as any).hotspot,
+    origWidth: (m as any).origWidth,
+    origHeight: (m as any).origHeight,
   }))
 
   // Cover görselini başa ekle (eğer varsa ve media array'inde yoksa)
@@ -221,6 +223,8 @@ export function ProjectDetailPage() {
         image: coverUrl,
         crop: coverCrop,
         hotspot: coverHotspot,
+        origWidth: project && project.cover && typeof project.cover === 'object' ? (project.cover as any).origWidth : undefined,
+        origHeight: project && project.cover && typeof project.cover === 'object' ? (project.cover as any).origHeight : undefined,
       },
     ]
     : []
@@ -290,6 +294,8 @@ export function ProjectDetailPage() {
               quality={90}
               crop={coverCrop}
               hotspot={coverHotspot}
+              origWidth={project && project.cover && typeof project.cover === 'object' ? (project.cover as any).origWidth : undefined}
+              origHeight={project && project.cover && typeof project.cover === 'object' ? (project.cover as any).origHeight : undefined}
             />
           </div>
         ) : (
@@ -373,7 +379,7 @@ export function ProjectDetailPage() {
 
       {/* Breadcrumb Band - Hero'nun altında */}
       <div className="w-full bg-white relative z-20">
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 pb-2">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
           <Breadcrumbs
             items={[
               { label: t('homepage'), to: '/' },
@@ -386,7 +392,7 @@ export function ProjectDetailPage() {
 
       {(project.excerpt || project.body || allMedia.length > 0 || (showBottomPrevNext && (prevProject || nextProject))) && (
         <div className="mt-0 relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-gray-100">
-          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-6 md:py-8">
+          <div className="w-full md:max-w-[92%] lg:max-w-[80vw] mx-auto md:px-8 lg:px-0 py-6 md:py-8">
             {/* Top Prev / Next controls */}
             {showBottomPrevNext && (prevProject || nextProject) && (
               <div className="flex items-center justify-between mb-8 px-4 sm:px-0">
@@ -421,7 +427,7 @@ export function ProjectDetailPage() {
 
             {/* Başlık ile aynı sol hizaya oturan içerik */}
             {(project.excerpt || project.body) && (
-              <div className="w-full space-y-4 px-4 sm:px-0">
+              <div className="w-full max-w-[95%] mx-auto space-y-4 px-4 sm:px-0 md:max-w-none md:mx-0">
                 {project.excerpt && (
                   <ScrollReveal delay={200}>
                     {(() => {
@@ -488,6 +494,7 @@ export function ProjectDetailPage() {
                   blocks={project.contentBlocks}
                   isMobile={isMobile}
                   imageBorderClass={imageBorderClass}
+                  overrideBackgroundColor="bg-gray-100"
                 />
               </div>
             ) : (
@@ -515,6 +522,8 @@ export function ProjectDetailPage() {
                             quality={85}
                             crop={m.crop}
                             hotspot={m.hotspot}
+                            origWidth={m.origWidth}
+                            origHeight={m.origHeight}
                           />
                         )}
                         {m.type === 'video' && (

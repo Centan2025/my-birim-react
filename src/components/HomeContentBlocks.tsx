@@ -32,12 +32,14 @@ interface HomeContentBlocksProps {
   blocks: ContentBlock[]
   isMobile: boolean
   imageBorderClass: string
+  overrideBackgroundColor?: string
 }
 
 export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
   blocks,
   isMobile,
   imageBorderClass,
+  overrideBackgroundColor,
 }) => {
   const { t } = useTranslation()
 
@@ -74,7 +76,10 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         const isRight = block.position === 'right'
         const isCenter = block.position === 'center'
 
-        const backgroundColor = block.backgroundColor === 'gray' ? 'bg-gray-100' : 'bg-white'
+        const backgroundColor = overrideBackgroundColor
+          ? overrideBackgroundColor
+          : block.backgroundColor === 'gray' ? 'bg-gray-100' : 'bg-white'
+
         const textAlign = block.textAlignment || 'left'
         const textAlignClass =
           textAlign === 'center'
@@ -207,7 +212,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 
         const mediaWidthClass = isFullWidth
           ? 'w-full'
-          : 'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto'
+          : 'w-full md:max-w-[92%] lg:max-w-[80vw] mx-auto'
 
         const isButtonWhite = block.buttonColor === 'white'
         const buttonTextColorClass = isButtonWhite ? 'text-white' : 'text-gray-950'
@@ -220,7 +225,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             className={`h-auto ${isFullWidth || isCenter ? 'w-full' : ''} ${isCenter ? 'flex justify-center' : ''}`}
           >
             {block.mediaType === 'youtube' ? (
-              <div className={`relative ${mediaWidthClass} aspect-video overflow-hidden`}>
+              <div className={`relative ${mediaWidthClass} ${isMobile ? 'w-full' : ''} aspect-video overflow-hidden`}>
                 <YouTubeBackground url={mediaUrl} />
                 {block.showButtonOnMedia && block.linkText && (
                   <div
@@ -256,7 +261,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               <div className="relative w-full h-full">
                 <OptimizedVideo
                   src={mediaUrl}
-                  className={`${isFullWidth ? 'w-full h-auto max-w-full' : `${mediaWidthClass} ${imageBorderClass}`} ${isMobile ? 'object-contain' : 'object-cover'}`}
+                  className={`${isFullWidth ? 'w-full h-auto max-w-full' : `${mediaWidthClass} ${imageBorderClass}`} ${isMobile ? 'w-full object-cover' : 'object-cover'}`}
                   autoPlay
                   loop
                   muted
@@ -299,11 +304,13 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 <OptimizedImage
                   src={mediaUrl}
                   alt=""
-                  className={`${isFullWidth ? 'w-full h-auto' : `${mediaWidthClass} ${imageBorderClass}`} ${isMobile ? 'object-contain' : 'object-cover'} block`}
+                  className={`${isFullWidth ? 'w-full h-auto' : `${mediaWidthClass} ${imageBorderClass}`} ${isMobile ? 'w-full object-cover' : 'object-cover'} block`}
                   loading="lazy"
                   quality={85}
                   crop={block.crop}
                   hotspot={block.hotspot}
+                  origWidth={block.origWidth}
+                  origHeight={block.origHeight}
                 />
                 {block.showButtonOnMedia && block.linkText && (
                   <div

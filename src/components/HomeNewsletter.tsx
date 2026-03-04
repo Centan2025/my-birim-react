@@ -156,23 +156,23 @@ export const HomeNewsletter: FC = () => {
   }
 
   return (
-    <section className="bg-[#ececec] w-full relative border-t border-gray-200 overflow-hidden">
+    <section className="bg-[#2a2a2a] w-full relative border-t border-zinc-800 overflow-hidden text-white">
       {/* Collapse Trigger Button - Band Style */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex flex-col md:flex-row items-center justify-between px-6 py-5 md:py-6 text-xs md:text-sm font-bold tracking-[0.3em] uppercase bg-[#c8c8c8] hover:bg-[#bfbfbf] transition-colors group z-30 relative font-inter gap-4 md:gap-0"
+        className="w-full flex flex-col md:flex-row items-center justify-between px-6 py-5 md:py-6 text-xs md:text-sm font-bold tracking-[0.3em] uppercase bg-[#333333] hover:bg-[#3d3d3d] transition-colors group z-30 relative font-inter gap-4 md:gap-0"
       >
         <div className="flex-1 flex flex-col items-center justify-center md:pl-[120px]">
-          <span className="font-bold tracking-[0.4em] text-sm md:text-base text-gray-600 transition-colors group-hover:text-gray-800">
+          <span className="font-bold tracking-[0.4em] text-sm md:text-base text-gray-100 transition-colors group-hover:text-white">
             {t('newsletter_title')}
           </span>
-          <span className="font-semibold tracking-[0.2em] text-[10px] md:text-xs text-gray-500 mt-1 md:mt-2 transition-colors group-hover:text-gray-700">
+          <span className="font-semibold tracking-[0.2em] text-[10px] md:text-xs text-gray-400 mt-1 md:mt-2 transition-colors group-hover:text-gray-200">
             {t('professional_access')}
           </span>
         </div>
         <div className="flex-shrink-0 md:ml-4 w-full md:w-auto">
           <div
-            className={`flex items-center justify-center gap-3 bg-black text-white px-6 py-3 transition-all duration-500 ${isExpanded ? 'bg-zinc-700' : 'bg-black'} font-inter`}
+            className={`flex items-center justify-center gap-3 bg-white text-black px-6 py-3 transition-all duration-500 font-inter hover:bg-gray-200`}
           >
             <span className="text-[11px] md:text-xs tracking-[0.2em] font-bold">
               {isExpanded ? t('close') : t('join_us')}
@@ -195,7 +195,7 @@ export const HomeNewsletter: FC = () => {
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="overflow-hidden"
           >
-            <div className="pt-8 pb-16 w-full flex flex-col items-center">
+            <div className="pt-8 pb-16 w-full flex flex-col items-center bg-[#f5f5f5] text-gray-900 relative">
               {/* Background Decorative Element */}
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent opacity-50" />
 
@@ -205,13 +205,13 @@ export const HomeNewsletter: FC = () => {
                     role="tab"
                     aria-selected={activeTab === 'newsletter'}
                     onClick={() => setActiveTab('newsletter')}
-                    className={`relative pb-4 px-6 text-xs md:text-sm font-bold tracking-[0.25em] transition-all duration-500 uppercase font-inter ${activeTab === 'newsletter' ? 'text-gray-500' : 'text-gray-400 hover:text-gray-500'}`}
+                    className={`relative pb-4 px-6 text-xs md:text-sm font-bold tracking-[0.25em] transition-all duration-500 uppercase font-inter ${activeTab === 'newsletter' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-900'}`}
                   >
                     {t('newsletter_title')}
                     {activeTab === 'newsletter' && (
                       <motion.div
                         layoutId="activeTabUnderline"
-                        className="absolute bottom-0 left-0 right-0 h-[2px] bg-gray-400"
+                        className="absolute bottom-0 left-0 right-0 h-[2px] bg-gray-600"
                         transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                       />
                     )}
@@ -220,13 +220,13 @@ export const HomeNewsletter: FC = () => {
                     role="tab"
                     aria-selected={activeTab === 'professional'}
                     onClick={() => setActiveTab('professional')}
-                    className={`relative pb-4 px-6 text-xs md:text-sm font-bold tracking-[0.25em] transition-all duration-500 uppercase font-inter ${activeTab === 'professional' ? 'text-gray-500' : 'text-gray-400 hover:text-gray-500'}`}
+                    className={`relative pb-4 px-6 text-xs md:text-sm font-bold tracking-[0.25em] transition-all duration-500 uppercase font-inter ${activeTab === 'professional' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-900'}`}
                   >
                     {t('professional_access')}
                     {activeTab === 'professional' && (
                       <motion.div
                         layoutId="activeTabUnderline"
-                        className="absolute bottom-0 left-0 right-0 h-[2px] bg-gray-400"
+                        className="absolute bottom-0 left-0 right-0 h-[2px] bg-gray-600"
                         transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                       />
                     )}
@@ -255,7 +255,7 @@ export const HomeNewsletter: FC = () => {
                       <motion.form
                         variants={itemVariants}
                         onSubmit={handleSubmitNewsletter}
-                        className="w-full flex flex-col md:flex-row gap-0 border border-black/30 focus-within:border-black transition-colors duration-500 bg-white"
+                        className="w-full flex flex-col md:flex-row gap-0 border border-black/20 focus-within:border-black transition-colors duration-500 bg-white"
                       >
                         <div className="flex-grow flex items-center px-4 py-1">
                           <Mail className="w-4 h-4 text-gray-400 mr-3" />

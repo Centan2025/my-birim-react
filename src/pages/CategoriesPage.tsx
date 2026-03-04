@@ -11,8 +11,8 @@ import { useSEO } from '../hooks/useSEO'
 import { useHeaderTheme } from '../context/HeaderThemeContext'
 
 export function CategoriesPage() {
-  const { data: categories = [], isLoading: loading } = useCategories()
-  const { data: allProducts = [] } = useProducts()
+  const { data: categories = [], isLoading: categoriesLoading } = useCategories()
+  const { data: allProducts = [], isLoading: productsLoading } = useProducts()
   const { t } = useTranslation()
   const { data: settings } = useSiteSettings()
   const { reset } = useHeaderTheme()
@@ -58,7 +58,7 @@ export function CategoriesPage() {
     return () => reset()
   }, [reset])
 
-  if (loading) {
+  if (categoriesLoading || productsLoading) {
     return (
       <div className="pt-20 min-h-screen">
         <PageLoading message={t('loading')} />

@@ -266,49 +266,41 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
 
         {/* hero arrows */}
         {slideCount > 1 && !isMobile && (
-          <div className="pointer-events-none absolute inset-0 z-40 flex items-center justify-between px-4 xl:px-8">
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-4 xl:px-8">
             <button
               type="button"
               onClick={onPrev}
-              className="group pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-gray-950 backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-xl"
+              className="group pointer-events-auto z-40 flex h-16 w-16 md:h-24 md:w-24 items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 text-white mix-blend-difference"
               style={arrowInLeft}
               aria-label="Previous hero slide"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
+                width="48"
+                height="48"
                 viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-7 w-7 -ml-0.5 transition-transform duration-300 group-hover:-translate-x-0.5"
+                fill="currentColor"
+                className="transition-transform duration-300 group-hover:-translate-x-0.5 md:w-16 md:h-16"
               >
-                <path d="M15 18l-6-6 6-6" />
+                <polygon points="18,4 18,20 6,12 13,7.333 13,10.333 10.5,12 15.5,15.333 15.5,5.667" />
               </svg>
             </button>
             <button
               type="button"
               onClick={onNext}
-              className="group pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-gray-950 backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-xl"
+              className="group pointer-events-auto z-40 flex h-16 w-16 md:h-24 md:w-24 items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 text-white mix-blend-difference"
               style={arrowInRight}
               aria-label="Next hero slide"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
+                width="48"
+                height="48"
                 viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-7 w-7 ml-0.5 transition-transform duration-300 group-hover:translate-x-0.5"
+                fill="currentColor"
+                className="transition-transform duration-300 group-hover:translate-x-0.5 md:w-16 md:h-16"
               >
-                <path d="M9 18l6-6-6-6" />
+                <polygon points="6,4 6,20 18,12 11,7.333 11,10.333 13.5,12 8.5,15.333 8.5,5.667" />
               </svg>
             </button>
           </div>
@@ -365,10 +357,14 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
           </div>
         )}
 
-        {/* Fullscreen button */}
         {slideCount > 0 && (
-          <div
-            className="absolute bottom-3 right-3 md:bottom-4 md:right-4 z-40"
+          <button
+            type="button"
+            onClick={e => {
+              e.stopPropagation()
+              onOpenFullscreen()
+            }}
+            className="absolute bottom-3 right-3 md:bottom-2 md:right-16 z-50 group flex h-16 w-16 md:h-32 md:w-32 items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 text-white mix-blend-difference"
             style={{
               opacity: isFullscreenButtonVisible ? 1 : 0,
               transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
@@ -376,35 +372,29 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                 'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
               willChange: 'transform, opacity',
             }}
+            aria-label="Tam Ekran"
           >
-            <button
-              type="button"
-              onClick={e => {
-                e.stopPropagation()
-                onOpenFullscreen()
-              }}
-              className="group flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-lg"
-              aria-label="Büyüt"
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="64"
+              height="64"
+              viewBox="0 0 64 64"
+              fill="currentColor"
+              className="transition-transform duration-500 group-hover:scale-110 md:w-28 md:h-28"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="0.5"
-                strokeLinecap="square"
-                strokeLinejoin="miter"
-                className="h-7 w-7 transition-transform duration-500"
-              >
-                {/* Küçük kare */}
-                <path d="M 3 13 h 8 v 8 H 3 Z" />
-                {/* Ok */}
-                <path d="M 13.5 10.5 L 18 6 M 14 6 H 18 V 10" />
-              </svg>
-            </button>
-          </div>
+              {/* Kullanıcı Tarifi: Next/Prev yan yana, aralarında boşluk, bütünleşik -45 rotasyon */}
+              <g transform="translate(32, 32) rotate(-45)">
+                {/* Sağ taraf (Next birimi) */}
+                <g transform="translate(7, 0) translate(-12, -12)">
+                  <polygon points="6,4 6,20 18,12 11,7.333 11,10.333 13.5,12 8.5,15.333 8.5,5.667" />
+                </g>
+                {/* Sol taraf (Prev: Dikey simetri alınarak kesik yer değiştirildi) */}
+                <g transform="translate(-7, 0) scale(-1, 1) translate(-12, -12)">
+                  <polygon points="6,20 6,4 18,12 11,16.667 11,13.667 13.5,12 8.5,8.667 8.5,18.333" />
+                </g>
+              </g>
+            </svg>
+          </button>
         )}
       </div>
     </header>

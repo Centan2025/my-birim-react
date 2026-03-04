@@ -685,7 +685,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                       key={index}
                       onClick={() => setCurrentSlide(index)}
                       className={`relative h-2 rounded-none transition-all duration-500 ease-in-out group ${areDotsVisible ? 'animate-dot-grow' : 'opacity-0 scale-0'
-                        } ${isActive ? 'w-12 bg-red-700' : 'w-2 bg-white/40 hover:bg-white/60'}`}
+                        } ${isActive ? 'w-12 bg-red-900' : 'w-2 bg-white/40 hover:bg-white/60'}`}
                       style={{
                         transitionDelay: `${animationDelay}ms`,
                       }}
@@ -694,7 +694,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                       {isActive && (
                         <div
                           key={`${normalizedSlide}-${index}`}
-                          className="absolute top-0 left-0 h-full rounded-none bg-red-700 animate-fill-line"
+                          className="absolute top-0 left-0 h-full rounded-none bg-red-900 animate-fill-line"
                         ></div>
                       )}
                     </button>

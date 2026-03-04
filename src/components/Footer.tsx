@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getFooterContent } from '../services/cms'
 import { useSiteSettings } from '../context/SiteSettingsContext'
@@ -7,15 +7,11 @@ import { useTranslation } from '../i18n'
 import { analytics } from '../lib/analytics'
 import ScrollReveal from './ScrollReveal'
 import { resolveLegalLinkText } from '../lib/legalLinks'
-import { NewsletterForm } from './NewsletterForm'
-import { HomeNewsletter } from './HomeNewsletter'
 import { SocialIcon } from './SocialIcon'
 
 export const Footer = () => {
   const { settings, isLoading: isSettingsLoading } = useSiteSettings()
   const { t, setLocale, locale, supportedLocales } = useTranslation()
-  const location = useLocation()
-  const isHomePage = location.pathname === '/'
 
   const { data: content, isLoading: isFooterLoading } = useQuery({
     queryKey: ['footerContent', locale],
@@ -29,7 +25,6 @@ export const Footer = () => {
 
   return (
     <>
-      <HomeNewsletter />
       <footer className="bg-[#101820] text-gray-400" style={{ position: 'relative', zIndex: 5 }}>
         <div
           className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-10 pb-6 lg:py-12"
@@ -105,21 +100,7 @@ export const Footer = () => {
               <div className="w-full border-t border-gray-700"></div>
             </ScrollReveal>
 
-            {/* Email abonelik formu - mobilde en altta ortalanmış */}
-            {!isHomePage && (
-              <ScrollReveal delay={150} threshold={0.1} width="w-full" className="h-auto">
-                <div className="w-full flex justify-center !mt-8 lg:!mt-6">
-                  <ScrollReveal
-                    delay={165}
-                    threshold={0.1}
-                    width="w-full"
-                    className="h-auto w-full flex flex-col items-center justify-center"
-                  >
-                    <NewsletterForm variant="mobile" className="flex flex-col items-center w-full" />
-                  </ScrollReveal>
-                </div>
-              </ScrollReveal>
-            )}
+
           </div>
 
           {/* Desktop düzen */}
@@ -287,17 +268,7 @@ export const Footer = () => {
               </ScrollReveal>
             </div>
 
-            {/* Email abonelik formu - sadece desktop'ta */}
-            {!isHomePage && (
-              <ScrollReveal delay={150} threshold={0.1} width="w-full lg:w-auto" className="h-auto">
-                <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-                  <NewsletterForm
-                    variant="desktop"
-                    className="flex w-full lg:w-auto lg:justify-end"
-                  />
-                </div>
-              </ScrollReveal>
-            )}
+
           </div>
 
           {/* Yasal linkler ve telif metni - mobilde alt alta, desktop'ta aynı satırda

@@ -31,6 +31,8 @@ export interface R2ImageMetadata {
     x: number
     y: number
   }
+  origWidth?: number
+  origHeight?: number
 }
 
 // --- Core Site Configuration ---
@@ -305,6 +307,8 @@ export interface ContentBlock {
   image?: string
   crop?: R2ImageMetadata['crop']
   hotspot?: R2ImageMetadata['hotspot']
+  origWidth?: number
+  origHeight?: number
   /** URL for video or YouTube (for video/youtube types) */
   url?: string
   /** Title text */
@@ -359,7 +363,7 @@ export interface HomePageContent {
  * Defines the content structure for the About Us page.
  */
 export interface AboutPageContent {
-  heroImage: string | { url: string; palette?: SanityImagePalette }
+  heroImage: string | { url: string; palette?: SanityImagePalette; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot'] }
   heroTitle: LocalizedString
   heroSubtitle: LocalizedString
   storyTitle: LocalizedString
@@ -371,19 +375,19 @@ export interface AboutPageContent {
   historySection?: {
     title?: LocalizedString
     content?: LocalizedString
-    image?: string | { url: string }
+    image?: string | { url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot'] }
     media?: NewsMedia[]
   }
   identitySection?: {
     title?: LocalizedString
     content?: LocalizedString
-    image?: string | { url: string }
+    image?: string | { url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot'] }
     media?: NewsMedia[]
   }
   qualitySection?: {
     title?: LocalizedString
     content?: LocalizedString
-    image?: string | { url: string }
+    image?: string | { url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot'] }
     media?: NewsMedia[]
   }
 }
@@ -473,6 +477,14 @@ export interface NewsMedia {
   urlDesktop?: string
   /** Optional localized caption for the media. */
   caption?: LocalizedString
+  /** Optional crop data from R2 asset */
+  crop?: R2ImageMetadata['crop']
+  /** Optional hotspot data from R2 asset */
+  hotspot?: R2ImageMetadata['hotspot']
+  /** Original Width */
+  origWidth?: number
+  /** Original Height */
+  origHeight?: number
 }
 
 // --- Footer Content Models ---

@@ -1,6 +1,6 @@
-import {createClient} from '@sanity/client'
+import { createClient } from '@sanity/client'
 import imageUrlBuilder from '@sanity/image-url'
-import type {SanityImagePalette, R2ImageMetadata, LocalizedString} from '../../types'
+import type { SanityImagePalette, R2ImageMetadata, LocalizedString } from '../../types'
 
 // Not: Çevresel değişkenler Vite config ile yüklenmektedir.
 // Ancak import.meta bazen hata fırlattığından any olarak tip çevrimi yapıyor olabilir.
@@ -23,11 +23,11 @@ export const ENABLE_LOCAL_FALLBACK =
 
 export const sanity = useSanity
   ? createClient({
-      projectId: SANITY_PROJECT_ID,
-      dataset: SANITY_DATASET,
-      apiVersion: SANITY_API_VERSION,
-      useCdn: true,
-    })
+    projectId: SANITY_PROJECT_ID,
+    dataset: SANITY_DATASET,
+    apiVersion: SANITY_API_VERSION,
+    useCdn: true,
+  })
   : null
 
 // SANITY_TOKEN artık sadece server-side (Vercel API) tarafında kullanılmaktadır.
@@ -44,21 +44,21 @@ export interface SanityFileAsset {
   _ref?: string
 }
 
-export type SanityImageLike = string | {url?: string} | null | undefined
+export type SanityImageLike = string | { url?: string } | null | undefined
 
 export interface SanityProductMediaItem {
   type?: 'image' | 'video' | 'youtube' | string
   url?: string
-  imageR2?: {url?: string; hasResponsiveSizes?: boolean}
-  imageMobileR2?: {url?: string; hasResponsiveSizes?: boolean}
-  imageDesktopR2?: {url?: string; hasResponsiveSizes?: boolean}
+  imageR2?: { url?: string; hasResponsiveSizes?: boolean }
+  imageMobileR2?: { url?: string; hasResponsiveSizes?: boolean }
+  imageDesktopR2?: { url?: string; hasResponsiveSizes?: boolean }
   title?: LocalizedString
   description?: LocalizedString
   link?: string
   linkText?: LocalizedString
-  videoFileR2?: {url?: string}
-  videoFileMobileR2?: {url?: string}
-  videoFileDesktopR2?: {url?: string}
+  videoFileR2?: { url?: string }
+  videoFileMobileR2?: { url?: string }
+  videoFileDesktopR2?: { url?: string }
   [key: string]: any // Fallback for legacy
 }
 
@@ -108,7 +108,7 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
 
 export const mapImage = (
   img: SanityImageLike | undefined,
-  options?: {width?: number; height?: number; quality?: number; format?: 'webp' | 'jpg' | 'png'}
+  options?: { width?: number; height?: number; quality?: number; format?: 'webp' | 'jpg' | 'png' }
 ): string => {
   if (!img) return ''
   if (typeof img === 'string') {
@@ -152,7 +152,7 @@ export const mapImage = (
   if (!b) return rewriteR2Url(img.url, hasResponsiveSizes) || ''
 
   try {
-    const {width = 1600, quality = 85, format = 'webp'} = options || {}
+    const { width = 1600, quality = 85, format = 'webp' } = options || {}
     return (
       b.width(width).quality(quality).format(format).auto('format').url() ||
       rewriteR2Url(img.url || (img as any)?.asset?.url, hasResponsiveSizes) ||
@@ -165,25 +165,46 @@ export const mapImage = (
 
 export const mapR2Metadata = (img: any): R2ImageMetadata => {
   if (!img) return {}
-  const crop =
+
+  let crop =
     img.cropX !== undefined && img.cropWidth !== undefined
-      ? {x: img.cropX, y: img.cropY || 0, width: img.cropWidth, height: img.cropHeight || 1}
+      ? { x: img.cropX, y: img.cropY || 0, width: img.cropWidth, height: img.cropHeight || 1 }
       : undefined
-  const hotspot =
+
+  // Support for nested crop object (Sanity standard or custom R2)
+  if (!crop && img.crop && typeof img.crop === 'object') {
+    const { left = 0, top = 0, right = 0, bottom = 0 } = img.crop
+    crop = {
+      x: left,
+      y: top,
+      width: 1 - left - right,
+      height: 1 - top - bottom
+    }
+  }
+
+  let hotspot =
     img.hotspotX !== undefined && img.hotspotY !== undefined
-      ? {x: img.hotspotX, y: img.hotspotY}
+      ? { x: img.hotspotX, y: img.hotspotY }
       : undefined
-  return {crop, hotspot}
+
+  if (!hotspot && img.hotspot && typeof img.hotspot === 'object') {
+    hotspot = { x: img.hotspot.x, y: img.hotspot.y }
+  }
+
+  const origWidth = img.width || img.asset?.metadata?.dimensions?.width
+  const origHeight = img.height || img.asset?.metadata?.dimensions?.height
+
+  return { crop, hotspot, origWidth, origHeight }
 }
 
 export const mapImages = (imgs: SanityImageLike[] | undefined): string[] =>
   Array.isArray(imgs) ? imgs.map(i => mapImage(i)).filter(Boolean) : []
 
 export const extractPalette = (
-  img: SanityImageLike | {asset?: {metadata?: {palette?: SanityImagePalette}}}
+  img: SanityImageLike | { asset?: { metadata?: { palette?: SanityImagePalette } } }
 ): SanityImagePalette | undefined => {
   if (typeof img === 'object' && img !== null && 'asset' in img) {
-    return (img as {asset?: {metadata?: {palette?: SanityImagePalette}}}).asset?.metadata?.palette
+    return (img as { asset?: { metadata?: { palette?: SanityImagePalette } } }).asset?.metadata?.palette
   }
   return undefined
 }

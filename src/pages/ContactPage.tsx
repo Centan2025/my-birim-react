@@ -576,10 +576,10 @@ export function ContactPage() {
   }
 
   return (
-    <div className={`${isFullscreenOpen ? 'bg-white' : 'bg-gray-100'}`}>
+    <div className={`${isFullscreenOpen ? 'bg-white' : 'bg-gray-100'} pt-20 md:pt-24 lg:pt-24`}>
       {/* Breadcrumb Band */}
       <div className="w-full bg-white">
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-20 md:pt-24 lg:pt-24 pb-4">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}

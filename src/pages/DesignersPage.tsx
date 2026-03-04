@@ -143,10 +143,10 @@ export function DesignersPage() {
   }
 
   return (
-    <div className="bg-gray-100 animate-fade-in-up-subtle">
+    <div className="bg-gray-100 animate-fade-in-up-subtle pt-20 md:pt-24 lg:pt-24">
       {/* Breadcrumb Band */}
-      <div className="w-full bg-white border-b border-gray-400">
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-20 md:pt-24 lg:pt-24 pb-4">
+      <div className="w-full bg-white">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
           <Breadcrumbs
             items={[{ label: t('homepage'), to: '/' }, { label: t('designers') }]}
           />

@@ -14,7 +14,7 @@ const ProjectRow: React.FC<{ project: Project; index: number }> = ({ project, in
     <ScrollReveal delay={index * 80} threshold={0.01} direction="up" distance={30}>
       <Link
         to={`/projects/${project.id}`}
-        className="group block border-b border-gray-300 transition-colors duration-300 hover:bg-gray-50/50"
+        className="group block border-b border-gray-300 transition-colors duration-300 hover:bg-gray-200/70"
       >
         <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 md:gap-8 py-8 md:py-10 lg:py-12">
           {/* Sol: Proje adı - hover'da sağa kayar */}
@@ -96,10 +96,10 @@ export function ProjectsPage() {
   }
 
   return (
-    <div className="bg-white min-h-screen animate-fade-in-up-subtle">
+    <div className="bg-gray-100 min-h-screen animate-fade-in-up-subtle pt-20 md:pt-24 lg:pt-24">
       {/* Breadcrumb Band */}
-      <div className="w-full bg-white border-b border-gray-400">
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-20 md:pt-24 lg:pt-24 pb-4">
+      <div className="w-full bg-white">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
           <Breadcrumbs
             items={[{ label: t('homepage'), to: '/' }, { label: t('projects') || 'Projeler' }]}
           />

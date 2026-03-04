@@ -496,6 +496,14 @@ export const productPanelMediaItem = defineType({
       initialValue: 'image',
     }),
     defineField({
+      name: 'image',
+      title: 'Görsel (Sanity - Eski)',
+      type: 'image',
+      options: { hotspot: true },
+      hidden: ({ parent }) => parent?.type !== 'image',
+      description: 'Eski Sanity görseli. Crop/hotspot için bu alanı kullanabilirsiniz. Yeni görselleri R2 alanına yükleyin.',
+    }),
+    defineField({
       name: 'imageR2',
       title: 'Görsel (Tüm Cihazlar)',
       type: 'r2Asset',
@@ -861,6 +869,14 @@ export const contentBlock = defineType({
         ],
       },
       initialValue: 'image',
+    }),
+    defineField({
+      name: 'image',
+      title: 'Görsel (Sanity - Eski)',
+      type: 'image',
+      options: { hotspot: true },
+      hidden: ({ parent }) => parent?.mediaType !== 'image',
+      description: 'Eski Sanity görseli. Crop/hotspot için bu alanı kullanabilirsiniz.',
     }),
     defineField({
       name: 'imageR2',

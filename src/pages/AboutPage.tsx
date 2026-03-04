@@ -36,8 +36,10 @@ const MediaGallery = ({ media, alt }: { media?: NewsMedia[]; alt: string }) => {
                   srcDesktop={m.urlDesktop}
                   alt={`${alt} gallery ${idx + 1}`}
                   className="w-full h-full object-cover"
-                  crop={(m as any).crop}
-                  hotspot={(m as any).hotspot}
+                  crop={m.crop}
+                  hotspot={m.hotspot}
+                  origWidth={m.origWidth}
+                  origHeight={m.origHeight}
                 />
               )}
             </div>
@@ -130,8 +132,10 @@ export function AboutPage() {
               loading="eager"
               sizes="100vw"
               quality={90}
-              crop={(heroImageObj as any)?.crop}
-              hotspot={(heroImageObj as any)?.hotspot}
+              crop={heroImageObj?.crop}
+              hotspot={heroImageObj?.hotspot}
+              origWidth={(heroImageObj as any)?.origWidth}
+              origHeight={(heroImageObj as any)?.origHeight}
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/20" />
           </div>
@@ -152,9 +156,8 @@ export function AboutPage() {
 
       {/* Main Content Sections */}
       <div className="bg-gray-100 overflow-hidden pb-32 font-light">
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-8 text-[11px] sm:text-[12px]">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 text-[11px] sm:text-[12px]">
           <Breadcrumbs
-            className="mb-12"
             items={[{ label: t('homepage'), to: '/' }, { label: t('about') }]}
           />
         </div>
@@ -192,7 +195,7 @@ export function AboutPage() {
                 </div>
                 <div className="flex-1 w-full lg:w-auto">
                   <ScrollReveal threshold={0.2} delay={200} duration={1} distance={10}>
-                    <div className="relative aspect-[4/5] overflow-hidden">
+                    <div className="relative w-full overflow-hidden">
                       {(() => {
                         const img = content.historySection?.image
                         const url =
@@ -201,9 +204,11 @@ export function AboutPage() {
                           <OptimizedImage
                             src={url}
                             alt="History"
-                            className="w-full h-full object-cover"
-                            crop={typeof img === 'object' ? (img as any).crop : undefined}
-                            hotspot={typeof img === 'object' ? (img as any).hotspot : undefined}
+                            className="w-full h-auto object-cover block"
+                            crop={typeof img === 'object' ? img.crop : undefined}
+                            hotspot={typeof img === 'object' ? img.hotspot : undefined}
+                            origWidth={typeof img === 'object' ? (img as any).origWidth : undefined}
+                            origHeight={typeof img === 'object' ? (img as any).origHeight : undefined}
                           />
                         )
                       })()}
@@ -224,7 +229,7 @@ export function AboutPage() {
               <div className="flex flex-col-reverse lg:flex-row items-start gap-12 lg:gap-20 text-left">
                 <div className="flex-1 w-full lg:w-auto">
                   <ScrollReveal threshold={0.2} duration={1} distance={10}>
-                    <div className="relative aspect-video overflow-hidden">
+                    <div className="relative w-full overflow-hidden">
                       {(() => {
                         const img = content.identitySection?.image
                         const url = typeof img === 'object' ? img.url : img || ''
@@ -232,9 +237,11 @@ export function AboutPage() {
                           <OptimizedImage
                             src={url}
                             alt="Identity"
-                            className="w-full h-full object-cover"
-                            crop={typeof img === 'object' ? (img as any).crop : undefined}
-                            hotspot={typeof img === 'object' ? (img as any).hotspot : undefined}
+                            className="w-full h-auto object-cover block"
+                            crop={typeof img === 'object' ? img.crop : undefined}
+                            hotspot={typeof img === 'object' ? img.hotspot : undefined}
+                            origWidth={typeof img === 'object' ? (img as any).origWidth : undefined}
+                            origHeight={typeof img === 'object' ? (img as any).origHeight : undefined}
                           />
                         )
                       })()}
@@ -293,7 +300,7 @@ export function AboutPage() {
                   </div>
                   <div className="lg:w-2/3 w-full">
                     <ScrollReveal threshold={0.2} delay={200} duration={1} distance={10}>
-                      <div className="relative aspect-video lg:aspect-[16/9] overflow-hidden">
+                      <div className="relative w-full overflow-hidden">
                         {(() => {
                           const img = content.qualitySection?.image
                           const url = typeof img === 'object' ? img.url : img || ''
@@ -301,9 +308,11 @@ export function AboutPage() {
                             <OptimizedImage
                               src={url}
                               alt="Quality"
-                              className="w-full h-full object-cover"
-                              crop={typeof img === 'object' ? (img as any).crop : undefined}
-                              hotspot={typeof img === 'object' ? (img as any).hotspot : undefined}
+                              className="w-full h-auto object-cover block"
+                              crop={typeof img === 'object' ? img.crop : undefined}
+                              hotspot={typeof img === 'object' ? img.hotspot : undefined}
+                              origWidth={typeof img === 'object' ? (img as any).origWidth : undefined}
+                              origHeight={typeof img === 'object' ? (img as any).origHeight : undefined}
                             />
                           )
                         })()}

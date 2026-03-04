@@ -32,6 +32,8 @@ interface OptimizedImageProps {
   style?: React.CSSProperties
   crop?: R2ImageMetadata['crop']
   hotspot?: R2ImageMetadata['hotspot']
+  origWidth?: number
+  origHeight?: number
 }
 
 /**
@@ -63,6 +65,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   style,
   crop,
   hotspot,
+  origWidth,
+  origHeight,
 }) => {
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
@@ -163,6 +167,11 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const activeMobileSrc = usingFallback ? undefined : rewriteUrl(srcMobile || src)
   const activeDesktopSrc = usingFallback ? undefined : rewriteUrl(srcDesktop || src)
 
+  // Cloudflare R2 / Image Resizing logic
+  const r2Domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
+  // .r2.dev ve .workers.dev domainleri image resizing desteklemez
+  const skipImageResizing = r2Domain?.includes('.r2.dev') || r2Domain?.includes('.workers.dev') || r2Domain?.includes('assets.birim.com')
+
   // Sanity image URL'lerini ve R2 URL'lerini optimize et
   const getOptimizedUrl = (url: string): string => {
     if (!url) return placeholder
@@ -180,17 +189,14 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     }
 
     // 2. Cloudflare R2 / Image Resizing
-    // VITE_R2_DOMAIN kontrolü (örn: https://assets.birim.com)
-    const r2Domain =
-      import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
-    // .r2.dev ve .workers.dev domainleri image resizing desteklemez, direkt döndür.
-    const skipImageResizing =
-      r2Domain?.includes('.r2.dev') ||
-      r2Domain?.includes('.workers.dev') ||
-      r2Domain?.includes('assets.birim.com')
-
     if (r2Domain && url.startsWith(r2Domain) && !url.includes('/cdn-cgi/image/')) {
       if (skipImageResizing) return url.replace('?rs=1', '').replace('&rs=1', '')
+
+      // Eğer domain .workers.dev veya .r2.dev ise Cloudflare Image Resizing desteklenmez (404 verir).
+      // Bu nedenle URL'yi doğrudan geri döndüreceğiz ve kırpma işlemini clientCrop (CSS) halledecek.
+      if (r2Domain.includes('.workers.dev') || r2Domain.includes('.r2.dev')) {
+        return encodeSrcSetUrl(url)
+      }
 
       // Cloudflare URL format: /cdn-cgi/image/format=auto,width=XXX,height=YYY/path/to/image
       const params = []
@@ -199,7 +205,13 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
       // Add crop rect if available
       if (crop) {
-        params.push(`rect=${crop.x},${crop.y},${crop.width},${crop.height}`)
+        if (crop.width < 1.0 || crop.height < 1.0 || crop.x > 0 || crop.y > 0) {
+          if (origWidth && origHeight) {
+            params.push(`rect=${Math.round(crop.x * origWidth)},${Math.round(crop.y * origHeight)},${Math.round(crop.width * origWidth)},${Math.round(crop.height * origHeight)}`)
+          }
+        } else {
+          params.push(`rect=${crop.x},${crop.y},${crop.width},${crop.height}`)
+        }
       }
 
       params.push(`quality=${quality}`)
@@ -265,7 +277,13 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
         // Add crop rect if available
         if (crop) {
-          params.push(`rect=${crop.x},${crop.y},${crop.width},${crop.height}`)
+          if (crop.width < 1.0 || crop.height < 1.0 || crop.x > 0 || crop.y > 0) {
+            if (origWidth && origHeight) {
+              params.push(`rect=${Math.round(crop.x * origWidth)},${Math.round(crop.y * origHeight)},${Math.round(crop.width * origWidth)},${Math.round(crop.height * origHeight)}`)
+            }
+          } else {
+            params.push(`rect=${crop.x},${crop.y},${crop.width},${crop.height}`)
+          }
         }
 
         // Remove domain to get path
@@ -290,51 +308,54 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     imgStyle.objectPosition = `${hotspot.x * 100}% ${hotspot.y * 100}%`
   }
 
-  // Crop: İki farklı mod var:
-  // 1. "cover" modu: Görsel sabit boyutlu bir container'ı dolduruyor (hero, h-full, object-cover)
-  //    → Sadece object-position ile crop noktasını ayarla, wrapper ekleme
-  // 2. "layout" modu: Görsel doğal boyutunda (h-auto, içerik bloğu)
-  //    → overflow:hidden wrapper ile layout boyutunu kırpılmış alana küçült
-  const hasCrop = crop && crop.width > 0 && crop.height > 0 && (crop.width < 0.999 || crop.height < 0.999 || crop.x > 0.001 || crop.y > 0.001)
+  // Crop detection
+  const hasCrop = !!(crop && crop.width > 0 && crop.height > 0 && (crop.width < 0.999 || crop.height < 0.999 || crop.x > 0.001 || crop.y > 0.001))
   const isCoverMode = className.includes('h-full') || className.includes('h-screen') || !!height
 
-  // Cover modda sadece object-position uygula (doğru crop noktasına odaklan)
-  if (hasCrop && isCoverMode) {
-    const centerX = (crop.x + crop.width / 2) * 100
-    const centerY = (crop.y + crop.height / 2) * 100
-    imgStyle.objectPosition = `${centerX}% ${centerY}%`
+  const canCloudflareCrop = !!(crop && (crop.width >= 1.0 || (origWidth && origHeight)))
+  const isServerResizingActive = activeSrc.includes('cdn.sanity.io/images') || (r2Domain && !r2Domain.includes('.workers.dev') && !r2Domain.includes('.r2.dev') && !skipImageResizing && (!hasCrop || canCloudflareCrop))
+
+  // Eğer origin sunucu (Cloudflare workers vb) resize desteklemiyorsa CLIENT CROP ZORUNLUDUR! isCoverMode'dan bağımsız.
+  const useClientCrop = hasCrop && !isServerResizingActive
+
+  // Sadece Crop yokken ama Hotspot varken veya Server Crop kullanıldığında Object Position aktif et.
+  if (isCoverMode && !useClientCrop) {
+    if (hasCrop) {
+      const centerX = (crop!.x + crop!.width / 2) * 100
+      const centerY = (crop!.y + crop!.height / 2) * 100
+      imgStyle.objectPosition = `${centerX}% ${centerY}%`
+    } else if (hotspot) {
+      imgStyle.objectPosition = `${hotspot.x * 100}% ${hotspot.y * 100}%`
+    }
   }
 
-  // Layout modda overflow:hidden wrapper ile kırp
-  const useLayoutCrop = hasCrop && !isCoverMode
   const renderCroppedContent = (pictureContent: React.ReactNode) => {
-    if (!useLayoutCrop) return pictureContent
+    if (!useClientCrop) return pictureContent
 
-    // naturalDims yoksa (henüz yüklenmedi), görseli normal göster
-    // Yüklendikten sonra re-render ile doğru boyutla gösterilecek
     if (!naturalDims) {
       return pictureContent
     }
 
-    // Doğal oranla kırpılmış alanın aspect ratio'sunu hesapla
-    const cropW = (naturalDims.w * crop.width)
-    const cropH = (naturalDims.h * crop.height)
+    const cropW = (naturalDims.w * crop!.width)
+    const cropH = (naturalDims.h * crop!.height)
     const aspectRatio = cropW / cropH
 
     return (
       <div
-        style={{ aspectRatio: `${aspectRatio} / 1` }}
-        className="relative w-full overflow-hidden"
+        style={{ aspectRatio: isCoverMode ? undefined : `${aspectRatio} / 1` }}
+        className={`relative overflow-hidden ${isCoverMode ? 'w-full h-full' : 'w-full'}`}
         data-crop={JSON.stringify(crop)}
       >
         <div
           style={{
-            width: `${(1 / crop.width) * 100}%`,
-            height: `${(1 / crop.height) * 100}%`,
-            transform: `translate(-${crop.x * 100}%, -${crop.y * 100}%)`,
+            width: `${(1 / crop!.width) * 100}%`,
+            height: `${(1 / crop!.height) * 100}%`,
+            transform: `translate(-${crop!.x * 100}%, -${crop!.y * 100}%)`,
             position: 'absolute',
             top: 0,
             left: 0,
+            // cover modedayken resmin uzayıp sünmemesi için kendi aspect-ratio'sunu koruması sağlanır
+            objectFit: isCoverMode ? 'cover' : 'fill',
           }}
         >
           {pictureContent}
@@ -383,7 +404,13 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
       // Add crop rect if available
       if (crop) {
-        params.push(`rect=${crop.x},${crop.y},${crop.width},${crop.height}`)
+        if (crop.width < 1.0 || crop.height < 1.0 || crop.x > 0 || crop.y > 0) {
+          if (origWidth && origHeight) {
+            params.push(`rect=${Math.round(crop.x * origWidth)},${Math.round(crop.y * origHeight)},${Math.round(crop.width * origWidth)},${Math.round(crop.height * origHeight)}`)
+          }
+        } else {
+          params.push(`rect=${crop.x},${crop.y},${crop.width},${crop.height}`)
+        }
       }
 
       params.push(`quality=${quality}`)

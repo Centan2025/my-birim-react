@@ -21,7 +21,7 @@ const mapProductMedia = (row: any): any[] => {
       const url = mapMediaUrl(m)
       const urlMobile = mapMediaUrl(m, true, false)
       const urlDesktop = mapMediaUrl(m, false, true)
-      const metadata = m?.imageR2 ? mapR2Metadata(m.imageR2) : {}
+      const metadata = m?.imageR2 ? mapR2Metadata(m.imageR2) : (m?.image ? mapR2Metadata(m.image) : {})
       const result: any = {
         type,
         url,
@@ -42,13 +42,13 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
   if (useSanity && sanity) {
     const q = groq`*[_type == "aboutPage"][0]{
             ...,
-            heroImage{ ..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}} },
+            heroImage{ ..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}, dimensions}} },
             heroImageR2,
-            historySection{ ..., image{ asset->{url, _ref, _id} }, imageR2, media[]{ ..., image{ ..., asset->{url, _ref, _id} }, imageR2, imageMobile{ ..., asset->{url, _ref, _id} }, imageMobileR2, imageDesktop{ ..., asset->{url, _ref, _id} }, imageDesktopR2, videoFile{ ..., asset->{url, _ref, _id} }, videoFileR2 } },
-            identitySection{ ..., image{ asset->{url, _ref, _id} }, imageR2, media[]{ ..., image{ ..., asset->{url, _ref, _id} }, imageR2, imageMobile{ ..., asset->{url, _ref, _id} }, imageMobileR2, imageDesktop{ ..., asset->{url, _ref, _id} }, imageDesktopR2, videoFile{ ..., asset->{url, _ref, _id} }, videoFileR2 } },
-            qualitySection{ ..., imageR2, media[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 } }
+            historySection{ ..., image{ ..., asset->{url, _ref, _id, metadata{dimensions}} }, imageR2, media[]{ ..., image{ ..., asset->{url, _ref, _id, metadata{dimensions}} }, imageR2, imageMobile{ ..., asset->{url, _ref, _id} }, imageMobileR2, imageDesktop{ ..., asset->{url, _ref, _id} }, imageDesktopR2, videoFile{ ..., asset->{url, _ref, _id} }, videoFileR2 } },
+            identitySection{ ..., image{ ..., asset->{url, _ref, _id, metadata{dimensions}} }, imageR2, media[]{ ..., image{ ..., asset->{url, _ref, _id, metadata{dimensions}} }, imageR2, imageMobile{ ..., asset->{url, _ref, _id} }, imageMobileR2, imageDesktop{ ..., asset->{url, _ref, _id} }, imageDesktopR2, videoFile{ ..., asset->{url, _ref, _id} }, videoFileR2 } },
+            qualitySection{ ..., image{ ..., asset->{url, _ref, _id, metadata{dimensions}} }, imageR2, media[]{ ..., image{ ..., asset->{url, _ref, _id, metadata{dimensions}} }, imageR2, imageMobile{ ..., asset->{url, _ref, _id} }, imageMobileR2, imageDesktop{ ..., asset->{url, _ref, _id} }, imageDesktopR2, videoFile{ ..., asset->{url, _ref, _id} }, videoFileR2 } }
         }`
-    const data = await sanity.fetch(q)
+    const data = await sanity.withConfig({ useCdn: false }).fetch(q)
     if (data) {
       if (data.heroImageR2?.url) {
         data.heroImage = {
@@ -57,10 +57,14 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
           ...mapR2Metadata(data.heroImageR2),
         }
       } else if (data.heroImage?.asset) {
-        data.heroImage = { url: mapImage(data.heroImage), palette: extractPalette(data.heroImage) }
+        data.heroImage = {
+          url: mapImage(data.heroImage),
+          palette: extractPalette(data.heroImage),
+          ...mapR2Metadata(data.heroImage)
+        }
       }
       if (data.historySection) {
-        const hsMeta = data.historySection.imageR2 ? mapR2Metadata(data.historySection.imageR2) : {}
+        const hsMeta = data.historySection.imageR2 ? mapR2Metadata(data.historySection.imageR2) : mapR2Metadata(data.historySection.image)
         data.historySection.image = {
           url: mapImage(data.historySection.imageR2) || mapImage(data.historySection.image),
           ...hsMeta,
@@ -68,7 +72,7 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
         data.historySection.media = mapProductMedia(data.historySection)
       }
       if (data.identitySection) {
-        const idMeta = data.identitySection.imageR2 ? mapR2Metadata(data.identitySection.imageR2) : {}
+        const idMeta = data.identitySection.imageR2 ? mapR2Metadata(data.identitySection.imageR2) : mapR2Metadata(data.identitySection.image)
         data.identitySection.image = {
           url: mapImage(data.identitySection.imageR2) || mapImage(data.identitySection.image),
           ...idMeta,
@@ -76,7 +80,7 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
         data.identitySection.media = mapProductMedia(data.identitySection)
       }
       if (data.qualitySection) {
-        const qsMeta = data.qualitySection.imageR2 ? mapR2Metadata(data.qualitySection.imageR2) : {}
+        const qsMeta = data.qualitySection.imageR2 ? mapR2Metadata(data.qualitySection.imageR2) : mapR2Metadata(data.qualitySection.image)
         data.qualitySection.image = {
           url: mapImage(data.qualitySection.imageR2) || mapImage(data.qualitySection.image),
           ...qsMeta,
@@ -131,8 +135,8 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
     try {
       const q = groq`*[_type == "homePage"][0]{
             ..., heroAutoPlay,
-            heroMedia[]{ ..., imageR2{..., metadata{palette{dominant{background,foreground}}} }, imageMobileR2{..., metadata{palette{dominant{background,foreground}}} }, imageDesktopR2{..., metadata{palette{dominant{background,foreground}}} }, videoFileR2, videoFileMobileR2, videoFileDesktopR2 },
-            contentBlocks[]{ ..., titleFont, imageR2, videoFileR2 }
+            heroMedia[]{ ..., image{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, imageR2{..., metadata{palette{dominant{background,foreground}}} }, imageMobileR2{..., metadata{palette{dominant{background,foreground}}} }, imageDesktopR2{..., metadata{palette{dominant{background,foreground}}} }, videoFileR2, videoFileMobileR2, videoFileDesktopR2 },
+            contentBlocks[]{ ..., image{..., asset->{url, _ref, _id}}, titleFont, imageR2, videoFileR2 }
         }`
       const data = await sanity.withConfig({ useCdn: false }).fetch(q)
       if (data?.heroMedia) {
@@ -153,7 +157,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
             if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
             if (palette) result.palette = palette
-            const heroMeta = m.imageR2 ? mapR2Metadata(m.imageR2) : {}
+            const heroMeta = m.imageR2 ? mapR2Metadata(m.imageR2) : (m.image ? mapR2Metadata(m.image) : {})
             if (heroMeta.crop) result.crop = heroMeta.crop
             if (heroMeta.hotspot) result.hotspot = heroMeta.hotspot
             return result
@@ -164,16 +168,15 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
         data.contentBlocks = data.contentBlocks.map((b: any) => {
           let url = b.url
           if (b.mediaType === 'image') {
-            const imgUrl = b.imageR2?.url ? mapImage(b.imageR2) : undefined
-            const imgMeta = b.imageR2 ? mapR2Metadata(b.imageR2) : {}
-            if (imgUrl) return { ...b, image: imgUrl, url: undefined, crop: imgMeta.crop, hotspot: imgMeta.hotspot }
+            const imgUrl = b.imageR2?.url ? mapImage(b.imageR2) : (b.image ? mapImage(b.image) : undefined)
+            const imgMeta = b.imageR2 ? mapR2Metadata(b.imageR2) : (b.image ? mapR2Metadata(b.image) : {})
+            if (imgUrl) return { ...b, image: imgUrl, url: undefined, crop: imgMeta.crop, hotspot: imgMeta.hotspot, origWidth: imgMeta.origWidth, origHeight: imgMeta.origHeight }
           }
           if (b.mediaType === 'video' && b.videoFileR2?.url) {
             url = rewriteR2Url(b.videoFileR2.url)
           }
-          const crop = b.imageR2 ? mapR2Metadata(b.imageR2).crop : undefined
-          const hotspot = b.imageR2 ? mapR2Metadata(b.imageR2).hotspot : undefined
-          return { ...b, image: undefined, url, crop, hotspot }
+          const meta = b.imageR2 ? mapR2Metadata(b.imageR2) : (b.image ? mapR2Metadata(b.image) : {})
+          return { ...b, image: undefined, url, crop: meta.crop, hotspot: meta.hotspot, origWidth: meta.origWidth, origHeight: meta.origHeight }
         })
       }
       if (!Array.isArray(data?.featuredProductIds)) data.featuredProductIds = []
