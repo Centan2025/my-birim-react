@@ -69,7 +69,7 @@ export function HeaderStyles() {
           font-size: clamp(10px, 0.2rem + 0.7vw, 14px) !important;
           font-weight: bold !important;
           letter-spacing: 0.05em !important;
-          font-family: 'Helvetica Neue LT', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+          font-family: 'Inter', sans-serif !important;
         }
 
         header nav .header-nav-text,
@@ -88,7 +88,7 @@ export function HeaderStyles() {
           letter-spacing: 0.05em !important;
           line-height: 1.25rem !important;
           display: inline-block !important;
-          font-family: 'Helvetica Neue LT', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+          font-family: 'Inter', sans-serif !important;
         }
 
         /* React Router active state override */
@@ -99,7 +99,7 @@ export function HeaderStyles() {
           font-weight: bold !important;
           letter-spacing: 0.05em !important;
           line-height: 1.25rem !important;
-          font-family: 'Helvetica Neue LT', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+          font-family: 'Inter', sans-serif !important;
         }
 
         /* Overlay mobile menu - fully opaque dark background */
@@ -135,7 +135,7 @@ export function HeaderStyles() {
           font-weight: 300 !important;
           letter-spacing: 0.2em !important;
           line-height: 1.25 !important;
-          font-family: 'Neue Montreal', 'Jura', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+          font-family: 'Inter', 'Neue Montreal', 'Jura', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
         }
 
         /* Soften tap highlight on mobile menu */

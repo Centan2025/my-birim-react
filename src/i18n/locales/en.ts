@@ -178,4 +178,13 @@ export default {
   back_to_login: 'Back to Login',
   close: 'Close',
   close_cart: 'Close cart',
+  newsletter_title: 'SUBSCRIBE TO OUR NEWSLETTER',
+  professional_access: 'PROFESSIONAL EXCLUSIVE ACCESS',
+  professional_access_desc: 'Access exclusive resources for architects, designers, and industry professionals.',
+  newsletter_prompt: 'Join our community to be informed about new collections, special projects, and studio news.',
+  join_us: 'JOIN US',
+  waiting: 'WAITING',
+  complete_application: 'COMPLETE APPLICATION',
+  professional_disclaimer: '* You will be able to provide full access after your membership is approved.',
+  set_password: 'SET PASSWORD',
 }

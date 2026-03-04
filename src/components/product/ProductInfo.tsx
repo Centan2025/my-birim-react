@@ -69,28 +69,28 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
   return (
     <section className="space-y-10">
       {/* Breadcrumbs */}
-      <nav className="mb-0 text-[11px] sm:text-[12px] text-gray-700" aria-label="Breadcrumb">
-        <ol className="list-none p-0 inline-flex items-center">
+      <nav className="mb-0" aria-label="Breadcrumb">
+        <ol className="list-none p-0 inline-flex flex-wrap items-center font-inter text-[11px] sm:text-[13px] text-gray-700">
           <li>
-            <Link to="/" className="underline underline-offset-4 text-gray-900 hover:text-gray-900">
+            <Link to="/" className="font-light text-gray-900 hover:text-gray-900 transition-colors">
               {t('homepage')}
             </Link>
           </li>
-          <li className="mx-2 font-light text-gray-400">|</li>
+          <li className="font-light text-gray-400 mx-2">|</li>
           {category && (
             <>
               <li>
                 <Link
                   to={`/products/${category.id}`}
-                  className="underline underline-offset-4 text-gray-900 hover:text-gray-900"
+                  className="font-light text-gray-900 hover:text-gray-900 transition-colors"
                 >
                   {t(category.name)}
                 </Link>
               </li>
-              <li className="mx-2 font-light text-gray-400">|</li>
+              <li className="font-light text-gray-400 mx-2">|</li>
             </>
           )}
-          <li className="font-light text-gray-500" aria-current="page">
+          <li className="font-bold text-gray-900" aria-current="page">
             {t(product.name)}
           </li>
         </ol>

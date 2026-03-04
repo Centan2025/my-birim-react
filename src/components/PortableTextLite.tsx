@@ -1,15 +1,15 @@
-import {ReactNode, Fragment} from 'react'
-import {sanitizeText, sanitizeUrl} from '../lib/sanitize'
-import {OptimizedImage} from './OptimizedImage'
-import {urlFor} from '../lib/imageUrl'
+import { ReactNode, Fragment } from 'react'
+import { sanitizeText, sanitizeUrl } from '../lib/sanitize'
+import { OptimizedImage } from './OptimizedImage'
+import { urlFor } from '../lib/imageUrl'
 
-type Span = {_type: 'span'; text: string; marks?: string[]}
+type Span = { _type: 'span'; text: string; marks?: string[] }
 type MarkDef = {
   _key?: string
   _type?: string
   href?: string
   blank?: boolean
-  reference?: {_ref: string; _type: string}
+  reference?: { _ref: string; _type: string }
 }
 
 type Block = {
@@ -32,7 +32,7 @@ type Block = {
   text?: any // for cta (localized)
   link?: string // for cta
   // For R2-based portableTextImage
-  imageR2?: {url?: string; path?: string; alt?: string}
+  imageR2?: { url?: string; path?: string; alt?: string }
 }
 
 function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
@@ -101,11 +101,17 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
   })
 }
 
-export default function PortableTextLite({value}: {value: Block[] | undefined}) {
+export default function PortableTextLite({
+  value,
+  removeTopMargin = false,
+}: {
+  value: Block[] | undefined
+  removeTopMargin?: boolean
+}) {
   if (!Array.isArray(value) || value.length === 0) return null
 
   const nodes: ReactNode[] = []
-  let listBuffer: {type: 'ul' | 'ol'; items: ReactNode[]} | null = null
+  let listBuffer: { type: 'ul' | 'ol'; items: ReactNode[] } | null = null
   let listCounter = 0
 
   const flushList = () => {
@@ -125,9 +131,27 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
     listBuffer = null
   }
 
+  let isFirstNode = removeTopMargin
+
+  const applyTopMarginRemoval = (className: string) => {
+    if (!isFirstNode) return className
+    const newClass = className.replace(/\bmy-(\d+)\b/g, 'mb-$1 !mt-0')
+    return newClass.includes('!mt-0') ? newClass : `${newClass} !mt-0`
+  }
+
   for (let idx = 0; idx < value.length; idx++) {
     const block = value[idx]
     if (!block) continue
+
+    // Check if block is practically empty text (to avoid removing margin from invisible blocks)
+    let isEmptyText = false
+    if (block._type === 'block' && block.children) {
+      const text = block.children.map(c => c.text || '').join('').trim()
+      if (!text && !block.children.some(c => c._type !== 'span' || (c.text && c.text.trim().length > 0))) {
+        isEmptyText = true
+      }
+    }
+    if (isEmptyText) continue // Skip empty paragraphs entirely
 
     const blockKey = block._key || `block-${idx}`
 
@@ -141,10 +165,12 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
       )
       if (!listBuffer || listBuffer.type !== type) {
         flushList()
-        listBuffer = {type, items: [item]}
+        // Here we could handle top margin for the list container when it flushes
+        listBuffer = { type, items: [item] }
       } else {
         listBuffer.items.push(item)
       }
+      isFirstNode = false
       continue
     }
 
@@ -171,7 +197,7 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
       ) {
         // PAIR DETECTED — eşit yükseklik için aspect-ratio container + object-cover
         nodes.push(
-          <div key={`pair-${blockKey}`} className="grid grid-cols-2 gap-2 my-2 clear-both">
+          <div key={`pair-${blockKey}`} className={`grid grid-cols-2 gap-2 my-2 clear-both ${applyTopMarginRemoval('')}`}>
             <figure className="flex flex-col">
               <div className="relative w-full aspect-[4/3] overflow-hidden">
                 <OptimizedImage
@@ -216,7 +242,7 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
         case 'h1':
           nodes.push(
             <h1
-              className="text-4xl md:text-5xl lg:text-6xl font-bold my-8 leading-tight text-gray-950"
+              className={applyTopMarginRemoval('text-4xl md:text-5xl lg:text-6xl font-bold my-8 leading-tight text-gray-950')}
               key={blockKey}
             >
               {content}
@@ -226,7 +252,7 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
         case 'h2':
           nodes.push(
             <h2
-              className="text-3xl md:text-4xl lg:text-5xl font-bold my-7 leading-snug text-gray-950"
+              className={applyTopMarginRemoval('text-3xl md:text-4xl lg:text-5xl font-bold my-7 leading-snug text-gray-950')}
               key={blockKey}
             >
               {content}
@@ -236,7 +262,7 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
         case 'h3':
           nodes.push(
             <h3
-              className="text-2xl md:text-3xl lg:text-4xl font-semibold my-6 text-gray-900"
+              className={applyTopMarginRemoval('text-2xl md:text-3xl lg:text-4xl font-semibold my-6 text-gray-900')}
               key={blockKey}
             >
               {content}
@@ -246,7 +272,7 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
         case 'h4':
           nodes.push(
             <h4
-              className="text-xl md:text-2xl lg:text-3xl font-semibold my-5 text-gray-900"
+              className={applyTopMarginRemoval('text-xl md:text-2xl lg:text-3xl font-semibold my-5 text-gray-900')}
               key={blockKey}
             >
               {content}
@@ -256,7 +282,7 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
         case 'h5':
           nodes.push(
             <h5
-              className="text-lg md:text-xl lg:text-2xl font-medium my-4 text-gray-950"
+              className={applyTopMarginRemoval('text-lg md:text-xl lg:text-2xl font-medium my-4 text-gray-950')}
               key={blockKey}
             >
               {content}
@@ -266,7 +292,7 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
         case 'h6':
           nodes.push(
             <h6
-              className="text-base md:text-lg lg:text-xl font-medium my-3 text-gray-950"
+              className={applyTopMarginRemoval('text-base md:text-lg lg:text-xl font-medium my-3 text-gray-950')}
               key={blockKey}
             >
               {content}
@@ -276,7 +302,7 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
         case 'blockquote':
           nodes.push(
             <blockquote
-              className="border-l-4 border-gray-300 pl-6 my-8 italic text-xl md:text-2xl text-gray-600 leading-relaxed"
+              className={applyTopMarginRemoval('border-l-4 border-gray-300 pl-6 my-8 italic text-xl md:text-2xl text-gray-600 leading-relaxed')}
               key={blockKey}
             >
               {content}
@@ -285,11 +311,12 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
           break
         default:
           nodes.push(
-            <p className="my-4 leading-relaxed text-gray-950" key={blockKey}>
+            <p className={applyTopMarginRemoval('my-4 leading-relaxed text-gray-950')} key={blockKey}>
               {content}
             </p>
           )
       }
+      isFirstNode = false
       continue
     }
 
@@ -318,6 +345,7 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
           )}
         </figure>
       )
+      isFirstNode = false
       continue
     }
 
@@ -346,6 +374,7 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
           )}
         </figure>
       )
+      isFirstNode = false
     }
 
     if (block._type === 'youtube' && block.url) {
@@ -356,7 +385,7 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
       )?.[1]
       if (videoId) {
         nodes.push(
-          <div key={blockKey} className="my-10">
+          <div key={blockKey} className={applyTopMarginRemoval('my-10')}>
             <div className="aspect-video w-full">
               <iframe
                 src={`https://www.youtube.com/embed/${videoId}`}
@@ -370,6 +399,7 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
             )}
           </div>
         )
+        isFirstNode = false
       }
     }
 
@@ -380,7 +410,8 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
           : block.style === 'dotted'
             ? 'border-t border-dotted'
             : 'border-t'
-      nodes.push(<hr key={blockKey} className={`my-12 border-gray-200 ${borderStyle}`} />)
+      nodes.push(<hr key={blockKey} className={`border-gray-200 ${borderStyle} ${applyTopMarginRemoval('my-12')}`} />)
+      isFirstNode = false
     }
 
     if (block._type === 'cta' && block.link) {
@@ -396,7 +427,7 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
         typeof block.text === 'string' ? block.text : block.text?.tr || block.text?.en || 'Devam Et'
 
       nodes.push(
-        <div key={blockKey} className="my-8 flex justify-center">
+        <div key={blockKey} className={`flex justify-center ${applyTopMarginRemoval('my-8')}`}>
           <a
             href={block.link}
             target="_blank"
@@ -407,6 +438,7 @@ export default function PortableTextLite({value}: {value: Block[] | undefined}) 
           </a>
         </div>
       )
+      isFirstNode = false
     }
   }
 

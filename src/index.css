@@ -52,6 +52,18 @@ body {
   font-weight: 300 !important;
 }
 
+/* Explicit Inter font utility */
+.font-inter,
+.font-inter * {
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* Helvetica Neue font utility */
+.font-helvetica,
+.font-helvetica * {
+  font-family: 'Helvetica Neue', 'Helvetica Neue LT', Helvetica, Arial, sans-serif !important;
+}
+
 /* Gotham Narrow Light font utility (content block'lar için gövde metinleri) */
 @font-face {
   font-family: 'Gotham';

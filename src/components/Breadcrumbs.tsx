@@ -16,24 +16,24 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className = '' 
 
   return (
     <nav aria-label="Breadcrumb" className={className}>
-      <ol className="flex flex-wrap items-center text-[13px] sm:text-[15px] text-gray-700 gap-1 sm:gap-2">
+      <ol className="list-none p-0 inline-flex flex-wrap items-center font-inter text-[11px] sm:text-[13px] text-gray-700">
         {items.map((item, index) => {
           const isLast = index === items.length - 1
           const label =
             typeof item.label === 'string' ? item.label.toLocaleUpperCase('tr-TR') : item.label
           return (
-            <li key={index} className="flex items-center gap-1">
+            <li key={index} className="flex items-center">
               {item.to && !isLast ? (
                 <Link
                   to={item.to}
-                  className="underline underline-offset-2 text-gray-900 hover:text-gray-900 transition-colors"
+                  className="font-light text-gray-900 hover:text-gray-900 transition-colors"
                 >
                   {label}
                 </Link>
               ) : (
-                <span className={isLast ? 'text-gray-900' : 'text-gray-800'}>{label}</span>
+                <span className="font-bold text-gray-900">{label}</span>
               )}
-              {!isLast && <span className="text-gray-400 mx-0.5 sm:mx-1">|</span>}
+              {!isLast && <span className="font-light text-gray-400 mx-2">|</span>}
             </li>
           )
         })}

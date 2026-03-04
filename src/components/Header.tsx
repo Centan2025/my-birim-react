@@ -488,7 +488,7 @@ export function Header() {
       fontSize: 'clamp(11px, 0.3rem + 0.7vw, 15px)', // Aggressive scaling
       fontWeight: 'bold',
       letterSpacing: '0.05em',
-      fontFamily: "'Helvetica Neue LT', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+      fontFamily: "'Inter', sans-serif",
       lineHeight: '1.25rem',
     }
     return (
@@ -745,7 +745,7 @@ export function Header() {
                       fontSize: 'clamp(12px, 0.4rem + 0.6vw, 15px)',
                       fontWeight: 'bold',
                       letterSpacing: '0.05em',
-                      fontFamily: "'Helvetica Neue LT', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                      fontFamily: "'Inter', sans-serif",
                       lineHeight: '1.25rem',
                     }}
                   >
@@ -755,7 +755,7 @@ export function Header() {
                         fontSize: 'clamp(0.75rem, 0.5rem + 0.4vw, 0.9375rem)',
                         fontWeight: 'bold',
                         letterSpacing: '0.05em',
-                        fontFamily: "'Helvetica Neue LT', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+                        fontFamily: "'Inter', sans-serif",
                         lineHeight: '1.25rem',
                       }}
                     >

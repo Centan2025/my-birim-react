@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getFooterContent } from '../services/cms'
 import { useSiteSettings } from '../context/SiteSettingsContext'
@@ -8,11 +8,14 @@ import { analytics } from '../lib/analytics'
 import ScrollReveal from './ScrollReveal'
 import { resolveLegalLinkText } from '../lib/legalLinks'
 import { NewsletterForm } from './NewsletterForm'
+import { HomeNewsletter } from './HomeNewsletter'
 import { SocialIcon } from './SocialIcon'
 
 export const Footer = () => {
   const { settings, isLoading: isSettingsLoading } = useSiteSettings()
   const { t, setLocale, locale, supportedLocales } = useTranslation()
+  const location = useLocation()
+  const isHomePage = location.pathname === '/'
 
   const { data: content, isLoading: isFooterLoading } = useQuery({
     queryKey: ['footerContent', locale],
@@ -26,6 +29,7 @@ export const Footer = () => {
 
   return (
     <>
+      <HomeNewsletter />
       <footer className="bg-[#101820] text-gray-400" style={{ position: 'relative', zIndex: 5 }}>
         <div
           className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-10 pb-6 lg:py-12"
@@ -62,7 +66,7 @@ export const Footer = () => {
                 >
                   <Link
                     to={link.to}
-                    className="flex justify-center items-center text-lg font-semibold uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
+                    className="flex justify-center items-center text-lg font-semibold font-inter uppercase tracking-wider text-gray-300 hover:text-white transition-colors duration-200 w-full"
                   >
                     {link.label}
                   </Link>
@@ -84,7 +88,7 @@ export const Footer = () => {
                     <button
                       key={langCode}
                       onClick={() => setLocale(langCode)}
-                      className={`text-xs uppercase tracking-wider transition-colors duration-200 ${isActive
+                      className={`text-xs font-inter uppercase tracking-wider transition-colors duration-200 ${isActive
                         ? 'text-white font-bold'
                         : 'text-gray-400 hover:text-white font-thin'
                         }`}
@@ -102,18 +106,20 @@ export const Footer = () => {
             </ScrollReveal>
 
             {/* Email abonelik formu - mobilde en altta ortalanmış */}
-            <ScrollReveal delay={150} threshold={0.1} width="w-full" className="h-auto">
-              <div className="w-full flex justify-center !mt-8 lg:!mt-6">
-                <ScrollReveal
-                  delay={165}
-                  threshold={0.1}
-                  width="w-full"
-                  className="h-auto w-full flex flex-col items-center justify-center"
-                >
-                  <NewsletterForm variant="mobile" className="flex flex-col items-center w-full" />
-                </ScrollReveal>
-              </div>
-            </ScrollReveal>
+            {!isHomePage && (
+              <ScrollReveal delay={150} threshold={0.1} width="w-full" className="h-auto">
+                <div className="w-full flex justify-center !mt-8 lg:!mt-6">
+                  <ScrollReveal
+                    delay={165}
+                    threshold={0.1}
+                    width="w-full"
+                    className="h-auto w-full flex flex-col items-center justify-center"
+                  >
+                    <NewsletterForm variant="mobile" className="flex flex-col items-center w-full" />
+                  </ScrollReveal>
+                </div>
+              </ScrollReveal>
+            )}
           </div>
 
           {/* Desktop düzen */}
@@ -164,7 +170,7 @@ export const Footer = () => {
 
             {/* Orta: Menü düğmeleri (sağa hizalı üstte) */}
             <div className="flex-1 flex justify-end">
-              <nav className="flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold uppercase tracking-wider text-gray-300 items-center justify-end">
+              <nav className="flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold font-inter uppercase tracking-wider text-gray-300 items-center justify-end">
                 {[
                   { to: '/products', label: t('view_all') },
                   { to: '/designers', label: t('designers') },
@@ -282,14 +288,16 @@ export const Footer = () => {
             </div>
 
             {/* Email abonelik formu - sadece desktop'ta */}
-            <ScrollReveal delay={150} threshold={0.1} width="w-full lg:w-auto" className="h-auto">
-              <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-                <NewsletterForm
-                  variant="desktop"
-                  className="flex w-full lg:w-auto lg:justify-end"
-                />
-              </div>
-            </ScrollReveal>
+            {!isHomePage && (
+              <ScrollReveal delay={150} threshold={0.1} width="w-full lg:w-auto" className="h-auto">
+                <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+                  <NewsletterForm
+                    variant="desktop"
+                    className="flex w-full lg:w-auto lg:justify-end"
+                  />
+                </div>
+              </ScrollReveal>
+            )}
           </div>
 
           {/* Yasal linkler ve telif metni - mobilde alt alta, desktop'ta aynı satırda

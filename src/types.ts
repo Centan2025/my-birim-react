@@ -102,7 +102,7 @@ export interface Designer {
 /**
  * Represents a registered user/member.
  */
-export type UserType = 'email_subscriber' | 'full_member'
+export type UserType = 'email_subscriber' | 'full_member' | 'professional_subscriber'
 
 export interface User {
   /** Unique identifier for the user (Sanity _id). */

@@ -21,6 +21,7 @@ export default {
           'sans-serif',
         ],
         oswald: ['"Oswald"', 'sans-serif'],
+        inter: ['"Inter"', 'sans-serif'],
       },
     },
   },

@@ -176,4 +176,13 @@ export default {
   back_to_login: 'Giriş Sayfasına Dön',
   close: 'Kapat',
   close_cart: 'Sepeti kapat',
+  newsletter_title: 'BÜLTENİMİZE ABONE OLUN',
+  professional_access: 'PROFESYONEL ÖZEL ERİŞİM',
+  professional_access_desc: 'Mimarlar, tasarımcılar ve sektör profesyonelleri için özel kaynaklara erişim sağlayın.',
+  newsletter_prompt: 'Yeni koleksiyonlar, özel projeler ve stüdyo haberlerinden haberdar olmak için topluluğumuza katılın.',
+  join_us: 'KATILIN',
+  waiting: 'BEKLEYİN',
+  complete_application: 'BAŞVURUYU TAMAMLA',
+  professional_disclaimer: '* Üyeliğiniz onaylandıktan sonra tam erişim sağlayabileceksiniz.',
+  set_password: 'ŞİFRE BELİRLE',
 }
