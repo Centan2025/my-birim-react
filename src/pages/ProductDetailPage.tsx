@@ -19,7 +19,6 @@ import { ProductThumbnails } from '../components/product/ProductThumbnails'
 import { ProductInfo } from '../components/product/ProductInfo'
 import { ProductMaterials } from '../components/product/ProductMaterials'
 import { ProductDimensions } from '../components/product/ProductDimensions'
-import { ProductBottomNav } from '../components/product/ProductBottomNav'
 import { ProductRelated } from '../components/product/ProductRelated'
 import { ProductMediaLightbox } from '../components/product/ProductMediaLightbox'
 import { ProductAddToCart } from '../components/product/ProductAddToCart'
@@ -254,7 +253,14 @@ export function ProductDetailPage() {
           }`}
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 lg:pt-12">
-          <ProductInfo product={product} category={category} locale={locale} />
+          <ProductInfo
+            product={product}
+            category={category}
+            locale={locale}
+            prevProduct={prevProduct}
+            nextProduct={nextProduct}
+            showProductPrevNext={showProductPrevNext}
+          />
 
           <div
             className={`mt-12 space-y-16 transition-all duration-700 ease-out ${!isMainContentVisible
@@ -331,16 +337,7 @@ export function ProductDetailPage() {
         </div>
       </main>
 
-      <div
-        className={`transition-all duration-700 ease-out ${!isMainContentVisible ? 'opacity-0 translate-y-12' : 'opacity-100 translate-y-0 delay-300'
-          }`}
-      >
-        <ProductBottomNav
-          prevProduct={prevProduct}
-          nextProduct={nextProduct}
-          show={showProductPrevNext}
-        />
-      </div>
+
 
       {/* Fullscreen viewer */}
       {isFullscreenOpen && bandMedia.length > 0 && (

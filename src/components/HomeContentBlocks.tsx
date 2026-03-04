@@ -116,7 +116,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             duration={1.0}
           >
             <h2
-              className={`${isFullWidth ? 'text-4xl md:text-6xl lg:text-7xl' : 'text-3xl md:text-5xl lg:text-6xl'} uppercase ${textAlignClass} text-gray-950 max-w-4xl mb-4 ${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}
+              className={`${isFullWidth ? 'text-4xl md:text-6xl lg:text-7xl' : 'text-3xl md:text-5xl lg:text-6xl'} uppercase ${textAlignClass} text-gray-950 w-full mb-4 ${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}
               style={{
                 textShadow: '0 2px 4px rgba(0,0,0,0.1)',
                 fontFamily:
@@ -143,7 +143,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 <div className={`prose max-w-none ${textAlignClass}`}>
                   {(() => {
                     const desc = t(block.description)
-                    const widthClass = textAlign === 'center' ? 'max-w-4xl' : 'max-w-2xl'
+                    const widthClass = textAlign === 'center' ? 'max-w-4xl' : 'w-full'
                     const marginClass =
                       textAlign === 'center'
                         ? 'mx-auto'
@@ -343,11 +343,11 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   className={
                     hasTextContent
                       ? `flex flex-col ${isLeft
-                        ? 'md:flex-row md:items-start'
+                        ? 'md:flex-row'
                         : isRight
-                          ? 'md:flex-row-reverse md:items-start'
-                          : 'md:flex-row md:items-start'
-                      } gap-4 md:gap-6`
+                          ? 'md:flex-row-reverse'
+                          : 'md:flex-row'
+                      } gap-4 md:gap-6 items-start`
                       : 'flex flex-col items-center gap-4 md:gap-6'
                   }
                 >

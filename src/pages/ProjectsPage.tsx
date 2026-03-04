@@ -16,16 +16,16 @@ const ProjectRow: React.FC<{ project: Project; index: number }> = ({ project, in
         to={`/projects/${project.id}`}
         className="group block border-b border-gray-300 transition-colors duration-300 hover:bg-gray-50/50"
       >
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-4 md:gap-8 py-8 md:py-10 lg:py-12">
+        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 md:gap-8 py-8 md:py-10 lg:py-12">
           {/* Sol: Proje adı - hover'da sağa kayar */}
-          <div className="flex items-center">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-light tracking-tight text-gray-900 uppercase transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:text-gray-600 group-hover:translate-x-6">
+          <div className="flex items-center min-w-0 pr-4">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-light tracking-tight text-gray-900 uppercase transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:text-gray-600 group-hover:translate-x-6 truncate">
               {t(project.title)}
             </h2>
           </div>
 
           {/* Orta: Kategori + Yıl */}
-          <div className="hidden md:flex flex-col items-start min-w-[200px] lg:min-w-[260px]">
+          <div className="hidden md:flex flex-col items-center text-center min-w-[200px] lg:min-w-[260px]">
             {project.projectCategory && (
               <span className="text-base lg:text-lg text-gray-400 uppercase tracking-widest font-light">
                 {t(project.projectCategory)}
@@ -47,8 +47,8 @@ const ProjectRow: React.FC<{ project: Project; index: number }> = ({ project, in
           </div>
 
           {/* Sağ: Proje görseli */}
-          <div className="flex justify-end">
-            <div className="w-full md:w-[320px] lg:w-[400px] aspect-[16/10] overflow-hidden">
+          <div className="flex justify-end min-w-0">
+            <div className="w-full max-w-[480px] lg:max-w-[640px] aspect-[16/10] overflow-hidden ml-auto">
               {project.cover && (
                 <OptimizedImage
                   src={typeof project.cover === 'string' ? project.cover : project.cover?.url || ''}

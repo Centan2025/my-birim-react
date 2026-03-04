@@ -16,7 +16,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       // Dev modunda SW devre dışı (cache karmaşasını önler)
       devOptions: { enabled: false },
-      includeAssets: ['logo.png', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
         name: 'Birim',
         short_name: 'Birim',
@@ -30,15 +30,15 @@ export default defineConfig({
         lang: 'tr',
         icons: [
           {
-            src: '/logo.png',
+            src: '/favicon.svg',
             sizes: '192x192',
-            type: 'image/png',
+            type: 'image/svg+xml',
             purpose: 'any maskable',
           },
           {
-            src: '/logo.png',
+            src: '/favicon.svg',
             sizes: '512x512',
-            type: 'image/png',
+            type: 'image/svg+xml',
             purpose: 'any maskable',
           },
         ],

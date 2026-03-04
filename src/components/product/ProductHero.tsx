@@ -393,13 +393,15 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="1"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                strokeWidth="0.5"
+                strokeLinecap="square"
+                strokeLinejoin="miter"
                 className="h-7 w-7 transition-transform duration-500"
               >
-                <line x1="12" y1="4" x2="12" y2="20" />
-                <line x1="4" y1="12" x2="20" y2="12" />
+                {/* Küçük kare */}
+                <path d="M 3 13 h 8 v 8 H 3 Z" />
+                {/* Ok */}
+                <path d="M 13.5 10.5 L 18 6 M 14 6 H 18 V 10" />
               </svg>
             </button>
           </div>

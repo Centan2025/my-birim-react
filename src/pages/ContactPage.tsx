@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react'
-import { motion } from 'framer-motion'
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { getContactPageContent } from '../services/cms'
 import type { ContactPageContent, ContactLocation } from '../types'
 import { OptimizedImage } from '../components/OptimizedImage'
@@ -129,11 +129,49 @@ const MailIcon = (props: React.ComponentProps<'svg'>) => (
     <polyline points="22,6 12,13 2,6"></polyline>
   </svg>
 )
+
+const ThinArrowLeft = (props: React.ComponentProps<'svg'>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1"
+    strokeLinecap="square"
+    strokeLinejoin="miter"
+    {...props}
+  >
+    <line x1="19" y1="12" x2="5" y2="12"></line>
+    <polyline points="12 19 5 12 12 5"></polyline>
+  </svg>
+)
+
+const ThinArrowRight = (props: React.ComponentProps<'svg'>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1"
+    strokeLinecap="square"
+    strokeLinejoin="miter"
+    {...props}
+  >
+    <line x1="5" y1="12" x2="19" y2="12"></line>
+    <polyline points="12 5 19 12 12 19"></polyline>
+  </svg>
+)
 const LocationCard: React.FC<{
   location: ContactLocation
   isSelected: boolean
+  isMapVisible: boolean
   onSelect: () => void
-}> = ({ location, isSelected, onSelect }) => {
+  onShowMap: () => void
+}> = ({ location, isSelected, isMapVisible, onSelect, onShowMap }) => {
   const { t } = useTranslation()
 
   return (
@@ -177,6 +215,60 @@ const LocationCard: React.FC<{
           <span>{location.email}</span>
         </p>
       )}
+
+      {/* Haritayı Aç Butonu & Harita */}
+      <AnimatePresence>
+        {isSelected && location.mapEmbedUrl && (
+          <motion.div
+            key="show-map-btn"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mt-6 overflow-hidden flex flex-col gap-4"
+          >
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation() // Kart seçimini tekrar tetiklememek için
+                onShowMap()
+              }}
+              className={`flex items-center gap-2 px-5 py-2.5 outline-none font-light tracking-wider text-sm transition-all duration-300 w-max ${isMapVisible
+                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300 shadow-inner'
+                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 hover:border-gray-400 shadow-sm hover:shadow active:scale-95'
+                }`}
+            >
+              <MapPinIcon className="w-4 h-4" />
+              {isMapVisible ? (t('hide_map') || 'HARİTAYI GİZLE') : (t('show_map') || 'HARİTAYI GÖR')}
+            </button>
+
+            <AnimatePresence>
+              {isMapVisible && (
+                <motion.div
+                  key="inline-map"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 450 }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                  className="w-full relative shadow-sm border border-gray-300 mt-2"
+                >
+                  <iframe
+                    src={convertGoogleMapsUrlToEmbed(location.mapEmbedUrl)}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    className="w-full h-full"
+                    allow="fullscreen"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title={`${t(location.title)}`}
+                  ></iframe>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -187,10 +279,27 @@ export function ContactPage() {
   const [selectedLocation, setSelectedLocation] = useState<ContactLocation | null>(null)
   const [selectedMediaIndex, setSelectedMediaIndex] = useState<number>(0)
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
+  const [showMap, setShowMap] = useState(false)
   const thumbRef = useRef<HTMLDivElement | null>(null)
   const [thumbDragStartX, setThumbDragStartX] = useState<number | null>(null)
   const [thumbScrollStart, setThumbScrollStart] = useState<number>(0)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
   const { t } = useTranslation()
+
+  const checkScroll = useCallback(() => {
+    if (thumbRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = thumbRef.current
+      setCanScrollLeft(scrollLeft > 0)
+      setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth)
+    }
+  }, [])
+
+  useEffect(() => {
+    checkScroll()
+    window.addEventListener('resize', checkScroll)
+    return () => window.removeEventListener('resize', checkScroll)
+  }, [checkScroll, selectedLocation])
 
   // SEO meta
   useSEO({
@@ -207,10 +316,9 @@ export function ContactPage() {
       setLoading(true)
       const pageContent = await getContactPageContent()
       setContent(pageContent)
-      if (pageContent && pageContent.locations.length > 0) {
-        const firstWithMap = pageContent.locations.find(loc => loc.mapEmbedUrl)
-        setSelectedLocation(firstWithMap || pageContent.locations[0] || null)
-      }
+      // İlk açılışta hiçbir adresi seçili yapma, harita da gizli kalsın
+      setSelectedLocation(null)
+      setShowMap(false)
       setLoading(false)
     }
     fetchContent()
@@ -276,16 +384,17 @@ export function ContactPage() {
     [selectedLocationMedia]
   )
 
-  // Seçili lokasyon değiştiğinde analytics event gönder
   useEffect(() => {
     if (!selectedLocation) return
-
     const locationTitle = t(selectedLocation.title)
     analytics.event({
       category: 'contact',
       action: 'view_location',
       label: locationTitle,
     })
+
+    // Seçim değiştiğinde haritayı direkt GÖSTERME (öncesinde true yapılıyordu, şimdi false kalmalı)
+    setShowMap(false)
 
     // Log a generate_lead event for viewing contact info
     analytics.event({
@@ -311,6 +420,7 @@ export function ContactPage() {
           <div
             ref={thumbRef}
             className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing w-full max-w-full"
+            onScroll={checkScroll}
             onMouseDown={e => {
               setThumbDragStartX(e.clientX)
               setThumbScrollStart(thumbRef.current ? thumbRef.current.scrollLeft : 0)
@@ -427,76 +537,38 @@ export function ContactPage() {
             </motion.div>
           </div>
           {/* Scroll buttons */}
-          {selectedLocationMedia.length > 6 && (
-            <>
-              {/* Ok butonlarını sadece desktop'ta göster; mobilde parmakla kaydırma yeterli */}
-              <button
-                aria-label="scroll-left"
-                onClick={() => {
-                  if (!thumbRef.current) return
-                  const delta = thumbRef.current.clientWidth || 240
-                  thumbRef.current.scrollTo({
-                    left: thumbRef.current.scrollLeft - delta,
-                    behavior: 'smooth',
-                  })
-                }}
-                className="hidden md:block md:absolute md:top-1/2 md:-translate-y-1/2 flex items-center justify-center rounded transition-transform hover:scale-105 active:scale-95 z-10"
-                style={{
-                  left: '-60px',
-                  width: '44px',
-                  height: '44px',
-                  backgroundColor: 'transparent',
-                  color: '#4b5563',
-                }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="33"
-                  height="33"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="16 20 8 12 16 4" />
-                </svg>
-              </button>
-              <button
-                aria-label="scroll-right"
-                onClick={() => {
-                  if (!thumbRef.current) return
-                  const delta = thumbRef.current.clientWidth || 240
-                  thumbRef.current.scrollTo({
-                    left: thumbRef.current.scrollLeft + delta,
-                    behavior: 'smooth',
-                  })
-                }}
-                className="hidden md:block md:absolute md:top-1/2 md:-translate-y-1/2 flex items-center justify-center rounded transition-transform hover:scale-105 active:scale-95 z-10"
-                style={{
-                  right: '-60px',
-                  width: '44px',
-                  height: '44px',
-                  backgroundColor: 'transparent',
-                  color: '#4b5563',
-                }}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="33"
-                  height="33"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="8 20 16 12 8 4" />
-                </svg>
-              </button>
-            </>
+          {canScrollLeft && (
+            <button
+              aria-label="scroll-left"
+              onClick={() => {
+                if (!thumbRef.current) return
+                const delta = thumbRef.current.clientWidth || 240
+                thumbRef.current.scrollTo({
+                  left: thumbRef.current.scrollLeft - delta,
+                  behavior: 'smooth',
+                })
+              }}
+              className="hidden md:flex absolute top-1/2 -translate-y-1/2 -left-12 items-center justify-center rounded transition-transform hover:scale-105 active:scale-95 z-10 w-10 h-10 text-gray-500 hover:text-gray-900 bg-transparent"
+            >
+              <ThinArrowLeft className="w-8 h-8" />
+            </button>
+          )}
+
+          {canScrollRight && (
+            <button
+              aria-label="scroll-right"
+              onClick={() => {
+                if (!thumbRef.current) return
+                const delta = thumbRef.current.clientWidth || 240
+                thumbRef.current.scrollTo({
+                  left: thumbRef.current.scrollLeft + delta,
+                  behavior: 'smooth',
+                })
+              }}
+              className="hidden md:flex absolute top-1/2 -translate-y-1/2 -right-12 items-center justify-center rounded transition-transform hover:scale-105 active:scale-95 z-10 w-10 h-10 text-gray-500 hover:text-gray-900 bg-transparent"
+            >
+              <ThinArrowRight className="w-8 h-8" />
+            </button>
           )}
         </div>
       </>
@@ -535,15 +607,15 @@ export function ContactPage() {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-stretch">
+        <div className="grid grid-cols-1 max-w-4xl mx-auto gap-8 md:gap-12 items-start transition-all duration-700 ease-in-out">
           <motion.div
-            className="bg-white p-6 shadow-sm border border-gray-300 space-y-8 w-full overflow-x-hidden h-full"
+            className="bg-white p-6 shadow-sm border border-gray-300 w-full overflow-x-hidden"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
           >
             {Array.from(locationGroupsMap.entries()).map(([type, locs]) => (
-              <div key={type}>
+              <div key={type} className="mb-8 last:mb-0">
                 <h2 className="text-2xl font-light text-gray-600 mb-2">{type}</h2>
                 <div className="h-px bg-gray-300 mb-6 w-full"></div>
                 <div className="space-y-4">
@@ -555,7 +627,16 @@ export function ContactPage() {
                         selectedLocation?.title === loc.title &&
                         selectedLocation?.address === loc.address
                       }
-                      onSelect={() => setSelectedLocation(loc)}
+                      isMapVisible={
+                        showMap &&
+                        selectedLocation?.title === loc.title &&
+                        selectedLocation?.address === loc.address
+                      }
+                      onSelect={() => {
+                        setSelectedLocation(loc)
+                        setShowMap(false) // Seçildiğinde harita kapansın
+                      }}
+                      onShowMap={() => setShowMap(!showMap)} // Butona tıklandığında açılsın / kapansın
                     />
                   ))}
                 </div>
@@ -575,53 +656,27 @@ export function ContactPage() {
             </motion.div>
           )}
 
-          <motion.div
-            className="bg-white shadow-sm border border-gray-300 overflow-hidden h-full flex"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-          >
-            {selectedLocation?.mapEmbedUrl ? (
-              <iframe
-                src={convertGoogleMapsUrlToEmbed(selectedLocation.mapEmbedUrl)}
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                className="w-full h-full"
-                allow="fullscreen"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title={`${t(selectedLocation.title)}`}
-                key={selectedLocation.mapEmbedUrl}
-              ></iframe>
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500">
-                <p>{t('map_not_available')}</p>
-              </div>
-            )}
-          </motion.div>
+          {/* Medya Bantı - Seçili lokasyonun medyaları (sadece desktop) */}
+          {selectedLocationMedia.length > 0 && (
+            <motion.div
+              className="mt-8 border-y border-gray-300 py-3 hidden md:block"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {renderSelectedLocationMediaStrip()}
+            </motion.div>
+          )}
         </div>
-
-        {/* Medya Bantı - Seçili lokasyonun medyaları (sadece desktop: haritanın altında tam genişlik) */}
-        {selectedLocationMedia.length > 0 && (
-          <motion.div
-            className="mt-12 border-y border-gray-300 py-3 hidden md:block"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          >
-            {renderSelectedLocationMediaStrip()}
-          </motion.div>
+        {/* Tüm cihazlar için: ürün / proje detay sayfasındakiyle aynı tam ekran viewer */}
+        {isFullscreenOpen && selectedLocationMediaForViewer.length > 0 && (
+          <FullscreenMediaViewer
+            items={selectedLocationMediaForViewer}
+            initialIndex={selectedMediaIndex}
+            onClose={() => setIsFullscreenOpen(false)}
+          />
         )}
       </div>
-      {/* Tüm cihazlar için: ürün / proje detay sayfasındakiyle aynı tam ekran viewer */}
-      {isFullscreenOpen && selectedLocationMediaForViewer.length > 0 && (
-        <FullscreenMediaViewer
-          items={selectedLocationMediaForViewer}
-          initialIndex={selectedMediaIndex}
-          onClose={() => setIsFullscreenOpen(false)}
-        />
-      )}
     </div>
   )
 }

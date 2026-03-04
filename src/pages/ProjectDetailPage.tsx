@@ -22,38 +22,39 @@ const getYouTubeId = (url: string): string | null => {
   return match && match[1] && match[1].length === 11 ? match[1] : null
 }
 
-
-const MinimalChevronLeft = (props: React.SVGProps<SVGSVGElement>) => (
+const ArrowLeft = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="48"
-    height="48"
+    width="28"
+    height="28"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="1"
+    strokeWidth="0.8"
     strokeLinecap="round"
     strokeLinejoin="round"
     {...props}
   >
-    <path d="m15 18-6-6 6-6" />
+    <path d="M8 6 2 12" />
+    <path d="M2 12h20" />
   </svg>
 )
 
-const MinimalChevronRight = (props: React.SVGProps<SVGSVGElement>) => (
+const ArrowRight = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="48"
-    height="48"
+    width="28"
+    height="28"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="1"
+    strokeWidth="0.8"
     strokeLinecap="round"
     strokeLinejoin="round"
     {...props}
   >
-    <path d="m9 18 6-6-6-6" />
+    <path d="M16 6 22 12" />
+    <path d="M22 12H2" />
   </svg>
 )
 
@@ -331,7 +332,7 @@ export function ProjectDetailPage() {
                 e.stopPropagation()
                 setIsFullscreenOpen(true)
               }}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/10 text-white backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white/20 shadow-xl"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-gray-100 bg-white text-gray-900 transition-all duration-300 hover:scale-110 hover:bg-gray-50 shadow-xl"
               aria-label="Büyüt"
             >
               <svg
@@ -341,13 +342,15 @@ export function ProjectDetailPage() {
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="1"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-7 w-7"
+                strokeWidth="0.5"
+                strokeLinecap="square"
+                strokeLinejoin="miter"
+                className="h-8 w-8"
               >
-                <line x1="12" y1="4" x2="12" y2="20" />
-                <line x1="4" y1="12" x2="20" y2="12" />
+                {/* Küçük kare */}
+                <path d="M 3 13 h 8 v 8 H 3 Z" />
+                {/* Ok */}
+                <path d="M 13.5 10.5 L 18 6 M 14 6 H 18 V 10" />
               </svg>
             </button>
           </div>
@@ -356,7 +359,7 @@ export function ProjectDetailPage() {
 
       {/* Breadcrumb Band - Hero'nun altında */}
       <div className="w-full bg-white relative z-20">
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 pb-2">
           <Breadcrumbs
             items={[
               { label: t('homepage'), to: '/' },
@@ -367,9 +370,41 @@ export function ProjectDetailPage() {
         </div>
       </div>
 
-      {(project.excerpt || project.body || allMedia.length > 0) && (
+      {(project.excerpt || project.body || allMedia.length > 0 || (showBottomPrevNext && (prevProject || nextProject))) && (
         <div className="mt-0 relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-gray-100">
           <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-6 md:py-8">
+            {/* Top Prev / Next controls */}
+            {showBottomPrevNext && (prevProject || nextProject) && (
+              <div className="flex items-center justify-between mb-8 px-4 sm:px-0">
+                <div>
+                  {prevProject ? (
+                    <Link
+                      to={`/projects/${prevProject.id}`}
+                      className="inline-flex items-center text-gray-400 hover:text-gray-800 transition-colors"
+                      aria-label="Previous project"
+                    >
+                      <ArrowLeft className="w-7 h-7 md:w-8 md:h-8" />
+                    </Link>
+                  ) : (
+                    <span className="w-7 h-7 md:w-8 md:h-8" />
+                  )}
+                </div>
+                <div>
+                  {nextProject ? (
+                    <Link
+                      to={`/projects/${nextProject.id}`}
+                      className="inline-flex items-center text-gray-400 hover:text-gray-800 transition-colors"
+                      aria-label="Next project"
+                    >
+                      <ArrowRight className="w-7 h-7 md:w-8 md:h-8" />
+                    </Link>
+                  ) : (
+                    <span className="w-7 h-7 md:w-8 md:h-8" />
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Başlık ile aynı sol hizaya oturan içerik */}
             {(project.excerpt || project.body) && (
               <div className="w-full space-y-4 px-4 sm:px-0">
@@ -503,41 +538,7 @@ export function ProjectDetailPage() {
         </div>
       )}
 
-      {/* Bottom Prev / Next controls - footer'ın hemen üzerinde */}
-      {showBottomPrevNext && (prevProject || nextProject) && (
-        <div className="bg-white border-t border-gray-200 relative z-20 w-screen left-1/2 right-1/2 -mx-[50vw]">
-          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-6">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex-1">
-                {prevProject ? (
-                  <Link
-                    to={`/projects/${prevProject.id}`}
-                    className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
-                    aria-label="Previous project"
-                  >
-                    <MinimalChevronLeft className="w-12 h-12 md:w-16 md:h-16" />
-                  </Link>
-                ) : (
-                  <span />
-                )}
-              </div>
-              <div className="flex-1 text-right">
-                {nextProject ? (
-                  <Link
-                    to={`/projects/${nextProject.id}`}
-                    className="inline-flex items-center justify-center text-gray-600 hover:text-gray-900 transition-colors"
-                    aria-label="Next project"
-                  >
-                    <MinimalChevronRight className="w-12 h-12 md:w-16 md:h-16" />
-                  </Link>
-                ) : (
-                  <span />
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+
       {/* Tüm cihazlarda tam ekran viewer - ürün ve iletişim sayfalarıyla aynı sistem */}
       {isFullscreenOpen && allMedia.length > 0 && (
         <FullscreenMediaViewer
