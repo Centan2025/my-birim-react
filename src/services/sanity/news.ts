@@ -153,11 +153,13 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
           : r.coverDesktop
             ? mapImage(r.coverDesktop)
             : undefined
+        const metadata = r.coverR2 ? mapR2Metadata(r.coverR2) : {}
         return {
           url,
           urlMobile: urlMobile && urlMobile !== url ? urlMobile : undefined,
           urlDesktop: urlDesktop && urlDesktop !== url ? urlDesktop : undefined,
           palette: extractPalette(r.coverR2) || extractPalette(r.cover),
+          ...metadata,
         }
       })(),
     }

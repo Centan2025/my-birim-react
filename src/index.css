@@ -519,3 +519,30 @@ button[class*='__vercel'] {
   height: 0 !important;
   overflow: hidden !important;
 }
+
+/* Chrome / Webkit autofill arka plan rengini geçersiz kıl */
+/* Açık arka planlı inputlar (Newsletter paneli vb.) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+  box-shadow: 0 0 0 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #111827 !important;
+  caret-color: #111827 !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+}
+
+/* Koyu arka planlı inputlar (Footer e-posta kutusu) */
+footer input:-webkit-autofill,
+footer input:-webkit-autofill:hover,
+footer input:-webkit-autofill:focus,
+footer input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  box-shadow: 0 0 0 1000px transparent inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+}

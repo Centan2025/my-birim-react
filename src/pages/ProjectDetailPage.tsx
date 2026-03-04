@@ -190,6 +190,14 @@ export function ProjectDetailPage() {
     project && project.cover && typeof project.cover === 'object'
       ? project.cover.urlDesktop
       : undefined
+  const coverCrop =
+    project && project.cover && typeof project.cover === 'object'
+      ? (project.cover as any).crop
+      : undefined
+  const coverHotspot =
+    project && project.cover && typeof project.cover === 'object'
+      ? (project.cover as any).hotspot
+      : undefined
 
   // Use cover image + media array (images and videos)
   const mediaArray = (project?.media || []).map(m => ({
@@ -198,6 +206,8 @@ export function ProjectDetailPage() {
     urlMobile: m.urlMobile,
     urlDesktop: m.urlDesktop,
     image: m.image || (m.type === 'image' ? m.url : undefined),
+    crop: (m as any).crop,
+    hotspot: (m as any).hotspot,
   }))
 
   // Cover görselini başa ekle (eğer varsa ve media array'inde yoksa)
@@ -209,6 +219,8 @@ export function ProjectDetailPage() {
         urlMobile: coverMobile,
         urlDesktop: coverDesktop,
         image: coverUrl,
+        crop: coverCrop,
+        hotspot: coverHotspot,
       },
     ]
     : []
@@ -276,6 +288,8 @@ export function ProjectDetailPage() {
               className="w-full h-full object-cover"
               loading="eager"
               quality={90}
+              crop={coverCrop}
+              hotspot={coverHotspot}
             />
           </div>
         ) : (
@@ -499,6 +513,8 @@ export function ProjectDetailPage() {
                             className="w-full h-auto object-cover"
                             loading="lazy"
                             quality={85}
+                            crop={m.crop}
+                            hotspot={m.hotspot}
                           />
                         )}
                         {m.type === 'video' && (
@@ -547,6 +563,8 @@ export function ProjectDetailPage() {
             url: m.url,
             urlMobile: m.urlMobile,
             urlDesktop: m.urlDesktop,
+            crop: m.crop,
+            hotspot: m.hotspot,
           }))}
           initialIndex={idx}
           onClose={() => setIsFullscreenOpen(false)}

@@ -80,5 +80,9 @@
   "coming_soon_footer": "Yakında sizlerle olacağız...",
   "coming_soon_under_construction": "Tasarım aşamasında",
   "invalid_youtube_url": "Geçersiz YouTube URL'si",
-  "too_many_attempts": "Çok fazla deneme yapıldı. Lütfen {0} dakika sonra tekrar deneyin."
+  "too_many_attempts": "Çok fazla deneme yapıldı. Lütfen {0} dakika sonra tekrar deneyin.",
+  "not_registered": "Üye Değil Misiniz?",
+  "register_or_subscribe": "Üye Ol / Kayıt Ol",
+  "go_to_profile": "Profile Git",
+  "welcome": "Hoş geldiniz"
 }

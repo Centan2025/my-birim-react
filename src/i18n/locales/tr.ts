@@ -185,4 +185,8 @@ export default {
   complete_application: 'BAŞVURUYU TAMAMLA',
   professional_disclaimer: '* Üyeliğiniz onaylandıktan sonra tam erişim sağlayabileceksiniz.',
   set_password: 'ŞİFRE BELİRLE',
+  not_registered: 'Üye Değil Misiniz?',
+  register_or_subscribe: 'Üye Ol / Kayıt Ol',
+  go_to_profile: 'Profile Git',
+  welcome: 'Hoş geldiniz',
 }

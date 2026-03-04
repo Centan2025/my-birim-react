@@ -1,5 +1,6 @@
 import { defineType, defineField } from 'sanity'
 import PortableTextImagePreview from '../../components/PortableTextImagePreview'
+import PortableTextImageInput from '../../components/PortableTextImageInput'
 
 /**
  * Zengin Metin (Portable Text) Editor Yapılandırması
@@ -114,6 +115,7 @@ const portableTextBlocks = [
     ],
     components: {
       preview: PortableTextImagePreview,
+      input: PortableTextImageInput,
     },
     preview: {
       select: {

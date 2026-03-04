@@ -182,7 +182,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       className={`group inline-flex items-center gap-x-3 text-gray-950 hover:text-gray-400 font-bold py-4 text-sm md:text-lg lg:text-xl transition-colors duration-300`}
                     >
                       <span className="inline-flex justify-center">
-                        <span className="font-bold font-inter tracking-[0.05em]">
+                        <span className="font-bold font-helvetica tracking-[0.05em]">
                           {t(block.linkText)}
                         </span>
                       </span>
@@ -193,7 +193,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       className={`inline-flex items-center gap-x-3 text-gray-950 font-bold py-4 text-sm md:text-lg lg:text-xl`}
                     >
                       <span className="inline-flex justify-center">
-                        <span className="font-bold font-inter tracking-[0.05em]">
+                        <span className="font-bold font-helvetica tracking-[0.05em]">
                           {t(block.linkText)}
                         </span>
                       </span>

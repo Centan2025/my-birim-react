@@ -15,7 +15,9 @@ const apiFetch = async (endpoint: string, body: any) => {
   })
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Bir hata oluştu')
+    const errorMsg = errorData.error || 'Bir hata oluştu'
+    const fullMsg = errorData.details ? `${errorMsg}\n\nDetay:\n${errorData.details}` : errorMsg
+    throw new Error(fullMsg)
   }
   return await response.json()
 }

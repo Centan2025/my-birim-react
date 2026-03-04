@@ -1,15 +1,17 @@
-import {useState, useEffect, useRef, FC, FormEventHandler} from 'react'
-import {subscribeEmail} from '../services/cms'
-import {analytics} from '../lib/analytics'
-import {useTranslation} from '../i18n'
+import { useState, useEffect, useRef, FC, FormEventHandler } from 'react'
+import { subscribeEmail } from '../services/cms'
+import { analytics } from '../lib/analytics'
+import { useTranslation } from '../i18n'
+
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()
 
 interface NewsletterFormProps {
   variant?: 'mobile' | 'desktop'
   className?: string
 }
 
-export const NewsletterForm: FC<NewsletterFormProps> = ({variant = 'mobile', className}) => {
-  const {t} = useTranslation()
+export const NewsletterForm: FC<NewsletterFormProps> = ({ variant = 'mobile', className }) => {
+  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState<string | null>(null)
@@ -82,7 +84,7 @@ export const NewsletterForm: FC<NewsletterFormProps> = ({variant = 'mobile', cla
       // Backend bazı durumlarda "zaten kayıtlı" uyarısını normal dönüşte verebilir;
       // bu yüzden hem dönüş değerine hem de hata mesajlarına bakıyoruz.
       const normalizedMessage = String(
-        (result as {message?: string} | null | undefined)?.message || ''
+        (result as { message?: string } | null | undefined)?.message || ''
       ).toLowerCase()
       const isAlready =
         normalizedMessage.includes('zaten aboneliğe kayıtlı') ||
@@ -153,9 +155,8 @@ export const NewsletterForm: FC<NewsletterFormProps> = ({variant = 'mobile', cla
   return (
     <form
       onSubmit={handleSubmit}
-      className={`${isDesktop ? 'flex flex-col items-end' : 'flex flex-col items-center'} ${
-        className || ''
-      }`}
+      className={`${isDesktop ? 'flex flex-col items-end' : 'flex flex-col items-center'} ${className || ''
+        }`}
     >
       {variant === 'mobile' && (
         <p className="text-sm text-gray-300 mb-4 text-center">{t('subscribe_prompt')}</p>
@@ -181,13 +182,13 @@ export const NewsletterForm: FC<NewsletterFormProps> = ({variant = 'mobile', cla
               setIsMessageVisible(false)
             }
           }}
-          placeholder={t('email_placeholder')}
+          placeholder={capitalize(t('email_placeholder'))}
           className={
             isDesktop
               ? 'w-full py-0.5 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[14px] text-left'
               : 'w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 focus-visible:outline-none transition-all duration-200 text-[15px] text-left'
           }
-          style={{outline: 'none', boxShadow: 'none'}}
+          style={{ outline: 'none', boxShadow: 'none' }}
         />
         <button
           type="submit"
@@ -211,9 +212,8 @@ export const NewsletterForm: FC<NewsletterFormProps> = ({variant = 'mobile', cla
       >
         {message && (
           <p
-            className={`text-[11px] md:text-xs leading-snug transition-all duration-1000 ease-in-out transform ${
-              status === 'error' ? 'text-red-400' : 'text-gray-200'
-            } ${isMessageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}
+            className={`text-[11px] md:text-xs leading-snug transition-all duration-1000 ease-in-out transform ${status === 'error' ? 'text-red-400' : 'text-gray-200'
+              } ${isMessageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}
           >
             {message}
           </p>

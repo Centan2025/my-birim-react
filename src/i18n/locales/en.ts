@@ -187,4 +187,8 @@ export default {
   complete_application: 'COMPLETE APPLICATION',
   professional_disclaimer: '* You will be able to provide full access after your membership is approved.',
   set_password: 'SET PASSWORD',
+  not_registered: 'Not Registered?',
+  register_or_subscribe: 'Register / Subscribe',
+  go_to_profile: 'Go to Profile',
+  welcome: 'Welcome',
 }

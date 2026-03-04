@@ -21,6 +21,7 @@ const mapProductMedia = (row: any): any[] => {
       const url = mapMediaUrl(m)
       const urlMobile = mapMediaUrl(m, true, false)
       const urlDesktop = mapMediaUrl(m, false, true)
+      const metadata = m?.imageR2 ? mapR2Metadata(m.imageR2) : {}
       const result: any = {
         type,
         url,
@@ -28,6 +29,7 @@ const mapProductMedia = (row: any): any[] => {
         description: m?.description,
         link: m?.link,
         linkText: m?.linkText,
+        ...metadata,
       }
       if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
       if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop

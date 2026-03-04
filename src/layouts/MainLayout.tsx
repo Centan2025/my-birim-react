@@ -5,6 +5,7 @@ import { Header } from '../components/Header'
 import { Footer } from '../components/Footer'
 import { PageTransition } from '../components/PageTransition'
 import { CartSidebar } from '../components/CartSidebar'
+import { FloatingAuthPanel } from '../components/FloatingAuthPanel'
 import CookieBanner from '../components/CookieBanner'
 import { PageLoading } from '../components/LoadingSpinner'
 import { ErrorBoundary } from '../components/ErrorBoundary'
@@ -74,6 +75,7 @@ export const MainLayout: React.FC = () => {
       <SkipLink />
       <Header />
       <CartSidebar />
+      <FloatingAuthPanel />
       <main id="main-content" className="flex flex-col flex-grow relative overflow-x-clip">
         <AnimatePresence mode="sync" initial={true}>
           <PageTransitionWrapper key={location.pathname} location={location} />

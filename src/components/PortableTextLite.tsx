@@ -1,15 +1,15 @@
-import { ReactNode, Fragment } from 'react'
-import { sanitizeText, sanitizeUrl } from '../lib/sanitize'
-import { OptimizedImage } from './OptimizedImage'
-import { urlFor } from '../lib/imageUrl'
+import {ReactNode, Fragment} from 'react'
+import {sanitizeText, sanitizeUrl} from '../lib/sanitize'
+import {OptimizedImage} from './OptimizedImage'
+import {urlFor} from '../lib/imageUrl'
 
-type Span = { _type: 'span'; text: string; marks?: string[] }
+type Span = {_type: 'span'; text: string; marks?: string[]}
 type MarkDef = {
   _key?: string
   _type?: string
   href?: string
   blank?: boolean
-  reference?: { _ref: string; _type: string }
+  reference?: {_ref: string; _type: string}
 }
 
 type Block = {
@@ -32,7 +32,17 @@ type Block = {
   text?: any // for cta (localized)
   link?: string // for cta
   // For R2-based portableTextImage
-  imageR2?: { url?: string; path?: string; alt?: string }
+  imageR2?: {
+    url?: string
+    path?: string
+    alt?: string
+    cropX?: number
+    cropY?: number
+    cropWidth?: number
+    cropHeight?: number
+    hotspotX?: number
+    hotspotY?: number
+  }
 }
 
 function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
@@ -111,7 +121,7 @@ export default function PortableTextLite({
   if (!Array.isArray(value) || value.length === 0) return null
 
   const nodes: ReactNode[] = []
-  let listBuffer: { type: 'ul' | 'ol'; items: ReactNode[] } | null = null
+  let listBuffer: {type: 'ul' | 'ol'; items: ReactNode[]} | null = null
   let listCounter = 0
 
   const flushList = () => {
@@ -146,8 +156,14 @@ export default function PortableTextLite({
     // Check if block is practically empty text (to avoid removing margin from invisible blocks)
     let isEmptyText = false
     if (block._type === 'block' && block.children) {
-      const text = block.children.map(c => c.text || '').join('').trim()
-      if (!text && !block.children.some(c => c._type !== 'span' || (c.text && c.text.trim().length > 0))) {
+      const text = block.children
+        .map(c => c.text || '')
+        .join('')
+        .trim()
+      if (
+        !text &&
+        !block.children.some(c => c._type !== 'span' || (c.text && c.text.trim().length > 0))
+      ) {
         isEmptyText = true
       }
     }
@@ -166,7 +182,7 @@ export default function PortableTextLite({
       if (!listBuffer || listBuffer.type !== type) {
         flushList()
         // Here we could handle top margin for the list container when it flushes
-        listBuffer = { type, items: [item] }
+        listBuffer = {type, items: [item]}
       } else {
         listBuffer.items.push(item)
       }
@@ -187,8 +203,57 @@ export default function PortableTextLite({
           : ''
     const getImageAlt = (b: Block) => b.alt || b.imageR2?.alt || ''
 
+    // R2 görselleri için crop ve hotspot bilgisini çıkar
+    const getImageCrop = (b: Block) => {
+      const r2 = b.imageR2
+      if (
+        r2 &&
+        r2.cropWidth &&
+        r2.cropHeight &&
+        (r2.cropWidth < 0.999 ||
+          r2.cropHeight < 0.999 ||
+          (r2.cropX && r2.cropX > 0.001) ||
+          (r2.cropY && r2.cropY > 0.001))
+      ) {
+        return {x: r2.cropX || 0, y: r2.cropY || 0, width: r2.cropWidth, height: r2.cropHeight}
+      }
+      return undefined
+    }
+    const getImageHotspot = (b: Block) => {
+      const r2 = b.imageR2
+      if (r2 && r2.hotspotX !== undefined && r2.hotspotY !== undefined) {
+        return {x: r2.hotspotX, y: r2.hotspotY}
+      }
+      return undefined
+    }
+
     if (isImageBlock(block) && (block.layout === 'left' || block.layout === 'right')) {
-      const nextBlock = value[idx + 1]
+      let nextValidIndex = idx + 1
+      let nextBlock = value[nextValidIndex]
+
+      while (nextBlock) {
+        let isNextEmptyText = false
+        if (nextBlock._type === 'block' && nextBlock.children) {
+          const text = nextBlock.children
+            .map(c => c.text || '')
+            .join('')
+            .trim()
+          if (
+            !text &&
+            !nextBlock.children.some(
+              c => c._type !== 'span' || (c.text && c.text.trim().length > 0)
+            )
+          ) {
+            isNextEmptyText = true
+          }
+        }
+        if (!isNextEmptyText) {
+          break
+        }
+        nextValidIndex++
+        nextBlock = value[nextValidIndex]
+      }
+
       if (
         nextBlock &&
         isImageBlock(nextBlock) &&
@@ -197,13 +262,18 @@ export default function PortableTextLite({
       ) {
         // PAIR DETECTED — eşit yükseklik için aspect-ratio container + object-cover
         nodes.push(
-          <div key={`pair-${blockKey}`} className={`grid grid-cols-2 gap-2 my-2 clear-both ${applyTopMarginRemoval('')}`}>
+          <div
+            key={`pair-${blockKey}`}
+            className={`grid grid-cols-2 gap-2 my-2 clear-both ${applyTopMarginRemoval('')}`}
+          >
             <figure className="flex flex-col">
               <div className="relative w-full aspect-[4/3] overflow-hidden">
                 <OptimizedImage
                   src={getImageSrc(block)}
                   alt={getImageAlt(block)}
                   className="absolute inset-0 w-full h-full object-cover shadow-sm"
+                  crop={getImageCrop(block)}
+                  hotspot={getImageHotspot(block)}
                 />
               </div>
               {block.caption && (
@@ -218,6 +288,8 @@ export default function PortableTextLite({
                   src={getImageSrc(nextBlock)}
                   alt={getImageAlt(nextBlock)}
                   className="absolute inset-0 w-full h-full object-cover shadow-sm"
+                  crop={getImageCrop(nextBlock)}
+                  hotspot={getImageHotspot(nextBlock)}
                 />
               </div>
               {nextBlock.caption && (
@@ -228,7 +300,7 @@ export default function PortableTextLite({
             </figure>
           </div>
         )
-        idx++ // Skip next block
+        idx = nextValidIndex // Skip next block
         continue
       }
     }
@@ -242,7 +314,9 @@ export default function PortableTextLite({
         case 'h1':
           nodes.push(
             <h1
-              className={applyTopMarginRemoval('text-4xl md:text-5xl lg:text-6xl font-bold my-8 leading-tight text-gray-950')}
+              className={applyTopMarginRemoval(
+                'text-4xl md:text-5xl lg:text-6xl font-bold my-8 leading-tight text-gray-950'
+              )}
               key={blockKey}
             >
               {content}
@@ -252,7 +326,9 @@ export default function PortableTextLite({
         case 'h2':
           nodes.push(
             <h2
-              className={applyTopMarginRemoval('text-3xl md:text-4xl lg:text-5xl font-bold my-7 leading-snug text-gray-950')}
+              className={applyTopMarginRemoval(
+                'text-3xl md:text-4xl lg:text-5xl font-bold my-7 leading-snug text-gray-950'
+              )}
               key={blockKey}
             >
               {content}
@@ -262,7 +338,9 @@ export default function PortableTextLite({
         case 'h3':
           nodes.push(
             <h3
-              className={applyTopMarginRemoval('text-2xl md:text-3xl lg:text-4xl font-semibold my-6 text-gray-900')}
+              className={applyTopMarginRemoval(
+                'text-2xl md:text-3xl lg:text-4xl font-semibold my-6 text-gray-900'
+              )}
               key={blockKey}
             >
               {content}
@@ -272,7 +350,9 @@ export default function PortableTextLite({
         case 'h4':
           nodes.push(
             <h4
-              className={applyTopMarginRemoval('text-xl md:text-2xl lg:text-3xl font-semibold my-5 text-gray-900')}
+              className={applyTopMarginRemoval(
+                'text-xl md:text-2xl lg:text-3xl font-semibold my-5 text-gray-900'
+              )}
               key={blockKey}
             >
               {content}
@@ -282,7 +362,9 @@ export default function PortableTextLite({
         case 'h5':
           nodes.push(
             <h5
-              className={applyTopMarginRemoval('text-lg md:text-xl lg:text-2xl font-medium my-4 text-gray-950')}
+              className={applyTopMarginRemoval(
+                'text-lg md:text-xl lg:text-2xl font-medium my-4 text-gray-950'
+              )}
               key={blockKey}
             >
               {content}
@@ -292,7 +374,9 @@ export default function PortableTextLite({
         case 'h6':
           nodes.push(
             <h6
-              className={applyTopMarginRemoval('text-base md:text-lg lg:text-xl font-medium my-3 text-gray-950')}
+              className={applyTopMarginRemoval(
+                'text-base md:text-lg lg:text-xl font-medium my-3 text-gray-950'
+              )}
               key={blockKey}
             >
               {content}
@@ -302,7 +386,9 @@ export default function PortableTextLite({
         case 'blockquote':
           nodes.push(
             <blockquote
-              className={applyTopMarginRemoval('border-l-4 border-gray-300 pl-6 my-8 italic text-xl md:text-2xl text-gray-600 leading-relaxed')}
+              className={applyTopMarginRemoval(
+                'border-l-4 border-gray-300 pl-6 my-8 italic text-xl md:text-2xl text-gray-600 leading-relaxed'
+              )}
               key={blockKey}
             >
               {content}
@@ -311,7 +397,10 @@ export default function PortableTextLite({
           break
         default:
           nodes.push(
-            <p className={applyTopMarginRemoval('my-4 leading-relaxed text-gray-950')} key={blockKey}>
+            <p
+              className={applyTopMarginRemoval('my-4 leading-relaxed text-gray-950')}
+              key={blockKey}
+            >
               {content}
             </p>
           )
@@ -337,6 +426,8 @@ export default function PortableTextLite({
             src={block.imageR2.url}
             alt={block.alt || block.imageR2.alt || ''}
             className="w-full h-auto shadow-sm"
+            crop={getImageCrop(block)}
+            hotspot={getImageHotspot(block)}
           />
           {block.caption && (
             <figcaption className="mt-3 text-sm text-gray-500 text-center italic">
@@ -410,7 +501,12 @@ export default function PortableTextLite({
           : block.style === 'dotted'
             ? 'border-t border-dotted'
             : 'border-t'
-      nodes.push(<hr key={blockKey} className={`border-gray-200 ${borderStyle} ${applyTopMarginRemoval('my-12')}`} />)
+      nodes.push(
+        <hr
+          key={blockKey}
+          className={`border-gray-200 ${borderStyle} ${applyTopMarginRemoval('my-12')}`}
+        />
+      )
       isFirstNode = false
     }
 

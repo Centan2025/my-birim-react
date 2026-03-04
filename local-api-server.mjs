@@ -13,6 +13,8 @@ import { createRequire } from 'module'
 import { readFileSync, existsSync } from 'fs'
 import { resolve, dirname } from 'path'
 import { fileURLToPath } from 'url'
+import crypto from 'crypto'
+import { randomUUID } from 'crypto'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -33,7 +35,11 @@ function loadEnvVars() {
           .slice(eqIdx + 1)
           .trim()
           .replace(/^["']|["']$/g, '')
-        if (!process.env[key]) {
+
+        // Boş değilse veya önceden hiç set edilmemişse set et (boş olanı dolu olanla ez)
+        if (val && (!process.env[key] || process.env[key] === '')) {
+          process.env[key] = val
+        } else if (!process.env[key]) {
           process.env[key] = val
         }
       }
@@ -98,6 +104,22 @@ app.use((req, res, next) => {
   next()
 })
 
+// Startup Test: Sanity Bağlantısını Kontrol Et
+async function testSanity() {
+  try {
+    const userCount = await sanityClient.fetch('count(*[_type == "user"])')
+    console.log(`✅ Sanity bağlantısı başarılı. Veritabanında ${userCount} kullanıcı var.`)
+  } catch (err) {
+    console.error('❌ Sanity bağlantı veya yetki hatası!!')
+    console.error(`   Hata: ${err.message}`)
+    console.error(`   Project ID: ${SANITY_PROJECT_ID}, Dataset: ${SANITY_DATASET}`)
+    if (err.message.includes('401') || err.message.includes('403')) {
+      console.error('   UYARI: Token yetkisi yetersiz veya Project ID/Token uyumsuz.')
+    }
+  }
+}
+testSanity()
+
 // ─── /api/auth/login ───────────────────────────────────────────────────────
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body
@@ -134,7 +156,7 @@ app.post('/api/auth/login', async (req, res) => {
     })
   } catch (err) {
     console.error('Login error:', err)
-    return res.status(500).json({ error: 'Giriş sırasında bir teknik hata oluştu.' })
+    return res.status(500).json({ error: `Giriş hatası: ${err.message || 'Teknik bir hata oluştu.'}` })
   }
 })
 
@@ -163,7 +185,7 @@ app.post('/api/auth/register', async (req, res) => {
             country: country || existingUser.country || '',
             userType: 'full_member',
             isVerified: false,
-            verificationToken: crypto.randomUUID(),
+            verificationToken: randomUUID(),
           })
           .commit()
         return res
@@ -178,7 +200,7 @@ app.post('/api/auth/register', async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(password, 10)
-    const verificationToken = crypto.randomUUID()
+    const verificationToken = randomUUID()
     const newUser = await sanityClient.create({
       _type: 'user',
       email: normEmail,
@@ -205,8 +227,7 @@ app.post('/api/auth/register', async (req, res) => {
         },
       })
   } catch (err) {
-    console.error('Registration error:', err)
-    return res.status(500).json({ error: err.message || 'Kayıt sırasında bir hata oluştu.' })
+    return res.status(500).json({ error: `Hata: ${err.message || 'Kayıt sırasında bir hata oluştu.'}` })
   }
 })
 
@@ -225,7 +246,7 @@ app.post('/api/auth/verify', async (req, res) => {
     return res.status(200).json({ success: true, message: 'E-posta adresiniz başarıyla doğrulandı.' })
   } catch (err) {
     console.error('Verification error:', err)
-    return res.status(500).json({ error: 'Doğrulama sırasında bir hata oluştu.' })
+    return res.status(500).json({ error: `Doğrulama hatası: ${err.message || 'Bir hata oluştu.'}` })
   }
 })
 
@@ -254,7 +275,7 @@ app.post('/api/auth/subscribe', async (req, res) => {
     return res.status(201).json({ success: true, user: newUser })
   } catch (err) {
     console.error('Subscribe error:', err)
-    return res.status(500).json({ error: 'İşlem sırasında bir hata oluştu.' })
+    return res.status(500).json({ error: `Abonelik hatası: ${err.message || 'İşlem sırasında bir hata oluştu.'}`, details: err.toString() })
   }
 })
 
@@ -279,7 +300,7 @@ app.post('/api/auth/subscribe-prof', async (req, res) => {
     if (existing) {
       if (existing.userType === 'email_subscriber') {
         // E-posta aboneliğinden profesyonel aboneliğe yükselt
-        const verificationToken = crypto.randomUUID()
+        const verificationToken = randomUUID()
         const patchData = {
           name: name || existing.name || '',
           company: company || existing.company || '',
@@ -314,7 +335,7 @@ app.post('/api/auth/subscribe-prof', async (req, res) => {
       return res.status(400).json({ error: 'Bu e-posta adresi ile zaten kayıtlı profesyonel hesabınız var.' })
     }
 
-    const verificationToken = crypto.randomUUID()
+    const verificationToken = randomUUID()
 
     // Profesyonel başvurucu: isActive=false, onay mailinden sonra aktif olacak
     const newUserObj = {
@@ -346,12 +367,13 @@ app.post('/api/auth/subscribe-prof', async (req, res) => {
     })
   } catch (err) {
     console.error('Subscribe Prof error:', err)
-    return res.status(500).json({ error: 'İşlem sırasında bir hata oluştu.' })
+    return res.status(500).json({ error: `Başvuru hatası: ${err.message || 'İşlem sırasında bir hata oluştu.'}` })
   }
 })
 
 // ─── /api/auth/reset-request ──────────────────────────────────────────────
 app.post('/api/auth/reset-request', async (req, res) => {
+  if (!SANITY_TOKEN) return res.status(500).json({ error: 'SANITY_TOKEN yapılandırılmamış.' })
   const { email } = req.body
   if (!email) return res.status(400).json({ error: 'E-posta adresi gereklidir.' })
   const normEmail = email.trim().toLowerCase()
@@ -361,7 +383,7 @@ app.post('/api/auth/reset-request', async (req, res) => {
       { email: normEmail }
     )
     if (!user) return res.status(404).json({ error: 'Kullanıcı bulunamadı.' })
-    const resetToken = crypto.randomUUID()
+    const resetToken = randomUUID()
     const resetPasswordExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
     await sanityClient
       .patch(user._id)
@@ -372,7 +394,7 @@ app.post('/api/auth/reset-request', async (req, res) => {
       .json({ success: true, resetToken, message: 'Şifre sıfırlama kodu oluşturuldu.' })
   } catch (err) {
     console.error('Reset request error:', err)
-    return res.status(500).json({ error: 'Süreç sırasında bir hata oluştu.' })
+    return res.status(500).json({ error: `Hata: ${err.message || 'Süreç sırasında bir hata oluştu.'}`, details: err.toString() })
   }
 })
 
@@ -396,7 +418,7 @@ app.post('/api/auth/reset-password', async (req, res) => {
     return res.status(200).json({ success: true, message: 'Şifreniz başarıyla değiştirildi.' })
   } catch (err) {
     console.error('Reset password error:', err)
-    return res.status(500).json({ error: 'Şifre sıfırlanırken bir hata oluştu.' })
+    return res.status(500).json({ error: `Şifre değiştirme hatası: ${err.message || 'Bir hata oluştu.'}` })
   }
 })
 
@@ -514,6 +536,105 @@ app.post('/api/send-verification', async (req, res) => {
   }
 })
 
+// ─── /api/send-password-reset ─────────────────────────────────────────────
+app.post('/api/send-password-reset', async (req, res) => {
+  const { email, resetUrl, logoUrl } = req.body || {}
+
+  if (!mailTransporter || !SMTP_PASSWORD) {
+    console.warn('⚠️  SMTP_PASSWORD yok, e-posta gönderilemedi. .env dosyasına SMTP_PASSWORD ekleyin.')
+    console.log(`📧 [SIMÜLASYON] Şifre sıfırlama maili gönderilecekti → ${email}`)
+    console.log(`   Sıfırlama URL: ${resetUrl}`)
+    return res.json({ ok: true, simulated: true })
+  }
+
+  if (!email || !resetUrl) {
+    return res.status(400).json({ error: 'email and resetUrl are required' })
+  }
+
+  try {
+    await mailTransporter.sendMail({
+      from: '"Birim Design" <birim@birim.com>',
+      to: email,
+      subject: 'Birim Şifre Sıfırlama Talebi',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #f9fafb;">
+          <div
+            style="
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 32px 24px;
+              background-color: #f9fafb;
+              font-family: 'Arial Narrow', Arial, 'Helvetica Neue', Helvetica, sans-serif;
+              color: #1a1f3a;
+              font-size: 15px;
+              line-height: 1.65;
+              font-weight: 400;
+            "
+          >
+            <div style="background-color:#ffffff; padding: 32px 28px 24px 28px; border-radius: 8px; border: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 16px 0; font-size: 18px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #1a1f3a;">
+                Birim Şifre Sıfırlama
+              </p>
+              <p style="margin: 0 0 14px 0; color: #1a1f3a;">
+                Merhaba,
+              </p>
+              <p style="margin: 0 0 14px 0; color: #1a1f3a;">
+                Birim hesabınız için şifre sıfırlama talebinde bulunuldu. Eğer bu talebi siz yapmadıysanız lütfen bu e-postayı dikkate almayın.
+              </p>
+              <p style="margin: 28px 0; text-align: left;">
+                <a
+                  href="${resetUrl}"
+                  style="
+                    display: inline-block;
+                    background: #1a1f3a;
+                    color: #ffffff;
+                    padding: 12px 24px;
+                    text-decoration: none;
+                    font-size: 13px;
+                    letter-spacing: 0.1em;
+                    text-transform: uppercase;
+                    font-weight: 600;
+                  "
+                >
+                  Şifremi Sıfırla
+                </a>
+              </p>
+              <p style="margin: 0 0 8px 0; font-size: 12px; color: #4b5563;">
+                Bağlantı 24 saat boyunca geçerlidir.
+              </p>
+              <p style="margin: 0; font-size: 12px; word-break: break-all;">
+                <a href="${resetUrl}" style="color:#1a1f3a; text-decoration: underline;">${resetUrl}</a>
+              </p>
+            </div>
+            ${logoUrl ? `
+            <div style="text-align: center; margin-top: 24px;">
+              <img
+                src="${logoUrl}"
+                alt="Birim Logo"
+                style="height: 40px; width: auto; max-width: 200px; display: block; margin: 0 auto;"
+              />
+            </div>
+            ` : ''}
+          </div>
+        </body>
+        </html>
+      `,
+    })
+
+    console.log('✅ Password reset email sent to', email)
+    res.json({ ok: true })
+  } catch (err) {
+    console.error('❌ Sıfırlama maili gönderim hatası:', err)
+    res.status(500).json({ error: 'Failed to send reset email' })
+  }
+})
+
 // ─── 404 ──────────────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({ error: `Route not found: ${req.method} ${req.path}` })
@@ -522,8 +643,11 @@ app.use((req, res) => {
 const PORT = 3002
 app.listen(PORT, () => {
   console.log(`\n✅  Local API Server çalışıyor → http://localhost:${PORT}`)
+  const tokenDisplay = SANITY_TOKEN
+    ? `${SANITY_TOKEN.slice(0, 4)}...${SANITY_TOKEN.slice(-4)}`
+    : 'YOK'
   console.log(
-    `   SANITY_TOKEN: ${SANITY_TOKEN ? '✓ Yüklendi' : "✗ YOK! (.env.local'e SANITY_TOKEN ekle)"}`
+    `   SANITY_TOKEN: ${SANITY_TOKEN ? `✓ (${tokenDisplay})` : "✗ YOK! (.env.local'e SANITY_TOKEN ekle)"}`
   )
   console.log(
     `   SMTP: ${mailTransporter ? '✓ Mail gönderimine hazır' : '✗ SMTP_PASSWORD yok (simülasyon modu)'}`
