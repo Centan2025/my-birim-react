@@ -81,6 +81,7 @@ export default defineConfig({
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'google-fonts-stylesheets',
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
           {
