@@ -6,6 +6,8 @@
  * before any other modules or SDKs (like Sentry) are initialized.
  */
 
+export { } // Make this file a proper ES module so `declare global` works
+
 declare global {
     interface Window {
         __SUPPRESSION_ACTIVE?: boolean;
@@ -59,6 +61,21 @@ const suppress = () => {
             return;
         }
         originalWarn.apply(console, args);
+    };
+
+    // Also patch console.log — some third-party bundles (e.g. Vercel Sentry instrument)
+    // emit the Zustand deprecation via console.log instead of console.warn
+    const originalLog = console.log;
+    console.log = (...logArgs: unknown[]) => {
+        const logMessage = logArgs.map(String).join(' ');
+        if (
+            logMessage.includes('[DEPRECATED]') ||
+            logMessage.includes('Default export is deprecated') ||
+            (logMessage.includes('zustand') && logMessage.includes('deprecated'))
+        ) {
+            return;
+        }
+        originalLog.apply(console, logArgs);
     };
 
     const originalError = console.error;

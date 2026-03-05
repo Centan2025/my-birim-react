@@ -296,7 +296,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     return ''
   }
 
-  const responsiveSrcSet = generateSrcSet(activeSrc)
+  // Safari treats empty srcSet="" differently from absent srcSet — ensure empty becomes undefined
+  const responsiveSrcSet = generateSrcSet(activeSrc) || undefined
   const defaultSizes = sizes || '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 1200px'
 
   // Art Direction kullanılıyor mu? (srcMobile veya srcDesktop varsa ve fallback yoksa)
@@ -375,53 +376,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     )
   }
 
-  // Format için optimize edilmiş URL oluştur
-  const getFormatUrl = (url: string, imgFormat: 'webp' | 'avif' | 'jpg' | 'png'): string => {
-    // Sanity
-    if (url && url.includes('cdn.sanity.io/images')) {
-      const urlObj = new URL(url)
-      urlObj.searchParams.set('fm', imgFormat)
-      urlObj.searchParams.set('auto', 'format')
-      if (width) urlObj.searchParams.set('w', width.toString())
-      if (height) urlObj.searchParams.set('h', height.toString())
-      urlObj.searchParams.set('q', quality.toString())
-      return urlObj.toString()
-    }
-    // Cloudflare R2
-    const r2Domain =
-      import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
-    if (r2Domain && url && url.startsWith(r2Domain)) {
-      if (
-        r2Domain.includes('.r2.dev') ||
-        r2Domain.includes('.workers.dev') ||
-        r2Domain.includes('assets.birim.com')
-      )
-        return '' // no image resizing support
-
-      const params = []
-      if (width) params.push(`width=${width}`)
-      if (height) params.push(`height=${height}`)
-
-      // Add crop rect if available
-      if (crop) {
-        if (crop.width < 1.0 || crop.height < 1.0 || crop.x > 0 || crop.y > 0) {
-          if (origWidth && origHeight) {
-            params.push(`rect=${Math.round(crop.x * origWidth)},${Math.round(crop.y * origHeight)},${Math.round(crop.width * origWidth)},${Math.round(crop.height * origHeight)}`)
-          }
-        } else {
-          params.push(`rect=${crop.x},${crop.y},${crop.width},${crop.height}`)
-        }
-      }
-
-      params.push(`quality=${quality}`)
-      params.push(`format=${imgFormat === 'jpg' ? 'jpeg' : imgFormat}`) // Cloudflare uses 'jpeg'
-
-      const path = url.replace(r2Domain + '/', '')
-      return encodeSrcSetUrl(`${r2Domain}/cdn-cgi/image/${params.join(',')}/${path}`)
-    }
-    return encodeSrcSetUrl(url)
-  }
-
   // Strip layout relevant classes from inner img to prevent nested constraints
   // Keep mx-auto for centering, only remove max-w- and w- to prevent double scaling
   const isHeightDefined = className.includes('h-') || className.includes('aspect-')
@@ -432,87 +386,31 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   // Art Direction ile picture elementi kullan
   if (useArtDirection) {
+    // Generate srcSets with Safari-safe empty handling (empty string → undefined)
+    const mobileSrcSet = (srcMobile ? generateSrcSet(srcMobile) : '') || undefined
+    const desktopSrcSet = (srcDesktop ? generateSrcSet(srcDesktop) : '') || undefined
+
     const pictureElement = (
       <picture>
-        {/* AVIF format (en iyi sıkıştırma) */}
-        {(() => {
-          const avifSrcSet = (srcMobile ? generateSrcSet(srcMobile) : undefined) || (srcMobile ? getFormatUrl(srcMobile, 'avif') : undefined)
-          if (!avifSrcSet) return null
-          return (
-            <source
-              type="image/avif"
-              media="(max-width: 768px)"
-              srcSet={avifSrcSet}
-              sizes={defaultSizes}
-            />
-          )
-        })()}
-        {(() => {
-          const avifSrcSet = (srcDesktop ? generateSrcSet(srcDesktop) : undefined) || (srcDesktop ? getFormatUrl(srcDesktop, 'avif') : undefined)
-          if (!avifSrcSet) return null
-          return (
-            <source
-              type="image/avif"
-              media="(min-width: 769px)"
-              srcSet={avifSrcSet}
-              sizes={defaultSizes}
-            />
-          )
-        })()}
+        {/* Mobil görsel — srcSet varsa kullan, yoksa sadece optimized src ile source */}
+        {srcMobile && (
+          <source
+            media="(max-width: 768px)"
+            srcSet={mobileSrcSet || (optimizedMobileSrc ? encodeSrcSetUrl(optimizedMobileSrc) : undefined)}
+            sizes={mobileSrcSet ? defaultSizes : undefined}
+          />
+        )}
 
-        {/* WebP format (fallback) */}
-        {(() => {
-          const webpSrcSet = (srcMobile ? generateSrcSet(srcMobile) : undefined) || (srcMobile ? getFormatUrl(srcMobile, 'webp') : undefined)
-          if (!webpSrcSet) return null
-          return (
-            <source
-              type="image/webp"
-              media="(max-width: 768px)"
-              srcSet={webpSrcSet}
-              sizes={defaultSizes}
-            />
-          )
-        })()}
-        {(() => {
-          const webpSrcSet = (srcDesktop ? generateSrcSet(srcDesktop) : undefined) || (srcDesktop ? getFormatUrl(srcDesktop, 'webp') : undefined)
-          if (!webpSrcSet) return null
-          return (
-            <source
-              type="image/webp"
-              media="(min-width: 769px)"
-              srcSet={webpSrcSet}
-              sizes={defaultSizes}
-            />
-          )
-        })()}
+        {/* Desktop görsel */}
+        {srcDesktop && (
+          <source
+            media="(min-width: 769px)"
+            srcSet={desktopSrcSet || (optimizedDesktopSrc ? encodeSrcSetUrl(optimizedDesktopSrc) : undefined)}
+            sizes={desktopSrcSet ? defaultSizes : undefined}
+          />
+        )}
 
-        {/* Mobil için görsel (max-width: 768px) */}
-        {srcMobile && optimizedMobileSrc && (() => {
-          const mobileSrcSet = generateSrcSet(srcMobile)
-          if (!mobileSrcSet) return null
-          return (
-            <source
-              media="(max-width: 768px)"
-              srcSet={mobileSrcSet}
-              sizes={defaultSizes}
-            />
-          )
-        })()}
-
-        {/* Desktop için görsel (min-width: 769px) */}
-        {srcDesktop && optimizedDesktopSrc && (() => {
-          const desktopSrcSet = generateSrcSet(srcDesktop)
-          if (!desktopSrcSet) return null
-          return (
-            <source
-              media="(min-width: 769px)"
-              srcSet={desktopSrcSet}
-              sizes={defaultSizes}
-            />
-          )
-        })()}
-
-        {/* Fallback: Eğer mobil versiyonu yoksa desktop'u kullan, o da yoksa src'i kullan */}
+        {/* Fallback img — Safari'de picture/source çalışmazsa bunu kullanır */}
         <img
           ref={imgRef}
           src={
@@ -559,30 +457,13 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   // Normal kullanım (Art Direction yok veya fallback)
   const pictureElement = (
     <picture>
-      {/* AVIF format (en iyi sıkıştırma) */}
-      {(() => {
-        const avifSrcSet = responsiveSrcSet || getFormatUrl(activeSrc, 'avif')
-        if (!avifSrcSet) return null
-        return (
-          <source
-            type="image/avif"
-            srcSet={avifSrcSet}
-            sizes={responsiveSrcSet ? defaultSizes : undefined}
-          />
-        )
-      })()}
-      {/* WebP format (fallback) */}
-      {(() => {
-        const webpSrcSet = responsiveSrcSet || getFormatUrl(activeSrc, 'webp')
-        if (!webpSrcSet) return null
-        return (
-          <source
-            type="image/webp"
-            srcSet={webpSrcSet}
-            sizes={responsiveSrcSet ? defaultSizes : undefined}
-          />
-        )
-      })()}
+      {/* srcSet varsa responsive source ekle, yoksa Safari-safe olarak hiç ekleme */}
+      {responsiveSrcSet && (
+        <source
+          srcSet={responsiveSrcSet}
+          sizes={defaultSizes}
+        />
+      )}
       {/* Fallback image */}
       <img
         key={activeSrc}
@@ -593,7 +474,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         height={height}
         loading={loading}
         {...fetchPriorityAttr}
-        srcSet={responsiveSrcSet || undefined}
+        srcSet={responsiveSrcSet}
         sizes={responsiveSrcSet ? defaultSizes : undefined}
         className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${isHeightDefined ? '' : 'h-auto'} ${innerImgClassName}`}
         draggable={draggable}
