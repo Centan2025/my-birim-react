@@ -317,6 +317,8 @@ export interface ContentBlock {
   titleFont?: string
   /** Description text */
   description?: LocalizedString
+  /** Content font style */
+  contentFont?: string
   /** Link text */
   linkText?: LocalizedString
   /** Link URL */

@@ -19,7 +19,6 @@ interface HeaderMobileMenuOverlayProps {
   locale: string
   t: HeaderTranslateFn
   isLoggedIn: boolean
-  iconClasses: string
   categories: Category[]
   headerHeight: number
   mobileMenuLinks: { to: string; label: string }[]
@@ -48,7 +47,6 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
     locale,
     t,
     isLoggedIn,
-    iconClasses,
     categories,
     headerHeight,
     mobileMenuLinks,
@@ -106,8 +104,8 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
       }}
       id="mobile-menu"
       className={`mobile-menu-overlay fixed left-0 right-0 bottom-0 lg:hidden z-40 flex flex-col border-t border-white/10 text-white pb-8 px-6 transition-all duration-400 ease-[cubic-bezier(0.76,0,0.24,1)] ${isMobileMenuOpen
-          ? 'translate-y-0 opacity-100 pointer-events-auto'
-          : 'translate-y-2 opacity-0 pointer-events-none'
+        ? 'translate-y-0 opacity-100 pointer-events-auto'
+        : 'translate-y-2 opacity-0 pointer-events-none'
         }`}
       style={{
         top: `${headerHeight}px`,
@@ -137,8 +135,8 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
                     }}
                     aria-pressed={isActive}
                     className={`group relative px-2.5 py-1.5 text-sm uppercase tracking-[0.2em] transition-all duration-200 ${isActive
-                        ? 'text-white font-light'
-                        : 'text-gray-400/90 hover:text-white font-light'
+                      ? 'text-white font-light'
+                      : 'text-gray-400/90 hover:text-white font-light'
                       } ${isActive ? 'scale-110' : 'scale-100'}`}
                     style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.2em' }}
                   >
@@ -149,14 +147,17 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
                 )
               })}
             </div>
-            <NavLink
-              to={isLoggedIn ? '/profile' : '/login'}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={iconClasses}
+            {/* Login button - opens FloatingAuthPanel */}
+            <button
+              onClick={() => {
+                setIsMobileMenuOpen(false)
+                window.dispatchEvent(new Event('openFloatingAuthPanel'))
+              }}
+              className="text-gray-300 hover:text-white transition-all duration-300 transform hover:scale-125"
               aria-label={isLoggedIn ? t('profile') || 'Profil' : t('login') || 'Giriş Yap'}
             >
               {isLoggedIn ? <UserLoggedInIcon /> : <UserIcon />}
-            </NavLink>
+            </button>
           </div>
           {/* Tam ekran genişliğinde ayırıcı çizgi */}
           <div

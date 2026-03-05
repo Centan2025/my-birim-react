@@ -1,4 +1,4 @@
-import {defineConfig} from 'sanity'
+import { defineConfig } from 'sanity'
 
 if (typeof window !== 'undefined') {
   // Monkey-patch window.fetch to silently swallow Sentry ingest errors
@@ -10,7 +10,7 @@ if (typeof window !== 'undefined') {
       const url =
         typeof args[0] === 'string' ? args[0] : args[0] instanceof Request ? args[0].url : ''
       if (url.includes('sentry.io') || url.includes('ingest.us.sentry.io')) {
-        return new Response(null, {status: 200})
+        return new Response(null, { status: 200 })
       }
       throw error
     }
@@ -20,7 +20,7 @@ if (typeof window !== 'undefined') {
   const originalXHR = window.XMLHttpRequest
   window.XMLHttpRequest = class extends originalXHR {
     open(method: string, url: string | URL, ...rest: any[]) {
-      ;(this as any)._sentryUrl = String(url)
+      ; (this as any)._sentryUrl = String(url)
       // @ts-ignore
       super.open(method, url, ...rest)
     }
@@ -42,14 +42,15 @@ if (typeof window !== 'undefined') {
     }
   } as typeof originalXHR
 }
-import {structureTool} from 'sanity/structure'
-import {visionTool} from '@sanity/vision'
-import {orderableDocumentListDeskItem} from '@sanity/orderable-document-list'
-import {schemaTypes} from './schemaTypes'
-import {deskStructure} from './deskStructure'
-import {excelImportTool} from './tools/excelImport'
-import {mediaImportTool} from './tools/mediaImport'
-import {emailExportTool} from './tools/emailExport'
+import { structureTool } from 'sanity/structure'
+import { visionTool } from '@sanity/vision'
+import { orderableDocumentListDeskItem } from '@sanity/orderable-document-list'
+import { schemaTypes } from './schemaTypes'
+import { deskStructure } from './deskStructure'
+import { excelImportTool } from './tools/excelImport'
+import { mediaImportTool } from './tools/mediaImport'
+import { emailExportTool } from './tools/emailExport'
+import { colorInput } from '@sanity/color-input'
 
 export default defineConfig({
   name: 'default',
@@ -66,6 +67,7 @@ export default defineConfig({
     excelImportTool(),
     mediaImportTool(),
     emailExportTool(),
+    colorInput(),
   ],
 
   schema: {

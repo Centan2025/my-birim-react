@@ -390,7 +390,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                       onSetCurrentImageIndex(index)
                     }}
                     className={`relative h-2 rounded-none transition-all duration-500 ease-in-out group ${areDotsVisible ? 'animate-dot-grow' : 'opacity-0 scale-0'
-                      } ${isActive ? 'w-12 bg-red-900' : 'w-2 bg-white/40 hover:bg-white/60'}`}
+                      } ${isActive ? 'w-2 bg-red-900' : 'w-2 bg-white/40 hover:bg-white/60'}`}
                     style={{
                       transitionDelay: `${animationDelay}ms`,
                     }}

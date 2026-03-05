@@ -495,14 +495,7 @@ export const productPanelMediaItem = defineType({
       },
       initialValue: 'image',
     }),
-    defineField({
-      name: 'image',
-      title: 'Görsel (Sanity - Eski)',
-      type: 'image',
-      options: { hotspot: true },
-      hidden: ({ parent }) => parent?.type !== 'image',
-      description: 'Eski Sanity görseli. Crop/hotspot için bu alanı kullanabilirsiniz. Yeni görselleri R2 alanına yükleyin.',
-    }),
+
     defineField({
       name: 'imageR2',
       title: 'Görsel (Tüm Cihazlar)',
@@ -870,14 +863,7 @@ export const contentBlock = defineType({
       },
       initialValue: 'image',
     }),
-    defineField({
-      name: 'image',
-      title: 'Görsel (Sanity - Eski)',
-      type: 'image',
-      options: { hotspot: true },
-      hidden: ({ parent }) => parent?.mediaType !== 'image',
-      description: 'Eski Sanity görseli. Crop/hotspot için bu alanı kullanabilirsiniz.',
-    }),
+
     defineField({
       name: 'imageR2',
       title: 'Görsel (Tüm Cihazlar)',
@@ -962,6 +948,16 @@ export const contentBlock = defineType({
       },
       initialValue: 'normal',
       description: 'Başlık için font stili seçin.',
+    }),
+    defineField({
+      name: 'contentFont',
+      title: 'İçerik Fontu',
+      type: 'string',
+      components: {
+        input: FontSelectorInput,
+      },
+      initialValue: 'normal',
+      description: 'Açıklama metni için font stili seçin.',
     }),
     defineField({
       name: 'titlePosition',
@@ -1118,13 +1114,16 @@ export const contentBlock = defineType({
   preview: {
     select: {
       title: 'title.tr',
+      titleFont: 'titleFont',
+      contentFont: 'contentFont',
       mediaType: 'mediaType',
       imageUrl: 'imageR2.url',
       thumbUrl: 'thumbnailR2.url',
       backgroundColor: 'backgroundColor',
     },
     prepare(selection: any) {
-      const { title, mediaType, imageUrl, backgroundColor, thumbUrl } = selection
+      const { title, titleFont, contentFont, mediaType, imageUrl, backgroundColor, thumbUrl } =
+        selection
 
       let sourceUrl =
         selection.type === 'image' || selection.mediaType === 'image'
@@ -1157,7 +1156,7 @@ export const contentBlock = defineType({
       }
       return {
         title: mediaTitle,
-        subtitle: `Arka Plan: ${backgroundColor === 'white' ? 'Beyaz' : 'Gri'}`,
+        subtitle: `Fontlar: T:${titleFont || 'Normal'} C:${contentFont || 'Normal'} | Arka Plan: ${backgroundColor === 'white' ? 'Beyaz' : 'Gri'}`,
         media:
           mediaType === 'image' && finalUrl
             ? React.createElement('img', { src: finalUrl, style: { objectFit: 'cover' } })

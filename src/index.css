@@ -34,7 +34,12 @@ body {
   font-weight: 500;
 }
 
-* {
+html,
+body,
+button,
+input,
+textarea,
+select {
   font-family:
     'Jura',
     'Inter',

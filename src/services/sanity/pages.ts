@@ -136,7 +136,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
       const q = groq`*[_type == "homePage"][0]{
             ..., heroAutoPlay,
             heroMedia[]{ ..., image{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, imageR2{..., metadata{palette{dominant{background,foreground}}} }, imageMobileR2{..., metadata{palette{dominant{background,foreground}}} }, imageDesktopR2{..., metadata{palette{dominant{background,foreground}}} }, videoFileR2, videoFileMobileR2, videoFileDesktopR2 },
-            contentBlocks[]{ ..., image{..., asset->{url, _ref, _id}}, titleFont, imageR2, videoFileR2 }
+            contentBlocks[]{ ..., image{..., asset->{url, _ref, _id}}, titleFont, contentFont, imageR2, videoFileR2 }
         }`
       const data = await sanity.withConfig({ useCdn: false }).fetch(q)
       if (data?.heroMedia) {

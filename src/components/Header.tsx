@@ -13,7 +13,6 @@ import { HeaderMobileMenuInline } from './HeaderMobileMenuInline'
 import { HeaderMobileMenuOverlay } from './HeaderMobileMenuOverlay'
 import { HeaderSearchPanel } from './HeaderSearchPanel'
 import { HeaderStyles } from './HeaderStyles'
-import { UserIcon, UserLoggedInIcon } from './HeaderShared'
 import { useTranslation } from '../i18n'
 import { useCart } from '../context/CartContext'
 import { useCategories } from '../hooks/useCategories'
@@ -867,14 +866,6 @@ export function Header() {
                       )
                     })}
                   </div>
-                  <NavLink
-                    to={isLoggedIn ? '/profile' : '/login'}
-                    className={`${iconClasses}`}
-                    style={sharedIconStyle}
-                    aria-label={isLoggedIn ? t('profile') || 'Profil' : t('login') || 'Giriş Yap'}
-                  >
-                    {isLoggedIn ? <UserLoggedInIcon /> : <UserIcon />}
-                  </NavLink>
                   {settings?.showCartButton === true && (
                     <button
                       onClick={toggleCart}
@@ -996,7 +987,6 @@ export function Header() {
             locale={locale}
             t={t}
             isLoggedIn={isLoggedIn}
-            iconClasses={iconClasses}
             onLocaleChange={handleMobileLocaleChange}
             onToggleProductsMenu={() => setIsMobileProductsMenuOpen(!isMobileProductsMenuOpen)}
             onCloseAll={() => setIsMobileMenuOpen(false)}
@@ -1017,7 +1007,6 @@ export function Header() {
         locale={locale}
         t={t}
         isLoggedIn={isLoggedIn}
-        iconClasses={iconClasses}
         categories={categories}
         headerHeight={headerHeight}
         mobileMenuLinks={mobileMenuLinks}

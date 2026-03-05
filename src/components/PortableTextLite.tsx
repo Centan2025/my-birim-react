@@ -1,15 +1,16 @@
-import {ReactNode, Fragment} from 'react'
-import {sanitizeText, sanitizeUrl} from '../lib/sanitize'
-import {OptimizedImage} from './OptimizedImage'
-import {urlFor} from '../lib/imageUrl'
+import { ReactNode, Fragment } from 'react'
+import { sanitizeText, sanitizeUrl } from '../lib/sanitize'
+import { OptimizedImage } from './OptimizedImage'
+import { urlFor } from '../lib/imageUrl'
 
-type Span = {_type: 'span'; text: string; marks?: string[]}
+type Span = { _type: 'span'; text: string; marks?: string[] }
 type MarkDef = {
   _key?: string
   _type?: string
   href?: string
   blank?: boolean
-  reference?: {_ref: string; _type: string}
+  reference?: { _ref: string; _type: string }
+  color?: string
 }
 
 type Block = {
@@ -51,7 +52,7 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
     let el: ReactNode = sanitizedText
 
     if (s.marks && s.marks.length) {
-      // Sort marks to ensure consistent nesting (decorators first, then links)
+      // Sort marks to ensure consistent nesting (decorators first, then annotations)
       const sortedMarks = [...s.marks].sort((a, b) => {
         const aIsDef = markDefs.some(d => d._key === a)
         const bIsDef = markDefs.some(d => d._key === b)
@@ -73,7 +74,7 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
             </code>
           )
 
-        // Annotations (Links)
+        // Annotations
         const def = markDefs.find(d => d?._key === m)
         if (def) {
           if (def._type === 'link' && def.href) {
@@ -104,6 +105,18 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
               </span>
             )
           }
+
+          // Text Color Support
+          if (def._type === 'textColor' && def.color) {
+            const finalColor = typeof def.color === 'string' ? def.color : (def.color as any).hex
+            if (finalColor) {
+              el = (
+                <span key={i + '-color'} style={{ color: finalColor }}>
+                  {el}
+                </span>
+              )
+            }
+          }
         }
       })
     }
@@ -121,7 +134,7 @@ export default function PortableTextLite({
   if (!Array.isArray(value) || value.length === 0) return null
 
   const nodes: ReactNode[] = []
-  let listBuffer: {type: 'ul' | 'ol'; items: ReactNode[]} | null = null
+  let listBuffer: { type: 'ul' | 'ol'; items: ReactNode[] } | null = null
   let listCounter = 0
 
   const flushList = () => {
@@ -182,7 +195,7 @@ export default function PortableTextLite({
       if (!listBuffer || listBuffer.type !== type) {
         flushList()
         // Here we could handle top margin for the list container when it flushes
-        listBuffer = {type, items: [item]}
+        listBuffer = { type, items: [item] }
       } else {
         listBuffer.items.push(item)
       }
@@ -215,14 +228,14 @@ export default function PortableTextLite({
           (r2.cropX && r2.cropX > 0.001) ||
           (r2.cropY && r2.cropY > 0.001))
       ) {
-        return {x: r2.cropX || 0, y: r2.cropY || 0, width: r2.cropWidth, height: r2.cropHeight}
+        return { x: r2.cropX || 0, y: r2.cropY || 0, width: r2.cropWidth, height: r2.cropHeight }
       }
       return undefined
     }
     const getImageHotspot = (b: Block) => {
       const r2 = b.imageR2
       if (r2 && r2.hotspotX !== undefined && r2.hotspotY !== undefined) {
-        return {x: r2.hotspotX, y: r2.hotspotY}
+        return { x: r2.hotspotX, y: r2.hotspotY }
       }
       return undefined
     }

@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { User, X, LogOut, ArrowRight } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useTranslation } from '../i18n'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { loginUser } from '../services/cms'
 import { loginRateLimiter } from '../lib/rateLimiter'
 
@@ -11,12 +11,21 @@ export const FloatingAuthPanel: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false)
   const { isLoggedIn, user, login, logout } = useAuth()
   const { t } = useTranslation()
-  const navigate = useNavigate()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    const handleOpenFloatingAuth = () => {
+      setIsOpen(true)
+    }
+    window.addEventListener('openFloatingAuthPanel', handleOpenFloatingAuth)
+    return () => {
+      window.removeEventListener('openFloatingAuthPanel', handleOpenFloatingAuth)
+    }
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -39,6 +48,7 @@ export const FloatingAuthPanel: React.FC = () => {
         login(loggedInUser)
         setEmail('')
         setPassword('')
+        setIsOpen(false)
       } else {
         setError(t('invalid_credentials') || 'Geçersiz e-posta veya şifre')
       }
@@ -51,22 +61,41 @@ export const FloatingAuthPanel: React.FC = () => {
 
   const scrollToFooter = () => {
     setIsOpen(false)
-    navigate('/login', { replace: false })
     setTimeout(() => {
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
-    }, 300)
+      const newsletterSection = document.getElementById('home-newsletter')
+      if (newsletterSection) {
+        newsletterSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+
+        // Kaydırma biterken (sayfa uzunluğuna göre 1.5 saniye) newsletter'ı aç
+        setTimeout(() => {
+          window.dispatchEvent(new Event('openNewsletter'))
+        }, 1500)
+      } else {
+        // Yedek: Sayfa sonuna git
+        window.scrollTo({
+          top: document.documentElement.scrollHeight,
+          behavior: 'smooth'
+        })
+      }
+    }, 500)
   }
 
   return (
     <>
-      {/* Floating button */}
-      <div className="fixed right-0 top-[60%] -translate-y-1/2 z-[45]">
+      {/* Floating button (Hidden on mobile) */}
+      <div className="hidden lg:flex fixed right-0 top-[60%] -translate-y-1/2 z-[45]">
         <button
           onClick={() => setIsOpen(true)}
-          className="bg-black/50 text-white p-3.5 shadow-lg backdrop-blur-md focus:outline-none transition-all duration-300 animate-fade-in-up flex items-center justify-center border-[0.5px] border-white rounded-none translate-x-1/2 hover:translate-x-0 opacity-60 hover:bg-black/80 hover:opacity-100"
+          className={`p-3.5 shadow-2xl backdrop-blur-xl focus:outline-none transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-center border-[0.5px] rounded-none translate-x-1/2 hover:translate-x-0 opacity-80 hover:opacity-100 group ${isLoggedIn
+            ? 'bg-white text-black border-black hover:bg-gray-50'
+            : 'bg-black/40 text-white border-white/30 hover:bg-black/80'
+            }`}
           aria-label={isLoggedIn ? t('profile') || 'Profil' : t('login') || 'Giriş Yap'}
         >
-          <User strokeWidth={0.8} className="w-6 h-6 md:w-8 md:h-8" />
+          <User
+            strokeWidth={0.8}
+            className="w-6 h-6 md:w-7 md:h-7 transition-transform duration-700 group-hover:scale-110"
+          />
         </button>
       </div>
 
@@ -80,7 +109,7 @@ export const FloatingAuthPanel: React.FC = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
-              className="fixed inset-0 bg-black/50 z-[100]"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
             />
 
             {/* Panel */}
@@ -88,116 +117,129 @@ export const FloatingAuthPanel: React.FC = () => {
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'tween', duration: 0.3 }}
-              className="fixed right-0 top-0 bottom-0 w-80 max-w-[85vw] bg-white shadow-2xl z-[101] flex flex-col"
+              transition={{ type: 'tween', duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed right-0 top-0 bottom-0 w-full max-w-[400px] bg-[#f5f5f5] shadow-[-10px_0_40px_-15px_rgba(0,0,0,0.3)] z-[101] flex flex-col"
             >
-              <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50">
-                <h2 className="text-sm font-bold uppercase tracking-[0.2em] font-inter">
-                  {isLoggedIn ? t('profile') || 'Profil' : t('login') || 'Giriş Yap'}
+              <div className="flex items-center justify-between px-8 py-10 border-b border-black/5 bg-white/40">
+                <h2 className="text-sm font-bold uppercase tracking-[0.4em] font-inter text-gray-900">
+                  {isLoggedIn ? t('profile') : t('login')}
+                  <span className="block h-0.5 w-12 bg-black mt-3" />
                 </h2>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="text-gray-400 hover:text-black transition-colors"
+                  className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 transition-colors group"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-5 h-5 text-gray-400 group-hover:text-black transition-colors" />
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6">
+              <div className="flex-1 overflow-y-auto px-8 py-10">
                 {isLoggedIn ? (
-                  <div className="space-y-6">
-                    <div>
-                      <p className="text-[11px] text-gray-500 uppercase tracking-widest">
-                        {t('welcome') || 'Hoş geldiniz'}
+                  <div className="space-y-12">
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <p className="text-[10px] text-gray-400 uppercase tracking-[0.3em] font-bold mb-4">
+                        {t('welcome_back') || 'Hoş Geldiniz'}
                       </p>
-                      <p className="text-lg font-bold font-helvetica mt-1">{user?.name}</p>
-                      <p className="text-sm text-gray-600 mt-1">{user?.email}</p>
-                    </div>
+                      <p className="text-2xl font-bold font-jura tracking-tight text-gray-900">{user?.name}</p>
+                      <p className="text-sm text-gray-500 font-inter mt-1 tracking-wide">{user?.email}</p>
+                    </motion.div>
 
-                    <div className="space-y-3 pt-6 border-t border-gray-100">
+                    <div className="space-y-4 pt-10 border-t border-black/5">
                       <Link
                         to="/profile"
                         onClick={() => setIsOpen(false)}
-                        className="flex items-center justify-between w-full p-4 bg-[#e5e5e5] text-black border border-black hover:bg-[#d8d8d8] transition-colors uppercase tracking-[0.2em] text-[11px] font-bold font-inter"
+                        className="flex items-center justify-between w-full p-5 bg-[#e5e5e5] text-black border border-black hover:bg-[#d8d8d8] transition-all duration-500 uppercase tracking-[0.25em] text-[11px] font-bold font-inter group"
                       >
-                        <span>{t('go_to_profile') || 'Profile Git'}</span>
-                        <User className="w-4 h-4" />
+                        <span>{t('go_to_profile')}</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </Link>
 
                       <button
                         onClick={() => {
                           logout()
                           setIsOpen(false)
-                          navigate('/')
+                          window.location.href = '/'
                         }}
-                        className="flex items-center justify-between w-full p-4 border border-gray-200 text-red-600 hover:bg-red-50 hover:border-red-600 transition-colors uppercase tracking-[0.2em] text-[11px] font-bold font-inter"
+                        className="flex items-center justify-between w-full p-5 border border-black/10 text-gray-400 hover:text-red-600 hover:border-red-600/30 transition-all duration-500 uppercase tracking-[0.25em] text-[11px] font-bold font-inter group"
                       >
-                        <span>{t('logout') || 'Çıkış Yap'}</span>
-                        <LogOut className="w-4 h-4" />
+                        <span>{t('logout')}</span>
+                        <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-6">
-                    <form onSubmit={handleLogin} className="space-y-5">
-                      <div>
-                        <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-gray-400 mb-2">
-                          {t('email') || 'E-posta'}
+                  <div className="space-y-10">
+                    <form onSubmit={handleLogin} className="space-y-8">
+                      <div className="relative group">
+                        <label className="block text-[10px] uppercase tracking-[0.3em] font-bold text-gray-400 mb-2 transition-colors group-focus-within:text-black">
+                          {t('email')}
                         </label>
                         <input
                           type="email"
                           required
                           value={email}
                           onChange={e => setEmail(e.target.value)}
-                          className="w-full border-b border-gray-300 py-2 text-sm focus:border-black focus:outline-none transition-colors"
-                          placeholder="E-posta adresiniz"
+                          className="w-full bg-transparent border-b border-black/20 py-3 text-sm focus:border-black focus:outline-none transition-all placeholder:text-gray-300 font-inter font-medium tracking-wider"
+                          placeholder="e-posta@adresiniz.com"
                         />
                       </div>
-                      <div>
-                        <label className="block text-[10px] uppercase tracking-[0.2em] font-bold text-gray-400 mb-2">
-                          {t('password') || 'Şifre'}
+                      <div className="relative group">
+                        <label className="block text-[10px] uppercase tracking-[0.3em] font-bold text-gray-400 mb-2 transition-colors group-focus-within:text-black">
+                          {t('password')}
                         </label>
                         <input
                           type="password"
                           required
                           value={password}
                           onChange={e => setPassword(e.target.value)}
-                          className="w-full border-b border-gray-300 py-2 text-sm focus:border-black focus:outline-none transition-colors"
+                          className="w-full bg-transparent border-b border-black/20 py-3 text-sm focus:border-black focus:outline-none transition-all placeholder:text-gray-300 font-inter font-medium tracking-wider"
                           placeholder="••••••••"
                         />
                       </div>
 
-                      {error && <p className="text-red-500 text-xs mt-2 font-inter">{error}</p>}
+                      {error && (
+                        <motion.p
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          className="text-red-500 text-[11px] uppercase tracking-widest font-bold"
+                        >
+                          {error}
+                        </motion.p>
+                      )}
 
                       <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full bg-[#e5e5e5] text-black border border-black p-4 mt-6 uppercase tracking-[0.2em] text-[11px] font-bold hover:bg-[#d8d8d8] transition-colors disabled:opacity-50 flex justify-between items-center font-inter"
+                        className="w-full bg-[#e5e5e5] text-black border border-black p-5 mt-4 uppercase tracking-[0.3em] text-[11px] font-bold hover:bg-[#d8d8d8] transition-all duration-500 disabled:opacity-50 flex justify-between items-center font-inter group"
                       >
-                        {isLoading ? t('waiting') || 'Bekleniyor' : t('login') || 'Giriş Yap'}
-                        <ArrowRight className="w-4 h-4" />
+                        <span>{isLoading ? t('waiting') : t('login')}</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </button>
 
-                      <div className="text-right">
+                      <div className="text-center pt-2">
                         <Link
                           to="/reset-password"
                           onClick={() => setIsOpen(false)}
-                          className="text-[10px] text-gray-500 hover:text-black uppercase tracking-wider font-inter underline"
+                          className="text-[10px] text-gray-400 hover:text-black uppercase tracking-[0.2em] font-bold font-inter transition-colors inline-block pb-1 border-b border-transparent hover:border-black"
                         >
-                          {t('forgot_password') || 'Şifremi unuttum'}
+                          {t('forgot_password')}
                         </Link>
                       </div>
                     </form>
 
-                    <div className="pt-8 mt-8 border-t border-gray-100 text-center">
-                      <p className="text-xs text-gray-500 mb-4 tracking-widest uppercase">
-                        {t('not_registered') || 'Üye Değil Misiniz?'}
+                    <div className="pt-12 mt-12 border-t border-black/5 text-center">
+                      <p className="text-[10px] text-gray-400 mb-6 tracking-[0.3em] uppercase font-bold">
+                        {t('not_registered')}
                       </p>
                       <button
                         onClick={scrollToFooter}
-                        className="w-full bg-[#e5e5e5] text-black border border-black p-4 uppercase tracking-[0.1em] md:tracking-[0.2em] text-[10px] md:text-[11px] font-bold hover:bg-[#d8d8d8] transition-colors font-inter group flex items-center justify-between"
+                        className="w-full bg-white border border-black/10 p-5 uppercase tracking-[0.25em] text-[10px] md:text-[11px] font-bold hover:bg-black hover:text-white transition-all duration-700 font-inter group flex items-center justify-between shadow-sm"
                       >
-                        <span>{t('register_or_subscribe') || 'Üye Ol / Kayıt Ol'}</span>
+                        <span>{t('register_or_subscribe')}</span>
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </button>
                     </div>

@@ -1,4 +1,5 @@
 import { defineType, defineField } from 'sanity'
+import { Palette } from 'lucide-react'
 import PortableTextImagePreview from '../../components/PortableTextImagePreview'
 import PortableTextImageInput from '../../components/PortableTextImageInput'
 
@@ -41,7 +42,7 @@ const portableTextBlocks = [
               name: 'href',
               type: 'url',
               title: 'URL',
-              validation: (Rule) =>
+              validation: (Rule: any) =>
                 Rule.uri({
                   scheme: ['http', 'https', 'mailto', 'tel'],
                 }),
@@ -70,6 +71,19 @@ const portableTextBlocks = [
                 { type: 'designer' },
                 { type: 'category' },
               ],
+            },
+          ],
+        },
+        {
+          name: 'textColor',
+          type: 'object',
+          title: 'Metin Rengi',
+          icon: Palette,
+          fields: [
+            {
+              name: 'color',
+              title: 'Renk Seçin',
+              type: 'color',
             },
           ],
         },

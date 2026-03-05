@@ -1,4 +1,4 @@
-import React, { SVGProps } from 'react'
+import React, { SVGProps, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 
 import { ContentBlock } from '../types'
@@ -43,8 +43,16 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 }) => {
   const { t } = useTranslation()
 
-  // Tüm bloklardaki fontları topla ve yükle
-  const allFonts = blocks.map(b => b.titleFont).filter(Boolean) as string[]
+  // Tüm bloklardaki fontları topla ve yükle (stabilize with useMemo)
+  const allFonts = useMemo(() => {
+    const fonts = new Set<string>()
+    blocks.forEach(b => {
+      if (b.titleFont && b.titleFont !== 'normal') fonts.add(b.titleFont)
+      if (b.contentFont && b.contentFont !== 'normal') fonts.add(b.contentFont)
+    })
+    return Array.from(fonts)
+  }, [blocks])
+
   useGoogleFonts(allFonts)
 
   if (!blocks || blocks.length === 0) {
@@ -91,6 +99,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         const textPosition = block.textPosition || 'below'
         const titlePosition = block.titlePosition || 'below'
         const titleFont = block.titleFont || 'normal'
+        const contentFont = block.contentFont || 'normal'
         const verticalAlignClass =
           block.verticalAlignment === 'top'
             ? 'justify-start'
@@ -114,6 +123,22 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           }
         }
 
+        // Helper: ref callback to apply font-family with !important (React inline styles ignore !important)
+        const applyFontRef = (fontFamily: string | undefined) => (el: HTMLElement | null) => {
+          if (el && fontFamily) {
+            el.style.setProperty('font-family', fontFamily, 'important')
+          }
+        }
+
+        const titleFontFamily =
+          titleFont === 'normal'
+            ? '"Oswald", sans-serif'
+            : titleFont === 'serif'
+              ? 'serif'
+              : titleFont === 'mono'
+                ? 'monospace'
+                : `"${titleFont}", sans-serif`
+
         const titleElement = hasTitle && (
           <ScrollReveal
             delay={0}
@@ -124,17 +149,10 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             duration={1.0}
           >
             <h2
+              ref={applyFontRef(titleFontFamily)}
               className={`${isFullWidth ? 'text-4xl md:text-6xl lg:text-7xl' : 'text-3xl md:text-5xl lg:text-6xl'} uppercase ${textAlignClass} text-gray-950 w-full ${block.verticalAlignment === 'top' ? 'mt-0' : ''} ${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}
               style={{
                 textShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                fontFamily:
-                  titleFont === 'normal'
-                    ? '"Oswald", sans-serif'
-                    : titleFont === 'serif'
-                      ? 'serif'
-                      : titleFont === 'mono'
-                        ? 'monospace'
-                        : `"${titleFont}", sans-serif`,
                 fontWeight: titleFont === 'normal' || titleFont === 'Oswald' ? 200 : 'inherit',
                 letterSpacing: '0.1em',
               }}
@@ -143,6 +161,15 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             </h2>
           </ScrollReveal>
         )
+
+        const isNormalContentFont = contentFont === 'normal' || contentFont === 'Barlow Condensed'
+        const contentFontFamily = isNormalContentFont
+          ? undefined
+          : contentFont === 'serif'
+            ? 'serif'
+            : contentFont === 'mono'
+              ? 'monospace'
+              : `"${contentFont}", sans-serif`
 
         const bodyElement = (hasDescription || (block.linkText && (!block.showButtonOnMedia || block.linkUrl))) && (
           <div className={`w-full ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0 pt-0' : ''}`}>
@@ -159,15 +186,23 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                           ? 'ml-auto'
                           : 'mr-auto'
 
-                    return Array.isArray(desc) ? (
-                      <div
-                        className={`${marginClass} ${widthClass} font-roboto-thin text-gray-950 text-xl md:text-2xl lg:text-3xl ${block.verticalAlignment === 'top' && !hasTitle ? '[&_.portable-text-container>*:first-child]:!mt-0' : ''}`}
-                      >
-                        <PortableTextLite value={desc} removeTopMargin={block.verticalAlignment === 'top' && !hasTitle} />
-                      </div>
-                    ) : (
+                    if (Array.isArray(desc)) {
+                      return (
+                        <div
+                          ref={!isNormalContentFont ? applyFontRef(contentFontFamily) : undefined}
+                          className={`${marginClass} ${widthClass} ${isNormalContentFont ? 'font-roboto-thin text-xl md:text-2xl lg:text-3xl' : ''} text-gray-950 ${block.verticalAlignment === 'top' && !hasTitle ? '[&_.portable-text-container>*:first-child]:!mt-0' : ''}`}
+                          style={!isNormalContentFont ? { fontWeight: 300 } : {}}
+                        >
+                          <PortableTextLite value={desc} removeTopMargin={block.verticalAlignment === 'top' && !hasTitle} />
+                        </div>
+                      )
+                    }
+
+                    return (
                       <p
-                        className={`text-gray-950 font-roboto-thin leading-relaxed ${widthClass} text-2xl md:text-3xl lg:text-4xl ${marginClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0' : ''}`}
+                        ref={!isNormalContentFont ? applyFontRef(contentFontFamily) : undefined}
+                        className={`text-gray-950 ${isNormalContentFont ? 'font-roboto-thin text-2xl md:text-3xl lg:text-4xl' : ''} leading-relaxed ${widthClass} ${marginClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0' : ''}`}
+                        style={!isNormalContentFont ? { fontWeight: 300 } : {}}
                       >
                         {desc}
                       </p>
@@ -217,7 +252,9 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         const isButtonWhite = block.buttonColor === 'white'
         const buttonTextColorClass = isButtonWhite ? 'text-white' : 'text-gray-950'
 
-        const mediaContent = (
+        const hasMedia = !!mediaUrl
+
+        const mediaContent = hasMedia ? (
           <ScrollReveal
             delay={50}
             threshold={0.1}
@@ -344,7 +381,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               </div>
             )}
           </ScrollReveal>
-        )
+        ) : null
 
         const hasTopContent =
           (titlePosition === 'above' && hasTitle) ||
@@ -399,24 +436,28 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
                 <div
                   className={
-                    hasTextContent
+                    hasTextContent && hasMedia
                       ? `flex flex-col ${isLeft
                         ? 'md:flex-row'
                         : isRight
                           ? 'md:flex-row-reverse'
                           : 'md:flex-row'
                       } ${block.verticalAlignment === 'top' ? 'gap-x-4 md:gap-x-6 gap-y-0' : 'gap-4 md:gap-6'} items-start`
-                      : 'flex flex-col items-center gap-4 md:gap-6'
+                      : hasTextContent && !hasMedia
+                        ? 'flex flex-col'
+                        : 'flex flex-col items-center gap-4 md:gap-6'
                   }
                 >
-                  <div
-                    className={`w-full ${!hasTextContent ? 'md:w-full flex flex-col items-center' : 'md:w-1/2'
-                      } overflow-visible`}
-                  >
-                    {mediaContent}
-                  </div>
+                  {hasMedia && (
+                    <div
+                      className={`w-full ${!hasTextContent ? 'md:w-full flex flex-col items-center' : 'md:w-1/2'
+                        } overflow-visible`}
+                    >
+                      {mediaContent}
+                    </div>
+                  )}
                   {hasTextContent && (
-                    <div className={`w-full md:w-1/2 flex flex-col ${hasTitle && (hasDescription || block.linkText) ? 'gap-6' : 'gap-0'} self-stretch ${verticalAlignClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'pt-0 mt-0' : ''}`}>
+                    <div className={`w-full ${hasMedia ? 'md:w-1/2' : 'md:w-full'} flex flex-col ${hasTitle && (hasDescription || block.linkText) ? 'gap-6' : 'gap-0'} self-stretch ${verticalAlignClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'pt-0 mt-0' : ''}`}>
                       {hasTitle && titleElement}
                       {bodyElement}
                     </div>

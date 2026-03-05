@@ -37,6 +37,17 @@ export const HomeNewsletter: FC = () => {
   const messageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Listen for external 'openNewsletter' event (e.g. from FloatingAuthPanel)
+  useEffect(() => {
+    const handleOpen = () => {
+      setIsExpanded(true)
+    }
+    window.addEventListener('openNewsletter', handleOpen)
+    return () => {
+      window.removeEventListener('openNewsletter', handleOpen)
+    }
+  }, [])
+
   const showMessage = (msg: string, type: 'success' | 'error') => {
     if (messageTimeoutRef.current) clearTimeout(messageTimeoutRef.current)
     if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current)
@@ -156,7 +167,7 @@ export const HomeNewsletter: FC = () => {
   }
 
   return (
-    <section className="bg-[#2a2a2a] w-full relative border-t border-zinc-800 overflow-hidden text-white">
+    <section id="home-newsletter" className="bg-[#2a2a2a] w-full relative border-t border-zinc-800 overflow-hidden text-white">
       {/* Collapse Trigger Button - Band Style */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}

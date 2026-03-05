@@ -17,6 +17,7 @@
   ],
   "dependencies": {
     "@aws-sdk/client-s3": "^3.971.0",
+    "@sanity/color-input": "^6.0.4",
     "@sanity/image-url": "^1.0.2",
     "@sanity/orderable-document-list": "^1.4.0",
     "@sanity/vision": "^5.13.0",
