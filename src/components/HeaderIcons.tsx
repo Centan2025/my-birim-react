@@ -1,4 +1,4 @@
-import {FC} from 'react'
+import { FC } from 'react'
 
 export const MenuIcon: FC = () => (
   <svg
@@ -8,7 +8,7 @@ export const MenuIcon: FC = () => (
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="1.5"
+    strokeWidth="0.8"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
@@ -26,7 +26,7 @@ export const ChevronDownIcon: FC = () => (
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2"
+    strokeWidth="0.8"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
@@ -42,7 +42,7 @@ export const SearchIcon: FC = () => (
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="1.5"
+    strokeWidth="0.8"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
@@ -59,7 +59,7 @@ export const CloseIcon: FC = () => (
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="1.5"
+    strokeWidth="0.8"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
@@ -76,7 +76,7 @@ export const ShoppingBagIcon: FC = () => (
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="1.5"
+    strokeWidth="0.8"
     strokeLinecap="round"
     strokeLinejoin="round"
   >

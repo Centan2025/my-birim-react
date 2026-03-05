@@ -131,7 +131,12 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
 
   return (
     <header ref={heroRef} className="relative w-full">
-      { }
+      <style>{`
+        @keyframes home-button-grow {
+          from { opacity: 0; transform: scale(0); }
+          to { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
       <div
         className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing"
         style={{
@@ -264,51 +269,98 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
           )}
         </div>
 
-        {/* hero arrows */}
-        {slideCount > 1 && !isMobile && (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-4 xl:px-8">
-            <button
-              type="button"
-              onClick={onPrev}
-              className="group pointer-events-auto z-40 flex h-16 w-16 md:h-24 md:w-24 items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 text-white mix-blend-difference"
-              style={arrowInLeft}
-              aria-label="Previous hero slide"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="48"
-                height="48"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="transition-transform duration-300 group-hover:-translate-x-0.5 md:w-16 md:h-16"
+        {slideCount > 0 && !isMobile && (
+          <div className="pointer-events-none absolute bottom-10 right-3 md:bottom-10 md:right-8 z-30 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] px-4 md:px-8 lg:px-0">
+            <div className="flex justify-end items-center gap-4">
+              {slideCount > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={onPrev}
+                    className="group pointer-events-auto flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                    style={arrowInLeft}
+                    aria-label="Previous hero slide"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="0.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-11 w-11 transition-transform duration-300 group-hover:-translate-x-1"
+                    >
+                      <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onNext}
+                    className="group pointer-events-auto flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                    style={arrowInRight}
+                    aria-label="Next hero slide"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="0.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-11 w-11 transition-transform duration-300 group-hover:translate-x-1"
+                    >
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  </button>
+                </>
+              )}
+              <button
+                type="button"
+                onClick={e => {
+                  e.stopPropagation()
+                  onOpenFullscreen()
+                }}
+                className="group pointer-events-auto flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                style={{
+                  opacity: isFullscreenButtonVisible ? 1 : 0,
+                  transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
+                  transition:
+                    'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  willChange: 'transform, opacity',
+                  animation: isFullscreenButtonVisible ? 'home-button-grow 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 300ms forwards' : 'none'
+                }}
+                aria-label="Tam Ekran"
               >
-                <polygon points="18,4 18,20 6,12 13,7.333 13,10.333 10.5,12 15.5,15.333 15.5,5.667" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={onNext}
-              className="group pointer-events-auto z-40 flex h-16 w-16 md:h-24 md:w-24 items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 text-white mix-blend-difference"
-              style={arrowInRight}
-              aria-label="Next hero slide"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="48"
-                height="48"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="transition-transform duration-300 group-hover:translate-x-0.5 md:w-16 md:h-16"
-              >
-                <polygon points="6,4 6,20 18,12 11,7.333 11,10.333 13.5,12 8.5,15.333 8.5,5.667" />
-              </svg>
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="0.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="transition-transform duration-500 group-hover:scale-110 h-10 w-10"
+                >
+                  <path d="M15 3h6v6" />
+                  <path d="M9 21H3v-6" />
+                  <path d="M21 3l-7 7" />
+                  <path d="M3 21l7-7" />
+                </svg>
+              </button>
+            </div>
           </div>
         )}
 
-        {/* Hero dots */}
         {slideCount > 1 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 flex items-center space-x-4">
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40 flex items-center space-x-4">
             {(() => {
               const normalizedSlideIndex =
                 slideCount <= 1
@@ -338,7 +390,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                       onSetCurrentImageIndex(index)
                     }}
                     className={`relative h-2 rounded-none transition-all duration-500 ease-in-out group ${areDotsVisible ? 'animate-dot-grow' : 'opacity-0 scale-0'
-                      } ${isActive ? 'w-12 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'}`}
+                      } ${isActive ? 'w-12 bg-red-900' : 'w-2 bg-white/40 hover:bg-white/60'}`}
                     style={{
                       transitionDelay: `${animationDelay}ms`,
                     }}
@@ -347,7 +399,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     {isActive && (
                       <div
                         key={`${normalizedSlideIndex}-${index}`}
-                        className="absolute top-0 left-0 h-full rounded-none bg-white animate-fill-line"
+                        className="absolute top-0 left-0 h-full rounded-none bg-red-900 animate-fill-line"
                       ></div>
                     )}
                   </button>
@@ -357,42 +409,42 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
           </div>
         )}
 
-        {slideCount > 0 && (
+        {/* Mobile Fullscreen Button */}
+        {slideCount > 0 && isMobile && (
           <button
             type="button"
             onClick={e => {
               e.stopPropagation()
               onOpenFullscreen()
             }}
-            className="absolute bottom-3 right-3 md:bottom-2 md:right-16 z-50 group flex h-16 w-16 md:h-32 md:w-32 items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 text-white mix-blend-difference"
+            className="absolute bottom-4 right-4 z-50 group flex h-12 w-12 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
             style={{
               opacity: isFullscreenButtonVisible ? 1 : 0,
               transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
               transition:
                 'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
               willChange: 'transform, opacity',
+              animation: isFullscreenButtonVisible ? 'home-button-grow 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 300ms forwards' : 'none',
+              bottom: 'max(16px, env(safe-area-inset-bottom, 0px) + 16px)'
             }}
             aria-label="Tam Ekran"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="64"
-              height="64"
-              viewBox="0 0 64 64"
-              fill="currentColor"
-              className="transition-transform duration-500 group-hover:scale-110 md:w-28 md:h-28"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="0.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-8 w-8"
             >
-              {/* Kullanıcı Tarifi: Next/Prev yan yana, aralarında boşluk, bütünleşik -45 rotasyon */}
-              <g transform="translate(32, 32) rotate(-45)">
-                {/* Sağ taraf (Next birimi) */}
-                <g transform="translate(7, 0) translate(-12, -12)">
-                  <polygon points="6,4 6,20 18,12 11,7.333 11,10.333 13.5,12 8.5,15.333 8.5,5.667" />
-                </g>
-                {/* Sol taraf (Prev: Dikey simetri alınarak kesik yer değiştirildi) */}
-                <g transform="translate(-7, 0) scale(-1, 1) translate(-12, -12)">
-                  <polygon points="6,20 6,4 18,12 11,16.667 11,13.667 13.5,12 8.5,8.667 8.5,18.333" />
-                </g>
-              </g>
+              <path d="M15 3h6v6" />
+              <path d="M9 21H3v-6" />
+              <path d="M21 3l-7 7" />
+              <path d="M3 21l7-7" />
             </svg>
           </button>
         )}

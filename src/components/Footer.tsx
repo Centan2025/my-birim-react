@@ -8,6 +8,7 @@ import { analytics } from '../lib/analytics'
 import ScrollReveal from './ScrollReveal'
 import { resolveLegalLinkText } from '../lib/legalLinks'
 import { SocialIcon } from './SocialIcon'
+import { HomeNewsletter } from './HomeNewsletter'
 
 export const Footer = () => {
   const { settings, isLoading: isSettingsLoading } = useSiteSettings()
@@ -25,6 +26,7 @@ export const Footer = () => {
 
   return (
     <>
+      <HomeNewsletter />
       <footer className="bg-[#101820] text-gray-400" style={{ position: 'relative', zIndex: 5 }}>
         <div
           className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-10 pb-6 lg:py-12"

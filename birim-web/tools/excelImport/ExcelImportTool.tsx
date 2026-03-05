@@ -1,8 +1,8 @@
-import {useState} from 'react'
-import {useClient} from 'sanity'
+import { useState } from 'react'
+import { useClient } from 'sanity'
 import * as XLSX from 'xlsx'
 import styled from 'styled-components'
-import {S3Client, PutObjectCommand} from '@aws-sdk/client-s3'
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 
 // R2 Configuration
 const R2_ACCOUNT_ID = process.env.SANITY_STUDIO_R2_ACCOUNT_ID
@@ -28,7 +28,7 @@ const Container = styled.div`
 
 const UploadArea = styled.div.withConfig({
   shouldForwardProp: (prop) => prop !== 'isDragging',
-})<{isDragging: boolean}>`
+}) <{ isDragging: boolean }>`
   border: 2px dashed ${(props) => (props.isDragging ? '#2276fc' : '#ccc')};
   border-radius: 8px;
   padding: 3rem;
@@ -68,7 +68,7 @@ const Button = styled.button`
   }
 `
 
-const StatusBox = styled.div<{type: 'info' | 'success' | 'error'}>`
+const StatusBox = styled.div<{ type: 'info' | 'success' | 'error' }>`
   padding: 1rem;
   border-radius: 4px;
   margin: 1rem 0;
@@ -84,13 +84,13 @@ const StatusBox = styled.div<{type: 'info' | 'success' | 'error'}>`
   }};
   border: 1px solid
     ${(props) => {
-      if (props.type === 'success') return '#c3e6cb'
-      if (props.type === 'error') return '#f5c6cb'
-      return '#bee5eb'
-    }};
+    if (props.type === 'success') return '#c3e6cb'
+    if (props.type === 'error') return '#f5c6cb'
+    return '#bee5eb'
+  }};
 `
 
-const ProgressBar = styled.div<{progress: number}>`
+const ProgressBar = styled.div<{ progress: number }>`
   width: 100%;
   height: 24px;
   background: #e0e0e0;
@@ -126,7 +126,7 @@ const FilterButtons = styled.div`
   flex-wrap: wrap;
 `
 
-const FilterButton = styled.button<{active: boolean}>`
+const FilterButton = styled.button<{ active: boolean }>`
   padding: 0.5rem 1rem;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -148,7 +148,7 @@ const DangerButton = styled(Button)`
   }
 `
 
-const LogEntry = styled.div<{type: 'info' | 'success' | 'error' | 'warning'}>`
+const LogEntry = styled.div<{ type: 'info' | 'success' | 'error' | 'warning' }>`
   padding: 0.25rem 0;
   color: ${(props) => {
     if (props.type === 'success') return '#155724'
@@ -165,7 +165,7 @@ interface ProcessResult {
 }
 
 export function ExcelImportTool() {
-  const client = useClient({apiVersion: '2025-01-01'})
+  const client = useClient({ apiVersion: '2025-01-01' })
   const [file, setFile] = useState<File | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -231,7 +231,7 @@ export function ExcelImportTool() {
     if (!folderStructure) return
 
     try {
-      const blob = new Blob([folderStructure], {type: 'text/plain;charset=utf-8'})
+      const blob = new Blob([folderStructure], { type: 'text/plain;charset=utf-8' })
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
@@ -261,7 +261,7 @@ export function ExcelImportTool() {
       addLog('Klasör yapısı oluşturuluyor...', 'info')
 
       const arrayBuffer = await file.arrayBuffer()
-      const workbook = XLSX.read(arrayBuffer, {type: 'array'})
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' })
 
       const paths = new Set<string>()
       const addPath = (path: string) => {
@@ -275,7 +275,7 @@ export function ExcelImportTool() {
       )
       if (materialsSheetName) {
         const worksheet = workbook.Sheets[materialsSheetName]
-        const data = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ''}) as any[][]
+        const data = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' }) as any[][]
         const rows = data.slice(2)
 
         for (const row of rows) {
@@ -298,7 +298,7 @@ export function ExcelImportTool() {
       )
       if (designersSheetName) {
         const worksheet = workbook.Sheets[designersSheetName]
-        const data = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ''}) as any[][]
+        const data = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' }) as any[][]
         const rows = data.slice(2)
 
         for (const row of rows) {
@@ -309,7 +309,10 @@ export function ExcelImportTool() {
           const designerName = String(row[2] || '').trim()
           if (!designerName) continue
 
-          addPath(`TASARIMCILAR/${designerName}`)
+          const basePath = `TASARIMCILAR/${designerName}`
+          addPath(`${basePath}/TÜM CİHAZLAR`)
+          addPath(`${basePath}/DESKTOP`)
+          addPath(`${basePath}/MOBİL`)
         }
       }
 
@@ -319,7 +322,7 @@ export function ExcelImportTool() {
       )
       if (projectsSheetName) {
         const worksheet = workbook.Sheets[projectsSheetName]
-        const data = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ''}) as any[][]
+        const data = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' }) as any[][]
         const rows = data.slice(1)
 
         for (const row of rows) {
@@ -330,7 +333,17 @@ export function ExcelImportTool() {
           const projectName = String(row[2] || '').trim()
           if (!projectName) continue
 
-          addPath(`PROJELER/${projectName}`)
+          const basePath = `PROJELER/${projectName}`
+          addPath(`${basePath}/KAPAK GÖRSELİ/TÜM CİHAZLAR`)
+          addPath(`${basePath}/KAPAK GÖRSELİ/DESKTOP`)
+          addPath(`${basePath}/KAPAK GÖRSELİ/MOBİL`)
+
+          let b
+          for (b = 1; b <= 5; b++) {
+            addPath(`${basePath}/İÇERİK BLOKLARI/BLOK ${b}/TÜM CİHAZLAR`)
+            addPath(`${basePath}/İÇERİK BLOKLARI/BLOK ${b}/DESKTOP`)
+            addPath(`${basePath}/İÇERİK BLOKLARI/BLOK ${b}/MOBİL`)
+          }
         }
       }
 
@@ -340,7 +353,7 @@ export function ExcelImportTool() {
       )
       if (productsSheetName) {
         const worksheet = workbook.Sheets[productsSheetName]
-        const data = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ''}) as any[][]
+        const data = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' }) as any[][]
         const rows = data.slice(2)
 
         for (const row of rows) {
@@ -354,6 +367,23 @@ export function ExcelImportTool() {
 
           const basePath = `ÜRÜNLER/${categoryName}/${productName}`
           addPath(basePath)
+
+          // ANA GÖRSEL
+          addPath(`${basePath}/ANA GÖRSEL/TÜM CİHAZLAR`)
+          addPath(`${basePath}/ANA GÖRSEL/DESKTOP`)
+          addPath(`${basePath}/ANA GÖRSEL/MOBİL`)
+
+          // ALTERNATİF MEDYA
+          addPath(`${basePath}/ALTERNATİF MEDYA/TÜM CİHAZLAR`)
+          addPath(`${basePath}/ALTERNATİF MEDYA/DESKTOP`)
+          addPath(`${basePath}/ALTERNATİF MEDYA/MOBİL`)
+
+          // İNDİRİLEBİLİR DOSYALAR
+          addPath(`${basePath}/İndirilebilir Dosyalar/3D DOSYALAR`)
+          addPath(`${basePath}/İndirilebilir Dosyalar/EK GÖRSELLER`)
+          addPath(`${basePath}/İndirilebilir Dosyalar/TEKNİK ÇİZİMLER`)
+
+          // ÖLÇÜLER
           addPath(`${basePath}/ÖLÇÜLER`)
         }
       }
@@ -430,7 +460,7 @@ export function ExcelImportTool() {
       // Mevcut kategoriyi bul
       const existingCategory = await client.fetch(
         `*[_type == "category" && id.current == $slug][0]`,
-        {slug: categorySlug},
+        { slug: categorySlug },
       )
 
       if (existingCategory) {
@@ -472,7 +502,7 @@ export function ExcelImportTool() {
       // Mevcut tasarımcıyı AD ile bul (name.tr veya name.en) - büyük/küçük harf duyarsız
       const existingDesigner = await client.fetch(
         `*[_type == "designer" && (lower(name.tr) == lower($name) || lower(name.en) == lower($name))][0]`,
-        {name: trimmedName},
+        { name: trimmedName },
       )
 
       if (existingDesigner) {
@@ -503,7 +533,7 @@ export function ExcelImportTool() {
       // Mevcut tasarımcıyı AD ile bul
       const existingDesigner = await client.fetch(
         `*[_type == "designer" && (name.tr == $name || name.en == $name)][0]`,
-        {name: trimmedName},
+        { name: trimmedName },
       )
 
       if (existingDesigner) {
@@ -546,7 +576,7 @@ export function ExcelImportTool() {
       // Mevcut tasarımcıyı kontrol et
       const existingDesigner = await client.fetch(
         `*[_type == "designer" && id.current == $slug][0]`,
-        {slug: designerSlug},
+        { slug: designerSlug },
       )
 
       const designerData: any = {
@@ -601,7 +631,7 @@ export function ExcelImportTool() {
       // Mevcut projeyi kontrol et
       const existingProject = await client.fetch(
         `*[_type == "project" && id.current == $slug][0]`,
-        {slug: projectSlug},
+        { slug: projectSlug },
       )
 
       const projectData: any = {
@@ -664,7 +694,7 @@ export function ExcelImportTool() {
       // Mevcut ürünü kontrol et
       const existingProduct = await client.fetch(
         `*[_type == "product" && id.current == $slug][0]`,
-        {slug: productSlug},
+        { slug: productSlug },
       )
 
       const productData: any = {
@@ -731,11 +761,11 @@ export function ExcelImportTool() {
     errorCount: number
     skippedCount: number
   }> => {
-    const data = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ''}) as any[][]
+    const data = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' }) as any[][]
 
     if (data.length < 2) {
       addLog('MALZEMELER sayfası en az 2 satır içermelidir (başlık + veri)', 'warning')
-      return {successCount: 0, errorCount: 0, skippedCount: 0}
+      return { successCount: 0, errorCount: 0, skippedCount: 0 }
     }
 
     // İlk 2 satırı başlık olarak atla (kullanıcı isteği)
@@ -784,7 +814,7 @@ export function ExcelImportTool() {
         // MALZEME GRUBU var mı kontrol et (büyük/küçük harf duyarsız)
         const existingGroup = await client.fetch(
           `*[_type == "materialGroup" && (lower(title.tr) == lower($groupName) || lower(title.en) == lower($groupName))][0]`,
-          {groupName: columnB.trim()},
+          { groupName: columnB.trim() },
         )
 
         let groupId: string
@@ -823,7 +853,7 @@ export function ExcelImportTool() {
 
           const updatedBooks = [...(existingGroup.books || []), newBook]
 
-          await client.patch(existingGroup._id).set({books: updatedBooks}).commit()
+          await client.patch(existingGroup._id).set({ books: updatedBooks }).commit()
           addLog(`Kartela eklendi: ${columnC} (Grup: ${columnB})`, 'success')
           successCount++
         } else {
@@ -857,7 +887,7 @@ export function ExcelImportTool() {
       }
     }
 
-    return {successCount, errorCount, skippedCount}
+    return { successCount, errorCount, skippedCount }
   }
 
   // PROJELER sayfasını işle
@@ -868,11 +898,11 @@ export function ExcelImportTool() {
     errorCount: number
     skippedCount: number
   }> => {
-    const data = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ''}) as any[][]
+    const data = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' }) as any[][]
 
     if (data.length < 2) {
       addLog('PROJELER sayfası en az 2 satır içermelidir (başlık + veri)', 'warning')
-      return {successCount: 0, errorCount: 0, skippedCount: 0}
+      return { successCount: 0, errorCount: 0, skippedCount: 0 }
     }
 
     // İlk satırdan sonra yukarıdan aşağıya oku
@@ -924,7 +954,7 @@ export function ExcelImportTool() {
       const projectSlug = createSlug(columnB)
       const existingProject = await client.fetch(
         `*[_type == "project" && id.current == $slug][0]`,
-        {slug: projectSlug},
+        { slug: projectSlug },
       )
 
       if (existingProject) {
@@ -939,7 +969,7 @@ export function ExcelImportTool() {
         // Yeni proje, AD kontrolü yap (büyük/küçük harf duyarsız)
         const existingByName = await client.fetch(
           `*[_type == "project" && (lower(title.tr) == lower($name) || lower(title.en) == lower($name))][0]`,
-          {name: columnC.trim()},
+          { name: columnC.trim() },
         )
         if (existingByName) {
           addLog(
@@ -959,7 +989,7 @@ export function ExcelImportTool() {
       }
     }
 
-    return {successCount, errorCount, skippedCount}
+    return { successCount, errorCount, skippedCount }
   }
 
   // TASARIMCILAR sayfasını işle
@@ -970,11 +1000,11 @@ export function ExcelImportTool() {
     errorCount: number
     skippedCount: number
   }> => {
-    const data = XLSX.utils.sheet_to_json(worksheet, {header: 1, defval: ''}) as any[][]
+    const data = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' }) as any[][]
 
     if (data.length < 2) {
       addLog('TASARIMCILAR sayfası en az 2 satır içermelidir (başlık + veri)', 'warning')
-      return {successCount: 0, errorCount: 0, skippedCount: 0}
+      return { successCount: 0, errorCount: 0, skippedCount: 0 }
     }
 
     // İlk 2 satırı başlık olarak atla (kullanıcı isteği)
@@ -1025,7 +1055,7 @@ export function ExcelImportTool() {
       const designerSlug = createSlug(columnB)
       const existingDesigner = await client.fetch(
         `*[_type == "designer" && id.current == $slug][0]`,
-        {slug: designerSlug},
+        { slug: designerSlug },
       )
 
       if (existingDesigner) {
@@ -1040,7 +1070,7 @@ export function ExcelImportTool() {
         // Yeni tasarımcı, AD kontrolü yap (büyük/küçük harf duyarsız)
         const existingByName = await client.fetch(
           `*[_type == "designer" && (lower(name.tr) == lower($name) || lower(name.en) == lower($name))][0]`,
-          {name: columnC.trim()},
+          { name: columnC.trim() },
         )
         if (existingByName) {
           addLog(
@@ -1060,7 +1090,7 @@ export function ExcelImportTool() {
       }
     }
 
-    return {successCount, errorCount, skippedCount}
+    return { successCount, errorCount, skippedCount }
   }
 
   const processExcel = async () => {
@@ -1080,7 +1110,7 @@ export function ExcelImportTool() {
 
     try {
       const arrayBuffer = await file.arrayBuffer()
-      const workbook = XLSX.read(arrayBuffer, {type: 'array'})
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' })
 
       // Excel'deki tasarımcı isimlerini tutacak Set
       const designersInExcel = new Set<string>()
@@ -1090,7 +1120,7 @@ export function ExcelImportTool() {
         name.toUpperCase().includes('MALZEMELER'),
       )
 
-      let materialsResult = {successCount: 0, errorCount: 0, skippedCount: 0}
+      let materialsResult = { successCount: 0, errorCount: 0, skippedCount: 0 }
       if (materialsSheetName) {
         addLog(`MALZEMELER sayfası bulundu: ${materialsSheetName}`, 'info')
         const materialsWorksheet = workbook.Sheets[materialsSheetName]
@@ -1109,7 +1139,7 @@ export function ExcelImportTool() {
           name.toUpperCase().includes('TASARIMCILAR') || name.toUpperCase().includes('DESIGNER'),
       )
 
-      let designersResult = {successCount: 0, errorCount: 0, skippedCount: 0}
+      let designersResult = { successCount: 0, errorCount: 0, skippedCount: 0 }
       if (designersSheetName) {
         addLog(`TASARIMCILAR sayfası bulundu: ${designersSheetName}`, 'info')
         const designersWorksheet = workbook.Sheets[designersSheetName]
@@ -1164,7 +1194,7 @@ export function ExcelImportTool() {
         (name) => name.toUpperCase().includes('PROJELER') || name.toUpperCase().includes('PROJECT'),
       )
 
-      let projectsResult = {successCount: 0, errorCount: 0, skippedCount: 0}
+      let projectsResult = { successCount: 0, errorCount: 0, skippedCount: 0 }
       if (projectsSheetName) {
         addLog(`PROJELER sayfası bulundu: ${projectsSheetName}`, 'info')
         const projectsWorksheet = workbook.Sheets[projectsSheetName]
@@ -1182,11 +1212,11 @@ export function ExcelImportTool() {
         (name) => name.toUpperCase().includes('ÜRÜNLER') || name.toUpperCase().includes('PRODUCT'),
       )
 
-      let productsResult = {successCount: 0, errorCount: 0, skippedCount: 0, processedCount: 0}
+      let productsResult = { successCount: 0, errorCount: 0, skippedCount: 0, processedCount: 0 }
       if (productsSheetName) {
         addLog(`ÜRÜNLER sayfası bulundu: ${productsSheetName}`, 'info')
         const productsWorksheet = workbook.Sheets[productsSheetName]
-        const data = XLSX.utils.sheet_to_json(productsWorksheet, {header: 1, defval: ''}) as any[][]
+        const data = XLSX.utils.sheet_to_json(productsWorksheet, { header: 1, defval: '' }) as any[][]
 
         if (data.length < 2) {
           addLog('ÜRÜNLER sayfası en az 2 satır içermelidir (başlık + veri)', 'warning')
@@ -1249,7 +1279,7 @@ export function ExcelImportTool() {
             const productSlug = createSlug(columnC)
             const existingProduct = await client.fetch(
               `*[_type == "product" && id.current == $slug][0]`,
-              {slug: productSlug},
+              { slug: productSlug },
             )
 
             if (existingProduct) {
@@ -1265,7 +1295,7 @@ export function ExcelImportTool() {
               // Yeni ürün, AD kontrolü yap (büyük/küçük harf duyarsız)
               const existingByName = await client.fetch(
                 `*[_type == "product" && (lower(name.tr) == lower($name) || lower(name.en) == lower($name))][0]`,
-                {name: columnD.trim()},
+                { name: columnD.trim() },
               )
               if (existingByName) {
                 addLog(
@@ -1339,7 +1369,7 @@ export function ExcelImportTool() {
             setProgress(Math.round((processedCount / rows.length) * 100))
           }
 
-          productsResult = {successCount, errorCount, skippedCount, processedCount}
+          productsResult = { successCount, errorCount, skippedCount, processedCount }
           addLog(
             `ÜRÜNLER işlemi tamamlandı! Başarılı: ${successCount}, Hata: ${errorCount}, Atlandı: ${skippedCount}`,
             'success',
@@ -1607,11 +1637,11 @@ export function ExcelImportTool() {
           borderRadius: '4px',
         }}
       >
-        <h3 style={{marginTop: 0, color: '#1976d2'}}>ℹ️ Excel Formatı ve Önemli Kurallar</h3>
-        <ul style={{marginBottom: 0, color: '#1976d2', lineHeight: '1.8'}}>
+        <h3 style={{ marginTop: 0, color: '#1976d2' }}>ℹ️ Excel Formatı ve Önemli Kurallar</h3>
+        <ul style={{ marginBottom: 0, color: '#1976d2', lineHeight: '1.8' }}>
           <li>
             <strong>MALZEMELER Sayfası:</strong> Malzeme grupları ve kartelalarını ekler.
-            <ul style={{marginTop: '0.5rem'}}>
+            <ul style={{ marginTop: '0.5rem' }}>
               <li>A Sütunu: LİSTEYE EKLE - "-" işareti yoksa ekler, "SON" varsa durur</li>
               <li>B Sütunu: MALZEME GRUBU - Grup yoksa oluşturulur</li>
               <li>C Sütunu: KARTELA - Grupta yoksa eklenir</li>
@@ -1622,7 +1652,7 @@ export function ExcelImportTool() {
           </li>
           <li>
             <strong>PROJELER Sayfası:</strong> Projeler eklenir/güncellenir.
-            <ul style={{marginTop: '0.5rem'}}>
+            <ul style={{ marginTop: '0.5rem' }}>
               <li>A Sütunu: LİSTEYE EKLE - "-" işareti yoksa ekler, "SON" varsa durur</li>
               <li>B Sütunu: ID - Proje ID'si (kontrol edilir, aynısı varsa güncellenir)</li>
               <li>C Sütunu: PROJE ADI - Proje başlığı</li>
@@ -1633,7 +1663,7 @@ export function ExcelImportTool() {
           </li>
           <li>
             <strong>ÜRÜNLER Sayfası:</strong> Son olarak işlenir.
-            <ul style={{marginTop: '0.5rem'}}>
+            <ul style={{ marginTop: '0.5rem' }}>
               <li>
                 Ürünlerin tasarımcıları <strong>MUTLAKA CMS'de mevcut olmalıdır</strong>
               </li>
@@ -1661,12 +1691,12 @@ export function ExcelImportTool() {
           borderRadius: '4px',
         }}
       >
-        <h3 style={{marginTop: 0, color: '#856404'}}>⚠️ Tehlikeli İşlemler</h3>
-        <p style={{marginBottom: '0.5rem', color: '#856404'}}>
+        <h3 style={{ marginTop: 0, color: '#856404' }}>⚠️ Tehlikeli İşlemler</h3>
+        <p style={{ marginBottom: '0.5rem', color: '#856404' }}>
           Tüm ürünleri veya tasarımcıları silmek istiyorsanız aşağıdaki butonları kullanın. Bu
           işlemler geri alınamaz!
         </p>
-        <div style={{display: 'flex', gap: '0.5rem', flexWrap: 'wrap'}}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <DangerButton onClick={deleteAllProducts} disabled={isDeleting || isProcessing}>
             {isDeleting ? 'Siliniyor...' : 'TÜM ÜRÜNLERİ VE KATEGORİLERİ SİL'}
           </DangerButton>
@@ -1675,9 +1705,9 @@ export function ExcelImportTool() {
           </DangerButton>
         </div>
         {isDeleting && (
-          <div style={{marginTop: '1rem'}}>
+          <div style={{ marginTop: '1rem' }}>
             <ProgressBar progress={progress} />
-            <p style={{textAlign: 'center', marginTop: '0.5rem'}}>İlerleme: %{progress}</p>
+            <p style={{ textAlign: 'center', marginTop: '0.5rem' }}>İlerleme: %{progress}</p>
           </div>
         )}
       </div>
@@ -1690,11 +1720,11 @@ export function ExcelImportTool() {
         onClick={() => document.getElementById('file-input')?.click()}
       >
         <div>
-          <p style={{fontSize: '3rem', margin: '0 0 1rem 0'}}>📁</p>
-          <p style={{fontSize: '1.2rem', marginBottom: '0.5rem'}}>
+          <p style={{ fontSize: '3rem', margin: '0 0 1rem 0' }}>📁</p>
+          <p style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>
             {file ? file.name : 'Excel dosyasını buraya sürükleyin veya tıklayın'}
           </p>
-          <p style={{color: '#666', fontSize: '0.9rem'}}>.xlsx veya .xls formatında dosya seçin</p>
+          <p style={{ color: '#666', fontSize: '0.9rem' }}>.xlsx veya .xls formatında dosya seçin</p>
         </div>
         <FileInput
           id="file-input"
@@ -1705,7 +1735,7 @@ export function ExcelImportTool() {
       </UploadArea>
 
       {file && (
-        <div style={{marginBottom: '1rem'}}>
+        <div style={{ marginBottom: '1rem' }}>
           <Button onClick={processExcel} disabled={isProcessing}>
             {isProcessing ? 'İşleniyor...' : 'Ürünleri Yükle'}
           </Button>
@@ -1718,14 +1748,14 @@ export function ExcelImportTool() {
               setFolderStructure(null)
             }}
             disabled={isProcessing}
-            style={{background: '#6c757d'}}
+            style={{ background: '#6c757d' }}
           >
             Temizle
           </Button>
           <Button
             onClick={generateFolderStructure}
             disabled={isProcessing}
-            style={{background: '#17a2b8'}}
+            style={{ background: '#17a2b8' }}
           >
             Klasör Yapısını Oluştur
           </Button>
@@ -1735,7 +1765,7 @@ export function ExcelImportTool() {
       {isProcessing && (
         <div>
           <ProgressBar progress={progress} />
-          <p style={{textAlign: 'center', marginTop: '0.5rem'}}>İlerleme: %{progress}</p>
+          <p style={{ textAlign: 'center', marginTop: '0.5rem' }}>İlerleme: %{progress}</p>
         </div>
       )}
 
@@ -1743,7 +1773,7 @@ export function ExcelImportTool() {
         <StatusBox type={status.success ? 'success' : 'error'}>
           <strong>{status.message}</strong>
           {status.details && (
-            <ul style={{marginTop: '0.5rem', marginBottom: 0, paddingLeft: '1.5rem'}}>
+            <ul style={{ marginTop: '0.5rem', marginBottom: 0, paddingLeft: '1.5rem' }}>
               {status.details.map((detail, idx) => (
                 <li key={idx}>{detail}</li>
               ))}
@@ -1762,7 +1792,7 @@ export function ExcelImportTool() {
               marginBottom: '1rem',
             }}
           >
-            <h3 style={{margin: 0}}>
+            <h3 style={{ margin: 0 }}>
               İşlem Logları ({filteredLogs.length}/{logs.length})
             </h3>
             <FilterButtons>
@@ -1788,7 +1818,7 @@ export function ExcelImportTool() {
           </div>
           <LogContainer>
             {filteredLogs.length === 0 ? (
-              <div style={{padding: '1rem', textAlign: 'center', color: '#666'}}>
+              <div style={{ padding: '1rem', textAlign: 'center', color: '#666' }}>
                 Seçilen filtreye uygun log bulunamadı
               </div>
             ) : (
@@ -1811,13 +1841,13 @@ export function ExcelImportTool() {
         </div>
       )}
       {folderStructure && (
-        <div style={{marginTop: '2rem'}}>
+        <div style={{ marginTop: '2rem' }}>
           <h3>Klasör Yapısı (kopyalayıp bilgisayarınızda klasör oluşturmak için)</h3>
-          <p style={{fontSize: '0.9rem'}}>
+          <p style={{ fontSize: '0.9rem' }}>
             Aşağıdaki satırları bir `.txt` dosyasına kaydedip referans olarak kullanabilir veya
             doğrudan bu yapıya göre klasörleri oluşturabilirsiniz.
           </p>
-          <div style={{marginBottom: '0.75rem'}}>
+          <div style={{ marginBottom: '0.75rem' }}>
             <Button onClick={downloadFolderStructure}>Klasör Yapısını TXT Olarak İndir</Button>
           </div>
           <textarea

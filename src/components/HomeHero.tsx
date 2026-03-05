@@ -609,53 +609,55 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
             )
           })}
         </div>
-        {/* Desktop için hero okları - Modern Glassmorphism */}
+        {/* Desktop için hero okları - Alt Köşe square style */}
         {slideCount > 1 && !isMobile && (
-          <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-between px-4 xl:px-8">
-            <button
-              type="button"
-              onClick={goToPrevSlide}
-              className="group pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-lg"
-              style={arrowInLeft}
-              aria-label="Previous hero slide"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-7 w-7 -ml-0.5 transition-transform duration-300 group-hover:-translate-x-0.5"
+          <div className="pointer-events-none absolute bottom-10 left-1/2 -translate-x-1/2 z-30 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] px-4 md:px-8 lg:px-0">
+            <div className="flex justify-end gap-4">
+              <button
+                type="button"
+                onClick={goToPrevSlide}
+                className="group pointer-events-auto flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                style={arrowInLeft}
+                aria-label="Previous hero slide"
               >
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={goToNextSlide}
-              className="group pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-lg"
-              style={arrowInRight}
-              aria-label="Next hero slide"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-7 w-7 ml-0.5 transition-transform duration-300 group-hover:translate-x-0.5"
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="0.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-11 w-11 transition-transform duration-300 group-hover:-translate-x-1"
+                >
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={goToNextSlide}
+                className="group pointer-events-auto flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                style={arrowInRight}
+                aria-label="Next hero slide"
               >
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="0.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-11 w-11 transition-transform duration-300 group-hover:translate-x-1"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </button>
+            </div>
           </div>
         )}
         {slideCount > 1 && (
@@ -722,7 +724,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="white"
-                  strokeWidth="2"
+                  strokeWidth="0.8"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   className="opacity-70"

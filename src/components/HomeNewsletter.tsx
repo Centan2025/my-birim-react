@@ -172,7 +172,7 @@ export const HomeNewsletter: FC = () => {
         </div>
         <div className="flex-shrink-0 md:ml-4 w-full md:w-auto">
           <div
-            className={`flex items-center justify-center gap-3 bg-white text-black px-6 py-3 transition-all duration-500 font-inter hover:bg-gray-200`}
+            className={`flex items-center justify-center gap-3 bg-[#555555] text-white border border-white px-6 py-3 transition-all duration-500 font-inter hover:bg-white/10`}
           >
             <span className="text-[11px] md:text-xs tracking-[0.2em] font-bold">
               {isExpanded ? t('close') : t('join_us')}
@@ -271,7 +271,7 @@ export const HomeNewsletter: FC = () => {
                         <button
                           type="submit"
                           disabled={status === 'loading'}
-                          className="bg-black text-white px-10 py-5 hover:bg-zinc-800 transition-all duration-500 disabled:opacity-50 flex items-center justify-center gap-3 overflow-hidden group min-w-[200px] font-inter"
+                          className="bg-[#e5e5e5] text-black border border-black px-10 py-5 hover:bg-[#d8d8d8] transition-all duration-500 disabled:opacity-50 flex items-center justify-center gap-3 overflow-hidden group min-w-[200px] font-inter"
                         >
                           <span className="text-[11px] md:text-xs uppercase tracking-[0.25em] font-bold">
                             {status === 'loading' ? t('waiting') : t('subscribe')}
@@ -430,7 +430,7 @@ export const HomeNewsletter: FC = () => {
                           <button
                             type="submit"
                             disabled={status === 'loading'}
-                            className="w-full md:w-auto md:min-w-[340px] group flex items-center justify-between bg-black text-white px-10 py-5 hover:bg-zinc-800 transition-all duration-500 disabled:opacity-50 border border-black shadow-lg font-inter"
+                            className="w-full md:w-auto md:min-w-[340px] group flex items-center justify-between bg-[#e5e5e5] text-black border border-black px-10 py-5 hover:bg-[#d8d8d8] transition-all duration-500 disabled:opacity-50 font-inter"
                           >
                             <span className="text-[11px] md:text-xs uppercase tracking-[0.3em] font-bold">
                               {status === 'loading' ? t('waiting') : t('complete_application')}

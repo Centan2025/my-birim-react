@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 
 export const BackToTopButton: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false)
@@ -23,7 +23,7 @@ export const BackToTopButton: React.FC = () => {
     }
 
     handleScroll()
-    window.addEventListener('scroll', handleScroll, {passive: true})
+    window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -32,11 +32,24 @@ export const BackToTopButton: React.FC = () => {
   return (
     <button
       type="button"
-      onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       aria-label="Sayfanın en üstüne dön"
-      className="fixed bottom-6 right-6 z-40 w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-full bg-black/40 text-white shadow-md backdrop-blur hover:bg-black/60 transition-all duration-200"
+      className="fixed bottom-6 right-6 z-40 w-12 h-12 flex items-center justify-center rounded-none border-[0.5px] border-white bg-white/10 text-white shadow-sm backdrop-blur-md mix-blend-difference hover:bg-white/20 transition-all duration-300 active:scale-95"
     >
-      <span className="text-lg leading-none">↑</span>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="0.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-9 w-9"
+      >
+        <path d="m18 15-6-6-6 6" />
+      </svg>
     </button>
   )
 }

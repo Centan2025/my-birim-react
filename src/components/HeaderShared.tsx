@@ -1,6 +1,6 @@
 import React from 'react'
-import type {LocalizedString} from '../types'
-import {sanitizeHtml} from '../lib/sanitize'
+import type { LocalizedString } from '../types'
+import { sanitizeHtml } from '../lib/sanitize'
 
 // Ortak çeviri fonksiyonu tipi (Header ve alt bileşenlerde)
 export type HeaderTranslateFn = (
@@ -13,7 +13,7 @@ export const CrossFadeText: React.FC<{
   text: string
   className?: string
   triggerKey?: string | number
-}> = ({text, className = '', triggerKey}) => {
+}> = ({ text, className = '', triggerKey }) => {
   const [currentText, setCurrentText] = React.useState(text)
   const [previousText, setPreviousText] = React.useState(text)
   const [isAnimating, setIsAnimating] = React.useState(false)
@@ -51,8 +51,8 @@ export const CrossFadeText: React.FC<{
 }
 
 // Header dışındaki bileşenlerde de kullanılabilen DynamicIcon
-export const DynamicIcon: React.FC<{svgString: string}> = ({svgString}) => (
-  <div dangerouslySetInnerHTML={{__html: sanitizeHtml(svgString)}} />
+export const DynamicIcon: React.FC<{ svgString: string }> = ({ svgString }) => (
+  <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(svgString) }} />
 )
 
 export const UserIcon = () => (
@@ -63,7 +63,7 @@ export const UserIcon = () => (
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="1.5"
+    strokeWidth="0.8"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
@@ -80,7 +80,7 @@ export const UserLoggedInIcon = () => (
     viewBox="0 0 24 24"
     fill="currentColor"
     stroke="currentColor"
-    strokeWidth="1.5"
+    strokeWidth="0.8"
     strokeLinecap="round"
     strokeLinejoin="round"
   >
@@ -97,7 +97,7 @@ export const ChevronRightIcon: React.FC = () => (
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="1.5"
+    strokeWidth="0.8"
     strokeLinecap="round"
     strokeLinejoin="round"
   >

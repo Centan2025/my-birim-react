@@ -1,16 +1,16 @@
-import React, {useState} from 'react'
-import {motion, AnimatePresence} from 'framer-motion'
-import {User, X, LogOut, ArrowRight} from 'lucide-react'
-import {useAuth} from '../context/AuthContext'
-import {useTranslation} from '../i18n'
-import {Link, useNavigate} from 'react-router-dom'
-import {loginUser} from '../services/cms'
-import {loginRateLimiter} from '../lib/rateLimiter'
+import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { User, X, LogOut, ArrowRight } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
+import { useTranslation } from '../i18n'
+import { Link, useNavigate } from 'react-router-dom'
+import { loginUser } from '../services/cms'
+import { loginRateLimiter } from '../lib/rateLimiter'
 
 export const FloatingAuthPanel: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false)
-  const {isLoggedIn, user, login, logout} = useAuth()
-  const {t} = useTranslation()
+  const { isLoggedIn, user, login, logout } = useAuth()
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   const [email, setEmail] = useState('')
@@ -51,9 +51,9 @@ export const FloatingAuthPanel: React.FC = () => {
 
   const scrollToFooter = () => {
     setIsOpen(false)
-    navigate('/login', {replace: false})
+    navigate('/login', { replace: false })
     setTimeout(() => {
-      window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
     }, 300)
   }
 
@@ -63,10 +63,10 @@ export const FloatingAuthPanel: React.FC = () => {
       <div className="fixed right-0 top-[60%] -translate-y-1/2 z-[45]">
         <button
           onClick={() => setIsOpen(true)}
-          className="bg-black text-white p-3 shadow-lg hover:bg-zinc-800 focus:outline-none transition-all duration-300 animate-fade-in-up flex items-center justify-center border border-r-0 border-transparent hover:border-white/20 translate-x-1/2 hover:translate-x-0 opacity-50 hover:opacity-100"
-          style={{borderTopLeftRadius: '0.25rem', borderBottomLeftRadius: '0.25rem'}}
+          className="bg-black/50 text-white p-3.5 shadow-lg backdrop-blur-md focus:outline-none transition-all duration-300 animate-fade-in-up flex items-center justify-center border-[0.5px] border-white rounded-none translate-x-1/2 hover:translate-x-0 opacity-60 hover:bg-black/80 hover:opacity-100"
+          aria-label={isLoggedIn ? t('profile') || 'Profil' : t('login') || 'Giriş Yap'}
         >
-          <User className="w-5 h-5 md:w-6 md:h-6" />
+          <User strokeWidth={0.8} className="w-6 h-6 md:w-8 md:h-8" />
         </button>
       </div>
 
@@ -76,19 +76,19 @@ export const FloatingAuthPanel: React.FC = () => {
           <>
             {/* Backdrop */}
             <motion.div
-              initial={{opacity: 0}}
-              animate={{opacity: 1}}
-              exit={{opacity: 0}}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
               className="fixed inset-0 bg-black/50 z-[100]"
             />
 
             {/* Panel */}
             <motion.div
-              initial={{x: '100%'}}
-              animate={{x: 0}}
-              exit={{x: '100%'}}
-              transition={{type: 'tween', duration: 0.3}}
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'tween', duration: 0.3 }}
               className="fixed right-0 top-0 bottom-0 w-80 max-w-[85vw] bg-white shadow-2xl z-[101] flex flex-col"
             >
               <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50">
@@ -118,7 +118,7 @@ export const FloatingAuthPanel: React.FC = () => {
                       <Link
                         to="/profile"
                         onClick={() => setIsOpen(false)}
-                        className="flex items-center justify-between w-full p-4 border border-black hover:bg-black hover:text-white transition-colors uppercase tracking-[0.2em] text-[11px] font-bold font-inter"
+                        className="flex items-center justify-between w-full p-4 bg-[#e5e5e5] text-black border border-black hover:bg-[#d8d8d8] transition-colors uppercase tracking-[0.2em] text-[11px] font-bold font-inter"
                       >
                         <span>{t('go_to_profile') || 'Profile Git'}</span>
                         <User className="w-4 h-4" />
@@ -172,7 +172,7 @@ export const FloatingAuthPanel: React.FC = () => {
                       <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full bg-black text-white p-4 mt-6 uppercase tracking-[0.2em] text-[11px] font-bold hover:bg-zinc-800 transition-colors disabled:opacity-50 flex justify-between items-center font-inter"
+                        className="w-full bg-[#e5e5e5] text-black border border-black p-4 mt-6 uppercase tracking-[0.2em] text-[11px] font-bold hover:bg-[#d8d8d8] transition-colors disabled:opacity-50 flex justify-between items-center font-inter"
                       >
                         {isLoading ? t('waiting') || 'Bekleniyor' : t('login') || 'Giriş Yap'}
                         <ArrowRight className="w-4 h-4" />
@@ -195,7 +195,7 @@ export const FloatingAuthPanel: React.FC = () => {
                       </p>
                       <button
                         onClick={scrollToFooter}
-                        className="w-full border border-black p-4 uppercase tracking-[0.1em] md:tracking-[0.2em] text-[10px] md:text-[11px] font-bold hover:bg-black hover:text-white transition-colors font-inter group flex items-center justify-between"
+                        className="w-full bg-[#e5e5e5] text-black border border-black p-4 uppercase tracking-[0.1em] md:tracking-[0.2em] text-[10px] md:text-[11px] font-bold hover:bg-[#d8d8d8] transition-colors font-inter group flex items-center justify-between"
                       >
                         <span>{t('register_or_subscribe') || 'Üye Ol / Kayıt Ol'}</span>
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

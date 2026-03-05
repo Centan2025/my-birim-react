@@ -339,11 +339,12 @@ export function ProjectDetailPage() {
         {/* Fullscreen Butonu */}
         {allMedia.length > 0 && (
           <div
-            className="absolute bottom-6 right-6 md:bottom-8 md:right-8 z-30"
+            className="absolute bottom-10 right-4 md:right-8 z-30"
             style={{
               opacity: isFullscreenButtonVisible ? 1 : 0,
               transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
               transition: 'opacity 700ms ease-out, transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+              ...(isMobile ? { bottom: 'max(16px, env(safe-area-inset-bottom, 0px) + 16px)' } : {})
             }}
           >
             <button
@@ -352,7 +353,7 @@ export function ProjectDetailPage() {
                 e.stopPropagation()
                 setIsFullscreenOpen(true)
               }}
-              className="flex h-12 w-12 items-center justify-center rounded-full border border-gray-100 bg-white text-gray-900 transition-all duration-300 hover:scale-110 hover:bg-gray-50 shadow-xl"
+              className="flex h-12 w-12 items-center justify-center rounded-none border-[0.5px] border-white/40 bg-transparent text-white transition-all duration-300 hover:scale-110 hover:bg-white/10 shadow-xl"
               aria-label="Büyüt"
             >
               <svg
@@ -362,15 +363,15 @@ export function ProjectDetailPage() {
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="0.5"
-                strokeLinecap="square"
-                strokeLinejoin="miter"
-                className="h-8 w-8"
+                strokeWidth="0.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-9 w-9"
               >
-                {/* Küçük kare */}
-                <path d="M 3 13 h 8 v 8 H 3 Z" />
-                {/* Ok */}
-                <path d="M 13.5 10.5 L 18 6 M 14 6 H 18 V 10" />
+                <path d="M15 3h6v6" />
+                <path d="M9 21H3v-6" />
+                <path d="M21 3l-7 7" />
+                <path d="M3 21l7-7" />
               </svg>
             </button>
           </div>
