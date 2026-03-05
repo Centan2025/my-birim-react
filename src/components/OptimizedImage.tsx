@@ -435,55 +435,83 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     const pictureElement = (
       <picture>
         {/* AVIF format (en iyi sıkıştırma) */}
-        {srcMobile && (
-          <source
-            type="image/avif"
-            media="(max-width: 768px)"
-            srcSet={generateSrcSet(srcMobile) || getFormatUrl(srcMobile, 'avif') || undefined}
-            sizes={defaultSizes}
-          />
-        )}
-        {srcDesktop && (
-          <source
-            type="image/avif"
-            media="(min-width: 769px)"
-            srcSet={generateSrcSet(srcDesktop) || getFormatUrl(srcDesktop, 'avif') || undefined}
-            sizes={defaultSizes}
-          />
-        )}
+        {(() => {
+          const avifSrcSet = (srcMobile ? generateSrcSet(srcMobile) : undefined) || (srcMobile ? getFormatUrl(srcMobile, 'avif') : undefined)
+          if (!avifSrcSet) return null
+          return (
+            <source
+              type="image/avif"
+              media="(max-width: 768px)"
+              srcSet={avifSrcSet}
+              sizes={defaultSizes}
+            />
+          )
+        })()}
+        {(() => {
+          const avifSrcSet = (srcDesktop ? generateSrcSet(srcDesktop) : undefined) || (srcDesktop ? getFormatUrl(srcDesktop, 'avif') : undefined)
+          if (!avifSrcSet) return null
+          return (
+            <source
+              type="image/avif"
+              media="(min-width: 769px)"
+              srcSet={avifSrcSet}
+              sizes={defaultSizes}
+            />
+          )
+        })()}
+
         {/* WebP format (fallback) */}
-        {srcMobile && (
-          <source
-            type="image/webp"
-            media="(max-width: 768px)"
-            srcSet={generateSrcSet(srcMobile) || getFormatUrl(srcMobile, 'webp') || undefined}
-            sizes={defaultSizes}
-          />
-        )}
-        {srcDesktop && (
-          <source
-            type="image/webp"
-            media="(min-width: 769px)"
-            srcSet={generateSrcSet(srcDesktop) || getFormatUrl(srcDesktop, 'webp') || undefined}
-            sizes={defaultSizes}
-          />
-        )}
+        {(() => {
+          const webpSrcSet = (srcMobile ? generateSrcSet(srcMobile) : undefined) || (srcMobile ? getFormatUrl(srcMobile, 'webp') : undefined)
+          if (!webpSrcSet) return null
+          return (
+            <source
+              type="image/webp"
+              media="(max-width: 768px)"
+              srcSet={webpSrcSet}
+              sizes={defaultSizes}
+            />
+          )
+        })()}
+        {(() => {
+          const webpSrcSet = (srcDesktop ? generateSrcSet(srcDesktop) : undefined) || (srcDesktop ? getFormatUrl(srcDesktop, 'webp') : undefined)
+          if (!webpSrcSet) return null
+          return (
+            <source
+              type="image/webp"
+              media="(min-width: 769px)"
+              srcSet={webpSrcSet}
+              sizes={defaultSizes}
+            />
+          )
+        })()}
+
         {/* Mobil için görsel (max-width: 768px) */}
-        {srcMobile && optimizedMobileSrc && (
-          <source
-            media="(max-width: 768px)"
-            srcSet={generateSrcSet(srcMobile) || undefined}
-            sizes={defaultSizes}
-          />
-        )}
+        {srcMobile && optimizedMobileSrc && (() => {
+          const mobileSrcSet = generateSrcSet(srcMobile)
+          if (!mobileSrcSet) return null
+          return (
+            <source
+              media="(max-width: 768px)"
+              srcSet={mobileSrcSet}
+              sizes={defaultSizes}
+            />
+          )
+        })()}
+
         {/* Desktop için görsel (min-width: 769px) */}
-        {srcDesktop && optimizedDesktopSrc && (
-          <source
-            media="(min-width: 769px)"
-            srcSet={generateSrcSet(srcDesktop) || undefined}
-            sizes={defaultSizes}
-          />
-        )}
+        {srcDesktop && optimizedDesktopSrc && (() => {
+          const desktopSrcSet = generateSrcSet(srcDesktop)
+          if (!desktopSrcSet) return null
+          return (
+            <source
+              media="(min-width: 769px)"
+              srcSet={desktopSrcSet}
+              sizes={defaultSizes}
+            />
+          )
+        })()}
+
         {/* Fallback: Eğer mobil versiyonu yoksa desktop'u kullan, o da yoksa src'i kullan */}
         <img
           ref={imgRef}
@@ -503,8 +531,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           draggable={draggable}
           onLoad={handleLoad}
           onError={handleError}
-          decoding="async"
-          style={{ ...imgStyle, display: 'block' }}
+          style={{
+            ...imgStyle,
+            display: 'block',
+            WebkitBackfaceVisibility: 'hidden',
+            backfaceVisibility: 'hidden'
+          }}
         />
       </picture>
     )
@@ -528,19 +560,32 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const pictureElement = (
     <picture>
       {/* AVIF format (en iyi sıkıştırma) */}
-      <source
-        type="image/avif"
-        srcSet={responsiveSrcSet || getFormatUrl(activeSrc, 'avif') || undefined}
-        sizes={responsiveSrcSet ? defaultSizes : undefined}
-      />
+      {(() => {
+        const avifSrcSet = responsiveSrcSet || getFormatUrl(activeSrc, 'avif')
+        if (!avifSrcSet) return null
+        return (
+          <source
+            type="image/avif"
+            srcSet={avifSrcSet}
+            sizes={responsiveSrcSet ? defaultSizes : undefined}
+          />
+        )
+      })()}
       {/* WebP format (fallback) */}
-      <source
-        type="image/webp"
-        srcSet={responsiveSrcSet || getFormatUrl(activeSrc, 'webp') || undefined}
-        sizes={responsiveSrcSet ? defaultSizes : undefined}
-      />
+      {(() => {
+        const webpSrcSet = responsiveSrcSet || getFormatUrl(activeSrc, 'webp')
+        if (!webpSrcSet) return null
+        return (
+          <source
+            type="image/webp"
+            srcSet={webpSrcSet}
+            sizes={responsiveSrcSet ? defaultSizes : undefined}
+          />
+        )
+      })()}
       {/* Fallback image */}
       <img
+        key={activeSrc}
         ref={imgRef}
         src={optimizedSrc}
         alt={alt}
@@ -554,8 +599,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         draggable={draggable}
         onLoad={handleLoad}
         onError={handleError}
-        decoding="async"
-        style={{ ...imgStyle, display: 'block' }}
+        style={{
+          ...imgStyle,
+          display: 'block',
+          WebkitBackfaceVisibility: 'hidden',
+          backfaceVisibility: 'hidden'
+        }}
       />
     </picture>
   )
