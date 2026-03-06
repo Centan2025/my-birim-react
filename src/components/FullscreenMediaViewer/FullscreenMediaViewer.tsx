@@ -341,14 +341,14 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
         right: 0,
         bottom: 0,
         width: '100vw',
-        height: '100vh',
+        height: '100dvh',
         zIndex: 99999,
         backgroundColor: '#e5e7eb',
       }}
     >
       <div
         className={`w-full relative transition-opacity duration-500 ease-in-out ${isVisible ? 'opacity-100' : 'opacity-0'}`}
-        style={{ height: '100vh', overflow: 'hidden' }}
+        style={{ height: '100dvh', overflow: 'hidden' }}
       >
         <div className="absolute inset-0 overflow-hidden">
           <FullscreenControls
@@ -374,7 +374,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
-              height: '100vh',
+              height: '100dvh',
               paddingTop: isMobile && isLandscape ? '4px' : '0',
               paddingBottom: isMobile && isLandscape ? '4px' : '0',
               gap: isMobile && isLandscape ? '4px' : isMobile ? '0' : '6px',
