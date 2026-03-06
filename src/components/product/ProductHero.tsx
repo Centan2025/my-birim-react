@@ -360,7 +360,10 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
         )}
 
         {slideCount > 1 && (
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40 flex items-center space-x-4">
+          <div
+            className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40 flex items-center space-x-2 md:space-x-4"
+            style={isMobile ? { bottom: 'max(16px, env(safe-area-inset-bottom, 0px) + 16px)' } : {}}
+          >
             {(() => {
               const normalizedSlideIndex =
                 slideCount <= 1
@@ -417,7 +420,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
               e.stopPropagation()
               onOpenFullscreen()
             }}
-            className="absolute bottom-4 right-4 z-50 group flex h-12 w-12 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
+            className="absolute bottom-4 right-4 z-50 group flex h-10 w-10 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
             style={{
               opacity: isFullscreenButtonVisible ? 1 : 0,
               transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
@@ -431,15 +434,15 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="22"
-              height="22"
+              width="20"
+              height="20"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth="0.8"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="h-8 w-8"
+              className="h-7 w-7"
             >
               <path d="M15 3h6v6" />
               <path d="M9 21H3v-6" />

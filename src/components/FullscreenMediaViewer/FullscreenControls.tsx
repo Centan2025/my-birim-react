@@ -2,6 +2,7 @@ import React from 'react'
 
 interface FullscreenControlsProps {
   isMobile: boolean
+  isLandscape: boolean
   isClosing: boolean
   isButtonVisible: boolean
   handleClose: () => void
@@ -14,6 +15,7 @@ interface FullscreenControlsProps {
 
 export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
   isMobile,
+  isLandscape,
   isClosing,
   isButtonVisible,
   handleClose,
@@ -32,12 +34,14 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
           opacity: isClosing ? 0 : 1,
           transition: 'opacity 300ms ease-in-out',
           transitionDelay: isClosing ? (isMobile ? '200ms' : '0ms') : '0ms',
+          paddingTop: isMobile ? 'max(8px, env(safe-area-inset-top, 0px))' : undefined
         }}
       >
         <button
           type="button"
           onClick={handleClose}
-          className="group flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/60 active:scale-95 shadow-lg"
+          className={`group flex items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/60 active:scale-95 shadow-lg ${isMobile ? 'h-10 w-10' : 'h-14 w-14'
+            }`}
           style={{
             opacity: isClosing ? 0 : isButtonVisible ? 1 : 0,
             transform: isButtonVisible && !isClosing ? 'scale(1)' : 'scale(0)',
@@ -57,7 +61,7 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
             strokeWidth="0.6"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className={`h-11 w-11 transition-all duration-500 ease-in-out ${isButtonVisible && !isClosing ? 'opacity-100 rotate-0' : 'opacity-0 rotate-90'
+            className={`${isMobile ? 'h-7 w-7' : 'h-11 w-11'} transition-all duration-500 ease-in-out ${isButtonVisible && !isClosing ? 'opacity-100 rotate-0' : 'opacity-0 rotate-90'
               }`}
             style={{
               transform: isButtonVisible && !isClosing ? 'rotate(0deg)' : 'rotate(90deg)',
@@ -70,12 +74,12 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
         </button>
       </div>
 
-      {/* Navigasyon Düğmeleri (Desktop) */}
-      {!isMobile && slideCount > 1 && (
+      {/* Navigasyon Düğmeleri (Desktop ve Mobil Landscape) */}
+      {(!isMobile || isLandscape) && slideCount > 1 && (
         <div
           className="flex absolute left-1/2 -translate-x-1/2 items-center gap-4 z-20"
           style={{
-            bottom: '32px',
+            bottom: isMobile ? 'max(16px, env(safe-area-inset-bottom, 0px) + 8px)' : '32px',
             opacity: isButtonVisible && !isClosing ? 1 : 0,
             transform: `translateX(-50%) ${isButtonVisible && !isClosing ? 'translateY(0)' : 'translateY(40px)'}`,
             transition:
@@ -86,7 +90,8 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
           <button
             type="button"
             onClick={onPrev}
-            className="group flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/60 active:scale-95 shadow-lg"
+            className={`group flex items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/60 active:scale-95 shadow-lg ${isMobile ? 'h-10 w-10' : 'h-14 w-14'
+              }`}
             aria-label="Previous"
           >
             <svg
@@ -99,7 +104,7 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
               strokeWidth="0.4"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="h-11 w-11 -ml-0.5 transition-transform duration-300 group-hover:-translate-x-1"
+              className={`${isMobile ? 'h-7 w-7' : 'h-11 w-11'} -ml-0.5 transition-transform duration-300 group-hover:-translate-x-1`}
             >
               <path d="M15 18l-6-6 6-6" />
             </svg>
@@ -107,7 +112,8 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
           <button
             type="button"
             onClick={onNext}
-            className="group flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/60 active:scale-95 shadow-lg"
+            className={`group flex items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/60 active:scale-95 shadow-lg ${isMobile ? 'h-10 w-10' : 'h-14 w-14'
+              }`}
             aria-label="Next"
           >
             <svg
@@ -120,7 +126,7 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
               strokeWidth="0.4"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="h-11 w-11 ml-0.5 transition-transform duration-300 group-hover:translate-x-1"
+              className={`${isMobile ? 'h-7 w-7' : 'h-11 w-11'} ml-0.5 transition-transform duration-300 group-hover:translate-x-1`}
             >
               <path d="M9 18l6-6-6-6" />
             </svg>
@@ -129,14 +135,17 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
       )}
 
       {/* Mobil Yukar-Git Düğmesi */}
-      {isMobile && (
+      {isMobile && !isLandscape && (
         <button
           type="button"
           onClick={handleScrollToTop}
-          className={`absolute bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 z-30 shadow-lg ${showScrollToTop
+          className={`absolute bottom-6 right-6 flex h-10 w-10 items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 z-30 shadow-lg ${showScrollToTop
             ? 'opacity-100 translate-y-0'
             : 'opacity-0 translate-y-4 pointer-events-none'
             }`}
+          style={{
+            bottom: 'max(24px, env(safe-area-inset-bottom, 0px) + 16px)'
+          }}
           aria-label="Scroll to top"
         >
           <svg
@@ -149,7 +158,7 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
             strokeWidth="0.4"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="h-11 w-11 -mt-0.5"
+            className="h-7 w-7 -mt-0.5"
           >
             <path d="m18 15-6-6-6 6" />
           </svg>
