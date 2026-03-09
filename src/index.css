@@ -1,4 +1,65 @@
-@import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* Tasarımcı isimleri için kullanılan font (İnter Regular 400) */
+  --font-display: "Inter", sans-serif;
+
+  /* Diğer yardımcı fontlar */
+  --font-sans: "Inter", sans-serif;
+  --font-accent: "Oswald", sans-serif;
+
+  --color-primary: #C5A059;
+  --color-charcoal: #121212;
+  --color-dark-charcoal: #0D0D0D;
+  --color-paper: #F5F5F0;
+}
+
+.font-inter-regular {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 400 !important;
+}
+
+@layer base {
+  .light-mode body {
+    @apply bg-paper text-gray-600;
+  }
+}
+
+.portrait-frame {
+  filter: grayscale(100%) contrast(1.1);
+}
+
+.outline-text {
+  -webkit-text-stroke: 1px currentColor;
+  color: transparent;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.designer-name-link {
+  font-family: 'Inter', sans-serif !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.designer-name-link:hover {
+  padding-left: 20px;
+  /* Üzerine gelince sağa doğru 20px kayar */
+}
+
+.designer-name-link.active-designer {
+  color: var(--color-primary) !important;
+  opacity: 1 !important;
+}
+
 
 /* Neue Montreal Light font tanımı (hamburger menü ve başlıklar için) */
 @font-face {
@@ -7,6 +68,28 @@
   font-weight: 300;
   font-style: normal;
   font-display: swap;
+}
+
+/* İnce ve şık kaydırma çubuğu tasarımı */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  /* Çubuğun genişliği */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  /* Arka plan şeffaf */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(197, 160, 89, 0.2);
+  /* Çubuğun rengi (Altın tonu) */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(197, 160, 89, 0.5);
+  /* Üzerine gelince belirginleşir */
 }
 
 html {

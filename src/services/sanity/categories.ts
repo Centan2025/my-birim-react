@@ -40,6 +40,7 @@ export const getDesigners = async (): Promise<Designer[]> => {
     const query = groq`*[_type == "designer"] | order(orderRank asc){
           "id": id.current, 
           name, 
+          role,
           bio, 
           image,
           imageR2,
@@ -51,10 +52,11 @@ export const getDesigners = async (): Promise<Designer[]> => {
       const imageFinal = mapImage(r.imageR2) || mapImage(r.image)
       const imageMobile = r.imageMobileR2?.url ? mapImage(r.imageMobileR2) : undefined
       const imageDesktop = r.imageDesktopR2?.url ? mapImage(r.imageDesktopR2) : undefined
-      const metadata = r.imageR2 ? mapR2Metadata(r.imageR2) : {}
+      const metadata = r.imageR2 ? mapR2Metadata(r.imageR2) : (r.image ? mapR2Metadata(r.image) : {})
       return {
         id: r.id,
         name: r.name,
+        role: r.role,
         bio: r.bio,
         image: {
           url: imageFinal,
@@ -74,17 +76,18 @@ export const getDesigners = async (): Promise<Designer[]> => {
 export const getDesignerById = async (id: string): Promise<Designer | undefined> => {
   if (useSanity && sanity) {
     const query = groq`*[_type == "designer" && id.current == $id][0]{ 
-      "id": id.current, name, bio, image, imageR2, imageMobileR2, imageDesktopR2
+      "id": id.current, name, role, bio, image, imageR2, imageMobileR2, imageDesktopR2
     }`
     const r = await sanity.fetch(query, { id })
     if (!r) return undefined
     const image = mapImage(r.imageR2) || mapImage(r.image) || ''
     const imageMobile = r.imageMobileR2?.url || undefined
     const imageDesktop = r.imageDesktopR2?.url || undefined
-    const metadata = r.imageR2 ? mapR2Metadata(r.imageR2) : {}
+    const metadata = r.imageR2 ? mapR2Metadata(r.imageR2) : (r.image ? mapR2Metadata(r.image) : {})
     return {
       id: r.id,
       name: r.name,
+      role: r.role,
       bio: r.bio,
       image: {
         url: image,

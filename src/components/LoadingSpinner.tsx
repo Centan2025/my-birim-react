@@ -21,16 +21,16 @@ export function LoadingSpinner({
 }: LoadingSpinnerProps) {
   const spinnerSize = small ? 'h-4 w-4' : 'h-12 w-12'
   const containerClass = fullScreen
-    ? 'fixed inset-0 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm z-50'
+    ? 'fixed inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50'
     : 'flex items-center justify-center py-20'
 
   return (
     <div className={`${containerClass} ${className}`}>
       <div className="text-center">
         <div
-          className={`inline-block animate-spin rounded-full border-b-2 border-white ${spinnerSize} mb-4`}
+          className={`inline-block animate-spin rounded-full border-b-2 border-primary ${spinnerSize} mb-4`}
         ></div>
-        {message && <p className="text-gray-300 text-sm md:text-base">{message}</p>}
+        {message && <p className="text-gray-600 text-sm md:text-base font-medium">{message}</p>}
       </div>
     </div>
   )
@@ -39,7 +39,7 @@ export function LoadingSpinner({
 /**
  * Inline Loading Spinner (küçük)
  */
-export function InlineLoadingSpinner({className = ''}: {className?: string}) {
+export function InlineLoadingSpinner({ className = '' }: { className?: string }) {
   return (
     <div className={`inline-flex items-center justify-center ${className}`}>
       <div className="inline-block animate-spin rounded-full border-b-2 border-current h-4 w-4"></div>
@@ -51,9 +51,9 @@ export function InlineLoadingSpinner({className = ''}: {className?: string}) {
  * Page Loading Component
  * Sayfa yüklenirken gösterilir
  */
-export function PageLoading({message}: {message?: string}) {
+export function PageLoading({ message }: { message?: string }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-white">
       <LoadingSpinner message={message || 'Yükleniyor...'} />
     </div>
   )

@@ -1,128 +1,22 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import type { Designer } from '../types'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { PageLoading } from '../components/LoadingSpinner'
 import { useTranslation } from '../i18n'
 import { useDesigners } from '../hooks/useDesigners'
-import { useSiteSettings } from '../hooks/useSiteData'
-import { Breadcrumbs } from '../components/Breadcrumbs'
-import ScrollReveal from '../components/ScrollReveal'
 import { useSEO } from '../hooks/useSEO'
-
-import { useNavigate } from 'react-router-dom'
-import { useCardTransition } from '../context/CardTransitionContext'
-
-const DesignerCard: React.FC<{ designer: Designer }> = ({ designer }) => {
-  const { t } = useTranslation()
-  const navigate = useNavigate()
-  const { triggerExpand } = useCardTransition()
-  const { data: settings } = useSiteSettings()
-  const cardRef = React.useRef<HTMLDivElement>(null)
-
-  const designerImageUrl =
-    typeof designer.image === 'string' ? designer.image : designer.image?.url || ''
-  const designerImageMobile =
-    typeof designer.image === 'object' ? designer.image.urlMobile : designer.imageMobile
-  const designerImageDesktop =
-    typeof designer.image === 'object' ? designer.image.urlDesktop : designer.imageDesktop
-
-  const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
-
-  const [isAnimating, setIsAnimating] = React.useState(false)
-
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-
-    const imageContainer = cardRef.current
-    if (!imageContainer) {
-      navigate(`/designer/${designer.id}`)
-      return
-    }
-
-    setIsAnimating(true)
-
-    const rect = imageContainer.getBoundingClientRect()
-
-    // Target position calculation for DesignerDetailPage
-    // On desktop, it's roughly 24rem (384px) from left and 80px from top of container
-    // But easier to use the system to fly into the correct spot.
-
-    const screenWidth = window.innerWidth
-    const isMobile = screenWidth < 768
-
-    // DesignerDetailPage'teki container genişliği hesaplaması
-    let containerWidth = screenWidth
-    if (screenWidth >= 1536) containerWidth = 1536
-    else if (screenWidth >= 1280) containerWidth = 1280
-    else if (screenWidth >= 1024) containerWidth = 1024
-    else if (screenWidth >= 768) containerWidth = 768
-
-    const containerMargin = (screenWidth - containerWidth) / 2
-    const paddingX = 8 // DesignerDetailPage'te container px-2 paddingi
-    const imageWidth = isMobile ? 320 : 384 // md:w-96 (384px) veya w-80 (320px)
-    const imageHeight = isMobile ? 384 : 512 // md:h-[32rem] (512px) veya h-96 (384px)
-
-    const targetLeft = isMobile
-      ? (screenWidth - imageWidth) / 2
-      : containerMargin + containerWidth - paddingX - imageWidth
-
-    triggerExpand(
-      {
-        top: rect.top,
-        left: rect.left,
-        width: rect.width,
-        height: rect.height,
-        imageUrl: designerImageUrl,
-        imageMobile: designerImageMobile,
-        imageDesktop: designerImageDesktop,
-        objectFit: 'cover',
-        className: 'grayscale brightness-90',
-        initialBorderRadius: imageBorderClass === 'rounded-lg' ? '8px' : '0px',
-        target: {
-          top: isMobile ? 80 : 160, // Rough estimate of container start + padding
-          left: targetLeft,
-          width: imageWidth,
-          height: imageHeight,
-          borderRadius: imageBorderClass === 'rounded-lg' ? '8px' : '0px',
-        },
-        showGradient: false, // Designers don't have hero gradient
-      },
-      () => {
-        navigate(`/designer/${designer.id}`, { state: { fromCard: true } })
-      }
-    )
-  }
-
-  return (
-    <div className="group flex flex-col h-full text-center">
-      <Link to={`/designer/${designer.id}`} onClick={handleClick} className="block h-full">
-        <div ref={cardRef} className={`overflow-hidden bg-white aspect-[3/4] ${imageBorderClass}`} style={{ opacity: isAnimating ? 0 : 1 }}>
-          <OptimizedImage
-            src={designerImageUrl}
-            srcMobile={designerImageMobile}
-            srcDesktop={designerImageDesktop}
-            alt={t(designer.name)}
-            className={`w-full h-full object-cover transform scale-100 grayscale brightness-90 group-hover:scale-[1.02] smooth-hover ${imageBorderClass}`}
-            loading="lazy"
-            quality={85}
-            crop={typeof designer.image === 'object' ? (designer.image as any).crop : undefined}
-            hotspot={typeof designer.image === 'object' ? (designer.image as any).hotspot : undefined}
-          />
-        </div>
-        <div className="mt-4 min-h-[2.5rem] flex items-center justify-center">
-          <h3 className="text-xl font-light text-gray-500 transition-colors duration-700 ease-in-out group-hover:text-gray-600">
-            {t(designer.name)}
-          </h3>
-        </div>
-      </Link>
-    </div>
-  )
-}
+import { PageLoading } from '../components/LoadingSpinner'
+import { OptimizedImage } from '../components/OptimizedImage'
+import PortableTextLite from '../components/PortableTextLite'
+import { Breadcrumbs } from '../components/Breadcrumbs'
 
 export function DesignersPage() {
   const { data: designers = [], isLoading: loading } = useDesigners()
   const { t } = useTranslation()
+  const navigate = useNavigate()
+
+  const [activeDesigner, setActiveDesigner] = useState<Designer | null>(null)
+  const isDarkMode = false
 
   // SEO meta
   useSEO({
@@ -134,50 +28,208 @@ export function DesignersPage() {
     section: 'Designers',
   })
 
-  if (loading) {
+  useEffect(() => {
+    if (designers.length > 0 && !activeDesigner) {
+      setActiveDesigner(designers[0] || null)
+    }
+  }, [designers, activeDesigner])
+
+  useEffect(() => {
+    if (!isDarkMode) {
+      document.documentElement.classList.add('light-mode')
+    } else {
+      document.documentElement.classList.remove('light-mode')
+    }
+    // Cleanup on unmount
+    return () => document.documentElement.classList.remove('light-mode')
+  }, [isDarkMode])
+
+  const handleDesignerClick = (designer: Designer) => {
+    // Mobilde tıklandığında anında detay sayfasına git (Sol taraf zaten gizli)
+    if (window.innerWidth < 1024) {
+      navigate(`/designer/${designer.id}`)
+      return
+    }
+
+    if (activeDesigner?.id === designer.id) {
+      navigate(`/designer/${designer.id}`)
+    } else {
+      setActiveDesigner(designer)
+    }
+  }
+
+  if (loading || !activeDesigner) {
     return (
-      <div className="pt-20">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <PageLoading message={t('loading')} />
       </div>
     )
   }
 
-  return (
-    <div className="bg-gray-100 animate-fade-in-up-subtle pt-20 md:pt-24 lg:pt-24">
-      {/* Breadcrumb Band */}
-      <div className="w-full bg-white">
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
-          <Breadcrumbs
-            items={[{ label: t('homepage'), to: '/' }, { label: t('designers') }]}
-          />
-        </div>
-      </div>
 
-      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-8 md:pt-12 pb-16">
-        <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-light text-gray-600">{t('designers')}</h1>
-          <div className="h-px bg-gray-300 mt-4 w-full"></div>
-        </div>
-        {designers.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8 items-stretch">
-            {designers.map((designer, index) => (
-              <ScrollReveal
-                key={designer.id}
-                delay={index * 100}
-                threshold={0.01}
-                direction="up"
-                distance={40}
-              >
-                <DesignerCard designer={designer} />
-              </ScrollReveal>
-            ))}
+  const getImageUrl = (designer: Designer) => {
+    return typeof designer.image === 'string' ? designer.image : designer.image?.url || ''
+  }
+
+  return (
+    <div className="h-auto min-h-screen lg:h-screen flex flex-col bg-white selection:bg-primary selection:text-black transition-colors duration-500 lg:overflow-hidden text-black dark:text-white">
+      <main className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto flex flex-col lg:flex-row flex-1 lg:overflow-hidden mt-16 md:mt-20">
+        {/* Sol Taraf: Portre ve Bilgi (Sabit kalır) */}
+        <div className="hidden lg:flex w-full lg:w-1/2 min-h-[45svh] lg:h-full shrink-0 relative lg:overflow-hidden bg-white group flex-col transition-colors duration-500 pb-8 lg:pb-0">
+          {/* Breadcrumbs (Left Top Desktop) */}
+          <div className="absolute top-4 left-6 lg:top-8 lg:left-0 z-30">
+            <Breadcrumbs
+              items={[{ label: t('homepage'), to: '/' }, { label: t('designers') || 'Tasarımcılar' }]}
+            />
           </div>
-        ) : (
-          <ScrollReveal delay={0} threshold={0.01}>
-            <p className="text-gray-600 text-center">{t('designer_not_found')}</p>
-          </ScrollReveal>
-        )}
-      </div>
+          <div className="flex-none lg:flex-1 relative mx-6 lg:ml-0 lg:mr-12 mt-12 lg:mt-24 mb-4 lg:mb-8 flex items-start justify-center overflow-visible">
+            <AnimatePresence mode="wait">
+              {activeDesigner && (
+                <motion.div
+                  key={activeDesigner.id}
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 30 }}
+                  transition={{ duration: 1, ease: [0.43, 0.13, 0.23, 0.96] }}
+                  className="relative w-full h-[35vh] lg:h-[98%] max-h-[850px] z-10"
+                >
+                  <OptimizedImage
+                    alt={t(activeDesigner.name)}
+                    className="w-full h-full object-cover portrait-frame"
+                    src={getImageUrl(activeDesigner)}
+                    srcMobile={typeof activeDesigner.image === 'object' ? activeDesigner.image.urlMobile : undefined}
+                    srcDesktop={typeof activeDesigner.image === 'object' ? activeDesigner.image.urlDesktop : undefined}
+                  />
+
+                  {/* Name alignment: Anchor point is exactly the bottom edge of the image */}
+                  <div className="absolute left-0 bottom-0 z-30 pointer-events-none">
+                    <div className="relative h-0">
+                      {/* First Name - Bottom edge sits exactly on the anchor point (optical adjustment) */}
+                      <motion.span
+                        initial={{ opacity: 0, x: -50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                        className="absolute bottom-[-4px] left-0 whitespace-nowrap text-3xl md:text-5xl lg:text-[90px] text-black dark:text-white font-display uppercase tracking-tighter leading-[0.75]"
+                      >
+                        {t(activeDesigner.name).split(' ')[0]}
+                      </motion.span>
+                      {/* Surname - Starts from the anchor point and hangs below */}
+                      <motion.span
+                        initial={{ opacity: 0, x: -50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+                        className="absolute top-0 left-0 text-black font-display uppercase tracking-tighter text-3xl md:text-5xl lg:text-[90px] whitespace-nowrap leading-[0.75]"
+                      >
+                        {t(activeDesigner.name).split(' ').slice(1).join(' ')}
+                      </motion.span>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <div className="absolute bottom-0 left-0 w-full z-20 p-8 lg:p-12 lg:pb-10 pt-0 flex flex-col justify-end items-start bg-transparent pointer-events-none">
+            <AnimatePresence mode="wait">
+              {activeDesigner && (
+                <motion.div
+                  key={activeDesigner.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="flex flex-col lg:flex-row items-center lg:items-end justify-center lg:justify-between w-full gap-0 lg:gap-12"
+                >
+                  {/* Title and Bio Wrapper - Hidden on Mobile */}
+                  <div className="hidden lg:flex flex-col items-start w-full lg:max-w-lg mb-2 text-left pointer-events-auto">
+                    {/* Role is visible on all devices */}
+                    {activeDesigner.role && (
+                      <span className="text-sm uppercase tracking-[0.25em] text-gray-500 mb-3 font-medium">
+                        {t(activeDesigner.role)}
+                      </span>
+                    )}
+                    {/* Bio is hidden on mobile */}
+                    <div className="text-base leading-relaxed text-gray-600 font-light line-clamp-2 overflow-hidden text-left">
+                      {(() => {
+                        const bio = t(activeDesigner.bio)
+                        return Array.isArray(bio) ? (
+                          <PortableTextLite value={bio} />
+                        ) : (
+                          bio
+                        )
+                      })()}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => navigate(`/designer/${activeDesigner.id}`)}
+                    className="w-full lg:w-auto text-center text-[11px] lg:text-sm uppercase font-medium tracking-[0.3em] text-black border border-black/20 px-6 lg:px-12 py-5 lg:py-6 hover:bg-black hover:text-white transition-all cursor-pointer whitespace-nowrap bg-transparent self-end lg:self-auto pointer-events-auto"
+                  >
+                    {t('explore_designer')}
+                  </button>
+
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Sağ Taraf: Rehber Listesi - Bağımsız Scroll */}
+        <div className="w-full lg:w-1/2 lg:flex-1 h-auto lg:h-full overflow-y-visible lg:overflow-y-auto custom-scrollbar bg-white border-l border-black/5 transition-colors duration-500 scroll-smooth lg:overscroll-contain pb-20 lg:pb-0">
+          <div className="py-12 lg:py-24 px-6 lg:px-20 min-h-full flex flex-col justify-start">
+            <div className="w-full mb-8 lg:hidden">
+              <Breadcrumbs
+                items={[{ label: t('homepage'), to: '/' }, { label: t('designers') || 'Tasarımcılar' }]}
+              />
+            </div>
+            <div className="mb-12 lg:mb-24 w-full">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 tracking-tight text-left mb-4">
+                {t('designers')}
+              </h1>
+              <div className="h-px w-full bg-gray-200"></div>
+            </div>
+            <nav className="flex flex-col gap-4 lg:gap-6">
+              {designers.map((designer) => (
+                <button
+                  key={designer.id}
+                  onClick={() => handleDesignerClick(designer)}
+                  className={`
+                    designer-name-link 
+                    text-left 
+                    font-inter-regular
+                    text-5xl md:text-7xl lg:text-[110px] 
+                    uppercase 
+                    leading-[0.95] 
+                    transition-all 
+                    duration-500 
+                    ${activeDesigner?.id === designer.id
+                      ? 'text-primary'
+                      : 'text-black/10 hover:text-primary/40'
+                    }
+                  `}
+                >
+                  {t(designer.name)}
+                </button>
+              ))}
+            </nav>
+            {/* Scroll Indicator for long lists */}
+            <div className="mt-20 opacity-30 flex items-center space-x-4">
+              <div className="w-px h-12 bg-black/10 relative overflow-hidden">
+                <motion.div
+                  animate={{ y: [0, 48] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  className="absolute top-0 left-0 w-full h-1/3 bg-primary"
+                />
+              </div>
+              <span className="text-[8px] uppercase tracking-[0.3em] vertical-text text-black">{t('scroll_discovery')}</span>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <style>{`
+        .vertical-text { writing-mode: vertical-rl; }
+      `}</style>
     </div>
   )
 }
+

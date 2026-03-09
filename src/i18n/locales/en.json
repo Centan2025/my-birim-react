@@ -84,5 +84,13 @@
   "not_registered": "Not Registered?",
   "register_or_subscribe": "Register / Subscribe",
   "go_to_profile": "Go to Profile",
-  "welcome": "Welcome"
+  "welcome": "Welcome",
+  "status": "Status",
+  "active_represented": "Active Representation",
+  "featured_designer": "Featured Designer",
+  "view_full_profile": "View Full Profile",
+  "quick_look": "Quick Look",
+  "directory": "Directory",
+  "scroll_discovery": "Scroll",
+  "istanbul_tr": "Istanbul, TR"
 }

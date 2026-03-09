@@ -1,7 +1,7 @@
 import React from 'react'
-import {defineField, defineType} from 'sanity'
-import {orderRankField} from '@sanity/orderable-document-list'
-import {getPreviewUrl} from '../utils/previewUrl'
+import { defineField, defineType } from 'sanity'
+import { orderRankField } from '@sanity/orderable-document-list'
+import { getPreviewUrl } from '../utils/previewUrl'
 
 export default defineType({
   name: 'designer',
@@ -12,17 +12,23 @@ export default defineType({
       name: 'id',
       title: 'ID (Slug)',
       type: 'slug',
-      options: {source: (doc: any) => doc.name?.tr || doc.name?.en, maxLength: 96},
+      options: { source: (doc: any) => doc.name?.tr || doc.name?.en, maxLength: 96 },
       validation: (Rule) => Rule.required(),
     }),
-    orderRankField({type: 'designer'}),
+    orderRankField({ type: 'designer' }),
     defineField({
       name: 'name',
       title: 'Ad',
       type: 'localizedString',
       validation: (Rule) => Rule.required(),
     }),
-    defineField({name: 'bio', title: 'Biyografi', type: 'localizedPortableText'}),
+    defineField({
+      name: 'role',
+      title: 'Unvan / Rol',
+      description: 'Örn: Mimar, Endüstriyel Tasarımcı, İç Mimar',
+      type: 'localizedString',
+    }),
+    defineField({ name: 'bio', title: 'Biyografi', type: 'localizedPortableText' }),
     defineField({
       name: 'imageR2',
       title: 'Görsel (Tüm Cihazlar)',
@@ -40,8 +46,8 @@ export default defineType({
     }),
   ],
   preview: {
-    select: {title: 'name.tr', r2Url: 'imageR2.url'},
-    prepare({title, r2Url}) {
+    select: { title: 'name.tr', r2Url: 'imageR2.url' },
+    prepare({ title, r2Url }) {
       let finalUrl = getPreviewUrl(r2Url)
       return {
         title: title || 'Tasarımcı',
@@ -49,7 +55,7 @@ export default defineType({
           <img
             src={finalUrl}
             alt={title || 'Tasarımcı'}
-            style={{width: '100%', height: '100%', objectFit: 'cover'}}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         ) : undefined,
       }

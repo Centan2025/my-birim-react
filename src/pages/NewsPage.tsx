@@ -6,9 +6,23 @@ import { PageLoading } from '../components/LoadingSpinner'
 import { useTranslation } from '../i18n'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { useNews } from '../hooks/useNews'
-import { useSiteSettings } from '../hooks/useSiteData'
 import { useSEO } from '../hooks/useSEO'
 import ScrollReveal from '../components/ScrollReveal'
+
+// Helper to convert Sanity block content to plain text
+const blockToPlainText = (blocks: any): string => {
+  if (!blocks) return ''
+  if (typeof blocks === 'string') return blocks
+  if (!Array.isArray(blocks)) return ''
+  return blocks
+    .map(block => {
+      if (block._type !== 'block' || !block.children) {
+        return ''
+      }
+      return block.children.map((child: any) => child.text).join('')
+    })
+    .join(' ')
+}
 
 const formatDate = (dateString: string): string => {
   if (!dateString) return ''
@@ -21,35 +35,62 @@ const formatDate = (dateString: string): string => {
 
 const NewsCard: React.FC<{ item: NewsItem }> = ({ item }) => {
   const { t } = useTranslation()
-  const { data: settings } = useSiteSettings()
-  const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
+
+  // Extract a summary from content if available
+  const getSummary = () => {
+    const translatedContent = t(item.content)
+    const plainText = blockToPlainText(translatedContent)
+    if (plainText) {
+      return plainText.substring(0, 160).trim() + '...'
+    }
+    return ''
+  }
+
+  const summary = getSummary()
 
   return (
-    <Link
-      to={`/news/${item.id}`}
-      className={`group block relative w-full max-w-full overflow-hidden shadow-lg transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl aspect-[4/5] ${imageBorderClass}`}
-    >
-      <OptimizedImage
-        src={typeof item.mainImage === 'string' ? item.mainImage : item.mainImage?.url || ''}
-        srcMobile={typeof item.mainImage === 'object' ? item.mainImage.urlMobile : undefined}
-        srcDesktop={typeof item.mainImage === 'object' ? item.mainImage.urlDesktop : undefined}
-        alt={t(item.title)}
-        className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-[1.03] ${imageBorderClass}`}
-        width={800}
-        height={1000}
-        loading="lazy"
-        quality={85}
-        crop={typeof item.mainImage === 'object' ? (item.mainImage as any).crop : undefined}
-        hotspot={typeof item.mainImage === 'object' ? (item.mainImage as any).hotspot : undefined}
-      />
-      <div className="absolute inset-x-0 bottom-0 h-4/5 bg-gradient-to-t from-black/95 via-black/60 to-transparent"></div>
-      <div className="absolute bottom-0 left-0 px-6 pt-12 pb-6 w-full max-w-full box-border">
-        <p className="text-[11px] text-white/50 mb-1">{formatDate(item.date)}</p>
-        <h2 className="text-3xl font-light text-white/70 group-hover:text-white transition-colors duration-300 break-words break-all">
-          {t(item.title)}
-        </h2>
+    <div className="group border-b border-gray-300 pb-16 mb-16 last:border-0 last:mb-0">
+      <div className="flex flex-col md:flex-row gap-8 md:gap-16 items-start">
+        {/* Text Content */}
+        <div className="flex-1 order-2 md:order-1">
+          <p className="text-sm text-gray-500 mb-2 font-light">{formatDate(item.date)}</p>
+          <Link to={`/news/${item.id}`} className="block mb-6">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-light tracking-tight text-gray-900 group-hover:text-gray-600 transition-colors duration-300 leading-tight uppercase">
+              {t(item.title)}
+            </h2>
+          </Link>
+
+          <p className="text-gray-500 text-lg leading-relaxed mb-8 max-w-2xl font-light">
+            {summary}
+          </p>
+
+          <Link
+            to={`/news/${item.id}`}
+            className="inline-flex items-center text-[11px] font-bold tracking-[0.2em] uppercase text-gray-900 transition-all duration-300"
+          >
+            <span>{t('continue_reading') || 'İÇERİĞİN DEVAMI'}</span>
+          </Link>
+        </div>
+
+        {/* Image */}
+        <Link
+          to={`/news/${item.id}`}
+          className="w-full md:w-[40%] aspect-[4/3] md:aspect-[3/2] overflow-hidden rounded-sm order-1 md:order-2"
+        >
+          <OptimizedImage
+            src={typeof item.mainImage === 'string' ? item.mainImage : item.mainImage?.url || ''}
+            srcMobile={typeof item.mainImage === 'object' ? item.mainImage.urlMobile : undefined}
+            srcDesktop={typeof item.mainImage === 'object' ? item.mainImage.urlDesktop : undefined}
+            alt={t(item.title)}
+            className="w-full h-full object-cover transition-transform duration-[1500ms] ease-out group-hover:scale-110"
+            width={1200}
+            height={800}
+            loading="lazy"
+            quality={90}
+          />
+        </Link>
       </div>
-    </Link>
+    </div>
   )
 }
 
@@ -75,41 +116,47 @@ export function NewsPage() {
     )
   }
 
+  const containerClass = "w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0"
+
   return (
-    <div className="bg-gray-100 animate-fade-in-up-subtle pt-20 md:pt-24 lg:pt-24">
+    <div className="bg-gray-100 min-h-screen animate-fade-in-up-subtle pt-20 md:pt-24 lg:pt-24">
       {/* Breadcrumb Band */}
-      <div className="w-full bg-white">
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
+      <div className="w-full relative z-20">
+        <div className={containerClass + " py-4"}>
           <Breadcrumbs
             items={[{ label: t('homepage'), to: '/' }, { label: t('news') }]}
           />
         </div>
       </div>
-      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-8 md:pt-12 pb-16">
-        <div className="text-center mb-16">
-          <h1 className="text-3xl md:text-4xl font-light text-gray-600 uppercase">
-            {t('news_title')}
-          </h1>
-          <div className="h-px bg-gray-300 mt-4 w-full"></div>
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-12 gap-x-8 items-stretch">
-          {news.length > 0 ? (
-            news.map((item, index) => (
+      {/* Sayfa Başlığı */}
+      <div className={containerClass + " pt-4 md:pt-12 pb-12"}>
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 tracking-tight text-center uppercase">
+          {t('news_title') || t('news')}
+        </h1>
+      </div>
+
+      {/* Haber Listesi */}
+      <div className={containerClass + " pb-16 md:pb-24"}>
+        {news.length > 0 ? (
+          <div className="border-t border-gray-300 pt-16">
+            {news.map((item, index) => (
               <ScrollReveal
                 key={item.id}
                 delay={index * 100}
                 threshold={0.01}
                 direction="up"
-                distance={40}
+                distance={30}
               >
                 <NewsCard item={item} />
               </ScrollReveal>
-            ))
-          ) : (
-            <p className="text-gray-600 text-center col-span-full">{t('no_news')}</p>
-          )}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="py-20 text-center">
+            <p className="text-gray-400 text-lg italic font-light">{t('no_news')}</p>
+          </div>
+        )}
       </div>
     </div>
   )

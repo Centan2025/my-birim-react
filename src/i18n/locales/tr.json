@@ -84,5 +84,13 @@
   "not_registered": "Üye Değil Misiniz?",
   "register_or_subscribe": "Üye Ol / Kayıt Ol",
   "go_to_profile": "Profile Git",
-  "welcome": "Hoş geldiniz"
+  "welcome": "Hoş geldiniz",
+  "status": "Durum",
+  "active_represented": "Aktif Temsil",
+  "featured_designer": "Öne Çıkan Tasarımcı",
+  "view_full_profile": "Tam Profili Görüntüle",
+  "quick_look": "Hızlı Bakış",
+  "directory": "Rehber",
+  "scroll_discovery": "Kaydırın",
+  "istanbul_tr": "İstanbul, TR"
 }

@@ -140,94 +140,101 @@ export function DesignerDetailPage() {
   }
 
   return (
-    <div className={`bg-gray-100 ${fromCard ? '' : 'animate-fade-in-up-subtle'} pt-20 md:pt-24 lg:pt-24`}>
-      {/* Breadcrumb Band */}
-      <div className="w-full bg-white relative z-20">
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
-          <Breadcrumbs
-            items={[
-              { label: t('homepage'), to: '/' },
-              { label: t('designers'), to: '/designers' },
-              { label: t(designer.name) },
-            ]}
-          />
-        </div>
-      </div>
-      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-12 md:py-16">
-        <div className="flex flex-col md:flex-row-reverse items-center md:items-start gap-8 md:gap-16 mt-6 md:mt-8 mb-12">
-          <div ref={imageRef} className="flex-shrink-0">
-            <OptimizedImage
-              src={typeof designer.image === 'string' ? designer.image : designer.image?.url || ''}
-              srcMobile={
-                typeof designer.image === 'object' ? designer.image.urlMobile : designer.imageMobile
-              }
-              srcDesktop={
-                typeof designer.image === 'object'
-                  ? designer.image.urlDesktop
-                  : designer.imageDesktop
-              }
-              alt={t(designer.name)}
-              className={`w-80 h-96 md:w-96 md:h-[32rem] object-cover shadow-none md:shadow-none filter grayscale brightness-90 ${imageBorderClass} ${phase === 'animating' ? 'opacity-0' : 'opacity-100'}`}
-              loading="eager"
-              quality={90}
-              crop={typeof designer.image === 'object' ? (designer.image as any).crop : undefined}
-              hotspot={typeof designer.image === 'object' ? (designer.image as any).hotspot : undefined}
+    <div className={`h-auto min-h-screen lg:h-screen flex flex-col bg-white selection:bg-primary selection:text-black transition-colors duration-500 lg:overflow-hidden text-black dark:text-white mt-16 md:mt-20 ${fromCard ? '' : 'animate-fade-in-up-subtle'}`}>
+      <main className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto flex flex-col lg:flex-row flex-1 lg:overflow-hidden">
+
+        {/* Sol Taraf: Büyük Görsel (Sabit) */}
+        <div className="w-full lg:w-1/2 h-[60vh] lg:h-full shrink-0 relative lg:overflow-hidden bg-white flex flex-col group">
+          {/* Breadcrumbs (Left Top) */}
+          <div className="absolute top-4 left-6 lg:top-8 lg:left-0 z-30">
+            <Breadcrumbs
+              items={[
+                { label: t('homepage'), to: '/' },
+                { label: t('designers'), to: '/designers' },
+                { label: t(designer.name) },
+              ]}
             />
           </div>
-          <div className="text-left w-full">
-            <div className="max-w-2xl px-4 sm:px-0 md:px-0 md:mx-0">
-              <h1
-                className={`text-4xl font-normal text-gray-700 ${isTitleVisible ? 'translate-x-0 opacity-100' : '-translate-x-[150%] opacity-0'
-                  }`}
-                style={{
-                  transition: 'transform 700ms ease-out, opacity 1200ms ease-out',
-                }}
-              >
-                {t(designer.name)}
-              </h1>
-              <ScrollReveal delay={200}>
-                {(() => {
-                  const bio = t(designer.bio)
-                  return Array.isArray(bio) ? (
-                    <div className="mt-4 text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
-                      <PortableTextLite value={bio} />
-                    </div>
-                  ) : (
-                    <p className="mt-4 text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
-                      {bio}
-                    </p>
-                  )
-                })()}
-              </ScrollReveal>
+          <div className="flex-1 relative mx-6 lg:ml-0 lg:mr-12 mt-12 lg:mt-24 mb-12 lg:mb-24 flex items-start justify-center overflow-visible">
+            <div ref={imageRef} className="relative w-full h-[95%] lg:h-full max-h-[850px] z-10">
+              <OptimizedImage
+                src={typeof designer.image === 'string' ? designer.image : designer.image?.url || ''}
+                srcMobile={typeof designer.image === 'object' ? designer.image.urlMobile : designer.imageMobile}
+                srcDesktop={typeof designer.image === 'object' ? designer.image.urlDesktop : designer.imageDesktop}
+                alt={t(designer.name)}
+                className={`w-full h-full object-cover portrait-frame filter grayscale transition-all duration-700 group-hover:grayscale-0 ${imageBorderClass} ${phase === 'animating' ? 'opacity-0' : 'opacity-100'}`}
+                loading="eager"
+                quality={90}
+                crop={typeof designer.image === 'object' ? (designer.image as any).crop : undefined}
+                hotspot={typeof designer.image === 'object' ? (designer.image as any).hotspot : undefined}
+              />
             </div>
           </div>
         </div>
 
-        <ScrollReveal delay={400} threshold={0.01}>
-          <div className="border-t pt-6 mt-4 md:pt-6 md:mt-6 px-4 sm:px-0 md:px-0">
-            <h2 className="text-3xl font-light text-gray-700 mb-4">
-              {t('designs') || 'Tasarımları'}
-            </h2>
-            {products.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
-                {products.map((product, index) => (
-                  <ScrollReveal
-                    key={product.id}
-                    delay={index < 12 ? index * 100 : 0}
-                    threshold={0.01}
-                  >
-                    <ProductCard product={product} variant="light" />
-                  </ScrollReveal>
-                ))}
-              </div>
-            ) : (
-              <ScrollReveal delay={0} threshold={0.01}>
-                <p className="text-gray-600">{t('no_products_by_designer')}</p>
+        {/* Sağ Taraf: Bilgiler ve Tasarımlar (Scroll Edilebilir) */}
+        <div className="w-full lg:w-1/2 lg:flex-1 h-auto lg:h-full overflow-y-visible lg:overflow-y-auto custom-scrollbar bg-white lg:border-l border-black/5 scroll-smooth pb-20 lg:pb-0">
+          <div className="py-12 lg:py-24 px-6 lg:px-20 min-h-full flex flex-col justify-start">
+
+            <div className="mb-12 lg:mb-16">
+              <h1
+                className={`text-4xl md:text-5xl lg:text-7xl font-display uppercase tracking-tighter text-black leading-none mb-4 transition-all duration-1000 ease-out delay-300 ${isTitleVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+              >
+                {t(designer.name)}
+              </h1>
+
+              {designer.role && (
+                <ScrollReveal delay={400}>
+                  <p className="text-sm md:text-base uppercase tracking-[0.25em] text-gray-500 font-medium ml-1">
+                    {t(designer.role)}
+                  </p>
+                </ScrollReveal>
+              )}
+
+              <div className="h-px w-full bg-black/10 my-8 lg:my-12"></div>
+
+              <ScrollReveal delay={500}>
+                <div className="text-base lg:text-lg leading-relaxed text-gray-600 font-light max-w-2xl">
+                  {(() => {
+                    const bio = t(designer.bio)
+                    return Array.isArray(bio) ? (
+                      <PortableTextLite value={bio} />
+                    ) : (
+                      <p>{bio}</p>
+                    )
+                  })()}
+                </div>
               </ScrollReveal>
-            )}
+            </div>
+
+            <ScrollReveal delay={600} threshold={0.01}>
+              <div className="pt-6">
+                <h2 className="text-2xl lg:text-3xl font-light text-gray-900 tracking-tight mb-8">
+                  {t('designs') || 'Tasarımları'}
+                </h2>
+
+                {products.length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-8">
+                    {products.map((product, index) => (
+                      <ScrollReveal
+                        key={product.id}
+                        delay={index < 8 ? index * 100 : 0}
+                        threshold={0.01}
+                      >
+                        <ProductCard product={product} variant="light" />
+                      </ScrollReveal>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 italic mt-4">{t('no_products_by_designer')}</p>
+                )}
+              </div>
+            </ScrollReveal>
+
           </div>
-        </ScrollReveal>
-      </div>
+        </div>
+
+      </main>
     </div>
   )
 }

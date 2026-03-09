@@ -11,17 +11,10 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: [
-          '"Jura"',
-          'Inter',
-          '-apple-system',
-          'BlinkMacSystemFont',
-          'Segoe UI',
-          'Roboto',
-          'sans-serif',
-        ],
-        oswald: ['"Oswald"', 'sans-serif'],
-        inter: ['"Inter"', 'sans-serif'],
+        display: ['"Inter"', 'sans-serif'],
+        sans: ['"Inter"', 'sans-serif'],
+        accent: ['"Oswald"', 'sans-serif'],
+        jura: ['"Jura"', 'sans-serif'],
       },
     },
   },

@@ -91,6 +91,8 @@ export interface Designer {
   id: string
   /** Localized name of the designer. */
   name: LocalizedString
+  /** Localized role or title of the designer (e.g., Architect). */
+  role?: LocalizedString
   /** Localized biography of the designer. */
   bio: LocalizedString
   /** URL for the designer's portrait or representative image. */

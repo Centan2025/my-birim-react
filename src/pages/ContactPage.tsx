@@ -578,7 +578,7 @@ export function ContactPage() {
   return (
     <div className={`${isFullscreenOpen ? 'bg-white' : 'bg-gray-100'} pt-20 md:pt-24 lg:pt-24`}>
       {/* Breadcrumb Band */}
-      <div className="w-full bg-white">
+      <div className="w-full relative z-20">
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
           <motion.div
             initial={{ opacity: 0, y: 15 }}
@@ -591,18 +591,27 @@ export function ContactPage() {
           </motion.div>
         </div>
       </div>
-      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-8 md:pt-12 pb-16">
+      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 md:pt-12 pb-12">
         <motion.div
-          className="text-center mb-12"
+          className="text-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
         >
-          <h1 className="text-3xl md:text-4xl font-light text-gray-600 uppercase">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 tracking-tight uppercase">
             {t('contact')}
           </h1>
-          <div className="h-px bg-gray-300 mt-4 w-full"></div>
-          <p className="mt-4 text-lg text-gray-500 max-w-3xl mx-auto font-light">
+        </motion.div>
+      </div>
+
+      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pb-16">
+        <motion.div
+          className="text-center mb-12 border-t border-gray-300 pt-16"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <p className="text-lg text-gray-500 max-w-3xl mx-auto font-light">
             {t(content.subtitle)}
           </p>
         </motion.div>

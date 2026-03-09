@@ -16,39 +16,32 @@ const ProjectRow: React.FC<{ project: Project; index: number }> = ({ project, in
         to={`/projects/${project.id}`}
         className="group block border-b border-gray-300 transition-colors duration-300 hover:bg-gray-200/70"
       >
-        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 md:gap-8 py-8 md:py-10 lg:py-12">
-          {/* Sol: Proje adı - hover'da sağa kayar */}
-          <div className="flex items-center min-w-0 pr-4">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-light tracking-tight text-gray-900 uppercase transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:text-gray-600 group-hover:translate-x-6 truncate">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] items-center gap-4 md:gap-8 py-8 md:py-10 lg:py-12">
+          {/* Sol: Proje adı ve detaylar - hover'da sağa kayar */}
+          <div className="flex flex-col items-start min-w-0 pr-4 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:translate-x-6">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-light tracking-tight text-gray-900 uppercase truncate">
               {t(project.title)}
             </h2>
-          </div>
-
-          {/* Orta: Kategori + Yıl */}
-          <div className="hidden md:flex flex-col items-center text-center min-w-[200px] lg:min-w-[260px]">
-            {project.projectCategory && (
-              <span className="text-base lg:text-lg text-gray-400 uppercase tracking-widest font-light">
-                {t(project.projectCategory)}
-              </span>
-            )}
-            {project.date && (
-              <span className="text-base lg:text-lg text-gray-400 mt-1 font-light">
-                {t(project.date)}
-              </span>
-            )}
-          </div>
-
-          {/* Mobilde: Kategori + Yıl */}
-          <div className="flex md:hidden gap-4 text-sm text-gray-400">
-            {project.projectCategory && (
-              <span className="uppercase tracking-wider">{t(project.projectCategory)}</span>
-            )}
-            {project.date && <span>{t(project.date)}</span>}
+            <div className="flex gap-4 mt-2">
+              {project.projectCategory && (
+                <span className="text-sm md:text-base lg:text-lg text-gray-400 uppercase tracking-widest font-light">
+                  {t(project.projectCategory)}
+                </span>
+              )}
+              {project.date && (
+                <>
+                  <span className="text-gray-300">|</span>
+                  <span className="text-sm md:text-base lg:text-lg text-gray-400 font-light">
+                    {t(project.date)}
+                  </span>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Sağ: Proje görseli */}
           <div className="flex justify-end min-w-0">
-            <div className="w-full max-w-[480px] lg:max-w-[640px] aspect-[16/10] overflow-hidden ml-auto">
+            <div className="w-64 md:w-[400px] lg:w-[480px] xl:w-[640px] aspect-[16/10] overflow-hidden ml-auto">
               {project.cover && (
                 <OptimizedImage
                   src={typeof project.cover === 'string' ? project.cover : project.cover?.url || ''}
@@ -98,7 +91,7 @@ export function ProjectsPage() {
   return (
     <div className="bg-gray-100 min-h-screen animate-fade-in-up-subtle pt-20 md:pt-24 lg:pt-24">
       {/* Breadcrumb Band */}
-      <div className="w-full bg-white">
+      <div className="w-full relative z-20">
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
           <Breadcrumbs
             items={[{ label: t('homepage'), to: '/' }, { label: t('projects') || 'Projeler' }]}
@@ -107,8 +100,8 @@ export function ProjectsPage() {
       </div>
 
       {/* Sayfa Başlığı */}
-      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 md:pt-6 pb-4 md:pb-8">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 tracking-tight text-center">
+      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 md:pt-12 pb-12">
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 tracking-tight text-center uppercase">
           {t('projects') || 'Projeler'}
         </h1>
       </div>
