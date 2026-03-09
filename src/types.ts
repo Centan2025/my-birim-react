@@ -331,6 +331,8 @@ export interface ContentBlock {
   textPosition?: 'above' | 'below'
   /** Title Position: above or below the media */
   titlePosition?: 'above' | 'below'
+  /** Title Alignment: left, center, or right (independent of text) */
+  titleAlignment?: 'left' | 'center' | 'right'
   /** Order for sorting blocks */
   order?: number
   /** Toggles button visibility over media */

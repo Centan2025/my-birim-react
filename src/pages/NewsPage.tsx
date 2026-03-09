@@ -24,17 +24,18 @@ const blockToPlainText = (blocks: any): string => {
     .join(' ')
 }
 
-const formatDate = (dateString: string): string => {
+const formatDate = (dateString: string, locale: string): string => {
   if (!dateString) return ''
   const date = new Date(dateString)
-  const day = String(date.getDate()).padStart(2, '0')
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const year = date.getFullYear()
-  return `${day}.${month}.${year}`
+  return date.toLocaleDateString(locale === 'tr' ? 'tr-TR' : 'en-US', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }).toUpperCase()
 }
 
 const NewsCard: React.FC<{ item: NewsItem }> = ({ item }) => {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
 
   // Extract a summary from content if available
   const getSummary = () => {
@@ -49,47 +50,43 @@ const NewsCard: React.FC<{ item: NewsItem }> = ({ item }) => {
   const summary = getSummary()
 
   return (
-    <div className="group border-b border-gray-300 pb-16 mb-16 last:border-0 last:mb-0">
-      <div className="flex flex-col md:flex-row gap-8 md:gap-16 items-start">
-        {/* Text Content */}
-        <div className="flex-1 order-2 md:order-1">
-          <p className="text-sm text-gray-500 mb-2 font-light">{formatDate(item.date)}</p>
-          <Link to={`/news/${item.id}`} className="block mb-6">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-light tracking-tight text-gray-900 group-hover:text-gray-600 transition-colors duration-300 leading-tight uppercase">
+    <div className="group border-b border-gray-300 py-10 md:py-16 last:border-0 hover:bg-gray-200/50 transition-colors duration-300">
+      <Link to={`/news/${item.id}`} className="block">
+        <div className="grid grid-cols-1 md:grid-cols-[140px_1fr_320px] items-start gap-8 md:gap-16">
+
+          {/* Kolon 1: Tarih */}
+          <div className="pt-2">
+            <p className="text-[10px] md:text-[11px] font-bold tracking-[0.2em] text-gray-400 uppercase leading-none">
+              {formatDate(item.date, locale)}
+            </p>
+          </div>
+
+          {/* Kolon 2: Başlık ve Özet */}
+          <div className="flex flex-col gap-5 max-w-2xl transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:translate-x-6">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-light tracking-tight text-gray-900 group-hover:text-gray-600 transition-colors duration-300 uppercase leading-tight">
               {t(item.title)}
             </h2>
-          </Link>
+            <p className="text-gray-400 text-sm md:text-base leading-relaxed font-light">
+              {summary}
+            </p>
+          </div>
 
-          <p className="text-gray-500 text-lg leading-relaxed mb-8 max-w-2xl font-light">
-            {summary}
-          </p>
-
-          <Link
-            to={`/news/${item.id}`}
-            className="inline-flex items-center text-[11px] font-bold tracking-[0.2em] uppercase text-gray-900 transition-all duration-300"
-          >
-            <span>{t('continue_reading') || 'İÇERİĞİN DEVAMI'}</span>
-          </Link>
+          {/* Kolon 3: Görsel */}
+          <div className="w-full h-40 md:h-48 overflow-hidden ml-auto">
+            <OptimizedImage
+              src={typeof item.mainImage === 'string' ? item.mainImage : item.mainImage?.url || ''}
+              srcMobile={typeof item.mainImage === 'object' ? item.mainImage.urlMobile : undefined}
+              srcDesktop={typeof item.mainImage === 'object' ? item.mainImage.urlDesktop : undefined}
+              alt={t(item.title)}
+              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] will-change-transform"
+              width={600}
+              height={400}
+              loading="lazy"
+              quality={85}
+            />
+          </div>
         </div>
-
-        {/* Image */}
-        <Link
-          to={`/news/${item.id}`}
-          className="w-full md:w-[40%] aspect-[4/3] md:aspect-[3/2] overflow-hidden rounded-sm order-1 md:order-2"
-        >
-          <OptimizedImage
-            src={typeof item.mainImage === 'string' ? item.mainImage : item.mainImage?.url || ''}
-            srcMobile={typeof item.mainImage === 'object' ? item.mainImage.urlMobile : undefined}
-            srcDesktop={typeof item.mainImage === 'object' ? item.mainImage.urlDesktop : undefined}
-            alt={t(item.title)}
-            className="w-full h-full object-cover transition-transform duration-[1500ms] ease-out group-hover:scale-110"
-            width={1200}
-            height={800}
-            loading="lazy"
-            quality={90}
-          />
-        </Link>
-      </div>
+      </Link>
     </div>
   )
 }

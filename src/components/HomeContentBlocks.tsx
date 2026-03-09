@@ -96,6 +96,15 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               ? 'text-right'
               : 'text-left'
 
+        // Separate title alignment (falls back to textAlignment)
+        const titleAlign = block.titleAlignment || textAlign
+        const titleAlignClass =
+          titleAlign === 'center'
+            ? 'text-center'
+            : titleAlign === 'right'
+              ? 'text-right'
+              : 'text-left'
+
         const textPosition = block.textPosition || 'below'
         const titlePosition = block.titlePosition || 'below'
         const titleFont = block.titleFont || 'normal'
@@ -150,7 +159,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           >
             <h2
               ref={applyFontRef(titleFontFamily)}
-              className={`${isFullWidth ? 'text-4xl md:text-6xl lg:text-7xl' : 'text-3xl md:text-5xl lg:text-6xl'} uppercase ${textAlignClass} text-gray-950 w-full ${block.verticalAlignment === 'top' ? 'mt-0' : ''} ${textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}
+              className={`${isFullWidth ? 'text-4xl md:text-6xl lg:text-7xl' : 'text-3xl md:text-5xl lg:text-6xl'} uppercase ${titleAlignClass} text-gray-950 w-full ${block.verticalAlignment === 'top' ? 'mt-0' : ''} ${titleAlign === 'center' ? 'mx-auto' : titleAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}
               style={{
                 textShadow: '0 2px 4px rgba(0,0,0,0.1)',
                 fontWeight: titleFont === 'normal' || titleFont === 'Oswald' ? 200 : 'inherit',
@@ -393,7 +402,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 
         const textContentAbove = hasTopContent ? (
           <div
-            className={`${isFullWidth ? `w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-0 ${block.verticalAlignment === 'top' ? 'pt-0' : 'pt-6 md:pt-8'} pb-3` : isCenter ? `w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto ${block.verticalAlignment === 'top' ? 'pt-0' : 'pt-6 md:pt-8'} pb-3` : 'w-full mx-auto mb-4'} flex flex-col gap-4 ${textAlign === 'center' ? 'items-center text-center' : textAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
+            className={`${isFullWidth ? `w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-0 ${block.verticalAlignment === 'top' ? 'pt-0' : 'pt-6 md:pt-8'} pb-3` : isCenter ? `w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto ${block.verticalAlignment === 'top' ? 'pt-0' : 'pt-6 md:pt-8'} pb-3` : 'w-full mx-auto mb-4'} flex flex-col gap-4 ${titleAlign === 'center' ? 'items-center text-center' : titleAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
           >
             {titlePosition === 'above' && titleElement}
             {textPosition === 'above' && bodyElement}
@@ -402,7 +411,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 
         const textContentBelow = hasBottomContent ? (
           <div
-            className={`${isFullWidth ? `w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-0 ${block.verticalAlignment === 'top' ? 'pt-0' : 'pt-3'} pb-6 md:pb-8` : isCenter ? `w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto ${block.verticalAlignment === 'top' ? 'pt-0' : 'pt-3'} pb-6 md:pb-8` : `w-full mx-auto ${block.verticalAlignment === 'top' ? 'mt-0' : 'mt-4'}`} flex flex-col gap-4 ${textAlign === 'center' ? 'items-center text-center' : textAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
+            className={`${isFullWidth ? `w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-0 ${block.verticalAlignment === 'top' ? 'pt-0' : 'pt-3'} pb-6 md:pb-8` : isCenter ? `w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto ${block.verticalAlignment === 'top' ? 'pt-0' : 'pt-3'} pb-6 md:pb-8` : `w-full mx-auto ${block.verticalAlignment === 'top' ? 'mt-0' : 'mt-4'}`} flex flex-col gap-4 ${titleAlign === 'center' ? 'items-center text-center' : titleAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
           >
             {titlePosition === 'below' && titleElement}
             {textPosition === 'below' && bodyElement}
@@ -431,6 +440,13 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 {textContentAbove}
                 {mediaContent}
                 {textContentBelow}
+                {/* Title-only fallback: when no media and no above/below content assigned, render title directly */}
+                {!hasMedia && !textContentAbove && !textContentBelow && hasTitle && (
+                  <div className={`w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-0 flex flex-col gap-4 ${titleAlign === 'center' ? 'items-center text-center' : titleAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}>
+                    {titleElement}
+                    {bodyElement}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">

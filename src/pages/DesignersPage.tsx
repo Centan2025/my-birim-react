@@ -129,7 +129,7 @@ export function DesignersPage() {
             </AnimatePresence>
           </div>
 
-          <div className="absolute bottom-0 left-0 w-full z-20 p-8 lg:p-12 lg:pb-10 pt-0 flex flex-col justify-end items-start bg-transparent pointer-events-none">
+          <div className="absolute bottom-0 left-0 w-full z-20 p-8 lg:px-0 lg:pr-12 lg:pb-10 pt-0 flex flex-col justify-end items-start bg-transparent pointer-events-none">
             <AnimatePresence mode="wait">
               {activeDesigner && (
                 <motion.div

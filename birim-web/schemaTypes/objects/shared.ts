@@ -975,6 +975,22 @@ export const contentBlock = defineType({
       description: 'Başlığın görselin üstünde mi yoksa altında mı duracağını belirler.',
     }),
     defineField({
+      name: 'titleAlignment',
+      title: 'Başlık Hizalaması (Yatay)',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Sol', value: 'left' },
+          { title: 'Orta', value: 'center' },
+          { title: 'Sağ', value: 'right' },
+        ],
+        layout: 'radio',
+        direction: 'horizontal',
+      },
+      initialValue: 'left',
+      description: 'Başlığın yatay hizalamasını belirler.',
+    }),
+    defineField({
       name: 'description',
       title: 'Açıklama Metni',
       type: 'localizedPortableText',
@@ -1009,7 +1025,7 @@ export const contentBlock = defineType({
         direction: 'horizontal',
       },
       initialValue: 'left',
-      description: 'Metinlerin (başlık ve açıklama) yatay hizalamasını belirler.',
+      description: 'Açıklama metninin yatay hizalamasını belirler. Başlık için özel hizalama seçilmediyse başlığı da etkiler.',
     }),
     defineField({
       name: 'verticalAlignment',

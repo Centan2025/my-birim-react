@@ -8,57 +8,71 @@ import { useProjects } from '../hooks/useProjects'
 import ScrollReveal from '../components/ScrollReveal'
 import { useSEO } from '../hooks/useSEO'
 
-const ProjectRow: React.FC<{ project: Project; index: number }> = ({ project, index }) => {
+/**
+ * Modern Grid Card for Projects
+ * Design inspired by the reference image.
+ */
+const ProjectCard: React.FC<{ project: Project; index: number }> = ({ project, index }) => {
   const { t } = useTranslation()
+
+  // Extract year from localized date string (e.g., "15.03.2023" -> "2023")
+  const dateVal = t(project.date)
+  const year = typeof dateVal === 'string' ? dateVal.match(/\d{4}/)?.[0] : ''
+
   return (
-    <ScrollReveal delay={index * 80} threshold={0.01} direction="up" distance={30}>
+    <ScrollReveal delay={index * 50} threshold={0.05} direction="none" distance={0}>
       <Link
         to={`/projects/${project.id}`}
-        className="group block border-b border-gray-300 transition-colors duration-300 hover:bg-gray-200/70"
+        className="group relative block aspect-square md:aspect-[4/3] lg:aspect-[16/10] overflow-hidden bg-zinc-900 border-[0.5px] border-white/5"
       >
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] items-center gap-4 md:gap-8 py-8 md:py-10 lg:py-12">
-          {/* Sol: Proje adı ve detaylar - hover'da sağa kayar */}
-          <div className="flex flex-col items-start min-w-0 pr-4 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:translate-x-6">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-light tracking-tight text-gray-900 uppercase truncate">
-              {t(project.title)}
-            </h2>
-            <div className="flex gap-4 mt-2">
-              {project.projectCategory && (
-                <span className="text-sm md:text-base lg:text-lg text-gray-400 uppercase tracking-widest font-light">
-                  {t(project.projectCategory)}
-                </span>
-              )}
-              {project.date && (
-                <>
-                  <span className="text-gray-300">|</span>
-                  <span className="text-sm md:text-base lg:text-lg text-gray-400 font-light">
-                    {t(project.date)}
-                  </span>
-                </>
-              )}
-            </div>
+        {/* Project Image */}
+        {project.cover && (
+          <OptimizedImage
+            src={typeof project.cover === 'string' ? project.cover : project.cover?.url || ''}
+            srcMobile={typeof project.cover === 'object' ? project.cover.urlMobile : undefined}
+            srcDesktop={typeof project.cover === 'object' ? project.cover.urlDesktop : undefined}
+            alt={t(project.title)}
+            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] will-change-transform"
+            width={1200}
+            height={800}
+            loading="lazy"
+            quality={90}
+            crop={typeof project.cover === 'object' ? (project.cover as any).crop : undefined}
+            hotspot={typeof project.cover === 'object' ? (project.cover as any).hotspot : undefined}
+          />
+        )}
+
+        {/* Dynamic Gradient Overlay - Darker at bottom for readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-1000" />
+
+        {/* Floating Content */}
+        <div className="absolute inset-0 p-8 md:p-12 lg:p-16 flex flex-col justify-end">
+          {/* Meta Row: Year | Category */}
+          <div className="flex items-center gap-4 mb-3">
+            {year && (
+              <span className="text-[10px] md:text-xs font-bold tracking-[0.3em] text-[#d4af37] uppercase">
+                {year}
+              </span>
+            )}
+            <div className="w-10 h-px bg-white/20"></div>
+            {project.projectCategory && (
+              <span className="text-[10px] md:text-xs font-bold tracking-[0.3em] text-white/50 uppercase">
+                {t(project.projectCategory)}
+              </span>
+            )}
           </div>
 
-          {/* Sağ: Proje görseli */}
-          <div className="flex justify-end min-w-0">
-            <div className="w-64 md:w-[400px] lg:w-[480px] xl:w-[640px] aspect-[16/10] overflow-hidden ml-auto">
-              {project.cover && (
-                <OptimizedImage
-                  src={typeof project.cover === 'string' ? project.cover : project.cover?.url || ''}
-                  srcMobile={typeof project.cover === 'object' ? project.cover.urlMobile : undefined}
-                  srcDesktop={typeof project.cover === 'object' ? project.cover.urlDesktop : undefined}
-                  alt={t(project.title)}
-                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-                  width={800}
-                  height={500}
-                  loading="lazy"
-                  quality={85}
-                  crop={typeof project.cover === 'object' ? (project.cover as any).crop : undefined}
-                  hotspot={typeof project.cover === 'object' ? (project.cover as any).hotspot : undefined}
-                />
-              )}
-            </div>
-          </div>
+          {/* Title */}
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-normal tracking-tight text-white uppercase leading-[1.1] mb-2 group-hover:text-white transition-colors">
+            {t(project.title)}
+          </h2>
+
+          {/* Location / Secondary Info (assuming excerpt might contain it or just skip) */}
+          {project.excerpt && (
+            <p className="text-[10px] md:text-xs font-light tracking-[0.2em] text-white/30 uppercase mt-2">
+              {t(project.excerpt).substring(0, 50)}
+            </p>
+          )}
         </div>
       </Link>
     </ScrollReveal>
@@ -69,11 +83,9 @@ export function ProjectsPage() {
   const { data: projects = [], isLoading: loading } = useProjects()
   const { t } = useTranslation()
 
-  // SEO meta
   useSEO({
     title: t('projects_meta_title') || 'BIRIM - Projeler',
-    description:
-      t('projects_meta_description') || 'BIRIM projeleri, referans işleri ve uygulama örnekleri',
+    description: t('projects_meta_description') || 'BIRIM projeleri, referans işleri ve uygulama örnekleri',
     type: 'website',
     siteName: 'BIRIM',
     locale: 'tr_TR',
@@ -82,17 +94,17 @@ export function ProjectsPage() {
 
   if (loading) {
     return (
-      <div className="pt-20">
+      <div className="bg-zinc-950 min-h-screen flex items-center justify-center">
         <PageLoading message={t('loading')} />
       </div>
     )
   }
 
   return (
-    <div className="bg-gray-100 min-h-screen animate-fade-in-up-subtle pt-20 md:pt-24 lg:pt-24">
+    <div className="bg-white min-h-screen animate-fade-in-up-subtle pt-20 md:pt-24 lg:pt-24 selection:bg-primary selection:text-black">
       {/* Breadcrumb Band */}
       <div className="w-full relative z-20">
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 text-gray-400">
           <Breadcrumbs
             items={[{ label: t('homepage'), to: '/' }, { label: t('projects') || 'Projeler' }]}
           />
@@ -106,18 +118,18 @@ export function ProjectsPage() {
         </h1>
       </div>
 
-      {/* Proje Listesi - Yatay satır düzeni */}
+      {/* Proje Listesi - 2 Kolon Izgara (Gap Kaldırıldı) */}
       <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pb-16 md:pb-24">
         {projects.length > 0 ? (
-          <div className="border-t border-gray-200">
+          <div className="grid grid-cols-1 md:grid-cols-2">
             {projects.map((project, index) => (
-              <ProjectRow key={project.id} project={project} index={index} />
+              <ProjectCard key={project.id} project={project} index={index} />
             ))}
           </div>
         ) : (
-          <ScrollReveal delay={0} threshold={0.01}>
-            <p className="text-gray-500 text-center py-16">{t('project_not_found')}</p>
-          </ScrollReveal>
+          <div className="py-32 text-center">
+            <p className="text-gray-400 text-lg italic font-light tracking-widest">{t('project_not_found')}</p>
+          </div>
         )}
       </div>
     </div>
