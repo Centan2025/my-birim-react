@@ -141,7 +141,7 @@ export function DesignerDetailPage() {
 
   return (
     <div
-      className={`h-auto min-h-screen lg:h-screen flex flex-col bg-[var(--bg-primary)] selection:bg-primary selection:text-black transition-colors duration-500 lg:overflow-hidden text-[var(--text-primary)] pt-20 ${fromCard ? '' : 'animate-fade-in-up-subtle'}`}
+      className={`h-auto min-h-screen lg:h-screen flex flex-col bg-[var(--bg-secondary)] selection:bg-primary selection:text-black transition-colors duration-500 lg:overflow-hidden text-[var(--text-primary)] pt-20 ${fromCard ? '' : 'animate-fade-in-up-subtle'}`}
     >
       {/* Breadcrumb Band */}
       <div className="w-full relative z-20">
@@ -158,8 +158,8 @@ export function DesignerDetailPage() {
 
       <main className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto flex flex-col lg:flex-row flex-1 lg:overflow-hidden mt-4 lg:mt-8">
         {/* Sol Taraf: Büyük Görsel (Sabit) */}
-        <div className="w-full lg:w-1/2 h-[60vh] lg:h-full shrink-0 relative lg:overflow-y-auto custom-scrollbar bg-[var(--bg-secondary)] border border-[var(--border-primary)] mt-0 p-10 lg:p-16 xl:p-24 flex flex-col group transition-colors duration-500">
-          <div className="flex-1 relative mt-4 lg:mt-8 flex items-start justify-center overflow-visible">
+        <div className="w-full lg:w-1/2 h-[60vh] lg:h-full shrink-0 relative lg:overflow-y-auto custom-scrollbar bg-[var(--bg-designer-hero)] border border-[var(--border-primary)] mt-0 p-10 lg:pt-24 lg:pb-16 lg:px-16 xl:pt-24 xl:pb-24 xl:px-24 flex flex-col group transition-colors duration-500">
+          <div className="flex-1 relative mt-0 flex items-start justify-center overflow-visible">
             <div
               ref={imageRef}
               className="relative w-full h-[85%] lg:h-[85%] xl:h-[95%] max-h-[850px] z-10"
@@ -192,7 +192,7 @@ export function DesignerDetailPage() {
         </div>
 
         {/* Sağ Taraf: Bilgiler ve Tasarımlar (Scroll Edilebilir) */}
-        <div className="w-full lg:w-1/2 lg:flex-1 h-auto lg:h-full overflow-y-visible lg:overflow-y-auto custom-scrollbar bg-[var(--bg-primary)] lg:border-l border-[var(--border-primary)] scroll-smooth pb-20 lg:pb-0">
+        <div className="w-full lg:w-1/2 lg:flex-1 h-auto lg:h-full overflow-y-visible lg:overflow-y-auto custom-scrollbar bg-[var(--bg-secondary)] lg:border-l border-[var(--border-primary)] scroll-smooth pb-20 lg:pb-0">
           <div className="py-12 lg:py-24 px-6 lg:px-20 min-h-full flex flex-col justify-start">
             <div className="mb-12 lg:mb-16">
               <h1

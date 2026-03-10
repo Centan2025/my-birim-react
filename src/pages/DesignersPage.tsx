@@ -61,7 +61,7 @@ export function DesignersPage() {
   }
 
   return (
-    <div className="h-auto min-h-screen lg:h-screen flex flex-col bg-[var(--bg-primary)] selection:bg-primary selection:text-black transition-colors duration-500 lg:overflow-hidden text-[var(--text-primary)] pt-20">
+    <div className="h-auto min-h-screen lg:h-screen flex flex-col bg-[var(--bg-secondary)] selection:bg-primary selection:text-black transition-colors duration-500 lg:overflow-hidden text-[var(--text-primary)] pt-20">
       {/* Breadcrumb Band */}
       <div className="w-full relative z-20">
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
@@ -73,8 +73,8 @@ export function DesignersPage() {
 
       <main className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto flex flex-col lg:flex-row flex-1 lg:overflow-hidden mt-4 lg:mt-8">
         {/* Sol Taraf: Portre ve Bilgi (Sabit kalır) */}
-        <div className="hidden lg:flex w-full lg:w-1/2 min-h-[45svh] lg:h-full shrink-0 relative lg:overflow-y-auto custom-scrollbar bg-[var(--bg-secondary)] border border-[var(--border-primary)] mt-0 pt-0 px-10 lg:px-16 xl:px-20 2xl:px-28 pb-12 lg:pb-24 xl:pb-32 group flex-col transition-colors duration-500">
-          <div className="flex-none lg:flex-1 relative mt-10 lg:mt-12 xl:mt-16 flex items-start justify-center overflow-visible">
+        <div className="hidden lg:flex w-full lg:w-1/2 min-h-[45svh] lg:h-full shrink-0 relative lg:overflow-hidden bg-[var(--bg-designer-hero)] border border-[var(--border-primary)] mt-0 pt-0 px-10 lg:px-16 xl:px-20 2xl:px-28 group flex-col transition-colors duration-500">
+          <div className="flex-none lg:flex-1 relative mt-10 lg:mt-28 flex items-start justify-center overflow-visible">
             <AnimatePresence mode="wait">
               {activeDesigner && (
                 <motion.div
@@ -83,7 +83,7 @@ export function DesignersPage() {
                   animate={{opacity: 1, x: 0}}
                   exit={{opacity: 0, x: 30}}
                   transition={{duration: 1, ease: [0.43, 0.13, 0.23, 0.96]}}
-                  className="relative w-full h-[50vh] lg:h-[80%] xl:h-[85%] 2xl:h-[85%] max-h-[800px] z-10"
+                  className="relative w-full h-[45vh] lg:h-[70%] xl:h-[75%] 2xl:h-[75%] max-h-[700px] z-10"
                 >
                   <OptimizedImage
                     alt={t(activeDesigner.name)}
@@ -109,7 +109,7 @@ export function DesignersPage() {
                         initial={{opacity: 0, x: -50}}
                         animate={{opacity: 1, x: 0}}
                         transition={{duration: 0.8, delay: 0.2, ease: 'easeOut'}}
-                        className="absolute bottom-[-2px] lg:bottom-[-4px] left-0 whitespace-nowrap text-3xl md:text-5xl lg:text-[70px] xl:text-[80px] 2xl:text-[90px] text-white font-display uppercase tracking-tighter leading-[0.75]"
+                        className="absolute bottom-[-2px] lg:bottom-[-4px] left-0 whitespace-nowrap text-2xl md:text-4xl lg:text-[60px] xl:text-[70px] 2xl:text-[80px] text-white font-display uppercase tracking-tighter leading-[0.75]"
                       >
                         {t(activeDesigner.name).split(' ')[0]}
                       </motion.span>
@@ -118,7 +118,7 @@ export function DesignersPage() {
                         initial={{opacity: 0, x: -50}}
                         animate={{opacity: 1, x: 0}}
                         transition={{duration: 0.8, delay: 0.4, ease: 'easeOut'}}
-                        className="absolute top-0 left-0 text-[var(--text-designer-surname)] font-display uppercase tracking-tighter text-3xl md:text-5xl lg:text-[70px] xl:text-[80px] 2xl:text-[90px] whitespace-nowrap leading-[0.75]"
+                        className="absolute top-0 left-0 text-[var(--text-designer-surname)] font-display uppercase tracking-tighter text-2xl md:text-4xl lg:text-[60px] xl:text-[70px] 2xl:text-[80px] whitespace-nowrap leading-[0.75]"
                       >
                         {t(activeDesigner.name).split(' ').slice(1).join(' ')}
                       </motion.span>
@@ -129,48 +129,53 @@ export function DesignersPage() {
             </AnimatePresence>
           </div>
 
-          <div className="w-full z-20 pb-0 mt-auto flex flex-col justify-end items-start bg-transparent">
-            <AnimatePresence mode="wait">
-              {activeDesigner && (
-                <motion.div
-                  key={activeDesigner.id}
-                  initial={{opacity: 0, y: 20}}
-                  animate={{opacity: 1, y: 0}}
-                  exit={{opacity: 0, y: -20}}
-                  className="flex flex-col lg:flex-row items-center lg:items-end justify-center lg:justify-between w-full gap-0 lg:gap-12"
-                >
-                  {/* Title and Bio Wrapper - Hidden on Mobile */}
-                  <div className="hidden lg:flex flex-col items-start w-full lg:max-w-lg mb-2 text-left pointer-events-auto">
-                    {/* Role is visible on all devices */}
-                    {activeDesigner.role && (
-                      <span className="text-xs lg:text-sm uppercase tracking-[0.25em] text-[var(--text-secondary)] mb-1 xl:mb-2 2xl:mb-3 font-medium">
-                        {t(activeDesigner.role)}
-                      </span>
-                    )}
-                    {/* Bio is hidden on mobile */}
-                    <div className="text-sm xl:text-base leading-relaxed text-[var(--text-secondary)] font-light lg:line-clamp-1 xl:line-clamp-2 overflow-hidden text-left">
-                      {(() => {
-                        const bio = t(activeDesigner.bio)
-                        return Array.isArray(bio) ? <PortableTextLite value={bio} /> : bio
-                      })()}
-                    </div>
-                  </div>
+          {/* Alt Bilgi ve Karar Butonu - Alta Sabitlendi */}
+          <div className="absolute bottom-12 lg:bottom-16 xl:bottom-20 left-10 lg:left-16 xl:left-20 2xl:left-28 right-10 lg:right-16 xl:right-20 2xl:right-28 z-40 bg-transparent">
+            <div className="flex flex-col lg:flex-row items-end justify-between w-full gap-8 lg:gap-12">
+              {/* Info Container with fixed height as anchor */}
+              <div className="hidden lg:block relative flex-1 h-24 pointer-events-none">
+                <AnimatePresence mode="wait">
+                  {activeDesigner && (
+                    <motion.div
+                      key={activeDesigner.id}
+                      initial={{opacity: 0, y: 10}}
+                      animate={{opacity: 1, y: 0}}
+                      exit={{opacity: 0, y: -10}}
+                      transition={{duration: 0.6, ease: 'easeOut'}}
+                      className="absolute bottom-0 left-0 w-full flex flex-col items-start"
+                    >
+                      {activeDesigner.role && (
+                        <span className="text-xs lg:text-sm uppercase tracking-[0.25em] text-[var(--text-secondary)] mb-2 font-medium">
+                          {t(activeDesigner.role)}
+                        </span>
+                      )}
+                      <div className="text-sm xl:text-base leading-relaxed text-[var(--text-secondary)] font-light line-clamp-2 text-left w-full">
+                        {(() => {
+                          const bio = t(activeDesigner.bio)
+                          return Array.isArray(bio) ? <PortableTextLite value={bio} /> : bio
+                        })()}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
-                  <button
-                    onClick={() => navigate(`/designer/${activeDesigner.id}`)}
-                    className="w-full lg:w-auto text-center text-[10px] xl:text-[11px] 2xl:text-sm uppercase font-medium tracking-[0.3em] text-[var(--text-primary)] border border-black/30 dark:border-[var(--border-primary)] px-6 xl:px-8 2xl:px-12 py-4 xl:py-5 2xl:py-6 hover:bg-[var(--text-primary)] hover:text-[var(--bg-primary)] transition-all cursor-pointer whitespace-nowrap self-end lg:self-auto pointer-events-auto"
-                  >
-                    {t('explore_designer')}
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
+              {/* Button remains static and aligned to the bottom of the same row */}
+              <div className="w-full lg:w-auto flex items-end">
+                <button
+                  onClick={() => activeDesigner && navigate(`/designer/${activeDesigner.id}`)}
+                  className="w-full lg:w-auto text-center text-[10px] xl:text-[11px] 2xl:text-sm uppercase font-medium tracking-[0.3em] text-[var(--text-primary)] border border-[var(--text-primary)]/60 px-6 xl:px-8 2xl:px-12 py-4 xl:py-5 2xl:py-6 hover:bg-primary/20 hover:border-primary transition-all duration-700 ease-out cursor-pointer whitespace-nowrap mb-0"
+                >
+                  {t('explore_designer')}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Sağ Taraf: Rehber Listesi - Bağımsız Scroll */}
-        <div className="w-full lg:w-1/2 lg:flex-1 h-auto lg:h-full overflow-y-visible lg:overflow-y-auto custom-scrollbar bg-[var(--bg-designer-panel)] border-l border-[var(--border-primary)]/10 transition-colors duration-500 scroll-smooth lg:overscroll-contain pb-20 lg:pb-0">
-          <div className="py-12 lg:py-24 px-6 lg:px-20 min-h-full flex flex-col justify-start">
+        <div className="w-full lg:w-1/2 lg:flex-1 h-auto lg:h-full overflow-y-visible lg:overflow-y-auto custom-scrollbar bg-[var(--bg-secondary)] border-l border-[var(--border-primary)]/10 transition-colors duration-500 scroll-smooth lg:overscroll-contain pb-20 lg:pb-0">
+          <div className="py-12 lg:pt-0 lg:pb-24 px-6 lg:px-20 min-h-full flex flex-col justify-start">
             <div className="w-full mb-8 lg:hidden">
               <Breadcrumbs
                 items={[{label: t('homepage'), to: '/'}, {label: t('designers') || 'Tasarımcılar'}]}
@@ -208,19 +213,6 @@ export function DesignersPage() {
                 </button>
               ))}
             </nav>
-            {/* Scroll Indicator for long lists */}
-            <div className="mt-20 opacity-30 flex items-center space-x-4">
-              <div className="w-px h-12 bg-[var(--border-primary)] relative overflow-hidden">
-                <motion.div
-                  animate={{y: [0, 48]}}
-                  transition={{duration: 2, repeat: Infinity, ease: 'linear'}}
-                  className="absolute top-0 left-0 w-full h-1/3 bg-primary"
-                />
-              </div>
-              <span className="text-[8px] uppercase tracking-[0.3em] vertical-text text-[var(--text-secondary)]">
-                {t('scroll_discovery')}
-              </span>
-            </div>
           </div>
         </div>
       </main>
