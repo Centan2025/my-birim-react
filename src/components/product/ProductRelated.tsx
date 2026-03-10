@@ -1,15 +1,15 @@
 import React from 'react'
-import {ProductCard} from '../ProductCard'
+import { ProductCard } from '../ProductCard'
 import ScrollReveal from '../ScrollReveal'
-import {useTranslation} from '../../i18n'
+import { useTranslation } from '../../i18n'
 
 interface ProductRelatedProps {
   products: any[]
   show: boolean
 }
 
-export const ProductRelated: React.FC<ProductRelatedProps> = ({products, show}) => {
-  const {t} = useTranslation()
+export const ProductRelated: React.FC<ProductRelatedProps> = ({ products, show }) => {
+  const { t } = useTranslation()
 
   if (!show || products.length === 0) return null
 
@@ -22,7 +22,7 @@ export const ProductRelated: React.FC<ProductRelatedProps> = ({products, show}) 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
           {products.map((related, index) => (
             <ScrollReveal key={related.id} delay={index < 8 ? index * 100 : 0} threshold={0.05}>
-              <ProductCard product={related} variant="light" />
+              <ProductCard product={related} />
             </ScrollReveal>
           ))}
         </div>
