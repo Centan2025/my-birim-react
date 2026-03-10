@@ -200,18 +200,18 @@ const LocationCard: React.FC<{
       className={`p-4 cursor-pointer w-full max-w-full transition-all duration-300 ${isSelected ? 'bg-gray-200' : 'hover:bg-gray-100'
         }`}
     >
-      <h3 className="text-xl font-light text-gray-500">{t(location.title)}</h3>
-      <p className="mt-2 text-gray-500 flex items-start gap-2 font-light">
-        <MapPinIcon className="mt-1 flex-shrink-0 text-gray-400" />
+      <h3 className="text-xl font-light text-[var(--text-secondary)]">{t(location.title)}</h3>
+      <p className="mt-2 text-[var(--text-secondary)] flex items-start gap-2 font-light">
+        <MapPinIcon className="mt-1 flex-shrink-0 opacity-60" />
         <span className="break-words">{location.address}</span>
       </p>
-      <p className="mt-1 text-gray-500 flex items-center gap-2 font-light">
-        <PhoneIcon className="flex-shrink-0 text-gray-400" />
+      <p className="mt-1 text-[var(--text-secondary)] flex items-center gap-2 font-light">
+        <PhoneIcon className="flex-shrink-0 opacity-60" />
         <span>{location.phone}</span>
       </p>
       {location.email && (
-        <p className="mt-1 text-gray-500 flex items-center gap-2 font-light">
-          <MailIcon className="flex-shrink-0 text-gray-400" />
+        <p className="mt-1 text-[var(--text-secondary)] flex items-center gap-2 font-light">
+          <MailIcon className="flex-shrink-0 opacity-60" />
           <span>{location.email}</span>
         </p>
       )}
@@ -234,8 +234,8 @@ const LocationCard: React.FC<{
                 onShowMap()
               }}
               className={`flex items-center gap-2 px-5 py-2.5 outline-none font-light tracking-wider text-sm transition-all duration-300 w-max ${isMapVisible
-                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300 shadow-inner'
-                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 hover:border-gray-400 shadow-sm hover:shadow active:scale-95'
+                ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] hover:opacity-80 border border-[var(--border-primary)] shadow-inner'
+                : 'bg-[var(--bg-primary)] text-[var(--text-primary)] hover:opacity-80 border border-[var(--border-primary)] shadow-sm hover:shadow active:scale-95'
                 }`}
             >
               <MapPinIcon className="w-4 h-4" />
@@ -250,7 +250,7 @@ const LocationCard: React.FC<{
                   animate={{ opacity: 1, height: 450 }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                  className="w-full relative shadow-sm border border-gray-300 mt-2"
+                  className="w-full relative shadow-sm border border-[var(--border-primary)] mt-2"
                 >
                   <iframe
                     src={convertGoogleMapsUrlToEmbed(location.mapEmbedUrl)}
@@ -576,7 +576,7 @@ export function ContactPage() {
   }
 
   return (
-    <div className={`${isFullscreenOpen ? 'bg-white' : 'bg-gray-100'} pt-20 md:pt-24 lg:pt-24`}>
+    <div className={`${isFullscreenOpen ? 'bg-[var(--bg-primary)]' : 'bg-[var(--bg-tertiary)]'} pt-20 md:pt-24 lg:pt-24 transition-colors duration-500`}>
       {/* Breadcrumb Band */}
       <div className="w-full relative z-20">
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
@@ -598,7 +598,7 @@ export function ContactPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
         >
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 tracking-tight uppercase">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight uppercase">
             {t('contact')}
           </h1>
         </motion.div>
@@ -611,22 +611,22 @@ export function ContactPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
         >
-          <p className="text-lg text-gray-500 max-w-3xl mx-auto font-light">
+          <p className="text-lg text-[var(--text-secondary)] max-w-3xl mx-auto font-light">
             {t(content.subtitle)}
           </p>
         </motion.div>
 
         <div className="grid grid-cols-1 max-w-4xl mx-auto gap-8 md:gap-12 items-start transition-all duration-700 ease-in-out">
           <motion.div
-            className="bg-white p-6 shadow-sm border border-gray-300 w-full overflow-x-hidden"
+            className="bg-[var(--bg-primary)] p-6 shadow-sm border border-[var(--border-primary)] w-full overflow-x-hidden"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
           >
             {Array.from(locationGroupsMap.entries()).map(([type, locs]) => (
               <div key={type} className="mb-8 last:mb-0">
-                <h2 className="text-2xl font-light text-gray-600 mb-2">{type}</h2>
-                <div className="h-px bg-gray-300 mb-6 w-full"></div>
+                <h2 className="text-2xl font-light text-[var(--text-secondary)] mb-2">{type}</h2>
+                <div className="h-px bg-[var(--border-primary)] mb-6 w-full"></div>
                 <div className="space-y-4">
                   {locs.map((loc, index) => (
                     <LocationCard

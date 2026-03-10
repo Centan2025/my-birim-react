@@ -184,7 +184,7 @@ export function ProductsPage() {
   }
 
   return (
-    <div className="bg-gray-100">
+    <div className="bg-[var(--bg-secondary)]">
       {/* Category Hero Image */}
       <div className="relative h-[450px] animate-fade-in-down">
         <div className="absolute inset-0">
@@ -238,22 +238,22 @@ export function ProductsPage() {
           <div className="relative" ref={sortRef}>
             <button
               onClick={() => setIsSortOpen(!isSortOpen)}
-              className="flex items-center gap-2 text-[13px] sm:text-[15px] font-light text-gray-700 hover:text-gray-900 transition-transform duration-300 transform hover:-translate-y-1 hover:scale-105"
+              className="flex items-center gap-2 text-[13px] sm:text-[15px] font-light text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-transform duration-300 transform hover:-translate-y-1 hover:scale-105"
             >
               <span>{t('sort')}</span>
               <ChevronDownIcon />
             </button>
             {isSortOpen && (
-              <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 py-1 shadow-sm z-50">
+              <div className="absolute top-full right-0 mt-2 w-48 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-1 shadow-sm z-50">
                 <button
                   onClick={() => handleSortChange('year-desc')}
-                  className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-100"
+                  className="block w-full text-left px-4 py-2 text-xs text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
                 >
                   {t('sort_newest')}
                 </button>
                 <button
                   onClick={() => handleSortChange('name-asc')}
-                  className="block w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-100"
+                  className="block w-full text-left px-4 py-2 text-xs text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
                 >
                   {t('sort_name_asc')}
                 </button>
@@ -304,7 +304,7 @@ export function ProductsPage() {
                     return (
                       <div key={catId} className="mb-16">
                         {/* Category Title */}
-                        <h2 className="font-oswald text-4xl md:text-5xl lg:text-6xl uppercase font-light tracking-[0.1em] text-gray-900 mb-8">
+                        <h2 className="font-oswald text-4xl md:text-5xl lg:text-6xl uppercase font-light tracking-[0.1em] text-[var(--text-primary)] mb-8">
                           {categoryName}
                         </h2>
                         {/* Products Grid */}
@@ -315,7 +315,7 @@ export function ProductsPage() {
                               delay={startIndex + idx < 12 ? (startIndex + idx) * 100 : 0}
                               threshold={0.01}
                             >
-                              <ProductCard product={product} variant="light" />
+                              <ProductCard product={product} />
                             </ScrollReveal>
                           ))}
                         </div>
@@ -334,14 +334,14 @@ export function ProductsPage() {
                   delay={index < 12 ? index * 100 : 0}
                   threshold={0.01}
                 >
-                  <ProductCard product={product} variant="light" />
+                  <ProductCard product={product} />
                 </ScrollReveal>
               ))}
             </div>
           )
         ) : (
           <ScrollReveal delay={0} threshold={0.01}>
-            <p className="text-gray-600 text-center">{t('no_products_in_category')}</p>
+            <p className="text-[var(--text-secondary)] text-center">{t('no_products_in_category')}</p>
           </ScrollReveal>
         )}
       </div>

@@ -14,9 +14,7 @@ export function DesignersPage() {
   const { data: designers = [], isLoading: loading } = useDesigners()
   const { t } = useTranslation()
   const navigate = useNavigate()
-
   const [activeDesigner, setActiveDesigner] = useState<Designer | null>(null)
-  const isDarkMode = false
 
   // SEO meta
   useSEO({
@@ -34,15 +32,7 @@ export function DesignersPage() {
     }
   }, [designers, activeDesigner])
 
-  useEffect(() => {
-    if (!isDarkMode) {
-      document.documentElement.classList.add('light-mode')
-    } else {
-      document.documentElement.classList.remove('light-mode')
-    }
-    // Cleanup on unmount
-    return () => document.documentElement.classList.remove('light-mode')
-  }, [isDarkMode])
+  // Removed local isDarkMode effect, handled by DarkModeProvider
 
   const handleDesignerClick = (designer: Designer) => {
     // Mobilde tıklandığında anında detay sayfasına git (Sol taraf zaten gizli)
@@ -60,7 +50,7 @@ export function DesignersPage() {
 
   if (loading || !activeDesigner) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
         <PageLoading message={t('loading')} />
       </div>
     )
@@ -72,17 +62,17 @@ export function DesignersPage() {
   }
 
   return (
-    <div className="h-auto min-h-screen lg:h-screen flex flex-col bg-white selection:bg-primary selection:text-black transition-colors duration-500 lg:overflow-hidden text-black dark:text-white">
-      <main className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto flex flex-col lg:flex-row flex-1 lg:overflow-hidden mt-16 md:mt-20">
+    <div className="h-auto min-h-screen lg:h-screen flex flex-col bg-[var(--bg-primary)] selection:bg-primary selection:text-black transition-colors duration-500 lg:overflow-hidden text-[var(--text-primary)]">
+      <main className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto flex flex-col lg:flex-row flex-1 lg:overflow-hidden mt-16 lg:mt-16 xl:mt-20">
         {/* Sol Taraf: Portre ve Bilgi (Sabit kalır) */}
-        <div className="hidden lg:flex w-full lg:w-1/2 min-h-[45svh] lg:h-full shrink-0 relative lg:overflow-hidden bg-white group flex-col transition-colors duration-500 pb-8 lg:pb-0">
+        <div className="hidden lg:flex w-full lg:w-1/2 min-h-[45svh] lg:h-full shrink-0 relative lg:overflow-y-auto custom-scrollbar bg-[var(--bg-primary)] group flex-col transition-colors duration-500 pb-8 lg:pb-0">
           {/* Breadcrumbs (Left Top Desktop) */}
           <div className="absolute top-4 left-6 lg:top-8 lg:left-0 z-30">
             <Breadcrumbs
               items={[{ label: t('homepage'), to: '/' }, { label: t('designers') || 'Tasarımcılar' }]}
             />
           </div>
-          <div className="flex-none lg:flex-1 relative mx-6 lg:ml-0 lg:mr-12 mt-12 lg:mt-24 mb-4 lg:mb-8 flex items-start justify-center overflow-visible">
+          <div className="flex-none lg:flex-1 relative mx-6 lg:ml-0 lg:mr-12 mt-12 lg:mt-10 xl:mt-16 2xl:mt-24 mb-4 lg:mb-2 xl:mb-4 2xl:mb-8 flex items-start justify-center overflow-visible">
             <AnimatePresence mode="wait">
               {activeDesigner && (
                 <motion.div
@@ -91,7 +81,7 @@ export function DesignersPage() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 30 }}
                   transition={{ duration: 1, ease: [0.43, 0.13, 0.23, 0.96] }}
-                  className="relative w-full h-[35vh] lg:h-[98%] max-h-[850px] z-10"
+                  className="relative w-full h-[35vh] lg:h-[70%] xl:h-[80%] 2xl:h-[90%] max-h-[850px] z-10"
                 >
                   <OptimizedImage
                     alt={t(activeDesigner.name)}
@@ -109,7 +99,7 @@ export function DesignersPage() {
                         initial={{ opacity: 0, x: -50 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-                        className="absolute bottom-[-4px] left-0 whitespace-nowrap text-3xl md:text-5xl lg:text-[90px] text-black dark:text-white font-display uppercase tracking-tighter leading-[0.75]"
+                        className="absolute bottom-[-2px] lg:bottom-[-4px] left-0 whitespace-nowrap text-3xl md:text-5xl lg:text-[70px] xl:text-[80px] 2xl:text-[90px] text-white font-display uppercase tracking-tighter leading-[0.75]"
                       >
                         {t(activeDesigner.name).split(' ')[0]}
                       </motion.span>
@@ -118,7 +108,7 @@ export function DesignersPage() {
                         initial={{ opacity: 0, x: -50 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-                        className="absolute top-0 left-0 text-black font-display uppercase tracking-tighter text-3xl md:text-5xl lg:text-[90px] whitespace-nowrap leading-[0.75]"
+                        className="absolute top-0 left-0 text-[var(--text-designer-surname)] font-display uppercase tracking-tighter text-3xl md:text-5xl lg:text-[70px] xl:text-[80px] 2xl:text-[90px] whitespace-nowrap leading-[0.75]"
                       >
                         {t(activeDesigner.name).split(' ').slice(1).join(' ')}
                       </motion.span>
@@ -129,7 +119,7 @@ export function DesignersPage() {
             </AnimatePresence>
           </div>
 
-          <div className="absolute bottom-0 left-0 w-full z-20 p-8 lg:px-0 lg:pr-12 lg:pb-10 pt-0 flex flex-col justify-end items-start bg-transparent pointer-events-none">
+          <div className="w-full z-20 px-8 lg:px-0 lg:pr-12 pb-10 lg:pb-12 xl:pb-14 mt-auto flex flex-col justify-end items-start bg-transparent">
             <AnimatePresence mode="wait">
               {activeDesigner && (
                 <motion.div
@@ -143,12 +133,12 @@ export function DesignersPage() {
                   <div className="hidden lg:flex flex-col items-start w-full lg:max-w-lg mb-2 text-left pointer-events-auto">
                     {/* Role is visible on all devices */}
                     {activeDesigner.role && (
-                      <span className="text-sm uppercase tracking-[0.25em] text-gray-500 mb-3 font-medium">
+                      <span className="text-xs lg:text-sm uppercase tracking-[0.25em] text-[var(--text-secondary)] mb-1 xl:mb-2 2xl:mb-3 font-medium">
                         {t(activeDesigner.role)}
                       </span>
                     )}
                     {/* Bio is hidden on mobile */}
-                    <div className="text-base leading-relaxed text-gray-600 font-light line-clamp-2 overflow-hidden text-left">
+                    <div className="text-sm xl:text-base leading-relaxed text-[var(--text-secondary)] font-light lg:line-clamp-1 xl:line-clamp-2 overflow-hidden text-left">
                       {(() => {
                         const bio = t(activeDesigner.bio)
                         return Array.isArray(bio) ? (
@@ -162,7 +152,7 @@ export function DesignersPage() {
 
                   <button
                     onClick={() => navigate(`/designer/${activeDesigner.id}`)}
-                    className="w-full lg:w-auto text-center text-[11px] lg:text-sm uppercase font-medium tracking-[0.3em] text-black border border-black/20 px-6 lg:px-12 py-5 lg:py-6 hover:bg-black hover:text-white transition-all cursor-pointer whitespace-nowrap bg-transparent self-end lg:self-auto pointer-events-auto"
+                    className="w-full lg:w-auto text-center text-[10px] xl:text-[11px] 2xl:text-sm uppercase font-medium tracking-[0.3em] text-[var(--text-primary)] border border-black/30 dark:border-[var(--border-primary)] px-6 xl:px-8 2xl:px-12 py-4 xl:py-5 2xl:py-6 hover:bg-[var(--text-primary)] hover:text-[var(--bg-primary)] transition-all cursor-pointer whitespace-nowrap self-end lg:self-auto pointer-events-auto"
                   >
                     {t('explore_designer')}
                   </button>
@@ -174,18 +164,18 @@ export function DesignersPage() {
         </div>
 
         {/* Sağ Taraf: Rehber Listesi - Bağımsız Scroll */}
-        <div className="w-full lg:w-1/2 lg:flex-1 h-auto lg:h-full overflow-y-visible lg:overflow-y-auto custom-scrollbar bg-white border-l border-black/5 transition-colors duration-500 scroll-smooth lg:overscroll-contain pb-20 lg:pb-0">
+        <div className="w-full lg:w-1/2 lg:flex-1 h-auto lg:h-full overflow-y-visible lg:overflow-y-auto custom-scrollbar bg-[var(--bg-designer-panel)] border-l border-[var(--border-primary)]/10 transition-colors duration-500 scroll-smooth lg:overscroll-contain pb-20 lg:pb-0">
           <div className="py-12 lg:py-24 px-6 lg:px-20 min-h-full flex flex-col justify-start">
             <div className="w-full mb-8 lg:hidden">
               <Breadcrumbs
                 items={[{ label: t('homepage'), to: '/' }, { label: t('designers') || 'Tasarımcılar' }]}
               />
             </div>
-            <div className="mb-12 lg:mb-24 w-full">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 tracking-tight text-left mb-4">
+            <div className="mb-8 lg:mb-12 w-full">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-left mb-4">
                 {t('designers')}
               </h1>
-              <div className="h-px w-full bg-gray-200"></div>
+              <div className="h-px w-full bg-[var(--border-primary)]"></div>
             </div>
             <nav className="flex flex-col gap-4 lg:gap-6">
               {designers.map((designer) => (
@@ -195,15 +185,16 @@ export function DesignersPage() {
                   className={`
                     designer-name-link 
                     text-left 
-                    font-inter-regular
-                    text-5xl md:text-7xl lg:text-[110px] 
+                    font-arial-regular
+                    text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-[95px]
                     uppercase 
                     leading-[0.95] 
                     transition-all 
                     duration-500 
+                    cursor-pointer
                     ${activeDesigner?.id === designer.id
                       ? 'text-primary'
-                      : 'text-black/10 hover:text-primary/40'
+                      : 'text-[var(--text-primary)]/40 dark:text-[var(--text-primary)]/15 hover:text-primary/40'
                     }
                   `}
                 >
@@ -213,14 +204,14 @@ export function DesignersPage() {
             </nav>
             {/* Scroll Indicator for long lists */}
             <div className="mt-20 opacity-30 flex items-center space-x-4">
-              <div className="w-px h-12 bg-black/10 relative overflow-hidden">
+              <div className="w-px h-12 bg-[var(--border-primary)] relative overflow-hidden">
                 <motion.div
                   animate={{ y: [0, 48] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                   className="absolute top-0 left-0 w-full h-1/3 bg-primary"
                 />
               </div>
-              <span className="text-[8px] uppercase tracking-[0.3em] vertical-text text-black">{t('scroll_discovery')}</span>
+              <span className="text-[8px] uppercase tracking-[0.3em] vertical-text text-[var(--text-secondary)]">{t('scroll_discovery')}</span>
             </div>
           </div>
         </div>

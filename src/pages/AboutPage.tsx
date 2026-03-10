@@ -19,7 +19,7 @@ const MediaGallery = ({ media, alt }: { media?: NewsMedia[]; alt: string }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
         {media.map((m, idx) => (
           <ScrollReveal key={idx} delay={idx * 100} distance={10} threshold={0.1}>
-            <div className="relative aspect-video overflow-hidden bg-gray-50">
+            <div className="relative aspect-video overflow-hidden bg-[var(--bg-secondary)]">
               {m.type === 'video' ? (
                 <video
                   src={m.url}
@@ -118,7 +118,7 @@ export function AboutPage() {
   }
 
   return (
-    <div className="bg-gray-100 animate-fade-in-up-subtle">
+    <div className="bg-[var(--bg-tertiary)] animate-fade-in-up-subtle">
       {/* Hero Section */}
       <div className="relative h-[70vh] min-h-[500px] bg-gray-900 text-white flex items-center justify-center overflow-hidden">
         {content.heroImage && (
@@ -155,7 +155,7 @@ export function AboutPage() {
       </div>
 
       {/* Main Content Sections */}
-      <div className="bg-gray-100 overflow-hidden pb-32 font-light">
+      <div className="bg-[var(--bg-tertiary)] overflow-hidden pb-32 font-light">
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 text-[11px] sm:text-[12px]">
           <Breadcrumbs
             items={[{ label: t('homepage'), to: '/' }, { label: t('about') }]}
@@ -169,10 +169,10 @@ export function AboutPage() {
               <div className="flex flex-col lg:flex-row items-start gap-12 lg:gap-20">
                 <div className="flex-1 lg:max-w-xl">
                   <ScrollReveal threshold={0.2} distance={20}>
-                    <h2 className="text-3xl md:text-5xl font-light text-gray-900 mb-8 tracking-tight">
+                    <h2 className="text-3xl md:text-5xl font-light text-[var(--text-primary)] mb-8 tracking-tight">
                       {t(content.historySection.title)}
                     </h2>
-                    <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
+                    <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-lg md:text-xl">
                       {(() => {
                         const historyContent = t(content.historySection.content)
                         const isPortable =
@@ -224,7 +224,7 @@ export function AboutPage() {
 
         {/* 2. SECTION: IDENTITY (Gray Background Breakout) */}
         {content.identitySection && (
-          <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-gray-50 py-32">
+          <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-[var(--bg-secondary)] py-32">
             <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
               <div className="flex flex-col-reverse lg:flex-row items-start gap-12 lg:gap-20 text-left">
                 <div className="flex-1 w-full lg:w-auto">
@@ -250,10 +250,10 @@ export function AboutPage() {
                 </div>
                 <div className="flex-1 lg:max-w-xl">
                   <ScrollReveal threshold={0.2} distance={20}>
-                    <h2 className="text-3xl md:text-5xl font-light text-gray-900 mb-8 tracking-tight">
+                    <h2 className="text-3xl md:text-5xl font-light text-[var(--text-primary)] mb-8 tracking-tight">
                       {t(content.identitySection.title)}
                     </h2>
-                    <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
+                    <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-lg md:text-xl">
                       {Array.isArray(t(content.identitySection.content)) ? (
                         <>
                           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
@@ -278,7 +278,7 @@ export function AboutPage() {
             <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
               <div className="max-w-7xl mx-auto">
                 <ScrollReveal threshold={0.2} distance={20}>
-                  <h2 className="text-4xl md:text-6xl font-light text-gray-900 mb-16 tracking-tight text-center">
+                  <h2 className="text-4xl md:text-6xl font-light text-[var(--text-primary)] mb-16 tracking-tight text-center">
                     {t(content.qualitySection.title)}
                   </h2>
                 </ScrollReveal>
@@ -286,7 +286,7 @@ export function AboutPage() {
                 <div className="flex flex-col lg:flex-row gap-16 lg:gap-24 items-start text-left">
                   <div className="lg:w-1/3">
                     <ScrollReveal threshold={0.2} distance={25} delay={100}>
-                      <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
+                      <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-lg md:text-xl">
                         {Array.isArray(t(content.qualitySection.content)) ? (
                           <>
                             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}

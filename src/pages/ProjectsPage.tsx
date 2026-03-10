@@ -94,14 +94,14 @@ export function ProjectsPage() {
 
   if (loading) {
     return (
-      <div className="bg-zinc-950 min-h-screen flex items-center justify-center">
+      <div className="bg-[var(--bg-primary)] min-h-screen flex items-center justify-center">
         <PageLoading message={t('loading')} />
       </div>
     )
   }
 
   return (
-    <div className="bg-white min-h-screen animate-fade-in-up-subtle pt-20 md:pt-24 lg:pt-24 selection:bg-primary selection:text-black">
+    <div className="bg-[var(--bg-primary)] min-h-screen animate-fade-in-up-subtle pt-20 md:pt-24 lg:pt-24 selection:bg-primary selection:text-black">
       {/* Breadcrumb Band */}
       <div className="w-full relative z-20">
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 text-gray-400">
@@ -113,7 +113,7 @@ export function ProjectsPage() {
 
       {/* Sayfa Başlığı */}
       <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 md:pt-12 pb-12">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 tracking-tight text-center uppercase">
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-center uppercase">
           {t('projects') || 'Projeler'}
         </h1>
       </div>
@@ -128,7 +128,7 @@ export function ProjectsPage() {
           </div>
         ) : (
           <div className="py-32 text-center">
-            <p className="text-gray-400 text-lg italic font-light tracking-widest">{t('project_not_found')}</p>
+            <p className="text-[var(--text-secondary)] text-lg italic font-light tracking-widest">{t('project_not_found')}</p>
           </div>
         )}
       </div>

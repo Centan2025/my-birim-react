@@ -50,23 +50,23 @@ const NewsCard: React.FC<{ item: NewsItem }> = ({ item }) => {
   const summary = getSummary()
 
   return (
-    <div className="group border-b border-gray-300 py-10 md:py-16 last:border-0 hover:bg-gray-200/50 transition-colors duration-300">
+    <div className="group border-b border-[var(--border-primary)] py-10 md:py-16 last:border-0 hover:bg-[var(--bg-secondary)]/50 transition-colors duration-300">
       <Link to={`/news/${item.id}`} className="block">
         <div className="grid grid-cols-1 md:grid-cols-[140px_1fr_320px] items-start gap-8 md:gap-16">
 
           {/* Kolon 1: Tarih */}
           <div className="pt-2">
-            <p className="text-[10px] md:text-[11px] font-bold tracking-[0.2em] text-gray-400 uppercase leading-none">
+            <p className="text-[10px] md:text-[11px] font-bold tracking-[0.2em] text-[var(--text-secondary)] uppercase leading-none">
               {formatDate(item.date, locale)}
             </p>
           </div>
 
           {/* Kolon 2: Başlık ve Özet */}
           <div className="flex flex-col gap-5 max-w-2xl transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:translate-x-6">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-light tracking-tight text-gray-900 group-hover:text-gray-600 transition-colors duration-300 uppercase leading-tight">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-light tracking-tight text-[var(--text-primary)] group-hover:text-[var(--text-secondary)] transition-colors duration-300 uppercase leading-tight">
               {t(item.title)}
             </h2>
-            <p className="text-gray-400 text-sm md:text-base leading-relaxed font-light">
+            <p className="text-[var(--text-secondary)] text-sm md:text-base leading-relaxed font-light">
               {summary}
             </p>
           </div>
@@ -107,7 +107,7 @@ export function NewsPage() {
 
   if (loading) {
     return (
-      <div className="pt-20">
+      <div className="pt-20 bg-[var(--bg-primary)] min-h-screen">
         <PageLoading message={t('loading')} />
       </div>
     )
@@ -116,7 +116,7 @@ export function NewsPage() {
   const containerClass = "w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0"
 
   return (
-    <div className="bg-gray-100 min-h-screen animate-fade-in-up-subtle pt-20 md:pt-24 lg:pt-24">
+    <div className="bg-[var(--bg-secondary)] min-h-screen animate-fade-in-up-subtle pt-20 md:pt-24 lg:pt-24">
       {/* Breadcrumb Band */}
       <div className="w-full relative z-20">
         <div className={containerClass + " py-4"}>
@@ -128,7 +128,7 @@ export function NewsPage() {
 
       {/* Sayfa Başlığı */}
       <div className={containerClass + " pt-4 md:pt-12 pb-12"}>
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 tracking-tight text-center uppercase">
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-center uppercase">
           {t('news_title') || t('news')}
         </h1>
       </div>
@@ -136,7 +136,7 @@ export function NewsPage() {
       {/* Haber Listesi */}
       <div className={containerClass + " pb-16 md:pb-24"}>
         {news.length > 0 ? (
-          <div className="border-t border-gray-300 pt-16">
+          <div className="border-t border-[var(--border-primary)] pt-16">
             {news.map((item, index) => (
               <ScrollReveal
                 key={item.id}
@@ -151,7 +151,7 @@ export function NewsPage() {
           </div>
         ) : (
           <div className="py-20 text-center">
-            <p className="text-gray-400 text-lg italic font-light">{t('no_news')}</p>
+            <p className="text-[var(--text-secondary)] text-lg italic font-light">{t('no_news')}</p>
           </div>
         )}
       </div>

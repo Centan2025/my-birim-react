@@ -258,22 +258,22 @@ export function ProjectDetailPage() {
 
   if (loading) {
     return (
-      <div className="pt-20">
+      <div className="pt-20 bg-[var(--bg-primary)] min-h-screen">
         <PageLoading message={t('loading')} />
       </div>
     )
   }
   if (!project) {
     return (
-      <div className="pt-20 text-center">
-        <p className="text-gray-600">{t('project_not_found') || 'Proje bulunamadı'}</p>
+      <div className="pt-20 bg-[var(--bg-primary)] min-h-screen text-center">
+        <p className="text-[var(--text-secondary)]">{t('project_not_found') || 'Proje bulunamadı'}</p>
       </div>
     )
   }
 
   return (
     <div
-      className={`min-h-screen bg-gray-100 transition-all duration-700 ease-out ${isPageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+      className={`min-h-screen bg-[var(--bg-primary)] transition-all duration-700 ease-out ${isPageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
         }`}
       style={{
         transform: isPageVisible ? 'translateY(0)' : 'translateY(80px)',
@@ -299,7 +299,7 @@ export function ProjectDetailPage() {
             />
           </div>
         ) : (
-          <div className="absolute inset-0 w-full h-full bg-gray-200" />
+          <div className="absolute inset-0 w-full h-full bg-[var(--bg-secondary)]" />
         )}
 
         {/* Dark Overlay for Readability */}
@@ -392,7 +392,7 @@ export function ProjectDetailPage() {
       </div>
 
       {(project.excerpt || project.body || allMedia.length > 0 || (showBottomPrevNext && (prevProject || nextProject))) && (
-        <div className="mt-0 relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-gray-100">
+        <div className="mt-0 relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-[var(--bg-secondary)]">
           <div className="w-full md:max-w-[92%] lg:max-w-[80vw] mx-auto md:px-8 lg:px-0 py-6 md:py-8">
             {/* Top Prev / Next controls */}
             {showBottomPrevNext && (prevProject || nextProject) && (
@@ -401,7 +401,7 @@ export function ProjectDetailPage() {
                   {prevProject ? (
                     <Link
                       to={`/projects/${prevProject.id}`}
-                      className="inline-flex items-center text-gray-400 hover:text-gray-800 transition-colors"
+                      className="inline-flex items-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                       aria-label="Previous project"
                     >
                       <ArrowLeft className="w-7 h-7 md:w-8 md:h-8" />
@@ -414,7 +414,7 @@ export function ProjectDetailPage() {
                   {nextProject ? (
                     <Link
                       to={`/projects/${nextProject.id}`}
-                      className="inline-flex items-center text-gray-400 hover:text-gray-800 transition-colors"
+                      className="inline-flex items-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                       aria-label="Next project"
                     >
                       <ArrowRight className="w-7 h-7 md:w-8 md:h-8" />
@@ -444,14 +444,14 @@ export function ProjectDetailPage() {
                           ? excerptContent
                           : [excerptContent]
                         return (
-                          <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
+                          <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-lg md:text-xl">
                             <PortableTextLite value={blocks} />
                           </div>
                         )
                       }
 
                       return (
-                        <p className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
+                        <p className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-lg md:text-xl">
                           {excerptContent as string}
                         </p>
                       )
@@ -471,14 +471,14 @@ export function ProjectDetailPage() {
                       if (isPortable) {
                         const blocks = Array.isArray(bodyContent) ? bodyContent : [bodyContent]
                         return (
-                          <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
+                          <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-lg md:text-xl">
                             <PortableTextLite value={blocks} />
                           </div>
                         )
                       }
 
                       return (
-                        <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl whitespace-pre-line">
+                        <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-lg md:text-xl whitespace-pre-line">
                           {bodyContent as string}
                         </div>
                       )
@@ -495,7 +495,7 @@ export function ProjectDetailPage() {
                   blocks={project.contentBlocks}
                   isMobile={isMobile}
                   imageBorderClass={imageBorderClass}
-                  overrideBackgroundColor="bg-gray-100"
+                  overrideBackgroundColor="bg-[var(--bg-secondary)]"
                 />
               </div>
             ) : (

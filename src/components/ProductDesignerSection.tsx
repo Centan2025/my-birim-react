@@ -35,9 +35,9 @@ export function ProductDesignerSection({ designer, t }: ProductDesignerSectionPr
 
   return (
     <ScrollReveal delay={400} threshold={0.05}>
-      <section className="mt-10 bg-gray-200 text-gray-600 border-t border-b border-gray-400">
+      <section className="mt-10 bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border-t border-b border-[var(--border-primary)] transition-colors duration-500">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-10">
-          <h2 className="text-xl font-thin text-gray-600 mb-4">{t('designer')}</h2>
+          <h2 className="text-xl font-thin text-[var(--text-secondary)] mb-4">{t('designer')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
             <div className="w-full">
               <OptimizedImage
@@ -63,8 +63,8 @@ export function ProductDesignerSection({ designer, t }: ProductDesignerSectionPr
               />
             </div>
             <div className="w-full">
-              <h3 className="text-2xl font-normal text-gray-700">{t(designer.name)}</h3>
-              <p className="mt-4 text-gray-800 font-normal leading-relaxed">
+              <h3 className="text-2xl font-normal text-[var(--text-primary)]">{t(designer.name)}</h3>
+              <p className="mt-4 text-[var(--text-primary)] font-normal leading-relaxed opacity-90">
                 {bioText.slice(0, 400)}
                 {isLongText ? '…' : ''}
               </p>
@@ -73,7 +73,7 @@ export function ProductDesignerSection({ designer, t }: ProductDesignerSectionPr
                 onClick={() =>
                   navigate(`/designer/${designer.id}`, { state: { slideOver: true, designer } })
                 }
-                className="inline-block mt-6 text-gray-600 font-light underline underline-offset-4 hover:text-gray-800 cursor-pointer bg-transparent border-none p-0"
+                className="inline-block mt-6 text-[var(--text-secondary)] font-light underline underline-offset-4 hover:text-[var(--text-primary)] cursor-pointer bg-transparent border-none p-0 transition-colors"
               >
                 {t('discover_the_designer')}
               </button>

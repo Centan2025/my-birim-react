@@ -110,7 +110,7 @@ export function HomePage() {
 
   return (
     <div
-      className={`bg-white text-gray-900 ${isMobile ? 'hero-page-container-mobile' : ''}`}
+      className={`bg-[var(--bg-primary)] text-[var(--text-primary)] ${isMobile ? 'hero-page-container-mobile' : ''}`}
       style={
         isMobile && viewportWidth > 0
           ? {

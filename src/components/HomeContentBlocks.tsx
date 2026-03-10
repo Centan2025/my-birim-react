@@ -86,7 +86,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 
         const backgroundColor = overrideBackgroundColor
           ? overrideBackgroundColor
-          : block.backgroundColor === 'gray' ? 'bg-gray-100' : 'bg-white'
+          : block.backgroundColor === 'gray' ? 'bg-[var(--bg-secondary)]' : 'bg-[var(--bg-primary)]'
 
         const textAlign = block.textAlignment || 'left'
         const textAlignClass =
@@ -159,7 +159,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           >
             <h2
               ref={applyFontRef(titleFontFamily)}
-              className={`${isFullWidth ? 'text-4xl md:text-6xl lg:text-7xl' : 'text-3xl md:text-5xl lg:text-6xl'} uppercase ${titleAlignClass} text-gray-950 w-full ${block.verticalAlignment === 'top' ? 'mt-0' : ''} ${titleAlign === 'center' ? 'mx-auto' : titleAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}
+              className={`${isFullWidth ? 'text-4xl md:text-6xl lg:text-7xl' : 'text-3xl md:text-5xl lg:text-6xl'} uppercase ${titleAlignClass} text-[var(--text-primary)] w-full ${block.verticalAlignment === 'top' ? 'mt-0' : ''} ${titleAlign === 'center' ? 'mx-auto' : titleAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}
               style={{
                 textShadow: '0 2px 4px rgba(0,0,0,0.1)',
                 fontWeight: titleFont === 'normal' || titleFont === 'Oswald' ? 200 : 'inherit',
@@ -199,7 +199,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       return (
                         <div
                           ref={!isNormalContentFont ? applyFontRef(contentFontFamily) : undefined}
-                          className={`${marginClass} ${widthClass} ${isNormalContentFont ? 'font-roboto-thin text-xl md:text-2xl lg:text-3xl' : ''} text-gray-950 ${block.verticalAlignment === 'top' && !hasTitle ? '[&_.portable-text-container>*:first-child]:!mt-0' : ''}`}
+                          className={`${marginClass} ${widthClass} ${isNormalContentFont ? 'font-roboto-thin text-xl md:text-2xl lg:text-3xl' : ''} text-[var(--text-primary)] ${block.verticalAlignment === 'top' && !hasTitle ? '[&_.portable-text-container>*:first-child]:!mt-0' : ''}`}
                           style={!isNormalContentFont ? { fontWeight: 300 } : {}}
                         >
                           <PortableTextLite value={desc} removeTopMargin={block.verticalAlignment === 'top' && !hasTitle} />
@@ -210,7 +210,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     return (
                       <p
                         ref={!isNormalContentFont ? applyFontRef(contentFontFamily) : undefined}
-                        className={`text-gray-950 ${isNormalContentFont ? 'font-roboto-thin text-2xl md:text-3xl lg:text-4xl' : ''} leading-relaxed ${widthClass} ${marginClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0' : ''}`}
+                        className={`text-[var(--text-primary)] ${isNormalContentFont ? 'font-roboto-thin text-2xl md:text-3xl lg:text-4xl' : ''} leading-relaxed ${widthClass} ${marginClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0' : ''}`}
                         style={!isNormalContentFont ? { fontWeight: 300 } : {}}
                       >
                         {desc}
@@ -228,7 +228,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   {block.linkUrl ? (
                     <Link
                       to={block.linkUrl}
-                      className={`group inline-flex items-center gap-x-3 text-gray-950 hover:text-gray-400 font-bold py-4 text-sm md:text-lg lg:text-xl transition-colors duration-300`}
+                      className={`group inline-flex items-center gap-x-3 text-[var(--text-primary)] hover:text-[var(--text-secondary)] font-bold py-4 text-sm md:text-lg lg:text-xl transition-colors duration-300`}
                     >
                       <span className="inline-flex justify-center">
                         <span className="font-bold font-helvetica tracking-[0.05em]">
@@ -239,7 +239,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     </Link>
                   ) : (
                     <div
-                      className={`inline-flex items-center gap-x-3 text-gray-950 font-bold py-4 text-sm md:text-lg lg:text-xl`}
+                      className={`inline-flex items-center gap-x-3 text-[var(--text-primary)] font-bold py-4 text-sm md:text-lg lg:text-xl`}
                     >
                       <span className="inline-flex justify-center">
                         <span className="font-bold font-helvetica tracking-[0.05em]">
@@ -259,7 +259,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           : 'w-full md:max-w-[92%] lg:max-w-[80vw] mx-auto'
 
         const isButtonWhite = block.buttonColor === 'white'
-        const buttonTextColorClass = isButtonWhite ? 'text-white' : 'text-gray-950'
+        const buttonTextColorClass = isButtonWhite ? 'text-white' : 'text-[var(--text-primary)]'
 
         const hasMedia = !!mediaUrl
 
@@ -424,7 +424,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         return (
           <section
             key={index}
-            className={`content-block-wrapper relative z-20 ${backgroundColor}`}
+            className={`content-block-wrapper relative z-20 ${backgroundColor} transition-colors duration-500`}
             style={{
               paddingBottom:
                 !hasTextContent || index === sortedBlocks.length - 1

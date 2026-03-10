@@ -70,9 +70,9 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
     <section className="space-y-10">
       {/* Breadcrumbs */}
       <nav className="mb-0" aria-label="Breadcrumb">
-        <ol className="list-none p-0 inline-flex flex-wrap items-center font-inter text-[11px] sm:text-[13px] text-gray-700">
+        <ol className="list-none p-0 inline-flex flex-wrap items-center font-inter text-[11px] sm:text-[13px] text-[var(--text-secondary)]">
           <li>
-            <Link to="/" className="font-light text-gray-900 hover:text-gray-900 transition-colors">
+            <Link to="/" className="font-light text-[var(--text-primary)] hover:opacity-80 transition-colors">
               {t('homepage')}
             </Link>
           </li>
@@ -82,7 +82,7 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
               <li>
                 <Link
                   to={`/products/${category.id}`}
-                  className="font-light text-gray-900 hover:text-gray-900 transition-colors"
+                  className="font-light text-[var(--text-primary)] hover:opacity-80 transition-colors"
                 >
                   {t(category.name)}
                 </Link>
@@ -90,7 +90,7 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
               <li className="font-light text-gray-400 mx-2">|</li>
             </>
           )}
-          <li className="font-bold text-gray-900" aria-current="page">
+          <li className="font-bold text-[var(--text-primary)]" aria-current="page">
             {t(product.name)}
           </li>
         </ol>
@@ -140,7 +140,7 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
       )}
 
       <div>
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900">
+        <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)]">
           {t(product.name)}
         </h2>
         <ScrollReveal delay={200}>
@@ -153,14 +153,14 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
             if (isPortableText) {
               const blocks = Array.isArray(desc) ? desc : [desc]
               return (
-                <div className="mt-4 text-lg md:text-xl text-gray-900 leading-relaxed max-w-3xl font-roboto-thin">
+                <div className="mt-4 text-lg md:text-xl text-[var(--text-primary)] leading-relaxed max-w-3xl font-roboto-thin">
                   <PortableTextLite value={blocks} />
                 </div>
               )
             }
 
             return (
-              <p className="mt-4 text-lg md:text-xl text-gray-900 leading-relaxed max-w-3xl font-roboto-thin">
+              <p className="mt-4 text-lg md:text-xl text-[var(--text-primary)] leading-relaxed max-w-3xl font-roboto-thin">
                 {desc}
               </p>
             )

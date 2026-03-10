@@ -109,7 +109,7 @@ const MediaComponent: FC<{ media: NewsMedia }> = ({ media }) => {
     <figure className="my-8">
       {renderMedia()}
       {media.caption && (
-        <figcaption className="mt-2 text-center text-sm text-gray-500">
+        <figcaption className="mt-2 text-center text-sm text-[var(--text-secondary)]">
           {t(media.caption)}
         </figcaption>
       )}
@@ -233,18 +233,18 @@ export function NewsDetailPage() {
 
   if (loading) {
     return (
-      <div className="pt-28">
+      <div className="pt-28 bg-[var(--bg-primary)] min-h-screen">
         <PageLoading message={t('loading')} />
       </div>
     )
   }
 
   if (!item) {
-    return <div className="pt-28 text-center">{t('news_not_found')}</div>
+    return <div className="pt-28 text-center bg-[var(--bg-primary)] min-h-screen text-[var(--text-primary)]">{t('news_not_found')}</div>
   }
 
   return (
-    <div key={newsId} className="bg-gray-100 animate-fade-in-up-subtle pt-20 md:pt-24 lg:pt-24">
+    <div key={newsId} className="bg-[var(--bg-secondary)] animate-fade-in-up-subtle pt-20 md:pt-24 lg:pt-24">
       {/* Breadcrumb Band */}
       <div className="w-full relative z-20">
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
@@ -266,7 +266,7 @@ export function NewsDetailPage() {
               {prevNews ? (
                 <Link
                   to={`/news/${prevNews.id}`}
-                  className="inline-flex items-center text-gray-400 hover:text-gray-800 transition-colors"
+                  className="inline-flex items-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                   aria-label="Previous news"
                 >
                   <ArrowLeft className="w-7 h-7 md:w-8 md:h-8" />
@@ -279,7 +279,7 @@ export function NewsDetailPage() {
               {nextNews ? (
                 <Link
                   to={`/news/${nextNews.id}`}
-                  className="inline-flex items-center text-gray-400 hover:text-gray-800 transition-colors"
+                  className="inline-flex items-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                   aria-label="Next news"
                 >
                   <ArrowRight className="w-7 h-7 md:w-8 md:h-8" />
@@ -319,14 +319,14 @@ export function NewsDetailPage() {
 
           {/* Sağ Kolon: Detaylar ve İçerik */}
           <div className="lg:sticky lg:top-32 flex flex-col w-full">
-            <p className="text-sm text-gray-500 mb-4 font-light">{formatDate(item.date)}</p>
-            <div className="h-px bg-gray-300 w-full mb-6"></div>
+            <p className="text-sm text-[var(--text-secondary)] mb-4 font-light">{formatDate(item.date)}</p>
+            <div className="h-px bg-[var(--border-primary)] w-full mb-6"></div>
 
-            <h1 className="text-3xl md:text-4xl font-normal tracking-tight text-gray-700 mb-8">
+            <h1 className="text-3xl md:text-4xl font-normal tracking-tight text-[var(--text-primary)] mb-8">
               {t(item.title)}
             </h1>
 
-            <div className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl max-w-none w-full">
+            <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-lg md:text-xl max-w-none w-full">
               {(() => {
                 const content = t(item.content)
                 const isPortableText =
@@ -341,7 +341,7 @@ export function NewsDetailPage() {
                 }
 
                 return (
-                  <p className="text-gray-900 leading-relaxed font-roboto-thin text-lg md:text-xl">
+                  <p className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-lg md:text-xl">
                     {content as string}
                   </p>
                 )

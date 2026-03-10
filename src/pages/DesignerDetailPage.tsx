@@ -134,17 +134,17 @@ export function DesignerDetailPage() {
   if (!designer) {
     return (
       <div className="pt-20 text-center">
-        <p className="text-gray-600">{t('designer_not_found')}</p>
+        <p className="text-[var(--text-secondary)]">{t('designer_not_found')}</p>
       </div>
     )
   }
 
   return (
-    <div className={`h-auto min-h-screen lg:h-screen flex flex-col bg-white selection:bg-primary selection:text-black transition-colors duration-500 lg:overflow-hidden text-black dark:text-white mt-16 md:mt-20 ${fromCard ? '' : 'animate-fade-in-up-subtle'}`}>
+    <div className={`h-auto min-h-screen lg:h-screen flex flex-col bg-[var(--bg-primary)] selection:bg-primary selection:text-black transition-colors duration-500 lg:overflow-hidden text-[var(--text-primary)] mt-16 md:mt-20 ${fromCard ? '' : 'animate-fade-in-up-subtle'}`}>
       <main className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto flex flex-col lg:flex-row flex-1 lg:overflow-hidden">
 
         {/* Sol Taraf: Büyük Görsel (Sabit) */}
-        <div className="w-full lg:w-1/2 h-[60vh] lg:h-full shrink-0 relative lg:overflow-hidden bg-white flex flex-col group">
+        <div className="w-full lg:w-1/2 h-[60vh] lg:h-full shrink-0 relative lg:overflow-y-auto custom-scrollbar bg-[var(--bg-primary)] flex flex-col group">
           {/* Breadcrumbs (Left Top) */}
           <div className="absolute top-4 left-6 lg:top-8 lg:left-0 z-30">
             <Breadcrumbs
@@ -155,8 +155,8 @@ export function DesignerDetailPage() {
               ]}
             />
           </div>
-          <div className="flex-1 relative mx-6 lg:ml-0 lg:mr-12 mt-12 lg:mt-24 mb-12 lg:mb-24 flex items-start justify-center overflow-visible">
-            <div ref={imageRef} className="relative w-full h-[95%] lg:h-full max-h-[850px] z-10">
+          <div className="flex-1 relative mx-6 lg:ml-0 lg:mr-12 mt-12 lg:mt-12 xl:mt-24 mb-12 lg:mb-12 xl:mb-24 flex items-start justify-center overflow-visible">
+            <div ref={imageRef} className="relative w-full h-[85%] lg:h-[85%] xl:h-[95%] max-h-[850px] z-10">
               <OptimizedImage
                 src={typeof designer.image === 'string' ? designer.image : designer.image?.url || ''}
                 srcMobile={typeof designer.image === 'object' ? designer.image.urlMobile : designer.imageMobile}
@@ -173,28 +173,28 @@ export function DesignerDetailPage() {
         </div>
 
         {/* Sağ Taraf: Bilgiler ve Tasarımlar (Scroll Edilebilir) */}
-        <div className="w-full lg:w-1/2 lg:flex-1 h-auto lg:h-full overflow-y-visible lg:overflow-y-auto custom-scrollbar bg-white lg:border-l border-black/5 scroll-smooth pb-20 lg:pb-0">
+        <div className="w-full lg:w-1/2 lg:flex-1 h-auto lg:h-full overflow-y-visible lg:overflow-y-auto custom-scrollbar bg-[var(--bg-primary)] lg:border-l border-[var(--border-primary)] scroll-smooth pb-20 lg:pb-0">
           <div className="py-12 lg:py-24 px-6 lg:px-20 min-h-full flex flex-col justify-start">
 
             <div className="mb-12 lg:mb-16">
               <h1
-                className={`text-4xl md:text-5xl lg:text-7xl font-display uppercase tracking-tighter text-black leading-none mb-4 transition-all duration-1000 ease-out delay-300 ${isTitleVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+                className={`text-4xl md:text-5xl lg:text-7xl font-display uppercase tracking-tighter text-[var(--text-primary)] leading-none mb-4 transition-all duration-1000 ease-out delay-300 ${isTitleVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
               >
                 {t(designer.name)}
               </h1>
 
               {designer.role && (
                 <ScrollReveal delay={400}>
-                  <p className="text-sm md:text-base uppercase tracking-[0.25em] text-gray-500 font-medium ml-1">
+                  <p className="text-sm md:text-base uppercase tracking-[0.25em] text-[var(--text-secondary)] font-medium ml-1">
                     {t(designer.role)}
                   </p>
                 </ScrollReveal>
               )}
 
-              <div className="h-px w-full bg-black/10 my-8 lg:my-12"></div>
+              <div className="h-px w-full bg-[var(--border-primary)] my-8 lg:my-12"></div>
 
               <ScrollReveal delay={500}>
-                <div className="text-base lg:text-lg leading-relaxed text-gray-600 font-light max-w-2xl">
+                <div className="text-base lg:text-lg leading-relaxed text-[var(--text-secondary)] font-light max-w-2xl">
                   {(() => {
                     const bio = t(designer.bio)
                     return Array.isArray(bio) ? (
@@ -209,7 +209,7 @@ export function DesignerDetailPage() {
 
             <ScrollReveal delay={600} threshold={0.01}>
               <div className="pt-6">
-                <h2 className="text-2xl lg:text-3xl font-light text-gray-900 tracking-tight mb-8">
+                <h2 className="text-2xl lg:text-3xl font-light text-[var(--text-primary)] tracking-tight mb-8">
                   {t('designs') || 'Tasarımları'}
                 </h2>
 
@@ -221,12 +221,12 @@ export function DesignerDetailPage() {
                         delay={index < 8 ? index * 100 : 0}
                         threshold={0.01}
                       >
-                        <ProductCard product={product} variant="light" />
+                        <ProductCard product={product} />
                       </ScrollReveal>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 italic mt-4">{t('no_products_by_designer')}</p>
+                  <p className="text-[var(--text-secondary)] italic mt-4">{t('no_products_by_designer')}</p>
                 )}
               </div>
             </ScrollReveal>

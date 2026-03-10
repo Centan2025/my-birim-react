@@ -8,15 +8,13 @@ import { analytics } from '../lib/analytics'
 import { useDesigners } from '../hooks/useDesigners'
 import { useCardTransition } from '../context/CardTransitionContext'
 
-export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'light' }> = ({
+export const ProductCard: React.FC<{ product: Product }> = ({
   product,
-  variant = 'default',
 }) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { settings } = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
-  const isLight = variant === 'light'
   const cardRef = useRef<HTMLDivElement>(null)
   const { triggerExpand } = useCardTransition()
 
@@ -82,10 +80,10 @@ export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'li
 
   return (
     <Link to={`/product/${product.id}`} className="group block w-full" onClick={handleClick}>
-      <div className={`bg-white ${imageBorderClass} overflow-hidden`}>
+      <div className={`bg-[var(--bg-primary)] ${imageBorderClass} overflow-hidden`}>
         <div
           ref={cardRef}
-          className="relative overflow-hidden aspect-square w-full flex items-center justify-center bg-white"
+          className="relative overflow-hidden aspect-square w-full flex items-center justify-center bg-[var(--bg-primary)]"
           style={{
             transition: 'scale 0.9s cubic-bezier(0.25, 0.1, 0.25, 1)',
             opacity: isAnimating ? 0 : 1,
@@ -105,24 +103,21 @@ export const ProductCard: React.FC<{ product: Product; variant?: 'default' | 'li
         </div>
         <div className="px-2.5 py-2 sm:px-3 sm:py-2 transition-colors duration-500">
           <h3
-            className={`text-base sm:text-lg tracking-tight font-semibold ${isLight
-              ? 'text-gray-800 group-hover:text-gray-900'
-              : 'text-gray-900 group-hover:text-black'
-              }`}
+            className={`text-base sm:text-lg tracking-tight font-semibold text-[var(--text-primary)] group-hover:opacity-70`}
           >
             {t(product.name)}
           </h3>
           {designerName && (
             <div className="mt-1 flex items-baseline justify-between gap-2">
-              <p className="text-xs sm:text-sm text-gray-600 truncate">{designerName}</p>
-              <span className="text-[11px] sm:text-xs uppercase tracking-[0.18em] text-gray-600 flex-shrink-0">
+              <p className="text-xs sm:text-sm text-[var(--text-secondary)] truncate">{designerName}</p>
+              <span className="text-[11px] sm:text-xs uppercase tracking-[0.18em] text-[var(--text-secondary)] flex-shrink-0">
                 {product.year}
               </span>
             </div>
           )}
           {!designerName && (
             <div className="mt-1 flex items-baseline justify-end">
-              <span className="text-[11px] sm:text-xs uppercase tracking-[0.18em] text-gray-600">
+              <span className="text-[11px] sm:text-xs uppercase tracking-[0.18em] text-[var(--text-secondary)]">
                 {product.year}
               </span>
             </div>

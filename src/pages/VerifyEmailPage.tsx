@@ -1,7 +1,7 @@
-import {useEffect, useState} from 'react'
-import {useLocation, useNavigate, Link} from 'react-router-dom'
-import {useAuth} from '../App'
-import {useSEO} from '../hooks/useSEO'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../App'
+import { useSEO } from '../hooks/useSEO'
 
 export function VerifyEmailPage() {
   const location = useLocation()
@@ -33,7 +33,7 @@ export function VerifyEmailPage() {
       }
 
       try {
-        const {verifyUserByToken} = await import('../services/cms')
+        const { verifyUserByToken } = await import('../services/cms')
         const user = await verifyUserByToken(token)
         if (!user) {
           if (!cancelled) setStatus('error')
@@ -60,25 +60,25 @@ export function VerifyEmailPage() {
   }, [token, auth, navigate])
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-white border border-gray-200 p-8 text-center">
+    <div className="min-h-screen bg-[var(--bg-secondary)] flex items-center justify-center px-4">
+      <div className="max-w-md w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-8 text-center shadow-sm">
         {status === 'verifying' && (
           <>
-            <h1 className="text-2xl font-semibold mb-4">E-posta Doğrulanıyor…</h1>
-            <p className="text-gray-600 mb-2">
+            <h1 className="text-2xl font-semibold mb-4 text-[var(--text-primary)]">E-posta Doğrulanıyor…</h1>
+            <p className="text-[var(--text-secondary)] mb-2">
               Lütfen birkaç saniye bekleyin, üyeliğiniz doğrulanıyor.
             </p>
           </>
         )}
         {status === 'success' && (
           <>
-            <h1 className="text-2xl font-semibold mb-4">E-posta Doğrulama Başarılı</h1>
-            <p className="text-gray-600 mb-4">
+            <h1 className="text-2xl font-semibold mb-4 text-[var(--text-primary)]">E-posta Doğrulama Başarılı</h1>
+            <p className="text-[var(--text-secondary)] mb-4">
               Üyeliğiniz başarıyla doğrulandı. Kısa süre içinde üye paneline yönlendirileceksiniz.
             </p>
             <Link
               to="/profile"
-              className="inline-block bg-gray-900 text-white px-6 py-2 font-semibold hover:bg-gray-800 transition-colors duration-200"
+              className="inline-block bg-[var(--text-primary)] text-[var(--bg-primary)] px-8 py-3 font-semibold hover:opacity-90 transition-all duration-200"
             >
               Üye Paneline Git
             </Link>
@@ -86,14 +86,14 @@ export function VerifyEmailPage() {
         )}
         {status === 'error' && (
           <>
-            <h1 className="text-2xl font-semibold mb-4">Doğrulama Başarısız</h1>
-            <p className="text-gray-600 mb-4">
+            <h1 className="text-2xl font-semibold mb-4 text-[var(--text-primary)]">Doğrulama Başarısız</h1>
+            <p className="text-[var(--text-secondary)] mb-4">
               Doğrulama linkiniz geçersiz veya süresi dolmuş olabilir. Lütfen tekrar üye olun veya
               yeni bir doğrulama maili isteyin.
             </p>
             <Link
               to="/login"
-              className="inline-block bg-gray-900 text-white px-6 py-2 font-semibold hover:bg-gray-800 transition-colors duration-200"
+              className="inline-block bg-[var(--text-primary)] text-[var(--bg-primary)] px-8 py-3 font-semibold hover:opacity-90 transition-all duration-200"
             >
               Giriş / Üye Ol
             </Link>

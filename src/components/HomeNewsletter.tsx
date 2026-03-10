@@ -206,7 +206,7 @@ export const HomeNewsletter: FC = () => {
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="overflow-hidden"
           >
-            <div className="pt-8 pb-16 w-full flex flex-col items-center bg-[#f5f5f5] text-gray-900 relative">
+            <div className="pt-8 pb-16 w-full flex flex-col items-center bg-[var(--bg-secondary)] text-[var(--text-primary)] relative transition-colors duration-500">
               {/* Background Decorative Element */}
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent opacity-50" />
 
@@ -216,13 +216,13 @@ export const HomeNewsletter: FC = () => {
                     role="tab"
                     aria-selected={activeTab === 'newsletter'}
                     onClick={() => setActiveTab('newsletter')}
-                    className={`relative pb-4 px-6 text-xs md:text-sm font-bold tracking-[0.25em] transition-all duration-500 uppercase font-inter ${activeTab === 'newsletter' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-900'}`}
+                    className={`relative pb-4 px-6 text-xs md:text-sm font-bold tracking-[0.25em] transition-all duration-500 uppercase font-inter ${activeTab === 'newsletter' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                   >
                     {t('newsletter_title')}
                     {activeTab === 'newsletter' && (
                       <motion.div
                         layoutId="activeTabUnderline"
-                        className="absolute bottom-0 left-0 right-0 h-[2px] bg-gray-600"
+                        className="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--text-primary)]"
                         transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                       />
                     )}
@@ -231,13 +231,13 @@ export const HomeNewsletter: FC = () => {
                     role="tab"
                     aria-selected={activeTab === 'professional'}
                     onClick={() => setActiveTab('professional')}
-                    className={`relative pb-4 px-6 text-xs md:text-sm font-bold tracking-[0.25em] transition-all duration-500 uppercase font-inter ${activeTab === 'professional' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-900'}`}
+                    className={`relative pb-4 px-6 text-xs md:text-sm font-bold tracking-[0.25em] transition-all duration-500 uppercase font-inter ${activeTab === 'professional' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                   >
                     {t('professional_access')}
                     {activeTab === 'professional' && (
                       <motion.div
                         layoutId="activeTabUnderline"
-                        className="absolute bottom-0 left-0 right-0 h-[2px] bg-gray-600"
+                        className="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--text-primary)]"
                         transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                       />
                     )}
@@ -258,7 +258,7 @@ export const HomeNewsletter: FC = () => {
                     >
                       <motion.p
                         variants={itemVariants}
-                        className="text-xs md:text-sm uppercase tracking-widest font-medium text-gray-500 mb-8 text-center max-w-md"
+                        className="text-xs md:text-sm uppercase tracking-widest font-medium text-[var(--text-secondary)] mb-8 text-center max-w-md"
                       >
                         {t('newsletter_prompt')}
                       </motion.p>
@@ -266,23 +266,23 @@ export const HomeNewsletter: FC = () => {
                       <motion.form
                         variants={itemVariants}
                         onSubmit={handleSubmitNewsletter}
-                        className="w-full flex flex-col md:flex-row gap-0 border border-black/20 focus-within:border-black transition-colors duration-500 bg-white"
+                        className="w-full flex flex-col md:flex-row gap-0 border border-[var(--border-primary)] focus-within:border-[var(--text-primary)] transition-colors duration-500 bg-[var(--bg-primary)]"
                       >
                         <div className="flex-grow flex items-center px-4 py-1">
-                          <Mail className="w-4 h-4 text-gray-400 mr-3" />
+                          <Mail className="w-4 h-4 text-[var(--text-secondary)] mr-3" />
                           <input
                             type="email"
                             value={email}
                             onChange={e => setEmail(e.target.value)}
                             required
                             placeholder={capitalize(t('email_placeholder'))}
-                            className="w-full bg-transparent py-4 text-gray-900 placeholder-gray-400 focus:outline-none text-sm md:text-base tracking-widest font-semibold font-inter"
+                            className="w-full bg-transparent py-4 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none text-sm md:text-base tracking-widest font-semibold font-inter"
                           />
                         </div>
                         <button
                           type="submit"
                           disabled={status === 'loading'}
-                          className="bg-[#e5e5e5] text-black border border-black px-10 py-5 hover:bg-[#d8d8d8] transition-all duration-500 disabled:opacity-50 flex items-center justify-center gap-3 overflow-hidden group min-w-[200px] font-inter"
+                          className="bg-[var(--text-primary)] text-[var(--bg-primary)] border border-[var(--text-primary)] px-10 py-5 hover:opacity-90 transition-all duration-500 disabled:opacity-50 flex items-center justify-center gap-3 overflow-hidden group min-w-[200px] font-inter"
                         >
                           <span className="text-[11px] md:text-xs uppercase tracking-[0.25em] font-bold">
                             {status === 'loading' ? t('waiting') : t('subscribe')}
@@ -298,7 +298,7 @@ export const HomeNewsletter: FC = () => {
                               initial={{ opacity: 0, y: 5 }}
                               animate={{ opacity: 1, y: 0 }}
                               exit={{ opacity: 0, y: -5 }}
-                              className={`text-[11px] md:text-xs uppercase tracking-[0.15em] font-bold text-center ${status === 'error' ? 'text-red-500' : 'text-gray-900'}`}
+                              className={`text-[11px] md:text-xs uppercase tracking-[0.15em] font-bold text-center ${status === 'error' ? 'text-red-500' : 'text-[var(--text-primary)]'}`}
                             >
                               {message}
                             </motion.p>
@@ -319,7 +319,7 @@ export const HomeNewsletter: FC = () => {
                     >
                       <motion.p
                         variants={itemVariants}
-                        className="text-xs md:text-sm uppercase tracking-widest font-medium text-gray-500 mb-10 text-center"
+                        className="text-xs md:text-sm uppercase tracking-widest font-medium text-[var(--text-secondary)] mb-10 text-center"
                       >
                         {t('professional_access_desc')}
                       </motion.p>
@@ -339,7 +339,7 @@ export const HomeNewsletter: FC = () => {
                               onChange={e => setProfData({ ...profData, name: e.target.value })}
                               required
                               placeholder={capitalize(t('full_name'))}
-                              className="block w-full pl-11 bg-white border border-black/30 py-3.5 text-black placeholder-gray-400 focus:outline-none focus:border-black transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
                             />
                           </div>
                           <div className="relative group">
@@ -352,7 +352,7 @@ export const HomeNewsletter: FC = () => {
                               onChange={e => setProfData({ ...profData, company: e.target.value })}
                               required
                               placeholder={capitalize(t('company'))}
-                              className="block w-full pl-11 bg-white border border-black/30 py-3.5 text-black placeholder-gray-400 focus:outline-none focus:border-black transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
                             />
                           </div>
                         </motion.div>
@@ -371,7 +371,7 @@ export const HomeNewsletter: FC = () => {
                               onChange={e => setProfData({ ...profData, profession: e.target.value })}
                               required
                               placeholder={capitalize(t('profession'))}
-                              className="block w-full pl-11 bg-white border border-black/30 py-3.5 text-black placeholder-gray-400 focus:outline-none focus:border-black transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
                             />
                           </div>
                           <div className="relative group">
@@ -384,7 +384,7 @@ export const HomeNewsletter: FC = () => {
                               onChange={e => setProfData({ ...profData, country: e.target.value })}
                               required
                               placeholder={capitalize(t('country'))}
-                              className="block w-full pl-11 bg-white border border-black/30 py-3.5 text-black placeholder-gray-400 focus:outline-none focus:border-black transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
                             />
                           </div>
                           <div className="relative group">
@@ -397,7 +397,7 @@ export const HomeNewsletter: FC = () => {
                               onChange={e => setProfData({ ...profData, phone: e.target.value })}
                               required
                               placeholder={capitalize(t('phone'))}
-                              className="block w-full pl-11 bg-white border border-black/30 py-3.5 text-black placeholder-gray-400 focus:outline-none focus:border-black transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
                             />
                           </div>
                         </motion.div>
@@ -416,7 +416,7 @@ export const HomeNewsletter: FC = () => {
                               onChange={e => setProfData({ ...profData, email: e.target.value })}
                               required
                               placeholder={capitalize(t('email'))}
-                              className="block w-full pl-11 bg-white border border-black/30 py-3.5 text-black placeholder-gray-400 focus:outline-none focus:border-black transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
                             />
                           </div>
                           <div className="relative group">
@@ -429,7 +429,7 @@ export const HomeNewsletter: FC = () => {
                               onChange={e => setProfData({ ...profData, password: e.target.value })}
                               required
                               placeholder={capitalize(t('set_password'))}
-                              className="block w-full pl-11 bg-white border border-black/30 py-3.5 text-black placeholder-gray-400 focus:outline-none focus:border-black transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
                             />
                           </div>
                         </motion.div>
@@ -441,7 +441,7 @@ export const HomeNewsletter: FC = () => {
                           <button
                             type="submit"
                             disabled={status === 'loading'}
-                            className="w-full md:w-auto md:min-w-[340px] group flex items-center justify-between bg-[#e5e5e5] text-black border border-black px-10 py-5 hover:bg-[#d8d8d8] transition-all duration-500 disabled:opacity-50 font-inter"
+                            className="w-full md:w-auto md:min-w-[340px] group flex items-center justify-between bg-[var(--text-primary)] text-[var(--bg-primary)] border border-[var(--text-primary)] px-10 py-5 hover:opacity-90 transition-all duration-500 disabled:opacity-50 font-inter"
                           >
                             <span className="text-[11px] md:text-xs uppercase tracking-[0.3em] font-bold">
                               {status === 'loading' ? t('waiting') : t('complete_application')}
@@ -456,7 +456,7 @@ export const HomeNewsletter: FC = () => {
                                   initial={{ opacity: 0 }}
                                   animate={{ opacity: 1 }}
                                   exit={{ opacity: 0 }}
-                                  className={`text-[11px] md:text-xs uppercase tracking-[0.15em] font-bold ${status === 'error' ? 'text-red-500' : 'text-gray-900'}`}
+                                  className={`text-[11px] md:text-xs uppercase tracking-[0.15em] font-bold ${status === 'error' ? 'text-red-500' : 'text-[var(--text-primary)]'}`}
                                 >
                                   {message}
                                 </motion.p>

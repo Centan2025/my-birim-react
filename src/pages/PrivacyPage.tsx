@@ -1,10 +1,10 @@
-import {useEffect, useState} from 'react'
-import {Link} from 'react-router-dom'
-import {getPrivacyPolicy} from '../services/cms'
-import {useTranslation} from '../i18n'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { getPrivacyPolicy } from '../services/cms'
+import { useTranslation } from '../i18n'
 import PortableTextLite from '../components/PortableTextLite'
-import type {PrivacyPolicy} from '../types'
-import {useSEO} from '../hooks/useSEO'
+import type { PrivacyPolicy } from '../types'
+import { useSEO } from '../hooks/useSEO'
 
 type PortableBlock = {
   _type?: string
@@ -13,7 +13,7 @@ type PortableBlock = {
 
 export default function PrivacyPage() {
   const [policy, setPolicy] = useState<PrivacyPolicy | null>(null)
-  const {t, locale} = useTranslation()
+  const { t, locale } = useTranslation()
   const localizedContent = policy?.content as Record<string, unknown> | undefined
 
   useEffect(() => {
@@ -39,34 +39,34 @@ export default function PrivacyPage() {
     : new Date().toLocaleDateString(locale === 'en' ? 'en-GB' : 'tr-TR')
 
   return (
-    <div className="min-h-[60vh] bg-gray-50">
+    <div className="min-h-[60vh] bg-[var(--bg-secondary)] text-[var(--text-primary)] transition-colors duration-300">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24 lg:pt-24 pb-16">
-        <nav className="mb-6 text-sm text-gray-700" aria-label="Breadcrumb">
+        <nav className="mb-6 text-sm text-[var(--text-secondary)]" aria-label="Breadcrumb">
           <ol className="list-none p-0 inline-flex items-center">
             <li>
               <Link
                 to="/"
-                className="underline underline-offset-2 text-gray-900 hover:text-gray-900 transition-colors"
+                className="underline underline-offset-2 text-[var(--text-primary)] hover:opacity-80 transition-colors"
               >
                 ANASAYFA
               </Link>
             </li>
             <li className="mx-2 font-light text-gray-400">|</li>
-            <li className="font-light text-gray-500" aria-current="page">
+            <li className="font-light text-[var(--text-secondary)]/60" aria-current="page">
               {title}
             </li>
           </ol>
         </nav>
-        <h1 className="text-3xl font-light text-gray-800 mt-6 md:mt-8 mb-6">{title}</h1>
+        <h1 className="text-3xl font-light text-[var(--text-primary)] mt-6 md:mt-8 mb-6">{title}</h1>
         {Array.isArray(contentBlocks) ? (
-          <div className="prose prose-gray max-w-none">
+          <div className="prose prose-gray dark:prose-invert max-w-none text-[var(--text-primary)]">
             <PortableTextLite value={contentBlocks as PortableBlock[]} />
-            <p className="text-sm text-gray-500 mt-6">
+            <p className="text-sm text-[var(--text-secondary)] mt-6">
               {locale === 'en' ? 'Last updated' : 'Son güncelleme'}: {updated}
             </p>
           </div>
         ) : (
-          <div className="text-gray-500">
+          <div className="text-[var(--text-secondary)]">
             İçerik henüz eklenmemiş. Lütfen Sanity CMS'te "Gizlilik Politikası" belgesini oluşturup
             başlık ve içeriği girin.
           </div>

@@ -69,7 +69,7 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
         if (m === 'strike-through') el = <del key={i + '-del'}>{el}</del>
         if (m === 'code')
           el = (
-            <code key={i + '-code'} className="bg-gray-100 px-1 rounded text-sm font-mono">
+            <code key={i + '-code'} className="bg-[var(--bg-tertiary)] px-1 rounded text-sm font-mono text-[var(--text-primary)]">
               {el}
             </code>
           )
@@ -86,7 +86,7 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
                   href={sanitizedHref}
                   target={def.blank ? '_blank' : undefined}
                   rel={def.blank ? 'noopener noreferrer' : undefined}
-                  className="underline hover:no-underline text-gray-950 font-medium"
+                  className="underline hover:no-underline text-[var(--text-primary)] font-medium"
                 >
                   {el}
                 </a>
@@ -142,11 +142,11 @@ export default function PortableTextLite({
     const listKey = `list-${listCounter++}`
     nodes.push(
       listBuffer.type === 'ul' ? (
-        <ul className="list-disc pl-6 my-6 space-y-2 text-gray-800" key={listKey}>
+        <ul className="list-disc pl-6 my-6 space-y-2 text-[var(--text-primary)]" key={listKey}>
           {listBuffer.items}
         </ul>
       ) : (
-        <ol className="list-decimal pl-6 my-6 space-y-2 text-gray-800" key={listKey}>
+        <ol className="list-decimal pl-6 my-6 space-y-2 text-[var(--text-primary)]" key={listKey}>
           {listBuffer.items}
         </ol>
       )
@@ -328,7 +328,7 @@ export default function PortableTextLite({
           nodes.push(
             <h1
               className={applyTopMarginRemoval(
-                'text-4xl md:text-5xl lg:text-6xl font-bold my-8 leading-tight text-gray-950'
+                'text-4xl md:text-5xl lg:text-6xl font-bold my-8 leading-tight text-[var(--text-primary)]'
               )}
               key={blockKey}
             >
@@ -340,7 +340,7 @@ export default function PortableTextLite({
           nodes.push(
             <h2
               className={applyTopMarginRemoval(
-                'text-3xl md:text-4xl lg:text-5xl font-bold my-7 leading-snug text-gray-950'
+                'text-3xl md:text-4xl lg:text-5xl font-bold my-7 leading-snug text-[var(--text-primary)]'
               )}
               key={blockKey}
             >
@@ -352,7 +352,7 @@ export default function PortableTextLite({
           nodes.push(
             <h3
               className={applyTopMarginRemoval(
-                'text-2xl md:text-3xl lg:text-4xl font-semibold my-6 text-gray-900'
+                'text-2xl md:text-3xl lg:text-4xl font-semibold my-6 text-[var(--text-primary)]'
               )}
               key={blockKey}
             >
@@ -364,7 +364,7 @@ export default function PortableTextLite({
           nodes.push(
             <h4
               className={applyTopMarginRemoval(
-                'text-xl md:text-2xl lg:text-3xl font-semibold my-5 text-gray-900'
+                'text-xl md:text-2xl lg:text-3xl font-semibold my-5 text-[var(--text-primary)]'
               )}
               key={blockKey}
             >
@@ -376,7 +376,7 @@ export default function PortableTextLite({
           nodes.push(
             <h5
               className={applyTopMarginRemoval(
-                'text-lg md:text-xl lg:text-2xl font-medium my-4 text-gray-950'
+                'text-lg md:text-xl lg:text-2xl font-medium my-4 text-[var(--text-primary)]'
               )}
               key={blockKey}
             >
@@ -388,7 +388,7 @@ export default function PortableTextLite({
           nodes.push(
             <h6
               className={applyTopMarginRemoval(
-                'text-base md:text-lg lg:text-xl font-medium my-3 text-gray-950'
+                'text-base md:text-lg lg:text-xl font-medium my-3 text-[var(--text-primary)]'
               )}
               key={blockKey}
             >
@@ -400,7 +400,7 @@ export default function PortableTextLite({
           nodes.push(
             <blockquote
               className={applyTopMarginRemoval(
-                'border-l-4 border-gray-300 pl-6 my-8 italic text-xl md:text-2xl text-gray-600 leading-relaxed'
+                'border-l-4 border-[var(--border-primary)] pl-6 my-8 italic text-xl md:text-2xl text-[var(--text-secondary)] leading-relaxed'
               )}
               key={blockKey}
             >
@@ -411,7 +411,7 @@ export default function PortableTextLite({
         default:
           nodes.push(
             <p
-              className={applyTopMarginRemoval('my-4 leading-relaxed text-gray-950')}
+              className={applyTopMarginRemoval('my-4 leading-relaxed text-[var(--text-primary)]')}
               key={blockKey}
             >
               {content}
@@ -527,10 +527,10 @@ export default function PortableTextLite({
       // Simple CTA Button
       const btnStyle =
         block.style === 'secondary'
-          ? 'bg-white text-gray-950 border border-gray-950 hover:bg-gray-50'
+          ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--text-primary)] hover:opacity-80'
           : block.style === 'outline'
-            ? 'bg-transparent text-gray-950 border border-gray-300 hover:border-gray-950'
-            : 'bg-gray-950 text-white hover:bg-gray-800'
+            ? 'bg-transparent text-[var(--text-primary)] border border-[var(--border-primary)] hover:border-[var(--text-primary)]'
+            : 'bg-[var(--text-primary)] text-[var(--bg-primary)] hover:opacity-80'
 
       const label =
         typeof block.text === 'string' ? block.text : block.text?.tr || block.text?.en || 'Devam Et'

@@ -179,21 +179,21 @@ export function ProductDetailPage() {
   // Loading / Not found
   if (productLoading && !product)
     return (
-      <div className="pt-20">
+      <div className="pt-20 bg-[var(--bg-primary)] min-h-screen">
         <PageLoading message={t('loading')} />
       </div>
     )
 
   if (!product) {
     return (
-      <div className="pt-20 text-center">
-        <p className="text-gray-600">{t('product_not_found')}</p>
+      <div className="pt-20 text-center bg-[var(--bg-primary)] min-h-screen">
+        <p className="text-[var(--text-secondary)]">{t('product_not_found')}</p>
       </div>
     )
   }
 
   return (
-    <div data-product-detail className="min-h-screen bg-white">
+    <div data-product-detail className="min-h-screen bg-[var(--bg-primary)]">
       <style>{`
         @keyframes dot-grow { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
         @keyframes fill-line { from { width: 0; } to { width: 100%; } }
@@ -249,7 +249,7 @@ export function ProductDetailPage() {
       </div>
 
       <main
-        className={`bg-gray-100 pb-12 transition-all duration-700 ease-out ${!isMainContentVisible ? 'opacity-0 translate-y-12' : 'opacity-100 translate-y-0 delay-75'
+        className={`bg-[var(--bg-secondary)] pb-12 transition-all duration-700 ease-out ${!isMainContentVisible ? 'opacity-0 translate-y-12' : 'opacity-100 translate-y-0 delay-75'
           }`}
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 lg:pt-12">

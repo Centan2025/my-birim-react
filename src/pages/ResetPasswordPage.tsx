@@ -1,14 +1,14 @@
-import {useState} from 'react'
-import {useSearchParams, useNavigate, Link} from 'react-router-dom'
-import {useTranslation} from '../i18n'
-import {requestPasswordReset, resetPassword} from '../services/cms'
-import {useSEO} from '../hooks/useSEO'
+import { useState } from 'react'
+import { useSearchParams, useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from '../i18n'
+import { requestPasswordReset, resetPassword } from '../services/cms'
+import { useSEO } from '../hooks/useSEO'
 
 export function ResetPasswordPage() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
   const navigate = useNavigate()
-  const {t} = useTranslation()
+  const { t } = useTranslation()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -68,22 +68,22 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[var(--bg-secondary)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h2 className="text-4xl font-light text-gray-900 mb-2 tracking-tight">
+          <h2 className="text-4xl font-light text-[var(--text-primary)] mb-2 tracking-tight">
             {token ? t('set_new_password') : t('forgot_password')}
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-[var(--text-secondary)]">
             {token ? t('set_new_password_desc') : t('forgot_password_desc')}
           </p>
         </div>
 
-        <div className="bg-white border border-gray-200 p-8 shadow-sm">
+        <div className="bg-[var(--bg-primary)] border border-[var(--border-primary)] p-8 shadow-sm">
           {!token ? (
             <form onSubmit={handleRequestReset} className="space-y-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                   {t('email')}
                 </label>
                 <input
@@ -92,7 +92,7 @@ export function ResetPasswordPage() {
                   required
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-none focus:ring-2 focus:ring-gray-900 outline-none"
+                  className="w-full px-4 py-3 border border-[var(--border-primary)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-none focus:ring-2 focus:ring-[var(--text-primary)] outline-none"
                   placeholder={t('email_placeholder')}
                 />
               </div>
@@ -103,7 +103,7 @@ export function ResetPasswordPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3.5 px-4 bg-gray-900 text-white font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                className="w-full py-3.5 px-4 bg-[var(--text-primary)] text-[var(--bg-primary)] font-medium hover:opacity-90 disabled:opacity-50 transition-all duration-200"
               >
                 {isLoading ? t('sending') : t('send_reset_link')}
               </button>
@@ -111,7 +111,7 @@ export function ResetPasswordPage() {
           ) : (
             <form onSubmit={handleResetPassword} className="space-y-6">
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="password" className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                   {t('new_password')}
                 </label>
                 <input
@@ -120,7 +120,7 @@ export function ResetPasswordPage() {
                   required
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-none focus:ring-2 focus:ring-gray-900 outline-none"
+                  className="w-full px-4 py-3 border border-[var(--border-primary)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-none focus:ring-2 focus:ring-[var(--text-primary)] outline-none"
                   placeholder="••••••••"
                 />
               </div>
@@ -128,7 +128,7 @@ export function ResetPasswordPage() {
               <div>
                 <label
                   htmlFor="confirmPassword"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-medium text-[var(--text-secondary)] mb-2"
                 >
                   {t('new_password_confirm')}
                 </label>
@@ -138,7 +138,7 @@ export function ResetPasswordPage() {
                   required
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-none focus:ring-2 focus:ring-gray-900 outline-none"
+                  className="w-full px-4 py-3 border border-[var(--border-primary)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-none focus:ring-2 focus:ring-[var(--text-primary)] outline-none"
                   placeholder="••••••••"
                 />
               </div>
@@ -149,7 +149,7 @@ export function ResetPasswordPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3.5 px-4 bg-gray-900 text-white font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                className="w-full py-3.5 px-4 bg-[var(--text-primary)] text-[var(--bg-primary)] font-medium hover:opacity-90 disabled:opacity-50 transition-all duration-200"
               >
                 {isLoading ? t('updating') : t('update_password')}
               </button>
@@ -157,7 +157,7 @@ export function ResetPasswordPage() {
           )}
 
           <div className="mt-6 text-center">
-            <Link to="/login" className="text-sm text-gray-600 hover:text-gray-900 underline">
+            <Link to="/login" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] underline">
               {t('back_to_login')}
             </Link>
           </div>

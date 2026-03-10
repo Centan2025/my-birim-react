@@ -67,7 +67,7 @@ export function CategoriesPage() {
   }
 
   return (
-    <div className="bg-gray-100">
+    <div className="bg-[var(--bg-tertiary)] min-h-screen transition-colors duration-500">
       {/* Hero Section */}
       <div className="relative h-[500px] animate-fade-in-down">
         <div className="absolute inset-0">
@@ -136,7 +136,7 @@ export function CategoriesPage() {
                     </div>
                   </div>
                   <div className="mt-6">
-                    <p className="text-gray-600 text-lg md:text-xl">{t(category.subtitle)}</p>
+                    <p className="text-[var(--text-secondary)] text-lg md:text-xl">{t(category.subtitle)}</p>
                   </div>
                 </Link>
               </ScrollReveal>
@@ -144,7 +144,7 @@ export function CategoriesPage() {
           </div>
         ) : (
           <ScrollReveal delay={0} threshold={0.01}>
-            <p className="text-gray-600 text-center">{t('no_products_in_category')}</p>
+            <p className="text-[var(--text-secondary)] text-center">{t('no_products_in_category')}</p>
           </ScrollReveal>
         )}
       </div>

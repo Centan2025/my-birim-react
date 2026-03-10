@@ -94,13 +94,13 @@ const MaterialCard: React.FC<{
         <OptimizedImage
           src={material.image}
           alt={t(material.name)}
-          className={`w-full h-full object-cover border border-gray-200 group-hover:border-gray-400 transition-all duration-200 group-hover:scale-105 ${imageBorderClass}`}
+          className={`w-full h-full object-cover border border-[var(--border-primary)] group-hover:opacity-80 transition-all duration-200 group-hover:scale-105 ${imageBorderClass}`}
           loading="lazy"
           quality={80}
         />
       </motion.div>
     </motion.div>
-    <p className="mt-2 md:mt-3 text-[11px] leading-tight md:text-sm text-gray-600 font-thin tracking-wider w-full break-words">
+    <p className="mt-2 md:mt-3 text-[11px] leading-tight md:text-sm text-[var(--text-secondary)] font-thin tracking-wider w-full break-words">
       {t(material.name)}
     </p>
   </motion.div>
@@ -148,18 +148,18 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
         }
       `}</style>
       <div className="pb-4">
-        <h2 className="text-xl font-light text-gray-600 mb-4">{t('material_alternatives')}</h2>
+        <h2 className="text-xl font-light text-[var(--text-secondary)] mb-4">{t('material_alternatives')}</h2>
         {hasMaterialGroups ? (
           <>
             {/* Group tabs */}
-            <div className="flex flex-wrap gap-0 border-t border-b border-gray-400 mb-6 bg-gray-200">
+            <div className="flex flex-wrap gap-0 border-t border-b border-[var(--border-primary)] mb-6 bg-[var(--bg-tertiary)]">
               {(Array.isArray(mergedGroups) ? mergedGroups : []).map((g: any, idx: number) => (
                 <button
                   key={`group-${idx}`}
                   onClick={() => onSetActiveMaterialGroup(idx)}
                   className={`px-5 py-3 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeMaterialGroup === idx
-                    ? 'bg-white text-gray-800 border-gray-500'
-                    : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
+                    ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--text-primary)]'
+                    : 'bg-transparent text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]'
                     }`}
                 >
                   {t(g.groupTitle)}
@@ -179,8 +179,8 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                           key={`book-${idx}`}
                           onClick={() => onSetActiveBookIndex(idx)}
                           className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeBookIndex === idx
-                            ? 'bg-white text-gray-800 border-gray-500'
-                            : 'bg-transparent text-gray-600 border-transparent hover:text-gray-800'
+                            ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--text-primary)]'
+                            : 'bg-transparent text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]'
                             }`}
                         >
                           {t(book.bookTitle)}
@@ -245,7 +245,7 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                 )}
               </AnimatedContent>
             ) : (
-              <div className="py-8 text-left text-gray-500 font-light">
+              <div className="py-8 text-left text-[var(--text-secondary)] font-light">
                 {t('please_select_price_group') ||
                   'Lütfen kartelaları görüntülemek için bir fiyat grubu seçiniz.'}
               </div>
