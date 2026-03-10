@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { getContactPageContent } from '../services/cms'
-import type { ContactPageContent, ContactLocation } from '../types'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { PageLoading } from '../components/LoadingSpinner'
-import { useTranslation } from '../i18n'
-import { analytics } from '../lib/analytics'
-import { Breadcrumbs } from '../components/Breadcrumbs'
-import { FullscreenMediaViewer } from '../components/FullscreenMediaViewer'
-import { useSEO } from '../hooks/useSEO'
+import React, {useState, useEffect, useMemo, useRef, useCallback} from 'react'
+import {motion, AnimatePresence} from 'framer-motion'
+import {getContactPageContent} from '../services/cms'
+import type {ContactPageContent, ContactLocation} from '../types'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {analytics} from '../lib/analytics'
+import {Breadcrumbs} from '../components/Breadcrumbs'
+import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
+import {useSEO} from '../hooks/useSEO'
 
 const getYouTubeId = (url: string): string | null => {
   const match = url.match(
@@ -171,8 +171,8 @@ const LocationCard: React.FC<{
   isMapVisible: boolean
   onSelect: () => void
   onShowMap: () => void
-}> = ({ location, isSelected, isMapVisible, onSelect, onShowMap }) => {
-  const { t } = useTranslation()
+}> = ({location, isSelected, isMapVisible, onSelect, onShowMap}) => {
+  const {t} = useTranslation()
 
   return (
     <div
@@ -197,8 +197,9 @@ const LocationCard: React.FC<{
           onSelect()
         }
       }}
-      className={`p-4 cursor-pointer w-full max-w-full transition-all duration-300 ${isSelected ? 'bg-gray-200' : 'hover:bg-gray-100'
-        }`}
+      className={`p-4 cursor-pointer w-full max-w-full transition-all duration-300 ${
+        isSelected ? 'bg-[var(--bg-tertiary)]' : 'hover:bg-[var(--bg-secondary)]'
+      }`}
     >
       <h3 className="text-xl font-light text-[var(--text-secondary)]">{t(location.title)}</h3>
       <p className="mt-2 text-[var(--text-secondary)] flex items-start gap-2 font-light">
@@ -221,42 +222,43 @@ const LocationCard: React.FC<{
         {isSelected && location.mapEmbedUrl && (
           <motion.div
             key="show-map-btn"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
+            initial={{opacity: 0, height: 0}}
+            animate={{opacity: 1, height: 'auto'}}
+            exit={{opacity: 0, height: 0}}
+            transition={{duration: 0.3}}
             className="mt-6 overflow-hidden flex flex-col gap-4"
           >
             <button
               type="button"
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation() // Kart seçimini tekrar tetiklememek için
                 onShowMap()
               }}
-              className={`flex items-center gap-2 px-5 py-2.5 outline-none font-light tracking-wider text-sm transition-all duration-300 w-max ${isMapVisible
-                ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] hover:opacity-80 border border-[var(--border-primary)] shadow-inner'
-                : 'bg-[var(--bg-primary)] text-[var(--text-primary)] hover:opacity-80 border border-[var(--border-primary)] shadow-sm hover:shadow active:scale-95'
-                }`}
+              className={`flex items-center gap-2 px-5 py-2.5 outline-none font-light tracking-wider text-sm transition-all duration-300 w-max ${
+                isMapVisible
+                  ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] hover:opacity-80 border border-[var(--border-primary)] shadow-inner'
+                  : 'bg-[var(--bg-primary)] text-[var(--text-primary)] hover:opacity-80 border border-[var(--border-primary)] shadow-sm hover:shadow active:scale-95'
+              }`}
             >
               <MapPinIcon className="w-4 h-4" />
-              {isMapVisible ? (t('hide_map') || 'HARİTAYI GİZLE') : (t('show_map') || 'HARİTAYI GÖR')}
+              {isMapVisible ? t('hide_map') || 'HARİTAYI GİZLE' : t('show_map') || 'HARİTAYI GÖR'}
             </button>
 
             <AnimatePresence>
               {isMapVisible && (
                 <motion.div
                   key="inline-map"
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 450 }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                  initial={{opacity: 0, height: 0}}
+                  animate={{opacity: 1, height: 450}}
+                  exit={{opacity: 0, height: 0}}
+                  transition={{duration: 0.5, ease: [0.22, 1, 0.36, 1]}}
                   className="w-full relative shadow-sm border border-[var(--border-primary)] mt-2"
                 >
                   <iframe
                     src={convertGoogleMapsUrlToEmbed(location.mapEmbedUrl)}
                     width="100%"
                     height="100%"
-                    style={{ border: 0 }}
+                    style={{border: 0}}
                     className="w-full h-full"
                     allow="fullscreen"
                     loading="lazy"
@@ -285,11 +287,11 @@ export function ContactPage() {
   const [thumbScrollStart, setThumbScrollStart] = useState<number>(0)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
-  const { t } = useTranslation()
+  const {t} = useTranslation()
 
   const checkScroll = useCallback(() => {
     if (thumbRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = thumbRef.current
+      const {scrollLeft, scrollWidth, clientWidth} = thumbRef.current
       setCanScrollLeft(scrollLeft > 0)
       setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth)
     }
@@ -378,9 +380,9 @@ export function ContactPage() {
           return {
             type: m.type,
             url,
-          } as { type: 'image' | 'video' | 'youtube'; url: string }
+          } as {type: 'image' | 'video' | 'youtube'; url: string}
         })
-        .filter(Boolean) as { type: 'image' | 'video' | 'youtube'; url: string }[],
+        .filter(Boolean) as {type: 'image' | 'video' | 'youtube'; url: string}[],
     [selectedLocationMedia]
   )
 
@@ -443,8 +445,8 @@ export function ContactPage() {
               initial="revealOff"
               animate="revealOn"
               variants={{
-                revealOff: { opacity: 0 },
-                revealOn: { opacity: 1, transition: { staggerChildren: 0.1 } }
+                revealOff: {opacity: 0},
+                revealOn: {opacity: 1, transition: {staggerChildren: 0.1}},
               }}
             >
               {selectedLocationMedia.map((m, idx) => (
@@ -452,12 +454,12 @@ export function ContactPage() {
                   key={idx}
                   className="relative flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24"
                   variants={{
-                    revealOff: { opacity: 0, x: -50 },
+                    revealOff: {opacity: 0, x: -50},
                     revealOn: {
                       opacity: 1,
                       x: 0,
-                      transition: { type: 'spring', stiffness: 100, damping: 20 }
-                    }
+                      transition: {type: 'spring', stiffness: 100, damping: 20},
+                    },
                   }}
                 >
                   <button
@@ -476,22 +478,22 @@ export function ContactPage() {
                   >
                     <motion.div
                       variants={{
-                        revealOff: { scaleX: 0, transformOrigin: 'left' },
+                        revealOff: {scaleX: 0, transformOrigin: 'left'},
                         revealOn: {
                           scaleX: 1,
-                          transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
-                        }
+                          transition: {duration: 0.8, ease: [0.22, 1, 0.36, 1]},
+                        },
                       }}
                       className="relative overflow-hidden w-full h-full"
                     >
                       <motion.div
                         variants={{
-                          revealOff: { opacity: 0, x: -20 },
+                          revealOff: {opacity: 0, x: -20},
                           revealOn: {
                             opacity: 1,
                             x: 0,
-                            transition: { delay: 0.2, duration: 0.8 }
-                          }
+                            transition: {delay: 0.2, duration: 0.8},
+                          },
                         }}
                         className="w-full h-full"
                       >
@@ -576,27 +578,27 @@ export function ContactPage() {
   }
 
   return (
-    <div className={`${isFullscreenOpen ? 'bg-[var(--bg-primary)]' : 'bg-[var(--bg-tertiary)]'} pt-20 md:pt-24 lg:pt-24 transition-colors duration-500`}>
+    <div
+      className={`${isFullscreenOpen ? 'bg-[var(--bg-primary)]' : 'bg-[var(--bg-tertiary)]'} pt-20 md:pt-24 lg:pt-24 transition-colors duration-500`}
+    >
       {/* Breadcrumb Band */}
       <div className="w-full relative z-20">
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            initial={{opacity: 0, y: 15}}
+            animate={{opacity: 1, y: 0}}
+            transition={{duration: 0.6, ease: [0.22, 1, 0.36, 1]}}
           >
-            <Breadcrumbs
-              items={[{ label: t('homepage'), to: '/' }, { label: t('contact') }]}
-            />
+            <Breadcrumbs items={[{label: t('homepage'), to: '/'}, {label: t('contact')}]} />
           </motion.div>
         </div>
       </div>
       <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 md:pt-12 pb-12">
         <motion.div
           className="text-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+          initial={{opacity: 0, y: 20}}
+          animate={{opacity: 1, y: 0}}
+          transition={{duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1]}}
         >
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight uppercase">
             {t('contact')}
@@ -606,10 +608,10 @@ export function ContactPage() {
 
       <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pb-16">
         <motion.div
-          className="text-center mb-12 border-t border-gray-300 pt-16"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          className="text-center mb-12 border-t border-[var(--border-primary)] pt-16"
+          initial={{opacity: 0, y: 20}}
+          animate={{opacity: 1, y: 0}}
+          transition={{duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1]}}
         >
           <p className="text-lg text-[var(--text-secondary)] max-w-3xl mx-auto font-light">
             {t(content.subtitle)}
@@ -619,9 +621,9 @@ export function ContactPage() {
         <div className="grid grid-cols-1 max-w-4xl mx-auto gap-8 md:gap-12 items-start transition-all duration-700 ease-in-out">
           <motion.div
             className="bg-[var(--bg-primary)] p-6 shadow-sm border border-[var(--border-primary)] w-full overflow-x-hidden"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            initial={{opacity: 0, y: 30}}
+            animate={{opacity: 1, y: 0}}
+            transition={{duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1]}}
           >
             {Array.from(locationGroupsMap.entries()).map(([type, locs]) => (
               <div key={type} className="mb-8 last:mb-0">
@@ -656,10 +658,10 @@ export function ContactPage() {
           {/* Mobilde: haritanın üzerinde medya bandı */}
           {selectedLocationMedia.length > 0 && (
             <motion.div
-              className="mt-4 border-y border-gray-300 py-2 md:hidden w-full overflow-x-hidden"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              className="mt-4 border-y border-[var(--border-primary)] py-2 md:hidden w-full overflow-x-hidden"
+              initial={{opacity: 0, y: 20}}
+              animate={{opacity: 1, y: 0}}
+              transition={{duration: 0.6, delay: 0.35, ease: [0.22, 1, 0.36, 1]}}
             >
               {renderSelectedLocationMediaStrip()}
             </motion.div>
@@ -668,10 +670,10 @@ export function ContactPage() {
           {/* Medya Bantı - Seçili lokasyonun medyaları (sadece desktop) */}
           {selectedLocationMedia.length > 0 && (
             <motion.div
-              className="mt-8 border-y border-gray-300 py-3 hidden md:block"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className="mt-8 border-y border-[var(--border-primary)] py-3 hidden md:block"
+              initial={{opacity: 0, y: 20}}
+              animate={{opacity: 1, y: 0}}
+              transition={{duration: 0.6, ease: [0.22, 1, 0.36, 1]}}
             >
               {renderSelectedLocationMediaStrip()}
             </motion.div>

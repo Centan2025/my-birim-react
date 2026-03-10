@@ -1,32 +1,14 @@
-import React, { SVGProps, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import React, {useMemo} from 'react'
+import {Link} from 'react-router-dom'
 
-import { ContentBlock } from '../types'
-import { useTranslation } from '../i18n'
+import {ContentBlock} from '../types'
+import {useTranslation} from '../i18n'
 import ScrollReveal from './ScrollReveal'
-import { OptimizedImage } from './OptimizedImage'
-import { OptimizedVideo } from './OptimizedVideo'
-import { YouTubeBackground } from './YouTubeBackground'
+import {OptimizedImage} from './OptimizedImage'
+import {OptimizedVideo} from './OptimizedVideo'
+import {YouTubeBackground} from './YouTubeBackground'
 import PortableTextLite from './PortableTextLite'
-import { useGoogleFonts } from '../hooks/useGoogleFont'
-
-const ArrowRight = (props: SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="28"
-    height="28"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="0.4"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <path d="M16 10 22 16" />
-    <path d="M22 16H2" />
-  </svg>
-)
+import {useGoogleFonts} from '../hooks/useGoogleFont'
 
 interface HomeContentBlocksProps {
   blocks: ContentBlock[]
@@ -41,7 +23,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
   imageBorderClass,
   overrideBackgroundColor,
 }) => {
-  const { t } = useTranslation()
+  const {t} = useTranslation()
 
   // Tüm bloklardaki fontları topla ve yükle (stabilize with useMemo)
   const allFonts = useMemo(() => {
@@ -66,10 +48,19 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
       {sortedBlocks.map((block, index) => {
         const titleContent = block.title ? t(block.title) : ''
         const descriptionRaw = block.description ? t(block.description) : ''
-        const descriptionContent = (Array.isArray(descriptionRaw) && descriptionRaw.length === 0) ? '' : descriptionRaw
-        const hasTitle = typeof titleContent === 'string' ? titleContent.trim().length > 0 : !!titleContent
-        const hasDescription = Array.isArray(descriptionContent) ? descriptionContent.length > 0 : (typeof descriptionContent === 'string' ? descriptionContent.trim().length > 0 : !!descriptionContent)
-        const hasTextContent = hasTitle || hasDescription || !!(block.linkText && (!block.showButtonOnMedia || block.linkUrl))
+        const descriptionContent =
+          Array.isArray(descriptionRaw) && descriptionRaw.length === 0 ? '' : descriptionRaw
+        const hasTitle =
+          typeof titleContent === 'string' ? titleContent.trim().length > 0 : !!titleContent
+        const hasDescription = Array.isArray(descriptionContent)
+          ? descriptionContent.length > 0
+          : typeof descriptionContent === 'string'
+            ? descriptionContent.trim().length > 0
+            : !!descriptionContent
+        const hasTextContent =
+          hasTitle ||
+          hasDescription ||
+          !!(block.linkText && (!block.showButtonOnMedia || block.linkUrl))
 
         const getMediaUrl = () => {
           if (block.mediaType === 'image' && block.image) {
@@ -86,7 +77,9 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 
         const backgroundColor = overrideBackgroundColor
           ? overrideBackgroundColor
-          : block.backgroundColor === 'gray' ? 'bg-[var(--bg-secondary)]' : 'bg-[var(--bg-primary)]'
+          : block.backgroundColor === 'gray'
+            ? 'bg-[var(--bg-secondary)]'
+            : 'bg-[var(--bg-primary)]'
 
         const textAlign = block.textAlignment || 'left'
         const textAlignClass =
@@ -180,11 +173,21 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               ? 'monospace'
               : `"${contentFont}", sans-serif`
 
-        const bodyElement = (hasDescription || (block.linkText && (!block.showButtonOnMedia || block.linkUrl))) && (
-          <div className={`w-full ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0 pt-0' : ''}`}>
+        const bodyElement = (hasDescription ||
+          (block.linkText && (!block.showButtonOnMedia || block.linkUrl))) && (
+          <div
+            className={`w-full ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0 pt-0' : ''}`}
+          >
             {hasDescription && (
-              <ScrollReveal delay={100} threshold={0.1} width="w-full" className={`h-auto ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0 pb-0' : ''}`}>
-                <div className={`prose max-w-none ${textAlignClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0 pt-0 prose-p:first-of-type:!mt-0 [&_.portable-text-container>*:first-child]:!mt-0' : ''}`}>
+              <ScrollReveal
+                delay={100}
+                threshold={0.1}
+                width="w-full"
+                className={`h-auto ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0 pb-0' : ''}`}
+              >
+                <div
+                  className={`prose max-w-none ${textAlignClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0 pt-0 prose-p:first-of-type:!mt-0 [&_.portable-text-container>*:first-child]:!mt-0' : ''}`}
+                >
                   {(() => {
                     const desc = descriptionContent
                     const widthClass = textAlign === 'center' ? 'max-w-4xl' : 'w-full'
@@ -200,9 +203,12 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                         <div
                           ref={!isNormalContentFont ? applyFontRef(contentFontFamily) : undefined}
                           className={`${marginClass} ${widthClass} ${isNormalContentFont ? 'font-roboto-thin text-xl md:text-2xl lg:text-3xl' : ''} text-[var(--text-primary)] ${block.verticalAlignment === 'top' && !hasTitle ? '[&_.portable-text-container>*:first-child]:!mt-0' : ''}`}
-                          style={!isNormalContentFont ? { fontWeight: 300 } : {}}
+                          style={!isNormalContentFont ? {fontWeight: 300} : {}}
                         >
-                          <PortableTextLite value={desc} removeTopMargin={block.verticalAlignment === 'top' && !hasTitle} />
+                          <PortableTextLite
+                            value={desc}
+                            removeTopMargin={block.verticalAlignment === 'top' && !hasTitle}
+                          />
                         </div>
                       )
                     }
@@ -211,7 +217,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       <p
                         ref={!isNormalContentFont ? applyFontRef(contentFontFamily) : undefined}
                         className={`text-[var(--text-primary)] ${isNormalContentFont ? 'font-roboto-thin text-2xl md:text-3xl lg:text-4xl' : ''} leading-relaxed ${widthClass} ${marginClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0' : ''}`}
-                        style={!isNormalContentFont ? { fontWeight: 300 } : {}}
+                        style={!isNormalContentFont ? {fontWeight: 300} : {}}
                       >
                         {desc}
                       </p>
@@ -228,14 +234,13 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   {block.linkUrl ? (
                     <Link
                       to={block.linkUrl}
-                      className={`group inline-flex items-center gap-x-3 text-[var(--text-primary)] hover:text-[var(--text-secondary)] font-bold py-4 text-sm md:text-lg lg:text-xl transition-colors duration-300`}
+                      className={`group inline-flex items-center gap-x-3 text-[var(--text-primary)] hover:opacity-70 border border-[var(--text-primary)] px-8 py-3 text-sm md:text-lg lg:text-xl transition-all duration-300`}
                     >
                       <span className="inline-flex justify-center">
                         <span className="font-bold font-helvetica tracking-[0.05em]">
                           {t(block.linkText)}
                         </span>
                       </span>
-                      <ArrowRight className="w-6 h-6 md:w-8 md:h-8 transition-transform duration-300 group-hover:translate-x-1" />
                     </Link>
                   ) : (
                     <div
@@ -271,7 +276,9 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             className={`h-auto ${isFullWidth || isCenter ? 'w-full' : ''} ${isCenter ? 'flex justify-center' : ''}`}
           >
             {block.mediaType === 'youtube' ? (
-              <div className={`relative ${mediaWidthClass} ${isMobile ? 'w-full' : ''} aspect-video overflow-hidden`}>
+              <div
+                className={`relative ${mediaWidthClass} ${isMobile ? 'w-full' : ''} aspect-video overflow-hidden`}
+              >
                 <YouTubeBackground url={mediaUrl} />
                 {block.showButtonOnMedia && block.linkText && (
                   <div
@@ -280,14 +287,13 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     {block.linkUrl ? (
                       <Link
                         to={block.linkUrl}
-                        className={`group pointer-events-auto inline-flex items-center gap-x-3 ${buttonTextColorClass} hover:opacity-50 font-bold py-4 px-4 md:px-8 transition-opacity duration-300 bg-transparent`}
+                        className={`group pointer-events-auto inline-flex items-center gap-x-3 ${buttonTextColorClass} hover:opacity-50 font-bold py-3 px-8 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-white' : 'border-[var(--text-primary)]'}`}
                       >
                         <span className="inline-flex justify-center">
                           <span className="font-bold font-helvetica tracking-[0.05em]">
                             {t(block.linkText)}
                           </span>
                         </span>
-                        <ArrowRight className="w-6 h-6 md:w-8 md:h-8" />
                       </Link>
                     ) : (
                       <div
@@ -322,14 +328,13 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     {block.linkUrl ? (
                       <Link
                         to={block.linkUrl}
-                        className={`group pointer-events-auto inline-flex items-center gap-x-3 ${buttonTextColorClass} hover:opacity-50 font-bold py-4 px-4 md:px-8 transition-opacity duration-300 bg-transparent`}
+                        className={`group pointer-events-auto inline-flex items-center gap-x-3 ${buttonTextColorClass} hover:opacity-50 font-bold py-3 px-8 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-white' : 'border-[var(--text-primary)]'}`}
                       >
                         <span className="inline-flex justify-center">
                           <span className="font-bold font-helvetica tracking-[0.05em]">
                             {t(block.linkText)}
                           </span>
                         </span>
-                        <ArrowRight className="w-6 h-6 md:w-8 md:h-8" />
                       </Link>
                     ) : (
                       <div
@@ -365,14 +370,13 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     {block.linkUrl ? (
                       <Link
                         to={block.linkUrl}
-                        className={`group pointer-events-auto inline-flex items-center gap-x-3 ${buttonTextColorClass} hover:opacity-50 font-bold py-4 px-4 md:px-8 transition-opacity duration-300 bg-transparent`}
+                        className={`group pointer-events-auto inline-flex items-center gap-x-3 ${buttonTextColorClass} hover:opacity-50 font-bold py-3 px-8 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-white' : 'border-[var(--text-primary)]'}`}
                       >
                         <span className="inline-flex justify-center">
                           <span className="font-bold font-helvetica tracking-[0.05em]">
                             {t(block.linkText)}
                           </span>
                         </span>
-                        <ArrowRight className="w-6 h-6 md:w-8 md:h-8" />
                       </Link>
                     ) : (
                       <div
@@ -394,11 +398,13 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 
         const hasTopContent =
           (titlePosition === 'above' && hasTitle) ||
-          (textPosition === 'above' && (hasDescription || (block.linkText && !block.showButtonOnMedia)))
+          (textPosition === 'above' &&
+            (hasDescription || (block.linkText && !block.showButtonOnMedia)))
 
         const hasBottomContent =
           (titlePosition === 'below' && hasTitle) ||
-          (textPosition === 'below' && (hasDescription || (block.linkText && !block.showButtonOnMedia)))
+          (textPosition === 'below' &&
+            (hasDescription || (block.linkText && !block.showButtonOnMedia)))
 
         const textContentAbove = hasTopContent ? (
           <div
@@ -442,7 +448,9 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 {textContentBelow}
                 {/* Title-only fallback: when no media and no above/below content assigned, render title directly */}
                 {!hasMedia && !textContentAbove && !textContentBelow && hasTitle && (
-                  <div className={`w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-0 flex flex-col gap-4 ${titleAlign === 'center' ? 'items-center text-center' : titleAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}>
+                  <div
+                    className={`w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-0 flex flex-col gap-4 ${titleAlign === 'center' ? 'items-center text-center' : titleAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
+                  >
                     {titleElement}
                     {bodyElement}
                   </div>
@@ -453,12 +461,9 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 <div
                   className={
                     hasTextContent && hasMedia
-                      ? `flex flex-col ${isLeft
-                        ? 'md:flex-row'
-                        : isRight
-                          ? 'md:flex-row-reverse'
-                          : 'md:flex-row'
-                      } ${block.verticalAlignment === 'top' ? 'gap-x-4 md:gap-x-6 gap-y-0' : 'gap-4 md:gap-6'} items-start`
+                      ? `flex flex-col ${
+                          isLeft ? 'md:flex-row' : isRight ? 'md:flex-row-reverse' : 'md:flex-row'
+                        } ${block.verticalAlignment === 'top' ? 'gap-x-4 md:gap-x-6 gap-y-0' : 'gap-4 md:gap-6'} items-start`
                       : hasTextContent && !hasMedia
                         ? 'flex flex-col'
                         : 'flex flex-col items-center gap-4 md:gap-6'
@@ -466,14 +471,17 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 >
                   {hasMedia && (
                     <div
-                      className={`w-full ${!hasTextContent ? 'md:w-full flex flex-col items-center' : 'md:w-1/2'
-                        } overflow-visible`}
+                      className={`w-full ${
+                        !hasTextContent ? 'md:w-full flex flex-col items-center' : 'md:w-1/2'
+                      } overflow-visible`}
                     >
                       {mediaContent}
                     </div>
                   )}
                   {hasTextContent && (
-                    <div className={`w-full ${hasMedia ? 'md:w-1/2' : 'md:w-full'} flex flex-col ${hasTitle && (hasDescription || block.linkText) ? 'gap-6' : 'gap-0'} self-stretch ${verticalAlignClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'pt-0 mt-0' : ''}`}>
+                    <div
+                      className={`w-full ${hasMedia ? 'md:w-1/2' : 'md:w-full'} flex flex-col ${hasTitle && (hasDescription || block.linkText) ? 'gap-6' : 'gap-0'} self-stretch ${verticalAlignClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'pt-0 mt-0' : ''}`}
+                    >
                       {hasTitle && titleElement}
                       {bodyElement}
                     </div>

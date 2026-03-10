@@ -1,5 +1,5 @@
-import { useState, FC, FormEventHandler, useRef, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import {useState, FC, FormEventHandler, useRef, useEffect} from 'react'
+import {motion, AnimatePresence} from 'framer-motion'
 import {
   ArrowUpRight,
   Mail,
@@ -11,14 +11,14 @@ import {
   Lock,
   Minus,
 } from 'lucide-react'
-import { subscribeEmail, subscribeProfessional } from '../services/cms'
-import { analytics } from '../lib/analytics'
-import { useTranslation } from '../i18n'
+import {subscribeEmail, subscribeProfessional} from '../services/cms'
+import {analytics} from '../lib/analytics'
+import {useTranslation} from '../i18n'
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()
 
 export const HomeNewsletter: FC = () => {
-  const { t } = useTranslation()
+  const {t} = useTranslation()
   const [isExpanded, setIsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<'newsletter' | 'professional'>('newsletter')
   const [email, setEmail] = useState('')
@@ -77,7 +77,7 @@ export const HomeNewsletter: FC = () => {
       })
 
       const normalizedMessage = String(
-        (result as { message?: string } | null | undefined)?.message || ''
+        (result as {message?: string} | null | undefined)?.message || ''
       ).toLowerCase()
       const isAlready =
         normalizedMessage.includes('zaten aboneliğe kayıtlı') ||
@@ -152,7 +152,7 @@ export const HomeNewsletter: FC = () => {
   }, [])
 
   const containerVariants = {
-    hidden: { opacity: 0 },
+    hidden: {opacity: 0},
     visible: {
       opacity: 1,
       transition: {
@@ -162,16 +162,19 @@ export const HomeNewsletter: FC = () => {
   }
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 15 },
-    visible: { opacity: 1, y: 0 },
+    hidden: {opacity: 0, y: 15},
+    visible: {opacity: 1, y: 0},
   }
 
   return (
-    <section id="home-newsletter" className="bg-[#2a2a2a] w-full relative border-t border-zinc-800 overflow-hidden text-white">
+    <section
+      id="home-newsletter"
+      className="bg-zinc-800 w-full relative overflow-hidden text-white leading-none"
+    >
       {/* Collapse Trigger Button - Band Style */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex flex-col md:flex-row items-center justify-between px-6 py-5 md:py-6 text-xs md:text-sm font-bold tracking-[0.3em] uppercase bg-[#333333] hover:bg-[#3d3d3d] transition-colors group z-30 relative font-inter gap-4 md:gap-0"
+        className="w-full flex flex-col md:flex-row items-center justify-between px-6 py-5 md:py-6 text-xs md:text-sm font-bold tracking-[0.3em] uppercase bg-zinc-900 transition-colors group z-30 relative font-inter gap-4 md:gap-0"
       >
         <div className="flex-1 flex flex-col items-center justify-center md:pl-[120px]">
           <span className="font-bold tracking-[0.4em] text-sm md:text-base text-gray-100 transition-colors group-hover:text-white">
@@ -200,16 +203,13 @@ export const HomeNewsletter: FC = () => {
       <AnimatePresence>
         {isExpanded && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            initial={{height: 0, opacity: 0}}
+            animate={{height: 'auto', opacity: 1}}
+            exit={{height: 0, opacity: 0}}
+            transition={{duration: 0.6, ease: [0.16, 1, 0.3, 1]}}
             className="overflow-hidden"
           >
             <div className="pt-8 pb-16 w-full flex flex-col items-center bg-[var(--bg-secondary)] text-[var(--text-primary)] relative transition-colors duration-500">
-              {/* Background Decorative Element */}
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent opacity-50" />
-
               <div className="flex gap-4 md:gap-12 mb-12 relative z-20">
                 <div role="tablist" className="relative flex">
                   <button
@@ -223,7 +223,7 @@ export const HomeNewsletter: FC = () => {
                       <motion.div
                         layoutId="activeTabUnderline"
                         className="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--text-primary)]"
-                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                        transition={{type: 'spring', stiffness: 380, damping: 30}}
                       />
                     )}
                   </button>
@@ -238,7 +238,7 @@ export const HomeNewsletter: FC = () => {
                       <motion.div
                         layoutId="activeTabUnderline"
                         className="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--text-primary)]"
-                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                        transition={{type: 'spring', stiffness: 380, damping: 30}}
                       />
                     )}
                   </button>
@@ -295,9 +295,9 @@ export const HomeNewsletter: FC = () => {
                         <AnimatePresence mode="wait">
                           {message && (
                             <motion.p
-                              initial={{ opacity: 0, y: 5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -5 }}
+                              initial={{opacity: 0, y: 5}}
+                              animate={{opacity: 1, y: 0}}
+                              exit={{opacity: 0, y: -5}}
                               className={`text-[11px] md:text-xs uppercase tracking-[0.15em] font-bold text-center ${status === 'error' ? 'text-red-500' : 'text-[var(--text-primary)]'}`}
                             >
                               {message}
@@ -336,7 +336,7 @@ export const HomeNewsletter: FC = () => {
                             <input
                               type="text"
                               value={profData.name}
-                              onChange={e => setProfData({ ...profData, name: e.target.value })}
+                              onChange={e => setProfData({...profData, name: e.target.value})}
                               required
                               placeholder={capitalize(t('full_name'))}
                               className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
@@ -349,7 +349,7 @@ export const HomeNewsletter: FC = () => {
                             <input
                               type="text"
                               value={profData.company}
-                              onChange={e => setProfData({ ...profData, company: e.target.value })}
+                              onChange={e => setProfData({...profData, company: e.target.value})}
                               required
                               placeholder={capitalize(t('company'))}
                               className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
@@ -368,7 +368,7 @@ export const HomeNewsletter: FC = () => {
                             <input
                               type="text"
                               value={profData.profession}
-                              onChange={e => setProfData({ ...profData, profession: e.target.value })}
+                              onChange={e => setProfData({...profData, profession: e.target.value})}
                               required
                               placeholder={capitalize(t('profession'))}
                               className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
@@ -381,7 +381,7 @@ export const HomeNewsletter: FC = () => {
                             <input
                               type="text"
                               value={profData.country}
-                              onChange={e => setProfData({ ...profData, country: e.target.value })}
+                              onChange={e => setProfData({...profData, country: e.target.value})}
                               required
                               placeholder={capitalize(t('country'))}
                               className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
@@ -394,7 +394,7 @@ export const HomeNewsletter: FC = () => {
                             <input
                               type="tel"
                               value={profData.phone}
-                              onChange={e => setProfData({ ...profData, phone: e.target.value })}
+                              onChange={e => setProfData({...profData, phone: e.target.value})}
                               required
                               placeholder={capitalize(t('phone'))}
                               className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
@@ -413,7 +413,7 @@ export const HomeNewsletter: FC = () => {
                             <input
                               type="email"
                               value={profData.email}
-                              onChange={e => setProfData({ ...profData, email: e.target.value })}
+                              onChange={e => setProfData({...profData, email: e.target.value})}
                               required
                               placeholder={capitalize(t('email'))}
                               className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
@@ -426,7 +426,7 @@ export const HomeNewsletter: FC = () => {
                             <input
                               type="password"
                               value={profData.password || ''}
-                              onChange={e => setProfData({ ...profData, password: e.target.value })}
+                              onChange={e => setProfData({...profData, password: e.target.value})}
                               required
                               placeholder={capitalize(t('set_password'))}
                               className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
@@ -453,9 +453,9 @@ export const HomeNewsletter: FC = () => {
                             <AnimatePresence mode="wait">
                               {message ? (
                                 <motion.p
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  exit={{ opacity: 0 }}
+                                  initial={{opacity: 0}}
+                                  animate={{opacity: 1}}
+                                  exit={{opacity: 0}}
                                   className={`text-[11px] md:text-xs uppercase tracking-[0.15em] font-bold ${status === 'error' ? 'text-red-500' : 'text-[var(--text-primary)]'}`}
                                 >
                                   {message}

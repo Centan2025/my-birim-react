@@ -71,13 +71,15 @@ export function ProductExclusiveContentSection({
 
   return (
     <ScrollReveal delay={600} threshold={0.05}>
-      <div className="relative rounded-none border border-gray-200 bg-white/70 backdrop-blur p-6 sm:p-8 pb-10">
+      <div className="relative rounded-none border border-[var(--border-primary)] bg-[var(--bg-primary)]/70 backdrop-blur p-6 sm:p-8 pb-10">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl md:text-3xl font-light text-gray-700">İndirilebilir Dosyalar</h2>
+          <h2 className="text-2xl md:text-3xl font-light text-[var(--text-primary)]">
+            İndirilebilir Dosyalar
+          </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="rounded-none border border-gray-200 bg-white p-4">
-            <div className="text-xs uppercase tracking-wider text-gray-500 mb-3">
+          <div className="rounded-none border border-[var(--border-primary)] bg-[var(--bg-secondary)] p-4">
+            <div className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mb-3">
               {t('additional_images') || 'Ek Görseller'}
             </div>
             {exclusiveContent.images && exclusiveContent.images.length > 0 ? (
@@ -92,12 +94,12 @@ export function ProductExclusiveContentSection({
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={e => handleDownloadClick(e, url)}
-                        className="flex items-center gap-2 px-3 py-2 rounded-none border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-2 px-3 py-2 rounded-none border border-[var(--border-primary)] bg-[var(--bg-primary)] hover:border-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors"
                       >
-                        <span className="shrink-0 text-gray-600 group-hover:text-gray-900">
+                        <span className="shrink-0 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
                           <DownloadIcon />
                         </span>
-                        <span className="text-sm text-gray-700 group-hover:text-gray-900 break-all">
+                        <span className="text-sm text-[var(--text-primary)] group-hover:text-[var(--text-primary)] break-all">
                           {label}
                         </span>
                       </a>
@@ -106,11 +108,13 @@ export function ProductExclusiveContentSection({
                 })}
               </ul>
             ) : (
-              <p className="text-gray-400 text-sm">Ek görsel bulunmuyor</p>
+              <p className="text-[var(--text-secondary)] opacity-50 text-sm">
+                Ek görsel bulunmuyor
+              </p>
             )}
           </div>
-          <div className="rounded-none border border-gray-200 bg-white p-4">
-            <div className="text-xs uppercase tracking-wider text-gray-500 mb-3">
+          <div className="rounded-none border border-[var(--border-primary)] bg-[var(--bg-secondary)] p-4">
+            <div className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mb-3">
               {t('technical_drawings') || 'Teknik Çizimler'}
             </div>
             {exclusiveContent.drawings && exclusiveContent.drawings.length > 0 ? (
@@ -121,12 +125,12 @@ export function ProductExclusiveContentSection({
                       href={doc.url}
                       download
                       onClick={e => handleDownloadClick(e, doc.url)}
-                      className="flex items-center gap-2 px-3 py-2 rounded-none border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-2 px-3 py-2 rounded-none border border-[var(--border-primary)] bg-[var(--bg-primary)] hover:border-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors"
                     >
-                      <span className="shrink-0 text-gray-600 group-hover:text-gray-900">
+                      <span className="shrink-0 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
                         <DownloadIcon />
                       </span>
-                      <span className="text-sm text-gray-700 group-hover:text-gray-900">
+                      <span className="text-sm text-[var(--text-primary)] group-hover:text-[var(--text-primary)]">
                         {t(doc.name)}
                       </span>
                     </a>
@@ -134,11 +138,13 @@ export function ProductExclusiveContentSection({
                 ))}
               </ul>
             ) : (
-              <p className="text-gray-400 text-sm">Teknik çizim bulunmuyor</p>
+              <p className="text-[var(--text-secondary)] opacity-50 text-sm">
+                Teknik çizim bulunmuyor
+              </p>
             )}
           </div>
-          <div className="rounded-none border border-gray-200 bg-white p-4">
-            <div className="text-xs uppercase tracking-wider text-gray-500 mb-3">
+          <div className="rounded-none border border-[var(--border-primary)] bg-[var(--bg-secondary)] p-4">
+            <div className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mb-3">
               {t('3d_models') || '3D Modeller'}
             </div>
             {exclusiveContent.models3d && exclusiveContent.models3d.length > 0 ? (
@@ -149,12 +155,12 @@ export function ProductExclusiveContentSection({
                       href={model.url}
                       download
                       onClick={e => handleDownloadClick(e, model.url)}
-                      className="flex items-center gap-2 px-3 py-2 rounded-none border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-2 px-3 py-2 rounded-none border border-[var(--border-primary)] bg-[var(--bg-primary)] hover:border-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors"
                     >
-                      <span className="shrink-0 text-gray-600 group-hover:text-gray-900">
+                      <span className="shrink-0 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
                         <DownloadIcon />
                       </span>
-                      <span className="text-sm text-gray-700 group-hover:text-gray-900">
+                      <span className="text-sm text-[var(--text-primary)] group-hover:text-[var(--text-primary)]">
                         {t(model.name)}
                       </span>
                     </a>
@@ -162,12 +168,12 @@ export function ProductExclusiveContentSection({
                 ))}
               </ul>
             ) : (
-              <p className="text-gray-400 text-sm">3D model bulunmuyor</p>
+              <p className="text-[var(--text-secondary)] opacity-50 text-sm">3D model bulunmuyor</p>
             )}
           </div>
         </div>
         {/* Alt çizgi: kartın tam alt kenarında, kenarlara kadar */}
-        <div className="absolute left-0 right-0 bottom-0 h-px bg-gray-300" />
+        <div className="absolute left-0 right-0 bottom-0 h-px bg-[var(--border-primary)]" />
       </div>
     </ScrollReveal>
   )
