@@ -209,7 +209,7 @@ export const HomeNewsletter: FC = () => {
             transition={{duration: 0.6, ease: [0.16, 1, 0.3, 1]}}
             className="overflow-hidden"
           >
-            <div className="pt-8 pb-16 w-full flex flex-col items-center bg-[var(--bg-secondary)] text-[var(--text-primary)] relative transition-colors duration-500">
+            <div className="pt-8 pb-16 w-full flex flex-col items-center bg-[var(--bg-tertiary)] text-[var(--text-primary)] relative transition-colors duration-500">
               <div className="flex gap-4 md:gap-12 mb-12 relative z-20">
                 <div role="tablist" className="relative flex">
                   <button

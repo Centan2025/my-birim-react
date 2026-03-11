@@ -361,8 +361,8 @@ export function HomePage() {
         <div className="relative h-[50vh] w-full bg-gray-900" />
       )}
 
-      {/* Hero Altı Beyaz Bant */}
-      <section className="w-full bg-white h-10 md:h-12" />
+      {/* Hero Altı Bant */}
+      <section className="w-full bg-[var(--bg-primary)] h-10 md:h-12" />
 
       {/* Content Blocks Section */}
       {content?.contentBlocks && content.contentBlocks.length > 0 && (
