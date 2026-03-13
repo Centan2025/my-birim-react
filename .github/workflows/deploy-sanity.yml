@@ -1,0 +1,37 @@
+name: Deploy Sanity Studio
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'birim-web/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          
+      - name: Install dependencies
+        run: |
+          cd birim-web
+          npm install
+          
+      - name: Deploy Sanity Studio
+        run: |
+          cd birim-web
+          npx sanity deploy --yes
+        env:
+          SANITY_AUTH_TOKEN: ${{ secrets.SANITY_AUTH_TOKEN }}
+          # R2 Environment Variables (needed for build)
+          SANITY_STUDIO_R2_ACCESS_KEY_ID: ${{ secrets.SANITY_STUDIO_R2_ACCESS_KEY_ID }}
+          SANITY_STUDIO_R2_ACCOUNT_ID: ${{ secrets.SANITY_STUDIO_R2_ACCOUNT_ID }}
+          SANITY_STUDIO_R2_BUCKET_NAME: ${{ secrets.SANITY_STUDIO_R2_BUCKET_NAME }}
+          SANITY_STUDIO_R2_DOMAIN: ${{ secrets.SANITY_STUDIO_R2_DOMAIN }}
+          SANITY_STUDIO_R2_SECRET_ACCESS_KEY: ${{ secrets.SANITY_STUDIO_R2_SECRET_ACCESS_KEY }}

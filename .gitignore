@@ -42,7 +42,14 @@ strategy_notes.md
 test-email.js
 test-env.js
 dummy
-*.github
+# *.github (commented out to allow workflows)
+# *.github
 coverage/
 .vercel
 .env*.local
+deploy-log.txt
+deploy-manual.mjs
+deploy_debug*.txt
+deploy_output.txt
+deploy_full_log.txt
+
