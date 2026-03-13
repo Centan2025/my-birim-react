@@ -167,16 +167,28 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
       if (data?.contentBlocks) {
         data.contentBlocks = data.contentBlocks.map((b: any) => {
           let url = b.url
+          let image = undefined
+          const meta = b.imageR2 ? mapR2Metadata(b.imageR2) : (b.image ? mapR2Metadata(b.image) : {})
+
           if (b.mediaType === 'image') {
-            const imgUrl = b.imageR2?.url ? mapImage(b.imageR2) : (b.image ? mapImage(b.image) : undefined)
-            const imgMeta = b.imageR2 ? mapR2Metadata(b.imageR2) : (b.image ? mapR2Metadata(b.image) : {})
-            if (imgUrl) return { ...b, image: imgUrl, url: undefined, crop: imgMeta.crop, hotspot: imgMeta.hotspot, origWidth: imgMeta.origWidth, origHeight: imgMeta.origHeight }
-          }
-          if (b.mediaType === 'video' && b.videoFileR2?.url) {
+            image = b.imageR2?.url ? mapImage(b.imageR2) : (b.image ? mapImage(b.image) : undefined)
+          } else if (b.mediaType === 'video' && b.videoFileR2?.url) {
             url = rewriteR2Url(b.videoFileR2.url)
           }
-          const meta = b.imageR2 ? mapR2Metadata(b.imageR2) : (b.image ? mapR2Metadata(b.image) : {})
-          return { ...b, image: undefined, url, crop: meta.crop, hotspot: meta.hotspot, origWidth: meta.origWidth, origHeight: meta.origHeight }
+
+          // Extract hex from Sanity color object for borderColor
+          const borderColor = b.borderColor?.hex
+
+          return {
+            ...b,
+            image,
+            url,
+            crop: meta.crop,
+            hotspot: meta.hotspot,
+            origWidth: meta.origWidth,
+            origHeight: meta.origHeight,
+            borderColor,
+          }
         })
       }
       if (!Array.isArray(data?.featuredProductIds)) data.featuredProductIds = []

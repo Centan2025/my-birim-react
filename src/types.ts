@@ -7,10 +7,10 @@ export type LocalizedString =
   | string
   | any[]
   | {
-    [key: string]: string | any[] | undefined
-    en?: string | any[]
-    tr?: string | any[]
-  }
+      [key: string]: string | any[] | undefined
+      en?: string | any[]
+      tr?: string | any[]
+    }
 
 // Sanity palette metadata (dominant renk bilgisi)
 export interface SanityImagePalette {
@@ -78,9 +78,9 @@ export interface Category {
   /** Localized subtitle or short description for the category page. */
   subtitle: LocalizedString
   /** URL for the hero image displayed on the category page. */
-  heroImage: string | { url: string; urlMobile?: string; urlDesktop?: string }
+  heroImage: string | {url: string; urlMobile?: string; urlDesktop?: string}
   /** URL for the menu image displayed in the products dropdown menu. */
-  menuImage?: string | { url: string; urlMobile?: string; urlDesktop?: string }
+  menuImage?: string | {url: string; urlMobile?: string; urlDesktop?: string}
 }
 
 /**
@@ -96,7 +96,7 @@ export interface Designer {
   /** Localized biography of the designer. */
   bio: LocalizedString
   /** URL for the designer's portrait or representative image. */
-  image: string | { url: string; urlMobile?: string; urlDesktop?: string }
+  image: string | {url: string; urlMobile?: string; urlDesktop?: string}
   /** Art Direction: Mobil için görsel URL (opsiyonel) */
   imageMobile?: string
   /** Art Direction: Desktop için görsel URL (opsiyonel) */
@@ -170,15 +170,15 @@ export interface Product {
   description: LocalizedString
   /** URL for the main display image of the product. */
   mainImage:
-  | string
-  | {
-    url: string
-    urlMobile?: string
-    urlDesktop?: string
-    palette?: SanityImagePalette
-    crop?: R2ImageMetadata['crop']
-    hotspot?: R2ImageMetadata['hotspot']
-  }
+    | string
+    | {
+        url: string
+        urlMobile?: string
+        urlDesktop?: string
+        palette?: SanityImagePalette
+        crop?: R2ImageMetadata['crop']
+        hotspot?: R2ImageMetadata['hotspot']
+      }
   /** Mixed alternative media for the band under hero. */
   alternativeMedia?: {
     type: 'image' | 'video' | 'youtube'
@@ -251,9 +251,9 @@ export interface ExclusiveContent {
   /** Array of URLs for exclusive images. */
   images: string[]
   /** Array of downloadable technical drawings. */
-  drawings: { name: LocalizedString; url: string }[]
+  drawings: {name: LocalizedString; url: string}[]
   /** Array of downloadable 3D models. */
-  models3d: { name: LocalizedString; url: string }[]
+  models3d: {name: LocalizedString; url: string}[]
 }
 
 // --- Page-Specific Content Models ---
@@ -301,6 +301,8 @@ export interface HeroMediaItem {
  */
 export interface ContentBlock {
   backgroundColor?: 'white' | 'gray'
+  hasBorder?: boolean
+  borderThickness?: number
   textAlignment?: 'left' | 'center' | 'right'
   verticalAlignment?: 'top' | 'center' | 'bottom'
   /** Type of media: image, video, or youtube */
@@ -343,6 +345,10 @@ export interface ContentBlock {
   spacingBottom?: number
   /** Button text color */
   buttonColor?: 'black' | 'white'
+  /** Internal padding in pixels */
+  padding?: number
+  /** Border color (hex) */
+  borderColor?: string
 }
 
 /**
@@ -369,7 +375,14 @@ export interface HomePageContent {
  * Defines the content structure for the About Us page.
  */
 export interface AboutPageContent {
-  heroImage: string | { url: string; palette?: SanityImagePalette; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot'] }
+  heroImage:
+    | string
+    | {
+        url: string
+        palette?: SanityImagePalette
+        crop?: R2ImageMetadata['crop']
+        hotspot?: R2ImageMetadata['hotspot']
+      }
   heroTitle: LocalizedString
   heroSubtitle: LocalizedString
   storyTitle: LocalizedString
@@ -377,23 +390,29 @@ export interface AboutPageContent {
   storyContentP2: LocalizedString
   storyImage: string
   valuesTitle: LocalizedString
-  values: { title: LocalizedString; description: LocalizedString }[]
+  values: {title: LocalizedString; description: LocalizedString}[]
   historySection?: {
     title?: LocalizedString
     content?: LocalizedString
-    image?: string | { url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot'] }
+    image?:
+      | string
+      | {url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot']}
     media?: NewsMedia[]
   }
   identitySection?: {
     title?: LocalizedString
     content?: LocalizedString
-    image?: string | { url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot'] }
+    image?:
+      | string
+      | {url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot']}
     media?: NewsMedia[]
   }
   qualitySection?: {
     title?: LocalizedString
     content?: LocalizedString
-    image?: string | { url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot'] }
+    image?:
+      | string
+      | {url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot']}
     media?: NewsMedia[]
   }
 }
@@ -458,7 +477,7 @@ export interface NewsItem {
   /** Localized main content/body of the news item. */
   content: LocalizedString
   /** URL for the main image used on the news list page card. */
-  mainImage: string | { url: string; urlMobile?: string; urlDesktop?: string }
+  mainImage: string | {url: string; urlMobile?: string; urlDesktop?: string}
   /** Array of media items (images, videos) within the article. */
   media: NewsMedia[]
   /** Whether this news item is published on the site. */
@@ -558,25 +577,25 @@ export type PortableTextBlock = unknown
 
 export interface CookiesPolicy {
   title: LocalizedString
-  content: { tr?: PortableTextBlock[]; en?: PortableTextBlock[] }
+  content: {tr?: PortableTextBlock[]; en?: PortableTextBlock[]}
   updatedAt?: string
 }
 
 export interface PrivacyPolicy {
   title: LocalizedString
-  content: { tr?: PortableTextBlock[]; en?: PortableTextBlock[] }
+  content: {tr?: PortableTextBlock[]; en?: PortableTextBlock[]}
   updatedAt?: string
 }
 
 export interface TermsOfService {
   title: LocalizedString
-  content: { tr?: PortableTextBlock[]; en?: PortableTextBlock[] }
+  content: {tr?: PortableTextBlock[]; en?: PortableTextBlock[]}
   updatedAt?: string
 }
 
 export interface KvkkPolicy {
   title: LocalizedString
-  content: { tr?: PortableTextBlock[]; en?: PortableTextBlock[] }
+  content: {tr?: PortableTextBlock[]; en?: PortableTextBlock[]}
   updatedAt?: string
 }
 
@@ -596,8 +615,8 @@ export interface Project {
   id: string
   title: LocalizedString
   cover:
-  | string
-  | { url: string; urlMobile?: string; urlDesktop?: string; palette?: SanityImagePalette }
+    | string
+    | {url: string; urlMobile?: string; urlDesktop?: string; palette?: SanityImagePalette}
   date?: LocalizedString
   projectCategory?: LocalizedString
   excerpt?: LocalizedString

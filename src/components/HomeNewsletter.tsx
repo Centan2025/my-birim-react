@@ -169,24 +169,25 @@ export const HomeNewsletter: FC = () => {
   return (
     <section
       id="home-newsletter"
-      className="bg-zinc-800 w-full relative overflow-hidden text-white leading-none"
+      className="bg-[#3b3e3c] w-full relative overflow-hidden text-white leading-none"
     >
       {/* Collapse Trigger Button - Band Style */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex flex-col md:flex-row items-center justify-between px-6 py-5 md:py-6 text-xs md:text-sm font-bold tracking-[0.3em] uppercase bg-zinc-900 transition-colors group z-30 relative font-inter gap-4 md:gap-0"
+        className="block w-full bg-[#484d4a] transition-colors group z-30 relative border-t border-white/10"
       >
-        <div className="flex-1 flex flex-col items-center justify-center md:pl-[120px]">
-          <span className="font-bold tracking-[0.4em] text-sm md:text-base text-gray-100 transition-colors group-hover:text-white">
-            {t('newsletter_title')}
-          </span>
-          <span className="font-semibold tracking-[0.2em] text-[10px] md:text-xs text-gray-400 mt-1 md:mt-2 transition-colors group-hover:text-gray-200">
-            {t('professional_access')}
-          </span>
-        </div>
-        <div className="flex-shrink-0 md:ml-4 w-full md:w-auto">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-6 md:py-8 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
+          <div className="flex-1 flex flex-col items-start justify-center text-left">
+            <span className="font-normal tracking-[0.05em] text-base md:text-lg text-gray-200 transition-colors font-inter">
+              {t('newsletter_title')}
+            </span>
+            <span className="font-light tracking-[0.15em] text-[11px] md:text-sm text-gray-400 mt-1 transition-colors font-inter">
+              {t('professional_access_desc')}
+            </span>
+          </div>
+          <div className="flex-shrink-0 md:ml-4 w-full md:w-auto">
           <div
-            className={`flex items-center justify-center gap-3 bg-[#555555] text-white border border-white px-6 py-3 transition-all duration-500 font-inter hover:bg-white/10`}
+            className={`flex items-center justify-center gap-3 bg-transparent text-white border border-gray-400 px-6 py-3 transition-all duration-500 font-inter hover:bg-white/5`}
           >
             <span className="text-[11px] md:text-xs tracking-[0.2em] font-bold">
               {isExpanded ? t('close') : t('join_us')}
@@ -197,6 +198,7 @@ export const HomeNewsletter: FC = () => {
               <ArrowUpRight className="w-3.5 h-3.5 group-hover:rotate-90 transition-transform duration-500" />
             )}
           </div>
+        </div>
         </div>
       </button>
 
@@ -216,9 +218,9 @@ export const HomeNewsletter: FC = () => {
                     role="tab"
                     aria-selected={activeTab === 'newsletter'}
                     onClick={() => setActiveTab('newsletter')}
-                    className={`relative pb-4 px-6 text-xs md:text-sm font-bold tracking-[0.25em] transition-all duration-500 uppercase font-inter ${activeTab === 'newsletter' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                    className={`relative pb-4 px-6 text-xs md:text-sm font-bold tracking-[0.25em] transition-all duration-500 font-inter ${activeTab === 'newsletter' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                   >
-                    {t('newsletter_title')}
+                    {t('join_us')}
                     {activeTab === 'newsletter' && (
                       <motion.div
                         layoutId="activeTabUnderline"
@@ -231,7 +233,7 @@ export const HomeNewsletter: FC = () => {
                     role="tab"
                     aria-selected={activeTab === 'professional'}
                     onClick={() => setActiveTab('professional')}
-                    className={`relative pb-4 px-6 text-xs md:text-sm font-bold tracking-[0.25em] transition-all duration-500 uppercase font-inter ${activeTab === 'professional' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                    className={`relative pb-4 px-6 text-xs md:text-sm font-bold tracking-[0.25em] transition-all duration-500 font-inter ${activeTab === 'professional' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                   >
                     {t('professional_access')}
                     {activeTab === 'professional' && (
@@ -256,12 +258,6 @@ export const HomeNewsletter: FC = () => {
                       exit="hidden"
                       className="w-full max-w-2xl mx-auto flex flex-col items-center"
                     >
-                      <motion.p
-                        variants={itemVariants}
-                        className="text-xs md:text-sm uppercase tracking-widest font-medium text-[var(--text-secondary)] mb-8 text-center max-w-md"
-                      >
-                        {t('newsletter_prompt')}
-                      </motion.p>
 
                       <motion.form
                         variants={itemVariants}
@@ -284,7 +280,7 @@ export const HomeNewsletter: FC = () => {
                           disabled={status === 'loading'}
                           className="bg-[var(--text-primary)] text-[var(--bg-primary)] border border-[var(--text-primary)] px-10 py-5 hover:opacity-90 transition-all duration-500 disabled:opacity-50 flex items-center justify-center gap-3 overflow-hidden group min-w-[200px] font-inter"
                         >
-                          <span className="text-[11px] md:text-xs uppercase tracking-[0.25em] font-bold">
+                          <span className="text-[11px] md:text-xs tracking-[0.25em] font-bold">
                             {status === 'loading' ? t('waiting') : t('subscribe')}
                           </span>
                           <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-500" />
@@ -317,12 +313,6 @@ export const HomeNewsletter: FC = () => {
                       exit="hidden"
                       className="w-full"
                     >
-                      <motion.p
-                        variants={itemVariants}
-                        className="text-xs md:text-sm uppercase tracking-widest font-medium text-[var(--text-secondary)] mb-10 text-center"
-                      >
-                        {t('professional_access_desc')}
-                      </motion.p>
 
                       <form onSubmit={handleSubmitProfessional} className="space-y-4">
                         <motion.div
@@ -443,7 +433,7 @@ export const HomeNewsletter: FC = () => {
                             disabled={status === 'loading'}
                             className="w-full md:w-auto md:min-w-[340px] group flex items-center justify-between bg-[var(--text-primary)] text-[var(--bg-primary)] border border-[var(--text-primary)] px-10 py-5 hover:opacity-90 transition-all duration-500 disabled:opacity-50 font-inter"
                           >
-                            <span className="text-[11px] md:text-xs uppercase tracking-[0.3em] font-bold">
+                            <span className="text-[11px] md:text-xs tracking-[0.3em] font-bold">
                               {status === 'loading' ? t('waiting') : t('complete_application')}
                             </span>
                             <ArrowUpRight className="w-5 h-5 group-hover:rotate-45 transition-transform duration-500" />

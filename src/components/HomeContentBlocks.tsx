@@ -81,6 +81,35 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             ? 'bg-[var(--bg-secondary)]'
             : 'bg-[var(--bg-primary)]'
 
+        const borderThickness = block.hasBorder
+          ? Math.max(1, Math.min(12, Number(block.borderThickness || 1)))
+          : 0
+
+        const borderOverlayColor = typeof block.borderColor === 'string' 
+          ? block.borderColor 
+          : (block.borderColor as any)?.hex || 'color-mix(in srgb, var(--text-primary) 28%, transparent)'
+
+        const borderOverlay = borderThickness > 0 && (
+          <div
+            className="absolute inset-0 pointer-events-none z-30"
+            style={{
+              boxShadow: `inset 0 0 0 ${borderThickness}px ${borderOverlayColor}`,
+            }}
+          />
+        )
+
+        // Çerçeve varsa veya manuel padding girilmişse içeriğe boşluk ekle
+        const customPadding = block.padding !== undefined ? Number(block.padding) : undefined
+        const borderPaddingStyle = customPadding !== undefined
+          ? { padding: `${customPadding}px` }
+          : undefined
+
+        const borderPaddingClass = !borderPaddingStyle && borderThickness > 0 
+          ? isFullWidth 
+            ? 'p-4 md:p-8' 
+            : 'p-4 md:p-6'
+          : ''
+
         const textAlign = block.textAlignment || 'left'
         const textAlignClass =
           textAlign === 'center'
@@ -313,7 +342,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               <div className="relative w-full h-full">
                 <OptimizedVideo
                   src={mediaUrl}
-                  className={`${isFullWidth ? 'w-full h-auto max-w-full' : `${mediaWidthClass} ${imageBorderClass}`} ${isMobile ? 'w-full object-cover' : 'object-cover'}`}
+                  className={`${isFullWidth ? 'w-full h-auto max-w-full' : `${mediaWidthClass} ${imageBorderClass}`} ${isMobile ? 'w-full object-cover' : 'object-cover'} block`}
                   autoPlay
                   loop
                   muted
@@ -442,7 +471,10 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             data-block-index={index}
           >
             {isFullWidth || isCenter ? (
-              <div className="w-full overflow-hidden flex flex-col items-center">
+              <div
+                className={`${isFullWidth ? 'w-full' : 'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto'} overflow-hidden flex flex-col items-center relative ${borderPaddingClass}`}
+                style={borderPaddingStyle}
+              >
                 {textContentAbove}
                 {mediaContent}
                 {textContentBelow}
@@ -455,9 +487,13 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     {bodyElement}
                   </div>
                 )}
+                {borderOverlay}
               </div>
             ) : (
-              <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
+              <div
+                className={`w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 overflow-hidden relative ${borderPaddingClass}`}
+                style={borderPaddingStyle}
+              >
                 <div
                   className={
                     hasTextContent && hasMedia
@@ -487,6 +523,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     </div>
                   )}
                 </div>
+                {borderOverlay}
               </div>
             )}
           </section>
