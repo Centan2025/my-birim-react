@@ -1,3 +1,4 @@
+// Triggering deployment after secret setup
 import {defineCliConfig} from 'sanity/cli'
 import path from 'path'
 
