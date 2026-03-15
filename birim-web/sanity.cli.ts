@@ -1,4 +1,3 @@
-// Triggering deployment after secret setup
 import {defineCliConfig} from 'sanity/cli'
 import path from 'path'
 
@@ -6,6 +5,10 @@ export default defineCliConfig({
   api: {
     projectId: 'wn3a082f',
     dataset: 'production',
+  },
+  studioHost: 'birim',
+  deployment: {
+    appId: 'uhq1n1x3jfninkphme61bf2x',
   },
   vite: (config) => {
     return {

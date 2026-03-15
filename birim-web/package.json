@@ -19,7 +19,7 @@
     "@aws-sdk/client-s3": "^3.971.0",
     "@sanity/color-input": "^6.0.4",
     "@sanity/image-url": "^1.0.2",
-    "@sanity/orderable-document-list": "^1.4.0",
+    "@sanity/orderable-document-list": "^1.5.1",
     "@sanity/vision": "^5.13.0",
     "browser-image-compression": "^2.0.2",
     "lucide-react": "^0.562.0",
