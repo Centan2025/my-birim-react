@@ -28,7 +28,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.971.0",
     "@fontsource/zalando-sans-semiexpanded": "^5.2.1",
-    "@google/genai": "^1.28.0",
+    "@google/genai": "^1.45.0",
     "@sanity/client": "^6.29.1",
     "@sanity/image-url": "^1.2.0",
     "@sanity/webhook": "^4.0.4",
