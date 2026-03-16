@@ -1,0 +1,523 @@
+[
+  {
+    "contentBlocks": [
+      {
+        "_key": "b87b0979ab68",
+        "_type": "contentBlock",
+        "backgroundColor": "white",
+        "buttonColor": "black",
+        "buttonPositionOnMedia": "center",
+        "contentFont": "normal",
+        "imageDesktopR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "imageMobileR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "imageR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "mediaType": "image",
+        "order": 0,
+        "position": "center",
+        "showButtonOnMedia": false,
+        "spacingBottom": 0,
+        "textAlignment": "left",
+        "textPosition": "below",
+        "thumbnailR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "title": {
+          "_type": "localizedString",
+          "en": "Berlin AC House",
+          "tr": "Berlin AC Evi Başlık Resimsiz"
+        },
+        "titleFont": "normal",
+        "titlePosition": "above",
+        "verticalAlignment": "center",
+        "videoFileDesktopR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "videoFileMobileR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "videoFileR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        }
+      },
+      {
+        "_key": "79d4db5c975d166feddc7ecddabec676",
+        "_type": "contentBlock",
+        "backgroundColor": "white",
+        "buttonColor": "black",
+        "buttonPositionOnMedia": "center",
+        "description": {
+          "_type": "localizedPortableText",
+          "tr": [
+            {
+              "_key": "b4882d49baa9",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "03e3913060c5",
+                  "_type": "span",
+                  "marks": [
+                    "strong"
+                  ],
+                  "text": "Tarih  :  12.20.2020"
+                }
+              ],
+              "markDefs": [],
+              "style": "h5"
+            },
+            {
+              "_key": "26118cdb0ff7",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "03e3913060c5",
+                  "_type": "span",
+                  "marks": [
+                    "strong"
+                  ],
+                  "text": "Yer : Londra"
+                }
+              ],
+              "markDefs": [],
+              "style": "h5"
+            },
+            {
+              "_key": "4d77719a9b83",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "03e3913060c5",
+                  "_type": "span",
+                  "marks": [
+                    "strong"
+                  ],
+                  "text": ""
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            },
+            {
+              "_key": "c6e82897792a",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "03e3913060c5",
+                  "_type": "span",
+                  "marks": [
+                    "strong"
+                  ],
+                  "text": "Thanks to its artizan production"
+                }
+              ],
+              "markDefs": [],
+              "style": "h5"
+            },
+            {
+              "_key": "e0d4776bb5e8",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "03e3913060c5",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "Thanks to its artizan production, you can feel ebony, olive, mahogany and anigre wood veneers as a single finishing material. This usage of different wooden veneers a single piece makes Calm Low Table an elegant and timeless product."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            },
+            {
+              "_key": "af6987de7534",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "03e3913060c5",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "The finishing material variability of Dıoros attracts you at first sight. The collection includes round table tops with different heaigt options."
+                }
+              ],
+              "markDefs": [],
+              "style": "blockquote"
+            }
+          ]
+        },
+        "imageDesktopR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "imageMobileR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "mediaType": "image",
+        "order": 0,
+        "position": "right",
+        "showButtonOnMedia": false,
+        "spacingBottom": 0,
+        "textAlignment": "left",
+        "textPosition": "below",
+        "thumbnailR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "titleFont": "normal",
+        "titlePosition": "below",
+        "verticalAlignment": "center",
+        "videoFileDesktopR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "videoFileMobileR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "videoFileR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        }
+      },
+      {
+        "_key": "924165836bd8",
+        "_type": "contentBlock",
+        "backgroundColor": "white",
+        "buttonColor": "black",
+        "buttonPositionOnMedia": "center",
+        "description": {
+          "_type": "localizedPortableText",
+          "tr": [
+            {
+              "_key": "1feab411dbbc",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "29a78cf67d01",
+                  "_type": "span",
+                  "marks": [],
+                  "text": ""
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            },
+            {
+              "_key": "b24e5deb5d66",
+              "_type": "portableTextImage",
+              "imageR2": {
+                "_type": "r2Asset",
+                "alt": "02",
+                "hasResponsiveSizes": true,
+                "height": 1620,
+                "hotspotX": 0.5,
+                "hotspotY": 0.5,
+                "mimeType": "image/webp",
+                "path": "projects/Proje_!/1772631407395-02.webp",
+                "url": "https://birim-assets.web-birim.workers.dev/projects/Proje_!/1772631407395-02.webp",
+                "width": 2432
+              },
+              "layout": "full"
+            },
+            {
+              "_key": "5d79dbfa57e8",
+              "_type": "portableTextImage",
+              "imageR2": {
+                "_type": "r2Asset",
+                "alt": "07",
+                "hasResponsiveSizes": true,
+                "height": 1620,
+                "hotspotX": 0.5,
+                "hotspotY": 0.5,
+                "mimeType": "image/webp",
+                "path": "projects/Proje_!/1772631422388-07.webp",
+                "url": "https://birim-assets.web-birim.workers.dev/projects/Proje_!/1772631422388-07.webp",
+                "width": 2432
+              },
+              "layout": "right"
+            },
+            {
+              "_key": "cf82a9d88d49",
+              "_type": "portableTextImage",
+              "imageR2": {
+                "_type": "r2Asset",
+                "alt": "12",
+                "hasResponsiveSizes": true,
+                "height": 1620,
+                "hotspotX": 0.5,
+                "hotspotY": 0.5,
+                "mimeType": "image/webp",
+                "path": "projects/Proje_!/1772631440528-12.webp",
+                "url": "https://birim-assets.web-birim.workers.dev/projects/Proje_!/1772631440528-12.webp",
+                "width": 2432
+              },
+              "layout": "left"
+            }
+          ]
+        },
+        "imageDesktopR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "imageMobileR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "mediaType": "image",
+        "order": 0,
+        "position": "right",
+        "showButtonOnMedia": false,
+        "spacingBottom": 0,
+        "textAlignment": "left",
+        "textPosition": "below",
+        "thumbnailR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "titleFont": "normal",
+        "titlePosition": "below",
+        "verticalAlignment": "center",
+        "videoFileDesktopR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "videoFileMobileR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "videoFileR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        }
+      }
+    ],
+    "id": "Proje_12",
+    "title": {
+      "_type": "localizedString",
+      "en": "Berlin AC House",
+      "tr": "Berlin AC Evi"
+    }
+  },
+  {
+    "contentBlocks": [
+      {
+        "_key": "924165836bd8",
+        "_type": "contentBlock",
+        "backgroundColor": "white",
+        "buttonColor": "black",
+        "buttonPositionOnMedia": "center",
+        "description": {
+          "_type": "localizedPortableText",
+          "tr": [
+            {
+              "_key": "b4882d49baa9",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "03e3913060c5",
+                  "_type": "span",
+                  "marks": [
+                    "strong"
+                  ],
+                  "text": "Tarih  :  12.20.2020"
+                }
+              ],
+              "markDefs": [],
+              "style": "h5"
+            },
+            {
+              "_key": "26118cdb0ff7",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "03e3913060c5",
+                  "_type": "span",
+                  "marks": [
+                    "strong"
+                  ],
+                  "text": "Yer : Londra"
+                }
+              ],
+              "markDefs": [],
+              "style": "h5"
+            },
+            {
+              "_key": "4d77719a9b83",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "03e3913060c5",
+                  "_type": "span",
+                  "marks": [
+                    "strong"
+                  ],
+                  "text": ""
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            },
+            {
+              "_key": "c6e82897792a",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "03e3913060c5",
+                  "_type": "span",
+                  "marks": [
+                    "strong"
+                  ],
+                  "text": "Thanks to its artizan production"
+                }
+              ],
+              "markDefs": [],
+              "style": "h5"
+            },
+            {
+              "_key": "e0d4776bb5e8",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "03e3913060c5",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "Thanks to its artizan production, you can feel ebony, olive, mahogany and anigre wood veneers as a single finishing material. This usage of different wooden veneers a single piece makes Calm Low Table an elegant and timeless product."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            },
+            {
+              "_key": "b24e5deb5d66",
+              "_type": "portableTextImage",
+              "imageR2": {
+                "_type": "r2Asset",
+                "alt": "02",
+                "hasResponsiveSizes": true,
+                "height": 1620,
+                "hotspotX": 0.5,
+                "hotspotY": 0.5,
+                "mimeType": "image/webp",
+                "path": "projects/Proje_!/1772631407395-02.webp",
+                "url": "https://birim-assets.web-birim.workers.dev/projects/Proje_!/1772631407395-02.webp",
+                "width": 2432
+              },
+              "layout": "full"
+            },
+            {
+              "_key": "5d79dbfa57e8",
+              "_type": "portableTextImage",
+              "imageR2": {
+                "_type": "r2Asset",
+                "alt": "07",
+                "hasResponsiveSizes": true,
+                "height": 1620,
+                "hotspotX": 0.5,
+                "hotspotY": 0.5,
+                "mimeType": "image/webp",
+                "path": "projects/Proje_!/1772631422388-07.webp",
+                "url": "https://birim-assets.web-birim.workers.dev/projects/Proje_!/1772631422388-07.webp",
+                "width": 2432
+              },
+              "layout": "right"
+            },
+            {
+              "_key": "cf82a9d88d49",
+              "_type": "portableTextImage",
+              "imageR2": {
+                "_type": "r2Asset",
+                "alt": "12",
+                "hasResponsiveSizes": true,
+                "height": 1620,
+                "hotspotX": 0.5,
+                "hotspotY": 0.5,
+                "mimeType": "image/webp",
+                "path": "projects/Proje_!/1772631440528-12.webp",
+                "url": "https://birim-assets.web-birim.workers.dev/projects/Proje_!/1772631440528-12.webp",
+                "width": 2432
+              },
+              "layout": "left"
+            },
+            {
+              "_key": "af6987de7534",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "03e3913060c5",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "The finishing material variability of Dıoros attracts you at first sight. The collection includes round table tops with different heaigt options."
+                }
+              ],
+              "markDefs": [],
+              "style": "blockquote"
+            }
+          ]
+        },
+        "imageDesktopR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "imageMobileR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "imageR2": {
+          "_type": "r2Asset",
+          "alt": "07",
+          "hasResponsiveSizes": true,
+          "height": 1620,
+          "hotspotX": 0.5,
+          "hotspotY": 0.5,
+          "mimeType": "image/webp",
+          "path": "projects/Proje_!/1772631529019-07.webp",
+          "url": "https://birim-assets.web-birim.workers.dev/projects/Proje_!/1772631529019-07.webp",
+          "width": 2432
+        },
+        "mediaType": "image",
+        "order": 0,
+        "position": "right",
+        "showButtonOnMedia": false,
+        "spacingBottom": 0,
+        "textAlignment": "left",
+        "textPosition": "below",
+        "thumbnailR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "titleFont": "normal",
+        "titlePosition": "below",
+        "verticalAlignment": "center",
+        "videoFileDesktopR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "videoFileMobileR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        },
+        "videoFileR2": {
+          "_type": "r2Asset",
+          "hasResponsiveSizes": false
+        }
+      }
+    ],
+    "id": "Proje_!",
+    "title": {
+      "_type": "localizedString",
+      "en": "Londra DY House",
+      "tr": "Londra DY House"
+    }
+  }
+]

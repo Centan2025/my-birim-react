@@ -1,0 +1,9 @@
+[34mℹ[39m Building with auto-updates enabled
+
+Including the following environment variables as part of the JavaScript bundle:
+- SANITY_STUDIO_R2_ACCESS_KEY_ID
+- SANITY_STUDIO_R2_ACCOUNT_ID
+- SANITY_STUDIO_R2_BUCKET_NAME
+- SANITY_STUDIO_R2_DOMAIN
+- SANITY_STUDIO_R2_SECRET_ACCESS_KEY
+

@@ -4,6 +4,7 @@ import {localizedString} from './localizedString'
 import MaterialSelectionInput from '../../components/MaterialSelectionInput'
 import FontSelectorInput from '../../components/FontSelectorInput'
 import {getPreviewUrl} from '../utils/previewUrl'
+import {browserOnlyInput} from '../utils/browserOnly'
 
 export const productDimensionDetail = defineType({
   name: 'productDimensionDetail',
@@ -89,7 +90,7 @@ export const productDimensionImage = defineType({
       return {
         title: title || 'İsimsiz Ölçü Görseli',
         media: finalUrl
-          ? React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
+          ? () => React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
           : undefined,
       }
     },
@@ -130,7 +131,7 @@ export const productMaterial = defineType({
       return {
         title: title || 'İsimsiz Malzeme',
         media: finalUrl
-          ? React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
+          ? () => React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
           : undefined,
       }
     },
@@ -365,7 +366,7 @@ export const heroMediaItem = defineType({
         subtitle: subtitle || (type === 'image' ? 'Resim' : type === 'video' ? 'Video' : 'YouTube'),
         media:
           type === 'image' && finalUrl
-            ? React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
+            ? () => React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
             : undefined,
       }
     },
@@ -469,7 +470,7 @@ export const productSimpleMediaItem = defineType({
           type === 'image' ? 'Resim Öğesi' : type === 'video' ? 'Video Öğesi' : 'YouTube Öğesi',
         media:
           type === 'image' && finalUrl
-            ? React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
+            ? () => React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
             : undefined,
       }
     },
@@ -601,7 +602,7 @@ export const productPanelMediaItem = defineType({
         title: mediaTitle,
         media:
           type === 'image' && finalUrl
-            ? React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
+            ? () => React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
             : undefined,
       }
     },
@@ -812,7 +813,7 @@ export const contactLocationMedia = defineType({
               : 'YouTube Medyası',
         media:
           type === 'image' && finalUrl
-            ? React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
+            ? () => React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
             : undefined,
       }
     },
@@ -825,7 +826,7 @@ export const productMaterialSelection = defineType({
   title: 'Malzeme Seçimi (Grup Bazlı)',
   type: 'object',
   components: {
-    input: MaterialSelectionInput,
+    input: browserOnlyInput(MaterialSelectionInput),
   },
   fields: [
     defineField({
@@ -944,7 +945,7 @@ export const contentBlock = defineType({
       title: 'Başlık Fontu',
       type: 'string',
       components: {
-        input: FontSelectorInput,
+        input: browserOnlyInput(FontSelectorInput),
       },
       initialValue: 'normal',
       description: 'Başlık için font stili seçin.',
@@ -954,7 +955,7 @@ export const contentBlock = defineType({
       title: 'İçerik Fontu',
       type: 'string',
       components: {
-        input: FontSelectorInput,
+        input: browserOnlyInput(FontSelectorInput),
       },
       initialValue: 'normal',
       description: 'Açıklama metni için font stili seçin.',
@@ -1219,7 +1220,7 @@ export const contentBlock = defineType({
         subtitle: `Fontlar: T:${titleFont || 'Normal'} C:${contentFont || 'Normal'} | Arka Plan: ${backgroundColor === 'white' ? 'Beyaz' : 'Gri'} | Çerçeve: ${hasBorder ? `${borderThickness || 1}px` : 'Kapalı'}`,
         media:
           mediaType === 'image' && finalUrl
-            ? React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
+            ? () => React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
             : undefined,
       }
     },

@@ -2,6 +2,7 @@ import { defineType, defineField } from 'sanity'
 import { Palette } from 'lucide-react'
 import PortableTextImagePreview from '../../components/PortableTextImagePreview'
 import PortableTextImageInput from '../../components/PortableTextImageInput'
+import { browserOnly, browserOnlyInput } from '../utils/browserOnly'
 
 /**
  * Zengin Metin (Portable Text) Editor Yapılandırması
@@ -128,8 +129,8 @@ const portableTextBlocks = [
       },
     ],
     components: {
-      preview: PortableTextImagePreview,
-      input: PortableTextImageInput,
+      preview: browserOnly(PortableTextImagePreview),
+      input: browserOnlyInput(PortableTextImageInput),
     },
     preview: {
       select: {

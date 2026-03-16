@@ -1,12 +1,13 @@
 import {defineType, defineField} from 'sanity'
 import LocalizedTextInput from '../../components/LocalizedTextInput'
+import {browserOnlyInput} from '../utils/browserOnly'
 
 export const localizedText = defineType({
   name: 'localizedText',
   title: 'Çok Dilli Metin (Uzun)',
   type: 'object',
   components: {
-    input: LocalizedTextInput,
+    input: browserOnlyInput(LocalizedTextInput),
   },
   fields: [
     defineField({name: 'tr', title: 'Türkçe', type: 'text', rows: 4}),

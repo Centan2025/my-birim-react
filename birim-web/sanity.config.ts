@@ -1,5 +1,43 @@
 import { defineConfig } from 'sanity'
 
+if (typeof window === 'undefined') {
+  const noop = () => {}
+  const mockClass = class {}
+  // @ts-ignore
+  globalThis.window = globalThis.window || {}
+  // @ts-ignore
+  globalThis.document = globalThis.document || {
+    createElement: () => ({
+      style: {},
+      appendChild: noop,
+      removeChild: noop,
+      setAttribute: noop,
+      getAttribute: () => null,
+      classList: {add: noop, remove: noop},
+    }),
+    getElementById: () => null,
+    querySelectorAll: () => [],
+    documentElement: {style: {}},
+    body: {appendChild: noop, style: {}},
+    head: {appendChild: noop},
+    activeElement: null,
+  }
+  // @ts-ignore
+  globalThis.Element = globalThis.Element || mockClass
+  // @ts-ignore
+  globalThis.HTMLElement =
+    globalThis.HTMLElement || class HTMLElement extends (globalThis.Element as any) {}
+  // @ts-ignore
+  globalThis.HTMLDivElement =
+    globalThis.HTMLDivElement || class extends (globalThis.HTMLElement as any) {}
+  // @ts-ignore
+  if (!globalThis.Element.prototype.matches) globalThis.Element.prototype.matches = () => false
+  // @ts-ignore
+  if (!globalThis.Element.prototype.closest) globalThis.Element.prototype.closest = () => null
+  // @ts-ignore
+  globalThis.navigator = globalThis.navigator || {userAgent: 'node'}
+}
+
 if (typeof window !== 'undefined') {
   // Monkey-patch window.fetch to silently swallow Sentry ingest errors
   const originalFetch = window.fetch
@@ -10,7 +48,7 @@ if (typeof window !== 'undefined') {
       const url =
         typeof args[0] === 'string' ? args[0] : args[0] instanceof Request ? args[0].url : ''
       if (url.includes('sentry.io') || url.includes('ingest.us.sentry.io')) {
-        return new Response(null, { status: 200 })
+        return new Response(null, {status: 200})
       }
       throw error
     }
@@ -20,7 +58,7 @@ if (typeof window !== 'undefined') {
   const originalXHR = window.XMLHttpRequest
   window.XMLHttpRequest = class extends originalXHR {
     open(method: string, url: string | URL, ...rest: any[]) {
-      ; (this as any)._sentryUrl = String(url)
+      ;(this as any)._sentryUrl = String(url)
       // @ts-ignore
       super.open(method, url, ...rest)
     }

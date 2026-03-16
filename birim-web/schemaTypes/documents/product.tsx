@@ -159,7 +159,7 @@ export default defineType({
       return {
         title: title || 'Ürün',
         media: finalUrl ? (
-          <img
+          () => <img
             src={finalUrl}
             alt={title || 'Ürün'}
             style={{width: '100%', height: '100%', objectFit: 'cover'}}

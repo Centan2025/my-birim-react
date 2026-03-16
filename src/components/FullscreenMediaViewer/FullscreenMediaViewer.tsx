@@ -370,7 +370,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
             aria-label="Fullscreen media scroll container"
             ref={scrollContainerRef}
             className={`w-full overflow-y-auto md:overflow-y-hidden md:overflow-x-auto flex ${isMobile && isLandscape ? 'flex-row' : isMobile ? 'flex-col' : 'flex-row'
-              } items-start md:items-stretch px-0 md:px-4 md:cursor-grab md:select-none`}
+              } items-start md:items-stretch ${slideCount === 1 ? 'justify-center' : 'justify-start'} px-0 md:px-4 md:cursor-grab md:select-none`}
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',

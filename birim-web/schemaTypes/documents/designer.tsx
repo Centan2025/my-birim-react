@@ -15,7 +15,7 @@ export default defineType({
       options: { source: (doc: any) => doc.name?.tr || doc.name?.en, maxLength: 96 },
       validation: (Rule) => Rule.required(),
     }),
-    orderRankField({ type: 'designer' }),
+    ...(typeof window !== 'undefined' ? [orderRankField({ type: 'designer' })] : []),
     defineField({
       name: 'name',
       title: 'Ad',
@@ -52,7 +52,7 @@ export default defineType({
       return {
         title: title || 'Tasarımcı',
         media: finalUrl ? (
-          <img
+          () => <img
             src={finalUrl}
             alt={title || 'Tasarımcı'}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}

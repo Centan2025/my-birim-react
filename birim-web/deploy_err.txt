@@ -1,0 +1,7 @@
+- Checking project info
+[32m✔[39m Checking project info
+- Clean output folder
+[32m✔[39m Clean output folder (5ms)
+- Build Sanity Studio
+[32m✔[39m Build Sanity Studio (12848ms)
+ »

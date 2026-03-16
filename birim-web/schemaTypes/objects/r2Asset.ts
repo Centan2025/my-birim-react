@@ -1,12 +1,13 @@
 import {defineField, defineType} from 'sanity'
 import R2AssetInput from '../../components/R2AssetInput'
+import {browserOnlyInput} from '../utils/browserOnly'
 
 export default defineType({
   name: 'r2Asset',
   title: 'Cloudflare R2 Asset',
   type: 'object',
   components: {
-    input: R2AssetInput,
+    input: browserOnlyInput(R2AssetInput),
   },
   fields: [
     defineField({name: 'url', title: 'URL', type: 'string'}),

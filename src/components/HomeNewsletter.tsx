@@ -169,12 +169,12 @@ export const HomeNewsletter: FC = () => {
   return (
     <section
       id="home-newsletter"
-      className="bg-[#3b3e3c] w-full relative overflow-hidden text-white leading-none"
+      className="bg-[#3b3e3c] w-full relative overflow-hidden text-white leading-none font-inter"
     >
       {/* Collapse Trigger Button - Band Style */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="block w-full bg-[#484d4a] transition-colors group z-30 relative border-t border-white/10"
+        className="block w-full bg-[#484d4a] transition-colors group z-30 relative border-t border-white/10 font-inter"
       >
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-6 md:py-8 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
           <div className="flex-1 flex flex-col items-start justify-center text-left">
