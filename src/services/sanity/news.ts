@@ -1,6 +1,6 @@
 import groq from 'groq'
 import type { NewsItem, Project } from '../../types'
-import { sanity, useSanity, mapImage, mapMediaUrl, rewriteR2Url, extractPalette, mapR2Metadata } from './client'
+import { sanity, useSanity, mapImage, mapMediaUrl, rewriteR2Url, extractPalette, mapR2Metadata, R2_DOMAIN } from './client'
 import { getItem } from './settings'
 
 const SIMULATED_DELAY = 200
@@ -91,14 +91,22 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
   if (useSanity && sanity) {
     const q = groq`*[_type=="project" && id.current==$id][0]{ 
       "id": id.current, title, date, 
-      cover{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, coverR2,
-      coverMobile{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, coverMobileR2,
-      coverDesktop{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, coverDesktopR2,
+      cover{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, 
+      coverR2, coverMobileR2, coverDesktopR2,
       excerpt, body, 
-      media[]{ type, url, caption, image{..., asset->{url, _ref, _id}}, imageR2, imageMobile{..., asset->{url, _ref, _id}}, imageMobileR2, imageDesktop{..., asset->{url, _ref, _id}}, imageDesktopR2, videoFile{..., asset->{url, _ref, _id}}, videoFileR2, videoFileMobileR2, videoFileDesktopR2 },
-      contentBlocks[]{ ..., titleFont, contentFont, imageR2, videoFileR2 }
+      media[]{ 
+        ..., 
+        image{..., asset->{url, _ref, _id}}, 
+        videoFile{..., asset->{url, _ref, _id}} 
+      },
+      contentBlocks[]{ 
+        ..., 
+        image{..., asset->{url, _ref, _id}}, 
+        videoFile{..., asset->{url, _ref, _id}}
+      }
     }`
     const r = await sanity.fetch(q, { id })
+
     if (!r) return undefined
 
     const media = (r.media || [])
@@ -107,7 +115,7 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
         const url = mapMediaUrl(m)
         const urlMobile = mapMediaUrl(m, true, false)
         const urlDesktop = mapMediaUrl(m, false, true)
-        const metadata = m?.imageR2 ? mapR2Metadata(m.imageR2) : {}
+        const metadata = m?.imageR2 ? mapR2Metadata(m.imageR2) : (m?.image ? mapR2Metadata(m.image) : {})
         const result: any = { type, url, image: type === 'image' ? url : undefined, ...metadata }
         if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
         if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
@@ -115,21 +123,56 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
       })
       .filter((m: any) => m.url)
 
+    // ... (rest of media mapping remains same)
+
+    // Helper: Derinlemesine URL taraması (Recursive)
+    const findDeepUrl = (obj: any, depth = 0): string | undefined => {
+      if (!obj || depth > 3) return undefined
+      if (typeof obj === 'string' && (obj.startsWith('http') || obj.startsWith('migration/'))) return obj
+      if (obj.url && typeof obj.url === 'string') return obj.url
+      if (obj.asset?.url) return obj.asset.url
+      if (obj.r2Asset?.url) return obj.r2Asset.url
+      if (obj.path && !obj.url && R2_DOMAIN) return `${R2_DOMAIN}/${obj.path.startsWith('/') ? obj.path.substring(1) : obj.path}`
+      
+      // Obje ise içindeki tüm alanları tara
+      if (typeof obj === 'object') {
+        for (const k in obj) {
+          if (k === '_type') continue
+          const res = findDeepUrl(obj[k], depth + 1)
+          if (res) return res
+        }
+      }
+      return undefined
+    }
+
     // Transform contentBlocks exactly like homepage
     const contentBlocks = r.contentBlocks
       ? r.contentBlocks.map((b: any) => {
+        let image = undefined
         let url = b.url
-        if (b.mediaType === 'image') {
-          const imgUrl = b.imageR2?.url ? mapImage(b.imageR2) : undefined
-          const imgMeta = b.imageR2 ? mapR2Metadata(b.imageR2) : {}
-          if (imgUrl) return { ...b, image: imgUrl, url: undefined, crop: imgMeta.crop, hotspot: imgMeta.hotspot }
+
+        // Find ANY valid image URL in the block object
+        const discoveredImage = findDeepUrl(b)
+        
+        if (b.mediaType === 'image' || !b.mediaType) {
+          image = mapImage(b.imageR2) || mapImage(b.image) || mapImage(b.imageDesktopR2) || mapImage(b.imageMobileR2) || discoveredImage
+        } else if (b.mediaType === 'video') {
+          url = rewriteR2Url(findDeepUrl(b.videoFileR2) || findDeepUrl(b.videoFile) || findDeepUrl(b.videoFileDesktopR2) || findDeepUrl(b.videoFileMobileR2) || discoveredImage || b.url)
+        } else if (b.mediaType === 'youtube') {
+          url = b.url
         }
-        if (b.mediaType === 'video' && b.videoFileR2?.url) {
-          url = rewriteR2Url(b.videoFileR2.url)
+
+        const meta = b.imageR2 ? mapR2Metadata(b.imageR2) : (b.image ? mapR2Metadata(b.image) : {})
+
+        return {
+          ...b,
+          image: image || undefined,
+          url: url || undefined,
+          crop: meta.crop,
+          hotspot: meta.hotspot,
+          origWidth: meta.origWidth,
+          origHeight: meta.origHeight,
         }
-        const crop = b.imageR2 ? mapR2Metadata(b.imageR2).crop : undefined
-        const hotspot = b.imageR2 ? mapR2Metadata(b.imageR2).hotspot : undefined
-        return { ...b, image: undefined, url, crop, hotspot }
       })
       : undefined
 

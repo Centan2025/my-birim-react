@@ -127,9 +127,11 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
 export default function PortableTextLite({
   value,
   removeTopMargin = false,
+  onMediaClick,
 }: {
   value: Block[] | undefined
   removeTopMargin?: boolean
+  onMediaClick?: (url: string) => void
 }) {
   if (!Array.isArray(value) || value.length === 0) return null
 
@@ -284,9 +286,10 @@ export default function PortableTextLite({
                 <OptimizedImage
                   src={getImageSrc(block)}
                   alt={getImageAlt(block)}
-                  className="absolute inset-0 w-full h-full object-cover shadow-sm"
+                  className="absolute inset-0 w-full h-full object-cover shadow-sm cursor-pointer"
                   crop={getImageCrop(block)}
                   hotspot={getImageHotspot(block)}
+                  onClick={() => onMediaClick?.(getImageSrc(block))}
                 />
               </div>
               {block.caption && (
@@ -300,9 +303,10 @@ export default function PortableTextLite({
                 <OptimizedImage
                   src={getImageSrc(nextBlock)}
                   alt={getImageAlt(nextBlock)}
-                  className="absolute inset-0 w-full h-full object-cover shadow-sm"
+                  className="absolute inset-0 w-full h-full object-cover shadow-sm cursor-pointer"
                   crop={getImageCrop(nextBlock)}
                   hotspot={getImageHotspot(nextBlock)}
+                  onClick={() => onMediaClick?.(getImageSrc(nextBlock))}
                 />
               </div>
               {nextBlock.caption && (
@@ -438,9 +442,10 @@ export default function PortableTextLite({
           <OptimizedImage
             src={block.imageR2.url}
             alt={block.alt || block.imageR2.alt || ''}
-            className="w-full h-auto shadow-sm"
+            className="w-full h-auto shadow-sm cursor-pointer"
             crop={getImageCrop(block)}
             hotspot={getImageHotspot(block)}
+            onClick={() => onMediaClick?.(block.imageR2!.url!)}
           />
           {block.caption && (
             <figcaption className="mt-3 text-sm text-gray-500 text-center italic">
@@ -469,7 +474,8 @@ export default function PortableTextLite({
           <OptimizedImage
             src={urlFor(block).url() || ''}
             alt={block.alt || ''}
-            className="w-full h-auto shadow-sm"
+            className="w-full h-auto shadow-sm cursor-pointer"
+            onClick={() => onMediaClick?.(urlFor(block).url() || '')}
           />
           {block.caption && (
             <figcaption className="mt-3 text-sm text-gray-500 text-center italic">

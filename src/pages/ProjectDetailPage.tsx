@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useParams, Link } from 'react-router-dom'
 import { OptimizedImage } from '../components/OptimizedImage'
 import { OptimizedVideo } from '../components/OptimizedVideo'
@@ -6,7 +7,8 @@ import { FullscreenMediaViewer } from '../components/FullscreenMediaViewer'
 import { PageLoading } from '../components/LoadingSpinner'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { useTranslation } from '../i18n'
-import { useProject, useProjects } from '../hooks/useProjects'
+import { useProjects } from '../hooks/useProjects'
+import { getProjectById } from '../services/cms'
 import { useSiteSettings } from '../hooks/useSiteData'
 import { analytics } from '../lib/analytics'
 import ScrollReveal from '../components/ScrollReveal'
@@ -60,7 +62,18 @@ const ArrowRight = (props: React.SVGProps<SVGSVGElement>) => (
 
 export function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>()
-  const { data: project, isLoading: loading } = useProject(projectId)
+
+  const { data: project, isLoading: loading } = useQuery({
+    queryKey: ['project', projectId],
+    queryFn: () => {
+      if (!projectId) throw new Error('Project ID is required')
+      return getProjectById(projectId)
+    },
+    enabled: !!projectId,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
+  })
   const { data: allProjects = [] } = useProjects()
   const { t } = useTranslation()
   const { data: settings } = useSiteSettings()
@@ -199,39 +212,108 @@ export function ProjectDetailPage() {
       ? (project.cover as any).hotspot
       : undefined
 
-  // Use cover image + media array (images and videos)
-  const mediaArray = (project?.media || []).map(m => ({
-    type: m.type,
-    url: m.url,
-    urlMobile: m.urlMobile,
-    urlDesktop: m.urlDesktop,
-    image: m.image || (m.type === 'image' ? m.url : undefined),
-    crop: (m as any).crop,
-    hotspot: (m as any).hotspot,
-    origWidth: (m as any).origWidth,
-    origHeight: (m as any).origHeight,
-  }))
+  // --- TÜM MEDYA ÖĞELERİNİ TOPLA (Fullscreen Viewer İçin) ---
+  const allMedia = useMemo(() => {
+    if (!project) return []
 
-  // Cover görselini başa ekle (eğer varsa ve media array'inde yoksa)
-  const coverMedia = coverUrl
-    ? [
-      {
-        type: 'image' as const,
+    const media: any[] = []
+    
+    // 1. Kapak Görseli
+    if (coverUrl) {
+      media.push({
+        type: 'image',
         url: coverUrl,
         urlMobile: coverMobile,
         urlDesktop: coverDesktop,
-        image: coverUrl,
         crop: coverCrop,
-        hotspot: coverHotspot,
-        origWidth: project && project.cover && typeof project.cover === 'object' ? (project.cover as any).origWidth : undefined,
-        origHeight: project && project.cover && typeof project.cover === 'object' ? (project.cover as any).origHeight : undefined,
-      },
-    ]
-    : []
-  // Cover'ı media array'inin başına ekle, ancak aynı URL'den varsa tekrar ekleme
-  const existingUrls = new Set(mediaArray.map(m => m.url))
-  const coverToAdd = coverMedia.filter(m => !existingUrls.has(m.url))
-  const allMedia = [...coverToAdd, ...mediaArray]
+        hotspot: coverHotspot
+      })
+    }
+
+    // 2. Ana Galeri (media array)
+    if (project.media && Array.isArray(project.media)) {
+      project.media.forEach((m: any) => {
+        const u = m.url || m.image
+        if (u) {
+          media.push({
+            type: m.type || 'image',
+            url: u,
+            urlMobile: m.urlMobile,
+            urlDesktop: m.urlDesktop,
+            crop: (m as any).crop,
+            hotspot: (m as any).hotspot
+          })
+        }
+      })
+    }
+
+    // 3. İçerik Bloklarındaki Medyalar (Content Blocks)
+    if (project.contentBlocks && Array.isArray(project.contentBlocks)) {
+      project.contentBlocks.forEach((block: any) => {
+        // Ana blok medyası
+        const mUrl = block.image || block.url
+        const mType = block.mediaType || (block.image ? 'image' : (block.url ? 'video' : undefined))
+        
+        if (mType && mUrl) {
+          media.push({
+            type: mType,
+            url: mUrl,
+            crop: block.crop,
+            hotspot: block.hotspot
+          })
+        }
+
+        // Blok içindeki Portable Text (description) içindeki görselleri tara
+        const scanPortableText = (val: any) => {
+          if (!val) return
+          const blocks = Array.isArray(val) ? val : [val]
+          blocks.forEach(b => {
+            if (b._type === 'portableTextImage' && b.imageR2?.url) {
+              media.push({
+                type: 'image',
+                url: b.imageR2.url,
+                crop: b.imageR2.cropWidth ? { x: b.imageR2.cropX || 0, y: b.imageR2.cropY || 0, width: b.imageR2.cropWidth, height: b.imageR2.cropHeight } : undefined,
+                hotspot: b.imageR2.hotspotX !== undefined ? { x: b.imageR2.hotspotX, y: b.imageR2.hotspotY } : undefined
+              })
+            }
+          })
+        }
+
+        if (block.description) {
+          const desc = t(block.description)
+          scanPortableText(desc)
+        }
+      })
+    }
+
+    // 4. Excerpt ve Body içindeki görselleri de ekle (opsiyonel ama tutarlılık için iyi)
+    if (project.excerpt) scanDeep(t(project.excerpt), media)
+    if (project.body) scanDeep(t(project.body), media)
+
+    function scanDeep(val: any, target: any[]) {
+      if (!val) return
+      const blocks = Array.isArray(val) ? val : [val]
+      blocks.forEach(b => {
+        if (b._type === 'portableTextImage' && b.imageR2?.url) {
+          target.push({
+            type: 'image',
+            url: b.imageR2.url,
+            crop: b.imageR2.cropWidth ? { x: b.imageR2.cropX || 0, y: b.imageR2.cropY || 0, width: b.imageR2.cropWidth, height: b.imageR2.cropHeight } : undefined,
+            hotspot: b.imageR2.hotspotX !== undefined ? { x: b.imageR2.hotspotX, y: b.imageR2.hotspotY } : undefined
+          })
+        }
+      })
+    }
+
+    // Deduplicate
+    const seen = new Set<string>()
+    return media.filter(m => {
+      const u = String(m.url || '').trim()
+      if (!u || seen.has(u)) return false
+      seen.add(u)
+      return true
+    })
+  }, [project, coverUrl, coverMobile, coverDesktop, coverCrop, coverHotspot])
 
 
   // SEO meta bilgileri
@@ -351,6 +433,7 @@ export function ProjectDetailPage() {
               type="button"
               onClick={e => {
                 e.stopPropagation()
+                setIdx(0)
                 setIsFullscreenOpen(true)
               }}
               className="flex h-12 w-12 items-center justify-center rounded-none border-[0.5px] border-white/40 bg-transparent text-white transition-all duration-300 hover:scale-110 hover:bg-white/10 shadow-xl"
@@ -445,7 +528,16 @@ export function ProjectDetailPage() {
                           : [excerptContent]
                         return (
                           <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-lg md:text-xl">
-                            <PortableTextLite value={blocks} />
+                            <PortableTextLite 
+                              value={blocks} 
+                              onMediaClick={(url) => {
+                                const clickIdx = allMedia.findIndex(m => m.url === url)
+                                if (clickIdx !== -1) {
+                                  setIdx(clickIdx)
+                                  setIsFullscreenOpen(true)
+                                }
+                              }}
+                            />
                           </div>
                         )
                       }
@@ -472,7 +564,16 @@ export function ProjectDetailPage() {
                         const blocks = Array.isArray(bodyContent) ? bodyContent : [bodyContent]
                         return (
                           <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-lg md:text-xl">
-                            <PortableTextLite value={blocks} />
+                            <PortableTextLite 
+                              value={blocks} 
+                              onMediaClick={(url) => {
+                                const clickIdx = allMedia.findIndex(m => m.url === url)
+                                if (clickIdx !== -1) {
+                                  setIdx(clickIdx)
+                                  setIsFullscreenOpen(true)
+                                }
+                              }}
+                            />
                           </div>
                         )
                       }
@@ -496,6 +597,13 @@ export function ProjectDetailPage() {
                   isMobile={isMobile}
                   imageBorderClass={imageBorderClass}
                   overrideBackgroundColor="bg-[var(--bg-secondary)]"
+                  onMediaClick={(url) => {
+                    const clickIdx = allMedia.findIndex(m => m.url === url)
+                    if (clickIdx !== -1) {
+                      setIdx(clickIdx)
+                      setIsFullscreenOpen(true)
+                    }
+                  }}
                 />
               </div>
             ) : (

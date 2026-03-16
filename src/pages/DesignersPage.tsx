@@ -101,75 +101,58 @@ export function DesignersPage() {
                     }
                   />
 
-                  {/* Name alignment: Anchor point is exactly the bottom edge of the image */}
-                  <div className="absolute left-0 bottom-0 z-30 pointer-events-none">
-                    <div className="relative h-0">
-                      {/* First Name - Bottom edge sits exactly on the anchor point (optical adjustment) */}
-                      <motion.span
-                        initial={{opacity: 0, x: -50}}
-                        animate={{opacity: 1, x: 0}}
-                        transition={{duration: 0.8, delay: 0.2, ease: 'easeOut'}}
-                        className="absolute bottom-[-2px] lg:bottom-[-4px] left-0 whitespace-nowrap text-2xl md:text-4xl lg:text-[60px] xl:text-[70px] 2xl:text-[80px] text-white font-display uppercase tracking-tighter leading-[0.75]"
-                      >
-                        {t(activeDesigner.name).split(' ')[0]}
-                      </motion.span>
-                      {/* Surname - Starts from the anchor point and hangs below */}
-                      <motion.span
-                        initial={{opacity: 0, x: -50}}
-                        animate={{opacity: 1, x: 0}}
-                        transition={{duration: 0.8, delay: 0.4, ease: 'easeOut'}}
-                        className="absolute top-0 left-0 text-[var(--text-designer-surname)] font-display uppercase tracking-tighter text-2xl md:text-4xl lg:text-[60px] xl:text-[70px] 2xl:text-[80px] whitespace-nowrap leading-[0.75]"
-                      >
-                        {t(activeDesigner.name).split(' ').slice(1).join(' ')}
-                      </motion.span>
-                    </div>
-                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
           {/* Alt Bilgi ve Karar Butonu - Alta Sabitlendi */}
-          <div className="absolute bottom-12 lg:bottom-16 xl:bottom-20 left-10 lg:left-16 xl:left-20 2xl:left-28 right-10 lg:right-16 xl:right-20 2xl:right-28 z-40 bg-transparent">
-            <div className="flex flex-col lg:flex-row items-end justify-between w-full gap-8 lg:gap-12">
-              {/* Info Container with fixed height as anchor */}
-              <div className="hidden lg:block relative flex-1 h-24 pointer-events-none">
-                <AnimatePresence mode="wait">
-                  {activeDesigner && (
-                    <motion.div
-                      key={activeDesigner.id}
-                      initial={{opacity: 0, y: 10}}
-                      animate={{opacity: 1, y: 0}}
-                      exit={{opacity: 0, y: -10}}
-                      transition={{duration: 0.6, ease: 'easeOut'}}
-                      className="absolute bottom-0 left-0 w-full flex flex-col items-start"
-                    >
-                      {activeDesigner.role && (
-                        <span className="text-xs lg:text-sm uppercase tracking-[0.25em] text-[var(--text-secondary)] mb-2 font-medium">
-                          {t(activeDesigner.role)}
-                        </span>
-                      )}
-                      <div className="text-sm xl:text-base leading-relaxed text-[var(--text-secondary)] font-light line-clamp-2 text-left w-full">
-                        {(() => {
-                          const bio = t(activeDesigner.bio)
-                          return Array.isArray(bio) ? <PortableTextLite value={bio} /> : bio
-                        })()}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Button remains static and aligned to the bottom of the same row */}
-              <div className="w-full lg:w-auto flex items-end">
-                <button
-                  onClick={() => activeDesigner && navigate(`/designer/${activeDesigner.id}`)}
-                  className="w-full lg:w-auto text-center text-[10px] xl:text-[11px] 2xl:text-sm uppercase font-medium tracking-[0.3em] text-[var(--text-primary)] border border-[var(--text-primary)]/60 px-6 xl:px-8 2xl:px-12 py-4 xl:py-5 2xl:py-6 hover:bg-primary/20 hover:border-primary transition-all duration-700 ease-out cursor-pointer whitespace-nowrap mb-0"
+          <div className="absolute bottom-10 lg:bottom-12 xl:bottom-16 left-10 lg:left-16 xl:left-20 2xl:left-28 right-10 lg:right-16 xl:right-20 2xl:right-28 z-40 bg-transparent h-[140px] lg:h-[160px] flex flex-col justify-start">
+            <AnimatePresence mode="wait">
+              {activeDesigner && (
+                <motion.div
+                  key={activeDesigner.id}
+                  initial={{opacity: 0, y: 15}}
+                  animate={{opacity: 1, y: 0}}
+                  exit={{opacity: 0, y: -15}}
+                  transition={{duration: 0.7, ease: [0.22, 1, 0.36, 1]}}
+                  className="grid grid-cols-1 lg:grid-cols-[calc(45%+1.5rem)_1fr] w-full items-start gap-0"
                 >
-                  {t('explore_designer')}
-                </button>
-              </div>
-            </div>
+                  {/* Sol Sütun: İsim ve Buton (Aşağı Kaydırıldı) */}
+                  <div className="flex flex-col items-start pt-6 lg:pt-10">
+                    <h2 
+                      className="text-2xl md:text-3xl lg:text-4xl xl:text-[2.8rem] uppercase leading-none text-neutral-800"
+                      style={{ 
+                        fontFamily: "'Inter', sans-serif", 
+                        fontWeight: 500, 
+                        letterSpacing: '-0.08em' 
+                      }}
+                    >
+                      {t(activeDesigner.name)}
+                    </h2>
+                    
+                    <div className="mt-10 lg:mt-14">
+                      <button
+                        onClick={() => navigate(`/designer/${activeDesigner.id}`)}
+                        className="w-full lg:w-auto text-center text-[10px] xl:text-[11px] uppercase font-medium tracking-[0.3em] text-[var(--text-primary)] border border-[var(--text-primary)]/30 px-6 xl:px-10 py-4 xl:py-5 hover:bg-primary/20 hover:border-primary transition-all duration-500 ease-out cursor-pointer whitespace-nowrap"
+                      >
+                        {t('explore_designer')}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Sağ Sütun: Biyografi (Aşağı Kaydırıldı) */}
+                  <div className="pl-4 lg:pl-6 pt-10 lg:pt-16">
+                    <div className="text-xs xl:text-sm leading-relaxed text-[var(--text-primary)]/70 font-light text-left w-full line-clamp-3 lg:line-clamp-4">
+                      {(() => {
+                        const bio = t(activeDesigner.bio)
+                        return Array.isArray(bio) ? <PortableTextLite value={bio} /> : bio
+                      })()}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
@@ -196,7 +179,7 @@ export function DesignersPage() {
                     designer-name-link 
                     text-left 
                     font-arial-regular
-                    text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl 2xl:text-[95px]
+                    text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-[80px]
                     uppercase 
                     leading-[0.95] 
                     transition-all 

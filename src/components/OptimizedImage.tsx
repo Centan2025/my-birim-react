@@ -34,6 +34,7 @@ interface OptimizedImageProps {
   hotspot?: R2ImageMetadata['hotspot']
   origWidth?: number
   origHeight?: number
+  onClick?: React.MouseEventHandler<HTMLElement>
 }
 
 /**
@@ -67,6 +68,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   hotspot,
   origWidth,
   origHeight,
+  onClick,
 }) => {
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
@@ -440,7 +442,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     )
 
     return (
-      <div className={`relative ${className}`} style={style}>
+      <div className={`relative ${className}`} style={style} onClick={onClick}>
         {!isLoaded && (
           <img
             src={placeholder}
@@ -491,7 +493,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   )
 
   return (
-    <div className={`relative ${className}`} style={style}>
+    <div className={`relative ${className}`} style={style} onClick={onClick}>
       {!isLoaded && (
         <img
           src={placeholder}

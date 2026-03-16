@@ -15,6 +15,7 @@ interface HomeContentBlocksProps {
   isMobile: boolean
   imageBorderClass: string
   overrideBackgroundColor?: string
+  onMediaClick?: (url: string) => void
 }
 
 export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
@@ -22,6 +23,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
   isMobile,
   imageBorderClass,
   overrideBackgroundColor,
+  onMediaClick,
 }) => {
   const {t} = useTranslation()
 
@@ -237,6 +239,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                           <PortableTextLite
                             value={desc}
                             removeTopMargin={block.verticalAlignment === 'top' && !hasTitle}
+                            onMediaClick={onMediaClick}
                           />
                         </div>
                       )
@@ -339,7 +342,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 )}
               </div>
             ) : block.mediaType === 'video' ? (
-              <div className="relative w-full h-full">
+              <div className={`relative w-full h-full ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`} onClick={() => onMediaClick && !block.linkUrl && onMediaClick(mediaUrl)}>
                 <OptimizedVideo
                   src={mediaUrl}
                   className={`${isFullWidth ? 'w-full h-auto max-w-full' : `${mediaWidthClass} ${imageBorderClass}`} ${isMobile ? 'w-full object-cover' : 'object-cover'} block`}
@@ -380,7 +383,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 )}
               </div>
             ) : (
-              <div className="relative w-full h-full">
+              <div className={`relative w-full h-full ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`} onClick={() => onMediaClick && !block.linkUrl && onMediaClick(mediaUrl)}>
                 <OptimizedImage
                   src={mediaUrl}
                   alt=""

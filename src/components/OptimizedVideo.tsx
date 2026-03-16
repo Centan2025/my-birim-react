@@ -20,6 +20,7 @@ interface OptimizedVideoProps {
   posterDesktop?: string // Desktop için poster (varsa)
   onLoad?: () => void
   onError?: () => void
+  onClick?: React.MouseEventHandler<HTMLVideoElement>
 }
 
 /**
@@ -47,6 +48,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
   posterDesktop,
   onLoad,
   onError,
+  onClick,
 }) => {
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
@@ -260,6 +262,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
         preload={preload}
         className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ${className}`}
         style={style}
+        onClick={onClick}
         onLoadedData={handleLoadedData}
         onError={e => {
           // İlk hata source tag'lerinden gelirse, direkt src'i dene
@@ -297,6 +300,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       preload={preload}
       className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ${className}`}
       style={style}
+      onClick={onClick}
       onLoadedData={handleLoadedData}
       onError={e => {
         // İlk hata source tag'inden gelirse, direkt src'i dene
