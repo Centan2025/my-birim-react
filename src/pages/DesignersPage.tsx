@@ -179,7 +179,7 @@ export function DesignersPage() {
                     designer-name-link 
                     text-left 
                     font-arial-regular
-                    text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-[80px]
+                    text-[clamp(1.25rem,3.5vw,4rem)]
                     uppercase 
                     leading-[0.95] 
                     transition-all 
