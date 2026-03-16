@@ -40,7 +40,7 @@
     "cors": "^2.8.5",
     "dompurify": "^3.3.0",
     "dotenv": "^16.6.1",
-    "express": "^4.21.2",
+    "express": "^4.22.1",
     "framer-motion": "^12.34.3",
     "groq": "^3.53.3",
     "lucide-react": "^0.577.0",
