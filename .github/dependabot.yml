@@ -1,0 +1,55 @@
+version: 2
+updates:
+  # npm paketleri için otomatik güvenlik güncellemeleri
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/Istanbul"
+    open-pull-requests-limit: 10
+    groups:
+      # React ve ekosistem güncellemelerini grupla
+      react-core:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "react-router-dom"
+          - "@types/react"
+          - "@types/react-dom"
+      # Vite ve build araçlarını grupla
+      build-tools:
+        patterns:
+          - "vite"
+          - "@vitejs/*"
+          - "typescript"
+          - "rollup*"
+      # Sanity paketleri
+      sanity:
+        patterns:
+          - "@sanity/*"
+          - "sanity"
+          - "groq"
+      # Test araçları
+      testing:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+          - "@testing-library/*"
+    ignore:
+      # Major sürüm güncellemelerini otomatik açma (breaking changes riski)
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    labels:
+      - "dependencies"
+      - "automated"
+
+  # GitHub Actions için versiyon güncellemeleri
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    labels:
+      - "dependencies"
+      - "ci"
