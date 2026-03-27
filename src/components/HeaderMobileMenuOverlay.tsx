@@ -112,6 +112,8 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
         backgroundColor: '#101820', // Pantone Black 6 C
         // Kapanırken panel animasyonunu, linklerin ters sırada kaybolma animasyonundan sonra başlat
         transitionDelay: isMobileMenuOpen ? '0ms' : `${mobileMenuCloseDelay}ms`,
+        fontFamily: "'Inter', sans-serif",
+        fontWeight: 300
       }}
       role="menu"
       aria-label={t('main_menu') || 'Ana menü'}
@@ -134,11 +136,11 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
                       onLocaleChange(langCode)
                     }}
                     aria-pressed={isActive}
-                    className={`group relative px-2.5 py-1.5 text-sm tracking-[0.2em] transition-all duration-200 ${isActive
-                      ? 'text-white font-light'
-                      : 'text-gray-400/90 hover:text-white font-light'
+                    className={`group relative px-2.5 py-1.5 text-sm tracking-[0.12em] transition-all duration-200 ${isActive
+                      ? 'text-white'
+                      : 'text-gray-400/90 hover:text-white'
                       } ${isActive ? 'scale-110' : 'scale-100'}`}
-                    style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.2em' }}
+                    style={{ fontFamily: "'Inter', sans-serif", fontWeight: 300 }}
                   >
                     <span className="relative inline-block transition-opacity transition-transform duration-200 ease-out">
                       {langCode.toLowerCase()}
@@ -176,9 +178,10 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
             style={{
               transitionDelay: `${isMobileMenuOpen ? 0 : (mobileMenuLinks.length - 1) * 100}ms`,
               fontWeight: 300,
-              letterSpacing: '0.2em',
+              letterSpacing: '0.14em',
+              fontFamily: "'Inter', sans-serif",
             }}
-            className={`group flex items-center justify-between w-full text-xl md:text-2xl font-light leading-tight text-white transition-all duration-400 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
+            className={`group flex items-center justify-between w-full text-2xl md:text-3xl leading-tight text-white transition-all duration-400 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
               }`}
           >
             <span>
@@ -216,9 +219,10 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
                   style={{
                     transitionDelay: isMobileProductsMenuOpen ? `${index * 50}ms` : '0ms',
                     fontWeight: 300,
-                    letterSpacing: '0.15em',
+                    letterSpacing: '0.1em',
+                    fontFamily: "'Inter', sans-serif",
                   }}
-                  className={`group flex items-center justify-between text-xl md:text-2xl font-light leading-tight text-gray-300 hover:text-white transition-all duration-400 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
+                  className={`group flex items-center justify-between text-2xl md:text-3xl leading-tight text-gray-300 hover:text-white transition-all duration-400 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
                     }`}
                   onClick={() => {
                     setIsMobileMenuOpen(false)
@@ -238,9 +242,10 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
                 style={{
                   transitionDelay: isMobileProductsMenuOpen ? `${categories.length * 50}ms` : '0ms',
                   fontWeight: 300,
-                  letterSpacing: '0.15em',
+                  letterSpacing: '0.1em',
+                  fontFamily: "'Inter', sans-serif",
                 }}
-                className={`group flex items-center justify-between text-xl md:text-2xl font-light leading-tight text-gray-300 hover:text-white transition-all duration-400 border-t border-white/20 pt-3 mt-2 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
+                className={`group flex items-center justify-between text-2xl md:text-3xl leading-tight text-gray-300 hover:text-white transition-all duration-400 border-t border-white/20 pt-3 mt-2 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
                   }`}
                 onClick={() => {
                   setIsMobileMenuOpen(false)
@@ -266,13 +271,13 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
             key={item.to}
             to={item.to}
             style={{
-              // Açılırken yukarı doğru (ilk eleman en geç), kapanırken tersine (ilk eleman en erken)
               transitionDelay: `${isMobileMenuOpen ? (index + 1) * 100 : (mobileMenuLinks.length - 1 - index) * 100
                 }ms`,
               fontWeight: 300,
-              letterSpacing: '0.2em',
+              letterSpacing: '0.14em',
+              fontFamily: "'Inter', sans-serif",
             }}
-            className={`group flex items-center justify-between text-2xl md:text-3xl font-light leading-tight text-white transition-all duration-400 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
+            className={`group flex items-center justify-between text-3xl md:text-4xl leading-tight text-white transition-all duration-400 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
               }`}
             onClick={() => {
               // Ana menüde başka bir linke gidildiğinde hem ana menüyü hem ürünler alt menüsünü kapat
@@ -392,7 +397,7 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
           }}
           className="flex flex-col items-center mb-6"
         >
-          <p className="text-sm text-gray-300 mb-4 text-center">
+          <p className="text-sm text-gray-300 mb-4 text-center" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400 }}>
             <CrossFadeText text={t('subscribe_prompt')} triggerKey={locale} />
           </p>
           <div className="flex items-center justify-center border-b border-white pb-0.5 w-full max-w-[280px]">
@@ -405,12 +410,13 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
               placeholder={t('email_placeholder')}
               className={`w-full py-1 bg-transparent border-0 rounded-none text-white placeholder-white/40 focus:outline-none focus:ring-0 transition-all duration-200 text-[15px] text-center ${isMobileLocaleTransition ? 'cross-fade-input' : ''
                 }`}
-              style={{ outline: 'none', boxShadow: 'none' }}
+              style={{ outline: 'none', boxShadow: 'none', fontFamily: "'Inter', sans-serif", fontWeight: 400 }}
             />
           </div>
           <button
             type="submit"
-            className="mt-4 px-6 py-2 border border-white/50 text-white hover:bg-white hover:text-black transition-all duration-300 text-sm font-medium uppercase tracking-wider"
+            className="mt-4 px-6 py-2 border border-white/50 text-white hover:bg-white hover:text-black transition-all duration-300 text-sm uppercase tracking-wider"
+            style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500 }}
           >
             <CrossFadeText text={t('subscribe')} triggerKey={locale} />
           </button>
@@ -449,7 +455,7 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
             animation: 'fadeIn 0.3s ease-in',
           }}
         >
-          <p className="text-sm text-center font-medium">{toastMessage}</p>
+          <p className="text-sm text-center" style={{ fontFamily: "'Inter', sans-serif", fontWeight: 300 }}>{toastMessage}</p>
         </div>
       )}
       <style>{`

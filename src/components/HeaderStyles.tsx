@@ -131,11 +131,11 @@ export function HeaderStyles() {
         #mobile-menu nav a .cross-fade-text-in,
         #mobile-menu nav button .cross-fade-text-out,
         #mobile-menu nav a .cross-fade-text-out {
-          font-size: 1.25rem !important;
+          font-size: 1.5rem !important;
           font-weight: 300 !important;
-          letter-spacing: 0.2em !important;
+          letter-spacing: 0.14em !important;
           line-height: 1.25 !important;
-          font-family: 'Inter', 'Neue Montreal', 'Jura', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+          font-family: 'Inter', sans-serif !important;
         }
 
         /* Soften tap highlight on mobile menu */

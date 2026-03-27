@@ -1,22 +1,18 @@
-import React, { useMemo, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import React, { useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import type { Product, Designer } from '../types'
 import { OptimizedImage } from './OptimizedImage'
 import { useTranslation } from '../i18n'
 import { useSiteSettings } from '../App'
 import { analytics } from '../lib/analytics'
 import { useDesigners } from '../hooks/useDesigners'
-import { useCardTransition } from '../context/CardTransitionContext'
 
 export const ProductCard: React.FC<{ product: Product }> = ({
   product,
 }) => {
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const { settings } = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
-  const cardRef = useRef<HTMLDivElement>(null)
-  const { triggerExpand } = useCardTransition()
 
   const { data: designers = [] } = useDesigners()
   const designerName = useMemo(() => {
@@ -33,60 +29,23 @@ export const ProductCard: React.FC<{ product: Product }> = ({
   const mainImageDesktop =
     typeof product.mainImage === 'object' ? product.mainImage.urlDesktop : undefined
 
-  const [isAnimating, setIsAnimating] = React.useState(false)
-
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-
+  const handleClick = () => {
+    // We still want to handle analytics before navigation
     analytics.event({
       category: 'navigation',
       action: 'product_click',
       label: t(product.name),
       value: product.year,
     })
-
-    // Get the image container's bounding rect
-    const imageContainer = cardRef.current
-    if (!imageContainer) {
-      navigate(`/product/${product.id}`, { state: { product } })
-      return
-    }
-
-    const rect = imageContainer.getBoundingClientRect()
-    const crop = typeof product.mainImage === 'object' ? product.mainImage.crop : undefined
-    const hotspot = typeof product.mainImage === 'object' ? product.mainImage.hotspot : undefined
-
-    setIsAnimating(true)
-
-    triggerExpand(
-      {
-        top: rect.top,
-        left: rect.left,
-        width: rect.width,
-        height: rect.height,
-        imageUrl: mainImageUrl,
-        imageMobile: mainImageMobile,
-        imageDesktop: mainImageDesktop,
-        crop,
-        hotspot,
-        showGradient: true,
-        initialBorderRadius: imageBorderClass === 'rounded-lg' ? '8px' : '0px',
-      },
-      () => {
-        navigate(`/product/${product.id}`, { state: { product, fromCard: true } })
-      }
-    )
   }
 
   return (
     <Link to={`/product/${product.id}`} className="group block w-full" onClick={handleClick}>
       <div className={`bg-[var(--bg-primary)] ${imageBorderClass} overflow-hidden`}>
         <div
-          ref={cardRef}
           className="relative overflow-hidden aspect-square w-full flex items-center justify-center bg-[var(--bg-primary)]"
           style={{
             transition: 'scale 0.9s cubic-bezier(0.25, 0.1, 0.25, 1)',
-            opacity: isAnimating ? 0 : 1,
           }}
         >
           <OptimizedImage

@@ -21,9 +21,10 @@ const CloseIcon = () => (
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="2"
+    strokeWidth="0.8"
     strokeLinecap="round"
     strokeLinejoin="round"
+    className="h-9 w-9"
   >
     <line x1="18" y1="6" x2="6" y2="18"></line>
     <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -45,6 +46,8 @@ const toYouTubeEmbed = (url: string, { autoplay = false, controls = false } = {}
     : ''
 }
 
+import { motion, AnimatePresence } from 'framer-motion'
+
 export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
   items,
   currentIndex,
@@ -56,6 +59,7 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
   const { t } = useTranslation()
   const youTubePlayerRef = useRef<HTMLIFrameElement | null>(null)
   const [isVisible, setIsVisible] = useState(false)
+  const [direction, setDirection] = useState(0) // 1 for next, -1 for prev
 
   // Açılış animasyonu: mount sonrası hemen tetikle
   useEffect(() => {
@@ -79,6 +83,18 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
     }, 300) // Animasyon süresiyle eşleşmeli
   }
 
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setDirection(1)
+    onNext()
+  }
+
+  const handlePrev = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setDirection(-1)
+    onPrev()
+  }
+
   const currentItem = items[currentIndex]
   if (!currentItem) return null
 
@@ -87,136 +103,176 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
   const type = (currentItem.type || 'image') as string
   const title = currentItem.title || currentItem.name || ''
 
+  // Directional Slide Variants
+  const variants = {
+    initial: (dir: number) => ({
+      x: dir > 0 ? '100%' : dir < 0 ? '-100%' : 0,
+      opacity: 0
+    }),
+    animate: {
+      x: 0,
+      opacity: 1,
+      transition: {
+        x: { type: "spring" as const, stiffness: 200, damping: 25 },
+        opacity: { duration: 0.4 }
+      }
+    },
+    exit: (dir: number) => ({
+      x: dir > 0 ? '-30%' : dir < 0 ? '30%' : 0,
+      opacity: 0,
+      transition: {
+        x: { type: "spring" as const, stiffness: 200, damping: 25 },
+        opacity: { duration: 0.3 }
+      }
+    })
+  }
+
   return createPortal(
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
-      className={`fixed inset-0 z-[100] flex items-center justify-center transition-all duration-300 ease-out ${isVisible ? 'bg-black/80 backdrop-blur-sm' : 'bg-black/0 backdrop-blur-none'
+      className={`fixed inset-0 z-[100] flex items-center justify-center transition-all duration-300 ease-out ${isVisible ? 'bg-black/90 backdrop-blur-sm' : 'bg-black/0 backdrop-blur-none'
         }`}
       onClick={handleClose}
       onKeyDown={e => {
         if (e.key === 'Escape') handleClose()
-        if (e.key === 'ArrowLeft') onPrev()
-        if (e.key === 'ArrowRight') onNext()
+        if (e.key === 'ArrowLeft') {
+          setDirection(-1)
+          onPrev()
+        }
+        if (e.key === 'ArrowRight') {
+          setDirection(1)
+          onNext()
+        }
       }}
       role="dialog"
       aria-modal="true"
       aria-label="Media Lightbox"
       tabIndex={-1}
     >
-      {/* Prev Button */}
-      {items.length > 1 && (
-        <button
-          onClick={e => {
-            e.stopPropagation()
-            onPrev()
-          }}
-          className={`absolute left-4 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 bg-white/90 text-gray-950 backdrop-blur-md z-20 shadow-lg border border-black/5 w-12 h-12 md:w-14 md:h-14 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
-            }`}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="28"
-            height="28"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="16 20 8 12 16 4" />
-          </svg>
-        </button>
-      )}
-
-      {/* Next Button */}
-      {items.length > 1 && (
-        <button
-          onClick={e => {
-            e.stopPropagation()
-            onNext()
-          }}
-          className={`absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 bg-white/90 text-gray-950 backdrop-blur-md z-20 shadow-lg border border-black/5 w-12 h-12 md:w-14 md:h-14 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
-            }`}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="28"
-            height="28"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="8 20 16 12 8 4" />
-          </svg>
-        </button>
-      )}
-
       {/* İçerik - tam ekran dikey ortalama */}
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div
-        className={`relative w-screen h-screen flex items-center justify-center p-4 md:p-8 transition-all duration-300 ease-out ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
-          }`}
+        className={`relative w-full h-full flex flex-col items-center justify-center p-4 md:p-8`}
         onClick={e => e.stopPropagation()}
       >
-        {/* Close Button */}
-        <button
-          onClick={handleClose}
-          className={`absolute top-4 right-4 md:top-6 md:right-6 z-[80] w-10 h-10 md:w-12 md:h-12 rounded-full border border-black/10 bg-white/90 text-gray-950 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white active:scale-95 shadow-lg flex items-center justify-center ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
-            }`}
-        >
-          <CloseIcon />
-        </button>
+        {/* Medya ve Kapatma Butonu Konteynırı */}
+        <div className="relative group w-full flex items-center justify-center overflow-hidden">
+          {/* Close Button - Görselin sağ üst köşesinde */}
+          <button
+            onClick={handleClose}
+            className={`absolute top-4 right-4 md:top-10 md:right-10 z-[110] w-12 h-12 md:w-16 md:h-16 rounded-none border-[0.5px] border-white/50 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg flex items-center justify-center ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
+              }`}
+          >
+            <CloseIcon />
+          </button>
 
-        {/* Medya içeriği - tam dikey ortalama */}
-        <div className="w-full h-full max-w-screen-2xl max-h-[90vh] flex items-center justify-center">
-          {type === 'image' ? (
-            <OptimizedImage
-              src={url}
-              alt="Enlarged view"
-              className="max-w-full max-h-[85vh] object-contain"
-              loading="eager"
-              quality={95}
-              crop={currentItem.crop}
-              hotspot={currentItem.hotspot}
-            />
-          ) : type === 'video' ? (
-            <OptimizedVideo
-              src={url}
-              autoPlay
-              muted
-              loop
-              playsInline
-              className="max-w-full max-h-[85vh] object-contain"
-              preload="auto"
-              loading="eager"
-            />
-          ) : (
-            <div className="relative w-full h-full flex items-center justify-center">
-              <iframe
-                ref={youTubePlayerRef}
-                className="w-full h-full max-w-5xl"
-                title="youtube-player"
-                src={toYouTubeEmbed(url, { autoplay: true })}
-                allow="autoplay; encrypted-media; fullscreen"
-                frameBorder="0"
-              />
-            </div>
-          )}
+          {/* Medya içeriği - Simultaneous Animation (Sabit Yükseklik) */}
+          <div className="relative w-full h-[75vh] flex items-center justify-center">
+            <AnimatePresence initial={false} custom={direction}>
+              <motion.div
+                key={url}
+                custom={direction}
+                variants={variants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="absolute inset-0 flex items-center justify-center p-4 md:p-12"
+              >
+                {type === 'image' ? (
+                  <OptimizedImage
+                    src={url}
+                    alt="Enlarged view"
+                    className="max-w-full max-h-[70vh] object-contain shadow-2xl"
+                    loading="eager"
+                    quality={95}
+                    crop={currentItem.crop}
+                    hotspot={currentItem.hotspot}
+                    placeholderColor="#111111" // Beyaz patlamayı önlemek için koyu placeholder
+                  />
+                ) : type === 'video' ? (
+                  <OptimizedVideo
+                    src={url}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="max-w-full max-h-[70vh] object-contain shadow-2xl"
+                    preload="auto"
+                    loading="eager"
+                  />
+                ) : (
+                  <div className="relative w-full h-full flex items-center justify-center aspect-video max-w-5xl">
+                    <iframe
+                      ref={youTubePlayerRef}
+                      className="w-full h-full"
+                      title="youtube-player"
+                      src={toYouTubeEmbed(url, { autoplay: true })}
+                      allow="autoplay; encrypted-media; fullscreen"
+                      frameBorder="0"
+                    />
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
+
+        {/* Alt Panel: Prev/Next Düğmeleri - Görselin HEMEN ALTINDA (Daha yakın) */}
+        {items.length > 1 && (
+          <div className={`mt-0 flex items-center gap-6 transition-all duration-500 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+            <button
+              onClick={handlePrev}
+              className="group flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white/50 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+              aria-label="Önceki"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="0.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-10 w-10 transition-transform duration-300 group-hover:-translate-x-1"
+              >
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+
+            <button
+              onClick={handleNext}
+              className="group flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white/50 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+              aria-label="Sonraki"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="0.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-10 w-10 transition-transform duration-300 group-hover:translate-x-1"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+          </div>
+        )}
 
         {/* Metadata Overlay */}
         {showMetadata && (
           <div
-            className={`absolute bottom-6 left-6 max-w-md p-6 text-white z-[70] pointer-events-none transition-all duration-300 delay-150 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            className={`mb-6 max-w-md text-center text-white transition-all duration-300 delay-150 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
               }`}
           >
-            {title && <h3 className="text-xl font-light mb-2">{t(title)}</h3>}
+            {title && <h3 className="text-xl font-light mb-1">{t(title)}</h3>}
             {currentItem.description && (
-              <p className="text-sm text-white/90 leading-relaxed mb-3">
+              <p className="text-sm text-white/70 leading-relaxed italic">
                 {t(currentItem.description)}
               </p>
             )}

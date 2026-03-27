@@ -73,6 +73,7 @@ export function Header() {
     p === '' ||
     p.startsWith('/about') ||
     p === '/products' ||
+    p.startsWith('/product/') ||
     p.startsWith('/projects/') ||
     p.startsWith('/project/') ||
     p === '/categories' ||

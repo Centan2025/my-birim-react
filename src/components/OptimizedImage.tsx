@@ -35,6 +35,8 @@ interface OptimizedImageProps {
   origWidth?: number
   origHeight?: number
   onClick?: React.MouseEventHandler<HTMLElement>
+  showPlaceholder?: boolean
+  placeholderColor?: string
 }
 
 /**
@@ -69,6 +71,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   origWidth,
   origHeight,
   onClick,
+  showPlaceholder = true,
+  placeholderColor = '#f3f4f6',
 }) => {
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
@@ -104,9 +108,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       ? ({ fetchpriority: fetchPriority } as Record<string, string>)
       : {}
 
-  // Placeholder (çok küçük, gri renk)
+  // Placeholder (çok küçük, özel renk veya varsayılan gri)
   const placeholder =
-    'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNmM2Y0ZjYiLz48L3N2Zz4='
+    `data:image/svg+xml;base64,${btoa(`<svg width="1" height="1" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="${placeholderColor}"/></svg>`)}`
 
   const handleLoad = () => {
     setIsLoaded(true)
@@ -443,7 +447,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
     return (
       <div className={`relative ${className}`} style={style} onClick={onClick}>
-        {!isLoaded && (
+        {showPlaceholder && !isLoaded && (
           <img
             src={placeholder}
             alt=""
@@ -492,17 +496,17 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     </picture>
   )
 
-  return (
-    <div className={`relative ${className}`} style={style} onClick={onClick}>
-      {!isLoaded && (
-        <img
-          src={placeholder}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-          aria-hidden="true"
-        />
-      )}
-      {renderCroppedContent(pictureElement)}
-    </div>
-  )
+    return (
+      <div className={`relative ${className}`} style={style} onClick={onClick}>
+        {showPlaceholder && !isLoaded && (
+          <img
+            src={placeholder}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+            aria-hidden="true"
+          />
+        )}
+        {renderCroppedContent(pictureElement)}
+      </div>
+    )
 }
