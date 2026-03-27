@@ -14,6 +14,7 @@ interface HeaderProductsPanelProps {
   onLeave: () => void
   onClose: () => void
   t: HeaderTranslateFn
+  isLightMode: boolean
 }
 
 export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
@@ -27,6 +28,7 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
   onLeave,
   onClose,
   t,
+  isLightMode,
 }) => {
   return (
     // Ürün kategorileri paneli - header içinde genişleyip daralır
@@ -37,15 +39,15 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
           : 'opacity-0 -translate-y-2 max-h-0 overflow-hidden'
       }`}
       style={{
-        backgroundColor: isOpen ? 'rgba(0, 0, 0, 0.85)' : 'transparent',
+        backgroundColor: isOpen ? (isLightMode ? 'rgba(255, 255, 255, 0.95)' : 'rgba(0, 0, 0, 0.85)') : 'transparent',
         backdropFilter: isOpen ? 'blur(16px)' : 'none',
         WebkitBackdropFilter: isOpen ? 'blur(16px)' : 'none',
       }}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
     >
-      {/* Beyaz ayırıcı çizgi */}
-      <div className="w-full border-t border-white/50"></div>
+      {/* Ayırıcı çizgi */}
+      <div className={`w-full border-t ${isLightMode ? 'border-black/10' : 'border-white/50'}`}></div>
 
       <div
         className="pt-4 pb-3 grid grid-cols-[auto_1fr] gap-24"
@@ -58,13 +60,17 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
               <NavLink
                 key={category.id}
                 to={`/products/${category.id}`}
-                className="group relative px-0 py-2 text-sm font-semibold uppercase text-gray-200 hover:text-white transition-colors duration-300"
+                className={`group relative px-0 py-2 text-sm font-semibold uppercase transition-colors duration-300 ${
+                    isLightMode ? 'text-gray-800 hover:text-black' : 'text-gray-200 hover:text-white'
+                }`}
                 onClick={onClose}
                 onMouseEnter={() => onHoveredCategoryChange(category.id)}
               >
                 <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase">
                   {t(category.name)}
-                  <span className="absolute -bottom-1 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
+                  <span className={`absolute -bottom-1 left-0 w-full h-[3px] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center ${
+                      isLightMode ? 'bg-black' : 'bg-white'
+                  }`}></span>
                 </span>
               </NavLink>
             ))}
@@ -149,16 +155,20 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
         </div>
       </div>
 
-      <div className="w-full border-t border-white/50 mt-3"></div>
+      <div className={`w-full border-t mt-3 ${isLightMode ? 'border-black/10' : 'border-white/50'}`}></div>
       <div className="pt-3 pb-3" style={{paddingLeft: submenuOffset, paddingRight: '5rem'}}>
         <NavLink
           to="/products"
-          className="group relative inline-block px-0 py-2 text-sm font-bold uppercase text-white hover:text-gray-200 transition-colors duration-300"
+          className={`group relative inline-block px-0 py-2 text-sm font-bold uppercase transition-colors duration-300 ${
+              isLightMode ? 'text-black hover:text-gray-800' : 'text-white hover:text-gray-200'
+          }`}
           onClick={onClose}
         >
           <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase">
             {t('view_all')}
-            <span className="absolute -bottom-1 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
+            <span className={`absolute -bottom-1 left-0 w-full h-[3px] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center ${
+                isLightMode ? 'bg-black' : 'bg-white'
+            }`}></span>
           </span>
         </NavLink>
       </div>

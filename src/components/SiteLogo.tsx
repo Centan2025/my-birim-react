@@ -16,9 +16,10 @@ const DefaultLogo = (props: React.SVGProps<SVGSVGElement>) => (
 interface SiteLogoProps {
   logoUrl?: string | null
   className?: string
+  style?: React.CSSProperties
 }
 
-export const SiteLogo: React.FC<SiteLogoProps> = ({logoUrl, className}) => {
+export const SiteLogo: React.FC<SiteLogoProps> = ({logoUrl, className, style}) => {
   const [imgError, setImgError] = useState(false)
 
   // Prioritize the URL from props, but fall back to a standard path.
@@ -31,7 +32,7 @@ export const SiteLogo: React.FC<SiteLogoProps> = ({logoUrl, className}) => {
 
   if (imgError || !finalLogoUrl) {
     // If there's an error loading the image OR if the final URL is somehow empty, show the default SVG.
-    return <DefaultLogo className={className} />
+    return <DefaultLogo className={className} style={style} />
   }
 
   return (
@@ -40,6 +41,7 @@ export const SiteLogo: React.FC<SiteLogoProps> = ({logoUrl, className}) => {
       alt="Birim Web Logo"
       className={`${className} object-contain`}
       onError={() => setImgError(true)}
+      style={style}
     />
   )
 }

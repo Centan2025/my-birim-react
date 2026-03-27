@@ -66,12 +66,39 @@ export function Header() {
   const { cartCount, toggleCart } = useCart()
   const [headerOpacity, setHeaderOpacity] = useState(0)
   const [isHeaderVisible, setIsHeaderVisible] = useState(true)
+
+  // Logic to determine if we are on a "Dark Hero" page (transparent header potential)
+  const isDarkHeroPage = useCallback((p: string) =>
+    p === '/' ||
+    p === '' ||
+    p.startsWith('/about') ||
+    p === '/products' ||
+    p.startsWith('/projects/') ||
+    p.startsWith('/project/') ||
+    p === '/categories' ||
+    /^\/products\/[^/]+$/.test(p), [])
+
+  const [isMobile, setIsMobile] = useState(false)
+  const [headerHeight, setHeaderHeight] = useState(56) // 3.5rem = 56px (mobil için varsayılan)
+  const [isMobileMenuClosing, setIsMobileMenuClosing] = useState(false)
+  const isDarkHero = isDarkHeroPage(location.pathname)
+
+  // On standard pages (white pages) WE MUST USE DARK TEXT
+  // On dark hero pages, if we scrolled or the hero is light, use DARK TEXT
+  // Logic: Use Dark Text (isLightMode = true) only if background is actually light.
+  // Mobile search and menu are always dark, so isLightMode must be false then.
+  const isLightMode = 
+    (!isDarkHero || headerTheme.mode === 'light' || headerOpacity > 0.5) && 
+    !(isMobile && (isSearchOpen || isMobileMenuOpen || isMobileMenuClosing))
+  
+  const headerForegroundColor = isLightMode ? '#000000' : '#ffffff'
+  const headerLogoFilter = isLightMode ? 'invert(1) brightness(0.95)' : 'none'
+  const iconBrightness = isLightMode ? 'brightness(0)' : 'none'
+
   const lastScrollYRef = useRef(0)
   const headerVisibilityLastChanged = useRef(0)
   const mobileMenuJustClosedUntilRef = useRef(0)
   const lastScrollForHeader = useRef(0) // Header visibility için ayrı scroll takibi
-  const [isMobile, setIsMobile] = useState(false)
-  const [headerHeight, setHeaderHeight] = useState(56) // 3.5rem = 56px (mobil için varsayılan)
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const opacitySetByHandleScrollRef = useRef(false) // handleScroll tarafından opacity ayarlandı mı kontrolü için
@@ -91,7 +118,6 @@ export function Header() {
   const isOverlayMobileMenu = Boolean(
     isMobile && settings && settings.mobileHeaderAnimation === 'overlay'
   )
-  const [isMobileMenuClosing, setIsMobileMenuClosing] = useState(false)
 
   // Search logic hook
   const { searchQuery, setSearchQuery, searchResults, isSearching, allData, internalCloseSearch } =
@@ -242,6 +268,7 @@ export function Header() {
     setIsHeaderVisible,
     setIsLangOpen,
     setIsProductsOpen,
+    isMobileMenuOpen,
   })
 
   // Mobil menü açıldığında/kapandığında opacity'yi güncelle
@@ -434,6 +461,8 @@ export function Header() {
     display: isMobile ? 'none' : 'flex', // Only apply flex on desktop to avoid forcing visibility
     alignItems: 'center',
     justifyContent: 'center',
+    color: headerForegroundColor,
+    filter: iconBrightness,
   }
 
   const mobileMenuLinks: { to: string; label: string }[] = [
@@ -495,10 +524,11 @@ export function Header() {
   }> = ({ to, children, onMouseEnter, onClick }) => {
     const baseStyle = {
       fontSize: 'clamp(11px, 0.3rem + 0.7vw, 15px)', // Aggressive scaling
-      fontWeight: 'bold',
+      fontWeight: 500,
       letterSpacing: '0.05em',
       fontFamily: "'Inter', sans-serif",
       lineHeight: '1.25rem',
+      color: headerForegroundColor
     }
     return (
       <NavLink
@@ -518,7 +548,10 @@ export function Header() {
           style={{ ...baseStyle, display: 'flex', alignItems: 'flex-end' }}
         >
           {children}
-          <span className="absolute -bottom-1 left-0 w-full h-[3px] bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"></span>
+          <span 
+            className="absolute -bottom-1 left-0 w-full h-[3px] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"
+            style={{ backgroundColor: headerForegroundColor }}
+          ></span>
         </span>
       </NavLink>
     )
@@ -550,6 +583,7 @@ export function Header() {
     isOverlayMobileMenu,
     isMobileMenuClosing,
     heroBrightness,
+    isSearchOpen,
   })
 
   return (
@@ -648,7 +682,8 @@ export function Header() {
                         setIsSearchOpen(true)
                       }
                     }}
-                    className="group p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center text-white"
+                    className="group p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center"
+                    style={{ color: headerForegroundColor }}
                     aria-label={
                       isSearchOpen
                         ? t('close_search') || 'Aramayı kapat'
@@ -681,8 +716,16 @@ export function Header() {
 
                 {/* Mobil Logo - Ortada */}
                 <div className="lg:hidden flex items-center absolute left-1/2 -translate-x-1/2">
-                  <Link to="/" className="flex items-center gap-1.5 text-white transition-colors">
-                    <SiteLogo logoUrl={settings?.logoUrl} className="w-32 h-5" />
+                  <Link 
+                    to="/" 
+                    className="flex items-center gap-1.5 transition-colors"
+                    style={{ color: headerForegroundColor }}
+                  >
+                    <SiteLogo 
+                      logoUrl={settings?.logoUrl} 
+                      className="w-32 h-5" 
+                      style={{ filter: headerLogoFilter }}
+                    />
                   </Link>
                 </div>
                 {/* Desktop Arama (masaüstü) - Sol tarafta */}
@@ -708,7 +751,7 @@ export function Header() {
                       }
                     }}
                     className={`${iconClasses} hidden lg:inline-flex`}
-                    style={sharedIconStyle}
+                    style={{ ...sharedIconStyle, color: headerForegroundColor }}
                     aria-label={
                       isSearchOpen
                         ? t('close_search') || 'Aramayı kapat'
@@ -752,17 +795,18 @@ export function Header() {
                     onClick={() => setIsProductsOpen(false)}
                     style={{
                       fontSize: 'clamp(12px, 0.4rem + 0.6vw, 15px)',
-                      fontWeight: 'bold',
+                      fontWeight: 500, // Re-applying the 500 from previous request
                       letterSpacing: '0.05em',
                       fontFamily: "'Inter', sans-serif",
                       lineHeight: '1.25rem',
+                      color: headerForegroundColor
                     }}
                   >
                     <span
                       className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase header-nav-text"
                       style={{
                         fontSize: 'clamp(0.75rem, 0.5rem + 0.4vw, 0.9375rem)',
-                        fontWeight: 'bold',
+                        fontWeight: 500, // Re-applying the 500 from previous request
                         letterSpacing: '0.05em',
                         fontFamily: "'Inter', sans-serif",
                         lineHeight: '1.25rem',
@@ -770,10 +814,13 @@ export function Header() {
                     >
                       {t('products')}
                       <span
-                        className={`absolute -bottom-1 left-0 w-full h-[3px] bg-white transition-transform duration-300 ease-out origin-center ${isProductsOpen ? 'scale-x-0 opacity-0' : 'transform scale-x-0 group-hover:scale-x-100'}`}
+                        className={`absolute -bottom-1 left-0 w-full h-[3px] transition-transform duration-300 ease-out origin-center ${isProductsOpen ? 'scale-x-0 opacity-0' : 'transform scale-x-0 group-hover:scale-x-100'}`}
+                        style={{ backgroundColor: headerForegroundColor }}
                       ></span>
                     </span>
-                    <ChevronDownIcon />
+                    <div style={{ filter: iconBrightness }}>
+                      <ChevronDownIcon />
+                    </div>
                   </Link>
                 </div>
                 <div className="hidden lg:flex items-end">
@@ -801,13 +848,21 @@ export function Header() {
 
               {/* Orta - Logo (Desktop) */}
               <div className="hidden lg:flex h-full items-end justify-center lg:pb-6 header-layout-transition-delayed">
-                <Link to="/" className="flex items-end gap-3 text-white transition-colors">
+                <Link 
+                  to="/" 
+                  className="flex items-end gap-3 transition-colors"
+                  style={{ color: headerForegroundColor }}
+                >
                   <div
                     style={{
                       width: 'clamp(110px, 10vw + 50px, 288px)', // Smaller minimum to avoid collision
                     }}
                   >
-                    <SiteLogo logoUrl={settings?.logoUrl} className="w-full h-auto" />
+                    <SiteLogo 
+                      logoUrl={settings?.logoUrl} 
+                      className="w-full h-auto" 
+                      style={{ filter: headerLogoFilter }}
+                    />
                   </div>
                 </Link>
               </div>
@@ -858,20 +913,19 @@ export function Header() {
                         <Fragment key={langCode}>
                           <button
                             onClick={() => setLocale(langCode)}
-                            className={`relative transition-all duration-300 uppercase ${isActive ? 'text-gray-300' : 'text-gray-400 hover:text-gray-200'
-                              }`}
+                            className={`relative transition-all duration-300 lowercase`}
                             style={{
-                              fontWeight: 100,
-                              fontFamily: "'Jura', 'Neue Montreal', sans-serif",
-                              letterSpacing: '0.25em',
-                              transform: 'scale(0.9, 1.35)',
-                              transformOrigin: 'center center',
-                              display: 'inline-block',
+                              fontWeight: 500,
+                              fontFamily: "'Inter', sans-serif",
+                              letterSpacing: '0.05em',
+                              fontSize: 'clamp(12px, 0.4rem + 0.6vw, 15px)',
+                              color: isActive ? headerForegroundColor : `${headerForegroundColor}80`, // 50% opacity for inactive
+                              opacity: isActive ? 1 : 0.6
                             }}
                           >
-                            {langCode}
+                            {langCode.toLowerCase()}
                           </button>
-                          {!isLast && <span className="mx-1 text-gray-400">|</span>}
+                          {!isLast && <span className="mx-1" style={{ color: `${headerForegroundColor}40` }}>|</span>}
                         </Fragment>
                       )
                     })}
@@ -881,7 +935,7 @@ export function Header() {
                   <button
                     onClick={toggleTheme}
                     className={`${iconClasses}`}
-                    style={sharedIconStyle}
+                    style={{ ...sharedIconStyle, color: headerForegroundColor }}
                     aria-label={isDarkMode ? t('light_mode') : t('dark_mode')}
                   >
                     <span className="relative flex items-center justify-center w-6 h-6">
@@ -898,14 +952,14 @@ export function Header() {
                     <button
                       onClick={toggleCart}
                       className={`relative ${iconClasses}`}
-                      style={sharedIconStyle}
+                      style={{ ...sharedIconStyle, color: headerForegroundColor }}
                       aria-label={`${t('cart') || 'Sepet'}${cartCount > 0 ? ` (${cartCount} ${t('items') || 'ürün'})` : ''}`}
                       aria-expanded={false}
                     >
                       <ShoppingBagIcon />
                       {cartCount > 0 && (
                         <span
-                          className="absolute -top-1 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"
+                          className="absolute -top-1 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white border-white border"
                           aria-hidden="true"
                         >
                           {cartCount}
@@ -942,21 +996,24 @@ export function Header() {
                       aria-expanded={isMobileMenuOpen}
                       aria-controls="mobile-menu"
                     >
-                      <div className="flex flex-col gap-1.5 items-center w-6">
+                      <div className="flex flex-col gap-1.5 items-center w-6" style={{ filter: iconBrightness }}>
                         {/* Üst Çizgi: 45 derece döner ve aşağı iner */}
                         <span
-                          className={`h-0.5 w-6 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''
+                          className={`h-0.5 w-6 transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''
                             }`}
+                          style={{ backgroundColor: headerForegroundColor }}
                         ></span>
                         {/* Orta Çizgi: Kaybolur */}
                         <span
-                          className={`h-0.5 w-6 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''
+                          className={`h-0.5 w-6 transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''
                             }`}
+                          style={{ backgroundColor: headerForegroundColor }}
                         ></span>
                         {/* Alt Çizgi: -45 derece döner ve yukarı çıkar */}
                         <span
-                          className={`h-0.5 w-6 bg-white transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''
+                          className={`h-0.5 w-6 transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''
                             }`}
+                          style={{ backgroundColor: headerForegroundColor }}
                         ></span>
                       </div>
                     </button>
@@ -1004,6 +1061,7 @@ export function Header() {
             onLeave={handleProductsLeave}
             onClose={handleCloseProducts}
             t={t}
+            isLightMode={isLightMode}
           />
           {/* Inline mobil menü (overlay olmayan mod) */}
           <HeaderMobileMenuInline
@@ -1067,6 +1125,7 @@ export function Header() {
         closeSearch={closeSearch}
         searchPanelRef={searchPanelRef}
         searchInputRef={searchInputRef}
+        isLightMode={isLightMode}
       />
     </>
   )

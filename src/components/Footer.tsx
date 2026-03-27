@@ -85,13 +85,13 @@ export const Footer = () => {
                     <button
                       key={langCode}
                       onClick={() => setLocale(langCode)}
-                      className={`text-xs font-inter uppercase tracking-wider transition-colors duration-200 ${
+                      className={`text-xs font-inter tracking-wider transition-colors duration-200 ${
                         isActive
                           ? 'text-white font-bold'
                           : 'text-gray-400 hover:text-white font-thin'
                       }`}
                     >
-                      {langCode.toUpperCase()}
+                      {langCode.toLowerCase()}
                     </button>
                   )
                 })}

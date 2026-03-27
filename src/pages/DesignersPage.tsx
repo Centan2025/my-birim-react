@@ -159,11 +159,6 @@ export function DesignersPage() {
         {/* Sağ Taraf: Rehber Listesi - Bağımsız Scroll */}
         <div className="w-full lg:w-1/2 lg:flex-1 h-auto lg:h-full overflow-y-visible lg:overflow-y-auto custom-scrollbar bg-[var(--bg-secondary)] border-l border-[var(--border-primary)]/10 transition-colors duration-500 scroll-smooth lg:overscroll-contain pb-20 lg:pb-0">
           <div className="py-12 lg:pt-0 lg:pb-24 px-6 lg:px-20 min-h-full flex flex-col justify-start">
-            <div className="w-full mb-8 lg:hidden">
-              <Breadcrumbs
-                items={[{label: t('homepage'), to: '/'}, {label: t('designers') || 'Tasarımcılar'}]}
-              />
-            </div>
             <div className="mb-8 lg:mb-12 w-full">
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-left mb-4">
                 {t('designers')}
@@ -188,7 +183,7 @@ export function DesignersPage() {
                     ${
                       activeDesigner?.id === designer.id
                         ? 'text-primary'
-                        : 'text-[var(--text-primary)]/40 dark:text-[var(--text-primary)]/15 hover:text-primary/40'
+                        : 'text-[var(--text-primary)]/75 dark:text-[var(--text-primary)]/40 hover:text-primary/40'
                     }
                   `}
                 >

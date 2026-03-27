@@ -134,14 +134,14 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
                       onLocaleChange(langCode)
                     }}
                     aria-pressed={isActive}
-                    className={`group relative px-2.5 py-1.5 text-sm uppercase tracking-[0.2em] transition-all duration-200 ${isActive
+                    className={`group relative px-2.5 py-1.5 text-sm tracking-[0.2em] transition-all duration-200 ${isActive
                       ? 'text-white font-light'
                       : 'text-gray-400/90 hover:text-white font-light'
                       } ${isActive ? 'scale-110' : 'scale-100'}`}
                     style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.2em' }}
                   >
                     <span className="relative inline-block transition-opacity transition-transform duration-200 ease-out">
-                      {langCode.toUpperCase()}
+                      {langCode.toLowerCase()}
                     </span>
                   </button>
                 )

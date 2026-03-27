@@ -69,7 +69,7 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
                       onLocaleChange(langCode)
                     }}
                     aria-pressed={isActive}
-                    className={`group relative px-2 py-1 text-[0.85rem] uppercase tracking-[0.2em] transition-colors duration-200 ${isActive
+                    className={`group relative px-2 py-1 text-[0.85rem] tracking-[0.2em] transition-colors duration-200 ${isActive
                       ? 'text-white font-light'
                       : 'text-gray-400/90 hover:text-white font-light'
                       }`}
@@ -78,7 +78,7 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
                       letterSpacing: '0.2em',
                     }}
                   >
-                    <span className="relative inline-block">{langCode.toUpperCase()}</span>
+                    <span className="relative inline-block">{langCode.toLowerCase()}</span>
                   </button>
                 )
               })}
