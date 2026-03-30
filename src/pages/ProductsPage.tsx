@@ -1,17 +1,17 @@
-import { useState, useMemo, useEffect, useRef } from 'react'
-import { useParams } from 'react-router-dom'
-import { ProductCard } from '../components/ProductCard'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { PageLoading } from '../components/LoadingSpinner'
-import { useTranslation } from '../i18n'
-import { Breadcrumbs } from '../components/Breadcrumbs'
-import { useProducts, useProductsByCategory } from '../hooks/useProducts'
-import { useCategory, useCategories } from '../hooks/useCategories'
-import { useSiteSettings } from '../hooks/useSiteData'
-import type { Product } from '../types'
+import {useState, useMemo, useEffect, useRef} from 'react'
+import {useParams} from 'react-router-dom'
+import {ProductCard} from '../components/ProductCard'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {Breadcrumbs} from '../components/Breadcrumbs'
+import {useProducts, useProductsByCategory} from '../hooks/useProducts'
+import {useCategory, useCategories} from '../hooks/useCategories'
+import {useSiteSettings} from '../hooks/useSiteData'
+import type {Product} from '../types'
 import ScrollReveal from '../components/ScrollReveal'
-import { useSEO } from '../hooks/useSEO'
-import { useHeaderTheme } from '../context/HeaderThemeContext'
+import {useSEO} from '../hooks/useSEO'
+import {useHeaderTheme} from '../context/HeaderThemeContext'
 
 const ChevronDownIcon = () => (
   <svg
@@ -29,26 +29,26 @@ const ChevronDownIcon = () => (
   </svg>
 )
 
-import { analytics } from '../lib/analytics'
+import {analytics} from '../lib/analytics'
 
 export function ProductsPage() {
-  const { categoryId } = useParams<{ categoryId: string }>()
+  const {categoryId} = useParams<{categoryId: string}>()
   const [isSortOpen, setIsSortOpen] = useState(false)
   const [sortBy, setSortBy] = useState('year-desc') // Default sort by newest
-  const { t } = useTranslation()
-  const { data: settings } = useSiteSettings()
+  const {t} = useTranslation()
+  const {data: settings} = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const sortRef = useRef<HTMLDivElement | null>(null)
 
   // React Query hooks - always call both, use enabled to control
-  const { data: allProductsData, isLoading: allProductsLoading } = useProducts()
-  const { data: categoryProductsData, isLoading: categoryProductsLoading } =
+  const {data: allProductsData, isLoading: allProductsLoading} = useProducts()
+  const {data: categoryProductsData, isLoading: categoryProductsLoading} =
     useProductsByCategory(categoryId)
   const allProducts = useMemo(() => allProductsData ?? [], [allProductsData])
   const categoryProducts = useMemo(() => categoryProductsData ?? [], [categoryProductsData])
-  const { data: category } = useCategory(categoryId)
-  const { data: categories = [] } = useCategories()
-  const { reset } = useHeaderTheme()
+  const {data: category} = useCategory(categoryId)
+  const {data: categories = []} = useCategories()
+  const {reset} = useHeaderTheme()
 
   // Use category products if categoryId exists, otherwise use all products
   const products = categoryId ? categoryProducts : allProducts
@@ -186,7 +186,7 @@ export function ProductsPage() {
   return (
     <div className="bg-[var(--bg-secondary)]">
       {/* Category Hero Image */}
-      <div className="relative h-[450px] animate-fade-in-down">
+      <div className="relative h-[450px] animate-fade-in-down hero-section">
         <div className="absolute inset-0">
           {(() => {
             const heroImage = category?.heroImage
@@ -227,11 +227,11 @@ export function ProductsPage() {
             items={
               category
                 ? [
-                  { label: t('homepage'), to: '/' },
-                  { label: t('products'), to: '/products' },
-                  { label: t(category.name) },
-                ]
-                : [{ label: t('homepage'), to: '/' }, { label: t('products') }]
+                    {label: t('homepage'), to: '/'},
+                    {label: t('products'), to: '/products'},
+                    {label: t(category.name)},
+                  ]
+                : [{label: t('homepage'), to: '/'}, {label: t('products')}]
             }
           />
           {/* Sort Controls */}
@@ -270,13 +270,13 @@ export function ProductsPage() {
             // Eğer kategori seçili değilse (tüm ürünler), kategorilere göre grupla ve başlık göster
             (() => {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const productsByCategory = new Map<string, { category: any; products: Product[] }>()
+              const productsByCategory = new Map<string, {category: any; products: Product[]}>()
 
               sortedProducts.forEach(product => {
                 const catId = product.categoryId || 'uncategorized'
                 if (!productsByCategory.has(catId)) {
                   const category = categories.find(c => c.id === catId)
-                  productsByCategory.set(catId, { category, products: [] })
+                  productsByCategory.set(catId, {category, products: []})
                 }
                 productsByCategory.get(catId)!.products.push(product)
               })
@@ -296,7 +296,7 @@ export function ProductsPage() {
               return (
                 <div>
                   {sortedCategoryIds.map(catId => {
-                    const { category, products } = productsByCategory.get(catId)!
+                    const {category, products} = productsByCategory.get(catId)!
                     const categoryName = category ? t(category.name) : catId
                     const startIndex = productIndex
                     productIndex += products.length
@@ -341,7 +341,9 @@ export function ProductsPage() {
           )
         ) : (
           <ScrollReveal delay={0} threshold={0.01}>
-            <p className="text-[var(--text-secondary)] text-center">{t('no_products_in_category')}</p>
+            <p className="text-[var(--text-secondary)] text-center">
+              {t('no_products_in_category')}
+            </p>
           </ScrollReveal>
         )}
       </div>

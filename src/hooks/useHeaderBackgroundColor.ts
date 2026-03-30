@@ -1,5 +1,5 @@
-import { useLocation } from 'react-router-dom'
-import { isDarkHeroPage } from '../utils/headerUtils'
+import {useLocation} from 'react-router-dom'
+import {isDarkHeroPage} from '../utils/headerUtils'
 
 interface HeaderBackgroundParams {
   isMobile: boolean
@@ -8,8 +8,8 @@ interface HeaderBackgroundParams {
   isMobileMenuOpen: boolean
   isOverlayMobileMenu: boolean
   isMobileMenuClosing: boolean
-  heroBrightness: number | null
   isSearchOpen: boolean
+  isDarkMode: boolean
 }
 
 export function useHeaderBackgroundColor({
@@ -19,32 +19,39 @@ export function useHeaderBackgroundColor({
   isMobileMenuOpen,
   isOverlayMobileMenu,
   isMobileMenuClosing,
-  heroBrightness,
   isSearchOpen,
+  isDarkMode,
 }: HeaderBackgroundParams) {
   const location = useLocation()
 
   const calculateBackgroundColor = () => {
     const path = location.pathname
 
-    if ((isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)) || (isSearchOpen && isMobile)) {
-      return 'rgba(16, 24, 32, 0.7)'
+    if (
+      (isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)) ||
+      (isSearchOpen && isMobile)
+    ) {
+      return isDarkMode ? 'rgba(0, 0, 0, 0.8)' : 'rgba(16, 24, 32, 0.7)'
     }
 
     if (isSearchOpen && !isMobile) {
       // isLightMode mantığına göre açık veya koyu fon dön
       const isDarkHero = isDarkHeroPage(path)
+      // Hero üzerindeyken yazı beyaz kaldığı için arama paneli de koyu kalmalı
+      const isHeaderLightMode = !isDarkHero || headerOpacity >= 0.75
 
-      const isLightMode = !isDarkHero || (heroBrightness !== null && heroBrightness >= 0.5) || headerOpacity > 0.5
-      return isLightMode ? 'rgba(255, 255, 255, 0.95)' : 'rgba(0, 0, 0, 0.85)'
+      if (isDarkMode) return 'rgba(10, 10, 10, 0.95)'
+      return isHeaderLightMode ? 'rgba(255, 255, 255, 0.95)' : 'rgba(0, 0, 0, 0.85)'
     }
 
     if (isProductsOpen && !isMobile) {
       // isLightMode mantığına göre açık veya koyu fon dön
       const isDarkHero = isDarkHeroPage(path)
+      // Hero üzerindeyken yazı beyaz kaldığı için ürün paneli de koyu kalmalı
+      const isHeaderLightMode = !isDarkHero || headerOpacity >= 0.75
 
-      const isLightMode = !isDarkHero || (heroBrightness !== null && heroBrightness >= 0.5) || headerOpacity > 0.5
-      return isLightMode ? 'rgba(255, 255, 255, 0.95)' : 'rgba(0, 0, 0, 0.85)'
+      if (isDarkMode) return 'rgba(10, 10, 10, 0.95)'
+      return isHeaderLightMode ? 'rgba(255, 255, 255, 0.95)' : 'rgba(0, 0, 0, 0.85)'
     }
 
     // Üstte koyu hero görseli bulunan sayfalar: header tam şeffaf olmalı.
@@ -52,7 +59,9 @@ export function useHeaderBackgroundColor({
 
     if (!isDarkHeroMatched) {
       // Beyaz sayfalarda: bg-white/60 + backdrop-blur-md (buz etkisi)
-      return `rgba(255, 255, 255, ${Math.max(headerOpacity, 0.6)})`
+      // Dark mode'da: bg-black/60 + backdrop-blur-md
+      const baseColor = isDarkMode ? 'rgba(10, 10, 10, ' : 'rgba(255, 255, 255, '
+      return `${baseColor}${Math.max(headerOpacity, 0.6)})`
     }
 
     // Koyu hero görseli olan sayfalar (Ana Sayfa, Hakkımızda, Proje Detay vb.) için şeffaflık kuralları:
@@ -60,10 +69,12 @@ export function useHeaderBackgroundColor({
     if (headerOpacity < 0.75) return 'transparent'
 
     if (isMobileMenuOpen && !isOverlayMobileMenu) {
-      return `rgba(16, 24, 32, 0.7)`
+      return isDarkMode ? 'rgba(0, 0, 0, 0.8)' : `rgba(16, 24, 32, 0.7)`
     }
 
-    return `rgba(255, 255, 255, ${Math.max(headerOpacity, 0.75)})`
+    // Dark mode'da koyu hero altındaki bölümde koyu arka plan, normal modda beyaz arka plan
+    const baseColor = isDarkMode ? 'rgba(0, 0, 0, ' : 'rgba(255, 255, 255, '
+    return `${baseColor}${Math.max(headerOpacity, 0.75)})`
   }
 
   return calculateBackgroundColor()

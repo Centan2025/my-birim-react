@@ -1,17 +1,17 @@
-import { useState, useEffect } from 'react'
-import { getAboutPageContent } from '../services/cms'
-import type { AboutPageContent, NewsMedia } from '../types'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { PageLoading } from '../components/LoadingSpinner'
-import { useTranslation } from '../i18n'
-import { Breadcrumbs } from '../components/Breadcrumbs'
-import { useSEO } from '../hooks/useSEO'
-import { useHeaderTheme } from '../context/HeaderThemeContext'
+import {useState, useEffect} from 'react'
+import {getAboutPageContent} from '../services/cms'
+import type {AboutPageContent, NewsMedia} from '../types'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {Breadcrumbs} from '../components/Breadcrumbs'
+import {useSEO} from '../hooks/useSEO'
+import {useHeaderTheme} from '../context/HeaderThemeContext'
 import ScrollReveal from '../components/ScrollReveal'
 import PortableTextLite from '../components/PortableTextLite'
 
 // Alt Medya Galerisi Bileşeni - Ekranı sağdan sola kaplayan tam genişlik (breakout) yapı
-const MediaGallery = ({ media, alt }: { media?: NewsMedia[]; alt: string }) => {
+const MediaGallery = ({media, alt}: {media?: NewsMedia[]; alt: string}) => {
   if (!media || media.length === 0) return null
 
   return (
@@ -53,8 +53,8 @@ const MediaGallery = ({ media, alt }: { media?: NewsMedia[]; alt: string }) => {
 export function AboutPage() {
   const [content, setContent] = useState<AboutPageContent | null>(null)
   const [loading, setLoading] = useState(true)
-  const { t } = useTranslation()
-  const { setFromPalette, reset } = useHeaderTheme()
+  const {t} = useTranslation()
+  const {setFromPalette, reset} = useHeaderTheme()
 
   // SEO
   const heroImageObj = typeof content?.heroImage === 'object' ? content.heroImage : null
@@ -96,8 +96,8 @@ export function AboutPage() {
     } else {
       const palette =
         typeof content.heroImage === 'object' &&
-          content.heroImage !== null &&
-          'palette' in content.heroImage
+        content.heroImage !== null &&
+        'palette' in content.heroImage
           ? content.heroImage.palette
           : undefined
       if (palette) {
@@ -120,7 +120,7 @@ export function AboutPage() {
   return (
     <div className="bg-[var(--bg-primary)] animate-fade-in-up-subtle">
       {/* Hero Section */}
-      <div className="relative h-[70vh] min-h-[500px] bg-gray-900 text-white flex items-center justify-center overflow-hidden">
+      <div className="relative h-[70vh] min-h-[500px] bg-gray-900 text-white flex items-center justify-center overflow-hidden hero-section">
         {content.heroImage && (
           <div className="absolute inset-0 w-full h-full scale-105 animate-slow-zoom">
             <OptimizedImage
@@ -157,9 +157,7 @@ export function AboutPage() {
       {/* Main Content Sections */}
       <div className="bg-[var(--bg-tertiary)] overflow-hidden pb-32 font-light">
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 text-[11px] sm:text-[12px]">
-          <Breadcrumbs
-            items={[{ label: t('homepage'), to: '/' }, { label: t('about') }]}
-          />
+          <Breadcrumbs items={[{label: t('homepage'), to: '/'}, {label: t('about')}]} />
         </div>
 
         {/* 1. SECTION: HISTORY */}
@@ -208,7 +206,9 @@ export function AboutPage() {
                             crop={typeof img === 'object' ? img.crop : undefined}
                             hotspot={typeof img === 'object' ? img.hotspot : undefined}
                             origWidth={typeof img === 'object' ? (img as any).origWidth : undefined}
-                            origHeight={typeof img === 'object' ? (img as any).origHeight : undefined}
+                            origHeight={
+                              typeof img === 'object' ? (img as any).origHeight : undefined
+                            }
                           />
                         )
                       })()}
@@ -241,7 +241,9 @@ export function AboutPage() {
                             crop={typeof img === 'object' ? img.crop : undefined}
                             hotspot={typeof img === 'object' ? img.hotspot : undefined}
                             origWidth={typeof img === 'object' ? (img as any).origWidth : undefined}
-                            origHeight={typeof img === 'object' ? (img as any).origHeight : undefined}
+                            origHeight={
+                              typeof img === 'object' ? (img as any).origHeight : undefined
+                            }
                           />
                         )
                       })()}
@@ -311,8 +313,12 @@ export function AboutPage() {
                               className="w-full h-auto object-cover block"
                               crop={typeof img === 'object' ? img.crop : undefined}
                               hotspot={typeof img === 'object' ? img.hotspot : undefined}
-                              origWidth={typeof img === 'object' ? (img as any).origWidth : undefined}
-                              origHeight={typeof img === 'object' ? (img as any).origHeight : undefined}
+                              origWidth={
+                                typeof img === 'object' ? (img as any).origWidth : undefined
+                              }
+                              origHeight={
+                                typeof img === 'object' ? (img as any).origHeight : undefined
+                              }
                             />
                           )
                         })()}

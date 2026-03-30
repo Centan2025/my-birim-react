@@ -1,20 +1,20 @@
-import React, { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
-import type { HomePageContent, SiteSettings } from '../types'
-import { OptimizedImage } from './OptimizedImage'
-import { OptimizedVideo } from './OptimizedVideo'
+import React, {CSSProperties, useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import {Link} from 'react-router-dom'
+import type {HomePageContent, SiteSettings} from '../types'
+import {OptimizedImage} from './OptimizedImage'
+import {OptimizedVideo} from './OptimizedVideo'
 // Build fix
-import { ArrowRight } from './ArrowRight'
-import { YouTubeBackground } from './YouTubeBackground'
-import { useTranslation } from '../i18n'
+import {ArrowRight} from './ArrowRight'
+import {YouTubeBackground} from './YouTubeBackground'
+import {useTranslation} from '../i18n'
 
 interface HomeHeroProps {
   content?: HomePageContent
   settings?: SiteSettings
 }
 
-export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
-  const { t } = useTranslation()
+export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
+  const {t} = useTranslation()
 
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
@@ -226,9 +226,9 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
       }
     }
 
-    container.addEventListener('touchstart', handleTouchStart, { passive: true })
-    container.addEventListener('touchmove', handleTouchMove, { passive: true })
-    container.addEventListener('touchend', handleTouchEnd, { passive: true })
+    container.addEventListener('touchstart', handleTouchStart, {passive: true})
+    container.addEventListener('touchmove', handleTouchMove, {passive: true})
+    container.addEventListener('touchend', handleTouchEnd, {passive: true})
 
     return () => {
       container.removeEventListener('touchstart', handleTouchStart)
@@ -408,7 +408,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
         }
       `}</style>
       <div // eslint-disable-line jsx-a11y/no-static-element-interactions
-        className={`relative ${isMobile ? 'h-screen hero-container-mobile' : 'h-screen'} md:h-screen overflow-hidden cursor-grab active:cursor-grabbing`}
+        className={`relative ${isMobile ? 'h-screen hero-container-mobile' : 'h-screen'} md:h-screen overflow-hidden cursor-grab active:cursor-grabbing hero-section`}
         ref={heroContainerRef}
         onMouseDown={handleDragStart}
         onMouseMove={handleDragMove}
@@ -431,10 +431,10 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
             touchAction: 'pan-y',
             ...(isMobile
               ? {
-                height: '100vh',
-                minHeight: '100vh',
-                maxHeight: '100vh',
-              }
+                  height: '100vh',
+                  minHeight: '100vh',
+                  maxHeight: '100vh',
+                }
               : {}),
           } as React.CSSProperties
         }
@@ -503,14 +503,14 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                   overflow: 'hidden',
                   position: 'relative',
                   ...(isMobile
-                    ? { height: '100vh', minHeight: '100vh', maxHeight: '100vh' }
-                    : { height: '100%', minHeight: '100%' }),
+                    ? {height: '100vh', minHeight: '100vh', maxHeight: '100vh'}
+                    : {height: '100%', minHeight: '100%'}),
                 }}
               >
                 {/* YouTube URL'si video type ile gelebilir - önce kontrol et */}
                 {media.type === 'youtube' ||
-                  (media.type === 'video' &&
-                    (media.url?.includes('youtube.com') || media.url?.includes('youtu.be'))) ? (
+                (media.type === 'video' &&
+                  (media.url?.includes('youtube.com') || media.url?.includes('youtu.be'))) ? (
                   isActiveSlide ? (
                     <YouTubeBackground url={media.url} isMobile={isMobile} />
                   ) : (
@@ -562,27 +562,28 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                   return (
                     <div
                       className={`absolute z-20 ${isMobile ? 'w-full px-2' : 'container mx-auto px-2 sm:px-2 lg:px-3'} h-full flex items-center ${justifyClass}`}
-                      style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+                      style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
                     >
                       <div
                         className={`flex flex-col md:flex-row items-center text-white gap-12 md:gap-16 ${content?.isHeroTextVisible ? 'max-w-4xl' : ''} ${textAlignClass}`}
                       >
                         {content?.isHeroTextVisible && (
                           <div
-                            className={`relative w-full transition-all duration-[700ms] ease-out ${isHeroTextVisible
-                              ? 'translate-x-0 opacity-100'
-                              : '-translate-x-[150%] opacity-0'
-                              }`}
+                            className={`relative w-full transition-all duration-[700ms] ease-out ${
+                              isHeroTextVisible
+                                ? 'translate-x-0 opacity-100'
+                                : '-translate-x-[150%] opacity-0'
+                            }`}
                           >
                             <h1
                               className="text-base md:text-5xl font-light tracking-tight mb-4 leading-relaxed"
-                              style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}
+                              style={{textShadow: '0 2px 4px rgba(0,0,0,0.5)'}}
                             >
                               {t(media.title || '')}
                             </h1>
                             <p
                               className="text-[10px] md:text-xl mb-8 leading-relaxed"
-                              style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}
+                              style={{textShadow: '0 1px 3px rgba(0,0,0,0.5)'}}
                             >
                               {t(media.subtitle || '')}
                             </p>
@@ -666,8 +667,8 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
             style={
               isMobile
                 ? {
-                  bottom: 'max(16px, env(safe-area-inset-bottom, 0px) + 16px)',
-                }
+                    bottom: 'max(16px, env(safe-area-inset-bottom, 0px) + 16px)',
+                  }
                 : {}
             }
           >
@@ -686,8 +687,9 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ content }) => {
                     <button
                       key={index}
                       onClick={() => setCurrentSlide(index)}
-                      className={`relative h-2 rounded-none transition-all duration-500 ease-in-out group ${areDotsVisible ? 'animate-dot-grow' : 'opacity-0 scale-0'
-                        } ${isActive ? 'w-2 bg-red-900' : 'w-2 bg-white/40 hover:bg-white/60'}`}
+                      className={`relative h-2 rounded-none transition-all duration-500 ease-in-out group ${
+                        areDotsVisible ? 'animate-dot-grow' : 'opacity-0 scale-0'
+                      } ${isActive ? 'w-2 bg-red-900' : 'w-2 bg-white/40 hover:bg-white/60'}`}
                       style={{
                         transitionDelay: `${animationDelay}ms`,
                       }}

@@ -1,21 +1,21 @@
-import { Link } from 'react-router-dom'
-import { useEffect, useMemo } from 'react'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { PageLoading } from '../components/LoadingSpinner'
-import { useTranslation } from '../i18n'
-import { useCategories } from '../hooks/useCategories'
-import { useProducts } from '../hooks/useProducts'
-import { useSiteSettings } from '../hooks/useSiteData'
+import {Link} from 'react-router-dom'
+import {useEffect, useMemo} from 'react'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {useCategories} from '../hooks/useCategories'
+import {useProducts} from '../hooks/useProducts'
+import {useSiteSettings} from '../hooks/useSiteData'
 import ScrollReveal from '../components/ScrollReveal'
-import { useSEO } from '../hooks/useSEO'
-import { useHeaderTheme } from '../context/HeaderThemeContext'
+import {useSEO} from '../hooks/useSEO'
+import {useHeaderTheme} from '../context/HeaderThemeContext'
 
 export function CategoriesPage() {
-  const { data: categories = [], isLoading: categoriesLoading } = useCategories()
-  const { data: allProducts = [], isLoading: productsLoading } = useProducts()
-  const { t } = useTranslation()
-  const { data: settings } = useSiteSettings()
-  const { reset } = useHeaderTheme()
+  const {data: categories = [], isLoading: categoriesLoading} = useCategories()
+  const {data: allProducts = [], isLoading: productsLoading} = useProducts()
+  const {t} = useTranslation()
+  const {data: settings} = useSiteSettings()
+  const {reset} = useHeaderTheme()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const pageTitle = `BIRIM - ${t('categories') || t('products') || 'Kategoriler'}`
 
@@ -43,12 +43,12 @@ export function CategoriesPage() {
     return categories.map(category => {
       // Eğer kategori görseli varsa onu kullan
       if (category.heroImage) {
-        return { ...category, displayImage: category.heroImage }
+        return {...category, displayImage: category.heroImage}
       }
 
       // Kategori görseli yoksa, harita uzerindeki urun görselini kullan
       const displayImage = categoryImageMap.get(category.id) || null
-      return { ...category, displayImage }
+      return {...category, displayImage}
     })
   }, [categories, categoryImageMap])
 
@@ -69,7 +69,7 @@ export function CategoriesPage() {
   return (
     <div className="bg-[var(--bg-tertiary)] min-h-screen transition-colors duration-500">
       {/* Hero Section */}
-      <div className="relative h-[500px] animate-fade-in-down">
+      <div className="relative h-[500px] animate-fade-in-down hero-section">
         <div className="absolute inset-0">
           <OptimizedImage
             src="https://picsum.photos/seed/categories-hero/1920/1080"
@@ -105,10 +105,7 @@ export function CategoriesPage() {
                 distance={0}
                 direction="none"
               >
-                <Link
-                  to={`/products/${category.id}`}
-                  className="group block overflow-hidden"
-                >
+                <Link to={`/products/${category.id}`} className="group block overflow-hidden">
                   <div className="relative h-[300px] sm:h-[350px] lg:h-[450px] overflow-hidden rounded-none border-none">
                     {category.displayImage && (
                       <OptimizedImage

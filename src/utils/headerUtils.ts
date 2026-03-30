@@ -1,4 +1,3 @@
-// Ortak (shared) Dark Hero Page check logic
 export const isDarkHeroPage = (p: string): boolean => {
   if (!p) return true
   const path = p.toLowerCase()
@@ -7,8 +6,9 @@ export const isDarkHeroPage = (p: string): boolean => {
     path === '' ||
     path.startsWith('/about') ||
     path.startsWith('/project/') ||
-    (path.startsWith('/projects/') && path !== '/projects' && path !== '/projects/') ||
-    path === '/products' ||
+    path.startsWith('/projects/') ||
+    path.startsWith('/products') ||
+    path.startsWith('/product/') ||
     path === '/categories'
   )
 }

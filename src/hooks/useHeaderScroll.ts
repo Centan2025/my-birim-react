@@ -1,5 +1,5 @@
-import { useEffect, MutableRefObject } from 'react'
-import { isDarkHeroPage } from '../utils/headerUtils'
+import {useEffect, MutableRefObject} from 'react'
+import {isDarkHeroPage} from '../utils/headerUtils'
 
 type MenuState = {
   isLangOpen: boolean
@@ -130,7 +130,13 @@ export function useHeaderScroll({
             opacitySetByHandleScrollRef.current = true
           } else {
             opacitySetByHandleScrollRef.current = false
-            const maxScroll = typeof window !== 'undefined' ? window.innerHeight : 800
+            // Hero yüksekliğini dinamik olarak al (sabit 800 veya innerHeight yerine)
+            const heroEl = document.querySelector('.hero-section')
+            const maxScroll = heroEl
+              ? heroEl.getBoundingClientRect().height
+              : typeof window !== 'undefined'
+                ? window.innerHeight
+                : 800
             const opacity = Math.min(0.75, (currentScrollY / maxScroll) * 0.75)
             setHeaderOpacity(opacity)
           }
@@ -158,7 +164,13 @@ export function useHeaderScroll({
           opacitySetByHandleScrollRef.current = true
         } else {
           // Koyu hero bulunan sayfalar dahil: scroll'a göre opacity artır
-          const maxScroll = typeof window !== 'undefined' ? window.innerHeight : 800
+          // Hero yüksekliğini dinamik olarak al
+          const heroEl = document.querySelector('.hero-section')
+          const maxScroll = heroEl
+            ? heroEl.getBoundingClientRect().height
+            : typeof window !== 'undefined'
+              ? window.innerHeight
+              : 800
           let opacity = 0
 
           if (currentScrollY > 0) {
@@ -236,7 +248,7 @@ export function useHeaderScroll({
     const initializeScrollListener = () => {
       scrollListener = handleScrollWithEnd
       handleScroll()
-      window.addEventListener('scroll', handleScrollWithEnd, { passive: true })
+      window.addEventListener('scroll', handleScrollWithEnd, {passive: true})
     }
 
     initializeScrollListener()

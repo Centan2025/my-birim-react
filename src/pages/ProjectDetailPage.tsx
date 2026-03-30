@@ -1,21 +1,21 @@
-import { useMemo, useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { useParams, Link } from 'react-router-dom'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { OptimizedVideo } from '../components/OptimizedVideo'
-import { FullscreenMediaViewer } from '../components/FullscreenMediaViewer'
-import { PageLoading } from '../components/LoadingSpinner'
-import { Breadcrumbs } from '../components/Breadcrumbs'
-import { useTranslation } from '../i18n'
-import { useProjects } from '../hooks/useProjects'
-import { getProjectById } from '../services/cms'
-import { useSiteSettings } from '../hooks/useSiteData'
-import { analytics } from '../lib/analytics'
+import {useMemo, useState, useEffect} from 'react'
+import {useQuery} from '@tanstack/react-query'
+import {useParams, Link} from 'react-router-dom'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {OptimizedVideo} from '../components/OptimizedVideo'
+import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
+import {PageLoading} from '../components/LoadingSpinner'
+import {Breadcrumbs} from '../components/Breadcrumbs'
+import {useTranslation} from '../i18n'
+import {useProjects} from '../hooks/useProjects'
+import {getProjectById} from '../services/cms'
+import {useSiteSettings} from '../hooks/useSiteData'
+import {analytics} from '../lib/analytics'
 import ScrollReveal from '../components/ScrollReveal'
-import { useSEO } from '../hooks/useSEO'
-import { useHeaderTheme } from '../context/HeaderThemeContext'
+import {useSEO} from '../hooks/useSEO'
+import {useHeaderTheme} from '../context/HeaderThemeContext'
 import PortableTextLite from '../components/PortableTextLite'
-import { HomeContentBlocks } from '../components/HomeContentBlocks'
+import {HomeContentBlocks} from '../components/HomeContentBlocks'
 
 const getYouTubeId = (url: string): string | null => {
   if (!url) return null
@@ -61,9 +61,9 @@ const ArrowRight = (props: React.SVGProps<SVGSVGElement>) => (
 )
 
 export function ProjectDetailPage() {
-  const { projectId } = useParams<{ projectId: string }>()
+  const {projectId} = useParams<{projectId: string}>()
 
-  const { data: project, isLoading: loading } = useQuery({
+  const {data: project, isLoading: loading} = useQuery({
     queryKey: ['project', projectId],
     queryFn: () => {
       if (!projectId) throw new Error('Project ID is required')
@@ -74,10 +74,10 @@ export function ProjectDetailPage() {
     gcTime: 0,
     refetchOnMount: 'always',
   })
-  const { data: allProjects = [] } = useProjects()
-  const { t } = useTranslation()
-  const { data: settings } = useSiteSettings()
-  const { setFromPalette, reset } = useHeaderTheme()
+  const {data: allProjects = []} = useProjects()
+  const {t} = useTranslation()
+  const {data: settings} = useSiteSettings()
+  const {setFromPalette, reset} = useHeaderTheme()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') return window.innerWidth < 1024
@@ -108,9 +108,9 @@ export function ProjectDetailPage() {
     }
     const palette =
       project.cover &&
-        typeof project.cover === 'object' &&
-        project.cover !== null &&
-        'palette' in project.cover
+      typeof project.cover === 'object' &&
+      project.cover !== null &&
+      'palette' in project.cover
         ? project.cover.palette
         : undefined
     if (palette) {
@@ -122,13 +122,13 @@ export function ProjectDetailPage() {
   }, [project, reset, setFromPalette])
 
   // Prev/Next must be declared before any early returns to keep hooks order stable
-  const { prevProject, nextProject } = useMemo(() => {
-    if (!project || allProjects.length < 2) return { prevProject: null, nextProject: null }
+  const {prevProject, nextProject} = useMemo(() => {
+    if (!project || allProjects.length < 2) return {prevProject: null, nextProject: null}
     const currentIndex = allProjects.findIndex(p => p.id === project.id)
-    if (currentIndex === -1) return { prevProject: null, nextProject: null }
+    if (currentIndex === -1) return {prevProject: null, nextProject: null}
     const prev = currentIndex > 0 ? allProjects[currentIndex - 1] : null
     const next = currentIndex < allProjects.length - 1 ? allProjects[currentIndex + 1] : null
-    return { prevProject: prev, nextProject: next }
+    return {prevProject: prev, nextProject: next}
   }, [project, allProjects])
 
   // Sayfa animasyonu - ilk açılışta fade-in
@@ -217,7 +217,7 @@ export function ProjectDetailPage() {
     if (!project) return []
 
     const media: any[] = []
-    
+
     // 1. Kapak Görseli
     if (coverUrl) {
       media.push({
@@ -226,7 +226,7 @@ export function ProjectDetailPage() {
         urlMobile: coverMobile,
         urlDesktop: coverDesktop,
         crop: coverCrop,
-        hotspot: coverHotspot
+        hotspot: coverHotspot,
       })
     }
 
@@ -241,7 +241,7 @@ export function ProjectDetailPage() {
             urlMobile: m.urlMobile,
             urlDesktop: m.urlDesktop,
             crop: (m as any).crop,
-            hotspot: (m as any).hotspot
+            hotspot: (m as any).hotspot,
           })
         }
       })
@@ -252,14 +252,14 @@ export function ProjectDetailPage() {
       project.contentBlocks.forEach((block: any) => {
         // Ana blok medyası
         const mUrl = block.image || block.url
-        const mType = block.mediaType || (block.image ? 'image' : (block.url ? 'video' : undefined))
-        
+        const mType = block.mediaType || (block.image ? 'image' : block.url ? 'video' : undefined)
+
         if (mType && mUrl) {
           media.push({
             type: mType,
             url: mUrl,
             crop: block.crop,
-            hotspot: block.hotspot
+            hotspot: block.hotspot,
           })
         }
 
@@ -272,8 +272,18 @@ export function ProjectDetailPage() {
               media.push({
                 type: 'image',
                 url: b.imageR2.url,
-                crop: b.imageR2.cropWidth ? { x: b.imageR2.cropX || 0, y: b.imageR2.cropY || 0, width: b.imageR2.cropWidth, height: b.imageR2.cropHeight } : undefined,
-                hotspot: b.imageR2.hotspotX !== undefined ? { x: b.imageR2.hotspotX, y: b.imageR2.hotspotY } : undefined
+                crop: b.imageR2.cropWidth
+                  ? {
+                      x: b.imageR2.cropX || 0,
+                      y: b.imageR2.cropY || 0,
+                      width: b.imageR2.cropWidth,
+                      height: b.imageR2.cropHeight,
+                    }
+                  : undefined,
+                hotspot:
+                  b.imageR2.hotspotX !== undefined
+                    ? {x: b.imageR2.hotspotX, y: b.imageR2.hotspotY}
+                    : undefined,
               })
             }
           })
@@ -298,8 +308,18 @@ export function ProjectDetailPage() {
           target.push({
             type: 'image',
             url: b.imageR2.url,
-            crop: b.imageR2.cropWidth ? { x: b.imageR2.cropX || 0, y: b.imageR2.cropY || 0, width: b.imageR2.cropWidth, height: b.imageR2.cropHeight } : undefined,
-            hotspot: b.imageR2.hotspotX !== undefined ? { x: b.imageR2.hotspotX, y: b.imageR2.hotspotY } : undefined
+            crop: b.imageR2.cropWidth
+              ? {
+                  x: b.imageR2.cropX || 0,
+                  y: b.imageR2.cropY || 0,
+                  width: b.imageR2.cropWidth,
+                  height: b.imageR2.cropHeight,
+                }
+              : undefined,
+            hotspot:
+              b.imageR2.hotspotX !== undefined
+                ? {x: b.imageR2.hotspotX, y: b.imageR2.hotspotY}
+                : undefined,
           })
         }
       })
@@ -314,7 +334,6 @@ export function ProjectDetailPage() {
       return true
     })
   }, [project, coverUrl, coverMobile, coverDesktop, coverCrop, coverHotspot])
-
 
   // SEO meta bilgileri
   const projectTitle = project ? t(project.title) : ''
@@ -348,21 +367,24 @@ export function ProjectDetailPage() {
   if (!project) {
     return (
       <div className="pt-20 bg-[var(--bg-primary)] min-h-screen text-center">
-        <p className="text-[var(--text-secondary)]">{t('project_not_found') || 'Proje bulunamadı'}</p>
+        <p className="text-[var(--text-secondary)]">
+          {t('project_not_found') || 'Proje bulunamadı'}
+        </p>
       </div>
     )
   }
 
   return (
     <div
-      className={`min-h-screen bg-[var(--bg-primary)] transition-all duration-700 ease-out ${isPageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
-        }`}
+      className={`min-h-screen bg-[var(--bg-primary)] transition-all duration-700 ease-out ${
+        isPageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
+      }`}
       style={{
         transform: isPageVisible ? 'translateY(0)' : 'translateY(80px)',
       }}
     >
       {/* Hero Alanı: Kapak görseli ve üzerine bindirilmiş başlık/yıl */}
-      <div className="relative w-full h-[60vh] md:h-[75vh] overflow-hidden">
+      <div className="relative w-full h-[60vh] md:h-[75vh] overflow-hidden hero-section">
         {/* Hero Medya (Sadece kapak görseli) */}
         {coverUrl ? (
           <div className="absolute inset-0 w-full h-full">
@@ -376,8 +398,16 @@ export function ProjectDetailPage() {
               quality={90}
               crop={coverCrop}
               hotspot={coverHotspot}
-              origWidth={project && project.cover && typeof project.cover === 'object' ? (project.cover as any).origWidth : undefined}
-              origHeight={project && project.cover && typeof project.cover === 'object' ? (project.cover as any).origHeight : undefined}
+              origWidth={
+                project && project.cover && typeof project.cover === 'object'
+                  ? (project.cover as any).origWidth
+                  : undefined
+              }
+              origHeight={
+                project && project.cover && typeof project.cover === 'object'
+                  ? (project.cover as any).origHeight
+                  : undefined
+              }
             />
           </div>
         ) : (
@@ -425,8 +455,9 @@ export function ProjectDetailPage() {
             style={{
               opacity: isFullscreenButtonVisible ? 1 : 0,
               transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
-              transition: 'opacity 700ms ease-out, transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
-              ...(isMobile ? { bottom: 'max(16px, env(safe-area-inset-bottom, 0px) + 16px)' } : {})
+              transition:
+                'opacity 700ms ease-out, transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+              ...(isMobile ? {bottom: 'max(16px, env(safe-area-inset-bottom, 0px) + 16px)'} : {}),
             }}
           >
             <button
@@ -466,15 +497,18 @@ export function ProjectDetailPage() {
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
           <Breadcrumbs
             items={[
-              { label: t('homepage'), to: '/' },
-              { label: t('projects') || 'Projeler', to: '/projects' },
-              { label: t(project.title) },
+              {label: t('homepage'), to: '/'},
+              {label: t('projects') || 'Projeler', to: '/projects'},
+              {label: t(project.title)},
             ]}
           />
         </div>
       </div>
 
-      {(project.excerpt || project.body || allMedia.length > 0 || (showBottomPrevNext && (prevProject || nextProject))) && (
+      {(project.excerpt ||
+        project.body ||
+        allMedia.length > 0 ||
+        (showBottomPrevNext && (prevProject || nextProject))) && (
         <div className="mt-0 relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-[var(--bg-secondary)]">
           <div className="w-full md:max-w-[92%] lg:max-w-[80vw] mx-auto md:px-8 lg:px-0 py-6 md:py-8">
             {/* Top Prev / Next controls */}
@@ -528,9 +562,9 @@ export function ProjectDetailPage() {
                           : [excerptContent]
                         return (
                           <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-lg md:text-xl">
-                            <PortableTextLite 
-                              value={blocks} 
-                              onMediaClick={(url) => {
+                            <PortableTextLite
+                              value={blocks}
+                              onMediaClick={url => {
                                 const clickIdx = allMedia.findIndex(m => m.url === url)
                                 if (clickIdx !== -1) {
                                   setIdx(clickIdx)
@@ -564,9 +598,9 @@ export function ProjectDetailPage() {
                         const blocks = Array.isArray(bodyContent) ? bodyContent : [bodyContent]
                         return (
                           <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-lg md:text-xl">
-                            <PortableTextLite 
-                              value={blocks} 
-                              onMediaClick={(url) => {
+                            <PortableTextLite
+                              value={blocks}
+                              onMediaClick={url => {
                                 const clickIdx = allMedia.findIndex(m => m.url === url)
                                 if (clickIdx !== -1) {
                                   setIdx(clickIdx)
@@ -597,7 +631,7 @@ export function ProjectDetailPage() {
                   isMobile={isMobile}
                   imageBorderClass={imageBorderClass}
                   overrideBackgroundColor="bg-[var(--bg-secondary)]"
-                  onMediaClick={(url) => {
+                  onMediaClick={url => {
                     const clickIdx = allMedia.findIndex(m => m.url === url)
                     if (clickIdx !== -1) {
                       setIdx(clickIdx)
@@ -671,7 +705,6 @@ export function ProjectDetailPage() {
           </div>
         </div>
       )}
-
 
       {/* Tüm cihazlarda tam ekran viewer - ürün ve iletişim sayfalarıyla aynı sistem */}
       {isFullscreenOpen && allMedia.length > 0 && (
