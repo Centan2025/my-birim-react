@@ -85,7 +85,7 @@ export function DesignersPage() {
                   transition={{duration: 1, ease: [0.43, 0.13, 0.23, 0.96]}}
                   className="relative w-full h-[40vh] lg:h-[62%] xl:h-[65%] 2xl:h-[65%] max-h-[650px] z-10 flex items-center justify-start"
                 >
-                  <div className="w-full h-full max-w-[700px] aspect-[3/2]">
+                  <div className="w-full h-full aspect-[3/2]">
                     <OptimizedImage
                       alt={t(activeDesigner.name)}
                       className="w-full h-full object-cover portrait-frame"
@@ -108,7 +108,7 @@ export function DesignersPage() {
           </div>
 
           {/* Alt Bilgi ve Karar Butonu - Alta Sabitlendi */}
-          <div className="absolute bottom-10 lg:bottom-12 xl:bottom-16 left-10 lg:left-16 xl:left-20 2xl:left-28 right-10 lg:right-16 xl:right-20 2xl:right-28 z-40 bg-transparent h-[180px] lg:h-[200px]">
+          <div className="absolute bottom-6 lg:bottom-8 xl:bottom-12 left-10 lg:left-16 xl:left-20 2xl:left-28 right-10 lg:right-16 xl:right-20 2xl:right-28 z-40 bg-transparent h-[180px] lg:h-[200px]">
             <AnimatePresence mode="wait">
               {activeDesigner && (
                 <motion.div
@@ -121,18 +121,18 @@ export function DesignersPage() {
                 >
                   {/* Sol Sütun: İsim ve Buton */}
                   <div className="flex flex-col items-start pt-6 lg:pt-10 h-full">
-                    <h2 
+                    <h2
                       className="text-xl md:text-2xl lg:text-3xl xl:text-[2.4rem] uppercase leading-[1.1] text-neutral-800"
-                      style={{ 
-                        fontFamily: "'Inter', sans-serif", 
-                        fontWeight: 500, 
-                        letterSpacing: '-0.08em' 
+                      style={{
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: 500,
+                        letterSpacing: '-0.08em',
                       }}
                     >
                       {t(activeDesigner.name)}
                     </h2>
-                    
-                    <div className="mt-auto pb-4">
+
+                    <div className="mt-auto pb-0">
                       <button
                         onClick={() => navigate(`/designer/${activeDesigner.id}`)}
                         className="w-full lg:w-auto text-center text-[10px] xl:text-[11px] uppercase font-medium tracking-[0.3em] text-[var(--text-primary)] border border-[var(--text-primary)]/30 px-6 xl:px-10 py-4 xl:py-5 hover:bg-primary/20 hover:border-primary transition-all duration-500 ease-out cursor-pointer whitespace-nowrap"
