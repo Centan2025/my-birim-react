@@ -109,7 +109,9 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
         }`}
       style={{
         top: `${headerHeight}px`,
-        backgroundColor: '#101820', // Pantone Black 6 C
+        backgroundColor: 'rgba(16, 24, 32, 0.85)', // Semi-transparent dark background
+        backdropFilter: 'blur(12px)', // Blurring whatever is behind
+        WebkitBackdropFilter: 'blur(12px)',
         // Kapanırken panel animasyonunu, linklerin ters sırada kaybolma animasyonundan sonra başlat
         transitionDelay: isMobileMenuOpen ? '0ms' : `${mobileMenuCloseDelay}ms`,
         fontFamily: "'Inter', sans-serif",

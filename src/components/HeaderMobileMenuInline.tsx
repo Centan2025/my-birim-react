@@ -51,14 +51,14 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
         }
       }}
       id="mobile-menu"
-      className="lg:hidden border-t border-white/10"
+      className="lg:hidden border-t border-white/10 bg-black/60 backdrop-blur-lg"
       role="menu"
       aria-label={t('main_menu') || 'Ana menü'}
     >
       {/* Dil seçenekleri - Menü öğelerinin üstünde */}
       {settings?.isLanguageSwitcherVisible !== false && supportedLocales.length > 1 && (
         <div className="relative w-full">
-          <div className="flex items-center justify-between bg-black/50 px-4 sm:px-5 lg:px-6 pt-3 pb-2 min-h-[3rem] border-b border-white/10">
+          <div className="flex items-center justify-between bg-black/30 px-4 sm:px-5 lg:px-6 pt-3 pb-2 min-h-[3rem] border-b border-white/10">
             <div className="flex items-center gap-1">
               {supportedLocales.map(langCode => {
                 const isActive = locale === langCode
