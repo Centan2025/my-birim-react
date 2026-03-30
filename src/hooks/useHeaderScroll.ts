@@ -1,4 +1,5 @@
 import { useEffect, MutableRefObject } from 'react'
+import { isDarkHeroPage } from '../utils/headerUtils'
 
 type MenuState = {
   isLangOpen: boolean
@@ -55,15 +56,7 @@ export function useHeaderScroll({
     const SCROLL_THROTTLE_MS = 50
 
     // Üstte koyu hero görseli olan sayfalar (header tam şeffaf olmalı)
-    const isDarkHeroPage = (p: string) =>
-      p === '/' ||
-      p === '' ||
-      p.startsWith('/about') ||
-      p === '/products' ||
-      p.startsWith('/projects/') ||
-      p.startsWith('/project/') ||
-      p === '/categories' ||
-      /^\/products\/[^/]+$/.test(p)
+    // isDarkHeroPage importundan geliyor.
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY
@@ -115,17 +108,9 @@ export function useHeaderScroll({
                 setHeaderOpacity(0)
                 setIsHeaderVisible(true)
                 opacitySetByHandleScrollRef.current = true
-              } else if (currentHeroBrightness >= 0.7) {
-                setHeaderOpacity(0.75)
-                opacitySetByHandleScrollRef.current = true
-              } else if (currentHeroBrightness >= 0.5) {
-                setHeaderOpacity(0.65)
-                opacitySetByHandleScrollRef.current = true
-              } else if (currentHeroBrightness > 0.4) {
-                const adjustedOpacity = Math.min(0.75, 0.2 + (currentHeroBrightness - 0.4) * 1.2)
-                setHeaderOpacity(adjustedOpacity)
-                opacitySetByHandleScrollRef.current = true
               } else {
+                // Brightness yüksek olsa bile en üstte şeffaf kalsın (Açılışta beyaz flash'ı önlemek için)
+                // Brightness'a bağlı opaklaşma scroll başladığında (calculateBackgroundColor içinde) devreye girecek
                 setHeaderOpacity(0)
                 opacitySetByHandleScrollRef.current = true
               }

@@ -197,7 +197,7 @@ const LocationCard: React.FC<{
           onSelect()
         }
       }}
-      className={`p-4 cursor-pointer w-full max-w-full transition-all duration-300 ${
+      className={`p-4 cursor-pointer w-full max-full transition-all duration-300 ${
         isSelected ? 'bg-[var(--bg-tertiary)]' : 'hover:bg-[var(--bg-secondary)]'
       }`}
     >
@@ -327,7 +327,6 @@ export function ContactPage() {
   }, [])
 
   // Fix: Ensure useMemo always returns a consistently typed object to avoid type inference issues.
-  // FIX: Explicitly setting the return type for useMemo to avoid type inference issues with Object.entries downstream.
   const locationGroupsMap = useMemo(() => {
     const map = new Map<string, ContactLocation[]>()
     for (const loc of content?.locations || []) {
@@ -395,7 +394,7 @@ export function ContactPage() {
       label: locationTitle,
     })
 
-    // Seçim değiştiğinde haritayı direkt GÖSTERME (öncesinde true yapılıyordu, şimdi false kalmalı)
+    // Seçim değiştiğinde haritayı direkt GÖSTERME
     setShowMap(false)
 
     // Log a generate_lead event for viewing contact info
@@ -417,8 +416,6 @@ export function ContactPage() {
     return (
       <>
         <div className="relative select-none">
-          {/* Mouse ile yatay sürükleme için; klavye ile etkileşim gerekmiyor */}
-          {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
           <div
             ref={thumbRef}
             className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing w-full max-w-full"
@@ -471,7 +468,6 @@ export function ContactPage() {
                         value: idx,
                       })
                       setSelectedMediaIndex(idx)
-                      // Tüm cihazlarda: ürün / proje detay sayfasındakiyle aynı tam ekran viewer
                       setIsFullscreenOpen(true)
                     }}
                     className="relative w-full h-full border-2 border-transparent opacity-80 hover:opacity-100 hover:scale-105 transition-all duration-300"
@@ -538,7 +534,6 @@ export function ContactPage() {
               ))}
             </motion.div>
           </div>
-          {/* Scroll buttons */}
           {canScrollLeft && (
             <button
               aria-label="scroll-left"
@@ -578,9 +573,7 @@ export function ContactPage() {
   }
 
   return (
-    <div
-      className={`${isFullscreenOpen ? 'bg-[var(--bg-primary)]' : 'bg-[var(--bg-tertiary)]'} pt-20 md:pt-24 lg:pt-24 transition-colors duration-500`}
-    >
+    <div className="bg-[var(--bg-primary)] pt-20 md:pt-24 lg:pt-24 transition-colors duration-500">
       {/* Breadcrumb Band */}
       <div className="w-full relative z-20">
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
@@ -645,9 +638,9 @@ export function ContactPage() {
                       }
                       onSelect={() => {
                         setSelectedLocation(loc)
-                        setShowMap(false) // Seçildiğinde harita kapansın
+                        setShowMap(false)
                       }}
-                      onShowMap={() => setShowMap(!showMap)} // Butona tıklandığında açılsın / kapansın
+                      onShowMap={() => setShowMap(!showMap)}
                     />
                   ))}
                 </div>
@@ -655,7 +648,6 @@ export function ContactPage() {
             ))}
           </motion.div>
 
-          {/* Mobilde: haritanın üzerinde medya bandı */}
           {selectedLocationMedia.length > 0 && (
             <motion.div
               className="mt-4 border-y border-[var(--border-primary)] py-2 md:hidden w-full overflow-x-hidden"
@@ -667,7 +659,6 @@ export function ContactPage() {
             </motion.div>
           )}
 
-          {/* Medya Bantı - Seçili lokasyonun medyaları (sadece desktop) */}
           {selectedLocationMedia.length > 0 && (
             <motion.div
               className="mt-8 border-y border-[var(--border-primary)] py-3 hidden md:block"
@@ -679,7 +670,6 @@ export function ContactPage() {
             </motion.div>
           )}
         </div>
-        {/* Tüm cihazlar için: ürün / proje detay sayfasındakiyle aynı tam ekran viewer */}
         {isFullscreenOpen && selectedLocationMediaForViewer.length > 0 && (
           <FullscreenMediaViewer
             items={selectedLocationMediaForViewer}

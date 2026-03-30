@@ -61,7 +61,7 @@ export function DesignersPage() {
   }
 
   return (
-    <div className="h-auto min-h-screen lg:h-screen flex flex-col bg-[var(--bg-secondary)] selection:bg-primary selection:text-black transition-colors duration-500 lg:overflow-hidden text-[var(--text-primary)] pt-20">
+    <div className="h-auto min-h-screen lg:h-screen flex flex-col bg-[var(--bg-primary)] selection:bg-primary selection:text-black transition-colors duration-500 lg:overflow-hidden text-[var(--text-primary)] pt-20">
       {/* Breadcrumb Band */}
       <div className="w-full relative z-20">
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
@@ -157,15 +157,15 @@ export function DesignersPage() {
         </div>
 
         {/* Sağ Taraf: Rehber Listesi - Bağımsız Scroll */}
-        <div className="w-full lg:w-1/2 lg:flex-1 h-auto lg:h-full overflow-y-visible lg:overflow-y-auto custom-scrollbar bg-[var(--bg-secondary)] border-l border-[var(--border-primary)]/10 transition-colors duration-500 scroll-smooth lg:overscroll-contain pb-20 lg:pb-0">
-          <div className="py-12 lg:pt-0 lg:pb-24 px-6 lg:px-20 min-h-full flex flex-col justify-start">
+        <div className="w-full lg:w-1/2 lg:flex-1 h-auto lg:h-full overflow-y-visible lg:overflow-y-auto custom-scrollbar bg-[var(--bg-primary)] border-l border-[var(--border-primary)]/10 transition-colors duration-500 scroll-smooth lg:overscroll-contain pb-20 lg:pb-0">
+          <div className="py-2 md:py-12 lg:pt-0 lg:pb-24 px-6 lg:px-20 min-h-full flex flex-col justify-start">
             <div className="mb-8 lg:mb-12 w-full">
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-left mb-4">
                 {t('designers')}
               </h1>
               <div className="h-px w-full bg-[var(--border-primary)]"></div>
             </div>
-            <nav className="flex flex-col gap-4 lg:gap-6">
+            <nav className="flex flex-col gap-4 md:gap-4 lg:gap-6">
               {designers.map(designer => (
                 <button
                   key={designer.id}
@@ -174,7 +174,7 @@ export function DesignersPage() {
                     designer-name-link 
                     text-left 
                     font-arial-regular
-                    text-[clamp(1.25rem,3.5vw,4rem)]
+                    text-[clamp(2.25rem,3.5vw,4rem)]
                     uppercase 
                     leading-[0.95] 
                     transition-all 

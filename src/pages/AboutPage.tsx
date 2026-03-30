@@ -118,7 +118,7 @@ export function AboutPage() {
   }
 
   return (
-    <div className="bg-[var(--bg-tertiary)] animate-fade-in-up-subtle">
+    <div className="bg-[var(--bg-primary)] animate-fade-in-up-subtle">
       {/* Hero Section */}
       <div className="relative h-[70vh] min-h-[500px] bg-gray-900 text-white flex items-center justify-center overflow-hidden">
         {content.heroImage && (

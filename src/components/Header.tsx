@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, FC, Fragment, useCallback, ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
+import { isDarkHeroPage as isDarkHeroPageUtil } from '../utils/headerUtils'
 import type { SiteSettings, Product, FooterContent } from '../types'
 import {
   getSiteSettings,
@@ -68,18 +69,9 @@ export function Header() {
   const [isHeaderVisible, setIsHeaderVisible] = useState(true)
 
   // Logic to determine if we are on a "Dark Hero" page (transparent header potential)
-  const isDarkHeroPage = useCallback((p: string) =>
-    p === '/' ||
-    p === '' ||
-    p.startsWith('/about') ||
-    p === '/products' ||
-    p.startsWith('/product/') ||
-    p.startsWith('/projects/') ||
-    p.startsWith('/project/') ||
-    p === '/categories' ||
-    /^\/products\/[^/]+$/.test(p), [])
+  const isDarkHeroPage = useCallback((p: string) => isDarkHeroPageUtil(p), [])
 
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 1024 : false))
   const [headerHeight, setHeaderHeight] = useState(56) // 3.5rem = 56px (mobil için varsayılan)
   const [isMobileMenuClosing, setIsMobileMenuClosing] = useState(false)
   const isDarkHero = isDarkHeroPage(location.pathname)

@@ -1,4 +1,5 @@
 import { useLocation } from 'react-router-dom'
+import { isDarkHeroPage } from '../utils/headerUtils'
 
 interface HeaderBackgroundParams {
   isMobile: boolean
@@ -32,17 +33,7 @@ export function useHeaderBackgroundColor({
 
     if (isSearchOpen && !isMobile) {
       // isLightMode mantığına göre açık veya koyu fon dön
-      const isDarkHero =
-        path === '/' ||
-        path === '' ||
-        path.startsWith('/about') ||
-        path === '/products' ||
-        path === '/categories' ||
-        path.startsWith('/projects/') ||
-        path.startsWith('/project/') ||
-        /^\/projects\/[^/]+$/.test(path) ||
-        /^\/project\/[^/]+$/.test(path) ||
-        /^\/products\/[^/]+$/.test(path)
+      const isDarkHero = isDarkHeroPage(path)
 
       const isLightMode = !isDarkHero || (heroBrightness !== null && heroBrightness >= 0.5) || headerOpacity > 0.5
       return isLightMode ? 'rgba(255, 255, 255, 0.95)' : 'rgba(0, 0, 0, 0.85)'
@@ -50,37 +41,16 @@ export function useHeaderBackgroundColor({
 
     if (isProductsOpen && !isMobile) {
       // isLightMode mantığına göre açık veya koyu fon dön
-      const isDarkHero =
-        path === '/' ||
-        path === '' ||
-        path.startsWith('/about') ||
-        path === '/products' ||
-        path === '/categories' ||
-        path.startsWith('/projects/') ||
-        path.startsWith('/project/') ||
-        /^\/projects\/[^/]+$/.test(path) ||
-        /^\/project\/[^/]+$/.test(path) ||
-        /^\/products\/[^/]+$/.test(path)
+      const isDarkHero = isDarkHeroPage(path)
 
       const isLightMode = !isDarkHero || (heroBrightness !== null && heroBrightness >= 0.5) || headerOpacity > 0.5
       return isLightMode ? 'rgba(255, 255, 255, 0.95)' : 'rgba(0, 0, 0, 0.85)'
     }
 
     // Üstte koyu hero görseli bulunan sayfalar: header tam şeffaf olmalı.
-    // Ana sayfa, hakkımızda, ürünler ana sayfası, alt kategori sayfaları ve kategoriler sayfası.
-    const isDarkHeroPage =
-      path === '/' ||
-      path === '' ||
-      path.startsWith('/about') ||
-      path === '/products' ||
-      path === '/categories' ||
-      path.startsWith('/projects/') ||
-      path.startsWith('/project/') || // Singular safety
-      /^\/projects\/[^/]+$/.test(path) ||
-      /^\/project\/[^/]+$/.test(path) ||
-      /^\/products\/[^/]+$/.test(path)
+    const isDarkHeroMatched = isDarkHeroPage(path)
 
-    if (!isDarkHeroPage) {
+    if (!isDarkHeroMatched) {
       // Beyaz sayfalarda: bg-white/60 + backdrop-blur-md
       return `rgba(255, 255, 255, ${Math.max(headerOpacity, 0.6)})`
     }
@@ -88,6 +58,9 @@ export function useHeaderBackgroundColor({
     // Koyu hero görseli olan sayfalar (Ana Sayfa, Hakkımızda) için mevcut şeffaflık kuralları:
     if (isMobile) {
       if (heroBrightness !== null) {
+        // En üstte (veya çok yakınında) her zaman şeffaf kalsın
+        if (headerOpacity <= 0.01) return 'transparent'
+
         if (heroBrightness >= 0.7) return 'rgba(255, 255, 255, 0.85)'
         if (heroBrightness >= 0.5) return 'rgba(255, 255, 255, 0.75)'
         if (heroBrightness >= 0.35) {
