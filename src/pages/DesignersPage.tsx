@@ -122,7 +122,7 @@ export function DesignersPage() {
                   {/* Sol Sütun: İsim ve Buton */}
                   <div className="flex flex-col items-start pt-6 lg:pt-10 h-full">
                     <h2
-                      className="text-xl md:text-2xl lg:text-3xl xl:text-[2.4rem] uppercase leading-[1.1] text-neutral-800"
+                      className="text-xl md:text-2xl lg:text-3xl xl:text-[2.4rem] uppercase leading-[1.1] text-[var(--text-primary)]"
                       style={{
                         fontFamily: "'Inter', sans-serif",
                         fontWeight: 500,
