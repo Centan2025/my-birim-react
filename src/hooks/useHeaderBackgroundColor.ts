@@ -51,51 +51,19 @@ export function useHeaderBackgroundColor({
     const isDarkHeroMatched = isDarkHeroPage(path)
 
     if (!isDarkHeroMatched) {
-      // Beyaz sayfalarda: bg-white/60 + backdrop-blur-md
+      // Beyaz sayfalarda: bg-white/60 + backdrop-blur-md (buz etkisi)
       return `rgba(255, 255, 255, ${Math.max(headerOpacity, 0.6)})`
     }
 
-    // Koyu hero görseli olan sayfalar (Ana Sayfa, Hakkımızda) için mevcut şeffaflık kuralları:
-    if (isMobile) {
-      if (heroBrightness !== null) {
-        // En üstte (veya çok yakınında) her zaman şeffaf kalsın
-        if (headerOpacity <= 0.01) return 'transparent'
+    // Koyu hero görseli olan sayfalar (Ana Sayfa, Hakkımızda, Proje Detay vb.) için şeffaflık kuralları:
+    // Metin rengi değişene kadar (0.7) tam şeffaf kalsın, sonra buz etkili beyaz fona geç
+    if (headerOpacity < 0.7) return 'transparent'
 
-        if (heroBrightness >= 0.7) return 'rgba(255, 255, 255, 0.85)'
-        if (heroBrightness >= 0.5) return 'rgba(255, 255, 255, 0.75)'
-        if (heroBrightness >= 0.35) {
-          return `rgba(255, 255, 255, ${Math.max(headerOpacity, 0.6)})`
-        }
-        if (headerOpacity <= 0.25) return 'transparent'
-        return `rgba(255, 255, 255, ${Math.max(headerOpacity, 0.6)})`
-      }
-
-      if (typeof window !== 'undefined' && window.scrollY <= 10 && headerOpacity <= 0) {
-        return 'transparent'
-      }
-    } else {
-      if (typeof window !== 'undefined' && window.scrollY <= 10 && headerOpacity <= 0) {
-        return 'transparent'
-      }
-
-      if (heroBrightness !== null) {
-        if (heroBrightness >= 0.7) return 'rgba(255, 255, 255, 0.85)'
-        if (heroBrightness >= 0.5) return 'rgba(255, 255, 255, 0.75)'
-        if (heroBrightness >= 0.35) {
-          return `rgba(255, 255, 255, ${Math.max(headerOpacity, 0.6)})`
-        }
-      }
-    }
-
-    // Default white glassmorphism
-    let baseOpacity = headerOpacity > 0.01 ? Math.max(headerOpacity, 0.6) : 0
     if (isMobileMenuOpen && !isOverlayMobileMenu) {
-      return `rgba(16, 24, 32, 0.7)` // Inline mobil menü için de glassmorphism korunsun
+      return `rgba(16, 24, 32, 0.7)`
     }
 
-    return headerOpacity <= 0.01 && baseOpacity === 0
-      ? 'transparent'
-      : `rgba(255, 255, 255, ${baseOpacity})`
+    return `rgba(255, 255, 255, ${Math.max(headerOpacity, 0.75)})`
   }
 
   return calculateBackgroundColor()

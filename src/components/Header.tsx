@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, FC, Fragment, useCallback, ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { isDarkHeroPage as isDarkHeroPageUtil } from '../utils/headerUtils'
+import { isDarkHeroPage } from '../utils/headerUtils'
 import type { SiteSettings, Product, FooterContent } from '../types'
 import {
   getSiteSettings,
@@ -68,49 +68,31 @@ export function Header() {
   const [headerOpacity, setHeaderOpacity] = useState(0)
   const [isHeaderVisible, setIsHeaderVisible] = useState(true)
 
-  // Logic to determine if we are on a "Dark Hero" page (transparent header potential)
-  const isDarkHeroPage = useCallback((p: string) => isDarkHeroPageUtil(p), [])
-
   const [isMobile, setIsMobile] = useState(() => (typeof window !== 'undefined' ? window.innerWidth < 1024 : false))
-  const [headerHeight, setHeaderHeight] = useState(56) // 3.5rem = 56px (mobil için varsayılan)
-  const [isMobileMenuClosing, setIsMobileMenuClosing] = useState(false)
-  const isDarkHero = isDarkHeroPage(location.pathname)
 
-  // On standard pages (white pages) WE MUST USE DARK TEXT
-  // On dark hero pages, if we scrolled or the hero is light, use DARK TEXT
-  // Logic: Use Dark Text (isLightMode = true) only if background is actually light.
-  // Mobile search and menu are always dark, so isLightMode must be false then.
-  const isLightMode = 
-    (!isDarkHero || headerTheme.mode === 'light' || headerOpacity > 0.5) && 
-    !(isMobile && (isSearchOpen || isMobileMenuOpen || isMobileMenuClosing))
-  
-  const headerForegroundColor = isLightMode ? '#000000' : '#ffffff'
-  const headerLogoFilter = isLightMode ? 'invert(1) brightness(0.95)' : 'none'
-  const iconBrightness = isLightMode ? 'brightness(0)' : 'none'
-
+  // References and state moved to top to prevent "Cannot find name" and TDZ errors
   const lastScrollYRef = useRef(0)
   const headerVisibilityLastChanged = useRef(0)
   const mobileMenuJustClosedUntilRef = useRef(0)
-  const lastScrollForHeader = useRef(0) // Header visibility için ayrı scroll takibi
+  const lastScrollForHeader = useRef(0)
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const opacitySetByHandleScrollRef = useRef(false) // handleScroll tarafından opacity ayarlandı mı kontrolü için
-  // Menü state'lerini ref olarak da tut (scroll handler için)
+  const opacitySetByHandleScrollRef = useRef(false)
+  
   const menuStateRef = useRef({
     isLangOpen: false,
     isProductsOpen: false,
     isSearchOpen: false,
     isMobileMenuOpen: false,
   })
+
   const [settings, setSettings] = useState<SiteSettings | null>(null)
   const currentRouteRef = useRef<string>(location.pathname)
   const [isMobileLocaleTransition, setIsMobileLocaleTransition] = useState(false)
-  // Desktop arama açıldığında header şeffaf ise, eski opacity'yi hatırlamak için
   const previousHeaderOpacityRef = useRef<number | null>(null)
-  // 2. seçenek (overlay) SADECE: (1) mobilde ve (2) CMS'te açıkça "overlay" seçiliyse aktif olsun.
-  const isOverlayMobileMenu = Boolean(
-    isMobile && settings && settings.mobileHeaderAnimation === 'overlay'
-  )
+
+  const [headerHeight, setHeaderHeight] = useState(56) // 3.5rem = 56px (mobil için varsayılan)
+  const [isMobileMenuClosing, setIsMobileMenuClosing] = useState(false)
+  const isDarkHero = isDarkHeroPage(location.pathname)
 
   // Search logic hook
   const { searchQuery, setSearchQuery, searchResults, isSearching, allData, internalCloseSearch } =
@@ -133,6 +115,23 @@ export function Header() {
     location.pathname,
     headerTheme.brightness
   )
+
+  // 2. seçenek (overlay) SADECE: (1) mobilde ve (2) CMS'te açıkça "overlay" seçiliyse aktif olsun.
+  const isOverlayMobileMenu = Boolean(
+    isMobile && settings && settings.mobileHeaderAnimation === 'overlay'
+  )
+
+  // Content-driven adaptation logic:
+  // 1. If we have a hero image brightness value (heroBrightness), use it with a bias.
+  // 2. If the page is NOT a dark hero page (like static white pages), use LIGHT mode (dark text).
+  // 3. If the user scrolled down significantly (headerOpacity >= 0.75), use LIGHT mode (dark text).
+  const isLightMode = 
+    (!isDarkHero ? true : (heroBrightness !== null && heroBrightness >= 0.7 && headerOpacity > 0.3) || headerOpacity >= 0.75) && 
+    !(isMobile && (isSearchOpen || isMobileMenuOpen || isMobileMenuClosing))
+  
+  const headerForegroundColor = isLightMode ? '#000000' : '#ffffff'
+  const headerLogoFilter = isLightMode ? 'invert(1) brightness(0.95)' : 'none'
+  const iconBrightness = isLightMode ? 'brightness(0)' : 'none'
 
   // Footer content for social links and subscribe
   const [footerContent, setFooterContent] = useState<FooterContent | null>(null)

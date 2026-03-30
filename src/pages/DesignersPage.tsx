@@ -74,7 +74,7 @@ export function DesignersPage() {
       <main className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto flex flex-col lg:flex-row flex-1 lg:overflow-hidden mt-4 lg:mt-8">
         {/* Sol Taraf: Portre ve Bilgi (Sabit kalır) */}
         <div className="hidden lg:flex w-full lg:w-1/2 min-h-[45svh] lg:h-full shrink-0 relative lg:overflow-hidden bg-[var(--bg-designer-hero)] border border-[var(--border-primary)] mt-0 pt-0 px-10 lg:px-16 xl:px-20 2xl:px-28 group flex-col transition-colors duration-500">
-          <div className="flex-none lg:flex-1 relative mt-10 lg:mt-28 flex items-start justify-center overflow-visible">
+          <div className="flex-none lg:flex-1 relative mt-10 lg:mt-28 flex items-start justify-start overflow-visible">
             <AnimatePresence mode="wait">
               {activeDesigner && (
                 <motion.div
@@ -83,31 +83,32 @@ export function DesignersPage() {
                   animate={{opacity: 1, x: 0}}
                   exit={{opacity: 0, x: 30}}
                   transition={{duration: 1, ease: [0.43, 0.13, 0.23, 0.96]}}
-                  className="relative w-full h-[45vh] lg:h-[70%] xl:h-[75%] 2xl:h-[75%] max-h-[700px] z-10"
+                  className="relative w-full h-[40vh] lg:h-[62%] xl:h-[65%] 2xl:h-[65%] max-h-[650px] z-10 flex items-center justify-start"
                 >
-                  <OptimizedImage
-                    alt={t(activeDesigner.name)}
-                    className="w-full h-full object-cover portrait-frame"
-                    src={getImageUrl(activeDesigner)}
-                    srcMobile={
-                      typeof activeDesigner.image === 'object'
-                        ? activeDesigner.image.urlMobile
-                        : undefined
-                    }
-                    srcDesktop={
-                      typeof activeDesigner.image === 'object'
-                        ? activeDesigner.image.urlDesktop
-                        : undefined
-                    }
-                  />
-
+                  <div className="w-full h-full max-w-[700px] aspect-[3/2]">
+                    <OptimizedImage
+                      alt={t(activeDesigner.name)}
+                      className="w-full h-full object-cover portrait-frame"
+                      src={getImageUrl(activeDesigner)}
+                      srcMobile={
+                        typeof activeDesigner.image === 'object'
+                          ? activeDesigner.image.urlMobile
+                          : undefined
+                      }
+                      srcDesktop={
+                        typeof activeDesigner.image === 'object'
+                          ? activeDesigner.image.urlDesktop
+                          : undefined
+                      }
+                    />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
           {/* Alt Bilgi ve Karar Butonu - Alta Sabitlendi */}
-          <div className="absolute bottom-10 lg:bottom-12 xl:bottom-16 left-10 lg:left-16 xl:left-20 2xl:left-28 right-10 lg:right-16 xl:right-20 2xl:right-28 z-40 bg-transparent h-[140px] lg:h-[160px] flex flex-col justify-start">
+          <div className="absolute bottom-10 lg:bottom-12 xl:bottom-16 left-10 lg:left-16 xl:left-20 2xl:left-28 right-10 lg:right-16 xl:right-20 2xl:right-28 z-40 bg-transparent h-[180px] lg:h-[200px]">
             <AnimatePresence mode="wait">
               {activeDesigner && (
                 <motion.div
@@ -116,12 +117,12 @@ export function DesignersPage() {
                   animate={{opacity: 1, y: 0}}
                   exit={{opacity: 0, y: -15}}
                   transition={{duration: 0.7, ease: [0.22, 1, 0.36, 1]}}
-                  className="grid grid-cols-1 lg:grid-cols-[calc(45%+1.5rem)_1fr] w-full items-start gap-0"
+                  className="grid grid-cols-1 lg:grid-cols-[calc(45%+1.5rem)_1fr] w-full h-full items-start gap-0"
                 >
-                  {/* Sol Sütun: İsim ve Buton (Aşağı Kaydırıldı) */}
-                  <div className="flex flex-col items-start pt-6 lg:pt-10">
+                  {/* Sol Sütun: İsim ve Buton */}
+                  <div className="flex flex-col items-start pt-6 lg:pt-10 h-full">
                     <h2 
-                      className="text-2xl md:text-3xl lg:text-4xl xl:text-[2.8rem] uppercase leading-none text-neutral-800"
+                      className="text-xl md:text-2xl lg:text-3xl xl:text-[2.4rem] uppercase leading-[1.1] text-neutral-800"
                       style={{ 
                         fontFamily: "'Inter', sans-serif", 
                         fontWeight: 500, 
@@ -131,7 +132,7 @@ export function DesignersPage() {
                       {t(activeDesigner.name)}
                     </h2>
                     
-                    <div className="mt-10 lg:mt-14">
+                    <div className="mt-auto pb-4">
                       <button
                         onClick={() => navigate(`/designer/${activeDesigner.id}`)}
                         className="w-full lg:w-auto text-center text-[10px] xl:text-[11px] uppercase font-medium tracking-[0.3em] text-[var(--text-primary)] border border-[var(--text-primary)]/30 px-6 xl:px-10 py-4 xl:py-5 hover:bg-primary/20 hover:border-primary transition-all duration-500 ease-out cursor-pointer whitespace-nowrap"
@@ -141,7 +142,7 @@ export function DesignersPage() {
                     </div>
                   </div>
 
-                  {/* Sağ Sütun: Biyografi (Aşağı Kaydırıldı) */}
+                  {/* Sağ Sütun: Biyografi */}
                   <div className="pl-4 lg:pl-6 pt-10 lg:pt-16">
                     <div className="text-xs xl:text-sm leading-relaxed text-[var(--text-primary)]/70 font-light text-left w-full line-clamp-3 lg:line-clamp-4">
                       {(() => {

@@ -1,10 +1,10 @@
-import { Suspense, lazy } from 'react'
-import { HashRouter, Routes, Route } from 'react-router-dom'
+import { Suspense, lazy, useEffect } from 'react'
+import { HashRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
 
 import { I18nProvider } from './i18n'
 import { CartProvider } from './context/CartContext'
-import { HeaderThemeProvider } from './context/HeaderThemeContext'
+import { HeaderThemeProvider, useHeaderTheme } from './context/HeaderThemeContext'
 import { AuthProvider } from './context/AuthContext'
 import { CardTransitionProvider } from './context/CardTransitionContext'
 import {
@@ -31,6 +31,14 @@ const ComingSoonPage = lazy(() =>
 
 // Maintenance mode kontrolünü provider içinde yapmak için ayrı component
 const AppContent = () => {
+  const { pathname } = useLocation()
+  const { reset: resetHeaderTheme } = useHeaderTheme()
+
+  // Sayfa değişimlerinde header temasını sıfırla (beyaz sayfalarda header'ın beyaz kalma sorununu çözer)
+  useEffect(() => {
+    resetHeaderTheme()
+  }, [pathname, resetHeaderTheme])
+
   // Maintenance mode kontrolü - öncelikle CMS'den, yoksa environment variable'dan
   const { settings, isLoading: settingsLoading } = useGlobalSettings()
   const maintenanceModeFromCMS = settings?.maintenanceMode ?? false
@@ -71,49 +79,47 @@ const AppContent = () => {
       : null
 
   return (
-    <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <div className="flex flex-col min-h-screen">
-        <ScrollToTop />
+    <div className="flex flex-col min-h-screen">
+      <ScrollToTop />
 
-        {/* Sayfa geçişleri kapalıyken CSS animasyonlarını öldür */}
-        {!settingsLoading && !enableTransitions && (
-          <style>{`
-            .animate-fade-in-up-subtle, 
-            .animate-fade-in-down, 
-            .animate-fade-in-panel { 
-              animation: none !important; 
-              transition: none !important;
-            }
-          `}</style>
-        )}
+      {/* Sayfa geçişleri kapalıyken CSS animasyonlarını öldür */}
+      {!settingsLoading && !enableTransitions && (
+        <style>{`
+          .animate-fade-in-up-subtle, 
+          .animate-fade-in-down, 
+          .animate-fade-in-panel { 
+            animation: none !important; 
+            transition: none !important;
+          }
+        `}</style>
+      )}
 
-        {isMaintenanceMode ? (
-          <main className="flex-grow overflow-x-clip">
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route path="*" element={<ComingSoonPage />} />
-              </Routes>
-            </Suspense>
-          </main>
-        ) : (
-          <MainLayout />
-        )}
-        <BackToTopButton />
-        {import.meta.env.DEV && debugInfo && (
-          <div className="fixed bottom-2 left-2 z-50 rounded bg-black/70 text-white text-[10px] px-2 py-1 font-mono text-left">
-            <div>MAINT DEBUG</div>
-            <div>bypassParam: {String(debugInfo.bypassParam)}</div>
-            <div>
-              allowedSecrets:
-              {debugInfo.allowedBypassSecrets.map((s, i) => (
-                <span key={i}> {String(s)}</span>
-              ))}
-            </div>
-            <div>isMaintenanceMode: {String(debugInfo.isMaintenanceMode)}</div>
+      {isMaintenanceMode ? (
+        <main className="flex-grow overflow-x-clip">
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="*" element={<ComingSoonPage />} />
+            </Routes>
+          </Suspense>
+        </main>
+      ) : (
+        <MainLayout />
+      )}
+      <BackToTopButton />
+      {import.meta.env.DEV && debugInfo && (
+        <div className="fixed bottom-2 left-2 z-50 rounded bg-black/70 text-white text-[10px] px-2 py-1 font-mono text-left">
+          <div>MAINT DEBUG</div>
+          <div>bypassParam: {String(debugInfo.bypassParam)}</div>
+          <div>
+            allowedSecrets:
+            {debugInfo.allowedBypassSecrets.map((s, i) => (
+              <span key={i}> {String(s)}</span>
+            ))}
           </div>
-        )}
-      </div>
-    </HashRouter>
+          <div>isMaintenanceMode: {String(debugInfo.isMaintenanceMode)}</div>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -121,24 +127,26 @@ import { DarkModeProvider } from './context/DarkModeContext'
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <I18nProvider>
-          <CartProvider>
-            <SEOProvider>
-              <DarkModeProvider>
-                <HeaderThemeProvider>
-                  <SiteSettingsProvider>
-                    <CardTransitionProvider>
-                      <AppContent />
-                    </CardTransitionProvider>
-                  </SiteSettingsProvider>
-                </HeaderThemeProvider>
-              </DarkModeProvider>
-            </SEOProvider>
-          </CartProvider>
-        </I18nProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <I18nProvider>
+            <CartProvider>
+              <SEOProvider>
+                <DarkModeProvider>
+                  <HeaderThemeProvider>
+                    <SiteSettingsProvider>
+                      <CardTransitionProvider>
+                        <AppContent />
+                      </CardTransitionProvider>
+                    </SiteSettingsProvider>
+                  </HeaderThemeProvider>
+                </DarkModeProvider>
+              </SEOProvider>
+            </CartProvider>
+          </I18nProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </HashRouter>
   )
 }
