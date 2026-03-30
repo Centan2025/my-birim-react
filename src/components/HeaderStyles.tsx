@@ -102,18 +102,20 @@ export function HeaderStyles() {
           font-family: 'Inter', sans-serif !important;
         }
 
-        /* Overlay mobile menu - fully opaque dark background */
+        /* Overlay mobile menu - glassmorphism effect */
         #mobile-menu.mobile-menu-overlay {
-          background-color: #101820 !important;
-          background: #101820 !important;
+          background-color: rgba(16, 24, 32, 0.7) !important;
+          background: rgba(16, 24, 32, 0.7) !important;
+          backdrop-filter: blur(20px) saturate(180%) !important;
+          -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
         }
 
-        /* When overlay menu is open, force header to match */
+        /* When overlay menu is open, force header to match with glassmorphism */
         header.overlay-menu-open > div {
-          background-color: #101820 !important;
-          background: #101820 !important;
-          backdrop-filter: none !important;
-          -webkit-backdrop-filter: none !important;
+          background-color: rgba(16, 24, 32, 0.7) !important;
+          background: rgba(16, 24, 32, 0.7) !important;
+          backdrop-filter: blur(20px) saturate(180%) !important;
+          -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
         }
 
         /* Consistent font sizing for mobile menu items */
@@ -133,7 +135,7 @@ export function HeaderStyles() {
         #mobile-menu nav a .cross-fade-text-out {
           font-size: 1.5rem !important;
           font-weight: 300 !important;
-          letter-spacing: 0.14em !important;
+          letter-spacing: 0.08em !important;
           line-height: 1.25 !important;
           font-family: 'Inter', sans-serif !important;
         }

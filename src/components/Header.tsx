@@ -611,29 +611,6 @@ export function Header() {
             }`}
           style={{
             backgroundColor: headerBgColor,
-            transition:
-              isProductsOpen || (isMobileMenuOpen && !isOverlayMobileMenu)
-                ? 'background-color 0.2s ease-out, max-height 0.7s ease-in-out'
-                : 'background-color 0.2s ease-out',
-            // Overlay mobil menü AÇIKKEN blur'ü tamamen kapat ki panel ile header aynı tonda görünsün
-            backdropFilter:
-              isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)
-                ? 'none'
-                : headerOpacity <= 0 && !isProductsOpen
-                  ? 'none'
-                  : 'blur(16px)',
-            WebkitBackdropFilter:
-              isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)
-                ? 'none'
-                : headerOpacity <= 0 && !isProductsOpen
-                  ? 'none'
-                  : 'blur(16px)',
-            // Header altındaki çizgi: sadece arama ve products kapalıyken göster
-            borderBottom: headerOpacity <= 0 || isProductsOpen || isSearchOpen ? 'none' : undefined,
-            pointerEvents: 'auto',
-            // Desktop'ta header yüksekliği her zaman sabit - products dropdown overflow ile gösterilir
-            height:
-              isMobileMenuOpen && !isOverlayMobileMenu ? 'auto' : isMobile ? '3.5rem' : '5rem',
             minHeight: isMobile ? '3.5rem' : '5rem',
             maxHeight:
               isMobileMenuOpen && !isOverlayMobileMenu ? '40rem' : isMobile ? '3.5rem' : '5rem',

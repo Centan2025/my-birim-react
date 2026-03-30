@@ -136,7 +136,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
       const q = groq`*[_type == "homePage"][0]{
             ..., heroAutoPlay,
             heroMedia[]{ ..., image{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, imageR2{..., metadata{palette{dominant{background,foreground}}} }, imageMobileR2{..., metadata{palette{dominant{background,foreground}}} }, imageDesktopR2{..., metadata{palette{dominant{background,foreground}}} }, videoFileR2, videoFileMobileR2, videoFileDesktopR2 },
-            contentBlocks[]{ ..., image{..., asset->{url, _ref, _id}}, titleFont, contentFont, imageR2, videoFileR2 }
+            contentBlocks[]{ ..., image{..., asset->{url, _ref, _id}}, titleFont, contentFont, imageR2, imageMobileR2, imageDesktopR2, videoFileR2, videoFileMobileR2, videoFileDesktopR2 }
         }`
       const data = await sanity.withConfig({ useCdn: false }).fetch(q)
       if (data?.heroMedia) {
@@ -166,23 +166,36 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
       }
       if (data?.contentBlocks) {
         data.contentBlocks = data.contentBlocks.map((b: any) => {
-          let url = b.url
           let image = undefined
-          const meta = b.imageR2 ? mapR2Metadata(b.imageR2) : (b.image ? mapR2Metadata(b.image) : {})
+          let imageMobile = undefined
+          let imageDesktop = undefined
+          let url = b.url
+          let urlMobile = undefined
+          let urlDesktop = undefined
 
-          if (b.mediaType === 'image') {
-            image = b.imageR2?.url ? mapImage(b.imageR2) : (b.image ? mapImage(b.image) : undefined)
-          } else if (b.mediaType === 'video' && b.videoFileR2?.url) {
-            url = rewriteR2Url(b.videoFileR2.url)
+          if (b.mediaType === 'image' || !b.mediaType) {
+            image = mapImage(b.imageR2) || mapImage(b.image)
+            imageMobile = mapImage(b.imageMobileR2) || mapImage(b.imageMobile)
+            imageDesktop = mapImage(b.imageDesktopR2) || mapImage(b.imageDesktop)
+          } else if (b.mediaType === 'video') {
+            url = b.videoFileR2?.url ? rewriteR2Url(b.videoFileR2.url) : (b.videoFile?.asset?.url ? rewriteR2Url(b.videoFile.asset.url) : b.url)
+            urlMobile = b.videoFileMobileR2?.url ? rewriteR2Url(b.videoFileMobileR2.url) : (b.videoFileMobile?.asset?.url ? rewriteR2Url(b.videoFileMobile.asset.url) : undefined)
+            urlDesktop = b.videoFileDesktopR2?.url ? rewriteR2Url(b.videoFileDesktopR2.url) : (b.videoFileDesktop?.asset?.url ? rewriteR2Url(b.videoFileDesktop.asset.url) : undefined)
+          } else if (b.mediaType === 'youtube') {
+            url = b.url
           }
 
-          // Extract hex from Sanity color object for borderColor
+          const meta = b.imageR2 ? mapR2Metadata(b.imageR2) : (b.image ? mapR2Metadata(b.image) : {})
           const borderColor = b.borderColor?.hex
 
           return {
             ...b,
             image,
+            imageMobile,
+            imageDesktop,
             url,
+            urlMobile,
+            urlDesktop,
             crop: meta.crop,
             hotspot: meta.hotspot,
             origWidth: meta.origWidth,

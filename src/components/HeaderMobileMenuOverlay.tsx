@@ -138,7 +138,7 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
                       onLocaleChange(langCode)
                     }}
                     aria-pressed={isActive}
-                    className={`group relative px-2.5 py-1.5 text-sm tracking-[0.12em] transition-all duration-200 ${isActive
+                    className={`group relative px-2.5 py-1.5 text-sm tracking-[0.08em] transition-all duration-200 ${isActive
                       ? 'text-white'
                       : 'text-gray-400/90 hover:text-white'
                       } ${isActive ? 'scale-110' : 'scale-100'}`}
@@ -180,7 +180,7 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
             style={{
               transitionDelay: `${isMobileMenuOpen ? 0 : (mobileMenuLinks.length - 1) * 100}ms`,
               fontWeight: 300,
-              letterSpacing: '0.14em',
+              letterSpacing: '0.08em',
               fontFamily: "'Inter', sans-serif",
             }}
             className={`group flex items-center justify-between w-full text-2xl md:text-3xl leading-tight text-white transition-all duration-400 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
@@ -221,7 +221,7 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
                   style={{
                     transitionDelay: isMobileProductsMenuOpen ? `${index * 50}ms` : '0ms',
                     fontWeight: 300,
-                    letterSpacing: '0.1em',
+                    letterSpacing: '0.08em',
                     fontFamily: "'Inter', sans-serif",
                   }}
                   className={`group flex items-center justify-between text-2xl md:text-3xl leading-tight text-gray-300 hover:text-white transition-all duration-400 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
@@ -244,7 +244,7 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
                 style={{
                   transitionDelay: isMobileProductsMenuOpen ? `${categories.length * 50}ms` : '0ms',
                   fontWeight: 300,
-                  letterSpacing: '0.1em',
+                  letterSpacing: '0.05em',
                   fontFamily: "'Inter', sans-serif",
                 }}
                 className={`group flex items-center justify-between text-2xl md:text-3xl leading-tight text-gray-300 hover:text-white transition-all duration-400 border-t border-white/20 pt-3 mt-2 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'
@@ -276,7 +276,7 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
               transitionDelay: `${isMobileMenuOpen ? (index + 1) * 100 : (mobileMenuLinks.length - 1 - index) * 100
                 }ms`,
               fontWeight: 300,
-              letterSpacing: '0.14em',
+              letterSpacing: '0.05em',
               fontFamily: "'Inter', sans-serif",
             }}
             className={`group flex items-center justify-between text-3xl md:text-4xl leading-tight text-white transition-all duration-400 ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : '-translate-x-10 opacity-0'

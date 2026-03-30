@@ -10,6 +10,8 @@ client.fetch(`*[_type=='project' && defined(contentBlocks) && length(contentBloc
   contentBlocks[]{ 
     ..., 
     image{..., asset->{url, _ref, _id}}, 
-    videoFile{..., asset->{url, _ref, _id}}
+    imageR2{...},
+    videoFile{..., asset->{url, _ref, _id}},
+    videoFileR2{...}
   }
 }`).then(res => console.log(JSON.stringify(res, null, 2)));

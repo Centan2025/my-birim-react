@@ -75,7 +75,7 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
                       }`}
                     style={{
                       fontFamily: 'Inter, sans-serif',
-                      letterSpacing: '0.2em',
+                      letterSpacing: '0.08em',
                     }}
                   >
                     <span className="relative inline-block">{langCode.toLowerCase()}</span>
@@ -103,7 +103,7 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
           <div className="border-b border-white/10">
             <button
               onClick={onToggleProductsMenu}
-              className="mobile-menu-products-button flex items-center justify-between w-full min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300"
+              className="mobile-menu-products-button flex items-center justify-between w-full min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.08em] uppercase text-gray-200 hover:text-white transition-colors duration-300"
             >
               <CrossFadeText text={t('products')} triggerKey={locale} />
               <svg
@@ -131,7 +131,7 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
                   <NavLink
                     key={category.id}
                     to={`/products/${category.id}`}
-                    className="flex items-center min-h-[2.5rem] py-2 text-lg font-light leading-tight tracking-[0.15em] uppercase text-gray-300 hover:text-white transition-colors duration-300 border-b border-white/5 last:border-b-0"
+                    className="flex items-center min-h-[2.5rem] py-2 text-lg font-light leading-tight tracking-[0.08em] uppercase text-gray-300 hover:text-white transition-colors duration-300 border-b border-white/5 last:border-b-0"
                     onClick={() => {
                       setIsMobileMenuOpen(false)
                       setIsMobileProductsMenuOpen(false)
@@ -145,7 +145,7 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
                 ))}
                 <NavLink
                   to="/products"
-                  className="flex items-center min-h-[2.5rem] py-2 mt-2 text-lg font-light leading-tight tracking-[0.15em] uppercase text-gray-300 hover:text-white transition-colors duration-300 border-t border-white/10 pt-2"
+                  className="flex items-center min-h-[2.5rem] py-2 mt-2 text-lg font-light leading-tight tracking-[0.08em] uppercase text-gray-300 hover:text-white transition-colors duration-300 border-t border-white/10 pt-2"
                   onClick={() => {
                     setIsMobileMenuOpen(false)
                     setIsMobileProductsMenuOpen(false)
@@ -163,7 +163,7 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
           </div>
           <NavLink
             to="/designers"
-            className={`flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10 transition-transform ${isMobileProductsMenuOpen ? 'translate-y-0' : 'translate-y-0'
+            className={`flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.08em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10 transition-transform ${isMobileProductsMenuOpen ? 'translate-y-0' : 'translate-y-0'
               }`}
             onClick={onCloseAll}
           >
@@ -171,28 +171,28 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
           </NavLink>
           <NavLink
             to="/projects"
-            className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
+            className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.08em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
             onClick={onCloseAll}
           >
             <CrossFadeText text={t('projects') || 'Projeler'} triggerKey={locale} />
           </NavLink>
           <NavLink
             to="/news"
-            className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
+            className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.08em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
             onClick={onCloseAll}
           >
             <CrossFadeText text={t('news')} triggerKey={locale} />
           </NavLink>
           <NavLink
             to="/about"
-            className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
+            className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.08em] uppercase text-gray-200 hover:text-white transition-colors duration-300 border-b border-white/10"
             onClick={onCloseAll}
           >
             <CrossFadeText text={t('about')} triggerKey={locale} />
           </NavLink>
           <NavLink
             to="/contact"
-            className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.2em] uppercase text-gray-200 hover:text-white transition-colors duration-300"
+            className="flex items-center min-h-[3rem] py-3 text-xl font-light leading-tight tracking-[0.08em] uppercase text-gray-200 hover:text-white transition-colors duration-300"
             onClick={onCloseAll}
           >
             <CrossFadeText text={t('contact')} triggerKey={locale} />

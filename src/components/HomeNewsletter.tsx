@@ -189,7 +189,7 @@ export const HomeNewsletter: FC = () => {
           <div
             className={`flex items-center justify-center gap-3 bg-transparent text-white border border-gray-400 px-6 py-3 transition-all duration-500 font-inter hover:bg-white/5`}
           >
-            <span className="text-[11px] md:text-xs tracking-[0.2em] font-bold">
+            <span className="text-[11px] md:text-xs tracking-[0.08em] font-bold">
               {isExpanded ? t('close') : t('join_us')}
             </span>
             {isExpanded ? (
@@ -218,7 +218,7 @@ export const HomeNewsletter: FC = () => {
                     role="tab"
                     aria-selected={activeTab === 'newsletter'}
                     onClick={() => setActiveTab('newsletter')}
-                    className={`relative pb-4 px-6 text-xs md:text-sm font-bold tracking-[0.25em] transition-all duration-500 font-inter ${activeTab === 'newsletter' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                    className={`relative pb-4 px-6 text-xs md:text-sm font-bold tracking-[0.08em] transition-all duration-500 font-inter ${activeTab === 'newsletter' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                   >
                     {t('join_us')}
                     {activeTab === 'newsletter' && (
@@ -233,7 +233,7 @@ export const HomeNewsletter: FC = () => {
                     role="tab"
                     aria-selected={activeTab === 'professional'}
                     onClick={() => setActiveTab('professional')}
-                    className={`relative pb-4 px-6 text-xs md:text-sm font-bold tracking-[0.25em] transition-all duration-500 font-inter ${activeTab === 'professional' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                    className={`relative pb-4 px-6 text-xs md:text-sm font-bold tracking-[0.08em] transition-all duration-500 font-inter ${activeTab === 'professional' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                   >
                     {t('professional_access')}
                     {activeTab === 'professional' && (
@@ -280,7 +280,7 @@ export const HomeNewsletter: FC = () => {
                           disabled={status === 'loading'}
                           className="bg-[var(--text-primary)] text-[var(--bg-primary)] border border-[var(--text-primary)] px-10 py-5 hover:opacity-90 transition-all duration-500 disabled:opacity-50 flex items-center justify-center gap-3 overflow-hidden group min-w-[200px] font-inter"
                         >
-                          <span className="text-[11px] md:text-xs tracking-[0.25em] font-bold">
+                          <span className="text-[11px] md:text-xs tracking-[0.08em] font-bold">
                             {status === 'loading' ? t('waiting') : t('subscribe')}
                           </span>
                           <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-500" />
@@ -433,7 +433,7 @@ export const HomeNewsletter: FC = () => {
                             disabled={status === 'loading'}
                             className="w-full md:w-auto md:min-w-[340px] group flex items-center justify-between bg-[var(--text-primary)] text-[var(--bg-primary)] border border-[var(--text-primary)] px-10 py-5 hover:opacity-90 transition-all duration-500 disabled:opacity-50 font-inter"
                           >
-                            <span className="text-[11px] md:text-xs tracking-[0.3em] font-bold">
+                            <span className="text-[11px] md:text-xs tracking-[0.08em] font-bold">
                               {status === 'loading' ? t('waiting') : t('complete_application')}
                             </span>
                             <ArrowUpRight className="w-5 h-5 group-hover:rotate-45 transition-transform duration-500" />

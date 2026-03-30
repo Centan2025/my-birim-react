@@ -64,14 +64,9 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           hasDescription ||
           !!(block.linkText && (!block.showButtonOnMedia || block.linkUrl))
 
-        const getMediaUrl = () => {
-          if (block.mediaType === 'image' && block.image) {
-            return block.image
-          }
-          return block.url || ''
-        }
-
-        const mediaUrl = getMediaUrl()
+        const mediaUrl = block.mediaType === 'image' ? block.image || '' : block.url || ''
+        const mediaMobileUrl = block.mediaType === 'image' ? block.imageMobile : block.urlMobile
+        const mediaDesktopUrl = block.mediaType === 'image' ? block.imageDesktop : block.urlDesktop
         const isFullWidth = block.position === 'full'
         const isLeft = block.position === 'left'
         const isRight = block.position === 'right'
@@ -345,6 +340,8 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               <div className={`relative w-full h-full ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`} onClick={() => onMediaClick && !block.linkUrl && onMediaClick(mediaUrl)}>
                 <OptimizedVideo
                   src={mediaUrl}
+                  srcMobile={mediaMobileUrl}
+                  srcDesktop={mediaDesktopUrl}
                   className={`${isFullWidth ? 'w-full h-auto max-w-full' : `${mediaWidthClass} ${imageBorderClass}`} ${isMobile ? 'w-full object-cover' : 'object-cover'} block`}
                   autoPlay
                   loop
@@ -386,6 +383,8 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               <div className={`relative w-full h-full ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`} onClick={() => onMediaClick && !block.linkUrl && onMediaClick(mediaUrl)}>
                 <OptimizedImage
                   src={mediaUrl}
+                  srcMobile={mediaMobileUrl}
+                  srcDesktop={mediaDesktopUrl}
                   alt=""
                   className={`${isFullWidth ? 'w-full h-auto' : `${mediaWidthClass} ${imageBorderClass}`} ${isMobile ? 'w-full object-cover' : 'object-cover'} block`}
                   loading="lazy"

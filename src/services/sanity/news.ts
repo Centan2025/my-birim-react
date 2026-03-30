@@ -149,15 +149,20 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
     const contentBlocks = r.contentBlocks
       ? r.contentBlocks.map((b: any) => {
         let image = undefined
+        let imageMobile = undefined
+        let imageDesktop = undefined
         let url = b.url
+        let urlMobile = undefined
+        let urlDesktop = undefined
 
-        // Find ANY valid image URL in the block object
-        const discoveredImage = findDeepUrl(b)
-        
         if (b.mediaType === 'image' || !b.mediaType) {
-          image = mapImage(b.imageR2) || mapImage(b.image) || mapImage(b.imageDesktopR2) || mapImage(b.imageMobileR2) || discoveredImage
+          image = mapImage(b.imageR2) || mapImage(b.image) || findDeepUrl(b)
+          imageMobile = mapImage(b.imageMobileR2) || mapImage(b.imageMobile)
+          imageDesktop = mapImage(b.imageDesktopR2) || mapImage(b.imageDesktop)
         } else if (b.mediaType === 'video') {
-          url = rewriteR2Url(findDeepUrl(b.videoFileR2) || findDeepUrl(b.videoFile) || findDeepUrl(b.videoFileDesktopR2) || findDeepUrl(b.videoFileMobileR2) || discoveredImage || b.url)
+          url = rewriteR2Url(findDeepUrl(b.videoFileR2) || findDeepUrl(b.videoFile) || b.url)
+          urlMobile = rewriteR2Url(findDeepUrl(b.videoFileMobileR2) || findDeepUrl(b.videoFileMobile))
+          urlDesktop = rewriteR2Url(findDeepUrl(b.videoFileDesktopR2) || findDeepUrl(b.videoFileDesktop))
         } else if (b.mediaType === 'youtube') {
           url = b.url
         }
@@ -167,7 +172,11 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
         return {
           ...b,
           image: image || undefined,
+          imageMobile: imageMobile || undefined,
+          imageDesktop: imageDesktop || undefined,
           url: url || undefined,
+          urlMobile: urlMobile || undefined,
+          urlDesktop: urlDesktop || undefined,
           crop: meta.crop,
           hotspot: meta.hotspot,
           origWidth: meta.origWidth,

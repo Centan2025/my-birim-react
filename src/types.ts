@@ -307,14 +307,17 @@ export interface ContentBlock {
   verticalAlignment?: 'top' | 'center' | 'bottom'
   /** Type of media: image, video, or youtube */
   mediaType: 'image' | 'video' | 'youtube'
-  /** Image asset (for image type) */
   image?: string
+  imageMobile?: string
+  imageDesktop?: string
   crop?: R2ImageMetadata['crop']
   hotspot?: R2ImageMetadata['hotspot']
   origWidth?: number
   origHeight?: number
   /** URL for video or YouTube (for video/youtube types) */
   url?: string
+  urlMobile?: string
+  urlDesktop?: string
   /** Title text */
   title?: LocalizedString
   /** Title font style */
