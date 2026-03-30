@@ -102,20 +102,30 @@ export function HeaderStyles() {
           font-family: 'Inter', sans-serif !important;
         }
 
-        /* Overlay mobile menu - glassmorphism effect */
+        /* Overlay & Inline mobile menu & Header - REFINED GLASSMORPHISM SYNC */
+        header.overlay-menu-open > div,
+        header:has(#mobile-menu) > div,
         #mobile-menu.mobile-menu-overlay {
-          background-color: rgba(16, 24, 32, 0.7) !important;
-          background: rgba(16, 24, 32, 0.7) !important;
-          backdrop-filter: blur(20px) saturate(180%) !important;
-          -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+          background-color: rgba(16, 24, 32, 0.72) !important;
+          background: rgba(16, 24, 32, 0.72) !important;
+          backdrop-filter: blur(28px) saturate(180%) !important;
+          -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+          will-change: auto !important; /* Fix for blur glitches in some browsers */
         }
 
-        /* When overlay menu is open, force header to match with glassmorphism */
+        /* HEADER - MAKE FULLY TRANSPARENT WHEN OVERLAY MENU OPEN */
+        header.overlay-menu-open,
         header.overlay-menu-open > div {
-          background-color: rgba(16, 24, 32, 0.7) !important;
-          background: rgba(16, 24, 32, 0.7) !important;
-          backdrop-filter: blur(20px) saturate(180%) !important;
-          -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+          background-color: transparent !important;
+          background: transparent !important;
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+          border-bottom: none !important;
+        }
+
+        /* INLINE MENU SPECIFIC */
+        header:has(#mobile-menu) > div {
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
         }
 
         /* Consistent font sizing for mobile menu items */

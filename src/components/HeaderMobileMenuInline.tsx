@@ -51,7 +51,7 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
         }
       }}
       id="mobile-menu"
-      className="lg:hidden border-t border-white/10 bg-black/60 backdrop-blur-lg"
+      className="lg:hidden border-t border-white/10 bg-transparent"
       role="menu"
       aria-label={t('main_menu') || 'Ana menü'}
     >

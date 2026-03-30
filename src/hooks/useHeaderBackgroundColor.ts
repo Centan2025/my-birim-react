@@ -28,7 +28,7 @@ export function useHeaderBackgroundColor({
     const path = location.pathname
 
     if ((isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)) || (isSearchOpen && isMobile)) {
-      return 'rgba(16, 24, 32, 0.65)'
+      return 'rgba(16, 24, 32, 0.7)'
     }
 
     if (isSearchOpen && !isMobile) {
@@ -90,7 +90,7 @@ export function useHeaderBackgroundColor({
     // Default white glassmorphism
     let baseOpacity = headerOpacity > 0.01 ? Math.max(headerOpacity, 0.6) : 0
     if (isMobileMenuOpen && !isOverlayMobileMenu) {
-      return `rgba(16, 24, 32, 0.65)` // Inline mobil menü için de glassmorphism korunsun
+      return `rgba(16, 24, 32, 0.7)` // Inline mobil menü için de glassmorphism korunsun
     }
 
     return headerOpacity <= 0.01 && baseOpacity === 0
