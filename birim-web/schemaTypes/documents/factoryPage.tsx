@@ -28,11 +28,15 @@ export default defineType({
     }),
   ],
   preview: {
-    select: {r2Url: 'heroImageR2.url'},
-    prepare({r2Url}) {
-      let finalUrl = getPreviewUrl(r2Url)
+    select: {
+      title: 'heroTitle.tr',
+      r2Url: 'heroImageR2.url',
+    },
+    prepare(selection: any) {
+      const {title, r2Url} = selection
+      const finalUrl = getPreviewUrl(r2Url)
       return {
-        title: 'Fabrika',
+        title: title || 'Fabrika',
         media: finalUrl ? (
           <img
             src={finalUrl}

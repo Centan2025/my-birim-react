@@ -13,6 +13,7 @@ export default {
   about: 'About Us',
   contact: 'Contact',
   projects: 'PROJECTS',
+  factory: 'FACTORY',
   search_placeholder: 'Search...',
   search_no_results: 'No results found for "{0}".',
   searching: 'Searching...',
