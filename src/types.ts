@@ -426,16 +426,7 @@ export interface AboutPageContent {
  * Defines the content structure for the Factory page.
  */
 export interface FactoryPageContent {
-  heroImage:
-    | string
-    | {
-        url: string
-        palette?: SanityImagePalette
-        crop?: R2ImageMetadata['crop']
-        hotspot?: R2ImageMetadata['hotspot']
-      }
-  heroTitle: LocalizedString
-  heroSubtitle: LocalizedString
+  title: LocalizedString
   content?: LocalizedString
   gallery?: NewsMedia[]
 }

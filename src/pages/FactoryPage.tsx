@@ -35,7 +35,7 @@ const MediaGallery = ({ media, alt }: { media?: NewsMedia[]; alt: string }) => {
 
   return (
     <>
-      <div className="mt-20 relative left-1/2 right-1/2 -mx-[50vw] w-screen overflow-hidden">
+      <div className="mt-8 relative w-full overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
           {media.map((m, idx) => (
             <ScrollReveal key={idx} delay={idx * 100} distance={10} threshold={0.1}>
@@ -103,7 +103,7 @@ export function FactoryPage() {
 
   useSEO({
     title: `BIRIM - ${t('factory') || 'Fabrika'}`,
-    description: (content && t(content.heroSubtitle)) || 'Fabrika',
+    description: (content && t(content.title)) || 'Fabrika',
     image: firstImageUrl,
     type: 'website',
     siteName: 'BIRIM',
@@ -124,7 +124,6 @@ export function FactoryPage() {
     fetchContent()
   }, [])
 
-  // Fabrika sayfası için koyu/açık tema sıfırlaması
   useEffect(() => {
     reset()
     return () => reset()
@@ -133,48 +132,39 @@ export function FactoryPage() {
 
   if (loading || !content) {
     return (
-      <div className="pt-24">
+      <div className="pt-24 min-h-screen bg-[var(--bg-primary)]">
         <PageLoading message={t('loading')} />
       </div>
     )
   }
 
+  const containerClass = "w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0"
+
   return (
-    <div className="bg-[var(--bg-tertiary)] min-h-screen animate-fade-in-up-subtle">
-      {/* Header Space & Breadcrumbs */}
-       <div className="pt-32 pb-4">
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 text-[11px] sm:text-[12px]">
+    <div className="bg-[var(--bg-primary)] min-h-screen animate-fade-in-up-subtle pt-20 md:pt-24 lg:pt-24">
+      {/* Breadcrumb Band */}
+      <div className="w-full relative z-20">
+        <div className={containerClass + " py-4"}>
           <Breadcrumbs
             items={[{ label: t('homepage'), to: '/' }, { label: t('factory') || 'Fabrika' }]}
           />
         </div>
       </div>
 
-      {/* Main Content Sections */}
-      <div className="overflow-hidden pb-32 font-light">
-        {/* FACTORY HEADER & CONTENT */}
-        <div className="pt-8 pb-32">
-          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
-            
-            {/* Title Section */}
-            <div className="max-w-4xl mb-16">
-               <ScrollReveal delay={100} duration={1.2} distance={15}>
-                <h1 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tighter uppercase leading-none text-[var(--text-primary)]">
-                  {t(content.heroTitle)}
-                </h1>
-              </ScrollReveal>
-              {content.heroSubtitle && (
-                <ScrollReveal delay={300} duration={1.2} distance={20}>
-                  <p className="mt-8 text-lg md:text-2xl text-[var(--text-primary)] opacity-80 max-w-2xl font-light leading-relaxed">
-                    {t(content.heroSubtitle)}
-                  </p>
-                </ScrollReveal>
-              )}
-            </div>
+      {/* Sayfa Başlığı (Haberler sayfası gibi ortalı) */}
+      <div className={containerClass + " pt-4 md:pt-12 pb-12"}>
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-center uppercase">
+          {t(content.title) || t('factory') || 'FABRİKA'}
+        </h1>
+      </div>
 
+      {/* Main Content Sections */}
+      <div className={containerClass + " pb-16 md:pb-24 font-light overflow-hidden"}>
+        {/* FACTORY CONTENT */}
+        <div className="pt-8 flex flex-col items-center">
             {/* Rich Text Content */}
             {content.content && (
-              <div className="max-w-4xl text-left mb-24">
+              <div className="max-w-4xl text-center mb-16">
                 <ScrollReveal threshold={0.2} distance={20}>
                   <div className="text-[var(--text-primary)] leading-relaxed font-roboto-thin text-lg md:text-xl">
                     {(() => {
@@ -199,9 +189,10 @@ export function FactoryPage() {
               </div>
             )}
 
-            {/* Alt Medyalar (Full Width) */}
-            <MediaGallery media={content.gallery} alt={t('factory') as string || 'Factory'} />
-          </div>
+            {/* Galeri (Genişliği diğer sayfalarla aynı olacak şekilde ayarlandı) */}
+            <div className="w-full border-t border-[var(--border-primary)] pt-12">
+               <MediaGallery media={content.gallery} alt={t('factory') as string || 'Factory'} />
+            </div>
         </div>
       </div>
     </div>

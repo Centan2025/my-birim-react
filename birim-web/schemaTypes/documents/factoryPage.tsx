@@ -8,12 +8,11 @@ export default defineType({
   type: 'document',
   fields: [
     defineField({
-      name: 'heroImageR2',
-      title: 'Hero Görseli (R2)',
-      type: 'r2Asset',
+      name: 'title',
+      title: 'Sayfa Başlığı',
+      type: 'localizedString',
+      initialValue: {tr: 'Fabrika', en: 'Factory'}
     }),
-    defineField({name: 'heroTitle', title: 'Hero Başlığı', type: 'localizedString'}),
-    defineField({name: 'heroSubtitle', title: 'Hero Alt Başlığı', type: 'localizedString'}),
     defineField({
       name: 'content',
       title: 'Açıklama Metni',
@@ -21,29 +20,20 @@ export default defineType({
     }),
     defineField({
       name: 'gallery',
-      title: 'Fabrika Görselleri',
+      title: 'Görsel Galerisi',
       type: 'array',
       of: [{type: 'productPanelMediaItem'}],
-      description: 'Fabrikaya ait geniş görseller veya videolar.',
+      description: 'Fabrikaya ait görseller veya videolar.',
     }),
   ],
   preview: {
     select: {
-      title: 'heroTitle.tr',
-      r2Url: 'heroImageR2.url',
+      title: 'title.tr',
     },
     prepare(selection: any) {
-      const {title, r2Url} = selection
-      const finalUrl = getPreviewUrl(r2Url)
+      const {title} = selection
       return {
         title: title || 'Fabrika',
-        media: finalUrl ? (
-          <img
-            src={finalUrl}
-            alt="Fabrika"
-            style={{width: '100%', height: '100%', objectFit: 'cover'}}
-          />
-        ) : undefined,
       }
     },
   },

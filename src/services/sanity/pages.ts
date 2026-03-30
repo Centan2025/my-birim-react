@@ -102,18 +102,11 @@ export const getFactoryPageContent = async (): Promise<FactoryPageContent> => {
   if (useSanity && sanity) {
     const q = groq`*[_type == "factoryPage"][0]{
             ...,
-            heroImageR2,
             gallery[]{ ..., image{ ..., asset->{url, _ref, _id, metadata{dimensions}} }, imageR2, imageMobile{ ..., asset->{url, _ref, _id} }, imageMobileR2, imageDesktop{ ..., asset->{url, _ref, _id} }, imageDesktopR2, videoFile{ ..., asset->{url, _ref, _id} }, videoFileR2 }
         }`
     const data = await sanity.withConfig({ useCdn: false }).fetch(q)
     if (data) {
-      if (data.heroImageR2?.url) {
-        data.heroImage = {
-          url: mapImage(data.heroImageR2),
-          palette: extractPalette(data.heroImageR2),
-          ...mapR2Metadata(data.heroImageR2),
-        }
-      }
+
       if (data.gallery) {
         data.gallery = mapProductMedia({ media: data.gallery })
       }
