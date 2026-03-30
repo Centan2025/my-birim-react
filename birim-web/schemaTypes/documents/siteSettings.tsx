@@ -112,6 +112,14 @@ export default defineType({
       description:
         'Site genelindeki sayfa geçiş animasyonlarını açıp kapatır. (Ürün ve Tasarımcı detay genişleme animasyonları hariç)',
     }),
+    defineField({
+      name: 'isFactoryVisible',
+      title: 'Fabrika Menüsünü Göster',
+      type: 'boolean',
+      initialValue: false,
+      description:
+        'Aktif edildiğinde menüde "Fabrika" seçeneği belirir ve ilgili sayfa erişilebilir olur.',
+    }),
   ],
   preview: {
     select: {r2Url: 'logoR2.url'},

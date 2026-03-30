@@ -463,6 +463,7 @@ export function Header() {
     { to: '/projects', label: (t('projects') || 'Projeler').toLocaleUpperCase('en') },
     { to: '/news', label: (t('news') || '').toLocaleUpperCase('en') },
     { to: '/about', label: (t('about') || '').toLocaleUpperCase('en') },
+    ...(settings?.isFactoryVisible ? [{ to: '/factory', label: (t('factory') || 'Fabrika').toLocaleUpperCase('en') }] : []),
     { to: '/contact', label: (t('contact') || '').toLocaleUpperCase('en') },
   ]
 
@@ -861,6 +862,17 @@ export function Header() {
                     {t('about')}
                   </NavItem>
                 </div>
+                {settings?.isFactoryVisible && (
+                  <div className="hidden lg:flex items-end">
+                    <NavItem
+                      to="/factory"
+                      onMouseEnter={handleCloseProducts}
+                      onClick={handleCloseProducts}
+                    >
+                      {t('factory') || 'Fabrika'}
+                    </NavItem>
+                  </div>
+                )}
                 <div className="hidden lg:flex items-end">
                   <NavItem
                     to="/contact"

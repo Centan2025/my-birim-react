@@ -74,6 +74,7 @@ export {
   getAboutPageContent,
   getContactPageContent,
   getHomePageContent,
+  getFactoryPageContent,
   updateAboutPageContent,
   updateContactPageContent,
   updateHomePageContent,

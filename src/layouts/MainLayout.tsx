@@ -35,6 +35,7 @@ const ProjectDetailPage = lazy(() =>
   import('../pages/ProjectDetailPage').then(m => ({ default: m.ProjectDetailPage }))
 )
 const AboutPage = lazy(() => import('../pages/AboutPage').then(m => ({ default: m.AboutPage })))
+const FactoryPage = lazy(() => import('../pages/FactoryPage').then(m => ({ default: m.FactoryPage })))
 const ContactPage = lazy(() => import('../pages/ContactPage').then(m => ({ default: m.ContactPage })))
 const LoginPage = lazy(() => import('../pages/LoginPage').then(m => ({ default: m.LoginPage })))
 const ProfilePage = lazy(() => import('../pages/ProfilePage').then(m => ({ default: m.ProfilePage })))
@@ -182,6 +183,14 @@ const PageTransitionWrapper = React.forwardRef<HTMLDivElement, { location: any }
                 element={
                   <PageBoundary pageName="Hakkımızda">
                     <AboutPage />
+                  </PageBoundary>
+                }
+              />
+              <Route
+                path="/factory"
+                element={
+                  <PageBoundary pageName="Fabrika">
+                    <FactoryPage />
                   </PageBoundary>
                 }
               />

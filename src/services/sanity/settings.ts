@@ -127,6 +127,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
         maintenanceMode: Boolean(s?.maintenanceMode ?? false),
         mobileHeaderAnimation: s?.mobileHeaderAnimation === 'overlay' ? 'overlay' : 'default',
         enablePageTransitions: s?.enablePageTransitions !== false,
+        isFactoryVisible: Boolean(s?.isFactoryVisible ?? false),
       }
     } catch {
       // Ignore
@@ -147,6 +148,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
     maintenanceMode: Boolean(s?.maintenanceMode ?? false),
     mobileHeaderAnimation: s?.mobileHeaderAnimation === 'overlay' ? 'overlay' : 'default',
     enablePageTransitions: s?.enablePageTransitions !== false,
+    isFactoryVisible: Boolean(s?.isFactoryVisible ?? false),
   }
 }
 

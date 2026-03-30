@@ -14,6 +14,7 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
   const siteSettingsDoc = await client.fetch('*[_type == "siteSettings"][0]')
   const homePage = await client.fetch('*[_type == "homePage"][0]')
   const aboutPage = await client.fetch('*[_type == "aboutPage"][0]')
+  const factoryPage = await client.fetch('*[_type == "factoryPage"][0]')
   const contactPage = await client.fetch('*[_type == "contactPage"][0]')
   // Ensure we always use published ids (strip drafts.)
   const pubId = (id?: string): string => {
@@ -103,6 +104,15 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
                 .schemaType('aboutPage')
                 .id(pubId(aboutPage._id) || 'aboutPage') // mevcut belgeyi doğrudan aç
             : S.document().schemaType('aboutPage'), // belge yoksa yeni oluştur
+        ),
+      S.listItem()
+        .title('Fabrika')
+        .child(
+          factoryPage?._id
+            ? S.document()
+                .schemaType('factoryPage')
+                .id(pubId(factoryPage._id) || 'factoryPage')
+            : S.document().schemaType('factoryPage'),
         ),
       S.listItem()
         .title('İletişim')

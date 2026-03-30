@@ -63,6 +63,8 @@ export interface SiteSettings {
   mobileHeaderAnimation?: 'default' | 'overlay'
   /** Toggles global page transition animations. */
   enablePageTransitions?: boolean
+  /** Whether the "Factory" (Fabrika) menu and page are visible. */
+  isFactoryVisible?: boolean
 }
 
 // --- Core Data Models ---
@@ -418,6 +420,24 @@ export interface AboutPageContent {
       | {url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot']}
     media?: NewsMedia[]
   }
+}
+
+/**
+ * Defines the content structure for the Factory page.
+ */
+export interface FactoryPageContent {
+  heroImage:
+    | string
+    | {
+        url: string
+        palette?: SanityImagePalette
+        crop?: R2ImageMetadata['crop']
+        hotspot?: R2ImageMetadata['hotspot']
+      }
+  heroTitle: LocalizedString
+  heroSubtitle: LocalizedString
+  content?: LocalizedString
+  gallery?: NewsMedia[]
 }
 
 /**

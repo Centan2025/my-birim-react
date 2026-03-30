@@ -1,5 +1,5 @@
 import groq from 'groq'
-import type { AboutPageContent, ContactPageContent, HomePageContent } from '../../types'
+import type { AboutPageContent, ContactPageContent, HomePageContent, FactoryPageContent } from '../../types'
 import { sanity, useSanity, mapImage, mapMediaUrl, rewriteR2Url, extractPalette, mapR2Metadata } from './client'
 import { getItem } from './settings'
 
@@ -88,6 +88,7 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
         data.qualitySection.media = mapProductMedia(data.qualitySection)
       }
       if (!Array.isArray(data.values)) data.values = []
+      if (!Array.isArray(data.values)) data.values = []
       return data
     }
   }
@@ -95,6 +96,32 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
   const data = getItem<AboutPageContent>(KEYS.ABOUT_PAGE)
   if (data && !Array.isArray(data.values)) data.values = []
   return data || ({} as AboutPageContent)
+}
+
+export const getFactoryPageContent = async (): Promise<FactoryPageContent> => {
+  if (useSanity && sanity) {
+    const q = groq`*[_type == "factoryPage"][0]{
+            ...,
+            heroImageR2,
+            gallery[]{ ..., image{ ..., asset->{url, _ref, _id, metadata{dimensions}} }, imageR2, imageMobile{ ..., asset->{url, _ref, _id} }, imageMobileR2, imageDesktop{ ..., asset->{url, _ref, _id} }, imageDesktopR2, videoFile{ ..., asset->{url, _ref, _id} }, videoFileR2 }
+        }`
+    const data = await sanity.withConfig({ useCdn: false }).fetch(q)
+    if (data) {
+      if (data.heroImageR2?.url) {
+        data.heroImage = {
+          url: mapImage(data.heroImageR2),
+          palette: extractPalette(data.heroImageR2),
+          ...mapR2Metadata(data.heroImageR2),
+        }
+      }
+      if (data.gallery) {
+        data.gallery = mapProductMedia({ media: data.gallery })
+      }
+      return data
+    }
+  }
+  await delay(SIMULATED_DELAY)
+  return ({} as FactoryPageContent)
 }
 
 export const getContactPageContent = async (): Promise<ContactPageContent> => {
