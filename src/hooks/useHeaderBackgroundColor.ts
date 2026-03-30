@@ -56,8 +56,8 @@ export function useHeaderBackgroundColor({
     }
 
     // Koyu hero görseli olan sayfalar (Ana Sayfa, Hakkımızda, Proje Detay vb.) için şeffaflık kuralları:
-    // Metin rengi değişene kadar (0.7) tam şeffaf kalsın, sonra buz etkili beyaz fona geç
-    if (headerOpacity < 0.7) return 'transparent'
+    // Metin rengi değişene kadar (0.75) tam şeffaf kalsın, sonra buz etkili beyaz fona geç
+    if (headerOpacity < 0.75) return 'transparent'
 
     if (isMobileMenuOpen && !isOverlayMobileMenu) {
       return `rgba(16, 24, 32, 0.7)`

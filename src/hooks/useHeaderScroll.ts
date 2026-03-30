@@ -130,7 +130,7 @@ export function useHeaderScroll({
             opacitySetByHandleScrollRef.current = true
           } else {
             opacitySetByHandleScrollRef.current = false
-            const maxScroll = typeof window !== 'undefined' ? window.innerHeight * 0.8 : 600
+            const maxScroll = typeof window !== 'undefined' ? window.innerHeight : 800
             const opacity = Math.min(0.75, (currentScrollY / maxScroll) * 0.75)
             setHeaderOpacity(opacity)
           }
@@ -158,7 +158,7 @@ export function useHeaderScroll({
           opacitySetByHandleScrollRef.current = true
         } else {
           // Koyu hero bulunan sayfalar dahil: scroll'a göre opacity artır
-          const maxScroll = typeof window !== 'undefined' ? window.innerHeight * 0.9 : 800
+          const maxScroll = typeof window !== 'undefined' ? window.innerHeight : 800
           let opacity = 0
 
           if (currentScrollY > 0) {
