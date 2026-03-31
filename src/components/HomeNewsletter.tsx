@@ -206,7 +206,7 @@ export const HomeNewsletter: FC = () => {
           >
             <div 
               className="pt-8 pb-16 w-full flex flex-col items-center text-[var(--text-primary)] relative transition-all duration-500"
-              style={{ background: 'linear-gradient(180deg, #ffffff 0%, #cccccc 70%, #afafaf 100%)' }}
+              style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f0f2f5 50%, #dbe1e6 100%)' }}
             >
               <div className="flex gap-4 md:gap-12 mb-12 relative z-20">
                 <div role="tablist" className="relative flex">
@@ -273,7 +273,7 @@ export const HomeNewsletter: FC = () => {
                         <button
                           type="submit"
                           disabled={status === 'loading'}
-                          className="bg-[var(--text-primary)] text-[var(--bg-primary)] border border-[var(--text-primary)] px-10 py-5 hover:opacity-90 transition-all duration-500 disabled:opacity-50 flex items-center justify-center gap-3 overflow-hidden group min-w-[200px] font-inter"
+                          className="bg-[#3c424d] text-white border border-[#3c424d] px-10 py-5 hover:bg-[#4a515c] transition-all duration-500 disabled:opacity-50 flex items-center justify-center gap-3 overflow-hidden group min-w-[200px] font-inter"
                         >
                           <span className="text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-medium">
                             {status === 'loading' ? t('waiting') : t('subscribe')}

@@ -261,23 +261,15 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   {block.linkUrl ? (
                     <Link
                       to={block.linkUrl}
-                      className={`group inline-flex items-center gap-x-3 text-[var(--text-primary)] hover:opacity-70 border border-[var(--text-primary)] px-8 py-3 text-sm md:text-lg lg:text-xl transition-all duration-300`}
+                      className={`group inline-flex items-center text-[var(--text-primary)] hover:opacity-70 border border-[var(--text-primary)] px-8 py-4 text-[10px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter transition-all duration-300`}
                     >
-                      <span className="inline-flex justify-center">
-                        <span className="font-bold font-helvetica tracking-[0.05em]">
-                          {t(block.linkText)}
-                        </span>
-                      </span>
+                        {t(block.linkText)}
                     </Link>
                   ) : (
                     <div
-                      className={`inline-flex items-center gap-x-3 text-[var(--text-primary)] font-bold py-4 text-sm md:text-lg lg:text-xl`}
+                      className={`inline-flex items-center text-[var(--text-primary)] px-8 py-4 text-[10px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
                     >
-                      <span className="inline-flex justify-center">
-                        <span className="font-bold font-helvetica tracking-[0.05em]">
-                          {t(block.linkText)}
-                        </span>
-                      </span>
+                        {t(block.linkText)}
                     </div>
                   )}
                 </div>
@@ -314,23 +306,15 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     {block.linkUrl ? (
                       <Link
                         to={block.linkUrl}
-                        className={`group pointer-events-auto inline-flex items-center gap-x-3 ${buttonTextColorClass} hover:opacity-50 font-bold py-3 px-8 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-white' : 'border-[var(--text-primary)]'}`}
+                        className={`group pointer-events-auto inline-flex items-center ${buttonTextColorClass} hover:opacity-50 px-4 py-2 md:px-8 md:py-4 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-white' : 'border-[var(--text-primary)]'} text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
                       >
-                        <span className="inline-flex justify-center">
-                          <span className="font-bold font-helvetica tracking-[0.05em]">
-                            {t(block.linkText)}
-                          </span>
-                        </span>
+                          {t(block.linkText)}
                       </Link>
                     ) : (
                       <div
-                        className={`pointer-events-auto inline-flex items-center gap-x-3 ${buttonTextColorClass} font-bold py-4 px-4 md:px-8 bg-transparent`}
+                        className={`pointer-events-auto inline-flex items-center ${buttonTextColorClass} px-4 py-2 md:px-8 md:py-4 bg-transparent text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
                       >
-                        <span className="inline-flex justify-center">
-                          <span className="font-bold font-helvetica tracking-[0.05em]">
-                            {t(block.linkText)}
-                          </span>
-                        </span>
+                          {t(block.linkText)}
                       </div>
                     )}
                   </div>
@@ -357,23 +341,15 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     {block.linkUrl ? (
                       <Link
                         to={block.linkUrl}
-                        className={`group pointer-events-auto inline-flex items-center gap-x-3 ${buttonTextColorClass} hover:opacity-50 font-bold py-3 px-8 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-white' : 'border-[var(--text-primary)]'}`}
+                        className={`group pointer-events-auto inline-flex items-center ${buttonTextColorClass} hover:opacity-50 px-4 py-2 md:px-8 md:py-4 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-white' : 'border-[var(--text-primary)]'} text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
                       >
-                        <span className="inline-flex justify-center">
-                          <span className="font-bold font-helvetica tracking-[0.05em]">
-                            {t(block.linkText)}
-                          </span>
-                        </span>
+                          {t(block.linkText)}
                       </Link>
                     ) : (
                       <div
-                        className={`pointer-events-auto inline-flex items-center gap-x-3 ${buttonTextColorClass} font-bold py-4 px-4 md:px-8 bg-transparent`}
+                        className={`pointer-events-auto inline-flex items-center ${buttonTextColorClass} px-4 py-2 md:px-8 md:py-4 bg-transparent text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
                       >
-                        <span className="inline-flex justify-center">
-                          <span className="font-bold font-helvetica tracking-[0.05em]">
-                            {t(block.linkText)}
-                          </span>
-                        </span>
+                          {t(block.linkText)}
                       </div>
                     )}
                   </div>
@@ -401,23 +377,15 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     {block.linkUrl ? (
                       <Link
                         to={block.linkUrl}
-                        className={`group pointer-events-auto inline-flex items-center gap-x-3 ${buttonTextColorClass} hover:opacity-50 font-bold py-3 px-8 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-white' : 'border-[var(--text-primary)]'}`}
+                        className={`group pointer-events-auto inline-flex items-center ${buttonTextColorClass} hover:opacity-50 px-4 py-2 md:px-8 md:py-4 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-white' : 'border-[var(--text-primary)]'} text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
                       >
-                        <span className="inline-flex justify-center">
-                          <span className="font-bold font-helvetica tracking-[0.05em]">
-                            {t(block.linkText)}
-                          </span>
-                        </span>
+                          {t(block.linkText)}
                       </Link>
                     ) : (
                       <div
-                        className={`pointer-events-auto inline-flex items-center gap-x-3 ${buttonTextColorClass} font-bold py-4 px-4 md:px-8 bg-transparent`}
+                        className={`pointer-events-auto inline-flex items-center ${buttonTextColorClass} px-4 py-2 md:px-8 md:py-4 bg-transparent text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
                       >
-                        <span className="inline-flex justify-center">
-                          <span className="font-bold font-helvetica tracking-[0.05em]">
-                            {t(block.linkText)}
-                          </span>
-                        </span>
+                          {t(block.linkText)}
                       </div>
                     )}
                   </div>

@@ -7,6 +7,7 @@ export const isDarkHeroPage = (p: string): boolean => {
     path.startsWith('/about') ||
     path.startsWith('/project/') ||
     path.startsWith('/projects/') ||
-    path === '/categories'
+    path.startsWith('/categories') ||
+    path.startsWith('/products')
   )
 }
