@@ -21,13 +21,13 @@ export const Footer = () => {
   })
 
   if (isSettingsLoading || isFooterLoading || !settings || !content) {
-    return <footer className="bg-[#161817] h-20" /> // Minimal placeholder to avoid collapse
+    return <footer className="bg-[#2f3332] h-20" /> // Minimal placeholder to avoid collapse
   }
 
   return (
     <>
       <HomeNewsletter />
-      <footer className="bg-[#161817] text-gray-400" style={{position: 'relative', zIndex: 5}}>
+      <footer className="bg-[#2f3332] text-gray-400" style={{position: 'relative', zIndex: 5}}>
         <div
           className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-10 pb-6 lg:py-12"
           style={{overflow: 'visible'}}
@@ -365,7 +365,7 @@ export const Footer = () => {
         </div>
       </footer>
       {/* Mobilde footer'dan sonra ekstra padding - scroll bounce beyaz alanını önler */}
-      <div className="lg:hidden h-2 bg-[#171920]" aria-hidden="true"></div>
+      <div className="lg:hidden h-2 bg-[#2f3332]" aria-hidden="true"></div>
     </>
   )
 }

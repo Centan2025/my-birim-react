@@ -2,13 +2,6 @@ import {useState, FC, FormEventHandler, useRef, useEffect} from 'react'
 import {motion, AnimatePresence} from 'framer-motion'
 import {
   ArrowUpRight,
-  Mail,
-  User,
-  Building,
-  Briefcase,
-  Globe,
-  Phone,
-  Lock,
   Minus,
 } from 'lucide-react'
 import {subscribeEmail, subscribeProfessional} from '../services/cms'
@@ -169,19 +162,19 @@ export const HomeNewsletter: FC = () => {
   return (
     <section
       id="home-newsletter"
-      className="bg-[#3b3e3c] w-full relative overflow-hidden text-white leading-none font-inter"
+      className="bg-[#454d59] w-full relative overflow-hidden text-white leading-none font-inter"
     >
       {/* Collapse Trigger Button - Band Style */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="block w-full bg-[#484d4a] transition-colors group z-30 relative border-t border-white/10 font-inter"
+        className="block w-full bg-[#525b6a] transition-colors group z-30 relative border-t border-white/10 font-inter"
       >
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-6 md:py-8 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
           <div className="flex-1 flex flex-col items-start justify-center text-left">
-            <span className="font-normal tracking-[0.05em] text-base md:text-lg text-gray-200 transition-colors font-inter">
+            <span className="font-medium tracking-tight text-xl md:text-2xl text-white transition-colors font-inter">
               {t('newsletter_title')}
             </span>
-            <span className="font-light tracking-[0.15em] text-[11px] md:text-sm text-gray-400 mt-1 transition-colors font-inter">
+            <span className="font-medium tracking-tight text-[12px] md:text-[14px] text-gray-300 mt-2 transition-colors font-inter">
               {t('professional_access_desc')}
             </span>
           </div>
@@ -189,7 +182,7 @@ export const HomeNewsletter: FC = () => {
           <div
             className={`flex items-center justify-center gap-3 bg-transparent text-white border border-gray-400 px-6 py-3 transition-all duration-500 font-inter hover:bg-white/5`}
           >
-            <span className="text-[11px] md:text-xs tracking-[0.08em] font-bold">
+            <span className="text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-medium">
               {isExpanded ? t('close') : t('join_us')}
             </span>
             {isExpanded ? (
@@ -211,14 +204,17 @@ export const HomeNewsletter: FC = () => {
             transition={{duration: 0.6, ease: [0.16, 1, 0.3, 1]}}
             className="overflow-hidden"
           >
-            <div className="pt-8 pb-16 w-full flex flex-col items-center bg-[var(--bg-tertiary)] text-[var(--text-primary)] relative transition-colors duration-500">
+            <div 
+              className="pt-8 pb-16 w-full flex flex-col items-center text-[var(--text-primary)] relative transition-all duration-500"
+              style={{ background: 'linear-gradient(180deg, #ffffff 0%, #cccccc 70%, #afafaf 100%)' }}
+            >
               <div className="flex gap-4 md:gap-12 mb-12 relative z-20">
                 <div role="tablist" className="relative flex">
                   <button
                     role="tab"
                     aria-selected={activeTab === 'newsletter'}
                     onClick={() => setActiveTab('newsletter')}
-                    className={`relative pb-4 px-6 text-xs md:text-sm font-bold tracking-[0.08em] transition-all duration-500 font-inter ${activeTab === 'newsletter' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                    className={`relative pb-4 px-6 text-[11px] md:text-xs font-medium uppercase tracking-[0.15em] transition-all duration-500 font-inter ${activeTab === 'newsletter' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                   >
                     {t('join_us')}
                     {activeTab === 'newsletter' && (
@@ -233,7 +229,7 @@ export const HomeNewsletter: FC = () => {
                     role="tab"
                     aria-selected={activeTab === 'professional'}
                     onClick={() => setActiveTab('professional')}
-                    className={`relative pb-4 px-6 text-xs md:text-sm font-bold tracking-[0.08em] transition-all duration-500 font-inter ${activeTab === 'professional' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                    className={`relative pb-4 px-6 text-[11px] md:text-xs font-medium uppercase tracking-[0.15em] transition-all duration-500 font-inter ${activeTab === 'professional' ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                   >
                     {t('professional_access')}
                     {activeTab === 'professional' && (
@@ -262,10 +258,9 @@ export const HomeNewsletter: FC = () => {
                       <motion.form
                         variants={itemVariants}
                         onSubmit={handleSubmitNewsletter}
-                        className="w-full flex flex-col md:flex-row gap-0 border border-[var(--border-primary)] focus-within:border-[var(--text-primary)] transition-colors duration-500 bg-[var(--bg-primary)]"
+                        className="w-full flex flex-col md:flex-row gap-0 border border-gray-400 focus-within:border-[var(--text-primary)] transition-colors duration-500 bg-[var(--bg-primary)]"
                       >
                         <div className="flex-grow flex items-center px-4 py-1">
-                          <Mail className="w-4 h-4 text-[var(--text-secondary)] mr-3" />
                           <input
                             type="email"
                             value={email}
@@ -280,7 +275,7 @@ export const HomeNewsletter: FC = () => {
                           disabled={status === 'loading'}
                           className="bg-[var(--text-primary)] text-[var(--bg-primary)] border border-[var(--text-primary)] px-10 py-5 hover:opacity-90 transition-all duration-500 disabled:opacity-50 flex items-center justify-center gap-3 overflow-hidden group min-w-[200px] font-inter"
                         >
-                          <span className="text-[11px] md:text-xs tracking-[0.08em] font-bold">
+                          <span className="text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-medium">
                             {status === 'loading' ? t('waiting') : t('subscribe')}
                           </span>
                           <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-500" />
@@ -320,29 +315,23 @@ export const HomeNewsletter: FC = () => {
                           className="grid grid-cols-1 md:grid-cols-2 gap-4"
                         >
                           <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                              <User className="h-4 w-4 text-gray-400 group-focus-within:text-black transition-colors" />
-                            </div>
                             <input
                               type="text"
                               value={profData.name}
                               onChange={e => setProfData({...profData, name: e.target.value})}
                               required
                               placeholder={capitalize(t('full_name'))}
-                              className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
                             />
                           </div>
                           <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                              <Building className="h-4 w-4 text-gray-400 group-focus-within:text-black transition-colors" />
-                            </div>
                             <input
                               type="text"
                               value={profData.company}
                               onChange={e => setProfData({...profData, company: e.target.value})}
                               required
                               placeholder={capitalize(t('company'))}
-                              className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
                             />
                           </div>
                         </motion.div>
@@ -352,42 +341,33 @@ export const HomeNewsletter: FC = () => {
                           className="grid grid-cols-1 md:grid-cols-3 gap-4"
                         >
                           <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                              <Briefcase className="h-4 w-4 text-gray-400 group-focus-within:text-black transition-colors" />
-                            </div>
                             <input
                               type="text"
                               value={profData.profession}
                               onChange={e => setProfData({...profData, profession: e.target.value})}
                               required
                               placeholder={capitalize(t('profession'))}
-                              className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
                             />
                           </div>
                           <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                              <Globe className="h-4 w-4 text-gray-400 group-focus-within:text-black transition-colors" />
-                            </div>
                             <input
                               type="text"
                               value={profData.country}
                               onChange={e => setProfData({...profData, country: e.target.value})}
                               required
                               placeholder={capitalize(t('country'))}
-                              className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
                             />
                           </div>
                           <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                              <Phone className="h-4 w-4 text-gray-400 group-focus-within:text-black transition-colors" />
-                            </div>
                             <input
                               type="tel"
                               value={profData.phone}
                               onChange={e => setProfData({...profData, phone: e.target.value})}
                               required
                               placeholder={capitalize(t('phone'))}
-                              className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
                             />
                           </div>
                         </motion.div>
@@ -397,29 +377,23 @@ export const HomeNewsletter: FC = () => {
                           className="grid grid-cols-1 md:grid-cols-2 gap-4"
                         >
                           <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                              <Mail className="h-4 w-4 text-gray-400 group-focus-within:text-black transition-colors" />
-                            </div>
                             <input
                               type="email"
                               value={profData.email}
                               onChange={e => setProfData({...profData, email: e.target.value})}
                               required
                               placeholder={capitalize(t('email'))}
-                              className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
                             />
                           </div>
                           <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                              <Lock className="h-4 w-4 text-gray-400 group-focus-within:text-black transition-colors" />
-                            </div>
                             <input
                               type="password"
                               value={profData.password || ''}
                               onChange={e => setProfData({...profData, password: e.target.value})}
                               required
                               placeholder={capitalize(t('set_password'))}
-                              className="block w-full pl-11 bg-[var(--bg-primary)] border border-[var(--border-primary)] py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
                             />
                           </div>
                         </motion.div>
@@ -431,9 +405,9 @@ export const HomeNewsletter: FC = () => {
                           <button
                             type="submit"
                             disabled={status === 'loading'}
-                            className="w-full md:w-auto md:min-w-[340px] group flex items-center justify-between bg-[var(--text-primary)] text-[var(--bg-primary)] border border-[var(--text-primary)] px-10 py-5 hover:opacity-90 transition-all duration-500 disabled:opacity-50 font-inter"
+                            className="w-full md:w-auto md:min-w-[340px] group flex items-center justify-between bg-[#3c424d] text-white border border-[#3c424d] px-10 py-5 hover:bg-[#4a515c] transition-all duration-500 disabled:opacity-50 font-inter"
                           >
-                            <span className="text-[11px] md:text-xs tracking-[0.08em] font-bold">
+                            <span className="text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-medium">
                               {status === 'loading' ? t('waiting') : t('complete_application')}
                             </span>
                             <ArrowUpRight className="w-5 h-5 group-hover:rotate-45 transition-transform duration-500" />
