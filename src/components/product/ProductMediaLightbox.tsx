@@ -24,7 +24,7 @@ const CloseIcon = () => (
     strokeWidth="0.8"
     strokeLinecap="round"
     strokeLinejoin="round"
-    className="h-9 w-9"
+    className="h-6 w-6"
   >
     <line x1="18" y1="6" x2="6" y2="18"></line>
     <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -155,19 +155,10 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
         className={`relative w-full h-full flex flex-col items-center justify-center p-4 md:p-8`}
         onClick={e => e.stopPropagation()}
       >
-        {/* Medya ve Kapatma Butonu Konteynırı */}
-        <div className="relative group w-full flex items-center justify-center overflow-hidden">
-          {/* Close Button - Görselin sağ üst köşesinde */}
-          <button
-            onClick={handleClose}
-            className={`absolute top-4 right-4 md:top-10 md:right-10 z-[110] w-12 h-12 md:w-16 md:h-16 rounded-none border-[0.5px] border-white/50 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg flex items-center justify-center ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
-              }`}
-          >
-            <CloseIcon />
-          </button>
-
+        {/* Medya Konteynırı */}
+        <div className="relative group w-full max-w-6xl mx-auto flex items-center justify-center overflow-visible">
           {/* Medya içeriği - Simultaneous Animation (Sabit Yükseklik) */}
-          <div className="relative w-full h-[75vh] flex items-center justify-center">
+          <div className={`relative w-full h-[75vh] flex items-center justify-center transition-all duration-300 ease-out ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
             <AnimatePresence initial={false} custom={direction}>
               <motion.div
                 key={url}
@@ -176,42 +167,52 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                className="absolute inset-0 flex items-center justify-center p-4 md:p-12"
+                className="absolute inset-0 flex items-center justify-center p-4 md:p-12 overflow-visible"
               >
-                {type === 'image' ? (
-                  <OptimizedImage
-                    src={url}
-                    alt="Enlarged view"
-                    className="max-w-full max-h-[70vh] object-contain shadow-2xl"
-                    loading="eager"
-                    quality={95}
-                    crop={currentItem.crop}
-                    hotspot={currentItem.hotspot}
-                    placeholderColor="#111111" // Beyaz patlamayı önlemek için koyu placeholder
-                  />
-                ) : type === 'video' ? (
-                  <OptimizedVideo
-                    src={url}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    className="max-w-full max-h-[70vh] object-contain shadow-2xl"
-                    preload="auto"
-                    loading="eager"
-                  />
-                ) : (
-                  <div className="relative w-full h-full flex items-center justify-center aspect-video max-w-5xl">
-                    <iframe
-                      ref={youTubePlayerRef}
-                      className="w-full h-full"
-                      title="youtube-player"
-                      src={toYouTubeEmbed(url, { autoplay: true })}
-                      allow="autoplay; encrypted-media; fullscreen"
-                      frameBorder="0"
+                <div className="relative w-fit h-fit mx-auto overflow-visible flex items-center justify-center">
+                  {/* Close Button - Görselin tam sağ üst köşesiyle kesişsin */}
+                  <button
+                    onClick={handleClose}
+                    className={`absolute -top-3 -right-3 md:-top-5 md:-right-5 z-[120] w-10 h-10 md:w-12 md:h-12 rounded-none border-[0.5px] border-white/50 bg-black/40 backdrop-blur-md text-white transition-all duration-300 md:hover:bg-white/10 active:scale-95 shadow-lg flex items-center justify-center outline-none ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}
+                  >
+                    <CloseIcon />
+                  </button>
+
+                  {type === 'image' ? (
+                    <OptimizedImage
+                      src={url}
+                      alt="Enlarged view"
+                      className="max-w-full max-h-[70vh] object-contain shadow-2xl"
+                      loading="eager"
+                      quality={95}
+                      crop={currentItem.crop}
+                      hotspot={currentItem.hotspot}
+                      placeholderColor="#111111"
                     />
-                  </div>
-                )}
+                  ) : type === 'video' ? (
+                    <OptimizedVideo
+                      src={url}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      className="max-w-full max-h-[70vh] object-contain shadow-2xl"
+                      preload="auto"
+                      loading="eager"
+                    />
+                  ) : (
+                    <div className="relative w-[85vw] md:w-[70vw] lg:w-[60vw] aspect-video max-w-5xl">
+                      <iframe
+                        ref={youTubePlayerRef}
+                        className="w-full h-full"
+                        title="youtube-player"
+                        src={toYouTubeEmbed(url, { autoplay: true })}
+                        allow="autoplay; encrypted-media; fullscreen"
+                        frameBorder="0"
+                      />
+                    </div>
+                  )}
+                </div>
               </motion.div>
             </AnimatePresence>
           </div>
@@ -222,7 +223,7 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
           <div className={`mt-0 flex items-center gap-6 transition-all duration-500 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
             <button
               onClick={handlePrev}
-              className="group flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white/50 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+              className="group flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white/50 bg-transparent text-white transition-all duration-300 md:hover:bg-white/10 active:scale-95 shadow-lg outline-none select-none"
               aria-label="Önceki"
             >
               <svg
@@ -243,7 +244,7 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
 
             <button
               onClick={handleNext}
-              className="group flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white/50 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+              className="group flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white/50 bg-transparent text-white transition-all duration-300 md:hover:bg-white/10 active:scale-95 shadow-lg outline-none select-none"
               aria-label="Sonraki"
             >
               <svg
