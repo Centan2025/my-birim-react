@@ -1,8 +1,9 @@
 import {useState, FC, FormEventHandler, useRef, useEffect} from 'react'
 import {motion, AnimatePresence} from 'framer-motion'
 import {
+  ChevronDown,
+  X,
   ArrowUpRight,
-  Minus,
 } from 'lucide-react'
 import {subscribeEmail, subscribeProfessional} from '../services/cms'
 import {analytics} from '../lib/analytics'
@@ -186,9 +187,9 @@ export const HomeNewsletter: FC = () => {
               {isExpanded ? t('close') : t('join_us')}
             </span>
             {isExpanded ? (
-              <Minus className="w-3.5 h-3.5" />
+              <X className="w-3.5 h-3.5" />
             ) : (
-              <ArrowUpRight className="w-3.5 h-3.5 group-hover:rotate-90 transition-transform duration-500" />
+              <ChevronDown className="w-3.5 h-3.5 transition-transform duration-500" />
             )}
           </div>
         </div>
