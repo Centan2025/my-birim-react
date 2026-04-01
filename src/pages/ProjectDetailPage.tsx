@@ -355,6 +355,14 @@ export function ProjectDetailPage() {
     siteName: 'BIRIM',
     locale: 'tr_TR',
     section: 'Projects',
+    schema: project ? {
+      '@context': 'https://schema.org',
+      '@type': 'CreativeWork',
+      name: projectTitle,
+      description: projectDescription,
+      image: seoImage,
+      datePublished: project.date,
+    } : undefined
   })
 
   if (loading) {

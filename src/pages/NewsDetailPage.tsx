@@ -10,7 +10,6 @@ import { useNewsItem, useNews } from '../hooks/useNews'
 import { useSiteSettings } from '../hooks/useSiteData'
 import { analytics } from '../lib/analytics'
 import { useSEO } from '../hooks/useSEO'
-import { addStructuredData, getArticleSchema } from '../lib/seo'
 import PortableTextLite from '../components/PortableTextLite'
 
 const getYouTubeId = (url: string): string | null => {
@@ -194,6 +193,23 @@ export function NewsDetailPage() {
     locale: 'tr_TR',
     section: 'News',
     publishedTime: item?.date,
+    schema: item ? {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: newsTitle || t(item.title),
+      description: newsDescription || t(item.content),
+      image: mainImageUrl,
+      datePublished: item.date,
+      author: {
+        '@type': 'Person',
+        name: 'BIRIM',
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: 'BIRIM',
+        logo: settings?.logoUrl || 'https://www.birim.com/logo.png',
+      },
+    } : undefined
   })
 
   useEffect(() => {
@@ -209,27 +225,6 @@ export function NewsDetailPage() {
       label: t(item.title), // ID yerine haber başlığı
     })
   }, [item, t])
-
-  // Structured Data (Article)
-  useEffect(() => {
-    if (!item) return
-
-    const schema = getArticleSchema({
-      headline: newsTitle || t(item.title),
-      description: newsDescription || t(item.content),
-      image: mainImageUrl,
-      datePublished: item.date,
-      author: {
-        name: 'BIRIM',
-      },
-      publisher: {
-        name: 'BIRIM',
-        logo: settings?.logoUrl,
-      },
-    })
-
-    addStructuredData(schema, 'news-article-schema')
-  }, [item, newsTitle, newsDescription, mainImageUrl, settings?.logoUrl, t])
 
   if (loading) {
     return (

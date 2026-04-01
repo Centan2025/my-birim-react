@@ -29,13 +29,37 @@ export function HomePage() {
 
   // SEO
   const seoData = useMemo(
-    () => ({
+    (): any => ({
       title: t('home_meta_title') || 'BIRIM - Ana Sayfa',
       description: t('home_meta_description') || 'BIRIM - Modern tasarım ve mimari çözümler',
       image: content?.heroMedia?.[0]?.url || undefined,
       type: 'website' as const,
       siteName: 'BIRIM',
       locale: 'tr_TR',
+      schema: [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'Organization',
+          name: 'BIRIM',
+          url: 'https://www.birim.com',
+          logo: 'https://www.birim.com/logo.png',
+          sameAs: [
+            'https://www.instagram.com/birim',
+            'https://www.linkedin.com/company/birim',
+          ],
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: 'BIRIM',
+          url: 'https://www.birim.com',
+          potentialAction: {
+            '@type': 'SearchAction',
+            target: 'https://www.birim.com/#/products?q={search_term_string}',
+            'query-input': 'required name=search_term_string',
+          },
+        }
+      ],
     }),
     [content?.heroMedia, t]
   )

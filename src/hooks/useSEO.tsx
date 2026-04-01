@@ -29,7 +29,8 @@ const isEqualSeoState = (a: SEOState, b: SEOState) =>
   a.type === b.type &&
   a.siteName === b.siteName &&
   a.url === b.url &&
-  a.locale === b.locale
+  a.locale === b.locale &&
+  JSON.stringify(a.schema) === JSON.stringify(b.schema)
 
 const DEFAULT_TITLE = 'BIRIM'
 const DEFAULT_SITE_NAME = 'BIRIM'
@@ -88,6 +89,18 @@ export const SEOProvider = ({children}: PropsWithChildren) => {
         {merged.description && <meta name="twitter:description" content={merged.description} />}
         {merged.image && <meta name="twitter:image" content={merged.image} />}
         <meta name="twitter:card" content={merged.image ? 'summary_large_image' : 'summary'} />
+
+        {/* AI Robots: Permissive but descriptive for Answer Engines */}
+        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+        <meta name="googlebot" content="index, follow" />
+        <meta name="bingbot" content="index, follow" />
+
+        {/* Structured Data (JSON-LD) */}
+        {merged.schema && (
+          <script type="application/ld+json">
+            {JSON.stringify(merged.schema)}
+          </script>
+        )}
       </Helmet>
       {children}
     </SEOContext.Provider>
@@ -97,7 +110,16 @@ export const SEOProvider = ({children}: PropsWithChildren) => {
 /**
  * Sayfa SEO ayarlarını günceller. Helmet tag'leri SEOProvider içinden render edilir.
  */
-export const useSEO = ({title, description, image, type, siteName, url, locale}: SEOData) => {
+export const useSEO = ({
+  title,
+  description,
+  image,
+  type,
+  siteName,
+  url,
+  locale,
+  schema,
+}: SEOData) => {
   const location = useLocation()
   const {setSeoData} = useSeoContext()
 
@@ -116,6 +138,7 @@ export const useSEO = ({title, description, image, type, siteName, url, locale}:
       siteName: siteName || DEFAULT_SITE_NAME,
       url: url || fullUrl,
       locale: locale || 'tr_TR',
+      schema,
     }
 
     setSeoData(prev => (isEqualSeoState(prev, nextData) ? prev : nextData))
@@ -130,6 +153,7 @@ export const useSEO = ({title, description, image, type, siteName, url, locale}:
     title,
     type,
     url,
+    JSON.stringify(schema),
   ])
 }
 

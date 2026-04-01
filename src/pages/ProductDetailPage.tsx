@@ -5,7 +5,6 @@ import { PageLoading } from '../components/LoadingSpinner'
 import { useTranslation } from '../i18n'
 import { useSEO } from '../hooks/useSEO'
 import { FullscreenMediaViewer } from '../components/FullscreenMediaViewer'
-import { addStructuredData, getProductSchema } from '../lib/seo'
 import { analytics } from '../lib/analytics'
 import { useProductDetail } from '../hooks/useProductDetail'
 import { useLightbox } from '../hooks/useLightbox'
@@ -99,29 +98,29 @@ export function ProductDetailPage() {
     type: 'product',
     siteName: 'BIRIM',
     locale: 'tr_TR',
+    schema: product ? {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: t(product.name),
+      description: t(product.description) || t(product.name),
+      image: typeof product.mainImage === 'string'
+        ? product.mainImage
+        : (product.mainImage as any)?.url || '',
+      brand: designer ? {
+        '@type': 'Brand',
+        name: t(designer.name),
+      } : undefined,
+    } : undefined
   })
 
   useEffect(() => {
     if (!product) return
     const productName = t(product.name)
-    const productDescription = t(product.description) || productName
-    const productImage =
-      typeof product.mainImage === 'string'
-        ? product.mainImage
-        : (product.mainImage as any)?.url || ''
     const catName = category ? t(category.name) : ''
     const seoTitle = catName ? `${catName} - ${productName}` : productName
 
     analytics.pageview(window.location.pathname, seoTitle)
     analytics.trackEcommerce('view_item', product.id, (product as any)?.price || 0)
-
-    const productSchema = getProductSchema({
-      name: productName,
-      description: productDescription,
-      image: productImage,
-      brand: designer ? t(designer.name) : undefined,
-    })
-    addStructuredData(productSchema, 'product-schema')
   }, [product, designer, category, t])
 
   // Entrance animations - Synced with phase if coming from card

@@ -16,6 +16,7 @@ export interface SEOData {
   modifiedTime?: string
   section?: string
   tags?: string[]
+  schema?: Record<string, any> | Record<string, any>[]
 }
 
 /**
@@ -255,5 +256,61 @@ export const getProductSchema = (data: {
         ...(data.offers.availability && {availability: data.offers.availability}),
       },
     }),
+  }
+}
+
+/**
+ * WebSite Schema.org data
+ */
+export const getWebSiteSchema = (data: {
+  name: string
+  url: string
+  description?: string
+  potentialAction?: {
+    target: string
+    queryInput: string
+  }
+}): Record<string, unknown> => {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: data.name,
+    url: data.url,
+    ...(data.description && {description: data.description}),
+    ...(data.potentialAction && {
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: data.potentialAction.target,
+        'query-input': data.potentialAction.queryInput,
+      },
+    }),
+  }
+}
+
+/**
+ * CreativeWork / Project Schema.org data
+ */
+export const getProjectSchema = (data: {
+  name: string
+  description: string
+  image?: string
+  datePublished?: string
+  location?: string
+  category?: string
+}): Record<string, unknown> => {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    name: data.name,
+    description: data.description,
+    ...(data.image && {image: data.image}),
+    ...(data.datePublished && {datePublished: data.datePublished}),
+    ...(data.location && {
+      locationCreated: {
+        '@type': 'Place',
+        name: data.location,
+      },
+    }),
+    ...(data.category && {genre: data.category}),
   }
 }
