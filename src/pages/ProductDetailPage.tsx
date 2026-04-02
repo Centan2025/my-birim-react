@@ -103,13 +103,23 @@ export function ProductDetailPage() {
       '@type': 'Product',
       name: t(product.name),
       description: t(product.description) || t(product.name),
+      sku: product.id,
+      category: category ? t(category.name) : undefined,
+      material: mergedGroups && mergedGroups.length > 0 ? mergedGroups.map(g => t(g.name)).join(', ') : undefined,
       image: typeof product.mainImage === 'string'
         ? product.mainImage
         : (product.mainImage as any)?.url || '',
-      brand: designer ? {
+      brand: {
         '@type': 'Brand',
-        name: t(designer.name),
-      } : undefined,
+        name: designer ? t(designer.name) : 'BIRIM',
+      },
+      offers: {
+        '@type': 'Offer',
+        price: (product as any).price?.toString() || '0.00',
+        priceCurrency: 'TRY',
+        availability: 'https://schema.org/InStock',
+        url: typeof window !== 'undefined' ? window.location.href : '',
+      }
     } : undefined
   })
 

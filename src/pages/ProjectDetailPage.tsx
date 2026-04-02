@@ -362,6 +362,14 @@ export function ProjectDetailPage() {
       description: projectDescription,
       image: seoImage,
       datePublished: project.date,
+      locationCreated: (project as any).location ? {
+        '@type': 'Place',
+        name: typeof (project as any).location === 'string' ? t((project as any).location) : 'Turkey'
+      } : undefined,
+      creator: {
+        '@type': 'Organization',
+        name: 'BIRIM'
+      }
     } : undefined
   })
 

@@ -29,39 +29,56 @@ export function HomePage() {
 
   // SEO
   const seoData = useMemo(
-    (): any => ({
-      title: t('home_meta_title') || 'BIRIM - Ana Sayfa',
-      description: t('home_meta_description') || 'BIRIM - Modern tasarım ve mimari çözümler',
-      image: content?.heroMedia?.[0]?.url || undefined,
-      type: 'website' as const,
-      siteName: 'BIRIM',
-      locale: 'tr_TR',
-      schema: [
-        {
-          '@context': 'https://schema.org',
-          '@type': 'Organization',
-          name: 'BIRIM',
-          url: 'https://www.birim.com',
-          logo: 'https://www.birim.com/logo.png',
-          sameAs: [
-            'https://www.instagram.com/birim',
-            'https://www.linkedin.com/company/birim',
-          ],
-        },
-        {
-          '@context': 'https://schema.org',
-          '@type': 'WebSite',
-          name: 'BIRIM',
-          url: 'https://www.birim.com',
-          potentialAction: {
-            '@type': 'SearchAction',
-            target: 'https://www.birim.com/#/products?q={search_term_string}',
-            'query-input': 'required name=search_term_string',
+    (): any => {
+      const s = settings as any
+      const socialLinks = s?.socialLinks?.map((link: any) => link?.url).filter(Boolean) || [
+        'https://www.instagram.com/birim',
+        'https://www.linkedin.com/company/birim',
+      ]
+      
+      return {
+        title: t('home_meta_title') || 'BIRIM - Ana Sayfa',
+        description: t('home_meta_description') || 'BIRIM - Modern tasarım ve mimari çözümler',
+        image: content?.heroMedia?.[0]?.url || undefined,
+        type: 'website' as const,
+        siteName: 'BIRIM',
+        locale: 'tr_TR',
+        schema: [
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'BIRIM',
+            url: typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com',
+            logo: typeof window !== 'undefined' ? `${window.location.origin}/logo.png` : 'https://www.birim.com/logo.png',
+            sameAs: socialLinks,
+            contactPoint: {
+              '@type': 'ContactPoint',
+              email: s?.contactEmail || 'info@birim.com',
+              telephone: s?.contactPhone || '+90 216 123 45 67',
+              contactType: 'customer service'
+            },
+
+            address: {
+              '@type': 'PostalAddress',
+              addressCountry: 'TR',
+              addressLocality: 'Istanbul'
+            }
           },
-        }
-      ],
-    }),
-    [content?.heroMedia, t]
+          {
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: 'BIRIM',
+            url: typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com',
+            potentialAction: {
+              '@type': 'SearchAction',
+              target: `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#/products?q={search_term_string}`,
+              'query-input': 'required name=search_term_string',
+            },
+          }
+        ],
+      }
+    },
+    [content?.heroMedia, t, settings]
   )
 
   useSEO(seoData)

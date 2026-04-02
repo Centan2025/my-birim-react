@@ -228,10 +228,16 @@ export const getProductSchema = (data: {
   description: string
   image?: string | string[]
   brand?: string
+  sku?: string
+  category?: string
+  material?: string
+  color?: string
+  manufacturer?: string
   offers?: {
     price: string
     priceCurrency: string
     availability?: string
+    url?: string
   }
 }): Record<string, unknown> => {
   return {
@@ -239,6 +245,10 @@ export const getProductSchema = (data: {
     '@type': 'Product',
     name: data.name,
     description: data.description,
+    ...(data.sku && {sku: data.sku}),
+    ...(data.category && {category: data.category}),
+    ...(data.material && {material: data.material}),
+    ...(data.color && {color: data.color}),
     ...(data.image && {
       image: Array.isArray(data.image) ? data.image : [data.image],
     }),
@@ -248,12 +258,19 @@ export const getProductSchema = (data: {
         name: data.brand,
       },
     }),
+    ...(data.manufacturer && {
+      manufacturer: {
+        '@type': 'Organization',
+        name: data.manufacturer,
+      },
+    }),
     ...(data.offers && {
       offers: {
         '@type': 'Offer',
         price: data.offers.price,
         priceCurrency: data.offers.priceCurrency,
         ...(data.offers.availability && {availability: data.offers.availability}),
+        ...(data.offers.url && {url: data.offers.url}),
       },
     }),
   }
