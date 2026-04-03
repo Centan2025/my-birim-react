@@ -1,16 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;700;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&display=swap');
-@import "@fontsource/zalando-sans-semiexpanded/index.css";
-@import "@fontsource/zalando-sans-semiexpanded/700.css";
-@import "@fontsource/zalando-sans-semiexpanded/800.css";
 @import 'tailwindcss';
 
 @theme {
   /* Tasarımcı isimleri için kullanılan font (İnter Regular 400) */
   --font-display: 'Inter', sans-serif;
-
-  /* Sayfa başlıkları için Zalando Sans */
-  --font-zalando: 'Zalando Sans SemiExpanded', 'Zalando Sans Expanded', sans-serif;
 
   /* Diğer yardımcı fontlar */
   --font-sans: 'Inter', sans-serif;
@@ -240,19 +234,14 @@ select {
   color: inherit !important;
 }
 
-/* Sadece sayfa başlıkları için Zalando Sans */
+/* Tüm başlıklar Oswald fontu ile */
 h1,
-.page-title {
-  font-family: var(--font-zalando), sans-serif;
-  letter-spacing: -0.01em;
-}
-
 h2,
 h3,
 h4,
 h5,
 h6 {
-  font-family: 'Oswald', sans-serif;
+  font-family: 'Oswald', sans-serif !important;
   font-weight: 300;
   letter-spacing: 0.1em;
 }

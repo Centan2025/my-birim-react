@@ -103,7 +103,7 @@ export function ProfilePage() {
                 <User className="w-64 h-64" strokeWidth={0.5} />
               </div>
 
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 uppercase tracking-[0.4em] font-inter mb-4">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 uppercase tracking-[0.4em] mb-4">
                 {t('member_panel')}
                 <span className="block h-1 w-20 bg-black mt-4" />
               </h1>

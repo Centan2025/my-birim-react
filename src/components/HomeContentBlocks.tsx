@@ -158,14 +158,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           }
         }
 
-        const titleFontFamily =
-          titleFont === 'normal'
-            ? '"Oswald", sans-serif'
-            : titleFont === 'serif'
-              ? 'serif'
-              : titleFont === 'mono'
-                ? 'monospace'
-                : `"${titleFont}", sans-serif`
+        const titleFontFamily = '"Oswald", sans-serif'
 
         const titleElement = hasTitle && (
           <ScrollReveal

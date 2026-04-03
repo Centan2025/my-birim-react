@@ -122,7 +122,7 @@ export const FloatingAuthPanel: React.FC = () => {
               className="fixed right-0 top-0 bottom-0 w-full max-w-[400px] bg-[var(--bg-secondary)] shadow-[-10px_0_40px_-15px_rgba(0,0,0,0.3)] z-[101] flex flex-col"
             >
               <div className="flex items-center justify-between px-8 py-10 border-b border-[var(--border-primary)]/10 bg-[var(--bg-primary)]/40">
-                <h2 className="text-sm font-bold uppercase tracking-[0.4em] font-inter text-[var(--text-primary)]">
+                <h2 className="text-sm font-bold uppercase tracking-[0.4em] text-[var(--text-primary)]">
                   {isLoggedIn ? t('profile') : t('login')}
                   <span className="block h-0.5 w-12 bg-primary mt-3" />
                 </h2>
