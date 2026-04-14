@@ -31,8 +31,10 @@ export function CategoriesPage() {
   const categoryImageMap = useMemo(() => {
     const map = new Map<string, any>()
     for (const product of allProducts) {
-      if (product && product.categoryId && product.mainImage?.url && !map.has(product.categoryId)) {
-        map.set(product.categoryId, product.mainImage)
+      const catId = product.categoryId?.toLowerCase()
+      const hasUrl = typeof product.mainImage === 'object' && product.mainImage !== null ? (product.mainImage as any).url : false
+      if (product && catId && hasUrl && !map.has(catId)) {
+        map.set(catId, product.mainImage)
       }
     }
     return map

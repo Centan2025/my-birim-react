@@ -3,17 +3,14 @@ import type {
   Product,
   ProductMaterial,
   ProductMaterialsGroup,
-  R2ImageMetadata,
   LocalizedString,
 } from '../../types'
 import {
   sanity,
   useSanity,
   mapImage,
-  mapR2Metadata,
   mapImages,
   extractPalette,
-  SanityProductMediaItem,
   SanityImageLike,
 } from './client'
 import {getItem} from './settings'
