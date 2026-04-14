@@ -1,5 +1,6 @@
 import React from 'react'
 import {defineField, defineType} from 'sanity'
+import BulkMediaUploadInput from '../../components/BulkMediaUploadInput'
 import {getPreviewUrl} from '../utils/previewUrl'
 
 export default defineType({
@@ -43,30 +44,26 @@ export default defineType({
         'Küçük sayı önce gelir. Boş bırakırsanız tarih alanına göre (yeniden eskiye) sıralanır.',
     }),
     defineField({name: 'content', title: 'İçerik', type: 'localizedPortableText'}),
-    defineField({
-      name: 'mainImageR2',
-      title: 'Kapak Görseli (Tüm Cihazlar)',
-      type: 'r2Asset',
-    }),
-    defineField({
-      name: 'mainImageMobileR2',
-      title: 'Kapak Görseli (Mobil)',
-      type: 'r2Asset',
-    }),
-    defineField({
-      name: 'mainImageDesktopR2',
-      title: 'Kapak Görseli (Desktop)',
-      type: 'r2Asset',
-    }),
+
     defineField({
       name: 'media',
-      title: 'Medya',
+      title: 'Haber Medyası',
       type: 'array',
+      components: {
+        input: BulkMediaUploadInput
+      },
       of: [
         {
           type: 'object',
           name: 'newsMedia',
           title: 'Haber Medyası',
+          fieldsets: [
+            {
+              name: 'artDirection',
+              title: '🎥 Art Direction',
+              options: {collapsible: true, collapsed: false},
+            },
+          ],
           fields: [
             defineField({
               name: 'type',
@@ -82,59 +79,107 @@ export default defineType({
               initialValue: 'image',
             }),
             defineField({
+              name: 'isCover',
+              title: 'Kapak Görseli mi?',
+              type: 'boolean',
+              initialValue: false,
+            }),
+            defineField({
               name: 'imageR2',
               title: 'Görsel (Tüm Cihazlar)',
               type: 'r2Asset',
-              hidden: ({parent}) => parent?.type !== 'image',
+              fieldset: 'artDirection',
+              hidden: ({parent}) => !!parent?.type && parent?.type !== 'image',
             }),
             defineField({
               name: 'imageMobileR2',
               title: 'Görsel (Mobil)',
               type: 'r2Asset',
-              hidden: ({parent}) => parent?.type !== 'image',
+              fieldset: 'artDirection',
+              hidden: ({parent}) => !!parent?.type && parent?.type !== 'image',
             }),
             defineField({
               name: 'imageDesktopR2',
               title: 'Görsel (Desktop)',
               type: 'r2Asset',
-              hidden: ({parent}) => parent?.type !== 'image',
+              fieldset: 'artDirection',
+              hidden: ({parent}) => !!parent?.type && parent?.type !== 'image',
             }),
             defineField({
               name: 'videoFileR2',
-              title: 'Video Dosyası (Tüm Cihazlar)',
+              title: 'Video (Tüm Cihazlar)',
               type: 'r2Asset',
+              fieldset: 'artDirection',
               hidden: ({parent}) => parent?.type !== 'video',
             }),
             defineField({
               name: 'videoFileMobileR2',
-              title: 'Video Dosyası (Mobil)',
+              title: 'Video (Mobil)',
               type: 'r2Asset',
+              fieldset: 'artDirection',
               hidden: ({parent}) => parent?.type !== 'video',
             }),
             defineField({
               name: 'videoFileDesktopR2',
-              title: 'Video Dosyası (Desktop)',
+              title: 'Video (Desktop)',
               type: 'r2Asset',
+              fieldset: 'artDirection',
               hidden: ({parent}) => parent?.type !== 'video',
             }),
             defineField({
               name: 'url',
-              title: 'Video URL (veya YouTube URL)',
+              title: 'URL (Video veya YouTube)',
               type: 'url',
-              hidden: ({parent}) => parent?.type === 'image',
-              description:
-                'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.',
+              hidden: ({parent}) => !parent?.type || parent?.type === 'image',
             }),
-            defineField({name: 'caption', title: 'Açıklama', type: 'localizedString'}),
+            defineField({
+              name: 'thumbnailR2',
+              title: 'Önizleme Görseli (Thumbnail)',
+              type: 'r2Asset',
+              hidden: ({parent}) => !parent?.type || parent?.type === 'image',
+            }),
+            defineField({
+              name: 'caption',
+              title: 'Açıklama',
+              type: 'localizedString',
+            }),
           ],
+          preview: {
+            select: {
+              type: 'type',
+              isCover: 'isCover',
+              imageUrl: 'imageR2.url',
+              thumbUrl: 'thumbnailR2.url',
+            },
+            prepare({type, isCover, imageUrl, thumbUrl}) {
+              const r2Url = type === 'image' ? imageUrl : thumbUrl || imageUrl
+              let finalUrl = getPreviewUrl(r2Url)
+              return {
+                title: `${isCover ? '⭐ ' : ''}${type === 'image' ? 'Resim Öğesi' : type === 'video' ? 'Video Öğesi' : 'YouTube Öğesi'}`,
+                media: finalUrl ? (
+                  () => <img
+                    src={finalUrl}
+                    style={{width: '100%', height: '100%', objectFit: 'cover'}}
+                  />
+                ) : undefined,
+              }
+            },
+          },
         },
       ],
+      description: 'Haber içerisindeki görseller ve videolar. Birini kapak olarak işaretleyebilirsiniz.',
     }),
   ],
   preview: {
-    select: {title: 'title.tr', r2Url: 'mainImageR2.url'},
-    prepare({title, r2Url}) {
+    select: {
+      title: 'title.tr', 
+      media: 'media'
+    },
+    prepare({title, media}) {
+      const coverItem = media?.find((m: any) => m.isCover) || media?.[0]
+      const r2Url = coverItem?.imageR2?.url || coverItem?.thumbnailR2?.url
       let finalUrl = getPreviewUrl(r2Url)
+
       return {
         title: title || 'Haber',
         media: finalUrl ? (

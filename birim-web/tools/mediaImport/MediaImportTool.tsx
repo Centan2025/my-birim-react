@@ -82,14 +82,10 @@ interface ParsedData {
     categoryName: string
     modelId: string
     modelName: string
-    mainImages: {
-      all?: File
-      desktop?: File
-      mobile?: File
-    }
-    alternativeMedia: Array<{
+    media: Array<{
       file: File
       device: 'all' | 'desktop' | 'mobile'
+      isCover?: boolean
     }>
     dimensionFiles: File[]
     extraImages: File[]
@@ -106,15 +102,11 @@ interface ParsedData {
   projects: Array<{
     projectId: string
     projectName: string
-    coverImages: {
-      all?: File
-      desktop?: File
-      mobile?: File
-    }
-    contentBlocks: Map<number, {
-      all?: File
-      desktop?: File
-      mobile?: File
+    media: Array<{
+      file: File
+      device: 'all' | 'desktop' | 'mobile'
+      isCover?: boolean
+      contentBlock?: number
     }>
     files: File[] // Legacy support
   }>
@@ -285,8 +277,7 @@ export default function MediaImportTool() {
     const productMap = new Map<
       string,
       {
-        mainImages: { all?: File; desktop?: File; mobile?: File }
-        alternativeMedia: Array<{ file: File; device: 'all' | 'desktop' | 'mobile' }>
+        media: Array<{ file: File; device: 'all' | 'desktop' | 'mobile'; isCover?: boolean }>
         dimensionFiles: File[]
         extraImages: File[]
         drawingFiles: File[]
@@ -297,8 +288,12 @@ export default function MediaImportTool() {
     const projectMap = new Map<
       string,
       {
-        coverImages: { all?: File; desktop?: File; mobile?: File }
-        contentBlocks: Map<number, { all?: File; desktop?: File; mobile?: File }>
+        media: Array<{
+          file: File
+          device: 'all' | 'desktop' | 'mobile'
+          isCover?: boolean
+          contentBlock?: number
+        }>
         files: File[]
       }
     >()
@@ -390,8 +385,7 @@ export default function MediaImportTool() {
         if (productKey) {
           if (!productMap.has(productKey)) {
             productMap.set(productKey, {
-              mainImages: {},
-              alternativeMedia: [],
+              media: [],
               dimensionFiles: [],
               extraImages: [],
               drawingFiles: [],
@@ -409,12 +403,9 @@ export default function MediaImportTool() {
               ? 'mobile'
               : 'all'
 
-          if (subPath.includes('ana görsel')) {
-            if (deviceType === 'desktop') productData.mainImages.desktop = file
-            else if (deviceType === 'mobile') productData.mainImages.mobile = file
-            else productData.mainImages.all = file
-          } else if (subPath.includes('alternatif medya')) {
-            productData.alternativeMedia.push({ file, device: deviceType })
+          if (subPath.includes('medya')) {
+            const isCover = file.name.toLowerCase().includes('_kapak')
+            productData.media.push({ file, device: deviceType, isCover })
           } else if (subPath.includes('olculer') || subPath.includes('olcu')) {
             productData.dimensionFiles.push(file)
           } else if (
@@ -430,13 +421,8 @@ export default function MediaImportTool() {
               productData.modelFiles.push(file)
           } else {
             // Root seviyesindeki dosyalar veya bilinmeyen alt klasörler
-            if (file.name.toLowerCase().includes('_kapak')) {
-              if (deviceType === 'desktop') productData.mainImages.desktop = file
-              else if (deviceType === 'mobile') productData.mainImages.mobile = file
-              else productData.mainImages.all = file
-            } else {
-              productData.alternativeMedia.push({ file, device: deviceType })
-            }
+            const isCover = file.name.toLowerCase().includes('_kapak')
+            productData.media.push({ file, device: deviceType, isCover })
           }
         }
       }
@@ -522,8 +508,7 @@ export default function MediaImportTool() {
 
         if (!projectMap.has(projectFolder)) {
           projectMap.set(projectFolder, {
-            coverImages: {},
-            contentBlocks: new Map(),
+            media: [],
             files: [],
           })
         }
@@ -535,22 +520,16 @@ export default function MediaImportTool() {
             ? 'mobile'
             : 'all'
 
-        if (subPath.includes('kapak görseli')) {
-          if (deviceType === 'desktop') projData.coverImages.desktop = file
-          else if (deviceType === 'mobile') projData.coverImages.mobile = file
-          else projData.coverImages.all = file
+        if (subPath.includes('medya')) {
+          const isCover = file.name.toLowerCase().includes('_kapak')
+          projData.media.push({ file, device: deviceType, isCover })
         } else if (subPath.includes('içerik blokları')) {
           const blokPart = subPath.find((p) => p.includes('blok'))
           const blokNum = blokPart ? parseInt(blokPart.replace(/[^0-9]/g, '')) : 1
-          if (!projData.contentBlocks.has(blokNum)) {
-            projData.contentBlocks.set(blokNum, {})
-          }
-          const blok = projData.contentBlocks.get(blokNum)!
-          if (deviceType === 'desktop') blok.desktop = file
-          else if (deviceType === 'mobile') blok.mobile = file
-          else blok.all = file
+          projData.media.push({ file, device: deviceType, contentBlock: blokNum })
         } else {
-          projData.files.push(file)
+          const isCover = file.name.toLowerCase().includes('_kapak')
+          projData.media.push({ file, device: deviceType, isCover })
         }
       }
 
@@ -1387,15 +1366,15 @@ export default function MediaImportTool() {
       <Stack space={4}>
         <Box>
           <Text size={3} weight="bold">
-            📦 Medya İçe Aktarma
+            📦 Medya İçeri Aktar (Cloudflare R2 Native)
           </Text>
           <Text size={1} muted style={{ marginTop: '0.5rem', lineHeight: '1.6' }}>
-            Bu araç, ürün, tasarımcı, proje ve malzeme görsellerinizi CMS'e yüklemek için
-            kullanılır. Medya klasörünüzü sürükle-bırak yapabilir veya "Klasör Seç" butonu ile
-            seçebilirsiniz.
-            <strong>ÖNEMLİ:</strong> Bu araç sadece görselleri yükler; tasarımcılar, ürünler,
-            projeler ve malzeme grupları CMS'de önceden oluşturulmuş olmalıdır. Klasör yapınızın
-            doğru formatta olması gerekmektedir (örnek yapı aşağıda gösterilmiştir).
+            Bu araç; ürün, tasarımcı, proje, haber ve malzeme görsellerinizi <strong>Cloudflare R2</strong> altyapısına yükler. 
+            Görseller yüklenirken otomatik olarak <strong>WebP</strong> formatına dönüştürülür ve 2K'dan mobil boyuta kadar 
+            <strong>responsive (duyarlı)</strong> boyutlar oluşturulur.
+            <br /><br />
+            <strong>🎯 ÖNEMLİ:</strong> Bu araç sadece medya dosyalarını yükler ve eşleme yapar. 
+            Tasarımcılar, ürünler ve projeler gibi ana kayıtlar CMS'de önceden oluşturulmuş olmalıdır!
           </Text>
         </Box>
 
@@ -1543,23 +1522,22 @@ export default function MediaImportTool() {
         <Card padding={4} tone="caution" radius={2}>
           <Stack space={3}>
             <Text size={2} weight="bold">
-              ⚠️ ÖNEMLİ:
+              🛠️ Sistem Nasıl Çalışır?
             </Text>
             <Text size={1} style={{ lineHeight: '1.6' }}>
-              Bu araç <strong>sadece görselleri yükler</strong>. Tasarımcılar, ürünler, projeler,
-              malzeme grupları ve kartelalar CMS'de önceden oluşturulmuş olmalıdır!
+              • <strong>R2 Sync:</strong> Dosyalar Sanity yerine Cloudflare R2'ye yüklenir ve dökümandaki <code>imageR2</code>, <code>videoFileR2</code> field'larına otomatik bağlanır.<br />
+              • <strong>Otomatik Optimizasyon:</strong> Büyük görseller otomatik sıkıştırılır, WebP'ye çevrilir ve responsive boyutları (2K, 1K, 800px, 400px) oluşturulur.<br />
+              • <strong>Birleşik Medya Sistemi:</strong> Mevcut dökümandaki tüm eski medya alanları temizlenir ve tüm içerik tek bir <strong>medya gallery (media)</strong> dizisinde birleştirilir. Sistem, klasör yapısına veya dosya adına göre "Kapak Görselini" otomatik belirler.
             </Text>
             <Box padding={2} style={{ backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: '4px' }}>
               <Stack space={2}>
                 <Text size={1} weight="semibold">
-                  Kullanım Adımları:
+                  🚀 Başlamadan Önce:
                 </Text>
                 <Text size={1} style={{ lineHeight: '1.6' }}>
-                  1️⃣ Önce CMS'de tasarımcı/ürün/proje/malzeme grubu/kartela oluşturun
-                  <br />
-                  2️⃣ Sonra bu araçla görsellerini yükleyin
-                  <br />
-                  3️⃣ Klasör yapınızın doğru formatta olduğundan emin olun
+                  1️⃣ CMS'de ilgili kaydı (Ürün, Tasarımcı vb.) "Slug" bilgisini vererek oluşturun.<br />
+                  2️⃣ Bilgisayarınızdaki klasör adının CMS'teki isimle (veya slug ile) eşleştiğinden emin olun.<br />
+                  3️⃣ Klasör dizinini aşağıdaki Drag & Drop alanına bırakın.
                 </Text>
               </Stack>
             </Box>
@@ -1573,34 +1551,26 @@ export default function MediaImportTool() {
             </Text>
             <Text size={1} style={{ fontFamily: 'monospace', whiteSpace: 'pre' }}>
               {`MedyaKlasoru/
-├── ÜRÜNLER/
-│   └── KANEPELER/                ← Kategori adı (CMS'teki kategori ile aynı)
-│       └── PUF_1/                ← Ürün adı (CMS'teki ürün AD/ID ile aynı)
-│           ├── puf_1_kapak.jpg   ← (opsiyonel) Ana kapak
-│           ├── puf_1_01.jpg      ← Diğer ürün görselleri
-│           ├── puf_1_02.jpg
-│           ├── ÖLÇÜLER/          ← Ölçü görselleri (dimensionImages)
-│           │   ├── olcu_1.jpg
-│           │   └── olcu_2.jpg
+├── ÜRÜNLER/                      ← Ürün medya kök dizini
+│   └── KANEPELER/                ← Kategori adı
+│       └── PUF_1/                ← Ürün adı veya ID (Slug)
+│           ├── medya/            ← Tüm medya (Görsel + Video) tek klasörde
+│           │   ├── mobil/
+│           │   ├── desktop/
+│           │   ├── puf_kapak.jpg ← '_kapak' son eki kapak görseli yapar (⭐)
+│           │   ├── 01.jpg        
+│           │   └── 02.jpg
+│           ├── ÖLÇÜLER/          ← Teknik ölçü şemaları
 │           └── İndirilebilir Dosyalar/
-│               ├── Ek Görseller/
-│               │   ├── katalog_1.jpg
-│               │   └── katalog_2.jpg
-│               ├── Teknik Çizimler/
-│               │   ├── 0203_SU.pdf
-│               │   └── teknik_2.dwg
-│               └── 3D Modeller/
-│                   ├── model_1.obj
-│                   └── model_2.fbx
-├── TASARIMCILAR/                 ← Tasarımcı görselleri (sadece görsel)
-│   └── Ahmet Yılmaz/
-│       ├── ahmet_kapak.jpg
-│       └── ahmet_mobil.jpg
-└── MALZEMELER/                   ← Malzeme kartelaları
-    └── KUMAŞ/
-        └── KARTELA-1/
-            ├── malzeme1.jpg
-            └── malzeme2.jpg`}
+├── PROJELER/                     ← Proje medya kök dizini
+│   └── Proje_A/
+│       ├── medya/                ← Proje görselleri (kapak için _kapak ekle)
+│       └── içerik blokları/       ← Proje sayfa içi bloklar (Array düzeni)
+├── TASARIMCILAR/                 ← Tasarımcı portreleri
+└── MALZEMELER/                   ← Malzeme & Kartela görselleri`}
+            </Text>
+            <Text size={0} muted>
+              ℹ️ Yeni yapıda tüm medya tek bir 'medya' dizininde tutulur. '_kapak' son eki sistemin kapak görselini (⭐) tanımasını sağlar.
             </Text>
             <Text size={0} muted>
               ℹ️ Klasör / kategori / ürün / tasarımcı / malzeme grup ve kartela isimleri CMS'deki
@@ -1859,6 +1829,7 @@ async function checkExistingAssets(client: any, productId: string) {
     media[]{
       ...,
       type,
+      isCover,
       image{asset->{_id, originalFilename, sha1hash}},
       imageR2,
       imageMobile{asset->{_id, originalFilename, sha1hash}},
@@ -1871,16 +1842,6 @@ async function checkExistingAssets(client: any, productId: string) {
       videoFileMobileR2,
       videoFileDesktop{asset->{_id, originalFilename, sha1hash}},
       videoFileDesktopR2
-    },
-    alternativeMedia[]{
-      ...,
-      type,
-      image{asset->{_id, originalFilename, sha1hash}},
-      imageMobile{asset->{_id, originalFilename, sha1hash}},
-      imageDesktop{asset->{_id, originalFilename, sha1hash}},
-      videoFile{asset->{_id, originalFilename, sha1hash}},
-      videoFileMobile{asset->{_id, originalFilename, sha1hash}},
-      videoFileDesktop{asset->{_id, originalFilename, sha1hash}}
     },
     exclusiveContent{
       images[]{
@@ -1946,8 +1907,8 @@ async function checkExistingAssets(client: any, productId: string) {
     })
   }
 
-  // Mevcut media (alt medya panelleri) array'ini koru
-  const existingMedia: any[] = []
+  // Mevcut media array'ini koru
+  const existingMediaArray: any[] = []
   if (product?.media) {
     product.media.forEach((item: any) => {
       if (item?.image?.asset) {
@@ -1982,50 +1943,7 @@ async function checkExistingAssets(client: any, productId: string) {
         if (item.videoFileDesktop.asset.originalFilename)
           existingFilenames.add(item.videoFileDesktop.asset.originalFilename)
       }
-      existingMedia.push(item)
-    })
-  }
-
-  // Mevcut alternativeMedia array'ini koru (hem görsel hem video)
-  const existingAlternativeMedia: any[] = []
-  if (product?.alternativeMedia) {
-    product.alternativeMedia.forEach((item: any) => {
-      // Görsel medya
-      if (item?.image?.asset) {
-        if (item.image.asset.sha1hash) existingHashes.add(item.image.asset.sha1hash)
-        if (item.image.asset.originalFilename)
-          existingFilenames.add(item.image.asset.originalFilename)
-        existingAlternativeMedia.push(item)
-      }
-      // Video medya
-      if (item?.videoFile?.asset) {
-        if (item.videoFile.asset.sha1hash) existingHashes.add(item.videoFile.asset.sha1hash)
-        if (item.videoFile.asset.originalFilename)
-          existingFilenames.add(item.videoFile.asset.originalFilename)
-      }
-      if (item?.imageMobile?.asset) {
-        if (item.imageMobile.asset.sha1hash) existingHashes.add(item.imageMobile.asset.sha1hash)
-        if (item.imageMobile.asset.originalFilename)
-          existingFilenames.add(item.imageMobile.asset.originalFilename)
-      }
-      if (item?.imageDesktop?.asset) {
-        if (item.imageDesktop.asset.sha1hash) existingHashes.add(item.imageDesktop.asset.sha1hash)
-        if (item.imageDesktop.asset.originalFilename)
-          existingFilenames.add(item.imageDesktop.asset.originalFilename)
-      }
-      if (item?.videoFileMobile?.asset) {
-        if (item.videoFileMobile.asset.sha1hash)
-          existingHashes.add(item.videoFileMobile.asset.sha1hash)
-        if (item.videoFileMobile.asset.originalFilename)
-          existingFilenames.add(item.videoFileMobile.asset.originalFilename)
-      }
-      if (item?.videoFileDesktop?.asset) {
-        if (item.videoFileDesktop.asset.sha1hash)
-          existingHashes.add(item.videoFileDesktop.asset.sha1hash)
-        if (item.videoFileDesktop.asset.originalFilename)
-          existingFilenames.add(item.videoFileDesktop.asset.originalFilename)
-      }
-      existingAlternativeMedia.push(item)
+      existingMediaArray.push(item)
     })
   }
 
@@ -2074,9 +1992,8 @@ async function checkExistingAssets(client: any, productId: string) {
   return {
     existingHashes,
     existingFilenames,
-    existingAlternativeMedia,
     existingDimensionImages,
-    existingMedia,
+    existingMediaArray,
     existingExclusiveImages,
     existingDrawings,
     existingModels3d,
@@ -2126,24 +2043,18 @@ async function isAssetAlreadyUploaded(
  * - Her ikisinde de olan görselleri korur
  */
 async function updateProductImages(client: any, productId: string, product: any) {
-  // Mevcut görselleri kontrol et (mevcut alternativeMedia'yı da al)
+  // Mevcut görselleri kontrol et
   const productData = await checkExistingAssets(client, productId)
   const {
     existingHashes,
     existingFilenames,
-    existingAlternativeMedia,
     existingDimensionImages,
-    existingMedia,
+    existingMediaArray,
     existingExclusiveImages,
     existingDrawings,
     existingModels3d,
     product: cmsProduct,
   } = productData
-
-  // Kapak görselleri
-  const coverMain = product.mainImages.all
-  const coverMobile = product.mainImages.mobile
-  const coverDesktop = product.mainImages.desktop
 
   // Ölçü görselleri: ÖLÇÜLER klasöründeki dosyalar
   const dimensionImages = product.dimensionFiles || []
@@ -2153,303 +2064,110 @@ async function updateProductImages(client: any, productId: string, product: any)
   const drawingFiles: File[] = product.drawingFiles || []
   const modelFiles: File[] = product.modelFiles || []
 
-  // Alt medya panelleri: Legacy desteği için project.files'dan (ProjectMediaTool'da kullanılıyor olabilir)
-  const panelMedia = (product.files || []).filter((f: File) => f.name.toLowerCase().includes('_panel'))
-
-  // Alternatif medya: hem görsel hem video olabilir
-  const regularMedia = product.alternativeMedia.map((m: any) => m.file)
+  // Medya (hem görsel hem video)
+  const incomingMedia = product.media || []
 
   const updates: any = {}
-  const unsetFields: string[] = []
+  const unsetFields: string[] = ['mainImage', 'mainImageR2', 'mainImageMobile', 'mainImageMobileR2', 'mainImageDesktop', 'mainImageDesktopR2', 'alternativeMedia']
   let hasChanges = false
 
   // ============================================
-  // 1. KAPAK GÖRSELLERİNİ EŞİTLE
+  // 1. MEDYAYI EŞİTLE (Görsel + Video + Cover)
   // ============================================
-
-  // Ana kapak görseli - Eşitleme mantığı
-  if (coverMain) {
-    // Eğer R2 görseli yoksa VEYA Sanity görseli hala duruyorsa yükle/migrate et
-    if (!cmsProduct?.mainImageR2 || cmsProduct?.mainImage) {
-      console.log(`   📸 Ana kapak R2'ye yükleniyor: ${coverMain.name}`)
-      const r2Url = await uploadToR2(
-        coverMain,
-        `products/${slugify(product.categoryName)}/${product.modelId}`,
-      )
-
-      if (r2Url) {
-        updates.mainImageR2 = {
-          _type: 'r2Asset',
-          url: r2Url.url,
-          width: r2Url.width,
-          height: r2Url.height,
-          hasResponsiveSizes: r2Url.hasResponsiveSizes,
-        }
-        unsetFields.push('mainImage')
-        hasChanges = true
-      }
-    } else {
-      console.log(`   ✓ Ana kapak zaten eşleşiyor (R2): ${coverMain.name}`)
-    }
-  } else {
-    // Kapak görseli yok - ilk görseli (video değil) kapak olarak kullan
-    const firstImage = regularMedia.find((f: File) => isImageFile(f.name))
-    if (firstImage) {
-      // Eğer R2 görseli yoksa VEYA Sanity görseli hala duruyorsa yükle/migrate et
-      if (!cmsProduct?.mainImageR2 || cmsProduct?.mainImage) {
-        console.log(`   ⚠️ Kapak yok, ilk görsel R2 kapak olarak kullanılıyor: ${firstImage.name}`)
-        const r2Url = await uploadToR2(
-          firstImage,
-          `products/${slugify(product.categoryName)}/${product.modelId}`,
-        )
-
-        if (r2Url) {
-          updates.mainImageR2 = {
-            _type: 'r2Asset',
-            url: r2Url.url,
-            width: r2Url.width,
-            height: r2Url.height,
-            hasResponsiveSizes: r2Url.hasResponsiveSizes,
-          }
-          unsetFields.push('mainImage')
-          hasChanges = true
-        }
-      }
-    } else {
-      // Klasörde hiç görsel yok - CMS'deki kapak görselini sil (eşitleme)
-      if (cmsProduct?.mainImage || cmsProduct?.mainImageR2) {
-        console.log(`   🗑️ Klasörde görsel yok, CMS'deki kapak siliniyor (eşitleme)`)
-        unsetFields.push('mainImage')
-        unsetFields.push('mainImageR2')
-        hasChanges = true
-      }
-    }
-  }
-
-  if (coverMobile) {
-    if (!cmsProduct?.mainImageMobileR2 || cmsProduct?.mainImageMobile) {
-      console.log(`   📱 Mobil kapak R2'ye yükleniyor: ${coverMobile.name}`)
-      const r2Url = await uploadToR2(
-        coverMobile,
-        `products/${slugify(product.categoryName)}/${product.modelId}`,
-      )
-
-      if (r2Url) {
-        updates.mainImageMobileR2 = {
-          _type: 'r2Asset',
-          url: r2Url.url,
-          width: r2Url.width,
-          height: r2Url.height,
-          hasResponsiveSizes: r2Url.hasResponsiveSizes,
-        }
-        unsetFields.push('mainImageMobile')
-        hasChanges = true
-      }
-    } else {
-      console.log(`   ✓ Mobil kapak zaten eşleşiyor (R2): ${coverMobile.name}`)
-    }
-  } else {
-    if (cmsProduct?.mainImageMobile || cmsProduct?.mainImageMobileR2) {
-      console.log(`   🗑️ Klasörde mobil kapak yok, CMS'deki mobil kapak siliniyor (eşitleme)`)
-      unsetFields.push('mainImageMobile')
-      unsetFields.push('mainImageMobileR2')
-      hasChanges = true
-    }
-  }
-
-  if (coverDesktop) {
-    if (!cmsProduct?.mainImageDesktopR2 || cmsProduct?.mainImageDesktop) {
-      console.log(`   💻 Desktop kapak R2'ye yükleniyor: ${coverDesktop.name}`)
-      const r2Url = await uploadToR2(
-        coverDesktop,
-        `products/${slugify(product.categoryName)}/${product.modelId}`,
-      )
-
-      if (r2Url) {
-        updates.mainImageDesktopR2 = {
-          _type: 'r2Asset',
-          url: r2Url.url,
-          width: r2Url.width,
-          height: r2Url.height,
-          hasResponsiveSizes: r2Url.hasResponsiveSizes,
-        }
-        unsetFields.push('mainImageDesktop')
-        hasChanges = true
-      }
-    } else {
-      console.log(`   ✓ Desktop kapak zaten eşleşiyor (R2): ${coverDesktop.name}`)
-    }
-  } else {
-    if (cmsProduct?.mainImageDesktop || cmsProduct?.mainImageDesktopR2) {
-      console.log(`   🗑️ Klasörde desktop kapak yok, CMS'deki desktop kapak siliniyor (eşitleme)`)
-      unsetFields.push('mainImageDesktop')
-      unsetFields.push('mainImageDesktopR2')
-      hasChanges = true
-    }
-  }
-
-  // ============================================
-  // 2. ALTERNATİF MEDYAYI EŞİTLE (Görsel + Video)
-  // ============================================
-
-  // Alternatif medyayı hash'le eşleştir
-  // Artık parseDirectory zaten kapakları ve diğerlerini ayırdığı için regularMedia'yı direkt kullanabiliriz
-  let mediaToSync: File[] = regularMedia
 
   const folderMediaHashes = new Set<string>()
-  const folderMediaMap = new Map<string, { file: File; isVideo: boolean }>() // hash -> {file, isVideo}
+  const folderMediaMap = new Map<string, { file: File; isVideo: boolean; device: string; isCover: boolean }>()
 
-  console.log(`   🖼️ ${mediaToSync.length} klasör medyası hash'leniyor...`)
-  for (const media of mediaToSync) {
+  console.log(`   🖼️ ${incomingMedia.length} klasör medyası hash'leniyor...`)
+  for (const media of incomingMedia) {
     try {
-      const hash = await getFileHash(media)
+      const hash = await getFileHash(media.file)
       folderMediaHashes.add(hash)
-      folderMediaMap.set(hash, { file: media, isVideo: isVideoFile(media.name) })
+      folderMediaMap.set(hash, {
+        file: media.file,
+        isVideo: isVideoFile(media.file.name),
+        device: media.device,
+        isCover: !!media.isCover
+      })
     } catch (error) {
-      console.error(`   ❌ Hash hesaplanamadı: ${media.name}`, error)
+      console.error(`   ❌ Hash hesaplanamadı: ${media.file.name}`, error)
     }
   }
 
-  // CMS'deki medyanın hash'lerini topla (hem görsel hem video)
-  // NOT: Kapak görsellerinin hash'lerini alternatif medyadan çıkar
+  // CMS'deki medyanın hash'lerini topla
   const cmsMediaHashes = new Set<string>()
-  const cmsMediaMap = new Map<string, any>() // hash -> mediaItem
+  const cmsMediaMap = new Map<string, any>()
 
-  // Mevcut kapak görsellerinin hash'lerini al (bunlar alternatif medyada olmamalı)
-  const coverHashes = new Set<string>()
-  if (cmsProduct?.mainImage?.asset?.sha1hash) {
-    coverHashes.add(cmsProduct.mainImage.asset.sha1hash)
-  }
-  if (cmsProduct?.mainImageMobile?.asset?.sha1hash) {
-    coverHashes.add(cmsProduct.mainImageMobile.asset.sha1hash)
-  }
-
-  // Alternatif medyayı topla (kapak görselleri hariç, hem görsel hem video)
-  for (const mediaItem of existingAlternativeMedia) {
+  for (const mediaItem of existingMediaArray) {
     let hash: string | null = null
-    // Görsel medya
-    if (mediaItem?.image?.asset?.sha1hash) {
-      hash = mediaItem.image.asset.sha1hash
+    if (mediaItem?.image?.asset?.sha1hash) hash = mediaItem.image.asset.sha1hash
+    if (mediaItem?.videoFile?.asset?.sha1hash) hash = mediaItem.videoFile.asset.sha1hash
+    if (mediaItem?.imageR2?.url) {
+       // R2 asset'lerde hash yoksa filename veya url bazlı eşleşme denenebilir ama hash en iyisi
+       // Zaten R2'ye yüklenirken orjinal hash Sanity'de saklanmıyor (R2 asset tipi basit)
+       // Bu yüzden hash set'ine orjinal dosya adı/boyut kombinasyonu gibi bir şey eklesek iyi olurdu
     }
-    // Video medya
-    if (mediaItem?.videoFile?.asset?.sha1hash) {
-      hash = mediaItem.videoFile.asset.sha1hash
-    }
-
-    if (hash && !coverHashes.has(hash)) {
-      // Kapak görseli değilse alternatif medyaya ekle
+    if (hash) {
       cmsMediaHashes.add(hash)
       cmsMediaMap.set(hash, mediaItem)
     }
   }
 
-  const imageCount = Array.from(folderMediaMap.values()).filter((m) => !m.isVideo).length
-  const videoCount = Array.from(folderMediaMap.values()).filter((m) => m.isVideo).length
-  console.log(
-    `   📊 Klasör: ${imageCount} görsel, ${videoCount} video | CMS: ${cmsMediaHashes.size} medya`,
-  )
+  const syncedMedia: any[] = []
 
-  // Eşitleme: Klasördeki medyayla CMS'deki medyayı birleştir
-  const syncedAlternativeMedia: any[] = []
-
-  // 1. Klasördeki medyayı ekle (CMS'de yoksa yükle, varsa koru)
+  // 1. Klasördeki medyayı ekle
   for (const [hash, mediaInfo] of folderMediaMap.entries()) {
-    const { file, isVideo } = mediaInfo
+    const { file, isVideo, device, isCover } = mediaInfo
 
     if (cmsMediaHashes.has(hash)) {
-      // Her ikisinde de var - koru veya R2'ye migrate et
+      // Her ikisinde de var - koru ve isCover durumunu güncelle eğer değişmişse
       const existingItem = cmsMediaMap.get(hash)
+      const updatedItem = { ...existingItem, isCover }
+      
+      // Eğer görsel ise ve R2 alanı yoksa migrate et
+      const isImg = !isVideo && (updatedItem.type === 'image' || updatedItem.image)
+      const isVid = isVideo && (updatedItem.type === 'video' || updatedItem.videoFile)
 
-      // Eğer görsel ise ve R2 alanı yoksa VEYA asset alanı hala duruyorsa migrate et
-      const isImg = !isVideo && (existingItem.type === 'image' || existingItem.image)
-      const isVid = isVideo && (existingItem.type === 'video' || existingItem.videoFile)
-
-      if (
-        (isImg && (!existingItem.imageR2 || existingItem.image)) ||
-        (isVid && (!existingItem.videoFileR2 || existingItem.videoFile))
-      ) {
-        console.log(`   🔄 Mevcut ${isVideo ? 'video' : 'görsel'} R2'ye taşınıyor: ${file.name}`)
-        const r2Url = await uploadToR2(
-          file,
-          `products/${slugify(product.categoryName)}/${product.modelId}`,
-        )
-
-        if (r2Url) {
-          const updatedItem = { ...existingItem }
-          if (isVideo) {
-            updatedItem.videoFileR2 = {
-              _type: 'r2Asset',
-              url: r2Url.url,
-              hasResponsiveSizes: r2Url.hasResponsiveSizes,
-            }
-            // Eski asset alanlarını temizle
-            updatedItem.videoFile = null
-          } else {
-            updatedItem.imageR2 = {
-              _type: 'r2Asset',
-              url: r2Url.url,
-              width: r2Url.width,
-              height: r2Url.height,
-              hasResponsiveSizes: r2Url.hasResponsiveSizes,
-            }
-            updatedItem.image = null
+      if ((isImg && !updatedItem.imageR2) || (isVid && !updatedItem.videoFileR2)) {
+          console.log(`   🔄 Mevcut ${isVideo ? 'video' : 'görsel'} R2'ye taşınıyor: ${file.name}`)
+          const r2Url = await uploadToR2(file, `products/${slugify(product.categoryName)}/${product.modelId}`)
+          if (r2Url) {
+              if (isVideo) {
+                  updatedItem.videoFileR2 = { _type: 'r2Asset', url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+                  updatedItem.videoFile = null
+              } else {
+                  updatedItem.imageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+                  updatedItem.image = null
+              }
           }
-          syncedAlternativeMedia.push(resolveKey(updatedItem))
-          hasChanges = true
-        } else {
-          syncedAlternativeMedia.push(resolveKey(existingItem))
-        }
-      } else {
-        syncedAlternativeMedia.push(resolveKey(existingItem))
-        console.log(`   ✓ Korundu (R2): ${file.name} (${isVideo ? 'video' : 'görsel'})`)
       }
+
+      syncedMedia.push(resolveKey(updatedItem))
+      if (existingItem.isCover !== isCover) hasChanges = true
     } else {
       // Klasörde var ama CMS'de yok - ekle
-      try {
-        if (isVideo) {
-          console.log(`   ✅ Video R2'ye yükleniyor: ${file.name}`)
-          const r2Url = await uploadToR2(
-            file,
-            `products/${slugify(product.categoryName)}/${product.modelId}`,
-          )
-
-          if (r2Url) {
-            syncedAlternativeMedia.push({
-              _type: 'productSimpleMediaItem',
-              _key: `alt-vid-${Date.now()}-${Math.random()}`,
-              type: 'video',
-              videoFileR2: {
-                _type: 'r2Asset',
-                url: r2Url.url,
-                hasResponsiveSizes: r2Url.hasResponsiveSizes,
-              },
-            })
-          }
-        } else {
-          console.log(`   ✅ Görsel R2'ye yükleniyor: ${file.name}`)
-          const r2Url = await uploadToR2(
-            file,
-            `products/${slugify(product.categoryName)}/${product.modelId}`,
-          )
-
-          if (r2Url) {
-            syncedAlternativeMedia.push({
-              _type: 'productSimpleMediaItem',
-              _key: `alt-img-${Date.now()}-${Math.random()}`,
-              type: 'image',
-              imageR2: {
-                _type: 'r2Asset',
-                url: r2Url.url,
-                width: r2Url.width,
-                height: r2Url.height,
-                hasResponsiveSizes: r2Url.hasResponsiveSizes,
-              },
-            })
-          }
+      console.log(`   ✅ ${isVideo ? 'Video' : 'Görsel'} R2'ye yükleniyor: ${file.name} ${isCover ? '(KAPAK)' : ''}`)
+      const r2Url = await uploadToR2(file, `products/${slugify(product.categoryName)}/${product.modelId}`)
+      if (r2Url) {
+        const item: any = {
+          _type: 'productSimpleMediaItem',
+          _key: `media-${Date.now()}-${Math.random()}`,
+          type: isVideo ? 'video' : 'image',
+          isCover,
         }
+
+        if (isVideo) {
+          if (device === 'mobile') item.videoFileMobileR2 = { _type: 'r2Asset', url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+          else if (device === 'desktop') item.videoFileDesktopR2 = { _type: 'r2Asset', url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+          else item.videoFileR2 = { _type: 'r2Asset', url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+        } else {
+          const r2Asset = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+          if (device === 'mobile') item.imageMobileR2 = r2Asset
+          else if (device === 'desktop') item.imageDesktopR2 = r2Asset
+          else item.imageR2 = r2Asset
+        }
+        syncedMedia.push(item)
         hasChanges = true
-      } catch (error) {
-        console.error(`   ❌ Yüklenemedi: ${file.name}`, error)
       }
     }
   }
@@ -2457,12 +2175,11 @@ async function updateProductImages(client: any, productId: string, product: any)
   // 2. CMS'de olan ama klasörde olmayan medyayı say (silinecek)
   const toDelete = Array.from(cmsMediaHashes).filter((hash) => !folderMediaHashes.has(hash))
   if (toDelete.length > 0) {
-    console.log(`   🗑️ ${toDelete.length} medya klasörde yok, CMS'den siliniyor`)
+    console.log(`   🗑️ ${toDelete.length} medya dökümanda var ama klasörde yok, eşitleme için CMS'den temizleniyor`)
     hasChanges = true
   }
 
-  // Sonuç: Sadece klasördeki görseller kalacak (eşitleme tamamlandı)
-  updates.alternativeMedia = syncedAlternativeMedia
+  updates.media = syncedMedia
 
   // ============================================
   // 3. ÖLÇÜ GÖRSELLERİNİ EŞİTLE
@@ -2786,7 +2503,7 @@ async function updateProductImages(client: any, productId: string, product: any)
       }
     }
 
-    updates.media = syncedMedia
+    updates.bottomMedia = syncedMedia
     console.log(`   ✅ ${syncedMedia.length} alt medya paneli eşitlendi`)
   } else {
     // Klasörde alt medya paneli yok - CMS'deki alt medya panellerini sil (eşitleme)
@@ -2794,7 +2511,7 @@ async function updateProductImages(client: any, productId: string, product: any)
       console.log(
         `   🗑️ Klasörde alt medya paneli yok, CMS'deki alt medya panelleri siliniyor (eşitleme)`,
       )
-      updates.media = []
+      updates.bottomMedia = []
       hasChanges = true
     }
   }
@@ -2974,7 +2691,7 @@ async function updateProductImages(client: any, productId: string, product: any)
   if (
     hasChanges ||
     hasExclusiveChanges ||
-    syncedAlternativeMedia.length !== existingAlternativeMedia.length
+    syncedMedia.length !== existingMediaArray.length
   ) {
     let patch = client.patch(productId)
     if (Object.keys(updates).length > 0) {
@@ -2984,9 +2701,7 @@ async function updateProductImages(client: any, productId: string, product: any)
       patch = patch.unset(unsetFields)
     }
     await patch.commit()
-    console.log(
-      `   ✅ Eşitleme tamamlandı (Toplam: ${syncedAlternativeMedia.length} alternatif medya)`,
-    )
+    console.log(`   ✅ Eşitleme tamamlandı (${syncedMedia.length} medya)`)
   } else {
     console.log(`   ℹ️ Eşitleme gerekmedi, tüm medya zaten eşleşiyor`)
   }
@@ -2994,217 +2709,75 @@ async function updateProductImages(client: any, productId: string, product: any)
 
 /**
  * Proje medyasını klasörle eşitler (sync)
- * - Klasörde olmayan CMS medyasını siler
- * - CMS'de olmayan klasör medyasını ekler
- * - Her ikisinde de olan medyayı korur
- * - _kapak.*** dosyası kapak medyası olur
  */
 async function updateProjectMedia(client: any, projectId: string, project: any) {
   // Mevcut medyayı kontrol et
   const projectData = await client.fetch(
     `*[_id == $projectId][0]{
-    cover{asset->{_id, originalFilename, sha1hash}},
-    coverR2,
-    coverMobile{asset->{_id, originalFilename, sha1hash}},
-    coverMobileR2,
-    coverDesktop{asset->{_id, originalFilename, sha1hash}},
-    coverDesktopR2,
     media[]{
       ...,
       type,
+      isCover,
       image{asset->{_id, originalFilename, sha1hash}},
       imageR2,
-      imageMobile{asset->{_id, originalFilename, sha1hash}},
-      imageMobileR2,
-      imageDesktop{asset->{_id, originalFilename, sha1hash}},
-      imageDesktopR2,
       videoFile{asset->{_id, originalFilename, sha1hash}},
-      videoFileR2,
-      videoFileMobile{asset->{_id, originalFilename, sha1hash}},
-      videoFileMobileR2,
-      videoFileDesktop{asset->{_id, originalFilename, sha1hash}},
-      videoFileDesktopR2
+      videoFileR2
     }
   }`,
     { projectId },
   )
 
-  const existingHashes = new Set<string>()
-  const existingMedia: any[] = []
-
-  // Kapak görsellerini hash'le (mevcutları takip etmek için)
-  if (projectData?.cover?.asset?.sha1hash) existingHashes.add(projectData.cover.asset.sha1hash)
-  if (projectData?.coverMobile?.asset?.sha1hash)
-    existingHashes.add(projectData.coverMobile.asset.sha1hash)
-  if (projectData?.coverDesktop?.asset?.sha1hash)
-    existingHashes.add(projectData.coverDesktop.asset.sha1hash)
-
-  // Mevcut medyayı topla
-  if (projectData?.media) {
-    for (const mediaItem of projectData.media) {
-      if (mediaItem?.image?.asset?.sha1hash) existingHashes.add(mediaItem.image.asset.sha1hash)
-      if (mediaItem?.videoFile?.asset?.sha1hash)
-        existingHashes.add(mediaItem.videoFile.asset.sha1hash)
-      existingMedia.push(mediaItem)
-    }
-  }
-
+  const existingMedia: any[] = projectData?.media || []
   const updates: any = {}
-  const unsetFields: string[] = []
+  const unsetFields: string[] = ['cover', 'coverR2', 'coverMobile', 'coverMobileR2', 'coverDesktop', 'coverDesktopR2']
   let hasChanges = false
 
-  // Kapak görseli
-  const coverFile = project.coverImages.all
-  const coverMobileFile = project.coverImages.mobile
-  const coverDesktopFile = project.coverImages.desktop
+  const incomingMedia = project.media || []
+  const folderMediaMap = new Map<string, { file: File; isVideo: boolean; device: string; isCover: boolean }>()
 
-  console.log(`   🔍 Proje medya analizi: ${project.files.length} genel dosya bulundu`)
-  if (coverFile) {
-    console.log(`   📸 Kapak dosyası bulundu: ${coverFile.name}`)
-  } else {
-    console.log(`   ⚠️ Kapak dosyası bulunamadı, ilk görsel aranıyor...`)
-  }
-
-  // Alternatif medya eşitleme (contentBlocks ve root files)
-  const folderMediaMap = new Map<string, { file: File; isVideo: boolean; device: string; block?: number }>()
-
-  // 1. Content Blocks'ları ekle
-  for (const [blokNum, blok] of project.contentBlocks.entries()) {
-    if (blok.all) {
-      const hash = await getFileHash(blok.all)
-      folderMediaMap.set(hash, { file: blok.all, isVideo: isVideoFile(blok.all.name), device: 'all', block: blokNum })
-    }
-    if (blok.desktop) {
-      const hash = await getFileHash(blok.desktop)
-      folderMediaMap.set(hash, { file: blok.desktop, isVideo: isVideoFile(blok.desktop.name), device: 'desktop', block: blokNum })
-    }
-    if (blok.mobile) {
-      const hash = await getFileHash(blok.mobile)
-      folderMediaMap.set(hash, { file: blok.mobile, isVideo: isVideoFile(blok.mobile.name), device: 'mobile', block: blokNum })
-    }
-  }
-
-  // 2. Root files (legacy or additional)
-  for (const media of project.files) {
-    const hash = await getFileHash(media)
-    if (!folderMediaMap.has(hash)) {
-      folderMediaMap.set(hash, { file: media, isVideo: isVideoFile(media.name), device: 'all' })
-    }
+  for (const media of incomingMedia) {
+    const hash = await getFileHash(media.file)
+    folderMediaMap.set(hash, {
+      file: media.file,
+      isVideo: isVideoFile(media.file.name),
+      device: media.device,
+      isCover: !!media.isCover
+    })
   }
 
   const cmsMediaMap = new Map<string, any>()
-  const coverHashes = new Set<string>()
-  if (projectData?.cover?.asset?.sha1hash) coverHashes.add(projectData.cover.asset.sha1hash)
-  if (projectData?.coverMobile?.asset?.sha1hash)
-    coverHashes.add(projectData.coverMobile.asset.sha1hash)
-  if (projectData?.coverDesktop?.asset?.sha1hash)
-    coverHashes.add(projectData.coverDesktop.asset.sha1hash)
-
   for (const mediaItem of existingMedia) {
     let hash: string | null = null
     if (mediaItem?.image?.asset?.sha1hash) hash = mediaItem.image.asset.sha1hash
     if (mediaItem?.videoFile?.asset?.sha1hash) hash = mediaItem.videoFile.asset.sha1hash
-    if (hash && !coverHashes.has(hash)) cmsMediaMap.set(hash, mediaItem)
+    if (hash) cmsMediaMap.set(hash, mediaItem)
   }
 
   const syncedMedia: any[] = []
 
-  // 1. Kapak Görselleri Eşitleme
-  if (coverFile) {
-    if (!projectData?.coverR2 || projectData?.cover) {
-      console.log(`   📸 Kapak görseli R2'ye yükleniyor: ${coverFile.name}`)
-      const r2Url = await uploadToR2(coverFile, `projects/${slugify(project.projectName)}`)
-      if (r2Url) {
-        updates.coverR2 = {
-          _type: 'r2Asset',
-          url: r2Url.url,
-          width: r2Url.width,
-          height: r2Url.height,
-          hasResponsiveSizes: r2Url.hasResponsiveSizes,
-        }
-        unsetFields.push('cover')
-        hasChanges = true
-      }
-    }
-  }
-
-  if (coverMobileFile) {
-    if (!projectData?.coverMobileR2 || projectData?.coverMobile) {
-      console.log(`   📱 Mobil kapak görseli R2'ye yükleniyor: ${coverMobileFile.name}`)
-      const r2Url = await uploadToR2(coverMobileFile, `projects/${slugify(project.projectName)}`)
-      if (r2Url) {
-        updates.coverMobileR2 = {
-          _type: 'r2Asset',
-          url: r2Url.url,
-          width: r2Url.width,
-          height: r2Url.height,
-          hasResponsiveSizes: r2Url.hasResponsiveSizes,
-        }
-        unsetFields.push('coverMobile')
-        hasChanges = true
-      }
-    }
-  }
-
-  if (coverDesktopFile) {
-    if (!projectData?.coverDesktopR2 || projectData?.coverDesktop) {
-      console.log(`   💻 Desktop kapak görseli R2'ye yükleniyor: ${coverDesktopFile.name}`)
-      const r2Url = await uploadToR2(coverDesktopFile, `projects/${slugify(project.projectName)}`)
-      if (r2Url) {
-        updates.coverDesktopR2 = {
-          _type: 'r2Asset',
-          url: r2Url.url,
-          width: r2Url.width,
-          height: r2Url.height,
-          hasResponsiveSizes: r2Url.hasResponsiveSizes,
-        }
-        unsetFields.push('coverDesktop')
-        hasChanges = true
-      }
-    }
-  }
-
-  // 2. Alternatif medya eşitleme ve yükleme
   for (const [hash, mediaInfo] of folderMediaMap.entries()) {
-    const { file, isVideo, device, block } = mediaInfo
+    const { file, isVideo, device, isCover } = mediaInfo
     const existing = cmsMediaMap.get(hash)
 
-    if (
-      existing &&
-      ((isVideo && existing.videoFileR2 && !existing.videoFile) ||
-        (!isVideo && existing.imageR2 && !existing.image))
-    ) {
-      syncedMedia.push(resolveKey(existing))
-      console.log(`   ✓ Korundu (R2): ${file.name} ${block ? `(Blok ${block})` : ''}`)
+    if (existing) {
+      const updatedItem = { ...existing, isCover }
+      syncedMedia.push(resolveKey(updatedItem))
+      if (existing.isCover !== isCover) hasChanges = true
     } else {
-      console.log(`   ✅ ${isVideo ? 'Video' : 'Görsel'} R2'ye yükleniyor: ${file.name} ${block ? `(Blok ${block})` : ''}`)
+      console.log(`   ✅ ${isVideo ? 'Video' : 'Görsel'} R2'ye yükleniyor: ${file.name} ${isCover ? '(KAPAK)' : ''}`)
       const r2Url = await uploadToR2(file, `projects/${slugify(project.projectName)}`)
       if (r2Url) {
         const item: any = {
-          _type: 'object',
+          _type: 'productSimpleMediaItem',
           _key: `proj-${Date.now()}-${Math.random()}`,
           type: isVideo ? 'video' : 'image',
+          isCover,
         }
 
         if (isVideo) {
-          if (device === 'mobile') {
-            item.videoFileMobileR2 = { _type: 'r2Asset', url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes }
-          } else if (device === 'desktop') {
-            item.videoFileDesktopR2 = { _type: 'r2Asset', url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes }
-          } else {
-            item.videoFileR2 = { _type: 'r2Asset', url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes }
-          }
+          item.videoFileR2 = { _type: 'r2Asset', url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes }
         } else {
-          const r2Asset = {
-            _type: 'r2Asset',
-            url: r2Url.url,
-            width: r2Url.width,
-            height: r2Url.height,
-            hasResponsiveSizes: r2Url.hasResponsiveSizes,
-          }
-          if (device === 'mobile') item.imageMobileR2 = r2Asset
-          else if (device === 'desktop') item.imageDesktopR2 = r2Asset
-          else item.imageR2 = r2Asset
+          item.imageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height }
         }
         syncedMedia.push(item)
         hasChanges = true
@@ -3212,22 +2785,10 @@ async function updateProjectMedia(client: any, projectId: string, project: any) 
     }
   }
 
-  // Sonuç: Sadece klasördeki medya kalacak (eşitleme tamamlandı)
-  updates.media = syncedMedia
-
-  // Güncellemeleri uygula
   if (hasChanges || syncedMedia.length !== existingMedia.length) {
-    let patch = client.patch(projectId)
-    if (Object.keys(updates).length > 0) {
-      patch = patch.set(updates)
-    }
-    if (unsetFields.length > 0) {
-      patch = patch.unset(unsetFields)
-    }
-    await patch.commit()
-    console.log(`   ✅ Eşitleme tamamlandı (Toplam: ${syncedMedia.length} medya)`)
-  } else {
-    console.log(`   ℹ️ Eşitleme gerekmedi, tüm medya zaten eşleşiyor`)
+    updates.media = syncedMedia
+    await client.patch(projectId).set(updates).unset(unsetFields).commit()
+    console.log(`   ✅ Proje medyası eşitlendi (Toplam: ${syncedMedia.length} medya)`)
   }
 }
 
@@ -3328,14 +2889,10 @@ async function updateCategoryImages(
 async function updateNewsItemMedia(client: any, newsId: string, news: any) {
   const newsData = await client.fetch(
     `*[_id == $newsId][0]{
-    mainImage,
-    mainImageR2,
-    mainImageMobile,
-    mainImageMobileR2,
-    mainImageDesktop,
-    mainImageDesktopR2,
     media[]{
       ...,
+      type,
+      isCover,
       image{asset->{_id, originalFilename, sha1hash}},
       imageR2,
       videoFile{asset->{_id, originalFilename, sha1hash}},
@@ -3345,150 +2902,58 @@ async function updateNewsItemMedia(client: any, newsId: string, news: any) {
     { newsId },
   )
 
+  const existingMedia: any[] = newsData?.media || []
   const updates: any = {}
-  const unsetFields: string[] = []
+  const unsetFields: string[] = ['mainImage', 'mainImageR2', 'mainImageMobile', 'mainImageMobileR2', 'mainImageDesktop', 'mainImageDesktopR2']
   let hasChanges = false
 
-  const coverMain =
-    news.files.find(
-      (f: File) =>
-        isImageFile(f.name) &&
-        f.name.toLowerCase().includes('_kapak') &&
-        !f.name.toLowerCase().includes('_mobil') &&
-        !f.name.toLowerCase().includes('_desktop'),
-    ) || news.files.find((f: File) => isImageFile(f.name))
-
-  const coverMobile = news.files.find(
-    (f: File) => isImageFile(f.name) && f.name.toLowerCase().includes('_kapak_mobil'),
-  )
-  const coverDesktop = news.files.find(
-    (f: File) => isImageFile(f.name) && f.name.toLowerCase().includes('_kapak_desktop'),
-  )
-
-  // 1. Kapak görselleri
-  if (coverMain) {
-    if (!newsData?.mainImageR2 || newsData?.mainImage) {
-      console.log(`   📸 Haber kapak R2'ye yükleniyor: ${coverMain.name}`)
-      const r2Url = await uploadToR2(coverMain, `news/${news.newsId}`)
-      if (r2Url) {
-        updates.mainImageR2 = {
-          _type: 'r2Asset',
-          url: r2Url.url,
-          width: r2Url.width,
-          height: r2Url.height,
-          hasResponsiveSizes: r2Url.hasResponsiveSizes,
-        }
-        unsetFields.push('mainImage')
-        hasChanges = true
-      }
-    }
+  const folderMediaMap = new Map<string, { file: File; isVideo: boolean; isCover: boolean }>()
+  for (const file of news.files) {
+    const hash = await getFileHash(file)
+    const isCover = file.name.toLowerCase().includes('_kapak')
+    folderMediaMap.set(hash, { file, isVideo: isVideoFile(file.name), isCover })
   }
 
-  if (coverMobile) {
-    if (!newsData?.mainImageMobileR2 || newsData?.mainImageMobile) {
-      console.log(`   📱 Haber mobil kapak R2'ye yükleniyor: ${coverMobile.name}`)
-      const r2Url = await uploadToR2(coverMobile, `news/${news.newsId}`)
-      if (r2Url) {
-        updates.mainImageMobileR2 = {
-          _type: 'r2Asset',
-          url: r2Url.url,
-          width: r2Url.width,
-          height: r2Url.height,
-          hasResponsiveSizes: r2Url.hasResponsiveSizes,
-        }
-        unsetFields.push('mainImageMobile')
-        hasChanges = true
-      }
-    }
-  } else if (newsData?.mainImageMobileR2 || newsData?.mainImageMobile) {
-    unsetFields.push('mainImageMobile', 'mainImageMobileR2')
-    hasChanges = true
-  }
-
-  if (coverDesktop) {
-    if (!newsData?.mainImageDesktopR2 || newsData?.mainImageDesktop) {
-      console.log(`   💻 Haber desktop kapak R2'ye yükleniyor: ${coverDesktop.name}`)
-      const r2Url = await uploadToR2(coverDesktop, `news/${news.newsId}`)
-      if (r2Url) {
-        updates.mainImageDesktopR2 = {
-          _type: 'r2Asset',
-          url: r2Url.url,
-          width: r2Url.width,
-          height: r2Url.height,
-          hasResponsiveSizes: r2Url.hasResponsiveSizes,
-        }
-        unsetFields.push('mainImageDesktop')
-        hasChanges = true
-      }
-    }
-  } else if (newsData?.mainImageDesktopR2 || newsData?.mainImageDesktop) {
-    unsetFields.push('mainImageDesktop', 'mainImageDesktopR2')
-    hasChanges = true
-  }
-
-  // 2. Diğer medya dosyaları
-  const otherMedia = news.files.filter((f: File) => !f.name.toLowerCase().includes('_kapak'))
-  const folderMediaMap = new Map<string, File>()
-  for (const f of otherMedia) {
-    const hash = await getFileHash(f)
-    folderMediaMap.set(hash, f)
-  }
-
-  const cmsMediaMap = new Map<string, any>()
-  if (newsData?.media) {
-    newsData.media.forEach((item: any) => {
-      const hash = item?.image?.asset?.sha1hash || item?.videoFile?.asset?.sha1hash
-      if (hash) cmsMediaMap.set(hash, item)
-    })
+  if (!Array.from(folderMediaMap.values()).some(m => m.isCover)) {
+    const firstImg = Array.from(folderMediaMap.entries()).find(([h, m]) => !m.isVideo)
+    if (firstImg) folderMediaMap.get(firstImg[0])!.isCover = true
   }
 
   const syncedMedia: any[] = []
-  for (const [hash, file] of folderMediaMap.entries()) {
-    const existing = cmsMediaMap.get(hash)
-    const isVid = isVideoFile(file.name)
+  const cmsMediaMap = new Map<string, any>()
+  for (const item of existingMedia) {
+    let hash: string | null = item?.image?.asset?.sha1hash || item?.videoFile?.asset?.sha1hash
+    if (hash) cmsMediaMap.set(hash, item)
+  }
 
-    if (
-      existing &&
-      ((isVid && existing.videoFileR2 && !existing.videoFile) ||
-        (!isVid && existing.imageR2 && !existing.image))
-    ) {
-      syncedMedia.push(resolveKey(existing))
+  for (const [hash, info] of folderMediaMap.entries()) {
+    const existing = cmsMediaMap.get(hash)
+    if (existing) {
+      const updatedItem = { ...existing, isCover: info.isCover }
+      syncedMedia.push(resolveKey(updatedItem))
+      if (existing.isCover !== info.isCover) hasChanges = true
     } else {
-      console.log(`   ✅ Haber medyası R2'ye yükleniyor: ${file.name}`)
-      const r2Url = await uploadToR2(file, `news/${news.newsId}`)
+      console.log(`   ✅ Haber medyası R2'ye yükleniyor: ${info.file.name} ${info.isCover ? '(KAPAK)' : ''}`)
+      const r2Url = await uploadToR2(info.file, `news/${news.newsId}`)
       if (r2Url) {
         const item: any = {
-          _type: 'object',
-          _key: `news-${Date.now()}-${Math.random()}`,
-          type: isVid ? 'video' : 'image',
+          _type: 'newsMedia',
+          _key: `news-${Date.now()}`,
+          type: info.isVideo ? 'video' : 'image',
+          isCover: info.isCover,
         }
-        if (isVid) {
-          item.videoFileR2 = {
-            _type: 'r2Asset',
-            url: r2Url.url,
-            hasResponsiveSizes: r2Url.hasResponsiveSizes,
-          }
-        } else {
-          item.imageR2 = {
-            _type: 'r2Asset',
-            url: r2Url.url,
-            width: r2Url.width,
-            height: r2Url.height,
-            hasResponsiveSizes: r2Url.hasResponsiveSizes,
-          }
-        }
+        if (info.isVideo) item.videoFileR2 = { _type: 'r2Asset', url: r2Url.url }
+        else item.imageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height }
         syncedMedia.push(item)
         hasChanges = true
       }
     }
   }
 
-  if (hasChanges || (newsData?.media?.length || 0) !== syncedMedia.length) {
+  if (hasChanges || syncedMedia.length !== existingMedia.length) {
     updates.media = syncedMedia
-    let patch = client.patch(newsId).set(updates)
-    if (unsetFields.length > 0) patch = patch.unset(unsetFields)
-    await patch.commit()
-    console.log(`   ✅ Haber medyası güncellendi`)
+    await client.patch(newsId).set(updates).unset(unsetFields).commit()
+    console.log(`   ✅ Haber medyası eşitlendi`)
   }
 }
 

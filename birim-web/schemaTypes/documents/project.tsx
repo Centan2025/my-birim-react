@@ -1,6 +1,7 @@
 import React from 'react'
 import { defineField, defineType } from 'sanity'
 import { getPreviewUrl } from '../utils/previewUrl'
+import BulkMediaUploadInput from '../../components/BulkMediaUploadInput'
 
 export default defineType({
   name: 'project',
@@ -54,19 +55,14 @@ export default defineType({
       description: 'Proje türü bilgisi (örn: Mimari & İç Mekan, Mobilya Tasarım, İç Mimarlık)',
     }),
     defineField({
-      name: 'coverR2',
-      title: 'Kapak Görseli (Tüm Cihazlar)',
-      type: 'r2Asset',
-    }),
-    defineField({
-      name: 'coverMobileR2',
-      title: 'Kapak Görseli (Mobil)',
-      type: 'r2Asset',
-    }),
-    defineField({
-      name: 'coverDesktopR2',
-      title: 'Kapak Görseli (Desktop)',
-      type: 'r2Asset',
+      name: 'media',
+      title: 'Proje Medyası',
+      type: 'array',
+      of: [{type: 'productSimpleMediaItem'}],
+      components: {
+        input: BulkMediaUploadInput
+      },
+      description: 'Projeye ait tüm görsel ve videolar. İlk öğe listede önizleme olarak kullanılır.',
     }),
     defineField({ name: 'excerpt', title: 'Kısa Açıklama', type: 'localizedPortableText' }),
     defineField({
@@ -78,9 +74,15 @@ export default defineType({
     }),
   ],
   preview: {
-    select: { title: 'title.tr', r2Url: 'coverR2.url' },
-    prepare({ title, r2Url }) {
+    select: { 
+      title: 'title.tr', 
+      media: 'media' 
+    },
+    prepare({ title, media }) {
+      const coverItem = media?.find((m: any) => m.isCover) || media?.[0]
+      const r2Url = coverItem?.imageR2?.url || coverItem?.thumbnailR2?.url
       let finalUrl = getPreviewUrl(r2Url)
+
       return {
         title: title || 'Proje',
         media: finalUrl ? (

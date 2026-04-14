@@ -19,13 +19,11 @@ interface OptimizedImageProps {
   loading?: 'lazy' | 'eager'
   fetchPriority?: 'high' | 'low' | 'auto'
   quality?: number
-  format?: 'webp' | 'avif' | 'jpg' | 'png'
   sizes?: string
   srcSet?: string
   // Art Direction: Farklı ekranlar için farklı görseller
   srcMobile?: string // Mobil için görsel (varsa)
   srcDesktop?: string // Desktop için görsel (varsa)
-  fallbackSrc?: string // R2 yüklenemezse kullanılacak yedek (Sanity) görsel
   draggable?: boolean
   onLoad?: () => void
   onError?: () => void
@@ -45,7 +43,7 @@ interface OptimizedImageProps {
  * - WebP format desteği
  * - Responsive images (srcset)
  * - Placeholder gösterimi
- * - R2 -> Sanity Fallback desteği
+ * - R2 tabanlı Art Direction
  */
 export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   src,
@@ -56,12 +54,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   loading = 'lazy',
   fetchPriority = 'auto',
   quality = 85,
-  format = 'webp',
   sizes,
   srcSet,
   srcMobile,
   srcDesktop,
-  fallbackSrc,
   draggable,
   onLoad,
   onError,
@@ -76,7 +72,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 }) => {
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
-  const [usingFallback, setUsingFallback] = useState(false)
   const [naturalDims, setNaturalDims] = useState<{ w: number, h: number } | null>(null)
   const imgRef = useRef<HTMLImageElement>(null)
 
@@ -84,8 +79,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   useEffect(() => {
     setIsLoaded(false)
     setHasError(false)
-    setUsingFallback(false)
   }, [src, srcMobile, srcDesktop])
+
 
   // Cache'den yüklenen görselleri yakalama — back navigation'da onLoad tetiklenmez
   useEffect(() => {
@@ -123,19 +118,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   }
 
   const handleError = () => {
-    // Eğer fallback varsa ve henüz kullanmıyorsak, ona geç
-    if (fallbackSrc && !usingFallback) {
-      console.warn(
-        'OptimizedImage: R2 visual failed or unavailable, switching to Sanity fallback.',
-        src
-      )
-      setUsingFallback(true)
-      // Hata durumunu resetle, çünkü yeni bir deneme yapıyoruz
-      setHasError(false)
-      setIsLoaded(false)
-      return
-    }
-
     setHasError(true)
     onError?.()
   }
@@ -167,44 +149,28 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     return url
   }
 
-  // fallback modundaysak sadece fallbackSrc'yi optimize etmeye çalış (Sanity ise)
-  // Değilse normal src'yi kullan.
-  const activeSrc = rewriteUrl(usingFallback && fallbackSrc ? fallbackSrc : src)
-  const activeMobileSrc = usingFallback ? undefined : rewriteUrl(srcMobile || src)
-  const activeDesktopSrc = usingFallback ? undefined : rewriteUrl(srcDesktop || src)
+  const activeSrc = rewriteUrl(src)
+  const activeMobileSrc = rewriteUrl(srcMobile || src)
+  const activeDesktopSrc = rewriteUrl(srcDesktop || src)
 
   // Cloudflare R2 / Image Resizing logic
   const r2Domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
   // .r2.dev ve .workers.dev domainleri image resizing desteklemez
   const skipImageResizing = r2Domain?.includes('.r2.dev') || r2Domain?.includes('.workers.dev') || r2Domain?.includes('assets.birim.com')
 
-  // Sanity image URL'lerini ve R2 URL'lerini optimize et
+  // R2 URL'lerini optimize et
   const getOptimizedUrl = (url: string): string => {
     if (!url) return placeholder
 
-    // 1. Sanity CDN
-    if (url.includes('cdn.sanity.io/images')) {
-      const urlObj = new URL(url)
-      // Mevcut parametreleri koru, yeni parametreler ekle
-      if (width) urlObj.searchParams.set('w', width.toString())
-      if (height) urlObj.searchParams.set('h', height.toString())
-      urlObj.searchParams.set('q', quality.toString())
-      urlObj.searchParams.set('fm', format)
-      urlObj.searchParams.set('auto', 'format')
-      return encodeSrcSetUrl(urlObj.toString())
-    }
-
-    // 2. Cloudflare R2 / Image Resizing
+    // Cloudflare R2 / Image Resizing
     if (r2Domain && url.startsWith(r2Domain) && !url.includes('/cdn-cgi/image/')) {
       if (skipImageResizing) return url.replace('?rs=1', '').replace('&rs=1', '')
 
       // Eğer domain .workers.dev veya .r2.dev ise Cloudflare Image Resizing desteklenmez (404 verir).
-      // Bu nedenle URL'yi doğrudan geri döndüreceğiz ve kırpma işlemini clientCrop (CSS) halledecek.
       if (r2Domain.includes('.workers.dev') || r2Domain.includes('.r2.dev')) {
         return encodeSrcSetUrl(url)
       }
 
-      // Cloudflare URL format: /cdn-cgi/image/format=auto,width=XXX,height=YYY/path/to/image
       const params = []
       if (width) params.push(`width=${width}`)
       if (height) params.push(`height=${height}`)
@@ -221,12 +187,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       }
 
       params.push(`quality=${quality}`)
-      params.push('format=auto') // Cloudflare auto format (webp/avif)
+      params.push('format=auto')
 
-      // URL'den domain'i çıkarıp path'i al
       const path = url.replace(r2Domain + '/', '')
-
-      // Construct: https://assets.birim.com/cdn-cgi/image/.../path
       return encodeSrcSetUrl(`${r2Domain}/cdn-cgi/image/${params.join(',')}/${path}`)
     }
 
@@ -240,21 +203,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   // Responsive srcset oluştur
   const generateSrcSet = (baseUrl: string): string => {
-    if (srcSet && !usingFallback) return srcSet
+    if (srcSet) return srcSet
 
     const sizes = [400, 800, 1200, 1600, 2000]
-
-    // Sanity Logic
-    if (baseUrl.includes('cdn.sanity.io/images')) {
-      return sizes
-        .map(w => {
-          const url = getOptimizedUrl(baseUrl)
-          const urlObj = new URL(url)
-          urlObj.searchParams.set('w', w.toString())
-          return `${urlObj.toString()} ${w}w`
-        })
-        .join(', ')
-    }
 
     // R2 Logic
     const r2Domain =
@@ -274,14 +225,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             `${cleanUrl} 2560w`,
           ].join(', ')
         }
-        return '' // srcset desteği yok (image resizing kapalı)
+        return '' 
       }
 
-      // Cloudflare URL builder helper for local usage inside map
       const buildR2 = (w: number) => {
         const params = [`width=${w}`, `quality=${quality}`, 'format=auto']
 
-        // Add crop rect if available
         if (crop) {
           if (crop.width < 1.0 || crop.height < 1.0 || crop.x > 0 || crop.y > 0) {
             if (origWidth && origHeight) {
@@ -292,7 +241,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           }
         }
 
-        // Remove domain to get path
         const path = baseUrl.replace(r2Domain + '/', '')
         return encodeSrcSetUrl(`${r2Domain}/cdn-cgi/image/${params.join(',')}/${path}`)
       }
@@ -306,8 +254,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const responsiveSrcSet = generateSrcSet(activeSrc) || undefined
   const defaultSizes = sizes || '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 1200px'
 
-  // Art Direction kullanılıyor mu? (srcMobile veya srcDesktop varsa ve fallback yoksa)
-  const useArtDirection = Boolean((srcMobile || srcDesktop) && !usingFallback)
+  // Art Direction kullanılıyor mu?
+  const useArtDirection = Boolean(srcMobile || srcDesktop)
 
   // Hotspot varsa style'a object-position ekle
   const imgStyle: React.CSSProperties = { ...style }
@@ -320,12 +268,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const isCoverMode = className.includes('h-full') || className.includes('h-screen') || !!height
 
   const canCloudflareCrop = !!(crop && (crop.width >= 1.0 || (origWidth && origHeight)))
-  const isServerResizingActive = activeSrc.includes('cdn.sanity.io/images') || (r2Domain && !r2Domain.includes('.workers.dev') && !r2Domain.includes('.r2.dev') && !skipImageResizing && (!hasCrop || canCloudflareCrop))
+  const isServerResizingActive = r2Domain && !r2Domain.includes('.workers.dev') && !r2Domain.includes('.r2.dev') && !skipImageResizing && (!hasCrop || canCloudflareCrop)
 
-  // Eğer origin sunucu (Cloudflare workers vb) resize desteklemiyorsa CLIENT CROP ZORUNLUDUR! isCoverMode'dan bağımsız.
   const useClientCrop = hasCrop && !isServerResizingActive
 
-  // Sadece Crop yokken ama Hotspot varken veya Server Crop kullanıldığında Object Position aktif et.
   if (isCoverMode && !useClientCrop) {
     if (hasCrop) {
       const centerX = (crop!.x + crop!.width / 2) * 100
@@ -361,7 +307,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             position: 'absolute',
             top: 0,
             left: 0,
-            // cover modedayken resmin uzayıp sünmemesi için kendi aspect-ratio'sunu koruması sağlanır
             objectFit: isCoverMode ? 'cover' : 'fill',
           }}
         >
@@ -382,23 +327,18 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     )
   }
 
-  // Strip layout relevant classes from inner img to prevent nested constraints
-  // Keep mx-auto for centering, only remove max-w- and w- to prevent double scaling
   const isHeightDefined = className.includes('h-') || className.includes('aspect-')
   const innerImgClassName = className
     .split(' ')
     .filter(c => !c.startsWith('max-w-') && !c.startsWith('w-'))
     .join(' ')
 
-  // Art Direction ile picture elementi kullan
   if (useArtDirection) {
-    // Generate srcSets with Safari-safe empty handling (empty string → undefined)
     const mobileSrcSet = (srcMobile ? generateSrcSet(srcMobile) : '') || undefined
     const desktopSrcSet = (srcDesktop ? generateSrcSet(srcDesktop) : '') || undefined
 
     const pictureElement = (
       <picture>
-        {/* Mobil görsel — srcSet varsa kullan, yoksa sadece optimized src ile source */}
         {srcMobile && (
           <source
             media="(max-width: 768px)"
@@ -407,7 +347,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           />
         )}
 
-        {/* Desktop görsel */}
         {srcDesktop && (
           <source
             media="(min-width: 769px)"
@@ -416,7 +355,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           />
         )}
 
-        {/* Fallback img — Safari'de picture/source çalışmazsa bunu kullanır */}
         <img
           ref={imgRef}
           src={
@@ -460,17 +398,14 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     )
   }
 
-  // Normal kullanım (Art Direction yok veya fallback)
   const pictureElement = (
     <picture>
-      {/* srcSet varsa responsive source ekle, yoksa Safari-safe olarak hiç ekleme */}
       {responsiveSrcSet && (
         <source
           srcSet={responsiveSrcSet}
           sizes={defaultSizes}
         />
       )}
-      {/* Fallback image */}
       <img
         key={activeSrc}
         ref={imgRef}
@@ -510,3 +445,4 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       </div>
     )
 }
+

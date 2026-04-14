@@ -21,7 +21,7 @@ const mapProductMedia = (row: any): any[] => {
       const url = mapMediaUrl(m)
       const urlMobile = mapMediaUrl(m, true, false)
       const urlDesktop = mapMediaUrl(m, false, true)
-      const metadata = m?.imageR2 ? mapR2Metadata(m.imageR2) : (m?.image ? mapR2Metadata(m.image) : {})
+      const metadata = m?.imageR2 ? mapR2Metadata(m.imageR2) : {}
       const result: any = {
         type,
         url,
@@ -42,11 +42,10 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
   if (useSanity && sanity) {
     const q = groq`*[_type == "aboutPage"][0]{
             ...,
-            heroImage{ ..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}, dimensions}} },
             heroImageR2,
-            historySection{ ..., image{ ..., asset->{url, _ref, _id, metadata{dimensions}} }, imageR2, media[]{ ..., image{ ..., asset->{url, _ref, _id, metadata{dimensions}} }, imageR2, imageMobile{ ..., asset->{url, _ref, _id} }, imageMobileR2, imageDesktop{ ..., asset->{url, _ref, _id} }, imageDesktopR2, videoFile{ ..., asset->{url, _ref, _id} }, videoFileR2 } },
-            identitySection{ ..., image{ ..., asset->{url, _ref, _id, metadata{dimensions}} }, imageR2, media[]{ ..., image{ ..., asset->{url, _ref, _id, metadata{dimensions}} }, imageR2, imageMobile{ ..., asset->{url, _ref, _id} }, imageMobileR2, imageDesktop{ ..., asset->{url, _ref, _id} }, imageDesktopR2, videoFile{ ..., asset->{url, _ref, _id} }, videoFileR2 } },
-            qualitySection{ ..., image{ ..., asset->{url, _ref, _id, metadata{dimensions}} }, imageR2, media[]{ ..., image{ ..., asset->{url, _ref, _id, metadata{dimensions}} }, imageR2, imageMobile{ ..., asset->{url, _ref, _id} }, imageMobileR2, imageDesktop{ ..., asset->{url, _ref, _id} }, imageDesktopR2, videoFile{ ..., asset->{url, _ref, _id} }, videoFileR2 } }
+            historySection{ ..., imageR2, media[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 } },
+            identitySection{ ..., imageR2, media[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 } },
+            qualitySection{ ..., imageR2, media[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 } }
         }`
     const data = await sanity.withConfig({ useCdn: false }).fetch(q)
     if (data) {
@@ -56,38 +55,31 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
           palette: extractPalette(data.heroImageR2),
           ...mapR2Metadata(data.heroImageR2),
         }
-      } else if (data.heroImage?.asset) {
-        data.heroImage = {
-          url: mapImage(data.heroImage),
-          palette: extractPalette(data.heroImage),
-          ...mapR2Metadata(data.heroImage)
-        }
       }
       if (data.historySection) {
-        const hsMeta = data.historySection.imageR2 ? mapR2Metadata(data.historySection.imageR2) : mapR2Metadata(data.historySection.image)
+        const hsMeta = mapR2Metadata(data.historySection.imageR2)
         data.historySection.image = {
-          url: mapImage(data.historySection.imageR2) || mapImage(data.historySection.image),
+          url: mapImage(data.historySection.imageR2),
           ...hsMeta,
         }
         data.historySection.media = mapProductMedia(data.historySection)
       }
       if (data.identitySection) {
-        const idMeta = data.identitySection.imageR2 ? mapR2Metadata(data.identitySection.imageR2) : mapR2Metadata(data.identitySection.image)
+        const idMeta = mapR2Metadata(data.identitySection.imageR2)
         data.identitySection.image = {
-          url: mapImage(data.identitySection.imageR2) || mapImage(data.identitySection.image),
+          url: mapImage(data.identitySection.imageR2),
           ...idMeta,
         }
         data.identitySection.media = mapProductMedia(data.identitySection)
       }
       if (data.qualitySection) {
-        const qsMeta = data.qualitySection.imageR2 ? mapR2Metadata(data.qualitySection.imageR2) : mapR2Metadata(data.qualitySection.image)
+        const qsMeta = mapR2Metadata(data.qualitySection.imageR2)
         data.qualitySection.image = {
-          url: mapImage(data.qualitySection.imageR2) || mapImage(data.qualitySection.image),
+          url: mapImage(data.qualitySection.imageR2),
           ...qsMeta,
         }
         data.qualitySection.media = mapProductMedia(data.qualitySection)
       }
-      if (!Array.isArray(data.values)) data.values = []
       if (!Array.isArray(data.values)) data.values = []
       return data
     }
@@ -102,11 +94,10 @@ export const getFactoryPageContent = async (): Promise<FactoryPageContent> => {
   if (useSanity && sanity) {
     const q = groq`*[_type == "factoryPage"][0]{
             ...,
-            gallery[]{ ..., image{ ..., asset->{url, _ref, _id, metadata{dimensions}} }, imageR2, imageMobile{ ..., asset->{url, _ref, _id} }, imageMobileR2, imageDesktop{ ..., asset->{url, _ref, _id} }, imageDesktopR2, videoFile{ ..., asset->{url, _ref, _id} }, videoFileR2 }
+            gallery[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 }
         }`
     const data = await sanity.withConfig({ useCdn: false }).fetch(q)
     if (data) {
-
       if (data.gallery) {
         data.gallery = mapProductMedia({ media: data.gallery })
       }
@@ -119,7 +110,7 @@ export const getFactoryPageContent = async (): Promise<FactoryPageContent> => {
 
 export const getContactPageContent = async (): Promise<ContactPageContent> => {
   if (useSanity && sanity) {
-    const q = groq`*[_type == "contactPage"][0]{ ..., locations[]{ ..., media[]{ type, url, image{..., asset->{url, _ref, _id}}, imageR2, videoFile{..., asset->{url, _ref, _id}}, videoFileR2 } } }`
+    const q = groq`*[_type == "contactPage"][0]{ ..., locations[]{ ..., media[]{ type, url, imageR2, videoFileR2 } } }`
     const data = await sanity.fetch(q)
     if (data?.locations) {
       data.locations = data.locations.map((loc: any) => {
@@ -128,11 +119,10 @@ export const getContactPageContent = async (): Promise<ContactPageContent> => {
             .map((mediaItem: any) => {
               let mediaUrl = mediaItem.url
               if (mediaItem.type === 'image') {
-                mediaUrl = mapImage(mediaItem.imageR2) || mapImage(mediaItem.image) || mediaItem.url
+                mediaUrl = mapImage(mediaItem.imageR2) || mediaItem.url
               } else if (mediaItem.type === 'video') {
                 mediaUrl =
                   (mediaItem.videoFileR2?.url ? rewriteR2Url(mediaItem.videoFileR2.url) : null) ||
-                  mediaItem.videoFile?.asset?.url ||
                   mediaItem.url
               }
               const metadata = mediaItem.imageR2 ? mapR2Metadata(mediaItem.imageR2) : {}
@@ -155,8 +145,8 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
     try {
       const q = groq`*[_type == "homePage"][0]{
             ..., heroAutoPlay,
-            heroMedia[]{ ..., image{..., asset->{url, _ref, _id, metadata{palette{dominant{background,foreground}}}}}, imageR2{..., metadata{palette{dominant{background,foreground}}} }, imageMobileR2{..., metadata{palette{dominant{background,foreground}}} }, imageDesktopR2{..., metadata{palette{dominant{background,foreground}}} }, videoFileR2, videoFileMobileR2, videoFileDesktopR2 },
-            contentBlocks[]{ ..., image{..., asset->{url, _ref, _id}}, titleFont, contentFont, imageR2, imageMobileR2, imageDesktopR2, videoFileR2, videoFileMobileR2, videoFileDesktopR2 }
+            heroMedia[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2, videoFileMobileR2, videoFileDesktopR2 },
+            contentBlocks[]{ ..., titleFont, contentFont, imageR2, imageMobileR2, imageDesktopR2, videoFileR2, videoFileMobileR2, videoFileDesktopR2 }
         }`
       const data = await sanity.withConfig({ useCdn: false }).fetch(q)
       if (data?.heroMedia) {
@@ -177,7 +167,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
             if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
             if (palette) result.palette = palette
-            const heroMeta = m.imageR2 ? mapR2Metadata(m.imageR2) : (m.image ? mapR2Metadata(m.image) : {})
+            const heroMeta = m.imageR2 ? mapR2Metadata(m.imageR2) : {}
             if (heroMeta.crop) result.crop = heroMeta.crop
             if (heroMeta.hotspot) result.hotspot = heroMeta.hotspot
             return result
@@ -194,18 +184,18 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
           let urlDesktop = undefined
 
           if (b.mediaType === 'image' || !b.mediaType) {
-            image = mapImage(b.imageR2) || mapImage(b.image)
-            imageMobile = mapImage(b.imageMobileR2) || mapImage(b.imageMobile)
-            imageDesktop = mapImage(b.imageDesktopR2) || mapImage(b.imageDesktop)
+            image = mapImage(b.imageR2)
+            imageMobile = mapImage(b.imageMobileR2)
+            imageDesktop = mapImage(b.imageDesktopR2)
           } else if (b.mediaType === 'video') {
-            url = b.videoFileR2?.url ? rewriteR2Url(b.videoFileR2.url) : (b.videoFile?.asset?.url ? rewriteR2Url(b.videoFile.asset.url) : b.url)
-            urlMobile = b.videoFileMobileR2?.url ? rewriteR2Url(b.videoFileMobileR2.url) : (b.videoFileMobile?.asset?.url ? rewriteR2Url(b.videoFileMobile.asset.url) : undefined)
-            urlDesktop = b.videoFileDesktopR2?.url ? rewriteR2Url(b.videoFileDesktopR2.url) : (b.videoFileDesktop?.asset?.url ? rewriteR2Url(b.videoFileDesktop.asset.url) : undefined)
+            url = b.videoFileR2?.url ? rewriteR2Url(b.videoFileR2.url) : b.url
+            urlMobile = b.videoFileMobileR2?.url ? rewriteR2Url(b.videoFileMobileR2.url) : undefined
+            urlDesktop = b.videoFileDesktopR2?.url ? rewriteR2Url(b.videoFileDesktopR2.url) : undefined
           } else if (b.mediaType === 'youtube') {
             url = b.url
           }
 
-          const meta = b.imageR2 ? mapR2Metadata(b.imageR2) : (b.image ? mapR2Metadata(b.image) : {})
+          const meta = b.imageR2 ? mapR2Metadata(b.imageR2) : {}
           const borderColor = b.borderColor?.hex
 
           return {
@@ -235,6 +225,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
   if (data && !Array.isArray(data.featuredProductIds)) data.featuredProductIds = []
   return data || ({} as HomePageContent)
 }
+
 
 export const updateAboutPageContent = async (): Promise<void> => { }
 export const updateContactPageContent = async (): Promise<void> => { }

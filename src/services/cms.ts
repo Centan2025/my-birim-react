@@ -20,14 +20,13 @@ export {
   sanity,
   SANITY_TOKEN,
   sanityMutations,
-  urlFor,
-  toFileUrl,
   rewriteR2Url,
   mapImage,
   mapR2Metadata,
   mapImages,
   extractPalette,
 } from './sanity/client'
+
 export type { SanityImageLike, SanityFileAsset, SanityProductMediaItem } from './sanity/client'
 
 // Settings & Globals

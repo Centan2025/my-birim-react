@@ -1,5 +1,4 @@
 import { createClient } from '@sanity/client'
-import imageUrlBuilder from '@sanity/image-url'
 import type { SanityImagePalette, R2ImageMetadata, LocalizedString } from '../../types'
 
 // Not: Çevresel değişkenler Vite config ile yüklenmektedir.
@@ -31,12 +30,8 @@ export const sanity = useSanity
   : null
 
 // SANITY_TOKEN artık sadece server-side (Vercel API) tarafında kullanılmaktadır.
-// Güvenlik nedeniyle VITE_ prefix'i kaldırıldı ve tarayıcıya sızması engellendi.
 export const SANITY_TOKEN = ''
 export const sanityMutations = null
-
-export const urlFor = (source: unknown) =>
-  useSanity && sanity ? imageUrlBuilder(sanity).image(source as any) : null
 
 export interface SanityFileAsset {
   url?: string
@@ -59,19 +54,6 @@ export interface SanityProductMediaItem {
   videoFileR2?: { url?: string }
   videoFileMobileR2?: { url?: string }
   videoFileDesktopR2?: { url?: string }
-  [key: string]: any // Fallback for legacy
-}
-
-export const toFileUrl = (asset: SanityFileAsset | null | undefined): string => {
-  if (!asset) return ''
-  if (asset.url) return asset.url
-  const raw = String(asset._id || asset._ref || '')
-  if (!raw) return ''
-  const cleaned = raw.replace(/^file-/, '')
-  const [assetId, ext] = cleaned.split('-')
-  if (!assetId) return ''
-  const postfix = ext ? `.${ext}` : ''
-  return `https://cdn.sanity.io/files/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${assetId}${postfix}`
 }
 
 export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boolean): string => {
@@ -107,8 +89,7 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
 }
 
 export const mapImage = (
-  img: SanityImageLike | undefined,
-  options?: { width?: number; height?: number; quality?: number; format?: 'webp' | 'jpg' | 'png' }
+  img: SanityImageLike | undefined
 ): string => {
   if (!img) return ''
   if (typeof img === 'string') {
@@ -120,7 +101,7 @@ export const mapImage = (
     return rewriteR2Url(img)
   }
 
-  const rawUrl = (img as any)?.r2Asset?.url || (img as any)?.url || (img as any)?.asset?.url
+  const rawUrl = (img as any)?.r2Asset?.url || (img as any)?.url
   const hasResponsiveSizes = Boolean(
     (img as any)?.r2Asset?.hasResponsiveSizes || (img as any)?.hasResponsiveSizes
   )
@@ -135,32 +116,13 @@ export const mapImage = (
     }
     if (
       typeof rawUrl === 'string' &&
-      (rawUrl.includes('r2.dev') || rawUrl.includes('cdn.sanity.io') || rawUrl.startsWith('http'))
+      (rawUrl.includes('r2.dev') || rawUrl.startsWith('http'))
     ) {
       return rewriteR2Url(rawUrl, hasResponsiveSizes)
     }
   }
 
-  const hasBuilderMeta =
-    (img as any)?.crop ||
-    (img as any)?.hotspot ||
-    (img as any)?.asset?._ref ||
-    (img as any)?.asset?._id
-  if (img.url && !hasBuilderMeta) return rewriteR2Url(img.url, hasResponsiveSizes)
-
-  const b = urlFor && urlFor(img)
-  if (!b) return rewriteR2Url(img.url, hasResponsiveSizes) || ''
-
-  try {
-    const { width = 1600, quality = 85, format = 'webp' } = options || {}
-    return (
-      b.width(width).quality(quality).format(format).auto('format').url() ||
-      rewriteR2Url(img.url || (img as any)?.asset?.url, hasResponsiveSizes) ||
-      ''
-    )
-  } catch {
-    return rewriteR2Url(img.url || (img as any)?.asset?.url, hasResponsiveSizes) || ''
-  }
+  return rewriteR2Url((img as any)?.url, hasResponsiveSizes) || ''
 }
 
 export const mapR2Metadata = (img: any): R2ImageMetadata => {
@@ -171,8 +133,7 @@ export const mapR2Metadata = (img: any): R2ImageMetadata => {
       ? { x: img.cropX, y: img.cropY || 0, width: img.cropWidth, height: img.cropHeight || 1 }
       : undefined
 
-  // Support for nested crop object (Sanity standard or custom R2)
-  if (!crop && img.crop && typeof img.crop === 'object') {
+  if (!crop && img.crop && typeof img.crop === 'object' && !('asset' in img)) {
     const { left = 0, top = 0, right = 0, bottom = 0 } = img.crop
     crop = {
       x: left,
@@ -187,12 +148,12 @@ export const mapR2Metadata = (img: any): R2ImageMetadata => {
       ? { x: img.hotspotX, y: img.hotspotY }
       : undefined
 
-  if (!hotspot && img.hotspot && typeof img.hotspot === 'object') {
+  if (!hotspot && img.hotspot && typeof img.hotspot === 'object' && !('asset' in img)) {
     hotspot = { x: img.hotspot.x, y: img.hotspot.y }
   }
 
-  const origWidth = img.width || img.asset?.metadata?.dimensions?.width
-  const origHeight = img.height || img.asset?.metadata?.dimensions?.height
+  const origWidth = img.width
+  const origHeight = img.height
 
   return { crop, hotspot, origWidth, origHeight }
 }
@@ -201,12 +162,10 @@ export const mapImages = (imgs: SanityImageLike[] | undefined): string[] =>
   Array.isArray(imgs) ? imgs.map(i => mapImage(i)).filter(Boolean) : []
 
 export const extractPalette = (
-  img: SanityImageLike | { asset?: { metadata?: { palette?: SanityImagePalette } } }
+  img: any
 ): SanityImagePalette | undefined => {
-  if (typeof img === 'object' && img !== null && 'asset' in img) {
-    return (img as { asset?: { metadata?: { palette?: SanityImagePalette } } }).asset?.metadata?.palette
-  }
-  return undefined
+  // R2 assets no longer carry Sanity palette metadata directly unless manually synced
+  return img?.palette || undefined
 }
 
 export const mapMediaUrl = (
@@ -215,7 +174,6 @@ export const mapMediaUrl = (
   isDesktop?: boolean
 ): string => {
   const type = m?.type
-  const raw = m as any
 
   if (type === 'image') {
     const r2Url = isMobile
@@ -238,11 +196,6 @@ export const mapMediaUrl = (
       }
       return rewriteR2Url(r2Url, hasResponsiveSizes)
     }
-    const legacyImg = isMobile ? raw?.imageMobile : isDesktop ? raw?.imageDesktop : raw?.image
-    if (legacyImg) {
-      const mapped = mapImage(legacyImg)
-      if (mapped) return mapped
-    }
     return rewriteR2Url(m?.url) || ''
   } else if (type === 'video') {
     const r2Url = isMobile
@@ -261,15 +214,11 @@ export const mapMediaUrl = (
         return `${R2_DOMAIN}/${genericR2}`.replace(/ /g, '%20')
       return rewriteR2Url(genericR2)
     }
-    const legacyVideo = isMobile
-      ? raw?.videoFileMobile
-      : isDesktop
-        ? raw?.videoFileDesktop
-        : raw?.videoFile
-    if (legacyVideo?.asset?.url) return rewriteR2Url(legacyVideo.asset.url)
+    
     const fallbackUrl = m?.url || ''
     if (fallbackUrl.includes('youtube.com') || fallbackUrl.includes('youtu.be')) return ''
     return rewriteR2Url(fallbackUrl) || ''
   }
   return m?.url || ''
 }
+

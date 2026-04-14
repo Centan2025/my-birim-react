@@ -34,7 +34,6 @@ export const ProductDimensions: React.FC<ProductDimensionsProps> = ({
                   src={dimImg.image}
                   srcMobile={dimImg.imageMobile}
                   srcDesktop={dimImg.imageDesktop}
-                  fallbackSrc={dimImg.fallbackImage}
                   alt={dimImg.title ? t(dimImg.title) : `${t('dimensions')} ${idx + 1}`}
                   className={`w-full h-40 object-contain group-hover:scale-[1.03] transition-transform duration-700 ease-in-out ${imageBorderClass}`}
                   loading="lazy"

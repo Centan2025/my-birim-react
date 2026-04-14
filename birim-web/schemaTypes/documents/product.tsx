@@ -1,6 +1,7 @@
 import React from 'react'
 import {defineField, defineType} from 'sanity'
 import {getPreviewUrl} from '../utils/previewUrl'
+import BulkMediaUploadInput from '../../components/BulkMediaUploadInput'
 
 export default defineType({
   name: 'product',
@@ -56,35 +57,16 @@ export default defineType({
         'Kategori içindeki özel sıralama için. Küçük sayı önce gelir. Boş bırakırsanız yıl alanına göre sıralanır.',
     }),
     defineField({name: 'description', title: 'Açıklama', type: 'localizedPortableText'}),
-    // R2 Migration Field
-    defineField({
-      name: 'mainImageR2',
-      title: 'Ana Görsel (Tüm Cihazlar)',
-      type: 'r2Asset',
-      description: 'Cloudflare R2 üzerinde barındırılan ana görsel.',
-    }),
 
-    // R2 Migration Field
     defineField({
-      name: 'mainImageMobileR2',
-      title: 'Ana Görsel (Mobil)',
-      type: 'r2Asset',
-      description: 'Cloudflare R2 üzerinde barındırılan mobil görsel.',
-    }),
-
-    // R2 Migration Field
-    defineField({
-      name: 'mainImageDesktopR2',
-      title: 'Ana Görsel (Desktop)',
-      type: 'r2Asset',
-      description: 'Cloudflare R2 üzerinde barındırılan desktop görsel.',
-    }),
-    defineField({
-      name: 'alternativeMedia',
-      title: 'Alternatif Medya (Görsel/Video/YouTube)',
+      name: 'media',
+      title: 'Ürün Medyası',
       type: 'array',
       of: [{type: 'productSimpleMediaItem'}],
-      description: 'Ana görselin altındaki bantta gösterilecek görsel/video/YouTube ögeleri',
+      components: {
+        input: BulkMediaUploadInput
+      },
+      description: 'Ürün görselleri, videoları ve YouTube bağlantıları. Birini kapak olarak işaretleyebilirsiniz.',
     }),
     defineField({name: 'buyable', title: 'Satın Alınabilir', type: 'boolean'}),
     defineField({name: 'price', title: 'Fiyat', type: 'number'}),
@@ -126,12 +108,12 @@ export default defineType({
     }),
     defineField({name: 'exclusiveContent', title: 'Özel İçerik', type: 'exclusiveContent'}),
     defineField({
-      name: 'media',
-      title: 'Alt Medya (Görsel/Video/YouTube)',
+      name: 'bottomMedia',
+      title: 'Alt Medya Panelleri',
       type: 'array',
       of: [{type: 'productPanelMediaItem'}],
       description:
-        'Sayfa altındaki medya panelleri. Görüntü, video veya YouTube bağlantısı ekleyin.',
+        'Sayfa altındaki büyük medya panelleri.',
     }),
     defineField({
       name: 'mediaSectionTitle',
@@ -153,9 +135,15 @@ export default defineType({
     }),
   ],
   preview: {
-    select: {title: 'name.tr', r2Url: 'mainImageR2.url'},
-    prepare({title, r2Url}) {
+    select: {
+      title: 'name.tr', 
+      media: 'media'
+    },
+    prepare({title, media}) {
+      const coverItem = media?.find((m: any) => m.isCover) || media?.[0]
+      const r2Url = coverItem?.imageR2?.url || coverItem?.thumbnailR2?.url
       let finalUrl = getPreviewUrl(r2Url)
+
       return {
         title: title || 'Ürün',
         media: finalUrl ? (

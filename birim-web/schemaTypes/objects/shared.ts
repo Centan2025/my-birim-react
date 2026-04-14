@@ -34,28 +34,35 @@ export const productDimensionImage = defineType({
   name: 'productDimensionImage',
   title: 'Ölçü Görseli',
   type: 'object',
+  fieldsets: [
+    {
+      name: 'artDirection',
+      title: '🎥 Art Direction (Cihaz Bazlı Görseller)',
+      options: {collapsible: true, collapsed: false},
+    },
+  ],
   fields: [
     defineField({
       name: 'imageR2',
       title: 'Görsel (Tüm Cihazlar)',
       type: 'r2Asset',
+      fieldset: 'artDirection',
       validation: (Rule) => Rule.required(),
-      description:
-        'Tüm cihazlar için varsayılan görsel. Mobil veya desktop versiyonu yoksa bu kullanılır.',
+      description: 'Varsayılan görsel. Mobil/Desktop özel klasör yoksa bu kullanılır.',
     }),
     defineField({
       name: 'imageMobileR2',
       title: 'Görsel (Mobil)',
       type: 'r2Asset',
-      description:
-        'Mobil cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+      fieldset: 'artDirection',
+      description: 'Mobil özel klasörden otomatik yüklenir.',
     }),
     defineField({
       name: 'imageDesktopR2',
       title: 'Görsel (Desktop)',
       type: 'r2Asset',
-      description:
-        'Desktop cihazlar için özel görsel (opsiyonel). Yoksa varsayılan görsel kullanılır.',
+      fieldset: 'artDirection',
+      description: 'Desktop özel klasörden otomatik yüklenir.',
     }),
     defineField({
       name: 'title',
@@ -292,7 +299,7 @@ export const heroMediaItem = defineType({
       title: 'Video URL (veya YouTube URL)',
       type: 'url',
       hidden: ({parent}) =>
-        parent?.type === 'image' || (parent?.type === 'video' && parent?.videoFile),
+        parent?.type === 'image' || (parent?.type === 'video' && parent?.videoFileR2),
       description: 'Video dosyası yüklediyseniz bu alanı boş bırakın. YouTube için kullanın.',
     }),
     defineField({
@@ -378,6 +385,13 @@ export const productSimpleMediaItem = defineType({
   name: 'productSimpleMediaItem',
   title: 'Basit Medya Öğesi',
   type: 'object',
+  fieldsets: [
+    {
+      name: 'artDirection',
+      title: '🎥 Art Direction (Cihaz Bazlı Medya)',
+      options: {collapsible: true, collapsed: false},
+    },
+  ],
   fields: [
     defineField({
       name: 'type',
@@ -393,39 +407,58 @@ export const productSimpleMediaItem = defineType({
       initialValue: 'image',
     }),
     defineField({
+      name: 'isCover',
+      title: 'Kapak Görseli mi?',
+      type: 'boolean',
+      initialValue: false,
+      description: 'Bu medya öğesini dökümanın ana kapak resmi olarak belirler.',
+    }),
+    defineField({
+      name: 'title',
+      title: 'Başlık (Opsiyonel)',
+      type: 'localizedString',
+      description: 'Görsel/Video için açıklayıcı başlık.',
+    }),
+    defineField({
       name: 'imageR2',
       title: 'Görsel (Tüm Cihazlar)',
       type: 'r2Asset',
+      fieldset: 'artDirection',
       hidden: ({parent}) => parent?.type !== 'image',
     }),
     defineField({
       name: 'imageMobileR2',
       title: 'Görsel (Mobil)',
       type: 'r2Asset',
+      fieldset: 'artDirection',
       hidden: ({parent}) => parent?.type !== 'image',
     }),
     defineField({
       name: 'imageDesktopR2',
       title: 'Görsel (Desktop)',
       type: 'r2Asset',
+      fieldset: 'artDirection',
       hidden: ({parent}) => parent?.type !== 'image',
     }),
     defineField({
       name: 'videoFileR2',
-      title: 'Video Dosyası (Tüm Cihazlar)',
+      title: 'Video (Tüm Cihazlar)',
       type: 'r2Asset',
+      fieldset: 'artDirection',
       hidden: ({parent}) => parent?.type !== 'video',
     }),
     defineField({
       name: 'videoFileMobileR2',
-      title: 'Video Dosyası (Mobil)',
+      title: 'Video (Mobil)',
       type: 'r2Asset',
+      fieldset: 'artDirection',
       hidden: ({parent}) => parent?.type !== 'video',
     }),
     defineField({
       name: 'videoFileDesktopR2',
-      title: 'Video Dosyası (Desktop)',
+      title: 'Video (Desktop)',
       type: 'r2Asset',
+      fieldset: 'artDirection',
       hidden: ({parent}) => parent?.type !== 'video',
     }),
     defineField({
@@ -445,15 +478,14 @@ export const productSimpleMediaItem = defineType({
   preview: {
     select: {
       type: 'type',
+      isCover: 'isCover',
+      titleTr: 'title.tr',
       imageUrl: 'imageR2.url',
       thumbUrl: 'thumbnailR2.url',
     },
     prepare(selection: any) {
-      const {type, imageUrl, thumbUrl} = selection
-      let sourceUrl =
-        selection.type === 'image' || selection.mediaType === 'image'
-          ? imageUrl
-          : thumbUrl || imageUrl
+      const {type, isCover, titleTr, imageUrl, thumbUrl} = selection
+      let sourceUrl = type === 'image' ? imageUrl : thumbUrl || imageUrl
       let finalUrl = sourceUrl
       const domain = process.env.SANITY_STUDIO_R2_DOMAIN
       if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
@@ -466,8 +498,7 @@ export const productSimpleMediaItem = defineType({
         } catch (e) {}
       }
       return {
-        title:
-          type === 'image' ? 'Resim Öğesi' : type === 'video' ? 'Video Öğesi' : 'YouTube Öğesi',
+        title: `${isCover ? '⭐ ' : ''}${titleTr || (type === 'image' ? 'Resim Öğesi' : type === 'video' ? 'Video Öğesi' : 'YouTube Öğesi')}`,
         media:
           type === 'image' && finalUrl
             ? () => React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
@@ -869,19 +900,19 @@ export const contentBlock = defineType({
       name: 'imageR2',
       title: 'Görsel (Tüm Cihazlar)',
       type: 'r2Asset',
-      hidden: ({parent}) => parent?.mediaType !== 'image',
+      hidden: ({parent}) => !!parent?.mediaType && parent?.mediaType !== 'image',
     }),
     defineField({
       name: 'imageMobileR2',
       title: 'Görsel (Mobil)',
       type: 'r2Asset',
-      hidden: ({parent}) => parent?.mediaType !== 'image',
+      hidden: ({parent}) => !!parent?.mediaType && parent?.mediaType !== 'image',
     }),
     defineField({
       name: 'imageDesktopR2',
       title: 'Görsel (Desktop)',
       type: 'r2Asset',
-      hidden: ({parent}) => parent?.mediaType !== 'image',
+      hidden: ({parent}) => !!parent?.mediaType && parent?.mediaType !== 'image',
     }),
     // Görsel konumu – doğrudan görsel alanlarının altında
     defineField({
@@ -930,7 +961,7 @@ export const contentBlock = defineType({
       name: 'thumbnailR2',
       title: 'Video Önizleme Görseli (Thumbnail)',
       type: 'r2Asset',
-      hidden: ({parent}) => parent?.type === 'image',
+      hidden: ({parent}) => parent?.mediaType === 'image',
       description: 'Video veya YouTube ögesi için listede görünecek küçük resim (opsiyonel).',
     }),
 

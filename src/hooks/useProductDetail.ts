@@ -56,29 +56,16 @@ export function useProductDetail(productId: string | undefined, prefetchedProduc
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // Band media (deduplicated)
+  // Band media (all items in product.media, cover first)
   const bandMedia = useMemo(() => {
-    if (!product) return []
-    const altMedia = product.alternativeMedia || []
-    const mainUrl =
-      typeof product.mainImage === 'string' ? product.mainImage : product.mainImage?.url || ''
-    const head = mainUrl
-      ? [
-          {
-            type: 'image' as const,
-            url: mainUrl,
-            ...((typeof product.mainImage === 'object' ? product.mainImage : {}) as any),
-          },
-        ]
-      : []
-    const merged = [...head, ...altMedia]
-    const seen = new Set<string>()
-    return merged.filter(m => {
-      const key = `${m.type}:${m.url}`
-      if (seen.has(key)) return false
-      seen.add(key)
-      return true
-    })
+    if (!product || !Array.isArray(product.media)) return []
+    const media = [...product.media]
+    const coverIdx = media.findIndex((m: any) => m.isCover)
+    if (coverIdx > 0) {
+      const [cover] = media.splice(coverIdx, 1)
+      media.unshift(cover)
+    }
+    return media
   }, [product])
 
   const slideCount = bandMedia.length

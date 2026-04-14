@@ -31,7 +31,7 @@ export function CategoriesPage() {
   const categoryImageMap = useMemo(() => {
     const map = new Map<string, any>()
     for (const product of allProducts) {
-      if (product && product.categoryId && product.mainImage && !map.has(product.categoryId)) {
+      if (product && product.categoryId && product.mainImage?.url && !map.has(product.categoryId)) {
         map.set(product.categoryId, product.mainImage)
       }
     }

@@ -21,13 +21,13 @@ export const ProductCard: React.FC<{ product: Product }> = ({
     return designer ? t(designer.name) : ''
   }, [designers, product.designerId, t])
 
-  // Helper: mainImage string veya object olabilir
-  const mainImageUrl =
-    typeof product.mainImage === 'string' ? product.mainImage : product.mainImage?.url || ''
-  const mainImageMobile =
-    typeof product.mainImage === 'object' ? product.mainImage.urlMobile : undefined
-  const mainImageDesktop =
-    typeof product.mainImage === 'object' ? product.mainImage.urlDesktop : undefined
+  const isObject = typeof product.mainImage === 'object' && product.mainImage !== null;
+  const mainImageObj = isObject ? product.mainImage as any : {};
+  const mainImageUrl = isObject ? mainImageObj.url : (product.mainImage || '');
+  const mainImageMobile = mainImageObj.urlMobile;
+  const mainImageDesktop = mainImageObj.urlDesktop;
+  const mainImageCrop = mainImageObj.crop;
+  const mainImageHotspot = mainImageObj.hotspot;
 
   const handleClick = () => {
     // We still want to handle analytics before navigation
@@ -56,8 +56,8 @@ export const ProductCard: React.FC<{ product: Product }> = ({
             className="w-full h-full object-contain transform transition-transform duration-700 group-hover:scale-[1.04]"
             loading="lazy"
             quality={85}
-            crop={typeof product.mainImage === 'object' ? product.mainImage.crop : undefined}
-            hotspot={typeof product.mainImage === 'object' ? product.mainImage.hotspot : undefined}
+            crop={mainImageCrop}
+            hotspot={mainImageHotspot}
           />
         </div>
         <div className="px-2.5 py-2 sm:px-3 sm:py-2 transition-colors duration-500">
