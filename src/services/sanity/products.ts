@@ -9,6 +9,7 @@ import {
   sanity,
   useSanity,
   mapImage,
+  mapR2Metadata,
   mapImages,
   extractPalette,
   SanityImageLike,
