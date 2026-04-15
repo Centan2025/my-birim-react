@@ -75,7 +75,6 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
               isMobile && isLandscape ? 'auto' : fixedHeight === 'auto' ? '100%' : 'fit-content',
             minWidth: isMobile && isLandscape ? '0' : 'auto',
             display: 'block',
-            imageRendering: 'high-quality',
             WebkitBackfaceVisibility: 'hidden'
           }}
           loading="eager"
