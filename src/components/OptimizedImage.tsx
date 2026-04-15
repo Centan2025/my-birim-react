@@ -7,7 +7,13 @@ import { R2ImageMetadata } from '../types'
  */
 const encodeSrcSetUrl = (url: string): string => {
   if (!url) return url
-  return url.replace(/ /g, '%20')
+  // Önce boşlukları standart %20 yap, sonra kalan özel karakterleri (İ, ş vb.) URI encode et
+  const cleanUrl = url.replace(/ /g, '%20')
+  try {
+    return encodeURI(cleanUrl)
+  } catch {
+    return cleanUrl
+  }
 }
 
 interface OptimizedImageProps {

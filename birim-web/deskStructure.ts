@@ -49,6 +49,7 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
             .title('Ürün Yönetimi')
             .items([
               // Kategorileri Sırala - Sürükle-bırak özelliği
+              /*
               orderableDocumentListDeskItem({
                 type: 'category',
                 title: 'Kategorileri Sırala (Sürükle-Bırak)',
@@ -56,6 +57,7 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
                 context,
                 icon: () => '↕️',
               }),
+              */
               // Kategorileri Düzenle - Modeller görünümü ile
               S.listItem()
                 .title('Kategorileri Düzenle')
@@ -67,7 +69,7 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
                     .schemaType('category')
                     .filter('_type == "category"')
                     .apiVersion('2024-01-01')
-                    .defaultOrdering([{field: 'orderRank', direction: 'asc'}])
+                    .defaultOrdering([{field: 'name.tr', direction: 'asc'}])
                     .child((categoryId) =>
                       S.document()
                         .schemaType('category')
@@ -88,12 +90,14 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
               S.documentTypeListItem('product').title('Tüm Modeller'),
             ]),
         ),
+      /*
       orderableDocumentListDeskItem({
         type: 'designer',
         title: 'Tasarımcılar',
         S,
         context,
       }),
+      */
       S.documentTypeListItem('project').title('Projeler'),
       S.documentTypeListItem('newsItem').title('Haberler'),
       S.listItem()

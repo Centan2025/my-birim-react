@@ -65,6 +65,8 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
           srcDesktop={item.urlDesktop}
           alt=""
           className="h-full w-auto max-w-none"
+          sizes="100vw"
+          fetchPriority="high"
           style={{
             height: fixedHeight === 'auto' ? 'auto' : '100%',
             maxHeight: fixedHeight === 'auto' ? 'none' : '100%',
@@ -73,9 +75,11 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
               isMobile && isLandscape ? 'auto' : fixedHeight === 'auto' ? '100%' : 'fit-content',
             minWidth: isMobile && isLandscape ? '0' : 'auto',
             display: 'block',
+            imageRendering: 'high-quality',
+            WebkitBackfaceVisibility: 'hidden'
           }}
           loading="eager"
-          quality={95}
+          quality={100}
           crop={item.crop}
           hotspot={item.hotspot}
         />

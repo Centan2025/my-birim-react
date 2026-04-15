@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from 'react'
-import { Card, Stack, Text, Button, Box, Flex, useToast } from '@sanity/ui'
+import { Card, Stack, Text, Button, Box, Flex, useToast, Grid } from '@sanity/ui'
 import { UploadIcon, FolderIcon, CheckmarkIcon, WarningOutlineIcon } from '@sanity/icons'
 import { useClient } from 'sanity'
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3'
 import imageCompression from 'browser-image-compression'
 
 // R2 Configuration
@@ -33,36 +33,25 @@ const resolveKey = (item: any, prefix: string = 'item') => {
   return { ...item, _key: newKey }
 }
 
-// Image Compression Helper
-const compressImage = async (file: File): Promise<File | Blob> => {
-  if (!file.type.startsWith('image/') || file.type.includes('gif') || file.type.includes('svg')) {
-    return file
-  }
-
-  const options = {
-    maxSizeMB: 0.8, // 800KB limit
-    maxWidthOrHeight: 2560,
-    useWebWorker: true,
-    fileType: 'image/webp' as any, // Convert to webp
-  }
-
-  try {
-    console.log(`   📉 Sıkıştırılıyor: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`)
-    const compressedFile = await imageCompression(file, options)
-    console.log(`   ✨ Sıkıştırma tamam: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`)
-    return compressedFile
-  } catch (error) {
-    console.error('Sıkıştırma hatası:', error)
-    return file
-  }
-}
-
 interface ProgressItem {
-  type: 'category' | 'designer' | 'product' | 'project' | 'materialGroup' | 'materialBook'
+  type: 'category' | 'designer' | 'product' | 'project' | 'materialGroup' | 'materialBook' | 'news' | 'about'
   name: string
-  status: 'pending' | 'uploading' | 'success' | 'error'
+  status: 'pending' | 'scanning' | 'uploading' | 'success' | 'error' | 'warning'
   message?: string
   details?: string
+}
+
+interface ScanReport {
+  totalFiles: number
+  totalSize: number
+  foundItems: {
+    categories: Array<{ id: string; name: string; files: number; exists: boolean }>
+    designers: Array<{ id: string; name: string; files: number; exists: boolean }>
+    products: Array<{ id: string; name: string; files: number; exists: boolean; categoryId: string }>
+    projects: Array<{ id: string; name: string; files: number; exists: boolean }>
+    materials: Array<{ group: string; books: number; files: number; exists: boolean }>
+  }
+  issues: Array<{ type: 'error' | 'warning'; message: string; subtext?: string }>
 }
 
 interface ParsedData {
@@ -108,7 +97,7 @@ interface ParsedData {
       isCover?: boolean
       contentBlock?: number
     }>
-    files: File[] // Legacy support
+    files: File[]
   }>
   newsItems: Array<{
     newsId: string
@@ -172,23 +161,64 @@ const uploadToR2 = async (
 
     if (isImage) {
       isResponsive = true
+      
+      // 1. Görsel boyutlarını bir kez al
+      const objectUrl = URL.createObjectURL(file)
+      const dimensions: { width: number; height: number } = await new Promise((resolve) => {
+        const img = new Image()
+        img.onload = () => resolve({ width: img.width, height: img.height })
+        img.onerror = () => resolve({ width: 0, height: 0 })
+        img.src = objectUrl
+      })
+      URL.revokeObjectURL(objectUrl)
+
       const sizes = [
-        { width: 2560, suffix: '', maxSizeMB: 0.8 },
-        { width: 1600, suffix: '-1600w', maxSizeMB: 0.5 },
-        { width: 800, suffix: '-800w', maxSizeMB: 0.2 },
-        { width: 400, suffix: '-400w', maxSizeMB: 0.1 },
+        { width: 2560, height: 1600, suffix: '', maxSizeMB: 2.5 },   // Ana görsel (Max: 2560x1600)
+        { width: 1600, height: 1000, suffix: '-1600w', maxSizeMB: 1.2 },
+        { width: 800, height: 500, suffix: '-800w', maxSizeMB: 0.5 },
+        { width: 400, height: 250, suffix: '-400w', maxSizeMB: 0.2 },
       ]
 
       const uploadPromises = sizes.map(async (size) => {
-        const options = {
-          maxSizeMB: size.maxSizeMB,
-          maxWidthOrHeight: size.width,
-          useWebWorker: true,
-          fileType: 'image/webp' as any,
-        }
-        const compressedBlob = await compressImageChunk(file, options)
-        if (size.suffix === '') {
-          processedFile = compressedBlob
+        // KRİTİK: Eğer dosya zaten WebP ise, pikseline dokunmadan HAM olarak gönder (Byte-perfect copy).
+        const isAlreadyWebP = file.name.toLowerCase().endsWith('.webp');
+        
+        // Ana görsel (suffix === '') için eğer zaten WebP ise asla işleme sokma
+        const isAlreadyOptimized = 
+          isAlreadyWebP && 
+          (size.suffix === '' || (dimensions.width <= size.width && dimensions.height <= size.height));
+
+        let compressedBlob: Blob;
+        
+        if (isAlreadyOptimized) {
+          console.log(`   💎 Ham Veri Geçişi (${size.suffix || 'Orijinal'}): ${file.name} korundu.`)
+          compressedBlob = file;
+          if (size.suffix === '') processedFile = file;
+        } else if (file.size < 500 * 1024) {
+          // Küçük dosya ama WebP değilse veya alt varyasyon (800w/400w) ise: 
+          // Çözünürlüğü hedef boyuta (size.width) getir, kaliteyi tavan yap.
+          console.log(`   ⚡ Hızlı Dönüştürme (${size.suffix || 'Orijinal'}): ${file.name} (Kalite koruma + Boyutlandırma)`)
+          const options = {
+            maxSizeMB: size.maxSizeMB,
+            maxWidthOrHeight: size.suffix === '' ? Math.max(dimensions.width, dimensions.height) : Math.max(size.width, size.height), 
+            useWebWorker: true,
+            fileType: 'image/webp' as any,
+            initialQuality: 0.99, // En üst düzey kalite
+          }
+          compressedBlob = await compressImageChunk(file, options)
+          if (size.suffix === '') processedFile = compressedBlob;
+        } else {
+          // Büyük dosyalar için standart kütüphane akışı
+          const options = {
+            maxSizeMB: size.maxSizeMB,
+            maxWidthOrHeight: Math.max(size.width, size.height), 
+            useWebWorker: true,
+            fileType: 'image/webp' as any,
+            initialQuality: size.suffix === '' ? 0.98 : 0.90,
+          }
+          console.log(`   📉 Standart Sıkıştırma (${size.suffix || 'Orijinal'}): ${file.name} -> ${size.width}x${size.height}`)
+          compressedBlob = await compressImageChunk(file, options)
+          if (size.suffix === '') processedFile = compressedBlob;
         }
 
         const currentKey = size.suffix ? key.replace(/\.webp$/, `${size.suffix}.webp`) : key
@@ -258,8 +288,18 @@ const compressImageChunk = async (file: File, options: any): Promise<File | Blob
 export default function MediaImportTool() {
   const client = useClient({ apiVersion: '2025-01-01' })
   const toast = useToast()
+  
+  // UI States
   const [isDragging, setIsDragging] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [isCleaning, setIsCleaning] = useState(false)
+  const [scanResult, setScanResult] = useState<ParsedData | null>(null)
+  const [scanReport, setScanReport] = useState<ScanReport | null>(null)
+  const [viewMode, setViewMode] = useState<'scan' | 'upload' | 'summary'>('scan')
+  const [filterMode, setFilterMode] = useState<'all' | 'error' | 'success'>('all')
+  const [importMode, setImportMode] = useState<'sync' | 'add'>('sync')
+  
+  // Data States
   const [progress, setProgress] = useState<ProgressItem[]>([])
   const [stats, setStats] = useState({
     categories: 0,
@@ -268,6 +308,16 @@ export default function MediaImportTool() {
     projects: 0,
     images: 0,
   })
+
+  // Pre-flight check
+  const preflight = {
+    accountId: !!R2_ACCOUNT_ID,
+    accessKey: !!R2_ACCESS_KEY_ID,
+    secretKey: !!R2_SECRET_ACCESS_KEY,
+    bucket: !!R2_BUCKET_NAME,
+    domain: !!R2_DOMAIN,
+    isAllOk: !!(R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY && R2_BUCKET_NAME && R2_DOMAIN)
+  }
 
   // Klasör yapısını parse et
   const parseDirectory = useCallback((files: FileList): ParsedData => {
@@ -373,12 +423,27 @@ export default function MediaImportTool() {
           })
         }
 
-        // Kategori adını çıkar: "01 - KANEPELER" -> "KANEPELER"
-        const categoryName = categoryFolder.split(' - ').pop()?.trim() || categoryFolder
+        // Kategori adını çıkar: "01 - KANEPELER" -> "KANEPELER", ama "TAB - DRESUAR" -> "TAB - DRESUAR"
+        let categoryName = categoryFolder.trim()
+        if (categoryName.includes(' - ')) {
+          const firstPart = categoryName.split(' - ')[0].trim()
+          // Eğer ilk parça sadece rakam+nokta veya rakamsal bir diziyse split et, değilse tam ismi koru
+          if (/^(\d+\.?)+$/.test(firstPart)) {
+            categoryName = categoryName.split(' - ').slice(1).join(' - ').trim()
+          }
+        }
         const categoryId = slugify(categoryName)
 
-        // Model adını çıkar: "01 - 0203 - SU" -> "SU"
-        const modelName = modelFolder.split(' - ').pop()?.trim() || modelFolder
+        // Model adını çıkar: "TAB - DRESUAR" tam olarak korunmalı.
+        let modelName = modelFolder.trim()
+        if (modelName.includes(' - ')) {
+          const firstPart = modelName.split(' - ')[0].trim()
+          // Sadece sayısal ön ek varsa (Örn: "01 - ...") temizle, "TAB - ..." ise dokunma
+          if (/^(\d+\.?)+$/.test(firstPart)) {
+            modelName = modelName.split(' - ').slice(1).join(' - ').trim()
+          }
+        }
+        
         const modelId = slugify(modelName)
 
         const productKey = `${categoryId}/${modelId}`
@@ -541,9 +606,15 @@ export default function MediaImportTool() {
 
       if (kategoriIndex !== -1 && parts.length >= kategoriIndex + 3 && isMediaFile(file.name)) {
         const categoryFolder = parts[kategoriIndex + 1]
-        const categoryName = categoryFolder.split(' - ').pop()?.trim() || categoryFolder
+        let categoryName = categoryFolder.trim()
+        if (categoryName.includes(' - ')) {
+          const firstPart = categoryName.split(' - ')[0].trim()
+          if (/^(\d+\.?)+$/.test(firstPart)) {
+            categoryName = categoryName.split(' - ').slice(1).join(' - ').trim()
+          }
+        }
         const categoryId = slugify(categoryName)
-
+        
         categories.set(categoryId, categoryName)
 
         if (!categoryMediaMap.has(categoryId)) {
@@ -602,13 +673,18 @@ export default function MediaImportTool() {
 
     const products = Array.from(productMap.entries()).map(([key, productData]) => {
       const [categoryId, modelId] = key.split('/')
+      // Orijinal model adını bulmaya çalış (ilk dosyanın yolundan)
+      const firstMedia = productData.media[0]?.file.webkitRelativePath || ''
+      const pathParts = firstMedia.split('/')
+      const modelIdx = pathParts.findIndex(p => slugify(p || '').replace(/-/g, '') === modelId.replace(/-/g, ''))
+      const originalName = modelIdx !== -1 ? pathParts[modelIdx] : modelId.toUpperCase()
+
       return {
         categoryId,
         categoryName: categories.get(categoryId) || categoryId,
         modelId,
-        modelName: modelId.toUpperCase(),
-        mainImages: productData.mainImages,
-        alternativeMedia: productData.alternativeMedia,
+        modelName: originalName, // Slugified-uppercase yerine orijinal klasör adını kullan
+        media: productData.media,
         dimensionFiles: productData.dimensionFiles.filter((f) => isMediaFile(f.name)),
         extraImages: productData.extraImages,
         drawingFiles: productData.drawingFiles,
@@ -627,8 +703,7 @@ export default function MediaImportTool() {
     const projects = Array.from(projectMap.entries()).map(([projectFolder, projData]) => ({
       projectId: slugify(projectFolder),
       projectName: projectFolder,
-      coverImages: projData.coverImages,
-      contentBlocks: projData.contentBlocks,
+      media: projData.media,
       files: projData.files.filter((f) => isMediaFile(f.name)),
     }))
 
@@ -656,68 +731,157 @@ export default function MediaImportTool() {
     }
   }, [])
 
-  // Dosya yükleme handler'ı
+  // Dosya yükleme handler'ı (Phase 1: SCAN)
   const handleFiles = useCallback(
     async (files: FileList) => {
       setIsProcessing(true)
       setProgress([])
+      setScanResult(null)
+      setScanReport(null)
+      setViewMode('scan')
 
       try {
-        // Debug: Tüm dosyaları logla
-        console.log('📁 Toplam dosya sayısı:', files.length)
-        console.log(
-          '📄 İlk 10 dosya:',
-          Array.from(files)
-            .slice(0, 10)
-            .map((f) => f.webkitRelativePath || f.name),
-        )
-
+        console.log('📁 Tarama başlatılıyor, toplam dosya:', files.length)
         const data = parseDirectory(files)
 
-        // Debug: Parse sonuçları
-        console.log('📊 Parse sonuçları:', {
-          kategoriler: data.categories.size,
-          tasarımcılar: data.designers.length,
-          ürünler: data.products.length,
-          malzemeGrupları: data.materialGroups.length,
-          tasarımcı_detay: data.designers.map((d) => ({ isim: d.name, dosya: d.files.length })),
-          ürün_detay: data.products.map((p) => ({
-            isim: p.modelName,
-            dosya: Object.values(p.mainImages).filter(Boolean).length + p.alternativeMedia.length,
-          })),
-          malzeme_detay: data.materialGroups.map((g) => ({
-            grup: g.groupName,
-            kartelaSayısı: g.books.length,
-            toplamGörsel: g.books.reduce((sum, b) => sum + b.files.length, 0),
-          })),
+        // Sanity'de bu kayıtlar var mı kontrol et (Pre-flight Scan)
+        toast.push({
+          status: 'info',
+          title: 'Dökümanlar doğrulanıyor...',
+          description: 'Klasör isimleri Sanity kayıtlarıyla eşleştiriliyor.'
         })
 
-        // İstatistikler (görsel + video)
-        const totalMedia =
+        const [allCategories, allDesigners, allProducts, allProjects, allMaterialGroups] = await Promise.all([
+          client.fetch(`*[_type == "category"]{ _id, "slug": id.current, name }`),
+          client.fetch(`*[_type == "designer"]{ _id, "slug": id.current, name }`),
+          client.fetch(`*[_type == "product"]{ _id, "slug": id.current, name, "categorySlug": category->id.current }`),
+          client.fetch(`*[_type == "project"]{ _id, "slug": id.current, name }`),
+          client.fetch(`*[_type == "materialGroup"]{ _id, title, "nameTr": title.tr }`)
+        ])
+
+        // Sanity'de bu kayıtlar var mı kontrol et (Pre-flight Scan)
+        
+        const checkExists = (type: string, folderId: string, folderName: string, categoryId?: string) => {
+          if (type === 'product') {
+            const normalizedFolderName = normalizeForMatch(folderName)
+            const superNormalize = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '')
+            const superFolderId = superNormalize(folderId)
+
+            const matches = allProducts.filter((p: any) => {
+              // Süper Temizlik: Sadece a-z ve 0-9 arası karakterleri tut
+              const sanitize = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+              
+              const sanityName = sanitize(p.name?.tr || p.name?.en || '')
+              const sanitySlug = sanitize(p.slug || '')
+              const folderClean = sanitize(folderId)
+              const nameClean = sanitize(folderName)
+              
+              // 1. İsim veya Slug üzerinden tam temizlenmiş eşleşme
+              return sanityName === nameClean || sanitySlug === folderClean || sanityName === folderClean
+            })
+
+            if (matches.length === 1) return true // Kesin eşleşme
+            if (matches.length > 1) {
+              // Birden fazla varsa kategoriye bak
+              const sanitize = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+              const targetCat = sanitize(categoryId || '')
+              return matches.some((p: any) => sanitize(p.categorySlug) === targetCat || targetCat.includes(sanitize(p.categorySlug)))
+            }
+            return false
+
+            if (matches.length === 1) return true // Sadece bir tane varsa, kategoriden bağımsız eşle
+            if (matches.length > 1) {
+              // Birden fazla varsa kategoriye bak
+              return matches.some((p: any) => 
+                p.categorySlug === categoryId || 
+                p.categorySlug === normalizeText(categoryId || '') ||
+                p.categorySlug?.includes(normalizeText(categoryId || ''))
+              )
+            }
+            return false
+          }
+          if (type === 'category') {
+            const normalized = normalizeForMatch(folderName)
+            return allCategories.some((c: any) => 
+              c.slug === folderId || 
+              normalizeForMatch(c.name?.tr) === normalized || 
+              normalizeForMatch(c.name?.en) === normalized
+            )
+          }
+          if (type === 'designer') {
+            const normalized = normalizeForMatch(folderName)
+            return allDesigners.some((d: any) => 
+              d.slug === folderId || 
+              normalizeForMatch(d.name?.tr) === normalized || 
+              normalizeForMatch(d.name?.en) === normalized
+            )
+          }
+          if (type === 'project') {
+            return allProjects.some((p: any) => p.slug === folderId || normalizeForMatch(p.name) === normalizeForMatch(folderName))
+          }
+          if (type === 'materialGroup') {
+            const normalized = normalizeForMatch(folderName)
+            return allMaterialGroups.some((g: any) => normalizeForMatch(g.nameTr) === normalized)
+          }
+          return false
+        }
+
+        const totalSize = Array.from(files).reduce((sum, f) => sum + f.size, 0)
+        const totalMedia = 
           data.categoryMedia.reduce((sum, c) => sum + c.files.length, 0) +
           data.designers.reduce((sum, d) => sum + d.files.length, 0) +
-          data.products.reduce((sum, p) => {
-            const mainCount = Object.values(p.mainImages).filter(Boolean).length
-            const altCount = p.alternativeMedia.length
-            return sum + mainCount + altCount + p.dimensionFiles.length
-          }, 0) +
-          data.projects.reduce((sum, p) => {
-            const coverCount = Object.values(p.coverImages).filter(Boolean).length
-            const blockCount = Array.from(p.contentBlocks.values()).reduce(
-              (s, b) => s + Object.values(b).filter(Boolean).length,
-              0,
-            )
-            return sum + coverCount + blockCount + p.files.length
-          }, 0) +
-          data.newsItems.reduce((sum, n) => sum + n.files.length, 0) +
-          data.aboutPage.hero.length +
-          data.aboutPage.history.length +
-          data.aboutPage.identity.length +
-          data.aboutPage.quality.length +
-          data.materialGroups.reduce(
-            (sum, g) => sum + g.books.reduce((bookSum, b) => bookSum + b.files.length, 0),
-            0,
-          )
+          data.products.reduce((sum, p) => sum + p.media.length + p.dimensionFiles.length, 0) +
+          data.projects.reduce((sum, p) => sum + p.media.length + p.files.length, 0) +
+          data.aboutPage.hero.length + data.aboutPage.history.length + data.aboutPage.identity.length + data.aboutPage.quality.length +
+          data.materialGroups.reduce((sum, g) => sum + g.books.reduce((bs, b) => bs + b.files.length, 0), 0)
+
+        // Rapor oluştur
+        const report: ScanReport = {
+          totalFiles: files.length,
+          totalSize,
+          foundItems: {
+            categories: data.categoryMedia.map(c => ({ 
+              id: c.categoryId, 
+              name: c.categoryName, 
+              files: c.files.length, 
+              exists: checkExists('category', c.categoryId, c.categoryName) 
+            })),
+            designers: data.designers.map(d => ({ 
+              id: d.id, 
+              name: d.name, 
+              files: d.files.length, 
+              exists: checkExists('designer', d.id, d.name) 
+            })),
+            products: data.products.map(p => ({ 
+              id: p.modelId, 
+              name: p.modelName, 
+              files: p.media.length + p.dimensionFiles.length, 
+              categoryId: p.categoryId, 
+              exists: checkExists('product', p.modelId, p.modelName, p.categoryId) 
+            })),
+            projects: data.projects.map(p => ({ 
+              id: p.projectId, 
+              name: p.projectName, 
+              files: p.media.length + p.files.length, 
+              exists: checkExists('project', p.projectId, p.projectName) 
+            })),
+            materials: data.materialGroups.map(g => ({ 
+              group: g.groupName, 
+              books: g.books.length, 
+              files: g.books.reduce((s, b) => s + b.files.length, 0), 
+              exists: checkExists('materialGroup', '', g.groupName) 
+            }))
+          },
+          issues: []
+        }
+
+        // Hataları ekle
+        report.foundItems.products.forEach(p => {
+          if (!p.exists) report.issues.push({ type: 'warning', message: `Eksik Ürün: ${p.name}`, subtext: 'Bu ürünü önce CMS\'den oluşturmalısınız.' })
+        })
+        report.foundItems.designers.forEach(d => {
+          if (!d.exists) report.issues.push({ type: 'warning', message: `Eksik Tasarımcı: ${d.name}` })
+        })
 
         setStats({
           categories: data.categoryMedia.length,
@@ -727,68 +891,42 @@ export default function MediaImportTool() {
           images: totalMedia,
         })
 
-        // Uyarı: Medya bulunamadıysa
-        if (totalMedia === 0) {
-          toast.push({
-            status: 'warning',
-            title: '⚠️ Medya bulunamadı!',
-            description:
-              'Klasörlerin içinde .jpg, .png, .mp4 gibi görsel veya video dosyaları yok. Lütfen medya dosyalarını ekleyip tekrar deneyin.',
-          })
-          setIsProcessing(false)
-          return
-        }
-
-        const materialSummary =
-          data.materialGroups.length > 0 ? `, ${data.materialGroups.length} malzeme grubu` : ''
-        const projectSummary = data.projects.length > 0 ? `, ${data.projects.length} proje` : ''
-        const newsSummary = data.newsItems.length > 0 ? `, ${data.newsItems.length} haber` : ''
-        const aboutSummary =
-          data.aboutPage.hero.length +
-            data.aboutPage.history.length +
-            data.aboutPage.identity.length +
-            data.aboutPage.quality.length >
-            0
-            ? ', Hakkımızda sayfası medyası'
-            : ''
-
+        setScanResult(data)
+        setScanReport(report)
         toast.push({
-          status: 'info',
+          status: 'success',
           title: 'Tarama tamamlandı',
-          description: `${data.categoryMedia.length} kategori, ${data.designers.length} tasarımcı, ${data.products.length} ürün${projectSummary}${newsSummary}${aboutSummary}${materialSummary} bulundu`,
+          description: `Bulunan içerik hazır. Lütfen detayları inceleyip onaylayın.`
         })
 
-        // Yükleme başlasın mı diye sor
-        const parts: string[] = []
-        if (data.categoryMedia.length > 0) parts.push(`${data.categoryMedia.length} kategori`)
-        if (data.designers.length > 0) parts.push(`${data.designers.length} tasarımcı`)
-        if (data.products.length > 0) parts.push(`${data.products.length} ürün`)
-        if (data.projects.length > 0) parts.push(`${data.projects.length} proje`)
-        if (data.newsItems.length > 0) parts.push(`${data.newsItems.length} haber`)
-        if (aboutSummary) parts.push('Hakkımızda sayfası')
-        if (data.materialGroups.length > 0)
-          parts.push(`${data.materialGroups.length} malzeme grubu`)
-
-        const confirmMsg = `${parts.join(', ')} yüklenecek. Devam edilsin mi?`
-
-        if (confirm(confirmMsg)) {
-          await uploadToSanity(data)
-        }
       } catch (error: any) {
-        console.error('Hata:', error)
-        toast.push({
-          status: 'error',
-          title: 'Hata oluştu',
-          description: error.message,
-        })
+        console.error('Scan Error:', error)
+        toast.push({ status: 'error', title: 'Tarama Hatası', description: error.message })
       } finally {
         setIsProcessing(false)
       }
     },
-    [parseDirectory, toast],
+    [parseDirectory, toast, client],
   )
 
-  // Sanity'ye yükleme
+  // Sanity'ye yükleme (Phase 2: UPLOAD)
+  const startUpload = async () => {
+    if (!scanResult) return
+    setIsProcessing(true)
+    setViewMode('upload')
+    setProgress([])
+    
+    try {
+      await uploadToSanity(scanResult)
+      setViewMode('summary')
+      toast.push({ status: 'success', title: 'İşlem Başarıyla Tamamlandı!' })
+    } catch (e: any) {
+      toast.push({ status: 'error', title: 'Yükleme Hatası', description: e.message })
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
   const uploadToSanity = async (data: ParsedData) => {
     const newProgress: ProgressItem[] = []
 
@@ -954,33 +1092,34 @@ export default function MediaImportTool() {
         )
 
         // Mevcut ürünü bul - Kategori ve model adı birlikte kontrol edilmeli
-        const productSlug = `${actualCategorySlug}-${product.modelId}`
-        const existing = existingProducts.find((p: any) => {
-          // Önce slug ile kontrol et (en güvenilir)
-          if (p.slug === productSlug) return true
+        const normalizedProductName = normalizeForMatch(product.modelName)
+        const superNormalize = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '')
+        const superFolderId = superNormalize(product.modelId)
 
-          // Slug yoksa, kategori + model adı ile kontrol et
-          // Türkçe karakterler için normalize edilmiş karşılaştırma
-          const normalizeForComparison = (str: string) => {
-            return slugify(str).replace(/-/g, '')
-          }
+        const matches = existingProducts.filter((p: any) => {
+          const sanitize = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+          const sanityName = sanitize(p.name?.tr || p.name?.en || '')
+          const sanitySlug = sanitize(p.slug || '')
+          const folderClean = sanitize(product.modelId)
+          const nameClean = sanitize(product.modelName)
 
-          const normalizedProductName = normalizeForComparison(product.modelName)
-          const modelNameMatch =
-            normalizeForComparison(p.name?.tr || '') === normalizedProductName ||
-            normalizeForComparison(p.name?.en || '') === normalizedProductName
-
-          const categoryMatch = p.categorySlug === actualCategorySlug
-
-          // HEM model adı HEM kategori eşleşmeli
-          return modelNameMatch && categoryMatch
+          return sanityName === nameClean || sanitySlug === folderClean || sanityName === folderClean
         })
+
+        let existing = null
+        if (matches.length === 1) {
+          existing = matches[0]
+        } else if (matches.length > 1) {
+          const sanitize = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+          const targetCat = sanitize(actualCategorySlug || '')
+          existing = matches.find((p: any) => sanitize(p.categorySlug) === targetCat || targetCat.includes(sanitize(p.categorySlug)))
+        }
 
         if (existing) {
           console.log(
-            `   🎯 Eşleşme bulundu: ${existing.name?.tr} (Kategori: ${existing.categoryName?.tr})`,
+            `   🎯 Eşleşme bulundu: ${existing.name?.tr} (Kategori: ${existing.categorySlug})`,
           )
-          await updateProductImages(client, existing._id, product)
+          await updateProductImages(client, existing._id, product, importMode)
           item.status = 'success'
           item.message = 'Görseller güncellendi'
         } else {
@@ -992,12 +1131,9 @@ export default function MediaImportTool() {
           console.log(`   📊 CMS'deki benzer ürünler:`)
           existingProducts
             .filter((p: any) => {
-              const normalizeForComparison = (str: string) => slugify(str).replace(/-/g, '')
-              const normalizedProductName = normalizeForComparison(product.modelName)
-              return (
-                normalizeForComparison(p.name?.tr || '') === normalizedProductName ||
-                normalizeForComparison(p.name?.en || '') === normalizedProductName
-              )
+              const nameMatch = normalizeForMatch(p.name?.tr) === normalizedProductName || 
+                               normalizeForMatch(p.name?.en) === normalizedProductName
+              return nameMatch
             })
             .forEach((p: any) => {
               console.log(
@@ -1214,7 +1350,7 @@ export default function MediaImportTool() {
           console.log(`   📁 Proje bulundu: ${matchingProject.titleTr || matchingProject.titleEn}`)
 
           // Proje medyasını eşitle
-          await updateProjectMedia(client, matchingProject._id, project)
+          await updateProjectMedia(client, matchingProject._id, project, importMode)
 
           item.status = 'success'
           item.message = 'Medya eşitlendi'
@@ -1316,6 +1452,157 @@ export default function MediaImportTool() {
     })
   }
 
+  /**
+   * CMS'de referansı olmayan R2 dosyalarını temizle
+   */
+  const handleCleanup = async () => {
+    if (
+      !confirm(
+        'CMS dökümanlarında kullanılmayan TÜM R2 dosyaları kalıcı olarak silinecektir.\n\nBu işlem geri alınamaz! Devam etmek istiyor musunuz?',
+      )
+    ) {
+      return
+    }
+
+    setIsCleaning(true)
+    try {
+      // 1. Sanity'den kullanılan tüm R2 URL'lerini topla
+      const query = `*[defined(imageR2.url) || defined(videoFileR2.url) || defined(fileR2.url) || defined(r2Asset.url) || defined(imageMobileR2.url) || defined(imageDesktopR2.url)] {
+        imageR2,
+        videoFileR2,
+        fileR2,
+        r2Asset,
+        imageMobileR2,
+        imageDesktopR2,
+        videoFileMobileR2,
+        videoFileDesktopR2,
+        "mediaUrls": media[].imageR2.url,
+        "mediaVideoUrls": media[].videoFileR2.url,
+        "bottomMediaImageUrls": bottomMedia[].imageR2.url,
+        "bottomMediaVideoUrls": bottomMedia[].videoFileR2.url,
+        "exclusiveImageUrls": exclusiveContent.images[].r2Asset.url,
+        "exclusiveDrawingUrls": exclusiveContent.drawings[].fileR2.url,
+        "exclusiveModelUrls": exclusiveContent.models3d[].fileR2.url,
+        "materialUrls": books[].items[].imageR2.url,
+        "aboutHeroUrls": hero[].imageR2.url
+      }`
+
+      const docs = await client.fetch(query)
+      const usedUrls = new Set<string>()
+
+      const extractUrls = (val: any) => {
+        if (!val) return
+        if (typeof val === 'string') {
+          usedUrls.add(val)
+        } else if (Array.isArray(val)) {
+          val.forEach(extractUrls)
+        } else if (typeof val === 'object') {
+          if (val.url) usedUrls.add(val.url)
+          // Alt objeleri de tara (responsive versions vb.)
+          Object.values(val).forEach(extractUrls)
+        }
+      }
+
+      docs.forEach((doc: any) => {
+        Object.values(doc).forEach(extractUrls)
+      })
+
+      console.log(`🔍 CMS'de kullanılan ${usedUrls.size} benzersiz medya dosyası bulundu.`)
+
+      // 2. R2'deki tüm dosyaları listele
+      let allObjects: any[] = []
+      let continuationToken: string | undefined = undefined
+
+      do {
+        const listCommand = new ListObjectsV2Command({
+          Bucket: R2_BUCKET_NAME,
+          ContinuationToken: continuationToken,
+        })
+        const response = await r2Client.send(listCommand)
+        if (response.Contents) {
+          allObjects = [...allObjects, ...response.Contents]
+        }
+        continuationToken = response.NextContinuationToken
+      } while (continuationToken)
+
+      console.log(`📦 R2'de toplam ${allObjects.length} dosya bulundu.`)
+
+      // 3. Yetim dosyaları tespit et
+      const orphanedKeys: string[] = []
+      
+      for (const obj of allObjects) {
+        if (!obj.Key) continue
+        const fullUrl = `${R2_DOMAIN}/${obj.Key}`
+        
+        // Eğer bu dosyanın tam hali kullanılıyorsa koru
+        let isUsed = usedUrls.has(fullUrl)
+        
+        if (!isUsed) {
+          // Eğer bir responsive varyasyon ise, ana dosyanın kullanılıp kullanılmadığına bak
+          const variantSuffixes = ['-1600w.webp', '-800w.webp', '-400w.webp']
+          const matchingSuffix = variantSuffixes.find(s => obj.Key.endsWith(s))
+          
+          if (matchingSuffix) {
+            const mainKey = obj.Key.replace(matchingSuffix, '.webp')
+            const mainUrl = `${R2_DOMAIN}/${mainKey}`
+            if (usedUrls.has(mainUrl)) {
+              isUsed = true
+            }
+          }
+        }
+
+        if (!isUsed) {
+          orphanedKeys.push(obj.Key)
+        }
+      }
+
+      if (orphanedKeys.length === 0) {
+        toast.push({
+          status: 'info',
+          title: 'Temizlik Gerekli Değil',
+          description: 'R2 üzerindeki tüm dosyalar CMS dökümanları tarafından kullanılmaktadır.',
+        })
+        return
+      }
+
+      if (!confirm(`${orphanedKeys.length} adet kullanılmayan dosya bulundu. Silinsin mi?`)) {
+        setIsCleaning(false)
+        return
+      }
+
+      // 4. Yetim dosyaları sil (1000'erli gruplar halinde)
+      console.log(`🗑️ ${orphanedKeys.length} adet yetim dosya siliniyor...`)
+      
+      for (let i = 0; i < orphanedKeys.length; i += 1000) {
+        const chunk = orphanedKeys.slice(i, i + 1000)
+        await r2Client.send(
+          new DeleteObjectsCommand({
+            Bucket: R2_BUCKET_NAME,
+            Delete: {
+              Objects: chunk.map(key => ({ Key: key })),
+              Quiet: true
+            }
+          })
+        )
+      }
+
+      toast.push({
+        status: 'success',
+        title: 'Temizlik Tamamlandı',
+        description: `${orphanedKeys.length} adet kullanılmayan dosya R2'den silindi.`,
+      })
+    } catch (error: any) {
+      console.error('Cleanup Error:', error)
+      toast.push({
+        status: 'critical',
+        title: 'Temizlik Hatası',
+        description: error.message,
+      })
+    } finally {
+      setIsCleaning(false)
+    }
+  }
+
   // Drag & Drop handlers
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -1361,223 +1648,263 @@ export default function MediaImportTool() {
     [handleFiles],
   )
 
+  // Dahili yardımcı: Log ekle
+  const addLog = (type: ProgressItem['type'], name: string, status: ProgressItem['status'], message?: string) => {
+    setProgress(prev => [{ type, name, status, message, details: new Date().toLocaleTimeString() }, ...prev])
+  }
+
+  // UI RENDER: DASHBOARD
   return (
-    <Card padding={4}>
+    <Card padding={4} tone="transparent">
       <Stack space={4}>
-        <Box>
-          <Text size={3} weight="bold">
-            📦 Medya İçeri Aktar (Cloudflare R2 Native)
-          </Text>
-          <Text size={1} muted style={{ marginTop: '0.5rem', lineHeight: '1.6' }}>
-            Bu araç; ürün, tasarımcı, proje, haber ve malzeme görsellerinizi <strong>Cloudflare R2</strong> altyapısına yükler. 
-            Görseller yüklenirken otomatik olarak <strong>WebP</strong> formatına dönüştürülür ve 2K'dan mobil boyuta kadar 
-            <strong>responsive (duyarlı)</strong> boyutlar oluşturulur.
-            <br /><br />
-            <strong>🎯 ÖNEMLİ:</strong> Bu araç sadece medya dosyalarını yükler ve eşleme yapar. 
-            Tasarımcılar, ürünler ve projeler gibi ana kayıtlar CMS'de önceden oluşturulmuş olmalıdır!
-          </Text>
-        </Box>
-
-        {/* Sürükle-bırak alanı */}
-        <Card
-          padding={5}
-          radius={3}
-          shadow={isDragging ? 3 : 1}
-          tone={isDragging ? 'primary' : 'default'}
-          style={{
-            border: isDragging
-              ? '2px dashed var(--card-focus-ring-color)'
-              : '2px dashed var(--card-border-color)',
-            textAlign: 'center',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-          }}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          <Stack space={3}>
-            <Flex justify="center">
-              <Text size={5}>{isDragging ? '📥' : '📁'}</Text>
-            </Flex>
-            <Text size={2} weight="semibold">
-              {isDragging ? 'Klasörü buraya bırakın' : 'Medya klasörünüzü buraya sürükleyin'}
-            </Text>
-            <Text size={1} muted>
-              veya
-            </Text>
-            <Flex justify="center">
-              <Button
-                text="Klasör Seç"
-                icon={FolderIcon}
-                tone="primary"
-                onClick={() => document.getElementById('folder-input')?.click()}
-                disabled={isProcessing}
-              />
-              <input
-                id="folder-input"
-                type="file"
-                {...{ webkitdirectory: '', directory: '' }}
-                multiple
-                style={{ display: 'none' }}
-                onChange={handleFolderSelect}
-              />
-            </Flex>
-          </Stack>
-        </Card>
-
-        {/* İstatistikler */}
-        {(stats.categories > 0 || stats.designers > 0 || stats.products > 0) && (
-          <Card padding={3} tone="positive" radius={2}>
-            <Stack space={2}>
-              <Text size={1} weight="semibold">
-                📊 Bulunan İçerik:
-              </Text>
-              <Flex gap={3}>
-                <Text size={1}>📂 {stats.categories} Kategori</Text>
-                <Text size={1}>👤 {stats.designers} Tasarımcı</Text>
-                <Text size={1}>📦 {stats.products} Ürün</Text>
-                <Text size={1}>📁 {stats.projects} Proje</Text>
-                <Text size={1}>🖼️ {stats.images} Medya (Görsel + Video)</Text>
+        {/* HEADER SECTION */}
+        <Card padding={4} radius={3} shadow={1} tone="default">
+          <Flex justify="space-between" align="center">
+            <Stack space={3}>
+              <Flex align="center" gap={3}>
+                <Box style={{ fontSize: '2rem' }}>🚀</Box>
+                <Stack space={2}>
+                  <Text size={4} weight="bold">Medya İçe Aktarma Merkezi</Text>
+                  <Text size={1} muted>Cloudflare R2 & Sanity Native Eşitleme Paneli</Text>
+                </Stack>
               </Flex>
             </Stack>
-          </Card>
-        )}
+            
+            <Flex gap={3} align="center">
+              {/* Import Mode Toggle */}
+              <Card padding={1} radius={2} border tone="default">
+                <Flex align="center">
+                  <Button
+                    size={1}
+                    text="Eşitleme (Sync)"
+                    mode={importMode === 'sync' ? 'default' : 'bleed'}
+                    tone={importMode === 'sync' ? 'primary' : 'default'}
+                    onClick={() => setImportMode('sync')}
+                  />
+                  <Button
+                    size={1}
+                    text="Sadece Ekle (Add)"
+                    mode={importMode === 'add' ? 'default' : 'bleed'}
+                    tone={importMode === 'add' ? 'primary' : 'default'}
+                    onClick={() => setImportMode('add')}
+                  />
+                </Flex>
+              </Card>
 
-        {/* Sadece Hatalar */}
-        {progress.filter((p) => p.status === 'error').length > 0 && (
-          <Card
-            padding={3}
-            tone="critical"
-            radius={2}
-            style={{ maxHeight: '300px', overflow: 'auto' }}
-          >
-            <Stack space={2}>
-              <Flex align="center" gap={2}>
-                <WarningOutlineIcon style={{ color: 'red' }} />
-                <Text size={2} weight="bold" style={{ color: 'red' }}>
-                  ❌ Hatalar ({progress.filter((p) => p.status === 'error').length})
-                </Text>
-              </Flex>
-              {progress
-                .filter((p) => p.status === 'error')
-                .map((item, idx) => (
-                  <Card key={idx} padding={2} tone="default" radius={2}>
-                    <Stack space={1}>
-                      <Text size={1} weight="semibold">
-                        {item.type === 'category' && '📂'}
-                        {item.type === 'designer' && '👤'}
-                        {item.type === 'product' && '📦'}
-                        {item.type === 'project' && '📁'}
-                        {item.type === 'materialGroup' && '🎨'}
-                        {item.type === 'materialBook' && '📚'} {item.name}
-                      </Text>
-                      {item.message && (
-                        <Text size={1} muted style={{ wordBreak: 'break-word' }}>
-                          {item.message}
-                        </Text>
-                      )}
+              {/* Pre-flight Indicator */}
+              <Card padding={2} radius={2} tone={preflight.isAllOk ? 'positive' : 'critical'} border>
+                <Flex align="center" gap={2}>
+                  <Box style={{ fontSize: '1rem' }}>{preflight.isAllOk ? '✅' : '❌'}</Box>
+                  <Text size={1} weight="semibold">R2 Bağlantısı: {preflight.isAllOk ? 'Hazır' : 'Hatalı'}</Text>
+                </Flex>
+              </Card>
+              
+              <Button
+                fontSize={2}
+                padding={3}
+                text={isCleaning ? 'Temizleniyor...' : 'Gereksiz Dosyaları Temizle'}
+                tone="critical"
+                onClick={handleCleanup}
+                disabled={isProcessing || isCleaning}
+                loading={isCleaning}
+                mode="ghost"
+              />
+            </Flex>
+          </Flex>
+        </Card>
+
+        {/* MAIN AREA */}
+        <Grid columns={[1, 1, 1, 12]} gap={4}>
+          {/* LEFT COLUMN: SCAN & STATS (8 columns) */}
+          <Box column={[1, 1, 1, 8]}>
+            <Stack space={4}>
+              {/* DROPZONE */}
+              <Card
+                padding={5}
+                radius={3}
+                shadow={isDragging ? 3 : 1}
+                tone={isDragging ? 'primary' : 'default'}
+                style={{
+                  border: isDragging ? '2px dashed #2276fc' : '2px dashed #ccc',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  backgroundColor: isDragging ? 'rgba(34, 118, 252, 0.05)' : 'transparent',
+                  transition: 'all 0.2s ease'
+                }}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <Stack space={4}>
+                  <Flex justify="center" style={{ fontSize: '3rem' }}>
+                    {isProcessing ? '⌛' : (scanReport ? '📋' : '📁')}
+                  </Flex>
+                  <Stack space={2}>
+                    <Text size={3} weight="bold">
+                      {isProcessing ? 'Taranıyor...' : (scanReport ? 'Tarama Tamamlandı' : 'Klasörünüzü buraya bırakın')}
+                    </Text>
+                    <Text size={1} muted>
+                      {scanReport ? `${scanReport.totalFiles} dosya bulundu (~${(scanReport.totalSize / 1024 / 1024).toFixed(1)} MB)` : 'Ürünler, Tasarımcılar ve Projeler içeren medya klasörü'}
+                    </Text>
+                  </Stack>
+                  <Flex justify="center" gap={2}>
+                    <Button
+                      text={scanReport ? "Yeni Klasör Seç" : "Klasör Seç"}
+                      icon={FolderIcon}
+                      tone="primary"
+                      onClick={() => document.getElementById('folder-input')?.click()}
+                      disabled={isProcessing}
+                      mode={scanReport ? 'outline' : 'default'}
+                    />
+                    {scanReport && !isProcessing && (
+                      <Button
+                        text="YÜKLEMEYİ BAŞLAT"
+                        icon={UploadIcon}
+                        tone="positive"
+                        fontSize={3}
+                        padding={4}
+                        onClick={startUpload}
+                        disabled={!preflight.isAllOk}
+                      />
+                    )}
+                  </Flex>
+                  <input id="folder-input" type="file" {...{ webkitdirectory: '', directory: '' }} multiple style={{ display: 'none' }} onChange={handleFolderSelect} />
+                </Stack>
+              </Card>
+
+              {/* STAT CARDS (Only after scan) */}
+              {scanReport && (
+                <Grid columns={4} gap={3}>
+                  <Card padding={3} radius={2} border>
+                    <Stack space={2}>
+                      <Text size={1} muted>📂 Kategoriler</Text>
+                      <Text size={3} weight="bold">{stats.categories}</Text>
                     </Stack>
                   </Card>
-                ))}
-            </Stack>
-          </Card>
-        )}
+                  <Card padding={3} radius={2} border>
+                    <Stack space={2}>
+                      <Text size={1} muted>👤 Tasarımcılar</Text>
+                      <Text size={3} weight="bold">{stats.designers}</Text>
+                    </Stack>
+                  </Card>
+                  <Card padding={3} radius={2} border>
+                    <Stack space={2}>
+                      <Text size={1} muted>📦 Ürünler</Text>
+                      <Text size={3} weight="bold">{stats.products}</Text>
+                    </Stack>
+                  </Card>
+                  <Card padding={3} radius={2} border>
+                    <Stack space={2}>
+                      <Text size={1} muted>🖼️ Medya</Text>
+                      <Text size={3} weight="bold">{stats.images}</Text>
+                    </Stack>
+                  </Card>
+                </Grid>
+              )}
 
-        {/* Tüm İşlemler */}
-        {progress.length > 0 && (
-          <Card
-            padding={3}
-            tone="transparent"
-            radius={2}
-            style={{ maxHeight: '400px', overflow: 'auto' }}
-          >
-            <Stack space={2}>
-              <Text size={1} weight="semibold">
-                ⏳ Tüm İşlemler:
-              </Text>
-              {progress.map((item, idx) => (
-                <Flex key={idx} align="center" gap={2}>
-                  <Box>
-                    {item.status === 'success' && <CheckmarkIcon style={{ color: 'green' }} />}
-                    {item.status === 'error' && <WarningOutlineIcon style={{ color: 'red' }} />}
-                    {item.status === 'uploading' && <Text>⏳</Text>}
-                  </Box>
-                  <Text size={1}>
-                    {item.type === 'category' && '📂'}
-                    {item.type === 'designer' && '👤'}
-                    {item.type === 'product' && '📦'}
-                    {item.type === 'project' && '📁'}
-                    {item.type === 'materialGroup' && '🎨'}
-                    {item.type === 'materialBook' && '📚'} {item.name}
-                    {item.message && ` - ${item.message}`}
+              {/* LOGS / PROGRESS */}
+              {progress.length > 0 && (
+                <Card padding={4} radius={3} shadow={1} border>
+                  <Stack space={4}>
+                    <Flex justify="space-between" align="center">
+                      <Text size={2} weight="bold">🚀 Canlı İşlem Günlüğü</Text>
+                      <Flex gap={1}>
+                        <Button size={1} text="Tümü" mode={filterMode === 'all' ? 'default' : 'bleed'} onClick={() => setFilterMode('all')} />
+                        <Button size={1} text="Hatalar" tone="critical" mode={filterMode === 'error' ? 'default' : 'bleed'} onClick={() => setFilterMode('error')} />
+                        <Button size={1} text="Başarılı" tone="positive" mode={filterMode === 'success' ? 'default' : 'bleed'} onClick={() => setFilterMode('success')} />
+                      </Flex>
+                    </Flex>
+                    <Box style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                      <Stack space={2}>
+                        {progress
+                          .filter(p => filterMode === 'all' || (filterMode === 'error' && p.status === 'error') || (filterMode === 'success' && p.status === 'success'))
+                          .map((item, idx) => (
+                          <Card key={idx} padding={2} radius={2} tone={item.status === 'error' ? 'critical' : (item.status === 'success' ? 'positive' : 'default')} border>
+                            <Flex align="center" justify="space-between">
+                              <Flex align="center" gap={3}>
+                                <Box style={{ fontSize: '1.2rem' }}>
+                                  {item.status === 'success' ? '✅' : (item.status === 'error' ? '❌' : (item.status === 'warning' ? '⚠️' : '⏳'))}
+                                </Box>
+                                <Stack space={2}>
+                                  <Text size={1} weight="bold">
+                                    {item.type.toUpperCase()}: {item.name}
+                                  </Text>
+                                  {item.message && <Text size={0} muted>{item.message}</Text>}
+                                </Stack>
+                              </Flex>
+                              <Text size={0} muted>{item.details}</Text>
+                            </Flex>
+                          </Card>
+                        ))}
+                      </Stack>
+                    </Box>
+                  </Stack>
+                </Card>
+              )}
+            </Stack>
+          </Box>
+
+          {/* RIGHT COLUMN: PRE-SCAN REPORT & GUIDE (4 columns) */}
+          <Box column={[1, 1, 1, 4]}>
+            <Stack space={4}>
+              {/* PRE-FLIGHT ISSUES */}
+              {scanReport && scanReport.issues.length > 0 && (
+                <Card padding={4} radius={3} tone="caution" shadow={1} border>
+                  <Stack space={3}>
+                    <Text size={2} weight="bold">⚠️ Dikkat Edilmesi Gerekenler ({scanReport.issues.length})</Text>
+                    <Box style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                      <Stack space={2}>
+                        {scanReport.issues.slice(0, 50).map((issue, i) => (
+                          <Stack key={i} space={1} style={{ paddingBottom: '8px', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+                            <Text size={1} weight="semibold" tone={issue.type === 'error' ? 'critical' : 'caution'}>
+                              {issue.message}
+                            </Text>
+                            {issue.subtext && <Text size={0} muted>{issue.subtext}</Text>}
+                          </Stack>
+                        ))}
+                        {scanReport.issues.length > 50 && <Text size={0} muted>...ve {scanReport.issues.length - 50} daha fazla uyarı.</Text>}
+                      </Stack>
+                    </Box>
+                  </Stack>
+                </Card>
+              )}
+
+              {/* R2 CONFIG CHECK */}
+              {!preflight.isAllOk && (
+                <Card padding={4} radius={3} tone="critical" shadow={1} border>
+                  <Stack space={3}>
+                    <Text size={2} weight="bold">❌ Eksik Yapılandırma</Text>
+                    <Text size={1}>R2 bağlantısı için .env dosyasındaki şu alanları kontrol edin:</Text>
+                    <Stack space={2}>
+                      {!preflight.accountId && <Text size={1} style={{ color: 'red' }}>• R2_ACCOUNT_ID</Text>}
+                      {!preflight.accessKey && <Text size={1} style={{ color: 'red' }}>• R2_ACCESS_KEY_ID</Text>}
+                      {!preflight.secretKey && <Text size={1} style={{ color: 'red' }}>• R2_SECRET_ACCESS_KEY</Text>}
+                      {!preflight.bucket && <Text size={1} style={{ color: 'red' }}>• R2_BUCKET_NAME</Text>}
+                      {!preflight.domain && <Text size={1} style={{ color: 'red' }}>• R2_DOMAIN</Text>}
+                    </Stack>
+                  </Stack>
+                </Card>
+              )}
+
+              {/* GUIDE */}
+              <Card padding={4} radius={3} tone="transparent" shadow={0} border style={{ borderStyle: 'dashed' }}>
+                <Stack space={3}>
+                  <Text size={2} weight="bold">ℹ️ Nasıl Çalışır?</Text>
+                  <Text size={1} style={{ lineHeight: '1.6' }}>
+                    1. **Tara:** Klasörü bırakın, sistem dökümanları eşleştirsin.<br/>
+                    2. **İncele:** Eksik dökümanları veya hatalı isimleri rapor panelinden kontrol edin.<br/>
+                    3. **Onayla:** Her şey hazırsa yüklemeyi başlatın.
                   </Text>
-                </Flex>
-              ))}
+                  <Box style={{ borderTop: '1px solid rgba(0,0,0,0.1)' }} />
+                  <Text size={1} weight="semibold">İsimlendirme İpucu:</Text>
+                  <Text size={1} muted>
+                    Ürün kapakları için dosya sonuna <b>_kapak</b> ekleyin. Mobil versiyonlar için <b>_mobil</b> etiketini kullanın.
+                  </Text>
+                </Stack>
+              </Card>
             </Stack>
-          </Card>
-        )}
-
-        {/* Yardım */}
-        <Card padding={4} tone="caution" radius={2}>
-          <Stack space={3}>
-            <Text size={2} weight="bold">
-              🛠️ Sistem Nasıl Çalışır?
-            </Text>
-            <Text size={1} style={{ lineHeight: '1.6' }}>
-              • <strong>R2 Sync:</strong> Dosyalar Sanity yerine Cloudflare R2'ye yüklenir ve dökümandaki <code>imageR2</code>, <code>videoFileR2</code> field'larına otomatik bağlanır.<br />
-              • <strong>Otomatik Optimizasyon:</strong> Büyük görseller otomatik sıkıştırılır, WebP'ye çevrilir ve responsive boyutları (2K, 1K, 800px, 400px) oluşturulur.<br />
-              • <strong>Birleşik Medya Sistemi:</strong> Mevcut dökümandaki tüm eski medya alanları temizlenir ve tüm içerik tek bir <strong>medya gallery (media)</strong> dizisinde birleştirilir. Sistem, klasör yapısına veya dosya adına göre "Kapak Görselini" otomatik belirler.
-            </Text>
-            <Box padding={2} style={{ backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: '4px' }}>
-              <Stack space={2}>
-                <Text size={1} weight="semibold">
-                  🚀 Başlamadan Önce:
-                </Text>
-                <Text size={1} style={{ lineHeight: '1.6' }}>
-                  1️⃣ CMS'de ilgili kaydı (Ürün, Tasarımcı vb.) "Slug" bilgisini vererek oluşturun.<br />
-                  2️⃣ Bilgisayarınızdaki klasör adının CMS'teki isimle (veya slug ile) eşleştiğinden emin olun.<br />
-                  3️⃣ Klasör dizinini aşağıdaki Drag & Drop alanına bırakın.
-                </Text>
-              </Stack>
-            </Box>
-          </Stack>
-        </Card>
-
-        <Card padding={3} tone="transparent" radius={2}>
-          <Stack space={2}>
-            <Text size={1} weight="semibold">
-              💡 Örnek Klasör Yapısı:
-            </Text>
-            <Text size={1} style={{ fontFamily: 'monospace', whiteSpace: 'pre' }}>
-              {`MedyaKlasoru/
-├── ÜRÜNLER/                      ← Ürün medya kök dizini
-│   └── KANEPELER/                ← Kategori adı
-│       └── PUF_1/                ← Ürün adı veya ID (Slug)
-│           ├── medya/            ← Tüm medya (Görsel + Video) tek klasörde
-│           │   ├── mobil/
-│           │   ├── desktop/
-│           │   ├── puf_kapak.jpg ← '_kapak' son eki kapak görseli yapar (⭐)
-│           │   ├── 01.jpg        
-│           │   └── 02.jpg
-│           ├── ÖLÇÜLER/          ← Teknik ölçü şemaları
-│           └── İndirilebilir Dosyalar/
-├── PROJELER/                     ← Proje medya kök dizini
-│   └── Proje_A/
-│       ├── medya/                ← Proje görselleri (kapak için _kapak ekle)
-│       └── içerik blokları/       ← Proje sayfa içi bloklar (Array düzeni)
-├── TASARIMCILAR/                 ← Tasarımcı portreleri
-└── MALZEMELER/                   ← Malzeme & Kartela görselleri`}
-            </Text>
-            <Text size={0} muted>
-              ℹ️ Yeni yapıda tüm medya tek bir 'medya' dizininde tutulur. '_kapak' son eki sistemin kapak görselini (⭐) tanımasını sağlar.
-            </Text>
-            <Text size={0} muted>
-              ℹ️ Klasör / kategori / ürün / tasarımcı / malzeme grup ve kartela isimleri CMS'deki
-              isimlerle mümkün olduğunca bire bir aynı olmalıdır.
-            </Text>
-          </Stack>
-        </Card>
+          </Box>
+        </Grid>
       </Stack>
     </Card>
   )
@@ -1619,8 +1946,10 @@ function slugify(text: string): string {
 }
 
 // Karşılaştırma için normalize et (tireler ve boşluklar olmadan)
+const normalizeForMatch = (str: string) => slugify(str || '').replace(/-/g, '')
+
 function normalizeText(text: string): string {
-  return slugify(text).replace(/-/g, '').replace(/\s+/g, '')
+  return normalizeForMatch(text).replace(/\s+/g, '')
 }
 
 function isImageFile(filename: string): boolean {
@@ -1858,6 +2187,22 @@ async function checkExistingAssets(client: any, productId: string) {
         file{asset->{_id, originalFilename, sha1hash}},
         fileR2
       }
+    },
+    bottomMedia[]{
+      ...,
+      type,
+      image{asset->{_id, originalFilename, sha1hash}},
+      imageR2,
+      imageMobile{asset->{_id, originalFilename, sha1hash}},
+      imageMobileR2,
+      imageDesktop{asset->{_id, originalFilename, sha1hash}},
+      imageDesktopR2,
+      videoFile{asset->{_id, originalFilename, sha1hash}},
+      videoFileR2,
+      videoFileMobile{asset->{_id, originalFilename, sha1hash}},
+      videoFileMobileR2,
+      videoFileDesktop{asset->{_id, originalFilename, sha1hash}},
+      videoFileDesktopR2
     }
   }`,
     { productId },
@@ -1989,11 +2334,32 @@ async function checkExistingAssets(client: any, productId: string) {
     }
   }
 
+  // Mevcut bottomMedia array'ini koru
+  const existingBottomMedia: any[] = []
+  if (product?.bottomMedia) {
+    product.bottomMedia.forEach((item: any) => {
+      const checkAsset = (asset: any) => {
+        if (asset) {
+          if (asset.sha1hash) existingHashes.add(asset.sha1hash)
+          if (asset.originalFilename) existingFilenames.add(asset.originalFilename)
+        }
+      }
+      checkAsset(item?.image?.asset)
+      checkAsset(item?.imageMobile?.asset)
+      checkAsset(item?.imageDesktop?.asset)
+      checkAsset(item?.videoFile?.asset)
+      checkAsset(item?.videoFileMobile?.asset)
+      checkAsset(item?.videoFileDesktop?.asset)
+      existingBottomMedia.push(item)
+    })
+  }
+
   return {
     existingHashes,
     existingFilenames,
     existingDimensionImages,
     existingMediaArray,
+    existingBottomMedia,
     existingExclusiveImages,
     existingDrawings,
     existingModels3d,
@@ -2042,7 +2408,7 @@ async function isAssetAlreadyUploaded(
  * - CMS'de olmayan klasör görsellerini ekler
  * - Her ikisinde de olan görselleri korur
  */
-async function updateProductImages(client: any, productId: string, product: any) {
+async function updateProductImages(client: any, productId: string, product: any, mode: 'sync' | 'add' = 'sync') {
   // Mevcut görselleri kontrol et
   const productData = await checkExistingAssets(client, productId)
   const {
@@ -2050,6 +2416,7 @@ async function updateProductImages(client: any, productId: string, product: any)
     existingFilenames,
     existingDimensionImages,
     existingMediaArray,
+    existingBottomMedia,
     existingExclusiveImages,
     existingDrawings,
     existingModels3d,
@@ -2065,10 +2432,20 @@ async function updateProductImages(client: any, productId: string, product: any)
   const modelFiles: File[] = product.modelFiles || []
 
   // Medya (hem görsel hem video)
-  const incomingMedia = product.media || []
+  const allMedia = product.media || []
+  const panelMedia: File[] = []
+  const incomingMedia: typeof allMedia = []
+
+  allMedia.forEach((m) => {
+    if (m.file.name.toLowerCase().includes('_panel')) {
+      panelMedia.push(m.file)
+    } else {
+      incomingMedia.push(m)
+    }
+  })
 
   const updates: any = {}
-  const unsetFields: string[] = ['mainImage', 'mainImageR2', 'mainImageMobile', 'mainImageMobileR2', 'mainImageDesktop', 'mainImageDesktopR2', 'alternativeMedia']
+  const unsetFields: string[] = mode === 'sync' ? ['mainImage', 'mainImageR2', 'mainImageMobile', 'mainImageMobileR2', 'mainImageDesktop', 'mainImageDesktopR2', 'alternativeMedia'] : []
   let hasChanges = false
 
   // ============================================
@@ -2173,13 +2550,21 @@ async function updateProductImages(client: any, productId: string, product: any)
   }
 
   // 2. CMS'de olan ama klasörde olmayan medyayı say (silinecek)
-  const toDelete = Array.from(cmsMediaHashes).filter((hash) => !folderMediaHashes.has(hash))
-  if (toDelete.length > 0) {
-    console.log(`   🗑️ ${toDelete.length} medya dökümanda var ama klasörde yok, eşitleme için CMS'den temizleniyor`)
-    hasChanges = true
+  if (mode === 'sync') {
+    const toDelete = Array.from(cmsMediaHashes).filter((hash) => !folderMediaHashes.has(hash))
+    if (toDelete.length > 0) {
+      console.log(`   🗑️ ${toDelete.length} medya dökümanda var ama klasörde yok, eşitleme için CMS'den temizleniyor`)
+      hasChanges = true
+    }
+    updates.media = syncedMedia
+  } else {
+    // ADD MODE: Mevcutların üzerine ekle
+    const newOnly = syncedMedia.filter(m => !cmsMediaHashes.has(m.image?.asset?.sha1hash || m.imageR2?.url))
+    if (newOnly.length > 0) {
+      updates.media = [...existingMediaArray, ...newOnly]
+      hasChanges = true
+    }
   }
-
-  updates.media = syncedMedia
 
   // ============================================
   // 3. ÖLÇÜ GÖRSELLERİNİ EŞİTLE
@@ -2372,7 +2757,7 @@ async function updateProductImages(client: any, productId: string, product: any)
 
       if (mainFile) {
         const hash = await getFileHash(mainFile.file)
-        const existing = existingMedia.find((item: any) => {
+        const existing = existingBottomMedia.find((item: any) => {
           if (mainFile.isVideo) {
             return item?.videoFile?.asset?.sha1hash === hash
           } else {
@@ -2507,7 +2892,7 @@ async function updateProductImages(client: any, productId: string, product: any)
     console.log(`   ✅ ${syncedMedia.length} alt medya paneli eşitlendi`)
   } else {
     // Klasörde alt medya paneli yok - CMS'deki alt medya panellerini sil (eşitleme)
-    if (existingMedia.length > 0) {
+    if (existingBottomMedia.length > 0) {
       console.log(
         `   🗑️ Klasörde alt medya paneli yok, CMS'deki alt medya panelleri siliniyor (eşitleme)`,
       )
@@ -2710,7 +3095,7 @@ async function updateProductImages(client: any, productId: string, product: any)
 /**
  * Proje medyasını klasörle eşitler (sync)
  */
-async function updateProjectMedia(client: any, projectId: string, project: any) {
+async function updateProjectMedia(client: any, projectId: string, project: any, mode: 'sync' | 'add' = 'sync') {
   // Mevcut medyayı kontrol et
   const projectData = await client.fetch(
     `*[_id == $projectId][0]{
@@ -2786,9 +3171,14 @@ async function updateProjectMedia(client: any, projectId: string, project: any) 
   }
 
   if (hasChanges || syncedMedia.length !== existingMedia.length) {
-    updates.media = syncedMedia
-    await client.patch(projectId).set(updates).unset(unsetFields).commit()
-    console.log(`   ✅ Proje medyası eşitlendi (Toplam: ${syncedMedia.length} medya)`)
+    if (mode === 'sync') {
+      updates.media = syncedMedia
+    } else {
+      const newOnly = syncedMedia.filter(m => !cmsMediaMap.has(m._key))
+      updates.media = [...existingMedia, ...newOnly]
+    }
+    await client.patch(projectId).set(updates).unset(mode === 'sync' ? unsetFields : []).commit()
+    console.log(`   ✅ Proje medyası güncellendi (Mode: ${mode})`)
   }
 }
 

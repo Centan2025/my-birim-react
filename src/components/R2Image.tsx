@@ -158,6 +158,8 @@ export const R2Image: React.FC<R2ImageProps> = ({
           {
             objectFit: 'cover',
             objectPosition,
+            imageRendering: 'high-quality', // Tarayıcıya en yüksek kaliteyi kullanmasını söyler
+            WebkitBackfaceVisibility: 'hidden', // Titreme ve bozulmaları önlemek için GPU tetikler
             ...style,
             ...(hasCrop
               ? {

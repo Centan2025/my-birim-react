@@ -90,7 +90,9 @@ const StatusBox = styled.div<{ type: 'info' | 'success' | 'error' }>`
   }};
 `
 
-const ProgressBar = styled.div<{ progress: number }>`
+const ProgressBar = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== 'progress',
+})<{ $progress: number }>`
   width: 100%;
   height: 24px;
   background: #e0e0e0;
@@ -101,7 +103,7 @@ const ProgressBar = styled.div<{ progress: number }>`
   &::after {
     content: '';
     display: block;
-    width: ${(props) => props.progress}%;
+    width: ${(props) => props.$progress}%;
     height: 100%;
     background: #2276fc;
     transition: width 0.3s;
@@ -126,17 +128,19 @@ const FilterButtons = styled.div`
   flex-wrap: wrap;
 `
 
-const FilterButton = styled.button<{ active: boolean }>`
+const FilterButton = styled.button.withConfig({
+  shouldForwardProp: (prop) => prop !== 'active',
+})<{ $active: boolean }>`
   padding: 0.5rem 1rem;
   border: 1px solid #ccc;
   border-radius: 4px;
-  background: ${(props) => (props.active ? '#2276fc' : 'white')};
-  color: ${(props) => (props.active ? 'white' : '#333')};
+  background: ${(props) => (props.$active ? '#2276fc' : 'white')};
+  color: ${(props) => (props.$active ? 'white' : '#333')};
   cursor: pointer;
   font-size: 0.875rem;
 
   &:hover {
-    background: ${(props) => (props.active ? '#1a5fc7' : '#f0f0f0')};
+    background: ${(props) => (props.$active ? '#1a5fc7' : '#f0f0f0')};
   }
 `
 
@@ -299,7 +303,7 @@ export function ExcelImportTool() {
       if (designersSheetName) {
         const worksheet = workbook.Sheets[designersSheetName]
         const data = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' }) as any[][]
-        const rows = data.slice(2)
+        const rows = data.slice(1)
 
         for (const row of rows) {
           const columnA = String(row[0] || '').trim()
@@ -480,6 +484,7 @@ export function ExcelImportTool() {
           tr: categoryName.trim(),
           en: categoryName.trim(),
         },
+        orderRank: 'a0',
       })
 
       addLog(`Kategori oluşturuldu: ${categoryName}`, 'success')
@@ -683,7 +688,7 @@ export function ExcelImportTool() {
     productId: string,
     productName: string,
     categoryId: string | null,
-    designerId: string | null,
+    designerIds: string[],
     year: number | null,
     descriptionTr: string,
     descriptionEn: string,
@@ -717,11 +722,12 @@ export function ExcelImportTool() {
         }
       }
 
-      if (designerId) {
-        productData.designer = {
+      if (designerIds && designerIds.length > 0) {
+        productData.designers = designerIds.map((id, index) => ({
           _type: 'reference',
-          _ref: designerId,
-        }
+          _ref: id,
+          _key: `designer-${id}-${index}`
+        }))
       }
 
       if (year) {
@@ -1007,8 +1013,8 @@ export function ExcelImportTool() {
       return { successCount: 0, errorCount: 0, skippedCount: 0 }
     }
 
-    // İlk 2 satırı başlık olarak atla (kullanıcı isteği)
-    const rows = data.slice(2)
+    // İlk satırı başlık olarak atla
+    const rows = data.slice(1)
     let successCount = 0
     let errorCount = 0
     let skippedCount = 0
@@ -1150,7 +1156,7 @@ export function ExcelImportTool() {
           defval: '',
         }) as any[][]
         if (designersData.length > 1) {
-          const designersRows = designersData.slice(2) // İlk 2 satır başlık
+          const designersRows = designersData.slice(1) // İlk satır başlık
           for (const row of designersRows) {
             const columnA = String(row[0] || '').trim()
             const columnC = String(row[2] || '').trim() // TASARIMCI ADI
@@ -1314,29 +1320,43 @@ export function ExcelImportTool() {
             }
 
             // Tasarımcı kontrolü ve bulma
-            let designerId: string | null = null
+            const designerIds: string[] = []
+            let hasDesignerError = false
+
             if (columnE) {
-              // Excel'de TASARIMCILAR sayfası varsa ve tasarımcı orada tanımlı değilse hata ver
-              if (designersInExcel.size > 0 && !designersInExcel.has(columnE.trim())) {
-                addLog(
-                  `ÜRÜNLER Satır ${i + 2}: ⚠️ Tasarımcı "${columnE}" TASARIMCILAR sayfasında tanımlı değil! Ürün atlanıyor.`,
-                  'error',
-                )
-                errorCount++
-                continue
-              }
+              // Ayraçları (virgül veya ve işareti) ayır
+              const designerNames = columnE.split(/[,&]/).map(name => name.trim()).filter(Boolean)
 
-              // Tasarımcıyı sadece bul (oluşturma!)
-              designerId = await findDesigner(columnE)
+              for (const dName of designerNames) {
+                // Excel'de TASARIMCILAR sayfası varsa ve tasarımcı orada tanımlı değilse hata ver
+                if (designersInExcel.size > 0 && !designersInExcel.has(dName)) {
+                  addLog(
+                    `ÜRÜNLER Satır ${i + 2}: ⚠️ Tasarımcı "${dName}" TASARIMCILAR sayfasında tanımlı değil! Ürün atlanıyor.`,
+                    'error',
+                  )
+                  hasDesignerError = true
+                  break
+                }
 
-              if (!designerId) {
-                addLog(
-                  `ÜRÜNLER Satır ${i + 2}: ⚠️ Tasarımcı "${columnE}" CMS'de bulunamadı! Önce TASARIMCILAR sayfasında tanımlayın veya CMS'den manuel ekleyin. Ürün atlanıyor.`,
-                  'error',
-                )
-                errorCount++
-                continue
+                // Tasarımcıyı sadece bul (oluşturma!)
+                const dId = await findDesigner(dName)
+
+                if (!dId) {
+                  addLog(
+                    `ÜRÜNLER Satır ${i + 2}: ⚠️ Tasarımcı "${dName}" CMS'de bulunamadı! Önce TASARIMCILAR sayfasında tanımlayın veya CMS'den manuel ekleyin. Ürün atlanıyor.`,
+                    'error',
+                  )
+                  hasDesignerError = true
+                  break
+                } else {
+                  designerIds.push(dId)
+                }
               }
+            }
+
+            if (hasDesignerError) {
+              errorCount++
+              continue
             }
 
             // Tasarım yılı
@@ -1353,7 +1373,7 @@ export function ExcelImportTool() {
               columnC,
               columnD,
               categoryId,
-              designerId,
+              designerIds,
               year,
               columnG,
               columnH,
@@ -1419,6 +1439,90 @@ export function ExcelImportTool() {
     }
   }
 
+  // Ultra-Debug Retry Logic
+  const retryAction = async (action: () => Promise<any>, maxRetries = 10) => {
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        return await action()
+      } catch (error: any) {
+        // Deep error inspection for Sanity
+        const errorCode = error.statusCode || error.response?.status || 0
+        const errorType = error.body?.error?.type || ''
+        const errorMsg = error.message || ''
+        
+        console.error('DEBUG - Hata Detayı:', { i, errorCode, errorType, errorMsg, error })
+
+        const isConflict = errorCode === 409 || errorType === 'mutation_conflict' || errorMsg.includes('Conflict')
+
+        if (isConflict && i < maxRetries - 1) {
+          const waitTime = 2000 + (i * 2000)
+          addLog(`Çakışma algılandı (409). Sanity veritabanını düzenliyor olabilir. ${waitTime/1000}sn sonra tekrar...`, 'warning')
+          await new Promise(r => setTimeout(r, waitTime))
+          continue
+        }
+        
+        if (errorCode === 0 && (errorMsg.includes('Network') || errorMsg.includes('fetch'))) {
+           addLog('Bağlantı hatası, 4sn bekleyip tazeleniyor...', 'warning')
+           await new Promise(r => setTimeout(r, 4000))
+           continue
+        }
+
+        throw error
+      }
+    }
+  }
+
+  // Debug-Enhanced deletion
+  const deleteByBatch = async (type: string, query: string, batchSize = 5) => {
+    addLog(`${type} verileri çekiliyor...`, 'info')
+    const docs = await client.fetch(query)
+    
+    if (docs.length === 0) {
+      addLog(`Silinecek ${type} kalmamış.`, 'info')
+      return 0
+    }
+
+    addLog(`${docs.length} adet ${type} için işlem başlıyor (Debug On)...`, 'info')
+    
+    const drafts = docs.filter((d: any) => d._id.startsWith('drafts.'))
+    const published = docs.filter((d: any) => !d._id.startsWith('drafts.'))
+    const sortedDocs = [...drafts, ...published]
+    
+    for (let i = 0; i < sortedDocs.length; i += batchSize) {
+      const batch = sortedDocs.slice(i, i + batchSize)
+      const ids = batch.map((d: any) => d._id)
+      
+      try {
+        await retryAction(async () => {
+          const t = client.transaction()
+          ids.forEach(id => t.delete(id))
+          await t.commit({ visibility: 'async', returnIds: false })
+        }, 3) // İlk 3 deneme paket olarak
+      } catch (batchError: any) {
+        addLog(`Paket hatası (İndeks: ${i}). Tekli silmeye geçiliyor (Debug Mode)...`, 'warning')
+        
+        // Paket başarısız olursa tek tek silerek suçluyu bul
+        for (const id of ids) {
+          try {
+            await retryAction(async () => {
+              await client.delete(id, { visibility: 'async' })
+            }, 5)
+            console.log(`Debug: ID ${id} başarıyla silindi.`)
+          } catch (singleError: any) {
+            addLog(`!!! KRITIK: ID ${id} silinemedi: ${singleError.message}`, 'error')
+            console.error('Hatanın tamamı:', singleError)
+          }
+        }
+      }
+      
+      setProgress(Math.round(((i + batch.length) / sortedDocs.length) * 100))
+      if (i % 2 === 0) addLog(`${i + batch.length}/${sortedDocs.length} ${type} işlendi...`, 'info')
+      await new Promise(r => setTimeout(r, 800))
+    }
+    
+    return docs.length
+  }
+
   const deleteAllProducts = async () => {
     if (
       !confirm(
@@ -1436,102 +1540,36 @@ export function ExcelImportTool() {
     setStatus(null)
     setLogs([])
     setProgress(0)
-    addLog('Tüm ürünler siliniyor...', 'info')
+    addLog('Tüm ürünler ve kategoriler siliniyor (Toplu İşlem)...', 'info')
 
     try {
-      // Tüm ürünleri getir
-      const allProducts = await client.fetch(`*[_type == "product"]{_id, "id": id.current, name}`)
-      const totalProducts = allProducts.length
+      addLog('Ürünlerin silinmesi başlatılıyor...', 'info')
+      const pCount = await deleteByBatch('Ürün', '*[_type == "product" || (_id in path("drafts.**") && _type == "product")]{_id}')
+      addLog(`${pCount} ürün temizlendi.`, 'success')
 
-      if (totalProducts === 0) {
-        addLog('Silinecek ürün bulunamadı', 'warning')
-        setStatus({
-          success: true,
-          message: 'Silinecek ürün bulunamadı',
-        })
-        setIsDeleting(false)
-        return
+      // Projelerdeki ürün referanslarını temizle (varsa)
+      addLog('Projelerdeki ürün referansları kontrol ediliyor...', 'info')
+      const projectsWithRefs = await client.fetch('*[_type == "project" && defined(category)]{_id}') // Proje kategorisi varsa
+      if (projectsWithRefs.length > 0) {
+         addLog(`${projectsWithRefs.length} projeden referanslar sökülüyor...`, 'info')
+         const tx = client.transaction()
+         projectsWithRefs.forEach((p: any) => tx.patch(p._id, (pt: any) => pt.unset(['category'])))
+         await tx.commit({ visibility: 'async' })
       }
 
-      addLog(`Toplam ${totalProducts} ürün bulundu`, 'info')
-
-      let deletedCount = 0
-      let errorCount = 0
-
-      // Her ürünü sil
-      for (let i = 0; i < allProducts.length; i++) {
-        const product = allProducts[i]
-        const productName = product.name?.tr || product.name?.en || product.id || 'Bilinmeyen'
-
-        try {
-          await client.delete(product._id)
-          deletedCount++
-          addLog(`Ürün silindi: ${productName} (${product.id})`, 'success')
-        } catch (error: any) {
-          errorCount++
-          addLog(`Ürün silinemedi: ${productName} - ${error.message}`, 'error')
-        }
-
-        setProgress(Math.round(((i + 1) / totalProducts) * 100))
-      }
-
-      addLog(`Ürün silme işlemi tamamlandı! ${deletedCount} ürün silindi`, 'success')
-
-      // Şimdi tüm kategorileri sil
-      addLog('Tüm kategoriler siliniyor...', 'info')
-      const allCategories = await client.fetch(
-        `*[_type == "category"]{_id, "id": id.current, name}`,
-      )
-      const totalCategories = allCategories.length
-
-      if (totalCategories === 0) {
-        addLog('Silinecek kategori bulunamadı', 'warning')
-      } else {
-        addLog(`Toplam ${totalCategories} kategori bulundu`, 'info')
-
-        let deletedCategoriesCount = 0
-        let categoryErrorCount = 0
-
-        // Her kategoriyi sil
-        for (let i = 0; i < allCategories.length; i++) {
-          const category = allCategories[i]
-          const categoryName = category.name?.tr || category.name?.en || category.id || 'Bilinmeyen'
-
-          try {
-            await client.delete(category._id)
-            deletedCategoriesCount++
-            addLog(`Kategori silindi: ${categoryName} (${category.id})`, 'success')
-          } catch (error: any) {
-            categoryErrorCount++
-            addLog(`Kategori silinemedi: ${categoryName} - ${error.message}`, 'error')
-          }
-        }
-
-        addLog(
-          `Kategori silme işlemi tamamlandı! ${deletedCategoriesCount} kategori silindi`,
-          'success',
-        )
-        errorCount += categoryErrorCount
-      }
+      addLog('Kategorilerin silinmesi başlatılıyor...', 'info')
+      const cCount = await deleteByBatch('Kategori', '*[_type == "category" || (_id in path("drafts.**") && _type == "category")]{_id}')
+      addLog(`${cCount} kategori temizlendi.`, 'success')
 
       setStatus({
-        success: errorCount === 0,
-        message: `Silme işlemi tamamlandı! Ürünler: ${deletedCount}, Kategoriler: ${totalCategories > 0 ? allCategories.length : 0}, Hata: ${errorCount}`,
-        details: [
-          `Toplam ürün: ${totalProducts}`,
-          `Başarıyla silinen ürün: ${deletedCount}`,
-          `Toplam kategori: ${totalCategories}`,
-          `Başarıyla silinen kategori: ${totalCategories > 0 ? allCategories.length - (errorCount - (totalProducts - deletedCount)) : 0}`,
-          `Toplam hata: ${errorCount}`,
-        ],
+        success: true,
+        message: 'Tüm ürünler ve kategoriler başarıyla temizlendi.',
       })
-
-      addLog(`Tüm işlemler tamamlandı!`, 'success')
     } catch (error: any) {
-      addLog(`Hata: ${error.message}`, 'error')
+      addLog(`Silme hatası: ${error.message}`, 'error')
       setStatus({
         success: false,
-        message: `Silme işlemi sırasında hata oluştu: ${error.message}`,
+        message: `Silme işlemi başarısız: ${error.message}`,
       })
     } finally {
       setIsDeleting(false)
@@ -1545,7 +1583,7 @@ export function ExcelImportTool() {
       return
     }
 
-    if (!confirm('LÜTFEN TEKRAR ONAYLAYIN: Tüm tasarımcılar kalıcı olarak silinecek!')) {
+    if (!confirm('Hala ürünler duruyorsa referans hataları oluşabilir. Tasarımcıları silmeden önce tüm ürünleri sildiğinizden emin olun. Devam edilsin mi?')) {
       return
     }
 
@@ -1553,64 +1591,94 @@ export function ExcelImportTool() {
     setStatus(null)
     setLogs([])
     setProgress(0)
-    addLog('Tüm tasarımcılar siliniyor...', 'info')
+    addLog('Tüm tasarımcılar ve taslakları siliniyor...', 'info')
 
     try {
-      // Tüm tasarımcıları getir
-      const allDesigners = await client.fetch(`*[_type == "designer"]{_id, "id": id.current, name}`)
-      const totalDesigners = allDesigners.length
-
-      if (totalDesigners === 0) {
-        addLog('Silinecek tasarımcı bulunamadı', 'warning')
-        setStatus({
-          success: true,
-          message: 'Silinecek tasarımcı bulunamadı',
-        })
-        setIsDeleting(false)
-        return
-      }
-
-      addLog(`Toplam ${totalDesigners} tasarımcı bulundu`, 'info')
-
-      let deletedCount = 0
-      let errorCount = 0
-
-      // Her tasarımcıyı sil
-      for (let i = 0; i < allDesigners.length; i++) {
-        const designer = allDesigners[i]
-        const designerName = designer.name?.tr || designer.name?.en || designer.id || 'Bilinmeyen'
-
-        try {
-          await client.delete(designer._id)
-          deletedCount++
-          addLog(`Tasarımcı silindi: ${designerName} (${designer.id})`, 'success')
-        } catch (error: any) {
-          errorCount++
-          addLog(`Tasarımcı silinemedi: ${designerName} - ${error.message}`, 'error')
+      // ÖNCE REFERANSLARI TEMİZLE
+      addLog('Ürünlerdeki tasarımcı referansları temizleniyor (Kilit açılıyor)...', 'info')
+      const productsWithDesigners = await client.fetch('*[_type == "product" && count(designers) > 0]{_id}')
+      if (productsWithDesigners.length > 0) {
+        addLog(`${productsWithDesigners.length} üründen tasarımcı bağları koparılıyor...`, 'info')
+        const batches = []
+        for (let i = 0; i < productsWithDesigners.length; i += 20) {
+          batches.push(productsWithDesigners.slice(i, i + 20))
         }
-
-        setProgress(Math.round(((i + 1) / totalDesigners) * 100))
+        for (const batch of batches) {
+          const transaction = client.transaction()
+          batch.forEach((p: any) => transaction.patch(p._id, (pt: any) => pt.unset(['designers'])))
+          await transaction.commit({ visibility: 'async' })
+          await new Promise(r => setTimeout(r, 500))
+        }
+        addLog('Referanslar temizlendi.', 'success')
       }
+
+      addLog('Tasarımcıların silinmesi başlatılıyor...', 'info')
+      const dCount = await deleteByBatch('Tasarımcı', '*[_type == "designer" || (_id in path("drafts.**") && _type == "designer")]{_id}')
+      addLog(`${dCount} tasarımcı temizlendi.`, 'success')
 
       setStatus({
-        success: errorCount === 0,
-        message: `Silme işlemi tamamlandı! Silinen: ${deletedCount}, Hata: ${errorCount}`,
-        details: [
-          `Toplam: ${totalDesigners} tasarımcı`,
-          `Başarıyla silinen: ${deletedCount} tasarımcı`,
-          `Hata: ${errorCount} tasarımcı`,
-        ],
+        success: true,
+        message: 'Tüm tasarımcılar başarıyla temizlendi.',
       })
-
-      addLog(`Silme işlemi tamamlandı! ${deletedCount} tasarımcı silindi`, 'success')
     } catch (error: any) {
-      addLog(`Hata: ${error.message}`, 'error')
+      addLog(`Silme hatası: ${error.message}`, 'error')
       setStatus({
         success: false,
-        message: `Silme işlemi sırasında hata oluştu: ${error.message}`,
+        message: `Silme işlemi başarısız: ${error.message}`,
       })
     } finally {
       setIsDeleting(false)
+    }
+  }
+
+  const fixOrderRanks = async () => {
+    if (!confirm('Veritabanında eksik olan "orderRank" alanları tespit edilip varsayılan değerler atanacak. Bu işlem çökmeleri önlemek içindir. Devam edilsin mi?')) {
+      return
+    }
+
+    setIsProcessing(true)
+    setProgress(0)
+    addLog('Eksik sıralama verileri taranıyor...', 'info')
+
+    try {
+      const types = ['designer', 'product', 'category']
+      let totalFixed = 0
+
+      for (const type of types) {
+        addLog(`[${type.toUpperCase()}] Taranıyor...`, 'info')
+        // Hem yayınlanmış hem taslak dökümanlardaki eksik orderRank'ları bul
+        const brokenDocs = await client.fetch(
+          `*[(_type == $type || (_id in path("drafts.**") && _type == $type)) && !defined(orderRank)]{_id}`, 
+          { type }
+        )
+        
+        if (brokenDocs.length === 0) {
+          addLog(`[${type.toUpperCase()}] Temiz!`, 'success')
+          continue
+        }
+        
+        addLog(`${type}: ${brokenDocs.length} adet bozuk veri onarılıyor...`, 'info')
+
+        // Patch işlemini retry mekanizması ve async visibility ile yap
+        await retryAction(async () => {
+          const transaction = client.transaction()
+          brokenDocs.forEach((doc: any) => {
+            transaction.patch(doc._id, (p) => p.set({ orderRank: 'a0' }))
+          })
+          await transaction.commit({ visibility: 'async' })
+        })
+
+        totalFixed += brokenDocs.length
+        setProgress(Math.round(((types.indexOf(type) + 1) / types.length) * 100))
+      }
+
+      addLog(`Onarım tamamlandı! Toplam ${totalFixed} döküman düzeltildi.`, 'success')
+      alert('Tüm bozuk veriler onarıldı. Artık sistem çökmeden dökümanları görebilir veya silebilirsiniz.')
+    } catch (error: any) {
+      addLog(`Onarım sırasında hata: ${error.message}`, 'error')
+    } finally {
+      setIsProcessing(false)
+      setProgress(0)
     }
   }
 
@@ -1703,10 +1771,17 @@ export function ExcelImportTool() {
           <DangerButton onClick={deleteAllDesigners} disabled={isDeleting || isProcessing}>
             {isDeleting ? 'Siliniyor...' : 'TÜM TASARIMCILARI SİL'}
           </DangerButton>
+          <Button 
+            onClick={fixOrderRanks} 
+            disabled={isDeleting || isProcessing}
+            style={{ background: '#28a745' }}
+          >
+            {isProcessing ? 'Onarılıyor...' : 'BOZUK SIRALAMA VERİLERİNİ ONAR'}
+          </Button>
         </div>
         {isDeleting && (
           <div style={{ marginTop: '1rem' }}>
-            <ProgressBar progress={progress} />
+            <ProgressBar $progress={progress} />
             <p style={{ textAlign: 'center', marginTop: '0.5rem' }}>İlerleme: %{progress}</p>
           </div>
         )}
@@ -1764,7 +1839,7 @@ export function ExcelImportTool() {
 
       {isProcessing && (
         <div>
-          <ProgressBar progress={progress} />
+          <ProgressBar $progress={progress} />
           <p style={{ textAlign: 'center', marginTop: '0.5rem' }}>İlerleme: %{progress}</p>
         </div>
       )}
@@ -1796,20 +1871,20 @@ export function ExcelImportTool() {
               İşlem Logları ({filteredLogs.length}/{logs.length})
             </h3>
             <FilterButtons>
-              <FilterButton active={logFilter === 'all'} onClick={() => setLogFilter('all')}>
+              <FilterButton $active={logFilter === 'all'} onClick={() => setLogFilter('all')}>
                 Tümü
               </FilterButton>
-              <FilterButton active={logFilter === 'error'} onClick={() => setLogFilter('error')}>
+              <FilterButton $active={logFilter === 'error'} onClick={() => setLogFilter('error')}>
                 ❌ Hatalar
               </FilterButton>
               <FilterButton
-                active={logFilter === 'warning'}
+                $active={logFilter === 'warning'}
                 onClick={() => setLogFilter('warning')}
               >
                 ⚠️ Uyarılar
               </FilterButton>
               <FilterButton
-                active={logFilter === 'success'}
+                $active={logFilter === 'success'}
                 onClick={() => setLogFilter('success')}
               >
                 ✅ Başarılı
