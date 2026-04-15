@@ -213,7 +213,8 @@ const mapProductRow = (r: any): Product => {
   return {
     id: r.id,
     name: r.name,
-    designerId: r.designer?.designerId || '',
+    designerId: r.designers?.[0]?.designerId || r.designer?.designerId || '',
+    designerIds: r.designers?.map((d: any) => d.designerId) || ([r.designer?.designerId].filter(Boolean) as string[]),
     categoryId: r.category?.categoryId || '',
     year: r.year,
     isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
@@ -254,7 +255,7 @@ const productQueryString = `
   mediaSectionTitle, mediaSectionText, showMediaPanels, buyable, price, currency, sku, stockStatus,
   materialSelections[]{ "group": group->{title,books[]{title,items[]{name,imageR2}}}, materials[]{name,imageR2} },
   dimensionImages[]{ imageR2, imageMobileR2, imageDesktopR2, title },
-  exclusiveContent, designer->{ "designerId": id.current }, category->{ "categoryId": id.current }
+  exclusiveContent, designer->{ "designerId": id.current }, designers[]->{ "designerId": id.current }, category->{ "categoryId": id.current }
 `
 
 export const getProducts = async (): Promise<Product[]> => {
@@ -290,7 +291,7 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
 
 export const getProductsByDesignerId = async (designerId: string): Promise<Product[]> => {
   if (useSanity && sanity) {
-    const query = groq`*[_type == "product" && designer->id.current == $designerId && (!defined(isPublished) || isPublished == true)] | order(year desc){ ${productQueryString} }`
+    const query = groq`*[_type == "product" && (designer->id.current == $designerId || $designerId in designers[]->id.current) && (!defined(isPublished) || isPublished == true)] | order(year desc){ ${productQueryString} }`
     const rows = await sanity.fetch(query, {designerId})
     return rows.map((r: any) => mapProductRow(r))
   }

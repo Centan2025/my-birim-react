@@ -162,6 +162,8 @@ export interface Product {
   name: LocalizedString
   /** ID of the designer who created the product. */
   designerId: string
+  /** IDs of all designers who created the product. */
+  designerIds?: string[]
   /** ID of the category this product belongs to. */
   categoryId: string
   /** The year the product was designed or released. */
