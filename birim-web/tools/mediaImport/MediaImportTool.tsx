@@ -780,25 +780,14 @@ export default function MediaImportTool() {
               return sanityName === nameClean || sanitySlug === folderClean || sanityName === folderClean
             })
 
-            if (matches.length === 1) return true // Kesin eşleşme
-            if (matches.length > 1) {
-              // Birden fazla varsa kategoriye bak
-              const sanitize = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '')
-              const targetCat = sanitize(categoryId || '')
-              return matches.some((p: any) => sanitize(p.categorySlug) === targetCat || targetCat.includes(sanitize(p.categorySlug)))
-            }
-            return false
-
-            if (matches.length === 1) return true // Sadece bir tane varsa, kategoriden bağımsız eşle
-            if (matches.length > 1) {
-              // Birden fazla varsa kategoriye bak
-              return matches.some((p: any) => 
-                p.categorySlug === categoryId || 
-                p.categorySlug === normalizeText(categoryId || '') ||
-                p.categorySlug?.includes(normalizeText(categoryId || ''))
-              )
-            }
-            return false
+            // Kategori kontrolü ile birlikte eşleşmeyi doğrula
+            const sanitize = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+            const targetCat = sanitize(categoryId || '')
+            
+            return matches.some((p: any) => {
+              const pCat = sanitize(p.categorySlug)
+              return pCat && (pCat === targetCat || targetCat.includes(pCat))
+            })
           }
           if (type === 'category') {
             const normalized = normalizeForMatch(folderName)
@@ -1107,13 +1096,14 @@ export default function MediaImportTool() {
         })
 
         let existing = null
-        if (matches.length === 1) {
-          existing = matches[0]
-        } else if (matches.length > 1) {
-          const sanitize = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '')
-          const targetCat = sanitize(actualCategorySlug || '')
-          existing = matches.find((p: any) => sanitize(p.categorySlug) === targetCat || targetCat.includes(sanitize(p.categorySlug)))
-        }
+        const sanitize = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+        const targetCat = sanitize(actualCategorySlug || '')
+        
+        // Kategori bazlı filtreleme - her zaman yapılmalı
+        existing = matches.find((p: any) => {
+          const pCat = sanitize(p.categorySlug)
+          return pCat && (pCat === targetCat || targetCat.includes(pCat))
+        })
 
         if (existing) {
           console.log(

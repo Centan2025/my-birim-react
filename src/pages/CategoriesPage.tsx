@@ -127,7 +127,7 @@ export function CategoriesPage() {
                             : undefined
                         }
                         alt={t(category.name)}
-                        className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-[1.08] rounded-none"
+                        className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-[1.03] rounded-none"
                         loading="lazy"
                         quality={85}
                         crop={
