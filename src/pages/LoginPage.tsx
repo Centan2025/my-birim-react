@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../App'
+import { useAuth } from '../context/AuthContext'
 import { useTranslation } from '../i18n'
 import { registerUser, loginUser } from '../services/cms'
 import { loginRateLimiter, registerRateLimiter } from '../lib/rateLimiter'

@@ -108,7 +108,7 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
 
           // Text Color Support
           if (def._type === 'textColor' && def.color) {
-            const finalColor = typeof def.color === 'string' ? def.color : (def.color as any).hex
+            const finalColor = typeof def.color === 'string' ? def.color : (def.color as {hex?: string}).hex
             if (finalColor) {
               el = (
                 <span key={i + '-color'} style={{ color: finalColor }}>

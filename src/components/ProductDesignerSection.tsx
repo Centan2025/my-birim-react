@@ -10,16 +10,16 @@ interface ProductDesignerSectionProps {
 }
 
 // Helper to extract plain text from Portable Text blocks
-function toPlainText(blocks: any): string {
+function toPlainText(blocks: unknown): string {
   if (!blocks) return ''
   if (typeof blocks === 'string') return blocks
   if (Array.isArray(blocks)) {
-    return blocks
+    return (blocks as { _type?: string; children?: { text?: string }[] }[])
       .map(block => {
         if (block._type !== 'block' || !block.children) {
           return ''
         }
-        return block.children.map((child: any) => child.text).join('')
+        return block.children.map(child => child.text || '').join('')
       })
       .join('\n\n')
   }
@@ -53,8 +53,8 @@ export function ProductDesignerSection({ designer, designers: designersProp, t }
                       className="w-full h-auto object-cover filter grayscale"
                       loading="lazy"
                       quality={85}
-                      crop={typeof d.image === 'object' ? (d.image as any).crop : undefined}
-                      hotspot={typeof d.image === 'object' ? (d.image as any).hotspot : undefined}
+                      crop={typeof d.image === 'object' ? (d.image as {crop?: unknown}).crop : undefined}
+                      hotspot={typeof d.image === 'object' ? (d.image as {hotspot?: unknown}).hotspot : undefined}
                     />
                   </div>
                   <div className="w-full">

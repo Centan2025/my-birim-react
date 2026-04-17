@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../App'
+import { useAuth } from '../context/AuthContext'
 import { useSEO } from '../hooks/useSEO'
 
 export function VerifyEmailPage() {

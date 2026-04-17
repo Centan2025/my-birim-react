@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import type { Product, Designer } from '../types'
 import { OptimizedImage } from './OptimizedImage'
 import { useTranslation } from '../i18n'
-import { useSiteSettings } from '../App'
+import { useSiteSettings } from '../context/SiteSettingsContext'
 import { analytics } from '../lib/analytics'
 import { useDesigners } from '../hooks/useDesigners'
 
@@ -22,7 +22,7 @@ export const ProductCard: React.FC<{ product: Product }> = ({
   }, [designers, product.designerId, t])
 
   const isObject = typeof product.mainImage === 'object' && product.mainImage !== null;
-  const mainImageObj = isObject ? product.mainImage as any : {};
+  const mainImageObj = isObject ? (product.mainImage as { url?: string; urlMobile?: string; urlDesktop?: string; crop?: unknown; hotspot?: unknown }) : {};
   const mainImageUrl = isObject ? mainImageObj.url : (product.mainImage || '');
   const mainImageMobile = mainImageObj.urlMobile;
   const mainImageDesktop = mainImageObj.urlDesktop;

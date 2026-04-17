@@ -7,7 +7,7 @@ import {
   getFooterContent,
   subscribeEmail as subscribeEmailService,
 } from '../services/cms'
-import {useAuth} from '../App'
+import {useAuth} from '../context/AuthContext'
 import {SiteLogo} from './SiteLogo'
 import {HeaderProductsPanel} from './HeaderProductsPanel'
 import {HeaderMobileMenuInline} from './HeaderMobileMenuInline'

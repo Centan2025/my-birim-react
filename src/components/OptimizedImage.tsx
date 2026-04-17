@@ -108,7 +108,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         })
       }
     }
-  })
+  }, [src, srcMobile, srcDesktop])
 
   // React henüz fetchPriority prop'unu DOM attribute olarak tanımıyor; uyarıyı
   // engellemek için custom attribute'u lowercase olarak enjekte ediyoruz.
@@ -405,7 +405,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         onKeyDown={onClick ? (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            (onClick as any)(e);
+            (onClick as React.MouseEventHandler)(e as unknown as React.MouseEvent);
           }
         } : undefined}
         role={onClick ? 'button' : undefined}
@@ -465,7 +465,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         onKeyDown={onClick ? (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            (onClick as any)(e);
+            (onClick as React.MouseEventHandler)(e as unknown as React.MouseEvent);
           }
         } : undefined}
         role={onClick ? 'button' : undefined}

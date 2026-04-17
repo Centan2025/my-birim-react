@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../App'
+import { useAuth } from '../context/AuthContext'
 import { useTranslation } from '../i18n'
 import { Link } from 'react-router-dom'
 import { useSEO } from '../hooks/useSEO'

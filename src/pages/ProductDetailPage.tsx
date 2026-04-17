@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useAuth } from '../App'
+import { useAuth } from '../context/AuthContext'
 import { PageLoading } from '../components/LoadingSpinner'
 import { useTranslation } from '../i18n'
 import { useSEO } from '../hooks/useSEO'
