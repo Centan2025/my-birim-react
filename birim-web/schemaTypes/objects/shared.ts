@@ -1230,6 +1230,7 @@ export const contentBlock = defineType({
       mediaType: 'mediaType',
       imageUrl: 'imageR2.url',
       thumbUrl: 'thumbnailR2.url',
+      imagePanels: 'imagePanels',
       backgroundColor: 'backgroundColor',
       hasBorder: 'hasBorder',
       borderThickness: 'borderThickness',
@@ -1243,14 +1244,18 @@ export const contentBlock = defineType({
         imageUrl,
         backgroundColor,
         thumbUrl,
+        imagePanels,
         hasBorder,
         borderThickness,
       } = selection
 
-      let sourceUrl =
-        selection.type === 'image' || selection.mediaType === 'image'
-          ? imageUrl
-          : thumbUrl || imageUrl
+      let sourceUrl = imageUrl
+      if (mediaType === 'panels' && Array.isArray(imagePanels) && imagePanels.length > 0) {
+        sourceUrl = imagePanels[0].url
+      } else if (mediaType === 'video' || mediaType === 'youtube') {
+        sourceUrl = thumbUrl || imageUrl
+      }
+
       let finalUrl = sourceUrl
       const domain = process.env.SANITY_STUDIO_R2_DOMAIN
       if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
@@ -1274,13 +1279,15 @@ export const contentBlock = defineType({
               ? 'Video Bloğu'
               : mediaType === 'youtube'
                 ? 'YouTube Bloğu'
-                : 'Metin Bloğu'
+                : mediaType === 'panels'
+                  ? 'Paralel Blok'
+                  : 'Metin Bloğu'
       }
       return {
         title: mediaTitle,
         subtitle: `Fontlar: T:${titleFont || 'Normal'} C:${contentFont || 'Normal'} | Arka Plan: ${backgroundColor === 'white' ? 'Beyaz' : 'Gri'} | Çerçeve: ${hasBorder ? `${borderThickness || 1}px` : 'Kapalı'}`,
         media:
-          mediaType === 'image' && finalUrl
+          (mediaType === 'image' || mediaType === 'panels') && finalUrl
             ? () => React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
             : undefined,
       }
