@@ -1,4 +1,4 @@
-import React, {useMemo, useState, useRef, useEffect, useCallback} from 'react'
+import React, {useMemo, useState, useRef, useCallback} from 'react'
 import {Link} from 'react-router-dom'
 
 import {ContentBlock} from '../types'
