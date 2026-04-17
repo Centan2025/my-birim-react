@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useRef } from 'react'
 import { R2ImageMetadata } from '../types'
 import { rewriteR2Url } from '../services/sanity/client'
 
@@ -102,7 +103,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     if (img && img.complete && img.naturalWidth > 0) {
       setIsLoaded(true)
       if (img.naturalHeight > 0) {
-        setNaturalDims(prev => {
+        setNaturalDims((prev: { w: number, h: number } | null) => {
           if (prev && prev.w === img.naturalWidth && prev.h === img.naturalHeight) return prev
           return { w: img.naturalWidth, h: img.naturalHeight }
         })

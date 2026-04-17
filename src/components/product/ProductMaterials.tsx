@@ -80,7 +80,7 @@ const MaterialCard: React.FC<{
   onClick: () => void
 }> = ({ material, imageBorderClass, t, onClick }) => (
   <motion.div
-    variants={sideReveal.item}
+    variants={sideReveal['item']}
     className="text-center group cursor-pointer flex flex-col items-center w-full sm:w-28 md:w-32"
     title={t(material.name)}
     onClick={onClick}
@@ -90,8 +90,8 @@ const MaterialCard: React.FC<{
     role="button"
     tabIndex={0}
   >
-    <motion.div variants={sideReveal.wrapper} className="relative overflow-hidden w-full aspect-square sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-sm shadow-sm">
-      <motion.div variants={sideReveal.image} className="w-full h-full">
+    <motion.div variants={sideReveal['wrapper']} className="relative overflow-hidden w-full aspect-square sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-sm shadow-sm">
+      <motion.div variants={sideReveal['image']} className="w-full h-full">
         <OptimizedImage
           src={material.image}
           alt={t(material.name)}
@@ -194,7 +194,7 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                       key={`book-${safeActiveIndex}-${activeBookIndex}`}
                       initial="revealOff"
                       animate="revealOn"
-                      variants={sideReveal.container}
+                      variants={sideReveal['container']}
                       className="grid grid-cols-3 sm:flex sm:flex-wrap gap-3 md:gap-6"
                     >
                       {(Array.isArray(books[activeBookIndex]?.materials)
@@ -222,7 +222,7 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                     key={`group-direct-${safeActiveIndex}`}
                     initial="revealOff"
                     animate="revealOn"
-                    variants={sideReveal.container}
+                    variants={sideReveal['container']}
                     className="grid grid-cols-3 sm:flex sm:flex-wrap gap-3 md:gap-6"
                   >
                     {(Array.isArray(grouped[safeActiveIndex]?.materials)
@@ -257,7 +257,7 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
           <motion.div
             initial="revealOff"
             animate="revealOn"
-            variants={sideReveal.container}
+            variants={sideReveal['container']}
             className="grid grid-cols-3 sm:flex sm:flex-wrap gap-3 md:gap-6"
           >
             {flatMaterials.map((material, index) => (

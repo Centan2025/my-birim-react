@@ -3,6 +3,8 @@ import { OptimizedImage } from '../OptimizedImage'
 import { useTranslation } from '../../i18n'
 import ScrollReveal from '../ScrollReveal'
 
+import type { LocalizedString, R2ImageMetadata } from '../../types'
+
 interface ProductDimensionsProps {
   dimImages: { image: string; imageMobile?: string; imageDesktop?: string; title?: string | LocalizedString }[]
   imageBorderClass: string

@@ -120,7 +120,7 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
       // Çok yeni dosyalar (timestamp > 1700...) root uploads/ altında olabilir
       // Ancak eski dosyalar migration/uploads/ altındadır.
       const filename = cleanPath.split('/').pop() || ''
-      const timestamp = parseInt(filename.split('-')[0])
+      const timestamp = parseInt(filename.split('-')[0] ?? '0')
       
       // Eğer timestamp 2024 öncesiyse veya sayısal değilse migration kabul et (0 degeeri legacy olabilir)
       const isLegacyTimestamp = isNaN(timestamp) || timestamp < 1700000000000
