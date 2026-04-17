@@ -58,22 +58,40 @@ export interface SanityProductMediaItem {
 
 export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boolean): string => {
   if (!url || typeof url !== 'string') return url || ''
-  let result = url
+  
+  // URL'deki segmentleri ayır, trim et ve gizli boşlukları temizle (BUG-1: 404 Fix)
+  const trimSegments = (u: string) => {
+    try {
+      const parts = u.split('/')
+      return parts.map((p, i) => {
+        if (i < 3 && p.includes(':')) return p
+        return p.trim()
+      }).join('/')
+    } catch {
+      return u.trim()
+    }
+  }
 
-  // Legacy Domain Rewrite (More aggressive, handles http/https and any occurrence)
+  let result = trimSegments(url)
+  let wasRewritten = false
+
+  // 1. Legacy Domain Rewrite (Hepsini tek bir domain'e topla)
+  const legacyDomains = [
+    /https?:\/\/assets\.birim\.com/g,
+    /https?:\/\/birim-assets\.web-birim\.workers\.dev/g,
+    /https?:\/\/pub-5e705b2a702d4bb1a3631c558917599d\.r2\.dev/g
+  ]
+
   if (R2_DOMAIN) {
-    result = result.replace(/https?:\/\/assets\.birim\.com/g, R2_DOMAIN)
+    for (const pattern of legacyDomains) {
+      if (pattern.test(result)) {
+        result = result.replace(pattern, R2_DOMAIN)
+        wasRewritten = true
+      }
+    }
   }
 
-  if (
-    R2_ORIGIN_DOMAIN &&
-    R2_DOMAIN &&
-    R2_ORIGIN_DOMAIN !== R2_DOMAIN &&
-    result.startsWith(R2_ORIGIN_DOMAIN)
-  ) {
-    result = result.replace(R2_ORIGIN_DOMAIN, R2_DOMAIN)
-  }
-
+  // 2. Generic R2.dev rewrite (subdomain'den bağımsız)
   if (R2_DOMAIN && !R2_DOMAIN.includes('.r2.dev') && result.includes('.r2.dev')) {
     try {
       const parsedUrl = new URL(result)
@@ -81,34 +99,53 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
         ? parsedUrl.pathname.substring(1)
         : parsedUrl.pathname
       result = `${R2_DOMAIN}/${pathPart}`
+      wasRewritten = true
     } catch {
       // ignore
     }
   }
 
-  // Pre-process: If it's already the R2_DOMAIN but missing migration/ prefix for uploads
-  if (R2_DOMAIN && result.startsWith(R2_DOMAIN)) {
-    const pathPart = result.replace(R2_DOMAIN, '')
-    const cleanPath = pathPart.startsWith('/') ? pathPart.substring(1) : pathPart
-    if (cleanPath.startsWith('uploads/') && !cleanPath.startsWith('migration/')) {
-      result = `${R2_DOMAIN}/migration/${cleanPath}`
-    }
-  }
-
-  // Handle Relative Paths (e.g. "uploads/..." or "migration/...")
-  if (R2_DOMAIN && !result.startsWith('http') && result.length > 0) {
-    const cleanPath = result.startsWith('/') ? result.substring(1) : result
-    // Most legacy R2 assets are actually under the 'migration/' prefix
-    if (!cleanPath.startsWith('migration/') && cleanPath.startsWith('uploads/')) {
-       result = `${R2_DOMAIN}/migration/${cleanPath}`
-    } else {
-       result = `${R2_DOMAIN}/${cleanPath}`
-    }
-  }
-
-  // Final step: Trim segments and replace spaces safely
-  // result = result.replace(/ /g, '%20') // Removed to avoid double encoding in OptimizedImage
+  // 3. Migration Prefix Logic (Geliştirildi)
+  // Sadece 'uploads/' ile başlayan yollar için geçerli.
+  // Yeni dosyalar (Örn: 177... ile başlayanlar) genellikle migration klasöründe değildir.
+  // Eğer URL bir legacy domain'den geldiyse veya relatif ise migration denemeli.
   
+  const processMigration = (r: string): string => {
+    if (!R2_DOMAIN) return r
+    
+    const path = r.includes(R2_DOMAIN) ? r.replace(R2_DOMAIN, '') : r
+    const cleanPath = path.startsWith('/') ? path.substring(1) : path
+    
+    if (cleanPath.startsWith('uploads/') && !cleanPath.startsWith('migration/')) {
+      // Çok yeni dosyalar (timestamp > 1700...) root uploads/ altında olabilir
+      // Ancak eski dosyalar migration/uploads/ altındadır.
+      const filename = cleanPath.split('/').pop() || ''
+      const timestamp = parseInt(filename.split('-')[0])
+      
+      // Eğer timestamp 2024 öncesiyse veya sayısal değilse migration kabul et (0 degeeri legacy olabilir)
+      const isLegacyTimestamp = isNaN(timestamp) || timestamp < 1700000000000
+      
+      if (wasRewritten || isLegacyTimestamp) {
+        return `${R2_DOMAIN}/migration/${cleanPath}`
+      }
+    }
+    
+    if (!r.startsWith('http') && r.length > 0) {
+      return `${R2_DOMAIN}/${cleanPath}`
+    }
+    
+    return r
+  }
+
+  result = processMigration(result)
+
+  // 4. Final step: Space encoding (Sadece bir kez)
+  try {
+    result = encodeURI(decodeURI(result)).replace(/ /g, '%20')
+  } catch {
+    result = result.replace(/ /g, '%20')
+  }
+
   if (hasResponsiveSizes && !result.includes('rs=1')) {
     result += result.includes('?') ? '&rs=1' : '?rs=1'
   }

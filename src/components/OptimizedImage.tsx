@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react'
 import { R2ImageMetadata } from '../types'
+import { rewriteR2Url } from '../services/sanity/client'
 
 /**
  * srcset attribute'ünde boşluklar ayırıcıdır — URL'deki boşlukları %20 ile encode ederek
@@ -136,36 +136,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     onError?.()
   }
 
-  // R2 URL Rewriter: .r2.dev URL'lerini custom domain'e çevir
-  const rewriteUrl = (url: string | undefined): string => {
-    if (!url) return ''
-    const r2Domain =
-      import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
-    const r2Origin =
-      import.meta.env['VITE_R2_ORIGIN_DOMAIN'] ||
-      'https://pub-5e705b2a702d4bb1a3631c558917599d.r2.dev'
-    // Origin -> Custom domain rewrite
-    if (r2Origin && r2Domain && r2Origin !== r2Domain && url.startsWith(r2Origin)) {
-      return url.replace(r2Origin, r2Domain)
-    }
-    // Generic .r2.dev -> custom domain rewrite
-    if (r2Domain && !r2Domain.includes('.r2.dev') && url.includes('.r2.dev')) {
-      try {
-        const parsed = new URL(url)
-        const path = parsed.pathname.startsWith('/')
-          ? parsed.pathname.substring(1)
-          : parsed.pathname
-        return `${r2Domain}/${path}`
-      } catch {
-        return url
-      }
-    }
-    return url
-  }
-
-  const activeSrc = rewriteUrl(src)
-  const activeMobileSrc = rewriteUrl(srcMobile || src)
-  const activeDesktopSrc = rewriteUrl(srcDesktop || src)
+  const activeSrc = rewriteR2Url(src)
+  const activeMobileSrc = rewriteR2Url(srcMobile || src)
+  const activeDesktopSrc = rewriteR2Url(srcDesktop || src)
 
   // Cloudflare R2 / Image Resizing logic
   const r2Domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'

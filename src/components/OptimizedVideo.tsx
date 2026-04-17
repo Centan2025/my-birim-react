@@ -1,5 +1,5 @@
-/* eslint-disable jsx-a11y/media-has-caption */
-import React, {useState, useRef, useCallback} from 'react'
+import React, {useState, useRef, useCallback, useEffect} from 'react'
+import { rewriteR2Url } from '../services/sanity/client'
 
 interface OptimizedVideoProps {
   src: string
@@ -55,9 +55,10 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null)
 
   // src zaten cms.ts tarafından rewrite edilerek geliyor (BUG-1 düzeltildi)
-  const rwSrc = src
-  const rwSrcMobile = srcMobile
-  const rwSrcDesktop = srcDesktop
+  // Ancak çift koruma için burada da rewriteR2Url çağırabiliriz.
+  const rwSrc = rewriteR2Url(src)
+  const rwSrcMobile = rewriteR2Url(srcMobile)
+  const rwSrcDesktop = rewriteR2Url(srcDesktop)
 
   const handleLoadedData = () => {
     setIsLoaded(true)
