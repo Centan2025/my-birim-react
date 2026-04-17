@@ -22,12 +22,12 @@ export const ProductCard: React.FC<{ product: Product }> = ({
   }, [designers, product.designerId, t])
 
   const isObject = typeof product.mainImage === 'object' && product.mainImage !== null;
-  const mainImageObj = isObject ? (product.mainImage as { url?: string; urlMobile?: string; urlDesktop?: string; crop?: any; hotspot?: any }) : {};
+  const mainImageObj = isObject ? (product.mainImage as { url?: string; urlMobile?: string; urlDesktop?: string; crop?: unknown; hotspot?: unknown }) : {};
   const mainImageUrl = (isObject ? mainImageObj.url : (product.mainImage as string)) || '';
   const mainImageMobile = mainImageObj.urlMobile;
   const mainImageDesktop = mainImageObj.urlDesktop;
-  const mainImageCrop = mainImageObj.crop as any;
-  const mainImageHotspot = mainImageObj.hotspot as any;
+  const mainImageCrop = mainImageObj.crop as { top: number; bottom: number; left: number; right: number } | undefined;
+  const mainImageHotspot = mainImageObj.hotspot as { x: number; y: number; height: number; width: number } | undefined;
 
   const handleClick = () => {
     // We still want to handle analytics before navigation

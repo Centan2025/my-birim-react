@@ -53,8 +53,8 @@ export function ProductDesignerSection({ designer, designers: designersProp, t }
                       className="w-full h-auto object-cover filter grayscale"
                       loading="lazy"
                       quality={85}
-                      crop={(typeof d.image === 'object' ? (d.image as any)?.crop : undefined) as any}
-                      hotspot={(typeof d.image === 'object' ? (d.image as any)?.hotspot : undefined) as any}
+                      crop={(typeof d.image === 'object' ? (d.image as { crop?: { top: number; bottom: number; left: number; right: number } })?.crop : undefined)}
+                      hotspot={(typeof d.image === 'object' ? (d.image as { hotspot?: { x: number; y: number; height: number; width: number } })?.hotspot : undefined)}
                     />
                   </div>
                   <div className="w-full">

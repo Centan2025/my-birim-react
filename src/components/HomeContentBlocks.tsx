@@ -82,6 +82,14 @@ const PanelSlider: React.FC<{
             key={i} 
             className={`flex-shrink-0 snap-start relative overflow-hidden ${imageBorderClass} aspect-[4/5] sm:aspect-[3/4] group cursor-pointer ${getWidthClass()}`}
             onClick={() => onMediaClick && onMediaClick(item.url)}
+            onKeyDown={(e) => {
+              if (onMediaClick && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault()
+                onMediaClick(item.url)
+              }
+            }}
+            role="button"
+            tabIndex={0}
           >
             {item.type === 'video' ? (
               <OptimizedVideo
@@ -193,8 +201,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 
         const borderOverlayColor = typeof block.borderColor === 'string' 
           ? block.borderColor 
-          : (block.borderColor as any)?.hex || 'color-mix(in srgb, var(--text-primary) 28%, transparent)'
-
+          : (block.borderColor as {hex?: string})?.hex || 'color-mix(in srgb, var(--text-primary) 28%, transparent)'
         const borderOverlay = borderThickness > 0 && (
           <div
             className="absolute inset-0 pointer-events-none z-30"

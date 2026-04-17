@@ -297,6 +297,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
         {rwSrcDesktop && <source src={desktopSrc} type="video/mp4" media="(min-width: 769px)" />}
         {/* Fallback source */}
         <source src={videoSrc} type="video/mp4" />
+        <track kind="captions" srcLang="en" label="English" />
       </video>
     )
   }
@@ -330,6 +331,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       onCanPlay={handleLoadedData}
     >
       <source src={rwSrc} type="video/mp4" />
+      <track kind="captions" srcLang="en" label="English" />
       {/* Fallback: Eğer source çalışmazsa, video element'inin src'i kullanılacak */}
     </video>
   )
