@@ -38,13 +38,24 @@ const getR2Url = (
   const domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
   if (!domain) return undefined
 
+  // Encode the path to prevent 404s on files with spaces or special characters
+  const cleanPath = path.startsWith('/') ? path.substring(1) : path
+  let finalPath = cleanPath
+  
+  // Most legacy R2 assets are actually under the 'migration/' prefix
+  if (!cleanPath.startsWith('migration/') && cleanPath.startsWith('uploads/')) {
+    finalPath = `migration/${cleanPath}`
+  }
+
+  const encodedPath = finalPath.split('/').map(segment => encodeURIComponent(decodeURIComponent(segment.trim()))).join('/')
+
   // .r2.dev ve .workers.dev (ve free plan custom domain) domainleri image resizing desteklemez
   const skipImageResizing =
     domain.includes('.r2.dev') ||
     domain.includes('.workers.dev') ||
     domain.includes('assets.birim.com')
   if (skipImageResizing) {
-    return `${domain}/${path}`
+    return `${domain}/${encodedPath}`
   }
 
   const params = []
@@ -65,7 +76,7 @@ const getR2Url = (
 
   params.push('format=auto')
 
-  return `${domain}/cdn-cgi/image/${params.join(',')}/${path}`
+  return `${domain}/cdn-cgi/image/${params.join(',')}/${encodedPath}`
 }
 
 export const R2Image: React.FC<R2ImageProps> = ({

@@ -1,5 +1,5 @@
 import {useQuery} from '@tanstack/react-query'
-import {getDesigners, getDesignerById} from '@/services/cms'
+import {getDesigners, getDesignerById, getDesignersByIds} from '@/services/cms'
 
 /**
  * Tüm tasarımcıları getir
@@ -29,5 +29,22 @@ export function useDesigner(designerId: string | undefined, initialData?: any) {
     gcTime: 30 * 60 * 1000,
     refetchOnMount: initialData ? false : 'always',
     initialData,
+  })
+}
+
+/**
+ * ID listesine göre tasarımcıları getir
+ */
+export function useDesignersByIds(designerIds: string[] | undefined) {
+  return useQuery({
+    queryKey: ['designers', designerIds],
+    queryFn: () => {
+      if (!designerIds || designerIds.length === 0) return []
+      return getDesignersByIds(designerIds)
+    },
+    enabled: !!designerIds && designerIds.length > 0,
+    staleTime: 15 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnMount: false,
   })
 }

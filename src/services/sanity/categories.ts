@@ -102,3 +102,41 @@ export const getDesignerById = async (id: string): Promise<Designer | undefined>
   const designers = await getDesigners()
   return designers.find(d => d.id === id)
 }
+export const getDesignersByIds = async (ids: string[]): Promise<Designer[]> => {
+  if (!ids || ids.length === 0) return []
+  if (useSanity && sanity) {
+    const query = groq`*[_type == "designer" && id.current in $ids] | order(orderRank asc){
+          "id": id.current, 
+          name, 
+          role,
+          bio, 
+          image,
+          imageR2,
+          imageMobileR2,
+          imageDesktopR2
+        }`
+    const rows = await sanity.fetch(query, { ids })
+    return rows.map((r: any) => {
+      const imageFinal = mapImage(r.imageR2) || mapImage(r.image)
+      const imageMobile = r.imageMobileR2?.url ? mapImage(r.imageMobileR2) : undefined
+      const imageDesktop = r.imageDesktopR2?.url ? mapImage(r.imageDesktopR2) : undefined
+      const metadata = r.imageR2 ? mapR2Metadata(r.imageR2) : (r.image ? mapR2Metadata(r.image) : {})
+      return {
+        id: r.id,
+        name: r.name,
+        role: r.role,
+        bio: r.bio,
+        image: {
+          url: imageFinal,
+          urlMobile: imageMobile && imageMobile !== imageFinal ? imageMobile : undefined,
+          urlDesktop: imageDesktop && imageDesktop !== imageFinal ? imageDesktop : undefined,
+          ...metadata,
+        },
+        imageMobile: imageMobile && imageMobile !== imageFinal ? imageMobile : undefined,
+        imageDesktop: imageDesktop && imageDesktop !== imageFinal ? imageDesktop : undefined,
+      }
+    })
+  }
+  const all = await getDesigners()
+  return all.filter(d => ids.includes(d.id))
+}

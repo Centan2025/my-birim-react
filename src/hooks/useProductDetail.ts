@@ -1,7 +1,7 @@
 import {useState, useEffect, useMemo} from 'react'
 import {useLocation} from 'react-router-dom'
 import {useProduct, useProductsByCategory} from './useProducts'
-import {useDesigner} from './useDesigners'
+import {useDesigner, useDesignersByIds} from './useDesigners'
 import {useCategories} from './useCategories'
 import {useSiteSettings} from './useSiteData'
 import {useProductHero} from './useProductHero'
@@ -32,12 +32,14 @@ export function useProductDetail(productId: string | undefined, prefetchedProduc
   const {data: allCategories = []} = useCategories()
   const {setFromPalette, reset} = useHeaderTheme()
 
-  const {data: designerData} = useDesigner(product?.designerId)
-  const [frozenDesigner, setFrozenDesigner] = useState<any>(null)
+  // Multiple Designers Support
+  const {data: designersData} = useDesignersByIds(product?.designerIds)
+  const [frozenDesigners, setFrozenDesigners] = useState<any[]>([])
   useEffect(() => {
-    if (designerData) setFrozenDesigner(designerData)
-  }, [designerData])
-  const designer = designerData || frozenDesigner
+    if (designersData && designersData.length > 0) setFrozenDesigners(designersData)
+  }, [designersData])
+  const designers = designersData || frozenDesigners
+  const designer = designers[0] || null // Still provide single designer for backward compatibility
 
   const {data: siblingProducts = []} = useProductsByCategory(product?.categoryId)
   const category = useMemo(
@@ -137,6 +139,7 @@ export function useProductDetail(productId: string | undefined, prefetchedProduc
     product,
     productLoading,
     designer,
+    designers,
     category,
     siteSettings,
     siblingProducts,

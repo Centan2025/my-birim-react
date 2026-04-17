@@ -14,6 +14,7 @@ interface ProductHeroProps {
     year?: string | number
   }
   designer?: Designer
+  designers?: Designer[]
   heroMedia: any[]
   slideCount: number
   totalHeroSlides: number
@@ -53,6 +54,7 @@ const toYouTubeEmbed = (url: string, {autoplay = false} = {}) => {
 export const ProductHero: React.FC<ProductHeroProps> = ({
   product,
   designer,
+  designers: designersProp,
   heroMedia,
   slideCount,
   totalHeroSlides,
@@ -78,6 +80,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
   onSetTransitionEnabled,
 }) => {
   const {t} = useTranslation()
+  const designers = designersProp || (designer ? [designer] : [])
   const location = useLocation()
   const {isExpanding, phase, setTargetRect} = useCardTransition()
   const fromCard = location.state?.fromCard || isExpanding
@@ -255,7 +258,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
               {t(product.name)}
             </h1>
           </div>
-          {designer && (
+          {designers.length > 0 && (
             <div
               className="mt-2 text-white/80"
               style={{
@@ -264,9 +267,15 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                 transition: 'transform 1000ms ease-out, opacity 1000ms ease-out',
               }}
             >
-              <Link to={`/designer/${designer.id}`} className="hover:text-white">
-                {t(designer.name)}
-              </Link>{' '}
+              {designers.map((d, i) => (
+                <span key={d.id}>
+                  <Link to={`/designer/${d.id}`} className="hover:text-white">
+                    {t(d.name)}
+                  </Link>
+                  {i < designers.length - 1 ? ' & ' : ''}
+                </span>
+              ))}
+              {' '}
               {product.year && <span>— {product.year}</span>}
             </div>
           )}

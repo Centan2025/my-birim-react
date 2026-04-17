@@ -36,6 +36,7 @@ export function ProductDetailPage() {
     product,
     productLoading,
     designer,
+    designers,
     category,
     isMobile,
     bandMedia,
@@ -215,6 +216,7 @@ export function ProductDetailPage() {
       <ProductHero
         product={product}
         designer={designer}
+        designers={designers}
         heroMedia={heroMedia}
         slideCount={slideCount}
         totalHeroSlides={heroHook.totalHeroSlides}
@@ -295,7 +297,7 @@ export function ProductDetailPage() {
               onOpenMaterialLightbox={(imgs, idx) => materialLightbox.open(imgs, idx)}
             />
 
-            <ProductDesignerSection designer={designer || null} t={t} />
+            <ProductDesignerSection designers={designers} t={t} />
 
             <ProductAddToCart
               product={product}

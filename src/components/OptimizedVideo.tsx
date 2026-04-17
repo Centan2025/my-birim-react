@@ -148,12 +148,26 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
 
   // Video src'i için ekran boyutuna göre seç
   const getVideoSrc = (): string => {
+    let rawSrc = rwSrc
     if (typeof window !== 'undefined') {
       const isMobile = window.innerWidth <= 768
-      if (isMobile && rwSrcMobile) return mobileSrc
-      if (!isMobile && rwSrcDesktop) return desktopSrc
+      if (isMobile && rwSrcMobile) rawSrc = mobileSrc
+      else if (!isMobile && rwSrcDesktop) rawSrc = desktopSrc
     }
-    return rwSrc
+    
+    if (!rawSrc) return ''
+    try {
+      // URL segmentlerini trim et ve encode et
+      const parts = rawSrc.split('/')
+      const trimmedSrc = parts.map((p, i) => {
+        if (i < 3 && p.includes(':')) return p
+        return p.trim()
+      }).join('/')
+      
+      return encodeURI(decodeURI(trimmedSrc)).replace(/ /g, '%20')
+    } catch {
+      return rawSrc.replace(/ /g, '%20')
+    }
   }
 
   // Poster'ı dinamik olarak güncelle

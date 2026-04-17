@@ -60,6 +60,11 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
   if (!url || typeof url !== 'string') return url || ''
   let result = url
 
+  // Legacy Domain Rewrite (More aggressive, handles http/https and any occurrence)
+  if (R2_DOMAIN) {
+    result = result.replace(/https?:\/\/assets\.birim\.com/g, R2_DOMAIN)
+  }
+
   if (
     R2_ORIGIN_DOMAIN &&
     R2_DOMAIN &&
@@ -72,16 +77,38 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
   if (R2_DOMAIN && !R2_DOMAIN.includes('.r2.dev') && result.includes('.r2.dev')) {
     try {
       const parsedUrl = new URL(result)
-      const path = parsedUrl.pathname.startsWith('/')
+      const pathPart = parsedUrl.pathname.startsWith('/')
         ? parsedUrl.pathname.substring(1)
         : parsedUrl.pathname
-      result = `${R2_DOMAIN}/${path}`
+      result = `${R2_DOMAIN}/${pathPart}`
     } catch {
       // ignore
     }
   }
 
-  result = result.replace(/ /g, '%20')
+  // Pre-process: If it's already the R2_DOMAIN but missing migration/ prefix for uploads
+  if (R2_DOMAIN && result.startsWith(R2_DOMAIN)) {
+    const pathPart = result.replace(R2_DOMAIN, '')
+    const cleanPath = pathPart.startsWith('/') ? pathPart.substring(1) : pathPart
+    if (cleanPath.startsWith('uploads/') && !cleanPath.startsWith('migration/')) {
+      result = `${R2_DOMAIN}/migration/${cleanPath}`
+    }
+  }
+
+  // Handle Relative Paths (e.g. "uploads/..." or "migration/...")
+  if (R2_DOMAIN && !result.startsWith('http') && result.length > 0) {
+    const cleanPath = result.startsWith('/') ? result.substring(1) : result
+    // Most legacy R2 assets are actually under the 'migration/' prefix
+    if (!cleanPath.startsWith('migration/') && cleanPath.startsWith('uploads/')) {
+       result = `${R2_DOMAIN}/migration/${cleanPath}`
+    } else {
+       result = `${R2_DOMAIN}/${cleanPath}`
+    }
+  }
+
+  // Final step: Trim segments and replace spaces safely
+  // result = result.replace(/ /g, '%20') // Removed to avoid double encoding in OptimizedImage
+  
   if (hasResponsiveSizes && !result.includes('rs=1')) {
     result += result.includes('?') ? '&rs=1' : '?rs=1'
   }
@@ -96,7 +123,7 @@ export const mapImage = (
     const isMigration = img.startsWith('migration/') || img.startsWith('/migration/')
     if (isMigration && R2_DOMAIN) {
       const cleanPath = img.startsWith('/') ? img.substring(1) : img
-      return `${R2_DOMAIN}/${cleanPath}`.replace(/ /g, '%20')
+      return `${R2_DOMAIN}/${cleanPath}`
     }
     return rewriteR2Url(img)
   }
@@ -190,7 +217,7 @@ export const mapMediaUrl = (
     )
     if (r2Url) {
       if (r2Url.startsWith('migration/') && R2_DOMAIN) {
-        let res = `${R2_DOMAIN}/${r2Url}`.replace(/ /g, '%20')
+        let res = `${R2_DOMAIN}/${r2Url}`
         if (hasResponsiveSizes) res += res.includes('?') ? '&rs=1' : '?rs=1'
         return res
       }
@@ -205,13 +232,13 @@ export const mapMediaUrl = (
         : m?.videoFileR2?.url
     if (r2Url) {
       if (r2Url.startsWith('migration/') && R2_DOMAIN)
-        return `${R2_DOMAIN}/${r2Url}`.replace(/ /g, '%20')
+        return `${R2_DOMAIN}/${r2Url}`
       return rewriteR2Url(r2Url)
     }
     if ((isMobile || isDesktop) && m?.videoFileR2?.url) {
       const genericR2 = m.videoFileR2.url
       if (genericR2.startsWith('migration/') && R2_DOMAIN)
-        return `${R2_DOMAIN}/${genericR2}`.replace(/ /g, '%20')
+        return `${R2_DOMAIN}/${genericR2}`
       return rewriteR2Url(genericR2)
     }
     

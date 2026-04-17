@@ -47,7 +47,7 @@ export {
 } from './sanity/settings'
 
 // Designers & Categories
-export { getCategories, getDesigners, getDesignerById } from './sanity/categories'
+export { getCategories, getDesigners, getDesignerById, getDesignersByIds } from './sanity/categories'
 
 export const addCategory = async (): Promise<void> => { }
 export const updateCategory = async (): Promise<void> => { }

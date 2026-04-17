@@ -7,12 +7,20 @@ import { R2ImageMetadata } from '../types'
  */
 const encodeSrcSetUrl = (url: string): string => {
   if (!url) return url
-  // Önce boşlukları standart %20 yap, sonra kalan özel karakterleri (İ, ş vb.) URI encode et
-  const cleanUrl = url.replace(/ /g, '%20')
   try {
-    return encodeURI(cleanUrl)
+    // URL'deki segmentleri ayır ve trim et (Örn: "dosya .webp" -> "dosya.webp")
+    // Bu sayede sondaki boşluklardan kaynaklanan 404 hatalarını önleriz.
+    const parts = url.split('/')
+    const trimmedUrl = parts.map((p, i) => {
+      if (i < 3 && p.includes(':')) return p // protocol/domain kısmına dokunma
+      return p.trim()
+    }).join('/')
+    
+    // Önce decode et (eğer zaten encode edilmişse), sonra tekrar encode et.
+    const decoded = decodeURI(trimmedUrl)
+    return encodeURI(decoded).replace(/ /g, '%20')
   } catch {
-    return cleanUrl
+    return url.replace(/ /g, '%20')
   }
 }
 
