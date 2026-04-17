@@ -15,12 +15,12 @@ const client = createClient({
 
 interface ApiRequest {
   method?: string;
-  body?: any;
+  body?: Record<string, unknown>;
 }
 
 interface ApiResponse {
   status: (code: number) => ApiResponse;
-  json: (body: any) => void;
+  json: (body: unknown) => void;
 }
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {

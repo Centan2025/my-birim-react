@@ -39,7 +39,7 @@ export function ProductDesignerSection({ designer, designers: designersProp, t }
             {designers.length > 1 ? t('designers') : t('designer')}
           </h2>
           <div className="space-y-12">
-            {designers.map((d, index) => {
+            {designers.map((d) => {
               const bioText = toPlainText(t(d.bio))
               const isLongText = bioText.length > 400
               return (

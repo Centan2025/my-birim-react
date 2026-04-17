@@ -1,7 +1,7 @@
 import {useState, useEffect, useMemo} from 'react'
 import {useLocation} from 'react-router-dom'
 import {useProduct, useProductsByCategory} from './useProducts'
-import {useDesigner, useDesignersByIds} from './useDesigners'
+import {useDesignersByIds} from './useDesigners'
 import {useCategories} from './useCategories'
 import {useSiteSettings} from './useSiteData'
 import {useProductHero} from './useProductHero'
