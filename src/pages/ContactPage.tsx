@@ -418,7 +418,10 @@ export function ContactPage() {
         <div className="relative select-none">
           <div
             ref={thumbRef}
-            className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing w-full max-w-full"
+            className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing w-full max-w-full focus:outline-none"
+            role="region"
+            aria-label="Location media thumbnails"
+            tabIndex={0}
             onScroll={checkScroll}
             onMouseDown={e => {
               setThumbDragStartX(e.clientX)

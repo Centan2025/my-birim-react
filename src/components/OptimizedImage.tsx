@@ -398,7 +398,19 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     )
 
     return (
-      <div className={`relative ${className}`} style={style} onClick={onClick}>
+      <div 
+        className={`relative ${className}`} 
+        style={style} 
+        onClick={onClick}
+        onKeyDown={onClick ? (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            (onClick as any)(e);
+          }
+        } : undefined}
+        role={onClick ? 'button' : undefined}
+        tabIndex={onClick ? 0 : undefined}
+      >
         {showPlaceholder && !isLoaded && (
           <img
             src={placeholder}
@@ -446,7 +458,19 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   )
 
     return (
-      <div className={`relative ${className}`} style={style} onClick={onClick}>
+      <div 
+        className={`relative ${className}`} 
+        style={style} 
+        onClick={onClick}
+        onKeyDown={onClick ? (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            (onClick as any)(e);
+          }
+        } : undefined}
+        role={onClick ? 'button' : undefined}
+        tabIndex={onClick ? 0 : undefined}
+      >
         {showPlaceholder && !isLoaded && (
           <img
             src={placeholder}

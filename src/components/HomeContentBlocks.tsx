@@ -314,7 +314,18 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 )}
               </div>
             ) : block.mediaType === 'video' ? (
-              <div className={`relative w-full h-full ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`} onClick={() => onMediaClick && !block.linkUrl && onMediaClick(mediaUrl)}>
+              <div 
+                className={`relative w-full h-full ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`} 
+                onClick={() => onMediaClick && !block.linkUrl && onMediaClick(mediaUrl)}
+                onKeyDown={onMediaClick && !block.linkUrl ? (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onMediaClick(mediaUrl);
+                  }
+                } : undefined}
+                role={onMediaClick && !block.linkUrl ? 'button' : undefined}
+                tabIndex={onMediaClick && !block.linkUrl ? 0 : undefined}
+              >
                 <OptimizedVideo
                   src={mediaUrl}
                   srcMobile={mediaMobileUrl}
@@ -349,7 +360,18 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 )}
               </div>
             ) : (
-              <div className={`relative w-full h-full ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`} onClick={() => onMediaClick && !block.linkUrl && onMediaClick(mediaUrl)}>
+              <div 
+                className={`relative w-full h-full ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`} 
+                onClick={() => onMediaClick && !block.linkUrl && onMediaClick(mediaUrl)}
+                onKeyDown={onMediaClick && !block.linkUrl ? (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onMediaClick(mediaUrl);
+                  }
+                } : undefined}
+                role={onMediaClick && !block.linkUrl ? 'button' : undefined}
+                tabIndex={onMediaClick && !block.linkUrl ? 0 : undefined}
+              >
                 <OptimizedImage
                   src={mediaUrl}
                   srcMobile={mediaMobileUrl}

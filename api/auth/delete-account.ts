@@ -13,7 +13,17 @@ const client = createClient({
   useCdn: false,
 })
 
-export default async function handler(req: any, res: any) {
+interface ApiRequest {
+  method?: string;
+  body?: any;
+}
+
+interface ApiResponse {
+  status: (code: number) => ApiResponse;
+  json: (body: any) => void;
+}
+
+export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({error: 'Method Not Allowed'})
   }
@@ -28,7 +38,7 @@ export default async function handler(req: any, res: any) {
   try {
     await client.delete(id)
     return res.status(200).json({success: true, message: 'Hesap başarıyla silindi.'})
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Delete account error:', error)
     return res.status(500).json({error: 'Hesap silinirken bir hata oluştu.'})
   }
