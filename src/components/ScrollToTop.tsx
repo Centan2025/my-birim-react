@@ -12,7 +12,7 @@ export const ScrollToTop = () => {
   const prevPathnameRef = useRef(pathname)
 
   useEffect(() => {
-    const state = location.state as any
+    const state = location.state as { slideOver?: boolean }
     const prevPathname = prevPathnameRef.current
     prevPathnameRef.current = pathname
 
@@ -20,7 +20,7 @@ export const ScrollToTop = () => {
     if (pathname === prevPathname) return
 
     // slideOver geçişinde scroll pozisyonunu kesinlikle koru
-    const historyState = window.history.state?.usr as any
+    const historyState = window.history.state?.usr as { slideOver?: boolean }
     if (state?.slideOver || historyState?.slideOver) return
 
     // Route değişiminde yukarıya ANINDA aktar (smooth animasyonlar çakışabiliyor)

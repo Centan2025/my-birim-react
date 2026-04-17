@@ -20,8 +20,8 @@ const TransparentShoppingBagIcon = () => (
 )
 
 interface ProductAddToCartProps {
-  product: any
-  mergedGroups: any[]
+  product: { buyable?: boolean; id: string; [key: string]: unknown }
+  mergedGroups: unknown[]
   activeMaterialGroup: number | null
 }
 

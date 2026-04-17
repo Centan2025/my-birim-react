@@ -2,8 +2,8 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 
 interface ProductNavProps {
-  prevProduct: any | null
-  nextProduct: any | null
+  prevProduct: { id: string } | null
+  nextProduct: { id: string } | null
   show: boolean
 }
 

@@ -21,7 +21,7 @@ interface R2Asset {
 
 interface R2ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   source?: R2Asset
-  fallback?: any // Sanity Image Source
+  fallback?: unknown // Sanity Image Source
   alt: string // Make alt required as per best practices, or optional if you prefer
   width?: number
   height?: number
@@ -92,8 +92,8 @@ export const R2Image: React.FC<R2ImageProps> = ({
 }) => {
   // 0. Extract Crop & Hotspot
   const hasCrop = source?.cropWidth !== undefined && source?.cropWidth > 0
-  const cropData =
-    hasCrop && source
+  const cropData = useMemo(() => {
+    return hasCrop && source
       ? {
         x: source.cropX || 0,
         y: source.cropY || 0,
@@ -103,6 +103,7 @@ export const R2Image: React.FC<R2ImageProps> = ({
         origH: source.height,
       }
       : undefined
+  }, [hasCrop, source])
 
   // 1. Try R2 Source First
   const r2Src = useMemo(() => {
