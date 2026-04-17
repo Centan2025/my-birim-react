@@ -4,9 +4,9 @@ import { useTranslation } from '../../i18n'
 import ScrollReveal from '../ScrollReveal'
 
 interface ProductDimensionsProps {
-  dimImages: any[]
+  dimImages: { image: string; imageMobile?: string; imageDesktop?: string; title?: string | LocalizedString }[]
   imageBorderClass: string
-  onOpenLightbox: (images: any[], index: number) => void
+  onOpenLightbox: (images: { image: string; imageMobile?: string; imageDesktop?: string; title?: string | LocalizedString }[], index: number) => void
 }
 
 export const ProductDimensions: React.FC<ProductDimensionsProps> = ({

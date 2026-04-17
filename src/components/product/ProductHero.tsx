@@ -15,7 +15,7 @@ interface ProductHeroProps {
   }
   designer?: Designer
   designers?: Designer[]
-  heroMedia: any[]
+  heroMedia: { type: string; url: string; urlMobile?: string; urlDesktop?: string; crop?: unknown; hotspot?: unknown }[]
   slideCount: number
   totalHeroSlides: number
   heroSlideIndex: number
@@ -190,7 +190,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                   {
                     width: `${100 / totalHeroSlides}%`,
                     viewTransitionName: isActiveSlide ? `product-img-${product.id}` : 'none',
-                  } as any
+                  } as React.CSSProperties
                 }
               >
                 {m.type === 'image' ? (

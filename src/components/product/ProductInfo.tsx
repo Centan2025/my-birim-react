@@ -148,7 +148,7 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
             const desc = t(product.description)
             const isPortableText =
               Array.isArray(desc) ||
-              (typeof desc === 'object' && desc !== null && (desc as any)._type === 'block')
+              (typeof desc === 'object' && desc !== null && (desc as { _type?: string })._type === 'block')
 
             if (isPortableText) {
               const blocks = Array.isArray(desc) ? desc : [desc]

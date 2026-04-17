@@ -1,21 +1,22 @@
-import { motion } from 'framer-motion'
+import { motion, type Variants } from 'framer-motion'
 import { OptimizedImage } from '../OptimizedImage'
 import { useTranslation } from '../../i18n'
 import ScrollReveal from '../ScrollReveal'
+import type { LocalizedString } from '../../types'
 
 interface ProductMaterialsProps {
-  mergedGroups: any[]
-  grouped: any[]
-  flatMaterials: any[]
+  mergedGroups: { groupTitle: LocalizedString; books: { bookTitle: LocalizedString; materials: { image: string; name: LocalizedString }[] }[] }[]
+  grouped: { materials: { image: string; name: LocalizedString }[] }[]
+  flatMaterials: { image: string; name: LocalizedString }[]
   activeMaterialGroup: number | null
   activeBookIndex: number
   imageBorderClass: string
   onSetActiveMaterialGroup: (index: number) => void
   onSetActiveBookIndex: (index: number) => void
-  onOpenMaterialLightbox: (images: any[], index: number) => void
+  onOpenMaterialLightbox: (images: { image: string; name: string }[], index: number) => void
 }
 
-const sideReveal: any = {
+const sideReveal: Record<string, Variants> = {
   container: {
     revealOff: { opacity: 0 },
     revealOn: {
@@ -51,7 +52,7 @@ const sideReveal: any = {
 /**
  * Animated container that fades/slides content when `animKey` changes.
  */
-const AnimatedContent: React.FC<{ animKey: string; children: React.ReactNode; variants?: any; className?: string }> = ({
+const AnimatedContent: React.FC<{ animKey: string; children: React.ReactNode; variants?: Variants; className?: string }> = ({
   animKey,
   children,
   variants,
@@ -73,9 +74,9 @@ const AnimatedContent: React.FC<{ animKey: string; children: React.ReactNode; va
 }
 
 const MaterialCard: React.FC<{
-  material: any
+  material: { image: string; name: string | LocalizedString }
   imageBorderClass: string
-  t: (v: any) => string
+  t: (v: string | LocalizedString) => string
   onClick: () => void
 }> = ({ material, imageBorderClass, t, onClick }) => (
   <motion.div
