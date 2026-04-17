@@ -13,7 +13,17 @@ const client = createClient({
   useCdn: false,
 })
 
-export default async function handler(req: any, res: any) {
+interface ApiRequest {
+  method?: string;
+  body?: Record<string, unknown>;
+}
+
+interface ApiResponse {
+  status: (code: number) => ApiResponse;
+  json: (body: unknown) => void;
+}
+
+export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({error: 'Method Not Allowed'})
   }
@@ -50,7 +60,7 @@ export default async function handler(req: any, res: any) {
         userType: user.userType,
       },
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Subscription error:', error)
     return res.status(500).json({error: 'Abonelik sırasında bir hata oluştu.'})
   }

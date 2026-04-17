@@ -19,17 +19,17 @@ if (typeof window !== 'undefined') {
   // Monkey-patch XMLHttpRequest to silently swallow Sentry ingest errors
   const originalXHR = window.XMLHttpRequest
   window.XMLHttpRequest = class extends originalXHR {
-    open(method: string, url: string | URL, ...rest: any[]) {
-      const self = this as any
+    open(method: string, url: string | URL, ...rest: unknown[]) {
+      const self = this as unknown as { _sentryUrl?: string }
       self._sentryUrl = String(url)
       // @ts-expect-error monkey patching XHR signature
-      super.open(method, url, ...rest)
+      super.open(method, url as string, ...rest as any[])
     }
     send(body?: Document | XMLHttpRequestBodyInit | null) {
       try {
         super.send(body)
       } catch (error) {
-        const sentryUrl = (this as any)._sentryUrl
+        const sentryUrl = (this as unknown as { _sentryUrl?: string })._sentryUrl
         if (
           sentryUrl &&
           (sentryUrl.includes('sentry.io') || sentryUrl.includes('ingest.us.sentry.io'))
