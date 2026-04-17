@@ -122,10 +122,12 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
       const filename = cleanPath.split('/').pop() || ''
       const timestamp = parseInt(filename.split('-')[0] ?? '0')
       
-      // Eğer timestamp 2024 öncesiyse veya sayısal değilse migration kabul et (0 degeeri legacy olabilir)
+      // Eğer timestamp 2024 öncesiyse veya sayısal değilse migration kabul edilebilir
       const isLegacyTimestamp = isNaN(timestamp) || timestamp < 1700000000000
       
-      if (wasRewritten || isLegacyTimestamp) {
+      // KRİTİK: Eğer timestamp yeniyse (1700...), kesinlikle migration ekleme.
+      // wasRewritten olsa bile (yani assets.birim.com olsa bile) yeni dosya root'tadır.
+      if (isLegacyTimestamp && (wasRewritten || isLegacyTimestamp)) {
         return `${R2_DOMAIN}/migration/${cleanPath}`
       }
     }
