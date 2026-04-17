@@ -2,9 +2,10 @@ import React from 'react'
 import { ProductCard } from '../ProductCard'
 import ScrollReveal from '../ScrollReveal'
 import { useTranslation } from '../../i18n'
+import { Product } from '../../types'
 
 interface ProductRelatedProps {
-  products: any[]
+  products: Product[]
   show: boolean
 }
 

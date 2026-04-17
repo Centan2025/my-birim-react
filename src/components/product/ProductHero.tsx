@@ -207,8 +207,8 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     loading={shouldEagerLoad ? 'eager' : 'lazy'}
                     fetchPriority={shouldEagerLoad ? 'high' : 'low'}
                     quality={90}
-                    crop={m.crop as any}
-                    hotspot={m.hotspot as any}
+                    crop={m.crop as { top: number; bottom: number; left: number; right: number } | undefined}
+                    hotspot={m.hotspot as { x: number; y: number; height: number; width: number } | undefined}
                   />
                 ) : m.type === 'video' ? (
                   <OptimizedVideo

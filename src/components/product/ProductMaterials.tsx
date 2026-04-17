@@ -133,10 +133,10 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
 
   if (!hasMaterialGroups && flatMaterials.length === 0) return null
 
-  const getMaterialsForLightbox = (materials: any[]) =>
-    materials.map((m: any) => ({
+  const getMaterialsForLightbox = (materials: { image?: string; name?: string | { tr: string; en: string } }[]) =>
+    materials.map((m) => ({
       image: m.image,
-      name: t(m.name),
+      name: t(m.name || ''),
     }))
 
   return (
@@ -154,7 +154,7 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
           <>
             {/* Group tabs */}
             <div className="flex flex-wrap gap-0 border-t border-b border-[var(--border-primary)] mb-6 bg-[var(--bg-tertiary)]">
-              {(Array.isArray(mergedGroups) ? mergedGroups : []).map((g: any, idx: number) => (
+              {(Array.isArray(mergedGroups) ? mergedGroups : []).map((g, idx: number) => (
                 <button
                   key={`group-${idx}`}
                   onClick={() => onSetActiveMaterialGroup(idx)}
@@ -175,7 +175,7 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                   <>
                     {/* Swatch books tabs */}
                     <div className="flex flex-wrap gap-0 border-b border-gray-200 mb-6">
-                      {books.map((book: any, idx: number) => (
+                      {books.map((book, idx: number) => (
                         <button
                           key={`book-${idx}`}
                           onClick={() => onSetActiveBookIndex(idx)}
@@ -200,7 +200,7 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                       {(Array.isArray(books[activeBookIndex]?.materials)
                         ? books[activeBookIndex].materials
                         : []
-                      ).map((material: any, index: number) => (
+                      ).map((material, index: number) => (
                         <MaterialCard
                           key={`mat-${index}-${material.image || index}`}
                           material={material}
@@ -228,7 +228,7 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                     {(Array.isArray(grouped[safeActiveIndex]?.materials)
                       ? grouped[safeActiveIndex].materials
                       : []
-                    ).map((material: any, index: number) => (
+                    ).map((material, index: number) => (
                       <MaterialCard
                         key={`mat-${index}-${material.image || index}`}
                         material={material}

@@ -4,8 +4,19 @@ import { OptimizedImage } from '../OptimizedImage'
 import { OptimizedVideo } from '../OptimizedVideo'
 import { useTranslation } from '../../i18n'
 
+interface LightboxItem {
+  url?: string
+  image?: string
+  type?: string
+  title?: string
+  name?: string
+  description?: string
+  crop?: { top: number; bottom: number; left: number; right: number }
+  hotspot?: { x: number; y: number; height: number; width: number }
+}
+
 interface ProductMediaLightboxProps {
-  items: any[]
+  items: LightboxItem[]
   currentIndex: number
   onClose: () => void
   onNext: () => void
