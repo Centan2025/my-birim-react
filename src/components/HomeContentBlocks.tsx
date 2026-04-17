@@ -33,16 +33,28 @@ const PanelSlider: React.FC<{
 
   const handleScroll = useCallback(() => {
     if (!scrollRef.current) return
-    const {scrollLeft, clientWidth} = scrollRef.current
-    const index = Math.round(scrollLeft / (clientWidth * 0.8)) // Guessing scroll snap point
-    setActiveIndex(index)
-  }, [])
+    const container = scrollRef.current
+    const item = container.querySelector('div')
+    if (!item) return
+    
+    const itemWidth = item.clientWidth
+    const gap = 16 // md:gap-4
+    const scrollLeft = container.scrollLeft
+    const index = Math.round(scrollLeft / (itemWidth + gap))
+    
+    if (index !== activeIndex) {
+      setActiveIndex(index)
+    }
+  }, [activeIndex])
 
   const scrollTo = (index: number) => {
     if (!scrollRef.current) return
     const container = scrollRef.current
-    const itemWidth = container.querySelector('div')?.clientWidth || 0
-    const gap = 16 // md:gap-4
+    const item = container.querySelector('div')
+    if (!item) return
+    
+    const itemWidth = item.clientWidth
+    const gap = 16
     container.scrollTo({
       left: index * (itemWidth + gap),
       behavior: 'smooth'
@@ -94,7 +106,7 @@ const PanelSlider: React.FC<{
         ))}
       </div>
 
-      {/* Pagination Dots */}
+      {/* Pagination Dots (Square) */}
       {media.length > 1 && (
         <div className="flex justify-center gap-2 mb-4">
           {media.map((_, i) => (
@@ -103,8 +115,8 @@ const PanelSlider: React.FC<{
               onClick={() => scrollTo(i)}
               className={`w-2 h-2 rounded-none transition-all duration-300 ${
                 activeIndex === i 
-                  ? 'bg-[var(--text-primary)] w-4' 
-                  : 'bg-[var(--text-primary)] opacity-25 hover:opacity-50'
+                  ? 'bg-[var(--text-primary)] opacity-100 scale-110 shadow-sm' 
+                  : 'bg-[var(--text-primary)] opacity-20 hover:opacity-40'
               }`}
               aria-label={`Go to slide ${i + 1}`}
             />
