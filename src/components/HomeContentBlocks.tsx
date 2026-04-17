@@ -101,10 +101,10 @@ const PanelSlider: React.FC<{
             <button
               key={i}
               onClick={() => scrollTo(i)}
-              className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+              className={`w-2 h-2 rounded-none transition-all duration-300 ${
                 activeIndex === i 
                   ? 'bg-[var(--text-primary)] w-4' 
-                  : 'bg-[var(--text-primary)] opacity-20 hover:opacity-40'
+                  : 'bg-[var(--text-primary)] opacity-25 hover:opacity-50'
               }`}
               aria-label={`Go to slide ${i + 1}`}
             />
