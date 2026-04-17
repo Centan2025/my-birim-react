@@ -201,7 +201,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 
         const borderOverlayColor = typeof block.borderColor === 'string' 
           ? block.borderColor 
-          : (block.borderColor as {hex?: string})?.hex || 'color-mix(in srgb, var(--text-primary) 28%, transparent)'
+          : (block.borderColor as unknown as {hex?: string})?.hex || 'color-mix(in srgb, var(--text-primary) 28%, transparent)'
         const borderOverlay = borderThickness > 0 && (
           <div
             className="absolute inset-0 pointer-events-none z-30"

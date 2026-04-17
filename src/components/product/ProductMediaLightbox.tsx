@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { OptimizedImage } from '../OptimizedImage'
 import { OptimizedVideo } from '../OptimizedVideo'
 import { useTranslation } from '../../i18n'
+import type { R2ImageMetadata } from '../../types'
 
 interface LightboxItem {
   url?: string
@@ -11,8 +12,8 @@ interface LightboxItem {
   title?: string
   name?: string
   description?: string
-  crop?: { top: number; bottom: number; left: number; right: number }
-  hotspot?: { x: number; y: number; height: number; width: number }
+  crop?: R2ImageMetadata['crop']
+  hotspot?: R2ImageMetadata['hotspot']
 }
 
 interface ProductMediaLightboxProps {

@@ -133,11 +133,13 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
 
   if (!hasMaterialGroups && flatMaterials.length === 0) return null
 
-  const getMaterialsForLightbox = (materials: { image?: string; name?: string | { tr: string; en: string } }[]) =>
-    materials.map((m) => ({
-      image: m.image,
-      name: t(m.name || ''),
-    }))
+  const getMaterialsForLightbox = (materials: { image?: string; name?: string | LocalizedString }[]) =>
+    materials
+      .filter((m) => !!m.image)
+      .map((m) => ({
+        image: m.image as string,
+        name: t(m.name || ''),
+      }))
 
   return (
     <ScrollReveal delay={300} threshold={0.05}>

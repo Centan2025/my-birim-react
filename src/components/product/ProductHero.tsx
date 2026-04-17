@@ -5,7 +5,7 @@ import {OptimizedVideo} from '../OptimizedVideo'
 import {useTranslation} from '../../i18n'
 import {motion} from 'framer-motion'
 import {useCardTransition} from '../../context/CardTransitionContext'
-import type {LocalizedString, Designer} from '../../types'
+import type {LocalizedString, Designer, R2ImageMetadata} from '../../types'
 
 interface ProductHeroProps {
   product: {
@@ -207,8 +207,8 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     loading={shouldEagerLoad ? 'eager' : 'lazy'}
                     fetchPriority={shouldEagerLoad ? 'high' : 'low'}
                     quality={90}
-                    crop={m.crop as { top: number; bottom: number; left: number; right: number } | undefined}
-                    hotspot={m.hotspot as { x: number; y: number; height: number; width: number } | undefined}
+                    crop={m.crop as R2ImageMetadata['crop']}
+                    hotspot={m.hotspot as R2ImageMetadata['hotspot']}
                   />
                 ) : m.type === 'video' ? (
                   <OptimizedVideo

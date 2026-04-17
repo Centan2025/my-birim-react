@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import type { Product, Designer } from '../types'
+import type { Product, Designer, R2ImageMetadata } from '../types'
 import { OptimizedImage } from './OptimizedImage'
 import { useTranslation } from '../i18n'
 import { useSiteSettings } from '../context/SiteSettingsContext'
@@ -22,12 +22,12 @@ export const ProductCard: React.FC<{ product: Product }> = ({
   }, [designers, product.designerId, t])
 
   const isObject = typeof product.mainImage === 'object' && product.mainImage !== null;
-  const mainImageObj = isObject ? (product.mainImage as { url?: string; urlMobile?: string; urlDesktop?: string; crop?: unknown; hotspot?: unknown }) : {};
+  const mainImageObj = isObject ? (product.mainImage as { url?: string; urlMobile?: string; urlDesktop?: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot'] }) : {};
   const mainImageUrl = (isObject ? mainImageObj.url : (product.mainImage as string)) || '';
   const mainImageMobile = mainImageObj.urlMobile;
   const mainImageDesktop = mainImageObj.urlDesktop;
-  const mainImageCrop = mainImageObj.crop as { top: number; bottom: number; left: number; right: number } | undefined;
-  const mainImageHotspot = mainImageObj.hotspot as { x: number; y: number; height: number; width: number } | undefined;
+  const mainImageCrop = mainImageObj.crop;
+  const mainImageHotspot = mainImageObj.hotspot;
 
   const handleClick = () => {
     // We still want to handle analytics before navigation

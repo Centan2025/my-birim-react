@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { OptimizedImage } from './OptimizedImage'
 import ScrollReveal from './ScrollReveal'
-import type { Designer, LocalizedString } from '../types'
+import type { Designer, LocalizedString, R2ImageMetadata } from '../types'
 
 interface ProductDesignerSectionProps {
   designer?: Designer | null
@@ -53,8 +53,8 @@ export function ProductDesignerSection({ designer, designers: designersProp, t }
                       className="w-full h-auto object-cover filter grayscale"
                       loading="lazy"
                       quality={85}
-                      crop={(typeof d.image === 'object' ? (d.image as { crop?: { top: number; bottom: number; left: number; right: number } })?.crop : undefined)}
-                      hotspot={(typeof d.image === 'object' ? (d.image as { hotspot?: { x: number; y: number; height: number; width: number } })?.hotspot : undefined)}
+                      crop={(typeof d.image === 'object' ? (d.image as { crop?: R2ImageMetadata['crop'] })?.crop : undefined)}
+                      hotspot={(typeof d.image === 'object' ? (d.image as { hotspot?: R2ImageMetadata['hotspot'] })?.hotspot : undefined)}
                     />
                   </div>
                   <div className="w-full">
