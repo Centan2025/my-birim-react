@@ -194,9 +194,15 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
           } else if (b.mediaType === 'youtube') {
             url = b.url
           } else if (b.mediaType === 'panels') {
-            // imagePanels dizisini URL dizisine dönüştür
+            // imagePanels dizisini tip ve URL içeren bir yapıya dönüştür
             if (Array.isArray(b.imagePanels)) {
-              b.imagePanels = b.imagePanels.map((p: any) => mapImage(p)).filter(Boolean)
+              b.imagePanels = b.imagePanels.map((p: any) => {
+                const url = mapImage(p)
+                if (!url) return null
+                const mime = p.mimeType || ''
+                const type = (mime.startsWith('video/') || url.toLowerCase().match(/\.(mp4|webm|mov|avi|mkv)$/)) ? 'video' : 'image'
+                return { url, type }
+              }).filter(Boolean)
             }
           }
 

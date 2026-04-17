@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react'
+import React, {useMemo, useState, useRef, useEffect, useCallback} from 'react'
 import {Link} from 'react-router-dom'
 
 import {ContentBlock} from '../types'
@@ -16,6 +16,103 @@ interface HomeContentBlocksProps {
   imageBorderClass: string
   overrideBackgroundColor?: string
   onMediaClick?: (url: string) => void
+}
+
+/**
+ * Panel Media Slider Component
+ * Side-by-side horizontal scroll with dots and video support
+ */
+const PanelSlider: React.FC<{
+  media: Array<{url: string; type: 'image' | 'video'}>
+  panelSize?: 'small' | 'medium' | 'large'
+  imageBorderClass: string
+  onMediaClick?: (url: string) => void
+}> = ({media, panelSize, imageBorderClass, onMediaClick}) => {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [activeIndex, setActiveIndex] = useState(0)
+
+  const handleScroll = useCallback(() => {
+    if (!scrollRef.current) return
+    const {scrollLeft, clientWidth} = scrollRef.current
+    const index = Math.round(scrollLeft / (clientWidth * 0.8)) // Guessing scroll snap point
+    setActiveIndex(index)
+  }, [])
+
+  const scrollTo = (index: number) => {
+    if (!scrollRef.current) return
+    const container = scrollRef.current
+    const itemWidth = container.querySelector('div')?.clientWidth || 0
+    const gap = 16 // md:gap-4
+    container.scrollTo({
+      left: index * (itemWidth + gap),
+      behavior: 'smooth'
+    })
+  }
+
+  // Determine width based on panel size
+  const getWidthClass = () => {
+    switch (panelSize) {
+      case 'small': return 'w-[45vw] md:w-[22vw] lg:w-[15vw]'
+      case 'large': return 'w-[85vw] md:w-[60vw] lg:w-[45vw]'
+      default: return 'w-[65vw] md:w-[35vw] lg:w-[25vw]'
+    }
+  }
+
+  return (
+    <div className="w-full relative group/panels flex flex-col gap-6">
+      <div 
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex overflow-x-auto gap-4 px-4 md:px-8 pb-4 no-scrollbar scroll-smooth snap-x snap-mandatory"
+      >
+        {media.map((item, i) => (
+          <div 
+            key={i} 
+            className={`flex-shrink-0 snap-start relative overflow-hidden ${imageBorderClass} aspect-[4/5] sm:aspect-[3/4] group cursor-pointer ${getWidthClass()}`}
+            onClick={() => onMediaClick && onMediaClick(item.url)}
+          >
+            {item.type === 'video' ? (
+              <OptimizedVideo
+                src={item.url}
+                className="w-full h-full object-cover"
+                autoPlay
+                loop
+                muted
+                playsInline
+                controls={false}
+              />
+            ) : (
+              <OptimizedImage
+                src={item.url}
+                alt=""
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                loading="lazy"
+                quality={85}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Pagination Dots */}
+      {media.length > 1 && (
+        <div className="flex justify-center gap-2 mb-4">
+          {media.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => scrollTo(i)}
+              className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                activeIndex === i 
+                  ? 'bg-[var(--text-primary)] w-4' 
+                  : 'bg-[var(--text-primary)] opacity-20 hover:opacity-40'
+              }`}
+              aria-label={`Go to slide ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
@@ -360,31 +457,12 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 )}
               </div>
             ) : block.mediaType === 'panels' ? (
-              <div 
-               className={`grid gap-2 md:gap-4 w-full ${
-                 block.panelSize === 'small' 
-                   ? 'grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8' 
-                   : block.panelSize === 'large'
-                     ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-                     : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'
-               }`}
-             >
-               {block.imagePanels?.map((url, i) => (
-                 <div 
-                   key={i} 
-                   className={`relative overflow-hidden ${imageBorderClass} aspect-[4/5] sm:aspect-[3/4] group cursor-pointer`}
-                   onClick={() => onMediaClick && onMediaClick(url)}
-                 >
-                   <OptimizedImage
-                     src={url}
-                     alt=""
-                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                     loading="lazy"
-                     quality={80}
-                   />
-                 </div>
-               ))}
-             </div>
+              <PanelSlider 
+                media={block.imagePanels || []} 
+                panelSize={block.panelSize} 
+                imageBorderClass={imageBorderClass}
+                onMediaClick={onMediaClick}
+              />
             ) : (
               <div 
                 className={`relative w-full h-full ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`} 

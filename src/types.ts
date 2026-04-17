@@ -314,8 +314,8 @@ export interface ContentBlock {
   image?: string
   imageMobile?: string
   imageDesktop?: string
-  /** Array of images for panels (for panels type) */
-  imagePanels?: string[]
+  /** Array of media for panels (for panels type) */
+  imagePanels?: Array<{ url: string; type: 'image' | 'video' }>
   /** Size for panels: small, medium, large */
   panelSize?: 'small' | 'medium' | 'large'
   crop?: R2ImageMetadata['crop']
