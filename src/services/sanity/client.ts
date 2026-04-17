@@ -59,7 +59,7 @@ export interface SanityProductMediaItem {
 export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boolean): string => {
   if (!url || typeof url !== 'string') return url || ''
   
-  // URL'deki segmentleri ayır, trim et ve gizli boşlukları temizle (BUG-1: 404 Fix)
+  // URL'deki segmentleri ayır, trim et ve gizli boşlukları temizle
   const trimSegments = (u: string) => {
     try {
       const parts = u.split('/')
@@ -73,9 +73,8 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
   }
 
   let result = trimSegments(url)
-  let wasRewritten = false
 
-  // 1. Legacy Domain Rewrite (Hepsini tek bir domain'e topla)
+  // 1. Domain Rewrite (Hepsini tek bir domain'e topla)
   const legacyDomains = [
     /https?:\/\/assets\.birim\.com/g,
     /https?:\/\/birim-assets\.web-birim\.workers\.dev/g,
@@ -86,62 +85,28 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
     for (const pattern of legacyDomains) {
       if (pattern.test(result)) {
         result = result.replace(pattern, R2_DOMAIN)
-        wasRewritten = true
       }
     }
-  }
 
-  // 2. Generic R2.dev rewrite (subdomain'den bağımsız)
-  if (R2_DOMAIN && !R2_DOMAIN.includes('.r2.dev') && result.includes('.r2.dev')) {
-    try {
-      const parsedUrl = new URL(result)
-      const pathPart = parsedUrl.pathname.startsWith('/')
-        ? parsedUrl.pathname.substring(1)
-        : parsedUrl.pathname
-      result = `${R2_DOMAIN}/${pathPart}`
-      wasRewritten = true
-    } catch {
-      // ignore
+    // 2. Generic R2.dev rewrite (subdomain'den bağımsız)
+    if (!R2_DOMAIN.includes('.r2.dev') && result.includes('.r2.dev') && !result.includes(R2_DOMAIN)) {
+      try {
+        const parsedUrl = new URL(result)
+        const pathPart = parsedUrl.pathname.startsWith('/')
+          ? parsedUrl.pathname.substring(1)
+          : parsedUrl.pathname
+        result = `${R2_DOMAIN}/${pathPart}`
+      } catch { /* ignore */ }
+    }
+
+    // 3. Relatif yolları mutlak yap
+    if (!result.startsWith('http') && result.length > 0) {
+      const cleanPath = result.startsWith('/') ? result.substring(1) : result
+      result = `${R2_DOMAIN}/${cleanPath}`
     }
   }
 
-  // 3. Migration Prefix Logic (Geliştirildi)
-  // Sadece 'uploads/' ile başlayan yollar için geçerli.
-  // Yeni dosyalar (Örn: 177... ile başlayanlar) genellikle migration klasöründe değildir.
-  // Eğer URL bir legacy domain'den geldiyse veya relatif ise migration denemeli.
-  
-  const processMigration = (r: string): string => {
-    if (!R2_DOMAIN) return r
-    
-    const path = r.includes(R2_DOMAIN) ? r.replace(R2_DOMAIN, '') : r
-    const cleanPath = path.startsWith('/') ? path.substring(1) : path
-    
-    if (cleanPath.startsWith('uploads/') && !cleanPath.startsWith('migration/')) {
-      // Çok yeni dosyalar (timestamp > 1700...) root uploads/ altında olabilir
-      // Ancak eski dosyalar migration/uploads/ altındadır.
-      const filename = cleanPath.split('/').pop() || ''
-      const timestamp = parseInt(filename.split('-')[0] ?? '0')
-      
-      // Eğer timestamp 2024 öncesiyse veya sayısal değilse migration kabul edilebilir
-      const isLegacyTimestamp = isNaN(timestamp) || timestamp < 1700000000000
-      
-      // KRİTİK: Eğer timestamp yeniyse (1700...), kesinlikle migration ekleme.
-      // wasRewritten olsa bile (yani assets.birim.com olsa bile) yeni dosya root'tadır.
-      if (isLegacyTimestamp && (wasRewritten || isLegacyTimestamp)) {
-        return `${R2_DOMAIN}/migration/${cleanPath}`
-      }
-    }
-    
-    if (!r.startsWith('http') && r.length > 0) {
-      return `${R2_DOMAIN}/${cleanPath}`
-    }
-    
-    return r
-  }
-
-  result = processMigration(result)
-
-  // 4. Final step: Space encoding (Sadece bir kez)
+  // 4. Final step: Space encoding
   try {
     result = encodeURI(decodeURI(result)).replace(/ /g, '%20')
   } catch {
@@ -159,11 +124,6 @@ export const mapImage = (
 ): string => {
   if (!img) return ''
   if (typeof img === 'string') {
-    const isMigration = img.startsWith('migration/') || img.startsWith('/migration/')
-    if (isMigration && R2_DOMAIN) {
-      const cleanPath = img.startsWith('/') ? img.substring(1) : img
-      return `${R2_DOMAIN}/${cleanPath}`
-    }
     return rewriteR2Url(img)
   }
 
@@ -173,16 +133,9 @@ export const mapImage = (
   )
 
   if (rawUrl) {
-    const isMigration = rawUrl.startsWith('migration/') || rawUrl.startsWith('/migration/')
-    if (isMigration && R2_DOMAIN) {
-      const cleanPath = rawUrl.startsWith('/') ? rawUrl.substring(1) : rawUrl
-      let res = `${R2_DOMAIN}/${cleanPath}`.replace(/ /g, '%20')
-      if (hasResponsiveSizes) res += res.includes('?') ? '&rs=1' : '?rs=1'
-      return res
-    }
     if (
       typeof rawUrl === 'string' &&
-      (rawUrl.includes('r2.dev') || rawUrl.startsWith('http'))
+      (rawUrl.includes('r2.dev') || rawUrl.startsWith('http') || rawUrl.startsWith('/') || rawUrl.startsWith('uploads/'))
     ) {
       return rewriteR2Url(rawUrl, hasResponsiveSizes)
     }
@@ -255,11 +208,6 @@ export const mapMediaUrl = (
           : (m?.imageR2 as any)?.hasResponsiveSizes
     )
     if (r2Url) {
-      if (r2Url.startsWith('migration/') && R2_DOMAIN) {
-        let res = `${R2_DOMAIN}/${r2Url}`
-        if (hasResponsiveSizes) res += res.includes('?') ? '&rs=1' : '?rs=1'
-        return res
-      }
       return rewriteR2Url(r2Url, hasResponsiveSizes)
     }
     return rewriteR2Url(m?.url) || ''
@@ -270,15 +218,10 @@ export const mapMediaUrl = (
         ? m?.videoFileDesktopR2?.url
         : m?.videoFileR2?.url
     if (r2Url) {
-      if (r2Url.startsWith('migration/') && R2_DOMAIN)
-        return `${R2_DOMAIN}/${r2Url}`
       return rewriteR2Url(r2Url)
     }
     if ((isMobile || isDesktop) && m?.videoFileR2?.url) {
-      const genericR2 = m.videoFileR2.url
-      if (genericR2.startsWith('migration/') && R2_DOMAIN)
-        return `${R2_DOMAIN}/${genericR2}`
-      return rewriteR2Url(genericR2)
+      return rewriteR2Url(m.videoFileR2.url)
     }
     
     const fallbackUrl = m?.url || ''
