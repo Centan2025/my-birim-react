@@ -52,8 +52,8 @@ export const FloatingAuthPanel: React.FC = () => {
       } else {
         setError(t('invalid_credentials') || 'Geçersiz e-posta veya şifre')
       }
-    } catch (err: any) {
-      setError(err.message || 'Giriş yapılırken hata oluştu')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Giriş yapılırken hata oluştu')
     } finally {
       setIsLoading(false)
     }

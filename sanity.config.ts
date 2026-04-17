@@ -23,7 +23,7 @@ if (typeof window !== 'undefined') {
       const self = this as unknown as { _sentryUrl?: string }
       self._sentryUrl = String(url)
       // @ts-expect-error monkey patching XHR signature
-      super.open(method, url as string, ...rest as any[])
+      super.open(method, url as string, ...rest as unknown[])
     }
     send(body?: Document | XMLHttpRequestBodyInit | null) {
       try {
@@ -45,7 +45,6 @@ if (typeof window !== 'undefined') {
 }
 import {structureTool} from 'sanity/structure'
 import {visionTool} from '@sanity/vision'
-import {orderableDocumentListDeskItem} from '@sanity/orderable-document-list'
 import {schemaTypes} from './schemaTypes'
 import {deskStructure} from './deskStructure'
 import {excelImportTool} from './tools/excelImport'

@@ -7,7 +7,7 @@ export default function CookieBanner() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    let timer: any
+    let timer: ReturnType<typeof setTimeout> | undefined
     try {
       const v = localStorage.getItem(STORAGE_KEY)
       if (!v) {
@@ -22,7 +22,7 @@ export default function CookieBanner() {
     }
   }, [])
 
-  const saveConsent = (data: any) => {
+  const saveConsent = (data: {necessary: boolean; analytics: boolean; rejected?: boolean}) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({...data, ts: Date.now()}))
     } catch (error) {

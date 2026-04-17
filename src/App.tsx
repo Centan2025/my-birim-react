@@ -20,10 +20,6 @@ import { ScrollToTop } from './components/ScrollToTop'
 import { BackToTopButton } from './components/BackToTopButton'
 import { MainLayout } from './layouts/MainLayout'
 
-// Re-export context hooks for backward compatibility
-export { useAuth, AuthContext } from './context/AuthContext'
-export { useSiteSettings } from './context/SiteSettingsContext'
-
 // Lazy load pages for code splitting
 const ComingSoonPage = lazy(() =>
   import('./pages/ComingSoonPage').then(m => ({ default: m.ComingSoonPage }))
