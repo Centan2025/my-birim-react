@@ -891,6 +891,7 @@ export const contentBlock = defineType({
           {title: 'Görsel', value: 'image'},
           {title: 'Video', value: 'video'},
           {title: 'YouTube', value: 'youtube'},
+          {title: 'Paneller (Çoklu Görsel)', value: 'panels'},
         ],
       },
       initialValue: 'image',
@@ -913,6 +914,31 @@ export const contentBlock = defineType({
       title: 'Görsel (Desktop)',
       type: 'r2Asset',
       hidden: ({parent}) => !!parent?.mediaType && parent?.mediaType !== 'image',
+    }),
+    defineField({
+      name: 'imagePanels',
+      title: 'Panel Görselleri (Çoklu)',
+      type: 'array',
+      of: [{type: 'r2Asset'}],
+      hidden: ({parent}) => parent?.mediaType !== 'panels',
+      description: 'Yan yana dizilecek görselleri buraya ekleyin.',
+    }),
+    defineField({
+      name: 'panelSize',
+      title: 'Panel Boyutu',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Küçük', value: 'small'},
+          {title: 'Orta', value: 'medium'},
+          {title: 'Büyük', value: 'large'},
+        ],
+        layout: 'radio',
+        direction: 'horizontal',
+      },
+      initialValue: 'medium',
+      hidden: ({parent}) => parent?.mediaType !== 'panels',
+      description: 'Panellerin ne kadar büyük görüneceğini belirler.',
     }),
     // Görsel konumu – doğrudan görsel alanlarının altında
     defineField({

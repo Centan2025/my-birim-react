@@ -193,6 +193,11 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             urlDesktop = b.videoFileDesktopR2?.url ? rewriteR2Url(b.videoFileDesktopR2.url) : undefined
           } else if (b.mediaType === 'youtube') {
             url = b.url
+          } else if (b.mediaType === 'panels') {
+            // imagePanels dizisini URL dizisine dönüştür
+            if (Array.isArray(b.imagePanels)) {
+              b.imagePanels = b.imagePanels.map((p: any) => mapImage(p)).filter(Boolean)
+            }
           }
 
           const meta = b.imageR2 ? mapR2Metadata(b.imageR2) : {}
@@ -206,6 +211,8 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             url,
             urlMobile,
             urlDesktop,
+            imagePanels: b.imagePanels,
+            panelSize: b.panelSize,
             crop: meta.crop,
             hotspot: meta.hotspot,
             origWidth: meta.origWidth,

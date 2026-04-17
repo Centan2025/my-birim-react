@@ -278,7 +278,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         const isButtonWhite = block.buttonColor === 'white'
         const buttonTextColorClass = isButtonWhite ? 'text-white' : 'text-[var(--text-primary)]'
 
-        const hasMedia = !!mediaUrl
+        const hasMedia = !!mediaUrl || (block.mediaType === 'panels' && Array.isArray(block.imagePanels) && block.imagePanels.length > 0)
 
         const mediaContent = hasMedia ? (
           <ScrollReveal
@@ -359,6 +359,32 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   </div>
                 )}
               </div>
+            ) : block.mediaType === 'panels' ? (
+              <div 
+               className={`grid gap-2 md:gap-4 w-full ${
+                 block.panelSize === 'small' 
+                   ? 'grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8' 
+                   : block.panelSize === 'large'
+                     ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+                     : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'
+               }`}
+             >
+               {block.imagePanels?.map((url, i) => (
+                 <div 
+                   key={i} 
+                   className={`relative overflow-hidden ${imageBorderClass} aspect-[4/5] sm:aspect-[3/4] group cursor-pointer`}
+                   onClick={() => onMediaClick && onMediaClick(url)}
+                 >
+                   <OptimizedImage
+                     src={url}
+                     alt=""
+                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                     loading="lazy"
+                     quality={80}
+                   />
+                 </div>
+               ))}
+             </div>
             ) : (
               <div 
                 className={`relative w-full h-full ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`} 

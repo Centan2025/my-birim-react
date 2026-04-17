@@ -309,11 +309,15 @@ export interface ContentBlock {
   borderThickness?: number
   textAlignment?: 'left' | 'center' | 'right'
   verticalAlignment?: 'top' | 'center' | 'bottom'
-  /** Type of media: image, video, or youtube */
-  mediaType: 'image' | 'video' | 'youtube'
+  /** Type of media: image, video, youtube or panels */
+  mediaType: 'image' | 'video' | 'youtube' | 'panels'
   image?: string
   imageMobile?: string
   imageDesktop?: string
+  /** Array of images for panels (for panels type) */
+  imagePanels?: string[]
+  /** Size for panels: small, medium, large */
+  panelSize?: 'small' | 'medium' | 'large'
   crop?: R2ImageMetadata['crop']
   hotspot?: R2ImageMetadata['hotspot']
   origWidth?: number
