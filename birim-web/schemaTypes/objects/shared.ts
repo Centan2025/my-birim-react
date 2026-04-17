@@ -3,6 +3,7 @@ import {defineField, defineType} from 'sanity'
 import {localizedString} from './localizedString'
 import MaterialSelectionInput from '../../components/MaterialSelectionInput'
 import FontSelectorInput from '../../components/FontSelectorInput'
+import BulkMediaUploadInput from '../../components/BulkMediaUploadInput'
 import {getPreviewUrl} from '../utils/previewUrl'
 import {browserOnlyInput} from '../utils/browserOnly'
 
@@ -920,6 +921,9 @@ export const contentBlock = defineType({
       title: 'Panel Görselleri (Çoklu)',
       type: 'array',
       of: [{type: 'r2Asset'}],
+      components: {
+        input: BulkMediaUploadInput,
+      },
       hidden: ({parent}) => parent?.mediaType !== 'panels',
       description: 'Yan yana dizilecek görselleri buraya ekleyin.',
     }),

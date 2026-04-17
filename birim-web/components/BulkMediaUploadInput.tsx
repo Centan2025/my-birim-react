@@ -58,23 +58,20 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
   const toast = useToast()
   const sanityDocument = useFormValue([]) as any
   const docType = sanityDocument?._type
-
   const handleBulkUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (!files || files.length === 0) return
 
     setIsUploading(true)
-    const newItems: any[] = []
     const fileArray = Array.from(files)
+    setUploadProgress(`0/${fileArray.length} başladı...`)
 
     try {
-      for (let i = 0; i < fileArray.length; i++) {
-        const file = fileArray[i]
+      // Dosyaları paralel işle (concurrency kontrolü isteğe bağlı, şimdilik Promise.all)
+      const uploadResults = await Promise.all(fileArray.map(async (file, index) => {
         const isImage = isImageFile(file.name)
         const isVideo = isVideoFile(file.name)
         
-        setUploadProgress(`${i + 1}/${fileArray.length}: ${file.name}`)
-
         // 1. Path belirle
         let folderPath = 'bulk-uploads'
         const docId = sanityDocument?.id?.current || sanityDocument?._id || 'unknown'
@@ -85,6 +82,8 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
           folderPath = `projects/${docId}/media`
         } else if (docType === 'newsItem') {
           folderPath = `news/${docId}/media`
+        } else if (docType === 'homePage') {
+          folderPath = `home/panels`
         }
 
         // 2. Filename
@@ -98,17 +97,16 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
 
         // 3. Upload
         if (isImage && !file.type.includes('gif') && !file.type.includes('svg')) {
-           // Resposive upload logic
            const sizes = [
-            { width: 2560, suffix: '', maxSizeMB: 0.8 },
-            { width: 1600, suffix: '-1600w', maxSizeMB: 0.5 },
-            { width: 800, suffix: '-800w', maxSizeMB: 0.2 },
-            { width: 400, suffix: '-400w', maxSizeMB: 0.1 },
+            { width: 2560, suffix: '', maxSizeMB: 1.0 },
+            { width: 1600, suffix: '-1600w', maxSizeMB: 0.6 },
+            { width: 800, suffix: '-800w', maxSizeMB: 0.3 },
+            { width: 400, suffix: '-400w', maxSizeMB: 0.15 },
           ]
 
           let dimensions = { width: 0, height: 0 }
           
-          const uploadPromises = sizes.map(async (size) => {
+          const sizePromises = sizes.map(async (size) => {
             const options = {
               maxSizeMB: size.maxSizeMB,
               maxWidthOrHeight: size.width,
@@ -118,7 +116,6 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
             const compressedBlob = await imageCompression(file, options)
             
             if (size.suffix === '') {
-              // Dimensiyonları ana görselden al
               try {
                 const img = new Image()
                 img.src = URL.createObjectURL(compressedBlob)
@@ -144,16 +141,20 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
             )
           })
 
-          await Promise.all(uploadPromises)
+          await Promise.all(sizePromises)
           r2Asset = {
             _type: 'r2Asset',
             url: `${R2_DOMAIN}/${key}`,
+            path: key,
             hasResponsiveSizes: true,
             width: dimensions.width,
-            height: dimensions.height
+            height: dimensions.height,
+            mimeType: 'image/webp',
+            alt: file.name.replace(/\.[^/.]+$/, ''),
+            hotspotX: 0.5,
+            hotspotY: 0.5,
           }
         } else {
-          // Video veya diğer dosyalar
           const arrayBuffer = await file.arrayBuffer()
           await r2Client.send(
             new PutObjectCommand({
@@ -166,34 +167,50 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
           r2Asset = {
             _type: 'r2Asset',
             url: `${R2_DOMAIN}/${key}`,
-            hasResponsiveSizes: false
+            path: key,
+            hasResponsiveSizes: false,
+            mimeType: file.type,
+            alt: file.name.replace(/\.[^/.]+$/, ''),
           }
         }
 
+        // Progress update (yaklaşık)
+        setUploadProgress(`${index + 1}/${fileArray.length}: ${file.name}`)
+
         // 4. Parçayı oluştur
-        const itemType = schemaType.of[0].name || 'productSimpleMediaItem'
-        const item: any = {
-          _type: itemType,
-          _key: `bulk-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          type: isVideo ? 'video' : 'image',
-          isCover: false,
-        }
+        const itemType = schemaType.of[0].name
+        let item: any
 
-        // Field mapping based on type
-        if (itemType === 'newsMedia') {
-          item.caption = { tr: '', en: '' }
+        if (itemType === 'r2Asset') {
+          item = {
+            ...r2Asset,
+            _key: `bulk-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          }
         } else {
-          item.title = { tr: '', en: '' }
+          item = {
+            _type: itemType,
+            _key: `bulk-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            type: isVideo ? 'video' : 'image',
+            isCover: false,
+          }
+
+          if (itemType === 'newsMedia') {
+            item.caption = { tr: '', en: '' }
+          } else if (itemType !== 'r2Asset') {
+            item.title = { tr: '', en: '' }
+          }
+
+          if (isVideo) {
+            item.videoFileR2 = r2Asset
+          } else {
+            item.imageR2 = r2Asset
+          }
         }
 
-        if (isVideo) {
-          item.videoFileR2 = r2Asset
-        } else {
-          item.imageR2 = r2Asset
-        }
+        return item
+      }))
 
-        newItems.push(item)
-      }
+      const newItems = uploadResults.filter(Boolean)
 
       // 5. Sanity'ye ekle
       if (newItems.length > 0) {
@@ -219,7 +236,7 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
       setUploadProgress('')
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
-  }, [docType, sanityDocument, onChange, toast])
+  }, [docType, sanityDocument, onChange, toast, schemaType.of])
 
   return (
     <Stack space={3}>
