@@ -1,4 +1,4 @@
-import {describe, it, expect, vi} from 'vitest'
+import {describe, it, expect} from 'vitest'
 import {mapImage, rewriteR2Url, extractPalette, R2_DOMAIN} from './client'
 
 describe('sanity client utils', () => {
@@ -47,7 +47,7 @@ describe('sanity client utils', () => {
           },
         },
       }
-      const p = extractPalette(img as any)
+      const p = extractPalette(img as unknown)
       expect(p?.dominant?.background).toBe('#000')
     })
   })

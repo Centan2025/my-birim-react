@@ -17,7 +17,7 @@ export const R2_ORIGIN_DOMAIN =
 const defaultEnableFallback = import.meta.env.PROD ? 'false' : 'true'
 export const ENABLE_LOCAL_FALLBACK =
   String(
-    (import.meta as any).env?.VITE_ENABLE_LOCAL_FALLBACK ?? defaultEnableFallback
+    (import.meta as ImportMeta).env?.['VITE_ENABLE_LOCAL_FALLBACK'] ?? defaultEnableFallback
   ).toLowerCase() !== 'false'
 
 export const sanity = useSanity
@@ -127,9 +127,9 @@ export const mapImage = (
     return rewriteR2Url(img)
   }
 
-  const rawUrl = (img as any)?.r2Asset?.url || (img as any)?.url
+  const rawUrl = (img as Record<string, Record<string, string>>)?.['r2Asset']?.['url'] || (img as Record<string, string>)?.['url']
   const hasResponsiveSizes = Boolean(
-    (img as any)?.r2Asset?.hasResponsiveSizes || (img as any)?.hasResponsiveSizes
+    (img as Record<string, Record<string, boolean>>)?.['r2Asset']?.['hasResponsiveSizes'] || (img as Record<string, boolean>)?.['hasResponsiveSizes']
   )
 
   if (rawUrl) {
@@ -141,15 +141,16 @@ export const mapImage = (
     }
   }
 
-  return rewriteR2Url((img as any)?.url, hasResponsiveSizes) || ''
+  return rewriteR2Url((img as Record<string, string>)?.['url'], hasResponsiveSizes) || ''
 }
 
-export const mapR2Metadata = (img: any): R2ImageMetadata => {
-  if (!img) return {}
+export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
+  if (!img || typeof img !== 'object') return {}
+  const i = img as Record<string, unknown>
 
   let crop =
-    img.cropX !== undefined && img.cropWidth !== undefined
-      ? { x: img.cropX, y: img.cropY || 0, width: img.cropWidth, height: img.cropHeight || 1 }
+    i['cropX'] !== undefined && i['cropWidth'] !== undefined
+      ? { x: i['cropX'] as number, y: (i['cropY'] as number) || 0, width: i['cropWidth'] as number, height: (i['cropHeight'] as number) || 1 }
       : undefined
 
   if (!crop && img.crop && typeof img.crop === 'object' && !('asset' in img)) {
@@ -167,12 +168,12 @@ export const mapR2Metadata = (img: any): R2ImageMetadata => {
       ? { x: img.hotspotX, y: img.hotspotY }
       : undefined
 
-  if (!hotspot && img.hotspot && typeof img.hotspot === 'object' && !('asset' in img)) {
-    hotspot = { x: img.hotspot.x, y: img.hotspot.y }
+    const h = i['hotspot'] as Record<string, number>
+    hotspot = { x: h['x'], y: h['y'] }
   }
 
-  const origWidth = img.width
-  const origHeight = img.height
+  const origWidth = i['width'] as number
+  const origHeight = i['height'] as number
 
   return { crop, hotspot, origWidth, origHeight }
 }
@@ -181,10 +182,10 @@ export const mapImages = (imgs: SanityImageLike[] | undefined): string[] =>
   Array.isArray(imgs) ? imgs.map(i => mapImage(i)).filter(Boolean) : []
 
 export const extractPalette = (
-  img: any
+  img: unknown
 ): SanityImagePalette | undefined => {
   // R2 assets no longer carry Sanity palette metadata directly unless manually synced
-  return img?.palette || undefined
+  return (img as Record<string, SanityImagePalette>)?.['palette'] || undefined
 }
 
 export const mapMediaUrl = (
@@ -202,10 +203,10 @@ export const mapMediaUrl = (
         : m?.imageR2?.url
     const hasResponsiveSizes = Boolean(
       isMobile
-        ? (m?.imageMobileR2 as any)?.hasResponsiveSizes
+        ? (m?.imageMobileR2 as Record<string, unknown>)?.['hasResponsiveSizes']
         : isDesktop
-          ? (m?.imageDesktopR2 as any)?.hasResponsiveSizes
-          : (m?.imageR2 as any)?.hasResponsiveSizes
+          ? (m?.imageDesktopR2 as Record<string, unknown>)?.['hasResponsiveSizes']
+          : (m?.imageR2 as Record<string, unknown>)?.['hasResponsiveSizes']
     )
     if (r2Url) {
       return rewriteR2Url(r2Url, hasResponsiveSizes)

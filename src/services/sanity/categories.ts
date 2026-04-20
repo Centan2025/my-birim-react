@@ -1,5 +1,5 @@
 import groq from 'groq'
-import type { Category, Designer } from '../../types'
+import type { Category, Designer, LocalizedString } from '../../types'
 import { sanity, useSanity, mapImage, mapR2Metadata, type SanityImageLike } from './client'
 import { getItem } from './settings'
 
@@ -15,9 +15,9 @@ interface SanityCategoryRow {
   name: LocalizedString
   subtitle: LocalizedString
   heroImage: SanityImageLike
-  heroImageR2: any
+  heroImageR2: SanityImageLike
   menuImage: SanityImageLike
-  menuImageR2: any
+  menuImageR2: SanityImageLike
 }
 
 interface SanityDesignerRow {
@@ -26,9 +26,9 @@ interface SanityDesignerRow {
   role: LocalizedString
   bio: LocalizedString
   image: SanityImageLike
-  imageR2: any
-  imageMobileR2: any
-  imageDesktopR2: any
+  imageR2: SanityImageLike
+  imageMobileR2: SanityImageLike
+  imageDesktopR2: SanityImageLike
 }
 
 export const getCategories = async (): Promise<Category[]> => {
@@ -47,8 +47,8 @@ export const getCategories = async (): Promise<Category[]> => {
       id: r.id,
       name: r.name,
       subtitle: r.subtitle,
-      heroImage: r.heroImageR2?.url ? { url: mapImage(r.heroImageR2), ...mapR2Metadata(r.heroImageR2) } : mapImage(r.heroImage),
-      menuImage: r.menuImageR2?.url ? { url: mapImage(r.menuImageR2), ...mapR2Metadata(r.menuImageR2) } : mapImage(r.menuImage),
+      heroImage: (r.heroImageR2 as Record<string, unknown>)?.['url'] ? { url: mapImage(r.heroImageR2), ...mapR2Metadata(r.heroImageR2) } : mapImage(r.heroImage),
+      menuImage: (r.menuImageR2 as Record<string, unknown>)?.['url'] ? { url: mapImage(r.menuImageR2), ...mapR2Metadata(r.menuImageR2) } : mapImage(r.menuImage),
     }))
   }
   await delay(SIMULATED_DELAY)
@@ -70,8 +70,8 @@ export const getDesigners = async (): Promise<Designer[]> => {
     const rows = await sanity.fetch(query)
     return rows.map((r: SanityDesignerRow) => {
       const imageFinal = mapImage(r.imageR2) || mapImage(r.image)
-      const imageMobile = r.imageMobileR2?.url ? mapImage(r.imageMobileR2) : undefined
-      const imageDesktop = r.imageDesktopR2?.url ? mapImage(r.imageDesktopR2) : undefined
+      const imageMobile = (r.imageMobileR2 as Record<string, unknown>)?.['url'] ? mapImage(r.imageMobileR2) : undefined
+      const imageDesktop = (r.imageDesktopR2 as Record<string, unknown>)?.['url'] ? mapImage(r.imageDesktopR2) : undefined
       const metadata = r.imageR2 ? mapR2Metadata(r.imageR2) : (r.image ? mapR2Metadata(r.image) : {})
       return {
         id: r.id,
@@ -101,8 +101,8 @@ export const getDesignerById = async (id: string): Promise<Designer | undefined>
     const r = await sanity.fetch(query, { id })
     if (!r) return undefined
     const image = mapImage(r.imageR2) || mapImage(r.image) || ''
-    const imageMobile = r.imageMobileR2?.url || undefined
-    const imageDesktop = r.imageDesktopR2?.url || undefined
+    const imageMobile = (r.imageMobileR2 as Record<string, unknown>)?.['url'] || undefined
+    const imageDesktop = (r.imageDesktopR2 as Record<string, unknown>)?.['url'] || undefined
     const metadata = r.imageR2 ? mapR2Metadata(r.imageR2) : (r.image ? mapR2Metadata(r.image) : {})
     return {
       id: r.id,
@@ -138,8 +138,8 @@ export const getDesignersByIds = async (ids: string[]): Promise<Designer[]> => {
     const rows = await sanity.fetch(query, { ids })
     return rows.map((r: SanityDesignerRow) => {
       const imageFinal = mapImage(r.imageR2) || mapImage(r.image)
-      const imageMobile = r.imageMobileR2?.url ? mapImage(r.imageMobileR2) : undefined
-      const imageDesktop = r.imageDesktopR2?.url ? mapImage(r.imageDesktopR2) : undefined
+      const imageMobile = (r.imageMobileR2 as Record<string, unknown>)?.['url'] ? mapImage(r.imageMobileR2) : undefined
+      const imageDesktop = (r.imageDesktopR2 as Record<string, unknown>)?.['url'] ? mapImage(r.imageDesktopR2) : undefined
       const metadata = r.imageR2 ? mapR2Metadata(r.imageR2) : (r.image ? mapR2Metadata(r.image) : {})
       return {
         id: r.id,
