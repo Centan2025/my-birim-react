@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMemo, useEffect, FC, SVGProps } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import type { NewsMedia } from '../types'
@@ -348,3 +349,4 @@ export function NewsDetailPage() {
     </div>
   )
 }
+
