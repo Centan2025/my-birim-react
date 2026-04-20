@@ -165,15 +165,16 @@ export const getTranslations = async (): Promise<Record<string, Record<string, s
       const results = await noCacheClient.fetch(q)
       const translationsMap: Record<string, Record<string, string>> = {}
       if (Array.isArray(results)) {
-        results.forEach((item: any) => {
-          if (item.language && item.strings) {
-            const normalized: Record<string, string> = {...item.strings}
+        results.forEach((item: Record<string, unknown>) => {
+          if (item['language'] && item['strings']) {
+            const normalized: Record<string, string> = {...(item['strings'] as Record<string, string>)}
             if (normalized['models_3d'] && !normalized['3d_models'])
               normalized['3d_models'] = normalized['models_3d']
-            if (!translationsMap[item.language]) translationsMap[item.language] = normalized
+            if (!translationsMap[item['language'] as string]) translationsMap[item['language'] as string] = normalized
           }
         })
       }
+
       return translationsMap
     } catch {
       return {}
@@ -222,8 +223,16 @@ export const getFooterContent = async (): Promise<FooterContent> => {
     const data = await sanity.fetch(
       groq`*[_type == "footer"][0]{ ..., partners[]{ ..., logoR2 }, legalLinks[] }`
     )
-    if (data?.partners)
-      data.partners = data.partners.map((p: any) => ({...p, logo: mapImage(p.logoR2)}))
+    if (data?.['partners'])
+      data['partners'] = (data['partners'] as Record<string, unknown>[]).map((p: Record<string, unknown>) => ({
+        ...p,
+        logo: mapImage({
+          asset: p['logoR2'],
+          crop: (p['logoR2'] as Record<string, unknown>)?.['crop'] as { x: number; y: number; width: number; height: number } | undefined,
+          hotspot: (p['logoR2'] as Record<string, unknown>)?.['hotspot'] as { x: number; y: number } | undefined,
+        } as SanityImageLike)
+      }))
+
     if (!Array.isArray(data?.legalLinks)) data.legalLinks = []
     return data
   }

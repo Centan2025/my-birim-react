@@ -8,12 +8,10 @@ import type {
 import {
   sanity,
   useSanity,
-  mapImage,
-  mapR2Metadata,
-  mapImages,
-  extractPalette,
   SanityImageLike,
+  LocalizedString
 } from './client'
+
 import {getItem} from './settings'
 
 const SIMULATED_DELAY = 200
@@ -62,25 +60,29 @@ const mapMaterialsFromSelections = (
     const groupMaterialByKey = new Map<string, {name?: LocalizedString; image?: unknown}>()
 
     for (const book of books) {
-      for (const item of book.items || []) {
-        const key = getAssetKey(item.image)
+      const items = (book?.['items'] as Record<string, unknown>[]) || []
+      for (const item of items) {
+        const key = getAssetKey(item['image'] as SanityImageLike)
         if (!key) continue
         if (!groupMaterialByKey.has(key)) {
-          groupMaterialByKey.set(key, {name: item.name, image: item.image})
+          groupMaterialByKey.set(key, {name: item['name'] as LocalizedString, image: item['image']})
         }
       }
     }
 
-    for (const m of sel.materials || []) {
-      const key = getAssetKey(m.image)
+
+
+    for (const m of (sel['materials'] as Record<string, unknown>[]) || []) {
+      const key = getAssetKey(m['image'] as SanityImageLike)
       if (!key || seenKeys.has(key)) continue
       const source = groupMaterialByKey.get(key) || m
       result.push({
-        name: (source.name ?? m.name ?? '') as LocalizedString,
-        image: mapImage(source.image),
+        name: ((source['name'] as LocalizedString) ?? (m['name'] as LocalizedString) ?? '') as LocalizedString,
+        image: mapImage(source['image'] as SanityImageLike),
       })
       seenKeys.add(key)
     }
+
   }
   return result
 }
@@ -92,31 +94,34 @@ const mapGroupedMaterials = (
 
   return materialSelections
     .map(sel => {
-      const group = (sel as any).group
-      const groupTitle = (group?.title ?? '') as LocalizedString
-      const books = group?.books || []
+      const group = (sel as Record<string, unknown>)['group'] as Record<string, unknown>
+      const groupTitle = (group?.['title'] ?? '') as LocalizedString
+      const books = (group?.['books'] as Record<string, unknown>[]) || []
       const selectedKeys = new Set<string>()
-      for (const m of sel.materials || []) {
-        const key = getAssetKey(m.image)
+      for (const m of (sel['materials'] as Record<string, unknown>[]) || []) {
+        const key = getAssetKey(m['image'] as SanityImageLike)
         if (key) selectedKeys.add(key)
       }
+
 
       const mappedBooks = books
         .map((book: Record<string, unknown>) => {
           const materials: ProductMaterial[] = []
-          for (const item of book.items || []) {
-            const key = getAssetKey(item.image)
+          const items = (book?.['items'] as Record<string, unknown>[]) || []
+          for (const item of items) {
+            const key = getAssetKey(item['image'] as SanityImageLike)
             if (!key || !selectedKeys.has(key)) continue
             materials.push({
-              name: (item.name ?? '') as LocalizedString,
-              image: mapImage(item.image),
+              name: (item['name'] as LocalizedString ?? '') as LocalizedString,
+              image: mapImage(item['image'] as SanityImageLike),
             })
           }
-          return {bookTitle: (book.title ?? '') as LocalizedString, materials}
+          return {bookTitle: (book['title'] as LocalizedString ?? '') as LocalizedString, materials}
         })
         .filter((b: Record<string, unknown>) => (b['materials'] as unknown[])?.length > 0)
 
       const allMaterials = mappedBooks.flatMap((b: Record<string, unknown>) => b['materials'] as ProductMaterial[])
+
       if (allMaterials.length === 0) return null
 
       return {groupTitle, books: mappedBooks, materials: allMaterials}
@@ -124,7 +129,7 @@ const mapGroupedMaterials = (
     .filter((g): g is ProductMaterialsGroup => Boolean(g))
 }
 
-const mapProductMedia = (mediaArrRaw: unknown): any[] => {
+const mapProductMedia = (mediaArrRaw: unknown): unknown[] => {
   const mediaArr = Array.isArray(mediaArrRaw) ? mediaArrRaw : []
   return mediaArr
     .map((m: Record<string, unknown>) => {
@@ -134,27 +139,28 @@ const mapProductMedia = (mediaArrRaw: unknown): any[] => {
       let urlDesktop: string | undefined = undefined
 
       if (type === 'image') {
-        url = mapImage(m?.imageR2)
-        urlMobile = m?.imageMobileR2?.url ? mapImage(m?.imageMobileR2) : undefined
-        urlDesktop = m?.imageDesktopR2?.url ? mapImage(m?.imageDesktopR2) : undefined
+        url = mapImage(m?.['imageR2'] as SanityImageLike)
+        urlMobile = (m?.['imageMobileR2'] as Record<string, string>)?.['url'] ? mapImage(m?.['imageMobileR2'] as SanityImageLike) : undefined
+        urlDesktop = (m?.['imageDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(m?.['imageDesktopR2'] as SanityImageLike) : undefined
       } else if (type === 'video') {
-        url = mapImage(m?.videoFileR2)
-        urlMobile = m?.videoFileMobileR2?.url ? mapImage(m?.videoFileMobileR2) : undefined
-        urlDesktop = m?.videoFileDesktopR2?.url ? mapImage(m?.videoFileDesktopR2) : undefined
+        url = mapImage(m?.['videoFileR2'] as SanityImageLike)
+        urlMobile = (m?.['videoFileMobileR2'] as Record<string, string>)?.['url'] ? mapImage(m?.['videoFileMobileR2'] as SanityImageLike) : undefined
+        urlDesktop = (m?.['videoFileDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(m?.['videoFileDesktopR2'] as SanityImageLike) : undefined
       } else {
-        url = m?.url || ''
+        url = (m?.['url'] as string) || ''
       }
 
-      const metadata = m?.['imageR2'] ? mapR2Metadata(m['imageR2']) : {}
+      const metadata = m?.['imageR2'] ? mapR2Metadata(m['imageR2'] as SanityImageLike) : {}
       const result: Record<string, unknown> = {
         type,
         url,
-        title: m?.title,
-        description: m?.description,
-        link: m?.link,
-        linkText: m?.linkText,
+        title: m?.['title'],
+        description: m?.['description'],
+        link: m?.['link'],
+        linkText: m?.['linkText'],
         ...metadata
       }
+
       if (urlMobile && urlMobile !== url) result['urlMobile'] = urlMobile
       if (urlDesktop && urlDesktop !== url) result['urlDesktop'] = urlDesktop
       result['isCover'] = !!m['isCover']
@@ -163,20 +169,23 @@ const mapProductMedia = (mediaArrRaw: unknown): any[] => {
     .filter((m: Record<string, unknown>) => !!m['url'])
 }
 
-const mapDimensionImages = (dimImgs: unknown[] | undefined): any[] => {
+const mapDimensionImages = (dimImgs: unknown[] | undefined): unknown[] => {
   if (!Array.isArray(dimImgs)) return []
   return dimImgs
-    .map((di: Record<string, unknown>) => {
-      const image = mapImage(di?.['imageR2'] as SanityImageLike)
-      const imgMobile = (di?.['imageMobileR2'] as Record<string, string>)?.['url'] ? mapImage(di?.['imageMobileR2'] as SanityImageLike) : undefined
-      const imgDesktop = (di?.['imageDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(di?.['imageDesktopR2'] as SanityImageLike) : undefined
-      const result: Record<string, unknown> = {image, title: di?.['title']}
-      if (imgMobile && imgMobile !== image) result.imageMobile = imgMobile
-      if (imgDesktop && imgDesktop !== image) result.imageDesktop = imgDesktop
+    .map((di: unknown) => {
+      const row = di as Record<string, unknown>
+      const image = mapImage(row?.['imageR2'] as SanityImageLike)
+      const imgMobile = (row?.['imageMobileR2'] as Record<string, string>)?.['url'] ? mapImage(row?.['imageMobileR2'] as SanityImageLike) : undefined
+      const imgDesktop = (row?.['imageDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(row?.['imageDesktopR2'] as SanityImageLike) : undefined
+      const result: Record<string, unknown> = {image, title: row?.['title']}
+
+      if (imgMobile && imgMobile !== image) result['imageMobile'] = imgMobile
+      if (imgDesktop && imgDesktop !== image) result['imageDesktop'] = imgDesktop
       return result
     })
-    .filter(di => !!di.image)
+    .filter((di: Record<string, unknown>) => !!di['image'])
 }
+
 
 const mapProductRow = (r: Record<string, unknown>): Product => {
   const mediaArr = Array.isArray(r['media']) ? (r['media'] as Record<string, unknown>[]) : []
@@ -262,7 +271,8 @@ export const getProducts = async (): Promise<Product[]> => {
   if (useSanity && sanity) {
     const query = groq`*[_type == "product" && (!defined(isPublished) || isPublished == true)] | order(year desc){ ${productQueryString} }`
     const rows = await sanity.fetch(query)
-    return rows.map((r: any) => mapProductRow(r))
+    return (rows as Record<string, unknown>[]).map((r: Record<string, unknown>) => mapProductRow(r))
+
   }
   await delay(SIMULATED_DELAY)
   return getItem<Product[]>(KEYS.PRODUCTS) || []
@@ -283,7 +293,8 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
   if (useSanity && sanity) {
     const query = groq`*[_type == "product" && category->id.current == $categoryId && (!defined(isPublished) || isPublished == true)] | order(year desc){ ${productQueryString} }`
     const rows = await sanity.fetch(query, {categoryId})
-    return rows.map((r: any) => mapProductRow(r))
+    return (rows as Record<string, unknown>[]).map((r: Record<string, unknown>) => mapProductRow(r))
+
   }
   await delay(SIMULATED_DELAY)
   return (getItem<Product[]>(KEYS.PRODUCTS) || []).filter(p => p.categoryId === categoryId)
@@ -293,7 +304,8 @@ export const getProductsByDesignerId = async (designerId: string): Promise<Produ
   if (useSanity && sanity) {
     const query = groq`*[_type == "product" && (designer->id.current == $designerId || $designerId in designers[]->id.current) && (!defined(isPublished) || isPublished == true)] | order(year desc){ ${productQueryString} }`
     const rows = await sanity.fetch(query, {designerId})
-    return rows.map((r: any) => mapProductRow(r))
+    return (rows as Record<string, unknown>[]).map((r: Record<string, unknown>) => mapProductRow(r))
+
   }
   await delay(SIMULATED_DELAY)
   return (getItem<Product[]>(KEYS.PRODUCTS) || []).filter(p => p.designerId === designerId)

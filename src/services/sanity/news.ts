@@ -8,7 +8,7 @@ const delay = (ms: number) => new Promise(res => setTimeout(res, ms))
 
 const KEYS = { NEWS: 'birim_news' }
 
-const mapMediaArray = (mediaArrRaw: unknown): any[] => {
+const mapMediaArray = (mediaArrRaw: unknown): unknown[] => {
   const mediaArr = Array.isArray(mediaArrRaw) ? (mediaArrRaw as Record<string, unknown>[]) : []
   return mediaArr
     .map((m: Record<string, unknown>) => {
@@ -132,8 +132,8 @@ const mapProjectRow = (r: Record<string, unknown>): Project => {
         url: url || undefined,
         urlMobile: urlMobile || undefined,
         urlDesktop: urlDesktop || undefined,
-        crop: (meta as Record<string, unknown>)?.['crop'] as Project['cover']['crop'],
-        hotspot: (meta as Record<string, unknown>)?.['hotspot'] as Project['cover']['hotspot'],
+        crop: (meta as Record<string, unknown>)?.['crop'] as { x: number; y: number; width: number; height: number } | undefined,
+        hotspot: (meta as Record<string, unknown>)?.['hotspot'] as { x: number; y: number } | undefined,
         origWidth: (meta as Record<string, unknown>)?.['origWidth'] as number,
         origHeight: (meta as Record<string, unknown>)?.['origHeight'] as number,
       }
