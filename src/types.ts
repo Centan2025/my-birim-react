@@ -646,6 +646,8 @@ export interface Project {
     urlMobile?: string // Art Direction: Mobil için URL
     urlDesktop?: string // Art Direction: Desktop için URL
     image?: string
+    isCover?: boolean
+    isOriginal?: boolean
   }[]
   body?: LocalizedString
   /** Content blocks displayed on project detail page (same system as homepage) */

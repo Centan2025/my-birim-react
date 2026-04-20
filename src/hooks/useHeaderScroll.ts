@@ -253,6 +253,8 @@ export function useHeaderScroll({
 
     initializeScrollListener()
 
+    const currentScrollTimeout = scrollTimeoutRef.current
+
     return () => {
       if (scrollListener) {
         window.removeEventListener('scroll', scrollListener)
@@ -260,7 +262,6 @@ export function useHeaderScroll({
       if (rafId !== null) {
         cancelAnimationFrame(rafId)
       }
-      const currentScrollTimeout = scrollTimeoutRef.current
       if (currentScrollTimeout) {
         clearTimeout(currentScrollTimeout)
       }

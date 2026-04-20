@@ -9,8 +9,16 @@ interface ProductThumbnailsProps {
   bandMedia: {
     type: 'image' | 'video' | 'youtube'
     url: string
-    crop?: any
-    hotspot?: any
+    crop?: {
+      x: number
+      y: number
+      width: number
+      height: number
+    }
+    hotspot?: {
+      x: number
+      y: number
+    }
   }[]
   currentImageIndex: number
   imageBorderClass: string

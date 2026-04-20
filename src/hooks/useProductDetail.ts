@@ -7,11 +7,13 @@ import {useSiteSettings} from './useSiteData'
 import {useProductHero} from './useProductHero'
 import {useHeaderTheme} from '../context/HeaderThemeContext'
 
+import type {Product, Designer} from '../types'
+
 /**
  * Encapsulates all data-fetching, derived state, and side effects
  * for the ProductDetailPage.
  */
-export function useProductDetail(productId: string | undefined, prefetchedProduct?: any) {
+export function useProductDetail(productId: string | undefined, prefetchedProduct?: Product) {
   const location = useLocation()
 
   // React Query hooks
@@ -21,7 +23,7 @@ export function useProductDetail(productId: string | undefined, prefetchedProduc
   )
 
   // Data freezing to prevent blank pages during exit animations
-  const [frozenProduct, setFrozenProduct] = useState<any>(null)
+  const [frozenProduct, setFrozenProduct] = useState<Product | null>(null)
   useEffect(() => {
     if (productData) setFrozenProduct(productData)
   }, [productData])
@@ -34,7 +36,7 @@ export function useProductDetail(productId: string | undefined, prefetchedProduc
 
   // Multiple Designers Support
   const {data: designersData} = useDesignersByIds(product?.designerIds)
-  const [frozenDesigners, setFrozenDesigners] = useState<any[]>([])
+  const [frozenDesigners, setFrozenDesigners] = useState<Designer[]>([])
   useEffect(() => {
     if (designersData && designersData.length > 0) setFrozenDesigners(designersData)
   }, [designersData])
@@ -62,7 +64,7 @@ export function useProductDetail(productId: string | undefined, prefetchedProduc
   const bandMedia = useMemo(() => {
     if (!product || !Array.isArray(product.media)) return []
     const media = [...product.media]
-    const coverIdx = media.findIndex((m: any) => m.isCover)
+    const coverIdx = media.findIndex((m) => (m as {isCover?: boolean}).isCover)
     if (coverIdx > 0) {
       const [cover] = media.splice(coverIdx, 1)
       media.unshift(cover)
@@ -84,7 +86,7 @@ export function useProductDetail(productId: string | undefined, prefetchedProduc
   const mergedGroups = useMemo(() => {
     if (!product) return []
     const groupedMap = new Map<string, any>()
-    const productGrouped = (product as any).groupedMaterials || []
+    const productGrouped = product.groupedMaterials || []
     for (const g of productGrouped) {
       const key = typeof g.groupTitle === 'string' ? g.groupTitle : JSON.stringify(g.groupTitle)
       if (!groupedMap.has(key)) {
@@ -129,8 +131,9 @@ export function useProductDetail(productId: string | undefined, prefetchedProduc
       reset()
       return
     }
+    const mainImg = product.mainImage as {palette?: any}
     const palette =
-      typeof product.mainImage === 'object' ? (product.mainImage as any)?.palette : undefined
+      typeof product.mainImage === 'object' ? mainImg?.palette : undefined
     setFromPalette(palette)
     return () => reset()
   }, [product, reset, setFromPalette])
