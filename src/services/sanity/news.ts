@@ -1,6 +1,6 @@
 import groq from 'groq'
 import type { NewsItem, Project } from '../../types'
-import { sanity, useSanity, mapImage, rewriteR2Url, extractPalette, mapR2Metadata } from './client'
+import { sanity, useSanity, mapImage, rewriteR2Url, extractPalette, mapR2Metadata, type SanityImageLike } from './client'
 import { getItem } from './settings'
 
 const SIMULATED_DELAY = 200
@@ -12,28 +12,28 @@ const mapMediaArray = (mediaArrRaw: unknown): any[] => {
   const mediaArr = Array.isArray(mediaArrRaw) ? (mediaArrRaw as Record<string, unknown>[]) : []
   return mediaArr
     .map((m: Record<string, unknown>) => {
-      const type = m?.type || 'image'
+      const type = (m?.['type'] as string) || 'image'
       let url = ''
       let urlMobile: string | undefined = undefined
       let urlDesktop: string | undefined = undefined
 
       if (type === 'image') {
-        url = mapImage(m['imageR2'])
-        urlMobile = (m['imageMobileR2'] as Record<string, string>)?.['url'] ? mapImage(m['imageMobileR2']) : undefined
-        urlDesktop = (m['imageDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(m['imageDesktopR2']) : undefined
+        url = mapImage(m['imageR2'] as SanityImageLike)
+        urlMobile = (m['imageMobileR2'] as Record<string, string>)?.['url'] ? mapImage(m['imageMobileR2'] as SanityImageLike) : undefined
+        urlDesktop = (m['imageDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(m['imageDesktopR2'] as SanityImageLike) : undefined
       } else if (type === 'video') {
-        url = mapImage(m['videoFileR2'])
-        urlMobile = (m['videoFileMobileR2'] as Record<string, string>)?.['url'] ? mapImage(m['videoFileMobileR2']) : undefined
-        urlDesktop = (m['videoFileDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(m['videoFileDesktopR2']) : undefined
+        url = mapImage(m['videoFileR2'] as SanityImageLike)
+        urlMobile = (m['videoFileMobileR2'] as Record<string, string>)?.['url'] ? mapImage(m['videoFileMobileR2'] as SanityImageLike) : undefined
+        urlDesktop = (m['videoFileDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(m['videoFileDesktopR2'] as SanityImageLike) : undefined
       } else {
         url = (m['url'] as string) || ''
       }
       
       const metadata = m?.['imageR2'] ? mapR2Metadata(m['imageR2']) : {}
       const result: Record<string, unknown> = { type, url, caption: m['caption'], ...metadata }
-      if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
-      if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
-      result.isCover = !!m['isCover']
+      if (urlMobile && urlMobile !== url) result['urlMobile'] = urlMobile
+      if (urlDesktop && urlDesktop !== url) result['urlDesktop'] = urlDesktop
+      result['isCover'] = !!m['isCover']
       return result
     })
     .filter((m: Record<string, unknown>) => m['url'])
@@ -50,32 +50,33 @@ const mapNewsRow = (r: Record<string, unknown>): NewsItem => {
     let urlDesktop: string | undefined = undefined
 
     if (coverItem['type'] === 'image') {
-      url = mapImage(coverItem['imageR2'])
-      urlMobile = (coverItem['imageMobileR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['imageMobileR2']) : undefined
-      urlDesktop = (coverItem['imageDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['imageDesktopR2']) : undefined
+      url = mapImage(coverItem['imageR2'] as SanityImageLike)
+      urlMobile = (coverItem['imageMobileR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['imageMobileR2'] as SanityImageLike) : undefined
+      urlDesktop = (coverItem['imageDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['imageDesktopR2'] as SanityImageLike) : undefined
     } else if (coverItem['type'] === 'video') {
-      url = mapImage(coverItem['videoFileR2'])
-      urlMobile = (coverItem['videoFileMobileR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['videoFileMobileR2']) : undefined
-      urlDesktop = (coverItem['videoFileDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['videoFileDesktopR2']) : undefined
+      url = mapImage(coverItem['videoFileR2'] as SanityImageLike)
+      urlMobile = (coverItem['videoFileMobileR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['videoFileMobileR2'] as SanityImageLike) : undefined
+      urlDesktop = (coverItem['videoFileDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['videoFileDesktopR2'] as SanityImageLike) : undefined
     } else if (coverItem['type'] === 'youtube') {
       url = (coverItem['url'] as string) || ''
     }
 
-    const metadata = coverItem.imageR2 ? mapR2Metadata(coverItem.imageR2) : {}
+    const metadata = coverItem['imageR2'] ? mapR2Metadata(coverItem['imageR2']) : {}
     mainImage = {
       url,
       ...metadata,
     }
-    if (urlMobile && urlMobile !== url) mainImage.urlMobile = urlMobile
-    if (urlDesktop && urlDesktop !== url) mainImage.urlDesktop = urlDesktop
+    if (urlMobile && urlMobile !== url) mainImage['urlMobile'] = urlMobile
+    if (urlDesktop && urlDesktop !== url) mainImage['urlDesktop'] = urlDesktop
   }
 
   return {
     ...r,
-    mainImage,
-    media: mapMediaArray(r.media),
-  }
+    mainImage: mainImage as NewsItem['mainImage'] ,
+    media: mapMediaArray(r['media']),
+  } as NewsItem
 }
+
 
 const mapProjectRow = (r: Record<string, unknown>): Project => {
   const mediaArr = Array.isArray(r['media']) ? (r['media'] as Record<string, unknown>[]) : []
@@ -83,17 +84,17 @@ const mapProjectRow = (r: Record<string, unknown>): Project => {
 
   let cover: Record<string, unknown> = { url: '' }
   if (coverItem) {
-    const url = mapImage(coverItem['imageR2'])
-    const urlMobile = (coverItem['imageMobileR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['imageMobileR2']) : undefined
-    const urlDesktop = (coverItem['imageDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['imageDesktopR2']) : undefined
+    const url = mapImage(coverItem['imageR2'] as SanityImageLike)
+    const urlMobile = (coverItem['imageMobileR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['imageMobileR2'] as SanityImageLike) : undefined
+    const urlDesktop = (coverItem['imageDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['imageDesktopR2'] as SanityImageLike) : undefined
     const metadata = coverItem['imageR2'] ? mapR2Metadata(coverItem['imageR2']) : {}
     cover = {
       url,
       palette: extractPalette(coverItem['imageR2']),
       ...metadata,
     }
-    if (urlMobile && urlMobile !== url) cover.urlMobile = urlMobile
-    if (urlDesktop && urlDesktop !== url) cover.urlDesktop = urlDesktop
+    if (urlMobile && urlMobile !== url) cover['urlMobile'] = urlMobile
+    if (urlDesktop && urlDesktop !== url) cover['urlDesktop'] = urlDesktop
   }
 
   // Transform contentBlocks
@@ -102,14 +103,14 @@ const mapProjectRow = (r: Record<string, unknown>): Project => {
       let image = undefined
       let imageMobile = undefined
       let imageDesktop = undefined
-      let url = b.url
+      let url = b['url'] as string
       let urlMobile = undefined
       let urlDesktop = undefined
 
       if (b['mediaType'] === 'image' || !b['mediaType']) {
-        image = mapImage(b['imageR2'])
-        imageMobile = mapImage(b['imageMobileR2'])
-        imageDesktop = mapImage(b['imageDesktopR2'])
+        image = mapImage(b['imageR2'] as SanityImageLike)
+        imageMobile = mapImage(b['imageMobileR2'] as SanityImageLike)
+        imageDesktop = mapImage(b['imageDesktopR2'] as SanityImageLike)
       } else if (b['mediaType'] === 'video') {
         const vR2 = b['videoFileR2'] as Record<string, string>
         url = vR2?.['url'] ? rewriteR2Url(vR2['url']) : (b['url'] as string)
@@ -131,20 +132,20 @@ const mapProjectRow = (r: Record<string, unknown>): Project => {
         url: url || undefined,
         urlMobile: urlMobile || undefined,
         urlDesktop: urlDesktop || undefined,
-        crop: meta.crop,
-        hotspot: meta.hotspot,
-        origWidth: meta.origWidth,
-        origHeight: meta.origHeight,
+        crop: (meta as Record<string, unknown>)?.['crop'] as Project['cover']['crop'],
+        hotspot: (meta as Record<string, unknown>)?.['hotspot'] as Project['cover']['hotspot'],
+        origWidth: (meta as Record<string, unknown>)?.['origWidth'] as number,
+        origHeight: (meta as Record<string, unknown>)?.['origHeight'] as number,
       }
     })
     : undefined
 
   return {
     ...r,
-    cover,
-    media: mapMediaArray(r.media),
-    contentBlocks: contentBlocks && contentBlocks.length > 0 ? contentBlocks : undefined,
-  }
+    cover: cover as Project['cover'],
+    media: mapMediaArray(r['media']),
+    contentBlocks: contentBlocks as Project['contentBlocks'],
+  } as Project
 }
 
 export const getNews = async (): Promise<NewsItem[]> => {

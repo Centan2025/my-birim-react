@@ -101,8 +101,8 @@ export const getDesignerById = async (id: string): Promise<Designer | undefined>
     const r = await sanity.fetch(query, { id })
     if (!r) return undefined
     const image = mapImage(r.imageR2) || mapImage(r.image) || ''
-    const imageMobile = (r.imageMobileR2 as Record<string, unknown>)?.['url'] || undefined
-    const imageDesktop = (r.imageDesktopR2 as Record<string, unknown>)?.['url'] || undefined
+    const imageMobile = (r.imageMobileR2 as Record<string, unknown>)?.['url'] as string | undefined
+    const imageDesktop = (r.imageDesktopR2 as Record<string, unknown>)?.['url'] as string | undefined
     const metadata = r.imageR2 ? mapR2Metadata(r.imageR2) : (r.image ? mapR2Metadata(r.image) : {})
     return {
       id: r.id,

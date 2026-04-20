@@ -153,8 +153,9 @@ export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
       ? { x: i['cropX'] as number, y: (i['cropY'] as number) || 0, width: i['cropWidth'] as number, height: (i['cropHeight'] as number) || 1 }
       : undefined
 
-  if (!crop && img.crop && typeof img.crop === 'object' && !('asset' in img)) {
-    const { left = 0, top = 0, right = 0, bottom = 0 } = img.crop
+  if (!crop && i['crop'] && typeof i['crop'] === 'object' && !('asset' in i)) {
+    const c = i['crop'] as Record<string, number>
+    const { left = 0, top = 0, right = 0, bottom = 0 } = c
     crop = {
       x: left,
       y: top,
@@ -164,8 +165,8 @@ export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
   }
 
   let hotspot =
-    img.hotspotX !== undefined && img.hotspotY !== undefined
-      ? { x: img.hotspotX, y: img.hotspotY }
+    i['hotspotX'] !== undefined && i['hotspotY'] !== undefined
+      ? { x: i['hotspotX'] as number, y: i['hotspotY'] as number }
       : undefined
 
     const h = i['hotspot'] as Record<string, number>

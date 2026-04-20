@@ -6,13 +6,13 @@ vi.mock('./client', () => ({
     withConfig: vi.fn().mockReturnThis(),
   },
   useSanity: true,
-  mapImage: vi.fn(val => val?.url || 'http://image.url'),
-  mapImages: vi.fn(val => []),
-  extractPalette: vi.fn(val => ({})),
-  mapR2Metadata: vi.fn(val => ({})),
-  rewriteR2Url: vi.fn(val => val),
-  toFileUrl: vi.fn(val => 'http://file.url'),
-  mapMediaUrl: vi.fn(val => 'http://media.url'),
+  mapImage: vi.fn(_val => _val?.url || 'http://image.url'),
+  mapImages: vi.fn(_val => []),
+  extractPalette: vi.fn(_val => ({})),
+  mapR2Metadata: vi.fn(_val => ({})),
+  rewriteR2Url: vi.fn(_val => _val),
+  toFileUrl: vi.fn(_val => 'http://file.url'),
+  mapMediaUrl: vi.fn(_val => 'http://media.url'),
 }))
 
 import {sanity} from './client'

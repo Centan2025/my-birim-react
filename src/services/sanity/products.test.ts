@@ -9,15 +9,15 @@ vi.mock('./client', () => ({
   urlFor: vi.fn(() => ({
     url: () => 'http://image.url',
   })),
-  mapImage: vi.fn(val => 'http://image.url'),
-  mapImages: vi.fn(val => []),
-  extractPalette: vi.fn(val => ({})),
-  mapR2Metadata: vi.fn(val => ({})),
-  rewriteR2Url: vi.fn(val => val),
-  toFileUrl: vi.fn(val => 'http://file.url'),
-  mapMediaUrl: vi.fn(val => 'http://media.url'),
-  mapProductMedia: vi.fn(val => []),
-  mapAlternativeMedia: vi.fn(val => []),
+  mapImage: vi.fn(_val => 'http://image.url'),
+  mapImages: vi.fn(_val => []),
+  extractPalette: vi.fn(_val => ({})),
+  mapR2Metadata: vi.fn(_val => ({})),
+  rewriteR2Url: vi.fn(_val => _val),
+  toFileUrl: vi.fn(_val => 'http://file.url'),
+  mapMediaUrl: vi.fn(_val => 'http://media.url'),
+  mapProductMedia: vi.fn(_val => []),
+  mapAlternativeMedia: vi.fn(_val => []),
 }))
 
 import {sanity} from './client'
