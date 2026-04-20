@@ -35,13 +35,14 @@ export function DesignersPage() {
     return typeof designer.image === 'string' ? designer.image : designer.image?.url || ''
   }
 
-  const getBioText = (bio: any) => {
-    const bioVal = t(bio) as any
+  const getBioText = (bio: unknown) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const bioVal = t(bio as any) as any
     if (typeof bioVal === 'string') return bioVal
     if (Array.isArray(bioVal) && bioVal.length > 0) {
-      const firstBlock = bioVal.find((b: any) => b._type === 'block')
-      if (firstBlock && firstBlock.children) {
-        return firstBlock.children.map((c: any) => c.text).join(' ')
+      const firstBlock = bioVal.find((b: Record<string, unknown>) => b._type === 'block')
+      if (firstBlock && Array.isArray(firstBlock.children)) {
+        return firstBlock.children.map((c: Record<string, unknown>) => c.text).join(' ')
       }
     }
     return ''
@@ -65,6 +66,7 @@ export function DesignersPage() {
       y: 0,
       transition: {
         duration: 0.8,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ease: [0.215, 0.61, 0.355, 1] as any,
       },
     },

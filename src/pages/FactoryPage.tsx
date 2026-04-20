@@ -185,10 +185,11 @@ export function FactoryPage() {
                       Array.isArray(textContent) ||
                       (typeof textContent === 'object' &&
                         textContent !== null &&
-                        (textContent as any)._type === 'block')
+                        (textContent as Record<string, unknown>)._type === 'block')
 
                     if (isPortable) {
                       const blocks = Array.isArray(textContent) ? textContent : [textContent]
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       return <PortableTextLite value={blocks as any} />
                     }
 

@@ -96,10 +96,10 @@ export function useProductDetail(productId: string | undefined, prefetchedProduc
           materials: [...(g.materials || [])],
         })
       } else {
-        const existing = groupedMap.get(key) as any
+        const existing = groupedMap.get(key) as ProductMaterialsGroup | undefined
         if (existing) {
-          existing.books = [...existing.books, ...(g.books || [])]
-          existing.materials = [...existing.materials, ...(g.materials || [])]
+          existing.books = [...(existing.books || []), ...(g.books || [])]
+          existing.materials = [...(existing.materials || []), ...(g.materials || [])]
         }
       }
     }

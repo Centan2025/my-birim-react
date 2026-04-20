@@ -29,8 +29,10 @@ export function HomePage() {
 
   // SEO
   const seoData = useMemo(
-    (): any => {
+    () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const s = settings as any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const socialLinks = s?.socialLinks?.map((link: any) => link?.url).filter(Boolean) || [
         'https://www.instagram.com/birim',
         'https://www.linkedin.com/company/birim',
