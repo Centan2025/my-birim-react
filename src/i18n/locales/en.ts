@@ -206,4 +206,5 @@ export default {
   read_full_story: 'READ FULL STORY',
   min_read: 'MIN READ',
   continue_reading: 'CONTINUE READING',
+  designers_description: 'Visionary minds creating the perfect harmony of aesthetics and function.',
 }

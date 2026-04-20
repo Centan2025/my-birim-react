@@ -204,4 +204,5 @@ export default {
   read_full_story: 'TAM HİKAYEYİ OKUYUN',
   min_read: 'DAKİKA OKUMA',
   continue_reading: 'İÇERİĞİN DEVAMI',
+  designers_description: 'Estetik ve fonksiyonun mükemmel uyumunu yaratan vizyoner zihinler.',
 }

@@ -1,5 +1,4 @@
-import {useState, useEffect} from 'react'
-import {motion, AnimatePresence} from 'framer-motion'
+import {motion} from 'framer-motion'
 import {useNavigate} from 'react-router-dom'
 import type {Designer} from '../types'
 import {useTranslation} from '../i18n'
@@ -7,48 +6,24 @@ import {useDesigners} from '../hooks/useDesigners'
 import {useSEO} from '../hooks/useSEO'
 import {PageLoading} from '../components/LoadingSpinner'
 import {OptimizedImage} from '../components/OptimizedImage'
-import PortableTextLite from '../components/PortableTextLite'
 import {Breadcrumbs} from '../components/Breadcrumbs'
 
 export function DesignersPage() {
   const {data: designers = [], isLoading: loading} = useDesigners()
   const {t} = useTranslation()
   const navigate = useNavigate()
-  const [activeDesigner, setActiveDesigner] = useState<Designer | null>(null)
 
   // SEO meta
   useSEO({
     title: `BIRIM - ${t('designers') || 'Tasarımcılar'}`,
-    description: 'BIRIM ile çalışan tasarımcılar ve yaratıcı ekip hakkında bilgiler',
+    description: 'BIRIM ile çalışan vizyoner tasarımcılar ve yaratıcı küratörler.',
     type: 'profile',
     siteName: 'BIRIM',
     locale: 'tr_TR',
     section: 'Designers',
   })
 
-  useEffect(() => {
-    if (designers.length > 0 && !activeDesigner) {
-      setActiveDesigner(designers[0] || null)
-    }
-  }, [designers, activeDesigner])
-
-  // Removed local isDarkMode effect, handled by DarkModeProvider
-
-  const handleDesignerClick = (designer: Designer) => {
-    // Mobilde tıklandığında anında detay sayfasına git (Sol taraf zaten gizli)
-    if (window.innerWidth < 1024) {
-      navigate(`/designer/${designer.id}`)
-      return
-    }
-
-    if (activeDesigner?.id === designer.id) {
-      navigate(`/designer/${designer.id}`)
-    } else {
-      setActiveDesigner(designer)
-    }
-  }
-
-  if (loading || !activeDesigner) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
         <PageLoading message={t('loading')} />
@@ -60,144 +35,151 @@ export function DesignersPage() {
     return typeof designer.image === 'string' ? designer.image : designer.image?.url || ''
   }
 
+  const getBioText = (bio: any) => {
+    const bioVal = t(bio)
+    if (typeof bioVal === 'string') return bioVal
+    if (Array.isArray(bioVal) && bioVal.length > 0) {
+      const firstBlock = bioVal.find((b: any) => b._type === 'block')
+      if (firstBlock && firstBlock.children) {
+        return firstBlock.children.map((c: any) => c.text).join(' ')
+      }
+    }
+    return ''
+  }
+
+  const containerVariants = {
+    hidden: {opacity: 0},
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  }
+
+  const cardVariants = {
+    hidden: {opacity: 0, scale: 0.95, y: 30},
+    visible: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: {
+        duration: 0.8,
+        ease: [0.215, 0.61, 0.355, 1],
+      },
+    },
+  }
+
   return (
-    <div className="h-auto min-h-screen lg:h-screen flex flex-col bg-[var(--bg-primary)] selection:bg-primary selection:text-black transition-colors duration-500 lg:overflow-hidden text-[var(--text-primary)] pt-20">
-      {/* Breadcrumb Band */}
-      <div className="w-full relative z-20">
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
-          <Breadcrumbs
-            items={[{label: t('homepage'), to: '/'}, {label: t('designers') || 'Tasarımcılar'}]}
-          />
-        </div>
+    <div className="min-h-screen bg-[var(--bg-primary)] overflow-x-hidden pt-20 md:pt-24 lg:pt-24 pb-32">
+      {/* Background Decorative Text */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden select-none z-0 opacity-[0.03] dark:opacity-[0.05]">
+        <h2 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[30vw] font-bold leading-none outline-text whitespace-nowrap uppercase tracking-tighter">
+          {t('designers')}
+        </h2>
       </div>
 
-      <main className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto flex flex-col lg:flex-row flex-1 lg:overflow-hidden mt-4 lg:mt-8">
-        {/* Sol Taraf: Portre ve Bilgi (Sabit kalır) */}
-        <div className="hidden lg:flex w-full lg:w-1/2 min-h-[45svh] lg:h-full shrink-0 relative lg:overflow-hidden bg-[var(--bg-designer-hero)] border border-[var(--border-primary)] mt-0 pt-0 px-10 lg:px-16 xl:px-20 2xl:px-28 group flex-col transition-colors duration-500">
-          <div className="flex-none lg:flex-1 relative mt-10 lg:mt-28 flex items-start justify-start overflow-visible">
-            <AnimatePresence mode="wait">
-              {activeDesigner && (
-                <motion.div
-                  key={activeDesigner.id}
-                  initial={{opacity: 0, x: -30}}
-                  animate={{opacity: 1, x: 0}}
-                  exit={{opacity: 0, x: 30}}
-                  transition={{duration: 1, ease: [0.43, 0.13, 0.23, 0.96]}}
-                  className="relative w-full h-[40vh] lg:h-[62%] xl:h-[65%] 2xl:h-[65%] max-h-[650px] z-10 flex items-center justify-start"
-                >
-                  <div className="w-full h-full aspect-[3/2]">
-                    <OptimizedImage
-                      alt={t(activeDesigner.name)}
-                      className="w-full h-full object-cover portrait-frame"
-                      src={getImageUrl(activeDesigner)}
-                      srcMobile={
-                        typeof activeDesigner.image === 'object'
-                          ? activeDesigner.image.urlMobile
-                          : undefined
-                      }
-                      srcDesktop={
-                        typeof activeDesigner.image === 'object'
-                          ? activeDesigner.image.urlDesktop
-                          : undefined
-                      }
-                    />
+      {/* Breadcrumb Section */}
+      <div className="relative z-20 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 text-gray-400">
+        <Breadcrumbs
+          items={[
+            {label: t('homepage'), to: '/'},
+            {label: t('designers') || 'Tasarımcılar'},
+          ]}
+        />
+      </div>
+
+      {/* Header Section (Matching Projects Page) */}
+      <header className="relative z-10 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 md:pt-12 pb-12">
+        <motion.div
+          initial={{opacity: 0, y: 20}}
+          animate={{opacity: 1, y: 0}}
+          transition={{duration: 1, ease: 'easeOut'}}
+        >
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-center uppercase">
+            {t('designers')}
+          </h1>
+        </motion.div>
+      </header>
+
+      {/* Grid Section */}
+      <main className="relative z-10 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+        >
+          {designers.map((designer, index) => (
+            <motion.div
+              key={designer.id}
+              variants={cardVariants}
+              whileHover={{y: -8}}
+              onClick={() => navigate(`/designer/${designer.id}`)}
+              className="group relative cursor-pointer overflow-hidden aspect-[4/5] bg-[var(--bg-secondary)] border border-[var(--border-primary)]/20 transition-all duration-500"
+            >
+              {/* Image Container */}
+              <div className="w-full h-full overflow-hidden relative">
+                <OptimizedImage
+                  alt={t(designer.name)}
+                  className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105 portrait-frame group-hover:grayscale-0"
+                  src={getImageUrl(designer)}
+                  srcMobile={typeof designer.image === 'object' ? designer.image.urlMobile : undefined}
+                  srcDesktop={typeof designer.image === 'object' ? designer.image.urlDesktop : undefined}
+                />
+                
+                {/* Refined Overlays */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-80 group-hover:opacity-40 transition-opacity duration-700"></div>
+                <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+              </div>
+
+              {/* Information Panel - Simplified & Modern */}
+              <div className="absolute bottom-0 left-0 w-full p-8 lg:p-10 translate-y-[calc(100%-110px)] group-hover:translate-y-0 transition-transform duration-700 ease-[cubic-bezier(0.2,0,0,1)]">
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 border-t border-white/10"></div>
+                
+                <div className="relative z-10">
+                  <div className="overflow-hidden mb-2">
+                    <p className="text-[9px] tracking-[0.5em] font-medium text-white/40 uppercase group-hover:text-white/60 transition-colors duration-500">
+                      {t('designer') || 'Tasarımcı'}
+                    </p>
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Alt Bilgi ve Karar Butonu - Alta Sabitlendi */}
-          <div className="absolute bottom-6 lg:bottom-8 xl:bottom-12 left-10 lg:left-16 xl:left-20 2xl:left-28 right-10 lg:right-16 xl:right-20 2xl:right-28 z-40 bg-transparent h-[180px] lg:h-[200px]">
-            <AnimatePresence mode="wait">
-              {activeDesigner && (
-                <motion.div
-                  key={activeDesigner.id}
-                  initial={{opacity: 0, y: 15}}
-                  animate={{opacity: 1, y: 0}}
-                  exit={{opacity: 0, y: -15}}
-                  transition={{duration: 0.7, ease: [0.22, 1, 0.36, 1]}}
-                  className="grid grid-cols-1 lg:grid-cols-[calc(45%+1.5rem)_1fr] w-full h-full items-start gap-0"
-                >
-                  {/* Sol Sütun: İsim ve Buton */}
-                  <div className="flex flex-col items-start pt-6 lg:pt-10 h-full">
-                    <h2
-                      className="text-xl md:text-2xl lg:text-3xl xl:text-[2.4rem] uppercase leading-[1.1] text-[var(--text-primary)] font-inter text-left"
-                      style={{
-                        fontWeight: 500,
-                        letterSpacing: '-0.08em',
-                      }}
-                    >
-                      {t(activeDesigner.name)}
-                    </h2>
-
-                    <div className="mt-auto pb-0">
-                      <button
-                        onClick={() => navigate(`/designer/${activeDesigner.id}`)}
-                        className="w-full lg:w-auto text-center text-[10px] xl:text-[11px] uppercase font-medium tracking-[0.3em] text-[var(--text-primary)] border border-[var(--text-primary)]/30 px-6 xl:px-10 py-4 xl:py-5 hover:bg-primary/20 hover:border-primary transition-all duration-500 ease-out cursor-pointer whitespace-nowrap"
-                      >
-                        {t('explore_designer')}
-                      </button>
-                    </div>
+                  
+                  <h3 className="text-xl md:text-2xl font-light text-white uppercase mb-4 tracking-widest leading-none">
+                    {t(designer.name)}
+                  </h3>
+                  
+                  <div className="h-px w-8 bg-white/20 mb-8 group-hover:w-full transition-all duration-700 ease-in-out"></div>
+                  
+                  <div className="text-[11px] text-white/40 font-light line-clamp-3 uppercase tracking-widest opacity-0 group-hover:opacity-100 group-hover:text-white/70 transition-all duration-700 delay-100 leading-relaxed">
+                    {getBioText(designer.bio)}
                   </div>
 
-                  {/* Sağ Sütun: Biyografi */}
-                  <div className="pl-4 lg:pl-6 pt-10 lg:pt-16">
-                    <div className="text-xs xl:text-sm leading-relaxed text-[var(--text-primary)]/70 font-light text-left w-full line-clamp-3 lg:line-clamp-4">
-                      {(() => {
-                        const bio = t(activeDesigner.bio)
-                        return Array.isArray(bio) ? <PortableTextLite value={bio} /> : bio
-                      })()}
-                    </div>
+                  <div className="mt-8 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-700 delay-200">
+                    <span className="text-[9px] font-medium tracking-[0.4em] text-white/30 group-hover:text-white border-b border-white/10 group-hover:border-white/30 pb-2 transition-all duration-500 uppercase">
+                      {t('explore_designer') || 'View Profile'}
+                    </span>
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
+                </div>
+              </div>
 
-        {/* Sağ Taraf: Rehber Listesi - Bağımsız Scroll */}
-        <div className="w-full lg:w-1/2 lg:flex-1 h-auto lg:h-full overflow-y-visible lg:overflow-y-auto custom-scrollbar bg-[var(--bg-primary)] border-l border-[var(--border-primary)]/10 transition-colors duration-500 scroll-smooth lg:overscroll-contain pb-20 lg:pb-0">
-          <div className="py-2 md:py-12 lg:pt-0 lg:pb-24 px-6 lg:px-20 min-h-full flex flex-col justify-start">
-            <div className="mb-8 lg:mb-12 w-full">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-left mb-4">
-                {t('designers')}
-              </h1>
-              <div className="h-px w-full bg-[var(--border-primary)]"></div>
-            </div>
-            <nav className="flex flex-col gap-4 md:gap-4 lg:gap-6">
-              {designers.map(designer => (
-                <button
-                  key={designer.id}
-                  onClick={() => handleDesignerClick(designer)}
-                  className={`
-                    designer-name-link 
-                    text-left 
-                    font-arial-regular
-                    text-[clamp(2.25rem,3.5vw,4rem)]
-                    uppercase 
-                    leading-[0.95] 
-                    transition-all 
-                    duration-500 
-                    cursor-pointer
-                    ${
-                      activeDesigner?.id === designer.id
-                        ? 'text-primary'
-                        : 'text-[var(--text-primary)]/75 dark:text-[var(--text-primary)]/40 hover:text-primary/40'
-                    }
-                  `}
-                >
-                  {t(designer.name)}
-                </button>
-              ))}
-            </nav>
-          </div>
-        </div>
+              {/* Decorative Linear Accents */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none">
+                <div className="absolute top-0 left-8 right-8 h-px bg-white/5"></div>
+                <div className="absolute bottom-0 left-8 right-8 h-px bg-white/5"></div>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
       </main>
 
-      <style>{`
-        .vertical-text { writing-mode: vertical-rl; }
-      `}</style>
+      {/* Decorative Navigation Aid */}
+      <div className="mt-32 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex justify-between items-center opacity-30">
+        <div className="h-px flex-1 bg-[var(--border-primary)]"></div>
+        <div className="mx-8 text-[10px] uppercase tracking-[0.5em] font-light text-[var(--text-secondary)] whitespace-nowrap">
+          BIRIM COLLABORATORS
+        </div>
+        <div className="h-px flex-1 bg-[var(--border-primary)]"></div>
+      </div>
     </div>
   )
 }
