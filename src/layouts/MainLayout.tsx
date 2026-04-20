@@ -1,5 +1,5 @@
 import React, { Suspense, lazy, useState } from 'react'
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route, useLocation, Location } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { Header } from '../components/Header'
 import { Footer } from '../components/Footer'
@@ -91,11 +91,11 @@ export const MainLayout: React.FC = () => {
  * Bu wrapper, lokasyonu "capture" eder ve hapseder.
  * PageTransition exit yaparken bile kendi içindeki Routes'a eski lokasyonu verir.
  */
-const PageTransitionWrapper = React.forwardRef<HTMLDivElement, { location: any }>(
+const PageTransitionWrapper = React.forwardRef<HTMLDivElement, { location: Location }>(
   ({ location: liveLocation }, ref) => {
     // Lokasyonu ilk mount anındaki haliyle donduruyoruz.
     const [frozenLocation] = useState(liveLocation)
-    const isSlideOver = (frozenLocation.state as any)?.slideOver === true
+    const isSlideOver = (frozenLocation.state as { slideOver?: boolean })?.slideOver === true
 
     // slideOver olan sayfa için ek sınıf veya mantık eklenebilir,
     // ancak `fixed` yapmak sayfa geçişi bittikten sonra scroll'u kilitliyor.

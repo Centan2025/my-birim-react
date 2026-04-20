@@ -24,6 +24,7 @@ interface II18nContext {
   supportedLocales: string[]
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const I18nContext = createContext<II18nContext | null>(null)
 
 const getInitialLocale = (locales: string[]): Locale => {
@@ -189,7 +190,7 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
       t,
       supportedLocales,
     }),
-    [locale, t, supportedLocales, cmsTranslations, setLocale]
+    [locale, t, supportedLocales, setLocale]
   )
 
   // Uygulamanın beyaz ekrana düşmemesi için loading sırasında da render etmeye devam et
@@ -197,6 +198,7 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTranslation = () => {
   const context = useContext(I18nContext)
   if (!context) {

@@ -1,11 +1,11 @@
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { OptimizedImage } from '../OptimizedImage'
 import { OptimizedVideo } from '../OptimizedVideo'
 import { useTranslation } from '../../i18n'
 import type { R2ImageMetadata } from '../../types'
 
-interface LightboxItem {
+export interface LightboxItem {
   url?: string
   image?: string
   type?: string

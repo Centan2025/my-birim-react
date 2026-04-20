@@ -7,7 +7,7 @@ import {useSiteSettings} from './useSiteData'
 import {useProductHero} from './useProductHero'
 import {useHeaderTheme} from '../context/HeaderThemeContext'
 
-import type {Product, Designer} from '../types'
+import type {Product, Designer, SanityImagePalette} from '../types'
 
 /**
  * Encapsulates all data-fetching, derived state, and side effects
@@ -85,7 +85,7 @@ export function useProductDetail(productId: string | undefined, prefetchedProduc
   // Merged material groups
   const mergedGroups = useMemo(() => {
     if (!product) return []
-    const groupedMap = new Map<string, any>()
+    const groupedMap = new Map<string, unknown>()
     const productGrouped = product.groupedMaterials || []
     for (const g of productGrouped) {
       const key = typeof g.groupTitle === 'string' ? g.groupTitle : JSON.stringify(g.groupTitle)
@@ -131,7 +131,7 @@ export function useProductDetail(productId: string | undefined, prefetchedProduc
       reset()
       return
     }
-    const mainImg = product.mainImage as {palette?: any}
+    const mainImg = product.mainImage as {palette?: SanityImagePalette}
     const palette =
       typeof product.mainImage === 'object' ? mainImg?.palette : undefined
     setFromPalette(palette)

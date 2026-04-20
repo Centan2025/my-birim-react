@@ -141,6 +141,7 @@ export const useSEO = ({
       schema,
     }
 
+    const schemaString = JSON.stringify(schema)
     setSeoData(prev => (isEqualSeoState(prev, nextData) ? prev : nextData))
   }, [
     description,
@@ -153,7 +154,7 @@ export const useSEO = ({
     title,
     type,
     url,
-    JSON.stringify(schema),
+    schemaString,
   ])
 }
 

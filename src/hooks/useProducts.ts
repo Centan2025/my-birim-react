@@ -5,6 +5,7 @@ import {
   getProductsByCategoryId,
   getProductsByDesignerId,
 } from '@/services/cms'
+import type {Product} from '../types'
 
 /**
  * Tüm ürünleri getir
@@ -23,7 +24,7 @@ export function useProducts() {
 /**
  * ID'ye göre ürün getir
  */
-export function useProduct(productId: string | undefined, initialData?: any) {
+export function useProduct(productId: string | undefined, initialData?: Product) {
   return useQuery({
     queryKey: ['product', productId],
     queryFn: async () => {

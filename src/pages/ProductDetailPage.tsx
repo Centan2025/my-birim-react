@@ -215,7 +215,7 @@ export function ProductDetailPage() {
 
       <ProductHero
         product={product}
-        designer={designer}
+        designer={designer || undefined}
         designers={designers}
         heroMedia={heroMedia}
         slideCount={slideCount}
