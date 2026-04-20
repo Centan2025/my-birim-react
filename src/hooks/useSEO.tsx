@@ -144,6 +144,7 @@ export const useSEO = ({
     }
 
     setSeoData(prev => (isEqualSeoState(prev, nextData) ? prev : nextData))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     description,
     image,

@@ -29,10 +29,10 @@ export function CategoriesPage() {
 
   // Ürünleri kategori ID'sine gore haritalayarak aramalari O(N) karmasikligina dusur
   const categoryImageMap = useMemo(() => {
-    const map = new Map<string, any>()
+    const map = new Map<string, unknown>()
     for (const product of allProducts) {
       const catId = product.categoryId?.toLowerCase()
-      const hasUrl = typeof product.mainImage === 'object' && product.mainImage !== null ? (product.mainImage as any).url : false
+      const hasUrl = typeof product.mainImage === 'object' && product.mainImage !== null ? (product.mainImage as {url?: string}).url : false
       if (product && catId && hasUrl && !map.has(catId)) {
         map.set(catId, product.mainImage)
       }
@@ -114,16 +114,16 @@ export function CategoriesPage() {
                         src={
                           typeof category.displayImage === 'string'
                             ? category.displayImage
-                            : category.displayImage.url
+                            : (category.displayImage as {url: string}).url
                         }
                         srcMobile={
                           typeof category.displayImage === 'object'
-                            ? category.displayImage.urlMobile
+                            ? (category.displayImage as {urlMobile?: string}).urlMobile
                             : undefined
                         }
                         srcDesktop={
                           typeof category.displayImage === 'object'
-                            ? category.displayImage.urlDesktop
+                            ? (category.displayImage as {urlDesktop?: string}).urlDesktop
                             : undefined
                         }
                         alt={t(category.name)}
@@ -132,12 +132,12 @@ export function CategoriesPage() {
                         quality={85}
                         crop={
                           typeof category.displayImage === 'object'
-                            ? (category.displayImage as any).crop
+                            ? (category.displayImage as {crop?: import('../types').R2ImageMetadata['crop']}).crop
                             : undefined
                         }
                         hotspot={
                           typeof category.displayImage === 'object'
-                            ? (category.displayImage as any).hotspot
+                            ? (category.displayImage as {hotspot?: import('../types').R2ImageMetadata['hotspot']}).hotspot
                             : undefined
                         }
                       />

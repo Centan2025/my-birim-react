@@ -14,6 +14,7 @@ import {useSEO} from '../hooks/useSEO'
 import PortableTextLite from '../components/PortableTextLite'
 
 import {useCardTransition} from '../context/CardTransitionContext'
+import type {Designer, Product, R2ImageMetadata} from '../types'
 
 export function DesignerDetailPage() {
   const {designerId: liveId} = useParams<{designerId: string}>()
@@ -29,8 +30,8 @@ export function DesignerDetailPage() {
   const {data: productsData = []} = useProductsByDesigner(designerData?.id)
 
   // Veri dondurma: Geçiş anında veri kaybolmasını önler
-  const [frozenDesigner, setFrozenDesigner] = useState<any>(null)
-  const [frozenProducts, setFrozenProducts] = useState<any[]>([])
+  const [frozenDesigner, setFrozenDesigner] = useState<Designer | null>(null)
+  const [frozenProducts, setFrozenProducts] = useState<Product[]>([])
 
   useEffect(() => {
     if (designerData) setFrozenDesigner(designerData)
@@ -182,9 +183,9 @@ export function DesignerDetailPage() {
                 className={`w-full h-full object-cover portrait-frame filter grayscale transition-all duration-700 group-hover:grayscale-0 ${imageBorderClass} ${phase === 'animating' ? 'opacity-0' : 'opacity-100'}`}
                 loading="eager"
                 quality={90}
-                crop={typeof designer.image === 'object' ? (designer.image as any).crop : undefined}
+                crop={typeof designer.image === 'object' ? (designer.image as {crop?: R2ImageMetadata['crop']}).crop : undefined}
                 hotspot={
-                  typeof designer.image === 'object' ? (designer.image as any).hotspot : undefined
+                  typeof designer.image === 'object' ? (designer.image as {hotspot?: R2ImageMetadata['hotspot']}).hotspot : undefined
                 }
               />
             </div>
