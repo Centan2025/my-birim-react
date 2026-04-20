@@ -127,22 +127,26 @@ export const getContactPageContent = async (): Promise<ContactPageContent> => {
     const q = groq`*[_type == "contactPage"][0]{ ..., locations[]{ ..., media[]{ type, url, imageR2, videoFileR2 } } }`
     const data = await sanity.fetch(q)
     if (data?.locations) {
-      data.locations = data.locations.map((loc: any) => {
-        if (loc.media && Array.isArray(loc.media)) {
-          const processedMedia = loc.media
-            .map((mediaItem: any) => {
-              let mediaUrl = mediaItem.url
-              if (mediaItem.type === 'image') {
-                mediaUrl = mapImage(mediaItem.imageR2) || mediaItem.url
-              } else if (mediaItem.type === 'video') {
-                mediaUrl =
-                  (mediaItem.videoFileR2?.url ? rewriteR2Url(mediaItem.videoFileR2.url) : null) ||
-                  mediaItem.url
+      data.locations = data.locations.map((loc: Record<string, unknown>) => {
+        const media = loc['media']
+        if (media && Array.isArray(media)) {
+          const processedMedia = (media as Record<string, unknown>[])
+            .map((mediaItem: Record<string, unknown>) => {
+              let mediaUrl = mediaItem['url'] as string | undefined
+              const type = mediaItem['type'] as string | undefined
+              const imageR2 = mediaItem['imageR2']
+              const videoFileR2 = mediaItem['videoFileR2'] as Record<string, unknown> | undefined
+
+              if (type === 'image') {
+                mediaUrl = mapImage(imageR2 as never) || mediaUrl
+              } else if (type === 'video') {
+                const videoUrl = videoFileR2?.['url'] as string | undefined
+                mediaUrl = (videoUrl ? rewriteR2Url(videoUrl) : null) || mediaUrl
               }
-              const metadata = mediaItem.imageR2 ? mapR2Metadata(mediaItem.imageR2) : {}
+              const metadata = imageR2 ? mapR2Metadata(imageR2) : {}
               return {...mediaItem, url: mediaUrl, ...metadata}
             })
-            .filter((m: any) => m.url)
+            .filter((m): m is Record<string, unknown> => typeof m['url'] === 'string')
           return {...loc, media: processedMedia}
         }
         return loc
@@ -165,58 +169,70 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
       const data = await sanity.withConfig({useCdn: false}).fetch(q)
       if (data?.heroMedia) {
         data.heroMedia = data.heroMedia
-          .map((m: any) => {
+          .map((m: Record<string, unknown>) => {
             const url = mapMediaUrl(m)
             const urlMobile = mapMediaUrl(m, true, false)
             const urlDesktop = mapMediaUrl(m, false, true)
-            const palette = extractPalette(m.imageR2)
-            let type = m.type
+            const imageR2 = m['imageR2']
+            const palette = extractPalette(imageR2)
+            let type = m['type'] as string | undefined
             if (
               type === 'video' &&
               url &&
               (url.includes('youtube.com') || url.includes('youtu.be'))
             )
               type = 'youtube'
-            const result: any = {...m, url, type}
-            if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
-            if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
-            if (palette) result.palette = palette
-            const heroMeta = m.imageR2 ? mapR2Metadata(m.imageR2) : {}
-            if (heroMeta.crop) result.crop = heroMeta.crop
-            if (heroMeta.hotspot) result.hotspot = heroMeta.hotspot
+            const result: Record<string, unknown> = {...m, url, type}
+            if (urlMobile && urlMobile !== url) result['urlMobile'] = urlMobile
+            if (urlDesktop && urlDesktop !== url) result['urlDesktop'] = urlDesktop
+            if (palette) result['palette'] = palette
+            const heroMeta = imageR2 ? mapR2Metadata(imageR2) : {}
+            if (heroMeta.crop) result['crop'] = heroMeta.crop
+            if (heroMeta.hotspot) result['hotspot'] = heroMeta.hotspot
             return result
           })
-          .filter((m: any) => m.url && m.url.trim() !== '')
+          .filter((m: Record<string, unknown>): m is Record<string, unknown> => 
+            typeof m['url'] === 'string' && m['url'].trim() !== ''
+          )
       }
       if (data?.contentBlocks) {
-        data.contentBlocks = data.contentBlocks.map((b: any) => {
+        data.contentBlocks = data.contentBlocks.map((b: Record<string, unknown>) => {
           let image = undefined
           let imageMobile = undefined
           let imageDesktop = undefined
-          let url = b.url
+          let url = b['url'] as string | undefined
           let urlMobile = undefined
           let urlDesktop = undefined
 
-          if (b.mediaType === 'image' || !b.mediaType) {
-            image = mapImage(b.imageR2)
-            imageMobile = mapImage(b.imageMobileR2)
-            imageDesktop = mapImage(b.imageDesktopR2)
-          } else if (b.mediaType === 'video') {
-            url = b.videoFileR2?.url ? rewriteR2Url(b.videoFileR2.url) : b.url
-            urlMobile = b.videoFileMobileR2?.url ? rewriteR2Url(b.videoFileMobileR2.url) : undefined
-            urlDesktop = b.videoFileDesktopR2?.url
-              ? rewriteR2Url(b.videoFileDesktopR2.url)
+          const mediaType = b['mediaType'] as string | undefined
+          const imageR2 = b['imageR2']
+          const imageMobileR2 = b['imageMobileR2']
+          const imageDesktopR2 = b['imageDesktopR2']
+
+          if (mediaType === 'image' || !mediaType) {
+            image = mapImage(imageR2 as never)
+            imageMobile = mapImage(imageMobileR2 as never)
+            imageDesktop = mapImage(imageDesktopR2 as never)
+          } else if (mediaType === 'video') {
+            const videoFileR2 = b['videoFileR2'] as Record<string, unknown> | undefined
+            const videoFileMobileR2 = b['videoFileMobileR2'] as Record<string, unknown> | undefined
+            const videoFileDesktopR2 = b['videoFileDesktopR2'] as Record<string, unknown> | undefined
+            
+            url = (videoFileR2?.['url'] as string | undefined) ? rewriteR2Url(videoFileR2['url'] as string) : url
+            urlMobile = (videoFileMobileR2?.['url'] as string | undefined) ? rewriteR2Url(videoFileMobileR2['url'] as string) : undefined
+            urlDesktop = (videoFileDesktopR2?.['url'] as string | undefined)
+              ? rewriteR2Url(videoFileDesktopR2['url'] as string)
               : undefined
-          } else if (b.mediaType === 'youtube') {
-            url = b.url
-          } else if (b.mediaType === 'panels') {
-            // imagePanels dizisini tip ve URL içeren bir yapıya dönüştür
-            if (Array.isArray(b.imagePanels)) {
-              b.imagePanels = b.imagePanels
-                .map((p: any) => {
-                  const url = mapImage(p)
+          } else if (mediaType === 'youtube') {
+            url = b['url'] as string | undefined
+          } else if (mediaType === 'panels') {
+            const imagePanels = b['imagePanels']
+            if (Array.isArray(imagePanels)) {
+              b['imagePanels'] = (imagePanels as Record<string, unknown>[])
+                .map((p: Record<string, unknown>) => {
+                  const url = mapImage(p as never)
                   if (!url) return null
-                  const mime = p.mimeType || ''
+                  const mime = (p['mimeType'] as string) || ''
                   const type =
                     mime.startsWith('video/') ||
                     url.toLowerCase().match(/\.(mp4|webm|mov|avi|mkv)$/)
@@ -228,8 +244,8 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             }
           }
 
-          const meta = b.imageR2 ? mapR2Metadata(b.imageR2) : {}
-          const borderColor = b.borderColor?.hex
+          const meta = imageR2 ? mapR2Metadata(imageR2) : {}
+          const borderColor = (b['borderColor'] as Record<string, unknown>)?.['hex']
 
           return {
             ...b,
@@ -239,8 +255,8 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             url,
             urlMobile,
             urlDesktop,
-            imagePanels: b.imagePanels,
-            panelSize: b.panelSize,
+            imagePanels: b['imagePanels'],
+            panelSize: b['panelSize'],
             crop: meta.crop,
             hotspot: meta.hotspot,
             origWidth: meta.origWidth,
