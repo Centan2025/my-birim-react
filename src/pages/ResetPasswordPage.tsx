@@ -31,8 +31,8 @@ export function ResetPasswordPage() {
     try {
       await requestPasswordReset(email)
       setSuccess(t('reset_link_sent'))
-    } catch (err: any) {
-      setError(err.message || t('generic_error'))
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t('generic_error'))
     } finally {
       setIsLoading(false)
     }
@@ -60,8 +60,8 @@ export function ResetPasswordPage() {
       await resetPassword(token, password)
       setSuccess(t('password_updated'))
       setTimeout(() => navigate('/login'), 2000)
-    } catch (err: any) {
-      setError(err.message || t('generic_error'))
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t('generic_error'))
     } finally {
       setIsLoading(false)
     }

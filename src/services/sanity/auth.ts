@@ -7,7 +7,7 @@ const KEYS = { USERS: 'birim_users' }
 
 const normalizeEmail = (value: string): string => (value || '').trim().toLowerCase()
 
-const apiFetch = async (endpoint: string, body: any) => {
+const apiFetch = async (endpoint: string, body: Record<string, unknown>) => {
   const response = await fetch(`/api/auth/${endpoint}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

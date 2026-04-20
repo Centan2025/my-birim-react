@@ -636,7 +636,16 @@ export interface Project {
   title: LocalizedString
   cover:
     | string
-    | {url: string; urlMobile?: string; urlDesktop?: string; palette?: SanityImagePalette}
+    | {
+        url: string
+        urlMobile?: string
+        urlDesktop?: string
+        palette?: SanityImagePalette
+        crop?: R2ImageMetadata['crop']
+        hotspot?: R2ImageMetadata['hotspot']
+        origWidth?: number
+        origHeight?: number
+      }
   date?: LocalizedString
   projectCategory?: LocalizedString
   excerpt?: LocalizedString

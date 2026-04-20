@@ -16,7 +16,7 @@ vi.mock('./client', () => ({
   },
 }))
 
-import {sanity, sanityMutations} from './client'
+import {sanity} from './client'
 import {loginUser, registerUser, getUserByEmail} from './auth'
 
 describe('sanity auth service', () => {

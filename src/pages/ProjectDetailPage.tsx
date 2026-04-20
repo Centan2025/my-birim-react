@@ -334,7 +334,7 @@ export function ProjectDetailPage() {
       seen.add(u)
       return true
     })
-  }, [project, coverUrl, coverMobile, coverDesktop, coverCrop, coverHotspot])
+  }, [project, coverUrl, coverMobile, coverDesktop, coverCrop, coverHotspot, t])
 
   // SEO meta bilgileri
   const projectTitle = project ? t(project.title) : ''

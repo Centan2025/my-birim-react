@@ -37,8 +37,8 @@ const ProjectCard: React.FC<{ project: Project; index: number }> = ({ project, i
             height={800}
             loading="lazy"
             quality={90}
-            crop={typeof project.cover === 'object' ? (project.cover as any).crop : undefined}
-            hotspot={typeof project.cover === 'object' ? (project.cover as any).hotspot : undefined}
+            crop={typeof project.cover === 'object' ? project.cover.crop : undefined}
+            hotspot={typeof project.cover === 'object' ? project.cover.hotspot : undefined}
           />
         )}
 

@@ -1,6 +1,6 @@
 import groq from 'groq'
 import type { Category, Designer } from '../../types'
-import { sanity, useSanity, mapImage, mapR2Metadata } from './client'
+import { sanity, useSanity, mapImage, mapR2Metadata, type SanityImageLike } from './client'
 import { getItem } from './settings'
 
 const SIMULATED_DELAY = 200
@@ -9,6 +9,26 @@ const delay = (ms: number) => new Promise(res => setTimeout(res, ms))
 const KEYS = {
   CATEGORIES: 'birim_categories',
   DESIGNERS: 'birim_designers',
+}
+interface SanityCategoryRow {
+  id: string
+  name: LocalizedString
+  subtitle: LocalizedString
+  heroImage: SanityImageLike
+  heroImageR2: any
+  menuImage: SanityImageLike
+  menuImageR2: any
+}
+
+interface SanityDesignerRow {
+  id: string
+  name: LocalizedString
+  role: LocalizedString
+  bio: LocalizedString
+  image: SanityImageLike
+  imageR2: any
+  imageMobileR2: any
+  imageDesktopR2: any
 }
 
 export const getCategories = async (): Promise<Category[]> => {
@@ -23,7 +43,7 @@ export const getCategories = async (): Promise<Category[]> => {
       menuImageR2
     }`
     const rows = await sanity.fetch(query)
-    return rows.map((r: any) => ({
+    return rows.map((r: SanityCategoryRow) => ({
       id: r.id,
       name: r.name,
       subtitle: r.subtitle,
@@ -48,7 +68,7 @@ export const getDesigners = async (): Promise<Designer[]> => {
           imageDesktopR2
         }`
     const rows = await sanity.fetch(query)
-    return rows.map((r: any) => {
+    return rows.map((r: SanityDesignerRow) => {
       const imageFinal = mapImage(r.imageR2) || mapImage(r.image)
       const imageMobile = r.imageMobileR2?.url ? mapImage(r.imageMobileR2) : undefined
       const imageDesktop = r.imageDesktopR2?.url ? mapImage(r.imageDesktopR2) : undefined
@@ -116,7 +136,7 @@ export const getDesignersByIds = async (ids: string[]): Promise<Designer[]> => {
           imageDesktopR2
         }`
     const rows = await sanity.fetch(query, { ids })
-    return rows.map((r: any) => {
+    return rows.map((r: SanityDesignerRow) => {
       const imageFinal = mapImage(r.imageR2) || mapImage(r.image)
       const imageMobile = r.imageMobileR2?.url ? mapImage(r.imageMobileR2) : undefined
       const imageDesktop = r.imageDesktopR2?.url ? mapImage(r.imageDesktopR2) : undefined
