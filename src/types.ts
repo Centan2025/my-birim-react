@@ -5,11 +5,11 @@
  */
 export type LocalizedString =
   | string
-  | any[]
+  | unknown[]
   | {
-      [key: string]: string | any[] | undefined
-      en?: string | any[]
-      tr?: string | any[]
+      [key: string]: string | unknown[] | undefined
+      en?: string | unknown[]
+      tr?: string | unknown[]
     }
 
 // Sanity palette metadata (dominant renk bilgisi)
@@ -80,9 +80,25 @@ export interface Category {
   /** Localized subtitle or short description for the category page. */
   subtitle: LocalizedString
   /** URL for the hero image displayed on the category page. */
-  heroImage: string | {url: string; urlMobile?: string; urlDesktop?: string}
+  heroImage:
+    | string
+    | {
+        url: string
+        urlMobile?: string
+        urlDesktop?: string
+        crop?: R2ImageMetadata['crop']
+        hotspot?: R2ImageMetadata['hotspot']
+      }
   /** URL for the menu image displayed in the products dropdown menu. */
-  menuImage?: string | {url: string; urlMobile?: string; urlDesktop?: string}
+  menuImage?:
+    | string
+    | {
+        url: string
+        urlMobile?: string
+        urlDesktop?: string
+        crop?: R2ImageMetadata['crop']
+        hotspot?: R2ImageMetadata['hotspot']
+      }
 }
 
 /**
@@ -98,7 +114,15 @@ export interface Designer {
   /** Localized biography of the designer. */
   bio: LocalizedString
   /** URL for the designer's portrait or representative image. */
-  image: string | {url: string; urlMobile?: string; urlDesktop?: string}
+  image:
+    | string
+    | {
+        url: string
+        urlMobile?: string
+        urlDesktop?: string
+        crop?: R2ImageMetadata['crop']
+        hotspot?: R2ImageMetadata['hotspot']
+      }
   /** Art Direction: Mobil için görsel URL (opsiyonel) */
   imageMobile?: string
   /** Art Direction: Desktop için görsel URL (opsiyonel) */

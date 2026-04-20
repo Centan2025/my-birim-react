@@ -3,7 +3,11 @@ import {renderHook, act, waitFor} from '@testing-library/react'
 import {useHeaderSearch} from '../hooks/useHeaderSearch'
 
 // Stable mock functions
-const mockT = vi.fn((val: any) => (typeof val === 'string' ? val : val?.tr || val?.en || ''))
+const mockT = vi.fn((val: unknown) => {
+  if (typeof val === 'string') return val;
+  const v = val as Record<string, string>;
+  return v?.tr || v?.en || '';
+});
 
 vi.mock('../i18n', () => ({
   useTranslation: () => ({

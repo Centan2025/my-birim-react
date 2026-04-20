@@ -26,12 +26,12 @@ const suppress = () => {
             const BLOCK_SUB_2 = 'The operation is insecure'; // Safari alternative
 
             const wrapMethod = (methodName: keyof Storage) => {
-                const original = StorageProto[methodName] as Function;
+                const original = StorageProto[methodName] as (...args: unknown[]) => unknown;
                 if (typeof original !== 'function') return;
 
                 StorageProto[methodName] = function (this: Storage, ...args: unknown[]) {
                     try {
-                        return original.apply(this, args);
+                        return original.call(this, ...args);
                     } catch (err) {
                         const msg = err instanceof Error ? err.message : String(err);
                         if (msg.includes(BLOCK_SUB_1) || msg.includes(BLOCK_SUB_2)) {
@@ -40,7 +40,7 @@ const suppress = () => {
                         }
                         throw err;
                     }
-                } as any;
+                } as unknown as Storage[typeof methodName];
             };
 
             ['getItem', 'setItem', 'removeItem', 'clear', 'key'].forEach(m => wrapMethod(m as keyof Storage));

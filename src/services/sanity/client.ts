@@ -59,147 +59,159 @@ export interface SanityProductMediaItem {
 export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boolean): string => {
   if (!url || typeof url !== 'string') return url || ''
   
-  // URL'deki segmentleri ayır, trim et ve gizli boşlukları temizle
-  const trimSegments = (u: string) => {
-    try {
-      const parts = u.split('/')
-      return parts.map((p, i) => {
-        if (i < 3 && p.includes(':')) return p
-        if (!p) return ''
-        // Segment bazlı encode işlemi (boşluklar, parantezler vb. için daha güvenli)
-        try {
-          // Segment bazlı encode işlemi (boşluklar, parantezler vb. için daha güvenli)
-          // encodeURIComponent parantezleri ( ) encode etmez, ancak bazı R2/S3 gateway'lerde sorun olabiliyor
-          return encodeURIComponent(decodeURIComponent(p.trim()))
-            .replace(/%2F/g, '/') // Kazara slash encode edilirse geri al
-            .replace(/%3A/g, ':') // Kazara iki nokta encode edilirse geri al
-            .replace(/\(/g, '%28')
-            .replace(/\)/g, '%29')
-        } catch {
-          return p.trim()
-        }
-      }).join('/')
-    } catch {
-      return u.trim()
-    }
-  }
+  // 1. Split query params to prevent double encoding of '?' and '='
+  const [baseUrl, searchParams] = url.split('?')
+  let result = baseUrl
 
-  let result = trimSegments(url)
-
-  // 1. Domain Rewrite (Hepsini tek bir domain'e topla)
+  // 2. Domain Rewrite (Hepsini tek bir domain'e topla)
+  // Regex pointer issue riskini azaltmak için string replace kullanıyoruz
   const legacyDomains = [
-    /https?:\/\/assets\.birim\.com/g,
-    /https?:\/\/birim-assets\.web-birim\.workers\.dev/g,
-    /https?:\/\/pub-5e705b2a702d4bb1a3631c558917599d\.r2\.dev/g
+    'assets.birim.com',
+    'birim-assets.web-birim.workers.dev',
+    'pub-5e705b2a702d4bb1a3631c558917599d.r2.dev'
   ]
 
   if (R2_DOMAIN) {
-    for (const pattern of legacyDomains) {
-      if (pattern.test(result)) {
-        result = result.replace(pattern, R2_DOMAIN)
+    const r2DomainNoProtocol = R2_DOMAIN.replace(/^https?:\/\//, '')
+    for (const domain of legacyDomains) {
+      if (result.includes(domain)) {
+        result = result.replace(domain, r2DomainNoProtocol)
       }
     }
-
-    // 2. Generic R2.dev rewrite (subdomain'den bağımsız)
-    if (!R2_DOMAIN.includes('.r2.dev') && result.includes('.r2.dev') && !result.includes(R2_DOMAIN)) {
+    
+    // Generic R2.dev rewrite
+    if (!R2_DOMAIN.includes('.r2.dev') && result.includes('.r2.dev') && !result.includes(r2DomainNoProtocol)) {
       try {
-        const parsedUrl = new URL(result)
-        const pathPart = parsedUrl.pathname.startsWith('/')
-          ? parsedUrl.pathname.substring(1)
-          : parsedUrl.pathname
-        result = `${R2_DOMAIN}/${pathPart}`
+        const parts = result.split('/')
+        // Find the segment containing r2.dev (usually the domain part)
+        for (let i = 0; i < parts.length; i++) {
+          if (parts[i].includes('.r2.dev')) {
+            parts[i] = r2DomainNoProtocol
+            break
+          }
+        }
+        result = parts.join('/')
       } catch { /* ignore */ }
     }
 
-    // 3. Relatif yolları mutlak yap
+    // New: Relatif yolları mutlak yap
     if (!result.startsWith('http') && result.length > 0) {
       const cleanPath = result.startsWith('/') ? result.substring(1) : result
       result = `${R2_DOMAIN}/${cleanPath}`
     }
   }
 
-  // 4. Final step: Space encoding
+  // 3. Segment bazlı temizlik ve encode
   try {
-    result = encodeURI(decodeURI(result)).replace(/ /g, '%20')
-  } catch {
-    result = result.replace(/ /g, '%20')
+    const parts = result.split('/')
+    result = parts.map((p, i) => {
+      if (i < 3 && p.includes(':')) return p // protocol
+      if (!p) return ''
+      try {
+        return encodeURIComponent(decodeURIComponent(p.trim()))
+          .replace(/%2F/g, '/')
+          .replace(/%3A/g, ':')
+          .replace(/\(/g, '%28')
+          .replace(/\)/g, '%29')
+      } catch {
+        return p.trim()
+      }
+    }).join('/')
+  } catch { /* ignore */ }
+
+  // 4. Params ekle
+  let finalUrl = result
+  const params = new URLSearchParams(searchParams || '')
+  
+  if (hasResponsiveSizes && !params.has('rs')) {
+    params.set('rs', '1')
   }
 
-  if (hasResponsiveSizes && !result.includes('rs=1')) {
-    result += result.includes('?') ? '&rs=1' : '?rs=1'
+  const queryString = params.toString()
+  if (queryString) {
+    finalUrl += '?' + queryString
   }
 
   // 5. Legacy Path Corrections (Hardening)
-  // newsItem/ID/media/filename -> news/ID/filename
-  if (result && result.includes('/newsItem/')) {
-    result = result.replace(/\/newsItem\//g, '/news/')
-    if (result.includes('/media/')) {
-      result = result.replace(/\/media\//g, '/')
+  if (finalUrl.includes('/newsItem/')) {
+    finalUrl = finalUrl.replace(/\/newsItem\//g, '/news/')
+    if (finalUrl.includes('/media/')) {
+      finalUrl = finalUrl.replace(/\/media\//g, '/')
     }
   }
 
-  return result
+  return finalUrl
 }
 
 export const mapImage = (
   img: SanityImageLike | undefined
 ): string => {
   if (!img) return ''
-  if (typeof img === 'string') {
-    return rewriteR2Url(img)
-  }
+  if (typeof img === 'string') return rewriteR2Url(img)
 
-  const rawUrl = (img as Record<string, Record<string, string>>)?.['r2Asset']?.['url'] || (img as Record<string, string>)?.['url']
-  const hasResponsiveSizes = Boolean(
-    (img as Record<string, Record<string, boolean>>)?.['r2Asset']?.['hasResponsiveSizes'] || (img as Record<string, boolean>)?.['hasResponsiveSizes']
-  )
+  try {
+    const i = img as Record<string, unknown>
+    const r2Url = i.r2Asset?.url
+    const standardUrl = i.url
+    const assetUrl = i.asset?.url || (typeof i.asset === 'string' ? i.asset : undefined)
+    
+    const rawUrl = r2Url || standardUrl || assetUrl
+    const hasResponsiveSizes = Boolean(i.r2Asset?.hasResponsiveSizes || i.hasResponsiveSizes)
 
-  if (rawUrl) {
-    if (
-      typeof rawUrl === 'string' &&
-      (rawUrl.includes('r2.dev') || rawUrl.startsWith('http') || rawUrl.startsWith('/') || rawUrl.startsWith('uploads/'))
-    ) {
+    if (rawUrl) {
       return rewriteR2Url(rawUrl, hasResponsiveSizes)
     }
+  } catch (err) {
+    console.error('Error in mapImage:', err)
   }
 
-  return rewriteR2Url((img as Record<string, string>)?.['url'], hasResponsiveSizes) || ''
+  return ''
 }
 
 export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
   if (!img || typeof img !== 'object') return {}
-  const i = img as Record<string, unknown>
+  
+  try {
+    const i = img as Record<string, unknown>
 
-  let crop =
-    i['cropX'] !== undefined && i['cropWidth'] !== undefined
-      ? { x: i['cropX'] as number, y: (i['cropY'] as number) || 0, width: i['cropWidth'] as number, height: (i['cropHeight'] as number) || 1 }
-      : undefined
-
-  if (!crop && i['crop'] && typeof i['crop'] === 'object' && !('asset' in i)) {
-    const c = i['crop'] as Record<string, number>
-    const { left = 0, top = 0, right = 0, bottom = 0 } = c
-    crop = {
-      x: left,
-      y: top,
-      width: 1 - left - right,
-      height: 1 - top - bottom
+    let crop: R2ImageMetadata['crop'] = undefined
+    if (i.cropX !== undefined && i.cropWidth !== undefined) {
+      crop = { 
+        x: Number(i.cropX) || 0, 
+        y: Number(i.cropY) || 0, 
+        width: Number(i.cropWidth) || 1, 
+        height: Number(i.cropHeight) || 1 
+      }
+    } else if (i.crop && typeof i.crop === 'object' && i.crop !== null) {
+      const c = i.crop
+      const left = Number(c.left) || 0
+      const top = Number(c.top) || 0
+      const right = Number(c.right) || 0
+      const bottom = Number(c.bottom) || 0
+      crop = {
+        x: left,
+        y: top,
+        width: Math.max(0, 1 - left - right),
+        height: Math.max(0, 1 - top - bottom)
+      }
     }
+
+    let hotspot: R2ImageMetadata['hotspot'] = undefined
+    if (i.hotspotX !== undefined && i.hotspotY !== undefined) {
+      hotspot = { x: Number(i.hotspotX) || 0.5, y: Number(i.hotspotY) || 0.5 }
+    } else if (i.hotspot && typeof i.hotspot === 'object' && i.hotspot !== null) {
+      const h = i.hotspot
+      hotspot = { x: Number(h.x) || 0.5, y: Number(h.y) || 0.5 }
+    }
+
+    const origWidth = Number(i.width) || undefined
+    const origHeight = Number(i.height) || undefined
+
+    return { crop, hotspot, origWidth, origHeight }
+  } catch (err) {
+    console.error('Error in mapR2Metadata:', err)
+    return {}
   }
-
-  let hotspot =
-    i['hotspotX'] !== undefined && i['hotspotY'] !== undefined
-      ? { x: i['hotspotX'] as number, y: i['hotspotY'] as number }
-      : undefined
-
-  if (!hotspot && i['hotspot'] && typeof i['hotspot'] === 'object') {
-    const h = i['hotspot'] as Record<string, number>
-    hotspot = { x: h['x'] ?? 0, y: h['y'] ?? 0 }
-  }
-
-  const origWidth = i['width'] as number
-  const origHeight = i['height'] as number
-
-  return { crop, hotspot, origWidth, origHeight }
 }
 
 export const mapImages = (imgs: SanityImageLike[] | undefined): string[] =>
@@ -208,8 +220,14 @@ export const mapImages = (imgs: SanityImageLike[] | undefined): string[] =>
 export const extractPalette = (
   img: unknown
 ): SanityImagePalette | undefined => {
-  // R2 assets no longer carry Sanity palette metadata directly unless manually synced
-  return (img as Record<string, SanityImagePalette>)?.['palette'] || undefined
+  if (!img || typeof img !== 'object') return undefined
+  const i = img as Record<string, unknown>
+  
+  if (i['palette']) return i['palette'] as SanityImagePalette
+  
+  const asset = i['asset'] as Record<string, unknown> | undefined
+  const metadata = asset?.['metadata'] as Record<string, unknown> | undefined
+  return metadata?.['palette'] as SanityImagePalette | undefined
 }
 
 export const mapMediaUrl = (

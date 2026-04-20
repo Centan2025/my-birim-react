@@ -14,6 +14,7 @@ import {
   useProductsByCategory,
   useProductsByDesigner,
 } from '../hooks/useProducts'
+import { Product } from '../types'
 
 // ----- Service mock'ları -----
 vi.mock('@/services/cms', () => ({
@@ -31,12 +32,13 @@ import {
 } from '@/services/cms'
 
 // Örnek ürün fixture'u
-const mockProduct = {
+const mockProduct: Product = {
   id: 'chair-1',
   name: {tr: 'Kanatlar', en: 'Wings'},
+  description: {tr: 'Açıklama', en: 'Description'},
   designerId: 'designer-1',
   categoryId: 'category-1',
-  year: '2023',
+  year: 2023,
   isPublished: true,
   mainImage: {url: '/img/chair.jpg'},
   alternativeMedia: [],
@@ -45,6 +47,8 @@ const mockProduct = {
   groupedMaterials: [],
   dimensionImages: [],
   buyable: false,
+  price: 0,
+  currency: 'TRY',
   showMediaPanels: false,
   exclusiveContent: {images: [], drawings: [], models3d: []},
 }
@@ -67,7 +71,7 @@ describe('useProducts', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('başarıyla ürün listesi döndürür', async () => {
-    vi.mocked(getProducts).mockResolvedValueOnce([mockProduct] as any)
+    vi.mocked(getProducts).mockResolvedValueOnce([mockProduct])
 
     const {result} = renderHook(() => useProducts(), {wrapper: makeWrapper()})
 
@@ -98,7 +102,7 @@ describe('useProduct', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('ürün ID verildiğinde doğru ürünü getirir', async () => {
-    vi.mocked(getProductById).mockResolvedValueOnce(mockProduct as any)
+    vi.mocked(getProductById).mockResolvedValueOnce(mockProduct)
 
     const {result} = renderHook(() => useProduct('chair-1'), {wrapper: makeWrapper()})
 
@@ -109,7 +113,7 @@ describe('useProduct', () => {
   })
 
   it('ürün bulunamazsa 404 error fırlatır', async () => {
-    vi.mocked(getProductById).mockResolvedValueOnce(undefined as any)
+    vi.mocked(getProductById).mockResolvedValueOnce(undefined)
 
     const {result} = renderHook(() => useProduct('not-found'), {wrapper: makeWrapper()})
 
@@ -131,7 +135,7 @@ describe('useProductsByCategory', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('categoryId ile filtrelenmiş ürünleri döndürür', async () => {
-    vi.mocked(getProductsByCategoryId).mockResolvedValueOnce([mockProduct] as any)
+    vi.mocked(getProductsByCategoryId).mockResolvedValueOnce([mockProduct])
 
     const {result} = renderHook(() => useProductsByCategory('category-1'), {
       wrapper: makeWrapper(),
@@ -155,7 +159,7 @@ describe('useProductsByDesigner', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('designerId ile filtrelenmiş ürünleri döndürür', async () => {
-    vi.mocked(getProductsByDesignerId).mockResolvedValueOnce([mockProduct] as any)
+    vi.mocked(getProductsByDesignerId).mockResolvedValueOnce([mockProduct])
 
     const {result} = renderHook(() => useProductsByDesigner('designer-1'), {
       wrapper: makeWrapper(),

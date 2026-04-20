@@ -13,7 +13,7 @@ import {HelmetProvider} from 'react-helmet-async'
 vi.mock('@/services/cms')
 vi.mock('@/lib/rateLimiter')
 
-import {AuthContext} from '../App'
+import {AuthContext} from '../context/AuthContext'
 
 // Mock useAuth with a factory function
 const mockAuthValue = {

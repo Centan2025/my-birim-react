@@ -416,7 +416,7 @@ export function ContactPage() {
     return (
       <>
         <div className="relative select-none">
-          {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/no-noninteractive-element-interactions */}
+          {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
           <div
             ref={thumbRef}
             className="overflow-x-auto scrollbar-hide cursor-grab active:cursor-grabbing w-full max-w-full focus:outline-none"

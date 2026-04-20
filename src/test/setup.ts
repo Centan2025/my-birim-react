@@ -23,7 +23,7 @@ Object.defineProperty(window, 'matchMedia', {
 })
 
 // Mock IntersectionObserver (jsdom ortamında globalThis üzerinden tanımlıyoruz)
-;(globalThis as any).IntersectionObserver = class IntersectionObserver {
+;(globalThis as unknown as Record<string, unknown>)['IntersectionObserver'] = class IntersectionObserver {
   constructor() {}
   disconnect() {}
   observe() {}
@@ -31,4 +31,4 @@ Object.defineProperty(window, 'matchMedia', {
     return []
   }
   unobserve() {}
-} as any
+} as unknown as typeof IntersectionObserver

@@ -16,7 +16,8 @@ const baseParams = {
   isMobileMenuOpen: false,
   isOverlayMobileMenu: false,
   isMobileMenuClosing: false,
-  heroBrightness: null as number | null,
+  isSearchOpen: false,
+  isDarkMode: false,
 }
 
 describe('useHeaderBackgroundColor', () => {
@@ -30,51 +31,30 @@ describe('useHeaderBackgroundColor', () => {
     const {result} = renderHook(() => useHeaderBackgroundColor({...baseParams, headerOpacity: 0}), {
       wrapper: wrapper('/product/sandalye-1'),
     })
-    expect(result.current).toBe('rgba(0, 0, 0, 0.7)')
+    expect(result.current).toBe('rgba(255, 255, 255, 0.6)')
   })
 
-  it('products dropdown açıkken 0.85 opacity döndürmeli', () => {
+  it('products dropdown açıkken 0.95 opacity döndürmeli (açık renk sayfa)', () => {
     const {result} = renderHook(
       () => useHeaderBackgroundColor({...baseParams, isProductsOpen: true}),
-      {wrapper: wrapper('/categories')}
+      {wrapper: wrapper('/contact')}
     )
-    expect(result.current).toBe('rgba(0, 0, 0, 0.85)')
+    expect(result.current).toBe('rgba(255, 255, 255, 0.95)')
   })
 
-  it('heroBrightness 0.5 ile 0.6 arası ise 0.75 opacity döndürmeli (mobil, scrolled)', () => {
-    // Mobilde scroll konumu dark hero istisnası dışında önemli değil ama heroBrightness varsa devrededir.
-    // window.scrollY > 0 ise ve heroBrightness varsa renk dönmeli.
-    Object.defineProperty(window, 'scrollY', {value: 20, configurable: true})
+  it('dark mode açıkken dark arka plan döndürmeli', () => {
     const {result} = renderHook(
-      () => useHeaderBackgroundColor({...baseParams, isMobile: true, heroBrightness: 0.6}),
-      {wrapper: wrapper('/')}
+      () => useHeaderBackgroundColor({...baseParams, isDarkMode: true}),
+      {wrapper: wrapper('/contact')}
     )
-    expect(result.current).toBe('rgba(0, 0, 0, 0.75)')
+    expect(result.current).toBe('rgba(10, 10, 10, 0.6)')
   })
 
-  it('heroBrightness 0.5 ile 0.6 arası ise 0.75 opacity döndürmeli (masaüstü, az scroll, not dark hero path)', () => {
-    // Masaüstünde brightness mantığı scroll <= 10 ve dark hero olmayan sayfalarda çalışır
-    Object.defineProperty(window, 'scrollY', {value: 5, configurable: true})
-    const {result} = renderHook(
-      () => useHeaderBackgroundColor({...baseParams, isMobile: false, heroBrightness: 0.6}),
-      {wrapper: wrapper('/products')}
-    )
-    expect(result.current).toBe('rgba(0, 0, 0, 0.75)')
-  })
-
-  it('dark olmayan sayfada scroll yoksa main element arka planına göre renk dönmeli (beyaz bg)', () => {
-    document.body.innerHTML = '<main style="background-color: rgb(255, 255, 255)"></main>'
-    Object.defineProperty(window, 'scrollY', {value: 0, configurable: true})
-
-    // getComputedStyle mock
-    vi.spyOn(window, 'getComputedStyle').mockReturnValue({
-      backgroundColor: 'rgb(255, 255, 255)',
-    } as any)
-
+  it('dark olmayan sayfada scroll yoksa (veya azsa) minimum 0.6 opacity döndürmeli', () => {
     const {result} = renderHook(() => useHeaderBackgroundColor({...baseParams}), {
-      wrapper: wrapper('/products'),
+      wrapper: wrapper('/contact'),
     })
-    expect(result.current).toBe('rgba(0, 0, 0, 0.85)')
+    expect(result.current).toBe('rgba(255, 255, 255, 0.6)')
   })
 
   it('inline mobil menü açıkken opacity 0.75 ile sınırlandırılmalı', () => {
@@ -88,7 +68,7 @@ describe('useHeaderBackgroundColor', () => {
         }),
       {wrapper: wrapper('/products')}
     )
-    expect(result.current).toBe('rgba(0, 0, 0, 0.75)')
+    expect(result.current).toBe('rgba(16, 24, 32, 0.7)')
   })
 
   it('mobilde heroBrightness düşük ve headerOpacity düşükse transparent döner', () => {

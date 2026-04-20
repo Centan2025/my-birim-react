@@ -97,7 +97,7 @@ export const SEOProvider = ({children}: PropsWithChildren) => {
 
         {/* Structured Data (JSON-LD) */}
         {merged.schema && (
-          <script type="application/ld+json">
+          <script id={merged.type === 'article' ? 'news-article-schema' : 'seo-schema'} type="application/ld+json">
             {JSON.stringify(merged.schema)}
           </script>
         )}

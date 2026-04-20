@@ -6,6 +6,7 @@ import {renderHook, waitFor} from '@testing-library/react'
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 import React from 'react'
 import {useCategories, useCategory} from '../hooks/useCategories'
+import { Category } from '../types'
 
 vi.mock('@/services/cms', () => ({
   getCategories: vi.fn(),
@@ -13,9 +14,19 @@ vi.mock('@/services/cms', () => ({
 
 import {getCategories} from '@/services/cms'
 
-const mockCategories = [
-  {id: 'koltuk', name: {tr: 'Koltuklar', en: 'Armchairs'}},
-  {id: 'masa', name: {tr: 'Masalar', en: 'Tables'}},
+const mockCategories: Category[] = [
+  {
+    id: 'koltuk', 
+    name: {tr: 'Koltuklar', en: 'Armchairs'},
+    subtitle: {tr: 'Alt başlık', en: 'Subtitle'},
+    heroImage: '/img/koltuk.jpg'
+  },
+  {
+    id: 'masa', 
+    name: {tr: 'Masalar', en: 'Tables'},
+    subtitle: {tr: 'Alt başlık', en: 'Subtitle'},
+    heroImage: '/img/masa.jpg'
+  },
 ]
 
 function makeWrapper() {
@@ -31,7 +42,7 @@ describe('useCategories', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('tüm kategorileri başarıyla döndürür', async () => {
-    vi.mocked(getCategories).mockResolvedValueOnce(mockCategories as any)
+    vi.mocked(getCategories).mockResolvedValueOnce(mockCategories)
 
     const {result} = renderHook(() => useCategories(), {wrapper: makeWrapper()})
 
@@ -63,7 +74,7 @@ describe('useCategory', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('ID ile doğru kategoriyi bulur', async () => {
-    vi.mocked(getCategories).mockResolvedValueOnce(mockCategories as any)
+    vi.mocked(getCategories).mockResolvedValueOnce(mockCategories)
 
     const {result} = renderHook(() => useCategory('masa'), {wrapper: makeWrapper()})
 
@@ -74,7 +85,7 @@ describe('useCategory', () => {
   })
 
   it('olmayan ID için data=undefined döner', async () => {
-    vi.mocked(getCategories).mockResolvedValueOnce(mockCategories as any)
+    vi.mocked(getCategories).mockResolvedValueOnce(mockCategories)
 
     const {result} = renderHook(() => useCategory('olmayan'), {wrapper: makeWrapper()})
 
@@ -84,7 +95,7 @@ describe('useCategory', () => {
   })
 
   it('ID undefined verildiğinde data=undefined kalır', async () => {
-    vi.mocked(getCategories).mockResolvedValueOnce(mockCategories as any)
+    vi.mocked(getCategories).mockResolvedValueOnce(mockCategories)
 
     const {result} = renderHook(() => useCategory(undefined), {wrapper: makeWrapper()})
 

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {useState, useMemo, useEffect, useRef} from 'react'
 import {useParams} from 'react-router-dom'
 import {ProductCard} from '../components/ProductCard'
@@ -9,7 +8,7 @@ import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useProducts, useProductsByCategory} from '../hooks/useProducts'
 import {useCategory, useCategories} from '../hooks/useCategories'
 import {useSiteSettings} from '../hooks/useSiteData'
-import type {Product} from '../types'
+import type {Product, Category} from '../types'
 import ScrollReveal from '../components/ScrollReveal'
 import {useSEO} from '../hooks/useSEO'
 import {useHeaderTheme} from '../context/HeaderThemeContext'
@@ -202,8 +201,8 @@ export function ProductsPage() {
                 className={`w-full h-full object-cover ${imageBorderClass}`}
                 loading="eager"
                 quality={90}
-                crop={typeof heroImage === 'object' ? (heroImage as any).crop : undefined}
-                hotspot={typeof heroImage === 'object' ? (heroImage as any).hotspot : undefined}
+                crop={typeof heroImage === 'object' ? heroImage.crop : undefined}
+                hotspot={typeof heroImage === 'object' ? heroImage.hotspot : undefined}
               />
             )
           })()}
@@ -270,8 +269,7 @@ export function ProductsPage() {
           !categoryId && allProducts.length > 0 ? (
             // Eğer kategori seçili değilse (tüm ürünler), kategorilere göre grupla ve başlık göster
             (() => {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const productsByCategory = new Map<string, {category: any; products: Product[]}>()
+              const productsByCategory = new Map<string, {category: Category | undefined; products: Product[]}>()
 
               sortedProducts.forEach(product => {
                 const catId = product.categoryId || 'uncategorized'

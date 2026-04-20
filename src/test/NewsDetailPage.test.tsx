@@ -1,5 +1,5 @@
 import {describe, it, expect, vi} from 'vitest'
-import {render, screen} from '@testing-library/react'
+import {render, screen, waitFor} from '@testing-library/react'
 import {MemoryRouter, Routes, Route} from 'react-router-dom'
 import {HelmetProvider} from 'react-helmet-async'
 
@@ -90,7 +90,7 @@ describe('NewsDetailPage', () => {
     expect(screen.getByText('Haber içeriği')).toBeInTheDocument()
   })
 
-  it('injects Article JSON-LD structured data', () => {
+  it('injects Article JSON-LD structured data', async () => {
     vi.mocked(newsHooks.useNewsItem).mockReturnValue({
       data: {
         id: 'news-1',
@@ -122,12 +122,14 @@ describe('NewsDetailPage', () => {
 
     renderWithRouter('/news/news-1')
 
-    const script = document.getElementById('news-article-schema') as HTMLScriptElement | null
-    expect(script).not.toBeNull()
-    expect(script?.type).toBe('application/ld+json')
+    await waitFor(() => {
+      const script = document.getElementById('news-article-schema') as HTMLScriptElement | null
+      expect(script).not.toBeNull()
+      expect(script?.type).toBe('application/ld+json')
 
-    const parsed = JSON.parse(script!.textContent || '{}')
-    expect(parsed['@type']).toBe('Article')
-    expect(parsed.headline).toBe('Haber Başlığı')
+      const parsed = JSON.parse(script!.textContent || '{}')
+      expect(parsed['@type']).toBe('Article')
+      expect(parsed.headline).toBe('Haber Başlığı')
+    })
   })
 })
