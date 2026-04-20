@@ -57,9 +57,9 @@ const mapMaterialsFromSelections = (
   const seenKeys = new Set<string>()
 
   for (const sel of selections || []) {
-    const group = (sel as any).group
-    const books = group?.books || []
-    const groupMaterialByKey = new Map<string, {name?: LocalizedString; image?: any}>()
+    const group = (sel as Record<string, unknown>)['group'] as Record<string, unknown>
+    const books = (group?.['books'] as Record<string, unknown>[]) || []
+    const groupMaterialByKey = new Map<string, {name?: LocalizedString; image?: unknown}>()
 
     for (const book of books) {
       for (const item of book.items || []) {
@@ -102,7 +102,7 @@ const mapGroupedMaterials = (
       }
 
       const mappedBooks = books
-        .map((book: any) => {
+        .map((book: Record<string, unknown>) => {
           const materials: ProductMaterial[] = []
           for (const item of book.items || []) {
             const key = getAssetKey(item.image)
@@ -114,9 +114,9 @@ const mapGroupedMaterials = (
           }
           return {bookTitle: (book.title ?? '') as LocalizedString, materials}
         })
-        .filter((b: any) => b.materials.length > 0)
+        .filter((b: Record<string, unknown>) => (b['materials'] as unknown[])?.length > 0)
 
-      const allMaterials = mappedBooks.flatMap((b: any) => b.materials)
+      const allMaterials = mappedBooks.flatMap((b: Record<string, unknown>) => b['materials'] as ProductMaterial[])
       if (allMaterials.length === 0) return null
 
       return {groupTitle, books: mappedBooks, materials: allMaterials}
@@ -124,11 +124,11 @@ const mapGroupedMaterials = (
     .filter((g): g is ProductMaterialsGroup => Boolean(g))
 }
 
-const mapProductMedia = (mediaArrRaw: any): any[] => {
+const mapProductMedia = (mediaArrRaw: unknown): any[] => {
   const mediaArr = Array.isArray(mediaArrRaw) ? mediaArrRaw : []
   return mediaArr
-    .map(m => {
-      const type = m?.type || 'image'
+    .map((m: Record<string, unknown>) => {
+      const type = (m?.['type'] as string) || 'image'
       let url = ''
       let urlMobile: string | undefined = undefined
       let urlDesktop: string | undefined = undefined
@@ -145,8 +145,8 @@ const mapProductMedia = (mediaArrRaw: any): any[] => {
         url = m?.url || ''
       }
 
-      const metadata = m?.imageR2 ? mapR2Metadata(m.imageR2) : {}
-      const result: any = {
+      const metadata = m?.['imageR2'] ? mapR2Metadata(m['imageR2']) : {}
+      const result: Record<string, unknown> = {
         type,
         url,
         title: m?.title,
@@ -155,22 +155,22 @@ const mapProductMedia = (mediaArrRaw: any): any[] => {
         linkText: m?.linkText,
         ...metadata
       }
-      if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
-      if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
-      result.isCover = !!m.isCover
+      if (urlMobile && urlMobile !== url) result['urlMobile'] = urlMobile
+      if (urlDesktop && urlDesktop !== url) result['urlDesktop'] = urlDesktop
+      result['isCover'] = !!m['isCover']
       return result
     })
-    .filter(m => !!m.url)
+    .filter((m: Record<string, unknown>) => !!m['url'])
 }
 
-const mapDimensionImages = (dimImgs: any[] | undefined): any[] => {
+const mapDimensionImages = (dimImgs: unknown[] | undefined): any[] => {
   if (!Array.isArray(dimImgs)) return []
   return dimImgs
-    .map(di => {
-      const image = mapImage(di?.imageR2)
-      const imgMobile = di?.imageMobileR2?.url ? mapImage(di?.imageMobileR2) : undefined
-      const imgDesktop = di?.imageDesktopR2?.url ? mapImage(di?.imageDesktopR2) : undefined
-      const result: any = {image, title: di?.title}
+    .map((di: Record<string, unknown>) => {
+      const image = mapImage(di?.['imageR2'] as SanityImageLike)
+      const imgMobile = (di?.['imageMobileR2'] as Record<string, string>)?.['url'] ? mapImage(di?.['imageMobileR2'] as SanityImageLike) : undefined
+      const imgDesktop = (di?.['imageDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(di?.['imageDesktopR2'] as SanityImageLike) : undefined
+      const result: Record<string, unknown> = {image, title: di?.['title']}
       if (imgMobile && imgMobile !== image) result.imageMobile = imgMobile
       if (imgDesktop && imgDesktop !== image) result.imageDesktop = imgDesktop
       return result
@@ -178,72 +178,72 @@ const mapDimensionImages = (dimImgs: any[] | undefined): any[] => {
     .filter(di => !!di.image)
 }
 
-const mapProductRow = (r: any): Product => {
-  const mediaArr = Array.isArray(r.media) ? r.media : []
-  const coverItem = mediaArr.find((m: any) => m.isCover) || mediaArr[0]
+const mapProductRow = (r: Record<string, unknown>): Product => {
+  const mediaArr = Array.isArray(r['media']) ? (r['media'] as Record<string, unknown>[]) : []
+  const coverItem = mediaArr.find((m: Record<string, unknown>) => m['isCover']) || mediaArr[0]
   
-  let mainImage: any = { url: '' }
+  let mainImage: Record<string, unknown> = { url: '' }
   if (coverItem) {
     let url = ''
     let urlMobile: string | undefined = undefined
     let urlDesktop: string | undefined = undefined
 
-    if (coverItem.type === 'image') {
-      url = mapImage(coverItem.imageR2)
-      urlMobile = coverItem.imageMobileR2?.url ? mapImage(coverItem.imageMobileR2) : undefined
-      urlDesktop = coverItem.imageDesktopR2?.url ? mapImage(coverItem.imageDesktopR2) : undefined
-    } else if (coverItem.type === 'video') {
-      url = mapImage(coverItem.videoFileR2)
-      urlMobile = coverItem.videoFileMobileR2?.url ? mapImage(coverItem.videoFileMobileR2) : undefined
-      urlDesktop = coverItem.videoFileDesktopR2?.url ? mapImage(coverItem.videoFileDesktopR2) : undefined
-    } else if (coverItem.type === 'youtube') {
-      url = coverItem.url || ''
+    if (coverItem['type'] === 'image') {
+      url = mapImage(coverItem['imageR2'] as SanityImageLike)
+      urlMobile = (coverItem['imageMobileR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['imageMobileR2'] as SanityImageLike) : undefined
+      urlDesktop = (coverItem['imageDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['imageDesktopR2'] as SanityImageLike) : undefined
+    } else if (coverItem['type'] === 'video') {
+      url = mapImage(coverItem['videoFileR2'] as SanityImageLike)
+      urlMobile = (coverItem['videoFileMobileR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['videoFileMobileR2'] as SanityImageLike) : undefined
+      urlDesktop = (coverItem['videoFileDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['videoFileDesktopR2'] as SanityImageLike) : undefined
+    } else if (coverItem['type'] === 'youtube') {
+      url = (coverItem['url'] as string) || ''
     }
 
-    const metadata = coverItem.imageR2 ? mapR2Metadata(coverItem.imageR2) : {}
+    const metadata = coverItem['imageR2'] ? mapR2Metadata(coverItem['imageR2']) : {}
     mainImage = {
       url,
-      palette: extractPalette(coverItem.imageR2),
+      palette: extractPalette(coverItem['imageR2']),
       ...metadata,
     }
-    if (urlMobile && urlMobile !== url) mainImage.urlMobile = urlMobile
-    if (urlDesktop && urlDesktop !== url) mainImage.urlDesktop = urlDesktop
+    if (urlMobile && urlMobile !== url) mainImage['urlMobile'] = urlMobile
+    if (urlDesktop && urlDesktop !== url) mainImage['urlDesktop'] = urlDesktop
   }
 
   return {
-    id: r.id,
-    name: r.name,
-    designerId: r.designers?.[0]?.designerId || r.designer?.designerId || '',
-    designerIds: r.designers?.map((d: any) => d.designerId) || ([r.designer?.designerId].filter(Boolean) as string[]),
-    categoryId: r.category?.categoryId || '',
-    year: r.year,
-    isPublished: r.isPublished !== undefined ? Boolean(r.isPublished) : true,
-    description: r.description,
-    mainImage,
-    media: mapProductMedia(r.media),
-    showMediaPanels: Boolean(r?.showMediaPanels),
-    dimensionImages: mapDimensionImages(r?.dimensionImages),
-    buyable: Boolean(r.buyable),
-    price: r.price,
-    currency: r.currency,
-    sku: r.sku,
-    stockStatus: r.stockStatus,
-    materials: mapMaterialsFromSelections(r.materialSelections),
-    groupedMaterials: mapGroupedMaterials(r.materialSelections),
-    mediaSectionTitle: r?.mediaSectionTitle,
-    mediaSectionText: r?.mediaSectionText,
+    id: r['id'] as string,
+    name: r['name'] as LocalizedString,
+    designerId: (r['designers'] as Record<string, unknown>[])?.[0]?.['designerId'] as string || (r['designer'] as Record<string, unknown>)?.['designerId'] as string || '',
+    designerIds: (r['designers'] as Record<string, unknown>[])?.map((d: Record<string, unknown>) => d['designerId'] as string) || ([(r['designer'] as Record<string, unknown>)?.['designerId'] as string].filter(Boolean) as string[]),
+    categoryId: (r['category'] as Record<string, unknown>)?.['categoryId'] as string || '',
+    year: r['year'] as number,
+    isPublished: r['isPublished'] !== undefined ? Boolean(r['isPublished']) : true,
+    description: r['description'] as LocalizedString,
+    mainImage: mainImage as Product['mainImage'],
+    media: mapProductMedia(r['media']),
+    showMediaPanels: Boolean(r?.['showMediaPanels']),
+    dimensionImages: mapDimensionImages(r?.['dimensionImages'] as unknown[]),
+    buyable: Boolean(r['buyable']),
+    price: r['price'] as number,
+    currency: r['currency'] as string,
+    sku: r['sku'] as string,
+    stockStatus: r['stockStatus'] as string,
+    materials: mapMaterialsFromSelections(r['materialSelections'] as SanityMaterialSelection[]),
+    groupedMaterials: mapGroupedMaterials(r['materialSelections'] as SanityMaterialSelection[]),
+    mediaSectionTitle: r?.['mediaSectionTitle'] as LocalizedString,
+    mediaSectionText: r?.['mediaSectionText'] as LocalizedString,
     exclusiveContent: {
-      images: mapImages(r?.exclusiveContent?.images),
-      drawings: (r?.exclusiveContent?.drawings || []).map((d: any) => ({
-        name: d?.name,
-        url: d?.fileR2?.url || '',
+      images: mapImages((r?.['exclusiveContent'] as Record<string, unknown>)?.['images'] as SanityImageLike[]),
+      drawings: (((r?.['exclusiveContent'] as Record<string, unknown>)?.['drawings'] as Record<string, unknown>[]) || []).map((d: Record<string, unknown>) => ({
+        name: d?.['name'] as LocalizedString,
+        url: (d?.['fileR2'] as Record<string, string>)?.['url'] || '',
       })),
-      models3d: (r?.exclusiveContent?.models3d || []).map((m: any) => ({
-        name: m?.name,
-        url: m?.fileR2?.url || '',
+      models3d: (((r?.['exclusiveContent'] as Record<string, unknown>)?.['models3d'] as Record<string, unknown>[]) || []).map((m: Record<string, unknown>) => ({
+        name: m?.['name'] as LocalizedString,
+        url: (m?.['fileR2'] as Record<string, string>)?.['url'] || '',
       })),
     },
-  }
+  } as Product
 }
 
 const productQueryString = `
