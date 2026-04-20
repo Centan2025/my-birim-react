@@ -65,7 +65,19 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
       const parts = u.split('/')
       return parts.map((p, i) => {
         if (i < 3 && p.includes(':')) return p
-        return p.trim()
+        if (!p) return ''
+        // Segment bazlı encode işlemi (boşluklar, parantezler vb. için daha güvenli)
+        try {
+          // Segment bazlı encode işlemi (boşluklar, parantezler vb. için daha güvenli)
+          // encodeURIComponent parantezleri ( ) encode etmez, ancak bazı R2/S3 gateway'lerde sorun olabiliyor
+          return encodeURIComponent(decodeURIComponent(p.trim()))
+            .replace(/%2F/g, '/') // Kazara slash encode edilirse geri al
+            .replace(/%3A/g, ':') // Kazara iki nokta encode edilirse geri al
+            .replace(/\(/g, '%28')
+            .replace(/\)/g, '%29')
+        } catch {
+          return p.trim()
+        }
       }).join('/')
     } catch {
       return u.trim()
