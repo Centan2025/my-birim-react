@@ -128,6 +128,16 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
   if (hasResponsiveSizes && !result.includes('rs=1')) {
     result += result.includes('?') ? '&rs=1' : '?rs=1'
   }
+
+  // 5. Legacy Path Corrections (Hardening)
+  // newsItem/ID/media/filename -> news/ID/filename
+  if (result && result.includes('/newsItem/')) {
+    result = result.replace(/\/newsItem\//g, '/news/')
+    if (result.includes('/media/')) {
+      result = result.replace(/\/media\//g, '/')
+    }
+  }
+
   return result
 }
 
