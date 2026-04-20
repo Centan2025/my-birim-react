@@ -16,7 +16,7 @@ export interface SEOData {
   modifiedTime?: string
   section?: string
   tags?: string[]
-  schema?: Record<string, any> | Record<string, any>[]
+  schema?: Record<string, unknown> | Record<string, unknown>[]
 }
 
 /**

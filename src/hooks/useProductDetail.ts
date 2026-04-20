@@ -7,7 +7,7 @@ import {useSiteSettings} from './useSiteData'
 import {useProductHero} from './useProductHero'
 import {useHeaderTheme} from '../context/HeaderThemeContext'
 
-import type {Product, Designer, SanityImagePalette} from '../types'
+import type {Product, Designer, SanityImagePalette, ProductMaterialsGroup} from '../types'
 
 /**
  * Encapsulates all data-fetching, derived state, and side effects
@@ -67,7 +67,7 @@ export function useProductDetail(productId: string | undefined, prefetchedProduc
     const coverIdx = media.findIndex((m) => (m as {isCover?: boolean}).isCover)
     if (coverIdx > 0) {
       const [cover] = media.splice(coverIdx, 1)
-      media.unshift(cover)
+      if (cover) media.unshift(cover)
     }
     return media
   }, [product])
@@ -96,12 +96,14 @@ export function useProductDetail(productId: string | undefined, prefetchedProduc
           materials: [...(g.materials || [])],
         })
       } else {
-        const existing = groupedMap.get(key)
-        existing.books = [...existing.books, ...(g.books || [])]
-        existing.materials = [...existing.materials, ...(g.materials || [])]
+        const existing = groupedMap.get(key) as any
+        if (existing) {
+          existing.books = [...existing.books, ...(g.books || [])]
+          existing.materials = [...existing.materials, ...(g.materials || [])]
+        }
       }
     }
-    return Array.from(groupedMap.values())
+    return Array.from(groupedMap.values()) as ProductMaterialsGroup[]
   }, [product])
 
   // Settings-derived values

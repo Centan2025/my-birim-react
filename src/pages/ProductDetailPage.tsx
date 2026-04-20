@@ -106,7 +106,7 @@ export function ProductDetailPage() {
       description: t(product.description) || t(product.name),
       sku: product.id,
       category: category ? t(category.name) : undefined,
-      material: mergedGroups && mergedGroups.length > 0 ? mergedGroups.map(g => t(g.name)).join(', ') : undefined,
+      material: mergedGroups && mergedGroups.length > 0 ? mergedGroups.map(g => t(g.groupTitle)).join(', ') : undefined,
       image: typeof product.mainImage === 'string'
         ? product.mainImage
         : (product.mainImage as any)?.url || '',
@@ -217,7 +217,7 @@ export function ProductDetailPage() {
         product={product}
         designer={designer || undefined}
         designers={designers}
-        heroMedia={heroMedia}
+        heroMedia={heroMedia as any}
         slideCount={slideCount}
         totalHeroSlides={heroHook.totalHeroSlides}
         heroSlideIndex={heroHook.heroSlideIndex}
@@ -282,7 +282,7 @@ export function ProductDetailPage() {
             <ProductDimensions
               dimImages={product.dimensionImages?.filter((di: any) => di?.image) || []}
               imageBorderClass={imageBorderClass}
-              onOpenLightbox={(imgs, idx) => dimLightbox.open(imgs, idx)}
+              onOpenLightbox={(imgs, idx) => dimLightbox.open(imgs as any, idx)}
             />
 
             <ProductMaterials
@@ -294,14 +294,14 @@ export function ProductDetailPage() {
               imageBorderClass={imageBorderClass}
               onSetActiveMaterialGroup={setActiveMaterialGroup}
               onSetActiveBookIndex={setActiveBookIndex}
-              onOpenMaterialLightbox={(imgs, idx) => materialLightbox.open(imgs, idx)}
+              onOpenMaterialLightbox={(imgs, idx) => materialLightbox.open(imgs as any, idx)}
             />
 
             <ProductDesignerSection designers={designers} t={t} />
 
             <ProductAddToCart
-              product={product}
-              mergedGroups={mergedGroups}
+              product={product as any}
+              mergedGroups={mergedGroups as any}
               activeMaterialGroup={activeMaterialGroup}
             />
 
@@ -339,7 +339,7 @@ export function ProductDetailPage() {
                   }}
                   openPanelLightbox={idx => {
                     setLightboxSource('panel')
-                    mediaLightbox.open(product.media || [], idx)
+                    mediaLightbox.open((product.media || []) as any, idx)
                   }}
                   t={t}
                 />

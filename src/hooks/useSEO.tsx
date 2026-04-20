@@ -123,6 +123,8 @@ export const useSEO = ({
   const location = useLocation()
   const {setSeoData} = useSeoContext()
 
+  const schemaString = JSON.stringify(schema)
+
   useEffect(() => {
     // Base URL oluştur (HashRouter için)
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
@@ -141,7 +143,6 @@ export const useSEO = ({
       schema,
     }
 
-    const schemaString = JSON.stringify(schema)
     setSeoData(prev => (isEqualSeoState(prev, nextData) ? prev : nextData))
   }, [
     description,

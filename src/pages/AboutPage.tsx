@@ -134,8 +134,8 @@ export function AboutPage() {
               quality={90}
               crop={heroImageObj?.crop}
               hotspot={heroImageObj?.hotspot}
-              origWidth={(heroImageObj as any)?.origWidth}
-              origHeight={(heroImageObj as any)?.origHeight}
+              origWidth={(heroImageObj as {origWidth?: number})?.origWidth}
+              origHeight={(heroImageObj as {origHeight?: number})?.origHeight}
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/20" />
           </div>
@@ -177,13 +177,13 @@ export function AboutPage() {
                           Array.isArray(historyContent) ||
                           (typeof historyContent === 'object' &&
                             historyContent !== null &&
-                            (historyContent as any)._type === 'block')
+                            (historyContent as Record<string, unknown>)['_type'] === 'block')
 
                         if (isPortable) {
                           const blocks = Array.isArray(historyContent)
                             ? historyContent
                             : [historyContent]
-                          return <PortableTextLite value={blocks as any} />
+                          return <PortableTextLite value={blocks as Record<string, unknown>[]} />
                         }
 
                         return <p>{historyContent as string}</p>
@@ -205,9 +205,9 @@ export function AboutPage() {
                             className="w-full h-auto object-cover block"
                             crop={typeof img === 'object' ? img.crop : undefined}
                             hotspot={typeof img === 'object' ? img.hotspot : undefined}
-                            origWidth={typeof img === 'object' ? (img as any).origWidth : undefined}
+                            origWidth={typeof img === 'object' ? (img as {origWidth?: number}).origWidth : undefined}
                             origHeight={
-                              typeof img === 'object' ? (img as any).origHeight : undefined
+                              typeof img === 'object' ? (img as {origHeight?: number}).origHeight : undefined
                             }
                           />
                         )
@@ -240,9 +240,9 @@ export function AboutPage() {
                             className="w-full h-auto object-cover block"
                             crop={typeof img === 'object' ? img.crop : undefined}
                             hotspot={typeof img === 'object' ? img.hotspot : undefined}
-                            origWidth={typeof img === 'object' ? (img as any).origWidth : undefined}
+                            origWidth={typeof img === 'object' ? (img as {origWidth?: number}).origWidth : undefined}
                             origHeight={
-                              typeof img === 'object' ? (img as any).origHeight : undefined
+                              typeof img === 'object' ? (img as {origHeight?: number}).origHeight : undefined
                             }
                           />
                         )
@@ -314,10 +314,10 @@ export function AboutPage() {
                               crop={typeof img === 'object' ? img.crop : undefined}
                               hotspot={typeof img === 'object' ? img.hotspot : undefined}
                               origWidth={
-                                typeof img === 'object' ? (img as any).origWidth : undefined
+                                typeof img === 'object' ? (img as {origWidth?: number}).origWidth : undefined
                               }
                               origHeight={
-                                typeof img === 'object' ? (img as any).origHeight : undefined
+                                typeof img === 'object' ? (img as {origHeight?: number}).origHeight : undefined
                               }
                             />
                           )
