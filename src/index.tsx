@@ -1,15 +1,15 @@
 import './lib/suppressWarnings'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { HelmetProvider } from 'react-helmet-async'
+import {HelmetProvider} from 'react-helmet-async'
 import App from './App'
-import { ErrorBoundary } from './components/ErrorBoundary'
-import { errorReporter } from './lib/errorReporting'
-import { initWebVitals } from './lib/webVitals'
-import { validateEnv, checkRequiredEnv } from './lib/envValidation'
+import {ErrorBoundary} from './components/ErrorBoundary'
+import {errorReporter} from './lib/errorReporting'
+import {initWebVitals} from './lib/webVitals'
+import {validateEnv, checkRequiredEnv} from './lib/envValidation'
 import './index.css'
 
-const DEBUG_LOGS = (import.meta.env as { VITE_DEBUG_LOGS?: string }).VITE_DEBUG_LOGS === 'true'
+const DEBUG_LOGS = (import.meta.env as {VITE_DEBUG_LOGS?: string}).VITE_DEBUG_LOGS === 'true'
 
 // Validate environment variables
 try {

@@ -1,6 +1,6 @@
-import { OptimizedImage } from './OptimizedImage'
+import {OptimizedImage} from './OptimizedImage'
 import ScrollReveal from './ScrollReveal'
-import type { LocalizedString, Product, R2ImageMetadata } from '../types'
+import type {LocalizedString, Product, R2ImageMetadata} from '../types'
 
 interface ProductMediaItem {
   type: 'image' | 'video' | 'youtube'

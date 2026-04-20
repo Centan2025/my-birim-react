@@ -1,9 +1,9 @@
-import React, { useRef, useState, useEffect } from 'react'
-import { createPortal } from 'react-dom'
-import { OptimizedImage } from '../OptimizedImage'
-import { OptimizedVideo } from '../OptimizedVideo'
-import { useTranslation } from '../../i18n'
-import type { R2ImageMetadata } from '../../types'
+import React, {useRef, useState, useEffect} from 'react'
+import {createPortal} from 'react-dom'
+import {OptimizedImage} from '../OptimizedImage'
+import {OptimizedVideo} from '../OptimizedVideo'
+import {useTranslation} from '../../i18n'
+import type {R2ImageMetadata} from '../../types'
 
 export interface LightboxItem {
   url?: string
@@ -43,7 +43,7 @@ const CloseIcon = () => (
   </svg>
 )
 
-const toYouTubeEmbed = (url: string, { autoplay = false, controls = false } = {}) => {
+const toYouTubeEmbed = (url: string, {autoplay = false, controls = false} = {}) => {
   if (!url) return ''
   let id = ''
   if (url.includes('youtube.com/watch?v=')) {
@@ -58,7 +58,7 @@ const toYouTubeEmbed = (url: string, { autoplay = false, controls = false } = {}
     : ''
 }
 
-import { motion, AnimatePresence } from 'framer-motion'
+import {motion, AnimatePresence} from 'framer-motion'
 
 export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
   items,
@@ -68,7 +68,7 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
   onPrev,
   showMetadata = false,
 }) => {
-  const { t } = useTranslation()
+  const {t} = useTranslation()
   const youTubePlayerRef = useRef<HTMLIFrameElement | null>(null)
   const [isVisible, setIsVisible] = useState(false)
   const [direction, setDirection] = useState(0) // 1 for next, -1 for prev
@@ -119,31 +119,32 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
   const variants = {
     initial: (dir: number) => ({
       x: dir > 0 ? '100%' : dir < 0 ? '-100%' : 0,
-      opacity: 0
+      opacity: 0,
     }),
     animate: {
       x: 0,
       opacity: 1,
       transition: {
-        x: { type: "spring" as const, stiffness: 200, damping: 25 },
-        opacity: { duration: 0.4 }
-      }
+        x: {type: 'spring' as const, stiffness: 200, damping: 25},
+        opacity: {duration: 0.4},
+      },
     },
     exit: (dir: number) => ({
       x: dir > 0 ? '-30%' : dir < 0 ? '30%' : 0,
       opacity: 0,
       transition: {
-        x: { type: "spring" as const, stiffness: 200, damping: 25 },
-        opacity: { duration: 0.3 }
-      }
-    })
+        x: {type: 'spring' as const, stiffness: 200, damping: 25},
+        opacity: {duration: 0.3},
+      },
+    }),
   }
 
   return createPortal(
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
-      className={`fixed inset-0 z-[100] flex items-center justify-center transition-all duration-300 ease-out ${isVisible ? 'bg-black/90 backdrop-blur-sm' : 'bg-black/0 backdrop-blur-none'
-        }`}
+      className={`fixed inset-0 z-[100] flex items-center justify-center transition-all duration-300 ease-out ${
+        isVisible ? 'bg-black/90 backdrop-blur-sm' : 'bg-black/0 backdrop-blur-none'
+      }`}
       onClick={handleClose}
       onKeyDown={e => {
         if (e.key === 'Escape') handleClose()
@@ -170,7 +171,9 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
         {/* Medya Konteynırı */}
         <div className="relative group w-full max-w-6xl mx-auto flex items-center justify-center overflow-visible">
           {/* Medya içeriği - Simultaneous Animation (Sabit Yükseklik) */}
-          <div className={`relative w-full h-[75vh] flex items-center justify-center transition-all duration-300 ease-out ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+          <div
+            className={`relative w-full h-[75vh] flex items-center justify-center transition-all duration-300 ease-out ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+          >
             <AnimatePresence initial={false} custom={direction}>
               <motion.div
                 key={url}
@@ -218,7 +221,7 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
                         ref={youTubePlayerRef}
                         className="w-full h-full"
                         title="youtube-player"
-                        src={toYouTubeEmbed(url, { autoplay: true })}
+                        src={toYouTubeEmbed(url, {autoplay: true})}
                         allow="autoplay; encrypted-media; fullscreen"
                         frameBorder="0"
                       />
@@ -232,7 +235,9 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
 
         {/* Alt Panel: Prev/Next Düğmeleri - Görselin HEMEN ALTINDA (Daha yakın) */}
         {items.length > 1 && (
-          <div className={`mt-0 flex items-center gap-6 transition-all duration-500 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          <div
+            className={`mt-0 flex items-center gap-6 transition-all duration-500 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+          >
             <button
               onClick={handlePrev}
               className="group flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white/50 bg-transparent text-white transition-all duration-300 md:hover:bg-white/10 active:scale-95 shadow-lg outline-none select-none"
@@ -280,8 +285,9 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
         {/* Metadata Overlay */}
         {showMetadata && (
           <div
-            className={`mb-6 max-w-md text-center text-white transition-all duration-300 delay-150 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-              }`}
+            className={`mb-6 max-w-md text-center text-white transition-all duration-300 delay-150 ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            }`}
           >
             {title && <h3 className="text-xl font-light mb-1">{t(title)}</h3>}
             {currentItem.description && (

@@ -40,13 +40,15 @@ export default defineType({
       let finalUrl = getPreviewUrl(r2Url)
       return {
         title: title || 'Kategori',
-        media: finalUrl ? (
-          () => <img
-            src={finalUrl}
-            alt={title || 'Kategori'}
-            style={{width: '100%', height: '100%', objectFit: 'cover'}}
-          />
-        ) : undefined,
+        media: finalUrl
+          ? () => (
+              <img
+                src={finalUrl}
+                alt={title || 'Kategori'}
+                style={{width: '100%', height: '100%', objectFit: 'cover'}}
+              />
+            )
+          : undefined,
       }
     },
   },

@@ -1,7 +1,7 @@
 import groq from 'groq'
-import type { Category, Designer, LocalizedString } from '../../types'
-import { sanity, useSanity, mapImage, mapR2Metadata, type SanityImageLike } from './client'
-import { getItem } from './settings'
+import type {Category, Designer, LocalizedString} from '../../types'
+import {sanity, useSanity, mapImage, mapR2Metadata, type SanityImageLike} from './client'
+import {getItem} from './settings'
 
 const SIMULATED_DELAY = 200
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms))
@@ -47,8 +47,12 @@ export const getCategories = async (): Promise<Category[]> => {
       id: r.id,
       name: r.name,
       subtitle: r.subtitle,
-      heroImage: (r.heroImageR2 as Record<string, unknown>)?.['url'] ? { url: mapImage(r.heroImageR2), ...mapR2Metadata(r.heroImageR2) } : mapImage(r.heroImage),
-      menuImage: (r.menuImageR2 as Record<string, unknown>)?.['url'] ? { url: mapImage(r.menuImageR2), ...mapR2Metadata(r.menuImageR2) } : mapImage(r.menuImage),
+      heroImage: (r.heroImageR2 as Record<string, unknown>)?.['url']
+        ? {url: mapImage(r.heroImageR2), ...mapR2Metadata(r.heroImageR2)}
+        : mapImage(r.heroImage),
+      menuImage: (r.menuImageR2 as Record<string, unknown>)?.['url']
+        ? {url: mapImage(r.menuImageR2), ...mapR2Metadata(r.menuImageR2)}
+        : mapImage(r.menuImage),
     }))
   }
   await delay(SIMULATED_DELAY)
@@ -70,9 +74,13 @@ export const getDesigners = async (): Promise<Designer[]> => {
     const rows = await sanity.fetch(query)
     return rows.map((r: SanityDesignerRow) => {
       const imageFinal = mapImage(r.imageR2) || mapImage(r.image)
-      const imageMobile = (r.imageMobileR2 as Record<string, unknown>)?.['url'] ? mapImage(r.imageMobileR2) : undefined
-      const imageDesktop = (r.imageDesktopR2 as Record<string, unknown>)?.['url'] ? mapImage(r.imageDesktopR2) : undefined
-      const metadata = r.imageR2 ? mapR2Metadata(r.imageR2) : (r.image ? mapR2Metadata(r.image) : {})
+      const imageMobile = (r.imageMobileR2 as Record<string, unknown>)?.['url']
+        ? mapImage(r.imageMobileR2)
+        : undefined
+      const imageDesktop = (r.imageDesktopR2 as Record<string, unknown>)?.['url']
+        ? mapImage(r.imageDesktopR2)
+        : undefined
+      const metadata = r.imageR2 ? mapR2Metadata(r.imageR2) : r.image ? mapR2Metadata(r.image) : {}
       return {
         id: r.id,
         name: r.name,
@@ -98,12 +106,14 @@ export const getDesignerById = async (id: string): Promise<Designer | undefined>
     const query = groq`*[_type == "designer" && id.current == $id][0]{ 
       "id": id.current, name, role, bio, image, imageR2, imageMobileR2, imageDesktopR2
     }`
-    const r = await sanity.fetch(query, { id })
+    const r = await sanity.fetch(query, {id})
     if (!r) return undefined
     const image = mapImage(r.imageR2) || mapImage(r.image) || ''
     const imageMobile = (r.imageMobileR2 as Record<string, unknown>)?.['url'] as string | undefined
-    const imageDesktop = (r.imageDesktopR2 as Record<string, unknown>)?.['url'] as string | undefined
-    const metadata = r.imageR2 ? mapR2Metadata(r.imageR2) : (r.image ? mapR2Metadata(r.image) : {})
+    const imageDesktop = (r.imageDesktopR2 as Record<string, unknown>)?.['url'] as
+      | string
+      | undefined
+    const metadata = r.imageR2 ? mapR2Metadata(r.imageR2) : r.image ? mapR2Metadata(r.image) : {}
     return {
       id: r.id,
       name: r.name,
@@ -135,12 +145,16 @@ export const getDesignersByIds = async (ids: string[]): Promise<Designer[]> => {
           imageMobileR2,
           imageDesktopR2
         }`
-    const rows = await sanity.fetch(query, { ids })
+    const rows = await sanity.fetch(query, {ids})
     return rows.map((r: SanityDesignerRow) => {
       const imageFinal = mapImage(r.imageR2) || mapImage(r.image)
-      const imageMobile = (r.imageMobileR2 as Record<string, unknown>)?.['url'] ? mapImage(r.imageMobileR2) : undefined
-      const imageDesktop = (r.imageDesktopR2 as Record<string, unknown>)?.['url'] ? mapImage(r.imageDesktopR2) : undefined
-      const metadata = r.imageR2 ? mapR2Metadata(r.imageR2) : (r.image ? mapR2Metadata(r.image) : {})
+      const imageMobile = (r.imageMobileR2 as Record<string, unknown>)?.['url']
+        ? mapImage(r.imageMobileR2)
+        : undefined
+      const imageDesktop = (r.imageDesktopR2 as Record<string, unknown>)?.['url']
+        ? mapImage(r.imageDesktopR2)
+        : undefined
+      const metadata = r.imageR2 ? mapR2Metadata(r.imageR2) : r.image ? mapR2Metadata(r.image) : {}
       return {
         id: r.id,
         name: r.name,

@@ -269,7 +269,10 @@ export function ProductsPage() {
           !categoryId && allProducts.length > 0 ? (
             // Eğer kategori seçili değilse (tüm ürünler), kategorilere göre grupla ve başlık göster
             (() => {
-              const productsByCategory = new Map<string, {category: Category | undefined; products: Product[]}>()
+              const productsByCategory = new Map<
+                string,
+                {category: Category | undefined; products: Product[]}
+              >()
 
               sortedProducts.forEach(product => {
                 const catId = product.categoryId || 'uncategorized'
@@ -349,4 +352,3 @@ export function ProductsPage() {
     </div>
   )
 }
-

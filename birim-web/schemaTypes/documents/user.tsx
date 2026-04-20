@@ -1,4 +1,4 @@
-import { defineField, defineType } from 'sanity'
+import {defineField, defineType} from 'sanity'
 
 export default defineType({
   name: 'user',
@@ -25,7 +25,7 @@ export default defineType({
           }
           return true
         }),
-      hidden: ({ document }) => document?.userType === 'email_subscriber',
+      hidden: ({document}) => document?.userType === 'email_subscriber',
     }),
     defineField({
       name: 'name',
@@ -63,9 +63,9 @@ export default defineType({
       type: 'string',
       options: {
         list: [
-          { title: 'E-posta Abonesi', value: 'email_subscriber' },
-          { title: 'Profesyonel Abone', value: 'professional_subscriber' },
-          { title: 'Tam Üye (Özel İçerik)', value: 'full_member' },
+          {title: 'E-posta Abonesi', value: 'email_subscriber'},
+          {title: 'Profesyonel Abone', value: 'professional_subscriber'},
+          {title: 'Tam Üye (Özel İçerik)', value: 'full_member'},
         ],
         layout: 'radio',
       },
@@ -86,7 +86,7 @@ export default defineType({
       type: 'string',
       description:
         'Kullanıcıya gönderilen e-posta doğrulama linki için kullanılan tek seferlik token.',
-      hidden: ({ document }) => Boolean((document as any)?.isVerified),
+      hidden: ({document}) => Boolean((document as any)?.isVerified),
     }),
     defineField({
       name: 'isActive',
@@ -109,7 +109,7 @@ export default defineType({
       userType: 'userType',
       active: 'isActive',
     },
-    prepare({ title, subtitle, userType, active }) {
+    prepare({title, subtitle, userType, active}) {
       const typeLabel = userType === 'full_member' ? 'Tam Üye' : 'E-posta Abonesi'
       return {
         title: title || 'Üye',

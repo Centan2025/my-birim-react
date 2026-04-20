@@ -15,7 +15,14 @@ interface ProductHeroProps {
   }
   designer?: Designer
   designers?: Designer[]
-  heroMedia: { type: string; url: string; urlMobile?: string; urlDesktop?: string; crop?: unknown; hotspot?: unknown }[]
+  heroMedia: {
+    type: string
+    url: string
+    urlMobile?: string
+    urlDesktop?: string
+    crop?: unknown
+    hotspot?: unknown
+  }[]
   slideCount: number
   totalHeroSlides: number
   heroSlideIndex: number
@@ -274,8 +281,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                   </Link>
                   {i < designers.length - 1 ? ' & ' : ''}
                 </span>
-              ))}
-              {' '}
+              ))}{' '}
               {product.year && <span>— {product.year}</span>}
             </div>
           )}

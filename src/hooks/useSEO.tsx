@@ -91,13 +91,19 @@ export const SEOProvider = ({children}: PropsWithChildren) => {
         <meta name="twitter:card" content={merged.image ? 'summary_large_image' : 'summary'} />
 
         {/* AI Robots: Permissive but descriptive for Answer Engines */}
-        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+        <meta
+          name="robots"
+          content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
+        />
         <meta name="googlebot" content="index, follow" />
         <meta name="bingbot" content="index, follow" />
 
         {/* Structured Data (JSON-LD) */}
         {merged.schema && (
-          <script id={merged.type === 'article' ? 'news-article-schema' : 'seo-schema'} type="application/ld+json">
+          <script
+            id={merged.type === 'article' ? 'news-article-schema' : 'seo-schema'}
+            type="application/ld+json"
+          >
             {JSON.stringify(merged.schema)}
           </script>
         )}

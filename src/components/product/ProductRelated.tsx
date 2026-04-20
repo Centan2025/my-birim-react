@@ -1,16 +1,16 @@
 import React from 'react'
-import { ProductCard } from '../ProductCard'
+import {ProductCard} from '../ProductCard'
 import ScrollReveal from '../ScrollReveal'
-import { useTranslation } from '../../i18n'
-import { Product } from '../../types'
+import {useTranslation} from '../../i18n'
+import {Product} from '../../types'
 
 interface ProductRelatedProps {
   products: Product[]
   show: boolean
 }
 
-export const ProductRelated: React.FC<ProductRelatedProps> = ({ products, show }) => {
-  const { t } = useTranslation()
+export const ProductRelated: React.FC<ProductRelatedProps> = ({products, show}) => {
+  const {t} = useTranslation()
 
   if (!show || products.length === 0) return null
 

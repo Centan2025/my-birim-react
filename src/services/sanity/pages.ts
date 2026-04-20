@@ -1,8 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import groq from 'groq'
-import type { AboutPageContent, ContactPageContent, HomePageContent, FactoryPageContent } from '../../types'
-import { sanity, useSanity, mapImage, mapMediaUrl, rewriteR2Url, extractPalette, mapR2Metadata } from './client'
-import { getItem } from './settings'
+import type {
+  AboutPageContent,
+  ContactPageContent,
+  HomePageContent,
+  FactoryPageContent,
+} from '../../types'
+import {
+  sanity,
+  useSanity,
+  mapImage,
+  mapMediaUrl,
+  rewriteR2Url,
+  extractPalette,
+  mapR2Metadata,
+} from './client'
+import {getItem} from './settings'
 
 const SIMULATED_DELAY = 200
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms))
@@ -48,7 +61,7 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
             identitySection{ ..., imageR2, media[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 } },
             qualitySection{ ..., imageR2, media[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 } }
         }`
-    const data = await sanity.withConfig({ useCdn: false }).fetch(q)
+    const data = await sanity.withConfig({useCdn: false}).fetch(q)
     if (data) {
       if (data.heroImageR2?.url) {
         data.heroImage = {
@@ -97,16 +110,16 @@ export const getFactoryPageContent = async (): Promise<FactoryPageContent> => {
             ...,
             gallery[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 }
         }`
-    const data = await sanity.withConfig({ useCdn: false }).fetch(q)
+    const data = await sanity.withConfig({useCdn: false}).fetch(q)
     if (data) {
       if (data.gallery) {
-        data.gallery = mapProductMedia({ media: data.gallery })
+        data.gallery = mapProductMedia({media: data.gallery})
       }
       return data
     }
   }
   await delay(SIMULATED_DELAY)
-  return ({} as FactoryPageContent)
+  return {} as FactoryPageContent
 }
 
 export const getContactPageContent = async (): Promise<ContactPageContent> => {
@@ -127,10 +140,10 @@ export const getContactPageContent = async (): Promise<ContactPageContent> => {
                   mediaItem.url
               }
               const metadata = mediaItem.imageR2 ? mapR2Metadata(mediaItem.imageR2) : {}
-              return { ...mediaItem, url: mediaUrl, ...metadata }
+              return {...mediaItem, url: mediaUrl, ...metadata}
             })
             .filter((m: any) => m.url)
-          return { ...loc, media: processedMedia }
+          return {...loc, media: processedMedia}
         }
         return loc
       })
@@ -149,7 +162,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             heroMedia[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2, videoFileMobileR2, videoFileDesktopR2 },
             contentBlocks[]{ ..., titleFont, contentFont, imageR2, imageMobileR2, imageDesktopR2, videoFileR2, videoFileMobileR2, videoFileDesktopR2 }
         }`
-      const data = await sanity.withConfig({ useCdn: false }).fetch(q)
+      const data = await sanity.withConfig({useCdn: false}).fetch(q)
       if (data?.heroMedia) {
         data.heroMedia = data.heroMedia
           .map((m: any) => {
@@ -164,7 +177,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
               (url.includes('youtube.com') || url.includes('youtu.be'))
             )
               type = 'youtube'
-            const result: any = { ...m, url, type }
+            const result: any = {...m, url, type}
             if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
             if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
             if (palette) result.palette = palette
@@ -191,19 +204,27 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
           } else if (b.mediaType === 'video') {
             url = b.videoFileR2?.url ? rewriteR2Url(b.videoFileR2.url) : b.url
             urlMobile = b.videoFileMobileR2?.url ? rewriteR2Url(b.videoFileMobileR2.url) : undefined
-            urlDesktop = b.videoFileDesktopR2?.url ? rewriteR2Url(b.videoFileDesktopR2.url) : undefined
+            urlDesktop = b.videoFileDesktopR2?.url
+              ? rewriteR2Url(b.videoFileDesktopR2.url)
+              : undefined
           } else if (b.mediaType === 'youtube') {
             url = b.url
           } else if (b.mediaType === 'panels') {
             // imagePanels dizisini tip ve URL içeren bir yapıya dönüştür
             if (Array.isArray(b.imagePanels)) {
-              b.imagePanels = b.imagePanels.map((p: any) => {
-                const url = mapImage(p)
-                if (!url) return null
-                const mime = p.mimeType || ''
-                const type = (mime.startsWith('video/') || url.toLowerCase().match(/\.(mp4|webm|mov|avi|mkv)$/)) ? 'video' : 'image'
-                return { url, type }
-              }).filter(Boolean)
+              b.imagePanels = b.imagePanels
+                .map((p: any) => {
+                  const url = mapImage(p)
+                  if (!url) return null
+                  const mime = p.mimeType || ''
+                  const type =
+                    mime.startsWith('video/') ||
+                    url.toLowerCase().match(/\.(mp4|webm|mov|avi|mkv)$/)
+                      ? 'video'
+                      : 'image'
+                  return {url, type}
+                })
+                .filter(Boolean)
             }
           }
 
@@ -240,8 +261,6 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
   return data || ({} as HomePageContent)
 }
 
-
-export const updateAboutPageContent = async (): Promise<void> => { }
-export const updateContactPageContent = async (): Promise<void> => { }
-export const updateHomePageContent = async (): Promise<void> => { }
-
+export const updateAboutPageContent = async (): Promise<void> => {}
+export const updateContactPageContent = async (): Promise<void> => {}
+export const updateHomePageContent = async (): Promise<void> => {}

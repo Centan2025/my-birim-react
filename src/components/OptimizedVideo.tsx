@@ -1,5 +1,5 @@
 import React, {useState, useRef, useCallback} from 'react'
-import { rewriteR2Url } from '../services/sanity/client'
+import {rewriteR2Url} from '../services/sanity/client'
 
 interface OptimizedVideoProps {
   src: string
@@ -155,16 +155,18 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       if (isMobile && rwSrcMobile) rawSrc = mobileSrc
       else if (!isMobile && rwSrcDesktop) rawSrc = desktopSrc
     }
-    
+
     if (!rawSrc) return ''
     try {
       // URL segmentlerini trim et ve encode et
       const parts = rawSrc.split('/')
-      const trimmedSrc = parts.map((p, i) => {
-        if (i < 3 && p.includes(':')) return p
-        return p.trim()
-      }).join('/')
-      
+      const trimmedSrc = parts
+        .map((p, i) => {
+          if (i < 3 && p.includes(':')) return p
+          return p.trim()
+        })
+        .join('/')
+
       return encodeURI(decodeURI(trimmedSrc)).replace(/ /g, '%20')
     } catch {
       return rawSrc.replace(/ /g, '%20')

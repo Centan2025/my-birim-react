@@ -50,7 +50,7 @@ export default defineType({
       title: 'Haber Medyası',
       type: 'array',
       components: {
-        input: BulkMediaUploadInput
+        input: BulkMediaUploadInput,
       },
       of: [
         {
@@ -156,24 +156,27 @@ export default defineType({
               let finalUrl = getPreviewUrl(r2Url)
               return {
                 title: `${isCover ? '⭐ ' : ''}${type === 'image' ? 'Resim Öğesi' : type === 'video' ? 'Video Öğesi' : 'YouTube Öğesi'}`,
-                media: finalUrl ? (
-                  () => <img
-                    src={finalUrl}
-                    style={{width: '100%', height: '100%', objectFit: 'cover'}}
-                  />
-                ) : undefined,
+                media: finalUrl
+                  ? () => (
+                      <img
+                        src={finalUrl}
+                        style={{width: '100%', height: '100%', objectFit: 'cover'}}
+                      />
+                    )
+                  : undefined,
               }
             },
           },
         },
       ],
-      description: 'Haber içerisindeki görseller ve videolar. Birini kapak olarak işaretleyebilirsiniz.',
+      description:
+        'Haber içerisindeki görseller ve videolar. Birini kapak olarak işaretleyebilirsiniz.',
     }),
   ],
   preview: {
     select: {
-      title: 'title.tr', 
-      media: 'media'
+      title: 'title.tr',
+      media: 'media',
     },
     prepare({title, media}) {
       const coverItem = media?.find((m: any) => m.isCover) || media?.[0]
@@ -182,13 +185,15 @@ export default defineType({
 
       return {
         title: title || 'Haber',
-        media: finalUrl ? (
-          () => <img
-            src={finalUrl}
-            alt={title || 'Haber'}
-            style={{width: '100%', height: '100%', objectFit: 'cover'}}
-          />
-        ) : undefined,
+        media: finalUrl
+          ? () => (
+              <img
+                src={finalUrl}
+                alt={title || 'Haber'}
+                style={{width: '100%', height: '100%', objectFit: 'cover'}}
+              />
+            )
+          : undefined,
       }
     },
   },

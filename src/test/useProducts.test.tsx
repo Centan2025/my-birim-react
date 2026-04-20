@@ -14,7 +14,7 @@ import {
   useProductsByCategory,
   useProductsByDesigner,
 } from '../hooks/useProducts'
-import { Product } from '../types'
+import {Product} from '../types'
 
 // ----- Service mock'ları -----
 vi.mock('@/services/cms', () => ({

@@ -1,33 +1,39 @@
-import React, { useMemo } from 'react'
-import { Link } from 'react-router-dom'
-import type { Product, Designer, R2ImageMetadata } from '../types'
-import { OptimizedImage } from './OptimizedImage'
-import { useTranslation } from '../i18n'
-import { useSiteSettings } from '../context/SiteSettingsContext'
-import { analytics } from '../lib/analytics'
-import { useDesigners } from '../hooks/useDesigners'
+import React, {useMemo} from 'react'
+import {Link} from 'react-router-dom'
+import type {Product, Designer, R2ImageMetadata} from '../types'
+import {OptimizedImage} from './OptimizedImage'
+import {useTranslation} from '../i18n'
+import {useSiteSettings} from '../context/SiteSettingsContext'
+import {analytics} from '../lib/analytics'
+import {useDesigners} from '../hooks/useDesigners'
 
-export const ProductCard: React.FC<{ product: Product }> = ({
-  product,
-}) => {
-  const { t } = useTranslation()
-  const { settings } = useSiteSettings()
+export const ProductCard: React.FC<{product: Product}> = ({product}) => {
+  const {t} = useTranslation()
+  const {settings} = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
 
-  const { data: designers = [] } = useDesigners()
+  const {data: designers = []} = useDesigners()
   const designerName = useMemo(() => {
     if (!product.designerId || !designers.length) return ''
     const designer = (designers as Designer[]).find(d => d.id === product.designerId)
     return designer ? t(designer.name) : ''
   }, [designers, product.designerId, t])
 
-  const isObject = typeof product.mainImage === 'object' && product.mainImage !== null;
-  const mainImageObj = isObject ? (product.mainImage as { url?: string; urlMobile?: string; urlDesktop?: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot'] }) : {};
-  const mainImageUrl = (isObject ? mainImageObj.url : (product.mainImage as string)) || '';
-  const mainImageMobile = mainImageObj.urlMobile;
-  const mainImageDesktop = mainImageObj.urlDesktop;
-  const mainImageCrop = mainImageObj.crop;
-  const mainImageHotspot = mainImageObj.hotspot;
+  const isObject = typeof product.mainImage === 'object' && product.mainImage !== null
+  const mainImageObj = isObject
+    ? (product.mainImage as {
+        url?: string
+        urlMobile?: string
+        urlDesktop?: string
+        crop?: R2ImageMetadata['crop']
+        hotspot?: R2ImageMetadata['hotspot']
+      })
+    : {}
+  const mainImageUrl = (isObject ? mainImageObj.url : (product.mainImage as string)) || ''
+  const mainImageMobile = mainImageObj.urlMobile
+  const mainImageDesktop = mainImageObj.urlDesktop
+  const mainImageCrop = mainImageObj.crop
+  const mainImageHotspot = mainImageObj.hotspot
 
   const handleClick = () => {
     // We still want to handle analytics before navigation
@@ -68,7 +74,9 @@ export const ProductCard: React.FC<{ product: Product }> = ({
           </h3>
           {designerName && (
             <div className="mt-1 flex items-baseline justify-between gap-2">
-              <p className="text-xs sm:text-sm text-[var(--text-secondary)] truncate">{designerName}</p>
+              <p className="text-xs sm:text-sm text-[var(--text-secondary)] truncate">
+                {designerName}
+              </p>
               <span className="text-[11px] sm:text-xs uppercase tracking-[0.18em] text-[var(--text-secondary)] flex-shrink-0">
                 {product.year}
               </span>

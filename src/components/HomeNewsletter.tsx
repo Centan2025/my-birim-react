@@ -1,10 +1,6 @@
 import {useState, FC, FormEventHandler, useRef, useEffect} from 'react'
 import {motion, AnimatePresence} from 'framer-motion'
-import {
-  ChevronDown,
-  X,
-  ArrowUpRight,
-} from 'lucide-react'
+import {ChevronDown, X, ArrowUpRight} from 'lucide-react'
 import {subscribeEmail, subscribeProfessional} from '../services/cms'
 import {analytics} from '../lib/analytics'
 import {useTranslation} from '../i18n'
@@ -180,19 +176,19 @@ export const HomeNewsletter: FC = () => {
             </span>
           </div>
           <div className="flex-shrink-0 md:ml-4 w-full md:w-auto">
-          <div
-            className={`flex items-center justify-center gap-3 bg-transparent text-white border border-gray-400 px-6 py-3 transition-all duration-500 font-inter hover:bg-white/5`}
-          >
-            <span className="text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-medium">
-              {isExpanded ? t('close') : t('join_us')}
-            </span>
-            {isExpanded ? (
-              <X className="w-3.5 h-3.5" />
-            ) : (
-              <ChevronDown className="w-3.5 h-3.5 transition-transform duration-500" />
-            )}
+            <div
+              className={`flex items-center justify-center gap-3 bg-transparent text-white border border-gray-400 px-6 py-3 transition-all duration-500 font-inter hover:bg-white/5`}
+            >
+              <span className="text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-medium">
+                {isExpanded ? t('close') : t('join_us')}
+              </span>
+              {isExpanded ? (
+                <X className="w-3.5 h-3.5" />
+              ) : (
+                <ChevronDown className="w-3.5 h-3.5 transition-transform duration-500" />
+              )}
+            </div>
           </div>
-        </div>
         </div>
       </button>
 
@@ -205,9 +201,9 @@ export const HomeNewsletter: FC = () => {
             transition={{duration: 0.6, ease: [0.16, 1, 0.3, 1]}}
             className="overflow-hidden"
           >
-            <div 
+            <div
               className="pt-8 pb-16 w-full flex flex-col items-center text-[var(--text-primary)] relative transition-all duration-500"
-              style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f0f2f5 50%, #dbe1e6 100%)' }}
+              style={{background: 'linear-gradient(135deg, #ffffff 0%, #f0f2f5 50%, #dbe1e6 100%)'}}
             >
               <div className="flex gap-4 md:gap-12 mb-12 relative z-20">
                 <div role="tablist" className="relative flex">
@@ -255,7 +251,6 @@ export const HomeNewsletter: FC = () => {
                       exit="hidden"
                       className="w-full max-w-2xl mx-auto flex flex-col items-center"
                     >
-
                       <motion.form
                         variants={itemVariants}
                         onSubmit={handleSubmitNewsletter}
@@ -309,7 +304,6 @@ export const HomeNewsletter: FC = () => {
                       exit="hidden"
                       className="w-full"
                     >
-
                       <form onSubmit={handleSubmitProfessional} className="space-y-4">
                         <motion.div
                           variants={itemVariants}

@@ -6,7 +6,7 @@ import {renderHook, waitFor} from '@testing-library/react'
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 import React from 'react'
 import {useCategories, useCategory} from '../hooks/useCategories'
-import { Category } from '../types'
+import {Category} from '../types'
 
 vi.mock('@/services/cms', () => ({
   getCategories: vi.fn(),
@@ -16,16 +16,16 @@ import {getCategories} from '@/services/cms'
 
 const mockCategories: Category[] = [
   {
-    id: 'koltuk', 
+    id: 'koltuk',
     name: {tr: 'Koltuklar', en: 'Armchairs'},
     subtitle: {tr: 'Alt başlık', en: 'Subtitle'},
-    heroImage: '/img/koltuk.jpg'
+    heroImage: '/img/koltuk.jpg',
   },
   {
-    id: 'masa', 
+    id: 'masa',
     name: {tr: 'Masalar', en: 'Tables'},
     subtitle: {tr: 'Alt başlık', en: 'Subtitle'},
-    heroImage: '/img/masa.jpg'
+    heroImage: '/img/masa.jpg',
   },
 ]
 

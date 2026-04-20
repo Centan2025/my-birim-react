@@ -1,7 +1,7 @@
-import { useNavigate } from 'react-router-dom'
-import { OptimizedImage } from './OptimizedImage'
+import {useNavigate} from 'react-router-dom'
+import {OptimizedImage} from './OptimizedImage'
 import ScrollReveal from './ScrollReveal'
-import type { Designer, LocalizedString, R2ImageMetadata } from '../types'
+import type {Designer, LocalizedString, R2ImageMetadata} from '../types'
 
 interface ProductDesignerSectionProps {
   designer?: Designer | null
@@ -14,7 +14,7 @@ function toPlainText(blocks: unknown): string {
   if (!blocks) return ''
   if (typeof blocks === 'string') return blocks
   if (Array.isArray(blocks)) {
-    return (blocks as { _type?: string; children?: { text?: string }[] }[])
+    return (blocks as {_type?: string; children?: {text?: string}[]}[])
       .map(block => {
         if (block._type !== 'block' || !block.children) {
           return ''
@@ -26,7 +26,11 @@ function toPlainText(blocks: unknown): string {
   return ''
 }
 
-export function ProductDesignerSection({ designer, designers: designersProp, t }: ProductDesignerSectionProps) {
+export function ProductDesignerSection({
+  designer,
+  designers: designersProp,
+  t,
+}: ProductDesignerSectionProps) {
   const navigate = useNavigate()
   const designers = designersProp || (designer ? [designer] : [])
   if (designers.length === 0) return null
@@ -39,7 +43,7 @@ export function ProductDesignerSection({ designer, designers: designersProp, t }
             {designers.length > 1 ? t('designers') : t('designer')}
           </h2>
           <div className="space-y-12">
-            {designers.map((d) => {
+            {designers.map(d => {
               const bioText = toPlainText(t(d.bio))
               const isLongText = bioText.length > 400
               return (
@@ -53,8 +57,16 @@ export function ProductDesignerSection({ designer, designers: designersProp, t }
                       className="w-full h-auto object-cover filter grayscale"
                       loading="lazy"
                       quality={85}
-                      crop={(typeof d.image === 'object' ? (d.image as { crop?: R2ImageMetadata['crop'] })?.crop : undefined)}
-                      hotspot={(typeof d.image === 'object' ? (d.image as { hotspot?: R2ImageMetadata['hotspot'] })?.hotspot : undefined)}
+                      crop={
+                        typeof d.image === 'object'
+                          ? (d.image as {crop?: R2ImageMetadata['crop']})?.crop
+                          : undefined
+                      }
+                      hotspot={
+                        typeof d.image === 'object'
+                          ? (d.image as {hotspot?: R2ImageMetadata['hotspot']})?.hotspot
+                          : undefined
+                      }
                     />
                   </div>
                   <div className="w-full">
@@ -66,7 +78,7 @@ export function ProductDesignerSection({ designer, designers: designersProp, t }
                     <button
                       type="button"
                       onClick={() =>
-                        navigate(`/designer/${d.id}`, { state: { slideOver: true, designer: d } })
+                        navigate(`/designer/${d.id}`, {state: {slideOver: true, designer: d}})
                       }
                       className="inline-block mt-6 text-[var(--text-secondary)] font-light underline underline-offset-4 hover:text-[var(--text-primary)] cursor-pointer bg-transparent border-none p-0 transition-colors"
                     >

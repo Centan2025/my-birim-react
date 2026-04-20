@@ -1,6 +1,6 @@
 import React from 'react'
-import { defineField, defineType } from 'sanity'
-import { getPreviewUrl } from '../utils/previewUrl'
+import {defineField, defineType} from 'sanity'
+import {getPreviewUrl} from '../utils/previewUrl'
 
 export default defineType({
   name: 'homePage',
@@ -11,7 +11,7 @@ export default defineType({
       name: 'heroMedia',
       title: 'Hero Medya',
       type: 'array',
-      of: [{ type: 'heroMediaItem' }],
+      of: [{type: 'heroMediaItem'}],
     }),
     defineField({
       name: 'heroAutoPlay',
@@ -20,18 +20,18 @@ export default defineType({
       description: 'Hero medyanın otomatik olarak geçiş yapmasını sağlar',
       initialValue: true,
     }),
-    defineField({ name: 'isHeroTextVisible', title: 'Hero Metnini Göster', type: 'boolean' }),
+    defineField({name: 'isHeroTextVisible', title: 'Hero Metnini Göster', type: 'boolean'}),
     defineField({
       name: 'contentBlocks',
       title: 'İçerik Blokları',
       type: 'array',
-      of: [{ type: 'contentBlock' }],
+      of: [{type: 'contentBlock'}],
       description: 'Hero bölümünün altında görünecek içerik blokları',
     }),
   ],
   preview: {
-    select: { r2Url: 'heroMedia.0.imageR2.url' },
-    prepare({ r2Url }) {
+    select: {r2Url: 'heroMedia.0.imageR2.url'},
+    prepare({r2Url}) {
       let finalUrl = getPreviewUrl(r2Url)
       return {
         title: 'Ana Sayfa',
@@ -39,7 +39,7 @@ export default defineType({
           <img
             src={finalUrl}
             alt="Ana Sayfa"
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            style={{width: '100%', height: '100%', objectFit: 'cover'}}
           />
         ) : undefined,
       }

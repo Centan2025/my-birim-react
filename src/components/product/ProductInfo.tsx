@@ -1,9 +1,9 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
-import { useTranslation } from '../../i18n'
+import {Link} from 'react-router-dom'
+import {useTranslation} from '../../i18n'
 import ScrollReveal from '../ScrollReveal'
 import PortableTextLite from '../PortableTextLite'
-import type { LocalizedString, Category } from '../../types'
+import type {LocalizedString, Category} from '../../types'
 
 const ArrowLeft = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -51,8 +51,8 @@ interface ProductInfoProps {
   }
   category?: Category
   locale: string
-  prevProduct?: { id: string } | null
-  nextProduct?: { id: string } | null
+  prevProduct?: {id: string} | null
+  nextProduct?: {id: string} | null
   showProductPrevNext?: boolean
 }
 
@@ -62,9 +62,9 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
   locale,
   prevProduct,
   nextProduct,
-  showProductPrevNext
+  showProductPrevNext,
 }) => {
-  const { t } = useTranslation()
+  const {t} = useTranslation()
 
   return (
     <section className="space-y-10">
@@ -72,7 +72,10 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
       <nav className="mb-0" aria-label="Breadcrumb">
         <ol className="list-none p-0 inline-flex flex-wrap items-center font-inter text-[11px] sm:text-[13px] text-[var(--text-secondary)]">
           <li>
-            <Link to="/" className="font-light text-[var(--text-primary)] hover:opacity-80 transition-colors">
+            <Link
+              to="/"
+              className="font-light text-[var(--text-primary)] hover:opacity-80 transition-colors"
+            >
               {t('homepage')}
             </Link>
           </li>
@@ -148,7 +151,9 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
             const desc = t(product.description)
             const isPortableText =
               Array.isArray(desc) ||
-              (typeof desc === 'object' && desc !== null && (desc as { _type?: string })._type === 'block')
+              (typeof desc === 'object' &&
+                desc !== null &&
+                (desc as {_type?: string})._type === 'block')
 
             if (isPortableText) {
               const blocks = Array.isArray(desc) ? desc : [desc]

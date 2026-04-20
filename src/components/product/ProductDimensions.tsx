@@ -1,14 +1,27 @@
 import React from 'react'
-import { OptimizedImage } from '../OptimizedImage'
-import { useTranslation } from '../../i18n'
+import {OptimizedImage} from '../OptimizedImage'
+import {useTranslation} from '../../i18n'
 import ScrollReveal from '../ScrollReveal'
 
-import type { LocalizedString } from '../../types'
+import type {LocalizedString} from '../../types'
 
 interface ProductDimensionsProps {
-  dimImages: { image: string; imageMobile?: string; imageDesktop?: string; title?: string | LocalizedString }[]
+  dimImages: {
+    image: string
+    imageMobile?: string
+    imageDesktop?: string
+    title?: string | LocalizedString
+  }[]
   imageBorderClass: string
-  onOpenLightbox: (images: { image: string; imageMobile?: string; imageDesktop?: string; title?: string | LocalizedString }[], index: number) => void
+  onOpenLightbox: (
+    images: {
+      image: string
+      imageMobile?: string
+      imageDesktop?: string
+      title?: string | LocalizedString
+    }[],
+    index: number
+  ) => void
 }
 
 export const ProductDimensions: React.FC<ProductDimensionsProps> = ({
@@ -16,7 +29,7 @@ export const ProductDimensions: React.FC<ProductDimensionsProps> = ({
   imageBorderClass,
   onOpenLightbox,
 }) => {
-  const { t } = useTranslation()
+  const {t} = useTranslation()
 
   if (!dimImages || dimImages.length === 0) return null
 

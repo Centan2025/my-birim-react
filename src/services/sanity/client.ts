@@ -1,5 +1,5 @@
-import { createClient } from '@sanity/client'
-import type { SanityImagePalette, R2ImageMetadata, LocalizedString } from '../../types'
+import {createClient} from '@sanity/client'
+import type {SanityImagePalette, R2ImageMetadata, LocalizedString} from '../../types'
 
 // Not: Çevresel değişkenler Vite config ile yüklenmektedir.
 // Ancak import.meta bazen hata fırlattığından any olarak tip çevrimi yapıyor olabilir.
@@ -22,11 +22,11 @@ export const ENABLE_LOCAL_FALLBACK =
 
 export const sanity = useSanity
   ? createClient({
-    projectId: SANITY_PROJECT_ID,
-    dataset: SANITY_DATASET,
-    apiVersion: SANITY_API_VERSION,
-    useCdn: true,
-  })
+      projectId: SANITY_PROJECT_ID,
+      dataset: SANITY_DATASET,
+      apiVersion: SANITY_API_VERSION,
+      useCdn: true,
+    })
   : null
 
 // SANITY_TOKEN artık sadece server-side (Vercel API) tarafında kullanılmaktadır.
@@ -39,26 +39,26 @@ export interface SanityFileAsset {
   _ref?: string
 }
 
-export type SanityImageLike = string | { url?: string } | null | undefined
+export type SanityImageLike = string | {url?: string} | null | undefined
 
 export interface SanityProductMediaItem {
   type?: 'image' | 'video' | 'youtube' | string
   url?: string
-  imageR2?: { url?: string; hasResponsiveSizes?: boolean }
-  imageMobileR2?: { url?: string; hasResponsiveSizes?: boolean }
-  imageDesktopR2?: { url?: string; hasResponsiveSizes?: boolean }
+  imageR2?: {url?: string; hasResponsiveSizes?: boolean}
+  imageMobileR2?: {url?: string; hasResponsiveSizes?: boolean}
+  imageDesktopR2?: {url?: string; hasResponsiveSizes?: boolean}
   title?: LocalizedString
   description?: LocalizedString
   link?: string
   linkText?: LocalizedString
-  videoFileR2?: { url?: string }
-  videoFileMobileR2?: { url?: string }
-  videoFileDesktopR2?: { url?: string }
+  videoFileR2?: {url?: string}
+  videoFileMobileR2?: {url?: string}
+  videoFileDesktopR2?: {url?: string}
 }
 
 export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boolean): string => {
   if (!url || typeof url !== 'string') return url || ''
-  
+
   const urlParts = url.split('?')
   let result = urlParts[0] || ''
   const searchParams = urlParts[1] || ''
@@ -68,7 +68,7 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
   const legacyDomains = [
     'assets.birim.com',
     'birim-assets.web-birim.workers.dev',
-    'pub-5e705b2a702d4bb1a3631c558917599d.r2.dev'
+    'pub-5e705b2a702d4bb1a3631c558917599d.r2.dev',
   ]
 
   if (R2_DOMAIN) {
@@ -78,9 +78,13 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
         result = result.replace(domain, r2DomainNoProtocol)
       }
     }
-    
+
     // Generic R2.dev rewrite
-    if (!R2_DOMAIN.includes('.r2.dev') && result.includes('.r2.dev') && !result.includes(r2DomainNoProtocol)) {
+    if (
+      !R2_DOMAIN.includes('.r2.dev') &&
+      result.includes('.r2.dev') &&
+      !result.includes(r2DomainNoProtocol)
+    ) {
       try {
         const parts = result.split('/')
         // Find the segment containing r2.dev (usually the domain part)
@@ -92,7 +96,9 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
           }
         }
         result = parts.join('/')
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
 
     // New: Relatif yolları mutlak yap
@@ -105,25 +111,29 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
   // 3. Segment bazlı temizlik ve encode
   try {
     const parts = result.split('/')
-    result = parts.map((p, i) => {
-      if (i < 3 && p.includes(':')) return p // protocol
-      if (!p) return ''
-      try {
-        return encodeURIComponent(decodeURIComponent(p.trim()))
-          .replace(/%2F/g, '/')
-          .replace(/%3A/g, ':')
-          .replace(/\(/g, '%28')
-          .replace(/\)/g, '%29')
-      } catch {
-        return p.trim()
-      }
-    }).join('/')
-  } catch { /* ignore */ }
+    result = parts
+      .map((p, i) => {
+        if (i < 3 && p.includes(':')) return p // protocol
+        if (!p) return ''
+        try {
+          return encodeURIComponent(decodeURIComponent(p.trim()))
+            .replace(/%2F/g, '/')
+            .replace(/%3A/g, ':')
+            .replace(/\(/g, '%28')
+            .replace(/\)/g, '%29')
+        } catch {
+          return p.trim()
+        }
+      })
+      .join('/')
+  } catch {
+    /* ignore */
+  }
 
   // 4. Params ekle
   let finalUrl = result
   const params = new URLSearchParams(searchParams || '')
-  
+
   if (hasResponsiveSizes && !params.has('rs')) {
     params.set('rs', '1')
   }
@@ -144,9 +154,7 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
   return finalUrl
 }
 
-export const mapImage = (
-  img: SanityImageLike | undefined
-): string => {
+export const mapImage = (img: SanityImageLike | undefined): string => {
   if (!img) return ''
   if (typeof img === 'string') return rewriteR2Url(img)
 
@@ -157,7 +165,7 @@ export const mapImage = (
     const standardUrl = i['url'] as string | undefined
     const asset = i['asset'] as Record<string, unknown> | string | undefined
     const assetUrl = typeof asset === 'string' ? asset : (asset?.['url'] as string | undefined)
-    
+
     const rawUrl = r2Url || standardUrl || assetUrl
     const hasResponsiveSizes = Boolean(r2Asset?.['hasResponsiveSizes'] || i['hasResponsiveSizes'])
 
@@ -173,17 +181,17 @@ export const mapImage = (
 
 export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
   if (!img || typeof img !== 'object') return {}
-  
+
   try {
     const i = img as Record<string, unknown>
 
     let crop: R2ImageMetadata['crop'] = undefined
     if (i['cropX'] !== undefined && i['cropWidth'] !== undefined) {
-      crop = { 
-        x: Number(i['cropX']) || 0, 
-        y: Number(i['cropY']) || 0, 
-        width: Number(i['cropWidth']) || 1, 
-        height: Number(i['cropHeight']) || 1 
+      crop = {
+        x: Number(i['cropX']) || 0,
+        y: Number(i['cropY']) || 0,
+        width: Number(i['cropWidth']) || 1,
+        height: Number(i['cropHeight']) || 1,
       }
     } else if (i['crop'] && typeof i['crop'] === 'object') {
       const c = i['crop'] as Record<string, unknown>
@@ -195,22 +203,22 @@ export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
         x: left,
         y: top,
         width: Math.max(0, 1 - left - right),
-        height: Math.max(0, 1 - top - bottom)
+        height: Math.max(0, 1 - top - bottom),
       }
     }
 
     let hotspot: R2ImageMetadata['hotspot'] = undefined
     if (i['hotspotX'] !== undefined && i['hotspotY'] !== undefined) {
-      hotspot = { x: Number(i['hotspotX']) || 0.5, y: Number(i['hotspotY']) || 0.5 }
+      hotspot = {x: Number(i['hotspotX']) || 0.5, y: Number(i['hotspotY']) || 0.5}
     } else if (i['hotspot'] && typeof i['hotspot'] === 'object') {
       const h = i['hotspot'] as Record<string, unknown>
-      hotspot = { x: Number(h['x']) || 0.5, y: Number(h['y']) || 0.5 }
+      hotspot = {x: Number(h['x']) || 0.5, y: Number(h['y']) || 0.5}
     }
 
     const origWidth = Number(i['width']) || undefined
     const origHeight = Number(i['height']) || undefined
 
-    return { crop, hotspot, origWidth, origHeight }
+    return {crop, hotspot, origWidth, origHeight}
   } catch (err) {
     console.error('Error in mapR2Metadata:', err)
     return {}
@@ -220,14 +228,12 @@ export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
 export const mapImages = (imgs: SanityImageLike[] | undefined): string[] =>
   Array.isArray(imgs) ? imgs.map(i => mapImage(i)).filter(Boolean) : []
 
-export const extractPalette = (
-  img: unknown
-): SanityImagePalette | undefined => {
+export const extractPalette = (img: unknown): SanityImagePalette | undefined => {
   if (!img || typeof img !== 'object') return undefined
   const i = img as Record<string, unknown>
-  
+
   if (i['palette']) return i['palette'] as SanityImagePalette
-  
+
   const asset = i['asset'] as Record<string, unknown> | undefined
   const metadata = asset?.['metadata'] as Record<string, unknown> | undefined
   return metadata?.['palette'] as SanityImagePalette | undefined
@@ -269,11 +275,10 @@ export const mapMediaUrl = (
     if ((isMobile || isDesktop) && m?.videoFileR2?.url) {
       return rewriteR2Url(m.videoFileR2.url)
     }
-    
+
     const fallbackUrl = m?.url || ''
     if (fallbackUrl.includes('youtube.com') || fallbackUrl.includes('youtu.be')) return ''
     return rewriteR2Url(fallbackUrl) || ''
   }
   return m?.url || ''
 }
-

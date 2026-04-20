@@ -1,16 +1,16 @@
 import groq from 'groq'
-import type { User } from '../../types'
-import { sanity, useSanity } from './client'
-import { getItem, setItem } from './settings'
+import type {User} from '../../types'
+import {sanity, useSanity} from './client'
+import {getItem, setItem} from './settings'
 
-const KEYS = { USERS: 'birim_users' }
+const KEYS = {USERS: 'birim_users'}
 
 const normalizeEmail = (value: string): string => (value || '').trim().toLowerCase()
 
 const apiFetch = async (endpoint: string, body: Record<string, unknown>) => {
   const response = await fetch(`/api/auth/${endpoint}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(body),
   })
   if (!response.ok) {
@@ -27,7 +27,7 @@ export const subscribeEmail = async (email: string): Promise<User> => {
   if (!normEmail) throw new Error('Geçerli bir e-posta adresi girin')
 
   if (useSanity) {
-    const data = await apiFetch('subscribe', { email: normEmail })
+    const data = await apiFetch('subscribe', {email: normEmail})
     return data.user
   }
 
@@ -56,7 +56,7 @@ export const subscribeProfessional = async (data: {
   profession: string
   country: string
   phone: string
-}): Promise<{ success: boolean; message: string }> => {
+}): Promise<{success: boolean; message: string}> => {
   const normEmail = normalizeEmail(data.email)
   if (!normEmail) throw new Error('Geçerli bir e-posta adresi girin')
 
@@ -75,7 +75,7 @@ export const subscribeProfessional = async (data: {
 
         fetch(`${emailServerUrl}/api/send-verification`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
             email: normEmail,
             verificationUrl,
@@ -107,7 +107,7 @@ export const subscribeProfessional = async (data: {
     createdAt: new Date().toISOString(),
   }
   setItem(KEYS.USERS, [...users, newUser])
-  return { success: true, message: 'Başvurunuz alındı. Onay mailini kontrol edin.' }
+  return {success: true, message: 'Başvurunuz alındı. Onay mailini kontrol edin.'}
 }
 
 export const registerUser = async (
@@ -140,7 +140,7 @@ export const registerUser = async (
 
       fetch(`${emailServerUrl}/api/send-verification`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           email: normEmail,
           verificationUrl,
@@ -177,7 +177,7 @@ export const loginUser = async (email: string, password: string): Promise<User> 
   const normEmail = normalizeEmail(email)
 
   if (useSanity) {
-    const data = await apiFetch('login', { email: normEmail, password })
+    const data = await apiFetch('login', {email: normEmail, password})
     return data.user
   }
 
@@ -189,7 +189,7 @@ export const loginUser = async (email: string, password: string): Promise<User> 
 
 export const verifyEmail = async (token: string): Promise<boolean> => {
   if (useSanity) {
-    const data = await apiFetch('verify', { token })
+    const data = await apiFetch('verify', {token})
     return !!data.success
   }
   return false
@@ -198,7 +198,7 @@ export const verifyEmail = async (token: string): Promise<boolean> => {
 export const requestPasswordReset = async (email: string): Promise<void> => {
   const normEmail = normalizeEmail(email)
   if (useSanity) {
-    const data = await apiFetch('reset-request', { email: normEmail })
+    const data = await apiFetch('reset-request', {email: normEmail})
 
     // E-posta gönderimini tetikle
     try {
@@ -208,7 +208,7 @@ export const requestPasswordReset = async (email: string): Promise<void> => {
 
       fetch(`${emailServerUrl}/api/send-password-reset`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           email: normEmail,
           resetUrl,
@@ -226,7 +226,7 @@ export const requestPasswordReset = async (email: string): Promise<void> => {
 
 export const resetPassword = async (token: string, newPassword: string): Promise<void> => {
   if (useSanity) {
-    await apiFetch('reset-password', { token, newPassword })
+    await apiFetch('reset-password', {token, newPassword})
     return
   }
   throw new Error('Sanity not configured.')
@@ -238,7 +238,7 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
     return (
       (await sanity.fetch(
         groq`*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]{ ..., isVerified }`,
-        { email: normEmail }
+        {email: normEmail}
       )) || null
     )
   return getItem<User[]>(KEYS.USERS)?.find(u => normalizeEmail(u.email) === normEmail) || null
@@ -247,7 +247,7 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
 export const getUserById = async (id: string): Promise<User | null> => {
   if (useSanity && sanity)
     return (
-      (await sanity.fetch(groq`*[_type == "user" && _id == $id][0]{ ..., isVerified }`, { id })) ||
+      (await sanity.fetch(groq`*[_type == "user" && _id == $id][0]{ ..., isVerified }`, {id})) ||
       null
     )
   return getItem<User[]>(KEYS.USERS)?.find(u => u._id === id) || null
@@ -256,7 +256,7 @@ export const getUserById = async (id: string): Promise<User | null> => {
 export const verifyUserByToken = async (token: string): Promise<User | null> => {
   if (useSanity) {
     try {
-      const data = await apiFetch('verify', { token })
+      const data = await apiFetch('verify', {token})
       if (data.success) {
         // Doğrulandıktan sonra kullanıcıyı çekmek için mevcut read-only client'ı kullanabiliriz
         return await sanity!.fetch(
@@ -273,7 +273,7 @@ export const verifyUserByToken = async (token: string): Promise<User | null> => 
 export const deleteUserAccount = async (id: string): Promise<boolean> => {
   if (useSanity) {
     try {
-      const data = await apiFetch('delete-account', { id })
+      const data = await apiFetch('delete-account', {id})
       return !!data.success
     } catch {
       return false

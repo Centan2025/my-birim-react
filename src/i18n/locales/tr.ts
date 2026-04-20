@@ -179,8 +179,10 @@ export default {
   close_cart: 'Sepeti kapat',
   newsletter_title: 'Tasarım dünyamıza katılın',
   professional_access: 'Özel erişim',
-  professional_access_desc: "BİRİM'in en yeni koleksiyonları, tasarım hikayeleri ve özel videolarından ilk siz haberdar olun.",
-  newsletter_prompt: "BİRİM'in en yeni koleksiyonları, tasarım hikayeleri ve özel videolarından ilk siz haberdar olun.",
+  professional_access_desc:
+    "BİRİM'in en yeni koleksiyonları, tasarım hikayeleri ve özel videolarından ilk siz haberdar olun.",
+  newsletter_prompt:
+    "BİRİM'in en yeni koleksiyonları, tasarım hikayeleri ve özel videolarından ilk siz haberdar olun.",
   join_us: 'Bültenimize abone olun',
   waiting: 'Bekleyin',
   complete_application: 'Başvuruyu tamamla',

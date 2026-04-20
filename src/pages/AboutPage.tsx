@@ -205,9 +205,15 @@ export function AboutPage() {
                             className="w-full h-auto object-cover block"
                             crop={typeof img === 'object' ? img.crop : undefined}
                             hotspot={typeof img === 'object' ? img.hotspot : undefined}
-                            origWidth={typeof img === 'object' ? (img as {origWidth?: number}).origWidth : undefined}
+                            origWidth={
+                              typeof img === 'object'
+                                ? (img as {origWidth?: number}).origWidth
+                                : undefined
+                            }
                             origHeight={
-                              typeof img === 'object' ? (img as {origHeight?: number}).origHeight : undefined
+                              typeof img === 'object'
+                                ? (img as {origHeight?: number}).origHeight
+                                : undefined
                             }
                           />
                         )
@@ -240,9 +246,15 @@ export function AboutPage() {
                             className="w-full h-auto object-cover block"
                             crop={typeof img === 'object' ? img.crop : undefined}
                             hotspot={typeof img === 'object' ? img.hotspot : undefined}
-                            origWidth={typeof img === 'object' ? (img as {origWidth?: number}).origWidth : undefined}
+                            origWidth={
+                              typeof img === 'object'
+                                ? (img as {origWidth?: number}).origWidth
+                                : undefined
+                            }
                             origHeight={
-                              typeof img === 'object' ? (img as {origHeight?: number}).origHeight : undefined
+                              typeof img === 'object'
+                                ? (img as {origHeight?: number}).origHeight
+                                : undefined
                             }
                           />
                         )
@@ -314,10 +326,14 @@ export function AboutPage() {
                               crop={typeof img === 'object' ? img.crop : undefined}
                               hotspot={typeof img === 'object' ? img.hotspot : undefined}
                               origWidth={
-                                typeof img === 'object' ? (img as {origWidth?: number}).origWidth : undefined
+                                typeof img === 'object'
+                                  ? (img as {origWidth?: number}).origWidth
+                                  : undefined
                               }
                               origHeight={
-                                typeof img === 'object' ? (img as {origHeight?: number}).origHeight : undefined
+                                typeof img === 'object'
+                                  ? (img as {origHeight?: number}).origHeight
+                                  : undefined
                               }
                             />
                           )

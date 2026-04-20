@@ -12,7 +12,7 @@ export const ArrowRight = (props: React.ComponentProps<'svg'>) => (
     strokeLinecap="round"
     strokeLinejoin="round"
     {...props}
-    style={{ ...props.style, display: 'block', margin: '0 auto' }}
+    style={{...props.style, display: 'block', margin: '0 auto'}}
   >
     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="0.8" fill="none" />
     <path

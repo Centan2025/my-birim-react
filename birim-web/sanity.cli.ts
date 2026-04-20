@@ -27,9 +27,11 @@ if (typeof window === 'undefined') {
   // @ts-ignore
   globalThis.Element = globalThis.Element || mockClass
   // @ts-ignore
-  globalThis.HTMLElement = globalThis.HTMLElement || class HTMLElement extends (globalThis.Element as any) {}
+  globalThis.HTMLElement =
+    globalThis.HTMLElement || class HTMLElement extends (globalThis.Element as any) {}
   // @ts-ignore
-  globalThis.HTMLDivElement = globalThis.HTMLDivElement || class extends (globalThis.HTMLElement as any) {}
+  globalThis.HTMLDivElement =
+    globalThis.HTMLDivElement || class extends (globalThis.HTMLElement as any) {}
   // @ts-ignore
   if (!globalThis.Element.prototype.matches) globalThis.Element.prototype.matches = () => false
   // @ts-ignore

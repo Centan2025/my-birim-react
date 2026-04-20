@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
-import { useTranslation } from '../i18n'
-import { registerUser, loginUser } from '../services/cms'
-import { loginRateLimiter, registerRateLimiter } from '../lib/rateLimiter'
-import { analytics } from '../lib/analytics'
-import { validateLoginForm, validateRegisterForm, getPasswordStrength } from '../lib/formValidation'
-import { useSEO } from '../hooks/useSEO'
+import React, {useEffect, useState} from 'react'
+import {useNavigate, Link} from 'react-router-dom'
+import {useAuth} from '../context/AuthContext'
+import {useTranslation} from '../i18n'
+import {registerUser, loginUser} from '../services/cms'
+import {loginRateLimiter, registerRateLimiter} from '../lib/rateLimiter'
+import {analytics} from '../lib/analytics'
+import {validateLoginForm, validateRegisterForm, getPasswordStrength} from '../lib/formValidation'
+import {useSEO} from '../hooks/useSEO'
 
 export function LoginPage() {
   const [isLoginMode, setIsLoginMode] = useState(true)
@@ -25,7 +25,7 @@ export function LoginPage() {
   )
   const auth = useAuth()
   const navigate = useNavigate()
-  const { t } = useTranslation()
+  const {t} = useTranslation()
   const pageTitle = isLoginMode ? `BIRIM - ${t('login')}` : `BIRIM - ${t('sign_up')}`
 
   useSEO({
@@ -39,7 +39,7 @@ export function LoginPage() {
   // Eğer kullanıcı zaten giriş yaptıysa, /login'e geldiğinde direkt profiline yönlendir
   useEffect(() => {
     if (auth.isLoggedIn) {
-      navigate('/profile', { replace: true })
+      navigate('/profile', {replace: true})
     }
   }, [auth.isLoggedIn, navigate])
 
@@ -62,7 +62,7 @@ export function LoginPage() {
         navigator.geolocation.getCurrentPosition(
           async pos => {
             try {
-              const { latitude, longitude } = pos.coords
+              const {latitude, longitude} = pos.coords
               const resp = await fetch(
                 `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=tr`
               )
@@ -259,8 +259,11 @@ export function LoginPage() {
                 setValidationErrors({})
                 setPasswordStrength(null)
               }}
-              className={`flex-1 py-4 text-center font-medium text-sm transition-all duration-300 relative ${isLoginMode ? 'text-[var(--text-primary)] bg-[var(--bg-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                }`}
+              className={`flex-1 py-4 text-center font-medium text-sm transition-all duration-300 relative ${
+                isLoginMode
+                  ? 'text-[var(--text-primary)] bg-[var(--bg-primary)]'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+              }`}
             >
               {t('login')}
               {isLoginMode && (
@@ -281,8 +284,11 @@ export function LoginPage() {
                 setValidationErrors({})
                 setPasswordStrength(null)
               }}
-              className={`flex-1 py-4 text-center font-medium text-sm transition-all duration-300 relative ${!isLoginMode ? 'text-[var(--text-primary)] bg-[var(--bg-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                }`}
+              className={`flex-1 py-4 text-center font-medium text-sm transition-all duration-300 relative ${
+                !isLoginMode
+                  ? 'text-[var(--text-primary)] bg-[var(--bg-primary)]'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+              }`}
             >
               {t('sign_up')}
               {!isLoginMode && (
@@ -302,7 +308,10 @@ export function LoginPage() {
               >
                 <div className="space-y-5">
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-[var(--text-secondary)] mb-2"
+                    >
                       {t('email') || 'E-posta'}
                     </label>
                     <input
@@ -316,14 +325,17 @@ export function LoginPage() {
                         setEmail(e.target.value)
                         if (validationErrors['email']) {
                           setValidationErrors(prev => {
-                            const newErrors = { ...prev }
+                            const newErrors = {...prev}
                             delete newErrors['email']
                             return newErrors
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${validationErrors['email'] ? 'border-red-500' : 'border-[var(--border-primary)]'
-                        }`}
+                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
+                        validationErrors['email']
+                          ? 'border-red-500'
+                          : 'border-[var(--border-primary)]'
+                      }`}
                       placeholder="E-posta adresiniz"
                     />
                     {validationErrors['email'] && (
@@ -348,14 +360,17 @@ export function LoginPage() {
                         setPassword(e.target.value)
                         if (validationErrors['password']) {
                           setValidationErrors(prev => {
-                            const newErrors = { ...prev }
+                            const newErrors = {...prev}
                             delete newErrors['password']
                             return newErrors
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${validationErrors['password'] ? 'border-red-500' : 'border-[var(--border-primary)]'
-                        }`}
+                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
+                        validationErrors['password']
+                          ? 'border-red-500'
+                          : 'border-[var(--border-primary)]'
+                      }`}
                       placeholder="••••••••"
                     />
                     {validationErrors['password'] && (
@@ -426,7 +441,10 @@ export function LoginPage() {
               >
                 <div className="space-y-5">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                    <label
+                      htmlFor="name"
+                      className="block text-sm font-medium text-[var(--text-secondary)] mb-2"
+                    >
                       {t('full_name')}
                     </label>
                     <input
@@ -439,14 +457,17 @@ export function LoginPage() {
                         setName(e.target.value)
                         if (validationErrors['name']) {
                           setValidationErrors(prev => {
-                            const newErrors = { ...prev }
+                            const newErrors = {...prev}
                             delete newErrors['name']
                             return newErrors
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${validationErrors['name'] ? 'border-red-500' : 'border-[var(--border-primary)]'
-                        }`}
+                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
+                        validationErrors['name']
+                          ? 'border-red-500'
+                          : 'border-[var(--border-primary)]'
+                      }`}
                       placeholder={t('full_name_placeholder')}
                     />
                     {validationErrors['name'] && (
@@ -471,14 +492,17 @@ export function LoginPage() {
                         setEmail(e.target.value)
                         if (validationErrors['email']) {
                           setValidationErrors(prev => {
-                            const newErrors = { ...prev }
+                            const newErrors = {...prev}
                             delete newErrors['email']
                             return newErrors
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${validationErrors['email'] ? 'border-red-500' : 'border-[var(--border-primary)]'
-                        }`}
+                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
+                        validationErrors['email']
+                          ? 'border-red-500'
+                          : 'border-[var(--border-primary)]'
+                      }`}
                       placeholder={t('email_placeholder')}
                     />
                     {validationErrors['email'] && (
@@ -506,14 +530,17 @@ export function LoginPage() {
                           setPasswordStrength(newPassword ? getPasswordStrength(newPassword) : null)
                           if (validationErrors['password']) {
                             setValidationErrors(prev => {
-                              const newErrors = { ...prev }
+                              const newErrors = {...prev}
                               delete newErrors['password']
                               return newErrors
                             })
                           }
                         }}
-                        className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${validationErrors['password'] ? 'border-red-500' : 'border-[var(--border-primary)]'
-                          }`}
+                        className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
+                          validationErrors['password']
+                            ? 'border-red-500'
+                            : 'border-[var(--border-primary)]'
+                        }`}
                         placeholder="••••••••"
                       />
                       {validationErrors['password'] && (
@@ -524,21 +551,23 @@ export function LoginPage() {
                           <div className="flex items-center gap-2 mb-1">
                             <div className="flex-1 h-2 bg-[var(--border-primary)] rounded-full overflow-hidden">
                               <div
-                                className={`h-full transition-all duration-300 ${passwordStrength === 'weak'
+                                className={`h-full transition-all duration-300 ${
+                                  passwordStrength === 'weak'
                                     ? 'bg-red-500 w-1/3'
                                     : passwordStrength === 'medium'
                                       ? 'bg-yellow-500 w-2/3'
                                       : 'bg-green-500 w-full'
-                                  }`}
+                                }`}
                               ></div>
                             </div>
                             <span
-                              className={`text-xs font-medium ${passwordStrength === 'weak'
+                              className={`text-xs font-medium ${
+                                passwordStrength === 'weak'
                                   ? 'text-red-600'
                                   : passwordStrength === 'medium'
                                     ? 'text-yellow-600'
                                     : 'text-green-600'
-                                }`}
+                              }`}
                             >
                               {passwordStrength === 'weak'
                                 ? t('weak')
@@ -547,7 +576,9 @@ export function LoginPage() {
                                   : t('strong')}
                             </span>
                           </div>
-                          <p className="text-xs text-[var(--text-secondary)]">{t('password_hint')}</p>
+                          <p className="text-xs text-[var(--text-secondary)]">
+                            {t('password_hint')}
+                          </p>
                         </div>
                       )}
                     </div>
@@ -569,14 +600,17 @@ export function LoginPage() {
                         setCompany(e.target.value)
                         if (validationErrors['company']) {
                           setValidationErrors(prev => {
-                            const newErrors = { ...prev }
+                            const newErrors = {...prev}
                             delete newErrors['company']
                             return newErrors
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${validationErrors['company'] ? 'border-red-500' : 'border-[var(--border-primary)]'
-                        }`}
+                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
+                        validationErrors['company']
+                          ? 'border-red-500'
+                          : 'border-[var(--border-primary)]'
+                      }`}
                       placeholder={t('company_placeholder')}
                     />
                     {validationErrors['company'] && (
@@ -600,14 +634,17 @@ export function LoginPage() {
                         setProfession(e.target.value)
                         if (validationErrors['profession']) {
                           setValidationErrors(prev => {
-                            const newErrors = { ...prev }
+                            const newErrors = {...prev}
                             delete newErrors['profession']
                             return newErrors
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${validationErrors['profession'] ? 'border-red-500' : 'border-[var(--border-primary)]'
-                        }`}
+                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
+                        validationErrors['profession']
+                          ? 'border-red-500'
+                          : 'border-[var(--border-primary)]'
+                      }`}
                       placeholder={t('profession_placeholder')}
                     />
                     {validationErrors['profession'] && (
@@ -630,14 +667,17 @@ export function LoginPage() {
                         setCountry(e.target.value)
                         if (validationErrors['country']) {
                           setValidationErrors(prev => {
-                            const newErrors = { ...prev }
+                            const newErrors = {...prev}
                             delete newErrors['country']
                             return newErrors
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${validationErrors['country'] ? 'border-red-500' : 'border-[var(--border-primary)]'
-                        }`}
+                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
+                        validationErrors['country']
+                          ? 'border-red-500'
+                          : 'border-[var(--border-primary)]'
+                      }`}
                       placeholder={t('country_placeholder')}
                     />
                     {validationErrors['country'] && (
@@ -698,7 +738,10 @@ export function LoginPage() {
         {/* Footer */}
         <p className="text-center text-sm text-[var(--text-secondary)]">
           {t('register_benefit_prefix')}
-          <Link to="/products" className="font-medium text-[var(--text-primary)] hover:opacity-80 underline">
+          <Link
+            to="/products"
+            className="font-medium text-[var(--text-primary)] hover:opacity-80 underline"
+          >
             {t('register_benefit_link')}
           </Link>
           {t('register_benefit_suffix')}

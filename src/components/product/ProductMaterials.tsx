@@ -1,70 +1,73 @@
-import { motion, type Variants } from 'framer-motion'
-import { OptimizedImage } from '../OptimizedImage'
-import { useTranslation } from '../../i18n'
+import {motion, type Variants} from 'framer-motion'
+import {OptimizedImage} from '../OptimizedImage'
+import {useTranslation} from '../../i18n'
 import ScrollReveal from '../ScrollReveal'
-import type { LocalizedString } from '../../types'
+import type {LocalizedString} from '../../types'
 
 interface ProductMaterialsProps {
-  mergedGroups: { groupTitle: LocalizedString; books: { bookTitle: LocalizedString; materials: { image: string; name: LocalizedString }[] }[] }[]
-  grouped: { materials: { image: string; name: LocalizedString }[] }[]
-  flatMaterials: { image: string; name: LocalizedString }[]
+  mergedGroups: {
+    groupTitle: LocalizedString
+    books: {bookTitle: LocalizedString; materials: {image: string; name: LocalizedString}[]}[]
+  }[]
+  grouped: {materials: {image: string; name: LocalizedString}[]}[]
+  flatMaterials: {image: string; name: LocalizedString}[]
   activeMaterialGroup: number | null
   activeBookIndex: number
   imageBorderClass: string
   onSetActiveMaterialGroup: (index: number) => void
   onSetActiveBookIndex: (index: number) => void
-  onOpenMaterialLightbox: (images: { image: string; name: string }[], index: number) => void
+  onOpenMaterialLightbox: (images: {image: string; name: string}[], index: number) => void
 }
 
 const sideReveal: Record<string, Variants> = {
   container: {
-    revealOff: { opacity: 0 },
+    revealOff: {opacity: 0},
     revealOn: {
       opacity: 1,
-      transition: { staggerChildren: 0.1 },
+      transition: {staggerChildren: 0.1},
     },
   },
   item: {
-    revealOff: { opacity: 0, x: -50 },
+    revealOff: {opacity: 0, x: -50},
     revealOn: {
       opacity: 1,
       x: 0,
-      transition: { type: 'spring', stiffness: 100, damping: 20 }
+      transition: {type: 'spring', stiffness: 100, damping: 20},
     },
   },
   wrapper: {
-    revealOff: { scaleX: 0, transformOrigin: 'left' },
+    revealOff: {scaleX: 0, transformOrigin: 'left'},
     revealOn: {
       scaleX: 1,
-      transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
-    }
+      transition: {duration: 0.8, ease: [0.22, 1, 0.36, 1]},
+    },
   },
   image: {
-    revealOff: { opacity: 0, x: -20 },
+    revealOff: {opacity: 0, x: -20},
     revealOn: {
       opacity: 1,
       x: 0,
-      transition: { delay: 0.2, duration: 0.8 }
-    }
-  }
+      transition: {delay: 0.2, duration: 0.8},
+    },
+  },
 }
 
 /**
  * Animated container that fades/slides content when `animKey` changes.
  */
-const AnimatedContent: React.FC<{ animKey: string; children: React.ReactNode; variants?: Variants; className?: string }> = ({
-  animKey,
-  children,
-  variants,
-  className
-}) => {
+const AnimatedContent: React.FC<{
+  animKey: string
+  children: React.ReactNode
+  variants?: Variants
+  className?: string
+}> = ({animKey, children, variants, className}) => {
   return (
     <motion.div
       key={animKey}
-      initial={variants ? "revealOff" : { opacity: 0, y: 10 }}
-      whileInView={variants ? "revealOn" : { opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.1 }}
-      transition={variants ? undefined : { duration: 0.4, ease: 'easeOut' }}
+      initial={variants ? 'revealOff' : {opacity: 0, y: 10}}
+      whileInView={variants ? 'revealOn' : {opacity: 1, y: 0}}
+      viewport={{once: true, amount: 0.1}}
+      transition={variants ? undefined : {duration: 0.4, ease: 'easeOut'}}
       variants={variants}
       className={className}
     >
@@ -74,11 +77,11 @@ const AnimatedContent: React.FC<{ animKey: string; children: React.ReactNode; va
 }
 
 const MaterialCard: React.FC<{
-  material: { image: string; name: string | LocalizedString }
+  material: {image: string; name: string | LocalizedString}
   imageBorderClass: string
   t: (v: string | LocalizedString) => string
   onClick: () => void
-}> = ({ material, imageBorderClass, t, onClick }) => (
+}> = ({material, imageBorderClass, t, onClick}) => (
   <motion.div
     variants={sideReveal['item']}
     className="text-center group cursor-pointer flex flex-col items-center w-full sm:w-28 md:w-32"
@@ -90,7 +93,10 @@ const MaterialCard: React.FC<{
     role="button"
     tabIndex={0}
   >
-    <motion.div variants={sideReveal['wrapper']} className="relative overflow-hidden w-full aspect-square sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-sm shadow-sm">
+    <motion.div
+      variants={sideReveal['wrapper']}
+      className="relative overflow-hidden w-full aspect-square sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-sm shadow-sm"
+    >
       <motion.div variants={sideReveal['image']} className="w-full h-full">
         <OptimizedImage
           src={material.image}
@@ -118,7 +124,7 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
   onSetActiveBookIndex,
   onOpenMaterialLightbox,
 }) => {
-  const { t } = useTranslation()
+  const {t} = useTranslation()
 
   const hasMaterialGroups = Array.isArray(mergedGroups) && mergedGroups.length > 0
   const safeActiveIndex =
@@ -133,10 +139,12 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
 
   if (!hasMaterialGroups && flatMaterials.length === 0) return null
 
-  const getMaterialsForLightbox = (materials: { image?: string; name?: string | LocalizedString }[]) =>
+  const getMaterialsForLightbox = (
+    materials: {image?: string; name?: string | LocalizedString}[]
+  ) =>
     materials
-      .filter((m) => !!m.image)
-      .map((m) => ({
+      .filter(m => !!m.image)
+      .map(m => ({
         image: m.image as string,
         name: t(m.name || ''),
       }))
@@ -151,7 +159,9 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
         }
       `}</style>
       <div className="pb-4">
-        <h2 className="text-xl font-light text-[var(--text-secondary)] mb-4">{t('material_alternatives')}</h2>
+        <h2 className="text-xl font-light text-[var(--text-secondary)] mb-4">
+          {t('material_alternatives')}
+        </h2>
         {hasMaterialGroups ? (
           <>
             {/* Group tabs */}
@@ -160,10 +170,11 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                 <button
                   key={`group-${idx}`}
                   onClick={() => onSetActiveMaterialGroup(idx)}
-                  className={`px-5 py-3 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeMaterialGroup === idx
-                    ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--text-primary)]'
-                    : 'bg-transparent text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]'
-                    }`}
+                  className={`px-5 py-3 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${
+                    activeMaterialGroup === idx
+                      ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--text-primary)]'
+                      : 'bg-transparent text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]'
+                  }`}
                 >
                   {t(g.groupTitle)}
                 </button>
@@ -181,10 +192,11 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                         <button
                           key={`book-${idx}`}
                           onClick={() => onSetActiveBookIndex(idx)}
-                          className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${activeBookIndex === idx
-                            ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--text-primary)]'
-                            : 'bg-transparent text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]'
-                            }`}
+                          className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${
+                            activeBookIndex === idx
+                              ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--text-primary)]'
+                              : 'bg-transparent text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]'
+                          }`}
                         >
                           {t(book.bookTitle)}
                         </button>

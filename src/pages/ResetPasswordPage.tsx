@@ -1,14 +1,14 @@
-import { useState } from 'react'
-import { useSearchParams, useNavigate, Link } from 'react-router-dom'
-import { useTranslation } from '../i18n'
-import { requestPasswordReset, resetPassword } from '../services/cms'
-import { useSEO } from '../hooks/useSEO'
+import {useState} from 'react'
+import {useSearchParams, useNavigate, Link} from 'react-router-dom'
+import {useTranslation} from '../i18n'
+import {requestPasswordReset, resetPassword} from '../services/cms'
+import {useSEO} from '../hooks/useSEO'
 
 export function ResetPasswordPage() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
   const navigate = useNavigate()
-  const { t } = useTranslation()
+  const {t} = useTranslation()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -83,7 +83,10 @@ export function ResetPasswordPage() {
           {!token ? (
             <form onSubmit={handleRequestReset} className="space-y-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-[var(--text-secondary)] mb-2"
+                >
                   {t('email')}
                 </label>
                 <input
@@ -111,7 +114,10 @@ export function ResetPasswordPage() {
           ) : (
             <form onSubmit={handleResetPassword} className="space-y-6">
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-[var(--text-secondary)] mb-2"
+                >
                   {t('new_password')}
                 </label>
                 <input
@@ -157,7 +163,10 @@ export function ResetPasswordPage() {
           )}
 
           <div className="mt-6 text-center">
-            <Link to="/login" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] underline">
+            <Link
+              to="/login"
+              className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] underline"
+            >
               {t('back_to_login')}
             </Link>
           </div>

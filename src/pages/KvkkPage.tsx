@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { getKvkkPolicy } from '../services/cms'
-import { useTranslation } from '../i18n'
+import {useEffect, useState} from 'react'
+import {Link} from 'react-router-dom'
+import {getKvkkPolicy} from '../services/cms'
+import {useTranslation} from '../i18n'
 import PortableTextLite from '../components/PortableTextLite'
-import type { KvkkPolicy } from '../types'
-import { useSEO } from '../hooks/useSEO'
+import type {KvkkPolicy} from '../types'
+import {useSEO} from '../hooks/useSEO'
 
 type PortableBlock = {
   _type?: string
@@ -13,7 +13,7 @@ type PortableBlock = {
 
 export default function KvkkPage() {
   const [policy, setPolicy] = useState<KvkkPolicy | null>(null)
-  const { t, locale } = useTranslation()
+  const {t, locale} = useTranslation()
   const localizedContent = policy?.content as Record<string, unknown> | undefined
 
   useEffect(() => {
@@ -57,7 +57,9 @@ export default function KvkkPage() {
             </li>
           </ol>
         </nav>
-        <h1 className="text-3xl font-light text-[var(--text-primary)] mt-6 md:mt-8 mb-6">{title}</h1>
+        <h1 className="text-3xl font-light text-[var(--text-primary)] mt-6 md:mt-8 mb-6">
+          {title}
+        </h1>
         {Array.isArray(contentBlocks) ? (
           <div className="prose prose-gray dark:prose-invert max-w-none text-[var(--text-primary)]">
             <PortableTextLite value={contentBlocks as PortableBlock[]} />

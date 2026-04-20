@@ -1,6 +1,6 @@
 import React from 'react'
-import { defineField, defineType } from 'sanity'
-import { getPreviewUrl } from '../utils/previewUrl'
+import {defineField, defineType} from 'sanity'
+import {getPreviewUrl} from '../utils/previewUrl'
 import BulkMediaUploadInput from '../../components/BulkMediaUploadInput'
 
 export default defineType({
@@ -12,7 +12,7 @@ export default defineType({
       name: 'id',
       title: 'ID (Slug)',
       type: 'slug',
-      options: { source: (doc: any) => doc.title?.tr || doc.title?.en, maxLength: 96 },
+      options: {source: (doc: any) => doc.title?.tr || doc.title?.en, maxLength: 96},
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -60,38 +60,42 @@ export default defineType({
       type: 'array',
       of: [{type: 'productSimpleMediaItem'}],
       components: {
-        input: BulkMediaUploadInput
+        input: BulkMediaUploadInput,
       },
-      description: 'Projeye ait tüm görsel ve videolar. İlk öğe listede önizleme olarak kullanılır.',
+      description:
+        'Projeye ait tüm görsel ve videolar. İlk öğe listede önizleme olarak kullanılır.',
     }),
-    defineField({ name: 'excerpt', title: 'Kısa Açıklama', type: 'localizedPortableText' }),
+    defineField({name: 'excerpt', title: 'Kısa Açıklama', type: 'localizedPortableText'}),
     defineField({
       name: 'contentBlocks',
       title: 'İçerik Blokları',
       type: 'array',
-      of: [{ type: 'contentBlock' }],
-      description: 'Proje detay sayfasında gösterilecek içerik blokları (ana sayfa ile aynı sistem)',
+      of: [{type: 'contentBlock'}],
+      description:
+        'Proje detay sayfasında gösterilecek içerik blokları (ana sayfa ile aynı sistem)',
     }),
   ],
   preview: {
-    select: { 
-      title: 'title.tr', 
-      media: 'media' 
+    select: {
+      title: 'title.tr',
+      media: 'media',
     },
-    prepare({ title, media }) {
+    prepare({title, media}) {
       const coverItem = media?.find((m: any) => m.isCover) || media?.[0]
       const r2Url = coverItem?.imageR2?.url || coverItem?.thumbnailR2?.url
       let finalUrl = getPreviewUrl(r2Url)
 
       return {
         title: title || 'Proje',
-        media: finalUrl ? (
-          () => <img
-            src={finalUrl}
-            alt={title || 'Proje'}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
-        ) : undefined,
+        media: finalUrl
+          ? () => (
+              <img
+                src={finalUrl}
+                alt={title || 'Proje'}
+                style={{width: '100%', height: '100%', objectFit: 'cover'}}
+              />
+            )
+          : undefined,
       }
     },
   },

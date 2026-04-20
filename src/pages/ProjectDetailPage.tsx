@@ -356,22 +356,29 @@ export function ProjectDetailPage() {
     siteName: 'BIRIM',
     locale: 'tr_TR',
     section: 'Projects',
-    schema: project ? {
-      '@context': 'https://schema.org',
-      '@type': 'CreativeWork',
-      name: projectTitle,
-      description: projectDescription,
-      image: seoImage,
-      datePublished: project.date,
-      locationCreated: (project as any).location ? {
-        '@type': 'Place',
-        name: typeof (project as any).location === 'string' ? t((project as any).location) : 'Turkey'
-      } : undefined,
-      creator: {
-        '@type': 'Organization',
-        name: 'BIRIM'
-      }
-    } : undefined
+    schema: project
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'CreativeWork',
+          name: projectTitle,
+          description: projectDescription,
+          image: seoImage,
+          datePublished: project.date,
+          locationCreated: (project as any).location
+            ? {
+                '@type': 'Place',
+                name:
+                  typeof (project as any).location === 'string'
+                    ? t((project as any).location)
+                    : 'Turkey',
+              }
+            : undefined,
+          creator: {
+            '@type': 'Organization',
+            name: 'BIRIM',
+          },
+        }
+      : undefined,
   })
 
   if (loading) {
@@ -741,4 +748,3 @@ export function ProjectDetailPage() {
     </div>
   )
 }
-

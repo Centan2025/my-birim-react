@@ -93,7 +93,11 @@ vi.mock('../components/FullscreenMediaViewer', () => ({
 }))
 
 vi.mock('../components/product/ProductMaterials', () => ({
-  ProductMaterials: ({onSetActiveMaterialGroup}: { onSetActiveMaterialGroup: (index: number) => void }) => (
+  ProductMaterials: ({
+    onSetActiveMaterialGroup,
+  }: {
+    onSetActiveMaterialGroup: (index: number) => void
+  }) => (
     <div data-testid="product-materials">
       <button onClick={() => onSetActiveMaterialGroup(0)}>Select Group 0</button>
     </div>

@@ -4,10 +4,10 @@ import {useHeaderSearch} from '../hooks/useHeaderSearch'
 
 // Stable mock functions
 const mockT = vi.fn((val: unknown) => {
-  if (typeof val === 'string') return val;
-  const v = val as Record<string, string>;
-  return v?.tr || v?.en || '';
-});
+  if (typeof val === 'string') return val
+  const v = val as Record<string, string>
+  return v?.tr || v?.en || ''
+})
 
 vi.mock('../i18n', () => ({
   useTranslation: () => ({

@@ -1,18 +1,28 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
-import { useTranslation } from '../i18n'
-import { Link } from 'react-router-dom'
-import { useSEO } from '../hooks/useSEO'
-import { deleteUserAccount } from '../services/cms'
-import { motion } from 'framer-motion'
-import { User, Mail, Building, Globe, Briefcase, Calendar, ArrowRight, LogOut, Trash2 } from 'lucide-react'
+import {useState} from 'react'
+import {useNavigate} from 'react-router-dom'
+import {useAuth} from '../context/AuthContext'
+import {useTranslation} from '../i18n'
+import {Link} from 'react-router-dom'
+import {useSEO} from '../hooks/useSEO'
+import {deleteUserAccount} from '../services/cms'
+import {motion} from 'framer-motion'
+import {
+  User,
+  Mail,
+  Building,
+  Globe,
+  Briefcase,
+  Calendar,
+  ArrowRight,
+  LogOut,
+  Trash2,
+} from 'lucide-react'
 
 export function ProfilePage() {
   const auth = useAuth()
   const navigate = useNavigate()
-  const { t, locale } = useTranslation()
+  const {t, locale} = useTranslation()
   const pageTitle = `BIRIM - ${t('profile')}`
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -28,12 +38,16 @@ export function ProfilePage() {
     return (
       <div className="bg-[#f5f5f5] min-h-[70vh] flex items-center justify-center py-20">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{opacity: 0, y: 20}}
+          animate={{opacity: 1, y: 0}}
           className="text-center p-12 bg-white shadow-sm border border-black/5 max-w-md w-full"
         >
-          <h1 className="text-xl font-bold uppercase tracking-[0.3em] mb-4 text-gray-900">{t('login_required')}</h1>
-          <p className="text-gray-500 mb-10 text-sm font-inter leading-relaxed">{t('login_required_desc')}</p>
+          <h1 className="text-xl font-bold uppercase tracking-[0.3em] mb-4 text-gray-900">
+            {t('login_required')}
+          </h1>
+          <p className="text-gray-500 mb-10 text-sm font-inter leading-relaxed">
+            {t('login_required_desc')}
+          </p>
           <Link
             to="/login"
             className="inline-block w-full bg-[#e5e5e5] text-black border border-black font-bold py-4 px-8 uppercase tracking-[0.2em] text-[11px] hover:bg-[#d8d8d8] transition-all duration-500 font-inter"
@@ -73,16 +87,31 @@ export function ProfilePage() {
 
   const dateLocale = locale === 'tr' ? 'tr-TR' : 'en-US'
 
-  const InfoItem = ({ label, value, icon: Icon }: { label: string, value: string | undefined, icon: any }) => {
+  const InfoItem = ({
+    label,
+    value,
+    icon: Icon,
+  }: {
+    label: string
+    value: string | undefined
+    icon: any
+  }) => {
     if (!value) return null
     return (
       <div className="group py-6 border-b border-black/5 last:border-0 flex items-start gap-6 transition-colors hover:bg-black/[0.01] px-2 -mx-2">
         <div className="mt-1">
-          <Icon className="w-5 h-5 text-gray-300 group-hover:text-black transition-colors duration-500" strokeWidth={1} />
+          <Icon
+            className="w-5 h-5 text-gray-300 group-hover:text-black transition-colors duration-500"
+            strokeWidth={1}
+          />
         </div>
         <div>
-          <p className="text-[10px] text-gray-400 uppercase tracking-[0.3em] font-bold mb-2">{label}</p>
-          <p className="text-sm md:text-base font-inter font-medium text-gray-900 tracking-wide">{value}</p>
+          <p className="text-[10px] text-gray-400 uppercase tracking-[0.3em] font-bold mb-2">
+            {label}
+          </p>
+          <p className="text-sm md:text-base font-inter font-medium text-gray-900 tracking-wide">
+            {value}
+          </p>
         </div>
       </div>
     )
@@ -93,9 +122,9 @@ export function ProfilePage() {
       <div className="container mx-auto px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
+            initial={{opacity: 0}}
+            animate={{opacity: 1}}
+            transition={{duration: 0.8}}
             className="bg-white shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] border border-black/5 overflow-hidden"
           >
             {/* Header Section */}
@@ -117,8 +146,8 @@ export function ProfilePage() {
               {/* Verification Alert */}
               {auth.user.isVerified === false && (
                 <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
+                  initial={{opacity: 0, x: -10}}
+                  animate={{opacity: 1, x: 0}}
                   className="bg-red-50/50 border border-red-100 text-red-800 px-6 py-4 text-xs md:text-sm font-inter tracking-wide leading-relaxed flex items-center gap-4"
                 >
                   <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
@@ -195,5 +224,3 @@ export function ProfilePage() {
     </div>
   )
 }
-
-

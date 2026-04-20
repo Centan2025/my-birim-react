@@ -129,9 +129,13 @@ export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
                 >
                   {/* Sade, ince beyaz çizgilerden oluşan X ikonu (biraz büyütülmüş) */}
                   <span className="relative w-5 h-5 birim-search-x-animate-in">
-                    <span className={`absolute inset-0 before:absolute before:left-1/2 before:top-[3px] before:bottom-[3px] before:w-[1px] before:-translate-x-1/2 before:rotate-45 after:absolute after:left-1/2 after:top-[3px] after:bottom-[3px] after:w-[1px] after:-translate-x-1/2 after:-rotate-45 transition-colors ${
-                        isLightMode ? 'before:bg-black after:bg-black group-hover:before:bg-black/70 group-hover:after:bg-black/70' : 'before:bg-white after:bg-white group-hover:before:bg-white/90 group-hover:after:bg-white/90'
-                    }`} />
+                    <span
+                      className={`absolute inset-0 before:absolute before:left-1/2 before:top-[3px] before:bottom-[3px] before:w-[1px] before:-translate-x-1/2 before:rotate-45 after:absolute after:left-1/2 after:top-[3px] after:bottom-[3px] after:w-[1px] after:-translate-x-1/2 after:-rotate-45 transition-colors ${
+                        isLightMode
+                          ? 'before:bg-black after:bg-black group-hover:before:bg-black/70 group-hover:after:bg-black/70'
+                          : 'before:bg-white after:bg-white group-hover:before:bg-white/90 group-hover:after:bg-white/90'
+                      }`}
+                    />
                   </span>
                 </button>
               )}
@@ -153,9 +157,11 @@ export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
 
                 {searchResults.products.length > 0 && (
                   <div className="mb-6">
-                    <h3 className={`text-sm font-semibold uppercase tracking-wider mb-3 pl-3 ${
+                    <h3
+                      className={`text-sm font-semibold uppercase tracking-wider mb-3 pl-3 ${
                         isLightMode ? 'text-gray-500' : 'text-gray-400'
-                    }`}>
+                      }`}
+                    >
                       {t('products')}
                     </h3>
                     <div className="space-y-2">
@@ -170,7 +176,7 @@ export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
                             to={`/product/${product.id}`}
                             onClick={closeSearch}
                             className={`flex items-center p-3 rounded-md transition-colors duration-200 ${
-                                isLightMode ? 'hover:bg-black/5' : 'hover:bg-white/10'
+                              isLightMode ? 'hover:bg-black/5' : 'hover:bg-white/10'
                             }`}
                           >
                             <img
@@ -183,9 +189,17 @@ export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
                               className="w-12 h-12 object-cover rounded-md mr-4 flex-shrink-0"
                             />
                             <div>
-                              <p className={`font-semibold ${isLightMode ? 'text-black' : 'text-white'}`}>{t(product.name)}</p>
+                              <p
+                                className={`font-semibold ${isLightMode ? 'text-black' : 'text-white'}`}
+                              >
+                                {t(product.name)}
+                              </p>
                               {designerName && (
-                                <p className={`text-sm ${isLightMode ? 'text-gray-500' : 'text-gray-400'}`}>{designerName}</p>
+                                <p
+                                  className={`text-sm ${isLightMode ? 'text-gray-500' : 'text-gray-400'}`}
+                                >
+                                  {designerName}
+                                </p>
                               )}
                             </div>
                           </Link>
@@ -197,9 +211,11 @@ export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
 
                 {searchResults.categories.length > 0 && (
                   <div className="mb-6">
-                    <h3 className={`text-sm font-semibold uppercase tracking-wider mb-3 pl-3 ${
+                    <h3
+                      className={`text-sm font-semibold uppercase tracking-wider mb-3 pl-3 ${
                         isLightMode ? 'text-gray-500' : 'text-gray-400'
-                    }`}>
+                      }`}
+                    >
                       {t('categories')}
                     </h3>
                     <div className="space-y-2">
@@ -209,7 +225,7 @@ export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
                           to={`/products/${category.id}`}
                           onClick={closeSearch}
                           className={`flex items-center p-3 rounded-md transition-colors duration-200 ${
-                              isLightMode ? 'hover:bg-black/5' : 'hover:bg-white/10'
+                            isLightMode ? 'hover:bg-black/5' : 'hover:bg-white/10'
                           }`}
                         >
                           <img
@@ -222,8 +238,16 @@ export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
                             className="w-12 h-12 object-cover rounded-md mr-4 flex-shrink-0"
                           />
                           <div>
-                            <p className={`font-semibold ${isLightMode ? 'text-black' : 'text-white'}`}>{t(category.name)}</p>
-                            <p className={`text-sm ${isLightMode ? 'text-gray-500' : 'text-gray-400'}`}>{t('category')}</p>
+                            <p
+                              className={`font-semibold ${isLightMode ? 'text-black' : 'text-white'}`}
+                            >
+                              {t(category.name)}
+                            </p>
+                            <p
+                              className={`text-sm ${isLightMode ? 'text-gray-500' : 'text-gray-400'}`}
+                            >
+                              {t('category')}
+                            </p>
                           </div>
                         </Link>
                       ))}
@@ -233,9 +257,11 @@ export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
 
                 {searchResults.designers.length > 0 && (
                   <div>
-                    <h3 className={`text-sm font-semibold uppercase tracking-wider mb-3 pl-3 ${
+                    <h3
+                      className={`text-sm font-semibold uppercase tracking-wider mb-3 pl-3 ${
                         isLightMode ? 'text-gray-500' : 'text-gray-400'
-                    }`}>
+                      }`}
+                    >
                       {t('designers')}
                     </h3>
                     <div className="space-y-2">
@@ -245,7 +271,7 @@ export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
                           to={`/designer/${designer.id}`}
                           onClick={closeSearch}
                           className={`flex items-center p-3 rounded-md transition-colors duration-200 ${
-                              isLightMode ? 'hover:bg-black/5' : 'hover:bg-white/10'
+                            isLightMode ? 'hover:bg-black/5' : 'hover:bg-white/10'
                           }`}
                         >
                           <img
@@ -258,8 +284,16 @@ export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
                             className="w-12 h-12 object-cover rounded-full mr-4 flex-shrink-0"
                           />
                           <div>
-                            <p className={`font-semibold ${isLightMode ? 'text-black' : 'text-white'}`}>{t(designer.name)}</p>
-                            <p className={`text-sm ${isLightMode ? 'text-gray-500' : 'text-gray-400'}`}>{t('designer')}</p>
+                            <p
+                              className={`font-semibold ${isLightMode ? 'text-black' : 'text-white'}`}
+                            >
+                              {t(designer.name)}
+                            </p>
+                            <p
+                              className={`text-sm ${isLightMode ? 'text-gray-500' : 'text-gray-400'}`}
+                            >
+                              {t('designer')}
+                            </p>
                           </div>
                         </Link>
                       ))}

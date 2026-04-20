@@ -11,7 +11,7 @@ export default defineType({
       name: 'title',
       title: 'Sayfa Başlığı',
       type: 'localizedString',
-      initialValue: {tr: 'Fabrika', en: 'Factory'}
+      initialValue: {tr: 'Fabrika', en: 'Factory'},
     }),
     defineField({
       name: 'content',

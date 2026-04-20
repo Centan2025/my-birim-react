@@ -1,8 +1,13 @@
-import React, { useState, useCallback } from 'react'
-import { Card, Stack, Text, Button, Box, Flex, useToast, Grid } from '@sanity/ui'
-import { UploadIcon, FolderIcon, CheckmarkIcon, WarningOutlineIcon } from '@sanity/icons'
-import { useClient } from 'sanity'
-import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3'
+import React, {useState, useCallback} from 'react'
+import {Card, Stack, Text, Button, Box, Flex, useToast, Grid} from '@sanity/ui'
+import {UploadIcon, FolderIcon, CheckmarkIcon, WarningOutlineIcon} from '@sanity/icons'
+import {useClient} from 'sanity'
+import {
+  S3Client,
+  PutObjectCommand,
+  ListObjectsV2Command,
+  DeleteObjectsCommand,
+} from '@aws-sdk/client-s3'
 import imageCompression from 'browser-image-compression'
 
 // R2 Configuration
@@ -30,11 +35,19 @@ const resolveKey = (item: any, prefix: string = 'item') => {
   }
   const newKey = `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
   uniqueKeyCache.add(newKey)
-  return { ...item, _key: newKey }
+  return {...item, _key: newKey}
 }
 
 interface ProgressItem {
-  type: 'category' | 'designer' | 'product' | 'project' | 'materialGroup' | 'materialBook' | 'news' | 'about'
+  type:
+    | 'category'
+    | 'designer'
+    | 'product'
+    | 'project'
+    | 'materialGroup'
+    | 'materialBook'
+    | 'news'
+    | 'about'
   name: string
   status: 'pending' | 'scanning' | 'uploading' | 'success' | 'error' | 'warning'
   message?: string
@@ -45,13 +58,13 @@ interface ScanReport {
   totalFiles: number
   totalSize: number
   foundItems: {
-    categories: Array<{ id: string; name: string; files: number; exists: boolean }>
-    designers: Array<{ id: string; name: string; files: number; exists: boolean }>
-    products: Array<{ id: string; name: string; files: number; exists: boolean; categoryId: string }>
-    projects: Array<{ id: string; name: string; files: number; exists: boolean }>
-    materials: Array<{ group: string; books: number; files: number; exists: boolean }>
+    categories: Array<{id: string; name: string; files: number; exists: boolean}>
+    designers: Array<{id: string; name: string; files: number; exists: boolean}>
+    products: Array<{id: string; name: string; files: number; exists: boolean; categoryId: string}>
+    projects: Array<{id: string; name: string; files: number; exists: boolean}>
+    materials: Array<{group: string; books: number; files: number; exists: boolean}>
   }
-  issues: Array<{ type: 'error' | 'warning'; message: string; subtext?: string }>
+  issues: Array<{type: 'error' | 'warning'; message: string; subtext?: string}>
 }
 
 interface ParsedData {
@@ -145,7 +158,7 @@ interface SummaryData {
 const uploadToR2 = async (
   file: File,
   path: string,
-): Promise<{ url: string; width?: number; height?: number; hasResponsiveSizes?: boolean } | null> => {
+): Promise<{url: string; width?: number; height?: number; hasResponsiveSizes?: boolean} | null> => {
   try {
     const isImage = isImageFile(file.name)
     let processedFile: File | Blob = file
@@ -161,64 +174,72 @@ const uploadToR2 = async (
 
     if (isImage) {
       isResponsive = true
-      
+
       // 1. Görsel boyutlarını bir kez al
       const objectUrl = URL.createObjectURL(file)
-      const dimensions: { width: number; height: number } = await new Promise((resolve) => {
+      const dimensions: {width: number; height: number} = await new Promise((resolve) => {
         const img = new Image()
-        img.onload = () => resolve({ width: img.width, height: img.height })
-        img.onerror = () => resolve({ width: 0, height: 0 })
+        img.onload = () => resolve({width: img.width, height: img.height})
+        img.onerror = () => resolve({width: 0, height: 0})
         img.src = objectUrl
       })
       URL.revokeObjectURL(objectUrl)
 
       const sizes = [
-        { width: 2560, height: 1600, suffix: '', maxSizeMB: 2.5 },   // Ana görsel (Max: 2560x1600)
-        { width: 1600, height: 1000, suffix: '-1600w', maxSizeMB: 1.2 },
-        { width: 800, height: 500, suffix: '-800w', maxSizeMB: 0.5 },
-        { width: 400, height: 250, suffix: '-400w', maxSizeMB: 0.2 },
+        {width: 2560, height: 1600, suffix: '', maxSizeMB: 2.5}, // Ana görsel (Max: 2560x1600)
+        {width: 1600, height: 1000, suffix: '-1600w', maxSizeMB: 1.2},
+        {width: 800, height: 500, suffix: '-800w', maxSizeMB: 0.5},
+        {width: 400, height: 250, suffix: '-400w', maxSizeMB: 0.2},
       ]
 
       const uploadPromises = sizes.map(async (size) => {
         // KRİTİK: Eğer dosya zaten WebP ise, pikseline dokunmadan HAM olarak gönder (Byte-perfect copy).
-        const isAlreadyWebP = file.name.toLowerCase().endsWith('.webp');
-        
-        // Ana görsel (suffix === '') için eğer zaten WebP ise asla işleme sokma
-        const isAlreadyOptimized = 
-          isAlreadyWebP && 
-          (size.suffix === '' || (dimensions.width <= size.width && dimensions.height <= size.height));
+        const isAlreadyWebP = file.name.toLowerCase().endsWith('.webp')
 
-        let compressedBlob: Blob;
-        
+        // Ana görsel (suffix === '') için eğer zaten WebP ise asla işleme sokma
+        const isAlreadyOptimized =
+          isAlreadyWebP &&
+          (size.suffix === '' ||
+            (dimensions.width <= size.width && dimensions.height <= size.height))
+
+        let compressedBlob: Blob
+
         if (isAlreadyOptimized) {
           console.log(`   💎 Ham Veri Geçişi (${size.suffix || 'Orijinal'}): ${file.name} korundu.`)
-          compressedBlob = file;
-          if (size.suffix === '') processedFile = file;
+          compressedBlob = file
+          if (size.suffix === '') processedFile = file
         } else if (file.size < 500 * 1024) {
-          // Küçük dosya ama WebP değilse veya alt varyasyon (800w/400w) ise: 
+          // Küçük dosya ama WebP değilse veya alt varyasyon (800w/400w) ise:
           // Çözünürlüğü hedef boyuta (size.width) getir, kaliteyi tavan yap.
-          console.log(`   ⚡ Hızlı Dönüştürme (${size.suffix || 'Orijinal'}): ${file.name} (Kalite koruma + Boyutlandırma)`)
+          console.log(
+            `   ⚡ Hızlı Dönüştürme (${size.suffix || 'Orijinal'}): ${file.name} (Kalite koruma + Boyutlandırma)`,
+          )
           const options = {
             maxSizeMB: size.maxSizeMB,
-            maxWidthOrHeight: size.suffix === '' ? Math.max(dimensions.width, dimensions.height) : Math.max(size.width, size.height), 
+            maxWidthOrHeight:
+              size.suffix === ''
+                ? Math.max(dimensions.width, dimensions.height)
+                : Math.max(size.width, size.height),
             useWebWorker: true,
             fileType: 'image/webp' as any,
             initialQuality: 0.99, // En üst düzey kalite
           }
           compressedBlob = await compressImageChunk(file, options)
-          if (size.suffix === '') processedFile = compressedBlob;
+          if (size.suffix === '') processedFile = compressedBlob
         } else {
           // Büyük dosyalar için standart kütüphane akışı
           const options = {
             maxSizeMB: size.maxSizeMB,
-            maxWidthOrHeight: Math.max(size.width, size.height), 
+            maxWidthOrHeight: Math.max(size.width, size.height),
             useWebWorker: true,
             fileType: 'image/webp' as any,
-            initialQuality: size.suffix === '' ? 0.98 : 0.90,
+            initialQuality: size.suffix === '' ? 0.98 : 0.9,
           }
-          console.log(`   📉 Standart Sıkıştırma (${size.suffix || 'Orijinal'}): ${file.name} -> ${size.width}x${size.height}`)
+          console.log(
+            `   📉 Standart Sıkıştırma (${size.suffix || 'Orijinal'}): ${file.name} -> ${size.width}x${size.height}`,
+          )
           compressedBlob = await compressImageChunk(file, options)
-          if (size.suffix === '') processedFile = compressedBlob;
+          if (size.suffix === '') processedFile = compressedBlob
         }
 
         const currentKey = size.suffix ? key.replace(/\.webp$/, `${size.suffix}.webp`) : key
@@ -256,7 +277,7 @@ const uploadToR2 = async (
           img.onload = resolve
           img.onerror = resolve
         })
-        dimensions = { width: img.width, height: img.height }
+        dimensions = {width: img.width, height: img.height}
       } catch (e) {
         console.warn('Boyutlar alınamadı:', e)
       }
@@ -286,9 +307,9 @@ const compressImageChunk = async (file: File, options: any): Promise<File | Blob
 }
 
 export default function MediaImportTool() {
-  const client = useClient({ apiVersion: '2025-01-01' })
+  const client = useClient({apiVersion: '2025-01-01'})
   const toast = useToast()
-  
+
   // UI States
   const [isDragging, setIsDragging] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -298,7 +319,7 @@ export default function MediaImportTool() {
   const [viewMode, setViewMode] = useState<'scan' | 'upload' | 'summary'>('scan')
   const [filterMode, setFilterMode] = useState<'all' | 'error' | 'success'>('all')
   const [importMode, setImportMode] = useState<'sync' | 'add'>('sync')
-  
+
   // Data States
   const [progress, setProgress] = useState<ProgressItem[]>([])
   const [stats, setStats] = useState({
@@ -316,7 +337,13 @@ export default function MediaImportTool() {
     secretKey: !!R2_SECRET_ACCESS_KEY,
     bucket: !!R2_BUCKET_NAME,
     domain: !!R2_DOMAIN,
-    isAllOk: !!(R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY && R2_BUCKET_NAME && R2_DOMAIN)
+    isAllOk: !!(
+      R2_ACCOUNT_ID &&
+      R2_ACCESS_KEY_ID &&
+      R2_SECRET_ACCESS_KEY &&
+      R2_BUCKET_NAME &&
+      R2_DOMAIN
+    ),
   }
 
   // Klasör yapısını parse et
@@ -327,7 +354,7 @@ export default function MediaImportTool() {
     const productMap = new Map<
       string,
       {
-        media: Array<{ file: File; device: 'all' | 'desktop' | 'mobile'; isCover?: boolean }>
+        media: Array<{file: File; device: 'all' | 'desktop' | 'mobile'; isCover?: boolean}>
         dimensionFiles: File[]
         extraImages: File[]
         drawingFiles: File[]
@@ -443,7 +470,7 @@ export default function MediaImportTool() {
             modelName = modelName.split(' - ').slice(1).join(' - ').trim()
           }
         }
-        
+
         const modelId = slugify(modelName)
 
         const productKey = `${categoryId}/${modelId}`
@@ -470,7 +497,7 @@ export default function MediaImportTool() {
 
           if (subPath.includes('medya')) {
             const isCover = file.name.toLowerCase().includes('_kapak')
-            productData.media.push({ file, device: deviceType, isCover })
+            productData.media.push({file, device: deviceType, isCover})
           } else if (subPath.includes('olculer') || subPath.includes('olcu')) {
             productData.dimensionFiles.push(file)
           } else if (
@@ -487,7 +514,7 @@ export default function MediaImportTool() {
           } else {
             // Root seviyesindeki dosyalar veya bilinmeyen alt klasörler
             const isCover = file.name.toLowerCase().includes('_kapak')
-            productData.media.push({ file, device: deviceType, isCover })
+            productData.media.push({file, device: deviceType, isCover})
           }
         }
       }
@@ -519,7 +546,7 @@ export default function MediaImportTool() {
         }
 
         // Cihaz bazlı klasör yapısı desteği
-        const subPath = parts.slice(tasarimIndex + 2).map(p => p.toLowerCase())
+        const subPath = parts.slice(tasarimIndex + 2).map((p) => p.toLowerCase())
         if (subPath.includes('desktop')) {
           // Dosya adını sanitize etmeden önce cihaz bilgisini ekleyebiliriz (opsiyonel)
         }
@@ -587,14 +614,14 @@ export default function MediaImportTool() {
 
         if (subPath.includes('medya')) {
           const isCover = file.name.toLowerCase().includes('_kapak')
-          projData.media.push({ file, device: deviceType, isCover })
+          projData.media.push({file, device: deviceType, isCover})
         } else if (subPath.includes('içerik blokları')) {
           const blokPart = subPath.find((p) => p.includes('blok'))
           const blokNum = blokPart ? parseInt(blokPart.replace(/[^0-9]/g, '')) : 1
-          projData.media.push({ file, device: deviceType, contentBlock: blokNum })
+          projData.media.push({file, device: deviceType, contentBlock: blokNum})
         } else {
           const isCover = file.name.toLowerCase().includes('_kapak')
-          projData.media.push({ file, device: deviceType, isCover })
+          projData.media.push({file, device: deviceType, isCover})
         }
       }
 
@@ -614,7 +641,7 @@ export default function MediaImportTool() {
           }
         }
         const categoryId = slugify(categoryName)
-        
+
         categories.set(categoryId, categoryName)
 
         if (!categoryMediaMap.has(categoryId)) {
@@ -676,7 +703,9 @@ export default function MediaImportTool() {
       // Orijinal model adını bulmaya çalış (ilk dosyanın yolundan)
       const firstMedia = productData.media[0]?.file.webkitRelativePath || ''
       const pathParts = firstMedia.split('/')
-      const modelIdx = pathParts.findIndex(p => slugify(p || '').replace(/-/g, '') === modelId.replace(/-/g, ''))
+      const modelIdx = pathParts.findIndex(
+        (p) => slugify(p || '').replace(/-/g, '') === modelId.replace(/-/g, ''),
+      )
       const originalName = modelIdx !== -1 ? pathParts[modelIdx] : modelId.toUpperCase()
 
       return {
@@ -748,20 +777,28 @@ export default function MediaImportTool() {
         toast.push({
           status: 'info',
           title: 'Dökümanlar doğrulanıyor...',
-          description: 'Klasör isimleri Sanity kayıtlarıyla eşleştiriliyor.'
+          description: 'Klasör isimleri Sanity kayıtlarıyla eşleştiriliyor.',
         })
 
-        const [allCategories, allDesigners, allProducts, allProjects, allMaterialGroups] = await Promise.all([
-          client.fetch(`*[_type == "category"]{ _id, "slug": id.current, name }`),
-          client.fetch(`*[_type == "designer"]{ _id, "slug": id.current, name }`),
-          client.fetch(`*[_type == "product"]{ _id, "slug": id.current, name, "categorySlug": category->id.current }`),
-          client.fetch(`*[_type == "project"]{ _id, "slug": id.current, name }`),
-          client.fetch(`*[_type == "materialGroup"]{ _id, title, "nameTr": title.tr }`)
-        ])
+        const [allCategories, allDesigners, allProducts, allProjects, allMaterialGroups] =
+          await Promise.all([
+            client.fetch(`*[_type == "category"]{ _id, "slug": id.current, name }`),
+            client.fetch(`*[_type == "designer"]{ _id, "slug": id.current, name }`),
+            client.fetch(
+              `*[_type == "product"]{ _id, "slug": id.current, name, "categorySlug": category->id.current }`,
+            ),
+            client.fetch(`*[_type == "project"]{ _id, "slug": id.current, name }`),
+            client.fetch(`*[_type == "materialGroup"]{ _id, title, "nameTr": title.tr }`),
+          ])
 
         // Sanity'de bu kayıtlar var mı kontrol et (Pre-flight Scan)
-        
-        const checkExists = (type: string, folderId: string, folderName: string, categoryId?: string) => {
+
+        const checkExists = (
+          type: string,
+          folderId: string,
+          folderName: string,
+          categoryId?: string,
+        ) => {
           if (type === 'product') {
             const normalizedFolderName = normalizeForMatch(folderName)
             const superNormalize = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '')
@@ -770,20 +807,22 @@ export default function MediaImportTool() {
             const matches = allProducts.filter((p: any) => {
               // Süper Temizlik: Sadece a-z ve 0-9 arası karakterleri tut
               const sanitize = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '')
-              
+
               const sanityName = sanitize(p.name?.tr || p.name?.en || '')
               const sanitySlug = sanitize(p.slug || '')
               const folderClean = sanitize(folderId)
               const nameClean = sanitize(folderName)
-              
+
               // 1. İsim veya Slug üzerinden tam temizlenmiş eşleşme
-              return sanityName === nameClean || sanitySlug === folderClean || sanityName === folderClean
+              return (
+                sanityName === nameClean || sanitySlug === folderClean || sanityName === folderClean
+              )
             })
 
             // Kategori kontrolü ile birlikte eşleşmeyi doğrula
             const sanitize = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '')
             const targetCat = sanitize(categoryId || '')
-            
+
             return matches.some((p: any) => {
               const pCat = sanitize(p.categorySlug)
               return pCat && (pCat === targetCat || targetCat.includes(pCat))
@@ -791,22 +830,27 @@ export default function MediaImportTool() {
           }
           if (type === 'category') {
             const normalized = normalizeForMatch(folderName)
-            return allCategories.some((c: any) => 
-              c.slug === folderId || 
-              normalizeForMatch(c.name?.tr) === normalized || 
-              normalizeForMatch(c.name?.en) === normalized
+            return allCategories.some(
+              (c: any) =>
+                c.slug === folderId ||
+                normalizeForMatch(c.name?.tr) === normalized ||
+                normalizeForMatch(c.name?.en) === normalized,
             )
           }
           if (type === 'designer') {
             const normalized = normalizeForMatch(folderName)
-            return allDesigners.some((d: any) => 
-              d.slug === folderId || 
-              normalizeForMatch(d.name?.tr) === normalized || 
-              normalizeForMatch(d.name?.en) === normalized
+            return allDesigners.some(
+              (d: any) =>
+                d.slug === folderId ||
+                normalizeForMatch(d.name?.tr) === normalized ||
+                normalizeForMatch(d.name?.en) === normalized,
             )
           }
           if (type === 'project') {
-            return allProjects.some((p: any) => p.slug === folderId || normalizeForMatch(p.name) === normalizeForMatch(folderName))
+            return allProjects.some(
+              (p: any) =>
+                p.slug === folderId || normalizeForMatch(p.name) === normalizeForMatch(folderName),
+            )
           }
           if (type === 'materialGroup') {
             const normalized = normalizeForMatch(folderName)
@@ -816,60 +860,72 @@ export default function MediaImportTool() {
         }
 
         const totalSize = Array.from(files).reduce((sum, f) => sum + f.size, 0)
-        const totalMedia = 
+        const totalMedia =
           data.categoryMedia.reduce((sum, c) => sum + c.files.length, 0) +
           data.designers.reduce((sum, d) => sum + d.files.length, 0) +
           data.products.reduce((sum, p) => sum + p.media.length + p.dimensionFiles.length, 0) +
           data.projects.reduce((sum, p) => sum + p.media.length + p.files.length, 0) +
-          data.aboutPage.hero.length + data.aboutPage.history.length + data.aboutPage.identity.length + data.aboutPage.quality.length +
-          data.materialGroups.reduce((sum, g) => sum + g.books.reduce((bs, b) => bs + b.files.length, 0), 0)
+          data.aboutPage.hero.length +
+          data.aboutPage.history.length +
+          data.aboutPage.identity.length +
+          data.aboutPage.quality.length +
+          data.materialGroups.reduce(
+            (sum, g) => sum + g.books.reduce((bs, b) => bs + b.files.length, 0),
+            0,
+          )
 
         // Rapor oluştur
         const report: ScanReport = {
           totalFiles: files.length,
           totalSize,
           foundItems: {
-            categories: data.categoryMedia.map(c => ({ 
-              id: c.categoryId, 
-              name: c.categoryName, 
-              files: c.files.length, 
-              exists: checkExists('category', c.categoryId, c.categoryName) 
+            categories: data.categoryMedia.map((c) => ({
+              id: c.categoryId,
+              name: c.categoryName,
+              files: c.files.length,
+              exists: checkExists('category', c.categoryId, c.categoryName),
             })),
-            designers: data.designers.map(d => ({ 
-              id: d.id, 
-              name: d.name, 
-              files: d.files.length, 
-              exists: checkExists('designer', d.id, d.name) 
+            designers: data.designers.map((d) => ({
+              id: d.id,
+              name: d.name,
+              files: d.files.length,
+              exists: checkExists('designer', d.id, d.name),
             })),
-            products: data.products.map(p => ({ 
-              id: p.modelId, 
-              name: p.modelName, 
-              files: p.media.length + p.dimensionFiles.length, 
-              categoryId: p.categoryId, 
-              exists: checkExists('product', p.modelId, p.modelName, p.categoryId) 
+            products: data.products.map((p) => ({
+              id: p.modelId,
+              name: p.modelName,
+              files: p.media.length + p.dimensionFiles.length,
+              categoryId: p.categoryId,
+              exists: checkExists('product', p.modelId, p.modelName, p.categoryId),
             })),
-            projects: data.projects.map(p => ({ 
-              id: p.projectId, 
-              name: p.projectName, 
-              files: p.media.length + p.files.length, 
-              exists: checkExists('project', p.projectId, p.projectName) 
+            projects: data.projects.map((p) => ({
+              id: p.projectId,
+              name: p.projectName,
+              files: p.media.length + p.files.length,
+              exists: checkExists('project', p.projectId, p.projectName),
             })),
-            materials: data.materialGroups.map(g => ({ 
-              group: g.groupName, 
-              books: g.books.length, 
-              files: g.books.reduce((s, b) => s + b.files.length, 0), 
-              exists: checkExists('materialGroup', '', g.groupName) 
-            }))
+            materials: data.materialGroups.map((g) => ({
+              group: g.groupName,
+              books: g.books.length,
+              files: g.books.reduce((s, b) => s + b.files.length, 0),
+              exists: checkExists('materialGroup', '', g.groupName),
+            })),
           },
-          issues: []
+          issues: [],
         }
 
         // Hataları ekle
-        report.foundItems.products.forEach(p => {
-          if (!p.exists) report.issues.push({ type: 'warning', message: `Eksik Ürün: ${p.name}`, subtext: 'Bu ürünü önce CMS\'den oluşturmalısınız.' })
+        report.foundItems.products.forEach((p) => {
+          if (!p.exists)
+            report.issues.push({
+              type: 'warning',
+              message: `Eksik Ürün: ${p.name}`,
+              subtext: "Bu ürünü önce CMS'den oluşturmalısınız.",
+            })
         })
-        report.foundItems.designers.forEach(d => {
-          if (!d.exists) report.issues.push({ type: 'warning', message: `Eksik Tasarımcı: ${d.name}` })
+        report.foundItems.designers.forEach((d) => {
+          if (!d.exists)
+            report.issues.push({type: 'warning', message: `Eksik Tasarımcı: ${d.name}`})
         })
 
         setStats({
@@ -885,12 +941,11 @@ export default function MediaImportTool() {
         toast.push({
           status: 'success',
           title: 'Tarama tamamlandı',
-          description: `Bulunan içerik hazır. Lütfen detayları inceleyip onaylayın.`
+          description: `Bulunan içerik hazır. Lütfen detayları inceleyip onaylayın.`,
         })
-
       } catch (error: any) {
         console.error('Scan Error:', error)
-        toast.push({ status: 'error', title: 'Tarama Hatası', description: error.message })
+        toast.push({status: 'error', title: 'Tarama Hatası', description: error.message})
       } finally {
         setIsProcessing(false)
       }
@@ -904,13 +959,13 @@ export default function MediaImportTool() {
     setIsProcessing(true)
     setViewMode('upload')
     setProgress([])
-    
+
     try {
       await uploadToSanity(scanResult)
       setViewMode('summary')
-      toast.push({ status: 'success', title: 'İşlem Başarıyla Tamamlandı!' })
+      toast.push({status: 'success', title: 'İşlem Başarıyla Tamamlandı!'})
     } catch (e: any) {
-      toast.push({ status: 'error', title: 'Yükleme Hatası', description: e.message })
+      toast.push({status: 'error', title: 'Yükleme Hatası', description: e.message})
     } finally {
       setIsProcessing(false)
     }
@@ -1092,13 +1147,15 @@ export default function MediaImportTool() {
           const folderClean = sanitize(product.modelId)
           const nameClean = sanitize(product.modelName)
 
-          return sanityName === nameClean || sanitySlug === folderClean || sanityName === folderClean
+          return (
+            sanityName === nameClean || sanitySlug === folderClean || sanityName === folderClean
+          )
         })
 
         let existing = null
         const sanitize = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '')
         const targetCat = sanitize(actualCategorySlug || '')
-        
+
         // Kategori bazlı filtreleme - her zaman yapılmalı
         existing = matches.find((p: any) => {
           const pCat = sanitize(p.categorySlug)
@@ -1121,8 +1178,9 @@ export default function MediaImportTool() {
           console.log(`   📊 CMS'deki benzer ürünler:`)
           existingProducts
             .filter((p: any) => {
-              const nameMatch = normalizeForMatch(p.name?.tr) === normalizedProductName || 
-                               normalizeForMatch(p.name?.en) === normalizedProductName
+              const nameMatch =
+                normalizeForMatch(p.name?.tr) === normalizedProductName ||
+                normalizeForMatch(p.name?.en) === normalizedProductName
               return nameMatch
             })
             .forEach((p: any) => {
@@ -1236,7 +1294,7 @@ export default function MediaImportTool() {
                   const item: any = {
                     _type: 'productMaterial',
                     _key: `material-${Date.now()}-${Math.random()}`,
-                    name: { tr: materialName, en: materialName },
+                    name: {tr: materialName, en: materialName},
                   }
 
                   if (r2Url) {
@@ -1264,7 +1322,7 @@ export default function MediaImportTool() {
                   items: newItems,
                 }
 
-                await client.patch(matchingGroup._id).set({ books: updatedBooks }).commit()
+                await client.patch(matchingGroup._id).set({books: updatedBooks}).commit()
                 bookItem.status = 'success'
                 bookItem.message = `${uploadedCount} görsel eklendi`
                 console.log(`   ✅ ${uploadedCount} görsel kartelaya eklendi`)
@@ -1519,19 +1577,19 @@ export default function MediaImportTool() {
 
       // 3. Yetim dosyaları tespit et
       const orphanedKeys: string[] = []
-      
+
       for (const obj of allObjects) {
         if (!obj.Key) continue
         const fullUrl = `${R2_DOMAIN}/${obj.Key}`
-        
+
         // Eğer bu dosyanın tam hali kullanılıyorsa koru
         let isUsed = usedUrls.has(fullUrl)
-        
+
         if (!isUsed) {
           // Eğer bir responsive varyasyon ise, ana dosyanın kullanılıp kullanılmadığına bak
           const variantSuffixes = ['-1600w.webp', '-800w.webp', '-400w.webp']
-          const matchingSuffix = variantSuffixes.find(s => obj.Key.endsWith(s))
-          
+          const matchingSuffix = variantSuffixes.find((s) => obj.Key.endsWith(s))
+
           if (matchingSuffix) {
             const mainKey = obj.Key.replace(matchingSuffix, '.webp')
             const mainUrl = `${R2_DOMAIN}/${mainKey}`
@@ -1562,17 +1620,17 @@ export default function MediaImportTool() {
 
       // 4. Yetim dosyaları sil (1000'erli gruplar halinde)
       console.log(`🗑️ ${orphanedKeys.length} adet yetim dosya siliniyor...`)
-      
+
       for (let i = 0; i < orphanedKeys.length; i += 1000) {
         const chunk = orphanedKeys.slice(i, i + 1000)
         await r2Client.send(
           new DeleteObjectsCommand({
             Bucket: R2_BUCKET_NAME,
             Delete: {
-              Objects: chunk.map(key => ({ Key: key })),
-              Quiet: true
-            }
-          })
+              Objects: chunk.map((key) => ({Key: key})),
+              Quiet: true,
+            },
+          }),
         )
       }
 
@@ -1639,8 +1697,16 @@ export default function MediaImportTool() {
   )
 
   // Dahili yardımcı: Log ekle
-  const addLog = (type: ProgressItem['type'], name: string, status: ProgressItem['status'], message?: string) => {
-    setProgress(prev => [{ type, name, status, message, details: new Date().toLocaleTimeString() }, ...prev])
+  const addLog = (
+    type: ProgressItem['type'],
+    name: string,
+    status: ProgressItem['status'],
+    message?: string,
+  ) => {
+    setProgress((prev) => [
+      {type, name, status, message, details: new Date().toLocaleTimeString()},
+      ...prev,
+    ])
   }
 
   // UI RENDER: DASHBOARD
@@ -1652,14 +1718,18 @@ export default function MediaImportTool() {
           <Flex justify="space-between" align="center">
             <Stack space={3}>
               <Flex align="center" gap={3}>
-                <Box style={{ fontSize: '2rem' }}>🚀</Box>
+                <Box style={{fontSize: '2rem'}}>🚀</Box>
                 <Stack space={2}>
-                  <Text size={4} weight="bold">Medya İçe Aktarma Merkezi</Text>
-                  <Text size={1} muted>Cloudflare R2 & Sanity Native Eşitleme Paneli</Text>
+                  <Text size={4} weight="bold">
+                    Medya İçe Aktarma Merkezi
+                  </Text>
+                  <Text size={1} muted>
+                    Cloudflare R2 & Sanity Native Eşitleme Paneli
+                  </Text>
                 </Stack>
               </Flex>
             </Stack>
-            
+
             <Flex gap={3} align="center">
               {/* Import Mode Toggle */}
               <Card padding={1} radius={2} border tone="default">
@@ -1682,13 +1752,20 @@ export default function MediaImportTool() {
               </Card>
 
               {/* Pre-flight Indicator */}
-              <Card padding={2} radius={2} tone={preflight.isAllOk ? 'positive' : 'critical'} border>
+              <Card
+                padding={2}
+                radius={2}
+                tone={preflight.isAllOk ? 'positive' : 'critical'}
+                border
+              >
                 <Flex align="center" gap={2}>
-                  <Box style={{ fontSize: '1rem' }}>{preflight.isAllOk ? '✅' : '❌'}</Box>
-                  <Text size={1} weight="semibold">R2 Bağlantısı: {preflight.isAllOk ? 'Hazır' : 'Hatalı'}</Text>
+                  <Box style={{fontSize: '1rem'}}>{preflight.isAllOk ? '✅' : '❌'}</Box>
+                  <Text size={1} weight="semibold">
+                    R2 Bağlantısı: {preflight.isAllOk ? 'Hazır' : 'Hatalı'}
+                  </Text>
                 </Flex>
               </Card>
-              
+
               <Button
                 fontSize={2}
                 padding={3}
@@ -1719,27 +1796,33 @@ export default function MediaImportTool() {
                   textAlign: 'center',
                   cursor: 'pointer',
                   backgroundColor: isDragging ? 'rgba(34, 118, 252, 0.05)' : 'transparent',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
                 }}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
               >
                 <Stack space={4}>
-                  <Flex justify="center" style={{ fontSize: '3rem' }}>
-                    {isProcessing ? '⌛' : (scanReport ? '📋' : '📁')}
+                  <Flex justify="center" style={{fontSize: '3rem'}}>
+                    {isProcessing ? '⌛' : scanReport ? '📋' : '📁'}
                   </Flex>
                   <Stack space={2}>
                     <Text size={3} weight="bold">
-                      {isProcessing ? 'Taranıyor...' : (scanReport ? 'Tarama Tamamlandı' : 'Klasörünüzü buraya bırakın')}
+                      {isProcessing
+                        ? 'Taranıyor...'
+                        : scanReport
+                          ? 'Tarama Tamamlandı'
+                          : 'Klasörünüzü buraya bırakın'}
                     </Text>
                     <Text size={1} muted>
-                      {scanReport ? `${scanReport.totalFiles} dosya bulundu (~${(scanReport.totalSize / 1024 / 1024).toFixed(1)} MB)` : 'Ürünler, Tasarımcılar ve Projeler içeren medya klasörü'}
+                      {scanReport
+                        ? `${scanReport.totalFiles} dosya bulundu (~${(scanReport.totalSize / 1024 / 1024).toFixed(1)} MB)`
+                        : 'Ürünler, Tasarımcılar ve Projeler içeren medya klasörü'}
                     </Text>
                   </Stack>
                   <Flex justify="center" gap={2}>
                     <Button
-                      text={scanReport ? "Yeni Klasör Seç" : "Klasör Seç"}
+                      text={scanReport ? 'Yeni Klasör Seç' : 'Klasör Seç'}
                       icon={FolderIcon}
                       tone="primary"
                       onClick={() => document.getElementById('folder-input')?.click()}
@@ -1758,7 +1841,14 @@ export default function MediaImportTool() {
                       />
                     )}
                   </Flex>
-                  <input id="folder-input" type="file" {...{ webkitdirectory: '', directory: '' }} multiple style={{ display: 'none' }} onChange={handleFolderSelect} />
+                  <input
+                    id="folder-input"
+                    type="file"
+                    {...{webkitdirectory: '', directory: ''}}
+                    multiple
+                    style={{display: 'none'}}
+                    onChange={handleFolderSelect}
+                  />
                 </Stack>
               </Card>
 
@@ -1767,26 +1857,42 @@ export default function MediaImportTool() {
                 <Grid columns={4} gap={3}>
                   <Card padding={3} radius={2} border>
                     <Stack space={2}>
-                      <Text size={1} muted>📂 Kategoriler</Text>
-                      <Text size={3} weight="bold">{stats.categories}</Text>
+                      <Text size={1} muted>
+                        📂 Kategoriler
+                      </Text>
+                      <Text size={3} weight="bold">
+                        {stats.categories}
+                      </Text>
                     </Stack>
                   </Card>
                   <Card padding={3} radius={2} border>
                     <Stack space={2}>
-                      <Text size={1} muted>👤 Tasarımcılar</Text>
-                      <Text size={3} weight="bold">{stats.designers}</Text>
+                      <Text size={1} muted>
+                        👤 Tasarımcılar
+                      </Text>
+                      <Text size={3} weight="bold">
+                        {stats.designers}
+                      </Text>
                     </Stack>
                   </Card>
                   <Card padding={3} radius={2} border>
                     <Stack space={2}>
-                      <Text size={1} muted>📦 Ürünler</Text>
-                      <Text size={3} weight="bold">{stats.products}</Text>
+                      <Text size={1} muted>
+                        📦 Ürünler
+                      </Text>
+                      <Text size={3} weight="bold">
+                        {stats.products}
+                      </Text>
                     </Stack>
                   </Card>
                   <Card padding={3} radius={2} border>
                     <Stack space={2}>
-                      <Text size={1} muted>🖼️ Medya</Text>
-                      <Text size={3} weight="bold">{stats.images}</Text>
+                      <Text size={1} muted>
+                        🖼️ Medya
+                      </Text>
+                      <Text size={3} weight="bold">
+                        {stats.images}
+                      </Text>
                     </Stack>
                   </Card>
                 </Grid>
@@ -1797,35 +1903,83 @@ export default function MediaImportTool() {
                 <Card padding={4} radius={3} shadow={1} border>
                   <Stack space={4}>
                     <Flex justify="space-between" align="center">
-                      <Text size={2} weight="bold">🚀 Canlı İşlem Günlüğü</Text>
+                      <Text size={2} weight="bold">
+                        🚀 Canlı İşlem Günlüğü
+                      </Text>
                       <Flex gap={1}>
-                        <Button size={1} text="Tümü" mode={filterMode === 'all' ? 'default' : 'bleed'} onClick={() => setFilterMode('all')} />
-                        <Button size={1} text="Hatalar" tone="critical" mode={filterMode === 'error' ? 'default' : 'bleed'} onClick={() => setFilterMode('error')} />
-                        <Button size={1} text="Başarılı" tone="positive" mode={filterMode === 'success' ? 'default' : 'bleed'} onClick={() => setFilterMode('success')} />
+                        <Button
+                          size={1}
+                          text="Tümü"
+                          mode={filterMode === 'all' ? 'default' : 'bleed'}
+                          onClick={() => setFilterMode('all')}
+                        />
+                        <Button
+                          size={1}
+                          text="Hatalar"
+                          tone="critical"
+                          mode={filterMode === 'error' ? 'default' : 'bleed'}
+                          onClick={() => setFilterMode('error')}
+                        />
+                        <Button
+                          size={1}
+                          text="Başarılı"
+                          tone="positive"
+                          mode={filterMode === 'success' ? 'default' : 'bleed'}
+                          onClick={() => setFilterMode('success')}
+                        />
                       </Flex>
                     </Flex>
-                    <Box style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                    <Box style={{maxHeight: '400px', overflowY: 'auto'}}>
                       <Stack space={2}>
                         {progress
-                          .filter(p => filterMode === 'all' || (filterMode === 'error' && p.status === 'error') || (filterMode === 'success' && p.status === 'success'))
+                          .filter(
+                            (p) =>
+                              filterMode === 'all' ||
+                              (filterMode === 'error' && p.status === 'error') ||
+                              (filterMode === 'success' && p.status === 'success'),
+                          )
                           .map((item, idx) => (
-                          <Card key={idx} padding={2} radius={2} tone={item.status === 'error' ? 'critical' : (item.status === 'success' ? 'positive' : 'default')} border>
-                            <Flex align="center" justify="space-between">
-                              <Flex align="center" gap={3}>
-                                <Box style={{ fontSize: '1.2rem' }}>
-                                  {item.status === 'success' ? '✅' : (item.status === 'error' ? '❌' : (item.status === 'warning' ? '⚠️' : '⏳'))}
-                                </Box>
-                                <Stack space={2}>
-                                  <Text size={1} weight="bold">
-                                    {item.type.toUpperCase()}: {item.name}
-                                  </Text>
-                                  {item.message && <Text size={0} muted>{item.message}</Text>}
-                                </Stack>
+                            <Card
+                              key={idx}
+                              padding={2}
+                              radius={2}
+                              tone={
+                                item.status === 'error'
+                                  ? 'critical'
+                                  : item.status === 'success'
+                                    ? 'positive'
+                                    : 'default'
+                              }
+                              border
+                            >
+                              <Flex align="center" justify="space-between">
+                                <Flex align="center" gap={3}>
+                                  <Box style={{fontSize: '1.2rem'}}>
+                                    {item.status === 'success'
+                                      ? '✅'
+                                      : item.status === 'error'
+                                        ? '❌'
+                                        : item.status === 'warning'
+                                          ? '⚠️'
+                                          : '⏳'}
+                                  </Box>
+                                  <Stack space={2}>
+                                    <Text size={1} weight="bold">
+                                      {item.type.toUpperCase()}: {item.name}
+                                    </Text>
+                                    {item.message && (
+                                      <Text size={0} muted>
+                                        {item.message}
+                                      </Text>
+                                    )}
+                                  </Stack>
+                                </Flex>
+                                <Text size={0} muted>
+                                  {item.details}
+                                </Text>
                               </Flex>
-                              <Text size={0} muted>{item.details}</Text>
-                            </Flex>
-                          </Card>
-                        ))}
+                            </Card>
+                          ))}
                       </Stack>
                     </Box>
                   </Stack>
@@ -1841,18 +1995,39 @@ export default function MediaImportTool() {
               {scanReport && scanReport.issues.length > 0 && (
                 <Card padding={4} radius={3} tone="caution" shadow={1} border>
                   <Stack space={3}>
-                    <Text size={2} weight="bold">⚠️ Dikkat Edilmesi Gerekenler ({scanReport.issues.length})</Text>
-                    <Box style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                    <Text size={2} weight="bold">
+                      ⚠️ Dikkat Edilmesi Gerekenler ({scanReport.issues.length})
+                    </Text>
+                    <Box style={{maxHeight: '300px', overflowY: 'auto'}}>
                       <Stack space={2}>
                         {scanReport.issues.slice(0, 50).map((issue, i) => (
-                          <Stack key={i} space={1} style={{ paddingBottom: '8px', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
-                            <Text size={1} weight="semibold" tone={issue.type === 'error' ? 'critical' : 'caution'}>
+                          <Stack
+                            key={i}
+                            space={1}
+                            style={{
+                              paddingBottom: '8px',
+                              borderBottom: '1px solid rgba(0,0,0,0.05)',
+                            }}
+                          >
+                            <Text
+                              size={1}
+                              weight="semibold"
+                              tone={issue.type === 'error' ? 'critical' : 'caution'}
+                            >
                               {issue.message}
                             </Text>
-                            {issue.subtext && <Text size={0} muted>{issue.subtext}</Text>}
+                            {issue.subtext && (
+                              <Text size={0} muted>
+                                {issue.subtext}
+                              </Text>
+                            )}
                           </Stack>
                         ))}
-                        {scanReport.issues.length > 50 && <Text size={0} muted>...ve {scanReport.issues.length - 50} daha fazla uyarı.</Text>}
+                        {scanReport.issues.length > 50 && (
+                          <Text size={0} muted>
+                            ...ve {scanReport.issues.length - 50} daha fazla uyarı.
+                          </Text>
+                        )}
                       </Stack>
                     </Box>
                   </Stack>
@@ -1863,32 +2038,71 @@ export default function MediaImportTool() {
               {!preflight.isAllOk && (
                 <Card padding={4} radius={3} tone="critical" shadow={1} border>
                   <Stack space={3}>
-                    <Text size={2} weight="bold">❌ Eksik Yapılandırma</Text>
-                    <Text size={1}>R2 bağlantısı için .env dosyasındaki şu alanları kontrol edin:</Text>
+                    <Text size={2} weight="bold">
+                      ❌ Eksik Yapılandırma
+                    </Text>
+                    <Text size={1}>
+                      R2 bağlantısı için .env dosyasındaki şu alanları kontrol edin:
+                    </Text>
                     <Stack space={2}>
-                      {!preflight.accountId && <Text size={1} style={{ color: 'red' }}>• R2_ACCOUNT_ID</Text>}
-                      {!preflight.accessKey && <Text size={1} style={{ color: 'red' }}>• R2_ACCESS_KEY_ID</Text>}
-                      {!preflight.secretKey && <Text size={1} style={{ color: 'red' }}>• R2_SECRET_ACCESS_KEY</Text>}
-                      {!preflight.bucket && <Text size={1} style={{ color: 'red' }}>• R2_BUCKET_NAME</Text>}
-                      {!preflight.domain && <Text size={1} style={{ color: 'red' }}>• R2_DOMAIN</Text>}
+                      {!preflight.accountId && (
+                        <Text size={1} style={{color: 'red'}}>
+                          • R2_ACCOUNT_ID
+                        </Text>
+                      )}
+                      {!preflight.accessKey && (
+                        <Text size={1} style={{color: 'red'}}>
+                          • R2_ACCESS_KEY_ID
+                        </Text>
+                      )}
+                      {!preflight.secretKey && (
+                        <Text size={1} style={{color: 'red'}}>
+                          • R2_SECRET_ACCESS_KEY
+                        </Text>
+                      )}
+                      {!preflight.bucket && (
+                        <Text size={1} style={{color: 'red'}}>
+                          • R2_BUCKET_NAME
+                        </Text>
+                      )}
+                      {!preflight.domain && (
+                        <Text size={1} style={{color: 'red'}}>
+                          • R2_DOMAIN
+                        </Text>
+                      )}
                     </Stack>
                   </Stack>
                 </Card>
               )}
 
               {/* GUIDE */}
-              <Card padding={4} radius={3} tone="transparent" shadow={0} border style={{ borderStyle: 'dashed' }}>
+              <Card
+                padding={4}
+                radius={3}
+                tone="transparent"
+                shadow={0}
+                border
+                style={{borderStyle: 'dashed'}}
+              >
                 <Stack space={3}>
-                  <Text size={2} weight="bold">ℹ️ Nasıl Çalışır?</Text>
-                  <Text size={1} style={{ lineHeight: '1.6' }}>
-                    1. **Tara:** Klasörü bırakın, sistem dökümanları eşleştirsin.<br/>
-                    2. **İncele:** Eksik dökümanları veya hatalı isimleri rapor panelinden kontrol edin.<br/>
+                  <Text size={2} weight="bold">
+                    ℹ️ Nasıl Çalışır?
+                  </Text>
+                  <Text size={1} style={{lineHeight: '1.6'}}>
+                    1. **Tara:** Klasörü bırakın, sistem dökümanları eşleştirsin.
+                    <br />
+                    2. **İncele:** Eksik dökümanları veya hatalı isimleri rapor panelinden kontrol
+                    edin.
+                    <br />
                     3. **Onayla:** Her şey hazırsa yüklemeyi başlatın.
                   </Text>
-                  <Box style={{ borderTop: '1px solid rgba(0,0,0,0.1)' }} />
-                  <Text size={1} weight="semibold">İsimlendirme İpucu:</Text>
+                  <Box style={{borderTop: '1px solid rgba(0,0,0,0.1)'}} />
+                  <Text size={1} weight="semibold">
+                    İsimlendirme İpucu:
+                  </Text>
                   <Text size={1} muted>
-                    Ürün kapakları için dosya sonuna <b>_kapak</b> ekleyin. Mobil versiyonlar için <b>_mobil</b> etiketini kullanın.
+                    Ürün kapakları için dosya sonuna <b>_kapak</b> ekleyin. Mobil versiyonlar için{' '}
+                    <b>_mobil</b> etiketini kullanın.
                   </Text>
                 </Stack>
               </Card>
@@ -2004,7 +2218,7 @@ async function checkExistingDesignerAssets(client: any, designerId: string) {
     imageDesktop{asset->{_id, originalFilename, sha1hash}},
     imageR2, imageMobileR2, imageDesktopR2
   }`,
-    { designerId },
+    {designerId},
   )
 
   const existingHashes = new Set<string>()
@@ -2027,7 +2241,7 @@ async function checkExistingDesignerAssets(client: any, designerId: string) {
       existingFilenames.add(designer.imageDesktop.asset.originalFilename)
   }
 
-  return { existingHashes, existingFilenames, designer }
+  return {existingHashes, existingFilenames, designer}
 }
 
 /**
@@ -2036,7 +2250,7 @@ async function checkExistingDesignerAssets(client: any, designerId: string) {
 async function updateDesignerImages(
   client: any,
   designerId: string,
-  designer: { id: string; name: string; files: File[] },
+  designer: {id: string; name: string; files: File[]},
 ) {
   // Mevcut görselleri kontrol et
   const designerData = await checkExistingDesignerAssets(client, designerId)
@@ -2195,7 +2409,7 @@ async function checkExistingAssets(client: any, productId: string) {
       videoFileDesktopR2
     }
   }`,
-    { productId },
+    {productId},
   )
 
   const existingHashes = new Set<string>()
@@ -2398,7 +2612,12 @@ async function isAssetAlreadyUploaded(
  * - CMS'de olmayan klasör görsellerini ekler
  * - Her ikisinde de olan görselleri korur
  */
-async function updateProductImages(client: any, productId: string, product: any, mode: 'sync' | 'add' = 'sync') {
+async function updateProductImages(
+  client: any,
+  productId: string,
+  product: any,
+  mode: 'sync' | 'add' = 'sync',
+) {
   // Mevcut görselleri kontrol et
   const productData = await checkExistingAssets(client, productId)
   const {
@@ -2435,7 +2654,18 @@ async function updateProductImages(client: any, productId: string, product: any,
   })
 
   const updates: any = {}
-  const unsetFields: string[] = mode === 'sync' ? ['mainImage', 'mainImageR2', 'mainImageMobile', 'mainImageMobileR2', 'mainImageDesktop', 'mainImageDesktopR2', 'alternativeMedia'] : []
+  const unsetFields: string[] =
+    mode === 'sync'
+      ? [
+          'mainImage',
+          'mainImageR2',
+          'mainImageMobile',
+          'mainImageMobileR2',
+          'mainImageDesktop',
+          'mainImageDesktopR2',
+          'alternativeMedia',
+        ]
+      : []
   let hasChanges = false
 
   // ============================================
@@ -2443,7 +2673,10 @@ async function updateProductImages(client: any, productId: string, product: any,
   // ============================================
 
   const folderMediaHashes = new Set<string>()
-  const folderMediaMap = new Map<string, { file: File; isVideo: boolean; device: string; isCover: boolean }>()
+  const folderMediaMap = new Map<
+    string,
+    {file: File; isVideo: boolean; device: string; isCover: boolean}
+  >()
 
   console.log(`   🖼️ ${incomingMedia.length} klasör medyası hash'leniyor...`)
   for (const media of incomingMedia) {
@@ -2454,7 +2687,7 @@ async function updateProductImages(client: any, productId: string, product: any,
         file: media.file,
         isVideo: isVideoFile(media.file.name),
         device: media.device,
-        isCover: !!media.isCover
+        isCover: !!media.isCover,
       })
     } catch (error) {
       console.error(`   ❌ Hash hesaplanamadı: ${media.file.name}`, error)
@@ -2470,9 +2703,9 @@ async function updateProductImages(client: any, productId: string, product: any,
     if (mediaItem?.image?.asset?.sha1hash) hash = mediaItem.image.asset.sha1hash
     if (mediaItem?.videoFile?.asset?.sha1hash) hash = mediaItem.videoFile.asset.sha1hash
     if (mediaItem?.imageR2?.url) {
-       // R2 asset'lerde hash yoksa filename veya url bazlı eşleşme denenebilir ama hash en iyisi
-       // Zaten R2'ye yüklenirken orjinal hash Sanity'de saklanmıyor (R2 asset tipi basit)
-       // Bu yüzden hash set'ine orjinal dosya adı/boyut kombinasyonu gibi bir şey eklesek iyi olurdu
+      // R2 asset'lerde hash yoksa filename veya url bazlı eşleşme denenebilir ama hash en iyisi
+      // Zaten R2'ye yüklenirken orjinal hash Sanity'de saklanmıyor (R2 asset tipi basit)
+      // Bu yüzden hash set'ine orjinal dosya adı/boyut kombinasyonu gibi bir şey eklesek iyi olurdu
     }
     if (hash) {
       cmsMediaHashes.add(hash)
@@ -2484,37 +2717,55 @@ async function updateProductImages(client: any, productId: string, product: any,
 
   // 1. Klasördeki medyayı ekle
   for (const [hash, mediaInfo] of folderMediaMap.entries()) {
-    const { file, isVideo, device, isCover } = mediaInfo
+    const {file, isVideo, device, isCover} = mediaInfo
 
     if (cmsMediaHashes.has(hash)) {
       // Her ikisinde de var - koru ve isCover durumunu güncelle eğer değişmişse
       const existingItem = cmsMediaMap.get(hash)
-      const updatedItem = { ...existingItem, isCover }
-      
+      const updatedItem = {...existingItem, isCover}
+
       // Eğer görsel ise ve R2 alanı yoksa migrate et
       const isImg = !isVideo && (updatedItem.type === 'image' || updatedItem.image)
       const isVid = isVideo && (updatedItem.type === 'video' || updatedItem.videoFile)
 
       if ((isImg && !updatedItem.imageR2) || (isVid && !updatedItem.videoFileR2)) {
-          console.log(`   🔄 Mevcut ${isVideo ? 'video' : 'görsel'} R2'ye taşınıyor: ${file.name}`)
-          const r2Url = await uploadToR2(file, `products/${slugify(product.categoryName)}/${product.modelId}`)
-          if (r2Url) {
-              if (isVideo) {
-                  updatedItem.videoFileR2 = { _type: 'r2Asset', url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes }
-                  updatedItem.videoFile = null
-              } else {
-                  updatedItem.imageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height, hasResponsiveSizes: r2Url.hasResponsiveSizes }
-                  updatedItem.image = null
-              }
+        console.log(`   🔄 Mevcut ${isVideo ? 'video' : 'görsel'} R2'ye taşınıyor: ${file.name}`)
+        const r2Url = await uploadToR2(
+          file,
+          `products/${slugify(product.categoryName)}/${product.modelId}`,
+        )
+        if (r2Url) {
+          if (isVideo) {
+            updatedItem.videoFileR2 = {
+              _type: 'r2Asset',
+              url: r2Url.url,
+              hasResponsiveSizes: r2Url.hasResponsiveSizes,
+            }
+            updatedItem.videoFile = null
+          } else {
+            updatedItem.imageR2 = {
+              _type: 'r2Asset',
+              url: r2Url.url,
+              width: r2Url.width,
+              height: r2Url.height,
+              hasResponsiveSizes: r2Url.hasResponsiveSizes,
+            }
+            updatedItem.image = null
           }
+        }
       }
 
       syncedMedia.push(resolveKey(updatedItem))
       if (existingItem.isCover !== isCover) hasChanges = true
     } else {
       // Klasörde var ama CMS'de yok - ekle
-      console.log(`   ✅ ${isVideo ? 'Video' : 'Görsel'} R2'ye yükleniyor: ${file.name} ${isCover ? '(KAPAK)' : ''}`)
-      const r2Url = await uploadToR2(file, `products/${slugify(product.categoryName)}/${product.modelId}`)
+      console.log(
+        `   ✅ ${isVideo ? 'Video' : 'Görsel'} R2'ye yükleniyor: ${file.name} ${isCover ? '(KAPAK)' : ''}`,
+      )
+      const r2Url = await uploadToR2(
+        file,
+        `products/${slugify(product.categoryName)}/${product.modelId}`,
+      )
       if (r2Url) {
         const item: any = {
           _type: 'productSimpleMediaItem',
@@ -2524,11 +2775,32 @@ async function updateProductImages(client: any, productId: string, product: any,
         }
 
         if (isVideo) {
-          if (device === 'mobile') item.videoFileMobileR2 = { _type: 'r2Asset', url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes }
-          else if (device === 'desktop') item.videoFileDesktopR2 = { _type: 'r2Asset', url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes }
-          else item.videoFileR2 = { _type: 'r2Asset', url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+          if (device === 'mobile')
+            item.videoFileMobileR2 = {
+              _type: 'r2Asset',
+              url: r2Url.url,
+              hasResponsiveSizes: r2Url.hasResponsiveSizes,
+            }
+          else if (device === 'desktop')
+            item.videoFileDesktopR2 = {
+              _type: 'r2Asset',
+              url: r2Url.url,
+              hasResponsiveSizes: r2Url.hasResponsiveSizes,
+            }
+          else
+            item.videoFileR2 = {
+              _type: 'r2Asset',
+              url: r2Url.url,
+              hasResponsiveSizes: r2Url.hasResponsiveSizes,
+            }
         } else {
-          const r2Asset = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+          const r2Asset = {
+            _type: 'r2Asset',
+            url: r2Url.url,
+            width: r2Url.width,
+            height: r2Url.height,
+            hasResponsiveSizes: r2Url.hasResponsiveSizes,
+          }
           if (device === 'mobile') item.imageMobileR2 = r2Asset
           else if (device === 'desktop') item.imageDesktopR2 = r2Asset
           else item.imageR2 = r2Asset
@@ -2543,13 +2815,17 @@ async function updateProductImages(client: any, productId: string, product: any,
   if (mode === 'sync') {
     const toDelete = Array.from(cmsMediaHashes).filter((hash) => !folderMediaHashes.has(hash))
     if (toDelete.length > 0) {
-      console.log(`   🗑️ ${toDelete.length} medya dökümanda var ama klasörde yok, eşitleme için CMS'den temizleniyor`)
+      console.log(
+        `   🗑️ ${toDelete.length} medya dökümanda var ama klasörde yok, eşitleme için CMS'den temizleniyor`,
+      )
       hasChanges = true
     }
     updates.media = syncedMedia
   } else {
     // ADD MODE: Mevcutların üzerine ekle
-    const newOnly = syncedMedia.filter(m => !cmsMediaHashes.has(m.image?.asset?.sha1hash || m.imageR2?.url))
+    const newOnly = syncedMedia.filter(
+      (m) => !cmsMediaHashes.has(m.image?.asset?.sha1hash || m.imageR2?.url),
+    )
     if (newOnly.length > 0) {
       updates.media = [...existingMediaArray, ...newOnly]
       hasChanges = true
@@ -2564,7 +2840,7 @@ async function updateProductImages(client: any, productId: string, product: any,
     console.log(`   📐 ${dimensionImages.length} ölçü görseli işleniyor (ÖLÇÜLER klasöründen)...`)
 
     // Ölçü görsellerini grupla (numara ile veya dosya adından)
-    const dimensionGroups = new Map<number, { main?: File; mobile?: File; desktop?: File }>()
+    const dimensionGroups = new Map<number, {main?: File; mobile?: File; desktop?: File}>()
 
     for (const file of dimensionImages) {
       const name = file.name.toLowerCase()
@@ -2720,7 +2996,7 @@ async function updateProductImages(client: any, productId: string, product: any,
     // Alt medya panellerini grupla (numara ile)
     const panelGroups = new Map<
       number,
-      Array<{ file: File; isVideo: boolean; isMobile: boolean; isDesktop: boolean }>
+      Array<{file: File; isVideo: boolean; isMobile: boolean; isDesktop: boolean}>
     >()
 
     for (const file of panelMedia) {
@@ -2736,7 +3012,7 @@ async function updateProductImages(client: any, productId: string, product: any,
       const isMobile = name.includes('_mobil') && !name.includes('_desktop')
       const isDesktop = name.includes('_desktop')
 
-      panelGroups.get(index)!.push({ file, isVideo, isMobile, isDesktop })
+      panelGroups.get(index)!.push({file, isVideo, isMobile, isDesktop})
     }
 
     const syncedMedia: any[] = []
@@ -2983,7 +3259,7 @@ async function updateProductImages(client: any, productId: string, product: any,
           newDrawings.push({
             _type: 'downloadableItem',
             _key: `drawing-${Date.now()}-${Math.random()}`,
-            name: { tr: baseName, en: baseName },
+            name: {tr: baseName, en: baseName},
             fileR2: {
               _type: 'r2Asset',
               url: r2Url.url,
@@ -3032,7 +3308,7 @@ async function updateProductImages(client: any, productId: string, product: any,
           newModels.push({
             _type: 'downloadableItem',
             _key: `model-${Date.now()}-${Math.random()}`,
-            name: { tr: baseName, en: baseName },
+            name: {tr: baseName, en: baseName},
             fileR2: {
               _type: 'r2Asset',
               url: r2Url.url,
@@ -3063,11 +3339,7 @@ async function updateProductImages(client: any, productId: string, product: any,
   // 6. GÜNCELLEMELERİ UYGULA
   // ============================================
 
-  if (
-    hasChanges ||
-    hasExclusiveChanges ||
-    syncedMedia.length !== existingMediaArray.length
-  ) {
+  if (hasChanges || hasExclusiveChanges || syncedMedia.length !== existingMediaArray.length) {
     let patch = client.patch(productId)
     if (Object.keys(updates).length > 0) {
       patch = patch.set(updates)
@@ -3085,7 +3357,12 @@ async function updateProductImages(client: any, productId: string, product: any,
 /**
  * Proje medyasını klasörle eşitler (sync)
  */
-async function updateProjectMedia(client: any, projectId: string, project: any, mode: 'sync' | 'add' = 'sync') {
+async function updateProjectMedia(
+  client: any,
+  projectId: string,
+  project: any,
+  mode: 'sync' | 'add' = 'sync',
+) {
   // Mevcut medyayı kontrol et
   const projectData = await client.fetch(
     `*[_id == $projectId][0]{
@@ -3099,16 +3376,26 @@ async function updateProjectMedia(client: any, projectId: string, project: any, 
       videoFileR2
     }
   }`,
-    { projectId },
+    {projectId},
   )
 
   const existingMedia: any[] = projectData?.media || []
   const updates: any = {}
-  const unsetFields: string[] = ['cover', 'coverR2', 'coverMobile', 'coverMobileR2', 'coverDesktop', 'coverDesktopR2']
+  const unsetFields: string[] = [
+    'cover',
+    'coverR2',
+    'coverMobile',
+    'coverMobileR2',
+    'coverDesktop',
+    'coverDesktopR2',
+  ]
   let hasChanges = false
 
   const incomingMedia = project.media || []
-  const folderMediaMap = new Map<string, { file: File; isVideo: boolean; device: string; isCover: boolean }>()
+  const folderMediaMap = new Map<
+    string,
+    {file: File; isVideo: boolean; device: string; isCover: boolean}
+  >()
 
   for (const media of incomingMedia) {
     const hash = await getFileHash(media.file)
@@ -3116,7 +3403,7 @@ async function updateProjectMedia(client: any, projectId: string, project: any, 
       file: media.file,
       isVideo: isVideoFile(media.file.name),
       device: media.device,
-      isCover: !!media.isCover
+      isCover: !!media.isCover,
     })
   }
 
@@ -3131,15 +3418,17 @@ async function updateProjectMedia(client: any, projectId: string, project: any, 
   const syncedMedia: any[] = []
 
   for (const [hash, mediaInfo] of folderMediaMap.entries()) {
-    const { file, isVideo, device, isCover } = mediaInfo
+    const {file, isVideo, device, isCover} = mediaInfo
     const existing = cmsMediaMap.get(hash)
 
     if (existing) {
-      const updatedItem = { ...existing, isCover }
+      const updatedItem = {...existing, isCover}
       syncedMedia.push(resolveKey(updatedItem))
       if (existing.isCover !== isCover) hasChanges = true
     } else {
-      console.log(`   ✅ ${isVideo ? 'Video' : 'Görsel'} R2'ye yükleniyor: ${file.name} ${isCover ? '(KAPAK)' : ''}`)
+      console.log(
+        `   ✅ ${isVideo ? 'Video' : 'Görsel'} R2'ye yükleniyor: ${file.name} ${isCover ? '(KAPAK)' : ''}`,
+      )
       const r2Url = await uploadToR2(file, `projects/${slugify(project.projectName)}`)
       if (r2Url) {
         const item: any = {
@@ -3150,9 +3439,18 @@ async function updateProjectMedia(client: any, projectId: string, project: any, 
         }
 
         if (isVideo) {
-          item.videoFileR2 = { _type: 'r2Asset', url: r2Url.url, hasResponsiveSizes: r2Url.hasResponsiveSizes }
+          item.videoFileR2 = {
+            _type: 'r2Asset',
+            url: r2Url.url,
+            hasResponsiveSizes: r2Url.hasResponsiveSizes,
+          }
         } else {
-          item.imageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height }
+          item.imageR2 = {
+            _type: 'r2Asset',
+            url: r2Url.url,
+            width: r2Url.width,
+            height: r2Url.height,
+          }
         }
         syncedMedia.push(item)
         hasChanges = true
@@ -3164,10 +3462,14 @@ async function updateProjectMedia(client: any, projectId: string, project: any, 
     if (mode === 'sync') {
       updates.media = syncedMedia
     } else {
-      const newOnly = syncedMedia.filter(m => !cmsMediaMap.has(m._key))
+      const newOnly = syncedMedia.filter((m) => !cmsMediaMap.has(m._key))
       updates.media = [...existingMedia, ...newOnly]
     }
-    await client.patch(projectId).set(updates).unset(mode === 'sync' ? unsetFields : []).commit()
+    await client
+      .patch(projectId)
+      .set(updates)
+      .unset(mode === 'sync' ? unsetFields : [])
+      .commit()
     console.log(`   ✅ Proje medyası güncellendi (Mode: ${mode})`)
   }
 }
@@ -3180,7 +3482,7 @@ async function updateProjectMedia(client: any, projectId: string, project: any, 
 async function updateCategoryImages(
   client: any,
   categoryId: string,
-  categoryMedia: { categoryId: string; categoryName: string; files: File[] },
+  categoryMedia: {categoryId: string; categoryName: string; files: File[]},
 ) {
   const categoryData = await client.fetch(
     `*[_id == $categoryId][0]{
@@ -3189,7 +3491,7 @@ async function updateCategoryImages(
     menuImage,
     menuImageR2
   }`,
-    { categoryId },
+    {categoryId},
   )
 
   const updates: any = {}
@@ -3279,22 +3581,29 @@ async function updateNewsItemMedia(client: any, newsId: string, news: any) {
       videoFileR2
     }
   }`,
-    { newsId },
+    {newsId},
   )
 
   const existingMedia: any[] = newsData?.media || []
   const updates: any = {}
-  const unsetFields: string[] = ['mainImage', 'mainImageR2', 'mainImageMobile', 'mainImageMobileR2', 'mainImageDesktop', 'mainImageDesktopR2']
+  const unsetFields: string[] = [
+    'mainImage',
+    'mainImageR2',
+    'mainImageMobile',
+    'mainImageMobileR2',
+    'mainImageDesktop',
+    'mainImageDesktopR2',
+  ]
   let hasChanges = false
 
-  const folderMediaMap = new Map<string, { file: File; isVideo: boolean; isCover: boolean }>()
+  const folderMediaMap = new Map<string, {file: File; isVideo: boolean; isCover: boolean}>()
   for (const file of news.files) {
     const hash = await getFileHash(file)
     const isCover = file.name.toLowerCase().includes('_kapak')
-    folderMediaMap.set(hash, { file, isVideo: isVideoFile(file.name), isCover })
+    folderMediaMap.set(hash, {file, isVideo: isVideoFile(file.name), isCover})
   }
 
-  if (!Array.from(folderMediaMap.values()).some(m => m.isCover)) {
+  if (!Array.from(folderMediaMap.values()).some((m) => m.isCover)) {
     const firstImg = Array.from(folderMediaMap.entries()).find(([h, m]) => !m.isVideo)
     if (firstImg) folderMediaMap.get(firstImg[0])!.isCover = true
   }
@@ -3309,11 +3618,13 @@ async function updateNewsItemMedia(client: any, newsId: string, news: any) {
   for (const [hash, info] of folderMediaMap.entries()) {
     const existing = cmsMediaMap.get(hash)
     if (existing) {
-      const updatedItem = { ...existing, isCover: info.isCover }
+      const updatedItem = {...existing, isCover: info.isCover}
       syncedMedia.push(resolveKey(updatedItem))
       if (existing.isCover !== info.isCover) hasChanges = true
     } else {
-      console.log(`   ✅ Haber medyası R2'ye yükleniyor: ${info.file.name} ${info.isCover ? '(KAPAK)' : ''}`)
+      console.log(
+        `   ✅ Haber medyası R2'ye yükleniyor: ${info.file.name} ${info.isCover ? '(KAPAK)' : ''}`,
+      )
       const r2Url = await uploadToR2(info.file, `news/${news.newsId}`)
       if (r2Url) {
         const item: any = {
@@ -3322,8 +3633,14 @@ async function updateNewsItemMedia(client: any, newsId: string, news: any) {
           type: info.isVideo ? 'video' : 'image',
           isCover: info.isCover,
         }
-        if (info.isVideo) item.videoFileR2 = { _type: 'r2Asset', url: r2Url.url }
-        else item.imageR2 = { _type: 'r2Asset', url: r2Url.url, width: r2Url.width, height: r2Url.height }
+        if (info.isVideo) item.videoFileR2 = {_type: 'r2Asset', url: r2Url.url}
+        else
+          item.imageR2 = {
+            _type: 'r2Asset',
+            url: r2Url.url,
+            width: r2Url.width,
+            height: r2Url.height,
+          }
         syncedMedia.push(item)
         hasChanges = true
       }
@@ -3341,7 +3658,7 @@ async function updateNewsItemMedia(client: any, newsId: string, news: any) {
  * Hakkımızda sayfası medyasını eşitler (sync)
  */
 async function updateAboutPageMedia(client: any, aboutId: string, aboutData: any) {
-  const doc = await client.fetch(`*[_id == $aboutId][0]`, { aboutId })
+  const doc = await client.fetch(`*[_id == $aboutId][0]`, {aboutId})
 
   const updates: any = {}
   const unsetFields: string[] = []

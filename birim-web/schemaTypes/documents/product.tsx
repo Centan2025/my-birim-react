@@ -3,7 +3,7 @@ import {defineField, defineType} from 'sanity'
 import {getPreviewUrl} from '../utils/previewUrl'
 import BulkMediaUploadInput from '../../components/BulkMediaUploadInput'
 
-import { orderRankField } from '@sanity/orderable-document-list'
+import {orderRankField} from '@sanity/orderable-document-list'
 
 export default defineType({
   name: 'product',
@@ -68,9 +68,10 @@ export default defineType({
       type: 'array',
       of: [{type: 'productSimpleMediaItem'}],
       components: {
-        input: BulkMediaUploadInput
+        input: BulkMediaUploadInput,
       },
-      description: 'Ürün görselleri, videoları ve YouTube bağlantıları. Birini kapak olarak işaretleyebilirsiniz.',
+      description:
+        'Ürün görselleri, videoları ve YouTube bağlantıları. Birini kapak olarak işaretleyebilirsiniz.',
     }),
     defineField({name: 'buyable', title: 'Satın Alınabilir', type: 'boolean'}),
     defineField({name: 'price', title: 'Fiyat', type: 'number'}),
@@ -116,8 +117,7 @@ export default defineType({
       title: 'Alt Medya Panelleri',
       type: 'array',
       of: [{type: 'productPanelMediaItem'}],
-      description:
-        'Sayfa altındaki büyük medya panelleri.',
+      description: 'Sayfa altındaki büyük medya panelleri.',
     }),
     defineField({
       name: 'mediaSectionTitle',
@@ -140,8 +140,8 @@ export default defineType({
   ],
   preview: {
     select: {
-      title: 'name.tr', 
-      media: 'media'
+      title: 'name.tr',
+      media: 'media',
     },
     prepare({title, media}) {
       const coverItem = media?.find((m: any) => m.isCover) || media?.[0]
@@ -150,13 +150,15 @@ export default defineType({
 
       return {
         title: title || 'Ürün',
-        media: finalUrl ? (
-          () => <img
-            src={finalUrl}
-            alt={title || 'Ürün'}
-            style={{width: '100%', height: '100%', objectFit: 'cover'}}
-          />
-        ) : undefined,
+        media: finalUrl
+          ? () => (
+              <img
+                src={finalUrl}
+                alt={title || 'Ürün'}
+                style={{width: '100%', height: '100%', objectFit: 'cover'}}
+              />
+            )
+          : undefined,
       }
     },
   },

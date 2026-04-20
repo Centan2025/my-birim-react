@@ -36,12 +36,12 @@ const PanelSlider: React.FC<{
     const container = scrollRef.current
     const item = container.querySelector('div')
     if (!item) return
-    
+
     const itemWidth = item.clientWidth
     const gap = 16 // md:gap-4
     const scrollLeft = container.scrollLeft
     const index = Math.round(scrollLeft / (itemWidth + gap))
-    
+
     if (index !== activeIndex) {
       setActiveIndex(index)
     }
@@ -52,37 +52,40 @@ const PanelSlider: React.FC<{
     const container = scrollRef.current
     const item = container.querySelector('div')
     if (!item) return
-    
+
     const itemWidth = item.clientWidth
     const gap = 16
     container.scrollTo({
       left: index * (itemWidth + gap),
-      behavior: 'smooth'
+      behavior: 'smooth',
     })
   }
 
   // Determine width based on panel size
   const getWidthClass = () => {
     switch (panelSize) {
-      case 'small': return 'w-[45vw] md:w-[22vw] lg:w-[15vw]'
-      case 'large': return 'w-[85vw] md:w-[60vw] lg:w-[45vw]'
-      default: return 'w-[65vw] md:w-[35vw] lg:w-[25vw]'
+      case 'small':
+        return 'w-[45vw] md:w-[22vw] lg:w-[15vw]'
+      case 'large':
+        return 'w-[85vw] md:w-[60vw] lg:w-[45vw]'
+      default:
+        return 'w-[65vw] md:w-[35vw] lg:w-[25vw]'
     }
   }
 
   return (
     <div className="w-full relative group/panels flex flex-col gap-6">
-      <div 
+      <div
         ref={scrollRef}
         onScroll={handleScroll}
         className="flex overflow-x-auto gap-4 px-4 md:px-8 pb-4 no-scrollbar scroll-smooth snap-x snap-mandatory"
       >
         {media.map((item, i) => (
-          <div 
-            key={i} 
+          <div
+            key={i}
             className={`flex-shrink-0 snap-start relative overflow-hidden ${imageBorderClass} aspect-[4/5] sm:aspect-[3/4] group cursor-pointer ${getWidthClass()}`}
             onClick={() => onMediaClick && onMediaClick(item.url)}
-            onKeyDown={(e) => {
+            onKeyDown={e => {
               if (onMediaClick && (e.key === 'Enter' || e.key === ' ')) {
                 e.preventDefault()
                 onMediaClick(item.url)
@@ -122,8 +125,8 @@ const PanelSlider: React.FC<{
               key={i}
               onClick={() => scrollTo(i)}
               className={`w-2 h-2 rounded-none transition-all duration-300 ${
-                activeIndex === i 
-                  ? 'bg-[var(--text-primary)] opacity-100 scale-110 shadow-sm' 
+                activeIndex === i
+                  ? 'bg-[var(--text-primary)] opacity-100 scale-110 shadow-sm'
                   : 'bg-[var(--text-primary)] opacity-20 hover:opacity-40'
               }`}
               aria-label={`Go to slide ${i + 1}`}
@@ -199,9 +202,11 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           ? Math.max(1, Math.min(12, Number(block.borderThickness || 1)))
           : 0
 
-        const borderOverlayColor = typeof block.borderColor === 'string' 
-          ? block.borderColor 
-          : (block.borderColor as unknown as {hex?: string})?.hex || 'color-mix(in srgb, var(--text-primary) 28%, transparent)'
+        const borderOverlayColor =
+          typeof block.borderColor === 'string'
+            ? block.borderColor
+            : (block.borderColor as unknown as {hex?: string})?.hex ||
+              'color-mix(in srgb, var(--text-primary) 28%, transparent)'
         const borderOverlay = borderThickness > 0 && (
           <div
             className="absolute inset-0 pointer-events-none z-30"
@@ -213,15 +218,15 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 
         // Çerçeve varsa veya manuel padding girilmişse içeriğe boşluk ekle
         const customPadding = block.padding !== undefined ? Number(block.padding) : undefined
-        const borderPaddingStyle = customPadding !== undefined
-          ? { padding: `${customPadding}px` }
-          : undefined
+        const borderPaddingStyle =
+          customPadding !== undefined ? {padding: `${customPadding}px`} : undefined
 
-        const borderPaddingClass = !borderPaddingStyle && borderThickness > 0 
-          ? isFullWidth 
-            ? 'p-4 md:p-8' 
-            : 'p-4 md:p-6'
-          : ''
+        const borderPaddingClass =
+          !borderPaddingStyle && borderThickness > 0
+            ? isFullWidth
+              ? 'p-4 md:p-8'
+              : 'p-4 md:p-6'
+            : ''
 
         const textAlign = block.textAlignment || 'left'
         const textAlignClass =
@@ -372,13 +377,13 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       to={block.linkUrl}
                       className={`group inline-flex items-center text-[var(--text-primary)] hover:opacity-70 border border-[var(--text-primary)] px-8 py-4 text-[10px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter transition-all duration-300`}
                     >
-                        {t(block.linkText)}
+                      {t(block.linkText)}
                     </Link>
                   ) : (
                     <div
                       className={`inline-flex items-center text-[var(--text-primary)] px-8 py-4 text-[10px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
                     >
-                        {t(block.linkText)}
+                      {t(block.linkText)}
                     </div>
                   )}
                 </div>
@@ -394,7 +399,11 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         const isButtonWhite = block.buttonColor === 'white'
         const buttonTextColorClass = isButtonWhite ? 'text-white' : 'text-[var(--text-primary)]'
 
-        const hasMedia = !!mediaUrl || (block.mediaType === 'panels' && Array.isArray(block.imagePanels) && block.imagePanels.length > 0)
+        const hasMedia =
+          !!mediaUrl ||
+          (block.mediaType === 'panels' &&
+            Array.isArray(block.imagePanels) &&
+            block.imagePanels.length > 0)
 
         const mediaContent = hasMedia ? (
           <ScrollReveal
@@ -417,28 +426,32 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                         to={block.linkUrl}
                         className={`group pointer-events-auto inline-flex items-center ${buttonTextColorClass} hover:opacity-50 px-4 py-2 md:px-8 md:py-4 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-white' : 'border-[var(--text-primary)]'} text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
                       >
-                          {t(block.linkText)}
+                        {t(block.linkText)}
                       </Link>
                     ) : (
                       <div
                         className={`pointer-events-auto inline-flex items-center ${buttonTextColorClass} px-4 py-2 md:px-8 md:py-4 bg-transparent text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
                       >
-                          {t(block.linkText)}
+                        {t(block.linkText)}
                       </div>
                     )}
                   </div>
                 )}
               </div>
             ) : block.mediaType === 'video' ? (
-              <div 
-                className={`relative w-full h-full ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`} 
+              <div
+                className={`relative w-full h-full ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`}
                 onClick={() => onMediaClick && !block.linkUrl && onMediaClick(mediaUrl)}
-                onKeyDown={onMediaClick && !block.linkUrl ? (e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    onMediaClick(mediaUrl);
-                  }
-                } : undefined}
+                onKeyDown={
+                  onMediaClick && !block.linkUrl
+                    ? e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          onMediaClick(mediaUrl)
+                        }
+                      }
+                    : undefined
+                }
                 role={onMediaClick && !block.linkUrl ? 'button' : undefined}
                 tabIndex={onMediaClick && !block.linkUrl ? 0 : undefined}
               >
@@ -463,35 +476,39 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                         to={block.linkUrl}
                         className={`group pointer-events-auto inline-flex items-center ${buttonTextColorClass} hover:opacity-50 px-4 py-2 md:px-8 md:py-4 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-white' : 'border-[var(--text-primary)]'} text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
                       >
-                          {t(block.linkText)}
+                        {t(block.linkText)}
                       </Link>
                     ) : (
                       <div
                         className={`pointer-events-auto inline-flex items-center ${buttonTextColorClass} px-4 py-2 md:px-8 md:py-4 bg-transparent text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
                       >
-                          {t(block.linkText)}
+                        {t(block.linkText)}
                       </div>
                     )}
                   </div>
                 )}
               </div>
             ) : block.mediaType === 'panels' ? (
-              <PanelSlider 
-                media={block.imagePanels || []} 
-                panelSize={block.panelSize} 
+              <PanelSlider
+                media={block.imagePanels || []}
+                panelSize={block.panelSize}
                 imageBorderClass={imageBorderClass}
                 onMediaClick={onMediaClick}
               />
             ) : (
-              <div 
-                className={`relative w-full h-full ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`} 
+              <div
+                className={`relative w-full h-full ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`}
                 onClick={() => onMediaClick && !block.linkUrl && onMediaClick(mediaUrl)}
-                onKeyDown={onMediaClick && !block.linkUrl ? (e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    onMediaClick(mediaUrl);
-                  }
-                } : undefined}
+                onKeyDown={
+                  onMediaClick && !block.linkUrl
+                    ? e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          onMediaClick(mediaUrl)
+                        }
+                      }
+                    : undefined
+                }
                 role={onMediaClick && !block.linkUrl ? 'button' : undefined}
                 tabIndex={onMediaClick && !block.linkUrl ? 0 : undefined}
               >
@@ -517,13 +534,13 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                         to={block.linkUrl}
                         className={`group pointer-events-auto inline-flex items-center ${buttonTextColorClass} hover:opacity-50 px-4 py-2 md:px-8 md:py-4 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-white' : 'border-[var(--text-primary)]'} text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
                       >
-                          {t(block.linkText)}
+                        {t(block.linkText)}
                       </Link>
                     ) : (
                       <div
                         className={`pointer-events-auto inline-flex items-center ${buttonTextColorClass} px-4 py-2 md:px-8 md:py-4 bg-transparent text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
                       >
-                          {t(block.linkText)}
+                        {t(block.linkText)}
                       </div>
                     )}
                   </div>

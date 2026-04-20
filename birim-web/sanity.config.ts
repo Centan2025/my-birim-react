@@ -1,4 +1,4 @@
-import { defineConfig } from 'sanity'
+import {defineConfig} from 'sanity'
 
 if (typeof window === 'undefined') {
   const noop = () => {}
@@ -80,15 +80,15 @@ if (typeof window !== 'undefined') {
     }
   } as typeof originalXHR
 }
-import { structureTool } from 'sanity/structure'
-import { visionTool } from '@sanity/vision'
-import { orderableDocumentListDeskItem } from '@sanity/orderable-document-list'
-import { schemaTypes } from './schemaTypes'
-import { deskStructure } from './deskStructure'
-import { excelImportTool } from './tools/excelImport'
-import { mediaImportTool } from './tools/mediaImport'
-import { emailExportTool } from './tools/emailExport'
-import { colorInput } from '@sanity/color-input'
+import {structureTool} from 'sanity/structure'
+import {visionTool} from '@sanity/vision'
+import {orderableDocumentListDeskItem} from '@sanity/orderable-document-list'
+import {schemaTypes} from './schemaTypes'
+import {deskStructure} from './deskStructure'
+import {excelImportTool} from './tools/excelImport'
+import {mediaImportTool} from './tools/mediaImport'
+import {emailExportTool} from './tools/emailExport'
+import {colorInput} from '@sanity/color-input'
 
 export default defineConfig({
   name: 'default',

@@ -51,7 +51,8 @@ export default function CookieBanner() {
                 Çerez Ayarları
               </h3>
               <p className="text-[12px] md:text-[13px] leading-relaxed text-gray-300 font-light tracking-wide">
-                BİRİM olarak web sitemizde deneyiminizi iyileştirmek, içerikleri kişiselleştirmek ve trafik analizi yapmak için çerezler kullanıyoruz. Detaylı bilgi için{' '}
+                BİRİM olarak web sitemizde deneyiminizi iyileştirmek, içerikleri kişiselleştirmek ve
+                trafik analizi yapmak için çerezler kullanıyoruz. Detaylı bilgi için{' '}
                 <a
                   href="#/cookies"
                   className="text-white underline underline-offset-4 hover:text-white/60 transition-colors decoration-white/20 hover:decoration-white/60"

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, {useState, useEffect} from 'react'
 
 export const BackToTopButton: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false)
@@ -23,7 +23,7 @@ export const BackToTopButton: React.FC = () => {
     }
 
     handleScroll()
-    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('scroll', handleScroll, {passive: true})
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -32,7 +32,7 @@ export const BackToTopButton: React.FC = () => {
   return (
     <button
       type="button"
-      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}
       aria-label="Sayfanın en üstüne dön"
       className="fixed bottom-6 right-6 z-40 w-12 h-12 flex items-center justify-center rounded-none border-[0.5px] border-white bg-white/10 text-white shadow-sm backdrop-blur-md mix-blend-difference hover:bg-white/20 transition-all duration-300 active:scale-95"
     >

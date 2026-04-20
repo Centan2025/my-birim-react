@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
-import { FullscreenMediaViewerProps } from './types'
-import { FullscreenMediaItem } from './FullscreenMediaItem'
-import { FullscreenControls } from './FullscreenControls'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
+import {createPortal} from 'react-dom'
+import {FullscreenMediaViewerProps} from './types'
+import {FullscreenMediaItem} from './FullscreenMediaItem'
+import {FullscreenControls} from './FullscreenControls'
 
 export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   items,
@@ -141,7 +141,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    window.scrollTo({ top: 0, behavior: 'auto' })
+    window.scrollTo({top: 0, behavior: 'auto'})
     const previousBodyOverflow = document.body.style.overflow
     const previousHtmlOverflow = document.documentElement.style.overflow
 
@@ -299,9 +299,9 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       const targetEl = itemRefs.current[index]
       if (targetEl) {
         if (!isMobile || (isMobile && isLandscape)) {
-          container.scrollTo({ left: targetEl.offsetLeft, behavior: 'smooth' })
+          container.scrollTo({left: targetEl.offsetLeft, behavior: 'smooth'})
         } else {
-          container.scrollTo({ top: targetEl.offsetTop, behavior: 'smooth' })
+          container.scrollTo({top: targetEl.offsetTop, behavior: 'smooth'})
         }
       }
     },
@@ -316,18 +316,18 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
 
   const handleScrollLeft = () => {
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: -window.innerWidth / 2, behavior: 'smooth' })
+      scrollContainerRef.current.scrollBy({left: -window.innerWidth / 2, behavior: 'smooth'})
     }
   }
 
   const handleScrollRight = () => {
     if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({ left: window.innerWidth / 2, behavior: 'smooth' })
+      scrollContainerRef.current.scrollBy({left: window.innerWidth / 2, behavior: 'smooth'})
     }
   }
 
   const handleScrollToTop = () => {
-    scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+    scrollContainerRef.current?.scrollTo({top: 0, behavior: 'smooth'})
   }
 
   if (!hasItems) return null
@@ -348,7 +348,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     >
       <div
         className={`w-full relative transition-opacity duration-500 ease-in-out ${isVisible ? 'opacity-100' : 'opacity-0'}`}
-        style={{ height: '100dvh', overflow: 'hidden' }}
+        style={{height: '100dvh', overflow: 'hidden'}}
       >
         <div className="absolute inset-0 overflow-hidden">
           <FullscreenControls
@@ -369,8 +369,9 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
             role="region"
             aria-label="Fullscreen media scroll container"
             ref={scrollContainerRef}
-            className={`w-full overflow-y-auto md:overflow-y-hidden md:overflow-x-auto flex ${isMobile && isLandscape ? 'flex-row' : isMobile ? 'flex-col' : 'flex-row'
-              } items-start md:items-stretch ${slideCount === 1 ? 'justify-center' : 'justify-start'} px-0 md:px-4 md:cursor-grab md:select-none`}
+            className={`w-full overflow-y-auto md:overflow-y-hidden md:overflow-x-auto flex ${
+              isMobile && isLandscape ? 'flex-row' : isMobile ? 'flex-col' : 'flex-row'
+            } items-start md:items-stretch ${slideCount === 1 ? 'justify-center' : 'justify-start'} px-0 md:px-4 md:cursor-grab md:select-none`}
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',

@@ -39,7 +39,7 @@ export function LoadingSpinner({
 /**
  * Inline Loading Spinner (küçük)
  */
-export function InlineLoadingSpinner({ className = '' }: { className?: string }) {
+export function InlineLoadingSpinner({className = ''}: {className?: string}) {
   return (
     <div className={`inline-flex items-center justify-center ${className}`}>
       <div className="inline-block animate-spin rounded-full border-b-2 border-current h-4 w-4"></div>
@@ -51,7 +51,7 @@ export function InlineLoadingSpinner({ className = '' }: { className?: string })
  * Page Loading Component
  * Sayfa yüklenirken gösterilir
  */
-export function PageLoading({ message }: { message?: string }) {
+export function PageLoading({message}: {message?: string}) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <LoadingSpinner message={message || 'Yükleniyor...'} />

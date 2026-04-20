@@ -181,12 +181,15 @@ export default {
   close_cart: 'Close cart',
   newsletter_title: 'Join Our World of Design',
   professional_access: 'Exclusive access',
-  professional_access_desc: 'Be the first to know about Birim’s latest collections, design stories, and exclusive videos.',
-  newsletter_prompt: 'Be the first to know about Birim’s latest collections, design stories, and exclusive videos.',
+  professional_access_desc:
+    'Be the first to know about Birim’s latest collections, design stories, and exclusive videos.',
+  newsletter_prompt:
+    'Be the first to know about Birim’s latest collections, design stories, and exclusive videos.',
   join_us: 'Join our newsletter',
   waiting: 'Waiting',
   complete_application: 'Complete application',
-  professional_disclaimer: '* You will be able to provide full access after your membership is approved.',
+  professional_disclaimer:
+    '* You will be able to provide full access after your membership is approved.',
   set_password: 'Set password',
   not_registered: 'Not Registered?',
   register_or_subscribe: 'Register / Subscribe',

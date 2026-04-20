@@ -43,10 +43,9 @@ describe('useHeaderBackgroundColor', () => {
   })
 
   it('dark mode açıkken dark arka plan döndürmeli', () => {
-    const {result} = renderHook(
-      () => useHeaderBackgroundColor({...baseParams, isDarkMode: true}),
-      {wrapper: wrapper('/contact')}
-    )
+    const {result} = renderHook(() => useHeaderBackgroundColor({...baseParams, isDarkMode: true}), {
+      wrapper: wrapper('/contact'),
+    })
     expect(result.current).toBe('rgba(10, 10, 10, 0.6)')
   })
 

@@ -64,7 +64,7 @@ export function useProductDetail(productId: string | undefined, prefetchedProduc
   const bandMedia = useMemo(() => {
     if (!product || !Array.isArray(product.media)) return []
     const media = [...product.media]
-    const coverIdx = media.findIndex((m) => (m as {isCover?: boolean}).isCover)
+    const coverIdx = media.findIndex(m => (m as {isCover?: boolean}).isCover)
     if (coverIdx > 0) {
       const [cover] = media.splice(coverIdx, 1)
       if (cover) media.unshift(cover)
@@ -134,8 +134,7 @@ export function useProductDetail(productId: string | undefined, prefetchedProduc
       return
     }
     const mainImg = product.mainImage as {palette?: SanityImagePalette}
-    const palette =
-      typeof product.mainImage === 'object' ? mainImg?.palette : undefined
+    const palette = typeof product.mainImage === 'object' ? mainImg?.palette : undefined
     setFromPalette(palette)
     return () => reset()
   }, [product, reset, setFromPalette])

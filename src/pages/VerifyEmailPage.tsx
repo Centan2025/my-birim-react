@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
-import { useLocation, useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
-import { useSEO } from '../hooks/useSEO'
+import {useEffect, useState} from 'react'
+import {useLocation, useNavigate, Link} from 'react-router-dom'
+import {useAuth} from '../context/AuthContext'
+import {useSEO} from '../hooks/useSEO'
 
 export function VerifyEmailPage() {
   const location = useLocation()
@@ -33,7 +33,7 @@ export function VerifyEmailPage() {
       }
 
       try {
-        const { verifyUserByToken } = await import('../services/cms')
+        const {verifyUserByToken} = await import('../services/cms')
         const user = await verifyUserByToken(token)
         if (!user) {
           if (!cancelled) setStatus('error')
@@ -64,7 +64,9 @@ export function VerifyEmailPage() {
       <div className="max-w-md w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-8 text-center shadow-sm">
         {status === 'verifying' && (
           <>
-            <h1 className="text-2xl font-semibold mb-4 text-[var(--text-primary)]">E-posta Doğrulanıyor…</h1>
+            <h1 className="text-2xl font-semibold mb-4 text-[var(--text-primary)]">
+              E-posta Doğrulanıyor…
+            </h1>
             <p className="text-[var(--text-secondary)] mb-2">
               Lütfen birkaç saniye bekleyin, üyeliğiniz doğrulanıyor.
             </p>
@@ -72,7 +74,9 @@ export function VerifyEmailPage() {
         )}
         {status === 'success' && (
           <>
-            <h1 className="text-2xl font-semibold mb-4 text-[var(--text-primary)]">E-posta Doğrulama Başarılı</h1>
+            <h1 className="text-2xl font-semibold mb-4 text-[var(--text-primary)]">
+              E-posta Doğrulama Başarılı
+            </h1>
             <p className="text-[var(--text-secondary)] mb-4">
               Üyeliğiniz başarıyla doğrulandı. Kısa süre içinde üye paneline yönlendirileceksiniz.
             </p>
@@ -86,7 +90,9 @@ export function VerifyEmailPage() {
         )}
         {status === 'error' && (
           <>
-            <h1 className="text-2xl font-semibold mb-4 text-[var(--text-primary)]">Doğrulama Başarısız</h1>
+            <h1 className="text-2xl font-semibold mb-4 text-[var(--text-primary)]">
+              Doğrulama Başarısız
+            </h1>
             <p className="text-[var(--text-secondary)] mb-4">
               Doğrulama linkiniz geçersiz veya süresi dolmuş olabilir. Lütfen tekrar üye olun veya
               yeni bir doğrulama maili isteyin.

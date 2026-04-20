@@ -27,7 +27,7 @@ export {
   extractPalette,
 } from './sanity/client'
 
-export type { SanityImageLike, SanityFileAsset, SanityProductMediaItem } from './sanity/client'
+export type {SanityImageLike, SanityFileAsset, SanityProductMediaItem} from './sanity/client'
 
 // Settings & Globals
 export {
@@ -47,14 +47,14 @@ export {
 } from './sanity/settings'
 
 // Designers & Categories
-export { getCategories, getDesigners, getDesignerById, getDesignersByIds } from './sanity/categories'
+export {getCategories, getDesigners, getDesignerById, getDesignersByIds} from './sanity/categories'
 
-export const addCategory = async (): Promise<void> => { }
-export const updateCategory = async (): Promise<void> => { }
-export const deleteCategory = async (): Promise<void> => { }
-export const addDesigner = async (): Promise<void> => { }
-export const updateDesigner = async (): Promise<void> => { }
-export const deleteDesigner = async (): Promise<void> => { }
+export const addCategory = async (): Promise<void> => {}
+export const updateCategory = async (): Promise<void> => {}
+export const deleteCategory = async (): Promise<void> => {}
+export const addDesigner = async (): Promise<void> => {}
+export const updateDesigner = async (): Promise<void> => {}
+export const deleteDesigner = async (): Promise<void> => {}
 
 // Products
 export {
@@ -64,9 +64,9 @@ export {
   getProductsByDesignerId,
 } from './sanity/products'
 
-export const addProduct = async (): Promise<void> => { }
-export const updateProduct = async (): Promise<void> => { }
-export const deleteProduct = async (): Promise<void> => { }
+export const addProduct = async (): Promise<void> => {}
+export const updateProduct = async (): Promise<void> => {}
+export const deleteProduct = async (): Promise<void> => {}
 
 // Pages
 export {
@@ -80,11 +80,11 @@ export {
 } from './sanity/pages'
 
 // News & Projects
-export { getNews, getNewsById, getProjects, getProjectById } from './sanity/news'
+export {getNews, getNewsById, getProjects, getProjectById} from './sanity/news'
 
-export const addNews = async (): Promise<void> => { }
-export const updateNews = async (): Promise<void> => { }
-export const deleteNews = async (): Promise<void> => { }
+export const addNews = async (): Promise<void> => {}
+export const updateNews = async (): Promise<void> => {}
+export const deleteNews = async (): Promise<void> => {}
 
 // Auth & Users
 export {

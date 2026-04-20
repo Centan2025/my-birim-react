@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, useCallback } from 'react'
-import { createPortal } from 'react-dom'
-import { motion, AnimatePresence } from 'framer-motion'
-import { OptimizedImage } from '../components/OptimizedImage'
+import React, {createContext, useContext, useState, useCallback} from 'react'
+import {createPortal} from 'react-dom'
+import {motion, AnimatePresence} from 'framer-motion'
+import {OptimizedImage} from '../components/OptimizedImage'
 
 interface CardRect {
   top: number
@@ -55,8 +55,8 @@ interface CardTransitionContextType {
 }
 
 const CardTransitionContext = createContext<CardTransitionContextType>({
-  triggerExpand: () => { },
-  setTargetRect: () => { },
+  triggerExpand: () => {},
+  setTargetRect: () => {},
   isExpanding: false,
   phase: 'none',
   heroTarget: null,
@@ -65,7 +65,7 @@ const CardTransitionContext = createContext<CardTransitionContextType>({
 // eslint-disable-next-line react-refresh/only-export-components
 export const useCardTransition = () => useContext(CardTransitionContext)
 
-export const CardTransitionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const CardTransitionProvider: React.FC<{children: React.ReactNode}> = ({children}) => {
   const [state, setState] = useState<{
     rect: CardRect
     onComplete: () => void
@@ -99,7 +99,7 @@ export const CardTransitionProvider: React.FC<{ children: React.ReactNode }> = (
       ...(rect.target || {}),
     }
 
-    setState({ rect, onComplete, phase: 'animating', heroTarget })
+    setState({rect, onComplete, phase: 'animating', heroTarget})
 
     // Trigger navigation immediately so the new page mounts and fades in while the card flies!
     onComplete()
@@ -132,7 +132,7 @@ export const CardTransitionProvider: React.FC<{ children: React.ReactNode }> = (
 
   return (
     <CardTransitionContext.Provider
-      value={{ triggerExpand, setTargetRect, isExpanding, phase, heroTarget }}
+      value={{triggerExpand, setTargetRect, isExpanding, phase, heroTarget}}
     >
       {children}
       {createPortal(
@@ -152,47 +152,47 @@ export const CardTransitionProvider: React.FC<{ children: React.ReactNode }> = (
               animate={
                 state.phase === 'animating'
                   ? {
-                    // Move to hero position
-                    top: state.heroTarget.top,
-                    left: state.heroTarget.left,
-                    width: state.heroTarget.width,
-                    height: state.heroTarget.height,
-                    borderRadius: state.heroTarget.borderRadius || '0px',
-                    backgroundColor: '#ffffff',
-                    transition: {
-                      duration: 0.8,
-                      ease: [0.22, 1, 0.36, 1],
-                    },
-                  }
+                      // Move to hero position
+                      top: state.heroTarget.top,
+                      left: state.heroTarget.left,
+                      width: state.heroTarget.width,
+                      height: state.heroTarget.height,
+                      borderRadius: state.heroTarget.borderRadius || '0px',
+                      backgroundColor: '#ffffff',
+                      transition: {
+                        duration: 0.8,
+                        ease: [0.22, 1, 0.36, 1],
+                      },
+                    }
                   : {
-                    // Holding — stay in place, fade out gently
-                    top: state.heroTarget.top,
-                    left: state.heroTarget.left,
-                    width: state.heroTarget.width,
-                    height: state.heroTarget.height,
-                    borderRadius: state.heroTarget.borderRadius || '0px',
-                    backgroundColor: '#ffffff',
-                    opacity: 0,
-                    transition: { duration: 0.5, ease: 'easeOut' },
-                  }
+                      // Holding — stay in place, fade out gently
+                      top: state.heroTarget.top,
+                      left: state.heroTarget.left,
+                      width: state.heroTarget.width,
+                      height: state.heroTarget.height,
+                      borderRadius: state.heroTarget.borderRadius || '0px',
+                      backgroundColor: '#ffffff',
+                      opacity: 0,
+                      transition: {duration: 0.5, ease: 'easeOut'},
+                    }
               }
               onAnimationComplete={() => {
                 if (state.phase === 'animating') {
                   // Arrived at hero position. The page is now fully loaded and visible beneath.
                   // Just transition to 'holding' phase to fade out smoothly over it.
-                  setState(prev => (prev ? { ...prev, phase: 'holding' } : null))
+                  setState(prev => (prev ? {...prev, phase: 'holding'} : null))
                 } else {
                   // Fade complete — remove overlay
                   setState(null)
                 }
               }}
-              style={{ position: 'fixed', zIndex: 30, pointerEvents: 'none', overflow: 'hidden' }}
+              style={{position: 'fixed', zIndex: 30, pointerEvents: 'none', overflow: 'hidden'}}
             >
               {/* Layer 1: Starts looking exactly like card, crossfades out */}
               <motion.div
-                initial={{ opacity: 1 }}
-                animate={{ opacity: 0 }}
-                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                initial={{opacity: 1}}
+                animate={{opacity: 0}}
+                transition={{duration: 0.8, ease: [0.22, 1, 0.36, 1]}}
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -213,17 +213,17 @@ export const CardTransitionProvider: React.FC<{ children: React.ReactNode }> = (
                 {/* Progressive gradient fade-out for Layer 1 */}
                 {state.rect.showGradient && (
                   <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 0 }}
+                    initial={{opacity: 0}}
+                    animate={{opacity: 0}}
                     className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent pointer-events-none"
                   />
                 )}
               </motion.div>
               {/* Layer 2: Final cover crop for hero, crossfades in seamlessly */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                initial={{opacity: 0}}
+                animate={{opacity: 1}}
+                transition={{duration: 0.8, ease: [0.22, 1, 0.36, 1]}}
                 style={{
                   position: 'absolute',
                   top: 0,
@@ -240,19 +240,20 @@ export const CardTransitionProvider: React.FC<{ children: React.ReactNode }> = (
                   crop={state.rect.crop}
                   hotspot={state.rect.hotspot}
                   alt=""
-                  className={`w-full h-full ${state.rect.className || ''} ${state.rect.objectFit === 'cover'
-                    ? 'object-cover'
-                    : !state.rect.imageMobile
-                      ? 'max-md:object-contain md:object-cover'
-                      : 'object-cover'
-                    }`}
+                  className={`w-full h-full ${state.rect.className || ''} ${
+                    state.rect.objectFit === 'cover'
+                      ? 'object-cover'
+                      : !state.rect.imageMobile
+                        ? 'max-md:object-contain md:object-cover'
+                        : 'object-cover'
+                  }`}
                 />
                 {/* Synchronized gradient fade-in for Layer 2 */}
                 {state.rect.showGradient && (
                   <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                    initial={{opacity: 0}}
+                    animate={{opacity: 1}}
+                    transition={{duration: 0.8, ease: [0.22, 1, 0.36, 1]}}
                     className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent pointer-events-none"
                   />
                 )}

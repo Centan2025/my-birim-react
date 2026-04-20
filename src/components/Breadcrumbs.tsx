@@ -1,6 +1,6 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
-import { Helmet } from 'react-helmet-async'
+import {Link} from 'react-router-dom'
+import {Helmet} from 'react-helmet-async'
 
 export interface BreadcrumbItem {
   label: string
@@ -12,7 +12,7 @@ interface BreadcrumbsProps {
   className?: string
 }
 
-export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className = '' }) => {
+export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({items, className = ''}) => {
   if (!items || items.length === 0) return null
 
   // Base URL for schema
@@ -26,18 +26,16 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className = '' 
       '@type': 'ListItem',
       position: index + 1,
       name: item.label,
-      // For the last item or items without 'to', we don't always provide an 'item' URL, 
-      // but if we do, it must be an absolute URL. 
-      item: item.to ? `${baseUrl}${item.to.startsWith('/') ? item.to : `/${item.to}`}` : undefined
-    }))
+      // For the last item or items without 'to', we don't always provide an 'item' URL,
+      // but if we do, it must be an absolute URL.
+      item: item.to ? `${baseUrl}${item.to.startsWith('/') ? item.to : `/${item.to}`}` : undefined,
+    })),
   }
 
   return (
     <>
       <Helmet prioritizeSeoTags>
-        <script type="application/ld+json">
-          {JSON.stringify(breadcrumbSchema)}
-        </script>
+        <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
       </Helmet>
       <nav aria-label="Breadcrumb" className={className}>
         <ol className="list-none p-0 inline-flex flex-wrap items-center font-inter text-[11px] sm:text-[13px] text-[var(--text-secondary)]">

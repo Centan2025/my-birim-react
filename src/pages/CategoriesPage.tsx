@@ -32,7 +32,10 @@ export function CategoriesPage() {
     const map = new Map<string, unknown>()
     for (const product of allProducts) {
       const catId = product.categoryId?.toLowerCase()
-      const hasUrl = typeof product.mainImage === 'object' && product.mainImage !== null ? (product.mainImage as {url?: string}).url : false
+      const hasUrl =
+        typeof product.mainImage === 'object' && product.mainImage !== null
+          ? (product.mainImage as {url?: string}).url
+          : false
       if (product && catId && hasUrl && !map.has(catId)) {
         map.set(catId, product.mainImage)
       }
@@ -132,12 +135,20 @@ export function CategoriesPage() {
                         quality={85}
                         crop={
                           typeof category.displayImage === 'object'
-                            ? (category.displayImage as {crop?: import('../types').R2ImageMetadata['crop']}).crop
+                            ? (
+                                category.displayImage as {
+                                  crop?: import('../types').R2ImageMetadata['crop']
+                                }
+                              ).crop
                             : undefined
                         }
                         hotspot={
                           typeof category.displayImage === 'object'
-                            ? (category.displayImage as {hotspot?: import('../types').R2ImageMetadata['hotspot']}).hotspot
+                            ? (
+                                category.displayImage as {
+                                  hotspot?: import('../types').R2ImageMetadata['hotspot']
+                                }
+                              ).hotspot
                             : undefined
                         }
                       />

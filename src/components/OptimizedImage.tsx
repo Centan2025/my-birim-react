@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { R2ImageMetadata } from '../types'
-import { rewriteR2Url } from '../services/sanity/client'
+import React, {useState, useEffect, useRef} from 'react'
+import {R2ImageMetadata} from '../types'
+import {rewriteR2Url} from '../services/sanity/client'
 
 /**
  * srcset attribute'ünde boşluklar ayırıcıdır — URL'deki boşlukları %20 ile encode ederek
@@ -12,11 +12,13 @@ const encodeSrcSetUrl = (url: string): string => {
     // URL'deki segmentleri ayır ve trim et (Örn: "dosya .webp" -> "dosya.webp")
     // Bu sayede sondaki boşluklardan kaynaklanan 404 hatalarını önleriz.
     const parts = url.split('/')
-    const trimmedUrl = parts.map((p, i) => {
-      if (i < 3 && p.includes(':')) return p // protocol/domain kısmına dokunma
-      return p.trim()
-    }).join('/')
-    
+    const trimmedUrl = parts
+      .map((p, i) => {
+        if (i < 3 && p.includes(':')) return p // protocol/domain kısmına dokunma
+        return p.trim()
+      })
+      .join('/')
+
     // Önce decode et (eğer zaten encode edilmişse), sonra tekrar encode et.
     const decoded = decodeURI(trimmedUrl)
     return encodeURI(decoded).replace(/ /g, '%20')
@@ -87,7 +89,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 }) => {
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
-  const [naturalDims, setNaturalDims] = useState<{ w: number, h: number } | null>(null)
+  const [naturalDims, setNaturalDims] = useState<{w: number; h: number} | null>(null)
   const imgRef = useRef<HTMLImageElement>(null)
 
   // src değiştiğinde state'i sıfırla
@@ -96,16 +98,15 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     setHasError(false)
   }, [src, srcMobile, srcDesktop])
 
-
   // Cache'den yüklenen görselleri yakalama — back navigation'da onLoad tetiklenmez
   useEffect(() => {
     const img = imgRef.current
     if (img && img.complete && img.naturalWidth > 0) {
       setIsLoaded(true)
       if (img.naturalHeight > 0) {
-        setNaturalDims((prev: { w: number, h: number } | null) => {
+        setNaturalDims((prev: {w: number; h: number} | null) => {
           if (prev && prev.w === img.naturalWidth && prev.h === img.naturalHeight) return prev
-          return { w: img.naturalWidth, h: img.naturalHeight }
+          return {w: img.naturalWidth, h: img.naturalHeight}
         })
       }
     }
@@ -115,19 +116,18 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   // engellemek için custom attribute'u lowercase olarak enjekte ediyoruz.
   const fetchPriorityAttr =
     fetchPriority && fetchPriority !== 'auto'
-      ? ({ fetchpriority: fetchPriority } as Record<string, string>)
+      ? ({fetchpriority: fetchPriority} as Record<string, string>)
       : {}
 
   // Placeholder (çok küçük, özel renk veya varsayılan gri)
-  const placeholder =
-    `data:image/svg+xml;base64,${btoa(`<svg width="1" height="1" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="${placeholderColor}"/></svg>`)}`
+  const placeholder = `data:image/svg+xml;base64,${btoa(`<svg width="1" height="1" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="${placeholderColor}"/></svg>`)}`
 
   const handleLoad = () => {
     setIsLoaded(true)
     // Doğal boyutları yakala (crop layout hesaplaması için gerekli)
     const img = imgRef.current
     if (img && img.naturalWidth && img.naturalHeight) {
-      setNaturalDims({ w: img.naturalWidth, h: img.naturalHeight })
+      setNaturalDims({w: img.naturalWidth, h: img.naturalHeight})
     }
     onLoad?.()
   }
@@ -144,7 +144,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   // Cloudflare R2 / Image Resizing logic
   const r2Domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
   // .r2.dev ve .workers.dev domainleri image resizing desteklemez
-  const skipImageResizing = r2Domain?.includes('.r2.dev') || r2Domain?.includes('.workers.dev') || r2Domain?.includes('assets.birim.com')
+  const skipImageResizing =
+    r2Domain?.includes('.r2.dev') ||
+    r2Domain?.includes('.workers.dev') ||
+    r2Domain?.includes('assets.birim.com')
 
   // R2 URL'lerini optimize et
   const getOptimizedUrl = (url: string): string => {
@@ -167,7 +170,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       if (crop) {
         if (crop.width < 1.0 || crop.height < 1.0 || crop.x > 0 || crop.y > 0) {
           if (origWidth && origHeight) {
-            params.push(`rect=${Math.round(crop.x * origWidth)},${Math.round(crop.y * origHeight)},${Math.round(crop.width * origWidth)},${Math.round(crop.height * origHeight)}`)
+            params.push(
+              `rect=${Math.round(crop.x * origWidth)},${Math.round(crop.y * origHeight)},${Math.round(crop.width * origWidth)},${Math.round(crop.height * origHeight)}`
+            )
           }
         } else {
           params.push(`rect=${crop.x},${crop.y},${crop.width},${crop.height}`)
@@ -213,7 +218,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             `${cleanUrl} 2560w`,
           ].join(', ')
         }
-        return '' 
+        return ''
       }
 
       const buildR2 = (w: number) => {
@@ -222,7 +227,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         if (crop) {
           if (crop.width < 1.0 || crop.height < 1.0 || crop.x > 0 || crop.y > 0) {
             if (origWidth && origHeight) {
-              params.push(`rect=${Math.round(crop.x * origWidth)},${Math.round(crop.y * origHeight)},${Math.round(crop.width * origWidth)},${Math.round(crop.height * origHeight)}`)
+              params.push(
+                `rect=${Math.round(crop.x * origWidth)},${Math.round(crop.y * origHeight)},${Math.round(crop.width * origWidth)},${Math.round(crop.height * origHeight)}`
+              )
             }
           } else {
             params.push(`rect=${crop.x},${crop.y},${crop.width},${crop.height}`)
@@ -246,17 +253,27 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const useArtDirection = Boolean(srcMobile || srcDesktop)
 
   // Hotspot varsa style'a object-position ekle
-  const imgStyle: React.CSSProperties = { ...style }
+  const imgStyle: React.CSSProperties = {...style}
   if (hotspot) {
     imgStyle.objectPosition = `${hotspot.x * 100}% ${hotspot.y * 100}%`
   }
 
   // Crop detection
-  const hasCrop = !!(crop && crop.width > 0 && crop.height > 0 && (crop.width < 0.999 || crop.height < 0.999 || crop.x > 0.001 || crop.y > 0.001))
+  const hasCrop = !!(
+    crop &&
+    crop.width > 0 &&
+    crop.height > 0 &&
+    (crop.width < 0.999 || crop.height < 0.999 || crop.x > 0.001 || crop.y > 0.001)
+  )
   const isCoverMode = className.includes('h-full') || className.includes('h-screen') || !!height
 
   const canCloudflareCrop = !!(crop && (crop.width >= 1.0 || (origWidth && origHeight)))
-  const isServerResizingActive = r2Domain && !r2Domain.includes('.workers.dev') && !r2Domain.includes('.r2.dev') && !skipImageResizing && (!hasCrop || canCloudflareCrop)
+  const isServerResizingActive =
+    r2Domain &&
+    !r2Domain.includes('.workers.dev') &&
+    !r2Domain.includes('.r2.dev') &&
+    !skipImageResizing &&
+    (!hasCrop || canCloudflareCrop)
 
   const useClientCrop = hasCrop && !isServerResizingActive
 
@@ -277,13 +294,13 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       return pictureContent
     }
 
-    const cropW = (naturalDims.w * crop!.width)
-    const cropH = (naturalDims.h * crop!.height)
+    const cropW = naturalDims.w * crop!.width
+    const cropH = naturalDims.h * crop!.height
     const aspectRatio = cropW / cropH
 
     return (
       <div
-        style={{ aspectRatio: isCoverMode ? undefined : `${aspectRatio} / 1` }}
+        style={{aspectRatio: isCoverMode ? undefined : `${aspectRatio} / 1`}}
         className={`relative overflow-hidden ${isCoverMode ? 'w-full h-full' : 'w-full'}`}
         data-crop={JSON.stringify(crop)}
       >
@@ -308,7 +325,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     return (
       <div
         className={`bg-gray-200 flex items-center justify-center ${className}`}
-        style={{ width, height }}
+        style={{width, height}}
       >
         <span className="text-gray-400 text-sm">Görsel yüklenemedi</span>
       </div>
@@ -330,7 +347,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         {srcMobile && (
           <source
             media="(max-width: 768px)"
-            srcSet={mobileSrcSet || (optimizedMobileSrc ? encodeSrcSetUrl(optimizedMobileSrc) : undefined)}
+            srcSet={
+              mobileSrcSet || (optimizedMobileSrc ? encodeSrcSetUrl(optimizedMobileSrc) : undefined)
+            }
             sizes={mobileSrcSet ? defaultSizes : undefined}
           />
         )}
@@ -338,7 +357,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         {srcDesktop && (
           <source
             media="(min-width: 769px)"
-            srcSet={desktopSrcSet || (optimizedDesktopSrc ? encodeSrcSetUrl(optimizedDesktopSrc) : undefined)}
+            srcSet={
+              desktopSrcSet ||
+              (optimizedDesktopSrc ? encodeSrcSetUrl(optimizedDesktopSrc) : undefined)
+            }
             sizes={desktopSrcSet ? defaultSizes : undefined}
           />
         )}
@@ -365,23 +387,27 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             ...imgStyle,
             display: 'block',
             WebkitBackfaceVisibility: 'hidden',
-            backfaceVisibility: 'hidden'
+            backfaceVisibility: 'hidden',
           }}
         />
       </picture>
     )
 
     return (
-      <div 
-        className={`relative ${className}`} 
-        style={style} 
+      <div
+        className={`relative ${className}`}
+        style={style}
         onClick={onClick}
-        onKeyDown={onClick ? (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            (onClick as React.MouseEventHandler)(e as unknown as React.MouseEvent);
-          }
-        } : undefined}
+        onKeyDown={
+          onClick
+            ? e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  ;(onClick as React.MouseEventHandler)(e as unknown as React.MouseEvent)
+                }
+              }
+            : undefined
+        }
         role={onClick ? 'button' : undefined}
         tabIndex={onClick ? 0 : undefined}
       >
@@ -400,12 +426,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   const pictureElement = (
     <picture>
-      {responsiveSrcSet && (
-        <source
-          srcSet={responsiveSrcSet}
-          sizes={defaultSizes}
-        />
-      )}
+      {responsiveSrcSet && <source srcSet={responsiveSrcSet} sizes={defaultSizes} />}
       <img
         key={activeSrc}
         ref={imgRef}
@@ -425,36 +446,39 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           ...imgStyle,
           display: 'block',
           WebkitBackfaceVisibility: 'hidden',
-          backfaceVisibility: 'hidden'
+          backfaceVisibility: 'hidden',
         }}
       />
     </picture>
   )
 
-    return (
-      <div 
-        className={`relative ${className}`} 
-        style={style} 
-        onClick={onClick}
-        onKeyDown={onClick ? (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            (onClick as React.MouseEventHandler)(e as unknown as React.MouseEvent);
-          }
-        } : undefined}
-        role={onClick ? 'button' : undefined}
-        tabIndex={onClick ? 0 : undefined}
-      >
-        {showPlaceholder && !isLoaded && (
-          <img
-            src={placeholder}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-            aria-hidden="true"
-          />
-        )}
-        {renderCroppedContent(pictureElement)}
-      </div>
-    )
+  return (
+    <div
+      className={`relative ${className}`}
+      style={style}
+      onClick={onClick}
+      onKeyDown={
+        onClick
+          ? e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                ;(onClick as React.MouseEventHandler)(e as unknown as React.MouseEvent)
+              }
+            }
+          : undefined
+      }
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+    >
+      {showPlaceholder && !isLoaded && (
+        <img
+          src={placeholder}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          aria-hidden="true"
+        />
+      )}
+      {renderCroppedContent(pictureElement)}
+    </div>
+  )
 }
-

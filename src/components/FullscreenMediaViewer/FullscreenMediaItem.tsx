@@ -1,7 +1,7 @@
 import React from 'react'
-import { OptimizedImage } from '../OptimizedImage'
-import { OptimizedVideo } from '../OptimizedVideo'
-import { MediaItem } from './types'
+import {OptimizedImage} from '../OptimizedImage'
+import {OptimizedVideo} from '../OptimizedVideo'
+import {MediaItem} from './types'
 
 interface FullscreenMediaItemProps {
   item: MediaItem
@@ -35,10 +35,11 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
   return (
     <div
       ref={itemRef}
-      className={`flex-shrink-0 flex items-center justify-center transition-all cubic-bezier(0.23, 1, 0.32, 1) ${isVisible && !isClosing
+      className={`flex-shrink-0 flex items-center justify-center transition-all cubic-bezier(0.23, 1, 0.32, 1) ${
+        isVisible && !isClosing
           ? 'opacity-100 translate-y-0 scale-100'
           : 'opacity-0 translate-y-12 scale-95'
-        }`}
+      }`}
       style={{
         transitionDelay: `${animationDelay}ms`,
         transitionDuration: '500ms',
@@ -75,7 +76,7 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
               isMobile && isLandscape ? 'auto' : fixedHeight === 'auto' ? '100%' : 'fit-content',
             minWidth: isMobile && isLandscape ? '0' : 'auto',
             display: 'block',
-            WebkitBackfaceVisibility: 'hidden'
+            WebkitBackfaceVisibility: 'hidden',
           }}
           loading="eager"
           quality={100}

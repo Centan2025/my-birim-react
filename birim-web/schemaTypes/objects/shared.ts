@@ -1210,7 +1210,8 @@ export const contentBlock = defineType({
       name: 'padding',
       title: 'İç Boşluk (Padding - px)',
       type: 'number',
-      description: 'Bloğun dört tarafına eklenecek boşluk (piksel). Çerçeve aktifse çerçeve ile içerik arasındaki mesafe olur.',
+      description:
+        'Bloğun dört tarafına eklenecek boşluk (piksel). Çerçeve aktifse çerçeve ile içerik arasındaki mesafe olur.',
       initialValue: 0,
       validation: (Rule) => Rule.min(0).max(200),
     }),
@@ -1219,7 +1220,8 @@ export const contentBlock = defineType({
       title: 'Çerçeve Rengi',
       type: 'color',
       hidden: ({parent}) => !parent?.hasBorder,
-      description: 'Çerçeve çizgisi için özel bir renk seçin. Boş bırakılırsa varsayılan koyu gri kullanılır.',
+      description:
+        'Çerçeve çizgisi için özel bir renk seçin. Boş bırakılırsa varsayılan koyu gri kullanılır.',
     }),
   ],
   preview: {

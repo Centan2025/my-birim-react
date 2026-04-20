@@ -1,8 +1,8 @@
-import { defineType, defineField } from 'sanity'
-import { Palette } from 'lucide-react'
+import {defineType, defineField} from 'sanity'
+import {Palette} from 'lucide-react'
 import PortableTextImagePreview from '../../components/PortableTextImagePreview'
 import PortableTextImageInput from '../../components/PortableTextImageInput'
-import { browserOnly, browserOnlyInput } from '../utils/browserOnly'
+import {browserOnly, browserOnlyInput} from '../utils/browserOnly'
 
 /**
  * Zengin Metin (Portable Text) Editor Yapılandırması
@@ -12,26 +12,26 @@ const portableTextBlocks = [
   {
     type: 'block',
     styles: [
-      { title: 'Normal', value: 'normal' },
-      { title: 'Başlık 1', value: 'h1' },
-      { title: 'Başlık 2', value: 'h2' },
-      { title: 'Başlık 3', value: 'h3' },
-      { title: 'Başlık 4', value: 'h4' },
-      { title: 'Başlık 5', value: 'h5' },
-      { title: 'Başlık 6', value: 'h6' },
-      { title: 'Alıntı', value: 'blockquote' },
+      {title: 'Normal', value: 'normal'},
+      {title: 'Başlık 1', value: 'h1'},
+      {title: 'Başlık 2', value: 'h2'},
+      {title: 'Başlık 3', value: 'h3'},
+      {title: 'Başlık 4', value: 'h4'},
+      {title: 'Başlık 5', value: 'h5'},
+      {title: 'Başlık 6', value: 'h6'},
+      {title: 'Alıntı', value: 'blockquote'},
     ],
     lists: [
-      { title: 'Madde İşaretli', value: 'bullet' },
-      { title: 'Numaralı', value: 'number' },
+      {title: 'Madde İşaretli', value: 'bullet'},
+      {title: 'Numaralı', value: 'number'},
     ],
     marks: {
       decorators: [
-        { title: 'Kalın', value: 'strong' },
-        { title: 'İtalik', value: 'em' },
-        { title: 'Altı Çizili', value: 'underline' },
-        { title: 'Üstü Çizili', value: 'strike-through' },
-        { title: 'Kod', value: 'code' },
+        {title: 'Kalın', value: 'strong'},
+        {title: 'İtalik', value: 'em'},
+        {title: 'Altı Çizili', value: 'underline'},
+        {title: 'Üstü Çizili', value: 'strike-through'},
+        {title: 'Kod', value: 'code'},
       ],
       annotations: [
         {
@@ -66,11 +66,11 @@ const portableTextBlocks = [
               type: 'reference',
               title: 'Referans',
               to: [
-                { type: 'product' },
-                { type: 'project' },
-                { type: 'newsItem' },
-                { type: 'designer' },
-                { type: 'category' },
+                {type: 'product'},
+                {type: 'project'},
+                {type: 'newsItem'},
+                {type: 'designer'},
+                {type: 'category'},
               ],
             },
           ],
@@ -119,10 +119,10 @@ const portableTextBlocks = [
         title: 'Yerleşim',
         options: {
           list: [
-            { title: 'Tam Genişlik', value: 'full' },
-            { title: 'Merkez', value: 'center' },
-            { title: 'Yan Yana (Sol Kolon)', value: 'left' },
-            { title: 'Yan Yana (Sağ Kolon)', value: 'right' },
+            {title: 'Tam Genişlik', value: 'full'},
+            {title: 'Merkez', value: 'center'},
+            {title: 'Yan Yana (Sol Kolon)', value: 'left'},
+            {title: 'Yan Yana (Sağ Kolon)', value: 'right'},
           ],
         },
         initialValue: 'full',
@@ -170,9 +170,9 @@ const portableTextBlocks = [
         title: 'Stil',
         options: {
           list: [
-            { title: 'İnce Çizgi', value: 'thin' },
-            { title: 'Kalın Çizgi', value: 'thick' },
-            { title: 'Noktalı Çizgi', value: 'dotted' },
+            {title: 'İnce Çizgi', value: 'thin'},
+            {title: 'Kalın Çizgi', value: 'thick'},
+            {title: 'Noktalı Çizgi', value: 'dotted'},
           ],
         },
         initialValue: 'thin',
@@ -201,9 +201,9 @@ const portableTextBlocks = [
         title: 'Stil',
         options: {
           list: [
-            { title: 'Siyah Buton', value: 'primary' },
-            { title: 'Beyaz Buton', value: 'secondary' },
-            { title: 'Çerçeveli', value: 'outline' },
+            {title: 'Siyah Buton', value: 'primary'},
+            {title: 'Beyaz Buton', value: 'secondary'},
+            {title: 'Çerçeveli', value: 'outline'},
           ],
         },
         initialValue: 'primary',

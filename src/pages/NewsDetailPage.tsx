@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useMemo, useEffect, FC, SVGProps } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import type { NewsMedia } from '../types'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { OptimizedVideo } from '../components/OptimizedVideo'
-import { PageLoading } from '../components/LoadingSpinner'
-import { Breadcrumbs } from '../components/Breadcrumbs'
-import { useTranslation } from '../i18n'
-import { useNewsItem, useNews } from '../hooks/useNews'
-import { useSiteSettings } from '../hooks/useSiteData'
-import { analytics } from '../lib/analytics'
-import { useSEO } from '../hooks/useSEO'
+import {useMemo, useEffect, FC, SVGProps} from 'react'
+import {useParams, Link} from 'react-router-dom'
+import type {NewsMedia} from '../types'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {OptimizedVideo} from '../components/OptimizedVideo'
+import {PageLoading} from '../components/LoadingSpinner'
+import {Breadcrumbs} from '../components/Breadcrumbs'
+import {useTranslation} from '../i18n'
+import {useNewsItem, useNews} from '../hooks/useNews'
+import {useSiteSettings} from '../hooks/useSiteData'
+import {analytics} from '../lib/analytics'
+import {useSEO} from '../hooks/useSEO'
 import PortableTextLite from '../components/PortableTextLite'
 
 const getYouTubeId = (url: string): string | null => {
@@ -29,9 +29,9 @@ const formatDate = (dateString: string): string => {
   return `${day}.${month}.${year}`
 }
 
-const MediaComponent: FC<{ media: NewsMedia }> = ({ media }) => {
-  const { t } = useTranslation()
-  const { data: settings } = useSiteSettings()
+const MediaComponent: FC<{media: NewsMedia}> = ({media}) => {
+  const {t} = useTranslation()
+  const {data: settings} = useSiteSettings()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
 
   const renderMedia = () => {
@@ -60,7 +60,7 @@ const MediaComponent: FC<{ media: NewsMedia }> = ({ media }) => {
           media.url.includes('cdn.sanity.io/files'))
       if (isVideoFile) {
         return (
-          <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16:9 Aspect Ratio */ }}>
+          <div className="relative w-full" style={{paddingTop: '56.25%' /* 16:9 Aspect Ratio */}}>
             <OptimizedVideo
               src={media.url}
               srcMobile={media.urlMobile}
@@ -76,7 +76,7 @@ const MediaComponent: FC<{ media: NewsMedia }> = ({ media }) => {
       }
       // URL ise iframe kullan (harici video servisleri için)
       return (
-        <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16:9 Aspect Ratio */ }}>
+        <div className="relative w-full" style={{paddingTop: '56.25%' /* 16:9 Aspect Ratio */}}>
           <iframe
             src={media.url}
             title={t(media.caption) || 'News video'}
@@ -91,7 +91,7 @@ const MediaComponent: FC<{ media: NewsMedia }> = ({ media }) => {
       const videoId = getYouTubeId(media.url)
       if (!videoId) return <p className="text-red-500 text-center">Geçersiz YouTube URL'si</p>
       return (
-        <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16:9 Aspect Ratio */ }}>
+        <div className="relative w-full" style={{paddingTop: '56.25%' /* 16:9 Aspect Ratio */}}>
           <iframe
             src={`https://www.youtube.com/embed/${videoId}?rel=0`}
             title={t(media.caption) || 'YouTube video player'}
@@ -159,20 +159,20 @@ const ArrowRight = (props: SVGProps<SVGSVGElement>) => (
 )
 
 export function NewsDetailPage() {
-  const { newsId } = useParams<{ newsId: string }>()
-  const { data: item, isLoading: loading } = useNewsItem(newsId)
-  const { data: allNews = [] } = useNews()
-  const { t } = useTranslation()
-  const { data: settings } = useSiteSettings()
+  const {newsId} = useParams<{newsId: string}>()
+  const {data: item, isLoading: loading} = useNewsItem(newsId)
+  const {data: allNews = []} = useNews()
+  const {t} = useTranslation()
+  const {data: settings} = useSiteSettings()
   const showBottomPrevNext = Boolean(settings?.showProductPrevNext)
 
-  const { prevNews, nextNews } = useMemo(() => {
-    if (!item || allNews.length < 2) return { prevNews: null, nextNews: null }
+  const {prevNews, nextNews} = useMemo(() => {
+    if (!item || allNews.length < 2) return {prevNews: null, nextNews: null}
     const currentIndex = allNews.findIndex(n => n.id === item.id)
-    if (currentIndex === -1) return { prevNews: null, nextNews: null }
+    if (currentIndex === -1) return {prevNews: null, nextNews: null}
     const prev = currentIndex > 0 ? allNews[currentIndex - 1] : null
     const next = currentIndex < allNews.length - 1 ? allNews[currentIndex + 1] : null
-    return { prevNews: prev, nextNews: next }
+    return {prevNews: prev, nextNews: next}
   }, [item, allNews])
 
   // SEO ve Analytics: haber detay görüntüleme
@@ -194,23 +194,25 @@ export function NewsDetailPage() {
     locale: 'tr_TR',
     section: 'News',
     publishedTime: item?.date,
-    schema: item ? {
-      '@context': 'https://schema.org',
-      '@type': 'Article',
-      headline: newsTitle || t(item.title),
-      description: newsDescription || t(item.content),
-      image: mainImageUrl,
-      datePublished: item.date,
-      author: {
-        '@type': 'Person',
-        name: 'BIRIM',
-      },
-      publisher: {
-        '@type': 'Organization',
-        name: 'BIRIM',
-        logo: settings?.logoUrl || 'https://www.birim.com/logo.png',
-      },
-    } : undefined
+    schema: item
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: newsTitle || t(item.title),
+          description: newsDescription || t(item.content),
+          image: mainImageUrl,
+          datePublished: item.date,
+          author: {
+            '@type': 'Person',
+            name: 'BIRIM',
+          },
+          publisher: {
+            '@type': 'Organization',
+            name: 'BIRIM',
+            logo: settings?.logoUrl || 'https://www.birim.com/logo.png',
+          },
+        }
+      : undefined,
   })
 
   useEffect(() => {
@@ -236,19 +238,26 @@ export function NewsDetailPage() {
   }
 
   if (!item) {
-    return <div className="pt-28 text-center bg-[var(--bg-primary)] min-h-screen text-[var(--text-primary)]">{t('news_not_found')}</div>
+    return (
+      <div className="pt-28 text-center bg-[var(--bg-primary)] min-h-screen text-[var(--text-primary)]">
+        {t('news_not_found')}
+      </div>
+    )
   }
 
   return (
-    <div key={newsId} className="bg-[var(--bg-secondary)] animate-fade-in-up-subtle pt-20 md:pt-24 lg:pt-24">
+    <div
+      key={newsId}
+      className="bg-[var(--bg-secondary)] animate-fade-in-up-subtle pt-20 md:pt-24 lg:pt-24"
+    >
       {/* Breadcrumb Band */}
       <div className="w-full relative z-20">
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
           <Breadcrumbs
             items={[
-              { label: t('homepage'), to: '/' },
-              { label: t('news'), to: '/news' },
-              { label: t(item.title) },
+              {label: t('homepage'), to: '/'},
+              {label: t('news'), to: '/news'},
+              {label: t(item.title)},
             ]}
           />
         </div>
@@ -307,15 +316,16 @@ export function NewsDetailPage() {
             )}
 
             <div className="flex flex-col">
-              {item.media && item.media.map((media, index) => (
-                <MediaComponent key={index} media={media} />
-              ))}
+              {item.media &&
+                item.media.map((media, index) => <MediaComponent key={index} media={media} />)}
             </div>
           </div>
 
           {/* Sağ Kolon: Detaylar ve İçerik */}
           <div className="lg:sticky lg:top-32 flex flex-col w-full">
-            <p className="text-sm text-[var(--text-secondary)] mb-4 font-light">{formatDate(item.date)}</p>
+            <p className="text-sm text-[var(--text-secondary)] mb-4 font-light">
+              {formatDate(item.date)}
+            </p>
             <div className="h-px bg-[var(--border-primary)] w-full mb-6"></div>
 
             <h1 className="text-3xl md:text-4xl font-normal tracking-tight text-[var(--text-primary)] mb-8">
@@ -349,4 +359,3 @@ export function NewsDetailPage() {
     </div>
   )
 }
-

@@ -1,19 +1,19 @@
-import { Link } from 'react-router-dom'
-import type { Project } from '../types'
-import { OptimizedImage } from '../components/OptimizedImage'
-import { PageLoading } from '../components/LoadingSpinner'
-import { useTranslation } from '../i18n'
-import { Breadcrumbs } from '../components/Breadcrumbs'
-import { useProjects } from '../hooks/useProjects'
+import {Link} from 'react-router-dom'
+import type {Project} from '../types'
+import {OptimizedImage} from '../components/OptimizedImage'
+import {PageLoading} from '../components/LoadingSpinner'
+import {useTranslation} from '../i18n'
+import {Breadcrumbs} from '../components/Breadcrumbs'
+import {useProjects} from '../hooks/useProjects'
 import ScrollReveal from '../components/ScrollReveal'
-import { useSEO } from '../hooks/useSEO'
+import {useSEO} from '../hooks/useSEO'
 
 /**
  * Modern Grid Card for Projects
  * Design inspired by the reference image.
  */
-const ProjectCard: React.FC<{ project: Project; index: number }> = ({ project, index }) => {
-  const { t } = useTranslation()
+const ProjectCard: React.FC<{project: Project; index: number}> = ({project, index}) => {
+  const {t} = useTranslation()
 
   // Extract year from localized date string (e.g., "15.03.2023" -> "2023")
   const dateVal = t(project.date)
@@ -80,12 +80,13 @@ const ProjectCard: React.FC<{ project: Project; index: number }> = ({ project, i
 }
 
 export function ProjectsPage() {
-  const { data: projects = [], isLoading: loading } = useProjects()
-  const { t } = useTranslation()
+  const {data: projects = [], isLoading: loading} = useProjects()
+  const {t} = useTranslation()
 
   useSEO({
     title: t('projects_meta_title') || 'BIRIM - Projeler',
-    description: t('projects_meta_description') || 'BIRIM projeleri, referans işleri ve uygulama örnekleri',
+    description:
+      t('projects_meta_description') || 'BIRIM projeleri, referans işleri ve uygulama örnekleri',
     type: 'website',
     siteName: 'BIRIM',
     locale: 'tr_TR',
@@ -106,7 +107,7 @@ export function ProjectsPage() {
       <div className="w-full relative z-20">
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 text-gray-400">
           <Breadcrumbs
-            items={[{ label: t('homepage'), to: '/' }, { label: t('projects') || 'Projeler' }]}
+            items={[{label: t('homepage'), to: '/'}, {label: t('projects') || 'Projeler'}]}
           />
         </div>
       </div>
@@ -128,7 +129,9 @@ export function ProjectsPage() {
           </div>
         ) : (
           <div className="py-32 text-center">
-            <p className="text-[var(--text-secondary)] text-lg italic font-light tracking-widest">{t('project_not_found')}</p>
+            <p className="text-[var(--text-secondary)] text-lg italic font-light tracking-widest">
+              {t('project_not_found')}
+            </p>
           </div>
         )}
       </div>

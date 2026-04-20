@@ -20,7 +20,7 @@ const TransparentShoppingBagIcon = () => (
 )
 
 interface ProductAddToCartProps {
-  product: { buyable?: boolean; id: string; [key: string]: unknown }
+  product: {buyable?: boolean; id: string; [key: string]: unknown}
   mergedGroups: unknown[]
   activeMaterialGroup: number | null
 }
@@ -40,7 +40,11 @@ export function ProductAddToCart({
   return (
     <div className="pt-6 border-t border-gray-200">
       <button
-        onClick={() => (disabled ? alert(t('please_select_price_group')) : addToCart(product as unknown as Parameters<typeof addToCart>[0]))}
+        onClick={() =>
+          disabled
+            ? alert(t('please_select_price_group'))
+            : addToCart(product as unknown as Parameters<typeof addToCart>[0])
+        }
         className={`group w-20 h-20 flex items-center justify-center rounded-full transition-all duration-300 transform hover:scale-110 active:scale-100 hover:shadow-lg ${disabled ? 'bg-gray-400 cursor-not-allowed opacity-70' : 'bg-gray-900 text-white hover:bg-gray-700'}`}
       >
         <TransparentShoppingBagIcon />

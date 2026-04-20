@@ -183,9 +183,15 @@ export function DesignerDetailPage() {
                 className={`w-full h-full object-cover portrait-frame filter grayscale transition-all duration-700 group-hover:grayscale-0 ${imageBorderClass} ${phase === 'animating' ? 'opacity-0' : 'opacity-100'}`}
                 loading="eager"
                 quality={90}
-                crop={typeof designer.image === 'object' ? (designer.image as {crop?: R2ImageMetadata['crop']}).crop : undefined}
+                crop={
+                  typeof designer.image === 'object'
+                    ? (designer.image as {crop?: R2ImageMetadata['crop']}).crop
+                    : undefined
+                }
                 hotspot={
-                  typeof designer.image === 'object' ? (designer.image as {hotspot?: R2ImageMetadata['hotspot']}).hotspot : undefined
+                  typeof designer.image === 'object'
+                    ? (designer.image as {hotspot?: R2ImageMetadata['hotspot']}).hotspot
+                    : undefined
                 }
               />
             </div>

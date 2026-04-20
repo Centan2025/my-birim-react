@@ -84,10 +84,7 @@ export function DesignersPage() {
       {/* Breadcrumb Section */}
       <div className="relative z-20 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 text-gray-400">
         <Breadcrumbs
-          items={[
-            {label: t('homepage'), to: '/'},
-            {label: t('designers') || 'Tasarımcılar'},
-          ]}
+          items={[{label: t('homepage'), to: '/'}, {label: t('designers') || 'Tasarımcılar'}]}
         />
       </div>
 
@@ -112,7 +109,7 @@ export function DesignersPage() {
           animate="visible"
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         >
-          {designers.map((designer) => (
+          {designers.map(designer => (
             <motion.div
               key={designer.id}
               variants={cardVariants}
@@ -126,10 +123,14 @@ export function DesignersPage() {
                   alt={t(designer.name)}
                   className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105 portrait-frame group-hover:grayscale-0"
                   src={getImageUrl(designer)}
-                  srcMobile={typeof designer.image === 'object' ? designer.image.urlMobile : undefined}
-                  srcDesktop={typeof designer.image === 'object' ? designer.image.urlDesktop : undefined}
+                  srcMobile={
+                    typeof designer.image === 'object' ? designer.image.urlMobile : undefined
+                  }
+                  srcDesktop={
+                    typeof designer.image === 'object' ? designer.image.urlDesktop : undefined
+                  }
                 />
-                
+
                 {/* Refined Overlays */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-80 group-hover:opacity-40 transition-opacity duration-700"></div>
                 <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
@@ -138,20 +139,20 @@ export function DesignersPage() {
               {/* Information Panel - Simplified & Modern */}
               <div className="absolute bottom-0 left-0 w-full p-8 lg:p-10 translate-y-[calc(100%-110px)] group-hover:translate-y-0 transition-transform duration-700 ease-[cubic-bezier(0.2,0,0,1)]">
                 <div className="absolute inset-0 bg-black/60 backdrop-blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 border-t border-white/10"></div>
-                
+
                 <div className="relative z-10">
                   <div className="overflow-hidden mb-2">
                     <p className="text-[9px] tracking-[0.5em] font-medium text-white/40 uppercase group-hover:text-white/60 transition-colors duration-500">
                       {t('designer') || 'Tasarımcı'}
                     </p>
                   </div>
-                  
+
                   <h3 className="text-xl md:text-2xl font-light text-white uppercase mb-4 tracking-widest leading-none">
                     {t(designer.name)}
                   </h3>
-                  
+
                   <div className="h-px w-8 bg-white/20 mb-8 group-hover:w-full transition-all duration-700 ease-in-out"></div>
-                  
+
                   <div className="text-[11px] text-white/40 font-light line-clamp-3 uppercase tracking-widest opacity-0 group-hover:opacity-100 group-hover:text-white/70 transition-all duration-700 delay-100 leading-relaxed">
                     {getBioText(designer.bio)}
                   </div>

@@ -20,16 +20,16 @@ if (typeof window !== 'undefined') {
   const originalXHR = window.XMLHttpRequest
   window.XMLHttpRequest = class extends originalXHR {
     open(method: string, url: string | URL, ...rest: unknown[]) {
-      const self = this as unknown as { _sentryUrl?: string }
+      const self = this as unknown as {_sentryUrl?: string}
       self._sentryUrl = String(url)
       // @ts-expect-error monkey patching XHR signature
-      super.open(method, url as string, ...rest as unknown[])
+      super.open(method, url as string, ...(rest as unknown[]))
     }
     send(body?: Document | XMLHttpRequestBodyInit | null) {
       try {
         super.send(body)
       } catch (error) {
-        const sentryUrl = (this as unknown as { _sentryUrl?: string })._sentryUrl
+        const sentryUrl = (this as unknown as {_sentryUrl?: string})._sentryUrl
         if (
           sentryUrl &&
           (sentryUrl.includes('sentry.io') || sentryUrl.includes('ingest.us.sentry.io'))

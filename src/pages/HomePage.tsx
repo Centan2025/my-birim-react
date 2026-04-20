@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useMemo } from 'react'
-import { useTranslation } from '../i18n'
-import { useSiteSettings } from '../hooks/useSiteData'
-import { useHomePageContent } from '../hooks/useHomePage'
-import { HomeHero } from '../components/HomeHero'
-import { useSEO } from '../hooks/useSEO'
-import { HomeContentBlocks } from '../components/HomeContentBlocks'
-import { useHeaderTheme } from '../context/HeaderThemeContext'
-import type { HeroMediaItem } from '../types'
+import React, {useState, useEffect, useMemo} from 'react'
+import {useTranslation} from '../i18n'
+import {useSiteSettings} from '../hooks/useSiteData'
+import {useHomePageContent} from '../hooks/useHomePage'
+import {HomeHero} from '../components/HomeHero'
+import {useSEO} from '../hooks/useSEO'
+import {HomeContentBlocks} from '../components/HomeContentBlocks'
+import {useHeaderTheme} from '../context/HeaderThemeContext'
+import type {HeroMediaItem} from '../types'
 
 export function HomePage() {
-  const { data: content } = useHomePageContent()
-  const { data: settings } = useSiteSettings()
-  const { setFromPalette, reset } = useHeaderTheme()
+  const {data: content} = useHomePageContent()
+  const {data: settings} = useSiteSettings()
+  const {setFromPalette, reset} = useHeaderTheme()
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth < 1024
@@ -24,64 +24,64 @@ export function HomePage() {
     }
     return 0
   })
-  const { t } = useTranslation()
+  const {t} = useTranslation()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
 
   // SEO
-  const seoData = useMemo(
-    () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const s = settings as any
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const socialLinks = s?.socialLinks?.map((link: any) => link?.url).filter(Boolean) || [
-        'https://www.instagram.com/birim',
-        'https://www.linkedin.com/company/birim',
-      ]
-      
-      return {
-        title: t('home_meta_title') || 'BIRIM - Ana Sayfa',
-        description: t('home_meta_description') || 'BIRIM - Modern tasarım ve mimari çözümler',
-        image: content?.heroMedia?.[0]?.url || undefined,
-        type: 'website' as const,
-        siteName: 'BIRIM',
-        locale: 'tr_TR',
-        schema: [
-          {
-            '@context': 'https://schema.org',
-            '@type': 'Organization',
-            name: 'BIRIM',
-            url: typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com',
-            logo: typeof window !== 'undefined' ? `${window.location.origin}/logo.png` : 'https://www.birim.com/logo.png',
-            sameAs: socialLinks,
-            contactPoint: {
-              '@type': 'ContactPoint',
-              email: s?.contactEmail || 'info@birim.com',
-              telephone: s?.contactPhone || '+90 216 123 45 67',
-              contactType: 'customer service'
-            },
+  const seoData = useMemo(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const s = settings as any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const socialLinks = s?.socialLinks?.map((link: any) => link?.url).filter(Boolean) || [
+      'https://www.instagram.com/birim',
+      'https://www.linkedin.com/company/birim',
+    ]
 
-            address: {
-              '@type': 'PostalAddress',
-              addressCountry: 'TR',
-              addressLocality: 'Istanbul'
-            }
+    return {
+      title: t('home_meta_title') || 'BIRIM - Ana Sayfa',
+      description: t('home_meta_description') || 'BIRIM - Modern tasarım ve mimari çözümler',
+      image: content?.heroMedia?.[0]?.url || undefined,
+      type: 'website' as const,
+      siteName: 'BIRIM',
+      locale: 'tr_TR',
+      schema: [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'Organization',
+          name: 'BIRIM',
+          url: typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com',
+          logo:
+            typeof window !== 'undefined'
+              ? `${window.location.origin}/logo.png`
+              : 'https://www.birim.com/logo.png',
+          sameAs: socialLinks,
+          contactPoint: {
+            '@type': 'ContactPoint',
+            email: s?.contactEmail || 'info@birim.com',
+            telephone: s?.contactPhone || '+90 216 123 45 67',
+            contactType: 'customer service',
           },
-          {
-            '@context': 'https://schema.org',
-            '@type': 'WebSite',
-            name: 'BIRIM',
-            url: typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com',
-            potentialAction: {
-              '@type': 'SearchAction',
-              target: `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#/products?q={search_term_string}`,
-              'query-input': 'required name=search_term_string',
-            },
-          }
-        ],
-      }
-    },
-    [content?.heroMedia, t, settings]
-  )
+
+          address: {
+            '@type': 'PostalAddress',
+            addressCountry: 'TR',
+            addressLocality: 'Istanbul',
+          },
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: 'BIRIM',
+          url: typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com',
+          potentialAction: {
+            '@type': 'SearchAction',
+            target: `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#/products?q={search_term_string}`,
+            'query-input': 'required name=search_term_string',
+          },
+        },
+      ],
+    }
+  }, [content?.heroMedia, t, settings])
 
   useSEO(seoData)
 
@@ -157,14 +157,14 @@ export function HomePage() {
       style={
         isMobile && viewportWidth > 0
           ? {
-            width: `${viewportWidth}px`,
-            maxWidth: `${viewportWidth}px`,
-            overflowX: 'hidden',
-            margin: 0,
-            padding: 0,
-            left: 0,
-            right: 0,
-          }
+              width: `${viewportWidth}px`,
+              maxWidth: `${viewportWidth}px`,
+              overflowX: 'hidden',
+              margin: 0,
+              padding: 0,
+              left: 0,
+              right: 0,
+            }
           : {}
       }
     >
