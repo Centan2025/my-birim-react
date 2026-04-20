@@ -214,8 +214,8 @@ export function ProjectDetailPage() {
       : undefined
 
   // --- TÜM MEDYA ÖĞELERİNİ TOPLA (Fullscreen Viewer İçin) ---
-  const allMedia = useMemo(() => {
-    if (!project) return []
+  const mediaData = useMemo(() => {
+    if (!project) return {all: [], gallery: []}
 
     const media: any[] = []
 
@@ -326,17 +326,68 @@ export function ProjectDetailPage() {
       })
     }
 
-    // Deduplicate
+    // Deduplicate and filter out items without URLs
     const seen = new Set<string>()
-    return media.filter(m => {
+    const masterMedia = media.filter(m => {
       const u = String(m.url || '').trim()
       if (!u || seen.has(u)) return false
       seen.add(u)
       return true
     })
+
+    // Build a set of images to exclude from the gallery list
+    // (Already rendered in Hero, Body, or Content Blocks)
+    const excludedUrls = new Set<string>()
+    if (coverUrl) excludedUrls.add(coverUrl)
+
+    // Scan content blocks for images to exclude from the bottom gallery
+    if (project.contentBlocks) {
+      project.contentBlocks.forEach((block: any) => {
+        const url = block.image || block.url
+        if (url) excludedUrls.add(url)
+        
+        // Also scan description in blocks
+        if (block.description) {
+          const scan = (val: any) => {
+            if (!val) return
+            const blocks = Array.isArray(val) ? val : [val]
+            blocks.forEach(b => {
+              if (b._type === 'portableTextImage' && b.imageR2?.url) {
+                excludedUrls.add(b.imageR2.url)
+              }
+            })
+          }
+          scan(t(block.description))
+        }
+      })
+    }
+
+    // Scan body for images to exclude
+    if (project.body) {
+      const scan = (val: any) => {
+        if (!val) return
+        const blocks = Array.isArray(val) ? val : [val]
+        blocks.forEach(b => {
+          if (b._type === 'portableTextImage' && b.imageR2?.url) {
+            excludedUrls.add(b.imageR2.url)
+          }
+        })
+      }
+      scan(t(project.body))
+    }
+
+    // Gallery media (excluding everything already rendered)
+    const galleryItems = masterMedia.filter(m => !excludedUrls.has(m.url))
+
+    return {
+      all: masterMedia,
+      gallery: galleryItems,
+    }
   }, [project, coverUrl, coverMobile, coverDesktop, coverCrop, coverHotspot, t])
 
   // SEO meta bilgileri
+  const allMedia = mediaData.all
+  const galleryMedia = mediaData.gallery
   const projectTitle = project ? t(project.title) : ''
   const projectDescription = project && project.body ? t(project.body) : projectTitle
   const seoImage =
@@ -665,15 +716,19 @@ export function ProjectDetailPage() {
                 />
               </div>
             ) : (
-              /* Eski medya sistemi - contentBlocks yoksa fallback */
-              allMedia.length > 0 && (
-                <div className={`space-y-0 ${project.excerpt || project.body ? 'mt-10' : ''}`}>
-                  {allMedia.map((m, i) => (
+              /* Galeri - SADECE içerik bloğu yoksa göster (Eski medya sistemi fallback) */
+              galleryMedia.length > 0 && (
+              <div className={`space-y-0 ${(project.excerpt || project.body || (project.contentBlocks && project.contentBlocks.length > 0)) ? 'mt-10' : ''}`}>
+                {galleryMedia.map((m: any, i: number) => {
+                  const globalIdx = allMedia.findIndex((am: any) => am.url === m.url)
+                  const displayIdx = globalIdx !== -1 ? globalIdx : i
+
+                  return (
                     <ScrollReveal key={i} delay={i * 80} threshold={0.1} distance={20}>
                       <button
                         type="button"
                         onClick={() => {
-                          setIdx(i)
+                          setIdx(displayIdx)
                           setIsFullscreenOpen(true)
                         }}
                         className="w-full block cursor-pointer focus:outline-none group"
@@ -722,10 +777,10 @@ export function ProjectDetailPage() {
                         )}
                       </button>
                     </ScrollReveal>
-                  ))}
-                </div>
-              )
-            )}
+                  )
+                })}
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -733,7 +788,7 @@ export function ProjectDetailPage() {
       {/* Tüm cihazlarda tam ekran viewer - ürün ve iletişim sayfalarıyla aynı sistem */}
       {isFullscreenOpen && allMedia.length > 0 && (
         <FullscreenMediaViewer
-          items={allMedia.map(m => ({
+          items={allMedia.map((m: any) => ({
             type: m.type,
             url: m.url,
             urlMobile: m.urlMobile,

@@ -70,7 +70,10 @@ const ProjectCard: React.FC<{project: Project; index: number}> = ({project, inde
           {/* Location / Secondary Info (assuming excerpt might contain it or just skip) */}
           {project.excerpt && (
             <p className="text-[10px] md:text-xs font-light tracking-[0.2em] text-white/30 uppercase mt-2">
-              {t(project.excerpt).substring(0, 50)}
+              {(() => {
+                const val = t(project.excerpt)
+                return typeof val === 'string' ? val.substring(0, 50) : ''
+              })()}
             </p>
           )}
         </div>
