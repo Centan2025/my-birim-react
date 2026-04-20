@@ -12,16 +12,14 @@ interface CardRect {
   imageMobile?: string
   imageDesktop?: string
   crop?: {
-    top: number
-    bottom: number
-    left: number
-    right: number
+    x: number
+    y: number
+    width: number
+    height: number
   }
   hotspot?: {
     x: number
     y: number
-    height: number
-    width: number
   }
   objectFit?: 'cover' | 'contain'
   initialBorderRadius?: string
