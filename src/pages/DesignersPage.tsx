@@ -36,7 +36,7 @@ export function DesignersPage() {
   }
 
   const getBioText = (bio: any) => {
-    const bioVal = t(bio)
+    const bioVal = t(bio) as any
     if (typeof bioVal === 'string') return bioVal
     if (Array.isArray(bioVal) && bioVal.length > 0) {
       const firstBlock = bioVal.find((b: any) => b._type === 'block')
@@ -65,7 +65,7 @@ export function DesignersPage() {
       y: 0,
       transition: {
         duration: 0.8,
-        ease: [0.215, 0.61, 0.355, 1],
+        ease: [0.215, 0.61, 0.355, 1] as any,
       },
     },
   }
@@ -110,7 +110,7 @@ export function DesignersPage() {
           animate="visible"
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         >
-          {designers.map((designer, index) => (
+          {designers.map((designer) => (
             <motion.div
               key={designer.id}
               variants={cardVariants}
