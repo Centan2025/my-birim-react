@@ -169,8 +169,8 @@ export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
       ? { x: i['hotspotX'] as number, y: i['hotspotY'] as number }
       : undefined
 
-    const h = i['hotspot'] as Record<string, number>
-    hotspot = { x: h['x'], y: h['y'] }
+    const h = i['hotspot'] as Record<string, unknown>
+    hotspot = { x: (h['x'] as number) ?? 0, y: (h['y'] as number) ?? 0 }
 
   const origWidth = i['width'] as number
   const origHeight = i['height'] as number
