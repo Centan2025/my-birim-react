@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import groq from 'groq'
 import type {
   AboutPageContent,
@@ -26,30 +25,31 @@ const KEYS = {
   CONTACT_PAGE: 'birim_contact_page',
 }
 
-const mapProductMedia = (row: any): any[] => {
-  const mediaArr = Array.isArray(row?.media) ? row.media : []
+const mapProductMedia = (row: unknown): Record<string, unknown>[] => {
+  const r = row as Record<string, unknown>
+  const mediaArr = Array.isArray(r?.['media']) ? (r['media'] as Record<string, unknown>[]) : []
   return mediaArr
-    .map((m: any) => {
-      const type = m?.type
+    .map((m: Record<string, unknown>) => {
+      const type = m?.['type'] as string | undefined
       if (type !== 'image' && type !== 'video' && type !== 'youtube') return null
       const url = mapMediaUrl(m)
       const urlMobile = mapMediaUrl(m, true, false)
       const urlDesktop = mapMediaUrl(m, false, true)
-      const metadata = m?.imageR2 ? mapR2Metadata(m.imageR2) : {}
-      const result: any = {
+      const metadata = m?.['imageR2'] ? mapR2Metadata(m['imageR2']) : {}
+      const result: Record<string, unknown> = {
         type,
         url,
-        title: m?.title,
-        description: m?.description,
-        link: m?.link,
-        linkText: m?.linkText,
+        title: m?.['title'],
+        description: m?.['description'],
+        link: m?.['link'],
+        linkText: m?.['linkText'],
         ...metadata,
       }
-      if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
-      if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
+      if (urlMobile && urlMobile !== url) result['urlMobile'] = urlMobile
+      if (urlDesktop && urlDesktop !== url) result['urlDesktop'] = urlDesktop
       return result
     })
-    .filter((m: any) => !!m && !!m.url)
+    .filter((m): m is Record<string, unknown> => !!m && typeof m['url'] === 'string')
 }
 
 export const getAboutPageContent = async (): Promise<AboutPageContent> => {
