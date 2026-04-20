@@ -191,8 +191,9 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             if (heroMeta.hotspot) result['hotspot'] = heroMeta.hotspot
             return result
           })
-          .filter((m: Record<string, unknown>): m is Record<string, unknown> => 
-            typeof m['url'] === 'string' && m['url'].trim() !== ''
+          .filter(
+            (m: Record<string, unknown>): m is Record<string, unknown> =>
+              typeof m['url'] === 'string' && m['url'].trim() !== ''
           )
       }
       if (data?.contentBlocks) {
@@ -216,10 +217,16 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
           } else if (mediaType === 'video') {
             const videoFileR2 = b['videoFileR2'] as Record<string, unknown> | undefined
             const videoFileMobileR2 = b['videoFileMobileR2'] as Record<string, unknown> | undefined
-            const videoFileDesktopR2 = b['videoFileDesktopR2'] as Record<string, unknown> | undefined
-            
-            url = (videoFileR2?.['url'] as string | undefined) ? rewriteR2Url(videoFileR2['url'] as string) : url
-            urlMobile = (videoFileMobileR2?.['url'] as string | undefined) ? rewriteR2Url(videoFileMobileR2['url'] as string) : undefined
+            const videoFileDesktopR2 = b['videoFileDesktopR2'] as
+              | Record<string, unknown>
+              | undefined
+
+            url = (videoFileR2?.['url'] as string | undefined)
+              ? rewriteR2Url(videoFileR2['url'] as string)
+              : url
+            urlMobile = (videoFileMobileR2?.['url'] as string | undefined)
+              ? rewriteR2Url(videoFileMobileR2['url'] as string)
+              : undefined
             urlDesktop = (videoFileDesktopR2?.['url'] as string | undefined)
               ? rewriteR2Url(videoFileDesktopR2['url'] as string)
               : undefined

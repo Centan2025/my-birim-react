@@ -22,7 +22,7 @@
     "generate-robots": "tsx scripts/generate-robots.ts",
     "prepare": "husky install",
     "size-limit": "size-limit",
-    "size-limit:ci": "size-limit --ci",
+    "size-limit:ci": "size-limit",
     "email:server": "node email-server.js"
   },
   "dependencies": {
