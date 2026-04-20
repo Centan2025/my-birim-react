@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {useMemo, useState, useEffect} from 'react'
 import {useQuery} from '@tanstack/react-query'
 import {useParams, Link} from 'react-router-dom'
@@ -740,3 +741,4 @@ export function ProjectDetailPage() {
     </div>
   )
 }
+

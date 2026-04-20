@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {useState, useMemo, useEffect, useRef} from 'react'
 import {useParams} from 'react-router-dom'
 import {ProductCard} from '../components/ProductCard'
@@ -350,3 +351,4 @@ export function ProductsPage() {
     </div>
   )
 }
+

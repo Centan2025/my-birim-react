@@ -40,9 +40,9 @@ export function DesignersPage() {
     const bioVal = t(bio as any) as any
     if (typeof bioVal === 'string') return bioVal
     if (Array.isArray(bioVal) && bioVal.length > 0) {
-      const firstBlock = bioVal.find((b: Record<string, unknown>) => b._type === 'block')
+      const firstBlock = bioVal.find((b: Record<string, unknown>) => b['_type'] === 'block')
       if (firstBlock && Array.isArray(firstBlock.children)) {
-        return firstBlock.children.map((c: Record<string, unknown>) => c.text).join(' ')
+        return firstBlock.children.map((c: Record<string, unknown>) => c['text']).join(' ')
       }
     }
     return ''

@@ -185,7 +185,7 @@ export function FactoryPage() {
                       Array.isArray(textContent) ||
                       (typeof textContent === 'object' &&
                         textContent !== null &&
-                        (textContent as Record<string, unknown>)._type === 'block')
+                        (textContent as Record<string, unknown>)['_type'] === 'block')
 
                     if (isPortable) {
                       const blocks = Array.isArray(textContent) ? textContent : [textContent]
