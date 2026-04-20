@@ -59,9 +59,9 @@ export interface SanityProductMediaItem {
 export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boolean): string => {
   if (!url || typeof url !== 'string') return url || ''
   
-  // 1. Split query params to prevent double encoding of '?' and '='
-  const [baseUrl, searchParams] = url.split('?')
-  let result = baseUrl
+  const urlParts = url.split('?')
+  let result = urlParts[0] || ''
+  const searchParams = urlParts[1] || ''
 
   // 2. Domain Rewrite (Hepsini tek bir domain'e topla)
   // Regex pointer issue riskini azaltmak için string replace kullanıyoruz
@@ -85,7 +85,8 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
         const parts = result.split('/')
         // Find the segment containing r2.dev (usually the domain part)
         for (let i = 0; i < parts.length; i++) {
-          if (parts[i].includes('.r2.dev')) {
+          const part = parts[i]
+          if (part && part.includes('.r2.dev')) {
             parts[i] = r2DomainNoProtocol
             break
           }
@@ -151,12 +152,14 @@ export const mapImage = (
 
   try {
     const i = img as Record<string, unknown>
-    const r2Url = i.r2Asset?.url
-    const standardUrl = i.url
-    const assetUrl = i.asset?.url || (typeof i.asset === 'string' ? i.asset : undefined)
+    const r2Asset = i['r2Asset'] as Record<string, unknown> | undefined
+    const r2Url = r2Asset?.['url'] as string | undefined
+    const standardUrl = i['url'] as string | undefined
+    const asset = i['asset'] as Record<string, unknown> | string | undefined
+    const assetUrl = typeof asset === 'string' ? asset : (asset?.['url'] as string | undefined)
     
     const rawUrl = r2Url || standardUrl || assetUrl
-    const hasResponsiveSizes = Boolean(i.r2Asset?.hasResponsiveSizes || i.hasResponsiveSizes)
+    const hasResponsiveSizes = Boolean(r2Asset?.['hasResponsiveSizes'] || i['hasResponsiveSizes'])
 
     if (rawUrl) {
       return rewriteR2Url(rawUrl, hasResponsiveSizes)
@@ -175,19 +178,19 @@ export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
     const i = img as Record<string, unknown>
 
     let crop: R2ImageMetadata['crop'] = undefined
-    if (i.cropX !== undefined && i.cropWidth !== undefined) {
+    if (i['cropX'] !== undefined && i['cropWidth'] !== undefined) {
       crop = { 
-        x: Number(i.cropX) || 0, 
-        y: Number(i.cropY) || 0, 
-        width: Number(i.cropWidth) || 1, 
-        height: Number(i.cropHeight) || 1 
+        x: Number(i['cropX']) || 0, 
+        y: Number(i['cropY']) || 0, 
+        width: Number(i['cropWidth']) || 1, 
+        height: Number(i['cropHeight']) || 1 
       }
-    } else if (i.crop && typeof i.crop === 'object' && i.crop !== null) {
-      const c = i.crop
-      const left = Number(c.left) || 0
-      const top = Number(c.top) || 0
-      const right = Number(c.right) || 0
-      const bottom = Number(c.bottom) || 0
+    } else if (i['crop'] && typeof i['crop'] === 'object') {
+      const c = i['crop'] as Record<string, unknown>
+      const left = Number(c['left']) || 0
+      const top = Number(c['top']) || 0
+      const right = Number(c['right']) || 0
+      const bottom = Number(c['bottom']) || 0
       crop = {
         x: left,
         y: top,
@@ -197,15 +200,15 @@ export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
     }
 
     let hotspot: R2ImageMetadata['hotspot'] = undefined
-    if (i.hotspotX !== undefined && i.hotspotY !== undefined) {
-      hotspot = { x: Number(i.hotspotX) || 0.5, y: Number(i.hotspotY) || 0.5 }
-    } else if (i.hotspot && typeof i.hotspot === 'object' && i.hotspot !== null) {
-      const h = i.hotspot
-      hotspot = { x: Number(h.x) || 0.5, y: Number(h.y) || 0.5 }
+    if (i['hotspotX'] !== undefined && i['hotspotY'] !== undefined) {
+      hotspot = { x: Number(i['hotspotX']) || 0.5, y: Number(i['hotspotY']) || 0.5 }
+    } else if (i['hotspot'] && typeof i['hotspot'] === 'object') {
+      const h = i['hotspot'] as Record<string, unknown>
+      hotspot = { x: Number(h['x']) || 0.5, y: Number(h['y']) || 0.5 }
     }
 
-    const origWidth = Number(i.width) || undefined
-    const origHeight = Number(i.height) || undefined
+    const origWidth = Number(i['width']) || undefined
+    const origHeight = Number(i['height']) || undefined
 
     return { crop, hotspot, origWidth, origHeight }
   } catch (err) {
