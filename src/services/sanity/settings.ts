@@ -7,7 +7,7 @@ import type {
   KvkkPolicy,
   FooterContent,
 } from '../../types'
-import {sanity, useSanity, mapImage} from './client'
+import {sanity, useSanity, mapImage, SanityImageLike} from './client'
 
 const SIMULATED_DELAY = 200
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms))

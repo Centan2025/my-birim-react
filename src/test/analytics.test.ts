@@ -16,8 +16,8 @@ describe('analytics', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     // Force initialization for testing
-    ;(analytics as any).googleAnalyticsId = 'UA-TEST-123'
-    ;(analytics as any).isInitialized = true
+    ;(analytics as unknown as Record<string, unknown>)['googleAnalyticsId'] = 'UA-TEST-123'
+    ;(analytics as unknown as Record<string, unknown>)['isInitialized'] = true
     // Mock window.location for safe side effects
     vi.stubGlobal('location', {origin: 'http://localhost'})
   })

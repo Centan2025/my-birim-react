@@ -8,8 +8,11 @@ import type {
 import {
   sanity,
   useSanity,
+  mapImage,
+  mapR2Metadata,
+  mapImages,
+  extractPalette,
   SanityImageLike,
-  LocalizedString
 } from './client'
 
 import {getItem} from './settings'

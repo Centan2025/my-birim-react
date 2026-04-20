@@ -1,4 +1,4 @@
-import {describe, it, expect, vi, beforeEach} from 'vitest'
+import {describe, it, expect, vi} from 'vitest'
 import {render, screen, fireEvent} from '@testing-library/react'
 import '@testing-library/jest-dom'
 import React from 'react'
@@ -93,7 +93,7 @@ vi.mock('../components/FullscreenMediaViewer', () => ({
 }))
 
 vi.mock('../components/product/ProductMaterials', () => ({
-  ProductMaterials: ({onSetActiveMaterialGroup}: any) => (
+  ProductMaterials: ({onSetActiveMaterialGroup}: { onSetActiveMaterialGroup: (index: number) => void }) => (
     <div data-testid="product-materials">
       <button onClick={() => onSetActiveMaterialGroup(0)}>Select Group 0</button>
     </div>

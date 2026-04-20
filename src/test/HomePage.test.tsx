@@ -23,7 +23,7 @@ vi.mock('../hooks/useSiteData')
 // Basit i18n mock'u
 vi.mock('../i18n', () => ({
   useTranslation: () => ({
-    t: (key: string) => key,
+    t: (key: unknown) => (typeof key === 'string' ? key : (key as Record<string, string>)?.tr || ''),
     locale: 'tr',
     setLocale: vi.fn(),
     supportedLocales: ['tr', 'en'],
@@ -65,7 +65,7 @@ describe('HomePage', () => {
       },
       isLoading: false,
       isError: false,
-    } as any)
+    } as unknown as ReturnType<typeof homeHook.useHomePageContent>)
 
     vi.mocked(siteHook.useSiteSettings).mockReturnValue({
       data: {
@@ -75,7 +75,7 @@ describe('HomePage', () => {
       },
       isLoading: false,
       isError: false,
-    } as any)
+    } as unknown as ReturnType<typeof siteHook.useSiteSettings>)
 
     renderHomePage()
 

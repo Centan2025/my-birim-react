@@ -20,7 +20,7 @@ const mockAuthValue = {
   isLoggedIn: false,
   login: vi.fn(),
   logout: vi.fn(),
-  user: null as any,
+  user: null as unknown,
 }
 
 // i18n mock with proper translations
@@ -299,7 +299,7 @@ describe('LoginPage', () => {
       logout: vi.fn(),
     }
 
-    renderLoginPage(authVal as any)
+    renderLoginPage(authVal as unknown as typeof mockAuthValue)
 
     // "Hoş Geldiniz" metni i18n'den geliyor, mock'da "already_logged_in" key'i var
     expect(screen.getByText('Hoş Geldiniz')).toBeInTheDocument()
