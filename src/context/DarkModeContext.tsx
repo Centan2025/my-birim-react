@@ -43,6 +43,7 @@ export const DarkModeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useDarkMode = () => {
     const context = useContext(DarkModeContext)
     if (context === undefined) {

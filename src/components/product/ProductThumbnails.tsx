@@ -6,7 +6,12 @@ import type { LocalizedString } from '../../types'
 
 interface ProductThumbnailsProps {
   productName: LocalizedString
-  bandMedia: any[]
+  bandMedia: {
+    type: 'image' | 'video' | 'youtube'
+    url: string
+    crop?: any
+    hotspot?: any
+  }[]
   currentImageIndex: number
   imageBorderClass: string
   onSelect: (index: number) => void

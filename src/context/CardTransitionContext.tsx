@@ -11,8 +11,18 @@ interface CardRect {
   imageUrl: string
   imageMobile?: string
   imageDesktop?: string
-  crop?: any
-  hotspot?: any
+  crop?: {
+    top: number
+    bottom: number
+    left: number
+    right: number
+  }
+  hotspot?: {
+    x: number
+    y: number
+    height: number
+    width: number
+  }
   objectFit?: 'cover' | 'contain'
   initialBorderRadius?: string
   className?: string
@@ -54,6 +64,7 @@ const CardTransitionContext = createContext<CardTransitionContextType>({
   heroTarget: null,
 })
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useCardTransition = () => useContext(CardTransitionContext)
 
 export const CardTransitionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

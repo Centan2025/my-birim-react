@@ -260,8 +260,9 @@ export function useHeaderScroll({
       if (rafId !== null) {
         cancelAnimationFrame(rafId)
       }
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current)
+      const currentScrollTimeout = scrollTimeoutRef.current
+      if (currentScrollTimeout) {
+        clearTimeout(currentScrollTimeout)
       }
       if (scrollEndTimeout) {
         clearTimeout(scrollEndTimeout)

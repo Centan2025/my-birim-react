@@ -1,5 +1,6 @@
 import {useQuery} from '@tanstack/react-query'
 import {getDesigners, getDesignerById, getDesignersByIds} from '@/services/cms'
+import type {Designer} from '@/types'
 
 /**
  * Tüm tasarımcıları getir
@@ -17,7 +18,7 @@ export function useDesigners() {
 /**
  * ID'ye göre tasarımcı getir
  */
-export function useDesigner(designerId: string | undefined, initialData?: any) {
+export function useDesigner(designerId: string | undefined, initialData?: Designer) {
   return useQuery({
     queryKey: ['designer', designerId],
     queryFn: () => {

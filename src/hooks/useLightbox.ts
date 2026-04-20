@@ -1,7 +1,7 @@
 import {useState, useCallback} from 'react'
 
-interface LightboxState {
-  images: any[]
+interface LightboxState<T = any> {
+  images: T[]
   currentIndex: number
 }
 
@@ -9,10 +9,10 @@ interface LightboxState {
  * Generic lightbox state management hook.
  * Handles open/close, next/prev navigation for any image array.
  */
-export function useLightbox() {
-  const [state, setState] = useState<LightboxState | null>(null)
+export function useLightbox<T = any>() {
+  const [state, setState] = useState<LightboxState<T> | null>(null)
 
-  const open = useCallback((images: any[], currentIndex: number) => {
+  const open = useCallback((images: T[], currentIndex: number) => {
     setState({images, currentIndex})
   }, [])
 

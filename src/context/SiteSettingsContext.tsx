@@ -12,6 +12,7 @@ interface SiteSettingsContextType {
 
 const SiteSettingsContext = createContext<SiteSettingsContextType | null>(null)
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useSiteSettings() {
   const context = useContext(SiteSettingsContext)
   if (!context) {

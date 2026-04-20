@@ -89,6 +89,7 @@ export const HeaderThemeProvider = ({children}: PropsWithChildren) => {
   return <HeaderThemeContext.Provider value={value}>{children}</HeaderThemeContext.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useHeaderTheme = () => {
   const ctx = useContext(HeaderThemeContext)
   if (!ctx) throw new Error('useHeaderTheme must be used within HeaderThemeProvider')
