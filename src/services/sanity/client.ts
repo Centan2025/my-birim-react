@@ -170,7 +170,6 @@ export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
 
     const h = i['hotspot'] as Record<string, number>
     hotspot = { x: h['x'], y: h['y'] }
-  }
 
   const origWidth = i['width'] as number
   const origHeight = i['height'] as number

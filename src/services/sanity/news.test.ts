@@ -6,8 +6,8 @@ vi.mock('./client', () => ({
   },
   useSanity: true,
   mapImage: vi.fn(val => val?.url || 'http://image.url'),
-  mapMediaUrl: vi.fn(val => 'http://media.url'),
-  extractPalette: vi.fn(val => ({})),
+  mapMediaUrl: vi.fn(_val => 'http://media.url'),
+  extractPalette: vi.fn(_val => ({})),
 }))
 
 import {sanity} from './client'

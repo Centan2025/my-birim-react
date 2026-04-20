@@ -8,57 +8,57 @@ const delay = (ms: number) => new Promise(res => setTimeout(res, ms))
 
 const KEYS = { NEWS: 'birim_news' }
 
-const mapMediaArray = (mediaArrRaw: any): any[] => {
-  const mediaArr = Array.isArray(mediaArrRaw) ? mediaArrRaw : []
+const mapMediaArray = (mediaArrRaw: unknown): any[] => {
+  const mediaArr = Array.isArray(mediaArrRaw) ? (mediaArrRaw as Record<string, unknown>[]) : []
   return mediaArr
-    .map((m: any) => {
+    .map((m: Record<string, unknown>) => {
       const type = m?.type || 'image'
       let url = ''
       let urlMobile: string | undefined = undefined
       let urlDesktop: string | undefined = undefined
 
       if (type === 'image') {
-        url = mapImage(m.imageR2)
-        urlMobile = m.imageMobileR2?.url ? mapImage(m.imageMobileR2) : undefined
-        urlDesktop = m.imageDesktopR2?.url ? mapImage(m.imageDesktopR2) : undefined
+        url = mapImage(m['imageR2'])
+        urlMobile = (m['imageMobileR2'] as Record<string, string>)?.['url'] ? mapImage(m['imageMobileR2']) : undefined
+        urlDesktop = (m['imageDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(m['imageDesktopR2']) : undefined
       } else if (type === 'video') {
-        url = mapImage(m.videoFileR2)
-        urlMobile = m.videoFileMobileR2?.url ? mapImage(m.videoFileMobileR2) : undefined
-        urlDesktop = m.videoFileDesktopR2?.url ? mapImage(m.videoFileDesktopR2) : undefined
+        url = mapImage(m['videoFileR2'])
+        urlMobile = (m['videoFileMobileR2'] as Record<string, string>)?.['url'] ? mapImage(m['videoFileMobileR2']) : undefined
+        urlDesktop = (m['videoFileDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(m['videoFileDesktopR2']) : undefined
       } else {
-        url = m.url || ''
+        url = (m['url'] as string) || ''
       }
       
-      const metadata = m?.imageR2 ? mapR2Metadata(m.imageR2) : {}
-      const result: any = { type, url, caption: m.caption, ...metadata }
+      const metadata = m?.['imageR2'] ? mapR2Metadata(m['imageR2']) : {}
+      const result: Record<string, unknown> = { type, url, caption: m['caption'], ...metadata }
       if (urlMobile && urlMobile !== url) result.urlMobile = urlMobile
       if (urlDesktop && urlDesktop !== url) result.urlDesktop = urlDesktop
-      result.isCover = !!m.isCover
+      result.isCover = !!m['isCover']
       return result
     })
-    .filter((m: any) => m.url)
+    .filter((m: Record<string, unknown>) => m['url'])
 }
 
-const mapNewsRow = (r: any): NewsItem => {
-  const mediaArr = Array.isArray(r.media) ? r.media : []
-  const coverItem = mediaArr.find((m: any) => m.isCover) || mediaArr[0]
+const mapNewsRow = (r: Record<string, unknown>): NewsItem => {
+  const mediaArr = Array.isArray(r['media']) ? (r['media'] as Record<string, unknown>[]) : []
+  const coverItem = mediaArr.find((m: Record<string, unknown>) => m['isCover']) || mediaArr[0]
   
-  let mainImage: any = { url: '' }
+  let mainImage: Record<string, unknown> = { url: '' }
   if (coverItem) {
     let url = ''
     let urlMobile: string | undefined = undefined
     let urlDesktop: string | undefined = undefined
 
-    if (coverItem.type === 'image') {
-      url = mapImage(coverItem.imageR2)
-      urlMobile = coverItem.imageMobileR2?.url ? mapImage(coverItem.imageMobileR2) : undefined
-      urlDesktop = coverItem.imageDesktopR2?.url ? mapImage(coverItem.imageDesktopR2) : undefined
-    } else if (coverItem.type === 'video') {
-      url = mapImage(coverItem.videoFileR2)
-      urlMobile = coverItem.videoFileMobileR2?.url ? mapImage(coverItem.videoFileMobileR2) : undefined
-      urlDesktop = coverItem.videoFileDesktopR2?.url ? mapImage(coverItem.videoFileDesktopR2) : undefined
-    } else if (coverItem.type === 'youtube') {
-      url = coverItem.url || ''
+    if (coverItem['type'] === 'image') {
+      url = mapImage(coverItem['imageR2'])
+      urlMobile = (coverItem['imageMobileR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['imageMobileR2']) : undefined
+      urlDesktop = (coverItem['imageDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['imageDesktopR2']) : undefined
+    } else if (coverItem['type'] === 'video') {
+      url = mapImage(coverItem['videoFileR2'])
+      urlMobile = (coverItem['videoFileMobileR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['videoFileMobileR2']) : undefined
+      urlDesktop = (coverItem['videoFileDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['videoFileDesktopR2']) : undefined
+    } else if (coverItem['type'] === 'youtube') {
+      url = (coverItem['url'] as string) || ''
     }
 
     const metadata = coverItem.imageR2 ? mapR2Metadata(coverItem.imageR2) : {}
@@ -77,19 +77,19 @@ const mapNewsRow = (r: any): NewsItem => {
   }
 }
 
-const mapProjectRow = (r: any): Project => {
-  const mediaArr = Array.isArray(r.media) ? r.media : []
-  const coverItem = mediaArr.find((m: any) => m.isCover) || mediaArr[0]
+const mapProjectRow = (r: Record<string, unknown>): Project => {
+  const mediaArr = Array.isArray(r['media']) ? (r['media'] as Record<string, unknown>[]) : []
+  const coverItem = mediaArr.find((m: Record<string, unknown>) => m['isCover']) || mediaArr[0]
 
-  let cover: any = { url: '' }
+  let cover: Record<string, unknown> = { url: '' }
   if (coverItem) {
-    const url = mapImage(coverItem.imageR2)
-    const urlMobile = coverItem.imageMobileR2?.url ? mapImage(coverItem.imageMobileR2) : undefined
-    const urlDesktop = coverItem.imageDesktopR2?.url ? mapImage(coverItem.imageDesktopR2) : undefined
-    const metadata = coverItem.imageR2 ? mapR2Metadata(coverItem.imageR2) : {}
+    const url = mapImage(coverItem['imageR2'])
+    const urlMobile = (coverItem['imageMobileR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['imageMobileR2']) : undefined
+    const urlDesktop = (coverItem['imageDesktopR2'] as Record<string, string>)?.['url'] ? mapImage(coverItem['imageDesktopR2']) : undefined
+    const metadata = coverItem['imageR2'] ? mapR2Metadata(coverItem['imageR2']) : {}
     cover = {
       url,
-      palette: extractPalette(coverItem.imageR2),
+      palette: extractPalette(coverItem['imageR2']),
       ...metadata,
     }
     if (urlMobile && urlMobile !== url) cover.urlMobile = urlMobile
@@ -97,8 +97,8 @@ const mapProjectRow = (r: any): Project => {
   }
 
   // Transform contentBlocks
-  const contentBlocks = r.contentBlocks
-    ? r.contentBlocks.map((b: any) => {
+  const contentBlocks = r['contentBlocks']
+    ? (r['contentBlocks'] as Record<string, unknown>[]).map((b: Record<string, unknown>) => {
       let image = undefined
       let imageMobile = undefined
       let imageDesktop = undefined
@@ -106,19 +106,22 @@ const mapProjectRow = (r: any): Project => {
       let urlMobile = undefined
       let urlDesktop = undefined
 
-      if (b.mediaType === 'image' || !b.mediaType) {
-        image = mapImage(b.imageR2)
-        imageMobile = mapImage(b.imageMobileR2)
-        imageDesktop = mapImage(b.imageDesktopR2)
-      } else if (b.mediaType === 'video') {
-        url = b.videoFileR2?.url ? rewriteR2Url(b.videoFileR2.url) : b.url
-        urlMobile = b.videoFileMobileR2?.url ? rewriteR2Url(b.videoFileMobileR2.url) : undefined
-        urlDesktop = b.videoFileDesktopR2?.url ? rewriteR2Url(b.videoFileDesktopR2.url) : undefined
-      } else if (b.mediaType === 'youtube') {
-        url = b.url
+      if (b['mediaType'] === 'image' || !b['mediaType']) {
+        image = mapImage(b['imageR2'])
+        imageMobile = mapImage(b['imageMobileR2'])
+        imageDesktop = mapImage(b['imageDesktopR2'])
+      } else if (b['mediaType'] === 'video') {
+        const vR2 = b['videoFileR2'] as Record<string, string>
+        url = vR2?.['url'] ? rewriteR2Url(vR2['url']) : (b['url'] as string)
+        const vMobileR2 = b['videoFileMobileR2'] as Record<string, string>
+        urlMobile = vMobileR2?.['url'] ? rewriteR2Url(vMobileR2['url']) : undefined
+        const vDesktopR2 = b['videoFileDesktopR2'] as Record<string, string>
+        urlDesktop = vDesktopR2?.['url'] ? rewriteR2Url(vDesktopR2['url']) : undefined
+      } else if (b['mediaType'] === 'youtube') {
+        url = b['url'] as string
       }
 
-      const meta = b.imageR2 ? mapR2Metadata(b.imageR2) : {}
+      const meta = b['imageR2'] ? mapR2Metadata(b['imageR2']) : {}
 
       return {
         ...b,
@@ -156,7 +159,7 @@ export const getNews = async (): Promise<NewsItem[]> => {
           }
         }`
     const rows = await sanity.fetch(q)
-    return rows.map((r: any) => mapNewsRow(r))
+    return rows.map((r: Record<string, unknown>) => mapNewsRow(r))
   }
   await delay(SIMULATED_DELAY)
   return getItem<NewsItem[]>(KEYS.NEWS) || []
@@ -179,7 +182,7 @@ export const getProjects = async (): Promise<Project[]> => {
         }
       }`
     const rows = await sanity.fetch(q)
-    return rows.map((r: any) => mapProjectRow(r))
+    return rows.map((r: Record<string, unknown>) => mapProjectRow(r))
   }
   return []
 }
