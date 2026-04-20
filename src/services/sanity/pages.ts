@@ -146,7 +146,7 @@ export const getContactPageContent = async (): Promise<ContactPageContent> => {
               const metadata = imageR2 ? mapR2Metadata(imageR2) : {}
               return {...mediaItem, url: mediaUrl, ...metadata}
             })
-            .filter((m): m is Record<string, unknown> => typeof m['url'] === 'string')
+            .filter((m: Record<string, unknown>) => typeof m['url'] === 'string')
           return {...loc, media: processedMedia}
         }
         return loc
@@ -192,8 +192,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             return result
           })
           .filter(
-            (m: Record<string, unknown>): m is Record<string, unknown> =>
-              typeof m['url'] === 'string' && m['url'].trim() !== ''
+            (m: Record<string, unknown>) => typeof m['url'] === 'string' && m['url'].trim() !== ''
           )
       }
       if (data?.contentBlocks) {
@@ -221,15 +220,14 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
               | Record<string, unknown>
               | undefined
 
-            url = (videoFileR2?.['url'] as string | undefined)
-              ? rewriteR2Url(videoFileR2['url'] as string)
-              : url
-            urlMobile = (videoFileMobileR2?.['url'] as string | undefined)
-              ? rewriteR2Url(videoFileMobileR2['url'] as string)
-              : undefined
-            urlDesktop = (videoFileDesktopR2?.['url'] as string | undefined)
-              ? rewriteR2Url(videoFileDesktopR2['url'] as string)
-              : undefined
+            const vUrl = videoFileR2?.['url'] as string | undefined
+            url = vUrl ? rewriteR2Url(vUrl) : url
+
+            const vmUrl = videoFileMobileR2?.['url'] as string | undefined
+            urlMobile = vmUrl ? rewriteR2Url(vmUrl) : undefined
+
+            const vdUrl = videoFileDesktopR2?.['url'] as string | undefined
+            urlDesktop = vdUrl ? rewriteR2Url(vdUrl) : undefined
           } else if (mediaType === 'youtube') {
             url = b['url'] as string | undefined
           } else if (mediaType === 'panels') {
