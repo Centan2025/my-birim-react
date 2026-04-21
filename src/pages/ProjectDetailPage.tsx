@@ -16,7 +16,7 @@ import {useSEO} from '../hooks/useSEO'
 import {useHeaderTheme} from '../context/HeaderThemeContext'
 import PortableTextLite from '../components/PortableTextLite'
 import {HomeContentBlocks} from '../components/HomeContentBlocks'
-import type {Project, ContentBlock, PortableTextBlock, R2ImageMetadata} from '../types'
+import type {ContentBlock, R2ImageMetadata} from '../types'
 
 const ArrowLeft = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -481,12 +481,12 @@ export function ProjectDetailPage() {
            <div className="space-y-6">
               {project.excerpt && (
                 <div className="text-[var(--text-primary)] font-roboto-thin text-lg md:text-xl leading-relaxed">
-                  <PortableTextLite value={t(project.excerpt as never) as any[]} />
+                  <PortableTextLite value={t(project.excerpt as never) as unknown as any[]} />
                 </div>
               )}
               {project.body && (
                 <div className="text-[var(--text-primary)] font-roboto-thin text-lg md:text-xl leading-relaxed">
-                  <PortableTextLite value={t(project.body as never) as any[]} />
+                  <PortableTextLite value={t(project.body as never) as unknown as any[]} />
                 </div>
               )}
            </div>
