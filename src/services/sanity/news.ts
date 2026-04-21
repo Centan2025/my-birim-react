@@ -148,17 +148,17 @@ const mapProjectRow = (r: Record<string, unknown>): Project => {
           imageMobile = mapImage(imageMobileR2 as never)
           imageDesktop = mapImage(imageDesktopR2 as never)
         } else if (mediaType === 'video') {
-          const videoFileR2 = b['videoFileR2']
-          const videoFileMobileR2 = b['videoFileMobileR2']
-          const videoFileDesktopR2 = b['videoFileDesktopR2']
+          const videoFileR2 = b['videoFileR2'] as Record<string, unknown> | undefined
+          const videoFileMobileR2 = b['videoFileMobileR2'] as Record<string, unknown> | undefined
+          const videoFileDesktopR2 = b['videoFileDesktopR2'] as Record<string, unknown> | undefined
 
-          const vUrl = (videoFileR2 as any)?.['url'] || b['url']
+          const vUrl = videoFileR2?.['url'] || b['url']
           url = vUrl ? rewriteR2Url(String(vUrl)) : undefined
 
-          const vmUrl = (videoFileMobileR2 as any)?.['url']
+          const vmUrl = videoFileMobileR2?.['url']
           urlMobile = vmUrl ? rewriteR2Url(String(vmUrl)) : undefined
 
-          const vdUrl = (videoFileDesktopR2 as any)?.['url']
+          const vdUrl = videoFileDesktopR2?.['url']
           urlDesktop = vdUrl ? rewriteR2Url(String(vdUrl)) : undefined
         } else if (mediaType === 'youtube') {
           url = b['url'] as string | undefined
