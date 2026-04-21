@@ -144,9 +144,9 @@ const mapProjectRow = (r: Record<string, unknown>): Project => {
 
         if (mediaType === 'image') {
           // Use mapImage which is very flexible for any Sanity image object/string
-          image = mapImage(imageR2 as never)
-          imageMobile = mapImage(imageMobileR2 as never)
-          imageDesktop = mapImage(imageDesktopR2 as never)
+          image = mapImage(imageR2 as SanityImageLike)
+          imageMobile = mapImage(imageMobileR2 as SanityImageLike)
+          imageDesktop = mapImage(imageDesktopR2 as SanityImageLike)
         } else if (mediaType === 'video') {
           const videoFileR2 = b['videoFileR2'] as Record<string, unknown> | undefined
           const videoFileMobileR2 = b['videoFileMobileR2'] as Record<string, unknown> | undefined
@@ -167,7 +167,7 @@ const mapProjectRow = (r: Record<string, unknown>): Project => {
           if (Array.isArray(imagePanels)) {
             b['imagePanels'] = (imagePanels as Record<string, unknown>[])
               .map((p: Record<string, unknown>) => {
-                const url = mapImage(p as never)
+                const url = mapImage(p as SanityImageLike)
                 if (!url) return null
                 const mime = (p['mimeType'] as string) || ''
                 const type =
