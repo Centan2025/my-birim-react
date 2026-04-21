@@ -13,6 +13,7 @@ import {
   rewriteR2Url,
   extractPalette,
   mapR2Metadata,
+  type SanityImageLike,
 } from './client'
 import {getItem} from './settings'
 
