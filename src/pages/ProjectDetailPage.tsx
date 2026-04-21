@@ -269,15 +269,15 @@ export function ProjectDetailPage() {
           blks.forEach(b => {
              const item = b as Record<string, unknown>;
              if (item?.['_type'] === 'portableTextImage') {
-               const r2 = item['imageR2'] as Record<string, string> | undefined;
-               const img = item['image'] as Record<string, {asset: {url: string}}> | undefined;
-               const url = r2?.['url'] || img?.['asset']?.['url'];
+               const r2 = item['imageR2'] as {url?: string} | undefined;
+               const img = item['image'] as {asset?: {url?: string}} | undefined;
+               const url = r2?.url || img?.asset?.url;
                if (url) {
                  media.push({
                    type: 'image',
                    url,
-                   urlMobile: (item['imageMobileR2'] as Record<string, string>)?.['url'],
-                   urlDesktop: (item['imageDesktopR2'] as Record<string, string>)?.['url'],
+                   urlMobile: (item['imageMobileR2'] as {url?: string})?.url,
+                   urlDesktop: (item['imageDesktopR2'] as {url?: string})?.url,
                  })
                }
              }
@@ -306,16 +306,16 @@ export function ProjectDetailPage() {
       } else if (typeof val === 'object' && val !== null) {
         const obj = val as Record<string, unknown>
         if (obj?.['_type'] === 'portableTextImage' || obj?.['_type'] === 'image' || obj?.['imageR2']) {
-          const r2 = obj['imageR2'] as Record<string, string> | undefined;
-          const img = obj['image'] as Record<string, {asset: {url: string}}> | undefined;
-          const url = r2?.['url'] || img?.['asset']?.['url'] || (obj['url'] as string);
+          const r2 = obj['imageR2'] as {url?: string} | undefined;
+          const img = obj['image'] as {asset?: {url?: string}} | undefined;
+          const url = r2?.url || img?.asset?.url || (obj['url'] as string);
 
           if (typeof url === 'string' && url) {
             target.push({
               type: 'image',
               url,
-              urlMobile: (obj['imageMobileR2'] as Record<string, string>)?.['url'] || (obj['urlMobile'] as string),
-              urlDesktop: (obj['imageDesktopR2'] as Record<string, string>)?.['url'] || (obj['urlDesktop'] as string),
+              urlMobile: (obj['imageMobileR2'] as {url?: string})?.url || (obj['urlMobile'] as string),
+              urlDesktop: (obj['imageDesktopR2'] as {url?: string})?.url || (obj['urlDesktop'] as string),
             })
           }
         }
