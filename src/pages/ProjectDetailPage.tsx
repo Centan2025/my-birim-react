@@ -267,20 +267,20 @@ export function ProjectDetailPage() {
           if (!val) return
           const blks = Array.isArray(val) ? val : [val]
           blks.forEach(b => {
-             const item = b as Record<string, unknown>;
-             if (item?.['_type'] === 'portableTextImage') {
-               const r2 = item['imageR2'] as {url?: string} | undefined;
-               const img = item['image'] as {asset?: {url?: string}} | undefined;
-               const url = r2?.url || img?.asset?.url;
-               if (url) {
-                 media.push({
-                   type: 'image',
-                   url,
-                   urlMobile: (item['imageMobileR2'] as {url?: string})?.url,
-                   urlDesktop: (item['imageDesktopR2'] as {url?: string})?.url,
-                 })
-               }
-             }
+            const item = b as Record<string, unknown>
+            if (item?.['_type'] === 'portableTextImage') {
+              const r2 = item['imageR2'] as {url?: string} | undefined
+              const img = item['image'] as {asset?: {url?: string}} | undefined
+              const url = r2?.url || img?.asset?.url
+              if (url) {
+                media.push({
+                  type: 'image',
+                  url,
+                  urlMobile: (item['imageMobileR2'] as {url?: string})?.url,
+                  urlDesktop: (item['imageDesktopR2'] as {url?: string})?.url,
+                })
+              }
+            }
           })
         }
         scanPortableText(t(block.description as never))
@@ -305,17 +305,23 @@ export function ProjectDetailPage() {
         val.forEach(v => scanDeep(v, target))
       } else if (typeof val === 'object' && val !== null) {
         const obj = val as Record<string, unknown>
-        if (obj?.['_type'] === 'portableTextImage' || obj?.['_type'] === 'image' || obj?.['imageR2']) {
-          const r2 = obj['imageR2'] as {url?: string} | undefined;
-          const img = obj['image'] as {asset?: {url?: string}} | undefined;
-          const url = r2?.url || img?.asset?.url || (obj['url'] as string);
+        if (
+          obj?.['_type'] === 'portableTextImage' ||
+          obj?.['_type'] === 'image' ||
+          obj?.['imageR2']
+        ) {
+          const r2 = obj['imageR2'] as {url?: string} | undefined
+          const img = obj['image'] as {asset?: {url?: string}} | undefined
+          const url = r2?.url || img?.asset?.url || (obj['url'] as string)
 
           if (typeof url === 'string' && url) {
             target.push({
               type: 'image',
               url,
-              urlMobile: (obj['imageMobileR2'] as {url?: string})?.url || (obj['urlMobile'] as string),
-              urlDesktop: (obj['imageDesktopR2'] as {url?: string})?.url || (obj['urlDesktop'] as string),
+              urlMobile:
+                (obj['imageMobileR2'] as {url?: string})?.url || (obj['urlMobile'] as string),
+              urlDesktop:
+                (obj['imageDesktopR2'] as {url?: string})?.url || (obj['urlDesktop'] as string),
             })
           }
         }
@@ -344,9 +350,9 @@ export function ProjectDetailPage() {
           if (!val) return
           const blks = Array.isArray(val) ? val : [val]
           blks.forEach(b => {
-             if (b?._type === 'portableTextImage' && (b.imageR2?.url || b.image?.asset?.url)) {
-               excludedUrls.add(b.imageR2?.url || b.image?.asset?.url)
-             }
+            if (b?._type === 'portableTextImage' && (b.imageR2?.url || b.image?.asset?.url)) {
+              excludedUrls.add(b.imageR2?.url || b.image?.asset?.url)
+            }
           })
         }
         scan(t(block.description as never))
@@ -403,8 +409,16 @@ export function ProjectDetailPage() {
               quality={90}
               crop={coverCrop}
               hotspot={coverHotspot}
-              origWidth={project.cover && typeof project.cover === 'object' ? (project.cover as {origWidth?: number}).origWidth : undefined}
-              origHeight={project.cover && typeof project.cover === 'object' ? (project.cover as {origHeight?: number}).origHeight : undefined}
+              origWidth={
+                project.cover && typeof project.cover === 'object'
+                  ? (project.cover as {origWidth?: number}).origWidth
+                  : undefined
+              }
+              origHeight={
+                project.cover && typeof project.cover === 'object'
+                  ? (project.cover as {origHeight?: number}).origHeight
+                  : undefined
+              }
             />
           </div>
         ) : (
@@ -449,7 +463,8 @@ export function ProjectDetailPage() {
             style={{
               opacity: isFullscreenButtonVisible ? 1 : 0,
               transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
-              transition: 'opacity 700ms ease-out, transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+              transition:
+                'opacity 700ms ease-out, transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
             }}
           >
             <button
@@ -459,8 +474,19 @@ export function ProjectDetailPage() {
               }}
               className="flex h-12 w-12 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all hover:bg-white/10"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.8">
-                 <path d="M15 3h6v6" /><path d="M9 21H3v-6" /><path d="M21 3l-7 7" /><path d="M3 21l7-7" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="0.8"
+              >
+                <path d="M15 3h6v6" />
+                <path d="M9 21H3v-6" />
+                <path d="M21 3l-7 7" />
+                <path d="M3 21l7-7" />
               </svg>
             </button>
           </div>
@@ -479,25 +505,33 @@ export function ProjectDetailPage() {
 
       <div className="w-full bg-[var(--bg-secondary)]">
         <div className="w-full max-w-[95%] md:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-8">
-           <div className="flex justify-between mb-8">
-              {prevProject && <Link to={`/projects/${prevProject.id}`}><ArrowLeft /></Link>}
-              {nextProject && <Link to={`/projects/${nextProject.id}`}><ArrowRight /></Link>}
-           </div>
+          <div className="flex justify-between mb-8">
+            {prevProject && (
+              <Link to={`/projects/${prevProject.id}`}>
+                <ArrowLeft />
+              </Link>
+            )}
+            {nextProject && (
+              <Link to={`/projects/${nextProject.id}`}>
+                <ArrowRight />
+              </Link>
+            )}
+          </div>
 
-           <div className="space-y-6">
-              {project.excerpt && (
-                <div className="text-[var(--text-primary)] font-roboto-thin text-lg md:text-xl leading-relaxed">
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  <PortableTextLite value={t(project.excerpt as never) as any} />
-                </div>
-              )}
-              {project.body && (
-                <div className="text-[var(--text-primary)] font-roboto-thin text-lg md:text-xl leading-relaxed">
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  <PortableTextLite value={t(project.body as never) as any} />
-                </div>
-              )}
-           </div>
+          <div className="space-y-6">
+            {project.excerpt && (
+              <div className="text-[var(--text-primary)] font-roboto-thin text-lg md:text-xl leading-relaxed">
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                <PortableTextLite value={t(project.excerpt as never) as any} />
+              </div>
+            )}
+            {project.body && (
+              <div className="text-[var(--text-primary)] font-roboto-thin text-lg md:text-xl leading-relaxed">
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                <PortableTextLite value={t(project.body as never) as any} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -538,7 +572,16 @@ export function ProjectDetailPage() {
                         />
                       )}
                       {m.type === 'video' && (
-                        <OptimizedVideo src={m.url} srcMobile={m.urlMobile} srcDesktop={m.urlDesktop} className="w-full" autoPlay loop muted playsInline />
+                        <OptimizedVideo
+                          src={m.url}
+                          srcMobile={m.urlMobile}
+                          srcDesktop={m.urlDesktop}
+                          className="w-full"
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                        />
                       )}
                     </button>
                   </ScrollReveal>
