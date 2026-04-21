@@ -207,11 +207,11 @@ export function ProjectDetailPage() {
       : undefined
   const coverCrop =
     project && project.cover && typeof project.cover === 'object'
-      ? (project.cover as any).crop
+      ? (project.cover as {crop?: R2ImageMetadata['crop']}).crop
       : undefined
   const coverHotspot =
     project && project.cover && typeof project.cover === 'object'
-      ? (project.cover as any).hotspot
+      ? (project.cover as {hotspot?: R2ImageMetadata['hotspot']}).hotspot
       : undefined
 
   const mediaData = useMemo(() => {
@@ -241,8 +241,8 @@ export function ProjectDetailPage() {
             url: u,
             urlMobile: m.urlMobile,
             urlDesktop: m.urlDesktop,
-            crop: (m as any).crop,
-            hotspot: (m as any).hotspot,
+            crop: m.crop,
+            hotspot: m.hotspot,
           })
         }
       })
@@ -254,7 +254,7 @@ export function ProjectDetailPage() {
         const mUrl = block.image || block.url
         if (mUrl && block.mediaType !== 'panels') {
           media.push({
-            type: (block.mediaType as any) || 'image',
+            type: (block.mediaType as 'image' | 'video' | 'youtube') || 'image',
             url: mUrl,
             urlMobile: block.imageMobile || block.urlMobile,
             urlDesktop: block.imageDesktop || block.urlDesktop,
@@ -267,17 +267,20 @@ export function ProjectDetailPage() {
           if (!val) return
           const blks = Array.isArray(val) ? val : [val]
           blks.forEach(b => {
-            if (b?._type === 'portableTextImage' && (b.imageR2?.url || b.image?.asset?.url)) {
-              const url = b.imageR2?.url || b.image?.asset?.url
-              if (url) {
-                media.push({
-                  type: 'image',
-                  url,
-                  urlMobile: b.imageMobileR2?.url,
-                  urlDesktop: b.imageDesktopR2?.url,
-                })
-              }
-            }
+             const item = b as Record<string, unknown>;
+             if (item?._type === 'portableTextImage') {
+               const r2 = item.imageR2 as Record<string, string> | undefined;
+               const img = item.image as Record<string, {asset: {url: string}}> | undefined;
+               const url = r2?.url || img?.asset?.url;
+               if (url) {
+                 media.push({
+                   type: 'image',
+                   url,
+                   urlMobile: (item.imageMobileR2 as Record<string, string>)?.url,
+                   urlDesktop: (item.imageDesktopR2 as Record<string, string>)?.url,
+                 })
+               }
+             }
           })
         }
         scanPortableText(t(block.description as never))
@@ -301,15 +304,18 @@ export function ProjectDetailPage() {
       if (Array.isArray(val)) {
         val.forEach(v => scanDeep(v, target))
       } else if (typeof val === 'object' && val !== null) {
-        const obj = val as Record<string, any>
+        const obj = val as Record<string, unknown>
         if (obj['_type'] === 'portableTextImage' || obj['_type'] === 'image' || obj['imageR2']) {
-          const url = (obj['imageR2'] as any)?.url || (obj['image'] as any)?.asset?.url || obj['url']
+          const r2 = obj['imageR2'] as Record<string, string> | undefined;
+          const img = obj['image'] as Record<string, {asset: {url: string}}> | undefined;
+          const url = r2?.url || img?.asset?.url || (obj['url'] as string);
+
           if (typeof url === 'string' && url) {
             target.push({
               type: 'image',
               url,
-              urlMobile: (obj['imageMobileR2'] as any)?.url || obj['urlMobile'],
-              urlDesktop: (obj['imageDesktopR2'] as any)?.url || obj['urlDesktop'],
+              urlMobile: (obj['imageMobileR2'] as Record<string, string>)?.url || (obj['urlMobile'] as string),
+              urlDesktop: (obj['imageDesktopR2'] as Record<string, string>)?.url || (obj['urlDesktop'] as string),
             })
           }
         }
@@ -397,8 +403,8 @@ export function ProjectDetailPage() {
               quality={90}
               crop={coverCrop}
               hotspot={coverHotspot}
-              origWidth={(project.cover as any)?.origWidth}
-              origHeight={(project.cover as any)?.origHeight}
+              origWidth={project.cover && typeof project.cover === 'object' ? (project.cover as {origWidth?: number}).origWidth : undefined}
+              origHeight={project.cover && typeof project.cover === 'object' ? (project.cover as {origHeight?: number}).origHeight : undefined}
             />
           </div>
         ) : (
@@ -481,12 +487,12 @@ export function ProjectDetailPage() {
            <div className="space-y-6">
               {project.excerpt && (
                 <div className="text-[var(--text-primary)] font-roboto-thin text-lg md:text-xl leading-relaxed">
-                  <PortableTextLite value={t(project.excerpt as never) as unknown as any[]} />
+                  <PortableTextLite value={t(project.excerpt as never) as unknown as unknown[]} />
                 </div>
               )}
               {project.body && (
                 <div className="text-[var(--text-primary)] font-roboto-thin text-lg md:text-xl leading-relaxed">
-                  <PortableTextLite value={t(project.body as never) as unknown as any[]} />
+                  <PortableTextLite value={t(project.body as never) as unknown as unknown[]} />
                 </div>
               )}
            </div>

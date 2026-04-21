@@ -681,6 +681,8 @@ export interface Project {
     image?: string
     isCover?: boolean
     isOriginal?: boolean
+    crop?: R2ImageMetadata['crop']
+    hotspot?: R2ImageMetadata['hotspot']
   }[]
   body?: LocalizedString
   /** Content blocks displayed on project detail page (same system as homepage) */
