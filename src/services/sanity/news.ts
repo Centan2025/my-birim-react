@@ -4,7 +4,6 @@ import {
   sanity,
   useSanity,
   mapImage,
-  mapMediaUrl,
   rewriteR2Url,
   extractPalette,
   mapR2Metadata,
