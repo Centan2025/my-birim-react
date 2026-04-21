@@ -4,6 +4,7 @@ import {
   sanity,
   useSanity,
   mapImage,
+  mapMediaUrl,
   rewriteR2Url,
   extractPalette,
   mapR2Metadata,
@@ -124,49 +125,87 @@ const mapProjectRow = (r: Record<string, unknown>): Project => {
     if (urlDesktop && urlDesktop !== url) cover['urlDesktop'] = urlDesktop
   }
 
-  // Transform contentBlocks
+  // Transform contentBlocks - Ana sayfa (sanity/pages.ts) ile senkronize edildi
   const contentBlocks = r['contentBlocks']
     ? (r['contentBlocks'] as Record<string, unknown>[]).map((b: Record<string, unknown>) => {
         let image = undefined
         let imageMobile = undefined
         let imageDesktop = undefined
-        let url = b['url'] as string
+        let url = b['url'] as string | undefined
         let urlMobile = undefined
         let urlDesktop = undefined
 
-        if (b['mediaType'] === 'image' || !b['mediaType']) {
-          image = mapImage(b['imageR2'] as SanityImageLike)
-          imageMobile = mapImage(b['imageMobileR2'] as SanityImageLike)
-          imageDesktop = mapImage(b['imageDesktopR2'] as SanityImageLike)
-        } else if (b['mediaType'] === 'video') {
-          const vR2 = b['videoFileR2'] as Record<string, string>
-          url = vR2?.['url'] ? rewriteR2Url(vR2['url']) : (b['url'] as string)
-          const vMobileR2 = b['videoFileMobileR2'] as Record<string, string>
-          urlMobile = vMobileR2?.['url'] ? rewriteR2Url(vMobileR2['url']) : undefined
-          const vDesktopR2 = b['videoFileDesktopR2'] as Record<string, string>
-          urlDesktop = vDesktopR2?.['url'] ? rewriteR2Url(vDesktopR2['url']) : undefined
-        } else if (b['mediaType'] === 'youtube') {
-          url = b['url'] as string
+        const mediaType = (b['mediaType'] as string) || 'image'
+        const imageR2 = b['imageR2'] || b['image'] || b['cover']
+        const imageMobileR2 = b['imageMobileR2'] || b['imageMobile']
+        const imageDesktopR2 = b['imageDesktopR2'] || b['imageDesktop']
+
+        // Try both 'position' and 'imagePosition' (Sanity schema may vary)
+        const position = (b['imagePosition'] || b['position'] || 'left') as string
+
+        if (mediaType === 'image') {
+          // Use mapImage which is very flexible for any Sanity image object/string
+          image = mapImage(imageR2 as never)
+          imageMobile = mapImage(imageMobileR2 as never)
+          imageDesktop = mapImage(imageDesktopR2 as never)
+        } else if (mediaType === 'video') {
+          const videoFileR2 = b['videoFileR2']
+          const videoFileMobileR2 = b['videoFileMobileR2']
+          const videoFileDesktopR2 = b['videoFileDesktopR2']
+
+          const vUrl = (videoFileR2 as any)?.['url'] || b['url']
+          url = vUrl ? rewriteR2Url(String(vUrl)) : undefined
+
+          const vmUrl = (videoFileMobileR2 as any)?.['url']
+          urlMobile = vmUrl ? rewriteR2Url(String(vmUrl)) : undefined
+
+          const vdUrl = (videoFileDesktopR2 as any)?.['url']
+          urlDesktop = vdUrl ? rewriteR2Url(String(vdUrl)) : undefined
+        } else if (mediaType === 'youtube') {
+          url = b['url'] as string | undefined
+        } else if (mediaType === 'panels') {
+          const imagePanels = b['imagePanels']
+          if (Array.isArray(imagePanels)) {
+            b['imagePanels'] = (imagePanels as Record<string, unknown>[])
+              .map((p: Record<string, unknown>) => {
+                const url = mapImage(p as never)
+                if (!url) return null
+                const mime = (p['mimeType'] as string) || ''
+                const type =
+                  mime.startsWith('video/') || url.toLowerCase().match(/\.(mp4|webm|mov|avi|mkv)$/)
+                    ? 'video'
+                    : 'image'
+                return {url, type}
+              })
+              .filter(Boolean)
+          }
         }
 
-        const meta = b['imageR2'] ? mapR2Metadata(b['imageR2']) : {}
+        const meta = imageR2 ? mapR2Metadata(imageR2) : {}
+        const borderColor = (b['borderColor'] as Record<string, unknown>)?.['hex']
+
+        // Final fallback: If image is empty but mobile/desktop has a value, use it as base
+        if (!image) {
+          image = imageMobile || imageDesktop
+        }
 
         return {
           ...b,
-          image: image || undefined,
-          imageMobile: imageMobile || undefined,
-          imageDesktop: imageDesktop || undefined,
-          url: url || undefined,
-          urlMobile: urlMobile || undefined,
-          urlDesktop: urlDesktop || undefined,
-          crop: (meta as Record<string, unknown>)?.['crop'] as
-            | {x: number; y: number; width: number; height: number}
-            | undefined,
-          hotspot: (meta as Record<string, unknown>)?.['hotspot'] as
-            | {x: number; y: number}
-            | undefined,
-          origWidth: (meta as Record<string, unknown>)?.['origWidth'] as number,
-          origHeight: (meta as Record<string, unknown>)?.['origHeight'] as number,
+          mediaType,
+          position,
+          image,
+          imageMobile,
+          imageDesktop,
+          url,
+          urlMobile,
+          urlDesktop,
+          imagePanels: b['imagePanels'],
+          panelSize: b['panelSize'],
+          crop: meta.crop,
+          hotspot: meta.hotspot,
+          origWidth: meta.origWidth,
+          origHeight: meta.origHeight,
+          borderColor,
         }
       })
     : undefined
@@ -230,7 +269,11 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
       },
       contentBlocks[]{ 
         ..., 
-        imageR2, imageMobileR2, imageDesktopR2, videoFileR2, videoFileMobileR2, videoFileDesktopR2
+        titleFont, contentFont,
+        image{ asset->{url} },
+        imageR2, imageMobileR2, imageDesktopR2, 
+        videoFileR2, videoFileMobileR2, videoFileDesktopR2,
+        imagePanels[]{ ..., imageR2, image{ asset->{url} } }
       }
     }`
     const r = await sanity.fetch(q, {id})

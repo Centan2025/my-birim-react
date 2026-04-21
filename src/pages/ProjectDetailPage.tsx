@@ -582,7 +582,6 @@ export function ProjectDetailPage() {
 
       {(project.excerpt ||
         project.body ||
-        allMedia.length > 0 ||
         (showBottomPrevNext && (prevProject || nextProject))) && (
         <div className="mt-0 relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-[var(--bg-secondary)]">
           <div className="w-full md:max-w-[92%] lg:max-w-[80vw] mx-auto md:px-8 lg:px-0 py-6 md:py-8">
@@ -697,90 +696,87 @@ export function ProjectDetailPage() {
                 )}
               </div>
             )}
+          </div>
+        </div>
+      )}
 
-            {/* İçerik Blokları - Ana sayfa ile aynı sistem */}
-            {project.contentBlocks && project.contentBlocks.length > 0 ? (
-              <div className={`${project.excerpt || project.body ? 'mt-10' : ''}`}>
-                <HomeContentBlocks
-                  blocks={project.contentBlocks}
-                  isMobile={isMobile}
-                  imageBorderClass={imageBorderClass}
-                  overrideBackgroundColor="bg-[var(--bg-secondary)]"
-                  onMediaClick={url => {
-                    const clickIdx = allMedia.findIndex(m => m.url === url)
-                    if (clickIdx !== -1) {
-                      setIdx(clickIdx)
-                      setIsFullscreenOpen(true)
-                    }
-                  }}
-                />
-              </div>
-            ) : (
-              /* Galeri - SADECE içerik bloğu yoksa göster (Eski medya sistemi fallback) */
-              galleryMedia.length > 0 && (
-              <div className={`space-y-0 ${(project.excerpt || project.body || (project.contentBlocks && project.contentBlocks.length > 0)) ? 'mt-10' : ''}`}>
-                {galleryMedia.map((m: any, i: number) => {
-                  const globalIdx = allMedia.findIndex((am: any) => am.url === m.url)
-                  const displayIdx = globalIdx !== -1 ? globalIdx : i
+      {/* İçerik Blokları - Ana sayfa ile birebir aynı kullanım */}
+      {project.contentBlocks && project.contentBlocks.length > 0 && (
+        <div className={project.excerpt || project.body ? "mt-10" : ""}>
+          <HomeContentBlocks
+            blocks={project.contentBlocks}
+            isMobile={isMobile}
+            imageBorderClass={imageBorderClass}
+          />
+        </div>
+      )}
 
-                  return (
-                    <ScrollReveal key={i} delay={i * 80} threshold={0.1} distance={20}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIdx(displayIdx)
-                          setIsFullscreenOpen(true)
-                        }}
-                        className="w-full block cursor-pointer focus:outline-none group"
-                      >
-                        {m.type === 'image' && (
-                          <OptimizedImage
+      {/* Galeri Fallback - SADECE içerik bloğu yoksa ve medya varsa göster (Eski projeler için) */}
+      {(!project.contentBlocks || project.contentBlocks.length === 0) && galleryMedia.length > 0 && (
+        <div className="mt-10 relative left-1/2 right-1/2 -mx-[50vw] w-screen bg-[var(--bg-secondary)] pb-10">
+          <div className="w-full md:max-w-[92%] lg:max-w-[80vw] mx-auto md:px-8 lg:px-0">
+            <div className="space-y-0">
+              {galleryMedia.map((m: any, i: number) => {
+                const globalIdx = allMedia.findIndex((am: any) => am.url === m.url)
+                const displayIdx = globalIdx !== -1 ? globalIdx : i
+
+                return (
+                  <ScrollReveal key={i} delay={i * 80} threshold={0.1} distance={20}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIdx(displayIdx)
+                        setIsFullscreenOpen(true)
+                      }}
+                      className="w-full block cursor-pointer focus:outline-none group"
+                    >
+                      {m.type === 'image' && (
+                        <OptimizedImage
+                          src={m.url}
+                          srcMobile={m.urlMobile}
+                          srcDesktop={m.urlDesktop}
+                          alt={`${t(project.title)} - ${i + 1}`}
+                          className="w-full h-auto object-cover"
+                          loading="lazy"
+                          quality={85}
+                          crop={m.crop}
+                          hotspot={m.hotspot}
+                          origWidth={m.origWidth}
+                          origHeight={m.origHeight}
+                        />
+                      )}
+                      {m.type === 'video' && (
+                        <div className="w-full relative">
+                          <OptimizedVideo
                             src={m.url}
                             srcMobile={m.urlMobile}
                             srcDesktop={m.urlDesktop}
-                            alt={`${t(project.title)} - ${i + 1}`}
                             className="w-full h-auto object-cover"
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            preload="metadata"
                             loading="lazy"
-                            quality={85}
-                            crop={m.crop}
-                            hotspot={m.hotspot}
-                            origWidth={m.origWidth}
-                            origHeight={m.origHeight}
                           />
-                        )}
-                        {m.type === 'video' && (
-                          <div className="w-full relative">
-                            <OptimizedVideo
-                              src={m.url}
-                              srcMobile={m.urlMobile}
-                              srcDesktop={m.urlDesktop}
-                              className="w-full h-auto object-cover"
-                              autoPlay
-                              loop
-                              muted
-                              playsInline
-                              preload="metadata"
-                              loading="lazy"
-                            />
-                          </div>
-                        )}
-                        {m.type === 'youtube' && (
-                          <div className="w-full aspect-video relative overflow-hidden">
-                            <iframe
-                              src={`https://www.youtube.com/embed/${getYouTubeId(m.url)}?autoplay=0&rel=0`}
-                              title={`Video ${i + 1}`}
-                              frameBorder="0"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                              className="absolute top-0 left-0 w-full h-full"
-                            />
-                          </div>
-                        )}
-                      </button>
-                    </ScrollReveal>
-                  )
-                })}
-              </div>
-            ))}
+                        </div>
+                      )}
+                      {m.type === 'youtube' && (
+                        <div className="w-full aspect-video relative overflow-hidden">
+                          <iframe
+                            src={`https://www.youtube.com/embed/${getYouTubeId(m.url)}?autoplay=0&rel=0`}
+                            title={`Video ${i + 1}`}
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                            className="absolute top-0 left-0 w-full h-full"
+                          />
+                        </div>
+                      )}
+                    </button>
+                  </ScrollReveal>
+                )
+              })}
+            </div>
           </div>
         </div>
       )}

@@ -204,12 +204,12 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
           let urlMobile = undefined
           let urlDesktop = undefined
 
-          const mediaType = b['mediaType'] as string | undefined
+          const mediaType = (b['mediaType'] as string) || 'image'
           const imageR2 = b['imageR2']
           const imageMobileR2 = b['imageMobileR2']
           const imageDesktopR2 = b['imageDesktopR2']
 
-          if (mediaType === 'image' || !mediaType) {
+          if (mediaType === 'image') {
             image = mapImage(imageR2 as never)
             imageMobile = mapImage(imageMobileR2 as never)
             imageDesktop = mapImage(imageDesktopR2 as never)
@@ -254,6 +254,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
 
           return {
             ...b,
+            mediaType,
             image,
             imageMobile,
             imageDesktop,
