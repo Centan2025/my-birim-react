@@ -268,16 +268,16 @@ export function ProjectDetailPage() {
           const blks = Array.isArray(val) ? val : [val]
           blks.forEach(b => {
              const item = b as Record<string, unknown>;
-             if (item?._type === 'portableTextImage') {
-               const r2 = item.imageR2 as Record<string, string> | undefined;
-               const img = item.image as Record<string, {asset: {url: string}}> | undefined;
-               const url = r2?.url || img?.asset?.url;
+             if (item?.['_type'] === 'portableTextImage') {
+               const r2 = item['imageR2'] as Record<string, string> | undefined;
+               const img = item['image'] as Record<string, {asset: {url: string}}> | undefined;
+               const url = r2?.['url'] || img?.['asset']?.['url'];
                if (url) {
                  media.push({
                    type: 'image',
                    url,
-                   urlMobile: (item.imageMobileR2 as Record<string, string>)?.url,
-                   urlDesktop: (item.imageDesktopR2 as Record<string, string>)?.url,
+                   urlMobile: (item['imageMobileR2'] as Record<string, string>)?.['url'],
+                   urlDesktop: (item['imageDesktopR2'] as Record<string, string>)?.['url'],
                  })
                }
              }
@@ -305,17 +305,17 @@ export function ProjectDetailPage() {
         val.forEach(v => scanDeep(v, target))
       } else if (typeof val === 'object' && val !== null) {
         const obj = val as Record<string, unknown>
-        if (obj['_type'] === 'portableTextImage' || obj['_type'] === 'image' || obj['imageR2']) {
+        if (obj?.['_type'] === 'portableTextImage' || obj?.['_type'] === 'image' || obj?.['imageR2']) {
           const r2 = obj['imageR2'] as Record<string, string> | undefined;
           const img = obj['image'] as Record<string, {asset: {url: string}}> | undefined;
-          const url = r2?.url || img?.asset?.url || (obj['url'] as string);
+          const url = r2?.['url'] || img?.['asset']?.['url'] || (obj['url'] as string);
 
           if (typeof url === 'string' && url) {
             target.push({
               type: 'image',
               url,
-              urlMobile: (obj['imageMobileR2'] as Record<string, string>)?.url || (obj['urlMobile'] as string),
-              urlDesktop: (obj['imageDesktopR2'] as Record<string, string>)?.url || (obj['urlDesktop'] as string),
+              urlMobile: (obj['imageMobileR2'] as Record<string, string>)?.['url'] || (obj['urlMobile'] as string),
+              urlDesktop: (obj['imageDesktopR2'] as Record<string, string>)?.['url'] || (obj['urlDesktop'] as string),
             })
           }
         }
@@ -487,12 +487,14 @@ export function ProjectDetailPage() {
            <div className="space-y-6">
               {project.excerpt && (
                 <div className="text-[var(--text-primary)] font-roboto-thin text-lg md:text-xl leading-relaxed">
-                  <PortableTextLite value={t(project.excerpt as never) as unknown as unknown[]} />
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                  <PortableTextLite value={t(project.excerpt as never) as any} />
                 </div>
               )}
               {project.body && (
                 <div className="text-[var(--text-primary)] font-roboto-thin text-lg md:text-xl leading-relaxed">
-                  <PortableTextLite value={t(project.body as never) as unknown as unknown[]} />
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                  <PortableTextLite value={t(project.body as never) as any} />
                 </div>
               )}
            </div>
