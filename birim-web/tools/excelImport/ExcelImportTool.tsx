@@ -452,6 +452,28 @@ export function ExcelImportTool() {
       .replace(/^-+|-+$/g, '')
   }
 
+  // Metni Sanity Portable Text (Blok) formatına çevirir
+  const stringToPortableText = (text: string) => {
+    if (!text || text.trim() === '') return []
+    // Satır sonlarına göre ayır ve her paragrafı ayrı bir blok yap
+    return text
+      .split(/\r?\n/)
+      .filter((line) => line.trim() !== '')
+      .map((line) => ({
+        _type: 'block',
+        _key: Math.random().toString(36).substring(2, 9),
+        children: [
+          {
+            _type: 'span',
+            _key: Math.random().toString(36).substring(2, 9),
+            text: line.trim(),
+          },
+        ],
+        markDefs: [],
+        style: 'normal',
+      }))
+  }
+
   // Kategori bul veya oluştur
   const findOrCreateCategory = async (categoryName: string): Promise<string | null> => {
     if (!categoryName || categoryName.trim() === '') {
@@ -596,11 +618,11 @@ export function ExcelImportTool() {
         },
       }
 
-      // Bio bilgilerini ekle
+      // Bio bilgilerini ekle (Portable Text formatında)
       if (bioTr || bioEn) {
         designerData.bio = {}
-        if (bioTr) designerData.bio.tr = bioTr.trim()
-        if (bioEn) designerData.bio.en = bioEn.trim()
+        if (bioTr) designerData.bio.tr = stringToPortableText(bioTr)
+        if (bioEn) designerData.bio.en = stringToPortableText(bioEn)
       }
 
       if (existingDesigner) {
@@ -660,8 +682,8 @@ export function ExcelImportTool() {
 
       if (excerptTr || excerptEn) {
         projectData.excerpt = {}
-        if (excerptTr) projectData.excerpt.tr = excerptTr.trim()
-        if (excerptEn) projectData.excerpt.en = excerptEn.trim()
+        if (excerptTr) projectData.excerpt.tr = stringToPortableText(excerptTr)
+        if (excerptEn) projectData.excerpt.en = stringToPortableText(excerptEn)
       }
 
       if (existingProject) {
@@ -736,8 +758,8 @@ export function ExcelImportTool() {
 
       if (descriptionTr || descriptionEn) {
         productData.description = {}
-        if (descriptionTr) productData.description.tr = descriptionTr.trim()
-        if (descriptionEn) productData.description.en = descriptionEn.trim()
+        if (descriptionTr) productData.description.tr = stringToPortableText(descriptionTr)
+        if (descriptionEn) productData.description.en = stringToPortableText(descriptionEn)
       }
 
       if (existingProduct) {
