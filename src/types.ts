@@ -258,6 +258,8 @@ export interface Product {
   groupedMaterials?: ProductMaterialsGroup[]
   /** Content accessible only to logged-in users. */
   exclusiveContent: ExclusiveContent
+  /** Sanity update timestamp. */
+  _updatedAt?: string
 }
 
 // --- Product Sub-types ---
@@ -530,6 +532,8 @@ export interface NewsItem {
   publishAt?: string
   /** Optional manual sort order; smaller numbers appear first. */
   sortOrder?: number
+  /** Sanity update timestamp. */
+  _updatedAt?: string
 }
 
 /**

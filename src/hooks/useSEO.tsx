@@ -79,22 +79,27 @@ export const SEOProvider = ({children}: PropsWithChildren) => {
         {merged.url && <link rel="canonical" href={merged.url} />}
 
         {/* Language Alternates */}
-        {merged.url &&
-          supportedLocales.map(lang => (
+        {merged.url && (() => {
+          const url = merged.url;
+          return supportedLocales.map(lang => (
             <link
               key={lang}
               rel="alternate"
               hrefLang={lang}
-              href={`${merged.url}${merged.url.includes('?') ? '&' : '?'}lang=${lang}`}
+              href={`${url}${url.includes('?') ? '&' : '?'}lang=${lang}`}
             />
-          ))}
-        {merged.url && (
-          <link
-            rel="alternate"
-            hrefLang="x-default"
-            href={`${merged.url}${merged.url.includes('?') ? '&' : '?'}lang=tr`}
-          />
-        )}
+          ));
+        })()}
+        {merged.url && (() => {
+          const url = merged.url;
+          return (
+            <link
+              rel="alternate"
+              hrefLang="x-default"
+              href={`${url}${url.includes('?') ? '&' : '?'}lang=tr`}
+            />
+          );
+        })()}
 
         {/* Open Graph / Facebook */}
         {merged.title && <meta property="og:title" content={merged.title} />}
