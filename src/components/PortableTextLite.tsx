@@ -283,14 +283,14 @@ export default function PortableTextLite({
         nodes.push(
           <div
             key={`pair-${blockKey}`}
-            className={`grid grid-cols-2 gap-2 my-2 clear-both ${applyTopMarginRemoval('')}`}
+            className={`grid grid-cols-2 gap-2 my-2 clear-both items-start ${applyTopMarginRemoval('')}`}
           >
             <figure className="flex flex-col">
-              <div className="relative w-full aspect-[4/3] overflow-hidden">
+              <div className="relative w-full overflow-hidden">
                 <OptimizedImage
                   src={getImageSrc(block)}
                   alt={getImageAlt(block)}
-                  className="absolute inset-0 w-full h-full object-cover shadow-sm cursor-pointer"
+                  className="w-full h-auto shadow-sm cursor-pointer"
                   crop={getImageCrop(block)}
                   hotspot={getImageHotspot(block)}
                   onClick={() => onMediaClick?.(getImageSrc(block))}
@@ -303,11 +303,11 @@ export default function PortableTextLite({
               )}
             </figure>
             <figure className="flex flex-col">
-              <div className="relative w-full aspect-[4/3] overflow-hidden">
+              <div className="relative w-full overflow-hidden">
                 <OptimizedImage
                   src={getImageSrc(nextBlock)}
                   alt={getImageAlt(nextBlock)}
-                  className="absolute inset-0 w-full h-full object-cover shadow-sm cursor-pointer"
+                  className="w-full h-auto shadow-sm cursor-pointer"
                   crop={getImageCrop(nextBlock)}
                   hotspot={getImageHotspot(nextBlock)}
                   onClick={() => onMediaClick?.(getImageSrc(nextBlock))}
