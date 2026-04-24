@@ -144,7 +144,7 @@ function slugify(text: string): string {
   return result
     .toLowerCase()
     .trim()
-    .replace(/[^a-z0-9_]+/g, '-')
+    .replace(/[^a-z0-9_.]+/g, '-') // Noktayı (.) koru
     .replace(/-+/g, '-')
     .replace(/^-+|-+$/g, '')
 }
@@ -173,7 +173,8 @@ export default function R2AssetInput(props: ObjectInputProps) {
   // Rewrite .r2.dev preview URLs to Worker CDN for fast loading
   const rewritePreviewUrl = (url: string | undefined): string => {
     if (!url) return ''
-    const domain = R2_DOMAIN || 'https://assets.birim.com'
+    const r2Domain = R2_DOMAIN?.startsWith('http') ? R2_DOMAIN : `https://${R2_DOMAIN}`
+    const domain = r2Domain || 'https://assets.birim.com'
     if (domain && (url.includes('.r2.dev') || url.includes('.workers.dev'))) {
       try {
         const parsed = new URL(url)
@@ -310,7 +311,8 @@ export default function R2AssetInput(props: ObjectInputProps) {
           )
         }
 
-        const finalUrl = `${R2_DOMAIN}/${key}`
+        const r2Domain = R2_DOMAIN?.startsWith('http') ? R2_DOMAIN : `https://${R2_DOMAIN}`
+        const finalUrl = `${r2Domain}/${key}`
 
         // 5. Get Dimensions
         let width, height

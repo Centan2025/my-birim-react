@@ -53,7 +53,7 @@ function slugify(text: string): string {
   return result
     .toLowerCase()
     .trim()
-    .replace(/[^a-z0-9_]+/g, '-')
+    .replace(/[^a-z0-9_.]+/g, '-') // Noktayı (.) koru
     .replace(/-+/g, '-')
     .replace(/^-+|-+$/g, '')
 }
@@ -108,12 +108,16 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
             } else if (docType === 'factoryPage') {
               folderPath = `factory/gallery`
             }
+            
+            // R2 Domain Temizliği
+            const r2Domain = R2_DOMAIN?.startsWith('http') ? R2_DOMAIN : `https://${R2_DOMAIN}`
 
             // 2. Filename
             let fileName = file.name
             if (isImage && !file.name.toLowerCase().endsWith('.webp')) {
               fileName = file.name.replace(/\.[^/.]+$/, '') + '.webp'
             }
+            // Key oluştururken slugify artık noktayı koruyor (.webp kalacak)
             const key = `${folderPath}/${Date.now()}-${slugify(fileName)}`
 
             let r2Asset: any = null
@@ -167,7 +171,7 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
               await Promise.all(sizePromises)
               r2Asset = {
                 _type: 'r2Asset',
-                url: `${R2_DOMAIN}/${key}`,
+                url: `${r2Domain}/${key}`,
                 path: key,
                 hasResponsiveSizes: true,
                 width: dimensions.width,
@@ -189,7 +193,7 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
               )
               r2Asset = {
                 _type: 'r2Asset',
-                url: `${R2_DOMAIN}/${key}`,
+                url: `${r2Domain}/${key}`,
                 path: key,
                 hasResponsiveSizes: false,
                 mimeType: file.type,

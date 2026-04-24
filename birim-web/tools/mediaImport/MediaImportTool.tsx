@@ -2153,7 +2153,7 @@ function slugify(text: string): string {
   return result
     .toLowerCase()
     .trim()
-    .replace(/[^a-z0-9_]+/g, '-') // "_" izinli, diğer özel karakterler "-"
+    .replace(/[^a-z0-9_.]+/g, '-') // "_" ve "." izinli, diğer özel karakterler "-"
     .replace(/-+/g, '-')
     .replace(/^-+|-+$/g, '')
 }
