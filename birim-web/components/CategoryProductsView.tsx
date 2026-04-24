@@ -4,8 +4,29 @@ import {Card, Stack, Text, Spinner, Box, Flex, Heading} from '@sanity/ui'
 import {useRouter} from 'sanity/router'
 import {getPreviewUrl} from '../schemaTypes/utils/previewUrl'
 
-export function CategoryProductsView(props: any) {
-  const [products, setProducts] = useState<any[]>([])
+interface CategoryProductsViewProps {
+  document: {
+    displayed: {
+      _id: string
+    }
+  }
+}
+
+interface ProductMediaItem {
+  type: string
+  isCover?: boolean
+  imageR2?: { url: string }
+  thumbnailR2?: { url: string }
+}
+
+interface Product {
+  _id: string
+  name: { tr?: string; en?: string }
+  media?: ProductMediaItem[]
+}
+
+export function CategoryProductsView(props: CategoryProductsViewProps) {
+  const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const client = useClient({apiVersion: '2024-01-01'})
   const categoryId = props.document.displayed._id
@@ -28,11 +49,11 @@ export function CategoryProductsView(props: any) {
     }`
     client
       .fetch(query, {categoryId, draftId, cleanId})
-      .then((data: any) => {
+      .then((data: Product[]) => {
         setProducts(data)
         setLoading(false)
       })
-      .catch((err: any) => {
+      .catch((err: Error) => {
         console.error('Error fetching products:', err)
         setLoading(false)
       })
@@ -71,8 +92,8 @@ export function CategoryProductsView(props: any) {
           </Card>
         ) : (
           <Stack space={2}>
-            {products.map((product: any) => {
-              const coverItem = product.media?.find((m: any) => m.isCover) || product.media?.[0]
+            {products.map((product: Product) => {
+              const coverItem = product.media?.find((m: ProductMediaItem) => m.isCover) || product.media?.[0]
               const rawUrl =
                 coverItem?.type === 'image'
                   ? coverItem?.imageR2?.url

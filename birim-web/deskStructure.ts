@@ -3,7 +3,7 @@ import {orderableDocumentListDeskItem} from '@sanity/orderable-document-list'
 import {CategoryProductsView} from './components/CategoryProductsView'
 import {PreviewView} from './components/PreviewView'
 
-export const deskStructure = async (S: StructureBuilder, context: any) => {
+export const deskStructure = async (S: StructureBuilder, context: {getClient: (options: {apiVersion: string}) => any}) => {
   const {getClient} = context
   const client = getClient({apiVersion: '2024-01-01'})
 

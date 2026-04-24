@@ -1139,13 +1139,13 @@ export default function MediaImportTool() {
         const targetCat = sanitize(actualCategorySlug || '')
 
         // 1. Önce sadece hedef kategorideki ürünleri filtrele (Kategori bazlı daraltma)
-        const categoryProducts = existingProducts.filter((p: any) => {
+        const categoryProducts = existingProducts.filter((p: {categorySlug?: string}) => {
           const pCat = sanitize(p.categorySlug || '')
           return pCat && pCat === targetCat
         })
 
         // 2. Bu kategori içinden isme veya slug'a göre ürünü bul
-        const existing = categoryProducts.find((p: any) => {
+        const existing = categoryProducts.find((p: {name?: {tr?: string; en?: string}; slug?: string; _id: string; categorySlug?: string}) => {
           const sanityName = sanitize(p.name?.tr || p.name?.en || '')
           const sanitySlug = sanitize(p.slug || '')
           const folderClean = sanitize(product.modelId)
@@ -1172,7 +1172,7 @@ export default function MediaImportTool() {
             `   🔍 Aranan Kategori: "${targetCat}", Model: "${product.modelName}" (ID: ${product.modelId})`,
           )
           console.log(`   📊 Bu kategorideki (${targetCat}) mevcut ürünler:`)
-          categoryProducts.forEach((p: any) => {
+          categoryProducts.forEach((p: {name?: {tr?: string; en?: string}; slug?: string}) => {
             console.log(
               `      - "${p.name?.tr}" | slug: "${p.slug}"`,
             )
@@ -1525,7 +1525,7 @@ export default function MediaImportTool() {
         }
       }
 
-      const scanValue = (val: any) => {
+      const scanValue = (val: unknown) => {
         if (!val) return
         if (typeof val === 'string') {
           const key = extractKey(val)
@@ -1533,17 +1533,18 @@ export default function MediaImportTool() {
         } else if (Array.isArray(val)) {
           val.forEach(scanValue)
         } else if (typeof val === 'object') {
+          const obj = val as Record<string, unknown>
           // r2Asset veya benzeri objelerdeki url alanını yakala
-          if (val.url) {
-            const key = extractKey(val.url)
+          if (obj.url && typeof obj.url === 'string') {
+            const key = extractKey(obj.url)
             if (key) usedKeys.add(key)
           }
           // Tüm obje değerlerini derinlemesine tara
-          Object.values(val).forEach(scanValue)
+          Object.values(obj).forEach(scanValue)
         }
       }
 
-      docs.forEach((doc: any) => scanValue(doc))
+      docs.forEach((doc: unknown) => scanValue(doc))
 
       console.log(`🔍 CMS'de kullanılan ${usedKeys.size} benzersiz R2 dosyası tespit edildi.`)
 
