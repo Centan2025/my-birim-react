@@ -278,7 +278,7 @@ export default function R2AssetInput(props: ObjectInputProps) {
             const options = {
               maxSizeMB: size.maxSizeMB,
               maxWidthOrHeight: size.width,
-              useWebWorker: true,
+              useWebWorker: false, // CSP eval hatasını önlemek için false
               fileType: 'image/webp' as any,
             }
             const compressedBlob = await imageCompression(file, options)
