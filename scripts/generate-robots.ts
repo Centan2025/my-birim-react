@@ -14,6 +14,31 @@ const SITEMAP_URL = `${SITE_URL}/sitemap.xml`
 
 const robotsContent = `User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+# AI Crawler Permissions
+User-agent: GPTBot
+Allow: /
+Disallow: /admin/
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: YouBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
 
 # Sitemap
 Sitemap: ${SITEMAP_URL}

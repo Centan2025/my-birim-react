@@ -89,6 +89,7 @@ import {excelImportTool} from './tools/excelImport'
 import {mediaImportTool} from './tools/mediaImport'
 import {emailExportTool} from './tools/emailExport'
 import {colorInput} from '@sanity/color-input'
+import {CategoryProductsView} from './components/CategoryProductsView'
 
 export default defineConfig({
   name: 'default',
@@ -100,6 +101,15 @@ export default defineConfig({
   plugins: [
     structureTool({
       structure: deskStructure,
+      defaultDocumentNode: (S, {schemaType}) => {
+        if (schemaType === 'category') {
+          return S.document().views([
+            S.view.form().title('Düzenle').icon(() => '✏️'),
+            S.view.component(CategoryProductsView).title('Modeller').icon(() => '📦'),
+          ])
+        }
+        return S.document().views([S.view.form()])
+      },
     }),
     visionTool(),
     excelImportTool(),

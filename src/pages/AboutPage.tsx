@@ -74,6 +74,19 @@ export function AboutPage() {
     siteName: 'BIRIM',
     locale: 'tr_TR',
     section: 'About',
+    schema: {
+      '@context': 'https://schema.org',
+      '@type': 'AboutPage',
+      '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/about#webpage`,
+      name: t('about') || 'Hakkımızda',
+      description:
+        (content && (t(content.heroSubtitle) || t(content.storyTitle))) ||
+        t('about_meta_description_default'),
+      url: `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/about`,
+      mainEntity: {
+        '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#organization`,
+      },
+    },
   })
 
   useEffect(() => {

@@ -198,18 +198,23 @@ export function NewsDetailPage() {
       ? {
           '@context': 'https://schema.org',
           '@type': 'Article',
+          '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/news/${newsId}#article`,
           headline: newsTitle || t(item.title),
           description: newsDescription || t(item.content),
           image: mainImageUrl,
           datePublished: item.date,
+          dateModified: item._updatedAt || item.date,
           author: {
             '@type': 'Person',
             name: 'BIRIM',
+            url: typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com',
           },
           publisher: {
-            '@type': 'Organization',
-            name: 'BIRIM',
-            logo: settings?.logoUrl || 'https://www.birim.com/logo.png',
+            '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#organization`,
+          },
+          mainEntityOfPage: {
+            '@type': 'WebPage',
+            '@id': typeof window !== 'undefined' ? window.location.href : '',
           },
         }
       : undefined,

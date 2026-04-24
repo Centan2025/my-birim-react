@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import {
   createContext,
   useContext,
@@ -11,6 +10,7 @@ import {
 } from 'react'
 import {Helmet} from 'react-helmet-async'
 import {useLocation} from 'react-router-dom'
+import {useTranslation} from '../i18n'
 import type {SEOData} from '../lib/seo'
 
 type SEOState = SEOData & {
@@ -54,6 +54,7 @@ const useSeoContext = () => {
 export const SEOProvider = ({children}: PropsWithChildren) => {
   const [seoData, setSeoData] = useState<SEOState>(DEFAULT_STATE)
   const [seoDefaults, setSeoDefaults] = useState<Partial<SEOState>>(DEFAULT_STATE)
+  const {supportedLocales} = useTranslation()
 
   const merged = useMemo(() => ({...seoDefaults, ...seoData}), [seoDefaults, seoData])
 
@@ -77,26 +78,54 @@ export const SEOProvider = ({children}: PropsWithChildren) => {
         {merged.description && <meta name="description" content={merged.description} />}
         {merged.url && <link rel="canonical" href={merged.url} />}
 
+        {/* Language Alternates */}
+        {merged.url &&
+          supportedLocales.map(lang => (
+            <link
+              key={lang}
+              rel="alternate"
+              hrefLang={lang}
+              href={`${merged.url}${merged.url.includes('?') ? '&' : '?'}lang=${lang}`}
+            />
+          ))}
+        {merged.url && (
+          <link
+            rel="alternate"
+            hrefLang="x-default"
+            href={`${merged.url}${merged.url.includes('?') ? '&' : '?'}lang=tr`}
+          />
+        )}
+
+        {/* Open Graph / Facebook */}
         {merged.title && <meta property="og:title" content={merged.title} />}
         {merged.description && <meta property="og:description" content={merged.description} />}
         {merged.image && <meta property="og:image" content={merged.image} />}
+        {merged.image && <meta property="og:image:width" content="1200" />}
+        {merged.image && <meta property="og:image:height" content="630" />}
         {merged.url && <meta property="og:url" content={merged.url} />}
         <meta property="og:type" content={ogType} />
         {siteName && <meta property="og:site_name" content={siteName} />}
         {locale && <meta property="og:locale" content={locale} />}
 
+        {/* Twitter */}
         {merged.title && <meta name="twitter:title" content={merged.title} />}
         {merged.description && <meta name="twitter:description" content={merged.description} />}
         {merged.image && <meta name="twitter:image" content={merged.image} />}
         <meta name="twitter:card" content={merged.image ? 'summary_large_image' : 'summary'} />
+        <meta name="twitter:site" content="@birim" />
+        <meta name="twitter:creator" content="@birim" />
 
-        {/* AI Robots: Permissive but descriptive for Answer Engines */}
+        {/* AI & Search Engine Robots */}
         <meta
           name="robots"
           content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
         />
-        <meta name="googlebot" content="index, follow" />
+        <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large" />
         <meta name="bingbot" content="index, follow" />
+
+        {/* Additional AI Discovery Meta */}
+        <meta name="ai-content" content="true" />
+        <meta name="rating" content="general" />
 
         {/* Structured Data (JSON-LD) */}
         {merged.schema && (

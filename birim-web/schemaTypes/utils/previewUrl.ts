@@ -17,7 +17,7 @@ export const getPreviewUrl = (url?: string): string => {
     return `${domain}/${url}`.replace(/ /g, '%20')
   }
 
-  if (url.includes('.r2.dev') && !domain.includes('.r2.dev')) {
+  if ((url.includes('.r2.dev') || url.includes('.workers.dev')) && !domain.includes(new URL(url).hostname)) {
     try {
       const parsed = new URL(url)
       const path = parsed.pathname.startsWith('/') ? parsed.pathname.substring(1) : parsed.pathname

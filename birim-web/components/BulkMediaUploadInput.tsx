@@ -105,6 +105,8 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
               folderPath = `news/${docId}/media`
             } else if (docType === 'homePage') {
               folderPath = `home/panels`
+            } else if (docType === 'factoryPage') {
+              folderPath = `factory/gallery`
             }
 
             // 2. Filename

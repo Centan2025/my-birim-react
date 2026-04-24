@@ -104,6 +104,7 @@ export function ProductDetailPage() {
       ? {
           '@context': 'https://schema.org',
           '@type': 'Product',
+          '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/product/${productId}#product`,
           name: t(product.name),
           description: t(product.description) || t(product.name),
           sku: product.id,
@@ -112,10 +113,12 @@ export function ProductDetailPage() {
             mergedGroups && mergedGroups.length > 0
               ? mergedGroups.map(g => t(g.groupTitle)).join(', ')
               : undefined,
-          image:
+          image: [
             typeof product.mainImage === 'string'
               ? product.mainImage
               : (product.mainImage as any)?.url || '',
+            ...bandMedia.map(m => m.url).filter(Boolean),
+          ].filter((url, index, self) => url && self.indexOf(url) === index),
           brand: {
             '@type': 'Brand',
             name: designer ? t(designer.name) : 'BIRIM',
@@ -126,6 +129,13 @@ export function ProductDetailPage() {
             priceCurrency: 'TRY',
             availability: 'https://schema.org/InStock',
             url: typeof window !== 'undefined' ? window.location.href : '',
+            seller: {
+              '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#organization`,
+            },
+          },
+          mainEntityOfPage: {
+            '@type': 'WebPage',
+            '@id': typeof window !== 'undefined' ? window.location.href : '',
           },
         }
       : undefined,

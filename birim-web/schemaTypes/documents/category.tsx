@@ -15,7 +15,7 @@ export default defineType({
       options: {source: (doc: any) => doc.name?.tr || doc.name?.en, maxLength: 96},
       validation: (Rule) => Rule.required(),
     }),
-    // ...(typeof window !== 'undefined' ? [orderRankField({type: 'category'})] : []),
+    orderRankField({type: 'category'}),
     defineField({
       name: 'name',
       title: 'Ad',

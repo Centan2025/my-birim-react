@@ -173,13 +173,17 @@ export default function R2AssetInput(props: ObjectInputProps) {
   // Rewrite .r2.dev preview URLs to Worker CDN for fast loading
   const rewritePreviewUrl = (url: string | undefined): string => {
     if (!url) return ''
-    if (R2_DOMAIN && !R2_DOMAIN.includes('.r2.dev') && url.includes('.r2.dev')) {
+    const domain = R2_DOMAIN || 'https://assets.birim.com'
+    if (domain && (url.includes('.r2.dev') || url.includes('.workers.dev'))) {
       try {
         const parsed = new URL(url)
+        // Eğer domain olarak workers verildiyse karışmasını engelle
+        if (domain.includes(parsed.hostname)) return url;
+        
         const path = parsed.pathname.startsWith('/')
           ? parsed.pathname.substring(1)
           : parsed.pathname
-        return `${R2_DOMAIN}/${path}`
+        return `${domain}/${path}`
       } catch {
         return url
       }

@@ -1,6 +1,7 @@
 import React from 'react'
 import {defineField, defineType} from 'sanity'
 import {getPreviewUrl} from '../utils/previewUrl'
+import BulkMediaUploadInput from '../../components/BulkMediaUploadInput'
 
 export default defineType({
   name: 'factoryPage',
@@ -23,6 +24,9 @@ export default defineType({
       title: 'Görsel Galerisi',
       type: 'array',
       of: [{type: 'productPanelMediaItem'}],
+      components: {
+        input: BulkMediaUploadInput,
+      },
       description: 'Fabrikaya ait görseller veya videolar.',
     }),
   ],

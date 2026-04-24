@@ -48,44 +48,14 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
           S.list()
             .title('Ürün Yönetimi')
             .items([
-              // Kategorileri Sırala - Sürükle-bırak özelliği
-              /*
+              // Kategorileri Düzenle - Sıralama ve Modeller görünümü ile
               orderableDocumentListDeskItem({
                 type: 'category',
-                title: 'Kategorileri Sırala (Sürükle-Bırak)',
+                title: 'Kategorileri Düzenle',
                 S,
                 context,
-                icon: () => '↕️',
+                icon: () => '📂',
               }),
-              */
-              // Kategorileri Düzenle - Modeller görünümü ile
-              S.listItem()
-                .title('Kategorileri Düzenle')
-                .icon(() => '📂')
-                .schemaType('category')
-                .child(
-                  S.documentList()
-                    .title('Kategoriler')
-                    .schemaType('category')
-                    .filter('_type == "category"')
-                    .apiVersion('2024-01-01')
-                    .defaultOrdering([{field: 'name.tr', direction: 'asc'}])
-                    .child((categoryId) =>
-                      S.document()
-                        .schemaType('category')
-                        .documentId(categoryId)
-                        .views([
-                          S.view
-                            .form()
-                            .title('Düzenle')
-                            .icon(() => '✏️'),
-                          S.view
-                            .component(CategoryProductsView)
-                            .title('Modeller')
-                            .icon(() => '📦'),
-                        ]),
-                    ),
-                ),
               S.divider(),
               S.documentTypeListItem('product').title('Tüm Modeller'),
             ]),
@@ -98,7 +68,13 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
         context,
       }),
       */
-      S.documentTypeListItem('project').title('Projeler'),
+      orderableDocumentListDeskItem({
+        type: 'project',
+        title: 'Projeler',
+        S,
+        context,
+        icon: () => '🏗️',
+      }),
       S.documentTypeListItem('newsItem').title('Haberler'),
       S.listItem()
         .title('Hakkımızda')

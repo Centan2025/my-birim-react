@@ -2,6 +2,7 @@ import React from 'react'
 import {defineField, defineType} from 'sanity'
 import {getPreviewUrl} from '../utils/previewUrl'
 import BulkMediaUploadInput from '../../components/BulkMediaUploadInput'
+import {orderRankField} from '@sanity/orderable-document-list'
 
 export default defineType({
   name: 'project',
@@ -15,6 +16,7 @@ export default defineType({
       options: {source: (doc: any) => doc.title?.tr || doc.title?.en, maxLength: 96},
       validation: (Rule) => Rule.required(),
     }),
+    orderRankField({type: 'project'}),
     defineField({
       name: 'title',
       title: 'Başlık',

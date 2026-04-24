@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react'
 import {useClient} from 'sanity'
 import {Card, Stack, Text, Spinner, Box, Flex, Heading} from '@sanity/ui'
 import {useRouter} from 'sanity/router'
+import {getPreviewUrl} from '../schemaTypes/utils/previewUrl'
 
 export function CategoryProductsView(props: any) {
   const [products, setProducts] = useState<any[]>([])
@@ -18,8 +19,12 @@ export function CategoryProductsView(props: any) {
     const query = `*[_type == "product" && (category._ref == $categoryId || category._ref == $draftId || category._ref == $cleanId)] | order(name.tr asc) {
       _id,
       name,
-      "imageUrl": mainImage.asset->url,
-      "r2Url": mainImageR2.url
+      media[] {
+        type,
+        isCover,
+        imageR2 { url },
+        thumbnailR2 { url }
+      }
     }`
     client
       .fetch(query, {categoryId, draftId, cleanId})
@@ -66,82 +71,87 @@ export function CategoryProductsView(props: any) {
           </Card>
         ) : (
           <Stack space={2}>
-            {products.map((product: any) => (
-              <Card
-                key={product._id}
-                padding={3}
-                radius={2}
-                shadow={1}
-                tone="default"
-                as="button"
-                onClick={() => handleProductClick(product._id)}
-                style={{
-                  textAlign: 'left',
-                  cursor: 'pointer',
-                  border: 'none',
-                  width: '100%',
-                  transition: 'all 0.2s',
-                  background: 'var(--card-bg-color)',
-                }}
-              >
-                <Flex align="center" gap={3}>
-                  {product.imageUrl || product.r2Url ? (
-                    <Box
-                      style={{
-                        width: '60px',
-                        height: '60px',
-                        overflow: 'hidden',
-                        borderRadius: '4px',
-                        flexShrink: 0,
-                        backgroundColor: '#f1f3f4',
-                      }}
-                    >
-                      <img
-                        src={
-                          product.imageUrl
-                            ? `${product.imageUrl}?w=120&h=120&fit=crop`
-                            : product.r2Url
-                        }
-                        alt={product.name?.tr || ''}
+            {products.map((product: any) => {
+              const coverItem = product.media?.find((m: any) => m.isCover) || product.media?.[0]
+              const rawUrl =
+                coverItem?.type === 'image'
+                  ? coverItem?.imageR2?.url
+                  : coverItem?.thumbnailR2?.url || coverItem?.imageR2?.url
+              const previewUrl = getPreviewUrl(rawUrl)
+
+              return (
+                <Card
+                  key={product._id}
+                  padding={3}
+                  radius={2}
+                  shadow={1}
+                  tone="default"
+                  as="button"
+                  onClick={() => handleProductClick(product._id)}
+                  style={{
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    border: 'none',
+                    width: '100%',
+                    transition: 'all 0.2s',
+                    background: 'var(--card-bg-color)',
+                  }}
+                >
+                  <Flex align="center" gap={3}>
+                    {previewUrl ? (
+                      <Box
                         style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
+                          width: '60px',
+                          height: '60px',
+                          overflow: 'hidden',
+                          borderRadius: '4px',
+                          flexShrink: 0,
+                          backgroundColor: '#f1f3f4',
                         }}
-                      />
-                    </Box>
-                  ) : (
-                    <Box
-                      style={{
-                        width: '60px',
-                        height: '60px',
-                        borderRadius: '4px',
-                        flexShrink: 0,
-                        backgroundColor: '#e0e0e0',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <Text>📦</Text>
-                    </Box>
-                  )}
-                  <Stack space={1} flex={1}>
-                    <Text size={2} weight="medium">
-                      {product.name?.tr || product.name?.en || 'Ürün'}
-                    </Text>
-                    {product.name?.en && product.name?.tr !== product.name?.en && (
-                      <Text size={1} muted>
-                        {product.name.en}
-                      </Text>
+                      >
+                        <img
+                          src={previewUrl}
+                          alt={product.name?.tr || ''}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                          }}
+                        />
+                      </Box>
+                    ) : (
+                      <Box
+                        style={{
+                          width: '60px',
+                          height: '60px',
+                          borderRadius: '4px',
+                          flexShrink: 0,
+                          backgroundColor: '#e0e0e0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Text>📦</Text>
+                      </Box>
                     )}
-                  </Stack>
-                  <Text size={1} muted>
-                    →
-                  </Text>
-                </Flex>
-              </Card>
-            ))}
+                    <Stack space={1} flex={1}>
+                      <Text size={2} weight="medium">
+                        {product.name?.tr || product.name?.en || 'Ürün'}
+                      </Text>
+                      {product.name?.en && product.name?.tr !== product.name?.en && (
+                        <Text size={1} muted>
+                          {product.name.en}
+                        </Text>
+                      )}
+                    </Stack>
+                    <Text size={1} muted>
+                      →
+                    </Text>
+                  </Flex>
+                </Card>
+              )
+            })}
           </Stack>
         )}
       </Stack>

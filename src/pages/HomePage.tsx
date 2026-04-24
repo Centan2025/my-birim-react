@@ -48,37 +48,59 @@ export function HomePage() {
         {
           '@context': 'https://schema.org',
           '@type': 'Organization',
+          '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#organization`,
           name: 'BIRIM',
           url: typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com',
-          logo:
-            typeof window !== 'undefined'
+          logo: {
+            '@type': 'ImageObject',
+            url: typeof window !== 'undefined'
               ? `${window.location.origin}/logo.png`
               : 'https://www.birim.com/logo.png',
+            width: '180',
+            height: '60'
+          },
+          image: typeof window !== 'undefined'
+            ? `${window.location.origin}/logo.png`
+            : 'https://www.birim.com/logo.png',
+          description: t('home_meta_description') || 'BIRIM - Modern tasarım ve mimari çözümler',
           sameAs: socialLinks,
           contactPoint: {
             '@type': 'ContactPoint',
             email: s?.contactEmail || 'info@birim.com',
             telephone: s?.contactPhone || '+90 216 123 45 67',
             contactType: 'customer service',
+            areaServed: 'TR',
+            availableLanguage: ['Turkish', 'English']
           },
-
           address: {
             '@type': 'PostalAddress',
-            addressCountry: 'TR',
+            streetAddress: 'Modern Sanat Sokak No:12',
             addressLocality: 'Istanbul',
-          },
+            addressRegion: 'Istanbul',
+            postalCode: '34000',
+            addressCountry: 'TR'
+          }
         },
         {
           '@context': 'https://schema.org',
           '@type': 'WebSite',
+          '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#website`,
           name: 'BIRIM',
           url: typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com',
+          description: t('home_meta_description') || 'BIRIM - Modern tasarım ve mimari çözümler',
+          publisher: {
+            '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#organization`
+          },
           potentialAction: {
             '@type': 'SearchAction',
-            target: `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#/products?q={search_term_string}`,
-            'query-input': 'required name=search_term_string',
+            target: {
+              '@type': 'EntryPoint',
+              urlTemplate: `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#/products?q={search_term_string}`
+            },
+            'query-input': 'required name=search_term_string'
           },
-        },
+          inLanguage: 'tr-TR'
+        }
       ],
     }
   }, [content?.heroMedia, t, settings])

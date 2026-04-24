@@ -608,34 +608,29 @@ export const productPanelMediaItem = defineType({
     },
     prepare(selection: any) {
       const {type, title, imageUrl, thumbUrl} = selection
-      let sourceUrl =
-        selection.type === 'image' || selection.mediaType === 'image'
-          ? imageUrl
-          : thumbUrl || imageUrl
+      let sourceUrl = type === 'image' || selection.mediaType === 'image' ? imageUrl : thumbUrl || imageUrl
       let finalUrl = sourceUrl
-      const domain = process.env.SANITY_STUDIO_R2_DOMAIN
-      if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
+      
+      // getPreviewUrl should be defined somewhere, wait, it's in previewUrl.ts. 
+      // I should manually apply the same logic or use the getPreviewUrl. 
+      // Let's use getPreviewUrl logic directly to avoid import issues if it's not imported at the top.
+      const domain = process.env.SANITY_STUDIO_R2_DOMAIN || 'https://assets.birim.com'
+      if (finalUrl && (finalUrl.includes('.r2.dev') || finalUrl.includes('.workers.dev'))) {
         try {
           const parsed = new URL(finalUrl)
-          const path = parsed.pathname.startsWith('/')
-            ? parsed.pathname.substring(1)
-            : parsed.pathname
-          finalUrl = `${domain}/${path}`
+          if (!domain.includes(parsed.hostname)) {
+            const path = parsed.pathname.startsWith('/') ? parsed.pathname.substring(1) : parsed.pathname
+            finalUrl = `${domain}/${path}`
+          }
         } catch (e) {}
       }
-      const mediaTitle =
-        title ||
-        (type === 'image'
-          ? 'Resim Medyası'
-          : type === 'video'
-            ? 'Video Medyası'
-            : 'YouTube Medyası')
+      
+      const mediaTitle = title || (type === 'image' ? 'Resim Medyası' : type === 'video' ? 'Video Medyası' : 'YouTube Medyası')
       return {
         title: mediaTitle,
-        media:
-          type === 'image' && finalUrl
-            ? () => React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
-            : undefined,
+        media: finalUrl
+          ? () => React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
+          : undefined,
       }
     },
   },
