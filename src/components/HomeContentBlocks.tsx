@@ -497,7 +497,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               />
             ) : (
               <div
-                className={`relative w-full h-full ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`}
+                className={`relative w-full h-auto ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`}
                 onClick={() => onMediaClick && !block.linkUrl && onMediaClick(mediaUrl)}
                 onKeyDown={
                   onMediaClick && !block.linkUrl
@@ -517,7 +517,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   srcMobile={mediaMobileUrl}
                   srcDesktop={mediaDesktopUrl}
                   alt=""
-                  className={`${isFullWidth ? 'w-full h-auto' : `${mediaWidthClass} ${imageBorderClass}`} ${isMobile ? 'w-full object-cover' : 'object-cover'} block`}
+                  className={`${isFullWidth ? 'w-full h-auto' : `${mediaWidthClass} ${imageBorderClass}`} w-full h-auto block`}
                   loading="lazy"
                   quality={85}
                   crop={block.crop}
