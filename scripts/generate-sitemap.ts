@@ -62,11 +62,16 @@ ${urlEntries}
 </urlset>`
 }
 
+interface SanityDoc {
+  slug: string
+  _updatedAt: string
+}
+
 async function run() {
   console.log('🚀 Sitemap oluşturma işlemi başlatıldı...')
 
   try {
-    const dynamicData = await sanityClient.fetch(`
+    const dynamicData = (await sanityClient.fetch(`
       {
         "products": *[_type == "product" && defined(slug.current)] { "slug": slug.current, _updatedAt },
         "news": *[_type == "newsItem" && defined(slug.current)] { "slug": slug.current, _updatedAt },
@@ -74,34 +79,40 @@ async function run() {
         "designers": *[_type == "designer" && defined(slug.current)] { "slug": slug.current, _updatedAt },
         "categories": *[_type == "category" && defined(slug.current)] { "slug": slug.current, _updatedAt }
       }
-    `)
+    `)) as {
+      products: SanityDoc[]
+      news: SanityDoc[]
+      projects: SanityDoc[]
+      designers: SanityDoc[]
+      categories: SanityDoc[]
+    }
 
     const dynamicPages: SitemapUrl[] = [
-      ...dynamicData.products.map((p: any) => ({
+      ...dynamicData.products.map((p: SanityDoc) => ({
         loc: `/product/${p.slug}`,
         lastmod: new Date(p._updatedAt).toISOString().split('T')[0],
         changefreq: 'weekly',
         priority: 0.8,
       })),
-      ...dynamicData.news.map((n: any) => ({
+      ...dynamicData.news.map((n: SanityDoc) => ({
         loc: `/news/${n.slug}`,
         lastmod: new Date(n._updatedAt).toISOString().split('T')[0],
         changefreq: 'monthly',
         priority: 0.7,
       })),
-      ...dynamicData.projects.map((p: any) => ({
+      ...dynamicData.projects.map((p: SanityDoc) => ({
         loc: `/projects/${p.slug}`,
         lastmod: new Date(p._updatedAt).toISOString().split('T')[0],
         changefreq: 'monthly',
         priority: 0.7,
       })),
-      ...dynamicData.designers.map((d: any) => ({
+      ...dynamicData.designers.map((d: SanityDoc) => ({
         loc: `/designer/${d.slug}`,
         lastmod: new Date(d._updatedAt).toISOString().split('T')[0],
         changefreq: 'monthly',
         priority: 0.6,
       })),
-      ...dynamicData.categories.map((c: any) => ({
+      ...dynamicData.categories.map((c: SanityDoc) => ({
         loc: `/products/${c.slug}`,
         lastmod: new Date(c._updatedAt).toISOString().split('T')[0],
         changefreq: 'weekly',
