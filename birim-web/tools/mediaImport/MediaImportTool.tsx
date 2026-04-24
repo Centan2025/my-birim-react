@@ -1514,48 +1514,49 @@ export default function MediaImportTool() {
 
     setIsCleaning(true)
     try {
-      // 1. Sanity'den kullanılan tüm R2 URL'lerini topla
-      const query = `*[defined(imageR2.url) || defined(videoFileR2.url) || defined(fileR2.url) || defined(r2Asset.url) || defined(imageMobileR2.url) || defined(imageDesktopR2.url)] {
-        imageR2,
-        videoFileR2,
-        fileR2,
-        r2Asset,
-        imageMobileR2,
-        imageDesktopR2,
-        videoFileMobileR2,
-        videoFileDesktopR2,
-        "mediaUrls": media[].imageR2.url,
-        "mediaVideoUrls": media[].videoFileR2.url,
-        "bottomMediaImageUrls": bottomMedia[].imageR2.url,
-        "bottomMediaVideoUrls": bottomMedia[].videoFileR2.url,
-        "exclusiveImageUrls": exclusiveContent.images[].r2Asset.url,
-        "exclusiveDrawingUrls": exclusiveContent.drawings[].fileR2.url,
-        "exclusiveModelUrls": exclusiveContent.models3d[].fileR2.url,
-        "materialUrls": books[].items[].imageR2.url,
-        "aboutHeroUrls": hero[].imageR2.url
-      }`
+      // 1. Sanity'den TÜM dökümanları çek (hiçbir alanı atlamamak için)
+      // Sadece URL içermesi muhtemel alanları içeren dökümanları çekmek daha performanslı olur ama
+      // risk almamak için tüm dökümanları çekip derinlemesine tarıyoruz.
+      const docs = await client.fetch('*')
+      const usedKeys = new Set<string>()
 
-      const docs = await client.fetch(query)
-      const usedUrls = new Set<string>()
-
-      const extractUrls = (val: any) => {
-        if (!val) return
-        if (typeof val === 'string') {
-          usedUrls.add(val)
-        } else if (Array.isArray(val)) {
-          val.forEach(extractUrls)
-        } else if (typeof val === 'object') {
-          if (val.url) usedUrls.add(val.url)
-          // Alt objeleri de tara (responsive versions vb.)
-          Object.values(val).forEach(extractUrls)
+      // R2 Key ayıklama yardımcısı
+      const extractKey = (url: string): string | null => {
+        if (!url || typeof url !== 'string') return null
+        if (!url.includes('birim-assets') && !url.includes('assets.birim.com') && !url.includes('.r2.dev')) return null
+        
+        try {
+          // URL'den domain'i ve query'yi temizle, sadece yolu (key) al
+          let path = url.split('?')[0]
+          // Domainleri temizle
+          path = path.replace(/https?:\/\/[^\/]+\//, '')
+          return path
+        } catch {
+          return null
         }
       }
 
-      docs.forEach((doc: any) => {
-        Object.values(doc).forEach(extractUrls)
-      })
+      const scanValue = (val: any) => {
+        if (!val) return
+        if (typeof val === 'string') {
+          const key = extractKey(val)
+          if (key) usedKeys.add(key)
+        } else if (Array.isArray(val)) {
+          val.forEach(scanValue)
+        } else if (typeof val === 'object') {
+          // r2Asset veya benzeri objelerdeki url alanını yakala
+          if (val.url) {
+            const key = extractKey(val.url)
+            if (key) usedKeys.add(key)
+          }
+          // Tüm obje değerlerini derinlemesine tara
+          Object.values(val).forEach(scanValue)
+        }
+      }
 
-      console.log(`🔍 CMS'de kullanılan ${usedUrls.size} benzersiz medya dosyası bulundu.`)
+      docs.forEach((doc: any) => scanValue(doc))
+
+      console.log(`🔍 CMS'de kullanılan ${usedKeys.size} benzersiz R2 dosyası tespit edildi.`)
 
       // 2. R2'deki tüm dosyaları listele
       let allObjects: any[] = []
@@ -1580,20 +1581,23 @@ export default function MediaImportTool() {
 
       for (const obj of allObjects) {
         if (!obj.Key) continue
-        const fullUrl = `${R2_DOMAIN}/${obj.Key}`
+        const currentKey = obj.Key
 
-        // Eğer bu dosyanın tam hali kullanılıyorsa koru
-        let isUsed = usedUrls.has(fullUrl)
+        // Eğer bu dosya doğrudan kullanılıyorsa koru
+        let isUsed = usedKeys.has(currentKey)
 
         if (!isUsed) {
           // Eğer bir responsive varyasyon ise, ana dosyanın kullanılıp kullanılmadığına bak
           const variantSuffixes = ['-1600w.webp', '-800w.webp', '-400w.webp']
-          const matchingSuffix = variantSuffixes.find((s) => obj.Key.endsWith(s))
+          const matchingSuffix = variantSuffixes.find((s) => currentKey.endsWith(s))
 
           if (matchingSuffix) {
-            const mainKey = obj.Key.replace(matchingSuffix, '.webp')
-            const mainUrl = `${R2_DOMAIN}/${mainKey}`
-            if (usedUrls.has(mainUrl)) {
+            // Ana dosya adını bul: foo-800w.webp -> foo.webp
+            // VEYA foo-webp-800w.webp -> foo-webp (uzantı yoksa)
+            const mainKey = currentKey.replace(matchingSuffix, '.webp')
+            const mainKeyNoExt = currentKey.replace(matchingSuffix, '')
+            
+            if (usedKeys.has(mainKey) || usedKeys.has(mainKeyNoExt)) {
               isUsed = true
             }
           }
