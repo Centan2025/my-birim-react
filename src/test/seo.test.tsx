@@ -6,6 +6,7 @@ import {HelmetProvider} from 'react-helmet-async'
 
 import {SEOProvider, useSEO} from '../hooks/useSEO'
 import {addStructuredData, getArticleSchema} from '../lib/seo'
+import {I18nContext} from '../i18n'
 
 const SeoTestComponent: React.FC = () => {
   useSEO({
@@ -23,11 +24,20 @@ describe('useSEO hook', () => {
   it('updates document title and basic meta tags', async () => {
     render(
       <HelmetProvider>
-        <SEOProvider>
-          <MemoryRouter initialEntries={['/test']}>
-            <SeoTestComponent />
-          </MemoryRouter>
-        </SEOProvider>
+        <I18nContext.Provider
+          value={{
+            t: (key: any) => (typeof key === 'string' ? key : key?.tr || ''),
+            locale: 'tr',
+            setLocale: vi.fn(),
+            supportedLocales: ['tr', 'en'],
+          }}
+        >
+          <SEOProvider>
+            <MemoryRouter initialEntries={['/test']}>
+              <SeoTestComponent />
+            </MemoryRouter>
+          </SEOProvider>
+        </I18nContext.Provider>
       </HelmetProvider>
     )
 

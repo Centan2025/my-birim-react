@@ -14,19 +14,23 @@ vi.mock('../hooks/useNews')
 vi.mock('../hooks/useSiteData')
 
 // Basit i18n mock'u
-vi.mock('../../i18n', () => ({
-  useTranslation: () => ({
-    t: (key: unknown) =>
-      typeof key === 'string'
-        ? key
-        : typeof key === 'object' && key !== null
-          ? (key as Record<string, string>)['tr'] || ''
-          : '',
-    locale: 'tr',
-    setLocale: vi.fn(),
-    supportedLocales: ['tr', 'en'],
-  }),
-}))
+vi.mock('../i18n', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../i18n')>()
+  return {
+    ...actual,
+    useTranslation: () => ({
+      t: (key: unknown) =>
+        typeof key === 'string'
+          ? key
+          : typeof key === 'object' && key !== null
+            ? (key as Record<string, string>)['tr'] || ''
+            : '',
+      locale: 'tr',
+      setLocale: vi.fn(),
+      supportedLocales: ['tr', 'en'],
+    }),
+  }
+})
 
 // useSEO ve structured data helper'ları gerçek implementasyonla kullanıyoruz
 
