@@ -310,7 +310,7 @@ const productQueryString = `
 
 export const getProducts = async (): Promise<Product[]> => {
   if (useSanity && sanity) {
-    const query = groq`*[_type == "product" && (!defined(isPublished) || isPublished == true)] | order(year desc){ ${productQueryString} }`
+    const query = groq`*[_type == "product"] | order(year desc){ ${productQueryString} }`
     const rows = await sanity.fetch(query)
     return (rows as Record<string, unknown>[]).map((r: Record<string, unknown>) => mapProductRow(r))
   }
@@ -320,7 +320,7 @@ export const getProducts = async (): Promise<Product[]> => {
 
 export const getProductById = async (id: string): Promise<Product | undefined> => {
   if (useSanity && sanity) {
-    const query = groq`*[_type == "product" && id.current == $id && (!defined(isPublished) || isPublished == true)][0]{ ${productQueryString} }`
+    const query = groq`*[_type == "product" && (_id == $id || _id == "drafts." + $id || id.current == $id)][0]{ ${productQueryString} }`
     const r = await sanity.fetch(query, {id})
     if (!r) return undefined
     return mapProductRow(r)

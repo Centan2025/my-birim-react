@@ -272,7 +272,9 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
           }
         })
       }
-      if (!Array.isArray(data?.featuredProductIds)) data.featuredProductIds = []
+      if (data && !Array.isArray(data.featuredProductIds)) {
+        data.featuredProductIds = []
+      }
       return data
     } catch (e) {
       console.error('Error fetching home page content', e)

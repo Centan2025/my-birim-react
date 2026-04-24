@@ -219,7 +219,7 @@ const mapProjectRow = (r: Record<string, unknown>): Project => {
 
 export const getNews = async (): Promise<NewsItem[]> => {
   if (useSanity && sanity) {
-    const q = groq`*[_type == "newsItem" && (isPublished != false) && (!defined(publishAt) || publishAt <= now())] 
+    const q = groq`*[_type == "newsItem"] 
         | order(coalesce(sortOrder, 999999) asc, coalesce(publishAt, date, _createdAt) desc){
           "id": id.current, 
           title, date, publishAt, isPublished, sortOrder, content, 
@@ -236,13 +236,26 @@ export const getNews = async (): Promise<NewsItem[]> => {
 }
 
 export const getNewsById = async (id: string): Promise<NewsItem | undefined> => {
-  const newsItems = await getNews()
-  return newsItems.find(n => n.id === id)
+  if (useSanity && sanity) {
+    const q = groq`*[_type == "newsItem" && (_id == $id || _id == "drafts." + $id || id.current == $id)][0]{
+          "id": id.current, 
+          title, date, publishAt, isPublished, sortOrder, content, 
+          media[]{ 
+            type, url, caption, imageR2, imageMobileR2, imageDesktopR2, 
+            videoFileR2, videoFileMobileR2, videoFileDesktopR2, isCover 
+          }
+    }`
+    const r = await sanity.fetch(q, {id})
+    if (!r) return undefined
+    return mapNewsRow(r)
+  }
+  await delay(SIMULATED_DELAY)
+  return (getItem<NewsItem[]>(KEYS.NEWS) || []).find(n => n.id === id)
 }
 
 export const getProjects = async (): Promise<Project[]> => {
   if (useSanity && sanity) {
-    const q = groq`*[_type=="project" && (isPublished != false) && (!defined(publishAt) || publishAt <= now())] 
+    const q = groq`*[_type=="project"] 
       | order(coalesce(sortOrder, 999999) asc, coalesce(publishAt, _createdAt) desc){
         "id": id.current, title, date, projectCategory, publishAt, isPublished, sortOrder,
         excerpt,
@@ -259,7 +272,7 @@ export const getProjects = async (): Promise<Project[]> => {
 
 export const getProjectById = async (id: string): Promise<Project | undefined> => {
   if (useSanity && sanity) {
-    const q = groq`*[_type=="project" && id.current==$id][0]{ 
+    const q = groq`*[_type=="project" && (_id == $id || _id == "drafts." + $id || id.current == $id)][0]{ 
       "id": id.current, title, date, 
       excerpt, body, 
       media[]{ 

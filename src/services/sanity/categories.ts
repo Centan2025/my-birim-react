@@ -103,7 +103,7 @@ export const getDesigners = async (): Promise<Designer[]> => {
 
 export const getDesignerById = async (id: string): Promise<Designer | undefined> => {
   if (useSanity && sanity) {
-    const query = groq`*[_type == "designer" && id.current == $id][0]{ 
+    const query = groq`*[_type == "designer" && (_id == $id || _id == "drafts." + $id || id.current == $id)][0]{ 
       "id": id.current, name, role, bio, image, imageR2, imageMobileR2, imageDesktopR2
     }`
     const r = await sanity.fetch(query, {id})

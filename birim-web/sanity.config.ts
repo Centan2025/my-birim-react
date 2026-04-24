@@ -103,33 +103,34 @@ export default defineConfig({
     structureTool({
       structure: deskStructure,
       defaultDocumentNode: (S, {schemaType}) => {
-        if (schemaType === 'category') {
-          return S.document().views([
-            S.view
-              .form()
-              .title('Düzenle')
-              .icon(() => '✏️'),
-            S.view
-              .component(CategoryProductsView)
-              .title('Modeller')
-              .icon(() => '📦'),
-          ])
-        }
-
         const previewTypes = [
           'product',
           'project',
           'newsItem',
           'designer',
+          'category',
           'homePage',
           'aboutPage',
           'factoryPage',
+          'contactPage',
         ]
         if (previewTypes.includes(schemaType)) {
-          return S.document().views([
-            S.view.form().title('Düzenle'),
-            S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
-          ])
+          const views = [S.view.form().title('Düzenle')]
+
+          // Kategori ise "Modeller" görünümünü de ekle
+          if (schemaType === 'category') {
+            views.push(
+              S.view
+                .component(CategoryProductsView)
+                .title('Modeller')
+                .icon(() => '📦'),
+            )
+          }
+
+          // Önizleme sekmesini ekle
+          views.push(S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'))
+
+          return S.document().views(views)
         }
 
         return S.document().views([S.view.form()])

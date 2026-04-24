@@ -1,6 +1,6 @@
 import React from 'react'
 
-export function PreviewView({document, options}: any) {
+export function PreviewView({document}: any) {
   const {displayed} = document
   if (!displayed) {
     return (
@@ -10,28 +10,31 @@ export function PreviewView({document, options}: any) {
     )
   }
 
-  const {id, _type} = displayed
-  const pubId = id.replace(/^drafts\./, '')
+  const id = displayed._id?.replace(/^drafts\./, '') || ''
+  const type = displayed._type
   
   // Site URL tespiti
   const remoteUrl = 'https://www.birim.com'
-  const localUrl = 'http://localhost:5173'
+  const localUrl = 'http://localhost:3001'
   const baseUrl = window.location.hostname === 'localhost' ? localUrl : remoteUrl
 
   // Tip bazlı path tespiti
   let path = ''
-  switch (_type) {
+  switch (type) {
     case 'product':
-      path = `/product/${pubId}`
+      path = `/product/${id}`
       break
     case 'project':
-      path = `/projects/${pubId}`
+      path = `/projects/${id}`
       break
     case 'newsItem':
-      path = `/news/${pubId}`
+      path = `/news/${id}`
+      break
+    case 'category':
+      path = `/products/${id}`
       break
     case 'designer':
-      path = `/designers/${pubId}`
+      path = `/designer/${id}`
       break
     case 'homePage':
       path = '/'
@@ -42,13 +45,14 @@ export function PreviewView({document, options}: any) {
     case 'factoryPage':
       path = '/factory'
       break
+    case 'contactPage':
+      path = '/contact'
+      break
     default:
       path = '/'
   }
 
-  // Preview token (sk... ile başlayan token güvenli bir şekilde aktarılmalı)
-  // Şimdilik sadece preview modu aktif etmek için flag gönderiyoruz
-  // Gerçek token .env'den VITE_SANITY_TOKEN olarak eklenmeli
+  // Preview token
   const previewToken = 'sk3hcgzMrsNDGtMbwCUGbh3PJ0eRfnpnGI4LBXI0lWGZdvD8oYDB2cqZEdATKCUrmDceAAgkoG0zoYUuGw2N3dfXoNaU4ZvOUoTeraWE1la5BCdjg967sQawjJydQJMq1jtsomH56RPKaD3hpY2XhRBr6Z4Zf7dO157WTvDzbDyRNtxK3bsw'
   
   const url = `${baseUrl}/#${path}${path.includes('?') ? '&' : '?'}preview=${previewToken}`
@@ -67,9 +71,10 @@ export function PreviewView({document, options}: any) {
         alignItems: 'center',
         padding: '0 10px',
         borderBottom: '1px solid #ddd',
-        color: '#666'
+        color: '#666',
+        zIndex: 10
       }}>
-        Önizleme: {url}
+        Önizleme Adresi: {url}
       </div>
       <iframe
         src={url}

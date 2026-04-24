@@ -1,6 +1,7 @@
 import type {StructureBuilder} from 'sanity/structure'
 import {orderableDocumentListDeskItem} from '@sanity/orderable-document-list'
 import {CategoryProductsView} from './components/CategoryProductsView'
+import {PreviewView} from './components/PreviewView'
 
 export const deskStructure = async (S: StructureBuilder, context: any) => {
   const {getClient} = context
@@ -29,8 +30,19 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
         .title('Site Ayarları')
         .child(
           siteSettingsDoc?._id
-            ? S.document().schemaType('siteSettings').id(pubId(siteSettingsDoc._id))
-            : S.document().schemaType('siteSettings'),
+            ? S.document()
+                .schemaType('siteSettings')
+                .id(pubId(siteSettingsDoc._id))
+                .views([
+                  S.view.form().title('Düzenle'),
+                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                ])
+            : S.document()
+                .schemaType('siteSettings')
+                .views([
+                  S.view.form().title('Düzenle'),
+                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                ]),
         ),
       S.listItem().title('UI Çevirileri').child(S.document().schemaType('uiTranslations')),
       S.listItem()
@@ -39,8 +51,18 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
           homePage?._id
             ? S.document()
                 .schemaType('homePage')
-                .id(pubId(homePage._id) || 'homePage') // mevcut belgeyi doğrudan aç
-            : S.document().schemaType('homePage'), // belge yoksa yeni oluştur
+                .id(pubId(homePage._id) || 'homePage')
+                .views([
+                  S.view.form().title('Düzenle'),
+                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                ])
+            : S.document()
+                .schemaType('homePage')
+                .documentId('anaSayfa') // Bazı durumlarda ID anaSayfa olabiliyor
+                .views([
+                  S.view.form().title('Düzenle'),
+                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                ]),
         ),
       S.listItem()
         .title('Ürünler')
@@ -60,14 +82,13 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
               S.documentTypeListItem('product').title('Tüm Modeller'),
             ]),
         ),
-      /*
       orderableDocumentListDeskItem({
         type: 'designer',
         title: 'Tasarımcılar',
         S,
         context,
+        icon: () => '🎨',
       }),
-      */
       orderableDocumentListDeskItem({
         type: 'project',
         title: 'Projeler',
@@ -82,8 +103,17 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
           aboutPage?._id
             ? S.document()
                 .schemaType('aboutPage')
-                .id(pubId(aboutPage._id) || 'aboutPage') // mevcut belgeyi doğrudan aç
-            : S.document().schemaType('aboutPage'), // belge yoksa yeni oluştur
+                .id(pubId(aboutPage._id) || 'aboutPage')
+                .views([
+                  S.view.form().title('Düzenle'),
+                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                ])
+            : S.document()
+                .schemaType('aboutPage')
+                .views([
+                  S.view.form().title('Düzenle'),
+                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                ]),
         ),
       S.listItem()
         .title('Fabrika')
@@ -92,7 +122,16 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
             ? S.document()
                 .schemaType('factoryPage')
                 .id(pubId(factoryPage._id) || 'factoryPage')
-            : S.document().schemaType('factoryPage'),
+                .views([
+                  S.view.form().title('Düzenle'),
+                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                ])
+            : S.document()
+                .schemaType('factoryPage')
+                .views([
+                  S.view.form().title('Düzenle'),
+                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                ]),
         ),
       S.listItem()
         .title('İletişim')
@@ -100,8 +139,17 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
           contactPage?._id
             ? S.document()
                 .schemaType('contactPage')
-                .id(pubId(contactPage._id) || 'contactPage') // mevcut belgeyi doğrudan aç
-            : S.document().schemaType('contactPage'), // belge yoksa yeni oluştur
+                .id(pubId(contactPage._id) || 'contactPage')
+                .views([
+                  S.view.form().title('Düzenle'),
+                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                ])
+            : S.document()
+                .schemaType('contactPage')
+                .views([
+                  S.view.form().title('Düzenle'),
+                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                ]),
         ),
       S.listItem()
         .title('Altbilgi')
@@ -110,7 +158,13 @@ export const deskStructure = async (S: StructureBuilder, context: any) => {
             .title('Altbilgi')
             .items([
               S.listItem().title('Genel Ayarlar').child(
-                S.document().schemaType('footer').id('footer'), // tekil belge olarak doğrudan aç
+                S.document()
+                  .schemaType('footer')
+                  .id('footer')
+                  .views([
+                    S.view.form().title('Düzenle'),
+                    S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                  ])
               ),
               S.listItem()
                 .title('Çerez Politikası')

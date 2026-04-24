@@ -40,9 +40,10 @@ export const sanity = useSanity
       projectId: SANITY_PROJECT_ID,
       dataset: SANITY_DATASET,
       apiVersion: SANITY_API_VERSION,
-      useCdn: !previewToken, // Disable CDN in preview mode to get fresh drafts
+      useCdn: !previewToken, // previewToken varsa CDN false olur
       token: previewToken || undefined,
-      perspective: previewToken ? 'previewDrafts' : 'published',
+      perspective: previewToken ? 'drafts' : 'published',
+      ignoreBrowserTokenWarning: true,
     })
   : null
 
@@ -90,21 +91,22 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
 
   if (R2_DOMAIN) {
     const r2DomainNoProtocol = R2_DOMAIN.replace(/^https?:\/\//, '')
+    
+    // Agresif assets.birim.com rewrite (Öncelikli)
+    if (result.includes('assets.birim.com')) {
+      result = result.replace('assets.birim.com', r2DomainNoProtocol)
+    }
+
     for (const domain of legacyDomains) {
-      if (result.includes(domain)) {
+      if (result.includes(domain) && domain !== 'assets.birim.com') {
         result = result.replace(domain, r2DomainNoProtocol)
       }
     }
 
     // Generic R2.dev rewrite
-    if (
-      !R2_DOMAIN.includes('.r2.dev') &&
-      result.includes('.r2.dev') &&
-      !result.includes(r2DomainNoProtocol)
-    ) {
+    if (result.includes('.r2.dev') && !result.includes(r2DomainNoProtocol)) {
       try {
         const parts = result.split('/')
-        // Find the segment containing r2.dev (usually the domain part)
         for (let i = 0; i < parts.length; i++) {
           const part = parts[i]
           if (part && part.includes('.r2.dev')) {
@@ -297,5 +299,5 @@ export const mapMediaUrl = (
     if (fallbackUrl.includes('youtube.com') || fallbackUrl.includes('youtu.be')) return ''
     return rewriteR2Url(fallbackUrl) || ''
   }
-  return m?.url || ''
+  return rewriteR2Url(m?.url) || ''
 }
