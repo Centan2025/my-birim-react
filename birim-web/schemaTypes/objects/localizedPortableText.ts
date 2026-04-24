@@ -222,12 +222,19 @@ export const localizedPortableText = defineType({
       title: 'Türkçe',
       type: 'array',
       of: portableTextBlocks,
+      options: {
+        // Bu alanların arama sonuçlarını kirletmemesi için ağırlığını (weight) çok düşürüyoruz
+        search: {weight: 0},
+      },
     }),
     defineField({
       name: 'en',
       title: 'English',
       type: 'array',
       of: portableTextBlocks,
+      options: {
+        search: {weight: 0},
+      },
     }),
   ],
 })

@@ -99,6 +99,10 @@ export default defineConfig({
   projectId: 'wn3a082f',
   dataset: 'production',
 
+  search: {
+    strategy: 'groq2024',
+  },
+
   plugins: [
     structureTool({
       structure: deskStructure,

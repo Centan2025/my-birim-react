@@ -9,12 +9,6 @@ export default defineType({
   name: 'product',
   title: 'Ürün',
   type: 'document',
-  __experimental_search: [
-    {path: 'name.tr', weight: 10},
-    {path: 'name.en', weight: 10},
-    {path: 'id.current', weight: 5},
-    {path: 'sku', weight: 5},
-  ],
   fields: [
     // ...(typeof window !== 'undefined' ? [orderRankField({ type: 'product' })] : []),
     defineField({
