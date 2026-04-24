@@ -90,6 +90,7 @@ import {mediaImportTool} from './tools/mediaImport'
 import {emailExportTool} from './tools/emailExport'
 import {colorInput} from '@sanity/color-input'
 import {CategoryProductsView} from './components/CategoryProductsView'
+import {PreviewView} from './components/PreviewView'
 
 export default defineConfig({
   name: 'default',
@@ -114,6 +115,23 @@ export default defineConfig({
               .icon(() => '📦'),
           ])
         }
+
+        const previewTypes = [
+          'product',
+          'project',
+          'newsItem',
+          'designer',
+          'homePage',
+          'aboutPage',
+          'factoryPage',
+        ]
+        if (previewTypes.includes(schemaType)) {
+          return S.document().views([
+            S.view.form().title('Düzenle'),
+            S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+          ])
+        }
+
         return S.document().views([S.view.form()])
       },
     }),

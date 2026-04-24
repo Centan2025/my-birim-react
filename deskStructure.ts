@@ -1,6 +1,7 @@
 import type {StructureBuilder} from 'sanity/structure'
 import {orderableDocumentListDeskItem} from '@sanity/orderable-document-list'
 import {CategoryProductsView} from './components/CategoryProductsView'
+import {PreviewView} from './components/PreviewView'
 
 export const deskStructure = async (
   S: StructureBuilder,
@@ -83,6 +84,10 @@ export const deskStructure = async (
                             .component(CategoryProductsView)
                             .title('Modeller')
                             .icon(() => '📦'),
+                          S.view
+                            .component(PreviewView)
+                            .title('Önizleme')
+                            .icon(() => '👁️'),
                         ])
                     )
                 ),

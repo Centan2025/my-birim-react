@@ -20,12 +20,29 @@ export const ENABLE_LOCAL_FALLBACK =
     (import.meta as ImportMeta).env?.['VITE_ENABLE_LOCAL_FALLBACK'] ?? defaultEnableFallback
   ).toLowerCase() !== 'false'
 
+// Preview mode detection
+const getPreviewToken = () => {
+  if (typeof window === 'undefined') return null
+  const params = new URLSearchParams(window.location.search)
+  const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '')
+  const token = params.get('preview') || hashParams.get('preview')
+  if (token) {
+    sessionStorage.setItem('sanity_preview_mode', token)
+    return token
+  }
+  return sessionStorage.getItem('sanity_preview_mode')
+}
+
+const previewToken = getPreviewToken()
+
 export const sanity = useSanity
   ? createClient({
       projectId: SANITY_PROJECT_ID,
       dataset: SANITY_DATASET,
       apiVersion: SANITY_API_VERSION,
-      useCdn: true,
+      useCdn: !previewToken, // Disable CDN in preview mode to get fresh drafts
+      token: previewToken || undefined,
+      perspective: previewToken ? 'previewDrafts' : 'published',
     })
   : null
 

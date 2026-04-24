@@ -47,6 +47,8 @@ import {structureTool} from 'sanity/structure'
 import {visionTool} from '@sanity/vision'
 import {schemaTypes} from './schemaTypes'
 import {deskStructure} from './deskStructure'
+import {PreviewView} from './components/PreviewView'
+import {CategoryProductsView} from './components/CategoryProductsView'
 import {excelImportTool} from './tools/excelImport'
 import {mediaImportTool} from './tools/mediaImport'
 import {emailExportTool} from './tools/emailExport'
@@ -61,6 +63,33 @@ export default defineConfig({
   plugins: [
     structureTool({
       structure: deskStructure,
+      defaultDocumentNode: (S, {schemaType}) => {
+        if (schemaType === 'category') {
+          return S.document().views([
+            S.view.form().title('Düzenle').icon(() => '✏️'),
+            S.view.component(CategoryProductsView).title('Modeller').icon(() => '📦'),
+            S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+          ])
+        }
+
+        const previewTypes = [
+          'product',
+          'project',
+          'newsItem',
+          'designer',
+          'homePage',
+          'aboutPage',
+          'factoryPage',
+        ]
+        if (previewTypes.includes(schemaType)) {
+          return S.document().views([
+            S.view.form().title('Düzenle'),
+            S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+          ])
+        }
+
+        return S.document().views([S.view.form()])
+      },
     }),
     visionTool(),
     excelImportTool(),
