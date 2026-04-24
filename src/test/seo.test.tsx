@@ -26,7 +26,8 @@ describe('useSEO hook', () => {
       <HelmetProvider>
         <I18nContext.Provider
           value={{
-            t: (key: any) => (typeof key === 'string' ? key : key?.tr || ''),
+            t: (key: unknown) =>
+              typeof key === 'string' ? key : (key as Record<string, string>)?.tr || '',
             locale: 'tr',
             setLocale: vi.fn(),
             supportedLocales: ['tr', 'en'],
