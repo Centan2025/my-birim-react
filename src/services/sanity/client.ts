@@ -9,10 +9,11 @@ export const SANITY_DATASET = import.meta.env['VITE_SANITY_DATASET'] || 'product
 export const SANITY_API_VERSION = import.meta.env['VITE_SANITY_API_VERSION'] || '2025-01-01'
 export const useSanity = Boolean(SANITY_PROJECT_ID && SANITY_DATASET)
 
-export const R2_DOMAIN =
-  import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
-export const R2_ORIGIN_DOMAIN =
-  import.meta.env['VITE_R2_ORIGIN_DOMAIN'] || 'https://pub-5e705b2a702d4bb1a3631c558917599d.r2.dev'
+const rawR2Domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
+export const R2_DOMAIN = rawR2Domain.startsWith('http') ? rawR2Domain : `https://${rawR2Domain}`
+
+const rawOriginDomain = import.meta.env['VITE_R2_ORIGIN_DOMAIN'] || 'https://pub-5e705b2a702d4bb1a3631c558917599d.r2.dev'
+export const R2_ORIGIN_DOMAIN = rawOriginDomain.startsWith('http') ? rawOriginDomain : `https://${rawOriginDomain}`
 
 const defaultEnableFallback = import.meta.env.PROD ? 'false' : 'true'
 export const ENABLE_LOCAL_FALLBACK =
@@ -122,8 +123,16 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
 
     // New: Relatif yolları mutlak yap
     if (!result.startsWith('http') && result.length > 0) {
-      const cleanPath = result.startsWith('/') ? result.substring(1) : result
-      result = `${R2_DOMAIN}/${cleanPath}`
+      // Eğer zaten domain ile başlıyorsa (ama protokolü yoksa) sadece protokolü ekle
+      if (result.startsWith(r2DomainNoProtocol)) {
+        const cleanPath = result.replace(r2DomainNoProtocol, '').startsWith('/') 
+          ? result.replace(r2DomainNoProtocol, '').substring(1) 
+          : result.replace(r2DomainNoProtocol, '')
+        result = `${R2_DOMAIN}/${cleanPath}`
+      } else {
+        const cleanPath = result.startsWith('/') ? result.substring(1) : result
+        result = `${R2_DOMAIN}/${cleanPath}`
+      }
     }
   }
 
