@@ -1,0 +1,40 @@
+# BIRIM
+> BIRIM is a contemporary design and furniture brand based in Istanbul, Turkey. We create furniture, accessories, and architectural solutions through collaboration with visionary designers.
+
+## About BIRIM
+BIRIM brings together modern design philosophy with quality craftsmanship. Our collections span furniture, lighting, accessories, and custom architectural solutions for residential and commercial spaces.
+
+## Products
+Browse our product collections including furniture, seating, tables, lighting, and accessories.
+- [Products](https://www.birim.com/#/products)
+- [Categories](https://www.birim.com/#/categories)
+
+## Projects
+Explore our architectural and interior design projects showcasing BIRIM products in real-world applications.
+- [Projects](https://www.birim.com/#/projects)
+
+## Designers
+Meet the visionary designers and creative curators who collaborate with BIRIM.
+- [Designers](https://www.birim.com/#/designers)
+
+## Factory
+Learn about our manufacturing process and quality standards.
+- [Factory](https://www.birim.com/#/factory)
+
+## News
+Stay updated with the latest news, events, and announcements from BIRIM.
+- [News](https://www.birim.com/#/news)
+
+## About
+Discover our story, philosophy, and commitment to design excellence.
+- [About](https://www.birim.com/#/about)
+
+## Contact
+Get in touch with our team for inquiries, orders, and collaborations.
+- [Contact](https://www.birim.com/#/contact)
+
+## Legal
+- [Privacy Policy](https://www.birim.com/#/privacy)
+- [Terms of Service](https://www.birim.com/#/terms)
+- [Cookie Policy](https://www.birim.com/#/cookies)
+- [KVKK](https://www.birim.com/#/kvkk)

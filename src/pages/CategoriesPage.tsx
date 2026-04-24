@@ -19,12 +19,30 @@ export function CategoriesPage() {
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const pageTitle = `BIRIM - ${t('categories') || t('products') || 'Kategoriler'}`
 
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'
   useSEO({
     title: pageTitle,
     description: t('products_page_subtitle') || t('products') || 'Ürün kategorileri',
     siteName: 'BIRIM',
     type: 'website',
     locale: 'tr_TR',
+    schema: {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: t('categories') || t('products') || 'Kategoriler',
+      description: t('products_page_subtitle') || 'Ürün kategorileri',
+      url: `${baseUrl}/#/categories`,
+      mainEntity: {
+        '@type': 'ItemList',
+        numberOfItems: categories.length,
+        itemListElement: categories.slice(0, 30).map((c, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          name: t(c.name),
+          url: `${baseUrl}/#/products/${c.id}`,
+        })),
+      },
+    },
   })
 
   // Ürünleri kategori ID'sine gore haritalayarak aramalari O(N) karmasikligina dusur

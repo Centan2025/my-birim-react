@@ -311,6 +311,24 @@ export function ContactPage() {
     siteName: 'BIRIM',
     locale: 'tr_TR',
     section: 'Contact',
+    schema: {
+      '@context': 'https://schema.org',
+      '@type': 'ContactPage',
+      name: t('contact') || 'İletişim',
+      url: `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#/contact`,
+      description: t(content?.subtitle) || t('contact_meta_description_default'),
+      mainEntity: {
+        '@type': 'Organization',
+        '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#organization`,
+        name: 'BIRIM',
+        contactPoint: {
+          '@type': 'ContactPoint',
+          contactType: 'customer service',
+          areaServed: 'TR',
+          availableLanguage: ['Turkish', 'English'],
+        },
+      },
+    },
   })
 
   useEffect(() => {

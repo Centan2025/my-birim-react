@@ -27,4 +27,4 @@ User-agent: Google-Extended
 Allow: /
 
 # Sitemap
-Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://www.birim.com/sitemap.xml

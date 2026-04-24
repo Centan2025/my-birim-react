@@ -120,6 +120,17 @@ export function FactoryPage() {
     siteName: 'BIRIM',
     locale: locale === 'tr' ? 'tr_TR' : 'en_US',
     section: 'Factory',
+    schema: {
+      '@context': 'https://schema.org',
+      '@type': 'ManufacturingBusiness',
+      name: 'BIRIM - Üretim Tesisi',
+      description: (content && t(content.title)) || 'BIRIM mobilya üretim tesisi',
+      url: `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#/factory`,
+      ...(firstImageUrl && {image: firstImageUrl}),
+      parentOrganization: {
+        '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#organization`,
+      },
+    },
   })
 
   useEffect(() => {

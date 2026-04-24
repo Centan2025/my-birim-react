@@ -130,7 +130,7 @@ export function checkRequiredEnv(): {isValid: boolean; missing: string[]; warnin
 
   // Production'da kritik olanlar
   if (import.meta.env.PROD) {
-    if (!env.VITE_SITE_URL || env.VITE_SITE_URL === 'https://yourdomain.com') {
+    if (!env.VITE_SITE_URL) {
       warnings.push('VITE_SITE_URL production domain ile güncellenmeli')
     }
   }

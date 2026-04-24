@@ -14,6 +14,7 @@ export function DesignersPage() {
   const navigate = useNavigate()
 
   // SEO meta
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'
   useSEO({
     title: `BIRIM - ${t('designers') || 'Tasarımcılar'}`,
     description: 'BIRIM ile çalışan vizyoner tasarımcılar ve yaratıcı küratörler.',
@@ -21,6 +22,23 @@ export function DesignersPage() {
     siteName: 'BIRIM',
     locale: 'tr_TR',
     section: 'Designers',
+    schema: {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: t('designers') || 'Tasarımcılar',
+      description: 'BIRIM ile çalışan vizyoner tasarımcılar ve yaratıcı küratörler.',
+      url: `${baseUrl}/#/designers`,
+      mainEntity: {
+        '@type': 'ItemList',
+        numberOfItems: designers.length,
+        itemListElement: designers.slice(0, 20).map((d, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          name: t(d.name),
+          url: `${baseUrl}/#/designer/${d.id}`,
+        })),
+      },
+    },
   })
 
   if (loading) {

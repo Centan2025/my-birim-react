@@ -331,3 +331,193 @@ export const getProjectSchema = (data: {
     ...(data.category && {genre: data.category}),
   }
 }
+
+/**
+ * CollectionPage Schema.org data
+ * Kategori listeleri, tasarımcılar sayfası gibi koleksiyon sayfaları için
+ */
+export const getCollectionPageSchema = (data: {
+  name: string
+  description: string
+  url: string
+  items?: {name: string; url: string; image?: string}[]
+}): Record<string, unknown> => {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: data.name,
+    description: data.description,
+    url: data.url,
+    ...(data.items &&
+      data.items.length > 0 && {
+        mainEntity: {
+          '@type': 'ItemList',
+          itemListElement: data.items.map((item, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            name: item.name,
+            url: item.url,
+            ...(item.image && {image: item.image}),
+          })),
+          numberOfItems: data.items.length,
+        },
+      }),
+  }
+}
+
+/**
+ * ContactPage Schema.org data
+ * İletişim sayfası için
+ */
+export const getContactPageSchema = (data: {
+  name: string
+  url: string
+  description?: string
+  telephone?: string
+  email?: string
+  address?: {
+    street?: string
+    city?: string
+    region?: string
+    postalCode?: string
+    country?: string
+  }
+  openingHours?: string[]
+  geo?: {latitude: number; longitude: number}
+}): Record<string, unknown> => {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    name: data.name,
+    url: data.url,
+    ...(data.description && {description: data.description}),
+    mainEntity: {
+      '@type': 'Organization',
+      name: 'BIRIM',
+      ...(data.telephone && {telephone: data.telephone}),
+      ...(data.email && {email: data.email}),
+      ...(data.address && {
+        address: {
+          '@type': 'PostalAddress',
+          ...(data.address.street && {streetAddress: data.address.street}),
+          ...(data.address.city && {addressLocality: data.address.city}),
+          ...(data.address.region && {addressRegion: data.address.region}),
+          ...(data.address.postalCode && {postalCode: data.address.postalCode}),
+          ...(data.address.country && {addressCountry: data.address.country}),
+        },
+      }),
+      ...(data.openingHours && {openingHours: data.openingHours}),
+      ...(data.geo && {
+        geo: {
+          '@type': 'GeoCoordinates',
+          latitude: data.geo.latitude,
+          longitude: data.geo.longitude,
+        },
+      }),
+    },
+  }
+}
+
+/**
+ * FAQPage Schema.org data
+ * SSS sayfaları veya FAQ bölümleri için
+ */
+export const getFAQSchema = (
+  questions: {question: string; answer: string}[]
+): Record<string, unknown> => {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: questions.map(q => ({
+      '@type': 'Question',
+      name: q.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: q.answer,
+      },
+    })),
+  }
+}
+
+/**
+ * ItemList Schema.org data
+ * Ürün listesi, proje listesi gibi sıralı listeler için
+ */
+export const getItemListSchema = (data: {
+  name: string
+  description?: string
+  items: {name: string; url: string; image?: string; position?: number}[]
+}): Record<string, unknown> => {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: data.name,
+    ...(data.description && {description: data.description}),
+    numberOfItems: data.items.length,
+    itemListElement: data.items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: item.position || index + 1,
+      name: item.name,
+      url: item.url,
+      ...(item.image && {image: item.image}),
+    })),
+  }
+}
+
+/**
+ * LocalBusiness / ManufacturingBusiness Schema.org data
+ * Fabrika sayfası için
+ */
+export const getManufacturingBusinessSchema = (data: {
+  name: string
+  description: string
+  url: string
+  image?: string
+  telephone?: string
+  email?: string
+  address?: {
+    street?: string
+    city?: string
+    region?: string
+    postalCode?: string
+    country?: string
+  }
+}): Record<string, unknown> => {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ManufacturingBusiness',
+    name: data.name,
+    description: data.description,
+    url: data.url,
+    ...(data.image && {image: data.image}),
+    ...(data.telephone && {telephone: data.telephone}),
+    ...(data.email && {email: data.email}),
+    ...(data.address && {
+      address: {
+        '@type': 'PostalAddress',
+        ...(data.address.street && {streetAddress: data.address.street}),
+        ...(data.address.city && {addressLocality: data.address.city}),
+        ...(data.address.region && {addressRegion: data.address.region}),
+        ...(data.address.postalCode && {postalCode: data.address.postalCode}),
+        ...(data.address.country && {addressCountry: data.address.country}),
+      },
+    }),
+  }
+}
+
+/**
+ * BIRIM site URL'sini döndürür (HashRouter uyumlu)
+ */
+export const getSiteUrl = (): string => {
+  if (typeof window !== 'undefined') return window.location.origin
+  return 'https://www.birim.com'
+}
+
+/**
+ * HashRouter URL'si oluşturur (SEO canonical URL için)
+ */
+export const getCanonicalUrl = (path: string): string => {
+  const base = getSiteUrl()
+  const cleanPath = path.startsWith('/') ? path : `/${path}`
+  return `${base}/#${cleanPath}`
+}

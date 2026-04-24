@@ -369,10 +369,34 @@ export function ProjectDetailPage() {
   const projectTitle = project ? t(project.title) : ''
 
   useSEO({
-    title: project ? t(project.title) : undefined,
+    title: project ? `BIRIM - ${t(project.title)}` : undefined,
     description: project ? t(project.excerpt || '') : undefined,
     image: coverUrl || undefined,
     type: 'article',
+    siteName: 'BIRIM',
+    locale: 'tr_TR',
+    schema: project
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'CreativeWork',
+          '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#/projects/${projectId}#project`,
+          name: t(project.title),
+          description: t(project.excerpt || '') || t(project.title),
+          ...(coverUrl && {image: coverUrl}),
+          ...(project.date && {datePublished: project.date}),
+          author: {
+            '@type': 'Organization',
+            '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#organization`,
+          },
+          publisher: {
+            '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#organization`,
+          },
+          mainEntityOfPage: {
+            '@type': 'WebPage',
+            '@id': typeof window !== 'undefined' ? window.location.href : '',
+          },
+        }
+      : undefined,
   })
 
   if (loading) {
