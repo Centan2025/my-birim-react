@@ -1115,6 +1115,7 @@ export default function MediaImportTool() {
 
     // 2. Ürün görsellerini yükle (sadece görsel, kayıt oluşturmadan)
     for (const product of data.products) {
+      const sanitize = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '')
       const item: ProgressItem = {
         type: 'product',
         name: `${product.categoryName}/${product.modelName}`,
@@ -1135,59 +1136,47 @@ export default function MediaImportTool() {
           `   🔍 ${product.categoryName}: "${product.categoryId}" -> "${actualCategorySlug}"`,
         )
 
-        // Mevcut ürünü bul - Kategori ve model adı birlikte kontrol edilmeli
-        const normalizedProductName = normalizeForMatch(product.modelName)
-        const superNormalize = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '')
-        const superFolderId = superNormalize(product.modelId)
+        const targetCat = sanitize(actualCategorySlug || '')
 
-        const matches = existingProducts.filter((p: any) => {
-          const sanitize = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+        // 1. Önce sadece hedef kategorideki ürünleri filtrele (Kategori bazlı daraltma)
+        const categoryProducts = existingProducts.filter((p: any) => {
+          const pCat = sanitize(p.categorySlug || '')
+          return pCat && pCat === targetCat
+        })
+
+        // 2. Bu kategori içinden isme veya slug'a göre ürünü bul
+        const existing = categoryProducts.find((p: any) => {
           const sanityName = sanitize(p.name?.tr || p.name?.en || '')
           const sanitySlug = sanitize(p.slug || '')
           const folderClean = sanitize(product.modelId)
           const nameClean = sanitize(product.modelName)
 
           return (
-            sanityName === nameClean || sanitySlug === folderClean || sanityName === folderClean
+            sanityName === nameClean || 
+            sanitySlug === folderClean || 
+            sanityName === folderClean ||
+            sanitySlug === nameClean
           )
-        })
-
-        let existing = null
-        const sanitize = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '')
-        const targetCat = sanitize(actualCategorySlug || '')
-
-        // Kategori bazlı filtreleme - her zaman yapılmalı
-        existing = matches.find((p: any) => {
-          const pCat = sanitize(p.categorySlug)
-          return pCat && (pCat === targetCat || targetCat.includes(pCat))
         })
 
         if (existing) {
           console.log(
-            `   🎯 Eşleşme bulundu: ${existing.name?.tr} (Kategori: ${existing.categorySlug})`,
+            `   🎯 Eşleşme bulundu: ${existing.name?.tr} (ID: ${existing._id} | Kategori: ${existing.categorySlug})`,
           )
           await updateProductImages(client, existing._id, product, importMode)
           item.status = 'success'
           item.message = 'Görseller güncellendi'
         } else {
           console.log(`   ❌ Bulunamadı: ${product.categoryName}/${product.modelName}`)
-          console.log(`   🔍 Aranan slug: "${productSlug}"`)
           console.log(
-            `   🔍 Aranan categoryId: "${product.categoryId}", modelId: "${product.modelId}"`,
+            `   🔍 Aranan Kategori: "${targetCat}", Model: "${product.modelName}" (ID: ${product.modelId})`,
           )
-          console.log(`   📊 CMS'deki benzer ürünler:`)
-          existingProducts
-            .filter((p: any) => {
-              const nameMatch =
-                normalizeForMatch(p.name?.tr) === normalizedProductName ||
-                normalizeForMatch(p.name?.en) === normalizedProductName
-              return nameMatch
-            })
-            .forEach((p: any) => {
-              console.log(
-                `      - "${p.name?.tr}" | slug: "${p.slug}" | kategori: "${p.categorySlug}"`,
-              )
-            })
+          console.log(`   📊 Bu kategorideki (${targetCat}) mevcut ürünler:`)
+          categoryProducts.forEach((p: any) => {
+            console.log(
+              `      - "${p.name?.tr}" | slug: "${p.slug}"`,
+            )
+          })
           item.status = 'error'
           item.message = `CMS'de bulunamadı (${product.categoryName}/${product.modelName}) - önce manuel oluşturun`
         }
