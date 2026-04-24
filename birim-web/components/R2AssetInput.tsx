@@ -178,8 +178,8 @@ export default function R2AssetInput(props: ObjectInputProps) {
       try {
         const parsed = new URL(url)
         // Eğer domain olarak workers verildiyse karışmasını engelle
-        if (domain.includes(parsed.hostname)) return url;
-        
+        if (domain.includes(parsed.hostname)) return url
+
         const path = parsed.pathname.startsWith('/')
           ? parsed.pathname.substring(1)
           : parsed.pathname

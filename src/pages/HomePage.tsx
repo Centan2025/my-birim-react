@@ -53,15 +53,17 @@ export function HomePage() {
           url: typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com',
           logo: {
             '@type': 'ImageObject',
-            url: typeof window !== 'undefined'
+            url:
+              typeof window !== 'undefined'
+                ? `${window.location.origin}/logo.png`
+                : 'https://www.birim.com/logo.png',
+            width: '180',
+            height: '60',
+          },
+          image:
+            typeof window !== 'undefined'
               ? `${window.location.origin}/logo.png`
               : 'https://www.birim.com/logo.png',
-            width: '180',
-            height: '60'
-          },
-          image: typeof window !== 'undefined'
-            ? `${window.location.origin}/logo.png`
-            : 'https://www.birim.com/logo.png',
           description: t('home_meta_description') || 'BIRIM - Modern tasarım ve mimari çözümler',
           sameAs: socialLinks,
           contactPoint: {
@@ -70,7 +72,7 @@ export function HomePage() {
             telephone: s?.contactPhone || '+90 216 123 45 67',
             contactType: 'customer service',
             areaServed: 'TR',
-            availableLanguage: ['Turkish', 'English']
+            availableLanguage: ['Turkish', 'English'],
           },
           address: {
             '@type': 'PostalAddress',
@@ -78,8 +80,8 @@ export function HomePage() {
             addressLocality: 'Istanbul',
             addressRegion: 'Istanbul',
             postalCode: '34000',
-            addressCountry: 'TR'
-          }
+            addressCountry: 'TR',
+          },
         },
         {
           '@context': 'https://schema.org',
@@ -89,18 +91,18 @@ export function HomePage() {
           url: typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com',
           description: t('home_meta_description') || 'BIRIM - Modern tasarım ve mimari çözümler',
           publisher: {
-            '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#organization`
+            '@id': `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#organization`,
           },
           potentialAction: {
             '@type': 'SearchAction',
             target: {
               '@type': 'EntryPoint',
-              urlTemplate: `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#/products?q={search_term_string}`
+              urlTemplate: `${typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'}/#/products?q={search_term_string}`,
             },
-            'query-input': 'required name=search_term_string'
+            'query-input': 'required name=search_term_string',
           },
-          inLanguage: 'tr-TR'
-        }
+          inLanguage: 'tr-TR',
+        },
       ],
     }
   }, [content?.heroMedia, t, settings])

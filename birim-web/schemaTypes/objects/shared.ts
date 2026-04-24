@@ -608,24 +608,33 @@ export const productPanelMediaItem = defineType({
     },
     prepare(selection: any) {
       const {type, title, imageUrl, thumbUrl} = selection
-      let sourceUrl = type === 'image' || selection.mediaType === 'image' ? imageUrl : thumbUrl || imageUrl
+      let sourceUrl =
+        type === 'image' || selection.mediaType === 'image' ? imageUrl : thumbUrl || imageUrl
       let finalUrl = sourceUrl
-      
-      // getPreviewUrl should be defined somewhere, wait, it's in previewUrl.ts. 
-      // I should manually apply the same logic or use the getPreviewUrl. 
+
+      // getPreviewUrl should be defined somewhere, wait, it's in previewUrl.ts.
+      // I should manually apply the same logic or use the getPreviewUrl.
       // Let's use getPreviewUrl logic directly to avoid import issues if it's not imported at the top.
       const domain = process.env.SANITY_STUDIO_R2_DOMAIN || 'https://assets.birim.com'
       if (finalUrl && (finalUrl.includes('.r2.dev') || finalUrl.includes('.workers.dev'))) {
         try {
           const parsed = new URL(finalUrl)
           if (!domain.includes(parsed.hostname)) {
-            const path = parsed.pathname.startsWith('/') ? parsed.pathname.substring(1) : parsed.pathname
+            const path = parsed.pathname.startsWith('/')
+              ? parsed.pathname.substring(1)
+              : parsed.pathname
             finalUrl = `${domain}/${path}`
           }
         } catch (e) {}
       }
-      
-      const mediaTitle = title || (type === 'image' ? 'Resim Medyası' : type === 'video' ? 'Video Medyası' : 'YouTube Medyası')
+
+      const mediaTitle =
+        title ||
+        (type === 'image'
+          ? 'Resim Medyası'
+          : type === 'video'
+            ? 'Video Medyası'
+            : 'YouTube Medyası')
       return {
         title: mediaTitle,
         media: finalUrl

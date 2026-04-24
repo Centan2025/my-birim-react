@@ -14,7 +14,7 @@ vi.mock('../hooks/useNews')
 vi.mock('../hooks/useSiteData')
 
 // Basit i18n mock'u
-vi.mock('../i18n', async (importOriginal) => {
+vi.mock('../i18n', async importOriginal => {
   const actual = await importOriginal<typeof import('../i18n')>()
   return {
     ...actual,
