@@ -984,7 +984,7 @@ export default function MediaImportTool() {
     const existingDesigners = await client.fetch(
       `*[_type == "designer"]{ _id, "slug": id.current, name }`,
     )
-    const existingProducts = await client.fetch(`*[_type == "product"]{ 
+    const existingProducts = await client.fetch(`*[_type == "product" && !(_id in path("drafts.**"))]{ 
       _id, 
       "slug": id.current, 
       name,
@@ -1139,9 +1139,10 @@ export default function MediaImportTool() {
         const targetCat = sanitize(actualCategorySlug || '')
 
         // 1. Önce sadece hedef kategorideki ürünleri filtrele (Kategori bazlı daraltma)
-        const categoryProducts = existingProducts.filter((p: {categorySlug?: string}) => {
+        const categoryProducts = existingProducts.filter((p: {categorySlug?: string; _id: string}) => {
           const pCat = sanitize(p.categorySlug || '')
-          return pCat && pCat === targetCat
+          // Her iki taraf da dolu olmalı ve tam eşleşmeli
+          return targetCat && pCat && pCat === targetCat
         })
 
         // 2. Bu kategori içinden isme veya slug'a göre ürünü bul
@@ -1161,7 +1162,7 @@ export default function MediaImportTool() {
 
         if (existing) {
           console.log(
-            `   🎯 Eşleşme bulundu: ${existing.name?.tr} (ID: ${existing._id} | Kategori: ${existing.categorySlug})`,
+            `   🎯 Eşleşme bulundu: "${existing.name?.tr}" (Kategori: ${existing.categorySlug} | ID: ${existing._id})`,
           )
           await updateProductImages(client, existing._id, product, importMode)
           item.status = 'success'
@@ -1169,9 +1170,23 @@ export default function MediaImportTool() {
         } else {
           console.log(`   ❌ Bulunamadı: ${product.categoryName}/${product.modelName}`)
           console.log(
-            `   🔍 Aranan Kategori: "${targetCat}", Model: "${product.modelName}" (ID: ${product.modelId})`,
+            `   🔍 Klasör Kategorisi: "${product.categoryName}" -> Aranan Slug: "${targetCat}"`,
           )
-          console.log(`   📊 Bu kategorideki (${targetCat}) mevcut ürünler:`)
+          
+          // Eğer kategori bazlı filtreleme boş döndüyse nedenini anlamak için CMS'deki ürünleri kontrol et
+          const sameNameProductsInOtherCats = existingProducts.filter((p: any) => {
+             const sanityName = sanitize(p.name?.tr || p.name?.en || '')
+             return sanityName === sanitize(product.modelName)
+          })
+
+          if (sameNameProductsInOtherCats.length > 0) {
+            console.log(`   ⚠️ DİKKAT: "${product.modelName}" isminde BAŞKA kategorilerde ürünler bulundu:`)
+            sameNameProductsInOtherCats.forEach((p: any) => {
+              console.log(`      - Kategori: "${p.categorySlug}" | ID: ${p._id} | Eşleşmeme Nedeni: ${sanitize(p.categorySlug || '')} !== ${targetCat}`)
+            })
+          }
+
+          console.log(`   📊 Hedef kategorideki (${targetCat}) mevcut ürünler:`)
           categoryProducts.forEach((p: {name?: {tr?: string; en?: string}; slug?: string}) => {
             console.log(
               `      - "${p.name?.tr}" | slug: "${p.slug}"`,
