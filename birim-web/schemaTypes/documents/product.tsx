@@ -146,7 +146,7 @@ export default defineType({
     },
     prepare({title, media}) {
       const coverItem = media?.find((m: any) => m.isCover) || media?.[0]
-      const r2Url = coverItem?.imageR2?.url || coverItem?.thumbnailR2?.url
+      const r2Url = coverItem?.imageR2?.url || coverItem?.videoFileR2?.url || coverItem?.thumbnailR2?.url
       let finalUrl = getPreviewUrl(r2Url)
 
       return {
