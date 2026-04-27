@@ -181,9 +181,19 @@ export default function R2AssetInput(props: ObjectInputProps) {
         // Eğer domain olarak workers verildiyse karışmasını engelle
         if (domain.includes(parsed.hostname)) return url
 
-        const path = parsed.pathname.startsWith('/')
+        let path = parsed.pathname.startsWith('/')
           ? parsed.pathname.substring(1)
           : parsed.pathname
+
+        // Hardening: Add migration prefix for known folders if missing
+        const r2Folders = ['uploads/', 'bulk-uploads/', 'products/', 'designers/', 'projects/', 'news/']
+        if (!path.startsWith('migration/')) {
+          const folder = r2Folders.find(f => path.startsWith(f))
+          if (folder) {
+            path = `migration/${path}`
+          }
+        }
+
         return `${domain}/${path}`
       } catch {
         return url
@@ -237,24 +247,26 @@ export default function R2AssetInput(props: ObjectInputProps) {
         let isResponsive = false
 
         // 2. Determine R2 Path
-        let folderPath = 'uploads'
+        let folderPath = 'migration/uploads'
         if (docType === 'product') {
           const modelId = sanityDocument?.id?.current || 'unknown-product'
-          folderPath = `products/${modelId}`
+          folderPath = `migration/products/${modelId}`
         } else if (docType === 'designer') {
           const designerId =
             sanityDocument?.id?.current || slugify(sanityDocument?.name?.tr || 'unknown-designer')
-          folderPath = `designers/${designerId}`
+          folderPath = `migration/designers/${designerId}`
         } else if (docType === 'project') {
           const projectId =
             sanityDocument?.id?.current || slugify(sanityDocument?.title?.tr || 'unknown-project')
-          folderPath = `projects/${projectId}`
+          folderPath = `migration/projects/${projectId}`
         } else if (docType === 'newsItem') {
           const newsId =
             sanityDocument?.id?.current || slugify(sanityDocument?.title?.tr || 'unknown-news')
-          folderPath = `news/${newsId}`
+          folderPath = `migration/news/${newsId}`
         } else if (docType === 'materialGroup') {
-          folderPath = `materials/${slugify(sanityDocument?.title?.tr || 'unknown-group')}`
+          folderPath = `migration/materials/${slugify(sanityDocument?.title?.tr || 'unknown-group')}`
+        } else if (docType === 'homePage') {
+          folderPath = `migration/home/panels`
         }
 
         // 3. Prepare Filename

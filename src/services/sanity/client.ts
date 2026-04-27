@@ -171,11 +171,30 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
     finalUrl += '?' + queryString
   }
 
-  // 5. Legacy Path Corrections (Hardening)
-  if (finalUrl.includes('/newsItem/')) {
-    finalUrl = finalUrl.replace(/\/newsItem\//g, '/news/')
-    if (finalUrl.includes('/media/')) {
-      finalUrl = finalUrl.replace(/\/media\//g, '/')
+  // 6. Migration Prefix Hardening
+  // Bazı assetler R2'de migration/ prefix'i altında saklanıyor.
+  // Eğer path bilinen bir klasörle başlıyorsa ve migration/ eksikse ekle.
+  const r2Folders = [
+    'uploads/',
+    'bulk-uploads/',
+    'products/',
+    'designers/',
+    'projects/',
+    'news/',
+    'materials/',
+    'home/',
+    'factory/',
+  ]
+
+  const hasR2Folder = r2Folders.some(folder => finalUrl.includes('/' + folder))
+  const hasMigration = finalUrl.includes('/migration/')
+
+  if (hasR2Folder && !hasMigration) {
+    for (const folder of r2Folders) {
+      if (finalUrl.includes('/' + folder)) {
+        finalUrl = finalUrl.replace('/' + folder, '/migration/' + folder)
+        break
+      }
     }
   }
 

@@ -94,19 +94,19 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
             const isVideo = isVideoFile(file.name)
 
             // 1. Path belirle
-            let folderPath = 'bulk-uploads'
+            let folderPath = 'migration/bulk-uploads'
             const docId = sanityDocument?.id?.current || sanityDocument?._id || 'unknown'
 
             if (docType === 'product') {
-              folderPath = `products/${docId}/media`
+              folderPath = `migration/products/${docId}/media`
             } else if (docType === 'project') {
-              folderPath = `projects/${docId}/media`
+              folderPath = `migration/projects/${docId}/media`
             } else if (docType === 'newsItem') {
-              folderPath = `news/${docId}/media`
+              folderPath = `migration/news/${docId}/media`
             } else if (docType === 'homePage') {
-              folderPath = `home/panels`
+              folderPath = `migration/home/panels`
             } else if (docType === 'factoryPage') {
-              folderPath = `factory/gallery`
+              folderPath = `migration/factory/gallery`
             }
             
             // R2 Domain Temizliği

@@ -13,6 +13,25 @@ export const getPreviewUrl = (url?: string): string => {
     url = url.substring(1)
   }
 
+  const r2Folders = [
+    'uploads/',
+    'bulk-uploads/',
+    'products/',
+    'designers/',
+    'projects/',
+    'news/',
+    'materials/',
+    'home/',
+    'factory/',
+  ]
+
+  if (!url.startsWith('migration/')) {
+    const folder = r2Folders.find((f) => url.startsWith(f))
+    if (folder) {
+      url = `migration/${url}`
+    }
+  }
+
   if (url.startsWith('migration/')) {
     return `${domain}/${url}`.replace(/ /g, '%20')
   }
@@ -23,7 +42,16 @@ export const getPreviewUrl = (url?: string): string => {
   ) {
     try {
       const parsed = new URL(url)
-      const path = parsed.pathname.startsWith('/') ? parsed.pathname.substring(1) : parsed.pathname
+      let path = parsed.pathname.startsWith('/') ? parsed.pathname.substring(1) : parsed.pathname
+
+      // Also check path for prefixing
+      if (!path.startsWith('migration/')) {
+        const folder = r2Folders.find((f) => path.startsWith(f))
+        if (folder) {
+          path = `migration/${path}`
+        }
+      }
+
       return `${domain}/${path}`.replace(/ /g, '%20')
     } catch (e) {}
   }
