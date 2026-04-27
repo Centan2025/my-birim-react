@@ -105,13 +105,13 @@ export const productDimensionImage = defineType({
       imageUrl: 'imageR2.url',
       thumbUrl: 'thumbnailR2.url',
     },
-    prepare(selection: any) {
-      const {title, imageUrl, thumbUrl} = selection
+    prepare(selection: Record<string, unknown>) {
+      const {title, imageUrl, thumbUrl} = selection as any
       const finalUrl = getPreviewUrl(thumbUrl || imageUrl)
       
       return {
         title: title || 'İsimsiz Ölçü Görseli',
-        media: renderPreviewMedia(finalUrl, selection.mediaType || selection.type),
+        media: renderPreviewMedia(finalUrl, (selection as any).mediaType || (selection as any).type),
       }
     },
   },
@@ -131,13 +131,13 @@ export const productMaterial = defineType({
       imageUrl: 'imageR2.url',
       thumbUrl: 'thumbnailR2.url',
     },
-    prepare(selection: any) {
-      const {title, imageUrl, thumbUrl} = selection
+    prepare(selection: Record<string, unknown>) {
+      const {title, imageUrl, thumbUrl} = selection as any
       const finalUrl = getPreviewUrl(thumbUrl || imageUrl)
       
       return {
         title: title || 'İsimsiz Malzeme',
-        media: renderPreviewMedia(finalUrl, selection.mediaType || selection.type),
+        media: renderPreviewMedia(finalUrl, (selection as any).mediaType || (selection as any).type),
       }
     },
   },
@@ -175,9 +175,9 @@ export const downloadableItem = defineType({
     select: {
       title: 'name.tr',
     },
-    prepare(selection: any) {
+    prepare(selection: Record<string, unknown>) {
       return {
-        title: selection.title || 'İsimsiz Dosya',
+        title: (selection.title as string) || 'İsimsiz Dosya',
         media: () => '📄',
       }
     },
@@ -337,8 +337,8 @@ export const heroMediaItem = defineType({
       videoR2Url: 'videoFileR2.url',
       thumbUrl: 'thumbnailR2.url',
     },
-    prepare(selection: any) {
-      const {type, title, subtitle, imageR2Url, videoR2Url, thumbUrl} = selection
+    prepare(selection: Record<string, unknown>) {
+      const {type, title, subtitle, imageR2Url, videoR2Url, thumbUrl} = selection as any
       let mediaTitle = title
       if (!mediaTitle) {
         mediaTitle =
@@ -464,8 +464,8 @@ export const productSimpleMediaItem = defineType({
       videoR2Url: 'videoFileR2.url',
       thumbUrl: 'thumbnailR2.url',
     },
-    prepare(selection: any) {
-      const {type, isCover, titleTr, imageR2Url, videoR2Url, thumbUrl} = selection
+    prepare(selection: Record<string, unknown>) {
+      const {type, isCover, titleTr, imageR2Url, videoR2Url, thumbUrl} = selection as any
       const finalUrl = getPreviewUrl(thumbUrl || imageR2Url || videoR2Url)
       
       return {
@@ -574,8 +574,8 @@ export const productPanelMediaItem = defineType({
       videoR2Url: 'videoFileR2.url',
       thumbUrl: 'thumbnailR2.url',
     },
-    prepare(selection: any) {
-      const {type, title, imageR2Url, videoR2Url, thumbUrl} = selection
+    prepare(selection: Record<string, unknown>) {
+      const {type, title, imageR2Url, videoR2Url, thumbUrl} = selection as any
       const finalUrl = getPreviewUrl(thumbUrl || imageR2Url || videoR2Url)
 
       const mediaTitle =
@@ -772,8 +772,8 @@ export const contactLocationMedia = defineType({
       videoR2Url: 'videoFileR2.url',
       thumbUrl: 'thumbnailR2.url',
     },
-    prepare(selection: any) {
-      const {type, imageR2Url, videoR2Url, thumbUrl} = selection
+    prepare(selection: Record<string, unknown>) {
+      const {type, imageR2Url, videoR2Url, thumbUrl} = selection as any
       const finalUrl = getPreviewUrl(thumbUrl || imageR2Url || videoR2Url)
       
       return {
@@ -1175,7 +1175,7 @@ export const contentBlock = defineType({
       hasBorder: 'hasBorder',
       borderThickness: 'borderThickness',
     },
-    prepare(selection: any) {
+    prepare(selection: Record<string, unknown>) {
       const {
         title,
         titleFont,
@@ -1188,7 +1188,7 @@ export const contentBlock = defineType({
         imagePanels,
         hasBorder,
         borderThickness,
-      } = selection
+      } = selection as any
 
       let finalUrl = getPreviewUrl(thumbUrl || imageR2Url || videoR2Url)
       if (mediaType === 'panels' && Array.isArray(imagePanels) && imagePanels.length > 0) {

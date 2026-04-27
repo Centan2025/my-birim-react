@@ -1,6 +1,16 @@
 import React from 'react'
 
-export function PreviewView({document}: any) {
+interface PreviewViewProps {
+  document: {
+    displayed: {
+      _id?: string
+      _type: string
+      [key: string]: unknown
+    }
+  }
+}
+
+export function PreviewView({document}: PreviewViewProps) {
   const {displayed} = document
   if (!displayed) {
     return (

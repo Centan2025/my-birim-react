@@ -144,14 +144,14 @@ export default defineType({
       title: 'name.tr',
       media: 'media',
     },
-    prepare({title, media}) {
-      const coverItem = media?.find((m: any) => m.isCover) || media?.[0]
-      const r2Url = coverItem?.imageR2?.url || coverItem?.videoFileR2?.url || coverItem?.thumbnailR2?.url
+    prepare({title, media}: {title?: string; media?: any[]}) {
+      const coverItem = media?.find((m) => (m as any).isCover) || media?.[0]
+      const r2Url = (coverItem as any)?.imageR2?.url || (coverItem as any)?.videoFileR2?.url || (coverItem as any)?.thumbnailR2?.url
       let finalUrl = getPreviewUrl(r2Url)
 
       return {
         title: title || 'Ürün',
-        media: renderPreviewMedia(finalUrl, coverItem?.type),
+        media: renderPreviewMedia(finalUrl, (coverItem as any)?.type),
       }
     },
   },
