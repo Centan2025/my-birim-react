@@ -1,6 +1,7 @@
 import React from 'react'
 import {defineField, defineType} from 'sanity'
 import {getPreviewUrl} from '../utils/previewUrl'
+import {renderPreviewMedia} from '../objects/shared'
 import BulkMediaUploadInput from '../../components/BulkMediaUploadInput'
 
 import {orderRankField} from '@sanity/orderable-document-list'
@@ -150,15 +151,7 @@ export default defineType({
 
       return {
         title: title || 'Ürün',
-        media: finalUrl
-          ? () => (
-              <img
-                src={finalUrl}
-                alt={title || 'Ürün'}
-                style={{width: '100%', height: '100%', objectFit: 'cover'}}
-              />
-            )
-          : undefined,
+        media: renderPreviewMedia(finalUrl, coverItem?.type),
       }
     },
   },

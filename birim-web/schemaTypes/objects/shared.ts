@@ -4,8 +4,35 @@ import {localizedString} from './localizedString'
 import MaterialSelectionInput from '../../components/MaterialSelectionInput'
 import FontSelectorInput from '../../components/FontSelectorInput'
 import BulkMediaUploadInput from '../../components/BulkMediaUploadInput'
-import {getPreviewUrl} from '../utils/previewUrl'
 import {browserOnlyInput} from '../utils/browserOnly'
+import {getPreviewUrl} from '../utils/previewUrl'
+
+/**
+ * Medya önizlemeleri için yardımcı fonksiyon.
+ * Görselse <img>, videosa <video> elementi döner.
+ */
+export const renderPreviewMedia = (url: string | undefined, type?: string) => {
+  if (!url) return undefined
+  
+  const isVideo = type === 'video' || url.match(/\.(mp4|webm|ogg|mov)$/i)
+  
+  // Eğer url bir görsel değilse ve tip videosa video elementi kullan
+  if (isVideo && !url.match(/\.(webp|jpg|jpeg|png|gif|avif)$/i)) {
+    return () => React.createElement('video', {
+      src: url,
+      style: {width: '100%', height: '100%', objectFit: 'cover'},
+      autoPlay: false,
+      muted: true,
+      playsInline: true,
+      preload: 'metadata'
+    })
+  }
+
+  return () => React.createElement('img', {
+    src: url,
+    style: {width: '100%', height: '100%', objectFit: 'cover'}
+  })
+}
 
 export const productDimensionDetail = defineType({
   name: 'productDimensionDetail',
@@ -80,26 +107,11 @@ export const productDimensionImage = defineType({
     },
     prepare(selection: any) {
       const {title, imageUrl, thumbUrl} = selection
-      let sourceUrl =
-        selection.type === 'image' || selection.mediaType === 'image'
-          ? imageUrl
-          : thumbUrl || imageUrl
-      let finalUrl = sourceUrl
-      const domain = process.env.SANITY_STUDIO_R2_DOMAIN
-      if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
-        try {
-          const parsed = new URL(finalUrl)
-          const path = parsed.pathname.startsWith('/')
-            ? parsed.pathname.substring(1)
-            : parsed.pathname
-          finalUrl = `${domain}/${path}`
-        } catch (e) {}
-      }
+      const finalUrl = getPreviewUrl(thumbUrl || imageUrl)
+      
       return {
         title: title || 'İsimsiz Ölçü Görseli',
-        media: finalUrl
-          ? () => React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
-          : undefined,
+        media: renderPreviewMedia(finalUrl, selection.mediaType || selection.type),
       }
     },
   },
@@ -121,26 +133,11 @@ export const productMaterial = defineType({
     },
     prepare(selection: any) {
       const {title, imageUrl, thumbUrl} = selection
-      let sourceUrl =
-        selection.type === 'image' || selection.mediaType === 'image'
-          ? imageUrl
-          : thumbUrl || imageUrl
-      let finalUrl = sourceUrl
-      const domain = process.env.SANITY_STUDIO_R2_DOMAIN
-      if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
-        try {
-          const parsed = new URL(finalUrl)
-          const path = parsed.pathname.startsWith('/')
-            ? parsed.pathname.substring(1)
-            : parsed.pathname
-          finalUrl = `${domain}/${path}`
-        } catch (e) {}
-      }
+      const finalUrl = getPreviewUrl(thumbUrl || imageUrl)
+      
       return {
         title: title || 'İsimsiz Malzeme',
-        media: finalUrl
-          ? () => React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
-          : undefined,
+        media: renderPreviewMedia(finalUrl, selection.mediaType || selection.type),
       }
     },
   },
@@ -351,31 +348,12 @@ export const heroMediaItem = defineType({
               : 'YouTube Medyası'
       }
 
-      let sourceUrl =
-        selection.type === 'image' || selection.mediaType === 'image'
-          ? imageUrl
-          : thumbUrl || imageUrl
-      let finalUrl = sourceUrl
-      const domain = process.env.SANITY_STUDIO_R2_DOMAIN
-      if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
-        try {
-          const parsed = new URL(finalUrl)
-          const path = parsed.pathname.startsWith('/')
-            ? parsed.pathname.substring(1)
-            : parsed.pathname
-          finalUrl = `${domain}/${path}`
-        } catch (e) {
-          // ignore
-        }
-      }
+      const finalUrl = getPreviewUrl(thumbUrl || imageUrl)
 
       return {
         title: mediaTitle,
         subtitle: subtitle || (type === 'image' ? 'Resim' : type === 'video' ? 'Video' : 'YouTube'),
-        media:
-          type === 'image' && finalUrl
-            ? () => React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
-            : undefined,
+        media: renderPreviewMedia(finalUrl, type),
       }
     },
   },
@@ -486,24 +464,11 @@ export const productSimpleMediaItem = defineType({
     },
     prepare(selection: any) {
       const {type, isCover, titleTr, imageUrl, thumbUrl} = selection
-      let sourceUrl = type === 'image' ? imageUrl : thumbUrl || imageUrl
-      let finalUrl = sourceUrl
-      const domain = process.env.SANITY_STUDIO_R2_DOMAIN
-      if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
-        try {
-          const parsed = new URL(finalUrl)
-          const path = parsed.pathname.startsWith('/')
-            ? parsed.pathname.substring(1)
-            : parsed.pathname
-          finalUrl = `${domain}/${path}`
-        } catch (e) {}
-      }
+      const finalUrl = getPreviewUrl(thumbUrl || imageUrl)
+      
       return {
         title: `${isCover ? '⭐ ' : ''}${titleTr || (type === 'image' ? 'Resim Öğesi' : type === 'video' ? 'Video Öğesi' : 'YouTube Öğesi')}`,
-        media:
-          type === 'image' && finalUrl
-            ? () => React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
-            : undefined,
+        media: renderPreviewMedia(finalUrl, type),
       }
     },
   },
@@ -608,25 +573,7 @@ export const productPanelMediaItem = defineType({
     },
     prepare(selection: any) {
       const {type, title, imageUrl, thumbUrl} = selection
-      let sourceUrl =
-        type === 'image' || selection.mediaType === 'image' ? imageUrl : thumbUrl || imageUrl
-      let finalUrl = sourceUrl
-
-      // getPreviewUrl should be defined somewhere, wait, it's in previewUrl.ts.
-      // I should manually apply the same logic or use the getPreviewUrl.
-      // Let's use getPreviewUrl logic directly to avoid import issues if it's not imported at the top.
-      const domain = process.env.SANITY_STUDIO_R2_DOMAIN || 'https://assets.birim.com'
-      if (finalUrl && (finalUrl.includes('.r2.dev') || finalUrl.includes('.workers.dev'))) {
-        try {
-          const parsed = new URL(finalUrl)
-          if (!domain.includes(parsed.hostname)) {
-            const path = parsed.pathname.startsWith('/')
-              ? parsed.pathname.substring(1)
-              : parsed.pathname
-            finalUrl = `${domain}/${path}`
-          }
-        } catch (e) {}
-      }
+      const finalUrl = getPreviewUrl(thumbUrl || imageUrl)
 
       const mediaTitle =
         title ||
@@ -637,9 +584,7 @@ export const productPanelMediaItem = defineType({
             : 'YouTube Medyası')
       return {
         title: mediaTitle,
-        media: finalUrl
-          ? () => React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
-          : undefined,
+        media: renderPreviewMedia(finalUrl, type),
       }
     },
   },
@@ -825,21 +770,8 @@ export const contactLocationMedia = defineType({
     },
     prepare(selection: any) {
       const {type, imageUrl, thumbUrl} = selection
-      let sourceUrl =
-        selection.type === 'image' || selection.mediaType === 'image'
-          ? imageUrl
-          : thumbUrl || imageUrl
-      let finalUrl = sourceUrl
-      const domain = process.env.SANITY_STUDIO_R2_DOMAIN
-      if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
-        try {
-          const parsed = new URL(finalUrl)
-          const path = parsed.pathname.startsWith('/')
-            ? parsed.pathname.substring(1)
-            : parsed.pathname
-          finalUrl = `${domain}/${path}`
-        } catch (e) {}
-      }
+      const finalUrl = getPreviewUrl(thumbUrl || imageUrl)
+      
       return {
         title:
           type === 'image'
@@ -847,10 +779,7 @@ export const contactLocationMedia = defineType({
             : type === 'video'
               ? 'Video Medyası'
               : 'YouTube Medyası',
-        media:
-          type === 'image' && finalUrl
-            ? () => React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
-            : undefined,
+        media: renderPreviewMedia(finalUrl, type),
       }
     },
   },
@@ -1255,25 +1184,11 @@ export const contentBlock = defineType({
         borderThickness,
       } = selection
 
-      let sourceUrl = imageUrl
+      let finalUrl = getPreviewUrl(imageUrl)
       if (mediaType === 'panels' && Array.isArray(imagePanels) && imagePanels.length > 0) {
-        sourceUrl = imagePanels[0].url
+        finalUrl = getPreviewUrl(imagePanels[0].url)
       } else if (mediaType === 'video' || mediaType === 'youtube') {
-        sourceUrl = thumbUrl || imageUrl
-      }
-
-      let finalUrl = sourceUrl
-      const domain = process.env.SANITY_STUDIO_R2_DOMAIN
-      if (finalUrl && domain && finalUrl.includes('.r2.dev') && !domain.includes('.r2.dev')) {
-        try {
-          const parsed = new URL(finalUrl)
-          const path = parsed.pathname.startsWith('/')
-            ? parsed.pathname.substring(1)
-            : parsed.pathname
-          finalUrl = `${domain}/${path}`
-        } catch (e) {
-          // ignore
-        }
+        finalUrl = getPreviewUrl(thumbUrl || imageUrl)
       }
 
       let mediaTitle = title
@@ -1292,10 +1207,7 @@ export const contentBlock = defineType({
       return {
         title: mediaTitle,
         subtitle: `Fontlar: T:${titleFont || 'Normal'} C:${contentFont || 'Normal'} | Arka Plan: ${backgroundColor === 'white' ? 'Beyaz' : 'Gri'} | Çerçeve: ${hasBorder ? `${borderThickness || 1}px` : 'Kapalı'}`,
-        media:
-          (mediaType === 'image' || mediaType === 'panels') && finalUrl
-            ? () => React.createElement('img', {src: finalUrl, style: {objectFit: 'cover'}})
-            : undefined,
+        media: renderPreviewMedia(finalUrl, mediaType),
       }
     },
   },
