@@ -13,45 +13,19 @@ export const getPreviewUrl = (url?: string): string => {
     url = url.substring(1)
   }
 
-  const r2Folders = [
-    'uploads/',
-    'bulk-uploads/',
-    'products/',
-    'designers/',
-    'projects/',
-    'news/',
-    'materials/',
-    'home/',
-    'factory/',
-  ]
-
-  if (!url.startsWith('migration/')) {
-    const folder = r2Folders.find((f) => url.startsWith(f))
-    if (folder) {
-      url = `migration/${url}`
-    }
-  }
-
-  if (url.startsWith('migration/')) {
+  // 1. If relative path, prepend domain
+  if (!url.startsWith('http') && url.length > 0) {
     return `${domain}/${url}`.replace(/ /g, '%20')
   }
 
+  // 2. If it's a legacy R2.dev or workers.dev URL, rewrite to our domain
   if (
     (url.includes('.r2.dev') || url.includes('.workers.dev')) &&
     !domain.includes(new URL(url).hostname)
   ) {
     try {
       const parsed = new URL(url)
-      let path = parsed.pathname.startsWith('/') ? parsed.pathname.substring(1) : parsed.pathname
-
-      // Also check path for prefixing
-      if (!path.startsWith('migration/')) {
-        const folder = r2Folders.find((f) => path.startsWith(f))
-        if (folder) {
-          path = `migration/${path}`
-        }
-      }
-
+      const path = parsed.pathname.startsWith('/') ? parsed.pathname.substring(1) : parsed.pathname
       return `${domain}/${path}`.replace(/ /g, '%20')
     } catch (e) {}
   }

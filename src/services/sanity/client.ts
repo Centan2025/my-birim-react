@@ -92,8 +92,8 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
 
   if (R2_DOMAIN) {
     const r2DomainNoProtocol = R2_DOMAIN.replace(/^https?:\/\//, '')
-    
-    // Agresif assets.birim.com rewrite (Öncelikli)
+
+    // Domain Rewrite
     if (result.includes('assets.birim.com')) {
       result = result.replace('assets.birim.com', r2DomainNoProtocol)
     }
@@ -120,7 +120,7 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
         /* ignore */
       }
     }
-
+    
     // New: Relatif yolları mutlak yap
     if (!result.startsWith('http') && result.length > 0) {
       // Eğer zaten domain ile başlıyorsa (ama protokolü yoksa) sadece protokolü ekle
@@ -169,33 +169,6 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
   const queryString = params.toString()
   if (queryString) {
     finalUrl += '?' + queryString
-  }
-
-  // 6. Migration Prefix Hardening
-  // Bazı assetler R2'de migration/ prefix'i altında saklanıyor.
-  // Eğer path bilinen bir klasörle başlıyorsa ve migration/ eksikse ekle.
-  const r2Folders = [
-    'uploads/',
-    'bulk-uploads/',
-    'products/',
-    'designers/',
-    'projects/',
-    'news/',
-    'materials/',
-    'home/',
-    'factory/',
-  ]
-
-  const hasR2Folder = r2Folders.some(folder => finalUrl.includes('/' + folder))
-  const hasMigration = finalUrl.includes('/migration/')
-
-  if (hasR2Folder && !hasMigration) {
-    for (const folder of r2Folders) {
-      if (finalUrl.includes('/' + folder)) {
-        finalUrl = finalUrl.replace('/' + folder, '/migration/' + folder)
-        break
-      }
-    }
   }
 
   return finalUrl
