@@ -3,7 +3,10 @@ import {orderableDocumentListDeskItem} from '@sanity/orderable-document-list'
 import {CategoryProductsView} from './components/CategoryProductsView'
 import {PreviewView} from './components/PreviewView'
 
-export const deskStructure = async (S: StructureBuilder, context: {getClient: (options: {apiVersion: string}) => any}) => {
+export const deskStructure = async (
+  S: StructureBuilder,
+  context: {getClient: (options: {apiVersion: string}) => any},
+) => {
   const {getClient} = context
   const client = getClient({apiVersion: '2024-01-01'})
 
@@ -35,13 +38,19 @@ export const deskStructure = async (S: StructureBuilder, context: {getClient: (o
                 .id(pubId(siteSettingsDoc._id))
                 .views([
                   S.view.form().title('Düzenle'),
-                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                  S.view
+                    .component(PreviewView)
+                    .title('Önizleme')
+                    .icon(() => '👁️'),
                 ])
             : S.document()
                 .schemaType('siteSettings')
                 .views([
                   S.view.form().title('Düzenle'),
-                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                  S.view
+                    .component(PreviewView)
+                    .title('Önizleme')
+                    .icon(() => '👁️'),
                 ]),
         ),
       S.listItem().title('UI Çevirileri').child(S.document().schemaType('uiTranslations')),
@@ -54,14 +63,20 @@ export const deskStructure = async (S: StructureBuilder, context: {getClient: (o
                 .id(pubId(homePage._id) || 'homePage')
                 .views([
                   S.view.form().title('Düzenle'),
-                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                  S.view
+                    .component(PreviewView)
+                    .title('Önizleme')
+                    .icon(() => '👁️'),
                 ])
             : S.document()
                 .schemaType('homePage')
                 .documentId('anaSayfa') // Bazı durumlarda ID anaSayfa olabiliyor
                 .views([
                   S.view.form().title('Düzenle'),
-                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                  S.view
+                    .component(PreviewView)
+                    .title('Önizleme')
+                    .icon(() => '👁️'),
                 ]),
         ),
       S.listItem()
@@ -106,13 +121,19 @@ export const deskStructure = async (S: StructureBuilder, context: {getClient: (o
                 .id(pubId(aboutPage._id) || 'aboutPage')
                 .views([
                   S.view.form().title('Düzenle'),
-                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                  S.view
+                    .component(PreviewView)
+                    .title('Önizleme')
+                    .icon(() => '👁️'),
                 ])
             : S.document()
                 .schemaType('aboutPage')
                 .views([
                   S.view.form().title('Düzenle'),
-                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                  S.view
+                    .component(PreviewView)
+                    .title('Önizleme')
+                    .icon(() => '👁️'),
                 ]),
         ),
       S.listItem()
@@ -124,13 +145,19 @@ export const deskStructure = async (S: StructureBuilder, context: {getClient: (o
                 .id(pubId(factoryPage._id) || 'factoryPage')
                 .views([
                   S.view.form().title('Düzenle'),
-                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                  S.view
+                    .component(PreviewView)
+                    .title('Önizleme')
+                    .icon(() => '👁️'),
                 ])
             : S.document()
                 .schemaType('factoryPage')
                 .views([
                   S.view.form().title('Düzenle'),
-                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                  S.view
+                    .component(PreviewView)
+                    .title('Önizleme')
+                    .icon(() => '👁️'),
                 ]),
         ),
       S.listItem()
@@ -142,13 +169,19 @@ export const deskStructure = async (S: StructureBuilder, context: {getClient: (o
                 .id(pubId(contactPage._id) || 'contactPage')
                 .views([
                   S.view.form().title('Düzenle'),
-                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                  S.view
+                    .component(PreviewView)
+                    .title('Önizleme')
+                    .icon(() => '👁️'),
                 ])
             : S.document()
                 .schemaType('contactPage')
                 .views([
                   S.view.form().title('Düzenle'),
-                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                  S.view
+                    .component(PreviewView)
+                    .title('Önizleme')
+                    .icon(() => '👁️'),
                 ]),
         ),
       S.listItem()
@@ -157,15 +190,20 @@ export const deskStructure = async (S: StructureBuilder, context: {getClient: (o
           S.list()
             .title('Altbilgi')
             .items([
-              S.listItem().title('Genel Ayarlar').child(
-                S.document()
-                  .schemaType('footer')
-                  .id('footer')
-                  .views([
-                    S.view.form().title('Düzenle'),
-                    S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
-                  ])
-              ),
+              S.listItem()
+                .title('Genel Ayarlar')
+                .child(
+                  S.document()
+                    .schemaType('footer')
+                    .id('footer')
+                    .views([
+                      S.view.form().title('Düzenle'),
+                      S.view
+                        .component(PreviewView)
+                        .title('Önizleme')
+                        .icon(() => '👁️'),
+                    ]),
+                ),
               S.listItem()
                 .title('Çerez Politikası')
                 .child(

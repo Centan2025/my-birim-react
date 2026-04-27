@@ -132,7 +132,12 @@ export default defineConfig({
           }
 
           // Önizleme sekmesini ekle
-          views.push(S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'))
+          views.push(
+            S.view
+              .component(PreviewView)
+              .title('Önizleme')
+              .icon(() => '👁️'),
+          )
 
           return S.document().views(views)
         }

@@ -984,7 +984,8 @@ export default function MediaImportTool() {
     const existingDesigners = await client.fetch(
       `*[_type == "designer"]{ _id, "slug": id.current, name }`,
     )
-    const existingProducts = await client.fetch(`*[_type == "product" && !(_id in path("drafts.**"))]{ 
+    const existingProducts =
+      await client.fetch(`*[_type == "product" && !(_id in path("drafts.**"))]{ 
       _id, 
       "slug": id.current, 
       name,
@@ -1139,26 +1140,35 @@ export default function MediaImportTool() {
         const targetCat = sanitize(actualCategorySlug || '')
 
         // 1. Önce sadece hedef kategorideki ürünleri filtrele (Kategori bazlı daraltma)
-        const categoryProducts = existingProducts.filter((p: {categorySlug?: string; _id: string}) => {
-          const pCat = sanitize(p.categorySlug || '')
-          // Her iki taraf da dolu olmalı ve tam eşleşmeli
-          return targetCat && pCat && pCat === targetCat
-        })
+        const categoryProducts = existingProducts.filter(
+          (p: {categorySlug?: string; _id: string}) => {
+            const pCat = sanitize(p.categorySlug || '')
+            // Her iki taraf da dolu olmalı ve tam eşleşmeli
+            return targetCat && pCat && pCat === targetCat
+          },
+        )
 
         // 2. Bu kategori içinden isme veya slug'a göre ürünü bul
-        const existing = categoryProducts.find((p: {name?: {tr?: string; en?: string}; slug?: string; _id: string; categorySlug?: string}) => {
-          const sanityName = sanitize(p.name?.tr || p.name?.en || '')
-          const sanitySlug = sanitize(p.slug || '')
-          const folderClean = sanitize(product.modelId)
-          const nameClean = sanitize(product.modelName)
+        const existing = categoryProducts.find(
+          (p: {
+            name?: {tr?: string; en?: string}
+            slug?: string
+            _id: string
+            categorySlug?: string
+          }) => {
+            const sanityName = sanitize(p.name?.tr || p.name?.en || '')
+            const sanitySlug = sanitize(p.slug || '')
+            const folderClean = sanitize(product.modelId)
+            const nameClean = sanitize(product.modelName)
 
-          return (
-            sanityName === nameClean || 
-            sanitySlug === folderClean || 
-            sanityName === folderClean ||
-            sanitySlug === nameClean
-          )
-        })
+            return (
+              sanityName === nameClean ||
+              sanitySlug === folderClean ||
+              sanityName === folderClean ||
+              sanitySlug === nameClean
+            )
+          },
+        )
 
         if (existing) {
           console.log(
@@ -1172,25 +1182,27 @@ export default function MediaImportTool() {
           console.log(
             `   🔍 Klasör Kategorisi: "${product.categoryName}" -> Aranan Slug: "${targetCat}"`,
           )
-          
+
           // Eğer kategori bazlı filtreleme boş döndüyse nedenini anlamak için CMS'deki ürünleri kontrol et
           const sameNameProductsInOtherCats = existingProducts.filter((p: any) => {
-             const sanityName = sanitize(p.name?.tr || p.name?.en || '')
-             return sanityName === sanitize(product.modelName)
+            const sanityName = sanitize(p.name?.tr || p.name?.en || '')
+            return sanityName === sanitize(product.modelName)
           })
 
           if (sameNameProductsInOtherCats.length > 0) {
-            console.log(`   ⚠️ DİKKAT: "${product.modelName}" isminde BAŞKA kategorilerde ürünler bulundu:`)
+            console.log(
+              `   ⚠️ DİKKAT: "${product.modelName}" isminde BAŞKA kategorilerde ürünler bulundu:`,
+            )
             sameNameProductsInOtherCats.forEach((p: any) => {
-              console.log(`      - Kategori: "${p.categorySlug}" | ID: ${p._id} | Eşleşmeme Nedeni: ${sanitize(p.categorySlug || '')} !== ${targetCat}`)
+              console.log(
+                `      - Kategori: "${p.categorySlug}" | ID: ${p._id} | Eşleşmeme Nedeni: ${sanitize(p.categorySlug || '')} !== ${targetCat}`,
+              )
             })
           }
 
           console.log(`   📊 Hedef kategorideki (${targetCat}) mevcut ürünler:`)
           categoryProducts.forEach((p: {name?: {tr?: string; en?: string}; slug?: string}) => {
-            console.log(
-              `      - "${p.name?.tr}" | slug: "${p.slug}"`,
-            )
+            console.log(`      - "${p.name?.tr}" | slug: "${p.slug}"`)
           })
           item.status = 'error'
           item.message = `CMS'de bulunamadı (${product.categoryName}/${product.modelName}) - önce manuel oluşturun`
@@ -1527,8 +1539,13 @@ export default function MediaImportTool() {
       // R2 Key ayıklama yardımcısı
       const extractKey = (url: string): string | null => {
         if (!url || typeof url !== 'string') return null
-        if (!url.includes('birim-assets') && !url.includes('assets.birim.com') && !url.includes('.r2.dev')) return null
-        
+        if (
+          !url.includes('birim-assets') &&
+          !url.includes('assets.birim.com') &&
+          !url.includes('.r2.dev')
+        )
+          return null
+
         try {
           // URL'den domain'i ve query'yi temizle, sadece yolu (key) al
           let path = url.split('?')[0]
@@ -1601,7 +1618,7 @@ export default function MediaImportTool() {
             // VEYA foo-webp-800w.webp -> foo-webp (uzantı yoksa)
             const mainKey = currentKey.replace(matchingSuffix, '.webp')
             const mainKeyNoExt = currentKey.replace(matchingSuffix, '')
-            
+
             if (usedKeys.has(mainKey) || usedKeys.has(mainKeyNoExt)) {
               isUsed = true
             }

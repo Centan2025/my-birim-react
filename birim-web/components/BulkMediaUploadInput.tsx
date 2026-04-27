@@ -108,7 +108,7 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
             } else if (docType === 'factoryPage') {
               folderPath = `migration/factory/gallery`
             }
-            
+
             // R2 Domain Temizliği
             const r2Domain = R2_DOMAIN?.startsWith('http') ? R2_DOMAIN : `https://${R2_DOMAIN}`
 

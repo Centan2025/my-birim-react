@@ -37,13 +37,19 @@ export const deskStructure = async (
                 .id(pubId(siteSettingsDoc._id))
                 .views([
                   S.view.form().title('Düzenle'),
-                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                  S.view
+                    .component(PreviewView)
+                    .title('Önizleme')
+                    .icon(() => '👁️'),
                 ])
             : S.document()
                 .schemaType('siteSettings')
                 .views([
                   S.view.form().title('Düzenle'),
-                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                  S.view
+                    .component(PreviewView)
+                    .title('Önizleme')
+                    .icon(() => '👁️'),
                 ])
         ),
       S.listItem().title('UI Çevirileri').child(S.document().schemaType('uiTranslations')),
@@ -56,13 +62,19 @@ export const deskStructure = async (
                 .id(pubId(homePage._id) || 'homePage')
                 .views([
                   S.view.form().title('Düzenle'),
-                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                  S.view
+                    .component(PreviewView)
+                    .title('Önizleme')
+                    .icon(() => '👁️'),
                 ])
             : S.document()
                 .schemaType('homePage')
                 .views([
                   S.view.form().title('Düzenle'),
-                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                  S.view
+                    .component(PreviewView)
+                    .title('Önizleme')
+                    .icon(() => '👁️'),
                 ])
         ),
       S.listItem()
@@ -132,13 +144,19 @@ export const deskStructure = async (
                 .id(pubId(aboutPage._id) || 'aboutPage')
                 .views([
                   S.view.form().title('Düzenle'),
-                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                  S.view
+                    .component(PreviewView)
+                    .title('Önizleme')
+                    .icon(() => '👁️'),
                 ])
             : S.document()
                 .schemaType('aboutPage')
                 .views([
                   S.view.form().title('Düzenle'),
-                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                  S.view
+                    .component(PreviewView)
+                    .title('Önizleme')
+                    .icon(() => '👁️'),
                 ])
         ),
       S.listItem()
@@ -150,13 +168,19 @@ export const deskStructure = async (
                 .id(pubId(contactPage._id) || 'contactPage')
                 .views([
                   S.view.form().title('Düzenle'),
-                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                  S.view
+                    .component(PreviewView)
+                    .title('Önizleme')
+                    .icon(() => '👁️'),
                 ])
             : S.document()
                 .schemaType('contactPage')
                 .views([
                   S.view.form().title('Düzenle'),
-                  S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+                  S.view
+                    .component(PreviewView)
+                    .title('Önizleme')
+                    .icon(() => '👁️'),
                 ])
         ),
       S.listItem()
@@ -165,15 +189,20 @@ export const deskStructure = async (
           S.list()
             .title('Altbilgi')
             .items([
-              S.listItem().title('Genel Ayarlar').child(
-                S.document()
-                  .schemaType('footer')
-                  .id('footer')
-                  .views([
-                    S.view.form().title('Düzenle'),
-                    S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
-                  ])
-              ),
+              S.listItem()
+                .title('Genel Ayarlar')
+                .child(
+                  S.document()
+                    .schemaType('footer')
+                    .id('footer')
+                    .views([
+                      S.view.form().title('Düzenle'),
+                      S.view
+                        .component(PreviewView)
+                        .title('Önizleme')
+                        .icon(() => '👁️'),
+                    ])
+                ),
               S.listItem()
                 .title('Çerez Politikası')
                 .child(

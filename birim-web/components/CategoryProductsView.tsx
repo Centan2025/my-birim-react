@@ -15,13 +15,13 @@ interface CategoryProductsViewProps {
 interface ProductMediaItem {
   type: string
   isCover?: boolean
-  imageR2?: { url: string }
-  thumbnailR2?: { url: string }
+  imageR2?: {url: string}
+  thumbnailR2?: {url: string}
 }
 
 interface Product {
   _id: string
-  name: { tr?: string; en?: string }
+  name: {tr?: string; en?: string}
   media?: ProductMediaItem[]
 }
 
@@ -93,7 +93,8 @@ export function CategoryProductsView(props: CategoryProductsViewProps) {
         ) : (
           <Stack space={2}>
             {products.map((product: Product) => {
-              const coverItem = product.media?.find((m: ProductMediaItem) => m.isCover) || product.media?.[0]
+              const coverItem =
+                product.media?.find((m: ProductMediaItem) => m.isCover) || product.media?.[0]
               const rawUrl =
                 coverItem?.type === 'image'
                   ? coverItem?.imageR2?.url

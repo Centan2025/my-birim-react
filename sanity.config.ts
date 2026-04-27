@@ -66,9 +66,18 @@ export default defineConfig({
       defaultDocumentNode: (S, {schemaType}) => {
         if (schemaType === 'category') {
           return S.document().views([
-            S.view.form().title('Düzenle').icon(() => '✏️'),
-            S.view.component(CategoryProductsView).title('Modeller').icon(() => '📦'),
-            S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+            S.view
+              .form()
+              .title('Düzenle')
+              .icon(() => '✏️'),
+            S.view
+              .component(CategoryProductsView)
+              .title('Modeller')
+              .icon(() => '📦'),
+            S.view
+              .component(PreviewView)
+              .title('Önizleme')
+              .icon(() => '👁️'),
           ])
         }
 
@@ -84,7 +93,10 @@ export default defineConfig({
         if (previewTypes.includes(schemaType)) {
           return S.document().views([
             S.view.form().title('Düzenle'),
-            S.view.component(PreviewView).title('Önizleme').icon(() => '👁️'),
+            S.view
+              .component(PreviewView)
+              .title('Önizleme')
+              .icon(() => '👁️'),
           ])
         }
 

@@ -22,7 +22,7 @@ export function PreviewView({document}: PreviewViewProps) {
 
   const {id, _type} = displayed
   const pubId = id?.replace(/^drafts\./, '') || ''
-  
+
   // Site URL tespiti
   const remoteUrl = 'https://www.birim.com'
   const localUrl = 'http://localhost:5173'
@@ -57,27 +57,30 @@ export function PreviewView({document}: PreviewViewProps) {
   }
 
   // Preview token
-  const previewToken = 'sk3hcgzMrsNDGtMbwCUGbh3PJ0eRfnpnGI4LBXI0lWGZdvD8oYDB2cqZEdATKCUrmDceAAgkoG0zoYUuGw2N3dfXoNaU4ZvOUoTeraWE1la5BCdjg967sQawjJydQJMq1jtsomH56RPKaD3hpY2XhRBr6Z4Zf7dO157WTvDzbDyRNtxK3bsw'
-  
+  const previewToken =
+    'sk3hcgzMrsNDGtMbwCUGbh3PJ0eRfnpnGI4LBXI0lWGZdvD8oYDB2cqZEdATKCUrmDceAAgkoG0zoYUuGw2N3dfXoNaU4ZvOUoTeraWE1la5BCdjg967sQawjJydQJMq1jtsomH56RPKaD3hpY2XhRBr6Z4Zf7dO157WTvDzbDyRNtxK3bsw'
+
   const url = `${baseUrl}/#${path}${path.includes('?') ? '&' : '?'}preview=${previewToken}`
 
   return (
     <div style={{width: '100%', height: '100%', position: 'relative'}}>
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: '30px',
-        background: '#f4f4f4',
-        fontSize: '10px',
-        display: 'flex',
-        alignItems: 'center',
-        padding: '0 10px',
-        borderBottom: '1px solid #ddd',
-        color: '#666',
-        zIndex: 10
-      }}>
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '30px',
+          background: '#f4f4f4',
+          fontSize: '10px',
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 10px',
+          borderBottom: '1px solid #ddd',
+          color: '#666',
+          zIndex: 10,
+        }}
+      >
         Önizleme: {url}
       </div>
       <iframe

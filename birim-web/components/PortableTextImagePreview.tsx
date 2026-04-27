@@ -9,11 +9,18 @@ export default function PortableTextImagePreview(props: any) {
     try {
       const parsed = new URL(url)
       let path = parsed.pathname.startsWith('/') ? parsed.pathname.substring(1) : parsed.pathname
-      
+
       // Hardening: Add migration prefix for known folders if missing
-      const r2Folders = ['uploads/', 'bulk-uploads/', 'products/', 'designers/', 'projects/', 'news/']
+      const r2Folders = [
+        'uploads/',
+        'bulk-uploads/',
+        'products/',
+        'designers/',
+        'projects/',
+        'news/',
+      ]
       if (!path.startsWith('migration/')) {
-        const folder = r2Folders.find(f => path.startsWith(f))
+        const folder = r2Folders.find((f) => path.startsWith(f))
         if (folder) {
           path = `migration/${path}`
         }
