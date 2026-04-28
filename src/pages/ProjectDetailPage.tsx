@@ -454,7 +454,7 @@ export function ProjectDetailPage() {
         <div className="absolute inset-0 z-20 flex flex-col justify-start pt-24 md:pt-28 lg:pt-32">
           <div className="w-full max-w-[95%] md:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
             <h1
-              className="text-3xl md:text-5xl lg:text-6xl font-light tracking-tight text-white mb-2 md:mb-4"
+              className="text-3xl md:text-5xl lg:text-6xl font-light tracking-tight text-white mb-2 md:mb-4 font-michroma"
               style={{
                 transform: isTitleVisible ? 'translateX(0)' : 'translateX(-40px)',
                 opacity: isTitleVisible ? 1 : 0,
@@ -467,7 +467,7 @@ export function ProjectDetailPage() {
 
             {project.date && (
               <p
-                className="text-base md:text-lg lg:text-xl text-white/90 font-light"
+                className="text-base md:text-lg lg:text-xl text-white/90 font-light font-michroma"
                 style={{
                   transform: isLocationVisible ? 'translateX(0)' : 'translateX(-40px)',
                   opacity: isLocationVisible ? 1 : 0,

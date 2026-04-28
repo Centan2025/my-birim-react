@@ -261,13 +261,13 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
               transition: 'transform 1000ms ease-out, opacity 1000ms ease-out',
             }}
           >
-            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg">
+            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg font-michroma">
               {t(product.name)}
             </h1>
           </div>
           {designers.length > 0 && (
             <div
-              className="mt-2 text-white/80"
+              className="mt-2 text-white/80 font-michroma"
               style={{
                 transform: isDesignerVisible ? 'translateX(0)' : 'translateX(-40px)',
                 opacity: isDesignerVisible ? 1 : 0,

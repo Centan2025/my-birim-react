@@ -15,6 +15,7 @@ export default {
         sans: ['"Inter"', 'sans-serif'],
         accent: ['"Oswald"', 'sans-serif'],
         jura: ['"Jura"', 'sans-serif'],
+        michroma: ['"Michroma"', 'sans-serif'],
       },
     },
   },

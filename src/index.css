@@ -9,6 +9,7 @@
   /* Diğer yardımcı fontlar */
   --font-sans: 'Inter', sans-serif;
   --font-accent: 'Oswald', sans-serif;
+  --font-michroma: 'Michroma', sans-serif;
 
   --color-primary: #c5a059;
   --color-charcoal: #121212;
@@ -52,6 +53,10 @@
 .font-arial-bold {
   font-family: Arial, sans-serif !important;
   font-weight: 700 !important;
+}
+
+.font-michroma {
+  font-family: 'Michroma', sans-serif !important;
 }
 
 @layer base {
