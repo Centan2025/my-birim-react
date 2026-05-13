@@ -282,13 +282,27 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
             </Stack>
             <Box>
               <input
+                id={props.id}
+                name={props.id}
                 type="file"
+                autoComplete="off"
                 multiple
                 accept="image/*,video/*"
                 ref={fileInputRef}
-                style={{display: 'none'}}
+                style={{
+                  position: 'absolute',
+                  width: '1px',
+                  height: '1px',
+                  padding: '0',
+                  margin: '-1px',
+                  overflow: 'hidden',
+                  clip: 'rect(0, 0, 0, 0)',
+                  whiteSpace: 'nowrap',
+                  border: '0',
+                }}
                 onChange={handleBulkUpload}
                 disabled={isUploading}
+                aria-label="Toplu Medya Yükleme"
               />
               <Button
                 text={isUploading ? 'Yükleniyor...' : 'Toplu Dosya Seç ve Yükle'}

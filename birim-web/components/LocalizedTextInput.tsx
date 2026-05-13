@@ -119,6 +119,26 @@ export default function LocalizedTextInput(props: ObjectInputProps) {
 
   return (
     <div>
+      {/* Label association fix: type="hidden" is not labelable, so we use a visually hidden text input */}
+      <input
+        type="text"
+        id={props.id}
+        name={props.id}
+        autoComplete="off"
+        readOnly
+        style={{
+          position: 'absolute',
+          width: '1px',
+          height: '1px',
+          padding: '0',
+          margin: '-1px',
+          overflow: 'hidden',
+          clip: 'rect(0, 0, 0, 0)',
+          whiteSpace: 'nowrap',
+          border: '0',
+        }}
+      />
+      
       {trValue && (
         <TranslateButtonsContainer>
           <span style={{fontWeight: 'bold', marginRight: '0.5rem', color: '#333'}}>
@@ -143,13 +163,7 @@ export default function LocalizedTextInput(props: ObjectInputProps) {
 
       {/* Sanity'nin varsayılan input'unu render et, ama textarea yüksekliğini artır */}
       <div style={{minHeight: '8rem'}}>
-        {renderDefault({
-          ...props,
-          elementProps: {
-            ...(props as any).elementProps,
-            rows: 6,
-          },
-        } as any)}
+        {renderDefault(props)}
       </div>
     </div>
   )

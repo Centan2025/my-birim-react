@@ -6,11 +6,11 @@ async function run() {
     dataset: 'production',
     useCdn: false,
     apiVersion: '2024-04-15',
-    token: process.env.SANITY_AUTH_TOKEN || undefined 
+    token: process.env.SANITY_TOKEN || undefined 
   })
 
   // Types that use orderRankField
-  const types = ['product', 'category', 'designer']
+  const types = ['product', 'category', 'designer', 'project']
   let totalFixed = 0
 
   console.log('--- DERİN TARAMA BAŞLATILDI ---')
@@ -24,14 +24,18 @@ async function run() {
 
     console.log(`${docs.length} adet döküman bulundu. Değerler inceleniyor...`)
     
-    const brokenDocs = docs.filter(doc => doc.orderRank === null || doc.orderRank === undefined)
+    const brokenDocs = docs.filter(doc => 
+      doc.orderRank === null || 
+      doc.orderRank === undefined || 
+      (typeof doc.orderRank === 'string' && !doc.orderRank.startsWith('0|'))
+    )
 
     if (brokenDocs.length > 0) {
-      console.log(`${brokenDocs.length} adet bozuk (null/undefined) döküman bulundu. Onarılıyor...`)
+      console.log(`${brokenDocs.length} adet bozuk (null/undefined/yanlış format) döküman bulundu. Onarılıyor...`)
       
       const transaction = client.transaction()
       brokenDocs.forEach(doc => {
-        transaction.patch(doc._id, p => p.set({ orderRank: 'a0' }))
+        transaction.patch(doc._id, p => p.set({ orderRank: '0|100000:' }))
       })
       
       await transaction.commit()

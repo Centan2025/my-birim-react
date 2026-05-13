@@ -222,5 +222,27 @@ export default function UiTranslationsStringsInput(props: ObjectInputProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentLanguage, docId])
 
-  return props.renderDefault(props)
+  return (
+    <>
+      <input
+        type="text"
+        id={props.id}
+        name={props.id}
+        autoComplete="off"
+        readOnly
+        style={{
+          position: 'absolute',
+          width: '1px',
+          height: '1px',
+          padding: '0',
+          margin: '-1px',
+          overflow: 'hidden',
+          clip: 'rect(0, 0, 0, 0)',
+          whiteSpace: 'nowrap',
+          border: '0',
+        }}
+      />
+      {props.renderDefault(props)}
+    </>
+  )
 }

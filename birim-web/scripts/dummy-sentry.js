@@ -67,6 +67,16 @@ export const globalHandlersIntegration = noopIntegration
 export const linkedErrorsIntegration = noopIntegration
 export const dedupeIntegration = noopIntegration
 export const httpContextIntegration = noopIntegration
+export const reactRouterV6BrowserTracingIntegration = noopIntegration
+export const wrap = noopHOC
+export const withErrorBoundary = noopHOC
+export const createBrowserRouter = noop
+export const createRoutesFromChildren = noop
+export const matchRoutes = noop
+export const useLocation = () => ({pathname: '/'})
+export const useNavigationType = () => 'PUSH'
+export const useParams = () => ({})
+export const useRoutes = () => null
 
 // Catch-all default export as a Proxy so any other import resolves gracefully
 export default new Proxy(

@@ -3,6 +3,8 @@ import {defineField, defineType} from 'sanity'
 import {getPreviewUrl} from '../utils/previewUrl'
 import {renderPreviewMedia} from '../objects/shared'
 import BulkMediaUploadInput from '../../components/BulkMediaUploadInput'
+import ReferenceInputFix from '../../components/ReferenceInputFix'
+
 
 import {orderRankField} from '@sanity/orderable-document-list'
 
@@ -11,7 +13,7 @@ export default defineType({
   title: 'Ürün',
   type: 'document',
   fields: [
-    // ...(typeof window !== 'undefined' ? [orderRankField({ type: 'product' })] : []),
+    orderRankField({type: 'product'}),
     defineField({
       name: 'id',
       title: 'ID (Slug)',
@@ -29,7 +31,15 @@ export default defineType({
       name: 'designers',
       title: 'Tasarımcılar',
       type: 'array',
-      of: [{type: 'reference', to: [{type: 'designer'}]}],
+      of: [
+        {
+          type: 'reference',
+          to: [{type: 'designer'}],
+          components: {
+            input: ReferenceInputFix,
+          },
+        },
+      ],
       description: 'Bu ürünü tasarlayan bir veya daha fazla tasarımcı ekleyebilirsiniz.',
     }),
     defineField({
@@ -37,7 +47,11 @@ export default defineType({
       title: 'Kategori',
       type: 'reference',
       to: [{type: 'category'}],
+      components: {
+        input: ReferenceInputFix,
+      },
     }),
+
     defineField({name: 'year', title: 'Yıl', type: 'number'}),
     defineField({
       name: 'isPublished',

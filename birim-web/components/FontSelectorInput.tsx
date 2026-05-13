@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useMemo} from 'react'
+import React, {useEffect, useState, useMemo, useId} from 'react'
 import type {StringInputProps} from 'sanity'
 import {set} from 'sanity'
 import styled from 'styled-components'
@@ -71,7 +71,7 @@ const SelectorWrapper = styled.div`
   width: 100%;
 `
 
-const DropdownTrigger = styled.div<{$isOpen: boolean; $hasValue: boolean}>`
+const DropdownTrigger = styled.button<{$isOpen: boolean; $hasValue: boolean}>`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -82,6 +82,9 @@ const DropdownTrigger = styled.div<{$isOpen: boolean; $hasValue: boolean}>`
   cursor: pointer;
   transition: all 0.2s;
   min-height: 3rem;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
 
   &:hover {
     border-color: #4285f4;
@@ -315,6 +318,7 @@ export default function FontSelectorInput(props: StringInputProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [customFontInput, setCustomFontInput] = useState('')
+  const inputId = useId()
 
   // Seçili fontu yükle
   useEffect(() => {
@@ -370,9 +374,16 @@ export default function FontSelectorInput(props: StringInputProps) {
     <Container>
       <SelectorWrapper>
         <DropdownTrigger
+          {...props.elementProps}
+          type="button"
+          role="combobox"
+          aria-expanded={isOpen}
+          aria-haspopup="listbox"
+          tabIndex={0}
           $isOpen={isOpen}
           $hasValue={!!displayValue}
           onClick={() => setIsOpen(!isOpen)}
+          onKeyDown={(e) => e.key === 'Enter' && setIsOpen(!isOpen)}
         >
           <SelectedFontInfo>
             <SelectedFontName fontFamily={displayValue}>
@@ -397,22 +408,30 @@ export default function FontSelectorInput(props: StringInputProps) {
         {isOpen && (
           <DropdownMenu onClick={(e) => e.stopPropagation()}>
             <SearchWrapper>
+              <label htmlFor={`${inputId}-search`} style={{display: 'none'}}>
+                Font Ara
+              </label>
               <Search size={16} color="#9ca3af" />
               <SearchInput
                 autoFocus
+                id={`${inputId}-search`}
+                name={`${inputId}-font-search`}
+                autoComplete="off"
                 placeholder="Font ara..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </SearchWrapper>
 
-            <FontList>
+            <FontList role="listbox">
               {Object.keys(filteredFonts).map((category) => (
                 <React.Fragment key={category}>
                   <CategoryHeader>{category}</CategoryHeader>
                   {filteredFonts[category].map((font) => (
                     <FontItem
                       key={font.name}
+                      role="option"
+                      aria-selected={value === font.name}
                       $isSelected={value === font.name}
                       onClick={() => handleSelect(font.name)}
                     >
@@ -430,11 +449,14 @@ export default function FontSelectorInput(props: StringInputProps) {
             </FontList>
 
             <CustomInputSection>
-              <CustomInputLabel>
+              <CustomInputLabel as="label" htmlFor={`${inputId}-custom`}>
                 <ExternalLink size={12} /> Google Fonts'tan Ekle
               </CustomInputLabel>
               <CustomInputGroup>
                 <StyledInput
+                  id={`${inputId}-custom`}
+                  name={`${inputId}-custom-font-name`}
+                  autoComplete="off"
                   placeholder="Font adı (örn: Inter)"
                   value={customFontInput}
                   onChange={(e) => setCustomFontInput(e.target.value)}

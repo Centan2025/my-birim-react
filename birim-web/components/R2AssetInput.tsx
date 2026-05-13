@@ -51,7 +51,15 @@ const PreviewImage = styled.img`
 `
 
 const HiddenInput = styled.input`
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 `
 
 const HotspotIndicator = styled.div<{$left: string; $top: string}>`
@@ -494,9 +502,12 @@ export default function R2AssetInput(props: ObjectInputProps) {
       >
         <HiddenInput
           id={props.id}
+          name={props.id}
           type="file"
+          autoComplete="off"
           accept="image/*,video/*"
           onChange={handleFileSelect}
+          aria-label="Dosya Seç"
         />
 
         {isUploading ? (

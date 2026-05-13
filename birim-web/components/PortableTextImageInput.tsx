@@ -21,6 +21,25 @@ export default function PortableTextImageInput(props: ObjectInputProps) {
 
   return (
     <div>
+      {/* Label association fix: type="hidden" is not labelable, so we use a visually hidden text input */}
+      <input
+        type="text"
+        id={props.id}
+        name={props.id}
+        autoComplete="off"
+        readOnly
+        style={{
+          position: 'absolute',
+          width: '1px',
+          height: '1px',
+          padding: '0',
+          margin: '-1px',
+          overflow: 'hidden',
+          clip: 'rect(0, 0, 0, 0)',
+          whiteSpace: 'nowrap',
+          border: '0',
+        }}
+      />
       {/* Yerleşim İkonları */}
       <div
         style={{

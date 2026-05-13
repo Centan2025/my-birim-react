@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState, useRef} from 'react'
+import React, {useEffect, useMemo, useState, useRef, useId} from 'react'
 import type {ObjectInputProps} from 'sanity'
 import {useClient, set, unset, setIfMissing} from 'sanity'
 import imageUrlBuilder from '@sanity/image-url'
@@ -44,6 +44,9 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
   >({})
   const restoringRef = useRef(false)
   const touchedRef = useRef(false)
+
+  const groupId = useId()
+  const bookId = useId()
 
   useEffect(() => {
     setLoading(true)
@@ -235,10 +238,17 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
     onChange(set(nextArr, ['materials']))
   }
 
+  const checkboxPrefix = useId()
+
   return (
     <div style={{display: 'grid', gap: 10}}>
-      <label style={{fontSize: 12, color: '#666'}}>Malzeme Grubu</label>
+      <label htmlFor={props.id} style={{fontSize: 12, color: '#666'}}>
+        Malzeme Grubu
+      </label>
       <select
+        id={props.id}
+        name={`${props.id}-group`}
+        autoComplete="off"
         value={selectedGroupId || ''}
         onChange={(e) => {
           touchedRef.current = false
@@ -291,8 +301,13 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
 
       {selectedGroupId && (
         <>
-          <label style={{fontSize: 12, color: '#666'}}>Kartela</label>
+          <label htmlFor={bookId} style={{fontSize: 12, color: '#666'}}>
+            Kartela
+          </label>
           <select
+            id={bookId}
+            name={`${props.id}-book`}
+            autoComplete="off"
             value={String(selectedBookIndex)}
             onChange={(e) => setSelectedBookIndex(Number(e.target.value))}
           >
@@ -337,19 +352,26 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
               const id = materialIdLoose(m)
               const isChecked = localSelectedIds.has(id)
               const labelTxt = m?.name?.tr || m?.name?.en || `Malzeme ${idx + 1}`
+              const checkboxId = `${checkboxPrefix}-material-${m?._key || idx}`
               return (
                 <label
                   key={m?._key || idx}
+                  htmlFor={checkboxId}
+
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: 10,
                     padding: 6,
                     border: '1px solid #e5e7eb',
+                    cursor: 'pointer',
                   }}
                 >
                   <input
+                    id={checkboxId}
+                    name={`${props.id}-material-${id}`}
                     type="checkbox"
+                    autoComplete="off"
                     checked={isChecked}
                     onChange={(e) => {
                       touchedRef.current = true
