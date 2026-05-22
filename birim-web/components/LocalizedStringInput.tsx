@@ -150,7 +150,7 @@ export default function LocalizedStringInput(props: ObjectInputProps) {
           border: '0',
         }}
       />
-      
+
       {/* Ürün adı değilse çeviri butonlarını göster */}
       {trValue && !isProductName && (
         <TranslateButtonsContainer>

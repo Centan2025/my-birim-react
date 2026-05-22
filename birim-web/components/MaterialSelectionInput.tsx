@@ -357,7 +357,6 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
                 <label
                   key={m?._key || idx}
                   htmlFor={checkboxId}
-
                   style={{
                     display: 'flex',
                     alignItems: 'center',

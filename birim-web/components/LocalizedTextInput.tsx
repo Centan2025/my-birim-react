@@ -138,7 +138,7 @@ export default function LocalizedTextInput(props: ObjectInputProps) {
           border: '0',
         }}
       />
-      
+
       {trValue && (
         <TranslateButtonsContainer>
           <span style={{fontWeight: 'bold', marginRight: '0.5rem', color: '#333'}}>
@@ -162,9 +162,7 @@ export default function LocalizedTextInput(props: ObjectInputProps) {
       {status && <StatusMessage type={status.type}>{status.message}</StatusMessage>}
 
       {/* Sanity'nin varsayılan input'unu render et, ama textarea yüksekliğini artır */}
-      <div style={{minHeight: '8rem'}}>
-        {renderDefault(props)}
-      </div>
+      <div style={{minHeight: '8rem'}}>{renderDefault(props)}</div>
     </div>
   )
 }

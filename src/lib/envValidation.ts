@@ -134,8 +134,6 @@ export function checkRequiredEnv(): {isValid: boolean; missing: string[]; warnin
     }
   }
 
-
-
   if (!env.VITE_SENTRY_DSN) {
     warnings.push("VITE_SENTRY_DSN yok - hata raporlama sadece console'a yazılacak")
   }

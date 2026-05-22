@@ -5,7 +5,6 @@ import {renderPreviewMedia} from '../objects/shared'
 import BulkMediaUploadInput from '../../components/BulkMediaUploadInput'
 import ReferenceInputFix from '../../components/ReferenceInputFix'
 
-
 import {orderRankField} from '@sanity/orderable-document-list'
 
 export default defineType({

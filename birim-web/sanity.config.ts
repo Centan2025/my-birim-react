@@ -216,7 +216,8 @@ if (typeof window !== 'undefined') {
         })
         return ws
       } catch (e) {
-        if (isNoise(url)) return {addEventListener: () => {}, close: () => {}, send: () => {}} as any
+        if (isNoise(url))
+          return {addEventListener: () => {}, close: () => {}, send: () => {}} as any
         throw e
       }
     }

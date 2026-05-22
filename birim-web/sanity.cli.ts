@@ -202,8 +202,8 @@ export default defineCliConfig({
 </script>
 `
             return html.replace('<head>', '<head>' + blockerScript)
-          }
-        }
+          },
+        },
       ],
       resolve: {
         ...config.resolve,

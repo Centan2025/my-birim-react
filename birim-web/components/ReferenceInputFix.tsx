@@ -3,7 +3,7 @@ import type {ReferenceInputProps} from 'sanity'
 
 /**
  * ReferenceInputFix
- * Sanity Studio'nun dahili referans ve autocomplete bileşenlerinde eksik kalan 
+ * Sanity Studio'nun dahili referans ve autocomplete bileşenlerinde eksik kalan
  * id ve name özniteliklerini MutationObserver kullanarak agresif bir şekilde yakalar ve atar.
  */
 export default function ReferenceInputFix(props: ReferenceInputProps) {

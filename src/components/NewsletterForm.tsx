@@ -117,9 +117,7 @@ export const NewsletterForm: FC<NewsletterFormProps> = ({variant = 'mobile', cla
 
       if (errorMessage === 'EMAIL_SUBSCRIBER_LOCAL_STORAGE') {
         // Token yokken local storage'a yazılan durum
-        const localMessage =
-          t('newsletter_success_local') ||
-          "E-posta aboneliğiniz kaydedildi."
+        const localMessage = t('newsletter_success_local') || 'E-posta aboneliğiniz kaydedildi.'
         showMessage(localMessage, 'success')
         analytics.trackUserAction('newsletter_subscribe', email)
         setEmail('')
