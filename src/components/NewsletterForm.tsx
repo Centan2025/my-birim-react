@@ -119,7 +119,7 @@ export const NewsletterForm: FC<NewsletterFormProps> = ({variant = 'mobile', cla
         // Token yokken local storage'a yazılan durum
         const localMessage =
           t('newsletter_success_local') ||
-          "E-posta aboneliğiniz kaydedildi. CMS'de görünmesi için VITE_SANITY_TOKEN ekleyin."
+          "E-posta aboneliğiniz kaydedildi."
         showMessage(localMessage, 'success')
         analytics.trackUserAction('newsletter_subscribe', email)
         setEmail('')

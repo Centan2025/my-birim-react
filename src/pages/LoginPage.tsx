@@ -218,7 +218,7 @@ export function LoginPage() {
         errorMessage.includes('yapılandırılmamış')
       ) {
         errorMessage =
-          'Sanity token yapılandırılmamış veya yetkisiz. Çözüm: Proje kök dizininde .env dosyası oluşturup VITE_SANITY_TOKEN=your_token_here ekleyin. Token\'ı https://sanity.io/manage adresinden alın. Token\'ın "Editor" veya "Admin" yetkisi olmalıdır. Uygulamayı yeniden başlatın.'
+          'Sanity token yapılandırılmamış veya yetkisiz. Çözüm: Sunucu ortamında (Vercel vb.) SANITY_TOKEN=your_token_here environment variable\'ının ayarlandığından emin olun. Token\'ı https://sanity.io/manage adresinden "Editor" veya "Admin" yetkisiyle alabilirsiniz.'
       }
       setError(errorMessage)
       // Kalan deneme sayısını göster

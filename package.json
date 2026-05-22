@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "vite",
     "dev:vercel": "vercel dev",
-    "api:server": "node local-api-server.mjs",
-    "dev:full": "start \"API Server\" node local-api-server.mjs && vite",
+    "api:server": "node scripts/local-api-server.mjs",
+    "dev:full": "start \"API Server\" node scripts/local-api-server.mjs && vite",
     "build": "tsc && vite build && npm run generate-sitemap && npm run generate-robots",
     "preview": "vite preview",
     "import-media": "cd tools/media-importer && npm install && npm run import --",
@@ -23,7 +23,7 @@
     "prepare": "husky install",
     "size-limit": "size-limit",
     "size-limit:ci": "size-limit",
-    "email:server": "node email-server.js"
+    "email:server": "node scripts/email-server.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.971.0",

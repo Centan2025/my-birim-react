@@ -10,7 +10,7 @@
 
 2. Sanity Token Yapılandırması:
 
-   Üye kayıtlarının CMS'de görünmesi için Sanity token'ı yapılandırmanız gerekmektedir.
+   Üye kayıtlarının CMS'de görünmesi için Sanity token'ı yapılandırmanız gerekmektedir. Güvenlik nedeniyle, bu token'ın istemciye sızmasını önlemek amacıyla `VITE_` prefix'i kullanılmamalıdır. Sunucu tarafındaki API fonksiyonlarımız bunu doğrudan okur.
 
    a. Proje kök dizininde `.env` dosyası oluşturun:
 
@@ -28,7 +28,7 @@
    VITE_SANITY_PROJECT_ID=wn3a082f
    VITE_SANITY_DATASET=production
    VITE_SANITY_API_VERSION=2025-01-01
-   VITE_SANITY_TOKEN=your_sanity_token_here
+   SANITY_TOKEN=your_sanity_token_here
    ```
 
    c. Sanity token'ınızı alın:
@@ -38,13 +38,22 @@
    - "Add API token" butonuna tıklayın
    - Token'a bir isim verin (örn: "Web App Token")
    - **"Editor" veya "Admin" yetkisi seçin** (önemli!)
-   - Token'ı kopyalayın ve `.env` dosyasındaki `VITE_SANITY_TOKEN` değerine yapıştırın
+   - Token'ı kopyalayın ve `.env` dosyasındaki `SANITY_TOKEN` değerine yapıştırın
 
    d. Uygulamayı yeniden başlatın:
 
    ```bash
    npm run dev
    ```
+
+## Proje Yapısı & Mimarisi
+
+Proje, monorepo benzeri organize edilmiş olup şu temel klasörlerden oluşmaktadır:
+
+- **`src/` (Vite + React Frontend)**: Kullanıcı arayüzünü, sayfaları ve bileşenleri barındıran ana React projesidir.
+- **`api/` (Serverless Backend Functions)**: Vercel üzerinde koşan API sunucusuz fonksiyonlarıdır. Kullanıcı kaydı, girişi, şifre sıfırlama, bülten aboneliği gibi hassas işlemleri ve `SANITY_TOKEN` kullanımını güvenli bir şekilde sunucu tarafında gerçekleştirir.
+- **`birim-web/` (Sanity Studio CMS)**: İçerik yönetim sistemidir. Sanity şemalarını, özelleştirilmiş bileşenleri ve medya içe aktarma aracını barındırır.
+- **`scripts/` (Geliştirme & Veritabanı Araçları)**: Local API sunucusu (`local-api-server.mjs`), test scriptleri ve R2 bulut depolama veri göçü/migrasyon araçlarını barındırır.
 
 3. Uygulamayı çalıştırın:
    ```bash
@@ -86,10 +95,10 @@ Sayfa tam olana kadar geçici bir "Yakında" sayfası göstermek için:
 
 Maintenance mode aktifken production'da sayfalara erişmek için:
 
-1. **Secret bypass key ekleyin (opsiyonel, güvenlik için):**
+1. **Secret bypass key ekleyin (güvenlik için zorunludur):**
    - Vercel'de yeni bir environment variable ekleyin:
      - **Name:** `VITE_MAINTENANCE_BYPASS_SECRET`
-     - **Value:** Kendi belirlediğiniz bir secret (örn: `my-secret-key-2024`)
+     - **Value:** Kendi belirlediğiniz güçlü bir secret (örn: `my-secret-key-2024`)
 2. **URL'ye query parameter ekleyin:**
 
    HashRouter kullanıldığı için iki yöntem var:
@@ -113,10 +122,6 @@ Maintenance mode aktifken production'da sayfalara erişmek için:
    https://yourdomain.com/?bypass=my-secret-key-2024#/designers
    https://yourdomain.com/?bypass=my-secret-key-2024#/about
    ```
-
-3. **Secret belirlemezseniz:**
-   - Varsayılan secret: `dev-bypass-2024`
-   - URL: `https://yourdomain.com/?bypass=dev-bypass-2024`
 
 ### Normal Sayfaya Dönmek
 
@@ -321,6 +326,6 @@ Medya-Klasörü/
 
 ## Önemli Notlar
 
-- Sanity token'ı olmadan üye kayıtları sadece local storage'da saklanır ve CMS'de görünmez
-- Token'ın "Editor" veya "Admin" yetkisi olmalıdır, aksi halde üye kayıtları yapılamaz
-- `.env` dosyasını git'e commit etmeyin (`.gitignore`'da olmalı)
+- `SANITY_TOKEN` olmadan üye kayıtları sadece local storage'da saklanır ve CMS'de görünmez.
+- Token'ın "Editor" veya "Admin" yetkisi olmalıdır, aksi halde üye kayıtları yapılamaz.
+- `.env` ve `.env.local` dosyalarını git'e commit etmeyin (`.gitignore`'da olmalı).

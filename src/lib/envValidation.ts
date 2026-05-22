@@ -13,7 +13,6 @@ const envSchema = z.object({
   VITE_SANITY_PROJECT_ID: z.string().min(1).optional().default('wn3a082f'),
   VITE_SANITY_DATASET: z.string().min(1).optional().default('production'),
   VITE_SANITY_API_VERSION: z.string().min(1).optional().default('2025-01-01'),
-  VITE_SANITY_TOKEN: z.string().optional(),
 
   // Error Reporting
   VITE_SENTRY_DSN: z.string().url().optional().or(z.literal('')),
@@ -135,10 +134,7 @@ export function checkRequiredEnv(): {isValid: boolean; missing: string[]; warnin
     }
   }
 
-  // Opsiyonel ama önerilen
-  if (!env.VITE_SANITY_TOKEN) {
-    warnings.push("VITE_SANITY_TOKEN yok - üye kayıtları local storage'a kaydedilecek")
-  }
+
 
   if (!env.VITE_SENTRY_DSN) {
     warnings.push("VITE_SENTRY_DSN yok - hata raporlama sadece console'a yazılacak")

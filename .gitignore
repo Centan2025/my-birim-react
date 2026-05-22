@@ -53,3 +53,22 @@ deploy_debug*.txt
 deploy_output.txt
 deploy_full_log.txt
 
+# Hassas ve geçici dosyalar
+.env.email
+debug-project.json
+diff.txt
+diff2.txt
+all_errors.txt
+all_errors_utf8.txt
+birim_errors.txt
+errors.txt
+errors_utf8.txt
+remaining_errors.txt
+remaining_errors_utf8.txt
+tsc_output.txt
+vitest_coverage.txt
+test-icon.html
+urun_yukleme_sablonu.xlsx
+brain/
+
+

@@ -22,7 +22,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 function loadEnvVars() {
   const envFiles = ['.env.local', '.env']
   for (const file of envFiles) {
-    const envPath = resolve(__dirname, file)
+    const envPath = resolve(__dirname, '..', file)
     if (existsSync(envPath)) {
       const content = readFileSync(envPath, 'utf-8')
       for (const line of content.split('\n')) {

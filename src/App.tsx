@@ -45,13 +45,7 @@ const AppContent = () => {
 
   const isProduction = import.meta.env.PROD
   const envBypassSecret = import.meta.env['VITE_MAINTENANCE_BYPASS_SECRET']
-  const allowedBypassSecrets = [
-    'dev-bypass-2024',
-    'birim-dev-2025',
-    ...(envBypassSecret && !['dev-bypass-2024', 'birim-dev-2025'].includes(envBypassSecret)
-      ? [envBypassSecret]
-      : []),
-  ]
+  const allowedBypassSecrets = envBypassSecret ? [envBypassSecret] : []
 
   const searchParams = new URLSearchParams(window.location.search)
   const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '')

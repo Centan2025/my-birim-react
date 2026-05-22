@@ -10,7 +10,7 @@ const sanity = createClient({
   projectId: process.env.VITE_SANITY_PROJECT_ID,
   dataset: process.env.VITE_SANITY_DATASET,
   apiVersion: process.env.VITE_SANITY_API_VERSION,
-  token: process.env.VITE_SANITY_TOKEN,
+  token: process.env.SANITY_TOKEN || process.env.VITE_SANITY_TOKEN,
   useCdn: false,
 })
 
