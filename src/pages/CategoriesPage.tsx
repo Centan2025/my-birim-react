@@ -95,7 +95,7 @@ export function CategoriesPage() {
       <div className="relative h-[500px] animate-fade-in-down hero-section">
         <div className="absolute inset-0">
           <OptimizedImage
-            src="https://picsum.photos/seed/categories-hero/1920/1080"
+            src="/img/sofa.jpg"
             alt={t('products')}
             className={`w-full h-full object-cover ${imageBorderClass}`}
             loading="eager"

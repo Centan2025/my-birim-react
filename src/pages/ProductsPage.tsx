@@ -190,10 +190,7 @@ export function ProductsPage() {
         <div className="absolute inset-0">
           {(() => {
             const heroImage = category?.heroImage
-            const url =
-              typeof heroImage === 'object'
-                ? heroImage.url
-                : heroImage || 'https://picsum.photos/seed/default/1920/1080'
+            const url = typeof heroImage === 'object' ? heroImage.url : heroImage || '/img/sofa.jpg'
             return (
               <OptimizedImage
                 src={url}
