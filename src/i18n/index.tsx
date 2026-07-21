@@ -109,6 +109,38 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
     [supportedLocales]
   )
 
+  const normalizeKey = (str: string): string => {
+    return str
+      .trim()
+      .toLowerCase()
+      .replace(/i̇/g, 'i')
+      .replace(/İ/g, 'i')
+      .replace(/I/g, 'i')
+      .replace(/ı/g, 'i')
+      .replace(/ğ/g, 'g')
+      .replace(/Ğ/g, 'g')
+      .replace(/ü/g, 'u')
+      .replace(/Ü/g, 'u')
+      .replace(/ş/g, 's')
+      .replace(/Ş/g, 's')
+      .replace(/ö/g, 'o')
+      .replace(/Ö/g, 'o')
+      .replace(/ç/g, 'c')
+      .replace(/Ç/g, 'c')
+  }
+
+  const findInDict = (dict: Record<string, string> | undefined, key: string): string | undefined => {
+    if (!dict || !key) return undefined
+    if (dict[key]) return dict[key]
+    const lower = key.toLowerCase()
+    if (dict[lower]) return dict[lower]
+    const norm = normalizeKey(key)
+    if (dict[norm]) return dict[norm]
+    const matchedKey = Object.keys(dict).find(k => normalizeKey(k) === norm)
+    if (matchedKey) return dict[matchedKey]
+    return undefined
+  }
+
   const t = useCallback(
     (keyOrObject: string | LocalizedString | undefined, ...args: (string | number)[]): string => {
       if (typeof keyOrObject === 'string') {
@@ -128,9 +160,10 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
           keyOrObject === 'email_placeholder'
 
         // Try CMS translations first (gerekirse bypass), then fallback to base translations
-        const cmsTranslation = shouldBypassCms ? undefined : cmsTranslations[locale]?.[keyOrObject]
+        const cmsTranslation = shouldBypassCms ? undefined : findInDict(cmsTranslations[locale], keyOrObject)
         const baseTranslation =
-          baseTranslations[locale]?.[keyOrObject] || baseTranslations['tr']?.[keyOrObject]
+          findInDict(baseTranslations[locale], keyOrObject) ||
+          findInDict(baseTranslations['tr'], keyOrObject)
         let translation = cmsTranslation || baseTranslation || keyOrObject
         if (args.length > 0 && typeof translation === 'string') {
           args.forEach((arg, index) => {
@@ -158,12 +191,8 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
         const lookupKey = trVal || enVal
 
         if (lookupKey) {
-          const cmsTrans =
-            cmsTranslations[locale]?.[lookupKey] ||
-            cmsTranslations[locale]?.[lookupKey.toLowerCase()]
-          const baseTrans =
-            baseTranslations[locale]?.[lookupKey] ||
-            baseTranslations[locale]?.[lookupKey.toLowerCase()]
+          const cmsTrans = findInDict(cmsTranslations[locale], lookupKey)
+          const baseTrans = findInDict(baseTranslations[locale], lookupKey)
           if (cmsTrans) return cmsTrans
           if (baseTrans) return baseTrans
         }
