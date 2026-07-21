@@ -19,6 +19,9 @@ interface ProductThumbnailsProps {
       x: number
       y: number
     }
+    isMirrored?: boolean
+    isMirroredMobile?: boolean
+    isMirroredDesktop?: boolean
   }[]
   currentImageIndex: number
   imageBorderClass: string
@@ -184,6 +187,9 @@ export const ProductThumbnails: React.FC<ProductThumbnailsProps> = ({
                             quality={75}
                             crop={m.crop}
                             hotspot={m.hotspot}
+                            isMirrored={m.isMirrored}
+                            isMirroredMobile={m.isMirroredMobile}
+                            isMirroredDesktop={m.isMirroredDesktop}
                           />
                         ) : m.type === 'video' ? (
                           <video

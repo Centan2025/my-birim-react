@@ -2,29 +2,7 @@ import React, {useState, useCallback} from 'react'
 import {Card, Stack, Text, Button, Box, Flex, useToast, Grid} from '@sanity/ui'
 import {UploadIcon, FolderIcon, CheckmarkIcon, WarningOutlineIcon} from '@sanity/icons'
 import {useClient} from 'sanity'
-import {
-  S3Client,
-  PutObjectCommand,
-  ListObjectsV2Command,
-  DeleteObjectsCommand,
-} from '@aws-sdk/client-s3'
 import imageCompression from 'browser-image-compression'
-
-// R2 Configuration
-const R2_ACCOUNT_ID = process.env.SANITY_STUDIO_R2_ACCOUNT_ID
-const R2_ACCESS_KEY_ID = process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID
-const R2_SECRET_ACCESS_KEY = process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY
-const R2_BUCKET_NAME = process.env.SANITY_STUDIO_R2_BUCKET_NAME || 'birim-web'
-const R2_DOMAIN = process.env.SANITY_STUDIO_R2_DOMAIN
-
-const r2Client = new S3Client({
-  region: 'auto',
-  endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: R2_ACCESS_KEY_ID || '',
-    secretAccessKey: R2_SECRET_ACCESS_KEY || '',
-  },
-})
 
 // Duplicate Key Prevention Helper
 const uniqueKeyCache = new Set<string>()
@@ -154,6 +132,56 @@ interface SummaryData {
   }>
 }
 
+const getApiUrl = (path: string): string => {
+  if (typeof window === 'undefined') return path
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  const base = isLocal ? 'http://localhost:3002' : 'https://www.birim.com'
+  return `${base}${path}`
+}
+
+const uploadFileViaPresignedUrl = async (
+  blob: Blob | File,
+  key: string,
+  contentType: string,
+): Promise<string> => {
+  const lastSlash = key.lastIndexOf('/')
+  const folder = key.substring(0, lastSlash)
+  const filename = key.substring(lastSlash + 1)
+
+  const res = await fetch(getApiUrl('/api/media/presigned-url'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      filename,
+      contentType,
+      folder,
+    }),
+  })
+
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}))
+    throw new Error(errBody.error || `Presigned URL isteği başarısız: ${res.statusText}`)
+  }
+
+  const { uploadUrl, fileUrl } = await res.json()
+
+  const uploadRes = await fetch(uploadUrl, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': contentType,
+    },
+    body: blob,
+  })
+
+  if (!uploadRes.ok) {
+    throw new Error(`R2'ye yükleme başarısız: ${uploadRes.statusText}`)
+  }
+
+  return fileUrl
+}
+
 // R2 Upload Helper
 const uploadToR2 = async (
   file: File,
@@ -171,6 +199,7 @@ const uploadToR2 = async (
     }
 
     const key = `${path}/${fileName}`
+    let finalUrl = ''
 
     if (isImage) {
       isResponsive = true
@@ -243,28 +272,13 @@ const uploadToR2 = async (
         }
 
         const currentKey = size.suffix ? key.replace(/\.webp$/, `${size.suffix}.webp`) : key
-        const arrayBuffer = await compressedBlob.arrayBuffer()
-        return r2Client.send(
-          new PutObjectCommand({
-            Bucket: R2_BUCKET_NAME,
-            Key: currentKey,
-            Body: new Uint8Array(arrayBuffer),
-            ContentType: 'image/webp',
-          }),
-        )
+        return uploadFileViaPresignedUrl(compressedBlob, currentKey, 'image/webp')
       })
 
-      await Promise.all(uploadPromises)
+      const uploadResults = await Promise.all(uploadPromises)
+      finalUrl = uploadResults[0] // Ana görselin URL'si (sizes[0] suffix'siz olan)
     } else {
-      const arrayBuffer = await processedFile.arrayBuffer()
-      await r2Client.send(
-        new PutObjectCommand({
-          Bucket: R2_BUCKET_NAME,
-          Key: key,
-          Body: new Uint8Array(arrayBuffer),
-          ContentType: file.type,
-        }),
-      )
+      finalUrl = await uploadFileViaPresignedUrl(processedFile, key, file.type)
     }
 
     // Görsel boyutlarını al
@@ -284,7 +298,7 @@ const uploadToR2 = async (
     }
 
     return {
-      url: `${R2_DOMAIN}/${key}`,
+      url: finalUrl,
       hasResponsiveSizes: isResponsive,
       ...dimensions,
     }
@@ -1585,15 +1599,23 @@ export default function MediaImportTool() {
       let continuationToken: string | undefined = undefined
 
       do {
-        const listCommand = new ListObjectsV2Command({
-          Bucket: R2_BUCKET_NAME,
-          ContinuationToken: continuationToken,
+        const res = await fetch(getApiUrl('/api/media/list'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({continuationToken}),
         })
-        const response = await r2Client.send(listCommand)
-        if (response.Contents) {
-          allObjects = [...allObjects, ...response.Contents]
+
+        if (!res.ok) {
+          throw new Error('Dosya listesi sunucudan alınamadı.')
         }
-        continuationToken = response.NextContinuationToken
+
+        const data = await res.json()
+        if (data.contents) {
+          allObjects = [...allObjects, ...data.contents]
+        }
+        continuationToken = data.nextContinuationToken
       } while (continuationToken)
 
       console.log(`📦 R2'de toplam ${allObjects.length} dosya bulundu.`)
@@ -1649,15 +1671,17 @@ export default function MediaImportTool() {
 
       for (let i = 0; i < orphanedKeys.length; i += 1000) {
         const chunk = orphanedKeys.slice(i, i + 1000)
-        await r2Client.send(
-          new DeleteObjectsCommand({
-            Bucket: R2_BUCKET_NAME,
-            Delete: {
-              Objects: chunk.map((key) => ({Key: key})),
-              Quiet: true,
-            },
-          }),
-        )
+        const res = await fetch(getApiUrl('/api/media/delete-batch'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({keys: chunk}),
+        })
+
+        if (!res.ok) {
+          throw new Error('Dosyaları toplu silme işlemi başarısız oldu.')
+        }
       }
 
       toast.push({
@@ -1668,7 +1692,7 @@ export default function MediaImportTool() {
     } catch (error: any) {
       console.error('Cleanup Error:', error)
       toast.push({
-        status: 'critical',
+        status: 'error',
         title: 'Temizlik Hatası',
         description: error.message,
       })
@@ -1853,7 +1877,7 @@ export default function MediaImportTool() {
                       tone="primary"
                       onClick={() => document.getElementById('folder-input')?.click()}
                       disabled={isProcessing}
-                      mode={scanReport ? 'outline' : 'default'}
+                      mode={scanReport ? 'ghost' : 'default'}
                     />
                     {scanReport && !isProcessing && (
                       <Button
@@ -2038,7 +2062,7 @@ export default function MediaImportTool() {
                             <Text
                               size={1}
                               weight="semibold"
-                              tone={issue.type === 'error' ? 'critical' : 'caution'}
+                              style={{ color: issue.type === 'error' ? 'var(--card-critical-fg-color)' : 'var(--card-caution-fg-color)' }}
                             >
                               {issue.message}
                             </Text>
@@ -2671,7 +2695,7 @@ async function updateProductImages(
   const panelMedia: File[] = []
   const incomingMedia: typeof allMedia = []
 
-  allMedia.forEach((m) => {
+  allMedia.forEach((m: any) => {
     if (m.file.name.toLowerCase().includes('_panel')) {
       panelMedia.push(m.file)
     } else {

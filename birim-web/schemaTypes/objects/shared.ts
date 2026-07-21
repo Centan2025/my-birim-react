@@ -4,6 +4,7 @@ import {localizedString} from './localizedString'
 import MaterialSelectionInput from '../../components/MaterialSelectionInput'
 import FontSelectorInput from '../../components/FontSelectorInput'
 import BulkMediaUploadInput from '../../components/BulkMediaUploadInput'
+import MirroredImageObjectInput from '../../components/MirroredImageObjectInput'
 import {browserOnlyInput} from '../utils/browserOnly'
 import {getPreviewUrl} from '../utils/previewUrl'
 
@@ -11,17 +12,18 @@ import {getPreviewUrl} from '../utils/previewUrl'
  * Medya önizlemeleri için yardımcı fonksiyon.
  * Görselse <img>, videosa <video> elementi döner.
  */
-export const renderPreviewMedia = (url: string | undefined, type?: string) => {
+export const renderPreviewMedia = (url: string | undefined, type?: string, isMirrored?: boolean) => {
   if (!url) return undefined
 
   const isVideo = type === 'video' || url.match(/\.(mp4|webm|ogg|mov)$/i)
+  const transformStyle = isMirrored ? 'scaleX(-1)' : 'none'
 
   // Eğer url bir görsel değilse ve tip videosa video elementi kullan
   if (isVideo && !url.match(/\.(webp|jpg|jpeg|png|gif|avif)$/i)) {
     return () =>
       React.createElement('video', {
         src: url,
-        style: {width: '100%', height: '100%', objectFit: 'cover'},
+        style: {width: '100%', height: '100%', objectFit: 'cover', transform: transformStyle},
         autoPlay: false,
         muted: true,
         playsInline: true,
@@ -32,7 +34,7 @@ export const renderPreviewMedia = (url: string | undefined, type?: string) => {
   return () =>
     React.createElement('img', {
       src: url,
-      style: {width: '100%', height: '100%', objectFit: 'cover'},
+      style: {width: '100%', height: '100%', objectFit: 'cover', transform: transformStyle},
     })
 }
 
@@ -373,6 +375,9 @@ export const productSimpleMediaItem = defineType({
   name: 'productSimpleMediaItem',
   title: 'Basit Medya Öğesi',
   type: 'object',
+  components: {
+    input: browserOnlyInput(MirroredImageObjectInput),
+  },
   fieldsets: [
     {
       name: 'artDirection',
@@ -400,6 +405,14 @@ export const productSimpleMediaItem = defineType({
       type: 'boolean',
       initialValue: false,
       description: 'Bu medya öğesini dökümanın ana kapak resmi olarak belirler.',
+    }),
+    defineField({
+      name: 'isMirrored',
+      title: 'Aynala (Yatay Çevir)?',
+      type: 'boolean',
+      initialValue: false,
+      description: 'Görselin yatay eksende ters (mirror/yansıma) olarak gösterilmesini sağlar.',
+      hidden: true,
     }),
     defineField({
       name: 'title',
@@ -467,18 +480,19 @@ export const productSimpleMediaItem = defineType({
     select: {
       type: 'type',
       isCover: 'isCover',
+      isMirrored: 'isMirrored',
       titleTr: 'title.tr',
       imageR2Url: 'imageR2.url',
       videoR2Url: 'videoFileR2.url',
       thumbUrl: 'thumbnailR2.url',
     },
     prepare(selection: Record<string, unknown>) {
-      const {type, isCover, titleTr, imageR2Url, videoR2Url, thumbUrl} = selection as any
+      const {type, isCover, isMirrored, titleTr, imageR2Url, videoR2Url, thumbUrl} = selection as any
       const finalUrl = getPreviewUrl(thumbUrl || imageR2Url || videoR2Url)
 
       return {
-        title: `${isCover ? '⭐ ' : ''}${titleTr || (type === 'image' ? 'Resim Öğesi' : type === 'video' ? 'Video Öğesi' : 'YouTube Öğesi')}`,
-        media: renderPreviewMedia(finalUrl, type),
+        title: `${isCover ? '⭐ ' : ''}${isMirrored ? '↔️ ' : ''}${titleTr || (type === 'image' ? 'Resim Öğesi' : type === 'video' ? 'Video Öğesi' : 'YouTube Öğesi')}`,
+        media: renderPreviewMedia(finalUrl, type, !!isMirrored),
       }
     },
   },

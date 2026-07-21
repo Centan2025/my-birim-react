@@ -7,6 +7,9 @@ export type MediaItem = {
   urlDesktop?: string
   crop?: R2ImageMetadata['crop']
   hotspot?: R2ImageMetadata['hotspot']
+  isMirrored?: boolean
+  isMirroredMobile?: boolean
+  isMirroredDesktop?: boolean
 }
 
 export interface FullscreenMediaViewerProps {

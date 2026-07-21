@@ -10,6 +10,9 @@ interface ProductMediaItem {
   title?: LocalizedString | string
   crop?: R2ImageMetadata['crop']
   hotspot?: R2ImageMetadata['hotspot']
+  isMirrored?: boolean
+  isMirroredMobile?: boolean
+  isMirroredDesktop?: boolean
 }
 
 interface ProductWithMedia extends Product {
@@ -64,6 +67,9 @@ export function ProductMediaPanels({
                     quality={85}
                     crop={m.crop}
                     hotspot={m.hotspot}
+                    isMirrored={m.isMirrored}
+                    isMirroredMobile={m.isMirroredMobile}
+                    isMirroredDesktop={m.isMirroredDesktop}
                   />
                 ) : m.type === 'video' ? (
                   <div className={`w-full h-full bg-gray-300 ${imageBorderClass}`} />

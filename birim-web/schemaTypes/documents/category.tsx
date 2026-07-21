@@ -2,11 +2,17 @@ import React from 'react'
 import {defineField, defineType} from 'sanity'
 import {orderRankField} from '@sanity/orderable-document-list'
 import {getPreviewUrl} from '../utils/previewUrl'
+import {CategoryPreview} from '../../components/CategoryPreview'
+import CategoryDocumentInput from '../../components/CategoryDocumentInput'
 
 export default defineType({
   name: 'category',
   title: 'Kategori',
   type: 'document',
+  components: {
+    preview: CategoryPreview,
+    input: CategoryDocumentInput,
+  },
   fields: [
     defineField({
       name: 'id',
@@ -35,10 +41,11 @@ export default defineType({
     }),
   ],
   preview: {
-    select: {title: 'name.tr', r2Url: 'heroImageR2.url'},
-    prepare({title, r2Url}) {
+    select: {_id: '_id', title: 'name.tr', r2Url: 'heroImageR2.url'},
+    prepare({_id, title, r2Url}) {
       let finalUrl = getPreviewUrl(r2Url)
       return {
+        _id,
         title: title || 'Kategori',
         media: finalUrl
           ? () => (

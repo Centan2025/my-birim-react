@@ -4,7 +4,6 @@ export default defineType({
   name: 'cookiesPolicy',
   title: 'Çerez Politikası',
   type: 'document',
-  actions: (prev) => prev,
   fields: [
     defineField({
       name: 'title',

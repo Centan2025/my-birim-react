@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState, useEffect, useRef, useMemo} from 'react'
 import {R2ImageMetadata} from '../types'
 import {rewriteR2Url} from '../services/sanity/client'
 
@@ -52,6 +52,9 @@ interface OptimizedImageProps {
   onClick?: React.MouseEventHandler<HTMLElement>
   showPlaceholder?: boolean
   placeholderColor?: string
+  isMirrored?: boolean
+  isMirroredMobile?: boolean
+  isMirroredDesktop?: boolean
 }
 
 /**
@@ -86,7 +89,30 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   onClick,
   showPlaceholder = true,
   placeholderColor = '#f3f4f6',
+  isMirrored = false,
+  isMirroredMobile,
+  isMirroredDesktop,
 }) => {
+  const styleBlock = useMemo(() => {
+    return (
+      <style dangerouslySetInnerHTML={{ __html: `
+        img.responsive-mirror {
+          scale: var(--is-mirrored-general, 1) 1 !important;
+        }
+        @media (max-width: 768px) {
+          img.responsive-mirror {
+            scale: var(--is-mirrored-mobile, var(--is-mirrored-general, 1)) 1 !important;
+          }
+        }
+        @media (min-width: 769px) {
+          img.responsive-mirror {
+            scale: var(--is-mirrored-desktop, var(--is-mirrored-general, 1)) 1 !important;
+          }
+        }
+      `}} />
+    )
+  }, [])
+
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
   const [naturalDims, setNaturalDims] = useState<{w: number; h: number} | null>(null)
@@ -253,7 +279,13 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const useArtDirection = Boolean(srcMobile || srcDesktop)
 
   // Hotspot varsa style'a object-position ekle
-  const imgStyle: React.CSSProperties = {...style}
+  const imgStyle: React.CSSProperties = {
+    ...style,
+    // SSR-stable CSS custom properties
+    '--is-mirrored-general': isMirrored ? '-1' : '1',
+    '--is-mirrored-mobile': isMirroredMobile !== undefined ? (isMirroredMobile ? '-1' : '1') : (isMirrored ? '-1' : '1'),
+    '--is-mirrored-desktop': isMirroredDesktop !== undefined ? (isMirroredDesktop ? '-1' : '1') : (isMirrored ? '-1' : '1'),
+  } as React.CSSProperties
   if (hotspot) {
     imgStyle.objectPosition = `${hotspot.x * 100}% ${hotspot.y * 100}%`
   }
@@ -379,7 +411,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           height={height}
           loading={loading}
           {...fetchPriorityAttr}
-          className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${isHeightDefined ? '' : 'h-auto'} ${innerImgClassName}`}
+          className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${isHeightDefined ? '' : 'h-auto'} ${innerImgClassName} responsive-mirror`}
           draggable={draggable}
           onLoad={handleLoad}
           onError={handleError}
@@ -411,6 +443,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         role={onClick ? 'button' : undefined}
         tabIndex={onClick ? 0 : undefined}
       >
+        {styleBlock}
         {showPlaceholder && !isLoaded && (
           <img
             src={placeholder}
@@ -438,7 +471,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         {...fetchPriorityAttr}
         srcSet={responsiveSrcSet}
         sizes={responsiveSrcSet ? defaultSizes : undefined}
-        className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${isHeightDefined ? '' : 'h-auto'} ${innerImgClassName}`}
+        className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${isHeightDefined ? '' : 'h-auto'} ${innerImgClassName} responsive-mirror`}
         draggable={draggable}
         onLoad={handleLoad}
         onError={handleError}
@@ -470,6 +503,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
     >
+      {styleBlock}
       {showPlaceholder && !isLoaded && (
         <img
           src={placeholder}

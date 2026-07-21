@@ -110,7 +110,12 @@ export default defineType({
       active: 'isActive',
     },
     prepare({title, subtitle, userType, active}) {
-      const typeLabel = userType === 'full_member' ? 'Tam Üye' : 'E-posta Abonesi'
+      const typeLabel =
+        userType === 'full_member'
+          ? 'Tam Üye'
+          : userType === 'professional_subscriber'
+            ? 'Profesyonel Abone'
+            : 'E-posta Abonesi'
       return {
         title: title || 'Üye',
         subtitle: subtitle

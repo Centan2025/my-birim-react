@@ -14,6 +14,9 @@ export interface LightboxItem {
   description?: string
   crop?: R2ImageMetadata['crop']
   hotspot?: R2ImageMetadata['hotspot']
+  isMirrored?: boolean
+  isMirroredMobile?: boolean
+  isMirroredDesktop?: boolean
 }
 
 interface ProductMediaLightboxProps {
@@ -203,6 +206,9 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
                       crop={currentItem.crop}
                       hotspot={currentItem.hotspot}
                       placeholderColor="#111111"
+                      isMirrored={currentItem.isMirrored}
+                      isMirroredMobile={currentItem.isMirroredMobile}
+                      isMirroredDesktop={currentItem.isMirroredDesktop}
                     />
                   ) : type === 'video' ? (
                     <OptimizedVideo

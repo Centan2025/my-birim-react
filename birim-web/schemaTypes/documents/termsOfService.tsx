@@ -4,7 +4,6 @@ export default defineType({
   name: 'termsOfService',
   title: 'Kullanım Şartları',
   type: 'document',
-  actions: (prev) => prev,
   fields: [
     defineField({
       name: 'title',

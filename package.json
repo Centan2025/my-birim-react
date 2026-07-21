@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.971.0",
+    "@aws-sdk/s3-request-presigner": "^3.1091.0",
     "@fontsource/zalando-sans-semiexpanded": "^5.2.1",
     "@google/genai": "^1.28.0",
     "@sanity/client": "^6.29.1",

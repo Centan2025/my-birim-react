@@ -82,6 +82,9 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
           quality={100}
           crop={item.crop}
           hotspot={item.hotspot}
+          isMirrored={item.isMirrored}
+          isMirroredMobile={item.isMirroredMobile}
+          isMirroredDesktop={item.isMirroredDesktop}
         />
       ) : item.type === 'video' ? (
         <OptimizedVideo

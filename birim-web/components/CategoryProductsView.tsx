@@ -50,7 +50,18 @@ export function CategoryProductsView(props: CategoryProductsViewProps) {
     client
       .fetch(query, {categoryId, draftId, cleanId})
       .then((data: Product[]) => {
-        setProducts(data)
+        // Mükerrer (draft ve published) olanları temizle. En güncel olan taslağı (draft) tercih et.
+        const productMap = new Map<string, Product>()
+        data.forEach(p => {
+          const cleanId = p._id.replace('drafts.', '')
+          const isDraft = p._id.startsWith('drafts.')
+          const existing = productMap.get(cleanId)
+
+          if (!existing || isDraft) {
+            productMap.set(cleanId, p)
+          }
+        })
+        setProducts(Array.from(productMap.values()))
         setLoading(false)
       })
       .catch((err: Error) => {
@@ -60,7 +71,14 @@ export function CategoryProductsView(props: CategoryProductsViewProps) {
   }, [categoryId, client])
 
   const handleProductClick = (productId: string) => {
-    router.navigateIntent('edit', {id: productId, type: 'product'})
+    const cleanCatId = categoryId.replace('drafts.', '')
+    const cleanProdId = productId.replace('drafts.', '')
+    router.navigateUrl({path: `/structure/orderable-category;${cleanCatId};${cleanProdId}`})
+  }
+
+  const handleEditCategoryClick = () => {
+    const cleanId = categoryId.replace('drafts.', '')
+    router.navigateUrl({path: `/structure/orderable-category;${cleanId},view=editor`})
   }
 
   if (loading) {
@@ -76,7 +94,29 @@ export function CategoryProductsView(props: CategoryProductsViewProps) {
   return (
     <Card padding={4} style={{minHeight: '400px', maxWidth: '800px', margin: '0 auto'}}>
       <Stack space={4}>
-        <Heading size={2}>Bu Kategorideki Modeller</Heading>
+        <Flex align="center" justify="space-between">
+          <Heading size={2}>Bu Kategorideki Modeller</Heading>
+          <button
+            onClick={handleEditCategoryClick}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 14px',
+              backgroundColor: '#2563eb',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '6px',
+              fontWeight: 600,
+              fontSize: '13px',
+              cursor: 'pointer',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            }}
+          >
+            ✏️ Kategoriyi Düzenle
+          </button>
+        </Flex>
+
         <Card padding={3} radius={2} shadow={1} tone="primary">
           <Text size={2} weight="semibold">
             Toplam {products.length} model

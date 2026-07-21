@@ -47,12 +47,12 @@ export const getCategories = async (): Promise<Category[]> => {
       id: r.id,
       name: r.name,
       subtitle: r.subtitle,
-      heroImage: (r.heroImageR2 as Record<string, unknown>)?.['url']
+      heroImage: r.heroImageR2
         ? {url: mapImage(r.heroImageR2), ...mapR2Metadata(r.heroImageR2)}
-        : mapImage(r.heroImage),
-      menuImage: (r.menuImageR2 as Record<string, unknown>)?.['url']
+        : '',
+      menuImage: r.menuImageR2
         ? {url: mapImage(r.menuImageR2), ...mapR2Metadata(r.menuImageR2)}
-        : mapImage(r.menuImage),
+        : '',
     }))
   }
   await delay(SIMULATED_DELAY)

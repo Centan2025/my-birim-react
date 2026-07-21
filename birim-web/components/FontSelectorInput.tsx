@@ -374,7 +374,7 @@ export default function FontSelectorInput(props: StringInputProps) {
     <Container>
       <SelectorWrapper>
         <DropdownTrigger
-          {...props.elementProps}
+          {...(props.elementProps as any)}
           type="button"
           role="combobox"
           aria-expanded={isOpen}

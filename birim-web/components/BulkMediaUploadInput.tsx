@@ -9,24 +9,11 @@ import {
 } from 'sanity'
 import {Box, Button, Card, Flex, Stack, Text, useToast, Spinner, Inline} from '@sanity/ui'
 import {UploadIcon} from '@sanity/icons'
-import {S3Client, PutObjectCommand} from '@aws-sdk/client-s3'
 import imageCompression from 'browser-image-compression'
 
-// R2 Configuration
-const R2_ACCOUNT_ID = process.env.SANITY_STUDIO_R2_ACCOUNT_ID
-const R2_ACCESS_KEY_ID = process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID
-const R2_SECRET_ACCESS_KEY = process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY
-const R2_BUCKET_NAME = process.env.SANITY_STUDIO_R2_BUCKET_NAME || 'birim-web'
+// R2 Configuration (only domain needed for URL generation)
 const R2_DOMAIN = process.env.SANITY_STUDIO_R2_DOMAIN
 
-const r2Client = new S3Client({
-  region: 'auto',
-  endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: R2_ACCESS_KEY_ID || '',
-    secretAccessKey: R2_SECRET_ACCESS_KEY || '',
-  },
-})
 
 // Helper: Slugify
 function slugify(text: string): string {
@@ -57,6 +44,55 @@ function slugify(text: string): string {
     .replace(/-+/g, '-')
     .replace(/^-+|-+$/g, '')
 }
+
+const getApiUrl = (path: string): string => {
+  if (typeof window === 'undefined') return path
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  const base = isLocal ? 'http://localhost:3002' : 'https://www.birim.com'
+  return `${base}${path}`
+}
+
+async function uploadFileViaPresignedUrl(blob: Blob | File, key: string, contentType: string): Promise<string> {
+  const lastSlash = key.lastIndexOf('/')
+  const folder = key.substring(0, lastSlash)
+  const filename = key.substring(lastSlash + 1)
+
+  // 1. Get Presigned URL
+  const res = await fetch(getApiUrl('/api/media/presigned-url'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      filename,
+      contentType,
+      folder,
+    }),
+  })
+
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}))
+    throw new Error(errBody.error || `Presigned URL isteği başarısız: ${res.statusText}`)
+  }
+
+  const { uploadUrl, fileUrl } = await res.json()
+
+  // 2. Upload file to R2 using Presigned URL
+  const uploadRes = await fetch(uploadUrl, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': contentType,
+    },
+    body: blob,
+  })
+
+  if (!uploadRes.ok) {
+    throw new Error(`R2'ye yükleme başarısız: ${uploadRes.statusText}`)
+  }
+
+  return fileUrl
+}
+
 
 const isVideoFile = (filename: string) => {
   const ext = filename.split('.').pop()?.toLowerCase() || ''
@@ -157,15 +193,7 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
                 }
 
                 const currentKey = size.suffix ? key.replace(/\.webp$/, `${size.suffix}.webp`) : key
-                const arrayBuffer = await compressedBlob.arrayBuffer()
-                return r2Client.send(
-                  new PutObjectCommand({
-                    Bucket: R2_BUCKET_NAME,
-                    Key: currentKey,
-                    Body: new Uint8Array(arrayBuffer),
-                    ContentType: 'image/webp',
-                  }),
-                )
+                return uploadFileViaPresignedUrl(compressedBlob, currentKey, 'image/webp')
               })
 
               await Promise.all(sizePromises)
@@ -182,15 +210,7 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
                 hotspotY: 0.5,
               }
             } else {
-              const arrayBuffer = await file.arrayBuffer()
-              await r2Client.send(
-                new PutObjectCommand({
-                  Bucket: R2_BUCKET_NAME,
-                  Key: key,
-                  Body: new Uint8Array(arrayBuffer),
-                  ContentType: file.type,
-                }),
-              )
+              await uploadFileViaPresignedUrl(file, key, file.type)
               r2Asset = {
                 _type: 'r2Asset',
                 url: `${r2Domain}/${key}`,

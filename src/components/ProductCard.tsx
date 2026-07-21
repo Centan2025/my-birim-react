@@ -27,6 +27,9 @@ export const ProductCard: React.FC<{product: Product}> = ({product}) => {
         urlDesktop?: string
         crop?: R2ImageMetadata['crop']
         hotspot?: R2ImageMetadata['hotspot']
+        isMirrored?: boolean
+        isMirroredMobile?: boolean
+        isMirroredDesktop?: boolean
       })
     : {}
   const mainImageUrl = (isObject ? mainImageObj.url : (product.mainImage as string)) || ''
@@ -34,6 +37,9 @@ export const ProductCard: React.FC<{product: Product}> = ({product}) => {
   const mainImageDesktop = mainImageObj.urlDesktop
   const mainImageCrop = mainImageObj.crop
   const mainImageHotspot = mainImageObj.hotspot
+  const mainImageIsMirrored = mainImageObj.isMirrored !== undefined ? !!mainImageObj.isMirrored : undefined
+  const mainImageIsMirroredMobile = mainImageObj.isMirroredMobile !== undefined ? !!mainImageObj.isMirroredMobile : undefined
+  const mainImageIsMirroredDesktop = mainImageObj.isMirroredDesktop !== undefined ? !!mainImageObj.isMirroredDesktop : undefined
 
   const handleClick = () => {
     // We still want to handle analytics before navigation
@@ -64,6 +70,9 @@ export const ProductCard: React.FC<{product: Product}> = ({product}) => {
             quality={85}
             crop={mainImageCrop}
             hotspot={mainImageHotspot}
+            isMirrored={mainImageIsMirrored}
+            isMirroredMobile={mainImageIsMirroredMobile}
+            isMirroredDesktop={mainImageIsMirroredDesktop}
           />
         </div>
         <div className="px-2.5 py-2 sm:px-3 sm:py-2 transition-colors duration-500">

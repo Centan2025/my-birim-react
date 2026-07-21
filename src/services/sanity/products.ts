@@ -173,6 +173,9 @@ const mapProductMedia = (mediaArrRaw: unknown): unknown[] => {
       if (urlMobile && urlMobile !== url) result['urlMobile'] = urlMobile
       if (urlDesktop && urlDesktop !== url) result['urlDesktop'] = urlDesktop
       result['isCover'] = !!m['isCover']
+      result['isMirrored'] = (m['imageR2'] as any)?.isMirrored !== undefined ? !!(m['imageR2'] as any)?.isMirrored : (m['isMirrored'] !== undefined ? !!m['isMirrored'] : undefined)
+      result['isMirroredMobile'] = (m['imageMobileR2'] as any)?.isMirrored !== undefined ? !!(m['imageMobileR2'] as any)?.isMirrored : undefined
+      result['isMirroredDesktop'] = (m['imageDesktopR2'] as any)?.isMirrored !== undefined ? !!(m['imageDesktopR2'] as any)?.isMirrored : undefined
       return result
     })
     .filter((m: Record<string, unknown>) => !!m['url'])
@@ -233,6 +236,9 @@ const mapProductRow = (r: Record<string, unknown>): Product => {
     mainImage = {
       url,
       palette: extractPalette(coverItem['imageR2']),
+      isMirrored: (coverItem['imageR2'] as any)?.isMirrored !== undefined ? !!(coverItem['imageR2'] as any)?.isMirrored : (coverItem['isMirrored'] !== undefined ? !!coverItem['isMirrored'] : undefined),
+      isMirroredMobile: (coverItem['imageMobileR2'] as any)?.isMirrored !== undefined ? !!(coverItem['imageMobileR2'] as any)?.isMirrored : undefined,
+      isMirroredDesktop: (coverItem['imageDesktopR2'] as any)?.isMirrored !== undefined ? !!(coverItem['imageDesktopR2'] as any)?.isMirrored : undefined,
       ...metadata,
     }
     if (urlMobile && urlMobile !== url) mainImage['urlMobile'] = urlMobile
@@ -300,7 +306,7 @@ const productQueryString = `
   "id": id.current, name, year, isPublished, description, 
   media[]{ 
     type, url, imageR2, imageMobileR2, imageDesktopR2, title, description, link, linkText, 
-    videoFileR2, videoFileMobileR2, videoFileDesktopR2, isCover 
+    videoFileR2, videoFileMobileR2, videoFileDesktopR2, isCover, isMirrored 
   },
   mediaSectionTitle, mediaSectionText, showMediaPanels, buyable, price, currency, sku, stockStatus,
   materialSelections[]{ "group": group->{title,books[]{title,items[]{name,imageR2}}}, materials[]{name,imageR2} },

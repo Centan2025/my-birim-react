@@ -28,5 +28,11 @@ export default defineType({
       type: 'boolean',
       initialValue: false,
     }),
+    defineField({
+      name: 'isMirrored',
+      title: 'Aynala (Yatay Çevir)?',
+      type: 'boolean',
+      initialValue: false,
+    }),
   ],
 })

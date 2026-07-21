@@ -2,27 +2,14 @@ import React, {useCallback, useState, useRef, useEffect} from 'react'
 import {Box, Button, Card, Flex, Stack, Text, useToast, Inline, Spinner, Dialog} from '@sanity/ui'
 import {UploadIcon, TrashIcon, CheckmarkIcon, EditIcon, CropIcon, CloseIcon} from '@sanity/icons'
 import {ObjectInputProps, set, unset, useFormValue} from 'sanity'
-import {S3Client, PutObjectCommand} from '@aws-sdk/client-s3'
 import imageCompression from 'browser-image-compression'
 import styled from 'styled-components'
 import ReactCrop, {type Crop, type PixelCrop, type PercentCrop} from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
-// R2 Configuration from Environment Variables
-const R2_ACCOUNT_ID = process.env.SANITY_STUDIO_R2_ACCOUNT_ID
-const R2_ACCESS_KEY_ID = process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID
-const R2_SECRET_ACCESS_KEY = process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY
-const R2_BUCKET_NAME = process.env.SANITY_STUDIO_R2_BUCKET_NAME || 'birim-web'
+// R2 Configuration from Environment Variables (only R2_DOMAIN is needed for rewrite URLs)
 const R2_DOMAIN = process.env.SANITY_STUDIO_R2_DOMAIN
 
-const r2Client = new S3Client({
-  region: 'auto',
-  endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: R2_ACCESS_KEY_ID || '',
-    secretAccessKey: R2_SECRET_ACCESS_KEY || '',
-  },
-})
 
 const DropZone = styled(Card)<{$isDragging: boolean; $hasValue: boolean}>`
   border: 2px dashed
@@ -157,6 +144,55 @@ function slugify(text: string): string {
     .replace(/^-+|-+$/g, '')
 }
 
+const getApiUrl = (path: string): string => {
+  if (typeof window === 'undefined') return path
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  const base = isLocal ? 'http://localhost:3002' : 'https://www.birim.com'
+  return `${base}${path}`
+}
+
+async function uploadFileViaPresignedUrl(blob: Blob | File, key: string, contentType: string): Promise<string> {
+  const lastSlash = key.lastIndexOf('/')
+  const folder = key.substring(0, lastSlash)
+  const filename = key.substring(lastSlash + 1)
+
+  // 1. Get Presigned URL
+  const res = await fetch(getApiUrl('/api/media/presigned-url'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      filename,
+      contentType,
+      folder,
+    }),
+  })
+
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}))
+    throw new Error(errBody.error || `Presigned URL isteği başarısız: ${res.statusText}`)
+  }
+
+  const { uploadUrl, fileUrl } = await res.json()
+
+  // 2. Upload file to R2 using Presigned URL
+  const uploadRes = await fetch(uploadUrl, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': contentType,
+    },
+    body: blob,
+  })
+
+  if (!uploadRes.ok) {
+    throw new Error(`R2'ye yükleme başarısız: ${uploadRes.statusText}`)
+  }
+
+  return fileUrl
+}
+
+
 export default function R2AssetInput(props: ObjectInputProps) {
   const {value, onChange} = props
   const toast = useToast()
@@ -177,6 +213,7 @@ export default function R2AssetInput(props: ObjectInputProps) {
 
   const asset = value as any
   const hasValue = !!asset?.url
+  const isMirrored = !!asset?.isMirrored
 
   // Rewrite .r2.dev preview URLs to Worker CDN for fast loading
   const rewritePreviewUrl = (url: string | undefined): string => {
@@ -312,28 +349,12 @@ export default function R2AssetInput(props: ObjectInputProps) {
             }
 
             const currentKey = size.suffix ? key.replace(/\.webp$/, `${size.suffix}.webp`) : key
-            const arrayBuffer = await compressedBlob.arrayBuffer()
-            return r2Client.send(
-              new PutObjectCommand({
-                Bucket: R2_BUCKET_NAME,
-                Key: currentKey,
-                Body: new Uint8Array(arrayBuffer),
-                ContentType: 'image/webp',
-              }),
-            )
+            return uploadFileViaPresignedUrl(compressedBlob, currentKey, 'image/webp')
           })
 
           await Promise.all(uploadPromises)
         } else {
-          const arrayBuffer = await processedFile.arrayBuffer()
-          await r2Client.send(
-            new PutObjectCommand({
-              Bucket: R2_BUCKET_NAME,
-              Key: key,
-              Body: new Uint8Array(arrayBuffer),
-              ContentType: file.type,
-            }),
-          )
+          await uploadFileViaPresignedUrl(processedFile, key, file.type)
         }
 
         const r2Domain = R2_DOMAIN?.startsWith('http') ? R2_DOMAIN : `https://${R2_DOMAIN}`
@@ -556,6 +577,8 @@ export default function R2AssetInput(props: ObjectInputProps) {
                       hasCrop && !isEditMode
                         ? `inset(${cropY * 100}% ${100 - (cropX + cropWidth) * 100}% ${100 - (cropY + cropHeight) * 100}% ${cropX * 100}%)`
                         : undefined,
+                    transform: isMirrored ? 'scaleX(-1)' : 'none',
+                    transition: 'transform 0.3s ease-in-out',
                   }}
                 />
 
@@ -574,18 +597,31 @@ export default function R2AssetInput(props: ObjectInputProps) {
               <Inline space={2}>
                 {/* Only show Edit button for images */}
                 {!isVideo && (
-                  <Button
-                    icon={CropIcon}
-                    mode="ghost"
-                    tone="primary"
-                    fontSize={1}
-                    padding={2}
-                    text="Düzenle"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setIsEditMode(true)
-                    }}
-                  />
+                  <>
+                    <Button
+                      icon={CropIcon}
+                      mode="ghost"
+                      tone="primary"
+                      fontSize={1}
+                      padding={2}
+                      text="Düzenle"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setIsEditMode(true)
+                      }}
+                    />
+                    <Button
+                      mode={isMirrored ? 'default' : 'ghost'}
+                      tone={isMirrored ? 'positive' : 'default'}
+                      fontSize={1}
+                      padding={2}
+                      text={isMirrored ? '↔️ Aynalandı' : '🔄 Aynala'}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onChange(set(!isMirrored, ['isMirrored']))
+                      }}
+                    />
+                  </>
                 )}
                 <Button
                   icon={TrashIcon}

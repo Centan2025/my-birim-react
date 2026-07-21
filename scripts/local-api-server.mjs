@@ -95,10 +95,22 @@ const sanityClient = createClient({
 const app = express()
 app.use(express.json())
 
-// CORS - sadece local Vite dev server'dan gelen isteklere izin ver
+const ALLOWED_ORIGINS = [
+  'http://localhost:3001',
+  'http://localhost:3333',
+  'https://birim.sanity.studio',
+  'https://www.birim.com',
+]
+
+// CORS - Dinamik origin destegi
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3001')
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+  const origin = req.headers.origin
+  if (origin && (ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.sanity.studio') || origin.endsWith('.vercel.app'))) {
+    res.setHeader('Access-Control-Allow-Origin', origin)
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3001')
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
   if (req.method === 'OPTIONS') return res.sendStatus(200)
   next()
@@ -632,6 +644,55 @@ app.post('/api/send-password-reset', async (req, res) => {
   } catch (err) {
     console.error('❌ Sıfırlama maili gönderim hatası:', err)
     res.status(500).json({ error: 'Failed to send reset email' })
+  }
+})
+
+// ─── /api/media/presigned-url ──────────────────────────────────────────────
+app.post('/api/media/presigned-url', async (req, res) => {
+  const { filename, contentType, folder } = req.body || {}
+  if (!filename || !contentType) {
+    return res.status(400).json({ error: 'filename ve contentType parametreleri gereklidir.' })
+  }
+
+  try {
+    const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3')
+    const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner')
+
+    const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || process.env.SANITY_STUDIO_R2_ACCOUNT_ID
+    const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID
+    const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY
+    const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || process.env.SANITY_STUDIO_R2_BUCKET_NAME || 'birim-web'
+    const R2_DOMAIN = process.env.R2_DOMAIN || process.env.SANITY_STUDIO_R2_DOMAIN
+
+    const r2Client = new S3Client({
+      region: 'auto',
+      endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+      credentials: {
+        accessKeyId: R2_ACCESS_KEY_ID || '',
+        secretAccessKey: R2_SECRET_ACCESS_KEY || '',
+      },
+    })
+
+    const key = folder ? `${folder}/${filename}` : `uploads/${filename}`
+    const command = new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: key,
+      ContentType: contentType,
+    })
+
+    const url = await getSignedUrl(r2Client, command, { expiresIn: 900 })
+    const r2Domain = R2_DOMAIN?.startsWith('http') ? R2_DOMAIN : `https://${R2_DOMAIN}`
+    const finalFileUrl = `${r2Domain}/${key}`
+
+    return res.status(200).json({
+      success: true,
+      uploadUrl: url,
+      fileUrl: finalFileUrl,
+      key: key,
+    })
+  } catch (error) {
+    console.error('Presigned URL error:', error)
+    return res.status(500).json({ error: `Presigned URL oluşturulamadı: ${error.message}` })
   }
 })
 

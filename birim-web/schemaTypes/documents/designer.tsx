@@ -59,16 +59,17 @@ export default defineType({
     }),
   ],
   preview: {
-    select: {title: 'name.tr', r2Url: 'imageR2.url'},
-    prepare({title, r2Url}) {
+    select: {name: 'name', r2Url: 'imageR2.url'},
+    prepare({name, r2Url}: {name?: {tr?: string; en?: string}; r2Url?: string}) {
       let finalUrl = getPreviewUrl(r2Url)
+      const displayTitle = name?.tr || name?.en || 'İsimsiz Tasarımcı'
       return {
-        title: title || 'Tasarımcı',
+        title: displayTitle,
         media: finalUrl
           ? () => (
               <img
                 src={finalUrl}
-                alt={title || 'Tasarımcı'}
+                alt={displayTitle}
                 style={{width: '100%', height: '100%', objectFit: 'cover'}}
               />
             )

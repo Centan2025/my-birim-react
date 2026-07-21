@@ -4,79 +4,79 @@
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://www.birim.com/#/</loc>
-    <lastmod>2026-06-01</lastmod>
+    <lastmod>2026-07-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>1</priority>
   </url>
   <url>
     <loc>https://www.birim.com/#/about</loc>
-    <lastmod>2026-06-01</lastmod>
+    <lastmod>2026-07-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.birim.com/#/contact</loc>
-    <lastmod>2026-06-01</lastmod>
+    <lastmod>2026-07-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.birim.com/#/products</loc>
-    <lastmod>2026-06-01</lastmod>
+    <lastmod>2026-07-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.birim.com/#/designers</loc>
-    <lastmod>2026-06-01</lastmod>
+    <lastmod>2026-07-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.birim.com/#/projects</loc>
-    <lastmod>2026-06-01</lastmod>
+    <lastmod>2026-07-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.birim.com/#/news</loc>
-    <lastmod>2026-06-01</lastmod>
+    <lastmod>2026-07-21</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://www.birim.com/#/categories</loc>
-    <lastmod>2026-06-01</lastmod>
+    <lastmod>2026-07-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://www.birim.com/#/factory</loc>
-    <lastmod>2026-06-01</lastmod>
+    <lastmod>2026-07-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://www.birim.com/#/cookies</loc>
-    <lastmod>2026-06-01</lastmod>
+    <lastmod>2026-07-21</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.birim.com/#/privacy</loc>
-    <lastmod>2026-06-01</lastmod>
+    <lastmod>2026-07-21</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.birim.com/#/terms</loc>
-    <lastmod>2026-06-01</lastmod>
+    <lastmod>2026-07-21</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://www.birim.com/#/kvkk</loc>
-    <lastmod>2026-06-01</lastmod>
+    <lastmod>2026-07-21</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

@@ -206,6 +206,9 @@ export interface Product {
         palette?: SanityImagePalette
         crop?: R2ImageMetadata['crop']
         hotspot?: R2ImageMetadata['hotspot']
+        isMirrored?: boolean
+        isMirroredMobile?: boolean
+        isMirroredDesktop?: boolean
       }
   /** Mixed alternative media for the band under hero. */
   alternativeMedia?: {
@@ -215,6 +218,9 @@ export interface Product {
     urlDesktop?: string // Art Direction: Desktop için URL
     crop?: R2ImageMetadata['crop']
     hotspot?: R2ImageMetadata['hotspot']
+    isMirrored?: boolean
+    isMirroredMobile?: boolean
+    isMirroredDesktop?: boolean
   }[]
   /** Optional rich media for hero: image/video/youtube */
   media?: {
@@ -228,6 +234,9 @@ export interface Product {
     linkText?: LocalizedString
     crop?: R2ImageMetadata['crop']
     hotspot?: R2ImageMetadata['hotspot']
+    isMirrored?: boolean
+    isMirroredMobile?: boolean
+    isMirroredDesktop?: boolean
   }[]
   /** Custom title for the bottom media section */
   mediaSectionTitle?: LocalizedString

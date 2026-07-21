@@ -6,11 +6,15 @@ import BulkMediaUploadInput from '../../components/BulkMediaUploadInput'
 import ReferenceInputFix from '../../components/ReferenceInputFix'
 
 import {orderRankField} from '@sanity/orderable-document-list'
+import ProductDocumentInput from '../../components/ProductDocumentInput'
 
 export default defineType({
   name: 'product',
   title: 'Ürün',
   type: 'document',
+  components: {
+    input: ProductDocumentInput,
+  },
   fields: [
     orderRankField({type: 'product'}),
     defineField({
@@ -154,20 +158,22 @@ export default defineType({
   ],
   preview: {
     select: {
-      title: 'name.tr',
+      name: 'name',
       media: 'media',
     },
-    prepare({title, media}: {title?: string; media?: any[]}) {
+    prepare({name, media}: {name?: {tr?: string; en?: string}; media?: any[]}) {
       const coverItem = media?.find((m) => (m as any).isCover) || media?.[0]
       const r2Url =
         (coverItem as any)?.imageR2?.url ||
         (coverItem as any)?.videoFileR2?.url ||
         (coverItem as any)?.thumbnailR2?.url
       let finalUrl = getPreviewUrl(r2Url)
+      const isMirrored =
+        !!(coverItem as any)?.imageR2?.isMirrored || !!(coverItem as any)?.isMirrored
 
       return {
-        title: title || 'Ürün',
-        media: renderPreviewMedia(finalUrl, (coverItem as any)?.type),
+        title: name?.tr || name?.en || 'İsimsiz Ürün',
+        media: renderPreviewMedia(finalUrl, (coverItem as any)?.type, isMirrored),
       }
     },
   },

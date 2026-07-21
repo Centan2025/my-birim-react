@@ -1,5 +1,6 @@
 import {createClient} from '@sanity/client'
 import bcrypt from 'bcryptjs'
+import {isRateLimited, getClientIp} from './rateLimiter'
 
 const SANITY_PROJECT_ID = process.env.VITE_SANITY_PROJECT_ID || 'wn3a082f'
 const SANITY_DATASET = process.env.VITE_SANITY_DATASET || 'production'
@@ -17,6 +18,8 @@ const client = createClient({
 interface ApiRequest {
   method?: string
   body?: Record<string, unknown>
+  headers?: Record<string, string>
+  socket?: {remoteAddress?: string}
 }
 
 interface ApiResponse {
@@ -27,6 +30,11 @@ interface ApiResponse {
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({error: 'Method Not Allowed'})
+  }
+
+  const ip = getClientIp(req)
+  if (isRateLimited(`register_ip_${ip}`, {limit: 5, windowMs: 60000})) {
+    return res.status(429).json({error: 'Çok fazla kayıt denemesi yaptınız. Lütfen daha sonra tekrar deneyin.'})
   }
 
   if (!SANITY_TOKEN) {
@@ -51,7 +59,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     if (existingUser) {
       // Eğer email abonesi ise tam üyeliğe yükselt
       if (existingUser.userType === 'email_subscriber') {
-        const passwordHash = await bcrypt.hash(password, 10)
+        const passwordHash = await bcrypt.hash(password, 12)
         const updatedUser = await client
           .patch(existingUser._id)
           .set({
@@ -76,7 +84,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     }
 
     // Yeni kullanıcı oluştur
-    const passwordHash = await bcrypt.hash(password, 10)
+    const passwordHash = await bcrypt.hash(password, 12)
     const verificationToken = crypto.randomUUID()
 
     const newUser = await client.create({

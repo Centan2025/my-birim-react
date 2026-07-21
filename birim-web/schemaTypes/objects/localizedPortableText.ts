@@ -236,5 +236,41 @@ export const localizedPortableText = defineType({
         search: {weight: 0},
       },
     }),
+    defineField({
+      name: 'it',
+      title: 'Italiano',
+      type: 'array',
+      of: portableTextBlocks,
+      options: {
+        search: {weight: 0},
+      },
+    }),
+    defineField({
+      name: 'de',
+      title: 'Deutsch',
+      type: 'array',
+      of: portableTextBlocks,
+      options: {
+        search: {weight: 0},
+      },
+    }),
+    defineField({
+      name: 'fr',
+      title: 'Français',
+      type: 'array',
+      of: portableTextBlocks,
+      options: {
+        search: {weight: 0},
+      },
+    }),
+    defineField({
+      name: 'es',
+      title: 'Español',
+      type: 'array',
+      of: portableTextBlocks,
+      options: {
+        search: {weight: 0},
+      },
+    }),
   ],
 })

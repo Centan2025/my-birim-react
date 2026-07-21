@@ -4,7 +4,6 @@ export default defineType({
   name: 'privacyPolicy',
   title: 'Gizlilik Politikası',
   type: 'document',
-  actions: (prev) => prev,
   fields: [
     defineField({
       name: 'title',

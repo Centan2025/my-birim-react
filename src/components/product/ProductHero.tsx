@@ -22,6 +22,9 @@ interface ProductHeroProps {
     urlDesktop?: string
     crop?: unknown
     hotspot?: unknown
+    isMirrored?: boolean
+    isMirroredMobile?: boolean
+    isMirroredDesktop?: boolean
   }[]
   slideCount: number
   totalHeroSlides: number
@@ -216,6 +219,9 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     quality={90}
                     crop={m.crop as R2ImageMetadata['crop']}
                     hotspot={m.hotspot as R2ImageMetadata['hotspot']}
+                    isMirrored={m.isMirrored}
+                    isMirroredMobile={m.isMirroredMobile}
+                    isMirroredDesktop={m.isMirroredDesktop}
                   />
                 ) : m.type === 'video' ? (
                   <OptimizedVideo

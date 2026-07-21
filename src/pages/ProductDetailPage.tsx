@@ -379,6 +379,7 @@ export function ProductDetailPage() {
             urlDesktop: m.urlDesktop,
             crop: m.crop,
             hotspot: m.hotspot,
+            isMirrored: m.isMirrored,
           }))}
           initialIndex={heroHook.currentImageIndex}
           onClose={() => setIsFullscreenOpen(false)}

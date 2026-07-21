@@ -85,10 +85,22 @@ export default defineType({
       of: [
         {
           type: 'object',
+          name: 'valueItem',
           fields: [
             defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
             defineField({name: 'description', title: 'Açıklama', type: 'localizedString'}),
           ],
+          preview: {
+            select: {
+              title: 'title.tr',
+              subtitle: 'title.en',
+            },
+            prepare({title, subtitle}) {
+              return {
+                title: title || subtitle || 'Değer',
+              }
+            },
+          },
         },
       ],
     }),

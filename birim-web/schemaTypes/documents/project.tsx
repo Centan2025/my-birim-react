@@ -79,21 +79,22 @@ export default defineType({
   ],
   preview: {
     select: {
-      title: 'title.tr',
+      titleObj: 'title',
       media: 'media',
     },
-    prepare({title, media}) {
+    prepare({titleObj, media}: {titleObj?: {tr?: string; en?: string}; media?: any[]}) {
       const coverItem = media?.find((m: any) => m.isCover) || media?.[0]
       const r2Url = coverItem?.imageR2?.url || coverItem?.thumbnailR2?.url
       let finalUrl = getPreviewUrl(r2Url)
+      const displayTitle = titleObj?.tr || titleObj?.en || 'İsimsiz Proje'
 
       return {
-        title: title || 'Proje',
+        title: displayTitle,
         media: finalUrl
           ? () => (
               <img
                 src={finalUrl}
-                alt={title || 'Proje'}
+                alt={displayTitle}
                 style={{width: '100%', height: '100%', objectFit: 'cover'}}
               />
             )

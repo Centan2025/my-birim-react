@@ -1,66 +1,61 @@
 import type {StructureBuilder} from 'sanity/structure'
+import type {ConfigContext} from 'sanity'
 import {orderableDocumentListDeskItem} from '@sanity/orderable-document-list'
-import {CategoryProductsView} from './components/CategoryProductsView'
 import {PreviewView} from './components/PreviewView'
 
-export const deskStructure = async (
+export const deskStructure = (
   S: StructureBuilder,
-  context: {getClient: (options: {apiVersion: string}) => any},
+  context: ConfigContext,
 ) => {
-  const {getClient} = context
-  const client = getClient({apiVersion: '2024-01-01'})
-
-  // Async işlemleri burada yapıyoruz
-  const cookiesPolicy = await client.fetch('*[_type == "cookiesPolicy"][0]')
-  const privacyPolicy = await client.fetch('*[_type == "privacyPolicy"][0]')
-  const termsOfService = await client.fetch('*[_type == "termsOfService"][0]')
-  const kvkkPolicy = await client.fetch('*[_type == "kvkkPolicy"][0]')
-  const siteSettingsDoc = await client.fetch('*[_type == "siteSettings"][0]')
-  const homePage = await client.fetch('*[_type == "homePage"][0]')
-  const aboutPage = await client.fetch('*[_type == "aboutPage"][0]')
-  const factoryPage = await client.fetch('*[_type == "factoryPage"][0]')
-  const contactPage = await client.fetch('*[_type == "contactPage"][0]')
-  // Ensure we always use published ids (strip drafts.)
-  const pubId = (id?: string): string => {
-    if (!id || typeof id !== 'string') return ''
-    return id.replace(/^drafts\./, '')
-  }
-
   return S.list()
     .title('İçerik')
     .items([
       S.listItem()
         .title('Site Ayarları')
         .child(
-          siteSettingsDoc?._id
-            ? S.document()
-                .schemaType('siteSettings')
-                .id(pubId(siteSettingsDoc._id))
-                .views([
-                  S.view.form().title('Düzenle'),
-                  S.view
-                    .component(PreviewView)
-                    .title('Önizleme')
-                    .icon(() => '👁️'),
-                ])
-            : S.document()
-                .schemaType('siteSettings')
-                .views([
-                  S.view.form().title('Düzenle'),
-                  S.view
-                    .component(PreviewView)
-                    .title('Önizleme')
-                    .icon(() => '👁️'),
-                ]),
+          S.document()
+            .schemaType('siteSettings')
+            .documentId('siteSettings')
+            .views([
+              S.view.form().title('Düzenle'),
+              S.view
+                .component(PreviewView)
+                .title('Önizleme')
+                .icon(() => '👁️'),
+            ]),
         ),
       S.listItem().title('UI Çevirileri').child(S.document().schemaType('uiTranslations')),
       S.listItem()
         .title('Ana Sayfa')
         .child(
-          homePage?._id
-            ? S.document()
-                .schemaType('homePage')
-                .id(pubId(homePage._id) || 'homePage')
+          S.document()
+            .schemaType('homePage')
+            .documentId('homePage')
+            .views([
+              S.view.form().title('Düzenle'),
+              S.view
+                .component(PreviewView)
+                .title('Önizleme')
+                .icon(() => '👁️'),
+            ]),
+        ),
+      (() => {
+        const item = orderableDocumentListDeskItem({
+          type: 'category',
+          title: 'Ürünler (Kategoriler & Modeller)',
+          S,
+          context,
+          icon: () => '🪑',
+        })
+        if (item.child && typeof item.child === 'object') {
+          const componentPane = item.child as unknown as Record<string, unknown>
+          componentPane.child = (childId: string, childContext: any) => {
+            const cleanId = childId.replace('drafts.', '')
+            
+            if (childContext?.params?.view === 'editor') {
+              return S.document()
+                .schemaType('category')
+                .documentId(cleanId)
                 .views([
                   S.view.form().title('Düzenle'),
                   S.view
@@ -68,35 +63,51 @@ export const deskStructure = async (
                     .title('Önizleme')
                     .icon(() => '👁️'),
                 ])
-            : S.document()
-                .schemaType('homePage')
-                .documentId('anaSayfa') // Bazı durumlarda ID anaSayfa olabiliyor
-                .views([
-                  S.view.form().title('Düzenle'),
-                  S.view
-                    .component(PreviewView)
-                    .title('Önizleme')
-                    .icon(() => '👁️'),
-                ]),
-        ),
-      S.listItem()
-        .title('Ürünler')
-        .child(
-          S.list()
-            .title('Ürün Yönetimi')
-            .items([
-              // Kategorileri Düzenle - Sıralama ve Modeller görünümü ile
-              orderableDocumentListDeskItem({
-                type: 'category',
-                title: 'Kategorileri Düzenle',
-                S,
-                context,
-                icon: () => '📂',
-              }),
-              S.divider(),
-              S.documentTypeListItem('product').title('Tüm Modeller'),
-            ]),
-        ),
+                .serialize()
+            }
+
+            return S.documentList()
+              .title('Modeller')
+              .schemaType('product')
+              .filter(
+                '_type == "product" && (category._ref == $catId || category._ref == $draftCatId)',
+              )
+              .params({
+                catId: cleanId,
+                draftCatId: `drafts.${cleanId}`,
+              })
+              .defaultOrdering([{field: 'orderRank', direction: 'asc'}])
+              .apiVersion('2024-01-01')
+              .menuItems([
+                S.menuItem()
+                  .title('Kategoriyi Düzenle')
+                  .icon(() => '✏️')
+                  .intent({
+                    type: 'edit',
+                    params: {id: cleanId, type: 'category'},
+                  }),
+                S.menuItem()
+                  .title('Yeni Model Ekle')
+                  .intent({type: 'create', params: {type: 'product'}}),
+              ])
+              .child((productId: string) =>
+                S.document()
+                  .schemaType('product')
+                  .documentId(productId)
+                  .views([
+                    S.view.form().title('Düzenle'),
+                    S.view
+                      .component(PreviewView)
+                      .title('Önizleme')
+                      .icon(() => '👁️'),
+                  ])
+                  .serialize(),
+              )
+              .serialize()
+          }
+        }
+        return item
+      })(),
       orderableDocumentListDeskItem({
         type: 'designer',
         title: 'Tasarımcılar',
@@ -115,74 +126,44 @@ export const deskStructure = async (
       S.listItem()
         .title('Hakkımızda')
         .child(
-          aboutPage?._id
-            ? S.document()
-                .schemaType('aboutPage')
-                .id(pubId(aboutPage._id) || 'aboutPage')
-                .views([
-                  S.view.form().title('Düzenle'),
-                  S.view
-                    .component(PreviewView)
-                    .title('Önizleme')
-                    .icon(() => '👁️'),
-                ])
-            : S.document()
-                .schemaType('aboutPage')
-                .views([
-                  S.view.form().title('Düzenle'),
-                  S.view
-                    .component(PreviewView)
-                    .title('Önizleme')
-                    .icon(() => '👁️'),
-                ]),
+          S.document()
+            .schemaType('aboutPage')
+            .documentId('aboutPage')
+            .views([
+              S.view.form().title('Düzenle'),
+              S.view
+                .component(PreviewView)
+                .title('Önizleme')
+                .icon(() => '👁️'),
+            ]),
         ),
       S.listItem()
         .title('Fabrika')
         .child(
-          factoryPage?._id
-            ? S.document()
-                .schemaType('factoryPage')
-                .id(pubId(factoryPage._id) || 'factoryPage')
-                .views([
-                  S.view.form().title('Düzenle'),
-                  S.view
-                    .component(PreviewView)
-                    .title('Önizleme')
-                    .icon(() => '👁️'),
-                ])
-            : S.document()
-                .schemaType('factoryPage')
-                .views([
-                  S.view.form().title('Düzenle'),
-                  S.view
-                    .component(PreviewView)
-                    .title('Önizleme')
-                    .icon(() => '👁️'),
-                ]),
+          S.document()
+            .schemaType('factoryPage')
+            .documentId('factoryPage')
+            .views([
+              S.view.form().title('Düzenle'),
+              S.view
+                .component(PreviewView)
+                .title('Önizleme')
+                .icon(() => '👁️'),
+            ]),
         ),
       S.listItem()
         .title('İletişim')
         .child(
-          contactPage?._id
-            ? S.document()
-                .schemaType('contactPage')
-                .id(pubId(contactPage._id) || 'contactPage')
-                .views([
-                  S.view.form().title('Düzenle'),
-                  S.view
-                    .component(PreviewView)
-                    .title('Önizleme')
-                    .icon(() => '👁️'),
-                ])
-            : S.document()
-                .schemaType('contactPage')
-                .views([
-                  S.view.form().title('Düzenle'),
-                  S.view
-                    .component(PreviewView)
-                    .title('Önizleme')
-                    .icon(() => '👁️'),
-                ]),
+          S.document()
+            .schemaType('contactPage')
+            .documentId('contactPage')
+            .views([
+              S.view.form().title('Düzenle'),
+              S.view
+                .component(PreviewView)
+                .title('Önizleme')
+                .icon(() => '👁️'),
+            ]),
         ),
       S.listItem()
         .title('Altbilgi')
@@ -195,7 +176,7 @@ export const deskStructure = async (
                 .child(
                   S.document()
                     .schemaType('footer')
-                    .id('footer')
+                    .documentId('footer')
                     .views([
                       S.view.form().title('Düzenle'),
                       S.view
@@ -207,38 +188,30 @@ export const deskStructure = async (
               S.listItem()
                 .title('Çerez Politikası')
                 .child(
-                  cookiesPolicy?._id
-                    ? S.document()
-                        .schemaType('cookiesPolicy')
-                        .id(pubId(cookiesPolicy._id) || 'cookiesPolicy')
-                    : S.document().schemaType('cookiesPolicy'),
+                  S.document()
+                    .schemaType('cookiesPolicy')
+                    .documentId('cookiesPolicy')
                 ),
               S.listItem()
                 .title('Gizlilik Politikası')
                 .child(
-                  privacyPolicy?._id
-                    ? S.document()
-                        .schemaType('privacyPolicy')
-                        .id(pubId(privacyPolicy._id) || 'privacyPolicy')
-                    : S.document().schemaType('privacyPolicy'),
+                  S.document()
+                    .schemaType('privacyPolicy')
+                    .documentId('privacyPolicy')
                 ),
               S.listItem()
                 .title('Kullanım Şartları')
                 .child(
-                  termsOfService?._id
-                    ? S.document()
-                        .schemaType('termsOfService')
-                        .id(pubId(termsOfService._id) || 'termsOfService')
-                    : S.document().schemaType('termsOfService'),
+                  S.document()
+                    .schemaType('termsOfService')
+                    .documentId('termsOfService')
                 ),
               S.listItem()
                 .title('KVKK Aydınlatma Metni')
                 .child(
-                  kvkkPolicy?._id
-                    ? S.document()
-                        .schemaType('kvkkPolicy')
-                        .id(pubId(kvkkPolicy._id) || 'kvkkPolicy')
-                    : S.document().schemaType('kvkkPolicy'),
+                  S.document()
+                    .schemaType('kvkkPolicy')
+                    .documentId('kvkkPolicy')
                 ),
             ]),
         ),
@@ -258,6 +231,16 @@ export const deskStructure = async (
                     .schemaType('user')
                     .filter('_type == "user" && userType == $t')
                     .params({t: 'email_subscriber'})
+                    .apiVersion('2024-01-01'),
+                ),
+              S.listItem()
+                .title('Profesyonel Aboneler')
+                .child(
+                  S.documentList()
+                    .title('Profesyonel Aboneler')
+                    .schemaType('user')
+                    .filter('_type == "user" && userType == $t')
+                    .params({t: 'professional_subscriber'})
                     .apiVersion('2024-01-01'),
                 ),
               S.listItem()
