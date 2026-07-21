@@ -47,6 +47,7 @@ export default defineType({
       return {
         _id,
         title: title || 'Kategori',
+        description: _id,
         media: finalUrl
           ? () => (
               <img

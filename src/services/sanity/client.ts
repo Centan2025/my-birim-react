@@ -241,8 +241,9 @@ export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
 
     const origWidth = Number(i['width']) || undefined
     const origHeight = Number(i['height']) || undefined
+    const isMirrored = i['isMirrored'] !== undefined ? !!i['isMirrored'] : undefined
 
-    return {crop, hotspot, origWidth, origHeight}
+    return {crop, hotspot, origWidth, origHeight, isMirrored}
   } catch (err) {
     console.error('Error in mapR2Metadata:', err)
     return {}

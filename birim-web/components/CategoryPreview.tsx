@@ -4,7 +4,7 @@ import {Flex, Box} from '@sanity/ui'
 
 export function CategoryPreview(props: any) {
   const router = useRouter()
-  const docId = props._id || props.value?._id || props.id
+  const docId = props.description || props._id || props.value?._id || props.id
 
   const handleEditClick = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -15,10 +15,12 @@ export function CategoryPreview(props: any) {
     }
   }
 
+  const {description, ...restProps} = props
+
   return (
     <Flex align="center" justify="space-between" style={{width: '100%', gap: '8px'}}>
       <Box style={{flex: 1, minWidth: 0}}>
-        {props.renderDefault(props)}
+        {props.renderDefault(restProps)}
       </Box>
       <button
         onClick={handleEditClick}

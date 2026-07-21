@@ -102,11 +102,13 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
 
             let imageUrl = ''
             let imageClass = 'w-full h-full object-cover'
+            let isMirrored = false
 
             // Önce menuImage'i kontrol et
             const menuImg = hoveredCategory.menuImage
             if (menuImg) {
               imageUrl = typeof menuImg === 'string' ? menuImg : menuImg.url
+              isMirrored = typeof menuImg === 'object' && menuImg.isMirrored ? true : false
             } else {
               // menuImage yoksa ilk ürün görselini göster
               const products = categoryProducts.get(hoveredCategory.id)
@@ -120,6 +122,13 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
                       ? product.mainImage
                       : product.mainImage?.url
 
+                  let tempIsMirrored = false
+                  if (typeof product.mainImage === 'object') {
+                    tempIsMirrored = product.mainImage.isMirroredDesktop !== undefined
+                      ? product.mainImage.isMirroredDesktop
+                      : !!product.mainImage.isMirrored
+                  }
+
                   // Ana görsel yoksa alternativeMedia'dan al
                   if (
                     !tempImageUrl &&
@@ -129,12 +138,16 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
                     const firstAlt = product.alternativeMedia[0]
                     if (firstAlt && firstAlt.type === 'image' && firstAlt.url) {
                       tempImageUrl = firstAlt.url
+                      tempIsMirrored = firstAlt.isMirroredDesktop !== undefined
+                        ? firstAlt.isMirroredDesktop
+                        : !!firstAlt.isMirrored
                     }
                   }
 
                   if (tempImageUrl && tempImageUrl.trim() !== '') {
                     imageUrl = tempImageUrl
                     imageClass = 'max-w-full max-h-full object-contain'
+                    isMirrored = tempIsMirrored
                     break
                   }
                 }
@@ -152,6 +165,7 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
                     className={`${imageClass} image-transition`}
                     style={{
                       animation: 'crossFade 0.5s ease-in-out',
+                      transform: isMirrored ? 'scaleX(-1)' : 'none',
                     }}
                   />
                 </div>

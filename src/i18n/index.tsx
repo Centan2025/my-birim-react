@@ -61,6 +61,38 @@ const getInitialLocaleSync = (): Locale => {
   return 'tr'
 }
 
+const normalizeKey = (str: string): string => {
+  return str
+    .trim()
+    .toLowerCase()
+    .replace(/i̇/g, 'i')
+    .replace(/İ/g, 'i')
+    .replace(/I/g, 'i')
+    .replace(/ı/g, 'i')
+    .replace(/ğ/g, 'g')
+    .replace(/Ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/Ü/g, 'u')
+    .replace(/ş/g, 's')
+    .replace(/Ş/g, 's')
+    .replace(/ö/g, 'o')
+    .replace(/Ö/g, 'o')
+    .replace(/ç/g, 'c')
+    .replace(/Ç/g, 'c')
+}
+
+const findInDict = (dict: Record<string, string> | undefined, key: string): string | undefined => {
+  if (!dict || !key) return undefined
+  if (dict[key]) return dict[key]
+  const lower = key.toLowerCase()
+  if (dict[lower]) return dict[lower]
+  const norm = normalizeKey(key)
+  if (dict[norm]) return dict[norm]
+  const matchedKey = Object.keys(dict).find(k => normalizeKey(k) === norm)
+  if (matchedKey) return dict[matchedKey]
+  return undefined
+}
+
 export const I18nProvider = ({children}: PropsWithChildren) => {
   const [supportedLocales, setSupportedLocales] = useState<string[]>([])
   const [locale, setLocaleState] = useState<Locale>(getInitialLocaleSync)
@@ -109,38 +141,6 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
     [supportedLocales]
   )
 
-  const normalizeKey = (str: string): string => {
-    return str
-      .trim()
-      .toLowerCase()
-      .replace(/i̇/g, 'i')
-      .replace(/İ/g, 'i')
-      .replace(/I/g, 'i')
-      .replace(/ı/g, 'i')
-      .replace(/ğ/g, 'g')
-      .replace(/Ğ/g, 'g')
-      .replace(/ü/g, 'u')
-      .replace(/Ü/g, 'u')
-      .replace(/ş/g, 's')
-      .replace(/Ş/g, 's')
-      .replace(/ö/g, 'o')
-      .replace(/Ö/g, 'o')
-      .replace(/ç/g, 'c')
-      .replace(/Ç/g, 'c')
-  }
-
-  const findInDict = (dict: Record<string, string> | undefined, key: string): string | undefined => {
-    if (!dict || !key) return undefined
-    if (dict[key]) return dict[key]
-    const lower = key.toLowerCase()
-    if (dict[lower]) return dict[lower]
-    const norm = normalizeKey(key)
-    if (dict[norm]) return dict[norm]
-    const matchedKey = Object.keys(dict).find(k => normalizeKey(k) === norm)
-    if (matchedKey) return dict[matchedKey]
-    return undefined
-  }
-
   const t = useCallback(
     (keyOrObject: string | LocalizedString | undefined, ...args: (string | number)[]): string => {
       if (typeof keyOrObject === 'string') {
@@ -175,6 +175,20 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
 
       if (typeof keyOrObject === 'object' && keyOrObject !== null) {
         const obj = keyOrObject as Record<string, string | undefined>
+        
+        const currentVal = typeof obj[locale] === 'string' ? (obj[locale] as string).trim() : ''
+        const trVal = typeof obj['tr'] === 'string' ? (obj['tr'] as string).trim() : ''
+
+        // Eğer mevcut locale değeri TR değeriyle aynıysa (ve locale TR değilse), 
+        // bu durum genellikle CMS'te çevrilmediği için TR değerinin kopyalandığını gösterir.
+        // Bu durumda önce yerel sözlüklerde (cms/base) TR değeri için bir çeviri arayalım.
+        if (locale !== 'tr' && currentVal && trVal && currentVal === trVal) {
+          const cmsTrans = findInDict(cmsTranslations[locale], trVal)
+          const baseTrans = findInDict(baseTranslations[locale], trVal)
+          if (cmsTrans) return cmsTrans
+          if (baseTrans) return baseTrans
+        }
+
         // Önce mevcut locale'i kontrol et (boş string değilse veya diziyse)
         if (
           locale in obj &&
@@ -186,7 +200,6 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
         }
 
         // Locale yoksa veya boşsa, TR veya EN değerini alıp sözlüklerde (cms/base) çevirisi var mı kontrol et
-        const trVal = typeof obj['tr'] === 'string' ? obj['tr'].trim() : ''
         const enVal = typeof obj['en'] === 'string' ? obj['en'].trim() : ''
         const lookupKey = trVal || enVal
 

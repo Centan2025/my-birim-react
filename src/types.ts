@@ -33,6 +33,7 @@ export interface R2ImageMetadata {
   }
   origWidth?: number
   origHeight?: number
+  isMirrored?: boolean
 }
 
 // --- Core Site Configuration ---
@@ -88,6 +89,7 @@ export interface Category {
         urlDesktop?: string
         crop?: R2ImageMetadata['crop']
         hotspot?: R2ImageMetadata['hotspot']
+        isMirrored?: boolean
       }
   /** URL for the menu image displayed in the products dropdown menu. */
   menuImage?:
@@ -98,6 +100,7 @@ export interface Category {
         urlDesktop?: string
         crop?: R2ImageMetadata['crop']
         hotspot?: R2ImageMetadata['hotspot']
+        isMirrored?: boolean
       }
 }
 
