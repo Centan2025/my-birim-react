@@ -147,27 +147,44 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
           locale in obj &&
           obj[locale] !== undefined &&
           obj[locale] !== null &&
-          (typeof obj[locale] !== 'string' || obj[locale].trim())
+          (typeof obj[locale] !== 'string' || (obj[locale] as string).trim())
         ) {
-          return obj[locale]
+          return obj[locale] as string
         }
+
+        // Locale yoksa veya boşsa, TR veya EN değerini alıp sözlüklerde (cms/base) çevirisi var mı kontrol et
+        const trVal = typeof obj['tr'] === 'string' ? obj['tr'].trim() : ''
+        const enVal = typeof obj['en'] === 'string' ? obj['en'].trim() : ''
+        const lookupKey = trVal || enVal
+
+        if (lookupKey) {
+          const cmsTrans =
+            cmsTranslations[locale]?.[lookupKey] ||
+            cmsTranslations[locale]?.[lookupKey.toLowerCase()]
+          const baseTrans =
+            baseTranslations[locale]?.[lookupKey] ||
+            baseTranslations[locale]?.[lookupKey.toLowerCase()]
+          if (cmsTrans) return cmsTrans
+          if (baseTrans) return baseTrans
+        }
+
         // Locale yoksa veya boşsa, 'tr' fallback'i kullan
         if (
           'tr' in obj &&
           obj['tr'] !== undefined &&
           obj['tr'] !== null &&
-          (typeof obj['tr'] !== 'string' || obj['tr'].trim())
+          (typeof obj['tr'] !== 'string' || (obj['tr'] as string).trim())
         ) {
-          return obj['tr']
+          return obj['tr'] as string
         }
         // 'tr' de yoksa, 'en' fallback'i dene
         if (
           'en' in obj &&
           obj['en'] !== undefined &&
           obj['en'] !== null &&
-          (typeof obj['en'] !== 'string' || obj['en'].trim())
+          (typeof obj['en'] !== 'string' || (obj['en'] as string).trim())
         ) {
-          return obj['en']
+          return obj['en'] as string
         }
         // Hiçbiri yoksa, object'teki ilk geçerli değeri al
         const firstValue = Object.values(obj).find(val => {
@@ -175,7 +192,7 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
           if (typeof val === 'string') return !!val.trim()
           return true
         })
-        return firstValue || ''
+        return (firstValue as string) || ''
       }
 
       return ''
