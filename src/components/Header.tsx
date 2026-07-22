@@ -104,7 +104,7 @@ export function Header() {
   }, [internalCloseSearch])
 
   // Hero brightness hook
-  const {heroBrightnessRef} = useHeroBrightness(isMobile, location.pathname, headerTheme.brightness)
+  const {heroBrightness, heroBrightnessRef} = useHeroBrightness(isMobile, location.pathname, headerTheme.brightness)
 
   // 2. seçenek (overlay) SADECE: (1) mobilde ve (2) CMS'te açıkça "overlay" seçiliyse aktif olsun.
   const isOverlayMobileMenu = Boolean(
@@ -112,11 +112,14 @@ export function Header() {
   )
 
   // Content-driven adaptation logic:
-  // 1. If we have a hero image brightness value (heroBrightness), use it with a bias.
+  // 1. On Homepage (/), hero is always a dark showcase; header elements at top must be WHITE (#ffffff).
   // 2. If the page is NOT a dark hero page (like static white pages), use LIGHT mode (dark text).
   // 3. If the user scrolled down significantly (headerOpacity >= 0.75), use LIGHT mode (dark text).
+  const isHomepage = location.pathname === '/' || location.pathname === ''
+  const currentHeroBrightness = heroBrightness ?? headerTheme.brightness ?? heroBrightnessRef.current
+
   const isLightMode =
-    (!isDarkHero ? true : headerOpacity >= 0.75) &&
+    (!isDarkHero || (!isHomepage && currentHeroBrightness !== null && currentHeroBrightness >= 0.45) || headerOpacity >= 0.75) &&
     !(isMobile && (isSearchOpen || isMobileMenuOpen || isMobileMenuClosing))
 
   // Dark mode'da aşağı kaydırınca logo/yazı beyaz kalmalı (arka plan siyah olduğu için),

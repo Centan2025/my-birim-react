@@ -66,6 +66,8 @@ export interface SiteSettings {
   enablePageTransitions?: boolean
   /** Whether the "Factory" (Fabrika) menu and page are visible. */
   isFactoryVisible?: boolean
+  /** Whether the AI Room Planner (Oda Planlayıcı) feature is enabled. */
+  enableAiRoomPlanner?: boolean
 }
 
 // --- Core Data Models ---

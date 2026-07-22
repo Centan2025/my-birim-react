@@ -6,12 +6,11 @@ import {HomeHero} from '../components/HomeHero'
 import {useSEO} from '../hooks/useSEO'
 import {HomeContentBlocks} from '../components/HomeContentBlocks'
 import {useHeaderTheme} from '../context/HeaderThemeContext'
-import type {HeroMediaItem} from '../types'
 
 export function HomePage() {
   const {data: content} = useHomePageContent()
   const {data: settings} = useSiteSettings()
-  const {setFromPalette, reset} = useHeaderTheme()
+  const {reset} = useHeaderTheme()
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth < 1024
@@ -112,22 +111,11 @@ export function HomePage() {
   const [mobileHeroHeight, setMobileHeroHeight] = useState<number | null>(null)
   const lastWidthRef = React.useRef(typeof window !== 'undefined' ? window.innerWidth : 0)
 
-  // Header temasını hero görsel paletinden besle
+  // Header temasını sıfırla (HomeHero bg-black/50 overlay içerdiği için hero her zaman koyudur)
   useEffect(() => {
-    if (!content?.heroMedia || !Array.isArray(content.heroMedia)) {
-      reset()
-      return () => reset()
-    }
-    const firstImageWithPalette = content.heroMedia.find(
-      (m): m is HeroMediaItem => m?.type === 'image' && !!m?.palette
-    )
-    if (firstImageWithPalette?.palette) {
-      setFromPalette(firstImageWithPalette.palette)
-    } else {
-      reset()
-    }
+    reset()
     return () => reset()
-  }, [content?.heroMedia, reset, setFromPalette])
+  }, [reset])
 
   // İlham görselinin yüksekliğini hesapla
   useEffect(() => {

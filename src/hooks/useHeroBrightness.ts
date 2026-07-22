@@ -109,33 +109,81 @@ export function useHeroBrightness(
       const ctx = canvas.getContext('2d')
       if (!ctx) return
 
-      canvas.width = Math.min(activeMedia.width || activeMedia.offsetWidth || 100, 200)
-      canvas.height = Math.min(activeMedia.height || activeMedia.offsetHeight || 100, 200)
+      const naturalW =
+        (activeMedia as HTMLImageElement).naturalWidth ||
+        activeMedia.width ||
+        activeMedia.offsetWidth ||
+        200
+      const naturalH =
+        (activeMedia as HTMLImageElement).naturalHeight ||
+        activeMedia.height ||
+        activeMedia.offsetHeight ||
+        200
+
+      // Only sample the top 20% region of the media where the header overlays
+      const sampleHeight = Math.max(10, Math.floor(naturalH * 0.2))
+
+      canvas.width = Math.min(naturalW, 200)
+      canvas.height = Math.min(sampleHeight, 50)
 
       try {
-        ctx.drawImage(activeMedia, 0, 0, canvas.width, canvas.height)
+        ctx.drawImage(
+          activeMedia,
+          0,
+          0,
+          naturalW,
+          sampleHeight,
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        )
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
         const data = imageData.data
         if (isCancelled) return
 
         let totalBrightness = 0
         let pixelCount = 0
-        const sampleRate = 10
+        const sampleRate = 4
         for (let i = 0; i < data.length; i += 4 * sampleRate) {
           if (isCancelled) return
           const r = data[i],
             g = data[i + 1],
-            b = data[i + 2]
-          if (r !== undefined && g !== undefined && b !== undefined) {
+            b = data[i + 2],
+            a = data[i + 3]
+          if (
+            r !== undefined &&
+            g !== undefined &&
+            b !== undefined &&
+            (a === undefined || a > 128)
+          ) {
             const brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255
             totalBrightness += brightness
             pixelCount++
           }
         }
 
+        // Check if active slide has a dark overlay div over the media
+        let darkOverlayMultiplier = 1.0
+        if (activeMedia) {
+          const parentSlide = activeMedia.closest(
+            '.hero-slide-mobile, [class*="hero-slide"], .relative'
+          )
+          if (parentSlide) {
+            const darkOverlay = parentSlide.querySelector(
+              '[class*="bg-black"], [class*="from-black"]'
+            )
+            if (darkOverlay) {
+              darkOverlayMultiplier = 0.5
+            }
+          }
+        }
+
         if (isCancelled) return
         if (pixelCount > 0) {
-          setHeroBrightness(totalBrightness / pixelCount)
+          const calculated = (totalBrightness / pixelCount) * darkOverlayMultiplier
+          setHeroBrightness(calculated)
+          heroBrightnessRef.current = calculated
         } else {
           setHeroBrightness(null)
         }
@@ -144,9 +192,10 @@ export function useHeroBrightness(
       }
     }
 
-    const immediateTimeoutId = setTimeout(checkTopImageBrightness, 100)
-    const timeoutId = setTimeout(checkTopImageBrightness, 500)
-    const intervalId = setInterval(checkTopImageBrightness, 2000)
+    checkTopImageBrightness()
+    const immediateTimeoutId = setTimeout(checkTopImageBrightness, 50)
+    const timeoutId = setTimeout(checkTopImageBrightness, 300)
+    const intervalId = setInterval(checkTopImageBrightness, 1500)
 
     return () => {
       isCancelled = true

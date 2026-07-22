@@ -46,6 +46,9 @@ const CookiesPage = lazy(() => import('../pages/CookiesPage').then(m => ({defaul
 const PrivacyPage = lazy(() => import('../pages/PrivacyPage').then(m => ({default: m.default})))
 const TermsPage = lazy(() => import('../pages/TermsPage').then(m => ({default: m.default})))
 const KvkkPage = lazy(() => import('../pages/KvkkPage').then(m => ({default: m.default})))
+const AiRoomPlannerPage = lazy(() =>
+  import('../pages/AiRoomPlannerPage').then(m => ({default: m.AiRoomPlannerPage}))
+)
 
 interface PageBoundaryProps {
   children: React.ReactNode
@@ -106,6 +109,14 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
           element={
             <PageBoundary pageName="Ürün Detayı">
               <ProductDetailPage />
+            </PageBoundary>
+          }
+        />
+        <Route
+          path="/ai-room-planner"
+          element={
+            <PageBoundary pageName="AI Room Planner">
+              <AiRoomPlannerPage />
             </PageBoundary>
           }
         />

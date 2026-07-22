@@ -152,12 +152,16 @@ export function ProductsPage() {
     ? t(category.subtitle) || pageTitle
     : t('all_products_subtitle') || t('products_meta_description_default')
   const heroImageUrl =
-    typeof category?.heroImage === 'object' ? category.heroImage.url : category?.heroImage
+    typeof category?.heroImage === 'object'
+      ? category.heroImage.url
+      : typeof category?.heroImage === 'string'
+      ? category.heroImage
+      : ''
 
   useSEO({
     title: t('products_meta_title') || `BIRIM - ${pageTitle}`,
     description: pageDescription,
-    image: heroImageUrl,
+    image: heroImageUrl || undefined,
     type: 'website',
     siteName: 'BIRIM',
     locale: 'tr_TR',
@@ -184,38 +188,34 @@ export function ProductsPage() {
   }
 
   return (
-    <div className="bg-[var(--bg-secondary)]">
+    <div className={`bg-[var(--bg-secondary)] ${!heroImageUrl ? 'pt-20 md:pt-24 lg:pt-24' : ''}`}>
       {/* Category Hero Image */}
-      <div className="relative h-[450px] animate-fade-in-down hero-section">
-        <div className="absolute inset-0">
-          {(() => {
-            const heroImage = category?.heroImage
-            const url = typeof heroImage === 'object' ? heroImage.url : heroImage || '/img/sofa.jpg'
-            return (
-              <OptimizedImage
-                src={url}
-                alt={t(category?.name) || t('products')}
-                className={`w-full h-full object-cover ${imageBorderClass}`}
-                loading="eager"
-                quality={90}
-                crop={typeof heroImage === 'object' ? heroImage.crop : undefined}
-                hotspot={typeof heroImage === 'object' ? heroImage.hotspot : undefined}
-              />
-            )
-          })()}
-          <div className="absolute inset-0 bg-black/40"></div>
-        </div>
-        <div className="relative h-full flex items-center justify-center text-center text-white pt-20">
-          <div>
-            <h1 className="text-4xl md:text-6xl font-oswald font-light tracking-[0.1em] uppercase drop-shadow-md">
-              {category ? t(category.name) : t('view_all')}
-            </h1>
-            <p className="mt-4 text-lg max-w-2xl mx-auto font-light drop-shadow-md">
-              {category ? t(category.subtitle) : t('all_products_subtitle')}
-            </p>
+      {heroImageUrl ? (
+        <div className="relative h-[450px] animate-fade-in-down hero-section">
+          <div className="absolute inset-0">
+            <OptimizedImage
+              src={heroImageUrl}
+              alt={t(category?.name) || t('products')}
+              className={`w-full h-full object-cover ${imageBorderClass}`}
+              loading="eager"
+              quality={90}
+              crop={typeof category?.heroImage === 'object' ? category.heroImage.crop : undefined}
+              hotspot={typeof category?.heroImage === 'object' ? category.heroImage.hotspot : undefined}
+            />
+            <div className="absolute inset-0 bg-black/40"></div>
+          </div>
+          <div className="relative h-full flex items-center justify-center text-center text-white pt-20">
+            <div>
+              <h1 className="text-4xl md:text-6xl font-oswald font-light tracking-[0.1em] uppercase drop-shadow-md">
+                {category ? t(category.name) : t('view_all')}
+              </h1>
+              <p className="mt-4 text-lg max-w-2xl mx-auto font-light drop-shadow-md">
+                {category ? t(category.subtitle) : t('all_products_subtitle')}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      ) : null}
 
       {/* Breadcrumb and Sort Band */}
       <div className="w-full relative z-20">
@@ -260,7 +260,16 @@ export function ProductsPage() {
         </div>
       </div>
 
-      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-12 md:py-16">
+      {/* Sayfa Başlığı (CMS'te görsel yoksa gösterilir) */}
+      {!heroImageUrl && (
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 md:pt-12 pb-12">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-center uppercase">
+            {category ? t(category.name) : t('view_all')}
+          </h1>
+        </div>
+      )}
+
+      <div className={`w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 ${!heroImageUrl ? 'pb-16 md:pb-24' : 'py-12 md:py-16'}`}>
         {/* Product Grid */}
         {sortedProducts.length > 0 ? (
           !categoryId && allProducts.length > 0 ? (

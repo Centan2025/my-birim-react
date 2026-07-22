@@ -65,7 +65,7 @@ describe('useHeaderBackgroundColor', () => {
           isOverlayMobileMenu: false,
           headerOpacity: 0.9,
         }),
-      {wrapper: wrapper('/products')}
+      {wrapper: wrapper('/')}
     )
     expect(result.current).toBe('rgba(16, 24, 32, 0.7)')
   })

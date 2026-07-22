@@ -23,6 +23,8 @@ import {ProductRelated} from '../components/product/ProductRelated'
 import {ProductMediaLightbox} from '../components/product/ProductMediaLightbox'
 import {ProductAddToCart} from '../components/product/ProductAddToCart'
 import {useCardTransition} from '../context/CardTransitionContext'
+import {useSiteSettings} from '../context/SiteSettingsContext'
+import {AiRoomPlannerModal} from '../components/AiRoomPlannerModal'
 
 export function ProductDetailPage() {
   const {productId: liveId} = useParams<{productId: string}>()
@@ -84,6 +86,8 @@ export function ProductDetailPage() {
 
   const {isLoggedIn, user} = useAuth()
   const {t, locale} = useTranslation()
+  const {settings} = useSiteSettings()
+  const [isAiPlannerOpen, setIsAiPlannerOpen] = useState(false)
 
   // SEO & Analytics
   useSEO({
@@ -292,6 +296,20 @@ export function ProductDetailPage() {
             showProductPrevNext={showProductPrevNext}
           />
 
+          {settings?.enableAiRoomPlanner !== false && (
+            <div className="mt-6">
+              <button
+                onClick={() => setIsAiPlannerOpen(true)}
+                className="inline-flex items-center gap-2.5 px-6 py-3 bg-neutral-900 hover:bg-black text-amber-400 font-medium text-xs uppercase tracking-wider rounded-xl border border-amber-500/30 hover:border-amber-500 shadow-md transition-all duration-300 transform active:scale-95 cursor-pointer"
+              >
+                <svg className="w-4 h-4 text-amber-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <span>Bu Ürünü Odamda Gör (Nano Banana AI)</span>
+              </button>
+            </div>
+          )}
+
           <div
             className={`mt-12 space-y-16 transition-all duration-700 ease-out ${
               !isMainContentVisible
@@ -417,6 +435,22 @@ export function ProductDetailPage() {
           onClose={materialLightbox.close}
           onNext={materialLightbox.next}
           onPrev={materialLightbox.prev}
+        />
+      )}
+
+      {/* AI Room Planner Modal */}
+      {product && (
+        <AiRoomPlannerModal
+          isOpen={isAiPlannerOpen}
+          onClose={() => setIsAiPlannerOpen(false)}
+          initialProduct={{
+            id: product.id,
+            name: t(product.name),
+            image:
+              typeof product.mainImage === 'string'
+                ? product.mainImage
+                : (product.mainImage as any)?.url || '',
+          }}
         />
       )}
     </div>

@@ -3,9 +3,9 @@ import {useEffect, useMemo} from 'react'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
+import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useCategories} from '../hooks/useCategories'
 import {useProducts} from '../hooks/useProducts'
-import {useSiteSettings} from '../hooks/useSiteData'
 import ScrollReveal from '../components/ScrollReveal'
 import {useSEO} from '../hooks/useSEO'
 import {useHeaderTheme} from '../context/HeaderThemeContext'
@@ -14,9 +14,7 @@ export function CategoriesPage() {
   const {data: categories = [], isLoading: categoriesLoading} = useCategories()
   const {data: allProducts = [], isLoading: productsLoading} = useProducts()
   const {t} = useTranslation()
-  const {data: settings} = useSiteSettings()
   const {reset} = useHeaderTheme()
-  const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
   const pageTitle = `BIRIM - ${t('categories') || t('products') || 'Kategoriler'}`
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'
@@ -90,33 +88,25 @@ export function CategoriesPage() {
   }
 
   return (
-    <div className="bg-[var(--bg-tertiary)] min-h-screen transition-colors duration-500">
-      {/* Hero Section */}
-      <div className="relative h-[500px] animate-fade-in-down hero-section">
-        <div className="absolute inset-0">
-          <OptimizedImage
-            src="/img/sofa.jpg"
-            alt={t('products')}
-            className={`w-full h-full object-cover ${imageBorderClass}`}
-            loading="eager"
-            quality={90}
+    <div className="bg-[var(--bg-secondary)] min-h-screen transition-colors duration-500 pt-20 md:pt-24 lg:pt-24 selection:bg-primary selection:text-black">
+      {/* Breadcrumb Band */}
+      <div className="w-full relative z-20">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 text-gray-400">
+          <Breadcrumbs
+            items={[{label: t('homepage'), to: '/'}, {label: t('categories') || 'Ürün Grupları'}]}
           />
-          <div className="absolute inset-0 bg-black/40"></div>
-        </div>
-        <div className="relative h-full flex items-center justify-center text-center text-white pt-20">
-          <div>
-            <h1 className="text-4xl md:text-6xl font-oswald font-light tracking-[0.1em] uppercase drop-shadow-md">
-              {t('products')}
-            </h1>
-            <p className="mt-4 text-lg max-w-2xl mx-auto drop-shadow-md">
-              {t('products_page_subtitle')}
-            </p>
-          </div>
         </div>
       </div>
 
+      {/* Sayfa Başlığı */}
+      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 md:pt-12 pb-12">
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-center uppercase">
+          {t('categories') || 'Ürün Grupları'}
+        </h1>
+      </div>
+
       {/* Categories Grid */}
-      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-16">
+      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pb-16 md:pb-24">
         {categoriesWithImages.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 sm:gap-2">
             {categoriesWithImages.map((category, index) => (
@@ -171,18 +161,18 @@ export function CategoriesPage() {
                         }
                       />
                     )}
-                    {/* Bottom-heavy gradient for text readability */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent opacity-75 group-hover:opacity-50 transition-opacity duration-500"></div>
-
                     {/* Text content inside at the bottom */}
-                    <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 lg:p-6 flex flex-col justify-end h-full">
-                      <h2 className="text-2xl md:text-3xl lg:text-4xl font-oswald font-light tracking-[0.1em] text-white uppercase drop-shadow-md">
+                    <div className="absolute inset-x-0 bottom-0 p-6 lg:p-8 flex flex-col justify-end z-10">
+                      <h2 className="text-xl md:text-2xl font-light tracking-widest text-[var(--text-primary)] uppercase leading-none">
                         {t(category.name)}
                       </h2>
-                      <div className="h-px w-12 bg-white/40 mt-2 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
-                      <p className="mt-2 text-white/80 text-sm md:text-base font-light tracking-wide opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-500">
-                        {t(category.subtitle)}
-                      </p>
+                      {/* Line expanding from w-8 to w-full on hover (matching DesignersPage) */}
+                      <div className="h-px w-8 bg-[var(--text-primary)]/30 my-3 group-hover:w-full transition-all duration-700 ease-in-out"></div>
+                      {category.subtitle && (
+                        <p className="text-[var(--text-secondary)] text-xs md:text-sm font-light tracking-widest uppercase opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-700 ease-in-out line-clamp-2">
+                          {t(category.subtitle)}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </Link>

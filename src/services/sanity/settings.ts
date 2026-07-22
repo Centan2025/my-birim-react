@@ -128,6 +128,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
         mobileHeaderAnimation: s?.mobileHeaderAnimation === 'overlay' ? 'overlay' : 'default',
         enablePageTransitions: s?.enablePageTransitions !== false,
         isFactoryVisible: Boolean(s?.isFactoryVisible ?? false),
+        enableAiRoomPlanner: s?.enableAiRoomPlanner !== false,
       }
     } catch {
       // Ignore
@@ -149,6 +150,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
     mobileHeaderAnimation: s?.mobileHeaderAnimation === 'overlay' ? 'overlay' : 'default',
     enablePageTransitions: s?.enablePageTransitions !== false,
     isFactoryVisible: Boolean(s?.isFactoryVisible ?? false),
+    enableAiRoomPlanner: s?.enableAiRoomPlanner !== false,
   }
 }
 
