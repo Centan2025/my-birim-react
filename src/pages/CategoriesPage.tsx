@@ -118,7 +118,7 @@ export function CategoriesPage() {
       {/* Categories Grid */}
       <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-16">
         {categoriesWithImages.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 sm:gap-2">
             {categoriesWithImages.map((category, index) => (
               <ScrollReveal
                 key={category.id}
@@ -128,7 +128,7 @@ export function CategoriesPage() {
                 distance={0}
                 direction="none"
               >
-                <Link to={`/products/${category.id}`} className="group block overflow-hidden">
+                <Link to={`/products/${category.id}`} className="group block overflow-hidden rounded-none">
                   <div className="relative h-[300px] sm:h-[350px] lg:h-[450px] overflow-hidden rounded-none border-none">
                     {category.displayImage && (
                       <OptimizedImage
@@ -172,7 +172,7 @@ export function CategoriesPage() {
                       />
                     )}
                     {/* Bottom-heavy gradient for text readability */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-90 group-hover:opacity-70 transition-opacity duration-500"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent opacity-75 group-hover:opacity-50 transition-opacity duration-500"></div>
 
                     {/* Text content inside at the bottom */}
                     <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 lg:p-6 flex flex-col justify-end h-full">

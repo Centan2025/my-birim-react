@@ -78,8 +78,6 @@ export default defineConfig({
           'contactPage',
         ]
         if (previewTypes.includes(schemaType)) {
-          const views = [S.view.form().title('Düzenle')]
-
           if (schemaType === 'category') {
             return S.document().views([
               S.view
@@ -93,6 +91,14 @@ export default defineConfig({
                 .icon(() => '👁️'),
             ])
           }
+
+          return S.document().views([
+            S.view.form().title('Düzenle'),
+            S.view
+              .component(PreviewView)
+              .title('Önizleme')
+              .icon(() => '👁️'),
+          ])
         }
 
         return S.document().views([S.view.form()])

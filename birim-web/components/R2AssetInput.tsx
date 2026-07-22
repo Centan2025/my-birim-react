@@ -49,6 +49,65 @@ const HiddenInput = styled.input`
   border: 0;
 `
 
+const generateVideoPoster = (
+  videoFile: File
+): Promise<{blob: Blob; width: number; height: number}> => {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video')
+    video.preload = 'metadata'
+    video.src = URL.createObjectURL(videoFile)
+    video.muted = true
+    video.playsInline = true
+
+    let isResolved = false
+
+    const cleanup = () => {
+      URL.revokeObjectURL(video.src)
+    }
+
+    video.onloadeddata = () => {
+      video.currentTime = Math.min(1.0, video.duration / 2 || 0)
+    }
+
+    video.onseeked = () => {
+      if (isResolved) return
+      isResolved = true
+      try {
+        const canvas = document.createElement('canvas')
+        canvas.width = video.videoWidth || 1280
+        canvas.height = video.videoHeight || 720
+        const ctx = canvas.getContext('2d')
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+          canvas.toBlob(
+            (blob) => {
+              cleanup()
+              if (blob) {
+                resolve({blob, width: canvas.width, height: canvas.height})
+              } else {
+                reject(new Error('Canvas blob generation failed'))
+              }
+            },
+            'image/webp',
+            0.85
+          )
+        } else {
+          cleanup()
+          reject(new Error('Canvas context unavailable'))
+        }
+      } catch (err) {
+        cleanup()
+        reject(err)
+      }
+    }
+
+    video.onerror = (err) => {
+      cleanup()
+      reject(err)
+    }
+  })
+}
+
 const HotspotIndicator = styled.div<{$left: string; $top: string}>`
   position: absolute;
   left: ${(props) => props.$left};
@@ -326,6 +385,30 @@ export default function R2AssetInput(props: ObjectInputProps) {
         }
         const key = `${folderPath}/${Date.now()}-${fileName}`
 
+        const isVideo = file.type.startsWith('video/')
+
+        // Video Uyarısı ve Format Kontrolü
+        if (isVideo) {
+          if (file.size > 50 * 1024 * 1024) {
+            toast.push({
+              status: 'warning',
+              title: 'Büyük Video Uyarısı',
+              description: 'Video 50MB üzerindedir. Mobil performans için 50MB altı videolar önerilir.',
+            })
+          }
+          if (!file.type.includes('mp4')) {
+            toast.push({
+              status: 'info',
+              title: 'Video Format Bilgisi',
+              description: 'Tüm tarayıcılarda (iOS Safari, Chrome, Edge) tam uyumluluk için MP4 (H.264) önerilir.',
+            })
+          }
+        }
+
+        let posterUrl: string | undefined = undefined
+        let posterWidth: number | undefined = undefined
+        let posterHeight: number | undefined = undefined
+
         // 4. Upload to R2
         if (isImage && !file.type.includes('gif') && !file.type.includes('svg')) {
           isResponsive = true
@@ -355,6 +438,21 @@ export default function R2AssetInput(props: ObjectInputProps) {
           await Promise.all(uploadPromises)
         } else {
           await uploadFileViaPresignedUrl(processedFile, key, file.type)
+
+          // Videolar için otomatik kapak görseli (poster) üret
+          if (isVideo) {
+            try {
+              const {blob, width: pW, height: pH} = await generateVideoPoster(file)
+              const posterKey = `${folderPath}/${Date.now()}-poster.webp`
+              await uploadFileViaPresignedUrl(blob, posterKey, 'image/webp')
+              const r2DomainNoProtocol = R2_DOMAIN?.startsWith('http') ? R2_DOMAIN : `https://${R2_DOMAIN}`
+              posterUrl = `${r2DomainNoProtocol}/${posterKey}`
+              posterWidth = pW
+              posterHeight = pH
+            } catch (err) {
+              console.warn('Video kapak görseli oluşturulamadı:', err)
+            }
+          }
         }
 
         const r2Domain = R2_DOMAIN?.startsWith('http') ? R2_DOMAIN : `https://${R2_DOMAIN}`
@@ -371,6 +469,9 @@ export default function R2AssetInput(props: ObjectInputProps) {
           })
           width = img.width
           height = img.height
+        } else if (isVideo && posterWidth && posterHeight) {
+          width = posterWidth
+          height = posterHeight
         }
 
         // 6. Update Sanity
@@ -383,6 +484,8 @@ export default function R2AssetInput(props: ObjectInputProps) {
           height,
           mimeType: isImage ? 'image/webp' : file.type,
           alt: file.name.replace(/\.[^/.]+$/, ''),
+          posterUrl,
+          thumbnailUrl: posterUrl,
           // Default center hotspot
           hotspotX: 0.5,
           hotspotY: 0.5,

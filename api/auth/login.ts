@@ -1,6 +1,6 @@
 import {createClient} from '@sanity/client'
 import bcrypt from 'bcryptjs'
-import {isRateLimited, getClientIp} from './rateLimiter'
+import {isRateLimitedAsync, getClientIp} from './rateLimiter'
 
 const SANITY_PROJECT_ID = process.env.VITE_SANITY_PROJECT_ID || 'wn3a082f'
 const SANITY_DATASET = process.env.VITE_SANITY_DATASET || 'production'
@@ -33,7 +33,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   }
 
   const ip = getClientIp(req)
-  if (isRateLimited(`login_ip_${ip}`, {limit: 10, windowMs: 60000})) {
+  if (await isRateLimitedAsync(`login_ip_${ip}`, {limit: 10, windowMs: 60000})) {
     return res.status(429).json({error: 'Çok fazla giriş denemesi yaptınız. Lütfen daha sonra tekrar deneyin.'})
   }
 

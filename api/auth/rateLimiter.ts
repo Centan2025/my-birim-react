@@ -57,6 +57,38 @@ export function isRateLimited(key: string, options: RateLimitOptions): boolean {
   return false
 }
 
+/**
+ * Async Upstash Redis REST API rate limiter (Serverless uyumlu)
+ */
+export async function isRateLimitedAsync(key: string, options: RateLimitOptions): Promise<boolean> {
+  const redisUrl = process.env.UPSTASH_REDIS_REST_URL
+  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN
+
+  if (redisUrl && redisToken) {
+    try {
+      const res = await fetch(`${redisUrl}/incr/${encodeURIComponent(key)}`, {
+        headers: { Authorization: `Bearer ${redisToken}` },
+      })
+      if (res.ok) {
+        const data = (await res.json()) as { result?: number }
+        const count = data.result || 1
+        if (count === 1) {
+          // Expiration ayarla
+          const expireSec = Math.ceil(options.windowMs / 1000)
+          await fetch(`${redisUrl}/expire/${encodeURIComponent(key)}/${expireSec}`, {
+            headers: { Authorization: `Bearer ${redisToken}` },
+          })
+        }
+        return count > options.limit
+      }
+    } catch {
+      // Redis erişim hatasında in-memory fallback'e düş
+    }
+  }
+
+  return isRateLimited(key, options)
+}
+
 interface MiniRequest {
   headers?: Record<string, string | string[] | undefined>
   socket?: {

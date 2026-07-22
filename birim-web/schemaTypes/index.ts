@@ -21,6 +21,7 @@ import {localizedString} from './objects/localizedString'
 import {localizedText} from './objects/localizedText'
 import {localizedPortableText} from './objects/localizedPortableText'
 import r2Asset from './objects/r2Asset'
+import seoFields from './objects/seoFields'
 import {
   productDimensionDetail,
   productDimensionSet,
@@ -68,6 +69,7 @@ export const schemaTypes = [
   localizedText,
   localizedPortableText,
   r2Asset,
+  seoFields,
   productDimensionDetail,
   productDimensionSet,
   productDimensionImage,

@@ -76,6 +76,11 @@ export default defineType({
       description:
         'Proje detay sayfasında gösterilecek içerik blokları (ana sayfa ile aynı sistem)',
     }),
+    defineField({
+      name: 'seo',
+      title: 'SEO & Arama Motoru Ayarları',
+      type: 'seoFields',
+    }),
   ],
   preview: {
     select: {

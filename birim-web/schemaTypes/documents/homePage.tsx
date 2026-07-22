@@ -28,6 +28,11 @@ export default defineType({
       of: [{type: 'contentBlock'}],
       description: 'Hero bölümünün altında görünecek içerik blokları',
     }),
+    defineField({
+      name: 'seo',
+      title: 'SEO & Arama Motoru Ayarları',
+      type: 'seoFields',
+    }),
   ],
   preview: {
     select: {r2Url: 'heroMedia.0.imageR2.url'},

@@ -16,8 +16,8 @@ const ProjectCard: React.FC<{project: Project; index: number}> = ({project, inde
   const {t} = useTranslation()
 
   // Extract year from localized date string (e.g., "15.03.2023" -> "2023")
-  const dateVal = t(project.date)
-  const year = typeof dateVal === 'string' ? dateVal.match(/\d{4}/)?.[0] : ''
+  const dateVal = typeof project.date === 'string' ? project.date : t(project.date as never)
+  const year = typeof dateVal === 'string' ? dateVal.match(/\d{4}/)?.[0] || dateVal : ''
 
   return (
     <ScrollReveal delay={index * 50} threshold={0.05} direction="none" distance={0}>
@@ -43,20 +43,20 @@ const ProjectCard: React.FC<{project: Project; index: number}> = ({project, inde
         )}
 
         {/* Dynamic Gradient Overlay - Darker at bottom for readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-1000" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-90 group-hover:opacity-75 transition-opacity duration-700" />
 
         {/* Floating Content */}
         <div className="absolute inset-0 p-8 md:p-12 lg:p-16 flex flex-col justify-end">
           {/* Meta Row: Year | Category */}
-          <div className="flex items-center gap-4 mb-3">
+          <div className="flex items-center gap-3 mb-3">
             {year && (
-              <span className="text-[10px] md:text-xs font-bold tracking-[0.3em] text-[#d4af37] uppercase">
+              <span className="text-[11px] md:text-xs font-bold tracking-[0.3em] text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] uppercase">
                 {year}
               </span>
             )}
-            <div className="w-10 h-px bg-white/20"></div>
+            <div className="w-8 h-px bg-white/40"></div>
             {project.projectCategory && (
-              <span className="text-[10px] md:text-xs font-bold tracking-[0.3em] text-white/50 uppercase">
+              <span className="text-[10px] md:text-xs font-medium tracking-[0.25em] text-white/70 uppercase">
                 {t(project.projectCategory)}
               </span>
             )}
@@ -67,12 +67,12 @@ const ProjectCard: React.FC<{project: Project; index: number}> = ({project, inde
             {t(project.title)}
           </h2>
 
-          {/* Location / Secondary Info (assuming excerpt might contain it or just skip) */}
+          {/* Location / Secondary Info */}
           {project.excerpt && (
-            <p className="text-[10px] md:text-xs font-light tracking-[0.2em] text-white/30 uppercase mt-2">
+            <p className="text-[11px] md:text-xs font-normal tracking-[0.12em] text-white/85 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] uppercase mt-2">
               {(() => {
                 const val = t(project.excerpt)
-                return typeof val === 'string' ? val.substring(0, 50) : ''
+                return typeof val === 'string' ? val.substring(0, 90) : ''
               })()}
             </p>
           )}

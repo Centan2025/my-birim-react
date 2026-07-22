@@ -301,13 +301,13 @@ export function ProductsPage() {
                     productIndex += products.length
 
                     return (
-                      <div key={catId} className="mb-16">
+                      <div key={catId} className="mb-4 md:mb-6 pb-2 border-b border-[var(--border-primary)]/20 last:border-b-0 last:mb-2">
                         {/* Category Title */}
-                        <h2 className="font-oswald text-4xl md:text-5xl lg:text-6xl uppercase font-light tracking-[0.1em] text-[var(--text-primary)] mb-8">
+                        <h2 className="font-oswald text-xl md:text-2xl lg:text-3xl uppercase font-light tracking-[0.1em] text-[var(--text-primary)] mb-2 md:mb-3">
                           {categoryName}
                         </h2>
                         {/* Products Grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3 lg:gap-4">
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1 sm:gap-2">
                           {products.map((product, idx) => (
                             <ScrollReveal
                               key={product.id}

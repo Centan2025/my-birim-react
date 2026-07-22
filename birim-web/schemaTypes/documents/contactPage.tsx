@@ -13,6 +13,11 @@ export default defineType({
       of: [{type: 'contactLocation'}],
       description: 'İletişim sayfasında listelenecek şubeler/lokasyonlar',
     }),
+    defineField({
+      name: 'seo',
+      title: 'SEO & Arama Motoru Ayarları',
+      type: 'seoFields',
+    }),
   ],
   preview: {
     prepare() {

@@ -75,15 +75,19 @@ export function CartSidebar() {
       />
       <div
         ref={cartFocusTrap as React.RefObject<HTMLDivElement>}
-        className={`fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl z-[70] transform transition-transform duration-300 ease-in-out ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`fixed top-0 right-0 h-full w-full max-w-md bg-white dark:bg-[#121212] text-gray-900 dark:text-gray-100 shadow-2xl z-[70] transform transition-transform duration-300 ease-in-out ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}
         role="dialog"
         aria-modal="true"
         aria-label={t('cart') || 'Sepet'}
       >
         <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between p-6 border-b">
-            <h2 className="text-xl font-semibold text-gray-800">Your Cart</h2>
-            <button onClick={toggleCart} className="text-gray-500 hover:text-gray-800">
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{t('cart') || 'Sepet'}</h2>
+            <button
+              onClick={toggleCart}
+              className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white p-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059]"
+              aria-label={t('close_cart') || 'Sepeti kapat'}
+            >
               <CloseIcon />
             </button>
           </div>
@@ -106,11 +110,11 @@ export function CartSidebar() {
                       <Link
                         to={`/product/${item.product.id}`}
                         onClick={toggleCart}
-                        className="font-semibold text-gray-800 hover:underline"
+                        className="font-semibold text-gray-800 dark:text-gray-100 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059]"
                       >
                         {t(item.product.name)}
                       </Link>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
                         {new Intl.NumberFormat(locale, {
                           style: 'currency',
                           currency: item.product.currency || 'TRY',
@@ -119,14 +123,14 @@ export function CartSidebar() {
                       <div className="flex items-center gap-2 mt-2">
                         <button
                           onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                          className="p-1 border rounded-md hover:bg-gray-100"
+                          className="p-1 border border-gray-300 dark:border-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059]"
                         >
                           <MinusIcon />
                         </button>
                         <span className="w-8 text-center">{item.quantity}</span>
                         <button
                           onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                          className="p-1 border rounded-md hover:bg-gray-100"
+                          className="p-1 border border-gray-300 dark:border-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059]"
                         >
                           <PlusIcon />
                         </button>
@@ -134,7 +138,7 @@ export function CartSidebar() {
                     </div>
                     <button
                       onClick={() => removeFromCart(item.product.id)}
-                      className="text-gray-400 hover:text-red-500 text-sm"
+                      className="text-gray-400 hover:text-red-500 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                     >
                       Remove
                     </button>
@@ -142,8 +146,8 @@ export function CartSidebar() {
                 ))}
               </div>
 
-              <div className="p-6 border-t">
-                <div className="flex justify-between items-center font-semibold text-lg text-gray-800">
+              <div className="p-6 border-t border-gray-200 dark:border-gray-800">
+                <div className="flex justify-between items-center font-semibold text-lg text-gray-800 dark:text-gray-100">
                   <span>Subtotal</span>
                   <span>
                     {new Intl.NumberFormat(locale, {style: 'currency', currency: 'TRY'}).format(
@@ -151,12 +155,12 @@ export function CartSidebar() {
                     )}
                   </span>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   Shipping and taxes calculated at checkout.
                 </p>
                 <button
                   onClick={handleCheckout}
-                  className="w-full mt-4 bg-gray-900 text-white font-semibold py-3 rounded-lg hover:bg-gray-700 transition-colors duration-300"
+                  className="w-full mt-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold py-3 rounded-lg hover:bg-gray-700 dark:hover:bg-gray-200 transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059]"
                 >
                   Checkout
                 </button>
@@ -164,10 +168,10 @@ export function CartSidebar() {
             </>
           ) : (
             <div className="flex-grow flex flex-col items-center justify-center p-6 text-center">
-              <p className="text-gray-600">Your cart is empty.</p>
+              <p className="text-gray-600 dark:text-gray-400">Your cart is empty.</p>
               <button
                 onClick={toggleCart}
-                className="mt-4 text-gray-800 font-semibold hover:underline"
+                className="mt-4 text-gray-800 dark:text-gray-200 font-semibold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059]"
               >
                 Continue Shopping
               </button>

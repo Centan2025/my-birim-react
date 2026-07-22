@@ -235,13 +235,13 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         r2Domain.includes('.workers.dev') ||
         r2Domain.includes('assets.birim.com')
       ) {
-        if (baseUrl.includes('rs=1')) {
+        if (baseUrl.endsWith('.webp') && !baseUrl.includes('-400w.webp') && !baseUrl.includes('-800w.webp') && !baseUrl.includes('-1600w.webp')) {
           const cleanUrl = baseUrl.replace('?rs=1', '').replace('&rs=1', '')
           return [
-            `${cleanUrl.replace(/\.webp$/, '-400w.webp')} 400w`,
-            `${cleanUrl.replace(/\.webp$/, '-800w.webp')} 800w`,
-            `${cleanUrl.replace(/\.webp$/, '-1600w.webp')} 1600w`,
-            `${cleanUrl} 2560w`,
+            `${encodeSrcSetUrl(cleanUrl.replace(/\.webp$/, '-400w.webp'))} 400w`,
+            `${encodeSrcSetUrl(cleanUrl.replace(/\.webp$/, '-800w.webp'))} 800w`,
+            `${encodeSrcSetUrl(cleanUrl.replace(/\.webp$/, '-1600w.webp'))} 1600w`,
+            `${encodeSrcSetUrl(cleanUrl)} 2560w`,
           ].join(', ')
         }
         return ''

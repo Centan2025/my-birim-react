@@ -20,7 +20,11 @@ export function PreviewView({document}: PreviewViewProps) {
     )
   }
 
-  const id = displayed._id?.replace(/^drafts\./, '') || ''
+  const rawSlug =
+    (displayed.id as {current?: string})?.current ||
+    (displayed.slug as {current?: string})?.current ||
+    displayed._id?.replace(/^drafts\./, '') ||
+    ''
   const type = displayed._type
 
   // Site URL tespiti
@@ -32,19 +36,19 @@ export function PreviewView({document}: PreviewViewProps) {
   let path = ''
   switch (type) {
     case 'product':
-      path = `/product/${id}`
+      path = `/product/${rawSlug}`
       break
     case 'project':
-      path = `/projects/${id}`
+      path = `/projects/${rawSlug}`
       break
     case 'newsItem':
-      path = `/news/${id}`
+      path = `/news/${rawSlug}`
       break
     case 'category':
-      path = `/products/${id}`
+      path = `/products/${rawSlug}`
       break
     case 'designer':
-      path = `/designer/${id}`
+      path = `/designer/${rawSlug}`
       break
     case 'homePage':
       path = '/'

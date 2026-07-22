@@ -46,11 +46,20 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(400).json({error: 'keys parametresi bos olamaz.'})
   }
 
+  // Path traversal & key type validation
+  const safeKeys: string[] = []
+  for (const k of keys) {
+    if (typeof k !== 'string' || k.includes('..')) {
+      return res.status(400).json({error: 'Geçersiz dosya anahtarı tespit edildi.'})
+    }
+    safeKeys.push(k)
+  }
+
   try {
     const command = new DeleteObjectsCommand({
       Bucket: R2_BUCKET_NAME,
       Delete: {
-        Objects: keys.map((key: string) => ({Key: key})),
+        Objects: safeKeys.map((key: string) => ({Key: key})),
         Quiet: true,
       },
     })
@@ -59,10 +68,11 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
     return res.status(200).json({
       success: true,
-      deletedCount: keys.length,
+      deletedCount: safeKeys.length,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('R2 delete error:', error)
-    return res.status(500).json({error: `Dosyalar silinemedi: ${error.message}`})
+    const message = error instanceof Error ? error.message : 'Bilinmeyen hata'
+    return res.status(500).json({error: `Dosyalar silinemedi: ${message}`})
   }
 }

@@ -172,6 +172,11 @@ export default defineType({
       description:
         'Haber içerisindeki görseller ve videolar. Birini kapak olarak işaretleyebilirsiniz.',
     }),
+    defineField({
+      name: 'seo',
+      title: 'SEO & Arama Motoru Ayarları',
+      type: 'seoFields',
+    }),
   ],
   preview: {
     select: {

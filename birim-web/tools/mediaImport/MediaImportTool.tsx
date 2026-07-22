@@ -4,6 +4,12 @@ import {UploadIcon, FolderIcon, CheckmarkIcon, WarningOutlineIcon} from '@sanity
 import {useClient} from 'sanity'
 import imageCompression from 'browser-image-compression'
 
+const R2_ACCOUNT_ID = process.env.SANITY_STUDIO_R2_ACCOUNT_ID || ''
+const R2_ACCESS_KEY_ID = process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID || ''
+const R2_SECRET_ACCESS_KEY = process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY || ''
+const R2_BUCKET_NAME = process.env.SANITY_STUDIO_R2_BUCKET_NAME || ''
+const R2_DOMAIN = process.env.SANITY_STUDIO_R2_DOMAIN || ''
+
 // Duplicate Key Prevention Helper
 const uniqueKeyCache = new Set<string>()
 const resolveKey = (item: any, prefix: string = 'item') => {
@@ -1599,7 +1605,7 @@ export default function MediaImportTool() {
       let continuationToken: string | undefined = undefined
 
       do {
-        const res = await fetch(getApiUrl('/api/media/list'), {
+        const res: Response = await fetch(getApiUrl('/api/media/list'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1611,7 +1617,7 @@ export default function MediaImportTool() {
           throw new Error('Dosya listesi sunucudan alınamadı.')
         }
 
-        const data = await res.json()
+        const data: Record<string, any> = await res.json()
         if (data.contents) {
           allObjects = [...allObjects, ...data.contents]
         }

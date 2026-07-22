@@ -50,12 +50,13 @@ export default defineType({
       title: 'Kategori',
       type: 'reference',
       to: [{type: 'category'}],
+      validation: (Rule) => Rule.required().error('Her ürünün en az bir kategoriye atanması zorunludur.'),
       components: {
         input: ReferenceInputFix,
       },
     }),
 
-    defineField({name: 'year', title: 'Yıl', type: 'number'}),
+    defineField({name: 'year', title: 'Yıl', type: 'number', validation: (Rule) => Rule.min(1900).max(2100)}),
     defineField({
       name: 'isPublished',
       title: 'Yayında Göster',
@@ -89,7 +90,7 @@ export default defineType({
         input: BulkMediaUploadInput,
       },
       description:
-        'Ürün görselleri, videoları ve YouTube bağlantıları. Birini kapak olarak işaretleyebilirsiniz.',
+        'Ürün görselleri, videoları ve YouTube bağlantıları. İdeal görsel boyutu 1920x1080px veya 1:1 karedir. Birini kapak olarak işaretleyebilirsiniz.',
     }),
     defineField({name: 'buyable', title: 'Satın Alınabilir', type: 'boolean'}),
     defineField({name: 'price', title: 'Fiyat', type: 'number'}),
@@ -154,6 +155,11 @@ export default defineType({
       title: 'Alt Medya Panellerini Göster',
       type: 'boolean',
       initialValue: true,
+    }),
+    defineField({
+      name: 'seo',
+      title: 'SEO & Arama Motoru Ayarları',
+      type: 'seoFields',
     }),
   ],
   preview: {

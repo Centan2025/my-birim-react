@@ -104,6 +104,11 @@ export default defineType({
         },
       ],
     }),
+    defineField({
+      name: 'seo',
+      title: 'SEO & Arama Motoru Ayarları',
+      type: 'seoFields',
+    }),
   ],
   preview: {
     select: {r2Url: 'heroImageR2.url'},

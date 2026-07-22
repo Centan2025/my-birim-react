@@ -39,6 +39,11 @@ export default defineType({
       title: 'Menü Görseli',
       type: 'r2Asset',
     }),
+    defineField({
+      name: 'seo',
+      title: 'SEO & Arama Motoru Ayarları',
+      type: 'seoFields',
+    }),
   ],
   preview: {
     select: {_id: '_id', title: 'name.tr', r2Url: 'heroImageR2.url'},

@@ -44,12 +44,19 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
   const {filename, contentType, folder} = req.body || {}
 
-  if (!filename || !contentType) {
+  if (!filename || typeof filename !== 'string' || !contentType || typeof contentType !== 'string') {
     return res.status(400).json({error: 'filename ve contentType parametreleri gereklidir.'})
   }
 
+  // Path traversal koruması
+  if (filename.includes('..') || (folder && typeof folder === 'string' && folder.includes('..'))) {
+    return res.status(400).json({error: 'Geçersiz klasör veya dosya adı.'})
+  }
+
   try {
-    const key = folder ? `${folder}/${filename}` : `uploads/${filename}`
+    const safeFolder = typeof folder === 'string' && folder.trim() ? folder.trim() : 'uploads'
+    const cleanFileName = filename.trim().replace(/[^a-zA-Z0-9_.-]/g, '_')
+    const key = safeFolder.endsWith('/') ? `${safeFolder}${cleanFileName}` : `${safeFolder}/${cleanFileName}`
 
     const command = new PutObjectCommand({
       Bucket: R2_BUCKET_NAME,
@@ -69,8 +76,9 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       fileUrl: finalFileUrl,
       key: key,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Presigned URL error:', error)
-    return res.status(500).json({error: `Presigned URL olusturulamadi: ${error.message}`})
+    const message = error instanceof Error ? error.message : 'Bilinmeyen hata'
+    return res.status(500).json({error: `Presigned URL olusturulamadi: ${message}`})
   }
 }

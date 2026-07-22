@@ -29,6 +29,11 @@ export default defineType({
       },
       description: 'Fabrikaya ait görseller veya videolar.',
     }),
+    defineField({
+      name: 'seo',
+      title: 'SEO & Arama Motoru Ayarları',
+      type: 'seoFields',
+    }),
   ],
   preview: {
     select: {
