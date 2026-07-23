@@ -243,7 +243,8 @@ ZERO-TOLERANCE MANDATORY PRODUCT CONSTRAINTS:
       promptText += `\n\nPOSITIONING INSTRUCTION: Reposition the SINGLE model from Image 2 on the floor according to: ${alignmentInstruction}. Ensure NO duplicate furniture appears.`
     }
 
-    promptText += `\n\nFINAL EXECUTION DIRECTIVE:\nProduce a single, photorealistic high-resolution photograph where the target furniture from Image 2 is integrated into Image 1 with 100% design fidelity.`
+    let outputImageBuffer: Buffer | null = null
+    let outputMimeType = 'image/png'
 
     const imageModels = [
       'gemini-3.1-flash-image',
