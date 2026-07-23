@@ -72,12 +72,18 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
 
   // Attach stream when video element mounts in DOM
   useEffect(() => {
-    if (isCameraActive && cameraStream && videoRef.current) {
-      videoRef.current.srcObject = cameraStream
-      videoRef.current
-        .play()
-        .catch((err) => console.warn('Video element play issue:', err))
-    }
+    if (!isCameraActive || !cameraStream) return
+
+    const timer = setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.srcObject = cameraStream
+        videoRef.current
+          .play()
+          .catch((err) => console.warn('Video element play issue:', err))
+      }
+    }, 50)
+
+    return () => clearTimeout(timer)
   }, [isCameraActive, cameraStream])
 
   if (!isOpen) return null
