@@ -35,23 +35,13 @@ export function useHeaderBackgroundColor({
     }
 
     if (isSearchOpen && !isMobile) {
-      // isLightMode mantığına göre açık veya koyu fon dön
-      const isDarkHero = isDarkHeroPage(path)
-      // Hero üzerindeyken yazı beyaz kaldığı için arama paneli de koyu kalmalı
-      const isHeaderLightMode = !isDarkHero || headerOpacity >= 0.75
-
       if (isDarkMode) return 'rgba(10, 10, 10, 0.95)'
-      return isHeaderLightMode ? 'rgba(255, 255, 255, 0.95)' : 'rgba(0, 0, 0, 0.85)'
+      return 'rgba(255, 255, 255, 0.95)'
     }
 
     if (isProductsOpen && !isMobile) {
-      // isLightMode mantığına göre açık veya koyu fon dön
-      const isDarkHero = isDarkHeroPage(path)
-      // Hero üzerindeyken yazı beyaz kaldığı için ürün paneli de koyu kalmalı
-      const isHeaderLightMode = !isDarkHero || headerOpacity >= 0.75
-
       if (isDarkMode) return 'rgba(10, 10, 10, 0.95)'
-      return isHeaderLightMode ? 'rgba(255, 255, 255, 0.95)' : 'rgba(0, 0, 0, 0.85)'
+      return 'rgba(255, 255, 255, 0.95)'
     }
 
     // Üstte koyu hero görseli bulunan sayfalar: header tam şeffaf olmalı.

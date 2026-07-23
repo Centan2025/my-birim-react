@@ -119,8 +119,9 @@ export function Header() {
   const currentHeroBrightness = heroBrightness ?? headerTheme.brightness ?? heroBrightnessRef.current
 
   const isLightMode =
-    (!isDarkHero || (!isHomepage && currentHeroBrightness !== null && currentHeroBrightness >= 0.45) || headerOpacity >= 0.75) &&
-    !(isMobile && (isSearchOpen || isMobileMenuOpen || isMobileMenuClosing))
+    ((!isDarkHero || (!isHomepage && currentHeroBrightness !== null && currentHeroBrightness >= 0.45) || headerOpacity >= 0.75) &&
+    !(isMobile && (isSearchOpen || isMobileMenuOpen || isMobileMenuClosing))) ||
+    (!isMobile && isProductsOpen)
 
   // Dark mode'da aşağı kaydırınca logo/yazı beyaz kalmalı (arka plan siyah olduğu için),
   // Light mode'da ise siyah olmalı (arka plan beyaz olduğu için).
