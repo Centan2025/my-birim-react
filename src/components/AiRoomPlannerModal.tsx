@@ -108,36 +108,51 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
     }
 
     try {
-      let stream: MediaStream | null = null
+      // 3. Enumerate available video devices (Identical logic to Fiyat_Listesi-11-4 QRScannerModal)
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      const videoDevices = devices.filter((d) => d.kind === 'videoinput')
 
-      // Strategy 1: Simple video: true (Works best for Windows Phone Link / DroidCam / Virtual Cameras)
+      let targetId: string | undefined = undefined
+      if (videoDevices.length > 0) {
+        const backCamera = videoDevices.find(
+          (d) =>
+            d.label.toLowerCase().includes('back') ||
+            d.label.toLowerCase().includes('rear') ||
+            d.label.toLowerCase().includes('environment')
+        )
+        targetId = backCamera ? backCamera.deviceId : videoDevices[0]?.deviceId
+      }
+
+      const constraints: MediaStreamConstraints = {
+        video: {
+          deviceId: targetId ? { exact: targetId } : undefined,
+          facingMode: targetId ? undefined : 'environment',
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      }
+
+      let stream: MediaStream | null = null
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: false,
-        })
+        stream = await navigator.mediaDevices.getUserMedia(constraints)
       } catch (err1) {
-        console.warn('Strategy 1 (simple video: true) failed:', err1)
-        // Strategy 2: Ideal environment camera for mobile browsers
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              facingMode: { ideal: 'environment' },
-            },
-            audio: false,
-          })
-        } catch (err2) {
-          console.warn('Strategy 2 (facingMode ideal) failed:', err2)
-          // Strategy 3: Loose video constraints
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: { width: { min: 320 }, height: { min: 240 } },
-            audio: false,
-          })
-        }
+        console.warn('Enumerate constraints failed, trying simple video: true', err1)
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
       }
 
       setCameraStream(stream)
       setIsCameraActive(true)
+
+      // Bind stream to video element directly if ref exists
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        try {
+          await videoRef.current.play()
+        } catch (e) {
+          console.warn('Autoplay prevented:', e)
+        }
+      }
     } catch (err: unknown) {
       console.error('Kamera İzin Hatası Detayı:', err)
       const errName = err instanceof Error ? err.name : ''
