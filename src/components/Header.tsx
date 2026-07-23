@@ -546,7 +546,7 @@ export function Header() {
       <NavLink
         to={to}
         onMouseEnter={onMouseEnter}
-        onClick={e => {
+        onClick={() => {
           if (isSearchOpen) closeSearch()
           if (onClick) onClick()
         }}
