@@ -348,7 +348,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-neutral-800">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+            <div className="w-8 h-8 rounded-full bg-[#c5a059]/10 border border-[#c5a059]/30 flex items-center justify-center text-[#c5a059]">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
@@ -359,13 +359,13 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
               </svg>
             </div>
             <div>
-              <h3 className="text-lg font-light tracking-wide text-white">AI Room Planner</h3>
-              <p className="text-xs text-neutral-400 font-mono">3D Spatial Render Engine</p>
+              <h3 className="text-base font-medium tracking-wide text-white uppercase font-sans">Odamda Gör • AI Oda Tasarımı</h3>
+              <p className="text-xs text-neutral-400 font-sans">Yapay Zeka 3D Mekan & Yerleşim Motoru</p>
             </div>
           </div>
           <button
             onClick={handleCloseModal}
-            className="w-9 h-9 rounded-full bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors flex items-center justify-center"
+            className="w-9 h-9 rounded-full bg-neutral-800 hover:bg-neutral-700 text-neutral-300 transition-colors flex items-center justify-center cursor-pointer"
             aria-label="Kapat"
           >
             ✕
@@ -383,12 +383,12 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                 className="w-16 h-16 object-cover rounded-lg border border-neutral-700"
               />
               <div className="flex-1 min-w-0">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-amber-400">
+                <span className="text-[10px] font-sans uppercase tracking-widest text-[#c5a059] font-medium">
                   Seçilen Mobilya
                 </span>
                 <h4 className="text-sm font-medium text-white truncate">{activeProd.name}</h4>
               </div>
-              <span className="text-xs text-neutral-400 hidden sm:inline">
+              <span className="text-xs text-neutral-400 hidden sm:inline font-sans">
                 Odanızda konumlandırılacak
               </span>
             </div>
@@ -398,14 +398,14 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
           {isLoading && (
             <div className="flex flex-col items-center justify-center py-16 px-4 space-y-6 text-center animate-pulse">
               <div className="relative w-20 h-20 flex items-center justify-center">
-                <div className="absolute inset-0 rounded-full border-4 border-amber-500/20 animate-ping" />
-                <div className="w-16 h-16 rounded-full border-4 border-t-amber-400 border-r-amber-400 border-b-transparent border-l-transparent animate-spin" />
+                <div className="absolute inset-0 rounded-full border-4 border-[#c5a059]/20 animate-ping" />
+                <div className="w-16 h-16 rounded-full border-4 border-t-[#c5a059] border-r-[#c5a059] border-b-transparent border-l-transparent animate-spin" />
               </div>
               <div className="space-y-2 max-w-md">
-                <h4 className="text-base font-medium text-amber-300">
+                <h4 className="text-base font-medium text-[#c5a059]">
                   Odanızın ışığı ve perspektifi AI motoru ile analiz ediliyor...
                 </h4>
-                <p className="text-xs text-neutral-400 leading-relaxed font-light">
+                <p className="text-xs text-neutral-400 leading-relaxed font-light font-sans">
                   Yapay zeka, mobilyanın ölçeğini, gölgelerini ve doğal ışık açılarını odanıza kusursuzca yerleştiriyor.
                 </p>
               </div>
@@ -426,8 +426,8 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                 {/* Skeleton Loader / Blur Overlay when updating angle/position */}
                 {isUpdating && (
                   <div className="absolute inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center space-y-3 z-30 transition-all">
-                    <div className="w-12 h-12 rounded-full border-3 border-t-amber-400 border-r-amber-400 border-b-transparent border-l-transparent animate-spin" />
-                    <span className="text-xs font-medium text-amber-300 tracking-wide bg-neutral-900/80 px-3 py-1.5 rounded-full border border-amber-500/30">
+                    <div className="w-12 h-12 rounded-full border-3 border-t-[#c5a059] border-r-[#c5a059] border-b-transparent border-l-transparent animate-spin" />
+                    <span className="text-xs font-medium text-[#c5a059] tracking-wide bg-neutral-900/80 px-3 py-1.5 rounded-full border border-[#c5a059]/30">
                       Açı ve ışık yeniden hesaplanıyor...
                     </span>
                   </div>
@@ -437,14 +437,14 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
               {/* Interactive Controls Panel */}
               <div className="p-4 rounded-xl bg-neutral-850 border border-neutral-800 space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono uppercase tracking-widest text-amber-400 font-semibold flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <span className="text-xs font-sans uppercase tracking-widest text-[#c5a059] font-semibold flex items-center gap-2">
+                    <svg className="w-4 h-4 text-[#c5a059]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                     </svg>
                     Arayüz Kontrol Paneli (Interactive Controls)
                   </span>
                   {isUpdating && (
-                    <span className="text-[10px] text-amber-300/80 animate-pulse">
+                    <span className="text-[10px] text-[#c5a059]/80 animate-pulse font-sans">
                       Yeniden hesaplanıyor...
                     </span>
                   )}
@@ -453,7 +453,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
                   {/* a) Angle Switcher */}
                   <div className="space-y-2">
-                    <label className="text-xs font-medium text-neutral-300 block">
+                    <label className="text-xs font-medium text-neutral-300 block font-sans">
                       🔄 Açıyı Döndür (Angle Switcher)
                     </label>
                     <div className="grid grid-cols-3 gap-2">
@@ -472,10 +472,10 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                               setSelectedAngle(angleOpt.id)
                               handleGenerate(angleOpt.id, selectedAlignment)
                             }}
-                            className={`py-2 px-2 text-xs rounded-lg border font-medium transition-all ${
+                            className={`py-2 px-2 text-xs rounded-lg border font-medium transition-all font-sans cursor-pointer ${
                               isActive
-                                ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-sm'
-                                : 'bg-neutral-800/80 hover:bg-neutral-800 border-neutral-700 text-neutral-400 hover:text-neutral-200'
+                                ? 'bg-[#c5a059]/15 border-[#c5a059] text-[#c5a059] shadow-sm'
+                                : 'bg-neutral-900/80 hover:bg-neutral-800 border-neutral-800 text-neutral-400 hover:text-neutral-200'
                             } disabled:opacity-50 disabled:cursor-not-allowed`}
                           >
                             {angleOpt.label}
@@ -487,7 +487,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
 
                   {/* b) Alignment Presets */}
                   <div className="space-y-2">
-                    <label className="text-xs font-medium text-neutral-300 block">
+                    <label className="text-xs font-medium text-neutral-300 block font-sans">
                       📐 Konum & Hizalama (Alignment Presets)
                     </label>
                     <div className="flex flex-wrap gap-1.5">
@@ -509,10 +509,10 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                               setSelectedAlignment(nextAlign)
                               handleGenerate(selectedAngle, nextAlign)
                             }}
-                            className={`py-1.5 px-2.5 text-[11px] rounded-lg border font-medium transition-all ${
+                            className={`py-1.5 px-2.5 text-[11px] rounded-lg border font-medium transition-all font-sans cursor-pointer ${
                               isActive
-                                ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-sm'
-                                : 'bg-neutral-800/80 hover:bg-neutral-800 border-neutral-700 text-neutral-400 hover:text-neutral-200'
+                                ? 'bg-[#c5a059]/15 border-[#c5a059] text-[#c5a059] shadow-sm'
+                                : 'bg-neutral-900/80 hover:bg-neutral-800 border-neutral-800 text-neutral-400 hover:text-neutral-200'
                             } disabled:opacity-50 disabled:cursor-not-allowed`}
                           >
                             {alignOpt.label}
@@ -529,13 +529,13 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                 <button
                   disabled={isUpdating}
                   onClick={() => setResultImage(null)}
-                  className="px-4 py-2 text-xs font-medium text-neutral-300 hover:text-white bg-neutral-800 hover:bg-neutral-700 rounded-lg transition-colors disabled:opacity-50"
+                  className="px-4 py-2 text-xs font-medium text-neutral-300 hover:text-white bg-neutral-800 hover:bg-neutral-700 rounded-lg transition-colors disabled:opacity-50 font-sans cursor-pointer"
                 >
                   Farklı Oda Fotoğrafı Yükle / Çek
                 </button>
                 <button
                   onClick={handleDownload}
-                  className="px-5 py-2 text-xs font-medium text-black bg-white hover:bg-neutral-200 rounded-lg transition-colors flex items-center gap-2"
+                  className="px-5 py-2 text-xs font-medium text-black bg-[#c5a059] hover:bg-[#b38f48] rounded-lg transition-colors flex items-center gap-2 font-sans cursor-pointer"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -557,7 +557,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                   muted
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 text-xs text-amber-400 font-mono flex items-center gap-2">
+                <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 text-xs text-[#c5a059] font-sans flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
                   Canlı Kamera
                 </div>
@@ -565,13 +565,13 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
               <div className="flex items-center justify-between gap-4">
                 <button
                   onClick={stopCamera}
-                  className="px-4 py-2.5 text-xs font-medium text-neutral-300 hover:text-white bg-neutral-800 hover:bg-neutral-700 rounded-xl transition-colors"
+                  className="px-4 py-2.5 text-xs font-medium text-neutral-300 hover:text-white bg-neutral-800 hover:bg-neutral-700 rounded-xl transition-colors font-sans cursor-pointer"
                 >
                   Kamerayı Kapat
                 </button>
                 <button
                   onClick={captureCameraPhoto}
-                  className="px-6 py-2.5 text-xs font-medium text-black bg-amber-400 hover:bg-amber-300 rounded-xl shadow-lg transition-all flex items-center gap-2"
+                  className="px-6 py-2.5 text-xs font-medium text-black bg-[#c5a059] hover:bg-[#b38f48] rounded-xl shadow-lg transition-all flex items-center gap-2 font-sans cursor-pointer"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -593,7 +593,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                 }}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-neutral-700 hover:border-amber-500/50 bg-neutral-950/50 hover:bg-neutral-900/80 transition-all rounded-xl p-8 text-center cursor-pointer flex flex-col items-center justify-center space-y-4"
+                className="border-2 border-dashed border-neutral-700 hover:border-[#c5a059]/60 bg-neutral-950/50 hover:bg-neutral-900/80 transition-all rounded-xl p-8 text-center cursor-pointer flex flex-col items-center justify-center space-y-4"
               >
                 <input
                   ref={fileInputRef}
@@ -611,7 +611,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                       className="w-full h-56 object-cover rounded-lg"
                     />
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                      <span className="text-xs text-white bg-black/70 px-3 py-1.5 rounded-full">
+                      <span className="text-xs text-white bg-black/70 px-3 py-1.5 rounded-full font-sans">
                         Fotoğrafı Değiştir
                       </span>
                     </div>
@@ -624,10 +624,10 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                       </svg>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-white">
+                      <p className="text-sm font-medium text-white font-sans">
                         Odanızın Fotoğrafını Sürükleyin veya Dosya Seçin
                       </p>
-                      <p className="text-xs text-neutral-400 mt-1 font-light">
+                      <p className="text-xs text-neutral-400 mt-1 font-light font-sans">
                         En iyi sonuç için aydınlık ve geniş açılı bir fotoğraf tercih edin.
                       </p>
                     </div>
@@ -639,9 +639,9 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
               <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={startCamera}
-                  className="px-4 py-2.5 text-xs font-medium text-neutral-200 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 hover:border-neutral-600 rounded-xl transition-all flex items-center gap-2"
+                  className="px-4 py-2.5 text-xs font-medium text-neutral-200 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 hover:border-neutral-600 rounded-xl transition-all flex items-center gap-2 font-sans cursor-pointer"
                 >
-                  <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-4 h-4 text-[#c5a059]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
@@ -655,16 +655,16 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                 disabled={!roomImagePreview}
                 className={`group relative w-full py-3.5 rounded-xl font-medium tracking-widest text-xs uppercase transition-all duration-300 flex items-center justify-center gap-2.5 overflow-hidden ${
                   roomImagePreview
-                    ? 'bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-600 hover:border-amber-400/80 shadow-lg cursor-pointer'
+                    ? 'bg-neutral-950 hover:bg-neutral-900 text-white border border-[#c5a059]/40 hover:border-[#c5a059] shadow-lg cursor-pointer'
                     : 'bg-neutral-850 text-neutral-600 border border-neutral-800 cursor-not-allowed'
                 }`}
               >
-                <div className="w-5 h-5 rounded-md bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-[#c5a059]/20 text-[#c5a059] flex items-center justify-center">
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <span className="font-mono">Bu Ürünü Odamda Gör • AI Render</span>
+                <span className="font-sans text-[#c5a059] group-hover:text-white transition-colors">Bu Ürünü Odamda Gör • AI Render</span>
               </button>
             </div>
           )}
@@ -677,18 +677,18 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
           <div className="bg-neutral-900 border border-neutral-800 p-6 sm:p-8 rounded-2xl max-w-md w-full text-center space-y-5 shadow-2xl relative">
             <button
               onClick={() => setShowQuotaModal(false)}
-              className="absolute top-4 right-4 text-neutral-400 hover:text-white text-lg"
+              className="absolute top-4 right-4 text-neutral-400 hover:text-white text-lg font-sans"
             >
               ✕
             </button>
-            <div className="w-14 h-14 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center mx-auto text-2xl">
+            <div className="w-14 h-14 rounded-full bg-[#c5a059]/10 text-[#c5a059] border border-[#c5a059]/30 flex items-center justify-center mx-auto text-2xl">
               ✨
             </div>
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-white">
+              <h3 className="text-lg font-semibold text-white font-sans">
                 Günlük Ücretsiz AI Tasarım Hakkınız Doldu
               </h3>
-              <p className="text-xs text-neutral-400 leading-relaxed">
+              <p className="text-xs text-neutral-400 leading-relaxed font-sans">
                 Anonim kullanıcılar için günlük 3 ücretsiz deneme sınırı bulunmaktadır. Mimarlarımızla iletişime geçerek veya ücretsiz üye olarak sınırsız AI oda tasarımı alabilirsiniz.
               </p>
             </div>
@@ -699,13 +699,13 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                   setShowQuotaModal(false)
                   onClose()
                 }}
-                className="block w-full py-3 bg-amber-400 hover:bg-amber-300 text-black font-medium text-xs rounded-xl transition-all shadow-lg shadow-amber-400/20"
+                className="block w-full py-3 bg-[#c5a059] hover:bg-[#b38f48] text-black font-medium text-xs rounded-xl transition-all shadow-lg font-sans"
               >
                 İç Mimarımızla İletişime Geçin
               </a>
               <button
                 onClick={() => setShowQuotaModal(false)}
-                className="w-full py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs rounded-xl font-medium transition-all"
+                className="w-full py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs rounded-xl font-medium transition-all font-sans cursor-pointer"
               >
                 Kapat
               </button>

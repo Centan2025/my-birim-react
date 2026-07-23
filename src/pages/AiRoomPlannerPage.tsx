@@ -65,13 +65,13 @@ export function AiRoomPlannerPage() {
       <div className="max-w-7xl mx-auto space-y-12">
         {/* Header Section */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
-          <span className="px-3.5 py-1 text-xs font-mono tracking-widest text-amber-400 uppercase bg-amber-500/10 border border-amber-500/20 rounded-full inline-block">
-            AI 3D Spatial Visualizer
+          <span className="px-3.5 py-1 text-xs font-sans tracking-widest text-[#c5a059] uppercase bg-[#c5a059]/10 border border-[#c5a059]/30 rounded-full inline-block">
+            AI 3D Mekan Tasarımı
           </span>
           <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-white">
             AI Room Planner
           </h1>
-          <p className="text-base sm:text-lg text-neutral-400 font-roboto-thin leading-relaxed">
+          <p className="text-base sm:text-lg text-neutral-400 font-sans leading-relaxed">
             Kataloğumuzdan dilediğiniz tasarımı seçin, odanızın fotoğrafını yükleyin ve yapay zekanın ışık, gölge ve perspektif analiziyle mobilyayı odanızda anında görüntüleyin.
           </p>
         </div>
@@ -82,7 +82,7 @@ export function AiRoomPlannerPage() {
             <h2 className="text-xl font-light tracking-wide text-neutral-200">
               Visualizer için Ürün Seçin
             </h2>
-            <span className="text-xs text-neutral-500 font-mono">
+            <span className="text-xs text-neutral-500 font-sans">
               {products?.length || 0} Ürün Listeleniyor
             </span>
           </div>
@@ -93,7 +93,7 @@ export function AiRoomPlannerPage() {
               return (
                 <div
                   key={prod.id}
-                  className="group relative bg-neutral-900/60 rounded-xl overflow-hidden border border-neutral-800/80 hover:border-amber-500/50 transition-all duration-300 flex flex-col"
+                  className="group relative bg-neutral-900/60 rounded-xl overflow-hidden border border-neutral-800/80 hover:border-[#c5a059]/50 transition-all duration-300 flex flex-col"
                 >
                   <div className="aspect-square relative overflow-hidden bg-neutral-950">
                     {imgUrl ? (
@@ -110,7 +110,7 @@ export function AiRoomPlannerPage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
                       <button
                         onClick={() => handleOpenPlanner(prod)}
-                        className="w-full py-2.5 px-4 text-xs font-medium tracking-wider uppercase text-black bg-amber-400 hover:bg-amber-300 rounded-lg shadow-lg transition-colors flex items-center justify-center gap-2"
+                        className="w-full py-2.5 px-4 text-xs font-medium tracking-wider uppercase text-black bg-[#c5a059] hover:bg-[#b38f48] rounded-lg shadow-lg transition-colors flex items-center justify-center gap-2 font-sans cursor-pointer"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -122,11 +122,11 @@ export function AiRoomPlannerPage() {
 
                   <div className="p-4 flex-1 flex flex-col justify-between space-y-2">
                     <div>
-                      <h3 className="text-sm font-medium text-white group-hover:text-amber-300 transition-colors">
+                      <h3 className="text-sm font-medium text-white group-hover:text-[#c5a059] transition-colors font-sans">
                         {t(prod.name)}
                       </h3>
                     </div>
-                    <div className="flex items-center justify-between pt-2 border-t border-neutral-800/60">
+                    <div className="flex items-center justify-between pt-2 border-t border-neutral-800/60 font-sans">
                       <Link
                         to={`/product/${prod.id}`}
                         className="text-xs text-neutral-400 hover:text-white transition-colors"
@@ -135,7 +135,7 @@ export function AiRoomPlannerPage() {
                       </Link>
                       <button
                         onClick={() => handleOpenPlanner(prod)}
-                        className="text-xs text-amber-400 hover:underline font-medium"
+                        className="text-xs text-[#c5a059] hover:underline font-medium cursor-pointer"
                       >
                         Visualizer
                       </button>

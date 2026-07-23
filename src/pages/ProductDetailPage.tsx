@@ -300,16 +300,16 @@ export function ProductDetailPage() {
             <div className="mt-8 pt-6 border-t border-[var(--border-color,rgba(255,255,255,0.1))]">
               <button
                 onClick={() => setIsAiPlannerOpen(true)}
-                className="group relative inline-flex items-center gap-3 px-7 py-3.5 bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs uppercase tracking-widest rounded-xl border border-neutral-700 hover:border-neutral-500 shadow-xl transition-all duration-300 transform active:scale-98 cursor-pointer overflow-hidden"
+                className="group relative inline-flex items-center gap-3 px-7 py-3.5 bg-neutral-950 hover:bg-neutral-900 text-white font-medium text-xs uppercase tracking-widest rounded-xl border border-[#c5a059]/40 hover:border-[#c5a059] shadow-xl transition-all duration-300 transform active:scale-98 cursor-pointer overflow-hidden"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 via-transparent to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="w-6 h-6 rounded-lg bg-neutral-800 group-hover:bg-neutral-700 border border-neutral-700 flex items-center justify-center text-amber-400 group-hover:text-amber-300 transition-colors">
+                <div className="absolute inset-0 bg-gradient-to-r from-[#c5a059]/10 via-transparent to-[#c5a059]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="w-6 h-6 rounded-lg bg-[#c5a059]/10 border border-[#c5a059]/30 flex items-center justify-center text-[#c5a059] group-hover:bg-[#c5a059]/20 transition-colors">
                   <svg className="w-3.5 h-3.5 transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <span className="relative z-10 font-mono tracking-wider group-hover:text-amber-300 transition-colors">
-                  Odamda Gör • AI Planner
+                <span className="relative z-10 font-sans tracking-widest text-[#c5a059] group-hover:text-white transition-colors">
+                  Odamda Gör • AI Oda Tasarımı
                 </span>
               </button>
             </div>
