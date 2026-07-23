@@ -118,7 +118,14 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
       setIsCameraActive(true)
     } catch (err: unknown) {
       console.error('Camera access error:', err)
-      showToast('Kameraya erişilemedi. Lütfen tarayıcı ayarlarından kamera izni verdiğinizden ve bağlantının HTTPS olduğundan emin olun.')
+      const errName = err instanceof Error ? err.name : ''
+      const errMsg = err instanceof Error ? err.message : ''
+
+      if (errName === 'NotAllowedError' || errMsg.includes('Permissions policy')) {
+        showToast('Kamera kullanımı tarayıcı politikası veya site izinleri tarafından engellendi. Lütfen adres çubuğundaki kilit simgesinden kameraya izin verin.')
+      } else {
+        showToast('Kameraya erişilemedi. Lütfen tarayıcı ayarlarından kamera izni verdiğinizden ve bağlantının HTTPS olduğundan emin olun.')
+      }
     }
   }
 
