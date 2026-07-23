@@ -117,22 +117,31 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
 
     try {
       let stream: MediaStream | null = null
+
+      // Strategy 1: Simple video: true (Works best for Windows Phone Link / DroidCam / Virtual Cameras)
       try {
-        // Try mobile back camera first
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: { ideal: 'environment' },
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          },
-          audio: false,
-        })
-      } catch {
-        // Fallback to default camera
         stream = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: false,
         })
+      } catch (err1) {
+        console.warn('Strategy 1 (simple video: true) failed:', err1)
+        // Strategy 2: Ideal environment camera for mobile browsers
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { ideal: 'environment' },
+            },
+            audio: false,
+          })
+        } catch (err2) {
+          console.warn('Strategy 2 (facingMode ideal) failed:', err2)
+          // Strategy 3: Loose video constraints
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { min: 320 }, height: { min: 240 } },
+            audio: false,
+          })
+        }
       }
 
       setCameraStream(stream)
