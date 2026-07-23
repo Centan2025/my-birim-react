@@ -418,26 +418,57 @@ export default function R2AssetInput(props: ObjectInputProps) {
         if (isImage && !file.type.includes('gif') && !file.type.includes('svg')) {
           isResponsive = true
           const sizes = [
-            {width: 2560, suffix: '', maxSizeMB: 0.8},
-            {width: 1600, suffix: '-1600w', maxSizeMB: 0.5},
-            {width: 800, suffix: '-800w', maxSizeMB: 0.2},
-            {width: 400, suffix: '-400w', maxSizeMB: 0.1},
+            {width: 2560, suffix: '', maxSizeMB: 1.5},
+            {width: 1600, suffix: '-1600w', maxSizeMB: 0.8},
+            {width: 800, suffix: '-800w', maxSizeMB: 0.4},
+            {width: 400, suffix: '-400w', maxSizeMB: 0.2},
           ]
 
+          // Zaten .webp olan veya 1.5MB altındaki dosyaları ana görsel için sıkıştırma (kalite kaybını önle)
+          const isAlreadyWebP =
+            file.type === 'image/webp' || file.name.toLowerCase().endsWith('.webp')
+          const isSmallFile = file.size < 1.5 * 1024 * 1024
+
           const uploadPromises = sizes.map(async (size) => {
-            const options = {
-              maxSizeMB: size.maxSizeMB,
-              maxWidthOrHeight: size.width,
-              useWebWorker: false, // CSP eval hatasını önlemek için false
-              fileType: 'image/webp' as any,
-            }
-            const compressedBlob = await imageCompression(file, options)
+            let blobToUpload: Blob | File = file
+
             if (size.suffix === '') {
-              processedFile = compressedBlob
+              // Ana orijinal görsel: Zaten WebP veya küçükse orijinal dosyayı direkt yükle
+              if (isAlreadyWebP || isSmallFile) {
+                blobToUpload = file
+              } else {
+                const options = {
+                  maxSizeMB: size.maxSizeMB,
+                  maxWidthOrHeight: size.width,
+                  useWebWorker: false,
+                  fileType: 'image/webp' as any,
+                  initialQuality: 0.92,
+                }
+                blobToUpload = await imageCompression(file, options)
+              }
+              processedFile = blobToUpload
+            } else {
+              // Alt çözünürlükler (-1600w, -800w, -400w)
+              try {
+                const options = {
+                  maxSizeMB: size.maxSizeMB,
+                  maxWidthOrHeight: size.width,
+                  useWebWorker: false,
+                  fileType: 'image/webp' as any,
+                  initialQuality: 0.9,
+                }
+                blobToUpload = await imageCompression(file, options)
+              } catch {
+                blobToUpload = file
+              }
             }
 
             const currentKey = size.suffix ? key.replace(/\.webp$/, `${size.suffix}.webp`) : key
-            return uploadFileViaPresignedUrl(compressedBlob, currentKey, 'image/webp')
+            const mime =
+              size.suffix === '' && (isAlreadyWebP || isSmallFile)
+                ? file.type || 'image/webp'
+                : 'image/webp'
+            return uploadFileViaPresignedUrl(blobToUpload, currentKey, mime)
           })
 
           await Promise.all(uploadPromises)
