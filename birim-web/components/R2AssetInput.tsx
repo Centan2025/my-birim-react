@@ -499,14 +499,25 @@ export default function R2AssetInput(props: ObjectInputProps) {
         // 5. Get Dimensions
         let width, height
         if (isImage) {
-          const img = new Image()
-          img.src = URL.createObjectURL(processedFile)
-          await new Promise((resolve) => {
-            img.onload = resolve
-            img.onerror = resolve
-          })
-          width = img.width
-          height = img.height
+          try {
+            const img = new Image()
+            const objectUrl = URL.createObjectURL(processedFile)
+            img.src = objectUrl
+            await new Promise((resolve) => {
+              img.onload = () => {
+                width = img.width
+                height = img.height
+                URL.revokeObjectURL(objectUrl)
+                resolve(null)
+              }
+              img.onerror = () => {
+                URL.revokeObjectURL(objectUrl)
+                resolve(null)
+              }
+            })
+          } catch {
+            /* ignore dimension read error */
+          }
         } else if (isVideo && posterWidth && posterHeight) {
           width = posterWidth
           height = posterHeight

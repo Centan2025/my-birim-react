@@ -17,7 +17,7 @@ export default function SingleCoverBooleanInput(props: BooleanInputProps) {
     <Flex align="center" gap={3} padding={2}>
       <Switch checked={!!value} onChange={handleChange} />
       <Text size={1} weight={value ? 'bold' : 'regular'}>
-        {value ? '⭐ Evet (Kapak Görseli)' : 'Hayır (Standart Görsel)'}
+        {value ? '⭐ Kapak görseli mi?' : 'Kapak görseli mi?'}
       </Text>
     </Flex>
   )
