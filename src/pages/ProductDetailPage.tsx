@@ -300,15 +300,14 @@ export function ProductDetailPage() {
             <div className="mt-8 pt-6 border-t border-[var(--border-color,rgba(255,255,255,0.1))]">
               <button
                 onClick={() => setIsAiPlannerOpen(true)}
-                className="group relative inline-flex items-center gap-3 px-7 py-3.5 bg-neutral-950 hover:bg-neutral-900 text-white font-medium text-xs uppercase tracking-widest rounded-xl border border-[#c5a059]/40 hover:border-[#c5a059] shadow-xl transition-all duration-300 transform active:scale-98 cursor-pointer overflow-hidden"
+                className="group relative inline-flex items-center gap-3 px-7 py-3.5 bg-white hover:bg-neutral-100 text-black font-medium text-xs uppercase tracking-widest rounded-none border border-neutral-300 shadow-none transition-all duration-300 cursor-pointer overflow-hidden"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-[#c5a059]/10 via-transparent to-[#c5a059]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="w-6 h-6 rounded-lg bg-[#c5a059]/10 border border-[#c5a059]/30 flex items-center justify-center text-[#c5a059] group-hover:bg-[#c5a059]/20 transition-colors">
+                <div className="w-6 h-6 rounded-none bg-black text-white flex items-center justify-center transition-colors">
                   <svg className="w-3.5 h-3.5 transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 </div>
-                <span className="relative z-10 font-sans tracking-widest text-[#c5a059] group-hover:text-white transition-colors">
+                <span className="relative z-10 font-sans tracking-widest text-black font-semibold">
                   Odamda Gör • AI Oda Tasarımı
                 </span>
               </button>

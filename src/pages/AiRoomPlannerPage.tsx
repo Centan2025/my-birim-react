@@ -110,9 +110,9 @@ export function AiRoomPlannerPage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
                       <button
                         onClick={() => handleOpenPlanner(prod)}
-                        className="w-full py-2.5 px-4 text-xs font-medium tracking-wider uppercase text-black bg-[#c5a059] hover:bg-[#b38f48] rounded-lg shadow-lg transition-colors flex items-center justify-center gap-2 font-sans cursor-pointer"
+                        className="w-full py-2.5 px-4 text-xs font-semibold tracking-wider uppercase text-black bg-white hover:bg-neutral-100 rounded-none border border-neutral-300 shadow-none transition-colors flex items-center justify-center gap-2 font-sans cursor-pointer"
                       >
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-3.5 h-3.5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                         Odamda Gör
