@@ -37,6 +37,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
   const [selectedAngle, setSelectedAngle] = useState<string>('Front')
   const [selectedAlignment, setSelectedAlignment] = useState<string>('')
   const [isUpdating, setIsUpdating] = useState(false)
+  const isGeneratingRef = useRef(false)
   const [isCameraActive, setIsCameraActive] = useState(false)
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -242,6 +243,11 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
     targetAngle?: string,
     targetAlignment?: string
   ) => {
+    // 1. Synchronous Lock & Debounce Check
+    if (isGeneratingRef.current || isLoading || isUpdating) {
+      return
+    }
+
     if (!roomImagePreview) {
       showToast('Lütfen öncelikle odanızın bir fotoğrafını yükleyin veya çekin.')
       return
@@ -262,9 +268,8 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
       return
     }
 
-    const activeAngle = targetAngle !== undefined ? targetAngle : selectedAngle
-    const activeAlignment = targetAlignment !== undefined ? targetAlignment : selectedAlignment
-
+    // 2. Lock synchronously before any async work (canvas resize, fetch)
+    isGeneratingRef.current = true
     if (resultImage) {
       setIsUpdating(true)
     } else {
@@ -272,6 +277,8 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
     }
     setToastMessage(null)
 
+    const activeAngle = targetAngle !== undefined ? targetAngle : selectedAngle
+    const activeAlignment = targetAlignment !== undefined ? targetAlignment : selectedAlignment
     const activeProd = selectedProduct || initialProduct
 
     try {
@@ -320,6 +327,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
       const errorMsg = err instanceof Error ? err.message : 'Bilinmeyen bir hata oluştu.'
       showToast(errorMsg, 'error')
     } finally {
+      isGeneratingRef.current = false
       setIsLoading(false)
       setIsUpdating(false)
     }
@@ -670,9 +678,9 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
               {/* Action Button */}
               <button
                 onClick={() => handleGenerate()}
-                disabled={!roomImagePreview}
+                disabled={!roomImagePreview || isLoading || isUpdating}
                 className={`group relative w-full py-3.5 rounded-none font-semibold tracking-widest text-xs uppercase transition-all duration-300 flex items-center justify-center gap-2.5 overflow-hidden shadow-none border ${
-                  roomImagePreview
+                  roomImagePreview && !isLoading && !isUpdating
                     ? 'bg-white hover:bg-neutral-100 text-black border-neutral-300 cursor-pointer'
                     : 'bg-neutral-800 text-neutral-400 border-neutral-700 cursor-not-allowed'
                 }`}

@@ -54,40 +54,44 @@ const staticPages: SitemapUrl[] = [
 ]
 
 /**
- * HashRouter URL'lerini oluşturur.
- * Google SPA rendering ile hash URL'leri anlayabilir,
- * ancak en iyi sonuç için hem hash hem clean URL'leri ekliyoruz.
+ * Generates clean canonical URLs and HashRouter URLs for maximum SEO compatibility.
  */
-const buildSitemapUrl = (path: string): string => {
-  // HashRouter formatı: domain/#/path
+const buildCleanUrl = (path: string): string => {
+  const cleanPath = path.startsWith('/') ? path : `/${path}`
+  return `${BASE_URL}${cleanPath}`
+}
+
+const buildHashUrl = (path: string): string => {
   const cleanPath = path.startsWith('/') ? path : `/${path}`
   return `${BASE_URL}/#${cleanPath}`
 }
 
 // XML sitemap oluşturucu (Sitemap Protocol 0.9 + xhtml:link for hreflang)
 const generateSitemapXml = (urls: SitemapUrl[]): string => {
-  const urlEntries = urls
-    .map(
-      url => `  <url>
-    <loc>${buildSitemapUrl(url.loc)}</loc>
-${url.lastmod ? `    <lastmod>${url.lastmod}</lastmod>\n` : ''}${url.changefreq ? `    <changefreq>${url.changefreq}</changefreq>\n` : ''}${url.priority !== undefined ? `    <priority>${url.priority}</priority>\n` : ''}${
-        url.alternates
-          ? url.alternates
-              .map(
-                alt =>
-                  `    <xhtml:link rel="alternate" hreflang="${alt.lang}" href="${alt.href}" />`
-              )
-              .join('\n') + '\n'
-          : ''
-      }  </url>`
-    )
-    .join('\n')
+  const urlEntries: string[] = []
+
+  for (const url of urls) {
+    const cleanLoc = buildCleanUrl(url.loc)
+    const hashLoc = buildHashUrl(url.loc)
+
+    // Clean Canonical URL Entry
+    urlEntries.push(`  <url>
+    <loc>${cleanLoc}</loc>
+${url.lastmod ? `    <lastmod>${url.lastmod}</lastmod>\n` : ''}${url.changefreq ? `    <changefreq>${url.changefreq}</changefreq>\n` : ''}${url.priority !== undefined ? `    <priority>${url.priority}</priority>\n` : ''}  </url>`)
+
+    // HashRouter URL Entry (if path is not root '/')
+    if (url.loc !== '/') {
+      urlEntries.push(`  <url>
+    <loc>${hashLoc}</loc>
+${url.lastmod ? `    <lastmod>${url.lastmod}</lastmod>\n` : ''}${url.changefreq ? `    <changefreq>${url.changefreq}</changefreq>\n` : ''}${url.priority !== undefined ? `    <priority>${url.priority ? Math.max(0.1, url.priority - 0.1) : 0.5}</priority>\n` : ''}  </url>`)
+    }
+  }
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-${urlEntries}
+${urlEntries.join('\n')}
 </urlset>`
 }
 

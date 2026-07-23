@@ -100,54 +100,59 @@ async function uploadToR2OrFallback(
 }
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  try {
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).json({})
-  }
+    if (req.method === 'OPTIONS') {
+      return res.status(200).json({})
+    }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' })
-  }
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method Not Allowed' })
+    }
 
-  const clientIp =
-    (req.headers['x-forwarded-for'] as string)?.split(',')[0] ||
-    req.socket.remoteAddress ||
-    '127.0.0.1'
+    const clientIp =
+      (req.headers?.['x-forwarded-for'] as string)?.split(',')[0] ||
+      req.socket?.remoteAddress ||
+      '127.0.0.1'
 
-  const rateCheck = checkRateLimit(clientIp, 3, 60 * 1000)
-  if (!rateCheck.allowed) {
-    return res.status(429).json({
-      error: 'Çok fazla istek attınız, lütfen 1 dakika bekleyin.',
-      retryAfterSeconds: Math.ceil(rateCheck.resetMs / 1000),
-    })
-  }
+    const rateCheck = checkRateLimit(clientIp, 3, 60 * 1000)
+    if (!rateCheck.allowed) {
+      return res.status(429).json({
+        error: 'Çok fazla istek attınız, lütfen 1 dakika bekleyin.',
+        retryAfterSeconds: Math.ceil(rateCheck.resetMs / 1000),
+      })
+    }
 
-  const { roomImage, productImage, customPrompt, angle, alignmentInstruction, productName, productDetails } = req.body || {}
+    const bodyData = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {})
+    const { roomImage, productImage, customPrompt, angle, alignmentInstruction, productName, productDetails } = bodyData
 
-  if (!roomImage || typeof roomImage !== 'string') {
-    return res
-      .status(400)
-      .json({ error: 'Kullanıcının oda görseli (roomImage) zorunludur.' })
-  }
+    if (!roomImage || typeof roomImage !== 'string') {
+      return res
+        .status(400)
+        .json({ error: 'Kullanıcının oda görseli (roomImage) zorunludur.' })
+    }
 
-  if (!productImage || typeof productImage !== 'string') {
-    return res
-      .status(400)
-      .json({ error: 'Seçilen ürün görseli (productImage) zorunludur.' })
-  }
+    if (!productImage || typeof productImage !== 'string') {
+      return res
+        .status(400)
+        .json({ error: 'Seçilen ürün görseli (productImage) zorunludur.' })
+    }
 
-  const cleanPrompt = sanitizePrompt(customPrompt, 150)
+    const cleanPrompt = sanitizePrompt(customPrompt, 150)
 
-  const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY
-  if (!apiKey) {
-    return res.status(500).json({
-      error:
-        'GEMINI_API_KEY tanımlanmamış. Lütfen .env.local dosyasına GEMINI_API_KEY ekleyin.',
-    })
-  }
+    const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY
+    if (!apiKey) {
+      console.warn('⚠️ GEMINI_API_KEY Vercel ortamında bulunamadı, demo moduna geçiliyor.')
+      return res.status(200).json({
+        success: true,
+        imageUrl: roomImage,
+        isDemo: true,
+        message: 'Google Gemini API anahtarı sunucuda henüz tanımlanmadığı için oda görseliniz hazırlandı. Canlı 3D sentezi için API anahtarı eklenmelidir.',
+      })
+    }
 
   try {
     const roomImg = await getBase64FromImageInput(roomImage)
@@ -294,7 +299,16 @@ ZERO-TOLERANCE MANDATORY PRODUCT CONSTRAINTS:
 
     return res.status(200).json({
       success: true,
-      imageUrl: roomImage,
+      imageUrl: typeof req.body === 'object' && req.body?.roomImage ? req.body.roomImage : '',
+      isDemo: true,
+      message: `AI Oda Tasarımı önizleme modu aktif: ${message}`,
+    })
+  }
+  } catch (topError: unknown) {
+    console.error('Nano Banana Top-Level API Error:', topError)
+    const message = topError instanceof Error ? topError.message : 'Bilinmeyen sunucu hatası.'
+    return res.status(200).json({
+      success: true,
       isDemo: true,
       message: `AI Oda Tasarımı önizleme modu aktif: ${message}`,
     })
