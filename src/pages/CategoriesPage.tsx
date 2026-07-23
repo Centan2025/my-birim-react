@@ -172,14 +172,12 @@ export function CategoriesPage() {
                       />
                     )}
                     {/* Text content inside at the bottom */}
-                    <div className="absolute inset-x-0 bottom-0 p-6 lg:p-8 flex flex-col justify-end z-10">
-                      <h2 className="text-xl md:text-2xl font-light tracking-widest text-[var(--text-primary)] uppercase leading-none">
+                    <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 lg:p-6 flex flex-col justify-end z-10">
+                      <h2 className="text-lg md:text-xl lg:text-2xl font-light tracking-widest text-[var(--text-secondary)] uppercase leading-tight transform transition-all duration-500 ease-out group-hover:-translate-y-2 group-hover:text-[var(--text-primary)]">
                         {t(category.name)}
                       </h2>
-                      {/* Line expanding from w-8 to w-full on hover (matching DesignersPage) */}
-                      <div className="h-px w-8 bg-[var(--text-primary)]/30 my-3 group-hover:w-full transition-all duration-700 ease-in-out"></div>
                       {category.subtitle && (
-                        <p className="text-[var(--text-secondary)] text-xs md:text-sm font-light tracking-widest uppercase opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-700 ease-in-out line-clamp-2">
+                        <p className="mt-1 text-[var(--text-secondary)] text-xs md:text-sm font-light tracking-widest uppercase opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-500 ease-out line-clamp-2">
                           {t(category.subtitle)}
                         </p>
                       )}
