@@ -155,8 +155,8 @@ export function ProductsPage() {
     typeof category?.heroImage === 'object'
       ? category.heroImage.url
       : typeof category?.heroImage === 'string'
-      ? category.heroImage
-      : ''
+        ? category.heroImage
+        : ''
 
   useSEO({
     title: t('products_meta_title') || `BIRIM - ${pageTitle}`,
@@ -200,7 +200,9 @@ export function ProductsPage() {
               loading="eager"
               quality={90}
               crop={typeof category?.heroImage === 'object' ? category.heroImage.crop : undefined}
-              hotspot={typeof category?.heroImage === 'object' ? category.heroImage.hotspot : undefined}
+              hotspot={
+                typeof category?.heroImage === 'object' ? category.heroImage.hotspot : undefined
+              }
             />
             <div className="absolute inset-0 bg-black/40"></div>
           </div>
@@ -269,7 +271,9 @@ export function ProductsPage() {
         </div>
       )}
 
-      <div className={`w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 ${!heroImageUrl ? 'pb-16 md:pb-24' : 'py-12 md:py-16'}`}>
+      <div
+        className={`w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 ${!heroImageUrl ? 'pb-16 md:pb-24' : 'py-12 md:py-16'}`}
+      >
         {/* Product Grid */}
         {sortedProducts.length > 0 ? (
           !categoryId && allProducts.length > 0 ? (
@@ -310,7 +314,10 @@ export function ProductsPage() {
                     productIndex += products.length
 
                     return (
-                      <div key={catId} className="mb-4 md:mb-6 pb-2 border-b border-[var(--border-primary)]/20 last:border-b-0 last:mb-2">
+                      <div
+                        key={catId}
+                        className="mb-4 md:mb-6 pb-2 border-b border-[var(--border-primary)]/20 last:border-b-0 last:mb-2"
+                      >
                         {/* Category Title */}
                         <h2 className="font-oswald text-xl md:text-2xl lg:text-3xl uppercase font-light tracking-[0.1em] text-[var(--text-primary)] mb-2 md:mb-3">
                           {categoryName}

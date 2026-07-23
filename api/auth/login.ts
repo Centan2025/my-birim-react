@@ -34,7 +34,9 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
   const ip = getClientIp(req)
   if (await isRateLimitedAsync(`login_ip_${ip}`, {limit: 10, windowMs: 60000})) {
-    return res.status(429).json({error: 'Çok fazla giriş denemesi yaptınız. Lütfen daha sonra tekrar deneyin.'})
+    return res
+      .status(429)
+      .json({error: 'Çok fazla giriş denemesi yaptınız. Lütfen daha sonra tekrar deneyin.'})
   }
 
   const {email, password} = req.body

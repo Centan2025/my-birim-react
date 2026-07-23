@@ -25,7 +25,15 @@ import {useHeaderSearch} from '../hooks/useHeaderSearch'
 import {useHeroBrightness} from '../hooks/useHeroBrightness'
 import {useHeaderBackgroundColor} from '../hooks/useHeaderBackgroundColor'
 import {useBodyScrollLock} from '../hooks/useBodyScrollLock'
-import {MenuIcon, ChevronDownIcon, SearchIcon, CloseIcon, ShoppingBagIcon, SunIcon, MoonIcon} from './HeaderIcons'
+import {
+  MenuIcon,
+  ChevronDownIcon,
+  SearchIcon,
+  CloseIcon,
+  ShoppingBagIcon,
+  SunIcon,
+  MoonIcon,
+} from './HeaderIcons'
 import {useDarkMode} from '../context/DarkModeContext'
 
 export function Header() {
@@ -104,7 +112,11 @@ export function Header() {
   }, [internalCloseSearch])
 
   // Hero brightness hook
-  const {heroBrightness, heroBrightnessRef} = useHeroBrightness(isMobile, location.pathname, headerTheme.brightness)
+  const {heroBrightness, heroBrightnessRef} = useHeroBrightness(
+    isMobile,
+    location.pathname,
+    headerTheme.brightness
+  )
 
   // 2. seçenek (overlay) SADECE: (1) mobilde ve (2) CMS'te açıkça "overlay" seçiliyse aktif olsun.
   const isOverlayMobileMenu = Boolean(
@@ -116,11 +128,14 @@ export function Header() {
   // 2. If the page is NOT a dark hero page (like static white pages), use LIGHT mode (dark text).
   // 3. If the user scrolled down significantly (headerOpacity >= 0.75), use LIGHT mode (dark text).
   const isHomepage = location.pathname === '/' || location.pathname === ''
-  const currentHeroBrightness = heroBrightness ?? headerTheme.brightness ?? heroBrightnessRef.current
+  const currentHeroBrightness =
+    heroBrightness ?? headerTheme.brightness ?? heroBrightnessRef.current
 
   const isLightMode =
-    ((!isDarkHero || (!isHomepage && currentHeroBrightness !== null && currentHeroBrightness >= 0.45) || headerOpacity >= 0.75) &&
-    !(isMobile && (isSearchOpen || isMobileMenuOpen || isMobileMenuClosing))) ||
+    ((!isDarkHero ||
+      (!isHomepage && currentHeroBrightness !== null && currentHeroBrightness >= 0.45) ||
+      headerOpacity >= 0.75) &&
+      !(isMobile && (isSearchOpen || isMobileMenuOpen || isMobileMenuClosing))) ||
     (!isMobile && isProductsOpen)
 
   // Dark mode'da aşağı kaydırınca logo/yazı beyaz kalmalı (arka plan siyah olduğu için),

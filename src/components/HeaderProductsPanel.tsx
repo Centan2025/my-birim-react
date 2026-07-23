@@ -124,9 +124,10 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
 
                   let tempIsMirrored = false
                   if (typeof product.mainImage === 'object') {
-                    tempIsMirrored = product.mainImage.isMirroredDesktop !== undefined
-                      ? product.mainImage.isMirroredDesktop
-                      : !!product.mainImage.isMirrored
+                    tempIsMirrored =
+                      product.mainImage.isMirroredDesktop !== undefined
+                        ? product.mainImage.isMirroredDesktop
+                        : !!product.mainImage.isMirrored
                   }
 
                   // Ana görsel yoksa alternativeMedia'dan al
@@ -138,9 +139,10 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
                     const firstAlt = product.alternativeMedia[0]
                     if (firstAlt && firstAlt.type === 'image' && firstAlt.url) {
                       tempImageUrl = firstAlt.url
-                      tempIsMirrored = firstAlt.isMirroredDesktop !== undefined
-                        ? firstAlt.isMirroredDesktop
-                        : !!firstAlt.isMirrored
+                      tempIsMirrored =
+                        firstAlt.isMirroredDesktop !== undefined
+                          ? firstAlt.isMirroredDesktop
+                          : !!firstAlt.isMirrored
                     }
                   }
 

@@ -50,13 +50,19 @@ export default defineType({
       title: 'Kategori',
       type: 'reference',
       to: [{type: 'category'}],
-      validation: (Rule) => Rule.required().error('Her ürünün en az bir kategoriye atanması zorunludur.'),
+      validation: (Rule) =>
+        Rule.required().error('Her ürünün en az bir kategoriye atanması zorunludur.'),
       components: {
         input: ReferenceInputFix,
       },
     }),
 
-    defineField({name: 'year', title: 'Yıl', type: 'number', validation: (Rule) => Rule.min(1900).max(2100)}),
+    defineField({
+      name: 'year',
+      title: 'Yıl',
+      type: 'number',
+      validation: (Rule) => Rule.min(1900).max(2100),
+    }),
     defineField({
       name: 'isPublished',
       title: 'Yayında Göster',

@@ -303,8 +303,18 @@ export function ProductDetailPage() {
                 className="group relative inline-flex items-center gap-3 px-7 py-3.5 bg-white hover:bg-neutral-100 text-black font-medium text-xs uppercase tracking-widest rounded-none border border-neutral-300 shadow-none transition-all duration-300 cursor-pointer overflow-hidden"
               >
                 <div className="w-6 h-6 rounded-none bg-black text-white flex items-center justify-center transition-colors">
-                  <svg className="w-3.5 h-3.5 transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  <svg
+                    className="w-3.5 h-3.5 transition-transform duration-300 group-hover:scale-110"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
                   </svg>
                 </div>
                 <span className="relative z-10 font-sans tracking-widest text-black font-semibold">
@@ -455,7 +465,7 @@ export function ProductDetailPage() {
                 ? product.mainImage
                 : (product.mainImage as any)?.url || '',
             details: {
-              material: product.materials?.map((m) => t(m.name)).join(', '),
+              material: product.materials?.map(m => t(m.name)).join(', '),
               description: typeof product.description === 'string' ? product.description : '',
             },
           }}

@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { BeforeAfterSlider } from './BeforeAfterSlider'
+import React, {useState, useRef, useEffect, useCallback} from 'react'
+import {BeforeAfterSlider} from './BeforeAfterSlider'
 import {
   getDailyQuota,
   incrementDailyQuota,
@@ -50,7 +50,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
 
   const stopCamera = useCallback(() => {
     if (cameraStream) {
-      cameraStream.getTracks().forEach((track) => track.stop())
+      cameraStream.getTracks().forEach(track => track.stop())
     }
     if (videoRef.current) {
       videoRef.current.srcObject = null
@@ -67,18 +67,21 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
   useEffect(() => {
     return () => {
       if (cameraStream) {
-        cameraStream.getTracks().forEach((track) => track.stop())
+        cameraStream.getTracks().forEach(track => track.stop())
       }
     }
   }, [cameraStream])
 
-  const setVideoRef = useCallback((node: HTMLVideoElement | null) => {
-    (videoRef as React.MutableRefObject<HTMLVideoElement | null>).current = node
-    if (node && cameraStream) {
-      node.srcObject = cameraStream
-      node.play().catch((err) => console.warn('Video element play issue:', err))
-    }
-  }, [cameraStream])
+  const setVideoRef = useCallback(
+    (node: HTMLVideoElement | null) => {
+      ;(videoRef as React.MutableRefObject<HTMLVideoElement | null>).current = node
+      if (node && cameraStream) {
+        node.srcObject = cameraStream
+        node.play().catch(err => console.warn('Video element play issue:', err))
+      }
+    },
+    [cameraStream]
+  )
 
   if (!isOpen) return null
 
@@ -99,7 +102,9 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
         window.location.hostname.startsWith('192.168.'))
 
     if (typeof window !== 'undefined' && !window.isSecureContext && !isLocalhost) {
-      showToast('Kamera erişimi için sitenin HTTPS (güvenli bağlantı) üzerinden çalışması gerekmektedir.')
+      showToast(
+        'Kamera erişimi için sitenin HTTPS (güvenli bağlantı) üzerinden çalışması gerekmektedir.'
+      )
       return
     }
 
@@ -112,12 +117,12 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
     try {
       // 3. Enumerate available video devices (Identical logic to Fiyat_Listesi-11-4 QRScannerModal)
       const devices = await navigator.mediaDevices.enumerateDevices()
-      const videoDevices = devices.filter((d) => d.kind === 'videoinput')
+      const videoDevices = devices.filter(d => d.kind === 'videoinput')
 
       let targetId: string | undefined = undefined
       if (videoDevices.length > 0) {
         const backCamera = videoDevices.find(
-          (d) =>
+          d =>
             d.label.toLowerCase().includes('back') ||
             d.label.toLowerCase().includes('rear') ||
             d.label.toLowerCase().includes('environment')
@@ -127,10 +132,10 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
 
       const constraints: MediaStreamConstraints = {
         video: {
-          deviceId: targetId ? { exact: targetId } : undefined,
+          deviceId: targetId ? {exact: targetId} : undefined,
           facingMode: targetId ? undefined : 'environment',
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
+          width: {ideal: 1280},
+          height: {ideal: 720},
         },
         audio: false,
       }
@@ -140,7 +145,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
         stream = await navigator.mediaDevices.getUserMedia(constraints)
       } catch (err1) {
         console.warn('Enumerate constraints failed, trying simple video: true', err1)
-        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+        stream = await navigator.mediaDevices.getUserMedia({video: true, audio: false})
       }
 
       setCameraStream(stream)
@@ -160,8 +165,14 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
       const errName = err instanceof Error ? err.name : ''
       const errMsg = err instanceof Error ? err.message : ''
 
-      if (errName === 'NotAllowedError' || errName === 'PermissionDeniedError' || errMsg.includes('Permissions policy')) {
-        showToast('Kamera izni reddedildi. Lütfen tarayıcı adres çubuğundaki kilit simgesine tıklayıp kamera iznini aktif edin.')
+      if (
+        errName === 'NotAllowedError' ||
+        errName === 'PermissionDeniedError' ||
+        errMsg.includes('Permissions policy')
+      ) {
+        showToast(
+          'Kamera izni reddedildi. Lütfen tarayıcı adres çubuğundaki kilit simgesine tıklayıp kamera iznini aktif edin.'
+        )
       } else if (errName === 'NotFoundError' || errName === 'DevicesNotFoundError') {
         showToast('Cihazınızda kullanılabilir bir kamera bulunamadı.')
       } else if (errName === 'NotReadableError' || errName === 'TrackStartError') {
@@ -239,10 +250,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
     }
   }
 
-  const handleGenerate = async (
-    targetAngle?: string,
-    targetAlignment?: string
-  ) => {
+  const handleGenerate = async (targetAngle?: string, targetAlignment?: string) => {
     // 1. Synchronous Lock & Debounce Check
     if (isGeneratingRef.current || isLoading || isUpdating) {
       return
@@ -283,13 +291,13 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
 
     try {
       const [compressedRoomImage, compressedProductImage] = await Promise.all([
-        resizeImageUrlOrBase64(roomImagePreview, 768, 0.70),
-        resizeImageUrlOrBase64(prodImage, 768, 0.70),
+        resizeImageUrlOrBase64(roomImagePreview, 768, 0.7),
+        resizeImageUrlOrBase64(prodImage, 768, 0.7),
       ])
 
       const response = await fetch('/api/ai/nano-banana-planner', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           roomImage: compressedRoomImage,
           productImage: compressedProductImage,
@@ -300,9 +308,21 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
         }),
       })
 
-      let data: { success?: boolean; imageUrl?: string; message?: string; isDemo?: boolean; error?: string } = {}
+      let data: {
+        success?: boolean
+        imageUrl?: string
+        message?: string
+        isDemo?: boolean
+        error?: string
+      } = {}
       try {
-        data = (await response.json()) as { success?: boolean; imageUrl?: string; message?: string; isDemo?: boolean; error?: string }
+        data = (await response.json()) as {
+          success?: boolean
+          imageUrl?: string
+          message?: string
+          isDemo?: boolean
+          error?: string
+        }
       } catch {
         throw new Error(`Sunucu yanıtı okunamadı (HTTP ${response.status}). Lütfen tekrar deneyin.`)
       }
@@ -321,7 +341,10 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
       }
 
       setResultImage(data.imageUrl)
-      showToast(data.message || 'Oda tasarımınız AI 3D Render motoru ile başarıyla sentezlendi!', 'success')
+      showToast(
+        data.message || 'Oda tasarımınız AI 3D Render motoru ile başarıyla sentezlendi!',
+        'success'
+      )
     } catch (err: unknown) {
       console.error('Room planner error:', err)
       const errorMsg = err instanceof Error ? err.message : 'Bilinmeyen bir hata oluştu.'
@@ -385,8 +408,12 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
               </svg>
             </div>
             <div>
-              <h3 className="text-base font-medium tracking-wide text-white uppercase font-sans">Odamda Gör • AI Oda Tasarımı</h3>
-              <p className="text-xs text-neutral-400 font-sans">Yapay Zeka 3D Mekan & Yerleşim Motoru</p>
+              <h3 className="text-base font-medium tracking-wide text-white uppercase font-sans">
+                Odamda Gör • AI Oda Tasarımı
+              </h3>
+              <p className="text-xs text-neutral-400 font-sans">
+                Yapay Zeka 3D Mekan & Yerleşim Motoru
+              </p>
             </div>
           </div>
           <button
@@ -432,7 +459,8 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                   Odanızın ışığı ve perspektifi AI motoru ile analiz ediliyor...
                 </h4>
                 <p className="text-xs text-neutral-400 leading-relaxed font-light font-sans">
-                  Yapay zeka, mobilyanın ölçeğini, gölgelerini ve doğal ışık açılarını odanıza kusursuzca yerleştiriyor.
+                  Yapay zeka, mobilyanın ölçeğini, gölgelerini ve doğal ışık açılarını odanıza
+                  kusursuzca yerleştiriyor.
                 </p>
               </div>
             </div>
@@ -464,8 +492,18 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
               <div className="p-4 rounded-none bg-neutral-850 border border-neutral-800 space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-sans uppercase tracking-widest text-[#c5a059] font-semibold flex items-center gap-2">
-                    <svg className="w-4 h-4 text-[#c5a059]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                    <svg
+                      className="w-4 h-4 text-[#c5a059]"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+                      />
                     </svg>
                     Arayüz Kontrol Paneli (Interactive Controls)
                   </span>
@@ -484,10 +522,10 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                     </span>
                     <div className="grid grid-cols-3 gap-2">
                       {[
-                        { id: '3/4 left perspective', label: '↖ Sol Çapraz' },
-                        { id: 'Front perspective', label: '⬆ Cephe' },
-                        { id: '3/4 right perspective', label: '↗ Sağ Çapraz' },
-                      ].map((angleOpt) => {
+                        {id: '3/4 left perspective', label: '↖ Sol Çapraz'},
+                        {id: 'Front perspective', label: '⬆ Cephe'},
+                        {id: '3/4 right perspective', label: '↗ Sağ Çapraz'},
+                      ].map(angleOpt => {
                         const isActive = selectedAngle === angleOpt.id
                         return (
                           <button
@@ -517,12 +555,15 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {[
-                        { id: 'Align parallel to the left wall', label: '⬅ Sol Duvara Paralel' },
-                        { id: 'Align parallel to the right wall', label: '➡️ Sağ Duvara Paralel' },
-                        { id: 'Turn 45 degrees left', label: '🔄 45° Sola Çevir' },
-                        { id: 'Turn 45 degrees right', label: '🔄 45° Sağa Çevir' },
-                        { id: 'Center in the middle of the room floor', label: '📐 Odanın Ortasına Çek' },
-                      ].map((alignOpt) => {
+                        {id: 'Align parallel to the left wall', label: '⬅ Sol Duvara Paralel'},
+                        {id: 'Align parallel to the right wall', label: '➡️ Sağ Duvara Paralel'},
+                        {id: 'Turn 45 degrees left', label: '🔄 45° Sola Çevir'},
+                        {id: 'Turn 45 degrees right', label: '🔄 45° Sağa Çevir'},
+                        {
+                          id: 'Center in the middle of the room floor',
+                          label: '📐 Odanın Ortasına Çek',
+                        },
+                      ].map(alignOpt => {
                         const isActive = selectedAlignment === alignOpt.id
                         return (
                           <button
@@ -554,8 +595,18 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                     onClick={() => handleGenerate(selectedAngle, selectedAlignment)}
                     className="w-full sm:w-auto px-5 py-2 text-xs font-medium text-white bg-[#c5a059] hover:bg-[#b08d48] rounded-none transition-colors border border-[#c5a059] flex items-center justify-center gap-2 font-sans cursor-pointer shadow-none disabled:opacity-50"
                   >
-                    <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    <svg
+                      className="w-3.5 h-3.5 text-white"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
                     </svg>
                     <span>Açı ve Konumu Yeniden Hesapla (AI Render)</span>
                   </button>
@@ -576,7 +627,12 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                   className="px-5 py-2 text-xs font-semibold text-black bg-white hover:bg-neutral-100 rounded-none border border-neutral-300 shadow-none transition-colors flex items-center gap-2 font-sans cursor-pointer"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                    />
                   </svg>
                   Yüksek Çözünürlüklü İndir
                 </button>
@@ -612,8 +668,18 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                   className="px-6 py-2.5 text-xs font-semibold text-black bg-white hover:bg-neutral-100 rounded-none border border-neutral-300 shadow-none transition-all flex items-center gap-2 font-sans cursor-pointer"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
                   </svg>
                   Fotoğraf Çek
                 </button>
@@ -627,13 +693,13 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
               <div
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => {
+                onKeyDown={e => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
                     fileInputRef.current?.click()
                   }
                 }}
-                onDragOver={(e) => {
+                onDragOver={e => {
                   e.preventDefault()
                   e.stopPropagation()
                 }}
@@ -665,8 +731,18 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                 ) : (
                   <>
                     <div className="w-14 h-14 rounded-none bg-neutral-800 border border-neutral-700 flex items-center justify-center text-neutral-400">
-                      <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      <svg
+                        className="w-7 h-7"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
                       </svg>
                     </div>
                     <div>
@@ -687,9 +763,24 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                   onClick={startCamera}
                   className="px-4 py-2.5 text-xs font-medium text-neutral-200 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 rounded-none transition-all flex items-center gap-2 font-sans cursor-pointer shadow-none"
                 >
-                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <svg
+                    className="w-4 h-4 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
                   </svg>
                   Canlı Kamera ile Çek
                 </button>
@@ -705,11 +796,23 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                     : 'bg-neutral-800 text-neutral-400 border-neutral-700 cursor-not-allowed'
                 }`}
               >
-                <div className={`w-5 h-5 rounded-none flex items-center justify-center ${
-                  roomImagePreview ? 'bg-black text-white' : 'bg-neutral-700 text-neutral-400'
-                }`}>
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <div
+                  className={`w-5 h-5 rounded-none flex items-center justify-center ${
+                    roomImagePreview ? 'bg-black text-white' : 'bg-neutral-700 text-neutral-400'
+                  }`}
+                >
+                  <svg
+                    className="w-3.5 h-3.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
                   </svg>
                 </div>
                 <span className="font-sans">Bu Ürünü Odamda Gör • AI Render</span>
@@ -737,7 +840,9 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                 Günlük Ücretsiz AI Tasarım Hakkınız Doldu
               </h3>
               <p className="text-xs text-neutral-400 leading-relaxed font-sans">
-                Anonim kullanıcılar için günlük 3 ücretsiz deneme sınırı bulunmaktadır. Mimarlarımızla iletişime geçerek veya ücretsiz üye olarak sınırsız AI oda tasarımı alabilirsiniz.
+                Anonim kullanıcılar için günlük 3 ücretsiz deneme sınırı bulunmaktadır.
+                Mimarlarımızla iletişime geçerek veya ücretsiz üye olarak sınırsız AI oda tasarımı
+                alabilirsiniz.
               </p>
             </div>
             <div className="space-y-2.5 pt-2">

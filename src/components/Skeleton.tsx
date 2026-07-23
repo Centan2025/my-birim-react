@@ -38,10 +38,10 @@ export const ProductCardSkeleton: React.FC = () => {
   )
 }
 
-export const ProductGridSkeleton: React.FC<{ count?: number }> = ({ count = 6 }) => {
+export const ProductGridSkeleton: React.FC<{count?: number}> = ({count = 6}) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full">
-      {Array.from({ length: count }).map((_, index) => (
+      {Array.from({length: count}).map((_, index) => (
         <ProductCardSkeleton key={index} />
       ))}
     </div>

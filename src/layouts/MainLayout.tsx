@@ -47,4 +47,3 @@ const PageTransitionWrapper = React.forwardRef<HTMLDivElement, {location: Locati
     )
   }
 )
-

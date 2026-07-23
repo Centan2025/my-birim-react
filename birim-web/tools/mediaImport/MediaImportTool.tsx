@@ -140,7 +140,8 @@ interface SummaryData {
 
 const getApiUrl = (path: string): string => {
   if (typeof window === 'undefined') return path
-  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  const isLocal =
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   const base = isLocal ? 'http://localhost:3002' : 'https://www.birim.com'
   return `${base}${path}`
 }
@@ -171,7 +172,7 @@ const uploadFileViaPresignedUrl = async (
     throw new Error(errBody.error || `Presigned URL isteği başarısız: ${res.statusText}`)
   }
 
-  const { uploadUrl, fileUrl } = await res.json()
+  const {uploadUrl, fileUrl} = await res.json()
 
   const uploadRes = await fetch(uploadUrl, {
     method: 'PUT',
@@ -2068,7 +2069,12 @@ export default function MediaImportTool() {
                             <Text
                               size={1}
                               weight="semibold"
-                              style={{ color: issue.type === 'error' ? 'var(--card-critical-fg-color)' : 'var(--card-caution-fg-color)' }}
+                              style={{
+                                color:
+                                  issue.type === 'error'
+                                    ? 'var(--card-critical-fg-color)'
+                                    : 'var(--card-caution-fg-color)',
+                              }}
                             >
                               {issue.message}
                             </Text>

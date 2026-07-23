@@ -37,9 +37,12 @@ export const ProductCard: React.FC<{product: Product}> = ({product}) => {
   const mainImageDesktop = mainImageObj.urlDesktop
   const mainImageCrop = mainImageObj.crop
   const mainImageHotspot = mainImageObj.hotspot
-  const mainImageIsMirrored = mainImageObj.isMirrored !== undefined ? !!mainImageObj.isMirrored : undefined
-  const mainImageIsMirroredMobile = mainImageObj.isMirroredMobile !== undefined ? !!mainImageObj.isMirroredMobile : undefined
-  const mainImageIsMirroredDesktop = mainImageObj.isMirroredDesktop !== undefined ? !!mainImageObj.isMirroredDesktop : undefined
+  const mainImageIsMirrored =
+    mainImageObj.isMirrored !== undefined ? !!mainImageObj.isMirrored : undefined
+  const mainImageIsMirroredMobile =
+    mainImageObj.isMirroredMobile !== undefined ? !!mainImageObj.isMirroredMobile : undefined
+  const mainImageIsMirroredDesktop =
+    mainImageObj.isMirroredDesktop !== undefined ? !!mainImageObj.isMirroredDesktop : undefined
 
   const handleClick = () => {
     // We still want to handle analytics before navigation

@@ -82,7 +82,9 @@ export function CartSidebar() {
       >
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{t('cart') || 'Sepet'}</h2>
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+              {t('cart') || 'Sepet'}
+            </h2>
             <button
               onClick={toggleCart}
               className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white p-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059]"

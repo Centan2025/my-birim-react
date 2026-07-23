@@ -160,7 +160,9 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
           keyOrObject === 'email_placeholder'
 
         // Try CMS translations first (gerekirse bypass), then fallback to base translations
-        const cmsTranslation = shouldBypassCms ? undefined : findInDict(cmsTranslations[locale], keyOrObject)
+        const cmsTranslation = shouldBypassCms
+          ? undefined
+          : findInDict(cmsTranslations[locale], keyOrObject)
         const baseTranslation =
           findInDict(baseTranslations[locale], keyOrObject) ||
           findInDict(baseTranslations['tr'], keyOrObject)
@@ -175,11 +177,11 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
 
       if (typeof keyOrObject === 'object' && keyOrObject !== null) {
         const obj = keyOrObject as Record<string, string | undefined>
-        
+
         const currentVal = typeof obj[locale] === 'string' ? (obj[locale] as string).trim() : ''
         const trVal = typeof obj['tr'] === 'string' ? (obj['tr'] as string).trim() : ''
 
-        // Eğer mevcut locale değeri TR değeriyle aynıysa (ve locale TR değilse), 
+        // Eğer mevcut locale değeri TR değeriyle aynıysa (ve locale TR değilse),
         // bu durum genellikle CMS'te çevrilmediği için TR değerinin kopyalandığını gösterir.
         // Bu durumda önce yerel sözlüklerde (cms/base) TR değeri için bir çeviri arayalım.
         if (locale !== 'tr' && currentVal && trVal && currentVal === trVal) {

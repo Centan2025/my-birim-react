@@ -29,8 +29,8 @@ if (typeof setInterval !== 'undefined') {
 }
 
 interface RateLimitOptions {
-  limit: number      // Maksimum istek sayısı
-  windowMs: number   // Zaman penceresi (milisaniye cinsinden)
+  limit: number // Maksimum istek sayısı
+  windowMs: number // Zaman penceresi (milisaniye cinsinden)
 }
 
 /**
@@ -67,16 +67,16 @@ export async function isRateLimitedAsync(key: string, options: RateLimitOptions)
   if (redisUrl && redisToken) {
     try {
       const res = await fetch(`${redisUrl}/incr/${encodeURIComponent(key)}`, {
-        headers: { Authorization: `Bearer ${redisToken}` },
+        headers: {Authorization: `Bearer ${redisToken}`},
       })
       if (res.ok) {
-        const data = (await res.json()) as { result?: number }
+        const data = (await res.json()) as {result?: number}
         const count = data.result || 1
         if (count === 1) {
           // Expiration ayarla
           const expireSec = Math.ceil(options.windowMs / 1000)
           await fetch(`${redisUrl}/expire/${encodeURIComponent(key)}/${expireSec}`, {
-            headers: { Authorization: `Bearer ${redisToken}` },
+            headers: {Authorization: `Bearer ${redisToken}`},
           })
         }
         return count > options.limit

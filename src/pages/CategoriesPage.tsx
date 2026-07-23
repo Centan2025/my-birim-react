@@ -118,7 +118,10 @@ export function CategoriesPage() {
                 distance={0}
                 direction="none"
               >
-                <Link to={`/products/${category.id}`} className="group block overflow-hidden rounded-none">
+                <Link
+                  to={`/products/${category.id}`}
+                  className="group block overflow-hidden rounded-none"
+                >
                   <div className="relative h-[300px] sm:h-[350px] lg:h-[450px] overflow-hidden rounded-none border-none">
                     {category.displayImage && (
                       <OptimizedImage

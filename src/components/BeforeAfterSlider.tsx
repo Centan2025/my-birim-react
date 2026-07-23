@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react'
+import React, {useState, useRef, useCallback, useEffect} from 'react'
 
 interface BeforeAfterSliderProps {
   beforeImage: string
@@ -73,11 +73,11 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
       role="region"
       aria-label="Görsel karşılaştırma slider"
       className={`relative w-full h-[400px] md:h-[500px] select-none overflow-hidden rounded-xl border border-white/10 shadow-2xl bg-black ${className}`}
-      onMouseDown={(e) => {
+      onMouseDown={e => {
         setIsDragging(true)
         handleMove(e.clientX)
       }}
-      onTouchStart={(e) => {
+      onTouchStart={e => {
         setIsDragging(true)
         if (e.touches[0]) handleMove(e.touches[0].clientX)
       }}
@@ -95,7 +95,7 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
       {/* Before Image (Clipped / Original Room) */}
       <div
         className="absolute inset-0 overflow-hidden"
-        style={{ clipPath: `polygon(0 0, ${sliderPosition}% 0, ${sliderPosition}% 100%, 0 100%)` }}
+        style={{clipPath: `polygon(0 0, ${sliderPosition}% 0, ${sliderPosition}% 100%, 0 100%)`}}
       >
         <img
           src={beforeImage}
@@ -110,7 +110,7 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
       {/* Slider Line & Handle */}
       <div
         className="absolute top-0 bottom-0 z-20 w-0.5 bg-white cursor-ew-resize shadow-[0_0_10px_rgba(255,255,255,0.8)]"
-        style={{ left: `${sliderPosition}%` }}
+        style={{left: `${sliderPosition}%`}}
       >
         <div className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white text-black rounded-full flex items-center justify-center shadow-lg border-2 border-black/10 text-xs font-bold transition-transform active:scale-95">
           <svg

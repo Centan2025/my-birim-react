@@ -50,13 +50,13 @@ export const getCategories = async (): Promise<Category[]> => {
       heroImage: r.heroImageR2
         ? {url: mapImage(r.heroImageR2), ...mapR2Metadata(r.heroImageR2)}
         : r.heroImage
-        ? {url: mapImage(r.heroImage), ...mapR2Metadata(r.heroImage)}
-        : '',
+          ? {url: mapImage(r.heroImage), ...mapR2Metadata(r.heroImage)}
+          : '',
       menuImage: r.menuImageR2
         ? {url: mapImage(r.menuImageR2), ...mapR2Metadata(r.menuImageR2)}
         : r.menuImage
-        ? {url: mapImage(r.menuImage), ...mapR2Metadata(r.menuImage)}
-        : '',
+          ? {url: mapImage(r.menuImage), ...mapR2Metadata(r.menuImage)}
+          : '',
     }))
   }
   await delay(SIMULATED_DELAY)

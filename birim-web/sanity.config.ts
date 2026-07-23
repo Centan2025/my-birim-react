@@ -38,7 +38,6 @@ if (typeof window === 'undefined') {
   globalThis.navigator = globalThis.navigator || {userAgent: 'node'}
 }
 
-
 import {structureTool} from 'sanity/structure'
 import {visionTool} from '@sanity/vision'
 import {orderableDocumentListDeskItem} from '@sanity/orderable-document-list'

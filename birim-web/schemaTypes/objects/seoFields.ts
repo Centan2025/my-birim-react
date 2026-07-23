@@ -9,7 +9,8 @@ export default defineType({
       name: 'metaTitle',
       title: 'Meta Başlık (Meta Title)',
       type: 'localizedString',
-      description: 'Arama motoru sonuçlarında görünecek başlık. Boş bırakılırsa ürün/sayfa adı kullanılır.',
+      description:
+        'Arama motoru sonuçlarında görünecek başlık. Boş bırakılırsa ürün/sayfa adı kullanılır.',
     }),
     defineField({
       name: 'metaDescription',
@@ -21,14 +22,16 @@ export default defineType({
       name: 'ogImage',
       title: 'Sosyal Medya Görseli (OpenGraph Image)',
       type: 'r2Asset',
-      description: 'Bağlantı WhatsApp, LinkedIn, Facebook vb. platformlarda paylaşıldığında görünecek resim.',
+      description:
+        'Bağlantı WhatsApp, LinkedIn, Facebook vb. platformlarda paylaşıldığında görünecek resim.',
     }),
     defineField({
       name: 'noIndex',
       title: 'Arama Motorlarında Gizle (noindex)',
       type: 'boolean',
       initialValue: false,
-      description: 'İşaretlenirse bu sayfa Google ve diğer arama motorları tarafından indekslenmez.',
+      description:
+        'İşaretlenirse bu sayfa Google ve diğer arama motorları tarafından indekslenmez.',
     }),
   ],
 })

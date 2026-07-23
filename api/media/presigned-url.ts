@@ -3,8 +3,10 @@ import {getSignedUrl} from '@aws-sdk/s3-request-presigner'
 
 const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || process.env.SANITY_STUDIO_R2_ACCOUNT_ID
 const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID
-const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY
-const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || process.env.SANITY_STUDIO_R2_BUCKET_NAME || 'birim-web'
+const R2_SECRET_ACCESS_KEY =
+  process.env.R2_SECRET_ACCESS_KEY || process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY
+const R2_BUCKET_NAME =
+  process.env.R2_BUCKET_NAME || process.env.SANITY_STUDIO_R2_BUCKET_NAME || 'birim-web'
 const R2_DOMAIN = process.env.R2_DOMAIN || process.env.SANITY_STUDIO_R2_DOMAIN
 
 const r2Client = new S3Client({
@@ -44,7 +46,12 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
   const {filename, contentType, folder} = req.body || {}
 
-  if (!filename || typeof filename !== 'string' || !contentType || typeof contentType !== 'string') {
+  if (
+    !filename ||
+    typeof filename !== 'string' ||
+    !contentType ||
+    typeof contentType !== 'string'
+  ) {
     return res.status(400).json({error: 'filename ve contentType parametreleri gereklidir.'})
   }
 
@@ -56,7 +63,9 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   try {
     const safeFolder = typeof folder === 'string' && folder.trim() ? folder.trim() : 'uploads'
     const cleanFileName = filename.trim().replace(/[^a-zA-Z0-9_.-]/g, '_')
-    const key = safeFolder.endsWith('/') ? `${safeFolder}${cleanFileName}` : `${safeFolder}/${cleanFileName}`
+    const key = safeFolder.endsWith('/')
+      ? `${safeFolder}${cleanFileName}`
+      : `${safeFolder}/${cleanFileName}`
 
     const command = new PutObjectCommand({
       Bucket: R2_BUCKET_NAME,

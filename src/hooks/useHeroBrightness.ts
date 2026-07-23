@@ -127,17 +127,7 @@ export function useHeroBrightness(
       canvas.height = Math.min(sampleHeight, 50)
 
       try {
-        ctx.drawImage(
-          activeMedia,
-          0,
-          0,
-          naturalW,
-          sampleHeight,
-          0,
-          0,
-          canvas.width,
-          canvas.height
-        )
+        ctx.drawImage(activeMedia, 0, 0, naturalW, sampleHeight, 0, 0, canvas.width, canvas.height)
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
         const data = imageData.data
         if (isCancelled) return

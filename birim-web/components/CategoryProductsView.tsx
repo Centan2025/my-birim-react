@@ -52,7 +52,7 @@ export function CategoryProductsView(props: CategoryProductsViewProps) {
       .then((data: Product[]) => {
         // Mükerrer (draft ve published) olanları temizle. En güncel olan taslağı (draft) tercih et.
         const productMap = new Map<string, Product>()
-        data.forEach(p => {
+        data.forEach((p) => {
           const cleanId = p._id.replace('drafts.', '')
           const isDraft = p._id.startsWith('drafts.')
           const existing = productMap.get(cleanId)

@@ -95,7 +95,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 }) => {
   const styleBlock = useMemo(() => {
     return (
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         img.responsive-mirror {
           scale: var(--is-mirrored-general, 1) 1 !important;
         }
@@ -109,7 +111,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             scale: var(--is-mirrored-desktop, var(--is-mirrored-general, 1)) 1 !important;
           }
         }
-      `}} />
+      `,
+        }}
+      />
     )
   }, [])
 
@@ -235,7 +239,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         r2Domain.includes('.workers.dev') ||
         r2Domain.includes('assets.birim.com')
       ) {
-        if (baseUrl.endsWith('.webp') && !baseUrl.includes('-400w.webp') && !baseUrl.includes('-800w.webp') && !baseUrl.includes('-1600w.webp')) {
+        if (
+          baseUrl.endsWith('.webp') &&
+          !baseUrl.includes('-400w.webp') &&
+          !baseUrl.includes('-800w.webp') &&
+          !baseUrl.includes('-1600w.webp')
+        ) {
           const cleanUrl = baseUrl.replace('?rs=1', '').replace('&rs=1', '')
           return [
             `${encodeSrcSetUrl(cleanUrl.replace(/\.webp$/, '-400w.webp'))} 400w`,
@@ -283,8 +292,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     ...style,
     // SSR-stable CSS custom properties
     '--is-mirrored-general': isMirrored ? '-1' : '1',
-    '--is-mirrored-mobile': isMirroredMobile !== undefined ? (isMirroredMobile ? '-1' : '1') : (isMirrored ? '-1' : '1'),
-    '--is-mirrored-desktop': isMirroredDesktop !== undefined ? (isMirroredDesktop ? '-1' : '1') : (isMirrored ? '-1' : '1'),
+    '--is-mirrored-mobile':
+      isMirroredMobile !== undefined ? (isMirroredMobile ? '-1' : '1') : isMirrored ? '-1' : '1',
+    '--is-mirrored-desktop':
+      isMirroredDesktop !== undefined ? (isMirroredDesktop ? '-1' : '1') : isMirrored ? '-1' : '1',
   } as React.CSSProperties
   if (hotspot) {
     imgStyle.objectPosition = `${hotspot.x * 100}% ${hotspot.y * 100}%`

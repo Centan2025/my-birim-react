@@ -12,7 +12,11 @@ import {getPreviewUrl} from '../utils/previewUrl'
  * Medya önizlemeleri için yardımcı fonksiyon.
  * Görselse <img>, videosa <video> elementi döner.
  */
-export const renderPreviewMedia = (url: string | undefined, type?: string, isMirrored?: boolean) => {
+export const renderPreviewMedia = (
+  url: string | undefined,
+  type?: string,
+  isMirrored?: boolean,
+) => {
   if (!url) return undefined
 
   const isVideo = type === 'video' || url.match(/\.(mp4|webm|ogg|mov)$/i)
@@ -487,7 +491,8 @@ export const productSimpleMediaItem = defineType({
       thumbUrl: 'thumbnailR2.url',
     },
     prepare(selection: Record<string, unknown>) {
-      const {type, isCover, isMirrored, titleTr, imageR2Url, videoR2Url, thumbUrl} = selection as any
+      const {type, isCover, isMirrored, titleTr, imageR2Url, videoR2Url, thumbUrl} =
+        selection as any
       const finalUrl = getPreviewUrl(thumbUrl || imageR2Url || videoR2Url)
 
       return {

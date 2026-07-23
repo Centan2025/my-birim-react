@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import {S3Client, PutObjectCommand} from '@aws-sdk/client-s3'
 import crypto from 'crypto'
 
 // Rate Limiting (In-Memory IP Tracker)
@@ -8,21 +8,25 @@ interface RateLimitRecord {
 }
 const ipStore = new Map<string, RateLimitRecord>()
 
-function checkRateLimit(ip: string, limit = 3, windowMs = 60 * 1000): { allowed: boolean; remaining: number; resetMs: number } {
+function checkRateLimit(
+  ip: string,
+  limit = 3,
+  windowMs = 60 * 1000
+): {allowed: boolean; remaining: number; resetMs: number} {
   if (ip === '127.0.0.1' || ip === '::1' || ip === 'localhost') {
-    return { allowed: true, remaining: 999, resetMs: 0 }
+    return {allowed: true, remaining: 999, resetMs: 0}
   }
   const now = Date.now()
   const record = ipStore.get(ip)
   if (!record || now > record.resetTime) {
-    ipStore.set(ip, { count: 1, resetTime: now + windowMs })
-    return { allowed: true, remaining: limit - 1, resetMs: windowMs }
+    ipStore.set(ip, {count: 1, resetTime: now + windowMs})
+    return {allowed: true, remaining: limit - 1, resetMs: windowMs}
   }
   if (record.count >= limit) {
-    return { allowed: false, remaining: 0, resetMs: record.resetTime - now }
+    return {allowed: false, remaining: 0, resetMs: record.resetTime - now}
   }
   record.count += 1
-  return { allowed: true, remaining: limit - record.count, resetMs: record.resetTime - now }
+  return {allowed: true, remaining: limit - record.count, resetMs: record.resetTime - now}
 }
 
 function sanitizePrompt(input?: unknown, maxLength = 150): string {
@@ -39,8 +43,10 @@ function sanitizePrompt(input?: unknown, maxLength = 150): string {
 
 const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || process.env.SANITY_STUDIO_R2_ACCOUNT_ID
 const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID
-const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY
-const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || process.env.SANITY_STUDIO_R2_BUCKET_NAME || 'birim-web'
+const R2_SECRET_ACCESS_KEY =
+  process.env.R2_SECRET_ACCESS_KEY || process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY
+const R2_BUCKET_NAME =
+  process.env.R2_BUCKET_NAME || process.env.SANITY_STUDIO_R2_BUCKET_NAME || 'birim-web'
 const R2_DOMAIN = process.env.R2_DOMAIN || process.env.SANITY_STUDIO_R2_DOMAIN
 
 interface ApiRequest {
@@ -64,11 +70,11 @@ interface ApiResponse {
  */
 async function getBase64FromImageInput(
   imageInput: string
-): Promise<{ base64Data: string; mimeType: string }> {
+): Promise<{base64Data: string; mimeType: string}> {
   if (imageInput.startsWith('data:')) {
     const matches = imageInput.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/)
     if (matches && matches.length === 3) {
-      return { mimeType: matches[1], base64Data: matches[2] }
+      return {mimeType: matches[1], base64Data: matches[2]}
     }
   }
 
@@ -87,7 +93,7 @@ async function getBase64FromImageInput(
   }
 
   // Raw base64 fallback
-  return { mimeType: 'image/jpeg', base64Data: imageInput }
+  return {mimeType: 'image/jpeg', base64Data: imageInput}
 }
 
 /**
@@ -144,7 +150,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     }
 
     if (req.method !== 'POST') {
-      return res.status(405).json({ error: 'Method Not Allowed' })
+      return res.status(405).json({error: 'Method Not Allowed'})
     }
 
     const clientIp =
@@ -160,19 +166,23 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       })
     }
 
-    const bodyData = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {})
-    const { roomImage, productImage, customPrompt, angle, alignmentInstruction, productName, productDetails } = bodyData
+    const bodyData = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {}
+    const {
+      roomImage,
+      productImage,
+      customPrompt,
+      angle,
+      alignmentInstruction,
+      productName,
+      productDetails,
+    } = bodyData
 
     if (!roomImage || typeof roomImage !== 'string') {
-      return res
-        .status(400)
-        .json({ error: 'Kullanıcının oda görseli (roomImage) zorunludur.' })
+      return res.status(400).json({error: 'Kullanıcının oda görseli (roomImage) zorunludur.'})
     }
 
     if (!productImage || typeof productImage !== 'string') {
-      return res
-        .status(400)
-        .json({ error: 'Seçilen ürün görseli (productImage) zorunludur.' })
+      return res.status(400).json({error: 'Seçilen ürün görseli (productImage) zorunludur.'})
     }
 
     const cleanPrompt = sanitizePrompt(customPrompt, 150)
@@ -184,15 +194,18 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
         success: true,
         imageUrl: roomImage,
         isDemo: true,
-        message: 'Google Gemini API anahtarı sunucuda henüz tanımlanmadığı için oda görseliniz hazırlandı. Canlı 3D sentezi için API anahtarı eklenmelidir.',
+        message:
+          'Google Gemini API anahtarı sunucuda henüz tanımlanmadığı için oda görseliniz hazırlandı. Canlı 3D sentezi için API anahtarı eklenmelidir.',
       })
     }
 
-  try {
-    const roomImg = await getBase64FromImageInput(roomImage)
-    const productImg = await getBase64FromImageInput(productImage)
+    try {
+      const roomImg = await getBase64FromImageInput(roomImage)
+      const productImg = await getBase64FromImageInput(productImage)
 
-    let promptText = cleanPrompt ? cleanPrompt : `
+      let promptText = cleanPrompt
+        ? cleanPrompt
+        : `
 You are an ultra-precise photorealistic 3D interior renderer and product-exact visualizer engine.
 
 INPUT IMAGES:
@@ -224,120 +237,127 @@ ZERO-TOLERANCE MANDATORY PRODUCT CONSTRAINTS:
    - There MUST be ONLY ONE piece of this furniture in the entire generated room image.
 `.trim()
 
-    if (productDetails && typeof productDetails === 'object') {
-      const detailsList: string[] = []
-      if (productDetails.material) detailsList.push(`- Material/Fabric: ${productDetails.material}`)
-      if (productDetails.legStyle) detailsList.push(`- Leg Style: ${productDetails.legStyle}`)
-      if (productDetails.color) detailsList.push(`- Color/Finish: ${productDetails.color}`)
-      if (productDetails.description) detailsList.push(`- Description: ${productDetails.description}`)
-      if (detailsList.length > 0) {
-        promptText += `\n\nEXACT PRODUCT SPECIFICATIONS TO KEEP UNCHANGED:\n${detailsList.join('\n')}`
-      }
-    }
-
-    if (angle && typeof angle === 'string') {
-      promptText += `\n\nROTATION INSTRUCTION: Re-render the SINGLE model from Image 2 from the requested angle: ${angle}. Ensure there is ONLY ONE piece of furniture in the room.`
-    }
-
-    if (alignmentInstruction && typeof alignmentInstruction === 'string') {
-      promptText += `\n\nPOSITIONING INSTRUCTION: Reposition the SINGLE model from Image 2 on the floor according to: ${alignmentInstruction}. Ensure NO duplicate furniture appears.`
-    }
-
-    let outputImageBuffer: Buffer | null = null
-    let outputMimeType = 'image/png'
-
-    // Valid production models (prioritize low-cost Fast Imagen 3 and Gemini Flash)
-    const imageModels = [
-      'imagen-3.0-fast-generate-001',
-      'imagen-3.0-generate-002',
-      'gemini-2.0-flash',
-      'gemini-1.5-flash',
-    ]
-
-    for (const modelName of imageModels) {
-      try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`
-        const apiRes = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [
-              {
-                role: 'user',
-                parts: [
-                  { text: promptText },
-                  { inlineData: { mimeType: roomImg.mimeType, data: roomImg.base64Data } },
-                  { inlineData: { mimeType: productImg.mimeType, data: productImg.base64Data } },
-                ],
-              },
-            ],
-            generationConfig: {
-              temperature: 0.15,
-              responseModalities: ['IMAGE', 'TEXT'],
-            },
-          }),
-        })
-
-        if (!apiRes.ok) continue
-
-        const resData = (await apiRes.json()) as {
-          candidates?: Array<{ content?: { parts?: Array<{ inlineData?: { data?: string; mimeType?: string } }> } }>
-          text?: string
+      if (productDetails && typeof productDetails === 'object') {
+        const detailsList: string[] = []
+        if (productDetails.material)
+          detailsList.push(`- Material/Fabric: ${productDetails.material}`)
+        if (productDetails.legStyle) detailsList.push(`- Leg Style: ${productDetails.legStyle}`)
+        if (productDetails.color) detailsList.push(`- Color/Finish: ${productDetails.color}`)
+        if (productDetails.description)
+          detailsList.push(`- Description: ${productDetails.description}`)
+        if (detailsList.length > 0) {
+          promptText += `\n\nEXACT PRODUCT SPECIFICATIONS TO KEEP UNCHANGED:\n${detailsList.join('\n')}`
         }
+      }
 
-        const candidates = resData.candidates || []
-        if (candidates.length > 0 && candidates[0].content?.parts) {
-          for (const part of candidates[0].content.parts) {
-            if (part.inlineData && part.inlineData.data) {
-              outputImageBuffer = Buffer.from(part.inlineData.data, 'base64')
-              if (part.inlineData.mimeType) outputMimeType = part.inlineData.mimeType
-              break
+      if (angle && typeof angle === 'string') {
+        promptText += `\n\nROTATION INSTRUCTION: Re-render the SINGLE model from Image 2 from the requested angle: ${angle}. Ensure there is ONLY ONE piece of furniture in the room.`
+      }
+
+      if (alignmentInstruction && typeof alignmentInstruction === 'string') {
+        promptText += `\n\nPOSITIONING INSTRUCTION: Reposition the SINGLE model from Image 2 on the floor according to: ${alignmentInstruction}. Ensure NO duplicate furniture appears.`
+      }
+
+      let outputImageBuffer: Buffer | null = null
+      let outputMimeType = 'image/png'
+
+      // Valid production models (prioritize low-cost Fast Imagen 3 and Gemini Flash)
+      const imageModels = [
+        'imagen-3.0-fast-generate-001',
+        'imagen-3.0-generate-002',
+        'gemini-2.0-flash',
+        'gemini-1.5-flash',
+      ]
+
+      for (const modelName of imageModels) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`
+          const apiRes = await fetch(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              contents: [
+                {
+                  role: 'user',
+                  parts: [
+                    {text: promptText},
+                    {inlineData: {mimeType: roomImg.mimeType, data: roomImg.base64Data}},
+                    {inlineData: {mimeType: productImg.mimeType, data: productImg.base64Data}},
+                  ],
+                },
+              ],
+              generationConfig: {
+                temperature: 0.15,
+                responseModalities: ['IMAGE', 'TEXT'],
+              },
+            }),
+          })
+
+          if (!apiRes.ok) continue
+
+          const resData = (await apiRes.json()) as {
+            candidates?: Array<{
+              content?: {parts?: Array<{inlineData?: {data?: string; mimeType?: string}}>}
+            }>
+            text?: string
+          }
+
+          const candidates = resData.candidates || []
+          if (candidates.length > 0 && candidates[0].content?.parts) {
+            for (const part of candidates[0].content.parts) {
+              if (part.inlineData && part.inlineData.data) {
+                outputImageBuffer = Buffer.from(part.inlineData.data, 'base64')
+                if (part.inlineData.mimeType) outputMimeType = part.inlineData.mimeType
+                break
+              }
             }
           }
-        }
 
-        if (!outputImageBuffer && resData.text) {
-          const match = resData.text.match(/data:(image\/[a-zA-Z+]+);base64,([A-Za-z0-9+/=]+)/)
-          if (match) {
-            outputMimeType = match[1]
-            outputImageBuffer = Buffer.from(match[2], 'base64')
+          if (!outputImageBuffer && resData.text) {
+            const match = resData.text.match(/data:(image\/[a-zA-Z+]+);base64,([A-Za-z0-9+/=]+)/)
+            if (match) {
+              outputMimeType = match[1]
+              outputImageBuffer = Buffer.from(match[2], 'base64')
+            }
           }
+
+          if (outputImageBuffer) break
+        } catch (err: unknown) {
+          console.warn(`Model ${modelName} fetch skipped:`, err)
         }
-
-        if (outputImageBuffer) break
-      } catch (err: unknown) {
-        console.warn(`Model ${modelName} fetch skipped:`, err)
       }
-    }
 
-    if (!outputImageBuffer) {
-      console.warn('⚠️ Google Gemini AI görsel sentezleme kotalara veya model erişimine takıldı, demo modu aktif edildi.')
+      if (!outputImageBuffer) {
+        console.warn(
+          '⚠️ Google Gemini AI görsel sentezleme kotalara veya model erişimine takıldı, demo modu aktif edildi.'
+        )
+        return res.status(200).json({
+          success: true,
+          imageUrl: roomImage,
+          isDemo: true,
+          message:
+            'Google Gemini API kotanız veya model erişim izniniz için önizleme modu hazırlandı. Kotanız yenilendiğinde canlı 3D sentezleme yapılacaktır.',
+        })
+      }
+
+      const publicUrl = await uploadToR2OrFallback(outputImageBuffer, outputMimeType)
+
       return res.status(200).json({
         success: true,
-        imageUrl: roomImage,
+        imageUrl: publicUrl,
+        message: 'Oda tasarımınız Nano Banana (Gemini AI) ile başarıyla tamamlandı.',
+      })
+    } catch (error: unknown) {
+      console.error('Nano Banana Planner API Error:', error)
+      const message = error instanceof Error ? error.message : 'Bilinmeyen sunucu hatası.'
+
+      return res.status(200).json({
+        success: true,
+        imageUrl: typeof req.body === 'object' && req.body?.roomImage ? req.body.roomImage : '',
         isDemo: true,
-        message: 'Google Gemini API kotanız veya model erişim izniniz için önizleme modu hazırlandı. Kotanız yenilendiğinde canlı 3D sentezleme yapılacaktır.',
+        message: `AI Oda Tasarımı önizleme modu aktif: ${message}`,
       })
     }
-
-    const publicUrl = await uploadToR2OrFallback(outputImageBuffer, outputMimeType)
-
-    return res.status(200).json({
-      success: true,
-      imageUrl: publicUrl,
-      message: 'Oda tasarımınız Nano Banana (Gemini AI) ile başarıyla tamamlandı.',
-    })
-  } catch (error: unknown) {
-    console.error('Nano Banana Planner API Error:', error)
-    const message = error instanceof Error ? error.message : 'Bilinmeyen sunucu hatası.'
-
-    return res.status(200).json({
-      success: true,
-      imageUrl: typeof req.body === 'object' && req.body?.roomImage ? req.body.roomImage : '',
-      isDemo: true,
-      message: `AI Oda Tasarımı önizleme modu aktif: ${message}`,
-    })
-  }
   } catch (topError: unknown) {
     console.error('Nano Banana Top-Level API Error:', topError)
     const message = topError instanceof Error ? topError.message : 'Bilinmeyen sunucu hatası.'

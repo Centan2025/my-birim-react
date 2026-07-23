@@ -34,7 +34,9 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
   const ip = getClientIp(req)
   if (await isRateLimitedAsync(`register_ip_${ip}`, {limit: 5, windowMs: 60000})) {
-    return res.status(429).json({error: 'Çok fazla kayıt denemesi yaptınız. Lütfen daha sonra tekrar deneyin.'})
+    return res
+      .status(429)
+      .json({error: 'Çok fazla kayıt denemesi yaptınız. Lütfen daha sonra tekrar deneyin.'})
   }
 
   if (!SANITY_TOKEN) {

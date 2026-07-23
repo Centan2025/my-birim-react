@@ -14,7 +14,6 @@ import imageCompression from 'browser-image-compression'
 // R2 Configuration (only domain needed for URL generation)
 const R2_DOMAIN = process.env.SANITY_STUDIO_R2_DOMAIN
 
-
 // Helper: Slugify
 function slugify(text: string): string {
   const turkishMap: Record<string, string> = {
@@ -47,12 +46,17 @@ function slugify(text: string): string {
 
 const getApiUrl = (path: string): string => {
   if (typeof window === 'undefined') return path
-  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  const isLocal =
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   const base = isLocal ? 'http://localhost:3002' : 'https://www.birim.com'
   return `${base}${path}`
 }
 
-async function uploadFileViaPresignedUrl(blob: Blob | File, key: string, contentType: string): Promise<string> {
+async function uploadFileViaPresignedUrl(
+  blob: Blob | File,
+  key: string,
+  contentType: string,
+): Promise<string> {
   const lastSlash = key.lastIndexOf('/')
   const folder = key.substring(0, lastSlash)
   const filename = key.substring(lastSlash + 1)
@@ -75,7 +79,7 @@ async function uploadFileViaPresignedUrl(blob: Blob | File, key: string, content
     throw new Error(errBody.error || `Presigned URL isteği başarısız: ${res.statusText}`)
   }
 
-  const { uploadUrl, fileUrl } = await res.json()
+  const {uploadUrl, fileUrl} = await res.json()
 
   // 2. Upload file to R2 using Presigned URL
   const uploadRes = await fetch(uploadUrl, {
@@ -92,7 +96,6 @@ async function uploadFileViaPresignedUrl(blob: Blob | File, key: string, content
 
   return fileUrl
 }
-
 
 const isVideoFile = (filename: string) => {
   const ext = filename.split('.').pop()?.toLowerCase() || ''

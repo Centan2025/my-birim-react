@@ -10,7 +10,6 @@ import 'react-image-crop/dist/ReactCrop.css'
 // R2 Configuration from Environment Variables (only R2_DOMAIN is needed for rewrite URLs)
 const R2_DOMAIN = process.env.SANITY_STUDIO_R2_DOMAIN
 
-
 const DropZone = styled(Card)<{$isDragging: boolean; $hasValue: boolean}>`
   border: 2px dashed
     ${(props) => (props.$isDragging ? 'var(--card-focus-ring-color)' : 'var(--card-border-color)')};
@@ -50,7 +49,7 @@ const HiddenInput = styled.input`
 `
 
 const generateVideoPoster = (
-  videoFile: File
+  videoFile: File,
 ): Promise<{blob: Blob; width: number; height: number}> => {
   return new Promise((resolve, reject) => {
     const video = document.createElement('video')
@@ -89,7 +88,7 @@ const generateVideoPoster = (
               }
             },
             'image/webp',
-            0.85
+            0.85,
           )
         } else {
           cleanup()
@@ -205,12 +204,17 @@ function slugify(text: string): string {
 
 const getApiUrl = (path: string): string => {
   if (typeof window === 'undefined') return path
-  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  const isLocal =
+    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   const base = isLocal ? 'http://localhost:3002' : 'https://www.birim.com'
   return `${base}${path}`
 }
 
-async function uploadFileViaPresignedUrl(blob: Blob | File, key: string, contentType: string): Promise<string> {
+async function uploadFileViaPresignedUrl(
+  blob: Blob | File,
+  key: string,
+  contentType: string,
+): Promise<string> {
   const lastSlash = key.lastIndexOf('/')
   const folder = key.substring(0, lastSlash)
   const filename = key.substring(lastSlash + 1)
@@ -233,7 +237,7 @@ async function uploadFileViaPresignedUrl(blob: Blob | File, key: string, content
     throw new Error(errBody.error || `Presigned URL isteği başarısız: ${res.statusText}`)
   }
 
-  const { uploadUrl, fileUrl } = await res.json()
+  const {uploadUrl, fileUrl} = await res.json()
 
   // 2. Upload file to R2 using Presigned URL
   const uploadRes = await fetch(uploadUrl, {
@@ -250,7 +254,6 @@ async function uploadFileViaPresignedUrl(blob: Blob | File, key: string, content
 
   return fileUrl
 }
-
 
 export default function R2AssetInput(props: ObjectInputProps) {
   const {value, onChange} = props
@@ -393,14 +396,16 @@ export default function R2AssetInput(props: ObjectInputProps) {
             toast.push({
               status: 'warning',
               title: 'Büyük Video Uyarısı',
-              description: 'Video 50MB üzerindedir. Mobil performans için 50MB altı videolar önerilir.',
+              description:
+                'Video 50MB üzerindedir. Mobil performans için 50MB altı videolar önerilir.',
             })
           }
           if (!file.type.includes('mp4')) {
             toast.push({
               status: 'info',
               title: 'Video Format Bilgisi',
-              description: 'Tüm tarayıcılarda (iOS Safari, Chrome, Edge) tam uyumluluk için MP4 (H.264) önerilir.',
+              description:
+                'Tüm tarayıcılarda (iOS Safari, Chrome, Edge) tam uyumluluk için MP4 (H.264) önerilir.',
             })
           }
         }
@@ -445,7 +450,9 @@ export default function R2AssetInput(props: ObjectInputProps) {
               const {blob, width: pW, height: pH} = await generateVideoPoster(file)
               const posterKey = `${folderPath}/${Date.now()}-poster.webp`
               await uploadFileViaPresignedUrl(blob, posterKey, 'image/webp')
-              const r2DomainNoProtocol = R2_DOMAIN?.startsWith('http') ? R2_DOMAIN : `https://${R2_DOMAIN}`
+              const r2DomainNoProtocol = R2_DOMAIN?.startsWith('http')
+                ? R2_DOMAIN
+                : `https://${R2_DOMAIN}`
               posterUrl = `${r2DomainNoProtocol}/${posterKey}`
               posterWidth = pW
               posterHeight = pH

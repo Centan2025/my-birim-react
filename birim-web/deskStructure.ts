@@ -3,10 +3,7 @@ import type {ConfigContext} from 'sanity'
 import {orderableDocumentListDeskItem} from '@sanity/orderable-document-list'
 import {PreviewView} from './components/PreviewView'
 
-export const deskStructure = (
-  S: StructureBuilder,
-  context: ConfigContext,
-) => {
+export const deskStructure = (S: StructureBuilder, context: ConfigContext) => {
   return S.list()
     .title('İçerik')
     .items([
@@ -51,7 +48,7 @@ export const deskStructure = (
           const componentPane = item.child as unknown as Record<string, unknown>
           componentPane.child = (childId: string, childContext: any) => {
             const cleanId = childId.replace('drafts.', '')
-            
+
             if (childContext?.params?.view === 'editor') {
               return S.document()
                 .schemaType('category')
@@ -187,32 +184,16 @@ export const deskStructure = (
                 ),
               S.listItem()
                 .title('Çerez Politikası')
-                .child(
-                  S.document()
-                    .schemaType('cookiesPolicy')
-                    .documentId('cookiesPolicy')
-                ),
+                .child(S.document().schemaType('cookiesPolicy').documentId('cookiesPolicy')),
               S.listItem()
                 .title('Gizlilik Politikası')
-                .child(
-                  S.document()
-                    .schemaType('privacyPolicy')
-                    .documentId('privacyPolicy')
-                ),
+                .child(S.document().schemaType('privacyPolicy').documentId('privacyPolicy')),
               S.listItem()
                 .title('Kullanım Şartları')
-                .child(
-                  S.document()
-                    .schemaType('termsOfService')
-                    .documentId('termsOfService')
-                ),
+                .child(S.document().schemaType('termsOfService').documentId('termsOfService')),
               S.listItem()
                 .title('KVKK Aydınlatma Metni')
-                .child(
-                  S.document()
-                    .schemaType('kvkkPolicy')
-                    .documentId('kvkkPolicy')
-                ),
+                .child(S.document().schemaType('kvkkPolicy').documentId('kvkkPolicy')),
             ]),
         ),
       S.documentTypeListItem('materialGroup').title('Malzeme Grupları'),

@@ -19,9 +19,7 @@ export function CategoryPreview(props: any) {
 
   return (
     <Flex align="center" justify="space-between" style={{width: '100%', gap: '8px'}}>
-      <Box style={{flex: 1, minWidth: 0}}>
-        {props.renderDefault(restProps)}
-      </Box>
+      <Box style={{flex: 1, minWidth: 0}}>{props.renderDefault(restProps)}</Box>
       <button
         onClick={handleEditClick}
         title="Kategoriyi Düzenle"
