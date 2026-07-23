@@ -283,8 +283,8 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
 
     try {
       const [compressedRoomImage, compressedProductImage] = await Promise.all([
-        resizeImageUrlOrBase64(roomImagePreview, 1024, 0.75),
-        resizeImageUrlOrBase64(prodImage, 1024, 0.75),
+        resizeImageUrlOrBase64(roomImagePreview, 768, 0.70),
+        resizeImageUrlOrBase64(prodImage, 768, 0.70),
       ])
 
       const response = await fetch('/api/ai/nano-banana-planner', {
@@ -494,9 +494,8 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                             key={angleOpt.id}
                             disabled={isUpdating}
                             onClick={() => {
-                              if (isActive || isUpdating) return
+                              if (isUpdating) return
                               setSelectedAngle(angleOpt.id)
-                              handleGenerate(angleOpt.id, selectedAlignment)
                             }}
                             className={`py-2 px-2 text-xs rounded-none border font-medium transition-all font-sans cursor-pointer shadow-none ${
                               isActive
@@ -530,10 +529,9 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                             key={alignOpt.id}
                             disabled={isUpdating}
                             onClick={() => {
-                              const nextAlign = isActive ? '' : alignOpt.id
                               if (isUpdating) return
+                              const nextAlign = isActive ? '' : alignOpt.id
                               setSelectedAlignment(nextAlign)
-                              handleGenerate(selectedAngle, nextAlign)
                             }}
                             className={`py-1.5 px-2.5 text-[11px] rounded-none border font-medium transition-all font-sans cursor-pointer shadow-none ${
                               isActive
@@ -547,6 +545,20 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                       })}
                     </div>
                   </div>
+                </div>
+
+                {/* Explicit Re-Render Trigger Button */}
+                <div className="pt-2 border-t border-neutral-800 flex justify-end">
+                  <button
+                    disabled={isUpdating}
+                    onClick={() => handleGenerate(selectedAngle, selectedAlignment)}
+                    className="w-full sm:w-auto px-5 py-2 text-xs font-medium text-white bg-[#c5a059] hover:bg-[#b08d48] rounded-none transition-colors border border-[#c5a059] flex items-center justify-center gap-2 font-sans cursor-pointer shadow-none disabled:opacity-50"
+                  >
+                    <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span>Açı ve Konumu Yeniden Hesapla (AI Render)</span>
+                  </button>
                 </div>
               </div>
 

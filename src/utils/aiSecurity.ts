@@ -144,8 +144,8 @@ export function incrementDailyQuota(maxDaily = 3): { count: number; remaining: n
   }
 }
 
-// 4. Client Image Resizer & Canvas Optimizer (Max 5MB input -> Downscale to 1024x1024 max, 0.75 JPEG quality)
-export async function optimizeImageForUpload(file: File, maxDimension = 1024, maxSizeBytes = 5 * 1024 * 1024): Promise<string> {
+// 4. Client Image Resizer & Canvas Optimizer (Max 5MB input -> Downscale to 768x768 max, 0.70 JPEG quality for token efficiency)
+export async function optimizeImageForUpload(file: File, maxDimension = 768, maxSizeBytes = 5 * 1024 * 1024): Promise<string> {
   if (file.size > maxSizeBytes) {
     throw new Error('Yüklenen dosya boyutu maksimum 5MB olabilir.');
   }
@@ -178,7 +178,7 @@ export async function optimizeImageForUpload(file: File, maxDimension = 1024, ma
         }
 
         ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.75));
+        resolve(canvas.toDataURL('image/jpeg', 0.70));
       };
       img.src = e.target?.result as string;
     };
@@ -187,9 +187,9 @@ export async function optimizeImageForUpload(file: File, maxDimension = 1024, ma
 }
 
 /**
- * Resizes any image URL or Base64 string to maxDimension (1024x1024) with quality 0.75 JPEG
+ * Resizes any image URL or Base64 string to maxDimension (768x768) with quality 0.70 JPEG
  */
-export async function resizeImageUrlOrBase64(imageSrc: string, maxDimension = 1024, quality = 0.75): Promise<string> {
+export async function resizeImageUrlOrBase64(imageSrc: string, maxDimension = 768, quality = 0.70): Promise<string> {
   if (!imageSrc) return ''
 
   return new Promise((resolve) => {

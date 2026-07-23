@@ -820,11 +820,10 @@ ZERO-TOLERANCE MANDATORY PRODUCT CONSTRAINTS:
     let outputMime = 'image/png'
 
     const imageModels = [
-      'gemini-3.1-flash-image',
-      'gemini-2.5-flash-image',
-      'nano-banana-pro-preview',
-      'gemini-3-pro-image',
+      'imagen-3.0-fast-generate-001',
+      'imagen-3.0-generate-002',
       'gemini-2.0-flash',
+      'gemini-1.5-flash',
     ]
 
     for (const modelName of imageModels) {
