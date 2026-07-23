@@ -4,6 +4,7 @@ import {
   getDailyQuota,
   incrementDailyQuota,
   optimizeImageForUpload,
+  resizeImageUrlOrBase64,
 } from '../utils/aiSecurity'
 
 interface ProductReference {
@@ -262,12 +263,17 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
     const activeProd = selectedProduct || initialProduct
 
     try {
+      const [compressedRoomImage, compressedProductImage] = await Promise.all([
+        resizeImageUrlOrBase64(roomImagePreview, 1024, 0.75),
+        resizeImageUrlOrBase64(prodImage, 1024, 0.75),
+      ])
+
       const response = await fetch('/api/ai/nano-banana-planner', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          roomImage: roomImagePreview,
-          productImage: prodImage,
+          roomImage: compressedRoomImage,
+          productImage: compressedProductImage,
           productName: activeProd?.name,
           productDetails: activeProd?.details,
           angle: activeAngle,

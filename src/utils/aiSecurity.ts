@@ -144,8 +144,8 @@ export function incrementDailyQuota(maxDaily = 3): { count: number; remaining: n
   }
 }
 
-// 4. Client Image Resizer & Canvas Optimizer (Max 5MB input -> Downscale to 1080p max)
-export async function optimizeImageForUpload(file: File, maxDimension = 1080, maxSizeBytes = 5 * 1024 * 1024): Promise<string> {
+// 4. Client Image Resizer & Canvas Optimizer (Max 5MB input -> Downscale to 1024x1024 max, 0.75 JPEG quality)
+export async function optimizeImageForUpload(file: File, maxDimension = 1024, maxSizeBytes = 5 * 1024 * 1024): Promise<string> {
   if (file.size > maxSizeBytes) {
     throw new Error('Yüklenen dosya boyutu maksimum 5MB olabilir.');
   }
@@ -178,10 +178,48 @@ export async function optimizeImageForUpload(file: File, maxDimension = 1080, ma
         }
 
         ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.88));
+        resolve(canvas.toDataURL('image/jpeg', 0.75));
       };
       img.src = e.target?.result as string;
     };
     reader.readAsDataURL(file);
+  });
+}
+
+/**
+ * Resizes any image URL or Base64 string to maxDimension (1024x1024) with quality 0.75 JPEG
+ */
+export async function resizeImageUrlOrBase64(imageSrc: string, maxDimension = 1024, quality = 0.75): Promise<string> {
+  if (!imageSrc) return ''
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onerror = () => resolve(imageSrc); // fallback to original on CORS or load error
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > maxDimension || height > maxDimension) {
+        if (width > height) {
+          height = Math.round((height * maxDimension) / width);
+          width = maxDimension;
+        } else {
+          width = Math.round((width * maxDimension) / height);
+          height = maxDimension;
+        }
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve(imageSrc);
+        return;
+      }
+
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = imageSrc;
   });
 }
