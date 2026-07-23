@@ -1,5 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { BeforeAfterSlider } from './BeforeAfterSlider'
+import {
+  getDailyQuota,
+  incrementDailyQuota,
+  optimizeImageForUpload,
+} from '../utils/aiSecurity'
 
 interface ProductReference {
   id?: string
@@ -12,8 +17,6 @@ interface AiRoomPlannerModalProps {
   onClose: () => void
   initialProduct?: ProductReference
 }
-
-
 
 export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
   isOpen,
@@ -31,6 +34,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [toastType, setToastType] = useState<'error' | 'success'>('error')
+  const [showQuotaModal, setShowQuotaModal] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -119,25 +123,25 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
     }
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
       if (!file.type.startsWith('image/')) {
         showToast('Lütfen geçerli bir görsel dosyası (JPG, PNG vb.) seçin.')
         return
       }
-      const reader = new FileReader()
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          setRoomImagePreview(reader.result)
-          setResultImage(null)
-        }
+      try {
+        const optimized = await optimizeImageForUpload(file)
+        setRoomImagePreview(optimized)
+        setResultImage(null)
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Görsel işlenirken hata oluştu.'
+        showToast(msg)
       }
-      reader.readAsDataURL(file)
     }
   }
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     e.stopPropagation()
     const file = e.dataTransfer.files?.[0]
@@ -146,14 +150,14 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
         showToast('Lütfen geçerli bir görsel dosyası seçin.')
         return
       }
-      const reader = new FileReader()
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          setRoomImagePreview(reader.result)
-          setResultImage(null)
-        }
+      try {
+        const optimized = await optimizeImageForUpload(file)
+        setRoomImagePreview(optimized)
+        setResultImage(null)
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Görsel işlenirken hata oluştu.'
+        showToast(msg)
       }
-      reader.readAsDataURL(file)
     }
   }
 
@@ -163,6 +167,13 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
   ) => {
     if (!roomImagePreview) {
       showToast('Lütfen öncelikle odanızın bir fotoğrafını yükleyin veya çekin.')
+      return
+    }
+
+    // Daily quota check (3 per day for anonymous users)
+    const currentQuota = getDailyQuota(3)
+    if (currentQuota.isExhausted) {
+      setShowQuotaModal(true)
       return
     }
 
@@ -201,9 +212,16 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
         throw new Error(`Sunucu yanıtı okunamadı (HTTP ${response.status}). Lütfen tekrar deneyin.`)
       }
 
+      if (response.status === 429) {
+        throw new Error(data.error || 'Çok fazla istek attınız, lütfen 1 dakika bekleyin.')
+      }
+
       if (!response.ok || !data.success || !data.imageUrl) {
         throw new Error(data.error || 'AI görsel üretimi sırasında bir sorun oluştu.')
       }
+
+      // Decrement quota only on successful render
+      incrementDailyQuota(3)
 
       setResultImage(data.imageUrl)
       showToast(data.message || 'Oda tasarımınız Nano Banana (Google Gemini AI) ile başarıyla sentezlendi!', 'success')
@@ -578,6 +596,49 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
           )}
         </div>
       </div>
+
+      {/* Quota Exhausted Modal (Anti-Abuse 3 Tries/Day Limit) */}
+      {showQuotaModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-fade-in">
+          <div className="bg-neutral-900 border border-neutral-800 p-6 sm:p-8 rounded-2xl max-w-md w-full text-center space-y-5 shadow-2xl relative">
+            <button
+              onClick={() => setShowQuotaModal(false)}
+              className="absolute top-4 right-4 text-neutral-400 hover:text-white text-lg"
+            >
+              ✕
+            </button>
+            <div className="w-14 h-14 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center mx-auto text-2xl">
+              ✨
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold text-white">
+                Günlük Ücretsiz AI Tasarım Hakkınız Doldu
+              </h3>
+              <p className="text-xs text-neutral-400 leading-relaxed">
+                Anonim kullanıcılar için günlük 3 ücretsiz deneme sınırı bulunmaktadır. Mimarlarımızla iletişime geçerek veya ücretsiz üye olarak sınırsız AI oda tasarımı alabilirsiniz.
+              </p>
+            </div>
+            <div className="space-y-2.5 pt-2">
+              <a
+                href="/#/contact"
+                onClick={() => {
+                  setShowQuotaModal(false)
+                  onClose()
+                }}
+                className="block w-full py-3 bg-amber-400 hover:bg-amber-300 text-black font-medium text-xs rounded-xl transition-all shadow-lg shadow-amber-400/20"
+              >
+                İç Mimarımızla İletişime Geçin
+              </a>
+              <button
+                onClick={() => setShowQuotaModal(false)}
+                className="w-full py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs rounded-xl font-medium transition-all"
+              >
+                Kapat
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

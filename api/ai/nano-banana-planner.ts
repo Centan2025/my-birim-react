@@ -1,6 +1,7 @@
 import { GoogleGenAI } from '@google/genai'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import crypto from 'crypto'
+import { checkRateLimit, sanitizePrompt } from '../../src/utils/aiSecurity'
 
 const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || process.env.SANITY_STUDIO_R2_ACCOUNT_ID
 const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID
@@ -111,6 +112,19 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(405).json({ error: 'Method Not Allowed' })
   }
 
+  const clientIp =
+    (req.headers['x-forwarded-for'] as string)?.split(',')[0] ||
+    req.socket.remoteAddress ||
+    '127.0.0.1'
+
+  const rateCheck = checkRateLimit(clientIp, 3, 60 * 1000)
+  if (!rateCheck.allowed) {
+    return res.status(429).json({
+      error: 'Çok fazla istek attınız, lütfen 1 dakika bekleyin.',
+      retryAfterSeconds: Math.ceil(rateCheck.resetMs / 1000),
+    })
+  }
+
   const { roomImage, productImage, customPrompt, angle, alignmentInstruction } = req.body || {}
 
   if (!roomImage || typeof roomImage !== 'string') {
@@ -125,6 +139,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       .json({ error: 'Seçilen ürün görseli (productImage) zorunludur.' })
   }
 
+  const cleanPrompt = sanitizePrompt(customPrompt, 150)
+
   const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY
   if (!apiKey) {
     return res.status(500).json({
@@ -137,7 +153,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     const roomImg = await getBase64FromImageInput(roomImage)
     const productImg = await getBase64FromImageInput(productImage)
 
-    let promptText = customPrompt && typeof customPrompt === 'string' ? customPrompt : `
+    let promptText = cleanPrompt ? cleanPrompt : `
 You are an expert photorealistic 3D interior visualizer and rendering engine.
 
 INPUT IMAGES:

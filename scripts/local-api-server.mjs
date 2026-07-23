@@ -697,11 +697,42 @@ app.post('/api/media/presigned-url', async (req, res) => {
   }
 })
 
-// ─── /api/ai/nano-banana-planner ──────────────────────────────────────────
+// In-Memory Rate Limiting for local API server (3 requests per 1 minute window)
+const rateLimitStore = new Map()
+
 app.post('/api/ai/nano-banana-planner', async (req, res) => {
+  const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1'
+  const now = Date.now()
+  const windowMs = 60 * 1000
+  const limit = 3
+
+  const rec = rateLimitStore.get(clientIp)
+  if (!rec || now > rec.resetTime) {
+    rateLimitStore.set(clientIp, { count: 1, resetTime: now + windowMs })
+  } else if (rec.count >= limit) {
+    console.warn(`⚠️ IP Rate limit aşıldı: ${clientIp}`)
+    return res.status(429).json({
+      error: 'Çok fazla istek attınız, lütfen 1 dakika bekleyin.',
+      retryAfterSeconds: Math.ceil((rec.resetTime - now) / 1000),
+    })
+  } else {
+    rec.count += 1
+  }
+
   const { roomImage, productImage, customPrompt, angle, alignmentInstruction } = req.body || {}
   if (!roomImage || !productImage) {
     return res.status(400).json({ error: 'roomImage ve productImage parametreleri zorunludur.' })
+  }
+
+  // Input Sanitization for customPrompt
+  let cleanPrompt = ''
+  if (customPrompt && typeof customPrompt === 'string') {
+    cleanPrompt = customPrompt
+      .trim()
+      .slice(0, 150)
+      .replace(/<[^>]*>?/gm, '')
+      .replace(/javascript:/gi, '')
+      .replace(/ignore previous instructions/gi, '')
   }
 
   const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY
@@ -732,7 +763,7 @@ app.post('/api/ai/nano-banana-planner', async (req, res) => {
     const roomImg = await parseImg(roomImage)
     const productImg = await parseImg(productImage)
 
-    let promptText = customPrompt && typeof customPrompt === 'string' ? customPrompt : `
+    let promptText = cleanPrompt ? cleanPrompt : `
 You are an expert photorealistic 3D interior visualizer and rendering engine.
 
 INPUT IMAGES:
