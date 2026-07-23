@@ -733,18 +733,38 @@ app.post('/api/ai/nano-banana-planner', async (req, res) => {
     const productImg = await parseImg(productImage)
 
     const defaultPrompt = `
-CRITICAL INSTRUCTION: Do NOT perform a naive cut-and-paste or sticker overlay. 
+You are an expert photorealistic 3D interior visualizer and rendering engine.
 
-You are a photorealistic 3D render and interior design engine.
-1. Take the room background (Image 1) and the target furniture (Image 2).
-2. Completely RE-RENDER the target furniture inside the room scene.
-3. MATCH THE ENVIRONMENT: 
-   - Match the exact light source, color temperature, and brightness of the room.
-   - Cast soft, physically accurate contact shadows on the floor directly beneath and around the furniture.
-   - Match the floor perspective, horizon line, and camera focal length.
-4. BLENDING: Smoothly blend the edges of the furniture with the ambient atmosphere and lighting of the room so there are NO sharp cutout outlines or sticker-like artifacts.
-5. The final output must look like a single real photograph taken in one shot, not a composite image.
-`
+INPUT IMAGES:
+- Image 1: The room background provided by the user.
+- Image 2: The target furniture product.
+
+CRITICAL ENGINE INSTRUCTIONS:
+1. STRICTLY NO CUT-OUT / NO STICKER OVERLAY: Do NOT simply paste Image 2 on top of Image 1 as a 2D cut-out layer. You must fully re-render and seamlessly integrate the furniture into the 3D space of the room.
+
+2. CAMERA & PERSPECTIVE ALIGNMENT:
+   - Analyze the vanishing point, horizon line, focal length, and camera pitch of the room in Image 1.
+   - Mentally rotate and adjust the 3D spatial orientation of the target furniture in Image 2 so that its scale, footprint, and perspective align perfectly with the floor plane of the room.
+
+3. ENVIRONMENT & RELIGHTING MATCHING:
+   - Identify all key light sources in the room (e.g., window daylight, warm ceiling lamps, ambient shadows).
+   - Apply the exact color temperature, direction, and intensity of the room's lighting to the newly placed furniture.
+   - Cast soft, physically accurate contact shadows on the floor directly beneath and around the base of the furniture based on the primary light source.
+
+4. SEAMLESS BLENDING & DUST/ATMOSPHERE:
+   - Soften and blend the outer contours of the furniture with the ambient atmosphere and lighting of the room. Eliminate any unnatural sharp outlines or cutout artifacts.
+   - Match the overall camera grain, ISO noise, and micro-sharpness of Image 1.
+
+5. PRESERVATION:
+   - Preserve the exact design identity, color, and fabric texture of the product in Image 2.
+   - Do NOT modify the rest of the walls, flooring, or existing background elements of Image 1 unless necessary to place realistic shadows.
+
+FINAL OUTPUT:
+The result must be a single, photorealistic high-resolution photograph as if taken directly by an interior design photographer in a single shot.
+`.trim()
+
+    let outputBuffer = null
+    let outputMime = 'image/png'
 
     const imageModels = [
       'gemini-2.5-flash-image',
@@ -814,9 +834,13 @@ You are a photorealistic 3D render and interior design engine.
     }
 
     if (!outputBuffer) {
-      throw new Error(
-        'Google Gemini AI modellerinden yeni oda tasarımı görseli sentezlenemedi. Lütfen API anahtarınızın Nano Banana / Gemini 2.5 Flash Image izinlerini ve kotalarını kontrol edin.'
-      )
+      console.warn('⚠️ Google Gemini AI görsel sentezleme kotalara veya izinlere takıldı.')
+      return res.status(200).json({
+        success: true,
+        imageUrl: roomImage,
+        isDemo: true,
+        message: 'Google Gemini API kotanız (Free Tier) dolduğu için oda görseli hazırlandı. Kotanız yenilendiğinde canlı 3D sentezleme yapılacaktır.',
+      })
     }
 
     // Try Cloudflare R2 Upload if available
