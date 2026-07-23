@@ -699,7 +699,7 @@ app.post('/api/media/presigned-url', async (req, res) => {
 
 // ─── /api/ai/nano-banana-planner ──────────────────────────────────────────
 app.post('/api/ai/nano-banana-planner', async (req, res) => {
-  const { roomImage, productImage, customPrompt } = req.body || {}
+  const { roomImage, productImage, customPrompt, angle, alignmentInstruction } = req.body || {}
   if (!roomImage || !productImage) {
     return res.status(400).json({ error: 'roomImage ve productImage parametreleri zorunludur.' })
   }
@@ -732,7 +732,7 @@ app.post('/api/ai/nano-banana-planner', async (req, res) => {
     const roomImg = await parseImg(roomImage)
     const productImg = await parseImg(productImage)
 
-    const defaultPrompt = `
+    let promptText = customPrompt && typeof customPrompt === 'string' ? customPrompt : `
 You are an expert photorealistic 3D interior visualizer and rendering engine.
 
 INPUT IMAGES:
@@ -758,10 +758,17 @@ CRITICAL ENGINE INSTRUCTIONS:
 5. PRESERVATION:
    - Preserve the exact design identity, color, and fabric texture of the product in Image 2.
    - Do NOT modify the rest of the walls, flooring, or existing background elements of Image 1 unless necessary to place realistic shadows.
-
-FINAL OUTPUT:
-The result must be a single, photorealistic high-resolution photograph as if taken directly by an interior design photographer in a single shot.
 `.trim()
+
+    if (angle) {
+      promptText += `\nROTATION INSTRUCTION: Orient and render the product from the requested angle: ${angle}.`
+    }
+
+    if (alignmentInstruction) {
+      promptText += `\nPOSITIONING INSTRUCTION: Adjust the product's placement and perspective in the room according to: ${alignmentInstruction}.`
+    }
+
+    promptText += `\n\nFINAL OUTPUT:\nThe result must be a single, photorealistic high-resolution photograph as if taken directly by an interior design photographer in a single shot.`
 
     let outputBuffer = null
     let outputMime = 'image/png'
@@ -786,7 +793,7 @@ The result must be a single, photorealistic high-resolution photograph as if tak
               {
                 role: 'user',
                 parts: [
-                  { text: customPrompt || defaultPrompt },
+                  { text: promptText },
                   { inlineData: { mimeType: roomImg.mimeType, data: roomImg.base64Data } },
                   { inlineData: { mimeType: productImg.mimeType, data: productImg.base64Data } },
                 ],

@@ -111,7 +111,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(405).json({ error: 'Method Not Allowed' })
   }
 
-  const { roomImage, productImage, customPrompt } = req.body || {}
+  const { roomImage, productImage, customPrompt, angle, alignmentInstruction } = req.body || {}
 
   if (!roomImage || typeof roomImage !== 'string') {
     return res
@@ -137,7 +137,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     const roomImg = await getBase64FromImageInput(roomImage)
     const productImg = await getBase64FromImageInput(productImage)
 
-    const defaultPrompt = `
+    let promptText = customPrompt && typeof customPrompt === 'string' ? customPrompt : `
 You are an expert photorealistic 3D interior visualizer and rendering engine.
 
 INPUT IMAGES:
@@ -163,12 +163,17 @@ CRITICAL ENGINE INSTRUCTIONS:
 5. PRESERVATION:
    - Preserve the exact design identity, color, and fabric texture of the product in Image 2.
    - Do NOT modify the rest of the walls, flooring, or existing background elements of Image 1 unless necessary to place realistic shadows.
-
-FINAL OUTPUT:
-The result must be a single, photorealistic high-resolution photograph as if taken directly by an interior design photographer in a single shot.
 `.trim()
 
-    const promptText = customPrompt && typeof customPrompt === 'string' ? customPrompt : defaultPrompt
+    if (angle && typeof angle === 'string') {
+      promptText += `\nROTATION INSTRUCTION: Orient and render the product from the requested angle: ${angle}.`
+    }
+
+    if (alignmentInstruction && typeof alignmentInstruction === 'string') {
+      promptText += `\nPOSITIONING INSTRUCTION: Adjust the product's placement and perspective in the room according to: ${alignmentInstruction}.`
+    }
+
+    promptText += `\n\nFINAL OUTPUT:\nThe result must be a single, photorealistic high-resolution photograph as if taken directly by an interior design photographer in a single shot.`
 
     const ai = new GoogleGenAI({ apiKey })
     const imageModels = [

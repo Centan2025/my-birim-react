@@ -24,6 +24,9 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
   const [selectedProduct] = useState<ProductReference | undefined>(initialProduct)
   const [isLoading, setIsLoading] = useState(false)
   const [resultImage, setResultImage] = useState<string | null>(null)
+  const [selectedAngle, setSelectedAngle] = useState<string>('Front')
+  const [selectedAlignment, setSelectedAlignment] = useState<string>('')
+  const [isUpdating, setIsUpdating] = useState(false)
   const [isCameraActive, setIsCameraActive] = useState(false)
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -154,7 +157,10 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
     }
   }
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (
+    targetAngle?: string,
+    targetAlignment?: string
+  ) => {
     if (!roomImagePreview) {
       showToast('Lütfen öncelikle odanızın bir fotoğrafını yükleyin veya çekin.')
       return
@@ -166,7 +172,14 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
       return
     }
 
-    setIsLoading(true)
+    const activeAngle = targetAngle !== undefined ? targetAngle : selectedAngle
+    const activeAlignment = targetAlignment !== undefined ? targetAlignment : selectedAlignment
+
+    if (resultImage) {
+      setIsUpdating(true)
+    } else {
+      setIsLoading(true)
+    }
     setToastMessage(null)
 
     try {
@@ -176,6 +189,8 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
         body: JSON.stringify({
           roomImage: roomImagePreview,
           productImage: prodImage,
+          angle: activeAngle,
+          alignmentInstruction: activeAlignment,
         }),
       })
 
@@ -198,6 +213,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
       showToast(errorMsg, 'error')
     } finally {
       setIsLoading(false)
+      setIsUpdating(false)
     }
   }
 
@@ -306,19 +322,124 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
             </div>
           )}
 
-          {/* Result View (Before/After Slider) */}
+          {/* Result View (Before/After Slider) with Interactive Controls */}
           {!isLoading && resultImage && roomImagePreview && (
-            <div className="space-y-4">
-              <BeforeAfterSlider
-                beforeImage={roomImagePreview}
-                afterImage={resultImage}
-                beforeLabel="Orijinal Oda"
-                afterLabel="Nano Banana AI Tasarım"
-              />
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <div className="space-y-5">
+              <div className="relative rounded-2xl overflow-hidden">
+                <BeforeAfterSlider
+                  beforeImage={roomImagePreview}
+                  afterImage={resultImage}
+                  beforeLabel="Orijinal Oda"
+                  afterLabel="Nano Banana AI Tasarım"
+                />
+
+                {/* Skeleton Loader / Blur Overlay when updating angle/position */}
+                {isUpdating && (
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center space-y-3 z-30 transition-all">
+                    <div className="w-12 h-12 rounded-full border-3 border-t-amber-400 border-r-amber-400 border-b-transparent border-l-transparent animate-spin" />
+                    <span className="text-xs font-medium text-amber-300 tracking-wide bg-neutral-900/80 px-3 py-1.5 rounded-full border border-amber-500/30">
+                      Açı ve ışık yeniden hesaplanıyor...
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Interactive Controls Panel */}
+              <div className="p-4 rounded-xl bg-neutral-850 border border-neutral-800 space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono uppercase tracking-widest text-amber-400 font-semibold flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                    </svg>
+                    Arayüz Kontrol Paneli (Interactive Controls)
+                  </span>
+                  {isUpdating && (
+                    <span className="text-[10px] text-amber-300/80 animate-pulse">
+                      Yeniden hesaplanıyor...
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                  {/* a) Angle Switcher */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-neutral-300 block">
+                      🔄 Açıyı Döndür (Angle Switcher)
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { id: '3/4 left perspective', label: '↖ Sol Çapraz' },
+                        { id: 'Front perspective', label: '⬆ Cephe' },
+                        { id: '3/4 right perspective', label: '↗ Sağ Çapraz' },
+                      ].map((angleOpt) => {
+                        const isActive = selectedAngle === angleOpt.id
+                        return (
+                          <button
+                            key={angleOpt.id}
+                            disabled={isUpdating}
+                            onClick={() => {
+                              if (isActive || isUpdating) return
+                              setSelectedAngle(angleOpt.id)
+                              handleGenerate(angleOpt.id, selectedAlignment)
+                            }}
+                            className={`py-2 px-2 text-xs rounded-lg border font-medium transition-all ${
+                              isActive
+                                ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-sm'
+                                : 'bg-neutral-800/80 hover:bg-neutral-800 border-neutral-700 text-neutral-400 hover:text-neutral-200'
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                          >
+                            {angleOpt.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  {/* b) Alignment Presets */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-neutral-300 block">
+                      📐 Konum & Hizalama (Alignment Presets)
+                    </label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {[
+                        { id: 'Align parallel to the left wall', label: '⬅ Sol Duvara Paralel' },
+                        { id: 'Align parallel to the right wall', label: '➡️ Sağ Duvara Paralel' },
+                        { id: 'Turn 45 degrees left', label: '🔄 45° Sola Çevir' },
+                        { id: 'Turn 45 degrees right', label: '🔄 45° Sağa Çevir' },
+                        { id: 'Center in the middle of the room floor', label: '📐 Odanın Ortasına Çek' },
+                      ].map((alignOpt) => {
+                        const isActive = selectedAlignment === alignOpt.id
+                        return (
+                          <button
+                            key={alignOpt.id}
+                            disabled={isUpdating}
+                            onClick={() => {
+                              const nextAlign = isActive ? '' : alignOpt.id
+                              if (isUpdating) return
+                              setSelectedAlignment(nextAlign)
+                              handleGenerate(selectedAngle, nextAlign)
+                            }}
+                            className={`py-1.5 px-2.5 text-[11px] rounded-lg border font-medium transition-all ${
+                              isActive
+                                ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-sm'
+                                : 'bg-neutral-800/80 hover:bg-neutral-800 border-neutral-700 text-neutral-400 hover:text-neutral-200'
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                          >
+                            {alignOpt.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
                 <button
+                  disabled={isUpdating}
                   onClick={() => setResultImage(null)}
-                  className="px-4 py-2 text-xs font-medium text-neutral-300 hover:text-white bg-neutral-800 hover:bg-neutral-700 rounded-lg transition-colors"
+                  className="px-4 py-2 text-xs font-medium text-neutral-300 hover:text-white bg-neutral-800 hover:bg-neutral-700 rounded-lg transition-colors disabled:opacity-50"
                 >
                   Farklı Oda Fotoğrafı Yükle / Çek
                 </button>
@@ -440,7 +561,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
 
               {/* Action Button */}
               <button
-                onClick={handleGenerate}
+                onClick={() => handleGenerate()}
                 disabled={!roomImagePreview}
                 className={`w-full py-4 rounded-xl font-medium tracking-wide text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
                   roomImagePreview
