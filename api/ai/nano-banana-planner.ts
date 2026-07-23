@@ -1,7 +1,41 @@
-import { GoogleGenAI } from '@google/genai'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import crypto from 'crypto'
-import { checkRateLimit, sanitizePrompt } from '../../src/utils/aiSecurity'
+
+// Rate Limiting (In-Memory IP Tracker)
+interface RateLimitRecord {
+  count: number
+  resetTime: number
+}
+const ipStore = new Map<string, RateLimitRecord>()
+
+function checkRateLimit(ip: string, limit = 3, windowMs = 60 * 1000): { allowed: boolean; remaining: number; resetMs: number } {
+  if (ip === '127.0.0.1' || ip === '::1' || ip === 'localhost') {
+    return { allowed: true, remaining: 999, resetMs: 0 }
+  }
+  const now = Date.now()
+  const record = ipStore.get(ip)
+  if (!record || now > record.resetTime) {
+    ipStore.set(ip, { count: 1, resetTime: now + windowMs })
+    return { allowed: true, remaining: limit - 1, resetMs: windowMs }
+  }
+  if (record.count >= limit) {
+    return { allowed: false, remaining: 0, resetMs: record.resetTime - now }
+  }
+  record.count += 1
+  return { allowed: true, remaining: limit - record.count, resetMs: record.resetTime - now }
+}
+
+function sanitizePrompt(input?: unknown, maxLength = 150): string {
+  if (!input || typeof input !== 'string') return ''
+  let sanitized = input.trim().slice(0, maxLength)
+  return sanitized
+    .replace(/<[^>]*>?/gm, '')
+    .replace(/javascript:/gi, '')
+    .replace(/data:/gi, '')
+    .replace(/ignore previous instructions/gi, '')
+    .replace(/system prompt/gi, '')
+    .replace(/override instructions/gi, '')
+}
 
 const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || process.env.SANITY_STUDIO_R2_ACCOUNT_ID
 const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID
@@ -211,7 +245,6 @@ ZERO-TOLERANCE MANDATORY PRODUCT CONSTRAINTS:
 
     promptText += `\n\nFINAL EXECUTION DIRECTIVE:\nProduce a single, photorealistic high-resolution photograph where the target furniture from Image 2 is integrated into Image 1 with 100% design fidelity.`
 
-    const ai = new GoogleGenAI({ apiKey })
     const imageModels = [
       'gemini-3.1-flash-image',
       'gemini-2.5-flash-image',
