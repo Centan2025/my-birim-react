@@ -132,12 +132,12 @@ export function AboutPage() {
 
   return (
     <div className="bg-[var(--bg-primary)] animate-fade-in-up-subtle">
-      {/* Hero Section */}
-      <div className="relative h-[70vh] min-h-[500px] bg-gray-900 text-white flex items-center justify-center overflow-hidden hero-section">
-        {content.heroImage && (
+      {/* Hero Section / Header */}
+      {heroImageUrl ? (
+        <div className="relative h-[70vh] min-h-[500px] bg-gray-900 text-white flex items-center justify-center overflow-hidden hero-section">
           <div className="absolute inset-0 w-full h-full scale-105 animate-slow-zoom">
             <OptimizedImage
-              src={heroImageUrl || ''}
+              src={heroImageUrl}
               alt={t(content.heroTitle)}
               className="w-full h-full opacity-60 object-cover"
               width={1920}
@@ -152,26 +152,46 @@ export function AboutPage() {
             />
             <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/20" />
           </div>
-        )}
-        <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
-          <ScrollReveal delay={100} duration={1.2} distance={15}>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tighter uppercase leading-none">
+          <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
+            <ScrollReveal delay={100} duration={1.2} distance={15}>
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tighter uppercase leading-none">
+                {t(content.heroTitle)}
+              </h1>
+            </ScrollReveal>
+            {content.heroSubtitle && (
+              <ScrollReveal delay={300} duration={1.2} distance={20}>
+                <p className="mt-8 text-lg md:text-2xl text-gray-200 max-w-2xl mx-auto font-light leading-relaxed">
+                  {t(content.heroSubtitle)}
+                </p>
+              </ScrollReveal>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="pt-20 md:pt-24 lg:pt-28 pb-8 text-[var(--text-primary)]">
+          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 text-[11px] sm:text-[12px]">
+            <Breadcrumbs items={[{label: t('homepage'), to: '/'}, {label: t('about')}]} />
+          </div>
+          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 text-center pt-4 pb-4">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-light tracking-tight text-[var(--text-primary)] uppercase leading-none">
               {t(content.heroTitle)}
             </h1>
-          </ScrollReveal>
-          <ScrollReveal delay={300} duration={1.2} distance={20}>
-            <p className="mt-8 text-lg md:text-2xl text-gray-200 max-w-2xl mx-auto font-light leading-relaxed">
-              {t(content.heroSubtitle)}
-            </p>
-          </ScrollReveal>
+            {content.heroSubtitle && (
+              <p className="mt-6 text-base md:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto font-light leading-relaxed">
+                {t(content.heroSubtitle)}
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Main Content Sections */}
       <div className="bg-[var(--bg-tertiary)] overflow-hidden pb-32 font-light">
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 text-[11px] sm:text-[12px]">
-          <Breadcrumbs items={[{label: t('homepage'), to: '/'}, {label: t('about')}]} />
-        </div>
+        {heroImageUrl && (
+          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 text-[11px] sm:text-[12px]">
+            <Breadcrumbs items={[{label: t('homepage'), to: '/'}, {label: t('about')}]} />
+          </div>
+        )}
 
         {/* 1. SECTION: HISTORY */}
         {content.historySection && (
