@@ -93,5 +93,10 @@
   "quick_look": "Quick Look",
   "directory": "Directory",
   "scroll_discovery": "Scroll",
-  "istanbul_tr": "Istanbul, TR"
+  "istanbul_tr": "Istanbul, TR",
+  "downloadable_files": "Downloadable Files",
+  "additional_image": "Additional Image",
+  "no_additional_images": "No additional images available",
+  "no_technical_drawings": "No technical drawings available",
+  "no_3d_models": "No 3D models available"
 }

@@ -66,7 +66,7 @@ export function ProductExclusiveContentSection({
   }
 
   const getExtraImageLabel = (_img: string | {url?: string; image?: string}, idx: number) => {
-    return `Ek Görsel ${idx + 1}`
+    return `${t('additional_image') || 'Ek Görsel'} ${idx + 1}`
   }
 
   return (
@@ -74,7 +74,7 @@ export function ProductExclusiveContentSection({
       <div className="relative rounded-none border border-[var(--border-primary)] bg-[var(--bg-primary)]/70 backdrop-blur p-6 sm:p-8 pb-10">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl md:text-3xl font-light text-[var(--text-primary)]">
-            İndirilebilir Dosyalar
+            {t('downloadable_files') || 'İndirilebilir Dosyalar'}
           </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -109,7 +109,7 @@ export function ProductExclusiveContentSection({
               </ul>
             ) : (
               <p className="text-[var(--text-secondary)] opacity-50 text-sm">
-                Ek görsel bulunmuyor
+                {t('no_additional_images') || 'Ek görsel bulunmuyor'}
               </p>
             )}
           </div>
@@ -139,7 +139,7 @@ export function ProductExclusiveContentSection({
               </ul>
             ) : (
               <p className="text-[var(--text-secondary)] opacity-50 text-sm">
-                Teknik çizim bulunmuyor
+                {t('no_technical_drawings') || 'Teknik çizim bulunmuyor'}
               </p>
             )}
           </div>
@@ -168,7 +168,9 @@ export function ProductExclusiveContentSection({
                 ))}
               </ul>
             ) : (
-              <p className="text-[var(--text-secondary)] opacity-50 text-sm">3D model bulunmuyor</p>
+              <p className="text-[var(--text-secondary)] opacity-50 text-sm">
+                {t('no_3d_models') || '3D model bulunmuyor'}
+              </p>
             )}
           </div>
         </div>

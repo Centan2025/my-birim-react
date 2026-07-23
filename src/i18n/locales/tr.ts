@@ -208,4 +208,9 @@ export default {
   min_read: 'DAKİKA OKUMA',
   continue_reading: 'İÇERİĞİN DEVAMI',
   designers_description: 'Estetik ve fonksiyonun mükemmel uyumunu yaratan vizyoner zihinler.',
+  downloadable_files: 'İndirilebilir Dosyalar',
+  additional_image: 'Ek Görsel',
+  no_additional_images: 'Ek görsel bulunmuyor',
+  no_technical_drawings: 'Teknik çizim bulunmuyor',
+  no_3d_models: '3D model bulunmuyor',
 }

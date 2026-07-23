@@ -93,5 +93,10 @@
   "quick_look": "Hızlı Bakış",
   "directory": "Rehber",
   "scroll_discovery": "Kaydırın",
-  "istanbul_tr": "İstanbul, TR"
+  "istanbul_tr": "İstanbul, TR",
+  "downloadable_files": "İndirilebilir Dosyalar",
+  "additional_image": "Ek Görsel",
+  "no_additional_images": "Ek görsel bulunmuyor",
+  "no_technical_drawings": "Teknik çizim bulunmuyor",
+  "no_3d_models": "3D model bulunmuyor"
 }
