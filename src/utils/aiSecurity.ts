@@ -159,10 +159,10 @@ export function incrementDailyQuota(maxDaily = 3): {
   }
 }
 
-// 4. Client Image Resizer & Canvas Optimizer (Max 5MB input -> Downscale to 768x768 max, 0.70 JPEG quality for token efficiency)
+// 4. Client Image Resizer & Canvas Optimizer (Max 5MB input -> Downscale to 512x512 max, 0.60 JPEG quality for token efficiency)
 export async function optimizeImageForUpload(
   file: File,
-  maxDimension = 768,
+  maxDimension = 512,
   maxSizeBytes = 5 * 1024 * 1024
 ): Promise<string> {
   if (file.size > maxSizeBytes) {
@@ -197,7 +197,7 @@ export async function optimizeImageForUpload(
         }
 
         ctx.drawImage(img, 0, 0, width, height)
-        resolve(canvas.toDataURL('image/jpeg', 0.7))
+        resolve(canvas.toDataURL('image/jpeg', 0.6))
       }
       img.src = e.target?.result as string
     }
@@ -206,14 +206,27 @@ export async function optimizeImageForUpload(
 }
 
 /**
- * Resizes any image URL or Base64 string to maxDimension (768x768) with quality 0.70 JPEG
+ * Resizes any image URL or Base64 string to maxDimension (512x512) with quality 0.60 JPEG
  */
 export async function resizeImageUrlOrBase64(
   imageSrc: string,
-  maxDimension = 768,
-  quality = 0.7
+  maxDimension = 512,
+  quality = 0.6
 ): Promise<string> {
   if (!imageSrc) return ''
+
+  // Fast path for Sanity CDN URLs to avoid cross-origin canvas taint and force backend low resolution
+  if (imageSrc.includes('cdn.sanity.io')) {
+    try {
+      const urlObj = new URL(imageSrc)
+      urlObj.searchParams.set('w', maxDimension.toString())
+      urlObj.searchParams.set('q', Math.round(quality * 100).toString())
+      urlObj.searchParams.set('auto', 'format')
+      return urlObj.toString()
+    } catch {
+      // ignore URL parsing errors and fallback to canvas
+    }
+  }
 
   return new Promise(resolve => {
     const img = new Image()

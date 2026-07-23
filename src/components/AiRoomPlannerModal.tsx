@@ -45,7 +45,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
   const [showQuotaModal, setShowQuotaModal] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const stopCamera = useCallback(() => {
@@ -74,7 +74,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
 
   const setVideoRef = useCallback(
     (node: HTMLVideoElement | null) => {
-      ;(videoRef as React.MutableRefObject<HTMLVideoElement | null>).current = node
+      videoRef.current = node
       if (node && cameraStream) {
         node.srcObject = cameraStream
         node.play().catch(err => console.warn('Video element play issue:', err))
@@ -291,8 +291,8 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
 
     try {
       const [compressedRoomImage, compressedProductImage] = await Promise.all([
-        resizeImageUrlOrBase64(roomImagePreview, 768, 0.7),
-        resizeImageUrlOrBase64(prodImage, 768, 0.7),
+        resizeImageUrlOrBase64(roomImagePreview, 512, 0.6),
+        resizeImageUrlOrBase64(prodImage, 512, 0.6),
       ])
 
       const response = await fetch('/api/ai/nano-banana-planner', {

@@ -752,7 +752,19 @@ app.post('/api/ai/nano-banana-planner', async (req, res) => {
         if (matches) return { mimeType: matches[1], base64Data: matches[2] }
       }
       if (inputStr.startsWith('http://') || inputStr.startsWith('https://')) {
-        const fRes = await fetch(inputStr)
+        let targetUrl = inputStr
+        if (targetUrl.includes('cdn.sanity.io') && !targetUrl.includes('w=')) {
+          try {
+            const urlObj = new URL(targetUrl)
+            urlObj.searchParams.set('w', '512')
+            urlObj.searchParams.set('q', '60')
+            urlObj.searchParams.set('auto', 'format')
+            targetUrl = urlObj.toString()
+          } catch {
+            // ignore
+          }
+        }
+        const fRes = await fetch(targetUrl)
         if (!fRes.ok) throw new Error(`Görsel indirilemedi: ${fRes.statusText}`)
         const buf = Buffer.from(await fRes.arrayBuffer())
         return { mimeType: fRes.headers.get('content-type') || 'image/jpeg', base64Data: buf.toString('base64') }

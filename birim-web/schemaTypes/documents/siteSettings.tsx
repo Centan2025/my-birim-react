@@ -120,6 +120,14 @@ export default defineType({
       description:
         'Aktif edildiğinde menüde "Fabrika" seçeneği belirir ve ilgili sayfa erişilebilir olur.',
     }),
+    defineField({
+      name: 'enableAiRoomPlanner',
+      title: 'AI Oda Tasarımı (Odamda Gör) Butonunu Göster',
+      type: 'boolean',
+      initialValue: true,
+      description:
+        'Pasif edildiğinde ürün detay sayfalarındaki "AI ile Odamda Gör" butonu ve AI oda tasarımı modülü gizlenir.',
+    }),
   ],
   preview: {
     select: {r2Url: 'logoR2.url'},
