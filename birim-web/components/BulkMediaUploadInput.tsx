@@ -139,8 +139,26 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
         // Dosyaları paralel işle (concurrency kontrolü isteğe bağlı, şimdilik Promise.all)
         const uploadResults = await Promise.all(
           fileArray.map(async (file, index) => {
-            const isImage = isImageFile(file.name)
+            const isTiff =
+              file.type === 'image/tiff' ||
+              file.type === 'image/tif' ||
+              /\.(tif|tiff)$/i.test(file.name)
+            const isImage = isImageFile(file.name) || isTiff
+            const isProcessableImage =
+              isImage &&
+              !file.type.includes('gif') &&
+              !file.type.includes('svg') &&
+              !isTiff
             const isVideo = isVideoFile(file.name)
+
+            if (isTiff) {
+              toast.push({
+                status: 'error',
+                title: 'TIFF Formatı Desteklenmiyor',
+                description: `${file.name} (TIFF) yüklenemez. Lütfen dosyayı JPG, PNG veya WebP formatına dönüştürün.`,
+              })
+              return null
+            }
 
             // 1. Path belirle
             let folderPath = 'migration/bulk-uploads'
@@ -163,16 +181,16 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
 
             // 2. Filename
             let fileName = file.name
-            if (isImage && !file.name.toLowerCase().endsWith('.webp')) {
+            if (isProcessableImage && !file.name.toLowerCase().endsWith('.webp')) {
               fileName = file.name.replace(/\.[^/.]+$/, '') + '.webp'
             }
             // Key oluştururken slugify artık noktayı koruyor (.webp kalacak)
             const key = `${folderPath}/${Date.now()}-${slugify(fileName)}`
 
-            let r2Asset: any = null
+            let r2Asset: Record<string, unknown> | null = null
 
             // 3. Upload
-            if (isImage && !file.type.includes('gif') && !file.type.includes('svg')) {
+            if (isProcessableImage) {
               const sizes = [
                 {width: 2560, suffix: '', maxSizeMB: 1.5},
                 {width: 1600, suffix: '-1600w', maxSizeMB: 0.8},
@@ -192,14 +210,18 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
                   if (isAlreadyWebP || isSmallFile) {
                     blobToUpload = file
                   } else {
-                    const options = {
-                      maxSizeMB: size.maxSizeMB,
-                      maxWidthOrHeight: size.width,
-                      useWebWorker: false,
-                      fileType: 'image/webp' as any,
-                      initialQuality: 0.92,
+                    try {
+                      const options = {
+                        maxSizeMB: size.maxSizeMB,
+                        maxWidthOrHeight: size.width,
+                        useWebWorker: false,
+                        fileType: 'image/webp' as unknown as string,
+                        initialQuality: 0.92,
+                      }
+                      blobToUpload = await imageCompression(file, options)
+                    } catch {
+                      blobToUpload = file
                     }
-                    blobToUpload = await imageCompression(file, options)
                   }
 
                   try {
@@ -212,14 +234,16 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
                       }
                       img.onerror = () => resolve(null)
                     })
-                  } catch (e) {}
+                  } catch {
+                    /* ignore dimension error */
+                  }
                 } else {
                   try {
                     const options = {
                       maxSizeMB: size.maxSizeMB,
                       maxWidthOrHeight: size.width,
                       useWebWorker: false,
-                      fileType: 'image/webp' as any,
+                      fileType: 'image/webp' as unknown as string,
                       initialQuality: 0.9,
                     }
                     blobToUpload = await imageCompression(file, options)
@@ -250,13 +274,13 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
                 hotspotY: 0.5,
               }
             } else {
-              await uploadFileViaPresignedUrl(file, key, file.type)
+              await uploadFileViaPresignedUrl(file, key, file.type || 'application/octet-stream')
               r2Asset = {
                 _type: 'r2Asset',
                 url: `${r2Domain}/${key}`,
                 path: key,
                 hasResponsiveSizes: false,
-                mimeType: file.type,
+                mimeType: file.type || 'image/tiff',
                 alt: file.name.replace(/\.[^/.]+$/, ''),
               }
             }

@@ -40,17 +40,59 @@ const getPreviewToken = () => {
 
 const previewToken = getPreviewToken()
 
-export const sanity = useSanity
+const rawSanity = useSanity
   ? createClient({
       projectId: SANITY_PROJECT_ID,
       dataset: SANITY_DATASET,
       apiVersion: SANITY_API_VERSION,
-      useCdn: !previewToken, // previewToken varsa CDN false olur
+      useCdn: false,
       token: previewToken || undefined,
       perspective: previewToken ? 'drafts' : 'published',
       ignoreBrowserTokenWarning: true,
     })
   : null
+
+if (rawSanity && typeof window !== 'undefined') {
+  const originalFetch = rawSanity.fetch.bind(rawSanity)
+  // @ts-ignore
+  rawSanity.fetch = async (query: string, params?: Record<string, unknown>, options?: unknown) => {
+    try {
+      // @ts-ignore
+      return await originalFetch(query, params, options)
+    } catch (err) {
+      console.warn(
+        'Primary Sanity fetch failed (Opera/AdBlocker), retrying via same-origin proxy:',
+        err,
+      )
+      try {
+        const proxyUrl = new URL('/api/sanity/query', window.location.origin)
+        proxyUrl.searchParams.set('query', query)
+        proxyUrl.searchParams.set('perspective', previewToken ? 'drafts' : 'published')
+        if (params && typeof params === 'object') {
+          for (const [key, val] of Object.entries(params)) {
+            proxyUrl.searchParams.set(`$${key}`, typeof val === 'string' ? `"${val}"` : JSON.stringify(val))
+          }
+        }
+        const res = await window.fetch(proxyUrl.toString(), {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            ...(previewToken ? {Authorization: `Bearer ${previewToken}`} : {}),
+          },
+        })
+        if (res.ok) {
+          const json = (await res.json()) as {result?: unknown}
+          return json.result
+        }
+      } catch (fallbackErr) {
+        console.error('Proxy fallback also failed:', fallbackErr)
+      }
+      throw err
+    }
+  }
+}
+
+export const sanity = rawSanity
 
 // SANITY_TOKEN artık sadece server-side (Vercel API) tarafında kullanılmaktadır.
 export const SANITY_TOKEN = ''

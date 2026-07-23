@@ -117,6 +117,27 @@ export default defineConfig({
       port: 3001,
     },
     proxy: {
+      '/api/sanity': {
+        target: 'https://wn3a082f.api.sanity.io',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (p: string) => {
+          const url = new URL(p, 'http://localhost')
+          const query = url.searchParams.get('query') || ''
+          const perspective = url.searchParams.get('perspective') || 'published'
+          const newUrl = new URL(`/v2025-01-01/data/query/production`, 'https://wn3a082f.api.sanity.io')
+          newUrl.searchParams.set('query', query)
+          newUrl.searchParams.set('returnQuery', 'false')
+          newUrl.searchParams.set('perspective', perspective)
+          // Forward GROQ params
+          for (const [key, val] of url.searchParams.entries()) {
+            if (key.startsWith('$')) {
+              newUrl.searchParams.set(key, val)
+            }
+          }
+          return newUrl.pathname + newUrl.search
+        },
+      },
       '/api': {
         target: 'http://localhost:3002',
         changeOrigin: true,

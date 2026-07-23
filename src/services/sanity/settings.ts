@@ -111,7 +111,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
   if (useSanity && sanity) {
     try {
       const q = groq`*[_type == "siteSettings" && !(_id in path("drafts.**"))] | order(_updatedAt desc)[0]{ ..., logo, logoR2 }`
-      const s = await sanity.withConfig({useCdn: false}).fetch(q)
+      const s = await sanity.fetch(q)
       return {
         logoUrl: s?.logoR2?.url || (s?.logo ? mapImage(s.logo) : s?.logoUrl || ''),
         topBannerText: s?.topBannerText || '',
@@ -163,8 +163,7 @@ export const getTranslations = async (): Promise<Record<string, Record<string, s
   if (useSanity && sanity) {
     try {
       const q = groq`*[_type == "uiTranslations" && !(_id in path("drafts.**"))] | order(_updatedAt desc){ language, strings }`
-      const noCacheClient = sanity.withConfig({useCdn: false})
-      const results = await noCacheClient.fetch(q)
+      const results = await sanity.fetch(q)
       const translationsMap: Record<string, Record<string, string>> = {}
       if (Array.isArray(results)) {
         results.forEach((item: Record<string, unknown>) => {

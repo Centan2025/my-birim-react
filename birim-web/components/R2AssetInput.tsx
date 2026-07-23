@@ -363,10 +363,31 @@ export default function R2AssetInput(props: ObjectInputProps) {
 
       setIsUploading(true)
       try {
-        // 1. Compression (only for images)
+        // 1. File Type Detection
         let processedFile: File | Blob = file
-        const isImage = file.type.startsWith('image/')
+        const isTiff =
+          file.type === 'image/tiff' ||
+          file.type === 'image/tif' ||
+          /\.(tif|tiff)$/i.test(file.name)
+        const isImage = file.type.startsWith('image/') || isTiff
+        const isProcessableImage =
+          isImage &&
+          !file.type.includes('gif') &&
+          !file.type.includes('svg') &&
+          !isTiff
         let isResponsive = false
+
+        if (isTiff) {
+          toast.push({
+            status: 'error',
+            title: 'TIFF Formatı Desteklenmiyor',
+            description:
+              'TIFF formatındaki görseller yüksek disk alanı kapladığı ve web tarayıcılarında görüntülenemediği için yüklenemez. Lütfen dosyayı JPG, PNG veya WebP formatına dönüştürüp tekrar deneyin.',
+          })
+          setIsUploading(false)
+          setIsDragging(false)
+          return
+        }
 
         // 2. Determine R2 Path
         let folderPath = 'migration/uploads'
@@ -393,7 +414,7 @@ export default function R2AssetInput(props: ObjectInputProps) {
 
         // 3. Prepare Filename
         let fileName = file.name
-        if (isImage && !file.name.toLowerCase().endsWith('.webp')) {
+        if (isProcessableImage && !file.name.toLowerCase().endsWith('.webp')) {
           fileName = file.name.replace(/\.[^/.]+$/, '') + '.webp'
         }
         const key = `${folderPath}/${Date.now()}-${fileName}`
@@ -425,7 +446,7 @@ export default function R2AssetInput(props: ObjectInputProps) {
         let posterHeight: number | undefined = undefined
 
         // 4. Upload to R2
-        if (isImage && !file.type.includes('gif') && !file.type.includes('svg')) {
+        if (isProcessableImage) {
           isResponsive = true
           const sizes = [
             {width: 2560, suffix: '', maxSizeMB: 1.5},
@@ -447,14 +468,18 @@ export default function R2AssetInput(props: ObjectInputProps) {
               if (isAlreadyWebP || isSmallFile) {
                 blobToUpload = file
               } else {
-                const options = {
-                  maxSizeMB: size.maxSizeMB,
-                  maxWidthOrHeight: size.width,
-                  useWebWorker: false,
-                  fileType: 'image/webp' as any,
-                  initialQuality: 0.92,
+                try {
+                  const options = {
+                    maxSizeMB: size.maxSizeMB,
+                    maxWidthOrHeight: size.width,
+                    useWebWorker: false,
+                    fileType: 'image/webp' as unknown as string,
+                    initialQuality: 0.92,
+                  }
+                  blobToUpload = await imageCompression(file, options)
+                } catch {
+                  blobToUpload = file
                 }
-                blobToUpload = await imageCompression(file, options)
               }
               processedFile = blobToUpload
             } else {
@@ -464,7 +489,7 @@ export default function R2AssetInput(props: ObjectInputProps) {
                   maxSizeMB: size.maxSizeMB,
                   maxWidthOrHeight: size.width,
                   useWebWorker: false,
-                  fileType: 'image/webp' as any,
+                  fileType: 'image/webp' as unknown as string,
                   initialQuality: 0.9,
                 }
                 blobToUpload = await imageCompression(file, options)
@@ -483,7 +508,7 @@ export default function R2AssetInput(props: ObjectInputProps) {
 
           await Promise.all(uploadPromises)
         } else {
-          await uploadFileViaPresignedUrl(processedFile, key, file.type)
+          await uploadFileViaPresignedUrl(processedFile, key, file.type || 'application/octet-stream')
 
           // Videolar için otomatik kapak görseli (poster) üret
           if (isVideo) {
@@ -508,7 +533,7 @@ export default function R2AssetInput(props: ObjectInputProps) {
 
         // 5. Get Dimensions
         let width, height
-        if (isImage) {
+        if (isImage && !isTiff) {
           try {
             const img = new Image()
             const objectUrl = URL.createObjectURL(processedFile)
@@ -541,7 +566,7 @@ export default function R2AssetInput(props: ObjectInputProps) {
           path: key,
           width,
           height,
-          mimeType: isImage ? 'image/webp' : file.type,
+          mimeType: isProcessableImage ? 'image/webp' : file.type || 'image/tiff',
           alt: file.name.replace(/\.[^/.]+$/, ''),
           posterUrl,
           thumbnailUrl: posterUrl,
@@ -558,12 +583,18 @@ export default function R2AssetInput(props: ObjectInputProps) {
           title: 'Yüklendi',
           description: `R2'ye başarıyla yüklendi: ${fileName}`,
         })
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('R2 Upload Error:', error)
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : typeof error === 'string'
+            ? error
+            : (error as {message?: string})?.message || 'Görsel yüklenirken bir hata oluştu.'
         toast.push({
           status: 'error',
           title: 'Yükleme Hatası',
-          description: error.message,
+          description: errorMessage,
         })
       } finally {
         setIsUploading(false)

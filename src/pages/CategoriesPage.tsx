@@ -152,28 +152,34 @@ export function CategoriesPage() {
                         loading="lazy"
                         quality={85}
                         crop={
-                          typeof category.displayImage === 'object'
-                            ? (
-                                category.displayImage as {
-                                  crop?: import('../types').R2ImageMetadata['crop']
-                                }
-                              ).crop
+                          typeof category.displayImage === 'object' && category.displayImage
+                            ? ((category.displayImage as Record<string, unknown>)['crop'] as import('../types').R2ImageMetadata['crop']) ||
+                              ((category.displayImage as Record<string, unknown>)['cropX'] !== undefined
+                                ? {
+                                    x: Number((category.displayImage as Record<string, unknown>)['cropX']) || 0,
+                                    y: Number((category.displayImage as Record<string, unknown>)['cropY']) || 0,
+                                    width: Number((category.displayImage as Record<string, unknown>)['cropWidth']) || 1,
+                                    height: Number((category.displayImage as Record<string, unknown>)['cropHeight']) || 1,
+                                  }
+                                : undefined)
                             : undefined
                         }
                         hotspot={
-                          typeof category.displayImage === 'object'
-                            ? (
-                                category.displayImage as {
-                                  hotspot?: import('../types').R2ImageMetadata['hotspot']
-                                }
-                              ).hotspot
+                          typeof category.displayImage === 'object' && category.displayImage
+                            ? ((category.displayImage as Record<string, unknown>)['hotspot'] as import('../types').R2ImageMetadata['hotspot']) ||
+                              ((category.displayImage as Record<string, unknown>)['hotspotX'] !== undefined
+                                ? {
+                                    x: Number((category.displayImage as Record<string, unknown>)['hotspotX']) ?? 0.5,
+                                    y: Number((category.displayImage as Record<string, unknown>)['hotspotY']) ?? 0.5,
+                                  }
+                                : undefined)
                             : undefined
                         }
                       />
                     )}
                     {/* Text content inside at the bottom */}
                     <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 lg:p-6 flex flex-col justify-end z-10">
-                      <h2 className="text-lg md:text-xl lg:text-2xl font-light tracking-widest text-[var(--text-secondary)] uppercase leading-tight transform transition-all duration-500 ease-out group-hover:-translate-y-2 group-hover:text-[var(--text-primary)]">
+                      <h2 className="text-lg md:text-xl lg:text-2xl font-light tracking-widest text-gray-400 uppercase leading-tight transform transition-all duration-500 ease-out group-hover:-translate-y-2 group-hover:text-[var(--text-primary)]">
                         {t(category.name)}
                       </h2>
                       {category.subtitle && (

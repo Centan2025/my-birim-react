@@ -62,7 +62,7 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
             identitySection{ ..., imageR2, media[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 } },
             qualitySection{ ..., imageR2, media[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 } }
         }`
-    const data = await sanity.withConfig({useCdn: false}).fetch(q)
+    const data = await sanity.fetch(q)
     if (data) {
       if (data.heroImageR2?.url) {
         data.heroImage = {
@@ -111,7 +111,7 @@ export const getFactoryPageContent = async (): Promise<FactoryPageContent> => {
             ...,
             gallery[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 }
         }`
-    const data = await sanity.withConfig({useCdn: false}).fetch(q)
+    const data = await sanity.fetch(q)
     if (data) {
       if (data.gallery) {
         data.gallery = mapProductMedia({media: data.gallery})
@@ -167,7 +167,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             heroMedia[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2, videoFileMobileR2, videoFileDesktopR2 },
             contentBlocks[]{ ..., titleFont, contentFont, imageR2, imageMobileR2, imageDesktopR2, videoFileR2, videoFileMobileR2, videoFileDesktopR2 }
         }`
-      const data = await sanity.withConfig({useCdn: false}).fetch(q)
+      const data = await sanity.fetch(q)
       if (data?.heroMedia) {
         data.heroMedia = data.heroMedia
           .map((m: Record<string, unknown>) => {

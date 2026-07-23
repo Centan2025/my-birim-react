@@ -46,10 +46,23 @@ export const deskStructure = (S: StructureBuilder, context: ConfigContext) => {
         })
         if (item.child && typeof item.child === 'object') {
           const componentPane = item.child as unknown as Record<string, unknown>
-          componentPane.child = (childId: string, childContext: any) => {
-            const cleanId = childId.replace('drafts.', '')
+          componentPane.child = (childId: string, childContext: unknown) => {
+            const isEditor =
+              childId.includes('view=editor') ||
+              childId.includes('mode=edit') ||
+              (childContext as {params?: {view?: string; mode?: string}} | undefined)?.params
+                ?.view === 'editor' ||
+              (childContext as {params?: {view?: string; mode?: string}} | undefined)?.params
+                ?.mode === 'edit'
 
-            if (childContext?.params?.view === 'editor') {
+            const cleanId = childId
+              .replace('drafts.', '')
+              .replace(',view=editor', '')
+              .replace(';view=editor', '')
+              .split(',')[0]
+              .split(';')[0]
+
+            if (isEditor) {
               return S.document()
                 .schemaType('category')
                 .documentId(cleanId)

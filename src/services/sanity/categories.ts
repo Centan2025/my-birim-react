@@ -33,31 +33,37 @@ interface SanityDesignerRow {
 
 export const getCategories = async (): Promise<Category[]> => {
   if (useSanity && sanity) {
-    const query = groq`*[_type == "category"] | order(orderRank asc) { 
-      "id": id.current, 
-      name, 
-      subtitle, 
-      heroImage, 
-      heroImageR2,
-      menuImage,
-      menuImageR2
-    }`
-    const rows = await sanity.fetch(query)
-    return rows.map((r: SanityCategoryRow) => ({
-      id: r.id,
-      name: r.name,
-      subtitle: r.subtitle,
-      heroImage: r.heroImageR2
-        ? {url: mapImage(r.heroImageR2), ...mapR2Metadata(r.heroImageR2)}
-        : r.heroImage
-          ? {url: mapImage(r.heroImage), ...mapR2Metadata(r.heroImage)}
-          : '',
-      menuImage: r.menuImageR2
-        ? {url: mapImage(r.menuImageR2), ...mapR2Metadata(r.menuImageR2)}
-        : r.menuImage
-          ? {url: mapImage(r.menuImage), ...mapR2Metadata(r.menuImage)}
-          : '',
-    }))
+    try {
+      const query = groq`*[_type == "category"] | order(orderRank asc) { 
+        "id": id.current, 
+        name, 
+        subtitle, 
+        heroImage, 
+        heroImageR2,
+        menuImage,
+        menuImageR2
+      }`
+      const rows = await sanity.fetch(query)
+      if (Array.isArray(rows)) {
+        return rows.map((r: SanityCategoryRow) => ({
+          id: r.id,
+          name: r.name,
+          subtitle: r.subtitle,
+          heroImage: r.heroImageR2
+            ? {url: mapImage(r.heroImageR2), ...mapR2Metadata(r.heroImageR2)}
+            : r.heroImage
+              ? {url: mapImage(r.heroImage), ...mapR2Metadata(r.heroImage)}
+              : '',
+          menuImage: r.menuImageR2
+            ? {url: mapImage(r.menuImageR2), ...mapR2Metadata(r.menuImageR2)}
+            : r.menuImage
+              ? {url: mapImage(r.menuImage), ...mapR2Metadata(r.menuImage)}
+              : '',
+        }))
+      }
+    } catch (err) {
+      console.warn('getCategories fetch failed, using local fallback:', err)
+    }
   }
   await delay(SIMULATED_DELAY)
   return getItem<Category[]>(KEYS.CATEGORIES) || []
