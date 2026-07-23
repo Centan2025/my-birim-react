@@ -204,10 +204,20 @@ function slugify(text: string): string {
 
 const getApiUrl = (path: string): string => {
   if (typeof window === 'undefined') return path
+  const hostname = window.location.hostname
   const isLocal =
-    window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  const base = isLocal ? 'http://localhost:3002' : 'https://www.birim.com'
-  return `${base}${path}`
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname.startsWith('192.168.') ||
+    hostname.startsWith('10.') ||
+    hostname.startsWith('172.') ||
+    hostname.endsWith('.local')
+
+  if (isLocal) {
+    const protocol = window.location.protocol || 'http:'
+    return `${protocol}//${hostname}:3002${path}`
+  }
+  return `https://www.birim.com${path}`
 }
 
 async function uploadFileViaPresignedUrl(
