@@ -85,46 +85,53 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
   }
 
   const startCamera = async () => {
-    try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        showToast('Tarayıcınız veya bağlantınız (HTTPS gereklidir) kamera kullanımını desteklemiyor.')
-        return
-      }
+    // 1. HTTPS / Secure Context check
+    if (typeof window !== 'undefined' && !window.isSecureContext) {
+      showToast('Kamera erişimi için sitenin HTTPS (güvenli bağlantı) üzerinden çalışması gerekmektedir.')
+      return
+    }
 
+    // 2. Browser API support check
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      showToast('Tarayıcınız kamera erişimini desteklemiyor veya izin kısıtlaması var.')
+      return
+    }
+
+    try {
       let stream: MediaStream | null = null
       try {
         // Try mobile back camera first
         stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { exact: 'environment' } },
+          video: {
+            facingMode: { ideal: 'environment' },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
           audio: false,
         })
       } catch {
-        // Fallback to ideal back camera or default camera
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: 'environment' },
-            audio: false,
-          })
-        } catch {
-          // Final fallback to any video camera
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: true,
-            audio: false,
-          })
-        }
+        // Fallback to default camera
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false,
+        })
       }
 
       setCameraStream(stream)
       setIsCameraActive(true)
     } catch (err: unknown) {
-      console.error('Camera access error:', err)
+      console.error('Kamera İzin Hatası Detayı:', err)
       const errName = err instanceof Error ? err.name : ''
       const errMsg = err instanceof Error ? err.message : ''
 
-      if (errName === 'NotAllowedError' || errMsg.includes('Permissions policy')) {
-        showToast('Kamera kullanımı tarayıcı politikası veya site izinleri tarafından engellendi. Lütfen adres çubuğundaki kilit simgesinden kameraya izin verin.')
+      if (errName === 'NotAllowedError' || errName === 'PermissionDeniedError' || errMsg.includes('Permissions policy')) {
+        showToast('Kamera izni reddedildi. Lütfen tarayıcı adres çubuğundaki kilit simgesine tıklayıp kamera iznini aktif edin.')
+      } else if (errName === 'NotFoundError' || errName === 'DevicesNotFoundError') {
+        showToast('Cihazınızda kullanılabilir bir kamera bulunamadı.')
+      } else if (errName === 'NotReadableError' || errName === 'TrackStartError') {
+        showToast('Kamera başka bir uygulama tarafından kullanılıyor olabilir.')
       } else {
-        showToast('Kameraya erişilemedi. Lütfen tarayıcı ayarlarından kamera izni verdiğinizden ve bağlantının HTTPS olduğundan emin olun.')
+        showToast(`Kamera başlatılamadı: ${errMsg || 'Bilinmeyen hata'}`)
       }
     }
   }
