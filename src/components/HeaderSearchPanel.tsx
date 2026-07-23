@@ -60,6 +60,14 @@ export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
             display: none;
           }
 
+          #global-search-input:focus,
+          #global-search-input:focus-visible,
+          #global-search-input:active {
+            outline: none !important;
+            box-shadow: none !important;
+            border: none !important;
+          }
+
           @keyframes birim-search-x-spin-in {
             0% {
               transform: rotate(-90deg) scale(0.6);
@@ -105,9 +113,10 @@ export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
                 placeholder={t('search_placeholder') || ''}
                 id="global-search-input"
                 name="global-search"
-                className={`w-full bg-transparent outline-none transition-colors duration-300 pr-10 ${
+                className={`w-full bg-transparent outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 transition-colors duration-300 pr-10 ${
                   isMobile ? 'text-lg pb-2' : 'text-2xl pb-3'
                 } ${isLightMode ? 'text-black placeholder-black/40' : 'text-white placeholder-white/40'}`}
+                style={{outline: 'none', boxShadow: 'none'}}
                 value={searchQuery}
                 onChange={e => onSearchQueryChange(e.target.value)}
               />

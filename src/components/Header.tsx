@@ -131,12 +131,15 @@ export function Header() {
   const currentHeroBrightness =
     heroBrightness ?? headerTheme.brightness ?? heroBrightnessRef.current
 
-  const isLightMode =
-    ((!isDarkHero ||
-      (!isHomepage && currentHeroBrightness !== null && currentHeroBrightness >= 0.45) ||
-      headerOpacity >= 0.75) &&
-      !(isMobile && (isSearchOpen || isMobileMenuOpen || isMobileMenuClosing))) ||
-    (!isMobile && isProductsOpen)
+  const isDarkHeroMatched = isDarkHeroPage(location.pathname)
+
+  const isLightMode = isSearchOpen
+    ? !isDarkMode && !isDarkHeroMatched
+    : ((!isDarkHero ||
+        (!isHomepage && currentHeroBrightness !== null && currentHeroBrightness >= 0.45) ||
+        headerOpacity >= 0.75) &&
+        !(isMobile && (isMobileMenuOpen || isMobileMenuClosing))) ||
+      (!isMobile && isProductsOpen)
 
   // Dark mode'da aşağı kaydırınca logo/yazı beyaz kalmalı (arka plan siyah olduğu için),
   // Light mode'da ise siyah olmalı (arka plan beyaz olduğu için).
@@ -161,9 +164,10 @@ export function Header() {
     // Route değiştiğini ref'e kaydet
     currentRouteRef.current = location.pathname
 
-    // Sayfa değiştiğinde brightness'i hemen sıfırla
-    // This is now handled by useHeroBrightness hook internally
-    // setHeroBrightness(null)
+    // Route değiştiğinde açılır panelleri (arama, ürünler menüsü, mobil menü) kapat
+    closeSearch()
+    setIsProductsOpen(false)
+    setIsMobileMenuOpen(false)
 
     // Scroll pozisyonunu sıfırla (ScrollToTop component'i bunu yapıyor ama biz de garantilemek için)
     lastScrollYRef.current = 0
@@ -389,19 +393,19 @@ export function Header() {
   }, [isSearchOpen])
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+    const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node
 
-      // Search panel için - sadece mouse event'lerde çalış (touch'da sorun yaratıyor)
-      if (event.type === 'mousedown' && isSearchOpen) {
+      // Search panel için - tıklama search paneli veya header kapsayıcısı içindeyse mousedown ile kapatma.
+      // Böylece header içindeki link/butonlar ilk tıklamada doğrudan çalışır.
+      if (isSearchOpen) {
         if (
-          searchPanelRef.current &&
-          !searchPanelRef.current.contains(target) &&
-          searchButtonRef.current &&
-          !searchButtonRef.current.contains(target)
+          searchPanelRef.current?.contains(target) ||
+          headerContainerRef.current?.contains(target)
         ) {
-          closeSearch()
+          return
         }
+        closeSearch()
       }
 
       // Mobil menü için
@@ -416,7 +420,6 @@ export function Header() {
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
-    // Touch event'i kaldırdık - arama paneli için sorun yaratıyordu
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
@@ -446,6 +449,9 @@ export function Header() {
     }
     setIsProductsOpen(false)
     setHoveredCategoryId(null) // Menü kapandığında görsel alanı temizle
+    if (isSearchOpen) {
+      closeSearch()
+    }
   }
 
   const navLinkClasses =
@@ -540,7 +546,10 @@ export function Header() {
       <NavLink
         to={to}
         onMouseEnter={onMouseEnter}
-        onClick={onClick}
+        onClick={e => {
+          if (isSearchOpen) closeSearch()
+          if (onClick) onClick()
+        }}
         className={`relative group flex items-end pb-0 pt-2 ${navLinkClasses}`}
         style={({isActive}) => ({
           ...(isActive ? activeLinkClasses : {}),
@@ -614,8 +623,8 @@ export function Header() {
               ? 'h-[3.5rem] min-h-[3.5rem] max-h-[3.5rem]'
               : 'h-[5rem] min-h-[5rem] max-h-[5rem]'
           } ${
-            // Arka plan blur'ü: opacity 0 ise blur'ü kaldır (Products açıkken blur aktif)
-            headerOpacity <= 0 && !isProductsOpen ? '' : 'backdrop-blur-lg'
+            // Arka plan blur'ü: opacity 0 ise blur'ü kaldır (Products veya Search açıkken blur aktif)
+            headerOpacity <= 0 && !isProductsOpen && !isSearchOpen ? '' : 'backdrop-blur-lg'
           } ${
             // Sadece menü açıldığında transition ve max-height değişimi
             isProductsOpen || (isMobileMenuOpen && !isOverlayMobileMenu)
@@ -665,8 +674,8 @@ export function Header() {
                         setIsSearchOpen(true)
                       }
                     }}
-                    className="group p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center"
-                    style={{color: headerForegroundColor}}
+                    className="group p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0"
+                    style={{color: headerForegroundColor, outline: 'none', boxShadow: 'none'}}
                     aria-label={
                       isSearchOpen
                         ? t('close_search') || 'Aramayı kapat'
@@ -735,8 +744,8 @@ export function Header() {
                         setIsSearchOpen(true)
                       }
                     }}
-                    className={`${iconClasses} hidden lg:inline-flex`}
-                    style={{...sharedIconStyle, color: headerForegroundColor}}
+                    className={`${iconClasses} hidden lg:inline-flex focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0`}
+                    style={{...sharedIconStyle, color: headerForegroundColor, outline: 'none', boxShadow: 'none'}}
                     aria-label={
                       isSearchOpen
                         ? t('close_search') || 'Aramayı kapat'

@@ -148,6 +148,8 @@ export default {
   profession_placeholder: 'Your Profession',
   country: 'Country',
   country_placeholder: 'Your Country',
+  phone: 'Phone',
+  phone_placeholder: 'Your Phone Number',
   logging_in: 'Logging in...',
   signing_up: 'Signing up...',
   register_benefit_prefix: 'By signing up, you can access ',

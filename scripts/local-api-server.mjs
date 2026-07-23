@@ -964,7 +964,7 @@ app.use((req, res) => {
 })
 
 const PORT = 3002
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n✅  Local API Server çalışıyor → http://localhost:${PORT}`)
   const tokenDisplay = SANITY_TOKEN
     ? `${SANITY_TOKEN.slice(0, 4)}...${SANITY_TOKEN.slice(-4)}`

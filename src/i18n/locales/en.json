@@ -38,6 +38,7 @@
   "login_prompt": "Log in to access exclusive content.",
   "login_test_creds": "(Test: user@example.com / password)",
   "email": "Email",
+  "phone": "Phone",
   "password": "Password",
   "invalid_credentials": "Invalid email or password.",
   "already_logged_in": "You are already logged in.",

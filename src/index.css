@@ -47,6 +47,16 @@
   outline-offset: 2px;
 }
 
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 .font-arial-regular {
   font-family: Arial, sans-serif !important;
   font-weight: 400 !important;

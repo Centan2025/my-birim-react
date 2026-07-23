@@ -116,6 +116,8 @@ export default {
   profession_placeholder: 'Mesleğiniz',
   country: 'Ülke',
   country_placeholder: 'Ülkeniz',
+  phone: 'Telefon',
+  phone_placeholder: 'Telefon Numaranız',
   logging_in: 'Giriş yapılıyor...',
   signing_up: 'Kayıt yapılıyor...',
   register_benefit_prefix: 'Üye olarak ',

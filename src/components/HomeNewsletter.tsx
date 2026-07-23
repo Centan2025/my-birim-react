@@ -263,7 +263,8 @@ export const HomeNewsletter: FC = () => {
                             onChange={e => setEmail(e.target.value)}
                             required
                             placeholder={capitalize(t('email_placeholder'))}
-                            className="w-full bg-transparent py-4 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none text-sm md:text-base tracking-widest font-semibold font-inter"
+                            className="w-full bg-transparent py-4 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 text-sm md:text-base tracking-widest font-semibold font-inter"
+                            style={{outline: 'none', boxShadow: 'none'}}
                           />
                         </div>
                         <button
@@ -316,7 +317,8 @@ export const HomeNewsletter: FC = () => {
                               onChange={e => setProfData({...profData, name: e.target.value})}
                               required
                               placeholder={capitalize(t('full_name'))}
-                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              style={{outline: 'none', boxShadow: 'none'}}
                             />
                           </div>
                           <div className="relative group">
@@ -326,7 +328,8 @@ export const HomeNewsletter: FC = () => {
                               onChange={e => setProfData({...profData, company: e.target.value})}
                               required
                               placeholder={capitalize(t('company'))}
-                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              style={{outline: 'none', boxShadow: 'none'}}
                             />
                           </div>
                         </motion.div>
@@ -342,7 +345,8 @@ export const HomeNewsletter: FC = () => {
                               onChange={e => setProfData({...profData, profession: e.target.value})}
                               required
                               placeholder={capitalize(t('profession'))}
-                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              style={{outline: 'none', boxShadow: 'none'}}
                             />
                           </div>
                           <div className="relative group">
@@ -352,7 +356,8 @@ export const HomeNewsletter: FC = () => {
                               onChange={e => setProfData({...profData, country: e.target.value})}
                               required
                               placeholder={capitalize(t('country'))}
-                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              style={{outline: 'none', boxShadow: 'none'}}
                             />
                           </div>
                           <div className="relative group">
@@ -362,7 +367,8 @@ export const HomeNewsletter: FC = () => {
                               onChange={e => setProfData({...profData, phone: e.target.value})}
                               required
                               placeholder={capitalize(t('phone'))}
-                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              style={{outline: 'none', boxShadow: 'none'}}
                             />
                           </div>
                         </motion.div>
@@ -378,7 +384,8 @@ export const HomeNewsletter: FC = () => {
                               onChange={e => setProfData({...profData, email: e.target.value})}
                               required
                               placeholder={capitalize(t('email'))}
-                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              style={{outline: 'none', boxShadow: 'none'}}
                             />
                           </div>
                           <div className="relative group">
@@ -388,7 +395,8 @@ export const HomeNewsletter: FC = () => {
                               onChange={e => setProfData({...profData, password: e.target.value})}
                               required
                               placeholder={capitalize(t('set_password'))}
-                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              className="block w-full px-6 bg-[var(--bg-primary)] border border-gray-400 py-3.5 text-[var(--text-primary)] placeholder-[var(--text-secondary)]/50 focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all text-sm md:text-base tracking-widest font-semibold font-inter"
+                              style={{outline: 'none', boxShadow: 'none'}}
                             />
                           </div>
                         </motion.div>

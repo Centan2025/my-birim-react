@@ -27,15 +27,17 @@ export function useHeaderBackgroundColor({
   const calculateBackgroundColor = () => {
     const path = location.pathname
 
+    const isDarkHeroMatched = isDarkHeroPage(path)
+
     if (
       (isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)) ||
       (isSearchOpen && isMobile)
     ) {
-      return isDarkMode ? 'rgba(0, 0, 0, 0.8)' : 'rgba(16, 24, 32, 0.7)'
+      return isDarkMode || isDarkHeroMatched ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.95)'
     }
 
-    if (isSearchOpen && !isMobile) {
-      if (isDarkMode) return 'rgba(10, 10, 10, 0.95)'
+    if (isSearchOpen) {
+      if (isDarkMode || isDarkHeroMatched) return 'rgba(0, 0, 0, 0.85)'
       return 'rgba(255, 255, 255, 0.95)'
     }
 
@@ -45,8 +47,6 @@ export function useHeaderBackgroundColor({
     }
 
     // Üstte koyu hero görseli bulunan sayfalar: header tam şeffaf olmalı.
-    const isDarkHeroMatched = isDarkHeroPage(path)
-
     if (!isDarkHeroMatched) {
       // Beyaz sayfalarda: bg-white/60 + backdrop-blur-md (buz etkisi)
       // Dark mode'da: bg-black/60 + backdrop-blur-md

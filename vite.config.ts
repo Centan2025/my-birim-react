@@ -115,7 +115,6 @@ export default defineConfig({
     host: true,
     hmr: {
       port: 3001,
-      host: 'localhost',
     },
     proxy: {
       '/api': {

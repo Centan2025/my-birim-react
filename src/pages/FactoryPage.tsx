@@ -1,4 +1,5 @@
 import {useState, useEffect} from 'react'
+import {motion} from 'framer-motion'
 import {getFactoryPageContent} from '../services/cms'
 import type {FactoryPageContent, NewsMedia} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
@@ -176,9 +177,15 @@ export function FactoryPage() {
 
       {/* Sayfa Başlığı (Haberler sayfası gibi ortalı) */}
       <div className={containerClass + ' pt-4 md:pt-12 pb-12'}>
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-center uppercase">
-          {t(content.title) || t('factory') || 'FABRİKA'}
-        </h1>
+        <motion.div
+          initial={{opacity: 0, y: 20}}
+          animate={{opacity: 1, y: 0}}
+          transition={{duration: 1, ease: 'easeOut'}}
+        >
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-center uppercase">
+            {t(content.title) || t('factory') || 'FABRİKA'}
+          </h1>
+        </motion.div>
       </div>
 
       {/* Main Content Sections */}

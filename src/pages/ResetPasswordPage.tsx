@@ -95,7 +95,8 @@ export function ResetPasswordPage() {
                   required
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 border border-[var(--border-primary)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-none focus:ring-2 focus:ring-[var(--text-primary)] outline-none"
+                  className="w-full px-4 py-3 border border-[var(--border-primary)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all duration-200"
+                  style={{outline: 'none', boxShadow: 'none'}}
                   placeholder={t('email_placeholder')}
                 />
               </div>
@@ -126,7 +127,8 @@ export function ResetPasswordPage() {
                   required
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-[var(--border-primary)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-none focus:ring-2 focus:ring-[var(--text-primary)] outline-none"
+                  className="w-full px-4 py-3 border border-[var(--border-primary)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all duration-200"
+                  style={{outline: 'none', boxShadow: 'none'}}
                   placeholder="••••••••"
                 />
               </div>
@@ -144,7 +146,8 @@ export function ResetPasswordPage() {
                   required
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-[var(--border-primary)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-none focus:ring-2 focus:ring-[var(--text-primary)] outline-none"
+                  className="w-full px-4 py-3 border border-[var(--border-primary)] bg-[var(--bg-primary)] text-[var(--text-primary)] rounded-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all duration-200"
+                  style={{outline: 'none', boxShadow: 'none'}}
                   placeholder="••••••••"
                 />
               </div>

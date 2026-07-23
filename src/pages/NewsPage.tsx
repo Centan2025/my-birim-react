@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react'
+import {motion} from 'framer-motion'
 import {Link} from 'react-router-dom'
 import type {NewsItem} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
@@ -131,9 +132,15 @@ export function NewsPage() {
 
       {/* Sayfa Başlığı */}
       <div className={containerClass + ' pt-4 md:pt-12 pb-12'}>
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-center uppercase">
-          {t('news_title') || t('news')}
-        </h1>
+        <motion.div
+          initial={{opacity: 0, y: 20}}
+          animate={{opacity: 1, y: 0}}
+          transition={{duration: 1, ease: 'easeOut'}}
+        >
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-center uppercase">
+            {t('news_title') || t('news')}
+          </h1>
+        </motion.div>
       </div>
 
       {/* Haber Listesi */}

@@ -38,6 +38,7 @@
   "login_prompt": "Özel içeriğe erişmek için giriş yapın.",
   "login_test_creds": "(Test: user@example.com / password)",
   "email": "E-posta",
+  "phone": "Telefon",
   "password": "Şifre",
   "invalid_credentials": "Geçersiz e-posta veya şifre.",
   "already_logged_in": "Zaten giriş yaptınız.",

@@ -188,7 +188,8 @@ export const FloatingAuthPanel: React.FC = () => {
                           required
                           value={email}
                           onChange={e => setEmail(e.target.value)}
-                          className="w-full bg-transparent border-b border-[var(--border-primary)] py-3 text-sm focus:border-primary focus:outline-none transition-all placeholder:text-[var(--text-secondary)]/30 font-inter font-medium tracking-wider text-[var(--text-primary)]"
+                          className="w-full bg-transparent border-b border-[var(--border-primary)] py-3 text-sm focus:border-primary focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 transition-all placeholder:text-[var(--text-secondary)]/30 font-inter font-medium tracking-wider text-[var(--text-primary)]"
+                          style={{outline: 'none', boxShadow: 'none'}}
                           placeholder="e-posta@adresiniz.com"
                         />
                       </div>
@@ -201,7 +202,8 @@ export const FloatingAuthPanel: React.FC = () => {
                           required
                           value={password}
                           onChange={e => setPassword(e.target.value)}
-                          className="w-full bg-transparent border-b border-[var(--border-primary)] py-3 text-sm focus:border-primary focus:outline-none transition-all placeholder:text-[var(--text-secondary)]/30 font-inter font-medium tracking-wider text-[var(--text-primary)]"
+                          className="w-full bg-transparent border-b border-[var(--border-primary)] py-3 text-sm focus:border-primary focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 transition-all placeholder:text-[var(--text-secondary)]/30 font-inter font-medium tracking-wider text-[var(--text-primary)]"
+                          style={{outline: 'none', boxShadow: 'none'}}
                           placeholder="••••••••"
                         />
                       </div>

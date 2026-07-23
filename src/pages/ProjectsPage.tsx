@@ -1,3 +1,4 @@
+import {motion} from 'framer-motion'
 import {Link} from 'react-router-dom'
 import type {Project} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
@@ -117,9 +118,15 @@ export function ProjectsPage() {
 
       {/* Sayfa Başlığı */}
       <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 md:pt-12 pb-12">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-center uppercase">
-          {t('projects') || 'Projeler'}
-        </h1>
+        <motion.div
+          initial={{opacity: 0, y: 20}}
+          animate={{opacity: 1, y: 0}}
+          transition={{duration: 1, ease: 'easeOut'}}
+        >
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-center uppercase">
+            {t('projects') || 'Projeler'}
+          </h1>
+        </motion.div>
       </div>
 
       {/* Proje Listesi - 2 Kolon Izgara (Gap Kaldırıldı) */}

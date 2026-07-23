@@ -331,11 +331,12 @@ export function LoginPage() {
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
+                      className={`w-full px-4 py-3 border rounded-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all duration-200 text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
                         validationErrors['email']
                           ? 'border-red-500'
                           : 'border-[var(--border-primary)]'
                       }`}
+                      style={{outline: 'none', boxShadow: 'none'}}
                       placeholder="E-posta adresiniz"
                     />
                     {validationErrors['email'] && (
@@ -366,11 +367,12 @@ export function LoginPage() {
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
+                      className={`w-full px-4 py-3 border rounded-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all duration-200 text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
                         validationErrors['password']
                           ? 'border-red-500'
                           : 'border-[var(--border-primary)]'
                       }`}
+                      style={{outline: 'none', boxShadow: 'none'}}
                       placeholder="••••••••"
                     />
                     {validationErrors['password'] && (
@@ -463,11 +465,12 @@ export function LoginPage() {
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
+                      className={`w-full px-4 py-3 border rounded-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all duration-200 text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
                         validationErrors['name']
                           ? 'border-red-500'
                           : 'border-[var(--border-primary)]'
                       }`}
+                      style={{outline: 'none', boxShadow: 'none'}}
                       placeholder={t('full_name_placeholder')}
                     />
                     {validationErrors['name'] && (
@@ -498,11 +501,12 @@ export function LoginPage() {
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
+                      className={`w-full px-4 py-3 border rounded-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all duration-200 text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
                         validationErrors['email']
                           ? 'border-red-500'
                           : 'border-[var(--border-primary)]'
                       }`}
+                      style={{outline: 'none', boxShadow: 'none'}}
                       placeholder={t('email_placeholder')}
                     />
                     {validationErrors['email'] && (
@@ -536,11 +540,12 @@ export function LoginPage() {
                             })
                           }
                         }}
-                        className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
+                        className={`w-full px-4 py-3 border rounded-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all duration-200 text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
                           validationErrors['password']
                             ? 'border-red-500'
                             : 'border-[var(--border-primary)]'
                         }`}
+                        style={{outline: 'none', boxShadow: 'none'}}
                         placeholder="••••••••"
                       />
                       {validationErrors['password'] && (
@@ -606,11 +611,12 @@ export function LoginPage() {
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
+                      className={`w-full px-4 py-3 border rounded-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all duration-200 text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
                         validationErrors['company']
                           ? 'border-red-500'
                           : 'border-[var(--border-primary)]'
                       }`}
+                      style={{outline: 'none', boxShadow: 'none'}}
                       placeholder={t('company_placeholder')}
                     />
                     {validationErrors['company'] && (
@@ -640,11 +646,12 @@ export function LoginPage() {
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
+                      className={`w-full px-4 py-3 border rounded-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all duration-200 text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
                         validationErrors['profession']
                           ? 'border-red-500'
                           : 'border-[var(--border-primary)]'
                       }`}
+                      style={{outline: 'none', boxShadow: 'none'}}
                       placeholder={t('profession_placeholder')}
                     />
                     {validationErrors['profession'] && (
@@ -673,11 +680,12 @@ export function LoginPage() {
                           })
                         }
                       }}
-                      className={`w-full px-4 py-3 border rounded-none focus:ring-2 focus:ring-[var(--text-primary)] focus:border-transparent transition-all duration-200 outline-none text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
+                      className={`w-full px-4 py-3 border rounded-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-[var(--text-primary)] transition-all duration-200 text-[var(--text-primary)] bg-[var(--bg-primary)] placeholder-[var(--text-secondary)]/50 ${
                         validationErrors['country']
                           ? 'border-red-500'
                           : 'border-[var(--border-primary)]'
                       }`}
+                      style={{outline: 'none', boxShadow: 'none'}}
                       placeholder={t('country_placeholder')}
                     />
                     {validationErrors['country'] && (

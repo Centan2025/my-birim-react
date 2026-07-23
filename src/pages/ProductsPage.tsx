@@ -1,5 +1,6 @@
 import {useState, useMemo, useEffect, useRef} from 'react'
 import {useParams} from 'react-router-dom'
+import {motion} from 'framer-motion'
 import {ProductCard} from '../components/ProductCard'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
@@ -207,14 +208,18 @@ export function ProductsPage() {
             <div className="absolute inset-0 bg-black/40"></div>
           </div>
           <div className="relative h-full flex items-center justify-center text-center text-white pt-20">
-            <div>
+            <motion.div
+              initial={{opacity: 0, y: 20}}
+              animate={{opacity: 1, y: 0}}
+              transition={{duration: 1, ease: 'easeOut'}}
+            >
               <h1 className="text-4xl md:text-6xl font-oswald font-light tracking-[0.1em] uppercase drop-shadow-md">
                 {category ? t(category.name) : t('view_all')}
               </h1>
               <p className="mt-4 text-lg max-w-2xl mx-auto font-light drop-shadow-md">
                 {category ? t(category.subtitle) : t('all_products_subtitle')}
               </p>
-            </div>
+            </motion.div>
           </div>
         </div>
       ) : null}
@@ -265,9 +270,15 @@ export function ProductsPage() {
       {/* Sayfa Başlığı (CMS'te görsel yoksa gösterilir) */}
       {!heroImageUrl && (
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 md:pt-12 pb-12">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-center uppercase">
-            {category ? t(category.name) : t('view_all')}
-          </h1>
+          <motion.div
+            initial={{opacity: 0, y: 20}}
+            animate={{opacity: 1, y: 0}}
+            transition={{duration: 1, ease: 'easeOut'}}
+          >
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-center uppercase">
+              {category ? t(category.name) : t('view_all')}
+            </h1>
+          </motion.div>
         </div>
       )}
 
