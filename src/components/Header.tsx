@@ -745,7 +745,12 @@ export function Header() {
                       }
                     }}
                     className={`${iconClasses} hidden lg:inline-flex focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0`}
-                    style={{...sharedIconStyle, color: headerForegroundColor, outline: 'none', boxShadow: 'none'}}
+                    style={{
+                      ...sharedIconStyle,
+                      color: headerForegroundColor,
+                      outline: 'none',
+                      boxShadow: 'none',
+                    }}
                     aria-label={
                       isSearchOpen
                         ? t('close_search') || 'Aramayı kapat'

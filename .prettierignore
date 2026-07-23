@@ -1,0 +1,8 @@
+node_modules
+dist
+build
+.sanity
+birim-web/.sanity
+.sanity-studio
+public
+*.min.js
