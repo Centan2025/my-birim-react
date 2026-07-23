@@ -95,8 +95,17 @@ export default defineType({
       components: {
         input: BulkMediaUploadInput,
       },
+      validation: (Rule) =>
+        Rule.custom((items: any) => {
+          if (!Array.isArray(items)) return true
+          const covers = items.filter((item) => item?.isCover)
+          if (covers.length > 1) {
+            return 'Sadece tek bir kapak görseli seçilebilir. Lütfen diğer kapak görsellerinin kapak seçimini kaldırın.'
+          }
+          return true
+        }),
       description:
-        'Ürün görselleri, videoları ve YouTube bağlantıları. İdeal görsel boyutu 1920x1080px veya 1:1 karedir. Birini kapak olarak işaretleyebilirsiniz.',
+        'Ürün görselleri, videoları ve YouTube bağlantıları. İdeal görsel boyutu 1920x1080px veya 1:1 karedir. Sadece tek bir kapak görseli seçebilirsiniz.',
     }),
     defineField({name: 'buyable', title: 'Satın Alınabilir', type: 'boolean'}),
     defineField({name: 'price', title: 'Fiyat', type: 'number'}),

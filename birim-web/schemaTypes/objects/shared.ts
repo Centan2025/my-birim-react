@@ -5,6 +5,7 @@ import MaterialSelectionInput from '../../components/MaterialSelectionInput'
 import FontSelectorInput from '../../components/FontSelectorInput'
 import BulkMediaUploadInput from '../../components/BulkMediaUploadInput'
 import MirroredImageObjectInput from '../../components/MirroredImageObjectInput'
+import SingleCoverBooleanInput from '../../components/SingleCoverBooleanInput'
 import {browserOnlyInput} from '../utils/browserOnly'
 import {getPreviewUrl} from '../utils/previewUrl'
 
@@ -408,7 +409,11 @@ export const productSimpleMediaItem = defineType({
       title: 'Kapak Görseli mi?',
       type: 'boolean',
       initialValue: false,
-      description: 'Bu medya öğesini dökümanın ana kapak resmi olarak belirler.',
+      components: {
+        input: browserOnlyInput(SingleCoverBooleanInput),
+      },
+      description:
+        'Bu medya öğesini dökümanın ana kapak resmi olarak belirler. Sadece tek bir kapak görseli seçilebilir.',
     }),
     defineField({
       name: 'isMirrored',
