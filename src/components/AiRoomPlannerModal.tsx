@@ -258,7 +258,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
       }
 
       setResultImage(data.imageUrl)
-      showToast(data.message || 'Oda tasarımınız Nano Banana (Google Gemini AI) ile başarıyla sentezlendi!', 'success')
+      showToast(data.message || 'Oda tasarımınız AI 3D Render motoru ile başarıyla sentezlendi!', 'success')
     } catch (err: unknown) {
       console.error('Room planner error:', err)
       const errorMsg = err instanceof Error ? err.message : 'Bilinmeyen bir hata oluştu.'
@@ -322,7 +322,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
             </div>
             <div>
               <h3 className="text-lg font-light tracking-wide text-white">AI Room Planner</h3>
-              <p className="text-xs text-neutral-400 font-mono">Powered by Google Nano Banana</p>
+              <p className="text-xs text-neutral-400 font-mono">3D Spatial Render Engine</p>
             </div>
           </div>
           <button
@@ -365,10 +365,10 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
               </div>
               <div className="space-y-2 max-w-md">
                 <h4 className="text-base font-medium text-amber-300">
-                  Nano Banana ile odanızın ışığı ve perspektifi analiz ediliyor...
+                  Odanızın ışığı ve perspektifi AI motoru ile analiz ediliyor...
                 </h4>
                 <p className="text-xs text-neutral-400 leading-relaxed font-light">
-                  Google Gemini 2.5 AI, mobilyanın ölçeğini, gölgelerini ve doğal ışık açılarını odanıza kusursuzca yerleştiriyor.
+                  Yapay zeka, mobilyanın ölçeğini, gölgelerini ve doğal ışık açılarını odanıza kusursuzca yerleştiriyor.
                 </p>
               </div>
             </div>
@@ -382,7 +382,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                   beforeImage={roomImagePreview}
                   afterImage={resultImage}
                   beforeLabel="Orijinal Oda"
-                  afterLabel="Nano Banana AI Tasarım"
+                  afterLabel="AI 3D Oda Tasarımı"
                 />
 
                 {/* Skeleton Loader / Blur Overlay when updating angle/position */}
@@ -615,16 +615,18 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
               <button
                 onClick={() => handleGenerate()}
                 disabled={!roomImagePreview}
-                className={`w-full py-4 rounded-xl font-medium tracking-wide text-sm transition-all duration-300 flex items-center justify-center gap-2 ${
+                className={`group relative w-full py-3.5 rounded-xl font-medium tracking-widest text-xs uppercase transition-all duration-300 flex items-center justify-center gap-2.5 overflow-hidden ${
                   roomImagePreview
-                    ? 'bg-amber-400 hover:bg-amber-300 text-black shadow-lg shadow-amber-400/20 cursor-pointer'
-                    : 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
+                    ? 'bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-600 hover:border-amber-400/80 shadow-lg cursor-pointer'
+                    : 'bg-neutral-850 text-neutral-600 border border-neutral-800 cursor-not-allowed'
                 }`}
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                Bu Ürünü Odamda Gör (Nano Banana AI)
+                <div className="w-5 h-5 rounded-md bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <span className="font-mono">Bu Ürünü Odamda Gör • AI Render</span>
               </button>
             </div>
           )}

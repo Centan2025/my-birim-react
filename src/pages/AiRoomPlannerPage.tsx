@@ -66,13 +66,13 @@ export function AiRoomPlannerPage() {
         {/* Header Section */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <span className="px-3.5 py-1 text-xs font-mono tracking-widest text-amber-400 uppercase bg-amber-500/10 border border-amber-500/20 rounded-full inline-block">
-            Google Nano Banana AI
+            AI 3D Spatial Visualizer
           </span>
           <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-white">
             AI Room Planner
           </h1>
           <p className="text-base sm:text-lg text-neutral-400 font-roboto-thin leading-relaxed">
-            Kataloğumuzdan dilediğiniz tasarımı seçin, odanızın fotoğrafını yükleyin ve Google Nano Banana AI'ın ışık, gölge ve perspektif analiziyle mobilyayı odanızda anında görüntüleyin.
+            Kataloğumuzdan dilediğiniz tasarımı seçin, odanızın fotoğrafını yükleyin ve yapay zekanın ışık, gölge ve perspektif analiziyle mobilyayı odanızda anında görüntüleyin.
           </p>
         </div>
 

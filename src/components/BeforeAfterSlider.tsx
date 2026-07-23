@@ -12,7 +12,7 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
   beforeImage,
   afterImage,
   beforeLabel = 'Orijinal Oda',
-  afterLabel = 'AI Tasarım (Nano Banana)',
+  afterLabel = 'AI Tasarım',
   className = '',
 }) => {
   const [sliderPosition, setSliderPosition] = useState(50)

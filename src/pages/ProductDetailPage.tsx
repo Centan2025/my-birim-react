@@ -297,15 +297,20 @@ export function ProductDetailPage() {
           />
 
           {settings?.enableAiRoomPlanner !== false && (
-            <div className="mt-6">
+            <div className="mt-8 pt-6 border-t border-[var(--border-color,rgba(255,255,255,0.1))]">
               <button
                 onClick={() => setIsAiPlannerOpen(true)}
-                className="inline-flex items-center gap-2.5 px-6 py-3 bg-neutral-900 hover:bg-black text-amber-400 font-medium text-xs uppercase tracking-wider rounded-xl border border-amber-500/30 hover:border-amber-500 shadow-md transition-all duration-300 transform active:scale-95 cursor-pointer"
+                className="group relative inline-flex items-center gap-3 px-7 py-3.5 bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs uppercase tracking-widest rounded-xl border border-neutral-700 hover:border-neutral-500 shadow-xl transition-all duration-300 transform active:scale-98 cursor-pointer overflow-hidden"
               >
-                <svg className="w-4 h-4 text-amber-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                <span>Bu Ürünü Odamda Gör (Nano Banana AI)</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 via-transparent to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="w-6 h-6 rounded-lg bg-neutral-800 group-hover:bg-neutral-700 border border-neutral-700 flex items-center justify-center text-amber-400 group-hover:text-amber-300 transition-colors">
+                  <svg className="w-3.5 h-3.5 transition-transform duration-300 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <span className="relative z-10 font-mono tracking-wider group-hover:text-amber-300 transition-colors">
+                  Odamda Gör • AI Planner
+                </span>
               </button>
             </div>
           )}
