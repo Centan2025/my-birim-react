@@ -11,6 +11,11 @@ interface RateLimitRecord {
 const ipStore = new Map<string, RateLimitRecord>();
 
 export function checkRateLimit(ip: string, limit = 3, windowMs = 60 * 1000): { allowed: boolean; remaining: number; resetMs: number } {
+  // Local environment bypass (localhost / 127.0.0.1)
+  if (ip === '127.0.0.1' || ip === '::1' || ip === 'localhost') {
+    return { allowed: true, remaining: 999, resetMs: 0 };
+  }
+
   const now = Date.now();
   const record = ipStore.get(ip);
 
@@ -71,8 +76,22 @@ function getTodayString(): string {
   return isoStr.split('T')[0] ?? isoStr
 }
 
+function isLocalhost(): boolean {
+  if (typeof window === 'undefined') return false;
+  return (
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname === '[::1]'
+  );
+}
+
 export function getDailyQuota(maxDaily = 3): { count: number; remaining: number; isExhausted: boolean } {
   if (typeof window === 'undefined') return { count: 0, remaining: maxDaily, isExhausted: false };
+
+  // Bypass daily limit in local environment
+  if (isLocalhost()) {
+    return { count: 0, remaining: 999, isExhausted: false };
+  }
 
   try {
     const raw = localStorage.getItem(QUOTA_STORAGE_KEY);
