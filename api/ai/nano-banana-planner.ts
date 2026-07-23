@@ -178,6 +178,11 @@ ZERO-TOLERANCE MANDATORY PRODUCT CONSTRAINTS:
    - Analyze the vanishing point, horizon line, scale, camera height, and lighting of Image 1.
    - Place the untouched model of Image 2 firmly onto the floor plane of Image 1.
    - Do NOT alter the walls, floor materials, windows, or existing elements of Image 1 except casting soft contact shadows on the floor beneath the newly placed product.
+
+5. EXACTLY ONE SINGLE PRODUCT INSTANCE (STRICT NO-DUPLICATION RULE):
+   - Render EXACTLY ONE (1) single instance of the furniture model from Image 2 in the room.
+   - NEVER place a second copy, clone, or duplicate of the furniture in the room.
+   - There MUST be ONLY ONE piece of this furniture in the entire generated room image.
 `.trim()
 
     if (productDetails && typeof productDetails === 'object') {
@@ -192,20 +197,20 @@ ZERO-TOLERANCE MANDATORY PRODUCT CONSTRAINTS:
     }
 
     if (angle && typeof angle === 'string') {
-      promptText += `\n\nROTATION INSTRUCTION: Re-render the exact model from Image 2 from the requested angle: ${angle}.`
+      promptText += `\n\nROTATION INSTRUCTION: Re-render the SINGLE model from Image 2 from the requested angle: ${angle}. Ensure there is ONLY ONE piece of furniture in the room.`
     }
 
     if (alignmentInstruction && typeof alignmentInstruction === 'string') {
-      promptText += `\n\nPOSITIONING INSTRUCTION: Adjust the exact model's placement in the room floor according to: ${alignmentInstruction}.`
+      promptText += `\n\nPOSITIONING INSTRUCTION: Reposition the SINGLE model from Image 2 on the floor according to: ${alignmentInstruction}. Ensure NO duplicate furniture appears.`
     }
 
     promptText += `\n\nFINAL EXECUTION DIRECTIVE:\nProduce a single, photorealistic high-resolution photograph where the target furniture from Image 2 is integrated into Image 1 with 100% design fidelity.`
 
     const ai = new GoogleGenAI({ apiKey })
     const imageModels = [
+      'gemini-3.1-flash-image',
       'gemini-2.5-flash-image',
       'nano-banana-pro-preview',
-      'gemini-3.1-flash-image',
       'gemini-3-pro-image',
       'gemini-2.0-flash',
     ]
