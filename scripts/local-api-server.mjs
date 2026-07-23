@@ -719,7 +719,7 @@ app.post('/api/ai/nano-banana-planner', async (req, res) => {
     rec.count += 1
   }
 
-  const { roomImage, productImage, customPrompt, angle, alignmentInstruction } = req.body || {}
+  const { roomImage, productImage, customPrompt, angle, alignmentInstruction, productName, productDetails } = req.body || {}
   if (!roomImage || !productImage) {
     return res.status(400).json({ error: 'roomImage ve productImage parametreleri zorunludur.' })
   }
@@ -768,28 +768,43 @@ You are an expert photorealistic 3D interior visualizer and rendering engine.
 
 INPUT IMAGES:
 - Image 1: The room background provided by the user.
-- Image 2: The target furniture product.
+- Image 2: The target furniture product (${productName || 'Target Furniture'}).
+
+CRITICAL PRODUCT IDENTITY RULE:
+- You MUST PRESERVE the exact design, geometry, proportions, arms, cushions, legs, stitchings, and fabric texture of the target furniture in Image 2.
+- DO NOT invent, redesign, modify, or substitute the furniture model with a different style.
+- The product in the final room output must be 100% IDENTICAL to the product shown in Image 2.
+- Only adjust its 3D angle, lighting, and contact shadows to fit Image 1; DO NOT alter its physical design features.
 
 CRITICAL ENGINE INSTRUCTIONS:
-1. STRICTLY NO CUT-OUT / NO STICKER OVERLAY: Do NOT simply paste Image 2 on top of Image 1 as a 2D cut-out layer. You must fully re-render and seamlessly integrate the furniture into the 3D space of the room.
+1. STRICT PRODUCT PRESERVATION: The target furniture in Image 2 must not be redesigned or modified in any way. Keep the exact armrest shape, leg style, cushion count, and fabric texture 100% identical to Image 2.
 
-2. CAMERA & PERSPECTIVE ALIGNMENT:
+2. STRICTLY NO CUT-OUT / NO STICKER OVERLAY: Do NOT simply paste Image 2 on top of Image 1 as a 2D cut-out layer. You must fully re-render and seamlessly integrate the furniture into the 3D space of the room.
+
+3. CAMERA & PERSPECTIVE ALIGNMENT:
    - Analyze the vanishing point, horizon line, focal length, and camera pitch of the room in Image 1.
    - Mentally rotate and adjust the 3D spatial orientation of the target furniture in Image 2 so that its scale, footprint, and perspective align perfectly with the floor plane of the room.
 
-3. ENVIRONMENT & RELIGHTING MATCHING:
+4. ENVIRONMENT & RELIGHTING MATCHING:
    - Identify all key light sources in the room (e.g., window daylight, warm ceiling lamps, ambient shadows).
    - Apply the exact color temperature, direction, and intensity of the room's lighting to the newly placed furniture.
    - Cast soft, physically accurate contact shadows on the floor directly beneath and around the base of the furniture based on the primary light source.
 
-4. SEAMLESS BLENDING & DUST/ATMOSPHERE:
+5. SEAMLESS BLENDING & DUST/ATMOSPHERE:
    - Soften and blend the outer contours of the furniture with the ambient atmosphere and lighting of the room. Eliminate any unnatural sharp outlines or cutout artifacts.
    - Match the overall camera grain, ISO noise, and micro-sharpness of Image 1.
-
-5. PRESERVATION:
-   - Preserve the exact design identity, color, and fabric texture of the product in Image 2.
-   - Do NOT modify the rest of the walls, flooring, or existing background elements of Image 1 unless necessary to place realistic shadows.
 `.trim()
+
+    if (productDetails && typeof productDetails === 'object') {
+      const detailsList = []
+      if (productDetails.material) detailsList.push(`Material/Fabric: ${productDetails.material}`)
+      if (productDetails.legStyle) detailsList.push(`Leg Style: ${productDetails.legStyle}`)
+      if (productDetails.color) detailsList.push(`Color/Finish: ${productDetails.color}`)
+      if (productDetails.description) detailsList.push(`Description: ${productDetails.description}`)
+      if (detailsList.length > 0) {
+        promptText += `\n\nTARGET PRODUCT SPECIFICATIONS:\n${detailsList.join('\n')}`
+      }
+    }
 
     if (angle) {
       promptText += `\nROTATION INSTRUCTION: Orient and render the product from the requested angle: ${angle}.`
@@ -831,6 +846,7 @@ CRITICAL ENGINE INSTRUCTIONS:
               },
             ],
             generationConfig: {
+              temperature: 0.15,
               responseModalities: ['IMAGE', 'TEXT'],
             },
           }),

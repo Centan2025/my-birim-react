@@ -10,6 +10,12 @@ interface ProductReference {
   id?: string
   name: string
   image: string
+  details?: {
+    material?: string
+    legStyle?: string
+    color?: string
+    description?: string
+  }
 }
 
 interface AiRoomPlannerModalProps {
@@ -225,6 +231,8 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
     }
     setToastMessage(null)
 
+    const activeProd = selectedProduct || initialProduct
+
     try {
       const response = await fetch('/api/ai/nano-banana-planner', {
         method: 'POST',
@@ -232,6 +240,8 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
         body: JSON.stringify({
           roomImage: roomImagePreview,
           productImage: prodImage,
+          productName: activeProd?.name,
+          productDetails: activeProd?.details,
           angle: activeAngle,
           alignmentInstruction: activeAlignment,
         }),

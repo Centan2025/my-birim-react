@@ -455,6 +455,10 @@ export function ProductDetailPage() {
               typeof product.mainImage === 'string'
                 ? product.mainImage
                 : (product.mainImage as any)?.url || '',
+            details: {
+              material: product.materials?.map((m) => t(m.name)).join(', '),
+              description: typeof product.description === 'string' ? product.description : '',
+            },
           }}
         />
       )}
