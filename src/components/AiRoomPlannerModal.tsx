@@ -175,12 +175,24 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current
       const canvas = canvasRef.current
-      canvas.width = video.videoWidth || 1280
-      canvas.height = video.videoHeight || 720
+      let width = video.videoWidth || 1024
+      let height = video.videoHeight || 768
+      const maxDim = 1024
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round((height * maxDim) / width)
+          width = maxDim
+        } else {
+          width = Math.round((width * maxDim) / height)
+          height = maxDim
+        }
+      }
+      canvas.width = width
+      canvas.height = height
       const ctx = canvas.getContext('2d')
       if (ctx) {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.92)
+        ctx.drawImage(video, 0, 0, width, height)
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.75)
         setRoomImagePreview(dataUrl)
         setResultImage(null)
         stopCamera()
