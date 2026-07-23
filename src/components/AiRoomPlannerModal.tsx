@@ -91,25 +91,29 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
   }
 
   const startCamera = async () => {
-    // 1. HTTPS / Secure Context check
-    if (typeof window !== 'undefined' && !window.isSecureContext) {
-      showToast('Kamera erişimi için sitenizin HTTPS (güvenli bağlantı) üzerinden çalışması gerekmektedir.')
+    // 1. HTTPS / Secure Context check (localhost ve 127.0.0.1 güvenli sayılır)
+    const isLocalhost =
+      typeof window !== 'undefined' &&
+      (window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1' ||
+        window.location.hostname.startsWith('192.168.'))
+
+    if (typeof window !== 'undefined' && !window.isSecureContext && !isLocalhost) {
+      showToast('Kamera erişimi için sitenin HTTPS (güvenli bağlantı) üzerinden çalışması gerekmektedir.')
       return
     }
 
-    // 2. API Desteği Kontrolü
+    // 2. Browser API support check
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      showToast('Tarayıcınız doğrudan kamera erişimini desteklemiyor. Lütfen fotoğraf yükleyin.')
+      showToast('Tarayıcınız kamera erişimini desteklemiyor veya izin kısıtlaması var.')
       return
     }
-
-    stopCamera()
 
     try {
-      // DENEME 1: Arka Kamera (Mobile Ideal)
-      let mediaStream: MediaStream
+      let stream: MediaStream | null = null
       try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({
+        // Try mobile back camera first
+        stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: { ideal: 'environment' },
             width: { ideal: 1280 },
@@ -118,27 +122,28 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
           audio: false,
         })
       } catch {
-        // DENEME 2: Herhangi bir kamera (Desktop / Laptop Fallback)
-        mediaStream = await navigator.mediaDevices.getUserMedia({
+        // Fallback to default camera
+        stream = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: false,
         })
       }
 
-      setCameraStream(mediaStream)
+      setCameraStream(stream)
       setIsCameraActive(true)
     } catch (err: unknown) {
-      console.error('Kamera Başlatma Hatası:', err)
+      console.error('Kamera İzin Hatası Detayı:', err)
       const errName = err instanceof Error ? err.name : ''
+      const errMsg = err instanceof Error ? err.message : ''
 
-      if (errName === 'NotAllowedError' || errName === 'PermissionDeniedError') {
-        showToast('Kamera izni engellendi. Adres çubuğundaki kilit (🔒) simgesinden izin verin veya galeriden fotoğraf yükleyin.')
+      if (errName === 'NotAllowedError' || errName === 'PermissionDeniedError' || errMsg.includes('Permissions policy')) {
+        showToast('Kamera izni reddedildi. Lütfen tarayıcı adres çubuğundaki kilit simgesine tıklayıp kamera iznini aktif edin.')
       } else if (errName === 'NotFoundError' || errName === 'DevicesNotFoundError') {
-        showToast('Cihazınızda kullanılabilir bir kamera bulunamadı. Fotoğraf yükleyerek devam edebilirsiniz.')
+        showToast('Cihazınızda kullanılabilir bir kamera bulunamadı.')
       } else if (errName === 'NotReadableError' || errName === 'TrackStartError') {
-        showToast('Kamera başka bir uygulama (WhatsApp, Zoom vb.) tarafından kullanılıyor.')
+        showToast('Kamera başka bir uygulama tarafından kullanılıyor olabilir.')
       } else {
-        showToast('Kamera başlatılamadı. Fotoğraf yükleyerek devam edebilirsiniz.')
+        showToast(`Kamera başlatılamadı: ${errMsg || 'Bilinmeyen hata'}`)
       }
     }
   }
@@ -572,7 +577,6 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                   ref={fileInputRef}
                   type="file"
                   accept="image/*"
-                  capture="environment"
                   onChange={handleFileChange}
                   className="hidden"
                 />
@@ -610,7 +614,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
               </div>
 
               {/* Options: File vs Live Camera */}
-              <div className="flex items-center justify-center gap-3">
+              <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={startCamera}
                   className="px-4 py-2.5 text-xs font-medium text-neutral-200 bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 hover:border-neutral-600 rounded-xl transition-all flex items-center gap-2"
@@ -619,17 +623,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  Canlı Kamera
-                </button>
-
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-4 py-2.5 text-xs font-medium text-neutral-300 bg-neutral-800/80 hover:bg-neutral-800 border border-neutral-700 rounded-xl transition-all flex items-center gap-2"
-                >
-                  <svg className="w-4 h-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  Galeriden / Dosya Yükle
+                  Canlı Kamera ile Çek
                 </button>
               </div>
 
