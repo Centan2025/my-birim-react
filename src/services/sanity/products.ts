@@ -167,7 +167,10 @@ const mapProductMedia = (mediaArrRaw: unknown): unknown[] => {
         url = (m?.['url'] as string) || ''
       }
 
-      const metadata = m?.['imageR2'] ? mapR2Metadata(m['imageR2'] as SanityImageLike) : {}
+      const metadata = {
+        ...mapR2Metadata(m),
+        ...(m?.['imageR2'] ? mapR2Metadata(m['imageR2'] as SanityImageLike) : {}),
+      }
       const result: Record<string, unknown> = {
         type,
         url,
@@ -240,7 +243,10 @@ const mapProductRow = (r: Record<string, unknown>): Product => {
       url = (coverItem['url'] as string) || ''
     }
 
-    const metadata = coverItem['imageR2'] ? mapR2Metadata(coverItem['imageR2']) : {}
+    const metadata = {
+      ...mapR2Metadata(coverItem),
+      ...(coverItem?.['imageR2'] ? mapR2Metadata(coverItem['imageR2']) : {}),
+    }
     mainImage = {
       url,
       palette: extractPalette(coverItem['imageR2']),

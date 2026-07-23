@@ -301,14 +301,27 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     imgStyle.objectPosition = `${hotspot.x * 100}% ${hotspot.y * 100}%`
   }
 
-  // Crop detection
+  // Crop ve Hotspot pozisyon hesaplaması
   const hasCrop = !!(
     crop &&
     crop.width > 0 &&
     crop.height > 0 &&
     (crop.width < 0.999 || crop.height < 0.999 || crop.x > 0.001 || crop.y > 0.001)
   )
-  const isCoverMode = className.includes('h-full') || className.includes('h-screen') || !!height
+
+  if (hasCrop) {
+    const centerX = (crop!.x + crop!.width / 2) * 100
+    const centerY = (crop!.y + crop!.height / 2) * 100
+    imgStyle.objectPosition = `${centerX}% ${centerY}%`
+  } else if (hotspot) {
+    imgStyle.objectPosition = `${hotspot.x * 100}% ${hotspot.y * 100}%`
+  }
+  const isCoverMode =
+    className.includes('h-full') ||
+    className.includes('h-screen') ||
+    className.includes('object-cover') ||
+    className.includes('object-contain') ||
+    !!height
 
   const canCloudflareCrop = !!(crop && (crop.width >= 1.0 || (origWidth && origHeight)))
   const isServerResizingActive =
@@ -319,16 +332,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     (!hasCrop || canCloudflareCrop)
 
   const useClientCrop = hasCrop && !isServerResizingActive
-
-  if (isCoverMode && !useClientCrop) {
-    if (hasCrop) {
-      const centerX = (crop!.x + crop!.width / 2) * 100
-      const centerY = (crop!.y + crop!.height / 2) * 100
-      imgStyle.objectPosition = `${centerX}% ${centerY}%`
-    } else if (hotspot) {
-      imgStyle.objectPosition = `${hotspot.x * 100}% ${hotspot.y * 100}%`
-    }
-  }
 
   const renderCroppedContent = (pictureContent: React.ReactNode) => {
     if (!useClientCrop) return pictureContent
