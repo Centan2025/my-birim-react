@@ -87,22 +87,38 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
   const startCamera = async () => {
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        showToast('Tarayıcınız canlı kamera kullanımını desteklemiyor.')
+        showToast('Tarayıcınız veya bağlantınız (HTTPS gereklidir) kamera kullanımını desteklemiyor.')
         return
       }
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: 'environment' },
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-        audio: false,
-      })
+
+      let stream: MediaStream | null = null
+      try {
+        // Try mobile back camera first
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { exact: 'environment' } },
+          audio: false,
+        })
+      } catch {
+        // Fallback to ideal back camera or default camera
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment' },
+            audio: false,
+          })
+        } catch {
+          // Final fallback to any video camera
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false,
+          })
+        }
+      }
+
       setCameraStream(stream)
       setIsCameraActive(true)
     } catch (err: unknown) {
       console.error('Camera access error:', err)
-      showToast('Kameraya erişilemedi. Lütfen kamera izinlerinizi kontrol edin.')
+      showToast('Kameraya erişilemedi. Lütfen tarayıcı ayarlarından kamera izni verdiğinizden ve bağlantının HTTPS olduğundan emin olun.')
     }
   }
 
@@ -170,11 +186,13 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
       return
     }
 
-    // Daily quota check (3 per day for anonymous users)
-    const currentQuota = getDailyQuota(3)
-    if (currentQuota.isExhausted) {
-      setShowQuotaModal(true)
-      return
+    // Daily quota check only for initial render (3 per day for anonymous users)
+    if (!resultImage) {
+      const currentQuota = getDailyQuota(3)
+      if (currentQuota.isExhausted) {
+        setShowQuotaModal(true)
+        return
+      }
     }
 
     const prodImage = selectedProduct?.image || initialProduct?.image
@@ -220,8 +238,10 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
         throw new Error(data.error || 'AI görsel üretimi sırasında bir sorun oluştu.')
       }
 
-      // Decrement quota only on successful render
-      incrementDailyQuota(3)
+      // Increment daily quota on initial successful render only
+      if (!resultImage) {
+        incrementDailyQuota(3)
+      }
 
       setResultImage(data.imageUrl)
       showToast(data.message || 'Oda tasarımınız Nano Banana (Google Gemini AI) ile başarıyla sentezlendi!', 'success')
