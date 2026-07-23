@@ -73,7 +73,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
   }, [cameraStream])
 
   const setVideoRef = useCallback((node: HTMLVideoElement | null) => {
-    ;(videoRef as React.MutableRefObject<HTMLVideoElement | null>).current = node
+    (videoRef as React.MutableRefObject<HTMLVideoElement | null>).current = node
     if (node && cameraStream) {
       node.srcObject = cameraStream
       node.play().catch((err) => console.warn('Video element play issue:', err))
@@ -479,9 +479,9 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
                   {/* a) Angle Switcher */}
                   <div className="space-y-2">
-                    <label className="text-xs font-medium text-neutral-300 block font-sans">
+                    <span className="text-xs font-medium text-neutral-300 block font-sans">
                       🔄 Açıyı Döndür (Angle Switcher)
-                    </label>
+                    </span>
                     <div className="grid grid-cols-3 gap-2">
                       {[
                         { id: '3/4 left perspective', label: '↖ Sol Çapraz' },
@@ -512,9 +512,9 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
 
                   {/* b) Alignment Presets */}
                   <div className="space-y-2">
-                    <label className="text-xs font-medium text-neutral-300 block font-sans">
+                    <span className="text-xs font-medium text-neutral-300 block font-sans">
                       📐 Konum & Hizalama (Alignment Presets)
-                    </label>
+                    </span>
                     <div className="flex flex-wrap gap-1.5">
                       {[
                         { id: 'Align parallel to the left wall', label: '⬅ Sol Duvara Paralel' },
@@ -625,6 +625,14 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
           {!isLoading && !resultImage && !isCameraActive && (
             <div className="space-y-6">
               <div
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    fileInputRef.current?.click()
+                  }
+                }}
                 onDragOver={(e) => {
                   e.preventDefault()
                   e.stopPropagation()

@@ -56,8 +56,9 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       contents: response.Contents || [],
       nextContinuationToken: response.NextContinuationToken,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('R2 list error:', error)
-    return res.status(500).json({error: `Dosyalar listelenemedi: ${error.message}`})
+    const message = error instanceof Error ? error.message : 'Bilinmeyen hata'
+    return res.status(500).json({error: `Dosyalar listelenemedi: ${message}`})
   }
 }

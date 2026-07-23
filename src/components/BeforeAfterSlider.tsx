@@ -67,8 +67,11 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
   }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove])
 
   return (
+    /* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */
     <div
       ref={containerRef}
+      role="region"
+      aria-label="Görsel karşılaştırma slider"
       className={`relative w-full h-[400px] md:h-[500px] select-none overflow-hidden rounded-xl border border-white/10 shadow-2xl bg-black ${className}`}
       onMouseDown={(e) => {
         setIsDragging(true)

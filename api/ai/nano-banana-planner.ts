@@ -27,7 +27,7 @@ function checkRateLimit(ip: string, limit = 3, windowMs = 60 * 1000): { allowed:
 
 function sanitizePrompt(input?: unknown, maxLength = 150): string {
   if (!input || typeof input !== 'string') return ''
-  let sanitized = input.trim().slice(0, maxLength)
+  const sanitized = input.trim().slice(0, maxLength)
   return sanitized
     .replace(/<[^>]*>?/gm, '')
     .replace(/javascript:/gi, '')
