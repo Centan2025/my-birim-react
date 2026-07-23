@@ -126,19 +126,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
       }
 
       setCameraStream(mediaStream)
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream
-        videoRef.current.setAttribute('playsinline', 'true')
-        videoRef.current.setAttribute('muted', 'true')
-
-        try {
-          await videoRef.current.play()
-        } catch (playErr) {
-          console.warn('Video play issue:', playErr)
-        }
-        setIsCameraActive(true)
-      }
+      setIsCameraActive(true)
     } catch (err: unknown) {
       console.error('Kamera Başlatma Hatası:', err)
       const errName = err instanceof Error ? err.name : ''
