@@ -14,7 +14,8 @@ const store: RateLimitStore = {}
 const cleanStore = () => {
   const now = Date.now()
   for (const key in store) {
-    if (store[key].resetTime < now) {
+    const record = store[key]
+    if (record && record.resetTime < now) {
       delete store[key]
     }
   }
@@ -61,8 +62,8 @@ export function isRateLimited(key: string, options: RateLimitOptions): boolean {
  * Async Upstash Redis REST API rate limiter (Serverless uyumlu)
  */
 export async function isRateLimitedAsync(key: string, options: RateLimitOptions): Promise<boolean> {
-  const redisUrl = process.env.UPSTASH_REDIS_REST_URL
-  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN
+  const redisUrl = process.env['UPSTASH_REDIS_REST_URL']
+  const redisToken = process.env['UPSTASH_REDIS_REST_TOKEN']
 
   if (redisUrl && redisToken) {
     try {

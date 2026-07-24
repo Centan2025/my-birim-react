@@ -42,13 +42,14 @@ function sanitizePrompt(input?: unknown, maxLength = 150): string {
     .replace(/override instructions/gi, '')
 }
 
-const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || process.env.SANITY_STUDIO_R2_ACCOUNT_ID
-const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID
+const R2_ACCOUNT_ID = process.env['R2_ACCOUNT_ID'] || process.env['SANITY_STUDIO_R2_ACCOUNT_ID']
+const R2_ACCESS_KEY_ID =
+  process.env['R2_ACCESS_KEY_ID'] || process.env['SANITY_STUDIO_R2_ACCESS_KEY_ID']
 const R2_SECRET_ACCESS_KEY =
-  process.env.R2_SECRET_ACCESS_KEY || process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY
+  process.env['R2_SECRET_ACCESS_KEY'] || process.env['SANITY_STUDIO_R2_SECRET_ACCESS_KEY']
 const R2_BUCKET_NAME =
-  process.env.R2_BUCKET_NAME || process.env.SANITY_STUDIO_R2_BUCKET_NAME || 'birim-web'
-const R2_DOMAIN = process.env.R2_DOMAIN || process.env.SANITY_STUDIO_R2_DOMAIN
+  process.env['R2_BUCKET_NAME'] || process.env['SANITY_STUDIO_R2_BUCKET_NAME'] || 'birim-web'
+const R2_DOMAIN = process.env['R2_DOMAIN'] || process.env['SANITY_STUDIO_R2_DOMAIN']
 
 interface ApiRequest {
   method?: string
@@ -79,7 +80,7 @@ async function getBase64FromImageInput(
 ): Promise<{base64Data: string; mimeType: string}> {
   if (imageInput.startsWith('data:')) {
     const matches = imageInput.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/)
-    if (matches && matches.length === 3) {
+    if (matches && matches[1] && matches[2]) {
       return {mimeType: matches[1], base64Data: matches[2]}
     }
   }
@@ -206,7 +207,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
 
     const cleanPrompt = sanitizePrompt(customPrompt, 150)
 
-    const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY
+    const apiKey = process.env['GEMINI_API_KEY'] || process.env['VITE_GEMINI_API_KEY']
     if (!apiKey) {
       return res.status(500).json({
         error:

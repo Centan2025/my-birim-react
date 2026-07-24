@@ -2,10 +2,10 @@ import {createClient} from '@sanity/client'
 import bcrypt from 'bcryptjs'
 import {isRateLimitedAsync, getClientIp} from './rateLimiter'
 
-const SANITY_PROJECT_ID = process.env.VITE_SANITY_PROJECT_ID || 'wn3a082f'
-const SANITY_DATASET = process.env.VITE_SANITY_DATASET || 'production'
-const SANITY_API_VERSION = process.env.VITE_SANITY_API_VERSION || '2025-01-01'
-const SANITY_TOKEN = process.env.SANITY_TOKEN
+const SANITY_PROJECT_ID = process.env['VITE_SANITY_PROJECT_ID'] || 'wn3a082f'
+const SANITY_DATASET = process.env['VITE_SANITY_DATASET'] || 'production'
+const SANITY_API_VERSION = process.env['VITE_SANITY_API_VERSION'] || '2025-01-01'
+const SANITY_TOKEN = process.env['SANITY_TOKEN']
 
 const client = createClient({
   projectId: SANITY_PROJECT_ID,
@@ -17,7 +17,7 @@ const client = createClient({
 
 interface ApiRequest {
   method?: string
-  body?: Record<string, unknown>
+  body?: any
   headers?: Record<string, string>
   socket?: {remoteAddress?: string}
 }
