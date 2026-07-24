@@ -1,15 +1,4 @@
-interface ApiRequest {
-  method?: string
-  query?: Record<string, string>
-  body?: Record<string, unknown>
-  headers?: Record<string, string>
-}
-
-interface ApiResponse {
-  status: (code: number) => ApiResponse
-  json: (body: unknown) => void
-  setHeader: (name: string, value: string) => void
-}
+import type {VercelRequest, VercelResponse} from '@vercel/node'
 
 const SANITY_PROJECT_ID =
   process.env['VITE_SANITY_PROJECT_ID'] || process.env['SANITY_PROJECT_ID'] || 'wn3a082f'
@@ -18,7 +7,7 @@ const SANITY_DATASET =
 const SANITY_API_VERSION =
   process.env['VITE_SANITY_API_VERSION'] || process.env['SANITY_API_VERSION'] || '2025-01-01'
 
-export default async function handler(req: ApiRequest, res: ApiResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({error: 'Method not allowed'})
   }

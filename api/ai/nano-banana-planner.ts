@@ -51,26 +51,7 @@ const R2_BUCKET_NAME =
   process.env['R2_BUCKET_NAME'] || process.env['SANITY_STUDIO_R2_BUCKET_NAME'] || 'birim-web'
 const R2_DOMAIN = process.env['R2_DOMAIN'] || process.env['SANITY_STUDIO_R2_DOMAIN']
 
-interface ApiRequest {
-  method?: string
-  body?: {
-    roomImage?: string
-    productImage?: string
-    customPrompt?: string
-    angle?: string
-    alignmentInstruction?: string
-    productName?: string
-    productDetails?: Record<string, string>
-  }
-  headers?: Record<string, string>
-  socket?: {remoteAddress?: string}
-}
-
-interface ApiResponse {
-  status: (code: number) => ApiResponse
-  json: (body: unknown) => void
-  setHeader: (name: string, value: string) => void
-}
+import type {VercelRequest, VercelResponse} from '@vercel/node'
 
 /**
  * Normalizes input image string (Data URL or HTTP URL or raw base64) into base64 + mimeType
@@ -159,7 +140,7 @@ async function uploadToR2OrFallback(
   return `data:${mimeType};base64,${imageBuffer.toString('base64')}`
 }
 
-export default async function handler(req: ApiRequest, res: ApiResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')

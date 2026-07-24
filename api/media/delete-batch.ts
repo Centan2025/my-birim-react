@@ -17,19 +17,9 @@ const r2Client = new S3Client({
   },
 })
 
-interface ApiRequest {
-  method?: string
-  body?: Record<string, unknown>
-  headers?: Record<string, string>
-}
+import type {VercelRequest, VercelResponse} from '@vercel/node'
 
-interface ApiResponse {
-  status: (code: number) => ApiResponse
-  json: (body: unknown) => void
-  setHeader: (name: string, value: string) => void
-}
-
-export default async function handler(req: ApiRequest, res: ApiResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS configuration
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
