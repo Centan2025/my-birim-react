@@ -1,8 +1,10 @@
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 
-const SANITY_PROJECT_ID = process.env.VITE_SANITY_PROJECT_ID || process.env.SANITY_PROJECT_ID || 'wn3a082f'
+const SANITY_PROJECT_ID =
+  process.env.VITE_SANITY_PROJECT_ID || process.env.SANITY_PROJECT_ID || 'wn3a082f'
 const SANITY_DATASET = process.env.VITE_SANITY_DATASET || process.env.SANITY_DATASET || 'production'
-const SANITY_API_VERSION = process.env.VITE_SANITY_API_VERSION || process.env.SANITY_API_VERSION || '2025-01-01'
+const SANITY_API_VERSION =
+  process.env.VITE_SANITY_API_VERSION || process.env.SANITY_API_VERSION || '2025-01-01'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET' && req.method !== 'POST') {
@@ -15,7 +17,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const sanityUrl = new URL(
-    `https://${SANITY_PROJECT_ID}.api.sanity.io/v${SANITY_API_VERSION}/data/query/${SANITY_DATASET}`,
+    `https://${SANITY_PROJECT_ID}.api.sanity.io/v${SANITY_API_VERSION}/data/query/${SANITY_DATASET}`
   )
   sanityUrl.searchParams.set('query', query)
   sanityUrl.searchParams.set('returnQuery', 'false')
@@ -31,7 +33,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // Forward perspective
-  const perspective = (req.method === 'GET' ? req.query['perspective'] : req.body?.perspective) as string | undefined
+  const perspective = (req.method === 'GET' ? req.query['perspective'] : req.body?.perspective) as
+    | string
+    | undefined
   if (perspective) {
     sanityUrl.searchParams.set('perspective', perspective)
   }

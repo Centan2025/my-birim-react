@@ -153,24 +153,56 @@ export function CategoriesPage() {
                         quality={85}
                         crop={
                           typeof category.displayImage === 'object' && category.displayImage
-                            ? ((category.displayImage as Record<string, unknown>)['crop'] as import('../types').R2ImageMetadata['crop']) ||
-                              ((category.displayImage as Record<string, unknown>)['cropX'] !== undefined
+                            ? ((category.displayImage as Record<string, unknown>)[
+                                'crop'
+                              ] as import('../types').R2ImageMetadata['crop']) ||
+                              ((category.displayImage as Record<string, unknown>)['cropX'] !==
+                              undefined
                                 ? {
-                                    x: Number((category.displayImage as Record<string, unknown>)['cropX']) || 0,
-                                    y: Number((category.displayImage as Record<string, unknown>)['cropY']) || 0,
-                                    width: Number((category.displayImage as Record<string, unknown>)['cropWidth']) || 1,
-                                    height: Number((category.displayImage as Record<string, unknown>)['cropHeight']) || 1,
+                                    x:
+                                      Number(
+                                        (category.displayImage as Record<string, unknown>)['cropX']
+                                      ) || 0,
+                                    y:
+                                      Number(
+                                        (category.displayImage as Record<string, unknown>)['cropY']
+                                      ) || 0,
+                                    width:
+                                      Number(
+                                        (category.displayImage as Record<string, unknown>)[
+                                          'cropWidth'
+                                        ]
+                                      ) || 1,
+                                    height:
+                                      Number(
+                                        (category.displayImage as Record<string, unknown>)[
+                                          'cropHeight'
+                                        ]
+                                      ) || 1,
                                   }
                                 : undefined)
                             : undefined
                         }
                         hotspot={
                           typeof category.displayImage === 'object' && category.displayImage
-                            ? ((category.displayImage as Record<string, unknown>)['hotspot'] as import('../types').R2ImageMetadata['hotspot']) ||
-                              ((category.displayImage as Record<string, unknown>)['hotspotX'] !== undefined
+                            ? ((category.displayImage as Record<string, unknown>)[
+                                'hotspot'
+                              ] as import('../types').R2ImageMetadata['hotspot']) ||
+                              ((category.displayImage as Record<string, unknown>)['hotspotX'] !==
+                              undefined
                                 ? {
-                                    x: Number((category.displayImage as Record<string, unknown>)['hotspotX']) ?? 0.5,
-                                    y: Number((category.displayImage as Record<string, unknown>)['hotspotY']) ?? 0.5,
+                                    x:
+                                      Number(
+                                        (category.displayImage as Record<string, unknown>)[
+                                          'hotspotX'
+                                        ]
+                                      ) ?? 0.5,
+                                    y:
+                                      Number(
+                                        (category.displayImage as Record<string, unknown>)[
+                                          'hotspotY'
+                                        ]
+                                      ) ?? 0.5,
                                   }
                                 : undefined)
                             : undefined

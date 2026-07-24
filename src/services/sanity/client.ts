@@ -63,7 +63,7 @@ if (rawSanity && typeof window !== 'undefined') {
     } catch (err) {
       console.warn(
         'Primary Sanity fetch failed (Opera/AdBlocker), retrying via same-origin proxy:',
-        err,
+        err
       )
       try {
         const proxyUrl = new URL('/api/sanity/query', window.location.origin)
@@ -71,7 +71,10 @@ if (rawSanity && typeof window !== 'undefined') {
         proxyUrl.searchParams.set('perspective', previewToken ? 'drafts' : 'published')
         if (params && typeof params === 'object') {
           for (const [key, val] of Object.entries(params)) {
-            proxyUrl.searchParams.set(`$${key}`, typeof val === 'string' ? `"${val}"` : JSON.stringify(val))
+            proxyUrl.searchParams.set(
+              `$${key}`,
+              typeof val === 'string' ? `"${val}"` : JSON.stringify(val)
+            )
           }
         }
         const res = await window.fetch(proxyUrl.toString(), {

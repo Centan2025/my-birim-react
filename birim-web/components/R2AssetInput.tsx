@@ -371,10 +371,7 @@ export default function R2AssetInput(props: ObjectInputProps) {
           /\.(tif|tiff)$/i.test(file.name)
         const isImage = file.type.startsWith('image/') || isTiff
         const isProcessableImage =
-          isImage &&
-          !file.type.includes('gif') &&
-          !file.type.includes('svg') &&
-          !isTiff
+          isImage && !file.type.includes('gif') && !file.type.includes('svg') && !isTiff
         let isResponsive = false
 
         if (isTiff) {
@@ -508,7 +505,11 @@ export default function R2AssetInput(props: ObjectInputProps) {
 
           await Promise.all(uploadPromises)
         } else {
-          await uploadFileViaPresignedUrl(processedFile, key, file.type || 'application/octet-stream')
+          await uploadFileViaPresignedUrl(
+            processedFile,
+            key,
+            file.type || 'application/octet-stream',
+          )
 
           // Videolar için otomatik kapak görseli (poster) üret
           if (isVideo) {
@@ -589,8 +590,8 @@ export default function R2AssetInput(props: ObjectInputProps) {
           error instanceof Error
             ? error.message
             : typeof error === 'string'
-            ? error
-            : (error as {message?: string})?.message || 'Görsel yüklenirken bir hata oluştu.'
+              ? error
+              : (error as {message?: string})?.message || 'Görsel yüklenirken bir hata oluştu.'
         toast.push({
           status: 'error',
           title: 'Yükleme Hatası',

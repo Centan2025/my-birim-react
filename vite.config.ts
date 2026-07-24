@@ -125,7 +125,10 @@ export default defineConfig({
           const url = new URL(p, 'http://localhost')
           const query = url.searchParams.get('query') || ''
           const perspective = url.searchParams.get('perspective') || 'published'
-          const newUrl = new URL(`/v2025-01-01/data/query/production`, 'https://wn3a082f.api.sanity.io')
+          const newUrl = new URL(
+            `/v2025-01-01/data/query/production`,
+            'https://wn3a082f.api.sanity.io'
+          )
           newUrl.searchParams.set('query', query)
           newUrl.searchParams.set('returnQuery', 'false')
           newUrl.searchParams.set('perspective', perspective)

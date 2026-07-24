@@ -145,10 +145,7 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
               /\.(tif|tiff)$/i.test(file.name)
             const isImage = isImageFile(file.name) || isTiff
             const isProcessableImage =
-              isImage &&
-              !file.type.includes('gif') &&
-              !file.type.includes('svg') &&
-              !isTiff
+              isImage && !file.type.includes('gif') && !file.type.includes('svg') && !isTiff
             const isVideo = isVideoFile(file.name)
 
             if (isTiff) {
