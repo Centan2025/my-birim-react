@@ -110,17 +110,37 @@ export function Header() {
   const [isMobileMenuClosing, setIsMobileMenuClosing] = useState(false)
   const isDarkHero = isDarkHeroPage(location.pathname)
 
-  // On standard pages (white pages) WE MUST USE DARK TEXT
-  // On dark hero pages, if we scrolled or the hero is light, use DARK TEXT
-  // Logic: Use Dark Text (isLightMode = true) only if background is actually light.
-  // Mobile search and menu are always dark, so isLightMode must be false then.
+  // Track whether scroll has passed the hero bottom boundary
+  const [isPastHero, setIsPastHero] = useState(false)
+
+  useEffect(() => {
+    if (!isDarkHero) {
+      setIsPastHero(false)
+      return
+    }
+    const update = () => {
+      const heroEl = document.querySelector('.hero-section') as HTMLElement | null
+      const heroBottom = heroEl ? heroEl.offsetTop + heroEl.offsetHeight : window.innerHeight
+      setIsPastHero(window.scrollY >= heroBottom - headerHeight)
+    }
+    update()
+    window.addEventListener('scroll', update, {passive: true})
+    return () => window.removeEventListener('scroll', update)
+  }, [isDarkHero, headerHeight, location.pathname])
+
+  // isDarkHero pages: white text at top, black after hero bottom boundary.
+  // Standard pages: always dark text.
+  // Search open: always dark text (white panel bg).
+  // Mobile overlay menu: always dark text.
   const isLightMode =
-    (!isDarkHero || headerTheme.mode === 'light' || headerOpacity > 0.5) &&
-    !(isMobile && (isSearchOpen || isMobileMenuOpen || isMobileMenuClosing))
+    (!isDarkHero || headerTheme.mode === 'light' || isPastHero || isSearchOpen) &&
+    !(isMobile && (isMobileMenuOpen || isMobileMenuClosing))
 
   const headerForegroundColor = isLightMode ? '#000000' : '#ffffff'
   const headerLogoFilter = isLightMode ? 'invert(1) brightness(0.95)' : 'none'
   const iconBrightness = isLightMode ? 'brightness(0)' : 'none'
+  // Smooth color transition at hero boundary
+  const colorTransition = 'color 0.25s ease, filter 0.25s ease'
 
   const lastScrollYRef = useRef(0)
   const headerVisibilityLastChanged = useRef(0)
@@ -484,11 +504,13 @@ export function Header() {
     justifyContent: 'center',
     color: headerForegroundColor,
     filter: iconBrightness,
+    transition: colorTransition,
   }
 
   const mobileMenuLinks: {to: string; label: string}[] = [
     {to: '/designers', label: (t('designers') || '').toLocaleUpperCase('en')},
     {to: '/projects', label: (t('projects') || 'Projeler').toLocaleUpperCase('en')},
+    ...(settings?.isFactoryVisible ? [{to: '/factory', label: (t('factory') || 'Fabrika').toLocaleUpperCase('en')}] : []),
     {to: '/news', label: (t('news') || '').toLocaleUpperCase('en')},
     {to: '/about', label: (t('about') || '').toLocaleUpperCase('en')},
     {to: '/contact', label: (t('contact') || '').toLocaleUpperCase('en')},
@@ -550,6 +572,7 @@ export function Header() {
       fontFamily: "'Inter', sans-serif",
       lineHeight: '1.25rem',
       color: headerForegroundColor,
+      transition: colorTransition,
     }
     return (
       <NavLink
@@ -681,7 +704,7 @@ export function Header() {
                       }
                     }}
                     className="group p-2 -ml-2 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center"
-                    style={{color: headerForegroundColor}}
+                    style={{color: headerForegroundColor, transition: colorTransition}}
                     aria-label={
                       isSearchOpen
                         ? t('close_search') || 'Aramayı kapat'
@@ -724,7 +747,7 @@ export function Header() {
                     <SiteLogo
                       logoUrl={settings?.logoUrl}
                       className="w-32 h-5"
-                      style={{filter: headerLogoFilter}}
+                      style={{filter: headerLogoFilter, transition: colorTransition}}
                     />
                   </Link>
                 </div>
@@ -893,6 +916,17 @@ export function Header() {
                     {t('about')}
                   </NavItem>
                 </div>
+                {settings?.isFactoryVisible && (
+                  <div className="hidden lg:flex items-end">
+                    <NavItem
+                      to="/factory"
+                      onMouseEnter={handleCloseProducts}
+                      onClick={handleCloseProducts}
+                    >
+                      {t('factory') || 'FABRİKA'}
+                    </NavItem>
+                  </div>
+                )}
                 <div className="hidden lg:flex items-end">
                   <NavItem
                     to="/contact"

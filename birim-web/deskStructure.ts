@@ -134,11 +134,25 @@ export const deskStructure = (S: StructureBuilder, context: ConfigContext) => {
       }),
       S.documentTypeListItem('newsItem').title('Haberler'),
       S.listItem()
-        .title('Hakkımızda')
+        .title('Hakkımızda (Klasik)')
         .child(
           S.document()
             .schemaType('aboutPage')
             .documentId('aboutPage')
+            .views([
+              S.view.form().title('Düzenle'),
+              S.view
+                .component(PreviewView)
+                .title('Önizleme')
+                .icon(() => '👁️'),
+            ]),
+        ),
+      S.listItem()
+        .title('Hakkımızda (Mimari V2)')
+        .child(
+          S.document()
+            .schemaType('aboutPageV2')
+            .documentId('aboutPageV2')
             .views([
               S.view.form().title('Düzenle'),
               S.view

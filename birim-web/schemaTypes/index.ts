@@ -5,6 +5,7 @@ import newsItem from './documents/newsItem'
 import siteSettings from './documents/siteSettings'
 import homePage from './documents/homePage'
 import aboutPage from './documents/aboutPage'
+import aboutPageV2 from './documents/aboutPageV2'
 import contactPage from './documents/contactPage'
 import factoryPage from './documents/factoryPage'
 import footer from './documents/footer'
@@ -53,6 +54,7 @@ export const schemaTypes = [
   siteSettings,
   homePage,
   aboutPage,
+  aboutPageV2,
   contactPage,
   factoryPage,
   footer,

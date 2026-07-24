@@ -30,14 +30,13 @@ export function useHeaderBackgroundColor({
     const isDarkHeroMatched = isDarkHeroPage(path)
 
     if (
-      (isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)) ||
-      (isSearchOpen && isMobile)
+      isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)
     ) {
       return isDarkMode || isDarkHeroMatched ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.95)'
     }
 
     if (isSearchOpen) {
-      if (isDarkMode || isDarkHeroMatched) return 'rgba(0, 0, 0, 0.85)'
+      if (isDarkMode) return 'rgba(10, 10, 10, 0.95)'
       return 'rgba(255, 255, 255, 0.95)'
     }
 

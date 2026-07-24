@@ -44,6 +44,7 @@ interface OptimizedImageProps {
   draggable?: boolean
   onLoad?: () => void
   onError?: () => void
+  fallbackSrc?: string
   style?: React.CSSProperties
   crop?: R2ImageMetadata['crop']
   hotspot?: R2ImageMetadata['hotspot']
@@ -81,6 +82,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   draggable,
   onLoad,
   onError,
+  fallbackSrc,
   style,
   crop,
   hotspot,
@@ -117,6 +119,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     )
   }, [])
 
+  const [currentSrc, setCurrentSrc] = useState<string>(src)
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
   const [naturalDims, setNaturalDims] = useState<{w: number; h: number} | null>(null)
@@ -124,6 +127,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   // src değiştiğinde state'i sıfırla
   useEffect(() => {
+    setCurrentSrc(src)
     setIsLoaded(false)
     setHasError(false)
   }, [src, srcMobile, srcDesktop])
@@ -140,7 +144,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         })
       }
     }
-  }, [src, srcMobile, srcDesktop])
+  }, [currentSrc, srcMobile, srcDesktop])
 
   // React henüz fetchPriority prop'unu DOM attribute olarak tanımıyor; uyarıyı
   // engellemek için custom attribute'u lowercase olarak enjekte ediyoruz.
@@ -163,13 +167,18 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   }
 
   const handleError = () => {
-    setHasError(true)
+    if (fallbackSrc && currentSrc !== fallbackSrc) {
+      setCurrentSrc(fallbackSrc)
+      setHasError(false)
+    } else {
+      setHasError(true)
+    }
     onError?.()
   }
 
-  const activeSrc = rewriteR2Url(src)
-  const activeMobileSrc = rewriteR2Url(srcMobile || src)
-  const activeDesktopSrc = rewriteR2Url(srcDesktop || src)
+  const activeSrc = rewriteR2Url(currentSrc)
+  const activeMobileSrc = rewriteR2Url(srcMobile || currentSrc)
+  const activeDesktopSrc = rewriteR2Url(srcDesktop || currentSrc)
 
   // Cloudflare R2 / Image Resizing logic
   const r2Domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'

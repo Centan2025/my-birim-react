@@ -434,8 +434,28 @@ export interface AboutPageContent {
         crop?: R2ImageMetadata['crop']
         hotspot?: R2ImageMetadata['hotspot']
       }
+  heroImageMobile?:
+    | string
+    | {
+        url: string
+        palette?: SanityImagePalette
+        crop?: R2ImageMetadata['crop']
+        hotspot?: R2ImageMetadata['hotspot']
+      }
+  heroBadge?: LocalizedString
   heroTitle: LocalizedString
   heroSubtitle: LocalizedString
+  manifestoLabel?: LocalizedString
+  manifestoQuote?: LocalizedString
+  timelineTitle?: LocalizedString
+  timelineSubtitle?: LocalizedString
+  eras?: {
+    year?: string
+    title?: LocalizedString
+    description?: LocalizedString
+    image?: string | {url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot']}
+    imageMobile?: string | {url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot']}
+  }[]
   storyTitle: LocalizedString
   storyContentP1: LocalizedString
   storyContentP2: LocalizedString
@@ -448,6 +468,9 @@ export interface AboutPageContent {
     image?:
       | string
       | {url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot']}
+    imageMobile?:
+      | string
+      | {url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot']}
     media?: NewsMedia[]
   }
   identitySection?: {
@@ -456,12 +479,18 @@ export interface AboutPageContent {
     image?:
       | string
       | {url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot']}
+    imageMobile?:
+      | string
+      | {url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot']}
     media?: NewsMedia[]
   }
   qualitySection?: {
     title?: LocalizedString
     content?: LocalizedString
     image?:
+      | string
+      | {url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot']}
+    imageMobile?:
       | string
       | {url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot']}
     media?: NewsMedia[]

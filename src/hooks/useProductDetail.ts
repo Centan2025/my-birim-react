@@ -7,7 +7,7 @@ import {useSiteSettings} from './useSiteData'
 import {useProductHero} from './useProductHero'
 import {useHeaderTheme} from '../context/HeaderThemeContext'
 
-import type {Product, Designer, SanityImagePalette, ProductMaterialsGroup} from '../types'
+import type {Product, Designer, ProductMaterialsGroup} from '../types'
 
 /**
  * Encapsulates all data-fetching, derived state, and side effects
@@ -32,7 +32,7 @@ export function useProductDetail(productId: string | undefined, prefetchedProduc
 
   const {data: siteSettings} = useSiteSettings()
   const {data: allCategories = []} = useCategories()
-  const {setFromPalette, reset} = useHeaderTheme()
+  const {reset} = useHeaderTheme()
 
   // Multiple Designers Support
   const {data: designersData} = useDesignersByIds(product?.designerIds)
@@ -127,17 +127,12 @@ export function useProductDetail(productId: string | undefined, prefetchedProduc
       ? siblingProducts[currentIdxInSiblings + 1]
       : null
 
-  // Header theme effect
+  // Header theme effect: Product Detail page is a standard light background page.
+  // Consistently reset header theme so logo and nav items remain dark/black across page transitions.
   useEffect(() => {
-    if (!product) {
-      reset()
-      return
-    }
-    const mainImg = product.mainImage as {palette?: SanityImagePalette}
-    const palette = typeof product.mainImage === 'object' ? mainImg?.palette : undefined
-    setFromPalette(palette)
+    reset()
     return () => reset()
-  }, [product, reset, setFromPalette])
+  }, [reset])
 
   return {
     product,

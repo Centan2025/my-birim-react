@@ -1,4 +1,5 @@
 import {useState, useEffect} from 'react'
+import {Link} from 'react-router-dom'
 import {getAboutPageContent} from '../services/cms'
 import type {AboutPageContent, NewsMedia} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
@@ -54,7 +55,12 @@ export function AboutPage() {
   const [content, setContent] = useState<AboutPageContent | null>(null)
   const [loading, setLoading] = useState(true)
   const {t} = useTranslation()
-  const {setFromPalette, reset} = useHeaderTheme()
+  const {reset} = useHeaderTheme()
+
+  useEffect(() => {
+    reset()
+    return () => reset()
+  }, [reset])
 
   // SEO
   const heroImageObj = typeof content?.heroImage === 'object' ? content.heroImage : null
@@ -102,25 +108,7 @@ export function AboutPage() {
     fetchContent()
   }, [])
 
-  // Header temasını hero görseli paletinden besle
-  useEffect(() => {
-    if (!content?.heroImage) {
-      reset()
-    } else {
-      const palette =
-        typeof content.heroImage === 'object' &&
-        content.heroImage !== null &&
-        'palette' in content.heroImage
-          ? content.heroImage.palette
-          : undefined
-      if (palette) {
-        setFromPalette(palette)
-      } else {
-        reset()
-      }
-    }
-    return () => reset()
-  }, [content?.heroImage, reset, setFromPalette])
+
 
   if (loading || !content) {
     return (
@@ -381,6 +369,21 @@ export function AboutPage() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Floating Design Switcher Banner */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <div className="bg-neutral-900/90 backdrop-blur-xl border border-white/20 text-white p-2.5 rounded-full shadow-2xl flex items-center gap-2 text-xs font-medium">
+          <span className="px-3 py-1 bg-gray-700 text-gray-200 rounded-full font-semibold">
+            Klasik Tasarım (V1)
+          </span>
+          <Link
+            to="/about"
+            className="px-4 py-1.5 bg-amber-500 hover:bg-amber-400 text-black font-semibold rounded-full transition-colors duration-200"
+          >
+            ✨ Yeni Tasarıma Geç (V2)
+          </Link>
+        </div>
       </div>
     </div>
   )

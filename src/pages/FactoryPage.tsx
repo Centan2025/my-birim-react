@@ -219,9 +219,11 @@ export function FactoryPage() {
           )}
 
           {/* Galeri (Genişliği diğer sayfalarla aynı olacak şekilde ayarlandı) */}
-          <div className="w-full pt-0">
-            <MediaGallery media={content.gallery} alt={(t('factory') as string) || 'Factory'} />
-          </div>
+          {content.gallery && content.gallery.length > 0 && (
+            <div className="w-full pt-0">
+              <MediaGallery media={content.gallery} alt={(t('factory') as string) || 'Factory'} />
+            </div>
+          )}
         </div>
       </div>
     </div>

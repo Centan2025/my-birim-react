@@ -1,6 +1,13 @@
 export const isDarkHeroPage = (p: string): boolean => {
-  if (!p) return true
+  if (!p) return false
   const path = p.toLowerCase()
+
+  // Ürün ve Ürün Listesi sayfaları her zaman açık renktir (header elemanları siyah olmalı)
+  if (path.startsWith('/product') || path.startsWith('/products')) {
+    return false
+  }
+
+  // Koyu hero kapak görseli olan sayfalar (Ana Sayfa, Hakkımızda, Projeler)
   if (
     path === '/' ||
     path === '' ||
@@ -10,8 +17,6 @@ export const isDarkHeroPage = (p: string): boolean => {
   ) {
     return true
   }
-  if (typeof document !== 'undefined' && document.querySelector('.hero-section')) {
-    return true
-  }
+
   return false
 }

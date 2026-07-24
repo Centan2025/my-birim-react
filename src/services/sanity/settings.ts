@@ -127,7 +127,14 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
         maintenanceMode: Boolean(s?.maintenanceMode ?? false),
         mobileHeaderAnimation: s?.mobileHeaderAnimation === 'overlay' ? 'overlay' : 'default',
         enablePageTransitions: s?.enablePageTransitions !== false,
-        isFactoryVisible: Boolean(s?.isFactoryVisible ?? false),
+        isFactoryVisible: Boolean(
+          s?.isFactoryVisible ??
+          s?.showFactory ??
+          s?.showFactoryMenu ??
+          s?.showFactoryPage ??
+          s?.enableFactory ??
+          false
+        ),
         enableAiRoomPlanner: s?.enableAiRoomPlanner !== false,
       }
     } catch {
@@ -149,7 +156,14 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
     maintenanceMode: Boolean(s?.maintenanceMode ?? false),
     mobileHeaderAnimation: s?.mobileHeaderAnimation === 'overlay' ? 'overlay' : 'default',
     enablePageTransitions: s?.enablePageTransitions !== false,
-    isFactoryVisible: Boolean(s?.isFactoryVisible ?? false),
+    isFactoryVisible: Boolean(
+      s?.isFactoryVisible ??
+      (s as Record<string, unknown> | null)?.[ 'showFactory' ] ??
+      (s as Record<string, unknown> | null)?.[ 'showFactoryMenu' ] ??
+      (s as Record<string, unknown> | null)?.[ 'showFactoryPage' ] ??
+      (s as Record<string, unknown> | null)?.[ 'enableFactory' ] ??
+      false
+    ),
     enableAiRoomPlanner: s?.enableAiRoomPlanner !== false,
   }
 }

@@ -242,7 +242,10 @@ export function useHeaderScroll({
     const handleScrollWithEnd = () => {
       throttledHandleScroll()
       if (scrollEndTimeout) clearTimeout(scrollEndTimeout)
-      scrollEndTimeout = setTimeout(checkOpacityOnScrollEnd, 150)
+      // 150ms: detect scroll end, then wait 300ms more for CSS color transition to complete before snapping opacity
+      scrollEndTimeout = setTimeout(() => {
+        setTimeout(checkOpacityOnScrollEnd, 300)
+      }, 150)
     }
 
     const initializeScrollListener = () => {

@@ -24,6 +24,7 @@ const KEYS = {
   HOME_PAGE: 'birim_home_page',
   ABOUT_PAGE: 'birim_about_page',
   CONTACT_PAGE: 'birim_contact_page',
+  FACTORY_PAGE: 'birim_factory_page',
 }
 
 const mapProductMedia = (row: unknown): Record<string, unknown>[] => {
@@ -55,12 +56,14 @@ const mapProductMedia = (row: unknown): Record<string, unknown>[] => {
 
 export const getAboutPageContent = async (): Promise<AboutPageContent> => {
   if (useSanity && sanity) {
-    const q = groq`*[_type == "aboutPage"][0]{
+    const q = groq`*[_type in ["aboutPageV2", "aboutPage"] && !(_id in path("drafts.**"))] | order(_updatedAt desc)[0]{
             ...,
             heroImageR2,
-            historySection{ ..., imageR2, media[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 } },
-            identitySection{ ..., imageR2, media[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 } },
-            qualitySection{ ..., imageR2, media[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 } }
+            heroImageMobileR2,
+            eras[]{ ..., imageR2, imageMobileR2 },
+            historySection{ ..., imageR2, imageMobileR2, media[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 } },
+            identitySection{ ..., imageR2, imageMobileR2, media[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 } },
+            qualitySection{ ..., imageR2, imageMobileR2, media[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 } }
         }`
     const data = await sanity.fetch(q)
     if (data) {
@@ -71,11 +74,31 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
           ...mapR2Metadata(data.heroImageR2),
         }
       }
+      if (data.heroImageMobileR2?.url) {
+        data.heroImageMobile = {
+          url: mapImage(data.heroImageMobileR2),
+          palette: extractPalette(data.heroImageMobileR2),
+          ...mapR2Metadata(data.heroImageMobileR2),
+        }
+      }
+      if (Array.isArray(data.eras)) {
+        data.eras = data.eras.map((era: Record<string, unknown>) => ({
+          ...era,
+          image: era['imageR2'] ? mapImage(era['imageR2'] as never) : era['image'],
+          imageMobile: era['imageMobileR2'] ? mapImage(era['imageMobileR2'] as never) : era['imageMobile'],
+        }))
+      }
       if (data.historySection) {
         const hsMeta = mapR2Metadata(data.historySection.imageR2)
         data.historySection.image = {
           url: mapImage(data.historySection.imageR2),
           ...hsMeta,
+        }
+        if (data.historySection.imageMobileR2) {
+          data.historySection.imageMobile = {
+            url: mapImage(data.historySection.imageMobileR2),
+            ...mapR2Metadata(data.historySection.imageMobileR2),
+          }
         }
         data.historySection.media = mapProductMedia(data.historySection)
       }
@@ -85,6 +108,12 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
           url: mapImage(data.identitySection.imageR2),
           ...idMeta,
         }
+        if (data.identitySection.imageMobileR2) {
+          data.identitySection.imageMobile = {
+            url: mapImage(data.identitySection.imageMobileR2),
+            ...mapR2Metadata(data.identitySection.imageMobileR2),
+          }
+        }
         data.identitySection.media = mapProductMedia(data.identitySection)
       }
       if (data.qualitySection) {
@@ -92,6 +121,12 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
         data.qualitySection.image = {
           url: mapImage(data.qualitySection.imageR2),
           ...qsMeta,
+        }
+        if (data.qualitySection.imageMobileR2) {
+          data.qualitySection.imageMobile = {
+            url: mapImage(data.qualitySection.imageMobileR2),
+            ...mapR2Metadata(data.qualitySection.imageMobileR2),
+          }
         }
         data.qualitySection.media = mapProductMedia(data.qualitySection)
       }
@@ -107,20 +142,29 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
 
 export const getFactoryPageContent = async (): Promise<FactoryPageContent> => {
   if (useSanity && sanity) {
-    const q = groq`*[_type == "factoryPage"][0]{
-            ...,
-            gallery[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 }
-        }`
-    const data = await sanity.fetch(q)
-    if (data) {
-      if (data.gallery) {
-        data.gallery = mapProductMedia({media: data.gallery})
+    try {
+      const q = groq`*[_type == "factoryPage" && !(_id in path("drafts.**"))] | order(_updatedAt desc)[0]{
+        ...,
+        gallery[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 },
+        media[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 },
+        images[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 }
+      }`
+      const data = await sanity.fetch(q)
+      if (data) {
+        const rawGallery = data.gallery ?? data.media ?? data.images
+        data.gallery = Array.isArray(rawGallery) ? mapProductMedia({media: rawGallery}) : []
+        return data
       }
-      return data
+    } catch {
+      // Ignore
     }
   }
   await delay(SIMULATED_DELAY)
-  return {} as FactoryPageContent
+  return (getItem<FactoryPageContent>(KEYS.FACTORY_PAGE) || {
+    title: 'FABRİKA',
+    content: '',
+    gallery: [],
+  }) as FactoryPageContent
 }
 
 export const getContactPageContent = async (): Promise<ContactPageContent> => {

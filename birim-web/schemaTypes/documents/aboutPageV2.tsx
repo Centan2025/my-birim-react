@@ -3,15 +3,21 @@ import {defineField, defineType} from 'sanity'
 import {getPreviewUrl} from '../utils/previewUrl'
 
 export default defineType({
-  name: 'aboutPage',
-  title: 'Hakkımızda',
+  name: 'aboutPageV2',
+  title: 'Hakkımızda (Mimari V2)',
   type: 'document',
   fields: [
     defineField({
       name: 'heroImageR2',
-      title: 'Hero Görseli (R2)',
+      title: 'Hero Görseli (Masaüstü R2)',
       type: 'r2Asset',
     }),
+    defineField({
+      name: 'heroImageMobileR2',
+      title: 'Hero Görseli (Mobil R2)',
+      type: 'r2Asset',
+    }),
+    defineField({name: 'heroBadge', title: 'Hero Üst Etiketi', type: 'localizedString'}),
     defineField({name: 'heroTitle', title: 'Hero Başlığı', type: 'localizedString'}),
     defineField({name: 'heroSubtitle', title: 'Hero Alt Başlığı', type: 'localizedString'}),
     defineField({name: 'manifestoLabel', title: 'Manifesto Etiketi', type: 'localizedString'}),
@@ -31,17 +37,27 @@ export default defineType({
             defineField({name: 'year', title: 'Yıl / Dönem', type: 'string'}),
             defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
             defineField({name: 'description', title: 'Açıklama', type: 'localizedString'}),
-            defineField({name: 'imageR2', title: 'Dönem Görseli (R2)', type: 'r2Asset'}),
+            defineField({name: 'imageR2', title: 'Dönem Görseli (Masaüstü R2)', type: 'r2Asset'}),
+            defineField({name: 'imageMobileR2', title: 'Dönem Görseli (Mobil R2)', type: 'r2Asset'}),
           ],
           preview: {
             select: {
               title: 'title.tr',
               subtitle: 'year',
+              r2Url: 'imageR2.url',
             },
-            prepare({title, subtitle}) {
+            prepare({title, subtitle, r2Url}) {
+              const finalUrl = getPreviewUrl(r2Url)
               return {
                 title: title || 'Dönem',
                 subtitle: subtitle || '',
+                media: finalUrl ? (
+                  <img
+                    src={finalUrl}
+                    alt={title || ''}
+                    style={{width: '100%', height: '100%', objectFit: 'cover'}}
+                  />
+                ) : undefined,
               }
             },
           },
@@ -60,13 +76,14 @@ export default defineType({
           title: 'Tarihçe Metni',
           type: 'localizedPortableText',
         }),
-        defineField({name: 'imageR2', title: 'Ana Görsel (R2)', type: 'r2Asset'}),
+        defineField({name: 'imageR2', title: 'Ana Görsel (Masaüstü R2)', type: 'r2Asset'}),
+        defineField({name: 'imageMobileR2', title: 'Ana Görsel (Mobil R2)', type: 'r2Asset'}),
         defineField({
           name: 'media',
           title: 'Medya Galerisi',
           type: 'array',
           of: [{type: 'productPanelMediaItem'}],
-          description: 'Bölüm için ek görseller veya videolar.',
+          description: 'Bölüm için ek görseller veya videolar (R2).',
         }),
       ],
     }),
@@ -81,13 +98,14 @@ export default defineType({
           title: 'Kimlik Metni',
           type: 'localizedPortableText',
         }),
-        defineField({name: 'imageR2', title: 'Ana Görsel (R2)', type: 'r2Asset'}),
+        defineField({name: 'imageR2', title: 'Ana Görsel (Masaüstü R2)', type: 'r2Asset'}),
+        defineField({name: 'imageMobileR2', title: 'Ana Görsel (Mobil R2)', type: 'r2Asset'}),
         defineField({
           name: 'media',
           title: 'Medya Galerisi',
           type: 'array',
           of: [{type: 'productPanelMediaItem'}],
-          description: 'Bölüm için ek görseller veya videolar.',
+          description: 'Bölüm için ek görseller veya videolar (R2).',
         }),
       ],
     }),
@@ -102,40 +120,15 @@ export default defineType({
           title: 'Kalite Metni',
           type: 'localizedPortableText',
         }),
-        defineField({name: 'imageR2', title: 'Ana Görsel (R2)', type: 'r2Asset'}),
+        defineField({name: 'imageR2', title: 'Ana Görsel (Masaüstü R2)', type: 'r2Asset'}),
+        defineField({name: 'imageMobileR2', title: 'Ana Görsel (Mobil R2)', type: 'r2Asset'}),
         defineField({
           name: 'media',
           title: 'Medya Galerisi',
           type: 'array',
           of: [{type: 'productPanelMediaItem'}],
-          description: 'Bölüm için ek görseller veya videolar.',
+          description: 'Bölüm için ek görseller veya videolar (R2).',
         }),
-      ],
-    }),
-    defineField({
-      name: 'values',
-      title: 'Değerler',
-      type: 'array',
-      of: [
-        {
-          type: 'object',
-          name: 'valueItem',
-          fields: [
-            defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
-            defineField({name: 'description', title: 'Açıklama', type: 'localizedString'}),
-          ],
-          preview: {
-            select: {
-              title: 'title.tr',
-              subtitle: 'title.en',
-            },
-            prepare({title, subtitle}) {
-              return {
-                title: title || subtitle || 'Değer',
-              }
-            },
-          },
-        },
       ],
     }),
     defineField({
@@ -147,13 +140,13 @@ export default defineType({
   preview: {
     select: {r2Url: 'heroImageR2.url'},
     prepare({r2Url}) {
-      let finalUrl = getPreviewUrl(r2Url)
+      const finalUrl = getPreviewUrl(r2Url)
       return {
-        title: 'Hakkımızda',
+        title: 'Hakkımızda (Mimari V2)',
         media: finalUrl ? (
           <img
             src={finalUrl}
-            alt="Hakkımızda"
+            alt="Hakkımızda V2"
             style={{width: '100%', height: '100%', objectFit: 'cover'}}
           />
         ) : undefined,

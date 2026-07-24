@@ -72,3 +72,4 @@ urun_yukleme_sablonu.xlsx
 brain/
 
 
+.env*

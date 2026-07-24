@@ -9,25 +9,8 @@ export function useHeroBrightness(
   const heroBrightnessRef = useRef<number | null>(null)
 
   useEffect(() => {
-    if (contextBrightness === null) {
-      setHeroBrightness(null)
-      heroBrightnessRef.current = null
-      return
-    }
-
-    const applyPaletteBrightness = () => {
-      if (window.scrollY > 0) {
-        setHeroBrightness(null)
-        heroBrightnessRef.current = null
-      } else {
-        setHeroBrightness(contextBrightness)
-        heroBrightnessRef.current = contextBrightness
-      }
-    }
-
-    applyPaletteBrightness()
-    window.addEventListener('scroll', applyPaletteBrightness, {passive: true})
-    return () => window.removeEventListener('scroll', applyPaletteBrightness)
+    setHeroBrightness(contextBrightness)
+    heroBrightnessRef.current = contextBrightness
   }, [contextBrightness])
 
   useEffect(() => {

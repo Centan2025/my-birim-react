@@ -10,7 +10,14 @@ import {useHeaderTheme} from '../context/HeaderThemeContext'
 export function HomePage() {
   const {data: content} = useHomePageContent()
   const {data: settings} = useSiteSettings()
-  const {reset} = useHeaderTheme()
+  const {setBrightness, reset} = useHeaderTheme()
+
+  useEffect(() => {
+    // HomePage has a dark hero slider banner (HomeHero).
+    // Set brightness to 0 so header logo & text always remain clean white at the top of the page.
+    setBrightness(0)
+    return () => reset()
+  }, [setBrightness, reset])
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth < 1024

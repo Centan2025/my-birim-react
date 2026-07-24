@@ -171,8 +171,15 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
       }
     }
 
-    // New: Relatif yolları mutlak yap
-    if (!result.startsWith('http') && result.length > 0) {
+    // New: Relatif yolları mutlak yap (lokal public görsellere /img/ dokunma)
+    if (
+      !result.startsWith('http') &&
+      !result.startsWith('/img/') &&
+      !result.startsWith('img/') &&
+      !result.startsWith('/logo') &&
+      !result.startsWith('data:') &&
+      result.length > 0
+    ) {
       // Eğer zaten domain ile başlıyorsa (ama protokolü yoksa) sadece protokolü ekle
       if (result.startsWith(r2DomainNoProtocol)) {
         const cleanPath = result.replace(r2DomainNoProtocol, '').startsWith('/')
