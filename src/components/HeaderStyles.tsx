@@ -102,18 +102,16 @@ export function HeaderStyles() {
           font-family: 'Inter', sans-serif !important;
         }
 
-        /* Overlay & Inline mobile menu & Header - REFINED GLASSMORPHISM SYNC */
-        header.overlay-menu-open > div,
-        header:has(#mobile-menu) > div,
+        /* Overlay mobile menu panel background */
         #mobile-menu.mobile-menu-overlay {
-          background-color: rgba(16, 24, 32, 0.72) !important;
-          background: rgba(16, 24, 32, 0.72) !important;
+          background-color: rgba(16, 24, 32, 0.94) !important;
+          background: rgba(16, 24, 32, 0.94) !important;
           backdrop-filter: blur(28px) saturate(180%) !important;
           -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-          will-change: auto !important; /* Fix for blur glitches in some browsers */
+          will-change: auto !important;
         }
 
-        /* HEADER - MAKE FULLY TRANSPARENT WHEN OVERLAY MENU OPEN */
+        /* HEADER - MAKE TRANSPARENT WHEN OVERLAY MENU OPEN TO SHOW OVERLAY PANEL BELOW IT */
         header.overlay-menu-open,
         header.overlay-menu-open > div {
           background-color: transparent !important;
