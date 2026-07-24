@@ -1,6 +1,6 @@
 import {createClient} from '@sanity/client'
 import bcrypt from 'bcryptjs'
-import {isRateLimitedAsync, getClientIp} from './rateLimiter'
+import {isRateLimitedAsync, getClientIp} from './_rateLimiter'
 
 const SANITY_PROJECT_ID = process.env['VITE_SANITY_PROJECT_ID'] || 'wn3a082f'
 const SANITY_DATASET = process.env['VITE_SANITY_DATASET'] || 'production'
