@@ -15,19 +15,9 @@ const client = createClient({
   useCdn: false,
 })
 
-interface ApiRequest {
-  method?: string
-  body?: any
-  headers?: Record<string, string>
-  socket?: {remoteAddress?: string}
-}
+import type {VercelRequest, VercelResponse} from '@vercel/node'
 
-interface ApiResponse {
-  status: (code: number) => ApiResponse
-  json: (body: unknown) => void
-}
-
-export default async function handler(req: ApiRequest, res: ApiResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({error: 'Method Not Allowed'})
   }
