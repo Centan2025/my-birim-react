@@ -236,7 +236,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         },
       })
 
-      const generatedImage = response.generatedImages?.[0]?.image
+      const generatedImage = (response as any)?.generatedImages?.[0]?.image
       if (!generatedImage || !generatedImage.imageBytes) {
         throw new Error('Imagen 3 API geçerli bir görsel yanıtı üretemedi.')
       }
