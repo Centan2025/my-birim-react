@@ -53,11 +53,12 @@ const rawSanity = useSanity
   : null
 
 if (rawSanity && typeof window !== 'undefined') {
-  const originalFetch = rawSanity.fetch.bind(rawSanity)
-  // @ts-ignore
-  rawSanity.fetch = async (query: string, params?: Record<string, unknown>, options?: unknown) => {
+  const sanityClientObj = rawSanity as unknown as {
+    fetch: (query: string, params?: unknown, options?: unknown) => Promise<unknown>
+  }
+  const originalFetch = sanityClientObj.fetch.bind(sanityClientObj)
+  sanityClientObj.fetch = async (query: string, params?: unknown, options?: unknown) => {
     try {
-      // @ts-ignore
       return await originalFetch(query, params, options)
     } catch (err) {
       console.warn(

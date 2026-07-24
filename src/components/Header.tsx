@@ -126,7 +126,7 @@ export function Header() {
   }, [internalCloseSearch])
 
   // Hero brightness hook
-  const { heroBrightness, heroBrightnessRef } = useHeroBrightness(
+  const { heroBrightnessRef } = useHeroBrightness(
     isMobile,
     location.pathname,
     headerTheme.brightness
@@ -573,8 +573,8 @@ export function Header() {
     isMobileMenuOpen,
     isOverlayMobileMenu,
     isMobileMenuClosing,
-    heroBrightness,
     isSearchOpen,
+    isDarkMode,
   })
 
   return (
