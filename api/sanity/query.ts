@@ -1,4 +1,15 @@
-import type {VercelRequest, VercelResponse} from '@vercel/node'
+interface ApiRequest {
+  method?: string
+  query?: Record<string, string>
+  body?: Record<string, unknown>
+  headers?: Record<string, string>
+}
+
+interface ApiResponse {
+  status: (code: number) => ApiResponse
+  json: (body: unknown) => void
+  setHeader: (name: string, value: string) => void
+}
 
 const SANITY_PROJECT_ID =
   process.env.VITE_SANITY_PROJECT_ID || process.env.SANITY_PROJECT_ID || 'wn3a082f'
@@ -6,12 +17,14 @@ const SANITY_DATASET = process.env.VITE_SANITY_DATASET || process.env.SANITY_DAT
 const SANITY_API_VERSION =
   process.env.VITE_SANITY_API_VERSION || process.env.SANITY_API_VERSION || '2025-01-01'
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({error: 'Method not allowed'})
   }
 
-  const query = (req.method === 'GET' ? req.query['query'] : req.body?.query) as string | undefined
+  const query = (req.method === 'GET' ? req.query?.['query'] : req.body?.['query']) as
+    | string
+    | undefined
   if (!query) {
     return res.status(400).json({error: 'Missing query parameter'})
   }
@@ -33,9 +46,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // Forward perspective
-  const perspective = (req.method === 'GET' ? req.query['perspective'] : req.body?.perspective) as
-    | string
-    | undefined
+  const perspective = (
+    req.method === 'GET' ? req.query?.['perspective'] : req.body?.['perspective']
+  ) as string | undefined
   if (perspective) {
     sanityUrl.searchParams.set('perspective', perspective)
   }
