@@ -12,10 +12,11 @@ interface ApiResponse {
 }
 
 const SANITY_PROJECT_ID =
-  process.env.VITE_SANITY_PROJECT_ID || process.env.SANITY_PROJECT_ID || 'wn3a082f'
-const SANITY_DATASET = process.env.VITE_SANITY_DATASET || process.env.SANITY_DATASET || 'production'
+  process.env['VITE_SANITY_PROJECT_ID'] || process.env['SANITY_PROJECT_ID'] || 'wn3a082f'
+const SANITY_DATASET =
+  process.env['VITE_SANITY_DATASET'] || process.env['SANITY_DATASET'] || 'production'
 const SANITY_API_VERSION =
-  process.env.VITE_SANITY_API_VERSION || process.env.SANITY_API_VERSION || '2025-01-01'
+  process.env['VITE_SANITY_API_VERSION'] || process.env['SANITY_API_VERSION'] || '2025-01-01'
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== 'GET' && req.method !== 'POST') {
@@ -59,7 +60,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     }
 
     // Forward auth token if present
-    const authHeader = req.headers.authorization
+    const authHeader = req.headers?.['authorization']
     if (authHeader && typeof authHeader === 'string') {
       headers['Authorization'] = authHeader
     }
