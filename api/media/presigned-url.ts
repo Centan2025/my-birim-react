@@ -75,7 +75,13 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     })
 
     // Presigned URL valid for 15 minutes
-    const url = await getSignedUrl(r2Client as any, command, {expiresIn: 900})
+    const url = await getSignedUrl(
+      r2Client as unknown as Parameters<typeof getSignedUrl>[0],
+      command,
+      {
+        expiresIn: 900,
+      }
+    )
 
     const r2Domain = R2_DOMAIN?.startsWith('http') ? R2_DOMAIN : `https://${R2_DOMAIN}`
     const finalFileUrl = `${r2Domain}/${key}`
