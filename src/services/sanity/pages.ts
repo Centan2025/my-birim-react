@@ -211,7 +211,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
       const q = groq`*[_type == "homePage"][0]{
             ..., heroAutoPlay,
             heroMedia[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2, videoFileMobileR2, videoFileDesktopR2 },
-            contentBlocks[]{ ..., titleFont, contentFont, imageR2, imageMobileR2, imageDesktopR2, videoFileR2, videoFileMobileR2, videoFileDesktopR2 }
+            contentBlocks[]{ ..., titleFont, contentFont, imageR2, imageMobileR2, imageDesktopR2, videoFileR2, videoFileMobileR2, videoFileDesktopR2, imagePanels[]{ ..., imageR2 }, panelFit, panelGap }
         }`
       const data = await sanity.fetch(q)
       if (data?.heroMedia) {
@@ -309,10 +309,18 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             urlMobile,
             urlDesktop,
             imagePanels: Array.isArray(b['imagePanels'])
-              ? b['imagePanels'].map((p: any) => ({
-                  url: mapImage(p) || p.url,
-                  type: p.mimeType?.startsWith('video/') ? 'video' : 'image',
-                }))
+              ? b['imagePanels']
+                  .map((p: any) => {
+                    const panelUrl =
+                      typeof p === 'string'
+                        ? p
+                        : mapImage(p) || mapImage(p?.imageR2) || p?.url || p?.imageR2?.url
+                    if (!panelUrl) return null
+                    const type =
+                      p?.mimeType?.startsWith('video/') || p?.type === 'video' ? 'video' : 'image'
+                    return {url: panelUrl, type}
+                  })
+                  .filter(Boolean)
               : b['imagePanels'],
             panelSize: b['panelSize'],
             panelFit: b['panelFit'],

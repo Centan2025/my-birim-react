@@ -111,7 +111,7 @@ const PanelSlider: React.FC<{
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className={`flex overflow-x-auto ${getGapClass()} px-4 md:px-8 pb-4 no-scrollbar scroll-smooth snap-x snap-mandatory`}
+        className={`flex overflow-x-auto ${getGapClass()} pb-4 no-scrollbar scroll-smooth snap-x snap-mandatory`}
       >
         {media.map((item, i) => (
           <div
