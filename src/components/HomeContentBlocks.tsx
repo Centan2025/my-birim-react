@@ -26,7 +26,7 @@ const PanelSlider: React.FC<{
   media: Array<{
     url: string
     type: 'image' | 'video'
-    crop?: {top: number; bottom: number; left: number; right: number}
+    crop?: {x: number; y: number; width: number; height: number}
     hotspot?: {x: number; y: number}
     origWidth?: number
     origHeight?: number

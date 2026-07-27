@@ -122,7 +122,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const [currentSrc, setCurrentSrc] = useState<string>(src)
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
-  const [naturalDims, setNaturalDims] = useState<{w: number; h: number} | null>(null)
   const imgRef = useRef<HTMLImageElement>(null)
 
   // src değiştiğinde state'i sıfırla
@@ -137,12 +136,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     const img = imgRef.current
     if (img && img.complete && img.naturalWidth > 0) {
       setIsLoaded(true)
-      if (img.naturalHeight > 0) {
-        setNaturalDims((prev: {w: number; h: number} | null) => {
-          if (prev && prev.w === img.naturalWidth && prev.h === img.naturalHeight) return prev
-          return {w: img.naturalWidth, h: img.naturalHeight}
-        })
-      }
     }
   }, [currentSrc, srcMobile, srcDesktop])
 
@@ -158,11 +151,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   const handleLoad = () => {
     setIsLoaded(true)
-    // Doğal boyutları yakala (crop layout hesaplaması için gerekli)
-    const img = imgRef.current
-    if (img && img.naturalWidth && img.naturalHeight) {
-      setNaturalDims({w: img.naturalWidth, h: img.naturalHeight})
-    }
     onLoad?.()
   }
 
