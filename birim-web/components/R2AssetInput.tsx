@@ -710,7 +710,7 @@ export default function R2AssetInput(props: ObjectInputProps) {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={(e) => {
-          if (e.target === e.currentTarget && !isEditMode) {
+          if (!hasValue && !isUploading && !isEditMode) {
             document.getElementById(props.id)?.click()
           }
         }}
