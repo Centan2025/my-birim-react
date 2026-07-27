@@ -391,10 +391,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const innerImgClassName = className
     .split(' ')
     .filter(
-      c =>
-        !c.startsWith('max-w-') &&
-        !c.startsWith('w-') &&
-        (!useClientCrop || !c.startsWith('h-'))
+      c => !c.startsWith('max-w-') && !c.startsWith('w-') && (!useClientCrop || !c.startsWith('h-'))
     )
     .join(' ')
 
