@@ -892,6 +892,7 @@ export const contentBlock = defineType({
       of: [{type: 'r2Asset'}],
       options: {
         layout: 'grid',
+        modal: {type: 'popover'},
       },
       components: {
         input: BulkMediaUploadInput,
