@@ -47,6 +47,12 @@ const PanelSlider: React.FC<{
   const scrollRef = useRef<HTMLDivElement>(null)
   const [activeIndex, setActiveIndex] = useState(0)
 
+  // Mouse Drag-to-Scroll state
+  const [isMouseDown, setIsMouseDown] = useState(false)
+  const [startX, setStartX] = useState(0)
+  const [scrollLeftState, setScrollLeftState] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+
   const handleScroll = useCallback(() => {
     if (!scrollRef.current) return
     const container = scrollRef.current
@@ -75,6 +81,47 @@ const PanelSlider: React.FC<{
       left: index * (itemWidth + gap),
       behavior: 'smooth',
     })
+  }
+
+  const scrollPrev = () => {
+    if (activeIndex > 0) {
+      scrollTo(activeIndex - 1)
+    }
+  }
+
+  const scrollNext = () => {
+    if (activeIndex < media.length - 1) {
+      scrollTo(activeIndex + 1)
+    }
+  }
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return
+    setIsMouseDown(true)
+    setIsDragging(false)
+    setStartX(e.pageX - scrollRef.current.offsetLeft)
+    setScrollLeftState(scrollRef.current.scrollLeft)
+  }
+
+  const handleMouseLeave = () => {
+    setIsMouseDown(false)
+    setTimeout(() => setIsDragging(false), 50)
+  }
+
+  const handleMouseUp = () => {
+    setIsMouseDown(false)
+    setTimeout(() => setIsDragging(false), 50)
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isMouseDown || !scrollRef.current) return
+    e.preventDefault()
+    const x = e.pageX - scrollRef.current.offsetLeft
+    const walk = (x - startX) * 1.5
+    if (Math.abs(x - startX) > 5) {
+      setIsDragging(true)
+    }
+    scrollRef.current.scrollLeft = scrollLeftState - walk
   }
 
   // Determine width based on panel size
@@ -114,17 +161,29 @@ const PanelSlider: React.FC<{
   }
 
   return (
-    <div className="w-full relative group/panels flex flex-col gap-3">
+    <div className="w-full relative group/panels flex flex-col gap-2 pb-2">
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className={`flex overflow-x-auto ${getGapClass()} pb-1 no-scrollbar scroll-smooth snap-x snap-mandatory`}
+        onMouseDown={handleMouseDown}
+        onMouseLeave={handleMouseLeave}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+        className={`flex overflow-x-auto ${getGapClass()} pb-2 no-scrollbar scroll-smooth snap-x snap-mandatory ${
+          isMouseDown ? 'cursor-grabbing select-none snap-none' : 'cursor-grab'
+        }`}
       >
         {media.map((item, i) => (
           <div
             key={i}
-            className={`flex-shrink-0 snap-start relative overflow-hidden ${imageBorderClass} ${panelFit === 'natural' ? 'h-auto max-h-[70vh]' : 'aspect-[4/5] sm:aspect-[3/4]'} group cursor-pointer ${getWidthClass()}`}
-            onClick={() => onMediaClick && onMediaClick(item.url)}
+            className={`flex-shrink-0 snap-start relative overflow-hidden ${imageBorderClass} ${
+              panelFit === 'natural' ? 'h-auto max-h-[70vh]' : 'aspect-[4/5] sm:aspect-[3/4]'
+            } group cursor-pointer ${getWidthClass()}`}
+            onClick={() => {
+              if (!isDragging && onMediaClick) {
+                onMediaClick(item.url)
+              }
+            }}
             onKeyDown={e => {
               if (onMediaClick && (e.key === 'Enter' || e.key === ' ')) {
                 e.preventDefault()
@@ -137,7 +196,7 @@ const PanelSlider: React.FC<{
             {item.type === 'video' ? (
               <OptimizedVideo
                 src={item.url}
-                className={`w-full h-full ${getFitClass()}`}
+                className={`w-full h-full ${getFitClass()} pointer-events-none`}
                 autoPlay
                 loop
                 muted
@@ -148,7 +207,7 @@ const PanelSlider: React.FC<{
               <OptimizedImage
                 src={item.url}
                 alt=""
-                className={`w-full h-full ${getFitClass()} group-hover:scale-105 transition-transform duration-700`}
+                className={`w-full h-full ${getFitClass()} group-hover:scale-105 transition-transform duration-700 pointer-events-none`}
                 loading="lazy"
                 quality={85}
                 crop={item.crop}
@@ -161,17 +220,64 @@ const PanelSlider: React.FC<{
         ))}
       </div>
 
-      {/* Pagination Dots (Square) */}
+      {/* Sol / Sağ Ok Butonları (Desktop Hover) */}
       {media.length > 1 && (
-        <div className="flex justify-center gap-2 mt-2">
+        <>
+          <button
+            type="button"
+            onClick={scrollPrev}
+            disabled={activeIndex === 0}
+            className={`hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md items-center justify-center transition-all duration-300 shadow-md ${
+              activeIndex === 0
+                ? 'opacity-0 pointer-events-none'
+                : 'opacity-0 group-hover/panels:opacity-100'
+            }`}
+            aria-label="Previous image"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={scrollNext}
+            disabled={activeIndex === media.length - 1}
+            className={`hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md items-center justify-center transition-all duration-300 shadow-md ${
+              activeIndex === media.length - 1
+                ? 'opacity-0 pointer-events-none'
+                : 'opacity-0 group-hover/panels:opacity-100'
+            }`}
+            aria-label="Next image"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+        </>
+      )}
+
+      {/* Pagination Dots */}
+      {media.length > 1 && (
+        <div className="flex justify-center items-center gap-2 pt-2 pb-1">
           {media.map((_, i) => (
             <button
               key={i}
+              type="button"
               onClick={() => scrollTo(i)}
-              className={`w-2 h-2 rounded-none transition-all duration-300 ${
+              className={`w-2.5 h-2.5 rounded-none transition-all duration-300 ${
                 activeIndex === i
                   ? 'bg-[var(--text-primary)] opacity-100 scale-110 shadow-sm'
-                  : 'bg-[var(--text-primary)] opacity-20 hover:opacity-40'
+                  : 'bg-[var(--text-primary)] opacity-20 hover:opacity-50'
               }`}
               aria-label={`Go to slide ${i + 1}`}
             />
