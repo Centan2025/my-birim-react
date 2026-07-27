@@ -23,7 +23,14 @@ interface HomeContentBlocksProps {
  * Side-by-side horizontal scroll with dots and video support
  */
 const PanelSlider: React.FC<{
-  media: Array<{url: string; type: 'image' | 'video'}>
+  media: Array<{
+    url: string
+    type: 'image' | 'video'
+    crop?: {top: number; bottom: number; left: number; right: number}
+    hotspot?: {x: number; y: number}
+    origWidth?: number
+    origHeight?: number
+  }>
   panelSize?: 'small' | 'medium' | 'large'
   panelFit?: 'cover' | 'contain' | 'natural'
   panelGap?: 'none' | 'small' | 'medium' | 'large'
@@ -144,6 +151,10 @@ const PanelSlider: React.FC<{
                 className={`w-full h-full ${getFitClass()} group-hover:scale-105 transition-transform duration-700`}
                 loading="lazy"
                 quality={85}
+                crop={item.crop}
+                hotspot={item.hotspot}
+                origWidth={item.origWidth}
+                origHeight={item.origHeight}
               />
             )}
           </div>

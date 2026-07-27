@@ -318,7 +318,15 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
                     if (!panelUrl) return null
                     const type =
                       p?.mimeType?.startsWith('video/') || p?.type === 'video' ? 'video' : 'image'
-                    return {url: panelUrl, type}
+                    const meta = typeof p === 'object' && p ? mapR2Metadata(p?.imageR2 || p) : {}
+                    return {
+                      url: panelUrl,
+                      type,
+                      crop: meta.crop,
+                      hotspot: meta.hotspot,
+                      origWidth: meta.origWidth,
+                      origHeight: meta.origHeight,
+                    }
                   })
                   .filter(Boolean)
               : b['imagePanels'],
