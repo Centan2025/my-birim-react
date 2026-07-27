@@ -4,11 +4,47 @@ import {UploadIcon, TrashIcon, CheckmarkIcon, EditIcon, CropIcon, CloseIcon} fro
 import {ObjectInputProps, set, unset, useFormValue} from 'sanity'
 import imageCompression from 'browser-image-compression'
 import styled from 'styled-components'
-import ReactCrop, {type Crop, type PixelCrop, type PercentCrop} from 'react-image-crop'
+import ReactCrop, {
+  type Crop,
+  type PixelCrop,
+  type PercentCrop,
+  centerCrop,
+  makeAspectCrop,
+} from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 
 // R2 Configuration from Environment Variables (only R2_DOMAIN is needed for rewrite URLs)
 const R2_DOMAIN = process.env.SANITY_STUDIO_R2_DOMAIN
+
+const ASPECT_RATIO_PRESETS = [
+  {label: 'Serbest', value: undefined},
+  {label: '4:5 (Panel)', value: 4 / 5},
+  {label: '3:4 (Panel)', value: 3 / 4},
+  {label: '1:1 (Kare)', value: 1},
+  {label: '16:9 (Geniş)', value: 16 / 9},
+  {label: '9:16 (Hikaye)', value: 9 / 16},
+  {label: '4:3 (Standart)', value: 4 / 3},
+]
+
+function centerAspectCrop(
+  mediaWidth: number,
+  mediaHeight: number,
+  aspectRatio: number,
+): PercentCrop {
+  return centerCrop(
+    makeAspectCrop(
+      {
+        unit: '%',
+        width: 80,
+      },
+      aspectRatio,
+      mediaWidth,
+      mediaHeight,
+    ),
+    mediaWidth,
+    mediaHeight,
+  )
+}
 
 const DropZone = styled(Card)<{$isDragging: boolean; $hasValue: boolean}>`
   border: 2px dashed
@@ -274,6 +310,20 @@ export default function R2AssetInput(props: ObjectInputProps) {
 
   // Crop state
   const [crop, setCrop] = useState<Crop>()
+  const [aspect, setAspect] = useState<number | undefined>(undefined)
+
+  const handleAspectSelect = useCallback((selectedAspect: number | undefined) => {
+    setAspect(selectedAspect)
+    if (selectedAspect && modalImageRef.current) {
+      const {width, height, naturalWidth, naturalHeight} = modalImageRef.current
+      const w = width || naturalWidth
+      const h = height || naturalHeight
+      if (w > 0 && h > 0) {
+        const newCrop = centerAspectCrop(w, h, selectedAspect)
+        setCrop(newCrop)
+      }
+    }
+  }, [])
 
   // Ref for image click calculation
   const imageRef = useRef<HTMLImageElement>(null)
@@ -903,6 +953,35 @@ export default function R2AssetInput(props: ObjectInputProps) {
                 gösterimi değiştirir.
               </Text>
 
+              {/* Oranlı Seçim Araçları */}
+              <Stack space={2}>
+                <Flex align="center" justify="space-between">
+                  <Text size={1} weight="bold">
+                    Oranlı Seçim Araçları (Aspect Ratio):
+                  </Text>
+                  {aspect && (
+                    <Text size={1} muted>
+                      Sabit Oran: {aspect.toFixed(2)}
+                    </Text>
+                  )}
+                </Flex>
+                <Flex gap={2} wrap="wrap">
+                  {ASPECT_RATIO_PRESETS.map((preset) => {
+                    const isSelected = aspect === preset.value
+                    return (
+                      <Button
+                        key={preset.label}
+                        size={1}
+                        text={preset.label}
+                        mode={isSelected ? 'default' : 'outline'}
+                        tone={isSelected ? 'primary' : 'default'}
+                        onClick={() => handleAspectSelect(preset.value)}
+                      />
+                    )
+                  })}
+                </Flex>
+              </Stack>
+
               <Box
                 style={{
                   background: '#000',
@@ -916,7 +995,7 @@ export default function R2AssetInput(props: ObjectInputProps) {
                   <ReactCrop
                     crop={crop}
                     onChange={(_, percentCrop) => setCrop(percentCrop)}
-                    aspect={undefined}
+                    aspect={aspect}
                   >
                     <img
                       ref={modalImageRef}
@@ -934,7 +1013,10 @@ export default function R2AssetInput(props: ObjectInputProps) {
                   text="Kırpmayı Sıfırla"
                   mode="ghost"
                   tone="critical"
-                  onClick={() => setCrop(undefined)}
+                  onClick={() => {
+                    setCrop(undefined)
+                    setAspect(undefined)
+                  }}
                 />
                 <Button text="Kaydet ve Uygula" tone="primary" onClick={handleSaveCrop} />
               </Flex>
