@@ -354,7 +354,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
     return (
       <div
-        className={`relative overflow-hidden ${isCoverMode ? 'w-full h-full' : 'w-full'}`}
+        className="relative w-full h-full overflow-hidden"
         style={{
           aspectRatio: isCoverMode ? undefined : `${cropW} / ${cropH}`,
         }}
@@ -368,6 +368,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             top: `${topPercent.toFixed(4)}%`,
             position: 'absolute',
           }}
+          className="w-full h-full"
         >
           {pictureContent}
         </div>
