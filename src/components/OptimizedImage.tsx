@@ -345,27 +345,21 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const renderCroppedContent = (pictureContent: React.ReactNode) => {
     if (!useClientCrop) return pictureContent
 
-    const widthPercent = (1 / crop!.width) * 100
-    const heightPercent = (1 / crop!.height) * 100
-    const leftPercent = -(crop!.x / crop!.width) * 100
-    const topPercent = -(crop!.y / crop!.height) * 100
+    // Sanity Crop Inset Percentages: top, right, bottom, left
+    const topInset = crop!.y * 100
+    const rightInset = Math.max(0, (1 - crop!.x - crop!.width) * 100)
+    const bottomInset = Math.max(0, (1 - crop!.y - crop!.height) * 100)
+    const leftInset = crop!.x * 100
 
     return (
       <div
         className={`relative overflow-hidden ${isCoverMode ? 'w-full h-full' : 'w-full'}`}
+        style={{
+          clipPath: `inset(${topInset.toFixed(2)}% ${rightInset.toFixed(2)}% ${bottomInset.toFixed(2)}% ${leftInset.toFixed(2)}%)`,
+        }}
         data-crop={JSON.stringify(crop)}
       >
-        <div
-          style={{
-            width: `${widthPercent}%`,
-            height: `${heightPercent}%`,
-            left: `${leftPercent}%`,
-            top: `${topPercent}%`,
-            position: 'absolute',
-          }}
-        >
-          {pictureContent}
-        </div>
+        {pictureContent}
       </div>
     )
   }
