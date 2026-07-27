@@ -394,7 +394,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       c =>
         !c.startsWith('max-w-') &&
         !c.startsWith('w-') &&
-        (!useClientCrop || (!c.startsWith('object-') && !c.startsWith('h-')))
+        (!useClientCrop || !c.startsWith('h-'))
     )
     .join(' ')
 
@@ -439,13 +439,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           height={height}
           loading={loading}
           {...fetchPriorityAttr}
-          className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${useClientCrop ? 'h-full object-fill' : isHeightDefined ? '' : 'h-auto'} ${innerImgClassName} responsive-mirror`}
+          className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${useClientCrop ? 'h-full' : isHeightDefined ? '' : 'h-auto'} ${innerImgClassName} responsive-mirror`}
           draggable={draggable}
           onLoad={handleLoad}
           onError={handleError}
           style={{
             ...imgStyle,
-            objectFit: useClientCrop ? 'fill' : imgStyle.objectFit,
             display: 'block',
             WebkitBackfaceVisibility: 'hidden',
             backfaceVisibility: 'hidden',
@@ -500,13 +499,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         {...fetchPriorityAttr}
         srcSet={responsiveSrcSet}
         sizes={responsiveSrcSet ? defaultSizes : undefined}
-        className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${useClientCrop ? 'h-full object-fill' : isHeightDefined ? '' : 'h-auto'} ${innerImgClassName} responsive-mirror`}
+        className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${useClientCrop ? 'h-full' : isHeightDefined ? '' : 'h-auto'} ${innerImgClassName} responsive-mirror`}
         draggable={draggable}
         onLoad={handleLoad}
         onError={handleError}
         style={{
           ...imgStyle,
-          objectFit: useClientCrop ? 'fill' : imgStyle.objectFit,
           display: 'block',
           WebkitBackfaceVisibility: 'hidden',
           backfaceVisibility: 'hidden',

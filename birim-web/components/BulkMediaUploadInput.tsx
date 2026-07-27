@@ -120,23 +120,22 @@ const isImageFile = (filename: string) => {
 export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
   const {renderDefault, onChange, schemaType} = props
   const [isUploading, setIsUploading] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
   const [uploadProgress, setUploadProgress] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const toast = useToast()
   const sanityDocument = useFormValue([]) as any
   const docType = sanityDocument?._type
-  const handleBulkUpload = useCallback(
-    async (event: React.ChangeEvent<HTMLInputElement>) => {
-      const files = event.target.files
-      if (!files || files.length === 0) return
+
+  const processFiles = useCallback(
+    async (fileArray: File[]) => {
+      if (!fileArray || fileArray.length === 0) return
 
       setIsUploading(true)
-      const fileArray = Array.from(files)
       setUploadProgress(`0/${fileArray.length} başladı...`)
 
       try {
-        // Dosyaları paralel işle (concurrency kontrolü isteğe bağlı, şimdilik Promise.all)
         const uploadResults = await Promise.all(
           fileArray.map(async (file, index) => {
             const isTiff =
@@ -157,7 +156,6 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
               return null
             }
 
-            // 1. Path belirle
             let folderPath = 'migration/bulk-uploads'
             const docId = sanityDocument?.id?.current || sanityDocument?._id || 'unknown'
 
@@ -173,20 +171,16 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
               folderPath = `migration/factory/gallery`
             }
 
-            // R2 Domain Temizliği
             const r2Domain = R2_DOMAIN?.startsWith('http') ? R2_DOMAIN : `https://${R2_DOMAIN}`
 
-            // 2. Filename
             let fileName = file.name
             if (isProcessableImage && !file.name.toLowerCase().endsWith('.webp')) {
               fileName = file.name.replace(/\.[^/.]+$/, '') + '.webp'
             }
-            // Key oluştururken slugify artık noktayı koruyor (.webp kalacak)
             const key = `${folderPath}/${Date.now()}-${slugify(fileName)}`
 
             let r2Asset: Record<string, unknown> | null = null
 
-            // 3. Upload
             if (isProcessableImage) {
               const sizes = [
                 {width: 2560, suffix: '', maxSizeMB: 1.5},
@@ -282,10 +276,8 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
               }
             }
 
-            // Progress update (yaklaşık)
             setUploadProgress(`${index + 1}/${fileArray.length}: ${file.name}`)
 
-            // 4. Parçayı oluştur
             const itemType = schemaType.of[0].name
             let item: any
 
@@ -321,7 +313,6 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
 
         const newItems = uploadResults.filter(Boolean)
 
-        // 5. Sanity'ye ekle
         if (newItems.length > 0) {
           onChange(PatchEvent.from([setIfMissing([]), insert(newItems, 'after', [-1])]))
           toast.push({
@@ -339,6 +330,7 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
         })
       } finally {
         setIsUploading(false)
+        setIsDragging(false)
         setUploadProgress('')
         if (fileInputRef.current) fileInputRef.current.value = ''
       }
@@ -346,11 +338,61 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
     [docType, sanityDocument, onChange, toast, schemaType.of],
   )
 
+  const handleBulkUpload = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const files = event.target.files
+      if (!files || files.length === 0) return
+      await processFiles(Array.from(files))
+    },
+    [processFiles],
+  )
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+    const files = e.dataTransfer.files
+    if (files && files.length > 0) {
+      processFiles(Array.from(files))
+    }
+  }
+
   return (
     <Stack space={3}>
       {renderDefault(props)}
 
-      <Card padding={3} border radius={2} tone="transparent">
+      <Card
+        padding={3}
+        border
+        radius={2}
+        tone={isDragging ? 'primary' : 'transparent'}
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        style={{
+          transition: 'all 0.2s ease',
+          borderStyle: isDragging ? 'dashed' : 'solid',
+        }}
+      >
         <Stack space={3}>
           <Flex align="center" justify="space-between">
             <Stack space={2}>

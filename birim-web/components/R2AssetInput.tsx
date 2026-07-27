@@ -663,18 +663,27 @@ export default function R2AssetInput(props: ObjectInputProps) {
     setIsEditMode(false)
   }
 
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     setIsDragging(true)
   }
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     setIsDragging(false)
   }
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     setIsDragging(false)
     const files = e.dataTransfer.files
     if (files && files.length > 0) {
@@ -706,6 +715,7 @@ export default function R2AssetInput(props: ObjectInputProps) {
         padding={hasValue ? 2 : 4}
         $isDragging={isDragging}
         $hasValue={hasValue}
+        onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}

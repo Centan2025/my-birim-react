@@ -277,23 +277,6 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             urlDesktop = vdUrl ? rewriteR2Url(vdUrl) : undefined
           } else if (mediaType === 'youtube') {
             url = b['url'] as string | undefined
-          } else if (mediaType === 'panels') {
-            const imagePanels = b['imagePanels']
-            if (Array.isArray(imagePanels)) {
-              b['imagePanels'] = (imagePanels as Record<string, unknown>[])
-                .map((p: Record<string, unknown>) => {
-                  const url = mapImage(p as SanityImageLike)
-                  if (!url) return null
-                  const mime = (p['mimeType'] as string) || ''
-                  const type =
-                    mime.startsWith('video/') ||
-                    url.toLowerCase().match(/\.(mp4|webm|mov|avi|mkv)$/)
-                      ? 'video'
-                      : 'image'
-                  return {url, type}
-                })
-                .filter(Boolean)
-            }
           }
 
           const meta = imageR2 ? mapR2Metadata(imageR2) : {}
@@ -317,7 +300,11 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
                         : mapImage(p) || mapImage(p?.imageR2) || p?.url || p?.imageR2?.url
                     if (!panelUrl) return null
                     const type =
-                      p?.mimeType?.startsWith('video/') || p?.type === 'video' ? 'video' : 'image'
+                      p?.mimeType?.startsWith('video/') ||
+                      p?.type === 'video' ||
+                      panelUrl.toLowerCase().match(/\.(mp4|webm|mov|avi|mkv)$/)
+                        ? 'video'
+                        : 'image'
                     const meta = typeof p === 'object' && p ? mapR2Metadata(p?.imageR2 || p) : {}
                     return {
                       url: panelUrl,

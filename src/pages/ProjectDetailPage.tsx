@@ -291,6 +291,8 @@ export function ProjectDetailPage() {
               media.push({
                 type: p.type || 'image',
                 url: p.url,
+                crop: p.crop,
+                hotspot: p.hotspot,
               })
             }
           })

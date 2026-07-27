@@ -42,4 +42,32 @@ describe('sanity pages service', () => {
     expect(content).toBeDefined()
     expect(sanity.fetch).toHaveBeenCalled()
   })
+
+  it('getHomePageContent panel görsellerindeki kırpma (crop) ve metadata bilgilerini korur', async () => {
+    const mockCrop = {x: 0.1, y: 0.2, width: 0.8, height: 0.6}
+    const {mapR2Metadata} = await import('./client')
+    vi.mocked(mapR2Metadata).mockReturnValue({crop: mockCrop, origWidth: 1000, origHeight: 800})
+
+    vi.mocked(sanity.fetch).mockResolvedValue({
+      heroMedia: [],
+      contentBlocks: [
+        {
+          mediaType: 'panels',
+          panelFit: 'cover',
+          imagePanels: [
+            {
+              url: 'https://example.com/panel1.jpg',
+              cropX: 0.1,
+              cropY: 0.2,
+              cropWidth: 0.8,
+              cropHeight: 0.6,
+            },
+          ],
+        },
+      ],
+    })
+
+    const content = await getHomePageContent()
+    expect(content?.contentBlocks?.[0]?.imagePanels?.[0]?.crop).toEqual(mockCrop)
+  })
 })
