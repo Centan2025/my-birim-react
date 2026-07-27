@@ -16,15 +16,79 @@ import 'react-image-crop/dist/ReactCrop.css'
 // R2 Configuration from Environment Variables (only R2_DOMAIN is needed for rewrite URLs)
 const R2_DOMAIN = process.env.SANITY_STUDIO_R2_DOMAIN
 
-const ASPECT_RATIO_PRESETS = [
-  {label: 'Serbest', value: undefined},
-  {label: '4:5 (Panel)', value: 4 / 5},
-  {label: '3:4 (Panel)', value: 3 / 4},
-  {label: '1:1 (Kare)', value: 1},
-  {label: '16:9 (Geniş)', value: 16 / 9},
-  {label: '9:16 (Hikaye)', value: 9 / 16},
-  {label: '4:3 (Standart)', value: 4 / 3},
-]
+interface AspectRatioOption {
+  label: string
+  value: number | undefined
+  isRecommended?: boolean
+  recommendationReason?: string
+}
+
+function getAspectRatioPresets(
+  path: (string | number | {_key: string})[] = [],
+  document: any,
+): AspectRatioOption[] {
+  const pathStr = (path || [])
+    .map((p) => (typeof p === 'object' && p !== null && '_key' in p ? (p as any)._key : String(p)))
+    .join('.')
+    .toLowerCase()
+
+  let recommendedValue: number | undefined = undefined
+  let reason = ''
+
+  // 1. Panel görselleri kontrolü (imagePanels veya panels)
+  if (pathStr.includes('imagepanels') || pathStr.includes('panel')) {
+    recommendedValue = 4 / 5
+    reason = 'Paneller için 4:5 oranı önerilir'
+  }
+  // 2. Mobil görseller kontrolü (Mobile/mobileR2)
+  else if (pathStr.includes('mobile')) {
+    recommendedValue = 9 / 16
+    reason = 'Mobil görünüm için 9:16 önerilir'
+  }
+  // 3. Masaüstü görseller kontrolü (Desktop/desktopR2)
+  else if (pathStr.includes('desktop')) {
+    recommendedValue = 16 / 9
+    reason = 'Masaüstü görünüm için 16:9 önerilir'
+  }
+  // 4. Ürün dokümanı veya ürün medyaları
+  else if (document?._type === 'product' || pathStr.includes('product')) {
+    recommendedValue = 1 / 1
+    reason = 'Ürün görselleri için 1:1 kare oranı önerilir'
+  }
+  // 5. Kategori / Tasarımcı / Haber görselleri
+  else if (document?._type === 'category' || document?._type === 'designer') {
+    recommendedValue = 4 / 3
+    reason = 'Kategori / Tasarımcı kartları için 4:3 önerilir'
+  }
+  // 6. Genel içerik blokları
+  else if (pathStr.includes('contentblocks')) {
+    recommendedValue = 16 / 9
+    reason = 'İçerik bloğu görseli için 16:9 önerilir'
+  }
+
+  const basePresets: {label: string; value: number | undefined}[] = [
+    {label: 'Serbest', value: undefined},
+    {label: '4:5 (Panel)', value: 4 / 5},
+    {label: '3:4 (Panel)', value: 3 / 4},
+    {label: '1:1 (Kare)', value: 1},
+    {label: '16:9 (Geniş)', value: 16 / 9},
+    {label: '9:16 (Hikaye)', value: 9 / 16},
+    {label: '4:3 (Standart)', value: 4 / 3},
+  ]
+
+  return basePresets.map((preset) => {
+    const isRecommended =
+      recommendedValue !== undefined &&
+      preset.value !== undefined &&
+      Math.abs(preset.value - recommendedValue) < 0.01
+
+    return {
+      ...preset,
+      isRecommended,
+      recommendationReason: isRecommended ? reason : undefined,
+    }
+  })
+}
 
 function centerAspectCrop(
   mediaWidth: number,
@@ -388,6 +452,16 @@ export default function R2AssetInput(props: ObjectInputProps) {
   const cropHeight = asset?.cropHeight
   const hasCrop = typeof cropX === 'number' && cropWidth > 0
 
+  // Contextual Aspect Ratio presets based on schema path and document type
+  const presets = React.useMemo(
+    () => getAspectRatioPresets(props.path, sanityDocument),
+    [props.path, sanityDocument],
+  )
+  const recommendedPreset = React.useMemo(
+    () => presets.find((p) => p.isRecommended),
+    [presets],
+  )
+
   // Init crop state from asset
   useEffect(() => {
     if (isEditMode) {
@@ -400,9 +474,22 @@ export default function R2AssetInput(props: ObjectInputProps) {
           width: cropWidth * 100,
           height: cropHeight * 100,
         })
+        setAspect(undefined)
+      } else if (recommendedPreset?.value) {
+        // Automatically default to recommended aspect ratio for uncropped images
+        setAspect(recommendedPreset.value)
+        if (modalImageRef.current) {
+          const {width, height, naturalWidth, naturalHeight} = modalImageRef.current
+          const w = width || naturalWidth
+          const h = height || naturalHeight
+          if (w > 0 && h > 0) {
+            setCrop(centerAspectCrop(w, h, recommendedPreset.value))
+          }
+        }
       } else {
         // No crop exists, start with undefined
         setCrop(undefined)
+        setAspect(undefined)
       }
     }
   }, [isEditMode]) // Only run when edit mode toggles
@@ -955,26 +1042,32 @@ export default function R2AssetInput(props: ObjectInputProps) {
 
               {/* Oranlı Seçim Araçları */}
               <Stack space={2}>
-                <Flex align="center" justify="space-between">
+                <Flex align="center" justify="space-between" wrap="wrap" gap={2}>
                   <Text size={1} weight="bold">
                     Oranlı Seçim Araçları (Aspect Ratio):
                   </Text>
-                  {aspect && (
+                  {recommendedPreset?.recommendationReason ? (
+                    <Card tone="positive" padding={2} radius={2}>
+                      <Text size={1} weight="semibold">
+                        ⭐ {recommendedPreset.recommendationReason}
+                      </Text>
+                    </Card>
+                  ) : aspect ? (
                     <Text size={1} muted>
                       Sabit Oran: {aspect.toFixed(2)}
                     </Text>
-                  )}
+                  ) : null}
                 </Flex>
                 <Flex gap={2} wrap="wrap">
-                  {ASPECT_RATIO_PRESETS.map((preset) => {
+                  {presets.map((preset) => {
                     const isSelected = aspect === preset.value
                     return (
                       <Button
                         key={preset.label}
                         size={1}
-                        text={preset.label}
+                        text={preset.isRecommended ? `⭐ ${preset.label}` : preset.label}
                         mode={isSelected ? 'default' : 'outline'}
-                        tone={isSelected ? 'primary' : 'default'}
+                        tone={isSelected ? 'primary' : preset.isRecommended ? 'positive' : 'default'}
                         onClick={() => handleAspectSelect(preset.value)}
                       />
                     )
@@ -1001,6 +1094,16 @@ export default function R2AssetInput(props: ObjectInputProps) {
                       ref={modalImageRef}
                       src={previewUrl}
                       alt="Crop Preview"
+                      onLoad={(e) => {
+                        const img = e.currentTarget
+                        if (aspect && !hasCrop && (!crop || crop.width === 0)) {
+                          const w = img.width || img.naturalWidth
+                          const h = img.height || img.naturalHeight
+                          if (w > 0 && h > 0) {
+                            setCrop(centerAspectCrop(w, h, aspect))
+                          }
+                        }
+                      }}
                       style={{maxHeight: '70vh', maxWidth: '100%'}}
                     />
                   </ReactCrop>
