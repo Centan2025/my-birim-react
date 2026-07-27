@@ -345,29 +345,23 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const renderCroppedContent = (pictureContent: React.ReactNode) => {
     if (!useClientCrop) return pictureContent
 
-    if (!naturalDims) {
-      return pictureContent
-    }
-
-    const cropW = naturalDims.w * crop!.width
-    const cropH = naturalDims.h * crop!.height
-    const aspectRatio = cropW / cropH
+    const widthPercent = (1 / crop!.width) * 100
+    const heightPercent = (1 / crop!.height) * 100
+    const leftPercent = -(crop!.x / crop!.width) * 100
+    const topPercent = -(crop!.y / crop!.height) * 100
 
     return (
       <div
-        style={{aspectRatio: isCoverMode ? undefined : `${aspectRatio} / 1`}}
         className={`relative overflow-hidden ${isCoverMode ? 'w-full h-full' : 'w-full'}`}
         data-crop={JSON.stringify(crop)}
       >
         <div
           style={{
-            width: `${(1 / crop!.width) * 100}%`,
-            height: `${(1 / crop!.height) * 100}%`,
-            transform: `translate(-${crop!.x * 100}%, -${crop!.y * 100}%)`,
+            width: `${widthPercent}%`,
+            height: `${heightPercent}%`,
+            left: `${leftPercent}%`,
+            top: `${topPercent}%`,
             position: 'absolute',
-            top: 0,
-            left: 0,
-            objectFit: isCoverMode ? 'cover' : 'fill',
           }}
         >
           {pictureContent}
