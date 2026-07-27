@@ -124,18 +124,26 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const [hasError, setHasError] = useState(false)
   const imgRef = useRef<HTMLImageElement>(null)
 
-  // src değiştiğinde state'i sıfırla
+  const [naturalDims, setNaturalDims] = useState<{w: number; h: number} | null>(
+    origWidth && origHeight ? {w: origWidth, h: origHeight} : null
+  )
+
+  // src veya props değiştiğinde state'i sıfırla
   useEffect(() => {
     setCurrentSrc(src)
     setIsLoaded(false)
     setHasError(false)
-  }, [src, srcMobile, srcDesktop])
+    if (origWidth && origHeight) {
+      setNaturalDims({w: origWidth, h: origHeight})
+    }
+  }, [src, srcMobile, srcDesktop, origWidth, origHeight])
 
-  // Cache'den yüklenen görselleri yakalama — back navigation'da onLoad tetiklenmez
+  // Cache'den yüklenen görselleri yakalama — naturalDims hesapla
   useEffect(() => {
     const img = imgRef.current
-    if (img && img.complete && img.naturalWidth > 0) {
+    if (img && img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
       setIsLoaded(true)
+      setNaturalDims({w: img.naturalWidth, h: img.naturalHeight})
     }
   }, [currentSrc, srcMobile, srcDesktop])
 
@@ -149,8 +157,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   // Placeholder (çok küçük, özel renk veya varsayılan gri)
   const placeholder = `data:image/svg+xml;base64,${btoa(`<svg width="1" height="1" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="${placeholderColor}"/></svg>`)}`
 
-  const handleLoad = () => {
+  const handleLoad = (e?: React.SyntheticEvent<HTMLImageElement>) => {
     setIsLoaded(true)
+    const img = e?.currentTarget || imgRef.current
+    if (img && img.naturalWidth > 0 && img.naturalHeight > 0) {
+      setNaturalDims({w: img.naturalWidth, h: img.naturalHeight})
+    }
     onLoad?.()
   }
 
@@ -313,11 +325,13 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   } else if (hotspot) {
     imgStyle.objectPosition = `${hotspot.x * 100}% ${hotspot.y * 100}%`
   }
+
+  const classList = className.split(' ')
   const isCoverMode =
-    className.includes('h-full') ||
-    className.includes('h-screen') ||
-    className.includes('object-cover') ||
-    className.includes('object-contain') ||
+    classList.includes('h-full') ||
+    classList.includes('h-screen') ||
+    classList.includes('object-cover') ||
+    classList.includes('object-contain') ||
     !!height
 
   const canCloudflareCrop = !!(crop && (crop.width >= 1.0 || (origWidth && origHeight)))
@@ -340,11 +354,16 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     const leftPercent = -(crop!.x / cropW) * 100
     const topPercent = -(crop!.y / cropH) * 100
 
+    // Orijinal görsel boyutları (varsa naturalDims veya origWidth/origHeight)
+    const imgW = naturalDims?.w || origWidth || 1
+    const imgH = naturalDims?.h || origHeight || 1
+    const croppedAspect = (cropW * imgW) / (cropH * imgH)
+
     return (
       <div
-        className="relative w-full h-full overflow-hidden"
+        className={`relative w-full ${isCoverMode ? 'h-full' : ''} overflow-hidden`}
         style={{
-          aspectRatio: isCoverMode ? undefined : `${cropW} / ${cropH}`,
+          aspectRatio: isCoverMode ? undefined : `${croppedAspect}`,
         }}
         data-crop={JSON.stringify(crop)}
       >
@@ -375,7 +394,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     )
   }
 
-  const isHeightDefined = className.includes('h-') || className.includes('aspect-')
+  const isHeightDefined = classList.some(c => (c.startsWith('h-') && c !== 'h-auto') || c.startsWith('aspect-'))
   const innerImgClassName = className
     .split(' ')
     .filter(

@@ -442,11 +442,10 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           >
             <h2
               ref={applyFontRef(titleFontFamily)}
-              className={`${isFullWidth ? 'text-4xl md:text-6xl lg:text-7xl' : 'text-3xl md:text-5xl lg:text-6xl'} uppercase ${titleAlignClass} text-[var(--text-primary)] w-full ${block.verticalAlignment === 'top' ? 'mt-0' : ''} ${titleAlign === 'center' ? 'mx-auto' : titleAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}
+              className={`${isFullWidth ? 'text-2xl md:text-4xl lg:text-5xl' : 'text-xl md:text-3xl lg:text-4xl'} uppercase ${titleAlignClass} text-[var(--text-primary)] w-full ${block.verticalAlignment === 'top' ? 'mt-0' : ''} ${titleAlign === 'center' ? 'mx-auto' : titleAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}
               style={{
-                textShadow: '0 2px 4px rgba(0,0,0,0.1)',
                 fontWeight: titleFont === 'normal' || titleFont === 'Oswald' ? 200 : 'inherit',
-                letterSpacing: '0.1em',
+                letterSpacing: '0.18em',
               }}
             >
               {titleContent as string}
@@ -492,7 +491,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       return (
                         <div
                           ref={!isNormalContentFont ? applyFontRef(contentFontFamily) : undefined}
-                          className={`${marginClass} ${widthClass} ${isNormalContentFont ? 'font-roboto-thin text-xl md:text-2xl lg:text-3xl' : ''} text-[var(--text-primary)] ${block.verticalAlignment === 'top' && !hasTitle ? '[&_.portable-text-container>*:first-child]:!mt-0' : ''}`}
+                          className={`${marginClass} ${widthClass} ${isNormalContentFont ? 'font-light text-base md:text-lg lg:text-xl' : ''} text-[var(--text-primary)] opacity-90 ${block.verticalAlignment === 'top' && !hasTitle ? '[&_.portable-text-container>*:first-child]:!mt-0' : ''}`}
                           style={!isNormalContentFont ? {fontWeight: 300} : {}}
                         >
                           <PortableTextLite
@@ -507,7 +506,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     return (
                       <p
                         ref={!isNormalContentFont ? applyFontRef(contentFontFamily) : undefined}
-                        className={`text-[var(--text-primary)] ${isNormalContentFont ? 'font-roboto-thin text-2xl md:text-3xl lg:text-4xl' : ''} leading-relaxed ${widthClass} ${marginClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0' : ''}`}
+                        className={`text-[var(--text-primary)] opacity-90 ${isNormalContentFont ? 'font-light text-base md:text-lg lg:text-xl' : ''} leading-relaxed ${widthClass} ${marginClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0' : ''}`}
                         style={!isNormalContentFont ? {fontWeight: 300} : {}}
                       >
                         {desc}
@@ -732,16 +731,18 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           </div>
         ) : null
 
-        // Content alanları arasında dikey boşluk olmasın (Sanity'den ayarlanabilir)
         const bottomSpacing = block.spacingBottom || 0
+        const isSideBySide = !isFullWidth && !isCenter
 
         return (
           <section
             key={index}
             className={`content-block-wrapper relative z-20 ${backgroundColor} transition-colors duration-500`}
             style={{
-              paddingBottom:
-                !hasTextContent || index === sortedBlocks.length - 1
+              paddingTop: isSideBySide ? `${customPadding !== undefined ? customPadding : 32}px` : undefined,
+              paddingBottom: isSideBySide
+                ? `${customPadding !== undefined ? customPadding : 32}px`
+                : !hasTextContent || index === sortedBlocks.length - 1
                   ? 0
                   : bottomSpacing > 0
                     ? `${bottomSpacing}px`
@@ -771,14 +772,19 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             ) : (
               <div
                 className={`w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 overflow-hidden relative ${borderPaddingClass}`}
-                style={borderPaddingStyle}
               >
                 <div
                   className={
                     hasTextContent && hasMedia
                       ? `flex flex-col ${
                           isLeft ? 'md:flex-row' : isRight ? 'md:flex-row-reverse' : 'md:flex-row'
-                        } ${block.verticalAlignment === 'top' ? 'gap-x-4 md:gap-x-6 gap-y-0' : 'gap-4 md:gap-6'} items-start`
+                        } ${block.verticalAlignment === 'top' ? 'gap-x-4 md:gap-x-6 gap-y-0' : 'gap-6 md:gap-12'} ${
+                          block.verticalAlignment === 'top'
+                            ? 'items-start'
+                            : block.verticalAlignment === 'bottom'
+                              ? 'items-end'
+                              : 'items-center'
+                        }`
                       : hasTextContent && !hasMedia
                         ? 'flex flex-col'
                         : 'flex flex-col items-center gap-4 md:gap-6'
@@ -795,7 +801,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   )}
                   {hasTextContent && (
                     <div
-                      className={`w-full ${hasMedia ? 'md:w-1/2' : 'md:w-full'} flex flex-col ${hasTitle && (hasDescription || block.linkText) ? 'gap-6' : 'gap-0'} self-stretch ${verticalAlignClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'pt-0 mt-0' : ''}`}
+                      className={`w-full ${hasMedia ? 'md:w-1/2' : 'md:w-full'} flex flex-col ${hasTitle && (hasDescription || block.linkText) ? 'gap-6' : 'gap-0'} ${block.verticalAlignment === 'top' ? 'self-start' : block.verticalAlignment === 'bottom' ? 'self-end' : 'self-center'} ${verticalAlignClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'pt-0 mt-0' : ''}`}
                     >
                       {hasTitle && titleElement}
                       {bodyElement}
