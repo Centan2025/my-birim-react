@@ -345,13 +345,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const renderCroppedContent = (pictureContent: React.ReactNode) => {
     if (!useClientCrop) return pictureContent
 
-    // Calculate crop aspect ratio and container dimensions
     const cropW = crop!.width
     const cropH = crop!.height
-    const scaleX = 1 / cropW
-    const scaleY = 1 / cropH
-    const offsetX = (crop!.x / cropW) * 100
-    const offsetY = (crop!.y / cropH) * 100
+    const scaleX = (1 / cropW) * 100
+    const scaleY = (1 / cropH) * 100
+    const leftPercent = -(crop!.x / cropW) * 100
+    const topPercent = -(crop!.y / cropH) * 100
 
     return (
       <div
@@ -363,14 +362,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       >
         <div
           style={{
-            width: `${(scaleX * 100).toFixed(4)}%`,
-            height: `${(scaleY * 100).toFixed(4)}%`,
-            transform: `translate(-${offsetX.toFixed(4)}%, -${offsetY.toFixed(4)}%)`,
+            width: `${scaleX.toFixed(4)}%`,
+            height: `${scaleY.toFixed(4)}%`,
+            left: `${leftPercent.toFixed(4)}%`,
+            top: `${topPercent.toFixed(4)}%`,
             position: 'absolute',
-            top: 0,
-            left: 0,
           }}
-          className="w-full h-full"
         >
           {pictureContent}
         </div>
