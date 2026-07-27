@@ -1,3 +1,4 @@
+import React from 'react'
 import {defineField, defineType} from 'sanity'
 import R2AssetInput from '../../components/R2AssetInput'
 import {browserOnlyInput} from '../utils/browserOnly'
@@ -35,4 +36,24 @@ export default defineType({
       initialValue: false,
     }),
   ],
+  preview: {
+    select: {
+      url: 'url',
+      alt: 'alt',
+      path: 'path',
+    },
+    prepare({url, alt, path}) {
+      const fileName = path ? path.split('/').pop() : 'R2 Görseli'
+      return {
+        title: alt || fileName || 'Görsel',
+        media: url
+          ? React.createElement('img', {
+              src: url,
+              alt: alt || '',
+              style: {width: '100%', height: '100%', objectFit: 'cover'},
+            })
+          : undefined,
+      }
+    },
+  },
 })

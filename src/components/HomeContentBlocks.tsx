@@ -25,9 +25,18 @@ interface HomeContentBlocksProps {
 const PanelSlider: React.FC<{
   media: Array<{url: string; type: 'image' | 'video'}>
   panelSize?: 'small' | 'medium' | 'large'
+  panelFit?: 'cover' | 'contain' | 'natural'
+  panelGap?: 'none' | 'small' | 'medium' | 'large'
   imageBorderClass: string
   onMediaClick?: (url: string) => void
-}> = ({media, panelSize, imageBorderClass, onMediaClick}) => {
+}> = ({
+  media,
+  panelSize,
+  panelFit = 'cover',
+  panelGap = 'medium',
+  imageBorderClass,
+  onMediaClick,
+}) => {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [activeIndex, setActiveIndex] = useState(0)
 
@@ -38,14 +47,14 @@ const PanelSlider: React.FC<{
     if (!item) return
 
     const itemWidth = item.clientWidth
-    const gap = 16 // md:gap-4
+    const gap = panelGap === 'none' ? 0 : panelGap === 'small' ? 12 : panelGap === 'large' ? 40 : 16
     const scrollLeft = container.scrollLeft
     const index = Math.round(scrollLeft / (itemWidth + gap))
 
     if (index !== activeIndex) {
       setActiveIndex(index)
     }
-  }, [activeIndex])
+  }, [activeIndex, panelGap])
 
   const scrollTo = (index: number) => {
     if (!scrollRef.current) return
@@ -54,7 +63,7 @@ const PanelSlider: React.FC<{
     if (!item) return
 
     const itemWidth = item.clientWidth
-    const gap = 16
+    const gap = panelGap === 'none' ? 0 : panelGap === 'small' ? 12 : panelGap === 'large' ? 40 : 16
     container.scrollTo({
       left: index * (itemWidth + gap),
       behavior: 'smooth',
@@ -73,17 +82,41 @@ const PanelSlider: React.FC<{
     }
   }
 
+  const getGapClass = () => {
+    switch (panelGap) {
+      case 'none':
+        return 'gap-0'
+      case 'small':
+        return 'gap-3'
+      case 'large':
+        return 'gap-8 md:gap-10'
+      default:
+        return 'gap-4'
+    }
+  }
+
+  const getFitClass = () => {
+    switch (panelFit) {
+      case 'contain':
+        return 'object-contain bg-black/5 dark:bg-white/5'
+      case 'natural':
+        return 'object-scale-down'
+      default:
+        return 'object-cover'
+    }
+  }
+
   return (
     <div className="w-full relative group/panels flex flex-col gap-6">
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex overflow-x-auto gap-4 px-4 md:px-8 pb-4 no-scrollbar scroll-smooth snap-x snap-mandatory"
+        className={`flex overflow-x-auto ${getGapClass()} px-4 md:px-8 pb-4 no-scrollbar scroll-smooth snap-x snap-mandatory`}
       >
         {media.map((item, i) => (
           <div
             key={i}
-            className={`flex-shrink-0 snap-start relative overflow-hidden ${imageBorderClass} aspect-[4/5] sm:aspect-[3/4] group cursor-pointer ${getWidthClass()}`}
+            className={`flex-shrink-0 snap-start relative overflow-hidden ${imageBorderClass} ${panelFit === 'natural' ? 'h-auto max-h-[70vh]' : 'aspect-[4/5] sm:aspect-[3/4]'} group cursor-pointer ${getWidthClass()}`}
             onClick={() => onMediaClick && onMediaClick(item.url)}
             onKeyDown={e => {
               if (onMediaClick && (e.key === 'Enter' || e.key === ' ')) {
@@ -97,7 +130,7 @@ const PanelSlider: React.FC<{
             {item.type === 'video' ? (
               <OptimizedVideo
                 src={item.url}
-                className="w-full h-full object-cover"
+                className={`w-full h-full ${getFitClass()}`}
                 autoPlay
                 loop
                 muted
@@ -108,7 +141,7 @@ const PanelSlider: React.FC<{
               <OptimizedImage
                 src={item.url}
                 alt=""
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                className={`w-full h-full ${getFitClass()} group-hover:scale-105 transition-transform duration-700`}
                 loading="lazy"
                 quality={85}
               />
@@ -492,6 +525,8 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               <PanelSlider
                 media={block.imagePanels || []}
                 panelSize={block.panelSize}
+                panelFit={block.panelFit}
+                panelGap={block.panelGap}
                 imageBorderClass={imageBorderClass}
                 onMediaClick={onMediaClick}
               />

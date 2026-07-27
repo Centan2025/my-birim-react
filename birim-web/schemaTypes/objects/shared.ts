@@ -916,6 +916,41 @@ export const contentBlock = defineType({
       hidden: ({parent}) => parent?.mediaType !== 'panels',
       description: 'Panellerin ne kadar büyük görüneceğini belirler.',
     }),
+    defineField({
+      name: 'panelFit',
+      title: 'Panel Görsel Sığdırma Yöntemi',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Kapsa / Tam Doldur (Cover - Kırpılabilir)', value: 'cover'},
+          {title: 'Sığdır / Tamamını Göster (Contain - Oranı Korur)', value: 'contain'},
+          {title: 'Doğal Boyut (Natural)', value: 'natural'},
+        ],
+        layout: 'radio',
+        direction: 'horizontal',
+      },
+      initialValue: 'cover',
+      hidden: ({parent}) => parent?.mediaType !== 'panels',
+      description: 'Görsellerin panel alanına nasıl sığdırılacağını veya oturacağını belirler.',
+    }),
+    defineField({
+      name: 'panelGap',
+      title: 'Paneller Arası Boşluk',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Yok (0px)', value: 'none'},
+          {title: 'Küçük (12px)', value: 'small'},
+          {title: 'Orta (24px)', value: 'medium'},
+          {title: 'Büyük (40px)', value: 'large'},
+        ],
+        layout: 'radio',
+        direction: 'horizontal',
+      },
+      initialValue: 'medium',
+      hidden: ({parent}) => parent?.mediaType !== 'panels',
+      description: 'Yan yana duran paneller arasındaki mesafeyi ayarlar.',
+    }),
     // Görsel konumu – doğrudan görsel alanlarının altında
     defineField({
       name: 'position',

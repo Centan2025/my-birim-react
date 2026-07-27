@@ -308,8 +308,15 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             url,
             urlMobile,
             urlDesktop,
-            imagePanels: b['imagePanels'],
+            imagePanels: Array.isArray(b['imagePanels'])
+              ? b['imagePanels'].map((p: any) => ({
+                  url: mapImage(p) || p.url,
+                  type: p.mimeType?.startsWith('video/') ? 'video' : 'image',
+                }))
+              : b['imagePanels'],
             panelSize: b['panelSize'],
+            panelFit: b['panelFit'],
+            panelGap: b['panelGap'],
             crop: meta.crop,
             hotspot: meta.hotspot,
             origWidth: meta.origWidth,

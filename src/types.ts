@@ -358,6 +358,10 @@ export interface ContentBlock {
   imagePanels?: Array<{url: string; type: 'image' | 'video'}>
   /** Size for panels: small, medium, large */
   panelSize?: 'small' | 'medium' | 'large'
+  /** Fitting mode for panel images: cover, contain, natural */
+  panelFit?: 'cover' | 'contain' | 'natural'
+  /** Gap between panels: none, small, medium, large */
+  panelGap?: 'none' | 'small' | 'medium' | 'large'
   crop?: R2ImageMetadata['crop']
   hotspot?: R2ImageMetadata['hotspot']
   origWidth?: number
