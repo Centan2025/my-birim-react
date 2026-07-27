@@ -162,6 +162,7 @@ const PanelSlider: React.FC<{
 
   return (
     <div className="w-full relative group/panels flex flex-col gap-2 pb-2">
+      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/no-noninteractive-element-interactions */}
       <div
         ref={scrollRef}
         onScroll={handleScroll}

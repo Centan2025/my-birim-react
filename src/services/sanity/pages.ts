@@ -293,7 +293,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             urlDesktop,
             imagePanels: Array.isArray(b['imagePanels'])
               ? b['imagePanels']
-                  .map((p: any) => {
+                  .map((p: Record<string, unknown> | string) => {
                     const panelUrl =
                       typeof p === 'string'
                         ? p
