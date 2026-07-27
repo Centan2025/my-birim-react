@@ -510,7 +510,9 @@ export function Header() {
   const mobileMenuLinks: {to: string; label: string}[] = [
     {to: '/designers', label: (t('designers') || '').toLocaleUpperCase('en')},
     {to: '/projects', label: (t('projects') || 'Projeler').toLocaleUpperCase('en')},
-    ...(settings?.isFactoryVisible ? [{to: '/factory', label: (t('factory') || 'Fabrika').toLocaleUpperCase('en')}] : []),
+    ...(settings?.isFactoryVisible
+      ? [{to: '/factory', label: (t('factory') || 'Fabrika').toLocaleUpperCase('en')}]
+      : []),
     {to: '/news', label: (t('news') || '').toLocaleUpperCase('en')},
     {to: '/about', label: (t('about') || '').toLocaleUpperCase('en')},
     {to: '/contact', label: (t('contact') || '').toLocaleUpperCase('en')},

@@ -108,8 +108,6 @@ export function AboutPage() {
     fetchContent()
   }, [])
 
-
-
   if (loading || !content) {
     return (
       <div className="pt-24">

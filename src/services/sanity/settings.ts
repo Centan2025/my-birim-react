@@ -129,11 +129,11 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
         enablePageTransitions: s?.enablePageTransitions !== false,
         isFactoryVisible: Boolean(
           s?.isFactoryVisible ??
-          s?.showFactory ??
-          s?.showFactoryMenu ??
-          s?.showFactoryPage ??
-          s?.enableFactory ??
-          false
+            s?.showFactory ??
+            s?.showFactoryMenu ??
+            s?.showFactoryPage ??
+            s?.enableFactory ??
+            false
         ),
         enableAiRoomPlanner: s?.enableAiRoomPlanner !== false,
       }
@@ -158,11 +158,11 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
     enablePageTransitions: s?.enablePageTransitions !== false,
     isFactoryVisible: Boolean(
       s?.isFactoryVisible ??
-      (s as Record<string, unknown> | null)?.[ 'showFactory' ] ??
-      (s as Record<string, unknown> | null)?.[ 'showFactoryMenu' ] ??
-      (s as Record<string, unknown> | null)?.[ 'showFactoryPage' ] ??
-      (s as Record<string, unknown> | null)?.[ 'enableFactory' ] ??
-      false
+        (s as Record<string, unknown> | null)?.['showFactory'] ??
+        (s as Record<string, unknown> | null)?.['showFactoryMenu'] ??
+        (s as Record<string, unknown> | null)?.['showFactoryPage'] ??
+        (s as Record<string, unknown> | null)?.['enableFactory'] ??
+        false
     ),
     enableAiRoomPlanner: s?.enableAiRoomPlanner !== false,
   }

@@ -29,9 +29,7 @@ export function useHeaderBackgroundColor({
 
     const isDarkHeroMatched = isDarkHeroPage(path)
 
-    if (
-      isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)
-    ) {
+    if (isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)) {
       return isDarkMode || isDarkHeroMatched ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.95)'
     }
 

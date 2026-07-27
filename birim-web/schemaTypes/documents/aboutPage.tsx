@@ -15,9 +15,21 @@ export default defineType({
     defineField({name: 'heroTitle', title: 'Hero Başlığı', type: 'localizedString'}),
     defineField({name: 'heroSubtitle', title: 'Hero Alt Başlığı', type: 'localizedString'}),
     defineField({name: 'manifestoLabel', title: 'Manifesto Etiketi', type: 'localizedString'}),
-    defineField({name: 'manifestoQuote', title: 'Felsefe / Manifesto Alıntısı', type: 'localizedString'}),
-    defineField({name: 'timelineTitle', title: 'Tarihçe Zaman Çizelgesi Başlığı', type: 'localizedString'}),
-    defineField({name: 'timelineSubtitle', title: 'Tarihçe Zaman Çizelgesi Alt Başlığı', type: 'localizedString'}),
+    defineField({
+      name: 'manifestoQuote',
+      title: 'Felsefe / Manifesto Alıntısı',
+      type: 'localizedString',
+    }),
+    defineField({
+      name: 'timelineTitle',
+      title: 'Tarihçe Zaman Çizelgesi Başlığı',
+      type: 'localizedString',
+    }),
+    defineField({
+      name: 'timelineSubtitle',
+      title: 'Tarihçe Zaman Çizelgesi Alt Başlığı',
+      type: 'localizedString',
+    }),
     defineField({
       name: 'eras',
       title: 'Tarihçe Dönemleri / Dönüm Noktaları',

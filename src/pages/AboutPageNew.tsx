@@ -401,12 +401,7 @@ export function AboutPageNew() {
       {/* Main Page Layout */}
       <div className="bg-[var(--bg-primary)] pb-16 sm:pb-32">
         <div className={containerClass + ' py-3 sm:py-4 text-[11px] sm:text-[12px]'}>
-          <Breadcrumbs
-            items={[
-              {label: t('homepage'), to: '/'},
-              {label: t('about')},
-            ]}
-          />
+          <Breadcrumbs items={[{label: t('homepage'), to: '/'}, {label: t('about')}]} />
         </div>
 
         {/* SECTION 1: ARCHITECTURAL MANIFESTO QUOTE */}
@@ -483,10 +478,10 @@ export function AboutPageNew() {
                     <AnimatePresence initial={false}>
                       {isActive && (
                         <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.35, ease: 'easeInOut' }}
+                          initial={{height: 0, opacity: 0}}
+                          animate={{height: 'auto', opacity: 1}}
+                          exit={{height: 0, opacity: 0}}
+                          transition={{duration: 0.35, ease: 'easeInOut'}}
                         >
                           <div className="p-4 pt-0 border-t border-neutral-500/30 space-y-4">
                             <div className="space-y-2 pt-3">
@@ -557,10 +552,10 @@ export function AboutPageNew() {
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={currentIdx}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        transition={{ duration: 0.4 }}
+                        initial={{opacity: 0, x: 20}}
+                        animate={{opacity: 1, x: 0}}
+                        exit={{opacity: 0, x: -20}}
+                        transition={{duration: 0.4}}
                         className="grid grid-cols-12 gap-8 items-center"
                       >
                         <div className="col-span-5 space-y-4">
@@ -693,210 +688,221 @@ export function AboutPageNew() {
                 </Link>
               </div>
 
-            {/* MOBILE ONLY: Horizontal Swipeable Designer Cards Carousel (lg:hidden) */}
-            <div className="lg:hidden">
-              <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 pt-1 scrollbar-none -mx-4 px-4 sm:-mx-6 sm:px-6">
-                {designersWithImage.slice(0, 5).map((designer, idx) => {
-                  const dName = getPlainText(t(designer.name))
-                  const dRoleText = getPlainText(t(designer.role))
-                  const dBioText = getPlainText(t(designer.bio))
-                  const dImgUrl =
-                    typeof designer.image === 'string'
-                      ? designer.image
-                      : (designer.image as {url: string}).url
+              {/* MOBILE ONLY: Horizontal Swipeable Designer Cards Carousel (lg:hidden) */}
+              <div className="lg:hidden">
+                <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 pt-1 scrollbar-none -mx-4 px-4 sm:-mx-6 sm:px-6">
+                  {designersWithImage.slice(0, 5).map((designer, idx) => {
+                    const dName = getPlainText(t(designer.name))
+                    const dRoleText = getPlainText(t(designer.role))
+                    const dBioText = getPlainText(t(designer.bio))
+                    const dImgUrl =
+                      typeof designer.image === 'string'
+                        ? designer.image
+                        : (designer.image as {url: string}).url
 
-                  return (
-                    <div
-                      key={designer.id || idx}
-                      className="w-[82vw] max-w-[310px] flex-shrink-0 snap-center border border-neutral-500/40 bg-[var(--bg-secondary)] p-5 rounded-none flex flex-col justify-between shadow-sm"
-                    >
-                      <div className="space-y-4">
-                        <div className="relative aspect-[3/4] w-full overflow-hidden rounded-none grayscale">
-                          <OptimizedImage
-                            src={dImgUrl}
-                            fallbackSrc={DEFAULT_IMAGES.identity}
-                            alt={dName}
-                            className="w-full h-full object-cover grayscale"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          {dRoleText && (
-                            <span className="text-[10px] uppercase tracking-widest text-[var(--text-secondary)] block font-light">
-                              {dRoleText}
-                            </span>
-                          )}
-                          <h3 className="font-outfit text-xl font-light uppercase tracking-tight text-[var(--text-primary)]">
-                            {dName}
-                          </h3>
-                          {dBioText && (
-                            <p className="text-xs text-[var(--text-secondary)] font-light leading-relaxed line-clamp-3">
-                              {dBioText}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      <Link
-                        to={`/designer/${designer.id}`}
-                        className="group inline-flex items-center justify-between text-[11px] uppercase tracking-widest text-[var(--text-primary)] bg-[var(--bg-primary)] border border-neutral-500/40 hover:border-[var(--text-primary)] px-4 py-3 transition-all font-light w-full shadow-sm mt-5"
+                    return (
+                      <div
+                        key={designer.id || idx}
+                        className="w-[82vw] max-w-[310px] flex-shrink-0 snap-center border border-neutral-500/40 bg-[var(--bg-secondary)] p-5 rounded-none flex flex-col justify-between shadow-sm"
                       >
-                        <span>Tasarımcı Koleksiyonu</span>
-                        <svg
-                          className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth="1.2"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                        </svg>
-                      </Link>
-                    </div>
-                  )
-                })}
-              </div>
-              <div className="flex items-center justify-center gap-1.5 mt-2">
-                <span className="text-[10px] uppercase tracking-widest text-[var(--text-secondary)] font-light opacity-60">
-                  Kaydırın &rarr;
-                </span>
-              </div>
-            </div>
-
-            {/* DESKTOP ONLY: Classic Split Exhibition Showcase (hidden lg:block) */}
-            <div className="hidden lg:block">
-              {(() => {
-                const currentDesigner =
-                  designersWithImage[activeDesignerIndex === -1 ? 0 : activeDesignerIndex] ?? designersWithImage[0]!
-                const currentImgUrl =
-                  typeof currentDesigner.image === 'string'
-                    ? currentDesigner.image
-                    : (currentDesigner.image as {url: string}).url
-                const currentBioText = getPlainText(t(currentDesigner.bio))
-
-                return (
-                  <div className="grid grid-cols-12 gap-8 items-stretch">
-                    {/* Left Column: Interactive Designer List */}
-                    <div className="col-span-5 flex flex-col justify-center space-y-3">
-                      {designersWithImage.slice(0, 5).map((designer, idx) => {
-                        const isActive = (activeDesignerIndex === -1 ? 0 : activeDesignerIndex) === idx
-                        const dName = getPlainText(t(designer.name))
-                        const dRoleText = getPlainText(t(designer.role))
-                        const dBioText = getPlainText(t(designer.bio))
-                        const dSubtext =
-                          dRoleText ||
-                          (dBioText
-                            ? dBioText.slice(0, 45) + '...'
-                            : '')
-
-                        return (
-                          <div
-                            key={designer.id || idx}
-                            onMouseEnter={() => setActiveDesignerIndex(idx)}
-                            onClick={() => setActiveDesignerIndex(idx)}
-                            onKeyDown={e => {
-                              if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault()
-                                setActiveDesignerIndex(idx)
-                              }
-                            }}
-                            role="button"
-                            tabIndex={0}
-                            className={`p-6 border rounded-none transition-all duration-300 cursor-pointer group ${
-                              isActive
-                                ? 'bg-[var(--bg-secondary)] border-[var(--text-primary)] translate-x-2 shadow-sm'
-                                : 'border-neutral-500/40 hover:border-[var(--text-primary)]/40'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between gap-4">
-                              <div>
-                                <h3 className="text-xl md:text-2xl font-light uppercase tracking-tight text-[var(--text-primary)] mt-1">
-                                  {dName}
-                                </h3>
-                                {dSubtext && (
-                                  <span className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mt-0.5 block font-light truncate max-w-xs">
-                                    {dSubtext}
-                                  </span>
-                                )}
-                              </div>
-                              <svg
-                                className={`w-5 h-5 ml-auto flex-shrink-0 transition-all duration-300 ${
-                                  isActive
-                                    ? 'text-[var(--text-primary)] translate-x-1 opacity-100'
-                                    : 'text-[var(--text-secondary)] opacity-30 group-hover:opacity-70 group-hover:translate-x-0.5'
-                                }`}
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth="1.2"
-                              >
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                              </svg>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-
-                    {/* Right Column: Featured Active Designer Exhibition Card */}
-                    <div className="col-span-7 bg-[var(--bg-secondary)] border border-neutral-500/40 rounded-none p-8 md:p-12 flex flex-col justify-between">
-                      <AnimatePresence mode="wait">
-                        <motion.div
-                          key={activeDesignerIndex === -1 ? 0 : activeDesignerIndex}
-                          initial={{opacity: 0, y: 15}}
-                          animate={{opacity: 1, y: 0}}
-                          exit={{opacity: 0, y: -15}}
-                          transition={{duration: 0.3}}
-                          className="grid grid-cols-12 gap-8 items-center h-full"
-                        >
-                          <div className="col-span-6 relative aspect-[3/4] overflow-hidden rounded-none grayscale">
+                        <div className="space-y-4">
+                          <div className="relative aspect-[3/4] w-full overflow-hidden rounded-none grayscale">
                             <OptimizedImage
-                              src={currentImgUrl}
+                              src={dImgUrl}
                               fallbackSrc={DEFAULT_IMAGES.identity}
-                              alt={getPlainText(t(currentDesigner.name))}
+                              alt={dName}
                               className="w-full h-full object-cover grayscale"
                             />
                           </div>
+                          <div className="space-y-2">
+                            {dRoleText && (
+                              <span className="text-[10px] uppercase tracking-widest text-[var(--text-secondary)] block font-light">
+                                {dRoleText}
+                              </span>
+                            )}
+                            <h3 className="font-outfit text-xl font-light uppercase tracking-tight text-[var(--text-primary)]">
+                              {dName}
+                            </h3>
+                            {dBioText && (
+                              <p className="text-xs text-[var(--text-secondary)] font-light leading-relaxed line-clamp-3">
+                                {dBioText}
+                              </p>
+                            )}
+                          </div>
+                        </div>
 
-                          <div className="col-span-6 flex flex-col justify-between h-full space-y-6">
-                            <div className="space-y-4">
-                              {currentDesigner.role && (
-                                <span className="text-xs uppercase tracking-widest text-[var(--text-secondary)]">
-                                  {getPlainText(t(currentDesigner.role))}
-                                </span>
-                              )}
-                              <h3 className="text-3xl font-light uppercase tracking-tight text-[var(--text-primary)]">
-                                {getPlainText(t(currentDesigner.name))}
-                              </h3>
-                              {currentBioText && (
-                                <p className="text-sm text-[var(--text-secondary)] font-light leading-relaxed line-clamp-6">
-                                  {currentBioText}
-                                </p>
-                              )}
+                        <Link
+                          to={`/designer/${designer.id}`}
+                          className="group inline-flex items-center justify-between text-[11px] uppercase tracking-widest text-[var(--text-primary)] bg-[var(--bg-primary)] border border-neutral-500/40 hover:border-[var(--text-primary)] px-4 py-3 transition-all font-light w-full shadow-sm mt-5"
+                        >
+                          <span>Tasarımcı Koleksiyonu</span>
+                          <svg
+                            className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth="1.2"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                            />
+                          </svg>
+                        </Link>
+                      </div>
+                    )
+                  })}
+                </div>
+                <div className="flex items-center justify-center gap-1.5 mt-2">
+                  <span className="text-[10px] uppercase tracking-widest text-[var(--text-secondary)] font-light opacity-60">
+                    Kaydırın &rarr;
+                  </span>
+                </div>
+              </div>
+
+              {/* DESKTOP ONLY: Classic Split Exhibition Showcase (hidden lg:block) */}
+              <div className="hidden lg:block">
+                {(() => {
+                  const currentDesigner =
+                    designersWithImage[activeDesignerIndex === -1 ? 0 : activeDesignerIndex] ??
+                    designersWithImage[0]!
+                  const currentImgUrl =
+                    typeof currentDesigner.image === 'string'
+                      ? currentDesigner.image
+                      : (currentDesigner.image as {url: string}).url
+                  const currentBioText = getPlainText(t(currentDesigner.bio))
+
+                  return (
+                    <div className="grid grid-cols-12 gap-8 items-stretch">
+                      {/* Left Column: Interactive Designer List */}
+                      <div className="col-span-5 flex flex-col justify-center space-y-3">
+                        {designersWithImage.slice(0, 5).map((designer, idx) => {
+                          const isActive =
+                            (activeDesignerIndex === -1 ? 0 : activeDesignerIndex) === idx
+                          const dName = getPlainText(t(designer.name))
+                          const dRoleText = getPlainText(t(designer.role))
+                          const dBioText = getPlainText(t(designer.bio))
+                          const dSubtext =
+                            dRoleText || (dBioText ? dBioText.slice(0, 45) + '...' : '')
+
+                          return (
+                            <div
+                              key={designer.id || idx}
+                              onMouseEnter={() => setActiveDesignerIndex(idx)}
+                              onClick={() => setActiveDesignerIndex(idx)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault()
+                                  setActiveDesignerIndex(idx)
+                                }
+                              }}
+                              role="button"
+                              tabIndex={0}
+                              className={`p-6 border rounded-none transition-all duration-300 cursor-pointer group ${
+                                isActive
+                                  ? 'bg-[var(--bg-secondary)] border-[var(--text-primary)] translate-x-2 shadow-sm'
+                                  : 'border-neutral-500/40 hover:border-[var(--text-primary)]/40'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between gap-4">
+                                <div>
+                                  <h3 className="text-xl md:text-2xl font-light uppercase tracking-tight text-[var(--text-primary)] mt-1">
+                                    {dName}
+                                  </h3>
+                                  {dSubtext && (
+                                    <span className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mt-0.5 block font-light truncate max-w-xs">
+                                      {dSubtext}
+                                    </span>
+                                  )}
+                                </div>
+                                <svg
+                                  className={`w-5 h-5 ml-auto flex-shrink-0 transition-all duration-300 ${
+                                    isActive
+                                      ? 'text-[var(--text-primary)] translate-x-1 opacity-100'
+                                      : 'text-[var(--text-secondary)] opacity-30 group-hover:opacity-70 group-hover:translate-x-0.5'
+                                  }`}
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                  strokeWidth="1.2"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                                  />
+                                </svg>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+
+                      {/* Right Column: Featured Active Designer Exhibition Card */}
+                      <div className="col-span-7 bg-[var(--bg-secondary)] border border-neutral-500/40 rounded-none p-8 md:p-12 flex flex-col justify-between">
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key={activeDesignerIndex === -1 ? 0 : activeDesignerIndex}
+                            initial={{opacity: 0, y: 15}}
+                            animate={{opacity: 1, y: 0}}
+                            exit={{opacity: 0, y: -15}}
+                            transition={{duration: 0.3}}
+                            className="grid grid-cols-12 gap-8 items-center h-full"
+                          >
+                            <div className="col-span-6 relative aspect-[3/4] overflow-hidden rounded-none grayscale">
+                              <OptimizedImage
+                                src={currentImgUrl}
+                                fallbackSrc={DEFAULT_IMAGES.identity}
+                                alt={getPlainText(t(currentDesigner.name))}
+                                className="w-full h-full object-cover grayscale"
+                              />
                             </div>
 
-                            <Link
-                              to={`/designer/${currentDesigner.id}`}
-                              className="group inline-flex items-center gap-3 text-xs uppercase tracking-widest text-[var(--text-primary)] bg-[var(--bg-primary)] border border-neutral-500/40 hover:border-[var(--text-primary)] px-6 py-3.5 transition-all font-light w-fit shadow-sm"
-                            >
-                              <span>Tasarımcı Koleksiyonu</span>
-                              <svg
-                                className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth="1.2"
+                            <div className="col-span-6 flex flex-col justify-between h-full space-y-6">
+                              <div className="space-y-4">
+                                {currentDesigner.role && (
+                                  <span className="text-xs uppercase tracking-widest text-[var(--text-secondary)]">
+                                    {getPlainText(t(currentDesigner.role))}
+                                  </span>
+                                )}
+                                <h3 className="text-3xl font-light uppercase tracking-tight text-[var(--text-primary)]">
+                                  {getPlainText(t(currentDesigner.name))}
+                                </h3>
+                                {currentBioText && (
+                                  <p className="text-sm text-[var(--text-secondary)] font-light leading-relaxed line-clamp-6">
+                                    {currentBioText}
+                                  </p>
+                                )}
+                              </div>
+
+                              <Link
+                                to={`/designer/${currentDesigner.id}`}
+                                className="group inline-flex items-center gap-3 text-xs uppercase tracking-widest text-[var(--text-primary)] bg-[var(--bg-primary)] border border-neutral-500/40 hover:border-[var(--text-primary)] px-6 py-3.5 transition-all font-light w-fit shadow-sm"
                               >
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                              </svg>
-                            </Link>
-                          </div>
-                        </motion.div>
-                      </AnimatePresence>
+                                <span>Tasarımcı Koleksiyonu</span>
+                                <svg
+                                  className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                  strokeWidth="1.2"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                                  />
+                                </svg>
+                              </Link>
+                            </div>
+                          </motion.div>
+                        </AnimatePresence>
+                      </div>
                     </div>
-                  </div>
-                )
-              })()}
-            </div>
+                  )
+                })()}
+              </div>
             </div>
           </section>
         )}
@@ -904,4 +910,3 @@ export function AboutPageNew() {
     </div>
   )
 }
-

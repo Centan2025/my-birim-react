@@ -21,9 +21,21 @@ export default defineType({
     defineField({name: 'heroTitle', title: 'Hero Başlığı', type: 'localizedString'}),
     defineField({name: 'heroSubtitle', title: 'Hero Alt Başlığı', type: 'localizedString'}),
     defineField({name: 'manifestoLabel', title: 'Manifesto Etiketi', type: 'localizedString'}),
-    defineField({name: 'manifestoQuote', title: 'Felsefe / Manifesto Alıntısı', type: 'localizedString'}),
-    defineField({name: 'timelineTitle', title: 'Tarihçe Zaman Çizelgesi Başlığı', type: 'localizedString'}),
-    defineField({name: 'timelineSubtitle', title: 'Tarihçe Zaman Çizelgesi Alt Başlığı', type: 'localizedString'}),
+    defineField({
+      name: 'manifestoQuote',
+      title: 'Felsefe / Manifesto Alıntısı',
+      type: 'localizedString',
+    }),
+    defineField({
+      name: 'timelineTitle',
+      title: 'Tarihçe Zaman Çizelgesi Başlığı',
+      type: 'localizedString',
+    }),
+    defineField({
+      name: 'timelineSubtitle',
+      title: 'Tarihçe Zaman Çizelgesi Alt Başlığı',
+      type: 'localizedString',
+    }),
     defineField({
       name: 'eras',
       title: 'Tarihçe Dönemleri / Dönüm Noktaları',
@@ -38,7 +50,11 @@ export default defineType({
             defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
             defineField({name: 'description', title: 'Açıklama', type: 'localizedString'}),
             defineField({name: 'imageR2', title: 'Dönem Görseli (Masaüstü R2)', type: 'r2Asset'}),
-            defineField({name: 'imageMobileR2', title: 'Dönem Görseli (Mobil R2)', type: 'r2Asset'}),
+            defineField({
+              name: 'imageMobileR2',
+              title: 'Dönem Görseli (Mobil R2)',
+              type: 'r2Asset',
+            }),
           ],
           preview: {
             select: {

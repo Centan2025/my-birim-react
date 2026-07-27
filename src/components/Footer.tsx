@@ -50,7 +50,9 @@ export const Footer = () => {
                 {to: '/products', label: t('view_all')},
                 {to: '/designers', label: t('designers')},
                 {to: '/projects', label: t('projects') || 'Projeler'},
-                ...(settings?.isFactoryVisible ? [{to: '/factory', label: t('factory') || 'Fabrika'}] : []),
+                ...(settings?.isFactoryVisible
+                  ? [{to: '/factory', label: t('factory') || 'Fabrika'}]
+                  : []),
                 {to: '/news', label: t('news')},
                 {to: '/about', label: t('about')},
                 {to: '/contact', label: t('contact')},
@@ -158,7 +160,9 @@ export const Footer = () => {
                   {to: '/products', label: t('view_all')},
                   {to: '/designers', label: t('designers')},
                   {to: '/projects', label: t('projects') || 'Projeler'},
-                  ...(settings?.isFactoryVisible ? [{to: '/factory', label: t('factory') || 'Fabrika'}] : []),
+                  ...(settings?.isFactoryVisible
+                    ? [{to: '/factory', label: t('factory') || 'Fabrika'}]
+                    : []),
                   {to: '/news', label: t('news')},
                   {to: '/about', label: t('about')},
                   {to: '/contact', label: t('contact')},

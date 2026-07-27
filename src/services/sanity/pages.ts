@@ -85,7 +85,9 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
         data.eras = data.eras.map((era: Record<string, unknown>) => ({
           ...era,
           image: era['imageR2'] ? mapImage(era['imageR2'] as never) : era['image'],
-          imageMobile: era['imageMobileR2'] ? mapImage(era['imageMobileR2'] as never) : era['imageMobile'],
+          imageMobile: era['imageMobileR2']
+            ? mapImage(era['imageMobileR2'] as never)
+            : era['imageMobile'],
         }))
       }
       if (data.historySection) {

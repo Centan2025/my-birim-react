@@ -453,8 +453,12 @@ export interface AboutPageContent {
     year?: string
     title?: LocalizedString
     description?: LocalizedString
-    image?: string | {url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot']}
-    imageMobile?: string | {url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot']}
+    image?:
+      | string
+      | {url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot']}
+    imageMobile?:
+      | string
+      | {url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot']}
   }[]
   storyTitle: LocalizedString
   storyContentP1: LocalizedString
