@@ -389,7 +389,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const isHeightDefined = className.includes('h-') || className.includes('aspect-')
   const innerImgClassName = className
     .split(' ')
-    .filter(c => !c.startsWith('max-w-') && !c.startsWith('w-'))
+    .filter(
+      c =>
+        !c.startsWith('max-w-') &&
+        !c.startsWith('w-') &&
+        (!useClientCrop || (!c.startsWith('object-') && !c.startsWith('h-')))
+    )
     .join(' ')
 
   if (useArtDirection) {
@@ -439,6 +444,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           onError={handleError}
           style={{
             ...imgStyle,
+            objectFit: useClientCrop ? 'fill' : imgStyle.objectFit,
             display: 'block',
             WebkitBackfaceVisibility: 'hidden',
             backfaceVisibility: 'hidden',
@@ -499,6 +505,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         onError={handleError}
         style={{
           ...imgStyle,
+          objectFit: useClientCrop ? 'fill' : imgStyle.objectFit,
           display: 'block',
           WebkitBackfaceVisibility: 'hidden',
           backfaceVisibility: 'hidden',
