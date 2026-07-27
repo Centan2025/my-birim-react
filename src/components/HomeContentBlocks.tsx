@@ -107,11 +107,11 @@ const PanelSlider: React.FC<{
   }
 
   return (
-    <div className="w-full relative group/panels flex flex-col gap-6">
+    <div className="w-full relative group/panels flex flex-col gap-3">
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className={`flex overflow-x-auto ${getGapClass()} pb-4 no-scrollbar scroll-smooth snap-x snap-mandatory`}
+        className={`flex overflow-x-auto ${getGapClass()} pb-1 no-scrollbar scroll-smooth snap-x snap-mandatory`}
       >
         {media.map((item, i) => (
           <div
@@ -152,7 +152,7 @@ const PanelSlider: React.FC<{
 
       {/* Pagination Dots (Square) */}
       {media.length > 1 && (
-        <div className="flex justify-center gap-2 mb-4">
+        <div className="flex justify-center gap-2 mt-2">
           {media.map((_, i) => (
             <button
               key={i}
