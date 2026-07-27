@@ -345,21 +345,35 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const renderCroppedContent = (pictureContent: React.ReactNode) => {
     if (!useClientCrop) return pictureContent
 
-    // Sanity Crop Inset Percentages: top, right, bottom, left
-    const topInset = crop!.y * 100
-    const rightInset = Math.max(0, (1 - crop!.x - crop!.width) * 100)
-    const bottomInset = Math.max(0, (1 - crop!.y - crop!.height) * 100)
-    const leftInset = crop!.x * 100
+    // Calculate crop aspect ratio and container dimensions
+    const cropW = crop!.width
+    const cropH = crop!.height
+    const scaleX = 1 / cropW
+    const scaleY = 1 / cropH
+    const offsetX = (crop!.x / cropW) * 100
+    const offsetY = (crop!.y / cropH) * 100
 
     return (
       <div
         className={`relative overflow-hidden ${isCoverMode ? 'w-full h-full' : 'w-full'}`}
         style={{
-          clipPath: `inset(${topInset.toFixed(2)}% ${rightInset.toFixed(2)}% ${bottomInset.toFixed(2)}% ${leftInset.toFixed(2)}%)`,
+          aspectRatio: isCoverMode ? undefined : `${cropW} / ${cropH}`,
         }}
         data-crop={JSON.stringify(crop)}
       >
-        {pictureContent}
+        <div
+          style={{
+            width: `${(scaleX * 100).toFixed(4)}%`,
+            height: `${(scaleY * 100).toFixed(4)}%`,
+            transform: `translate(-${offsetX.toFixed(4)}%, -${offsetY.toFixed(4)}%)`,
+            position: 'absolute',
+            top: 0,
+            left: 0,
+          }}
+          className="w-full h-full"
+        >
+          {pictureContent}
+        </div>
       </div>
     )
   }
@@ -422,7 +436,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           height={height}
           loading={loading}
           {...fetchPriorityAttr}
-          className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${isHeightDefined ? '' : 'h-auto'} ${innerImgClassName} responsive-mirror`}
+          className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${useClientCrop ? 'h-full object-fill' : isHeightDefined ? '' : 'h-auto'} ${innerImgClassName} responsive-mirror`}
           draggable={draggable}
           onLoad={handleLoad}
           onError={handleError}
@@ -482,7 +496,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         {...fetchPriorityAttr}
         srcSet={responsiveSrcSet}
         sizes={responsiveSrcSet ? defaultSizes : undefined}
-        className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${isHeightDefined ? '' : 'h-auto'} ${innerImgClassName} responsive-mirror`}
+        className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${useClientCrop ? 'h-full object-fill' : isHeightDefined ? '' : 'h-auto'} ${innerImgClassName} responsive-mirror`}
         draggable={draggable}
         onLoad={handleLoad}
         onError={handleError}
