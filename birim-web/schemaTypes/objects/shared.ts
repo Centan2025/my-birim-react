@@ -890,6 +890,9 @@ export const contentBlock = defineType({
       title: 'Panel Görselleri (Çoklu)',
       type: 'array',
       of: [{type: 'r2Asset'}],
+      options: {
+        layout: 'grid',
+      },
       components: {
         input: BulkMediaUploadInput,
       },
