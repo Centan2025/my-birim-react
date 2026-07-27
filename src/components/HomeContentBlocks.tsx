@@ -522,14 +522,16 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 )}
               </div>
             ) : block.mediaType === 'panels' ? (
-              <PanelSlider
-                media={block.imagePanels || []}
-                panelSize={block.panelSize}
-                panelFit={block.panelFit}
-                panelGap={block.panelGap}
-                imageBorderClass={imageBorderClass}
-                onMediaClick={onMediaClick}
-              />
+              <div className={`relative ${mediaWidthClass}`}>
+                <PanelSlider
+                  media={block.imagePanels || []}
+                  panelSize={block.panelSize}
+                  panelFit={block.panelFit}
+                  panelGap={block.panelGap}
+                  imageBorderClass={imageBorderClass}
+                  onMediaClick={onMediaClick}
+                />
+              </div>
             ) : (
               <div
                 className={`relative w-full h-auto ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`}
