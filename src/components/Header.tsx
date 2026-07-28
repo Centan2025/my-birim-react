@@ -630,6 +630,7 @@ export function Header() {
     isMobileMenuClosing,
     isSearchOpen,
     isDarkMode,
+    isLightMode,
   })
 
   return (

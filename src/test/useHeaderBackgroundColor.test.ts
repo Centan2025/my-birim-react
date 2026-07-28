@@ -42,6 +42,14 @@ describe('useHeaderBackgroundColor', () => {
     expect(result.current).toBe('rgba(255, 255, 255, 0.95)')
   })
 
+  it('products dropdown açıkken koyu arka plan döndürmeli (koyu hero sayfa)', () => {
+    const {result} = renderHook(
+      () => useHeaderBackgroundColor({...baseParams, isProductsOpen: true, isLightMode: false}),
+      {wrapper: wrapper('/')}
+    )
+    expect(result.current).toBe('rgba(0, 0, 0, 0.85)')
+  })
+
   it('dark mode açıkken dark arka plan döndürmeli', () => {
     const {result} = renderHook(() => useHeaderBackgroundColor({...baseParams, isDarkMode: true}), {
       wrapper: wrapper('/contact'),

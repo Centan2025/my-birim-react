@@ -10,6 +10,7 @@ interface HeaderBackgroundParams {
   isMobileMenuClosing: boolean
   isSearchOpen: boolean
   isDarkMode: boolean
+  isLightMode?: boolean
 }
 
 export function useHeaderBackgroundColor({
@@ -21,6 +22,7 @@ export function useHeaderBackgroundColor({
   isMobileMenuClosing,
   isSearchOpen,
   isDarkMode,
+  isLightMode,
 }: HeaderBackgroundParams) {
   const location = useLocation()
 
@@ -28,9 +30,10 @@ export function useHeaderBackgroundColor({
     const path = location.pathname
 
     const isDarkHeroMatched = isDarkHeroPage(path)
+    const effectiveIsLight = isLightMode ?? !isDarkHeroMatched
 
     if (isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)) {
-      return isDarkMode || isDarkHeroMatched ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.95)'
+      return isDarkMode || !effectiveIsLight ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.95)'
     }
 
     if (isSearchOpen) {
@@ -39,7 +42,7 @@ export function useHeaderBackgroundColor({
     }
 
     if (isProductsOpen && !isMobile) {
-      if (isDarkMode) return 'rgba(10, 10, 10, 0.95)'
+      if (isDarkMode || !effectiveIsLight) return 'rgba(0, 0, 0, 0.85)'
       return 'rgba(255, 255, 255, 0.95)'
     }
 
