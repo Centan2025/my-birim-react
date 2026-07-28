@@ -457,10 +457,7 @@ export default function R2AssetInput(props: ObjectInputProps) {
     () => getAspectRatioPresets(props.path, sanityDocument),
     [props.path, sanityDocument],
   )
-  const recommendedPreset = React.useMemo(
-    () => presets.find((p) => p.isRecommended),
-    [presets],
-  )
+  const recommendedPreset = React.useMemo(() => presets.find((p) => p.isRecommended), [presets])
 
   // Init crop state from asset
   useEffect(() => {
@@ -1067,7 +1064,9 @@ export default function R2AssetInput(props: ObjectInputProps) {
                         size={1}
                         text={preset.isRecommended ? `⭐ ${preset.label}` : preset.label}
                         mode={isSelected ? 'default' : 'outline'}
-                        tone={isSelected ? 'primary' : preset.isRecommended ? 'positive' : 'default'}
+                        tone={
+                          isSelected ? 'primary' : preset.isRecommended ? 'positive' : 'default'
+                        }
                         onClick={() => handleAspectSelect(preset.value)}
                       />
                     )

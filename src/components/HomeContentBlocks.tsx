@@ -740,7 +740,9 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             key={index}
             className={`content-block-wrapper relative z-20 ${backgroundColor} transition-colors duration-500`}
             style={{
-              paddingTop: isSideBySide ? `${customPadding !== undefined ? customPadding : 32}px` : undefined,
+              paddingTop: isSideBySide
+                ? `${customPadding !== undefined ? customPadding : 32}px`
+                : undefined,
               paddingBottom: isSideBySide
                 ? `${customPadding !== undefined ? customPadding : 32}px`
                 : !hasTextContent || index === sortedBlocks.length - 1

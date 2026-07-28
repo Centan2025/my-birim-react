@@ -238,7 +238,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       const generatedImage = (
         response as {
-          generatedImages?: Array<{ image?: { imageBytes?: string | Uint8Array } }>
+          generatedImages?: Array<{image?: {imageBytes?: string | Uint8Array}}>
         }
       )?.generatedImages?.[0]?.image
       if (!generatedImage || !generatedImage.imageBytes) {

@@ -297,7 +297,9 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
                     if (typeof p === 'string') {
                       return {
                         url: p,
-                        type: p.toLowerCase().match(/\.(mp4|webm|mov|avi|mkv)$/) ? 'video' : 'image',
+                        type: p.toLowerCase().match(/\.(mp4|webm|mov|avi|mkv)$/)
+                          ? 'video'
+                          : 'image',
                       }
                     }
                     const imgR2 = p['imageR2'] as SanityImageLike
@@ -306,9 +308,11 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
                       typeof (imgR2 as Record<string, unknown> | undefined)?.['url'] === 'string'
                         ? ((imgR2 as Record<string, unknown>)['url'] as string)
                         : undefined
-                    const panelUrl = mapImage(p as SanityImageLike) || mapImage(imgR2) || pUrl || imgR2Url
+                    const panelUrl =
+                      mapImage(p as SanityImageLike) || mapImage(imgR2) || pUrl || imgR2Url
                     if (!panelUrl) return null
-                    const pMime = typeof p['mimeType'] === 'string' ? (p['mimeType'] as string) : undefined
+                    const pMime =
+                      typeof p['mimeType'] === 'string' ? (p['mimeType'] as string) : undefined
                     const pType = typeof p['type'] === 'string' ? (p['type'] as string) : undefined
                     const type =
                       pMime?.startsWith('video/') ||

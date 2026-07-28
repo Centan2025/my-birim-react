@@ -394,7 +394,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     )
   }
 
-  const isHeightDefined = classList.some(c => (c.startsWith('h-') && c !== 'h-auto') || c.startsWith('aspect-'))
+  const isHeightDefined = classList.some(
+    c => (c.startsWith('h-') && c !== 'h-auto') || c.startsWith('aspect-')
+  )
   const innerImgClassName = className
     .split(' ')
     .filter(

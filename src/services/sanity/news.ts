@@ -197,9 +197,11 @@ const mapProjectRow = (r: Record<string, unknown>): Project => {
                     typeof (imgR2 as Record<string, unknown> | undefined)?.['url'] === 'string'
                       ? ((imgR2 as Record<string, unknown>)['url'] as string)
                       : undefined
-                  const panelUrl = mapImage(p as SanityImageLike) || mapImage(imgR2) || pUrl || imgR2Url
+                  const panelUrl =
+                    mapImage(p as SanityImageLike) || mapImage(imgR2) || pUrl || imgR2Url
                   if (!panelUrl) return null
-                  const pMime = typeof p['mimeType'] === 'string' ? (p['mimeType'] as string) : undefined
+                  const pMime =
+                    typeof p['mimeType'] === 'string' ? (p['mimeType'] as string) : undefined
                   const pType = typeof p['type'] === 'string' ? (p['type'] as string) : undefined
                   const type =
                     pMime?.startsWith('video/') ||
