@@ -544,7 +544,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                     hotspot={media.hotspot}
                   />
                 )}
-                <div className="absolute inset-0 bg-black/30 z-10"></div>
+                <div className="absolute inset-0 bg-black/10 z-10"></div>
                 {(() => {
                   const textPosition = media.textPosition || 'center'
                   const justifyClass =
