@@ -528,7 +528,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   {block.linkUrl ? (
                     <Link
                       to={block.linkUrl}
-                      className={`group inline-flex items-center text-[var(--text-primary)] hover:opacity-70 border border-[var(--text-primary)] px-8 py-4 text-[10px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter transition-all duration-300`}
+                      className={`group inline-flex items-center text-[var(--text-primary)] hover:opacity-70 border border-gray-400 dark:border-gray-500 px-8 py-4 text-[10px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter transition-all duration-300`}
                     >
                       {t(block.linkText)}
                     </Link>
@@ -577,7 +577,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     {block.linkUrl ? (
                       <Link
                         to={block.linkUrl}
-                        className={`group pointer-events-auto inline-flex items-center ${buttonTextColorClass} hover:opacity-50 px-4 py-2 md:px-8 md:py-4 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-white' : 'border-[var(--text-primary)]'} text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
+                        className={`group pointer-events-auto inline-flex items-center ${buttonTextColorClass} hover:opacity-50 px-4 py-2 md:px-8 md:py-4 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-gray-300/80' : 'border-gray-400 dark:border-gray-500'} text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
                       >
                         {t(block.linkText)}
                       </Link>
@@ -627,7 +627,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     {block.linkUrl ? (
                       <Link
                         to={block.linkUrl}
-                        className={`group pointer-events-auto inline-flex items-center ${buttonTextColorClass} hover:opacity-50 px-4 py-2 md:px-8 md:py-4 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-white' : 'border-[var(--text-primary)]'} text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
+                        className={`group pointer-events-auto inline-flex items-center ${buttonTextColorClass} hover:opacity-50 px-4 py-2 md:px-8 md:py-4 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-gray-300/80' : 'border-gray-400 dark:border-gray-500'} text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
                       >
                         {t(block.linkText)}
                       </Link>
@@ -689,7 +689,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                     {block.linkUrl ? (
                       <Link
                         to={block.linkUrl}
-                        className={`group pointer-events-auto inline-flex items-center ${buttonTextColorClass} hover:opacity-50 px-4 py-2 md:px-8 md:py-4 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-white' : 'border-[var(--text-primary)]'} text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
+                        className={`group pointer-events-auto inline-flex items-center ${buttonTextColorClass} hover:opacity-50 px-4 py-2 md:px-8 md:py-4 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-gray-300/80' : 'border-gray-400 dark:border-gray-500'} text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
                       >
                         {t(block.linkText)}
                       </Link>
