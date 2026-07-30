@@ -64,12 +64,19 @@ export const FloatingAuthPanel: React.FC = () => {
     setTimeout(() => {
       const newsletterSection = document.getElementById('home-newsletter')
       if (newsletterSection) {
-        newsletterSection.scrollIntoView({behavior: 'smooth', block: 'start'})
+        const headerHeight = document.querySelector('header')?.clientHeight || 80
+        const elementPosition = newsletterSection.getBoundingClientRect().top + window.pageYOffset
+        const offsetPosition = elementPosition - headerHeight - 20
 
-        // Kaydırma biterken (sayfa uzunluğuna göre 1.5 saniye) newsletter'ı aç
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth',
+        })
+
+        // Kaydırma biterken (sayfa uzunluğuna göre 1.2 saniye) newsletter'ı aç
         setTimeout(() => {
           window.dispatchEvent(new Event('openNewsletter'))
-        }, 1500)
+        }, 1200)
       } else {
         // Yedek: Sayfa sonuna git
         window.scrollTo({
@@ -77,7 +84,7 @@ export const FloatingAuthPanel: React.FC = () => {
           behavior: 'smooth',
         })
       }
-    }, 500)
+    }, 400)
   }
 
   return (
@@ -244,7 +251,7 @@ export const FloatingAuthPanel: React.FC = () => {
                       </p>
                       <button
                         onClick={scrollToFooter}
-                        className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] p-5 uppercase tracking-[0.25em] text-[10px] md:text-[11px] font-bold hover:bg-primary hover:text-black transition-all duration-700 font-inter group flex items-center justify-between shadow-sm"
+                        className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-primary)] p-5 uppercase tracking-[0.25em] text-[10px] md:text-[11px] font-bold text-[var(--text-primary)] hover:bg-[var(--bg-primary)] hover:border-[var(--text-primary)] transition-all duration-500 font-inter group flex items-center justify-between shadow-sm"
                       >
                         <span>{t('register_or_subscribe')}</span>
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
