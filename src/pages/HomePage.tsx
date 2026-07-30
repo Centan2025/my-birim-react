@@ -426,11 +426,15 @@ export function HomePage() {
 
       {/* Hero Altı Bant / Quick Action Banner */}
       {(() => {
-        const getLocVal = (val?: {tr?: string; en?: string}) => {
-          if (!val || typeof val !== 'object') return ''
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const current = (val as any)[locale] || val.tr || val.en || ''
-          return typeof current === 'string' ? current.trim() : ''
+        const getLocVal = (val?: unknown) => {
+          if (!val) return ''
+          if (typeof val === 'string') return val.trim()
+          if (typeof val === 'object') {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const current = (val as any)[locale] || (val as any).tr || (val as any).en || ''
+            return typeof current === 'string' ? current.trim() : ''
+          }
+          return ''
         }
 
         const title = getLocVal(content?.quickBannerTitle)
@@ -441,10 +445,14 @@ export function HomePage() {
         const hasTextContent = !!(title || subtitle)
 
         return (
-          <section className="w-full bg-[#484d54] text-white py-3.5 md:py-4 transition-colors duration-500 font-roboto">
+          <section
+            className={`w-full bg-[#484d54] text-white transition-colors duration-500 font-roboto ${
+              !hasTextContent ? 'py-3 md:py-4' : 'py-3.5 md:py-4'
+            }`}
+          >
             <div
               className={`container mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-8 text-center md:text-left ${
-                !hasTextContent ? 'justify-center min-h-[44px]' : ''
+                !hasTextContent ? 'justify-center min-h-[44px] md:min-h-0' : 'min-h-[44px]'
               }`}
             >
               {hasTextContent ? (
@@ -460,12 +468,14 @@ export function HomePage() {
                     </p>
                   ) : null}
                 </div>
-              ) : null}
+              ) : (
+                <div className="hidden md:block" />
+              )}
               {buttonText ? (
                 <Link
                   to={link}
                   className={`group inline-flex items-center gap-2.5 text-white text-xs md:text-base uppercase tracking-[0.08em] font-medium hover:text-gray-200 transition-colors duration-300 py-1 ${
-                    !hasTextContent ? 'mx-auto md:mx-0' : ''
+                    !hasTextContent ? 'my-auto md:my-0 md:ml-auto' : 'md:ml-auto'
                   }`}
                 >
                   <span>{buttonText}</span>

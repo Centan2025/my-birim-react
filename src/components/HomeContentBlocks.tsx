@@ -221,7 +221,7 @@ const PanelSlider: React.FC<{
         ))}
       </div>
 
-      {/* Sol / Sağ Ok Butonları (Desktop Hover) */}
+      {/* Sol / Sağ Ok Butonları (Desktop Daima Görünür) */}
       {media.length > 1 && (
         <>
           <button
@@ -229,9 +229,7 @@ const PanelSlider: React.FC<{
             onClick={scrollPrev}
             disabled={activeIndex === 0}
             className={`hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md items-center justify-center transition-all duration-300 shadow-md ${
-              activeIndex === 0
-                ? 'opacity-0 pointer-events-none'
-                : 'opacity-0 group-hover/panels:opacity-100'
+              activeIndex === 0 ? 'opacity-0 pointer-events-none' : 'opacity-100'
             }`}
             aria-label="Previous image"
           >
@@ -249,9 +247,7 @@ const PanelSlider: React.FC<{
             onClick={scrollNext}
             disabled={activeIndex === media.length - 1}
             className={`hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md items-center justify-center transition-all duration-300 shadow-md ${
-              activeIndex === media.length - 1
-                ? 'opacity-0 pointer-events-none'
-                : 'opacity-0 group-hover/panels:opacity-100'
+              activeIndex === media.length - 1 ? 'opacity-0 pointer-events-none' : 'opacity-100'
             }`}
             aria-label="Next image"
           >
@@ -275,13 +271,20 @@ const PanelSlider: React.FC<{
               key={i}
               type="button"
               onClick={() => scrollTo(i)}
-              className={`w-2.5 h-2.5 rounded-none transition-all duration-300 ${
+              className={`relative h-2 w-2 rounded-none transition-all duration-300 ${
                 activeIndex === i
-                  ? 'bg-[var(--text-primary)] opacity-100 scale-110 shadow-sm'
-                  : 'bg-[var(--text-primary)] opacity-20 hover:opacity-50'
+                  ? 'bg-red-900 opacity-100 shadow-sm'
+                  : 'bg-neutral-300 dark:bg-neutral-600 hover:bg-neutral-500 dark:hover:bg-neutral-400 border border-neutral-400/50 dark:border-neutral-500/50'
               }`}
               aria-label={`Go to slide ${i + 1}`}
-            />
+            >
+              {activeIndex === i && (
+                <div
+                  key={i}
+                  className="absolute top-0 left-0 h-full w-full rounded-none bg-red-900 animate-fill-line"
+                />
+              )}
+            </button>
           ))}
         </div>
       )}
