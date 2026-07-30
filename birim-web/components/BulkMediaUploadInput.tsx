@@ -59,7 +59,7 @@ const getApiUrl = (path: string): string => {
     const protocol = window.location.protocol || 'http:'
     return `${protocol}//${hostname}:3002${path}`
   }
-  return `https://www.birim.com${path}`
+  return `https://birim-web-antigravity.vercel.app${path}`
 }
 
 async function uploadFileViaPresignedUrl(

@@ -399,7 +399,7 @@ export function ExcelImportTool() {
     if (typeof window === 'undefined') return path
     const isLocal =
       window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    const base = isLocal ? 'http://localhost:3002' : 'https://www.birim.com'
+    const base = isLocal ? 'http://localhost:3002' : 'https://birim-web-antigravity.vercel.app'
     return `${base}${path}`
   }
 
