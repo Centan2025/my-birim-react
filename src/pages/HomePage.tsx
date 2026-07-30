@@ -425,27 +425,44 @@ export function HomePage() {
       )}
 
       {/* Hero Altı Bant / Quick Action Banner */}
-      <section className="w-full bg-[#484d54] text-white py-3.5 md:py-4 transition-colors duration-500 font-roboto">
-        <div className="container mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-8 text-center md:text-left">
-          <div className="space-y-1">
-            <h3 className="text-base md:text-xl font-normal uppercase tracking-[0.08em] text-white font-roboto">
-              {content?.quickBannerTitle ? t(content.quickBannerTitle) : 'BİRİM TASARIM KOLEKSİYONU'}
-            </h3>
-            <p className="text-xs md:text-base text-gray-200 font-light tracking-[0.06em]">
-              {content?.quickBannerSubtitle ? t(content.quickBannerSubtitle) : 'ZAMANSIZ PARÇALAR VE MİMARİ ÇÖZÜMLERİ KEŞFEDİN'}
-            </p>
-          </div>
-          <Link
-            to={content?.quickBannerLink || '/products'}
-            className="group inline-flex items-center gap-3 text-white text-sm md:text-lg uppercase tracking-[0.08em] font-medium hover:text-gray-200 transition-colors duration-300 py-1"
-          >
-            <span>{content?.quickBannerButtonText ? t(content.quickBannerButtonText) : 'ÜRÜNLERİ KEŞFET'}</span>
-            <span className="text-lg md:text-xl font-normal transition-transform duration-300 group-hover:translate-x-1.5">
-              &gt;
-            </span>
-          </Link>
-        </div>
-      </section>
+      {(() => {
+        const title = content?.quickBannerTitle ? t(content.quickBannerTitle) : ''
+        const subtitle = content?.quickBannerSubtitle ? t(content.quickBannerSubtitle) : ''
+        const buttonText = content?.quickBannerButtonText ? t(content.quickBannerButtonText) : ''
+        const link = content?.quickBannerLink || '/products'
+
+        if (!title && !subtitle && !buttonText) return null
+
+        return (
+          <section className="w-full bg-[#484d54] text-white py-3.5 md:py-4 transition-colors duration-500 font-roboto">
+            <div className="container mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-8 text-center md:text-left">
+              <div className="space-y-1">
+                {title ? (
+                  <h3 className="text-base md:text-xl font-normal uppercase tracking-[0.08em] text-white font-roboto">
+                    {title}
+                  </h3>
+                ) : null}
+                {subtitle ? (
+                  <p className="text-xs md:text-base text-gray-200 font-light tracking-[0.06em]">
+                    {subtitle}
+                  </p>
+                ) : null}
+              </div>
+              {buttonText ? (
+                <Link
+                  to={link}
+                  className="group inline-flex items-center gap-3 text-white text-sm md:text-lg uppercase tracking-[0.08em] font-medium hover:text-gray-200 transition-colors duration-300 py-1"
+                >
+                  <span>{buttonText}</span>
+                  <span className="text-lg md:text-xl font-normal transition-transform duration-300 group-hover:translate-x-1.5">
+                    &gt;
+                  </span>
+                </Link>
+              ) : null}
+            </div>
+          </section>
+        )
+      })()}
 
       {/* Content Blocks Section */}
       {content?.contentBlocks && content.contentBlocks.length > 0 && (
