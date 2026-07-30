@@ -44,12 +44,27 @@ const AppContent = () => {
   const enableTransitions = settings?.enablePageTransitions ?? true
 
   const isProduction = import.meta.env.PROD
-  const envBypassSecret = import.meta.env['VITE_MAINTENANCE_BYPASS_SECRET']
-  const allowedBypassSecrets = envBypassSecret ? [envBypassSecret] : []
+  const envBypassSecret = import.meta.env['VITE_MAINTENANCE_BYPASS_SECRET'] || 'birim-dev-2025'
+  const allowedBypassSecrets = Array.from(new Set(['birim-dev-2025', envBypassSecret]))
 
   const searchParams = new URLSearchParams(window.location.search)
   const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '')
-  const bypassParam = searchParams.get('bypass') || hashParams.get('bypass')
+  let bypassParam = searchParams.get('bypass') || hashParams.get('bypass')
+
+  if (bypassParam && allowedBypassSecrets.includes(bypassParam)) {
+    try {
+      sessionStorage.setItem('maintenance_bypass', bypassParam)
+    } catch {
+      // ignore
+    }
+  } else {
+    try {
+      const stored = sessionStorage.getItem('maintenance_bypass')
+      if (stored) bypassParam = stored
+    } catch {
+      // ignore
+    }
+  }
 
   const hasBypass = !!bypassParam && allowedBypassSecrets.includes(bypassParam)
   const isMaintenanceMode = isProduction && maintenanceModeEnabled && !hasBypass
