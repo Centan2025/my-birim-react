@@ -4,11 +4,11 @@ import {UploadIcon, FolderIcon, CheckmarkIcon, WarningOutlineIcon} from '@sanity
 import {useClient} from 'sanity'
 import imageCompression from 'browser-image-compression'
 
-const R2_ACCOUNT_ID = process.env.SANITY_STUDIO_R2_ACCOUNT_ID || ''
-const R2_ACCESS_KEY_ID = process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID || ''
-const R2_SECRET_ACCESS_KEY = process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY || ''
-const R2_BUCKET_NAME = process.env.SANITY_STUDIO_R2_BUCKET_NAME || ''
-const R2_DOMAIN = process.env.SANITY_STUDIO_R2_DOMAIN || ''
+const R2_ACCOUNT_ID = process.env.SANITY_STUDIO_R2_ACCOUNT_ID || process.env.R2_ACCOUNT_ID || ''
+const R2_ACCESS_KEY_ID = process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID || process.env.R2_ACCESS_KEY_ID || ''
+const R2_SECRET_ACCESS_KEY = process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY || process.env.R2_SECRET_ACCESS_KEY || ''
+const R2_BUCKET_NAME = process.env.SANITY_STUDIO_R2_BUCKET_NAME || process.env.R2_BUCKET_NAME || ''
+const R2_DOMAIN = process.env.SANITY_STUDIO_R2_DOMAIN || process.env.R2_DOMAIN || ''
 
 // Duplicate Key Prevention Helper
 const uniqueKeyCache = new Set<string>()

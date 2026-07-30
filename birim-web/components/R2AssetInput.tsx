@@ -14,7 +14,7 @@ import ReactCrop, {
 import 'react-image-crop/dist/ReactCrop.css'
 
 // R2 Configuration from Environment Variables (only R2_DOMAIN is needed for rewrite URLs)
-const R2_DOMAIN = process.env.SANITY_STUDIO_R2_DOMAIN
+const R2_DOMAIN = process.env.SANITY_STUDIO_R2_DOMAIN || process.env.R2_DOMAIN
 
 interface AspectRatioOption {
   label: string
