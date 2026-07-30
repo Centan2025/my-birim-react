@@ -2,6 +2,7 @@ import React, {useState, useEffect, useMemo} from 'react'
 import {useTranslation} from '../i18n'
 import {useSiteSettings} from '../hooks/useSiteData'
 import {useHomePageContent} from '../hooks/useHomePage'
+import {Link} from 'react-router-dom'
 import {HomeHero} from '../components/HomeHero'
 import {useSEO} from '../hooks/useSEO'
 import {HomeContentBlocks} from '../components/HomeContentBlocks'
@@ -423,8 +424,34 @@ export function HomePage() {
         <div className="relative h-[50vh] w-full bg-gray-900" />
       )}
 
-      {/* Hero Altı Bant */}
-      <section className="w-full bg-[var(--bg-primary)] h-10 md:h-12" />
+      {/* Hero Altı Bant / Quick Action Banner */}
+      <section className="w-full bg-[var(--bg-secondary)] border-y border-[var(--border-primary)]/10 py-6 md:py-8 transition-colors duration-500">
+        <div className="container mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 text-center md:text-left">
+          <div className="space-y-1">
+            <h3 className="font-outfit text-xs md:text-sm uppercase tracking-[0.25em] font-light text-[var(--text-primary)]">
+              {t('explore_collection_title') || 'BİRİM TASARIM KOLEKSİYONU'}
+            </h3>
+            <p className="text-[11px] md:text-xs text-[var(--text-secondary)] font-light tracking-wide">
+              {t('explore_collection_subtitle') || 'Zamansız parçalar ve mimari çözümleri keşfedin'}
+            </p>
+          </div>
+          <Link
+            to="/products"
+            className="group inline-flex items-center gap-3 bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--border-primary)]/40 px-6 py-3 text-[10px] md:text-xs uppercase tracking-[0.25em] font-light hover:bg-[var(--text-primary)] hover:text-[var(--bg-primary)] transition-all duration-500 rounded-none shadow-sm"
+          >
+            <span>{t('explore_products') || 'ÜRÜNLERİ KEŞFET'}</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-4 h-4 transition-transform duration-500 group-hover:translate-x-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </Link>
+        </div>
+      </section>
 
       {/* Content Blocks Section */}
       {content?.contentBlocks && content.contentBlocks.length > 0 && (
