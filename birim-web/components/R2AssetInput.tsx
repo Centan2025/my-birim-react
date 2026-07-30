@@ -548,7 +548,8 @@ export default function R2AssetInput(props: ObjectInputProps) {
         if (isProcessableImage && !file.name.toLowerCase().endsWith('.webp')) {
           fileName = file.name.replace(/\.[^/.]+$/, '') + '.webp'
         }
-        const key = `${folderPath}/${Date.now()}-${fileName}`
+        const cleanFileName = fileName.trim().replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_.-]/g, '_')
+        const key = `${folderPath}/${Date.now()}-${cleanFileName}`
 
         const isVideo = file.type.startsWith('video/')
 
