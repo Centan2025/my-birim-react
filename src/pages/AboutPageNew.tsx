@@ -470,7 +470,7 @@ export function AboutPageNew() {
                           </span>
                         ) : null}
                       </div>
-                      <div className="flex items-center justify-center w-7 h-7 rounded-none border border-neutral-500/40 text-[var(--text-primary)] font-light text-base flex-shrink-0">
+                      <div className="flex items-center justify-center w-7 h-7 rounded-none text-[var(--text-primary)] font-light text-base flex-shrink-0">
                         {isActive ? '−' : '+'}
                       </div>
                     </button>
