@@ -425,22 +425,22 @@ export function HomePage() {
       )}
 
       {/* Hero Altı Bant / Quick Action Banner */}
-      <section className="w-full bg-[#3a3f47] text-white py-6 md:py-8 transition-colors duration-500">
-        <div className="container mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 text-center md:text-left">
-          <div className="space-y-1">
-            <h3 className="font-outfit text-xs md:text-sm uppercase tracking-[0.25em] font-light text-white">
+      <section className="w-full bg-[#3a3f47] text-white py-3.5 md:py-4 transition-colors duration-500">
+        <div className="container mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-2.5 md:gap-6 text-center md:text-left">
+          <div className="space-y-0.5">
+            <h3 className="font-outfit text-sm md:text-base uppercase tracking-[0.2em] font-medium text-white">
               BİRİM TASARIM KOLEKSİYONU
             </h3>
-            <p className="text-[11px] md:text-xs text-gray-300 font-light tracking-wide">
+            <p className="text-xs md:text-sm text-gray-300 font-light tracking-wide">
               ZAMANSIZ PARÇALAR VE MİMARİ ÇÖZÜMLERİ KEŞFEDİN
             </p>
           </div>
           <Link
             to="/products"
-            className="group inline-flex items-center gap-2 text-white text-[11px] md:text-xs uppercase tracking-[0.25em] font-light hover:text-gray-300 transition-colors duration-300"
+            className="group inline-flex items-center gap-2.5 text-white text-xs md:text-sm uppercase tracking-[0.25em] font-medium hover:text-gray-300 transition-colors duration-300 py-1"
           >
             <span>ÜRÜNLERİ KEŞFET</span>
-            <span className="text-sm font-normal transition-transform duration-300 group-hover:translate-x-1">
+            <span className="text-base font-normal transition-transform duration-300 group-hover:translate-x-1">
               &gt;
             </span>
           </Link>
