@@ -423,8 +423,11 @@ export interface HomePageContent {
   heroAutoPlay?: boolean
   /** Toggles the visibility of the hero text overlay. */
   isHeroTextVisible: boolean
-  /** Toggles the visibility of the logo in the hero section. */
-  isLogoVisible: boolean
+  /** Dynamic fields for the quick action banner under Hero */
+  quickBannerTitle?: string
+  quickBannerSubtitle?: string
+  quickBannerButtonText?: string
+  quickBannerLink?: string
   /** An array of product IDs to be featured on the homepage. */
   featuredProductIds: string[]
   /** The ID of the designer to be spotlighted on the homepage. */
