@@ -426,9 +426,16 @@ export function HomePage() {
 
       {/* Hero Altı Bant / Quick Action Banner */}
       {(() => {
-        const title = content?.quickBannerTitle ? t(content.quickBannerTitle) : ''
-        const subtitle = content?.quickBannerSubtitle ? t(content.quickBannerSubtitle) : ''
-        const buttonText = content?.quickBannerButtonText ? t(content.quickBannerButtonText) : ''
+        const getLocVal = (val?: {tr?: string; en?: string}) => {
+          if (!val || typeof val !== 'object') return ''
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const current = (val as any)[locale] || val.tr || val.en || ''
+          return typeof current === 'string' ? current.trim() : ''
+        }
+
+        const title = getLocVal(content?.quickBannerTitle)
+        const subtitle = getLocVal(content?.quickBannerSubtitle)
+        const buttonText = getLocVal(content?.quickBannerButtonText)
         const link = content?.quickBannerLink || '/products'
 
         if (!title && !subtitle && !buttonText) return null
