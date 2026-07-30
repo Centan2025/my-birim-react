@@ -428,7 +428,7 @@ export function HomePage() {
       <section className="w-full bg-[#484d54] text-white py-3.5 md:py-4 transition-colors duration-500 font-roboto">
         <div className="container mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-8 text-center md:text-left">
           <div className="space-y-1">
-            <h3 className="text-base md:text-xl font-normal uppercase tracking-[0.18em] text-white">
+            <h3 className="text-base md:text-xl font-normal uppercase tracking-[0.18em] text-white font-roboto">
               {content?.quickBannerTitle ? content.quickBannerTitle : 'BİRİM TASARIM KOLEKSİYONU'}
             </h3>
             <p className="text-xs md:text-base text-gray-200 font-light tracking-wider">
