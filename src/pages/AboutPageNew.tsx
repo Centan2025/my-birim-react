@@ -470,8 +470,15 @@ export function AboutPageNew() {
                           </span>
                         ) : null}
                       </div>
-                      <div className="flex items-center justify-center w-7 h-7 rounded-none text-[var(--text-primary)] font-light text-base flex-shrink-0">
-                        {isActive ? '−' : '+'}
+                      <div className="flex items-center justify-center w-7 h-7 text-[var(--text-primary)] flex-shrink-0">
+                        <motion.div
+                          animate={{rotate: isActive ? 45 : 0}}
+                          transition={{duration: 0.3, ease: 'easeInOut'}}
+                          className="relative w-4 h-4 flex items-center justify-center"
+                        >
+                          <span className="absolute w-3.5 h-[1.5px] bg-current" />
+                          <span className="absolute h-3.5 w-[1.5px] bg-current" />
+                        </motion.div>
                       </div>
                     </button>
 
