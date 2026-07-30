@@ -438,21 +438,27 @@ export function HomePage() {
         const buttonText = getLocVal(content?.quickBannerButtonText)
         const link = content?.quickBannerLink || '/products'
 
+        const hasLeftText = Boolean(title || subtitle)
+        const justifyClass = hasLeftText ? 'justify-between' : 'justify-center'
+        const textAlignClass = hasLeftText ? 'text-center md:text-left' : 'text-center'
+
         return (
           <section className="w-full bg-[#484d54] text-white py-3.5 md:py-4 transition-colors duration-500 font-roboto">
-            <div className="container mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-8 text-center md:text-left">
-              <div className="space-y-1">
-                {title ? (
-                  <h3 className="text-sm md:text-lg font-medium uppercase tracking-[0.08em] text-white font-roboto">
-                    {title}
-                  </h3>
-                ) : null}
-                {subtitle ? (
-                  <p className="text-[11px] md:text-sm text-gray-200 font-normal tracking-[0.06em]">
-                    {subtitle}
-                  </p>
-                ) : null}
-              </div>
+            <div className={`container mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center ${justifyClass} gap-3 md:gap-8 ${textAlignClass}`}>
+              {hasLeftText ? (
+                <div className="space-y-1">
+                  {title ? (
+                    <h3 className="text-sm md:text-lg font-medium uppercase tracking-[0.08em] text-white font-roboto">
+                      {title}
+                    </h3>
+                  ) : null}
+                  {subtitle ? (
+                    <p className="text-[11px] md:text-sm text-gray-200 font-normal tracking-[0.06em]">
+                      {subtitle}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
               {buttonText ? (
                 <Link
                   to={link}
