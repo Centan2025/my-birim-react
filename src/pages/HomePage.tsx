@@ -443,17 +443,17 @@ export function HomePage() {
         const textAlignClass = hasLeftText ? 'text-center md:text-left' : 'text-center'
 
         return (
-          <section className="w-full bg-[#484d54] text-white py-3.5 md:py-4 transition-colors duration-500 font-roboto">
-            <div className={`container mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center ${justifyClass} gap-3 md:gap-8 ${textAlignClass}`}>
+          <section className="w-full bg-[#484d54] text-white py-3.5 md:py-4 transition-colors duration-500 font-roboto flex items-center justify-center min-h-[52px]">
+            <div className={`container mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-center ${justifyClass} gap-3 md:gap-8 ${textAlignClass} w-full`}>
               {hasLeftText ? (
                 <div className="space-y-1">
                   {title ? (
-                    <h3 className="text-sm md:text-lg font-medium uppercase tracking-[0.08em] text-white font-roboto">
+                    <h3 className="text-sm md:text-lg font-medium uppercase tracking-[0.08em] text-white font-roboto leading-tight">
                       {title}
                     </h3>
                   ) : null}
                   {subtitle ? (
-                    <p className="text-[11px] md:text-sm text-gray-200 font-normal tracking-[0.06em]">
+                    <p className="text-[11px] md:text-sm text-gray-200 font-normal tracking-[0.06em] leading-tight">
                       {subtitle}
                     </p>
                   ) : null}
@@ -462,10 +462,10 @@ export function HomePage() {
               {buttonText ? (
                 <Link
                   to={link}
-                  className="group inline-flex items-center gap-2.5 text-white text-xs md:text-base uppercase tracking-[0.08em] font-medium hover:text-gray-200 transition-colors duration-300 py-1"
+                  className="group inline-flex items-center justify-center gap-2.5 text-white text-xs md:text-base uppercase tracking-[0.08em] font-medium hover:text-gray-200 transition-colors duration-300 py-1 leading-none"
                 >
-                  <span>{buttonText}</span>
-                  <span className="text-base md:text-lg font-normal transition-transform duration-300 group-hover:translate-x-1.5">
+                  <span className="leading-none">{buttonText}</span>
+                  <span className="text-base md:text-lg font-normal transition-transform duration-300 group-hover:translate-x-1.5 leading-none -mt-0.5">
                     &gt;
                   </span>
                 </Link>
