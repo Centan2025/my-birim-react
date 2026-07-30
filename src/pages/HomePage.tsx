@@ -31,7 +31,7 @@ export function HomePage() {
     }
     return 0
   })
-  const {t} = useTranslation()
+  const {t, locale} = useTranslation()
   const imageBorderClass = settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'
 
   // SEO
@@ -437,8 +437,6 @@ export function HomePage() {
         const subtitle = getLocVal(content?.quickBannerSubtitle)
         const buttonText = getLocVal(content?.quickBannerButtonText)
         const link = content?.quickBannerLink || '/products'
-
-        if (!title && !subtitle && !buttonText) return null
 
         return (
           <section className="w-full bg-[#484d54] text-white py-3.5 md:py-4 transition-colors duration-500 font-roboto">
