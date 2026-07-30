@@ -173,7 +173,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   color: var(--text-primary);
   /* çok daha koyu gri (yaklaşık Tailwind gray-900) */
-  font-weight: 400;
+  font-weight: 500;
 }
 
 html,

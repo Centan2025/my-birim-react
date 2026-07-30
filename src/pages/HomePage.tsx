@@ -443,12 +443,12 @@ export function HomePage() {
             <div className="container mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-8 text-center md:text-left">
               <div className="space-y-1">
                 {title ? (
-                  <h3 className="text-base md:text-xl font-normal uppercase tracking-[0.08em] text-white font-roboto">
+                  <h3 className="text-sm md:text-lg font-medium uppercase tracking-[0.08em] text-white font-roboto">
                     {title}
                   </h3>
                 ) : null}
                 {subtitle ? (
-                  <p className="text-xs md:text-base text-gray-200 font-light tracking-[0.06em]">
+                  <p className="text-[11px] md:text-sm text-gray-200 font-normal tracking-[0.06em]">
                     {subtitle}
                   </p>
                 ) : null}
@@ -456,10 +456,10 @@ export function HomePage() {
               {buttonText ? (
                 <Link
                   to={link}
-                  className="group inline-flex items-center gap-3 text-white text-sm md:text-lg uppercase tracking-[0.08em] font-medium hover:text-gray-200 transition-colors duration-300 py-1"
+                  className="group inline-flex items-center gap-2.5 text-white text-xs md:text-base uppercase tracking-[0.08em] font-medium hover:text-gray-200 transition-colors duration-300 py-1"
                 >
                   <span>{buttonText}</span>
-                  <span className="text-lg md:text-xl font-normal transition-transform duration-300 group-hover:translate-x-1.5">
+                  <span className="text-base md:text-lg font-normal transition-transform duration-300 group-hover:translate-x-1.5">
                     &gt;
                   </span>
                 </Link>
