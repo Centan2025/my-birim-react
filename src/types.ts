@@ -424,9 +424,9 @@ export interface HomePageContent {
   /** Toggles the visibility of the hero text overlay. */
   isHeroTextVisible: boolean
   /** Dynamic fields for the quick action banner under Hero */
-  quickBannerTitle?: string
-  quickBannerSubtitle?: string
-  quickBannerButtonText?: string
+  quickBannerTitle?: LocalizedString
+  quickBannerSubtitle?: LocalizedString
+  quickBannerButtonText?: LocalizedString
   quickBannerLink?: string
   /** An array of product IDs to be featured on the homepage. */
   featuredProductIds: string[]

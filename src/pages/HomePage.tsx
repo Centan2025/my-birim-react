@@ -429,17 +429,17 @@ export function HomePage() {
         <div className="container mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-8 text-center md:text-left">
           <div className="space-y-1">
             <h3 className="text-base md:text-xl font-normal uppercase tracking-[0.08em] text-white font-roboto">
-              {content?.quickBannerTitle ? content.quickBannerTitle : 'BİRİM TASARIM KOLEKSİYONU'}
+              {content?.quickBannerTitle ? t(content.quickBannerTitle) : 'BİRİM TASARIM KOLEKSİYONU'}
             </h3>
             <p className="text-xs md:text-base text-gray-200 font-light tracking-[0.06em]">
-              {content?.quickBannerSubtitle ? content.quickBannerSubtitle : 'ZAMANSIZ PARÇALAR VE MİMARİ ÇÖZÜMLERİ KEŞFEDİN'}
+              {content?.quickBannerSubtitle ? t(content.quickBannerSubtitle) : 'ZAMANSIZ PARÇALAR VE MİMARİ ÇÖZÜMLERİ KEŞFEDİN'}
             </p>
           </div>
           <Link
             to={content?.quickBannerLink || '/products'}
             className="group inline-flex items-center gap-3 text-white text-sm md:text-lg uppercase tracking-[0.08em] font-medium hover:text-gray-200 transition-colors duration-300 py-1"
           >
-            <span>{content?.quickBannerButtonText ? content.quickBannerButtonText : 'ÜRÜNLERİ KEŞFET'}</span>
+            <span>{content?.quickBannerButtonText ? t(content.quickBannerButtonText) : 'ÜRÜNLERİ KEŞFET'}</span>
             <span className="text-lg md:text-xl font-normal transition-transform duration-300 group-hover:translate-x-1.5">
               &gt;
             </span>
