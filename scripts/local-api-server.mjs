@@ -68,7 +68,7 @@ if (SMTP_PASSWORD) {
     port: 465,
     secure: true,
     auth: {
-      user: 'birim@birim.com',
+      user: 'birimdesign@birim.com',
       pass: SMTP_PASSWORD,
     },
   })
@@ -467,7 +467,7 @@ app.post('/api/send-verification', async (req, res) => {
 
   try {
     await mailTransporter.sendMail({
-      from: '"Birim Design" <birim@birim.com>',
+      from: '"Birim Design" <birimdesign@birim.com>',
       to: email,
       subject: 'Birim Üyelik Doğrulaması',
       html: `
@@ -566,7 +566,7 @@ app.post('/api/send-password-reset', async (req, res) => {
 
   try {
     await mailTransporter.sendMail({
-      from: '"Birim Design" <birim@birim.com>',
+      from: '"Birim Design" <birimdesign@birim.com>',
       to: email,
       subject: 'Birim Şifre Sıfırlama Talebi',
       html: `
