@@ -273,6 +273,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     return (
       <video
         ref={videoRef}
+        src={videoSrc}
         poster={getPosterForScreen()}
         autoPlay={autoPlay}
         loop={loop}
@@ -284,34 +285,19 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
         style={style}
         onClick={onClick}
         onLoadedData={handleLoadedData}
-        onError={e => {
-          // İlk hata source tag'lerinden gelirse, direkt src'i dene
-          const video = e.currentTarget
-          if (!video.src && videoSrc) {
-            video.src = videoSrc
-            video.load()
-          } else {
-            handleError(e)
-          }
-        }}
+        onError={handleError}
         onCanPlay={handleLoadedData}
       >
-        {/* Mobil için video source */}
-        {rwSrcMobile && <source src={mobileSrc} type="video/mp4" media="(max-width: 768px)" />}
-        {/* Desktop için video source */}
-        {rwSrcDesktop && <source src={desktopSrc} type="video/mp4" media="(min-width: 769px)" />}
-        {/* Fallback source */}
-        <source src={videoSrc} type="video/mp4" />
         <track kind="captions" srcLang="en" label="English" />
       </video>
     )
   }
 
   // Normal kullanım (Art Direction yok)
-  // Video URL'i geçerliyse, önce source tag'lerini dene, sonra direkt src kullan
   return (
     <video
       ref={videoRef}
+      src={rwSrc}
       poster={poster}
       autoPlay={autoPlay}
       loop={loop}
@@ -323,21 +309,10 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       style={style}
       onClick={onClick}
       onLoadedData={handleLoadedData}
-      onError={e => {
-        // İlk hata source tag'inden gelirse, direkt src'i dene
-        const video = e.currentTarget
-        if (video.src !== rwSrc && rwSrc) {
-          video.src = rwSrc
-          video.load()
-        } else {
-          handleError(e)
-        }
-      }}
+      onError={handleError}
       onCanPlay={handleLoadedData}
     >
-      <source src={rwSrc} type="video/mp4" />
       <track kind="captions" srcLang="en" label="English" />
-      {/* Fallback: Eğer source çalışmazsa, video element'inin src'i kullanılacak */}
     </video>
   )
 }
