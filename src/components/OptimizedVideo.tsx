@@ -75,17 +75,10 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       // MEDIA_ERR_DECODE (3): Video decode edilemedi
       // MEDIA_ERR_SRC_NOT_SUPPORTED (4): Video formatı desteklenmiyor veya URL geçersiz
 
-      console.error('Video yükleme hatası:', {
-        code: error.code,
-        message: error.message,
-        videoSrc: videoElement.src || videoElement.currentSrc,
-        errorCode: {
-          1: 'MEDIA_ERR_ABORTED',
-          2: 'MEDIA_ERR_NETWORK',
-          3: 'MEDIA_ERR_DECODE',
-          4: 'MEDIA_ERR_SRC_NOT_SUPPORTED',
-        }[error.code],
-      })
+      // MEDIA_ERR_ABORTED için sessizce devam et (kullanıcı veya slider geçişi durdurmuş olabilir)
+      if (error.code === MediaError.MEDIA_ERR_ABORTED) {
+        return
+      }
 
       // Sadece gerçek yükleme hatalarını yakala
       if (
@@ -93,11 +86,21 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
         error.code === MediaError.MEDIA_ERR_NETWORK ||
         error.code === MediaError.MEDIA_ERR_DECODE
       ) {
+        console.warn('Video yükleme uyarısı/hatası:', {
+          code: error.code,
+          message: error.message,
+          videoSrc: videoElement.src || videoElement.currentSrc,
+          errorCode: {
+            1: 'MEDIA_ERR_ABORTED',
+            2: 'MEDIA_ERR_NETWORK',
+            3: 'MEDIA_ERR_DECODE',
+            4: 'MEDIA_ERR_SRC_NOT_SUPPORTED',
+          }[error.code],
+        })
         setHasError(true)
         onError?.()
         return
       }
-      // MEDIA_ERR_ABORTED için sessizce devam et (kullanıcı durdurmuş olabilir)
       return
     }
     // Error event'i geldi ama error objesi yoksa, muhtemelen cache hatası
