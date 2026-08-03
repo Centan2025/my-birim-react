@@ -26,9 +26,15 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
     return false
   })
 
-  // Touch / Swipe drag state
-  const touchStartXRef = useRef<number | null>(null)
+  // Drag / Swipe State for mouse and touch
+  const [draggedX, setDraggedX] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const dragStartXRef = useRef<number>(0)
+  const dragStartYRef = useRef<number>(0)
+  const isPointerDownRef = useRef<boolean>(false)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  const DRAG_THRESHOLD = 50
 
   useEffect(() => {
     const checkMobile = () => {
@@ -37,8 +43,6 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
-
-
 
   // Close popover when active slide changes
   useEffect(() => {
@@ -79,26 +83,48 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
     setActiveIndex(prev => (prev === items.length - 1 ? 0 : prev + 1))
   }
 
-  // Swipe handlers
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches && e.touches[0]) {
-      touchStartXRef.current = e.touches[0].clientX
+  // Pointer drag handlers (Mouse on desktop & Touch on mobile)
+  const handlePointerDown = (clientX: number, clientY: number) => {
+    isPointerDownRef.current = true
+    dragStartXRef.current = clientX
+    dragStartYRef.current = clientY
+    setDraggedX(0)
+  }
+
+  const handlePointerMove = (clientX: number, clientY: number) => {
+    if (!isPointerDownRef.current) return
+    const deltaX = clientX - dragStartXRef.current
+    const deltaY = Math.abs(clientY - dragStartYRef.current)
+
+    // Ignore horizontal drag if vertical scroll is predominant on touch
+    if (deltaY > Math.abs(deltaX) * 1.2 && deltaY > 10 && !isDragging) {
+      isPointerDownRef.current = false
+      setDraggedX(0)
+      return
+    }
+
+    if (Math.abs(deltaX) > 5) {
+      setIsDragging(true)
+      setDraggedX(deltaX)
     }
   }
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartXRef.current === null || !e.changedTouches || !e.changedTouches[0]) return
-    const touchEndX = e.changedTouches[0].clientX
-    const diff = touchStartXRef.current - touchEndX
+  const handlePointerUp = () => {
+    if (!isPointerDownRef.current && !isDragging) return
+    isPointerDownRef.current = false
 
-    if (Math.abs(diff) > 40) {
-      if (diff > 0) {
+    if (Math.abs(draggedX) > DRAG_THRESHOLD && items.length > 1) {
+      if (draggedX < 0) {
         handleNext()
       } else {
         handlePrev()
       }
     }
-    touchStartXRef.current = null
+
+    setDraggedX(0)
+    setTimeout(() => {
+      setIsDragging(false)
+    }, 50)
   }
 
   return (
@@ -109,14 +135,30 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
       {/* Main Full-Bleed & Full-Screen Interactive Showcase Container */}
       <div
         ref={containerRef}
-        className="relative w-full overflow-hidden bg-neutral-950 shadow-2xl"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
+        className={`relative w-full overflow-hidden bg-neutral-950 shadow-2xl ${
+          items.length > 1 ? 'cursor-grab active:cursor-grabbing select-none' : ''
+        }`}
+        onMouseDown={e => {
+          if (e.button === 0) handlePointerDown(e.clientX, e.clientY)
+        }}
+        onMouseMove={e => handlePointerMove(e.clientX, e.clientY)}
+        onMouseUp={handlePointerUp}
+        onMouseLeave={handlePointerUp}
+        onTouchStart={e => {
+          if (e.touches && e.touches[0]) handlePointerDown(e.touches[0].clientX, e.touches[0].clientY)
+        }}
+        onTouchMove={e => {
+          if (e.touches && e.touches[0]) handlePointerMove(e.touches[0].clientX, e.touches[0].clientY)
+        }}
+        onTouchEnd={handlePointerUp}
       >
         {/* Horizontal Sliding Track (kayarak değişen görseller) */}
         <div
-          className="flex w-full transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]"
-          style={{transform: `translateX(-${activeIndex * 100}%)`}}
+          className="flex w-full"
+          style={{
+            transform: `translateX(calc(-${activeIndex * 100}% + ${draggedX}px))`,
+            transition: isDragging ? 'none' : 'transform 1000ms cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
         >
           {items.map((slide, slideIdx) => {
             const slideTitle = getLocVal(slide.title)
@@ -172,6 +214,7 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
                             type="button"
                             onClick={e => {
                               e.stopPropagation()
+                              if (isDragging) return
                               if (isActive) {
                                 setActiveHotspot(null)
                               } else {
@@ -353,20 +396,32 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
           </>
         )}
 
-        {/* Slide Pagination Dots (Çerçevesiz Minimalist Çizgiler / Borderless Dots) */}
+        {/* Slide Pagination Dots (Hero stili kare dotlar / Square dots matching Hero) */}
         {items.length > 1 && (
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 py-1">
-            {items.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setActiveIndex(i)}
-                className={`h-1.5 transition-all duration-500 rounded-none ${
-                  activeIndex === i ? 'w-10 bg-white' : 'w-4 bg-white/50 hover:bg-white/90'
-                }`}
-                aria-label={`Görsel ${i + 1}`}
-              />
-            ))}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center space-x-4">
+            <div className="flex items-center gap-3">
+              {items.map((_, index) => {
+                const isActive = activeIndex === index
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setActiveIndex(index)}
+                    className={`relative h-2 rounded-none transition-all duration-500 ease-in-out group ${
+                      isActive ? 'w-2 bg-red-900' : 'w-2 bg-white/40 hover:bg-white/60'
+                    }`}
+                    aria-label={`Görsel ${index + 1}`}
+                  >
+                    {isActive && (
+                      <div
+                        key={`${activeIndex}-${index}`}
+                        className="absolute top-0 left-0 h-full rounded-none bg-red-900 animate-fill-line"
+                      />
+                    )}
+                  </button>
+                )
+              })}
+            </div>
           </div>
         )}
       </div>

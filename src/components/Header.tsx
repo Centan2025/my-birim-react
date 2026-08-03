@@ -528,7 +528,7 @@ export function Header() {
     onClick?: () => void
   }> = ({to, children, onMouseEnter, onClick}) => {
     const baseStyle = {
-      fontSize: 'clamp(9px, 0.2rem + 0.5vw, 11px)', // Smaller font size
+      fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)',
       fontWeight: 500,
       letterSpacing: '0.05em',
       fontFamily: "'Inter', sans-serif",
@@ -782,7 +782,7 @@ export function Header() {
                     className={`group flex items-end space-x-1 pb-0 pt-2 ${navLinkClasses}`}
                     onClick={() => setIsProductsOpen(false)}
                     style={{
-                      fontSize: 'clamp(9px, 0.2rem + 0.5vw, 11px)',
+                      fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)',
                       fontWeight: 500, // Re-applying the 500 from previous request
                       letterSpacing: '0.05em',
                       fontFamily: "'Inter', sans-serif",
@@ -793,7 +793,7 @@ export function Header() {
                     <span
                       className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase header-nav-text"
                       style={{
-                        fontSize: 'clamp(9px, 0.2rem + 0.5vw, 11px)',
+                        fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)',
                         fontWeight: 500, // Re-applying the 500 from previous request
                         letterSpacing: '0.05em',
                         fontFamily: "'Inter', sans-serif",
@@ -897,7 +897,7 @@ export function Header() {
                 <div className="hidden lg:flex items-end space-x-4">
                   <div
                     className="flex items-center"
-                    style={{fontSize: 'clamp(9px, 0.2rem + 0.5vw, 11px)'}}
+                    style={{fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)'}}
                   >
                     {supportedLocales.map((langCode, index) => {
                       const isLast = index === supportedLocales.length - 1

@@ -66,7 +66,7 @@ export function HeaderStyles() {
         header nav a[href*="/about"],
         header nav a[href*="/contact"],
         header nav a[href*="/categories"] {
-          font-size: clamp(9px, 0.2rem + 0.5vw, 11px) !important;
+          font-size: clamp(12px, 0.35rem + 0.5vw, 13.5px) !important;
           font-weight: 500 !important;
           letter-spacing: 0.05em !important;
           font-family: 'Inter', sans-serif !important;
@@ -83,7 +83,7 @@ export function HeaderStyles() {
         header nav a[href*="/about"] span,
         header nav a[href*="/contact"] span,
         header nav a[href*="/categories"] span {
-          font-size: clamp(9px, 0.2rem + 0.5vw, 11px) !important;
+          font-size: clamp(12px, 0.35rem + 0.5vw, 13.5px) !important;
           font-weight: 500 !important;
           letter-spacing: 0.05em !important;
           line-height: 1.25rem !important;
@@ -95,7 +95,7 @@ export function HeaderStyles() {
         header nav a[class*="active"] span,
         header nav a.active span,
         header nav a[aria-current="page"] span {
-          font-size: clamp(9px, 0.2rem + 0.5vw, 11px) !important;
+          font-size: clamp(12px, 0.35rem + 0.5vw, 13.5px) !important;
           font-weight: 500 !important;
           letter-spacing: 0.05em !important;
           line-height: 1.25rem !important;
