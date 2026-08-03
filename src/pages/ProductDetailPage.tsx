@@ -251,6 +251,7 @@ export function ProductDetailPage() {
         isFullscreenButtonVisible={isFullscreenButtonVisible}
         imageBorderClass={imageBorderClass}
         currentImageIndex={heroHook.currentImageIndex}
+        showHeroNavigation={Boolean(product.showHeroNavigation)}
         onNext={heroHook.heroNext}
         onPrev={heroHook.heroPrev}
         onDragStart={heroHook.handleHeroDragStart}
@@ -263,23 +264,25 @@ export function ProductDetailPage() {
         onSetTransitionEnabled={heroHook.setHeroTransitionEnabled}
       />
 
-      <div
-        className={`transition-all duration-700 ease-out ${
-          !isThumbnailsVisible ? 'opacity-0 translate-y-8' : 'opacity-100 translate-y-0'
-        }`}
-      >
-        <ProductThumbnails
-          productName={product.name}
-          bandMedia={bandMedia}
-          currentImageIndex={heroHook.currentImageIndex}
-          imageBorderClass={imageBorderClass}
-          onSelect={idx => {
-            heroHook.setHeroTransitionEnabled(true)
-            heroHook.setHeroSlideIndex(slideCount > 1 ? idx + 1 : 0)
-            heroHook.setCurrentImageIndex(idx)
-          }}
-        />
-      </div>
+      {Boolean(product.showHeroNavigation) && (
+        <div
+          className={`transition-all duration-700 ease-out ${
+            !isThumbnailsVisible ? 'opacity-0 translate-y-8' : 'opacity-100 translate-y-0'
+          }`}
+        >
+          <ProductThumbnails
+            productName={product.name}
+            bandMedia={bandMedia}
+            currentImageIndex={heroHook.currentImageIndex}
+            imageBorderClass={imageBorderClass}
+            onSelect={idx => {
+              heroHook.setHeroTransitionEnabled(true)
+              heroHook.setHeroSlideIndex(slideCount > 1 ? idx + 1 : 0)
+              heroHook.setCurrentImageIndex(idx)
+            }}
+          />
+        </div>
+      )}
 
       <main
         className={`bg-[var(--bg-secondary)] pb-12 transition-all duration-700 ease-out ${

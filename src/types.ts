@@ -249,6 +249,8 @@ export interface Product {
   mediaSectionText?: LocalizedString
   /** Toggle for showing media panels at bottom. */
   showMediaPanels?: boolean
+  /** Toggle for showing hero navigation thumbnails band under hero. */
+  showHeroNavigation?: boolean
   /** Dimension drawings/images shown before materials. Each has an image and a title. */
   dimensionImages?: {
     image: string

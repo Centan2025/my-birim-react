@@ -280,6 +280,7 @@ const mapProductRow = (r: Record<string, unknown>): Product => {
     mainImage: mainImage as Product['mainImage'],
     media: mapProductMedia(r['media']),
     showMediaPanels: Boolean(r?.['showMediaPanels']),
+    showHeroNavigation: Boolean(r?.['showHeroNavigation']),
     dimensionImages: mapDimensionImages(r?.['dimensionImages'] as unknown[]),
     buyable: Boolean(r['buyable']),
     price: r['price'] as number,
@@ -322,7 +323,7 @@ const productQueryString = `
     type, url, imageR2, imageMobileR2, imageDesktopR2, title, description, link, linkText, 
     videoFileR2, videoFileMobileR2, videoFileDesktopR2, isCover, isMirrored 
   },
-  mediaSectionTitle, mediaSectionText, showMediaPanels, buyable, price, currency, sku, stockStatus,
+  mediaSectionTitle, mediaSectionText, showMediaPanels, showHeroNavigation, buyable, price, currency, sku, stockStatus,
   materialSelections[]{ "group": group->{title,books[]{title,items[]{name,imageR2}}}, materials[]{name,imageR2} },
   dimensionImages[]{ imageR2, imageMobileR2, imageDesktopR2, title },
   exclusiveContent, designer->{ "designerId": id.current }, designers[]->{ "designerId": id.current }, category->{ "categoryId": id.current }

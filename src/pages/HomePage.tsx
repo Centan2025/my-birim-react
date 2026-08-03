@@ -451,7 +451,7 @@ export function HomePage() {
             }`}
           >
             <div
-              className={`container mx-auto px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-8 text-center md:text-left ${
+              className={`w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex flex-col md:flex-row items-center justify-between gap-3 md:gap-8 text-center md:text-left ${
                 !hasTextContent ? 'justify-center min-h-[44px] md:min-h-0' : 'min-h-[44px]'
               }`}
             >

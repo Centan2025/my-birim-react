@@ -66,9 +66,14 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
               <NavLink
                 key={category.id}
                 to={`/products/${category.id}`}
-                className={`group relative px-0 py-2 text-sm font-semibold uppercase transition-colors duration-300 ${
+                className={`group relative px-0 py-2 font-medium uppercase transition-colors duration-300 ${
                   isLightMode ? 'text-gray-800 hover:text-black' : 'text-gray-200 hover:text-white'
                 }`}
+                style={{
+                  fontSize: 'clamp(9px, 0.2rem + 0.5vw, 11px)',
+                  letterSpacing: '0.05em',
+                  fontFamily: "'Inter', sans-serif",
+                }}
                 onClick={onClose}
                 onMouseEnter={() => onHoveredCategoryChange(category.id)}
               >
@@ -185,9 +190,14 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
       <div className="pt-3 pb-3" style={{paddingLeft: submenuOffset, paddingRight: '5rem'}}>
         <NavLink
           to="/products"
-          className={`group relative inline-block px-0 py-2 text-sm font-bold uppercase transition-colors duration-300 ${
+          className={`group relative inline-block px-0 py-2 font-medium uppercase transition-colors duration-300 ${
             isLightMode ? 'text-black hover:text-gray-800' : 'text-white hover:text-gray-200'
           }`}
+          style={{
+            fontSize: 'clamp(9px, 0.2rem + 0.5vw, 11px)',
+            letterSpacing: '0.05em',
+            fontFamily: "'Inter', sans-serif",
+          }}
           onClick={onClose}
         >
           <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase">

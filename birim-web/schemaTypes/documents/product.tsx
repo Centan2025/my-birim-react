@@ -172,6 +172,14 @@ export default defineType({
       initialValue: true,
     }),
     defineField({
+      name: 'showHeroNavigation',
+      title: 'Hero Altı Navigasyonu Göster',
+      type: 'boolean',
+      initialValue: false,
+      description:
+        'Hero bölümünün altındaki görsel/medya navigasyon (bant) bölümünün gösterilip gösterilmeyeceğini belirler. Kapalıysa hero bölümü ekranın altına kadar uzanır.',
+    }),
+    defineField({
       name: 'seo',
       title: 'SEO & Arama Motoru Ayarları',
       type: 'seoFields',

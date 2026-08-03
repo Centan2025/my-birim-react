@@ -73,3 +73,5 @@ brain/
 
 
 .env*
+playwright-report/
+test-results/
