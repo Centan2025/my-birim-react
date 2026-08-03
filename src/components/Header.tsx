@@ -28,46 +28,6 @@ import {useBodyScrollLock} from '../hooks/useBodyScrollLock'
 import {MenuIcon, ChevronDownIcon, SearchIcon, CloseIcon, ShoppingBagIcon} from './HeaderIcons'
 import {useDarkMode} from '../context/DarkModeContext'
 
-const SunIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="12" cy="12" r="5" />
-    <line x1="12" y1="1" x2="12" y2="3" />
-    <line x1="12" y1="21" x2="12" y2="23" />
-    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-    <line x1="1" y1="12" x2="3" y2="12" />
-    <line x1="21" y1="12" x2="23" y2="12" />
-    <line x1="4.22" y1="18.36" x2="5.64" y2="19.78" />
-    <line x1="18.36" y1="4.22" x2="19.78" y2="5.64" />
-  </svg>
-)
-
-const MoonIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-  </svg>
-)
-
 export function Header() {
   const {t, setLocale, locale, supportedLocales} = useTranslation()
   const location = useLocation()
@@ -94,7 +54,7 @@ export function Header() {
   const [submenuOffset, setSubmenuOffset] = useState(0)
   const {theme: headerTheme} = useHeaderTheme()
 
-  const {isDarkMode, toggleTheme} = useDarkMode()
+  const {isDarkMode} = useDarkMode()
   const {isLoggedIn} = useAuth()
   const {cartCount, toggleCart} = useCart()
   const [headerOpacity, setHeaderOpacity] = useState(0)
@@ -493,7 +453,7 @@ export function Header() {
     textShadow: '0 0 5px rgba(255,255,255,0.5)',
     opacity: 1,
   }
-  const iconBaseSize = 'clamp(22px, 1.2rem + 0.4vw, 30px)'
+  const iconBaseSize = 'clamp(16px, 0.8rem + 0.3vw, 20px)'
   const iconClasses =
     'text-gray-300 hover:text-white transition-all duration-300 transform hover:scale-125'
   const sharedIconStyle = {
@@ -568,7 +528,7 @@ export function Header() {
     onClick?: () => void
   }> = ({to, children, onMouseEnter, onClick}) => {
     const baseStyle = {
-      fontSize: 'clamp(11px, 0.3rem + 0.7vw, 15px)', // Aggressive scaling
+      fontSize: 'clamp(9px, 0.2rem + 0.5vw, 11px)', // Smaller font size
       fontWeight: 500,
       letterSpacing: '0.05em',
       fontFamily: "'Inter', sans-serif",
@@ -688,7 +648,7 @@ export function Header() {
             {/* Üst satır: grid stretch (tam yükseklik), içindeki hücreler alttan hizalı */}
             <div className="relative flex w-full h-full items-center lg:grid lg:grid-cols-[1fr_auto_1fr] header-layout-transition">
               {/* Sol taraf - Arama + sol menü (desktop) ve arama + logo (mobil) */}
-              <div className="flex flex-1 h-full items-center lg:items-end lg:justify-between lg:pb-6 lg:translate-y-[6px] header-layout-transition">
+              <div className="flex flex-1 h-full items-center lg:items-end lg:justify-start lg:gap-6 xl:gap-8 lg:pb-6 lg:translate-y-[6px] header-layout-transition">
                 {/* Mobil Arama - Solda */}
                 {isMobile && (
                   <button
@@ -822,7 +782,7 @@ export function Header() {
                     className={`group flex items-end space-x-1 pb-0 pt-2 ${navLinkClasses}`}
                     onClick={() => setIsProductsOpen(false)}
                     style={{
-                      fontSize: 'clamp(12px, 0.4rem + 0.6vw, 15px)',
+                      fontSize: 'clamp(9px, 0.2rem + 0.5vw, 11px)',
                       fontWeight: 500, // Re-applying the 500 from previous request
                       letterSpacing: '0.05em',
                       fontFamily: "'Inter', sans-serif",
@@ -833,7 +793,7 @@ export function Header() {
                     <span
                       className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase header-nav-text"
                       style={{
-                        fontSize: 'clamp(0.75rem, 0.5rem + 0.4vw, 0.9375rem)',
+                        fontSize: 'clamp(9px, 0.2rem + 0.5vw, 11px)',
                         fontWeight: 500, // Re-applying the 500 from previous request
                         letterSpacing: '0.05em',
                         fontFamily: "'Inter', sans-serif",
@@ -869,9 +829,6 @@ export function Header() {
                     {t('projects') || 'Projeler'}
                   </NavItem>
                 </div>
-
-                {/* Görünmez çapa: Boşluğu 4'e bölmek için 5. nokta (Logo sınırı) */}
-                <div className="hidden lg:block w-0" aria-hidden="true" />
               </div>
 
               {/* Orta - Logo (Desktop) */}
@@ -896,10 +853,7 @@ export function Header() {
               </div>
 
               {/* Sağ taraf - Logo'nun sağındaki linkler + ikonlar */}
-              <div className="flex flex-1 h-full items-center lg:items-end justify-end lg:justify-between lg:pb-6 lg:translate-y-[6px] header-layout-transition">
-                {/* Görünmez çapa: Boşluğu 4'e bölmek için 1. nokta (Logo sınırı) */}
-                <div className="hidden lg:block w-0" aria-hidden="true" />
-
+              <div className="flex flex-1 h-full items-center lg:items-end justify-end lg:justify-end lg:gap-6 xl:gap-8 lg:pb-6 lg:translate-y-[6px] header-layout-transition">
                 {/* Desktop Menü - Logo'nun sağındaki linkler (eşit aralıklarla dağıtılmış) */}
                 <div className="hidden lg:flex items-end">
                   <NavItem
@@ -943,7 +897,7 @@ export function Header() {
                 <div className="hidden lg:flex items-end space-x-4">
                   <div
                     className="flex items-center"
-                    style={{fontSize: 'clamp(12px, 0.4rem + 0.6vw, 16px)'}}
+                    style={{fontSize: 'clamp(9px, 0.2rem + 0.5vw, 11px)'}}
                   >
                     {supportedLocales.map((langCode, index) => {
                       const isLast = index === supportedLocales.length - 1
@@ -957,7 +911,7 @@ export function Header() {
                               fontWeight: 500,
                               fontFamily: "'Inter', sans-serif",
                               letterSpacing: '0.05em',
-                              fontSize: 'clamp(12px, 0.4rem + 0.6vw, 15px)',
+                              fontSize: 'clamp(9px, 0.2rem + 0.5vw, 11px)',
                               color: isActive
                                 ? headerForegroundColor
                                 : `${headerForegroundColor}80`, // 50% opacity for inactive
@@ -975,27 +929,6 @@ export function Header() {
                       )
                     })}
                   </div>
-
-                  {/* Dark Mode Toggle */}
-                  <button
-                    onClick={toggleTheme}
-                    className={`${iconClasses}`}
-                    style={{...sharedIconStyle, color: headerForegroundColor}}
-                    aria-label={isDarkMode ? t('light_mode') : t('dark_mode')}
-                  >
-                    <span className="relative flex items-center justify-center w-6 h-6">
-                      <span
-                        className={`absolute transition-all duration-500 ${isDarkMode ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-0'}`}
-                      >
-                        <SunIcon />
-                      </span>
-                      <span
-                        className={`absolute transition-all duration-500 ${!isDarkMode ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 rotate-90 scale-0'}`}
-                      >
-                        <MoonIcon />
-                      </span>
-                    </span>
-                  </button>
 
                   {settings?.showCartButton === true && (
                     <button

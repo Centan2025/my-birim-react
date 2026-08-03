@@ -67,8 +67,18 @@ export function useProductHero(slideCount: number) {
   const handleHeroDragStart = useCallback(
     (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
       if (e.target instanceof HTMLElement && e.target.closest('a, button')) return
-      const x = 'touches' in e && e.touches && e.touches.length > 0 ? e.touches[0]?.clientX : 'clientX' in e ? e.clientX : undefined
-      const y = 'touches' in e && e.touches && e.touches.length > 0 ? e.touches[0]?.clientY : 'clientY' in e ? e.clientY : undefined
+      const x =
+        'touches' in e && e.touches && e.touches.length > 0
+          ? e.touches[0]?.clientX
+          : 'clientX' in e
+            ? e.clientX
+            : undefined
+      const y =
+        'touches' in e && e.touches && e.touches.length > 0
+          ? e.touches[0]?.clientY
+          : 'clientY' in e
+            ? e.clientY
+            : undefined
 
       if (x === undefined || y === undefined) return
 
@@ -87,8 +97,18 @@ export function useProductHero(slideCount: number) {
   const handleHeroDragMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
       if (!isDragging) return
-      const x = 'touches' in e && e.touches && e.touches.length > 0 ? e.touches[0]?.clientX : 'clientX' in e ? e.clientX : undefined
-      const y = 'touches' in e && e.touches && e.touches.length > 0 ? e.touches[0]?.clientY : 'clientY' in e ? e.clientY : undefined
+      const x =
+        'touches' in e && e.touches && e.touches.length > 0
+          ? e.touches[0]?.clientX
+          : 'clientX' in e
+            ? e.clientX
+            : undefined
+      const y =
+        'touches' in e && e.touches && e.touches.length > 0
+          ? e.touches[0]?.clientY
+          : 'clientY' in e
+            ? e.clientY
+            : undefined
 
       if (x === undefined || y === undefined) return
 
