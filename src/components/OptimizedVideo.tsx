@@ -86,10 +86,15 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
         error.code === MediaError.MEDIA_ERR_NETWORK ||
         error.code === MediaError.MEDIA_ERR_DECODE
       ) {
+        const currentSrc = videoElement.src || videoElement.currentSrc
+        if (!currentSrc || currentSrc === window.location.href) {
+          return
+        }
+
         console.warn('Video yükleme uyarısı/hatası:', {
           code: error.code,
           message: error.message,
-          videoSrc: videoElement.src || videoElement.currentSrc,
+          videoSrc: currentSrc,
           errorCode: {
             1: 'MEDIA_ERR_ABORTED',
             2: 'MEDIA_ERR_NETWORK',
@@ -103,6 +108,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       }
       return
     }
+
     // Error event'i geldi ama error objesi yoksa, muhtemelen cache hatası
     // Bu durumda video yine de çalışabilir, bu yüzden görmezden gel
     console.warn('Video error event tetiklendi ama error objesi yok:', {
@@ -205,9 +211,12 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       const playPromise = video.play()
       if (playPromise !== undefined) {
         playPromise.catch(error => {
-          // If play is interrupted by a pause() call, it throws an AbortError.
-          // We can safely ignore AbortErrors to avoid console spam.
-          if (error.name !== 'AbortError') {
+          // If play is interrupted by pause() or restricted by browser autoplay policy, ignore standard non-fatal errors
+          if (
+            error.name !== 'AbortError' &&
+            error.name !== 'NotAllowedError' &&
+            error.name !== 'NotSupportedError'
+          ) {
             console.warn('Video autoplay prevented:', error)
           }
         })
