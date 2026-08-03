@@ -12,6 +12,7 @@
     "preview": "vite preview",
     "import-media": "cd tools/media-importer && npm install && npm run import --",
     "test": "vitest",
+    "test:e2e": "playwright test",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 300",
@@ -56,6 +57,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.0",
     "@size-limit/preset-app": "^11.2.0",
     "@tailwindcss/postcss": "^4.1.17",
     "@testing-library/jest-dom": "^6.1.5",
