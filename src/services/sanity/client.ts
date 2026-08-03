@@ -132,6 +132,10 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
   let result = urlParts[0] || ''
   const searchParams = urlParts[1] || ''
 
+  // Video dosyaları Cloudflare Worker CDN üzerinde Accept-Ranges desteklemediği için R2 Origin domain kullanmalıdır
+  const isVideoFile = /\.(mp4|webm|mov|m4v|ogv)($|\?)/i.test(result)
+  const activeDomain = isVideoFile && R2_ORIGIN_DOMAIN ? R2_ORIGIN_DOMAIN : R2_DOMAIN
+
   // 2. Domain Rewrite (Hepsini tek bir domain'e topla)
   // Regex pointer issue riskini azaltmak için string replace kullanıyoruz
   const legacyDomains = [
@@ -140,8 +144,8 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
     'pub-5e705b2a702d4bb1a3631c558917599d.r2.dev',
   ]
 
-  if (R2_DOMAIN) {
-    const r2DomainNoProtocol = R2_DOMAIN.replace(/^https?:\/\//, '')
+  if (activeDomain) {
+    const r2DomainNoProtocol = activeDomain.replace(/^https?:\/\//, '')
 
     // Domain Rewrite
     if (result.includes('assets.birim.com')) {
@@ -185,10 +189,10 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
         const cleanPath = result.replace(r2DomainNoProtocol, '').startsWith('/')
           ? result.replace(r2DomainNoProtocol, '').substring(1)
           : result.replace(r2DomainNoProtocol, '')
-        result = `${R2_DOMAIN}/${cleanPath}`
+        result = `${activeDomain}/${cleanPath}`
       } else {
         const cleanPath = result.startsWith('/') ? result.substring(1) : result
-        result = `${R2_DOMAIN}/${cleanPath}`
+        result = `${activeDomain}/${cleanPath}`
       }
     }
   }

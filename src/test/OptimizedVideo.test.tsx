@@ -10,7 +10,9 @@ describe('OptimizedVideo', () => {
     )
     const video = container.querySelector('video')
     expect(video).toBeInTheDocument()
-    expect(video?.getAttribute('src')).toBe('https://birim-assets.web-birim.workers.dev/sample.mp4')
+    expect(video?.getAttribute('src')).toBe(
+      'https://pub-5e705b2a702d4bb1a3631c558917599d.r2.dev/sample.mp4'
+    )
   })
 
   it('handles media error and attempts fallback to origin R2 domain', async () => {

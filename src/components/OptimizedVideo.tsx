@@ -70,6 +70,11 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
 
   const handleError = useCallback(
     (e?: React.SyntheticEvent<HTMLVideoElement, Event>) => {
+      // Eğer hata çocuk bir <source> etiketinden kabarmışsa (bubbling), göz ardı et
+      if (e?.target && e.target !== e.currentTarget) {
+        return
+      }
+
       const videoElement = e?.currentTarget
       if (videoElement?.error) {
         const error = videoElement.error
