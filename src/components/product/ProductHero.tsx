@@ -38,6 +38,7 @@ interface ProductHeroProps {
   isFullscreenButtonVisible: boolean
   imageBorderClass: string
   currentImageIndex: number
+  showHeroNavigation?: boolean
   onNext: () => void
   onPrev: () => void
   onDragStart: (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => void
@@ -78,6 +79,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
   isFullscreenButtonVisible,
   imageBorderClass,
   currentImageIndex: _unused_currentImageIndex,
+  showHeroNavigation = false,
   onNext,
   onPrev,
   onDragStart,
@@ -153,9 +155,9 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
       <div
         className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing"
         style={{
-          height: isMobile ? '70vh' : '85vh',
-          minHeight: isMobile ? '70vh' : '85vh',
-          maxHeight: isMobile ? '70vh' : '85vh',
+          height: !showHeroNavigation ? '100vh' : isMobile ? '70vh' : '85vh',
+          minHeight: !showHeroNavigation ? '100vh' : isMobile ? '70vh' : '85vh',
+          maxHeight: !showHeroNavigation ? '100vh' : isMobile ? '70vh' : '85vh',
         }}
         aria-label="Product Image Carousel"
         onMouseDown={onDragStart}
