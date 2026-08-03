@@ -183,7 +183,10 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
     const rawDelta = currentX - dragStartX
     const containerWidth = containerRef.current?.offsetWidth || window.innerWidth
     // Apply soft dampening and clamp maximum drag movement to prevent over-scrolling
-    const clampedDelta = Math.min(Math.max(rawDelta * 0.85, -containerWidth * 0.5), containerWidth * 0.5)
+    const clampedDelta = Math.min(
+      Math.max(rawDelta * 0.85, -containerWidth * 0.5),
+      containerWidth * 0.5
+    )
     setDraggedX(clampedDelta)
     if (!('touches' in e)) {
       e.preventDefault()

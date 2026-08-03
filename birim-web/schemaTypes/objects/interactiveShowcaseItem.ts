@@ -20,7 +20,7 @@ export const interactiveShowcaseItem = defineType({
       title: 'Görsel (Masaüstü)',
       type: 'r2Asset',
       description: 'Ürünlerin kullanıldığı tam ekran arka plan görseli',
-      validation: Rule => Rule.required(),
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'imageMobileR2',

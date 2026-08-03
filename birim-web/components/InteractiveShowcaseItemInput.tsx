@@ -97,7 +97,7 @@ export default function InteractiveShowcaseItemInput(props: ObjectInputProps) {
               return (
                 <div
                   key={hs._key || idx}
-                  onClick={e => {
+                  onClick={(e) => {
                     e.stopPropagation()
                     setSelectedHotspotIndex(idx)
                   }}
@@ -129,7 +129,13 @@ export default function InteractiveShowcaseItemInput(props: ObjectInputProps) {
             })}
           </div>
 
-          <Flex align="center" justify="space-between" marginTop={3} padding={2} style={{background: '#f4f5f7', borderRadius: '4px'}}>
+          <Flex
+            align="center"
+            justify="space-between"
+            marginTop={3}
+            padding={2}
+            style={{background: '#f4f5f7', borderRadius: '4px'}}
+          >
             <Text size={1} weight="medium">
               {selectedHotspotIndex !== null && hotspots[selectedHotspotIndex]
                 ? `Seçili Nokta #${selectedHotspotIndex + 1}: X: %${hotspots[selectedHotspotIndex].x}, Y: %${hotspots[selectedHotspotIndex].y}`

@@ -97,14 +97,16 @@ export default defineType({
       type: 'array',
       fieldset: 'showcaseGroup',
       of: [{type: 'interactiveShowcaseItem'}],
-      description: 'Ürünlerin kullanıldığı tam ekran görseller ve üzerlerindeki tıklanabilir ürün noktaları',
+      description:
+        'Ürünlerin kullanıldığı tam ekran görseller ve üzerlerindeki tıklanabilir ürün noktaları',
     }),
     defineField({
       name: 'interactiveShowcaseBlockIndex',
       title: 'İnteraktif Alan Gösterim Sırası (İçerik Bloğu İndeksi)',
       type: 'number',
       fieldset: 'showcaseGroup',
-      description: 'Bu alanın kaçıncı içerik bloğundan sonra gösterileceği (0: Hero altı banttan sonra, 1: 1. bloktan sonra, 2: 2. bloktan sonra vb.)',
+      description:
+        'Bu alanın kaçıncı içerik bloğundan sonra gösterileceği (0: Hero altı banttan sonra, 1: 1. bloktan sonra, 2: 2. bloktan sonra vb.)',
       initialValue: 1,
     }),
     defineField({

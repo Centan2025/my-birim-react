@@ -10,7 +10,7 @@ export const productHotspot = defineType({
       title: 'X Koordinatı (%)',
       type: 'number',
       description: 'Görselin solundan sağa yüzdelik konumu (0 - 100)',
-      validation: Rule => Rule.required().min(0).max(100),
+      validation: (Rule) => Rule.required().min(0).max(100),
       initialValue: 50,
     }),
     defineField({
@@ -18,7 +18,7 @@ export const productHotspot = defineType({
       title: 'Y Koordinatı (%)',
       type: 'number',
       description: 'Görselin üstünden alta yüzdelik konumu (0 - 100)',
-      validation: Rule => Rule.required().min(0).max(100),
+      validation: (Rule) => Rule.required().min(0).max(100),
       initialValue: 50,
     }),
     defineField({
@@ -27,7 +27,7 @@ export const productHotspot = defineType({
       type: 'reference',
       to: [{type: 'product'}],
       description: 'Bu noktaya tıklandığında gösterilecek ürün',
-      validation: Rule => Rule.required(),
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'label',

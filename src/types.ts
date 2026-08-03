@@ -425,7 +425,9 @@ export interface ProductHotspot {
   product?: {
     id: string
     name: LocalizedString
-    mainImage?: string | {url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot']}
+    mainImage?:
+      | string
+      | {url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot']}
     price?: number
     currency?: string
     categoryName?: LocalizedString

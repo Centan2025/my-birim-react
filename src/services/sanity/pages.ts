@@ -272,64 +272,70 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
           )
       }
       if (data?.interactiveShowcase && Array.isArray(data.interactiveShowcase)) {
-        data.interactiveShowcase = data.interactiveShowcase.map((item: Record<string, unknown>) => {
-          const imgR2 = item['imageR2']
-          const imgMobileR2 = item['imageMobileR2']
-          const image = mapImage(imgR2 as SanityImageLike) || (typeof item['image'] === 'string' ? item['image'] : '')
-          const imageMobile = mapImage(imgMobileR2 as SanityImageLike) || (typeof item['imageMobile'] === 'string' ? item['imageMobile'] : undefined)
-          const meta = imgR2 ? mapR2Metadata(imgR2) : {}
+        data.interactiveShowcase = data.interactiveShowcase
+          .map((item: Record<string, unknown>) => {
+            const imgR2 = item['imageR2']
+            const imgMobileR2 = item['imageMobileR2']
+            const image =
+              mapImage(imgR2 as SanityImageLike) ||
+              (typeof item['image'] === 'string' ? item['image'] : '')
+            const imageMobile =
+              mapImage(imgMobileR2 as SanityImageLike) ||
+              (typeof item['imageMobile'] === 'string' ? item['imageMobile'] : undefined)
+            const meta = imgR2 ? mapR2Metadata(imgR2) : {}
 
-          const rawHotspots = Array.isArray(item['hotspots']) ? item['hotspots'] : []
-          const hotspots = rawHotspots.map((hs: Record<string, unknown>) => {
-            const prod = hs['product'] as Record<string, unknown> | undefined
-            let mappedProd = undefined
-            if (prod) {
-              const prodMedia = Array.isArray(prod['media'])
-                ? (prod['media'] as Record<string, unknown>[])
-                : []
-              const coverItem = prodMedia.find(m => m['isCover']) || prodMedia[0]
-              const imageR2Obj =
-                (coverItem?.['imageR2'] as Record<string, unknown> | undefined) ||
-                (prod['mainImageR2'] as Record<string, unknown> | undefined)
+            const rawHotspots = Array.isArray(item['hotspots']) ? item['hotspots'] : []
+            const hotspots = rawHotspots.map((hs: Record<string, unknown>) => {
+              const prod = hs['product'] as Record<string, unknown> | undefined
+              let mappedProd = undefined
+              if (prod) {
+                const prodMedia = Array.isArray(prod['media'])
+                  ? (prod['media'] as Record<string, unknown>[])
+                  : []
+                const coverItem = prodMedia.find(m => m['isCover']) || prodMedia[0]
+                const imageR2Obj =
+                  (coverItem?.['imageR2'] as Record<string, unknown> | undefined) ||
+                  (prod['mainImageR2'] as Record<string, unknown> | undefined)
 
-              const resolvedUrl =
-                (typeof imageR2Obj?.['url'] === 'string'
-                  ? mapImage(imageR2Obj as SanityImageLike)
-                  : '') ||
-                mapImage(coverItem?.['imageR2'] as SanityImageLike) ||
-                mapImage(prod['mainImageR2'] as SanityImageLike) ||
-                mapImage(prod['mainImage'] as SanityImageLike) ||
-                (typeof coverItem?.['url'] === 'string' ? coverItem['url'] : '') ||
-                (typeof prod['mainImage'] === 'string' ? prod['mainImage'] : '')
+                const resolvedUrl =
+                  (typeof imageR2Obj?.['url'] === 'string'
+                    ? mapImage(imageR2Obj as SanityImageLike)
+                    : '') ||
+                  mapImage(coverItem?.['imageR2'] as SanityImageLike) ||
+                  mapImage(prod['mainImageR2'] as SanityImageLike) ||
+                  mapImage(prod['mainImage'] as SanityImageLike) ||
+                  (typeof coverItem?.['url'] === 'string' ? coverItem['url'] : '') ||
+                  (typeof prod['mainImage'] === 'string' ? prod['mainImage'] : '')
 
-              mappedProd = {
-                id: (prod['id'] as string) || (prod['_id'] as string) || '',
-                name: prod['name'],
-                mainImage: resolvedUrl || undefined,
-                price: typeof prod['price'] === 'number' ? prod['price'] : undefined,
-                currency: typeof prod['currency'] === 'string' ? prod['currency'] : 'TRY',
-                categoryName: prod['categoryName'],
-                designerName: prod['designerName'],
+                mappedProd = {
+                  id: (prod['id'] as string) || (prod['_id'] as string) || '',
+                  name: prod['name'],
+                  mainImage: resolvedUrl || undefined,
+                  price: typeof prod['price'] === 'number' ? prod['price'] : undefined,
+                  currency: typeof prod['currency'] === 'string' ? prod['currency'] : 'TRY',
+                  categoryName: prod['categoryName'],
+                  designerName: prod['designerName'],
+                }
               }
-            }
+
+              return {
+                x: typeof hs['x'] === 'number' ? hs['x'] : 50,
+                y: typeof hs['y'] === 'number' ? hs['y'] : 50,
+                label: hs['label'],
+                product: mappedProd,
+              }
+            })
 
             return {
-              x: typeof hs['x'] === 'number' ? hs['x'] : 50,
-              y: typeof hs['y'] === 'number' ? hs['y'] : 50,
-              label: hs['label'],
-              product: mappedProd,
+              title: item['title'],
+              image,
+              imageMobile,
+              crop: meta.crop,
+              hotspot: meta.hotspot,
+              hotspots,
             }
           })
-
-          return {
-            title: item['title'],
-            image,
-            imageMobile,
-            crop: meta.crop,
-            hotspot: meta.hotspot,
-            hotspots,
-          }
-        }).filter((item: Record<string, unknown>) => !!item['image'])
+          .filter((item: Record<string, unknown>) => !!item['image'])
       }
 
       if (!data.interactiveShowcase || data.interactiveShowcase.length === 0) {

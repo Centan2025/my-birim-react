@@ -24,10 +24,7 @@ interface HomeContentBlocksProps {
 
 const ContentBlockSnapWrapper: React.FC<{children: React.ReactNode}> = ({children}) => {
   return (
-    <div
-      style={{scrollSnapAlign: 'start'}}
-      className="scroll-snap-start"
-    >
+    <div style={{scrollSnapAlign: 'start'}} className="scroll-snap-start">
       {children}
     </div>
   )
@@ -343,10 +340,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 
   if (!hasBlocks && hasInteractiveShowcase) {
     return (
-      <InteractiveShowcase
-        items={interactiveShowcase}
-        sectionTitle={interactiveShowcaseTitle}
-      />
+      <InteractiveShowcase items={interactiveShowcase} sectionTitle={interactiveShowcaseTitle} />
     )
   }
 
@@ -359,10 +353,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
   return (
     <>
       {hasInteractiveShowcase && targetIndex === 0 && (
-        <InteractiveShowcase
-          items={interactiveShowcase}
-          sectionTitle={interactiveShowcaseTitle}
-        />
+        <InteractiveShowcase items={interactiveShowcase} sectionTitle={interactiveShowcaseTitle} />
       )}
       {sortedBlocks.map((block, index) => {
         const titleContent = block.title ? t(block.title) : ''
@@ -827,7 +818,11 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       className={
                         hasTextContent && hasMedia
                           ? `flex flex-col ${
-                              isLeft ? 'md:flex-row' : isRight ? 'md:flex-row-reverse' : 'md:flex-row'
+                              isLeft
+                                ? 'md:flex-row'
+                                : isRight
+                                  ? 'md:flex-row-reverse'
+                                  : 'md:flex-row'
                             } ${block.verticalAlignment === 'top' ? 'gap-x-4 md:gap-x-6 gap-y-0' : 'gap-6 md:gap-12'} ${
                               block.verticalAlignment === 'top'
                                 ? 'items-start'

@@ -119,7 +119,12 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
           }
 
           // 1. Worker CDN hatasında R2 Direct Origin domain'e otomatik düş
-          if (!useFallbackDomain && R2_ORIGIN_DOMAIN && R2_DOMAIN && R2_DOMAIN !== R2_ORIGIN_DOMAIN) {
+          if (
+            !useFallbackDomain &&
+            R2_ORIGIN_DOMAIN &&
+            R2_DOMAIN &&
+            R2_DOMAIN !== R2_ORIGIN_DOMAIN
+          ) {
             setUseFallbackDomain(true)
             setRetryCount(prev => prev + 1)
             setTimeout(() => {

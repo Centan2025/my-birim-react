@@ -5,7 +5,9 @@ import {OptimizedVideo} from '../components/OptimizedVideo'
 
 describe('OptimizedVideo', () => {
   it('renders video element with given src', () => {
-    const {container} = render(<OptimizedVideo src="https://birim-assets.web-birim.workers.dev/sample.mp4" />)
+    const {container} = render(
+      <OptimizedVideo src="https://birim-assets.web-birim.workers.dev/sample.mp4" />
+    )
     const video = container.querySelector('video')
     expect(video).toBeInTheDocument()
     expect(video?.getAttribute('src')).toBe('https://birim-assets.web-birim.workers.dev/sample.mp4')
