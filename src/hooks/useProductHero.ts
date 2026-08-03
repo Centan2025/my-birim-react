@@ -67,8 +67,8 @@ export function useProductHero(slideCount: number) {
   const handleHeroDragStart = useCallback(
     (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
       if (e.target instanceof HTMLElement && e.target.closest('a, button')) return
-      const x = 'touches' in e ? e.touches[0]?.clientX : e.clientX
-      const y = 'touches' in e ? e.touches[0]?.clientY : e.clientY
+      const x = 'touches' in e && e.touches && e.touches.length > 0 ? e.touches[0]?.clientX : 'clientX' in e ? e.clientX : undefined
+      const y = 'touches' in e && e.touches && e.touches.length > 0 ? e.touches[0]?.clientY : 'clientY' in e ? e.clientY : undefined
 
       if (x === undefined || y === undefined) return
 
@@ -76,6 +76,10 @@ export function useProductHero(slideCount: number) {
       setDragStartX(x)
       dragStartY.current = y
       setDraggedX(0)
+
+      if (!('touches' in e)) {
+        e.preventDefault()
+      }
     },
     []
   )
@@ -83,8 +87,8 @@ export function useProductHero(slideCount: number) {
   const handleHeroDragMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
       if (!isDragging) return
-      const x = 'touches' in e ? e.touches[0]?.clientX : e.clientX
-      const y = 'touches' in e ? e.touches[0]?.clientY : e.clientY
+      const x = 'touches' in e && e.touches && e.touches.length > 0 ? e.touches[0]?.clientX : 'clientX' in e ? e.clientX : undefined
+      const y = 'touches' in e && e.touches && e.touches.length > 0 ? e.touches[0]?.clientY : 'clientY' in e ? e.clientY : undefined
 
       if (x === undefined || y === undefined) return
 
@@ -92,9 +96,14 @@ export function useProductHero(slideCount: number) {
       const deltaY = Math.abs(y - dragStartY.current)
       if (deltaY > deltaX && deltaY > 10) {
         setIsDragging(false)
+        setDraggedX(0)
         return
       }
       setDraggedX(x - dragStartX)
+
+      if (!('touches' in e)) {
+        e.preventDefault()
+      }
     },
     [isDragging, dragStartX]
   )

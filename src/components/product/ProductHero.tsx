@@ -211,7 +211,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     alt={`${t(product.name)} ${index + 1}`}
                     className={`w-full h-full ${
                       !m.urlMobile ? 'max-md:object-contain md:object-cover' : 'object-cover'
-                    } ${imageBorderClass}`}
+                    } ${imageBorderClass} select-none`}
                     width={1600}
                     height={900}
                     loading={shouldEagerLoad ? 'eager' : 'lazy'}
@@ -222,6 +222,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     isMirrored={m.isMirrored}
                     isMirroredMobile={m.isMirroredMobile}
                     isMirroredDesktop={m.isMirroredDesktop}
+                    draggable={false}
                   />
                 ) : m.type === 'video' ? (
                   <OptimizedVideo
