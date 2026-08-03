@@ -237,7 +237,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
                   price,
                   currency,
                   "categoryName": category->name,
-                  "designerName": designer->name
+                  "designerName": coalesce(designers[0]->name, designer->name)
                 }
               }
             }

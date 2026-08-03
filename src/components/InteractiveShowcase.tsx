@@ -410,10 +410,17 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
                                       const des = getLocVal(prod.designerName)
                                       if (!cat && !des) return null
                                       return (
-                                        <div className="flex items-center gap-1.5 flex-wrap text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500 line-clamp-1">
-                                          {cat ? <span>{cat}</span> : null}
-                                          {cat && des ? <span className="text-neutral-300">•</span> : null}
-                                          {des ? <span className="text-neutral-900 font-medium">TASARIMCI: {des}</span> : null}
+                                        <div className="space-y-0.5 mb-1">
+                                          {cat ? (
+                                            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500 line-clamp-1">
+                                              {cat}
+                                            </p>
+                                          ) : null}
+                                          {des ? (
+                                            <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-neutral-800 line-clamp-1">
+                                              TASARIMCI: {des}
+                                            </p>
+                                          ) : null}
                                         </div>
                                       )
                                     })()}
@@ -558,10 +565,17 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
                     const des = getLocVal(prod.designerName)
                     if (!cat && !des) return null
                     return (
-                      <div className="flex items-center gap-1.5 flex-wrap text-[11px] font-semibold uppercase tracking-widest text-neutral-500 line-clamp-1">
-                        {cat ? <span>{cat}</span> : null}
-                        {cat && des ? <span className="text-neutral-300">•</span> : null}
-                        {des ? <span className="text-neutral-900 font-medium">TASARIMCI: {des}</span> : null}
+                      <div className="space-y-0.5 mb-1">
+                        {cat ? (
+                          <p className="text-[11px] font-semibold uppercase tracking-widest text-neutral-500 line-clamp-1">
+                            {cat}
+                          </p>
+                        ) : null}
+                        {des ? (
+                          <p className="text-[11px] font-medium uppercase tracking-wider text-neutral-800 line-clamp-1">
+                            TASARIMCI: {des}
+                          </p>
+                        ) : null}
                       </div>
                     )
                   })()}
