@@ -104,6 +104,7 @@ export const DesktopMediaSlider: React.FC<DesktopMediaSliderProps> = ({items, ac
           {cloned.map((item, idx) => {
             const url = getUrl(item)
             if (!item || !url) return null
+            const isActive = idx === slideIndex
             return (
               <div
                 key={idx}
@@ -122,10 +123,10 @@ export const DesktopMediaSlider: React.FC<DesktopMediaSliderProps> = ({items, ac
                   <OptimizedVideo
                     src={url}
                     controls
-                    autoPlay
+                    autoPlay={isActive}
                     className="max-w-full max-h-full w-auto h-auto object-contain"
-                    preload="auto"
-                    loading="eager"
+                    preload={isActive ? 'metadata' : 'none'}
+                    loading={isActive ? 'eager' : 'lazy'}
                   />
                 ) : (
                   <OptimizedImage

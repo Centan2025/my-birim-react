@@ -25,10 +25,9 @@ interface OptimizedVideoProps {
 
 /**
  * Optimize edilmiş video component'i
- * - Lazy loading desteği
- * - Poster image desteği
- * - Preload kontrolü
- * - Hata ve domain fallback yönetimi
+ * - Multi-domain HTML5 source desteği (Worker CDN + R2 Origin fallback)
+ * - YouTube ve geçersiz URL filtresi
+ * - Preload & lazy loading yönetimi
  */
 export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
   src,
@@ -41,7 +40,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
   controls = false,
   playsInline = true,
   loading = 'lazy',
-  preload = 'none', // Varsayılan olarak preload yok (performans için)
+  preload = 'none',
   srcMobile,
   srcDesktop,
   posterMobile,
@@ -52,39 +51,17 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
 }) => {
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
-  const [useFallbackDomain, setUseFallbackDomain] = useState(false)
-  const [retryCount, setRetryCount] = useState(0)
   const videoRef = useRef<HTMLVideoElement>(null)
 
   // src prop'ları değiştiğinde state'leri sıfırla
   React.useEffect(() => {
     setIsLoaded(false)
     setHasError(false)
-    setUseFallbackDomain(false)
-    setRetryCount(0)
   }, [src, srcMobile, srcDesktop])
 
-  // src zaten cms.ts tarafından rewrite edilerek geliyor (BUG-1 düzeltildi)
   const rawRwSrc = rewriteR2Url(src)
   const rawRwSrcMobile = rewriteR2Url(srcMobile)
   const rawRwSrcDesktop = rewriteR2Url(srcDesktop)
-
-  const getFallbackSrc = useCallback(
-    (url: string) => {
-      if (!url || !useFallbackDomain) return url
-      if (R2_DOMAIN && R2_ORIGIN_DOMAIN && R2_DOMAIN !== R2_ORIGIN_DOMAIN) {
-        const r2DomainNoProtocol = R2_DOMAIN.replace(/^https?:\/\//, '')
-        const originDomainNoProtocol = R2_ORIGIN_DOMAIN.replace(/^https?:\/\//, '')
-        return url.replace(r2DomainNoProtocol, originDomainNoProtocol)
-      }
-      return url
-    },
-    [useFallbackDomain]
-  )
-
-  const rwSrc = getFallbackSrc(rawRwSrc)
-  const rwSrcMobile = getFallbackSrc(rawRwSrcMobile)
-  const rwSrcDesktop = getFallbackSrc(rawRwSrcDesktop)
 
   const handleLoadedData = () => {
     setIsLoaded(true)
@@ -97,74 +74,22 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       if (videoElement?.error) {
         const error = videoElement.error
         const codeAborted = typeof MediaError !== 'undefined' ? MediaError.MEDIA_ERR_ABORTED : 1
-        const codeNetwork = typeof MediaError !== 'undefined' ? MediaError.MEDIA_ERR_NETWORK : 2
-        const codeDecode = typeof MediaError !== 'undefined' ? MediaError.MEDIA_ERR_DECODE : 3
-        const codeNotSupported =
-          typeof MediaError !== 'undefined' ? MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED : 4
 
         // MEDIA_ERR_ABORTED için sessizce devam et (kullanıcı veya slider geçişi durdurmuş olabilir)
         if (error.code === codeAborted) {
           return
         }
 
-        // Sadece gerçek yükleme hatalarını yakala
-        if (
-          error.code === codeNotSupported ||
-          error.code === codeNetwork ||
-          error.code === codeDecode
-        ) {
-          const currentSrc = videoElement.src || videoElement.currentSrc
-          if (!currentSrc || currentSrc === window.location.href) {
-            return
-          }
-
-          // 1. Worker CDN hatasında R2 Direct Origin domain'e otomatik düş
-          if (
-            !useFallbackDomain &&
-            R2_ORIGIN_DOMAIN &&
-            R2_DOMAIN &&
-            R2_DOMAIN !== R2_ORIGIN_DOMAIN
-          ) {
-            setUseFallbackDomain(true)
-            setRetryCount(prev => prev + 1)
-            setTimeout(() => {
-              if (videoRef.current) {
-                videoRef.current.load()
-              }
-            }, 100)
-            return
-          }
-
-          // 2. Geçici ağ aksaklıkları için 1 kez yeniden yükleme dene
-          if (retryCount < 2) {
-            setRetryCount(prev => prev + 1)
-            setTimeout(() => {
-              if (videoRef.current) {
-                videoRef.current.load()
-              }
-            }, 500)
-            return
-          }
-
-          console.warn('Video yükleme uyarısı/hatası:', {
-            code: error.code,
-            message: error.message,
-            videoSrc: currentSrc,
-            errorCode: {
-              1: 'MEDIA_ERR_ABORTED',
-              2: 'MEDIA_ERR_NETWORK',
-              3: 'MEDIA_ERR_DECODE',
-              4: 'MEDIA_ERR_SRC_NOT_SUPPORTED',
-            }[error.code],
-          })
-          setHasError(true)
-          onError?.()
+        const currentSrc = videoElement.src || videoElement.currentSrc
+        if (!currentSrc || currentSrc === window.location.href) {
           return
         }
-        return
+
+        setHasError(true)
+        onError?.()
       }
     },
-    [useFallbackDomain, retryCount, onError]
+    [onError]
   )
 
   // Intersection Observer ile lazy loading
@@ -174,7 +99,6 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
         entries => {
           entries.forEach(entry => {
             if (entry.isIntersecting && videoRef.current) {
-              // Video görünür olduğunda yükle
               if (preload === 'none') {
                 videoRef.current.preload = 'metadata'
               }
@@ -192,12 +116,38 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     return undefined
   }, [loading, preload])
 
-  // Art Direction: srcMobile veya srcDesktop varsa kullan, yoksa src'i kullan
-  const mobileSrc = rwSrcMobile || rwSrc
-  const desktopSrc = rwSrcDesktop || rwSrc
-  const useArtDirection = Boolean(rwSrcMobile || rwSrcDesktop)
+  // Video URL'lerini seç ve YouTube kontrolü yap
+  const getActiveSrc = (): string => {
+    let rawSrc = rawRwSrc
+    if (typeof window !== 'undefined') {
+      const isMobile = window.innerWidth <= 768
+      if (isMobile && rawRwSrcMobile) rawSrc = rawRwSrcMobile
+      else if (!isMobile && rawRwSrcDesktop) rawSrc = rawRwSrcDesktop
+    }
 
-  // Poster için de Art Direction desteği
+    if (!rawSrc) return ''
+    if (rawSrc.includes('youtube.com') || rawSrc.includes('youtu.be')) return ''
+    return rawSrc
+  }
+
+  const activeSrc = getActiveSrc()
+
+  // Fallback domain URL'i üret (Worker CDN -> Direct R2)
+  const getFallbackUrl = (primaryUrl: string): string => {
+    if (!primaryUrl) return ''
+    if (R2_DOMAIN && R2_ORIGIN_DOMAIN && R2_DOMAIN !== R2_ORIGIN_DOMAIN) {
+      const r2DomainNoProtocol = R2_DOMAIN.replace(/^https?:\/\//, '')
+      const originDomainNoProtocol = R2_ORIGIN_DOMAIN.replace(/^https?:\/\//, '')
+      if (primaryUrl.includes(r2DomainNoProtocol)) {
+        return primaryUrl.replace(r2DomainNoProtocol, originDomainNoProtocol)
+      }
+    }
+    return ''
+  }
+
+  const fallbackSrc = getFallbackUrl(activeSrc)
+
+  // Poster için Art Direction desteği
   const getPosterForScreen = useCallback((): string | undefined => {
     if (typeof window !== 'undefined') {
       const isMobileScreen = window.innerWidth <= 768
@@ -206,32 +156,6 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     }
     return poster
   }, [poster, posterMobile, posterDesktop])
-
-  // Video src'i için ekran boyutuna göre seç
-  const getVideoSrc = (): string => {
-    let rawSrc = rwSrc
-    if (typeof window !== 'undefined') {
-      const isMobile = window.innerWidth <= 768
-      if (isMobile && rwSrcMobile) rawSrc = mobileSrc
-      else if (!isMobile && rwSrcDesktop) rawSrc = desktopSrc
-    }
-
-    if (!rawSrc) return ''
-    try {
-      // URL segmentlerini trim et ve encode et
-      const parts = rawSrc.split('/')
-      const trimmedSrc = parts
-        .map((p, i) => {
-          if (i < 3 && p.includes(':')) return p
-          return p.trim()
-        })
-        .join('/')
-
-      return encodeURI(decodeURI(trimmedSrc)).replace(/ /g, '%20')
-    } catch {
-      return rawSrc.replace(/ /g, '%20')
-    }
-  }
 
   // Poster'ı dinamik olarak güncelle
   React.useEffect(() => {
@@ -252,13 +176,12 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     return undefined
   }, [posterMobile, posterDesktop, poster, getPosterForScreen])
 
-  // Handle autoPlay prop changes (for carousel/slider scenarios)
+  // Handle autoPlay prop changes
   React.useEffect(() => {
     const video = videoRef.current
     if (!video) return
 
     if (autoPlay) {
-      // Try to play the video
       if (typeof video.play === 'function') {
         const playPromise = video.play()
         if (playPromise !== undefined) {
@@ -268,13 +191,12 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
               error.name !== 'NotAllowedError' &&
               error.name !== 'NotSupportedError'
             ) {
-              console.warn('Video autoplay prevented:', error)
+              /* silent catch */
             }
           })
         }
       }
     } else {
-      // Pause the video when not active
       if (typeof video.pause === 'function') {
         try {
           video.pause()
@@ -290,12 +212,10 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     if (videoRef.current) {
       const video = videoRef.current
 
-      // Video zaten yüklenmişse (cache'den gelmiş olabilir)
       if (video.readyState >= 2) {
         setIsLoaded(true)
       }
 
-      // Video yüklendiğinde kontrol et
       const checkLoaded = () => {
         if (video.readyState >= 2) {
           setIsLoaded(true)
@@ -311,7 +231,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       }
     }
     return undefined
-  }, [rwSrc, rwSrcMobile, rwSrcDesktop])
+  }, [activeSrc])
 
   if (hasError) {
     return (
@@ -322,50 +242,22 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
         <div className="text-center p-4">
           <span className="text-gray-400 text-sm block mb-2">Video yüklenemedi</span>
           <span className="text-gray-300 text-xs block">
-            URL: {rwSrc || rwSrcMobile || rwSrcDesktop || 'Belirtilmemiş'}
+            URL: {activeSrc || 'Belirtilmemiş'}
           </span>
         </div>
       </div>
     )
   }
 
-  // Don't render a video element if there's no source at all
-  if (!rwSrc && !rwSrcMobile && !rwSrcDesktop) {
+  if (!activeSrc) {
     return null
   }
 
-  // Art Direction kullanılıyorsa, video src'i dinamik olarak ayarla
-  if (useArtDirection) {
-    const videoSrc = getVideoSrc()
-    return (
-      <video
-        ref={videoRef}
-        src={videoSrc}
-        poster={getPosterForScreen()}
-        autoPlay={autoPlay}
-        loop={loop}
-        muted={muted}
-        controls={controls}
-        playsInline={playsInline}
-        preload={preload}
-        className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ${className}`}
-        style={style}
-        onClick={onClick}
-        onLoadedData={handleLoadedData}
-        onError={handleError}
-        onCanPlay={handleLoadedData}
-      >
-        <track kind="captions" srcLang="en" label="English" />
-      </video>
-    )
-  }
-
-  // Normal kullanım (Art Direction yok)
   return (
     <video
       ref={videoRef}
-      src={rwSrc}
-      poster={poster}
+      src={activeSrc}
+      poster={getPosterForScreen()}
       autoPlay={autoPlay}
       loop={loop}
       muted={muted}
@@ -379,7 +271,10 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       onError={handleError}
       onCanPlay={handleLoadedData}
     >
+      <source src={activeSrc} type="video/mp4" />
+      {fallbackSrc && <source src={fallbackSrc} type="video/mp4" />}
       <track kind="captions" srcLang="en" label="English" />
     </video>
   )
 }
+

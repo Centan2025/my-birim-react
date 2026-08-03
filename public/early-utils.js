@@ -7,7 +7,8 @@
     if (
       msg.indexOf('zustand') !== -1 ||
       msg.indexOf('Default export is deprecated') !== -1 ||
-      msg.indexOf('instrument') !== -1
+      msg.indexOf('instrument') !== -1 ||
+      msg.indexOf('Video yükleme uyarısı') !== -1
     )
       return
     originalWarn.apply(console, arguments)
