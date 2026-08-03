@@ -27,12 +27,32 @@ export const HomeNewsletter: FC = () => {
   const messageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Listen for external 'openNewsletter' event (e.g. from FloatingAuthPanel)
+  // Listen for external 'openNewsletter' event (e.g. from FloatingAuthPanel) and URL hash
   useEffect(() => {
     const handleOpen = () => {
       setIsExpanded(true)
     }
     window.addEventListener('openNewsletter', handleOpen)
+
+    if (typeof window !== 'undefined' && window.location.hash === '#home-newsletter') {
+      setIsExpanded(true)
+      const el = document.getElementById('home-newsletter')
+      if (el) {
+        setTimeout(() => {
+          const lenis = (
+            window as unknown as {
+              lenis?: {scrollTo: (target: HTMLElement | number, opts?: unknown) => void}
+            }
+          ).lenis
+          if (lenis && typeof lenis.scrollTo === 'function') {
+            lenis.scrollTo(el, {offset: -80, duration: 1.2})
+          } else {
+            el.scrollIntoView({behavior: 'smooth'})
+          }
+        }, 500)
+      }
+    }
+
     return () => {
       window.removeEventListener('openNewsletter', handleOpen)
     }

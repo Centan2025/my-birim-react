@@ -64,27 +64,32 @@ export const FloatingAuthPanel: React.FC = () => {
     setTimeout(() => {
       const newsletterSection = document.getElementById('home-newsletter')
       if (newsletterSection) {
-        const headerHeight = document.querySelector('header')?.clientHeight || 80
-        const elementPosition = newsletterSection.getBoundingClientRect().top + window.pageYOffset
-        const offsetPosition = elementPosition - headerHeight - 20
+        const lenis = (
+          window as unknown as {
+            lenis?: {scrollTo: (target: HTMLElement | number, opts?: unknown) => void}
+          }
+        ).lenis
 
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth',
-        })
+        if (lenis && typeof lenis.scrollTo === 'function') {
+          lenis.scrollTo(newsletterSection, {offset: -80, duration: 1.2})
+        } else {
+          const headerHeight = document.querySelector('header')?.clientHeight || 80
+          const elementPosition = newsletterSection.getBoundingClientRect().top + window.pageYOffset
+          const offsetPosition = elementPosition - headerHeight - 20
 
-        // Kaydırma biterken (sayfa uzunluğuna göre 1.2 saniye) newsletter'ı aç
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth',
+          })
+        }
+
         setTimeout(() => {
           window.dispatchEvent(new Event('openNewsletter'))
-        }, 1200)
+        }, 600)
       } else {
-        // Yedek: Sayfa sonuna git
-        window.scrollTo({
-          top: document.documentElement.scrollHeight,
-          behavior: 'smooth',
-        })
+        window.location.href = '/#home-newsletter'
       }
-    }, 400)
+    }, 350)
   }
 
   return (
