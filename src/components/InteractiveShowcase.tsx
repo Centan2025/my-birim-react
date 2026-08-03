@@ -26,15 +26,16 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
     return false
   })
 
-  // Drag / Swipe State for mouse and touch
+  // Drag / Swipe State (HomeHero ile birebir aynı mimari)
+  const [dragStartX, setDragStartX] = useState(0)
   const [draggedX, setDraggedX] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
-  const dragStartXRef = useRef<number>(0)
-  const dragStartYRef = useRef<number>(0)
-  const isPointerDownRef = useRef<boolean>(false)
+  const dragStartY = useRef(0)
   const containerRef = useRef<HTMLDivElement>(null)
 
   const DRAG_THRESHOLD = 50
+  const VERTICAL_SCROLL_TOLERANCE = 1.2
+  const MIN_VERTICAL_DELTA = 8
 
   useEffect(() => {
     const checkMobile = () => {
@@ -43,6 +44,71 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  // Touch event'ler – dikey scroll'a izin ver, yatay sürüklemeyi koru (HomeHero ile aynı)
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.target instanceof HTMLElement && e.target.closest('a, button')) {
+        return
+      }
+      if (!e.touches || e.touches.length === 0) return
+      setIsDragging(true)
+      const startX = e.touches[0]?.clientX ?? 0
+      const startY = e.touches[0]?.clientY ?? 0
+      setDragStartX(startX)
+      dragStartY.current = startY
+      setDraggedX(0)
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isDragging) return
+      if (!e.touches || e.touches.length === 0) return
+      const currentX = e.touches[0]?.clientX ?? 0
+      const currentY = e.touches[0]?.clientY ?? 0
+      const deltaX = Math.abs(currentX - dragStartX)
+      const deltaY = Math.abs(currentY - dragStartY.current)
+
+      if (deltaY > deltaX * VERTICAL_SCROLL_TOLERANCE && deltaY > MIN_VERTICAL_DELTA) {
+        setIsDragging(false)
+        setDraggedX(0)
+        return
+      }
+
+      setDraggedX(currentX - dragStartX)
+    }
+
+    const handleTouchEnd = () => {
+      if (!isDragging) return
+      setIsDragging(false)
+
+      const count = items?.length || 1
+      if (count <= 1) {
+        setDraggedX(0)
+        return
+      }
+
+      if (draggedX < -DRAG_THRESHOLD) {
+        handleNext()
+      } else if (draggedX > DRAG_THRESHOLD) {
+        handlePrev()
+      } else {
+        setDraggedX(0)
+      }
+    }
+
+    container.addEventListener('touchstart', handleTouchStart, {passive: true})
+    container.addEventListener('touchmove', handleTouchMove, {passive: true})
+    container.addEventListener('touchend', handleTouchEnd, {passive: true})
+
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart)
+      container.removeEventListener('touchmove', handleTouchMove)
+      container.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [isDragging, dragStartX, draggedX, items?.length])
 
   // Close popover when active slide changes
   useEffect(() => {
@@ -83,89 +149,61 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
     setActiveIndex(prev => (prev === items.length - 1 ? 0 : prev + 1))
   }
 
-  // Pointer drag handlers (Mouse on desktop & Touch on mobile)
-  const handlePointerDown = (clientX: number, clientY: number) => {
-    isPointerDownRef.current = true
-    dragStartXRef.current = clientX
-    dragStartYRef.current = clientY
+  // Mouse / Pointer drag handlers (HomeHero ile birebir aynı)
+  const handleDragStart = (
+    e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
+  ) => {
+    if (e.target instanceof HTMLElement && e.target.closest('a, button')) {
+      return
+    }
+    setIsDragging(true)
+    const startX =
+      'touches' in e && e.touches && e.touches.length > 0
+        ? (e.touches[0]?.clientX ?? 0)
+        : 'clientX' in e
+          ? e.clientX
+          : 0
+    setDragStartX(startX)
     setDraggedX(0)
+    if (!('touches' in e)) {
+      e.preventDefault()
+    }
   }
 
-  const handlePointerMove = (clientX: number, clientY: number) => {
-    if (!isPointerDownRef.current) return
-    const deltaX = clientX - dragStartXRef.current
-    const deltaY = Math.abs(clientY - dragStartYRef.current)
+  const handleDragMove = (
+    e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
+  ) => {
+    if (!isDragging) return
+    const currentX =
+      'touches' in e && e.touches && e.touches.length > 0
+        ? (e.touches[0]?.clientX ?? 0)
+        : 'clientX' in e
+          ? e.clientX
+          : 0
+    setDraggedX(currentX - dragStartX)
+    if (!('touches' in e)) {
+      e.preventDefault()
+    }
+  }
 
-    // Ignore horizontal drag if vertical scroll is predominant on touch
-    if (deltaY > Math.abs(deltaX) * 1.2 && deltaY > 10 && !isDragging) {
-      isPointerDownRef.current = false
+  const handleDragEnd = () => {
+    if (!isDragging) return
+    setIsDragging(false)
+
+    const count = items?.length || 1
+    if (count <= 1) {
       setDraggedX(0)
       return
     }
 
-    if (Math.abs(deltaX) > 5) {
-      setIsDragging(true)
-      setDraggedX(deltaX)
+    if (draggedX < -DRAG_THRESHOLD) {
+      handleNext()
+    } else if (draggedX > DRAG_THRESHOLD) {
+      handlePrev()
+    } else {
+      setDraggedX(0)
     }
   }
-
-  const handlePointerUp = () => {
-    if (!isPointerDownRef.current && !isDragging) return
-    isPointerDownRef.current = false
-
-    if (Math.abs(draggedX) > DRAG_THRESHOLD && items.length > 1) {
-      if (draggedX < 0) {
-        handleNext()
-      } else {
-        handlePrev()
-      }
-    }
-
-    setDraggedX(0)
-    setTimeout(() => {
-      setIsDragging(false)
-    }, 50)
-  }
-
-  // Global window listeners for smooth mouse dragging without sticking to cursor
-  useEffect(() => {
-    const handleGlobalMouseMove = (e: MouseEvent) => {
-      if (!isPointerDownRef.current) return
-      const deltaX = e.clientX - dragStartXRef.current
-      if (Math.abs(deltaX) > 5) {
-        setIsDragging(true)
-        setDraggedX(deltaX)
-      }
-    }
-
-    const handleGlobalMouseUp = () => {
-      if (!isPointerDownRef.current) return
-      isPointerDownRef.current = false
-
-      setDraggedX(currentDragged => {
-        if (Math.abs(currentDragged) > DRAG_THRESHOLD && items.length > 1) {
-          if (currentDragged < 0) {
-            handleNext()
-          } else {
-            handlePrev()
-          }
-        }
-        return 0
-      })
-
-      setTimeout(() => {
-        setIsDragging(false)
-      }, 50)
-    }
-
-    window.addEventListener('mousemove', handleGlobalMouseMove)
-    window.addEventListener('mouseup', handleGlobalMouseUp)
-
-    return () => {
-      window.removeEventListener('mousemove', handleGlobalMouseMove)
-      window.removeEventListener('mouseup', handleGlobalMouseUp)
-    }
-  }, [items.length])
 
   return (
     <section
@@ -176,19 +214,15 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
       <div
         ref={containerRef}
         className={`relative w-full overflow-hidden bg-neutral-950 shadow-2xl ${
-          items.length > 1 ? 'cursor-grab active:cursor-grabbing select-none' : ''
+          (items?.length || 0) > 1 ? 'cursor-grab active:cursor-grabbing select-none' : ''
         }`}
-        onDragStart={e => e.preventDefault()}
-        onMouseDown={e => {
-          if (e.button === 0) handlePointerDown(e.clientX, e.clientY)
-        }}
-        onTouchStart={e => {
-          if (e.touches && e.touches[0]) handlePointerDown(e.touches[0].clientX, e.touches[0].clientY)
-        }}
-        onTouchMove={e => {
-          if (e.touches && e.touches[0]) handlePointerMove(e.touches[0].clientX, e.touches[0].clientY)
-        }}
-        onTouchEnd={handlePointerUp}
+        onMouseDown={handleDragStart}
+        onMouseMove={handleDragMove}
+        onMouseUp={handleDragEnd}
+        onMouseLeave={handleDragEnd}
+        onTouchStart={handleDragStart}
+        onTouchMove={handleDragMove}
+        onTouchEnd={handleDragEnd}
       >
         {/* Horizontal Sliding Track (kayarak değişen görseller) */}
         <div
