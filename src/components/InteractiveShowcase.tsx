@@ -127,6 +127,46 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
     }, 50)
   }
 
+  // Global window listeners for smooth mouse dragging without sticking to cursor
+  useEffect(() => {
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (!isPointerDownRef.current) return
+      const deltaX = e.clientX - dragStartXRef.current
+      if (Math.abs(deltaX) > 5) {
+        setIsDragging(true)
+        setDraggedX(deltaX)
+      }
+    }
+
+    const handleGlobalMouseUp = () => {
+      if (!isPointerDownRef.current) return
+      isPointerDownRef.current = false
+
+      setDraggedX(currentDragged => {
+        if (Math.abs(currentDragged) > DRAG_THRESHOLD && items.length > 1) {
+          if (currentDragged < 0) {
+            handleNext()
+          } else {
+            handlePrev()
+          }
+        }
+        return 0
+      })
+
+      setTimeout(() => {
+        setIsDragging(false)
+      }, 50)
+    }
+
+    window.addEventListener('mousemove', handleGlobalMouseMove)
+    window.addEventListener('mouseup', handleGlobalMouseUp)
+
+    return () => {
+      window.removeEventListener('mousemove', handleGlobalMouseMove)
+      window.removeEventListener('mouseup', handleGlobalMouseUp)
+    }
+  }, [items.length])
+
   return (
     <section
       className="w-full relative bg-[var(--bg-primary)] py-0 my-0 overflow-hidden select-none leading-none scroll-snap-start home-content-block-snap"
@@ -138,12 +178,10 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
         className={`relative w-full overflow-hidden bg-neutral-950 shadow-2xl ${
           items.length > 1 ? 'cursor-grab active:cursor-grabbing select-none' : ''
         }`}
+        onDragStart={e => e.preventDefault()}
         onMouseDown={e => {
           if (e.button === 0) handlePointerDown(e.clientX, e.clientY)
         }}
-        onMouseMove={e => handlePointerMove(e.clientX, e.clientY)}
-        onMouseUp={handlePointerUp}
-        onMouseLeave={handlePointerUp}
         onTouchStart={e => {
           if (e.touches && e.touches[0]) handlePointerDown(e.touches[0].clientX, e.touches[0].clientY)
         }}
