@@ -241,9 +241,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       >
         <div className="text-center p-4">
           <span className="text-gray-400 text-sm block mb-2">Video yüklenemedi</span>
-          <span className="text-gray-300 text-xs block">
-            URL: {activeSrc || 'Belirtilmemiş'}
-          </span>
+          <span className="text-gray-300 text-xs block">URL: {activeSrc || 'Belirtilmemiş'}</span>
         </div>
       </div>
     )
@@ -277,4 +275,3 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     </video>
   )
 }
-
