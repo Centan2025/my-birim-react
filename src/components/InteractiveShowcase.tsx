@@ -180,7 +180,11 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
         : 'clientX' in e
           ? e.clientX
           : 0
-    setDraggedX(currentX - dragStartX)
+    const rawDelta = currentX - dragStartX
+    const containerWidth = containerRef.current?.offsetWidth || window.innerWidth
+    // Apply soft dampening and clamp maximum drag movement to prevent over-scrolling
+    const clampedDelta = Math.min(Math.max(rawDelta * 0.85, -containerWidth * 0.5), containerWidth * 0.5)
+    setDraggedX(clampedDelta)
     if (!('touches' in e)) {
       e.preventDefault()
     }
@@ -190,18 +194,17 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
     if (!isDragging) return
     setIsDragging(false)
 
-    const count = items?.length || 1
-    if (count <= 1) {
-      setDraggedX(0)
-      return
-    }
+    const finalDelta = draggedX
+    setDraggedX(0)
 
-    if (draggedX < -DRAG_THRESHOLD) {
+    const count = items?.length || 1
+    if (count <= 1) return
+
+    // Require controlled 60px threshold to move exactly 1 slide at a time
+    if (finalDelta < -60) {
       handleNext()
-    } else if (draggedX > DRAG_THRESHOLD) {
+    } else if (finalDelta > 60) {
       handlePrev()
-    } else {
-      setDraggedX(0)
     }
   }
 
