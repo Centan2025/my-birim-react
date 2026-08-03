@@ -43,8 +43,8 @@ const AppContent = () => {
       touchMultiplier: 1.5,
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ;(window as any).lenis = lenis
+    const win = window as unknown as {lenis: unknown}
+    win.lenis = lenis
 
     let animationFrameId: number
 
@@ -56,8 +56,7 @@ const AppContent = () => {
     animationFrameId = requestAnimationFrame(raf)
 
     return () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ;(window as any).lenis = null
+      win.lenis = null
       cancelAnimationFrame(animationFrameId)
       lenis.destroy()
     }

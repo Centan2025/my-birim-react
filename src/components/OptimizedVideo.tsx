@@ -1,5 +1,5 @@
 import React, {useState, useRef, useCallback} from 'react'
-import {rewriteR2Url} from '../services/sanity/client'
+import {rewriteR2Url, R2_DOMAIN, R2_ORIGIN_DOMAIN} from '../services/sanity/client'
 
 interface OptimizedVideoProps {
   src: string
@@ -28,7 +28,7 @@ interface OptimizedVideoProps {
  * - Lazy loading desteği
  * - Poster image desteği
  * - Preload kontrolü
- * - Hata yönetimi
+ * - Hata ve domain fallback yönetimi
  */
 export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
   src,
@@ -52,69 +52,115 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
 }) => {
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
+  const [useFallbackDomain, setUseFallbackDomain] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
   const videoRef = useRef<HTMLVideoElement>(null)
 
+  // src prop'ları değiştiğinde state'leri sıfırla
+  React.useEffect(() => {
+    setIsLoaded(false)
+    setHasError(false)
+    setUseFallbackDomain(false)
+    setRetryCount(0)
+  }, [src, srcMobile, srcDesktop])
+
   // src zaten cms.ts tarafından rewrite edilerek geliyor (BUG-1 düzeltildi)
-  // Ancak çift koruma için burada da rewriteR2Url çağırabiliriz.
-  const rwSrc = rewriteR2Url(src)
-  const rwSrcMobile = rewriteR2Url(srcMobile)
-  const rwSrcDesktop = rewriteR2Url(srcDesktop)
+  const rawRwSrc = rewriteR2Url(src)
+  const rawRwSrcMobile = rewriteR2Url(srcMobile)
+  const rawRwSrcDesktop = rewriteR2Url(srcDesktop)
+
+  const getFallbackSrc = useCallback(
+    (url: string) => {
+      if (!url || !useFallbackDomain) return url
+      if (R2_DOMAIN && R2_ORIGIN_DOMAIN && R2_DOMAIN !== R2_ORIGIN_DOMAIN) {
+        const r2DomainNoProtocol = R2_DOMAIN.replace(/^https?:\/\//, '')
+        const originDomainNoProtocol = R2_ORIGIN_DOMAIN.replace(/^https?:\/\//, '')
+        return url.replace(r2DomainNoProtocol, originDomainNoProtocol)
+      }
+      return url
+    },
+    [useFallbackDomain]
+  )
+
+  const rwSrc = getFallbackSrc(rawRwSrc)
+  const rwSrcMobile = getFallbackSrc(rawRwSrcMobile)
+  const rwSrcDesktop = getFallbackSrc(rawRwSrcDesktop)
 
   const handleLoadedData = () => {
     setIsLoaded(true)
     onLoad?.()
   }
 
-  const handleError = (e?: React.SyntheticEvent<HTMLVideoElement, Event>) => {
-    const videoElement = e?.currentTarget
-    if (videoElement?.error) {
-      const error = videoElement.error
-      // Hata kodlarını kontrol et
-      // MEDIA_ERR_ABORTED (1): Yükleme kullanıcı tarafından durduruldu
-      // MEDIA_ERR_NETWORK (2): Ağ hatası
-      // MEDIA_ERR_DECODE (3): Video decode edilemedi
-      // MEDIA_ERR_SRC_NOT_SUPPORTED (4): Video formatı desteklenmiyor veya URL geçersiz
+  const handleError = useCallback(
+    (e?: React.SyntheticEvent<HTMLVideoElement, Event>) => {
+      const videoElement = e?.currentTarget
+      if (videoElement?.error) {
+        const error = videoElement.error
+        const codeAborted = typeof MediaError !== 'undefined' ? MediaError.MEDIA_ERR_ABORTED : 1
+        const codeNetwork = typeof MediaError !== 'undefined' ? MediaError.MEDIA_ERR_NETWORK : 2
+        const codeDecode = typeof MediaError !== 'undefined' ? MediaError.MEDIA_ERR_DECODE : 3
+        const codeNotSupported =
+          typeof MediaError !== 'undefined' ? MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED : 4
 
-      // MEDIA_ERR_ABORTED için sessizce devam et (kullanıcı veya slider geçişi durdurmuş olabilir)
-      if (error.code === MediaError.MEDIA_ERR_ABORTED) {
-        return
-      }
-
-      // Sadece gerçek yükleme hatalarını yakala
-      if (
-        error.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED ||
-        error.code === MediaError.MEDIA_ERR_NETWORK ||
-        error.code === MediaError.MEDIA_ERR_DECODE
-      ) {
-        const currentSrc = videoElement.src || videoElement.currentSrc
-        if (!currentSrc || currentSrc === window.location.href) {
+        // MEDIA_ERR_ABORTED için sessizce devam et (kullanıcı veya slider geçişi durdurmuş olabilir)
+        if (error.code === codeAborted) {
           return
         }
 
-        console.warn('Video yükleme uyarısı/hatası:', {
-          code: error.code,
-          message: error.message,
-          videoSrc: currentSrc,
-          errorCode: {
-            1: 'MEDIA_ERR_ABORTED',
-            2: 'MEDIA_ERR_NETWORK',
-            3: 'MEDIA_ERR_DECODE',
-            4: 'MEDIA_ERR_SRC_NOT_SUPPORTED',
-          }[error.code],
-        })
-        setHasError(true)
-        onError?.()
+        // Sadece gerçek yükleme hatalarını yakala
+        if (
+          error.code === codeNotSupported ||
+          error.code === codeNetwork ||
+          error.code === codeDecode
+        ) {
+          const currentSrc = videoElement.src || videoElement.currentSrc
+          if (!currentSrc || currentSrc === window.location.href) {
+            return
+          }
+
+          // 1. Worker CDN hatasında R2 Direct Origin domain'e otomatik düş
+          if (!useFallbackDomain && R2_ORIGIN_DOMAIN && R2_DOMAIN && R2_DOMAIN !== R2_ORIGIN_DOMAIN) {
+            setUseFallbackDomain(true)
+            setRetryCount(prev => prev + 1)
+            setTimeout(() => {
+              if (videoRef.current) {
+                videoRef.current.load()
+              }
+            }, 100)
+            return
+          }
+
+          // 2. Geçici ağ aksaklıkları için 1 kez yeniden yükleme dene
+          if (retryCount < 2) {
+            setRetryCount(prev => prev + 1)
+            setTimeout(() => {
+              if (videoRef.current) {
+                videoRef.current.load()
+              }
+            }, 500)
+            return
+          }
+
+          console.warn('Video yükleme uyarısı/hatası:', {
+            code: error.code,
+            message: error.message,
+            videoSrc: currentSrc,
+            errorCode: {
+              1: 'MEDIA_ERR_ABORTED',
+              2: 'MEDIA_ERR_NETWORK',
+              3: 'MEDIA_ERR_DECODE',
+              4: 'MEDIA_ERR_SRC_NOT_SUPPORTED',
+            }[error.code],
+          })
+          setHasError(true)
+          onError?.()
+          return
+        }
         return
       }
-      return
-    }
-
-    // Error event'i geldi ama error objesi yoksa, muhtemelen cache hatası
-    // Bu durumda video yine de çalışabilir, bu yüzden görmezden gel
-    console.warn('Video error event tetiklendi ama error objesi yok:', {
-      videoSrc: videoElement?.src || videoElement?.currentSrc,
-    })
-  }
+    },
+    [useFallbackDomain, retryCount, onError]
+  )
 
   // Intersection Observer ile lazy loading
   React.useEffect(() => {
@@ -208,22 +254,29 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
 
     if (autoPlay) {
       // Try to play the video
-      const playPromise = video.play()
-      if (playPromise !== undefined) {
-        playPromise.catch(error => {
-          // If play is interrupted by pause() or restricted by browser autoplay policy, ignore standard non-fatal errors
-          if (
-            error.name !== 'AbortError' &&
-            error.name !== 'NotAllowedError' &&
-            error.name !== 'NotSupportedError'
-          ) {
-            console.warn('Video autoplay prevented:', error)
-          }
-        })
+      if (typeof video.play === 'function') {
+        const playPromise = video.play()
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            if (
+              error.name !== 'AbortError' &&
+              error.name !== 'NotAllowedError' &&
+              error.name !== 'NotSupportedError'
+            ) {
+              console.warn('Video autoplay prevented:', error)
+            }
+          })
+        }
       }
     } else {
       // Pause the video when not active
-      video.pause()
+      if (typeof video.pause === 'function') {
+        try {
+          video.pause()
+        } catch {
+          /* ignore JSDOM / unhandled pause errors */
+        }
+      }
     }
   }, [autoPlay])
 

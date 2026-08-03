@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect} from 'react'
+import React, {useState, useRef, useEffect, useCallback} from 'react'
 import {Link} from 'react-router-dom'
 import {InteractiveShowcaseItem, ProductHotspot, LocalizedString} from '../types'
 import {useTranslation} from '../i18n'
@@ -44,6 +44,14 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
+
+  const handlePrev = useCallback(() => {
+    setActiveIndex(prev => (prev === 0 ? (items?.length || 1) - 1 : prev - 1))
+  }, [items?.length])
+
+  const handleNext = useCallback(() => {
+    setActiveIndex(prev => (prev === (items?.length || 1) - 1 ? 0 : prev + 1))
+  }, [items?.length])
 
   // Touch event'ler – dikey scroll'a izin ver, yatay sürüklemeyi koru (HomeHero ile aynı)
   useEffect(() => {
@@ -108,7 +116,7 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
       container.removeEventListener('touchmove', handleTouchMove)
       container.removeEventListener('touchend', handleTouchEnd)
     }
-  }, [isDragging, dragStartX, draggedX, items?.length])
+  }, [isDragging, dragStartX, draggedX, items?.length, handleNext, handlePrev])
 
   // Close popover when active slide changes
   useEffect(() => {
@@ -133,20 +141,12 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
   const getLocVal = (val?: unknown) => {
     if (!val) return ''
     if (typeof val === 'string') return val.trim()
-    if (typeof val === 'object') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const current = (val as any)[locale] || (val as any).tr || (val as any).en || ''
+    if (typeof val === 'object' && val !== null) {
+      const obj = val as Record<string, unknown>
+      const current = obj[locale] || obj['tr'] || obj['en'] || ''
       return typeof current === 'string' ? current.trim() : ''
     }
     return ''
-  }
-
-  const handlePrev = () => {
-    setActiveIndex(prev => (prev === 0 ? items.length - 1 : prev - 1))
-  }
-
-  const handleNext = () => {
-    setActiveIndex(prev => (prev === items.length - 1 ? 0 : prev + 1))
   }
 
   // Mouse / Pointer drag handlers (HomeHero ile birebir aynı)
@@ -214,8 +214,11 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
       style={{scrollSnapAlign: 'start', scrollSnapStop: 'always'}}
     >
       {/* Main Full-Bleed & Full-Screen Interactive Showcase Container */}
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
       <div
         ref={containerRef}
+        role="region"
+        aria-label="Interactive Showcase"
         className={`relative w-full overflow-hidden bg-neutral-950 shadow-2xl ${
           (items?.length || 0) > 1 ? 'cursor-grab active:cursor-grabbing select-none' : ''
         }`}
@@ -328,7 +331,10 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
 
                           {/* Desktop Popover Card (Large Image Banner White Square Card) */}
                           {!isMobile && isActive && prod && (
+                            /* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */
                             <div
+                              role="dialog"
+                              aria-label="Hotspot details"
                               className={`absolute z-50 w-80 sm:w-88 bg-white text-neutral-900 border border-neutral-200 rounded-none shadow-2xl overflow-hidden transition-all duration-300 animate-in fade-in zoom-in-95 ${
                                 hs.y > 60 ? 'bottom-full mb-4' : 'top-full mt-4'
                               } ${
@@ -339,6 +345,12 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
                                     : 'left-1/2 -translate-x-1/2'
                               }`}
                               onClick={e => e.stopPropagation()}
+                              onKeyDown={e => {
+                                if (e.key === 'Escape') {
+                                  e.stopPropagation()
+                                  setActiveHotspot(null)
+                                }
+                              }}
                             >
                               {/* Close Button (X) */}
                               <button
@@ -516,9 +528,18 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
 
       {/* Mobile Active Hotspot Drawer (Görselli Beyaz Dik Köşeli Mobil Kart) */}
       {isMobile && activeHotspot && activeHotspot.hotspot.product && (
+        /* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */
         <div
+          role="dialog"
+          aria-label="Mobile Hotspot details"
           className="fixed inset-x-0 bottom-0 z-50 p-5 bg-white text-neutral-900 border-t-2 border-neutral-900 shadow-2xl rounded-none animate-in slide-in-from-bottom duration-300"
           onClick={e => e.stopPropagation()}
+          onKeyDown={e => {
+            if (e.key === 'Escape') {
+              e.stopPropagation()
+              setActiveHotspot(null)
+            }
+          }}
         >
           <button
             type="button"
