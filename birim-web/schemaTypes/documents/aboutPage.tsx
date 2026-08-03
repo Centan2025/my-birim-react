@@ -6,34 +6,91 @@ export default defineType({
   name: 'aboutPage',
   title: 'Hakkımızda',
   type: 'document',
+  fieldsets: [
+    {
+      name: 'heroGroup',
+      title: '🎬 Hero & Manifesto Bölümü',
+      options: {collapsible: true, collapsed: false},
+    },
+    {
+      name: 'timelineGroup',
+      title: '⏳ Tarihçe Zaman Çizelgesi (Timeline)',
+      options: {collapsible: true, collapsed: true},
+    },
+    {
+      name: 'historyGroup',
+      title: '📜 Tarihçe Bölümü',
+      options: {collapsible: true, collapsed: true},
+    },
+    {
+      name: 'identityGroup',
+      title: '🆔 Kimlik Bölümü',
+      options: {collapsible: true, collapsed: true},
+    },
+    {
+      name: 'qualityGroup',
+      title: '⭐ Kalite Bölümü',
+      options: {collapsible: true, collapsed: true},
+    },
+    {
+      name: 'valuesGroup',
+      title: '💎 Kurumsal Değerler',
+      options: {collapsible: true, collapsed: true},
+    },
+    {
+      name: 'seoGroup',
+      title: '🔍 SEO Ayarları',
+      options: {collapsible: true, collapsed: true},
+    },
+  ],
   fields: [
     defineField({
       name: 'heroImageR2',
       title: 'Hero Görseli (R2)',
       type: 'r2Asset',
+      fieldset: 'heroGroup',
     }),
-    defineField({name: 'heroTitle', title: 'Hero Başlığı', type: 'localizedString'}),
-    defineField({name: 'heroSubtitle', title: 'Hero Alt Başlığı', type: 'localizedString'}),
-    defineField({name: 'manifestoLabel', title: 'Manifesto Etiketi', type: 'localizedString'}),
+    defineField({
+      name: 'heroTitle',
+      title: 'Hero Başlığı',
+      type: 'localizedString',
+      fieldset: 'heroGroup',
+    }),
+    defineField({
+      name: 'heroSubtitle',
+      title: 'Hero Alt Başlığı',
+      type: 'localizedString',
+      fieldset: 'heroGroup',
+    }),
+    defineField({
+      name: 'manifestoLabel',
+      title: 'Manifesto Etiketi',
+      type: 'localizedString',
+      fieldset: 'heroGroup',
+    }),
     defineField({
       name: 'manifestoQuote',
       title: 'Felsefe / Manifesto Alıntısı',
       type: 'localizedString',
+      fieldset: 'heroGroup',
     }),
     defineField({
       name: 'timelineTitle',
       title: 'Tarihçe Zaman Çizelgesi Başlığı',
       type: 'localizedString',
+      fieldset: 'timelineGroup',
     }),
     defineField({
       name: 'timelineSubtitle',
       title: 'Tarihçe Zaman Çizelgesi Alt Başlığı',
       type: 'localizedString',
+      fieldset: 'timelineGroup',
     }),
     defineField({
       name: 'eras',
       title: 'Tarihçe Dönemleri / Dönüm Noktaları',
       type: 'array',
+      fieldset: 'timelineGroup',
       of: [
         {
           type: 'object',
@@ -60,11 +117,12 @@ export default defineType({
         },
       ],
     }),
-    // Özel üçlü bölüm: Tarihçe / Kimlik / Kalite
     defineField({
       name: 'historySection',
       title: 'Tarihçe Bölümü',
       type: 'object',
+      fieldset: 'historyGroup',
+      options: {collapsible: true, collapsed: false},
       fields: [
         defineField({name: 'title', title: 'Bölüm Başlığı', type: 'localizedString'}),
         defineField({
@@ -86,6 +144,8 @@ export default defineType({
       name: 'identitySection',
       title: 'Kimlik Bölümü',
       type: 'object',
+      fieldset: 'identityGroup',
+      options: {collapsible: true, collapsed: false},
       fields: [
         defineField({name: 'title', title: 'Bölüm Başlığı', type: 'localizedString'}),
         defineField({
@@ -107,6 +167,8 @@ export default defineType({
       name: 'qualitySection',
       title: 'Kalite Bölümü',
       type: 'object',
+      fieldset: 'qualityGroup',
+      options: {collapsible: true, collapsed: false},
       fields: [
         defineField({name: 'title', title: 'Bölüm Başlığı', type: 'localizedString'}),
         defineField({
@@ -128,6 +190,7 @@ export default defineType({
       name: 'values',
       title: 'Değerler',
       type: 'array',
+      fieldset: 'valuesGroup',
       of: [
         {
           type: 'object',
@@ -154,6 +217,7 @@ export default defineType({
       name: 'seo',
       title: 'SEO & Arama Motoru Ayarları',
       type: 'seoFields',
+      fieldset: 'seoGroup',
     }),
   ],
   preview: {

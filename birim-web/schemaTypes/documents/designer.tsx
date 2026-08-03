@@ -9,9 +9,14 @@ export default defineType({
   type: 'document',
   fieldsets: [
     {
-      name: 'profileMedia',
-      title: '🎥 Profil Görseli & Art Direction',
+      name: 'basicInfo',
+      title: '👤 Profil & Biyografi',
       options: {collapsible: true, collapsed: false},
+    },
+    {
+      name: 'profileMedia',
+      title: '🎥 Profil Görselleri (Desktop & Mobil)',
+      options: {collapsible: true, collapsed: true},
     },
   ],
   fields: [
@@ -19,6 +24,7 @@ export default defineType({
       name: 'id',
       title: 'ID (Slug)',
       type: 'slug',
+      fieldset: 'basicInfo',
       options: {source: (doc: any) => doc.name?.tr || doc.name?.en, maxLength: 96},
       validation: (Rule) => Rule.required(),
     }),
@@ -27,6 +33,7 @@ export default defineType({
       name: 'name',
       title: 'Ad',
       type: 'localizedString',
+      fieldset: 'basicInfo',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -34,8 +41,14 @@ export default defineType({
       title: 'Unvan / Rol',
       description: 'Örn: Mimar, Endüstriyel Tasarımcı, İç Mimar',
       type: 'localizedString',
+      fieldset: 'basicInfo',
     }),
-    defineField({name: 'bio', title: 'Biyografi', type: 'localizedPortableText'}),
+    defineField({
+      name: 'bio',
+      title: 'Biyografi',
+      type: 'localizedPortableText',
+      fieldset: 'basicInfo',
+    }),
     defineField({
       name: 'imageR2',
       title: 'Görsel (Tüm Cihazlar)',

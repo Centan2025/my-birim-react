@@ -1,7 +1,7 @@
 import React, {useMemo, useState, useRef, useCallback} from 'react'
 import {Link} from 'react-router-dom'
 
-import {ContentBlock} from '../types'
+import {ContentBlock, InteractiveShowcaseItem, LocalizedString} from '../types'
 import {useTranslation} from '../i18n'
 import ScrollReveal from './ScrollReveal'
 import {OptimizedImage} from './OptimizedImage'
@@ -9,6 +9,7 @@ import {OptimizedVideo} from './OptimizedVideo'
 import {YouTubeBackground} from './YouTubeBackground'
 import PortableTextLite from './PortableTextLite'
 import {useGoogleFonts} from '../hooks/useGoogleFont'
+import {InteractiveShowcase} from './InteractiveShowcase'
 
 interface HomeContentBlocksProps {
   blocks: ContentBlock[]
@@ -16,6 +17,20 @@ interface HomeContentBlocksProps {
   imageBorderClass: string
   overrideBackgroundColor?: string
   onMediaClick?: (url: string) => void
+  interactiveShowcase?: InteractiveShowcaseItem[]
+  interactiveShowcaseTitle?: LocalizedString
+  interactiveShowcaseBlockIndex?: number
+}
+
+const ContentBlockSnapWrapper: React.FC<{children: React.ReactNode}> = ({children}) => {
+  return (
+    <div
+      style={{scrollSnapAlign: 'start'}}
+      className="scroll-snap-start"
+    >
+      {children}
+    </div>
+  )
 }
 
 /**
@@ -298,29 +313,57 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
   imageBorderClass,
   overrideBackgroundColor,
   onMediaClick,
+  interactiveShowcase,
+  interactiveShowcaseTitle,
+  interactiveShowcaseBlockIndex,
 }) => {
   const {t} = useTranslation()
 
   // Tüm bloklardaki fontları topla ve yükle (stabilize with useMemo)
   const allFonts = useMemo(() => {
     const fonts = new Set<string>()
-    blocks.forEach(b => {
-      if (b.titleFont && b.titleFont !== 'normal') fonts.add(b.titleFont)
-      if (b.contentFont && b.contentFont !== 'normal') fonts.add(b.contentFont)
-    })
+    if (Array.isArray(blocks)) {
+      blocks.forEach(b => {
+        if (b.titleFont && b.titleFont !== 'normal') fonts.add(b.titleFont)
+        if (b.contentFont && b.contentFont !== 'normal') fonts.add(b.contentFont)
+      })
+    }
     return Array.from(fonts)
   }, [blocks])
 
   useGoogleFonts(allFonts)
 
-  if (!blocks || blocks.length === 0) {
+  const hasInteractiveShowcase =
+    Array.isArray(interactiveShowcase) && interactiveShowcase.length > 0
+  const hasBlocks = Array.isArray(blocks) && blocks.length > 0
+
+  if (!hasBlocks && !hasInteractiveShowcase) {
     return null
   }
 
+  if (!hasBlocks && hasInteractiveShowcase) {
+    return (
+      <InteractiveShowcase
+        items={interactiveShowcase}
+        sectionTitle={interactiveShowcaseTitle}
+      />
+    )
+  }
+
   const sortedBlocks = [...blocks].sort((a, b) => (a.order || 0) - (b.order || 0))
+  const targetIndex =
+    interactiveShowcaseBlockIndex !== undefined && interactiveShowcaseBlockIndex !== null
+      ? Math.max(0, interactiveShowcaseBlockIndex)
+      : 1
 
   return (
     <>
+      {hasInteractiveShowcase && targetIndex === 0 && (
+        <InteractiveShowcase
+          items={interactiveShowcase}
+          sectionTitle={interactiveShowcaseTitle}
+        />
+      )}
       {sortedBlocks.map((block, index) => {
         const titleContent = block.title ? t(block.title) : ''
         const descriptionRaw = block.description ? t(block.description) : ''
@@ -739,85 +782,97 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         const isSideBySide = !isFullWidth && !isCenter
 
         return (
-          <section
-            key={index}
-            className={`content-block-wrapper relative z-20 ${backgroundColor} transition-colors duration-500`}
-            style={{
-              paddingTop: isSideBySide
-                ? `${customPadding !== undefined ? customPadding : 32}px`
-                : undefined,
-              paddingBottom: isSideBySide
-                ? `${customPadding !== undefined ? customPadding : 32}px`
-                : !hasTextContent || index === sortedBlocks.length - 1
-                  ? 0
-                  : bottomSpacing > 0
-                    ? `${bottomSpacing}px`
+          <React.Fragment key={index}>
+            <ContentBlockSnapWrapper>
+              <section
+                className={`content-block-wrapper home-content-block-snap relative z-20 min-h-[85vh] lg:min-h-screen flex flex-col justify-center ${backgroundColor} transition-colors duration-500`}
+                style={{
+                  paddingTop: isSideBySide
+                    ? `${customPadding !== undefined ? customPadding : 32}px`
                     : undefined,
-            }}
-            data-block-index={index}
-          >
-            {isFullWidth || isCenter ? (
-              <div
-                className={`${isFullWidth ? 'w-full' : 'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto'} overflow-hidden flex flex-col items-center relative ${borderPaddingClass}`}
-                style={borderPaddingStyle}
+                  paddingBottom: isSideBySide
+                    ? `${customPadding !== undefined ? customPadding : 32}px`
+                    : !hasTextContent || index === sortedBlocks.length - 1
+                      ? 0
+                      : bottomSpacing > 0
+                        ? `${bottomSpacing}px`
+                        : undefined,
+                }}
+                data-block-index={index}
               >
-                {textContentAbove}
-                {mediaContent}
-                {textContentBelow}
-                {/* Title-only fallback: when no media and no above/below content assigned, render title directly */}
-                {!hasMedia && !textContentAbove && !textContentBelow && hasTitle && (
+                {isFullWidth || isCenter ? (
                   <div
-                    className={`w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-0 flex flex-col gap-4 ${titleAlign === 'center' ? 'items-center text-center' : titleAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
+                    className={`${isFullWidth ? 'w-full' : 'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto'} overflow-hidden flex flex-col items-center relative ${borderPaddingClass}`}
+                    style={borderPaddingStyle}
                   >
-                    {titleElement}
-                    {bodyElement}
+                    {textContentAbove}
+                    {mediaContent}
+                    {textContentBelow}
+                    {/* Title-only fallback: when no media and no above/below content assigned, render title directly */}
+                    {!hasMedia && !textContentAbove && !textContentBelow && hasTitle && (
+                      <div
+                        className={`w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-0 flex flex-col gap-4 ${titleAlign === 'center' ? 'items-center text-center' : titleAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
+                      >
+                        {titleElement}
+                        {bodyElement}
+                      </div>
+                    )}
+                    {borderOverlay}
+                  </div>
+                ) : (
+                  <div
+                    className={`w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 overflow-hidden relative ${borderPaddingClass}`}
+                  >
+                    <div
+                      className={
+                        hasTextContent && hasMedia
+                          ? `flex flex-col ${
+                              isLeft ? 'md:flex-row' : isRight ? 'md:flex-row-reverse' : 'md:flex-row'
+                            } ${block.verticalAlignment === 'top' ? 'gap-x-4 md:gap-x-6 gap-y-0' : 'gap-6 md:gap-12'} ${
+                              block.verticalAlignment === 'top'
+                                ? 'items-start'
+                                : block.verticalAlignment === 'bottom'
+                                  ? 'items-end'
+                                  : 'items-center'
+                            }`
+                          : hasTextContent && !hasMedia
+                            ? 'flex flex-col'
+                            : 'flex flex-col items-center gap-4 md:gap-6'
+                      }
+                    >
+                      {hasMedia && (
+                        <div
+                          className={`w-full ${
+                            !hasTextContent ? 'md:w-full flex flex-col items-center' : 'md:w-1/2'
+                          } overflow-visible`}
+                        >
+                          {mediaContent}
+                        </div>
+                      )}
+                      {hasTextContent && (
+                        <div
+                          className={`w-full ${hasMedia ? 'md:w-1/2' : 'md:w-full'} flex flex-col ${hasTitle && (hasDescription || block.linkText) ? 'gap-6' : 'gap-0'} ${block.verticalAlignment === 'top' ? 'self-start' : block.verticalAlignment === 'bottom' ? 'self-end' : 'self-center'} ${verticalAlignClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'pt-0 mt-0' : ''}`}
+                        >
+                          {hasTitle && titleElement}
+                          {bodyElement}
+                        </div>
+                      )}
+                    </div>
+                    {borderOverlay}
                   </div>
                 )}
-                {borderOverlay}
-              </div>
-            ) : (
-              <div
-                className={`w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 overflow-hidden relative ${borderPaddingClass}`}
-              >
-                <div
-                  className={
-                    hasTextContent && hasMedia
-                      ? `flex flex-col ${
-                          isLeft ? 'md:flex-row' : isRight ? 'md:flex-row-reverse' : 'md:flex-row'
-                        } ${block.verticalAlignment === 'top' ? 'gap-x-4 md:gap-x-6 gap-y-0' : 'gap-6 md:gap-12'} ${
-                          block.verticalAlignment === 'top'
-                            ? 'items-start'
-                            : block.verticalAlignment === 'bottom'
-                              ? 'items-end'
-                              : 'items-center'
-                        }`
-                      : hasTextContent && !hasMedia
-                        ? 'flex flex-col'
-                        : 'flex flex-col items-center gap-4 md:gap-6'
-                  }
-                >
-                  {hasMedia && (
-                    <div
-                      className={`w-full ${
-                        !hasTextContent ? 'md:w-full flex flex-col items-center' : 'md:w-1/2'
-                      } overflow-visible`}
-                    >
-                      {mediaContent}
-                    </div>
-                  )}
-                  {hasTextContent && (
-                    <div
-                      className={`w-full ${hasMedia ? 'md:w-1/2' : 'md:w-full'} flex flex-col ${hasTitle && (hasDescription || block.linkText) ? 'gap-6' : 'gap-0'} ${block.verticalAlignment === 'top' ? 'self-start' : block.verticalAlignment === 'bottom' ? 'self-end' : 'self-center'} ${verticalAlignClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'pt-0 mt-0' : ''}`}
-                    >
-                      {hasTitle && titleElement}
-                      {bodyElement}
-                    </div>
-                  )}
-                </div>
-                {borderOverlay}
-              </div>
-            )}
-          </section>
+              </section>
+            </ContentBlockSnapWrapper>
+            {hasInteractiveShowcase &&
+              (index + 1 === targetIndex ||
+                (index === sortedBlocks.length - 1 && targetIndex > index + 1)) && (
+                <InteractiveShowcase
+                  key={`interactive-showcase-${index}`}
+                  items={interactiveShowcase}
+                  sectionTitle={interactiveShowcaseTitle}
+                />
+              )}
+          </React.Fragment>
         )
       })}
     </>

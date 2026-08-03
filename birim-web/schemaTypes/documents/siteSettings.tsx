@@ -6,28 +6,54 @@ export default defineType({
   name: 'siteSettings',
   title: 'Site Ayarları',
   type: 'document',
+  fieldsets: [
+    {
+      name: 'general',
+      title: '⚙️ Genel Görünüm & Logo',
+      options: {collapsible: true, collapsed: false},
+    },
+    {
+      name: 'navigation',
+      title: '🧭 Navigasyon, Menü & Diller',
+      options: {collapsible: true, collapsed: true},
+    },
+    {
+      name: 'features',
+      title: '🧩 Özellikler & Modüller',
+      options: {collapsible: true, collapsed: true},
+    },
+    {
+      name: 'animations',
+      title: '✨ Animasyon & Stiller',
+      options: {collapsible: true, collapsed: true},
+    },
+  ],
   fields: [
     defineField({
       name: 'logoR2',
       title: 'Logo',
       type: 'r2Asset',
+      fieldset: 'general',
     }),
     defineField({
       name: 'topBannerText',
       title: 'Üst Bilgi Metni',
       type: 'string',
+      fieldset: 'general',
       description: 'Web sayfasının üstünde gösterilecek kısa bilgi/not.',
     }),
     defineField({
       name: 'showProductPrevNext',
       title: 'Önceki / Sonraki Düğmeleri (Ürünlerde, projelerde, haberlerde)',
       type: 'boolean',
+      fieldset: 'navigation',
       initialValue: false,
     }),
     defineField({
       name: 'showRelatedProducts',
       title: 'Ürün detay sayfasında "Benzer ürünler" bölümünü göster',
       type: 'boolean',
+      fieldset: 'features',
       initialValue: true,
       description:
         'Pasif edildiğinde ürün detay sayfalarındaki "Benzer ürünler" bölümü tamamen gizlenir.',
@@ -36,18 +62,21 @@ export default defineType({
       name: 'showCartButton',
       title: "Header'da Sepet Düğmesini Göster",
       type: 'boolean',
+      fieldset: 'navigation',
       initialValue: true,
     }),
     defineField({
       name: 'isLanguageSwitcherVisible',
       title: 'Dil Değiştirici Gözüksün',
       type: 'boolean',
+      fieldset: 'navigation',
       initialValue: true,
     }),
     defineField({
       name: 'maintenanceMode',
       title: 'Bakım Modu (Yakında Sayfası)',
       type: 'boolean',
+      fieldset: 'features',
       initialValue: false,
       description:
         'Aktif edildiğinde ziyaretçiler sadece "Yakında" sayfasını görür. Development modunda otomatik olarak devre dışıdır.',
@@ -56,6 +85,7 @@ export default defineType({
       name: 'imageBorderStyle',
       title: 'Görsel ve Video Kenar Stili',
       type: 'string',
+      fieldset: 'animations',
       options: {
         list: [
           {title: 'Düz (Köşeler Keskin)', value: 'square'},
@@ -69,6 +99,7 @@ export default defineType({
       name: 'languages',
       title: 'Desteklenen Diller',
       type: 'array',
+      fieldset: 'navigation',
       of: [
         {
           type: 'object',
@@ -88,12 +119,12 @@ export default defineType({
           ],
         },
       ],
-      // Sanity, obje dizilerinde Rule.unique() desteklemez; gerekirse custom validasyon eklenir
     }),
     defineField({
       name: 'mobileHeaderAnimation',
       title: 'Mobil Header / Menü Animasyonu',
       type: 'string',
+      fieldset: 'animations',
       options: {
         list: [
           {title: 'Varsayılan (Birim)', value: 'default'},
@@ -108,6 +139,7 @@ export default defineType({
       name: 'enablePageTransitions',
       title: 'Sayfa Geçiş Animasyonlarını Etkinleştir',
       type: 'boolean',
+      fieldset: 'animations',
       initialValue: true,
       description:
         'Site genelindeki sayfa geçiş animasyonlarını açıp kapatır. (Ürün ve Tasarımcı detay genişleme animasyonları hariç)',
@@ -116,6 +148,7 @@ export default defineType({
       name: 'isFactoryVisible',
       title: 'Fabrika Menüsünü Göster',
       type: 'boolean',
+      fieldset: 'navigation',
       initialValue: false,
       description:
         'Aktif edildiğinde menüde "Fabrika" seçeneği belirir ve ilgili sayfa erişilebilir olur.',
@@ -124,6 +157,7 @@ export default defineType({
       name: 'enableAiRoomPlanner',
       title: 'AI Oda Tasarımı (Odamda Gör) Butonunu Göster',
       type: 'boolean',
+      fieldset: 'features',
       initialValue: true,
       description:
         'Pasif edildiğinde ürün detay sayfalarındaki "AI ile Odamda Gör" butonu ve AI oda tasarımı modülü gizlenir.',

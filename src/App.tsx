@@ -25,10 +25,43 @@ const ComingSoonPage = lazy(() =>
   import('./pages/ComingSoonPage').then(m => ({default: m.ComingSoonPage}))
 )
 
+import Lenis from 'lenis'
+import 'lenis/dist/lenis.css'
+
 // Maintenance mode kontrolünü provider içinde yapmak için ayrı component
 const AppContent = () => {
   const {pathname} = useLocation()
   const {reset: resetHeaderTheme} = useHeaderTheme()
+
+  // Ultra-Soft Lenis Smooth Momentum Scroll Integration
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.4,
+      easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      wheelMultiplier: 0.95,
+      touchMultiplier: 1.5,
+    })
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(window as any).lenis = lenis
+
+    let animationFrameId: number
+
+    function raf(time: number) {
+      lenis.raf(time)
+      animationFrameId = requestAnimationFrame(raf)
+    }
+
+    animationFrameId = requestAnimationFrame(raf)
+
+    return () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ;(window as any).lenis = null
+      cancelAnimationFrame(animationFrameId)
+      lenis.destroy()
+    }
+  }, [])
 
   // Sayfa değişimlerinde header temasını sıfırla (beyaz sayfalarda header'ın beyaz kalma sorununu çözer)
   useEffect(() => {

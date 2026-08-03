@@ -43,6 +43,15 @@
   --border-primary: #262626;
 }
 
+html {
+  scroll-behavior: smooth !important;
+}
+
+.scroll-snap-start {
+  scroll-snap-align: start !important;
+  scroll-snap-stop: always !important;
+}
+
 /* Accessibility Focus Ring Styles */
 *:focus-visible {
   outline: 2px solid #c5a059;

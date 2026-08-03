@@ -330,17 +330,39 @@ async function uploadFileViaPresignedUrl(
   const filename = key.substring(lastSlash + 1)
 
   // 1. Get Presigned URL
-  const res = await fetch(getApiUrl('/api/media/presigned-url'), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      filename,
-      contentType,
-      folder,
-    }),
-  })
+  let res: Response
+  try {
+    res = await fetch(getApiUrl('/api/media/presigned-url'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        filename,
+        contentType,
+        folder,
+      }),
+    })
+  } catch {
+    const fallbackUrl = `https://birim-web-antigravity.vercel.app/api/media/presigned-url`
+    try {
+      res = await fetch(fallbackUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          filename,
+          contentType,
+          folder,
+        }),
+      })
+    } catch {
+      throw new Error(
+        'Media API sunucusuna bağlanılamadı. Lütfen yerel API sunucusunun (port 3002) çalıştığından emin olun ("npm run api:server").',
+      )
+    }
+  }
 
   if (!res.ok) {
     const errBody = await res.json().catch(() => ({}))

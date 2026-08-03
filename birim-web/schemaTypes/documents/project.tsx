@@ -8,11 +8,39 @@ export default defineType({
   name: 'project',
   title: 'Proje',
   type: 'document',
+  fieldsets: [
+    {
+      name: 'basicInfo',
+      title: '📌 Temel Bilgiler',
+      options: {collapsible: true, collapsed: false},
+    },
+    {
+      name: 'publishing',
+      title: '🌐 Yayın & Sıralama Ayarları',
+      options: {collapsible: true, collapsed: true},
+    },
+    {
+      name: 'mediaGroup',
+      title: '🖼️ Proje Medyası & Görseller',
+      options: {collapsible: true, collapsed: true},
+    },
+    {
+      name: 'contentGroup',
+      title: '📝 İçerik & Bloklar',
+      options: {collapsible: true, collapsed: true},
+    },
+    {
+      name: 'seoGroup',
+      title: '🔍 SEO & Arama Motoru',
+      options: {collapsible: true, collapsed: true},
+    },
+  ],
   fields: [
     defineField({
       name: 'id',
       title: 'ID (Slug)',
       type: 'slug',
+      fieldset: 'basicInfo',
       options: {source: (doc: any) => doc.title?.tr || doc.title?.en, maxLength: 96},
       validation: (Rule) => Rule.required(),
     }),
@@ -21,12 +49,14 @@ export default defineType({
       name: 'title',
       title: 'Başlık',
       type: 'localizedString',
+      fieldset: 'basicInfo',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'isPublished',
       title: 'Yayında Göster',
       type: 'boolean',
+      fieldset: 'publishing',
       initialValue: true,
       description: 'Bu projenin web sitesinde listelerde görünüp görünmeyeceğini belirler.',
     }),
@@ -34,6 +64,7 @@ export default defineType({
       name: 'publishAt',
       title: 'Yayın Tarihi (Opsiyonel)',
       type: 'datetime',
+      fieldset: 'publishing',
       description:
         'Belirli bir tarihten sonra görünsün istiyorsanız kullanın. Boş bırakırsanız hemen yayına girer.',
     }),
@@ -41,6 +72,7 @@ export default defineType({
       name: 'sortOrder',
       title: 'Sıra (Opsiyonel)',
       type: 'number',
+      fieldset: 'publishing',
       description:
         'Küçük sayı önce gelir. Boş bırakırsanız oluşturulma tarihine göre (yeniden eskiye) sıralanır.',
     }),
@@ -48,18 +80,21 @@ export default defineType({
       name: 'date',
       title: 'Yer + Tarih',
       type: 'localizedString',
+      fieldset: 'basicInfo',
       description: 'Yer ve tarih bilgisini birlikte girin (örn: İstanbul + 15 Ocak 2024)',
     }),
     defineField({
       name: 'projectCategory',
       title: 'Proje Kategorisi',
       type: 'localizedString',
+      fieldset: 'basicInfo',
       description: 'Proje türü bilgisi (örn: Mimari & İç Mekan, Mobilya Tasarım, İç Mimarlık)',
     }),
     defineField({
       name: 'media',
       title: 'Proje Medyası',
       type: 'array',
+      fieldset: 'mediaGroup',
       of: [{type: 'productSimpleMediaItem'}],
       components: {
         input: BulkMediaUploadInput,
@@ -67,11 +102,17 @@ export default defineType({
       description:
         'Projeye ait tüm görsel ve videolar. İlk öğe listede önizleme olarak kullanılır.',
     }),
-    defineField({name: 'excerpt', title: 'Kısa Açıklama', type: 'localizedPortableText'}),
+    defineField({
+      name: 'excerpt',
+      title: 'Kısa Açıklama',
+      type: 'localizedPortableText',
+      fieldset: 'contentGroup',
+    }),
     defineField({
       name: 'contentBlocks',
       title: 'İçerik Blokları',
       type: 'array',
+      fieldset: 'contentGroup',
       of: [{type: 'contentBlock'}],
       description:
         'Proje detay sayfasında gösterilecek içerik blokları (ana sayfa ile aynı sistem)',
@@ -80,6 +121,7 @@ export default defineType({
       name: 'seo',
       title: 'SEO & Arama Motoru Ayarları',
       type: 'seoFields',
+      fieldset: 'seoGroup',
     }),
   ],
   preview: {

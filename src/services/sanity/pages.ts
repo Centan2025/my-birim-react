@@ -211,7 +211,36 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
       const q = groq`*[_type == "homePage"][0]{
             ..., heroAutoPlay,
             heroMedia[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2, videoFileMobileR2, videoFileDesktopR2 },
-            contentBlocks[]{ ..., titleFont, contentFont, imageR2, imageMobileR2, imageDesktopR2, videoFileR2, videoFileMobileR2, videoFileDesktopR2, imagePanels[]{ ..., imageR2 }, panelFit, panelGap }
+            contentBlocks[]{ ..., titleFont, contentFont, imageR2, imageMobileR2, imageDesktopR2, videoFileR2, videoFileMobileR2, videoFileDesktopR2, imagePanels[]{ ..., imageR2 }, panelFit, panelGap },
+            interactiveShowcaseTitle,
+            interactiveShowcaseBlockIndex,
+            interactiveShowcase[]{
+              title,
+              imageR2,
+              imageMobileR2,
+              hotspots[]{
+                x,
+                y,
+                label,
+                product->{
+                  _id,
+                  "id": coalesce(slug.current, _id),
+                  name,
+                  mainImage,
+                  mainImageR2,
+                  media[]{
+                    type,
+                    isCover,
+                    imageR2,
+                    url
+                  },
+                  price,
+                  currency,
+                  "categoryName": category->name,
+                  "designerName": designer->name
+                }
+              }
+            }
         }`
       const data = await sanity.fetch(q)
       if (data?.heroMedia) {
@@ -241,6 +270,175 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
           .filter(
             (m: Record<string, unknown>) => typeof m['url'] === 'string' && m['url'].trim() !== ''
           )
+      }
+      if (data?.interactiveShowcase && Array.isArray(data.interactiveShowcase)) {
+        data.interactiveShowcase = data.interactiveShowcase.map((item: Record<string, unknown>) => {
+          const imgR2 = item['imageR2']
+          const imgMobileR2 = item['imageMobileR2']
+          const image = mapImage(imgR2 as SanityImageLike) || (typeof item['image'] === 'string' ? item['image'] : '')
+          const imageMobile = mapImage(imgMobileR2 as SanityImageLike) || (typeof item['imageMobile'] === 'string' ? item['imageMobile'] : undefined)
+          const meta = imgR2 ? mapR2Metadata(imgR2) : {}
+
+          const rawHotspots = Array.isArray(item['hotspots']) ? item['hotspots'] : []
+          const hotspots = rawHotspots.map((hs: Record<string, unknown>) => {
+            const prod = hs['product'] as Record<string, unknown> | undefined
+            let mappedProd = undefined
+            if (prod) {
+              const prodMedia = Array.isArray(prod['media'])
+                ? (prod['media'] as Record<string, unknown>[])
+                : []
+              const coverItem = prodMedia.find(m => m['isCover']) || prodMedia[0]
+              const imageR2Obj =
+                (coverItem?.['imageR2'] as Record<string, unknown> | undefined) ||
+                (prod['mainImageR2'] as Record<string, unknown> | undefined)
+
+              const resolvedUrl =
+                (typeof imageR2Obj?.['url'] === 'string'
+                  ? mapImage(imageR2Obj as SanityImageLike)
+                  : '') ||
+                mapImage(coverItem?.['imageR2'] as SanityImageLike) ||
+                mapImage(prod['mainImageR2'] as SanityImageLike) ||
+                mapImage(prod['mainImage'] as SanityImageLike) ||
+                (typeof coverItem?.['url'] === 'string' ? coverItem['url'] : '') ||
+                (typeof prod['mainImage'] === 'string' ? prod['mainImage'] : '')
+
+              mappedProd = {
+                id: (prod['id'] as string) || (prod['_id'] as string) || '',
+                name: prod['name'],
+                mainImage: resolvedUrl || undefined,
+                price: typeof prod['price'] === 'number' ? prod['price'] : undefined,
+                currency: typeof prod['currency'] === 'string' ? prod['currency'] : 'TRY',
+                categoryName: prod['categoryName'],
+                designerName: prod['designerName'],
+              }
+            }
+
+            return {
+              x: typeof hs['x'] === 'number' ? hs['x'] : 50,
+              y: typeof hs['y'] === 'number' ? hs['y'] : 50,
+              label: hs['label'],
+              product: mappedProd,
+            }
+          })
+
+          return {
+            title: item['title'],
+            image,
+            imageMobile,
+            crop: meta.crop,
+            hotspot: meta.hotspot,
+            hotspots,
+          }
+        }).filter((item: Record<string, unknown>) => !!item['image'])
+      }
+
+      if (!data.interactiveShowcase || data.interactiveShowcase.length === 0) {
+        data.interactiveShowcase = [
+          {
+            title: {
+              tr: 'Modern Yaşam Alanı Entegrasyonu',
+              en: 'Modern Living Space Integration',
+            },
+            image:
+              'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop',
+            hotspots: [
+              {
+                x: 35,
+                y: 62,
+                label: {tr: 'Lüks Deri Berjer', en: 'Luxury Leather Lounge Chair'},
+                product: {
+                  id: 'luxe-lounge-chair',
+                  name: {tr: 'Lüks Deri Berjer', en: 'Luxury Leather Lounge Chair'},
+                  mainImage:
+                    'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=800&auto=format&fit=crop',
+                  price: 24500,
+                  currency: 'TRY',
+                  categoryName: {tr: 'Koltuk & Berjer', en: 'Chairs & Armchairs'},
+                  designerName: {tr: 'Birim Tasarım Stüdyosu', en: 'Birim Design Studio'},
+                },
+              },
+              {
+                x: 68,
+                y: 72,
+                label: {tr: 'Mermer Kahve Sehpa', en: 'Marble Coffee Table'},
+                product: {
+                  id: 'marble-coffee-table',
+                  name: {tr: 'Mermer Kahve Sehpa', en: 'Marble Coffee Table'},
+                  mainImage:
+                    'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?q=80&w=800&auto=format&fit=crop',
+                  price: 18200,
+                  currency: 'TRY',
+                  categoryName: {tr: 'Sehpalar', en: 'Coffee Tables'},
+                  designerName: {tr: 'Mimari Çözümler', en: 'Architectural Solutions'},
+                },
+              },
+              {
+                x: 82,
+                y: 45,
+                label: {tr: 'Minimalist Lambader', en: 'Minimalist Floor Lamp'},
+                product: {
+                  id: 'minimalist-floor-lamp',
+                  name: {tr: 'Minimalist Lambader', en: 'Minimalist Floor Lamp'},
+                  mainImage:
+                    'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?q=80&w=800&auto=format&fit=crop',
+                  price: 9400,
+                  currency: 'TRY',
+                  categoryName: {tr: 'Aydınlatma', en: 'Lighting'},
+                  designerName: {tr: 'Studio Nord', en: 'Studio Nord'},
+                },
+              },
+            ],
+          },
+          {
+            title: {
+              tr: 'Yemek ve Konferans Alanı Projesi',
+              en: 'Dining & Conference Area Project',
+            },
+            image:
+              'https://images.unsplash.com/photo-1617806118233-18e1de247200?q=80&w=2000&auto=format&fit=crop',
+            hotspots: [
+              {
+                x: 50,
+                y: 65,
+                label: {tr: 'Ahşap Yemek Masası', en: 'Solid Wood Dining Table'},
+                product: {
+                  id: 'wood-dining-table',
+                  name: {tr: 'Ahşap Yemek Masası', en: 'Solid Wood Dining Table'},
+                  mainImage:
+                    'https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?q=80&w=800&auto=format&fit=crop',
+                  price: 36000,
+                  currency: 'TRY',
+                  categoryName: {tr: 'Masalar', en: 'Tables'},
+                  designerName: {tr: 'Birim Arch', en: 'Birim Arch'},
+                },
+              },
+              {
+                x: 28,
+                y: 58,
+                label: {tr: 'Ergonomik Ahşap Sandalye', en: 'Ergonomic Wooden Chair'},
+                product: {
+                  id: 'ergonomic-wood-chair',
+                  name: {tr: 'Ergonomik Ahşap Sandalye', en: 'Ergonomic Wooden Chair'},
+                  mainImage:
+                    'https://images.unsplash.com/photo-1503602642458-232111445657?q=80&w=800&auto=format&fit=crop',
+                  price: 7800,
+                  currency: 'TRY',
+                  categoryName: {tr: 'Sandalyeler', en: 'Chairs'},
+                  designerName: {tr: 'Studio Nord', en: 'Studio Nord'},
+                },
+              },
+            ],
+          },
+        ]
+        if (!data.interactiveShowcaseTitle) {
+          data.interactiveShowcaseTitle = {
+            tr: 'Mekanlarımızda Ürünlerimiz',
+            en: 'Products in Our Spaces',
+          }
+        }
+        if (data.interactiveShowcaseBlockIndex === undefined) {
+          data.interactiveShowcaseBlockIndex = 1
+        }
       }
       if (data?.contentBlocks) {
         data.contentBlocks = data.contentBlocks.map((b: Record<string, unknown>) => {
@@ -352,9 +550,117 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
     }
   }
   await delay(SIMULATED_DELAY)
-  const data = getItem<HomePageContent>(KEYS.HOME_PAGE)
-  if (data && !Array.isArray(data.featuredProductIds)) data.featuredProductIds = []
-  return data || ({} as HomePageContent)
+  const data = getItem<HomePageContent>(KEYS.HOME_PAGE) || ({} as HomePageContent)
+  if (!Array.isArray(data.featuredProductIds)) data.featuredProductIds = []
+  if (!data.interactiveShowcase || data.interactiveShowcase.length === 0) {
+    data.interactiveShowcase = [
+      {
+        title: {
+          tr: 'Modern Yaşam Alanı Entegrasyonu',
+          en: 'Modern Living Space Integration',
+        },
+        image:
+          'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop',
+        hotspots: [
+          {
+            x: 35,
+            y: 62,
+            label: {tr: 'Lüks Deri Berjer', en: 'Luxury Leather Lounge Chair'},
+            product: {
+              id: 'luxe-lounge-chair',
+              name: {tr: 'Lüks Deri Berjer', en: 'Luxury Leather Lounge Chair'},
+              mainImage:
+                'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=800&auto=format&fit=crop',
+              price: 24500,
+              currency: 'TRY',
+              categoryName: {tr: 'Koltuk & Berjer', en: 'Chairs & Armchairs'},
+              designerName: {tr: 'Birim Tasarım Stüdyosu', en: 'Birim Design Studio'},
+            },
+          },
+          {
+            x: 68,
+            y: 72,
+            label: {tr: 'Mermer Kahve Sehpa', en: 'Marble Coffee Table'},
+            product: {
+              id: 'marble-coffee-table',
+              name: {tr: 'Mermer Kahve Sehpa', en: 'Marble Coffee Table'},
+              mainImage:
+                'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?q=80&w=800&auto=format&fit=crop',
+              price: 18200,
+              currency: 'TRY',
+              categoryName: {tr: 'Sehpalar', en: 'Coffee Tables'},
+              designerName: {tr: 'Mimari Çözümler', en: 'Architectural Solutions'},
+            },
+          },
+          {
+            x: 82,
+            y: 45,
+            label: {tr: 'Minimalist Lambader', en: 'Minimalist Floor Lamp'},
+            product: {
+              id: 'minimalist-floor-lamp',
+              name: {tr: 'Minimalist Lambader', en: 'Minimalist Floor Lamp'},
+              mainImage:
+                'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?q=80&w=800&auto=format&fit=crop',
+              price: 9400,
+              currency: 'TRY',
+              categoryName: {tr: 'Aydınlatma', en: 'Lighting'},
+              designerName: {tr: 'Studio Nord', en: 'Studio Nord'},
+            },
+          },
+        ],
+      },
+      {
+        title: {
+          tr: 'Yemek ve Konferans Alanı Projesi',
+          en: 'Dining & Conference Area Project',
+        },
+        image:
+          'https://images.unsplash.com/photo-1617806118233-18e1de247200?q=80&w=2000&auto=format&fit=crop',
+        hotspots: [
+          {
+            x: 50,
+            y: 65,
+            label: {tr: 'Ahşap Yemek Masası', en: 'Solid Wood Dining Table'},
+            product: {
+              id: 'wood-dining-table',
+              name: {tr: 'Ahşap Yemek Masası', en: 'Solid Wood Dining Table'},
+              mainImage:
+                'https://images.unsplash.com/photo-1615066390971-03e4e1c36ddf?q=80&w=800&auto=format&fit=crop',
+              price: 36000,
+              currency: 'TRY',
+              categoryName: {tr: 'Masalar', en: 'Tables'},
+              designerName: {tr: 'Birim Arch', en: 'Birim Arch'},
+            },
+          },
+          {
+            x: 28,
+            y: 58,
+            label: {tr: 'Ergonomik Ahşap Sandalye', en: 'Ergonomic Wooden Chair'},
+            product: {
+              id: 'ergonomic-wood-chair',
+              name: {tr: 'Ergonomik Ahşap Sandalye', en: 'Ergonomic Wooden Chair'},
+              mainImage:
+                'https://images.unsplash.com/photo-1503602642458-232111445657?q=80&w=800&auto=format&fit=crop',
+              price: 7800,
+              currency: 'TRY',
+              categoryName: {tr: 'Sandalyeler', en: 'Chairs'},
+              designerName: {tr: 'Studio Nord', en: 'Studio Nord'},
+            },
+          },
+        ],
+      },
+    ]
+    if (!data.interactiveShowcaseTitle) {
+      data.interactiveShowcaseTitle = {
+        tr: 'Mekanlarımızda Ürünlerimiz',
+        en: 'Products in Our Spaces',
+      }
+    }
+    if (data.interactiveShowcaseBlockIndex === undefined) {
+      data.interactiveShowcaseBlockIndex = 1
+    }
+  }
+  return data
 }
 
 export const updateAboutPageContent = async (): Promise<void> => {}

@@ -416,6 +416,36 @@ export interface ContentBlock {
 }
 
 /**
+ * Represents a hotspot marker on an interactive product visual.
+ */
+export interface ProductHotspot {
+  x: number
+  y: number
+  label?: LocalizedString
+  product?: {
+    id: string
+    name: LocalizedString
+    mainImage?: string | {url: string; crop?: R2ImageMetadata['crop']; hotspot?: R2ImageMetadata['hotspot']}
+    price?: number
+    currency?: string
+    categoryName?: LocalizedString
+    designerName?: LocalizedString
+  }
+}
+
+/**
+ * Represents a slide item in the interactive product showcase.
+ */
+export interface InteractiveShowcaseItem {
+  title?: LocalizedString
+  image: string
+  imageMobile?: string
+  crop?: R2ImageMetadata['crop']
+  hotspot?: R2ImageMetadata['hotspot']
+  hotspots: ProductHotspot[]
+}
+
+/**
  * Defines the content structure for the Home page.
  */
 export interface HomePageContent {
@@ -436,6 +466,12 @@ export interface HomePageContent {
   featuredDesignerId: string
   /** Content blocks displayed after hero section */
   contentBlocks?: ContentBlock[]
+  /** Title for the interactive showcase section */
+  interactiveShowcaseTitle?: LocalizedString
+  /** Interactive product showcase items with hotspots */
+  interactiveShowcase?: InteractiveShowcaseItem[]
+  /** Content block index after which interactive showcase is rendered (0-indexed) */
+  interactiveShowcaseBlockIndex?: number
 }
 
 /**
