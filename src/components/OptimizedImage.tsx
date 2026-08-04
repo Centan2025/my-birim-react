@@ -192,7 +192,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         }
         img.responsive-crop-pos,
         picture.responsive-crop-pos img {
-          object-fit: cover !important;
+          object-fit: var(--img-object-fit, cover) !important;
           object-position: var(--obj-pos-desktop, center) !important;
           clip-path: var(--clip-desktop, none) !important;
           transform: var(--transform-desktop, none) !important;
@@ -201,7 +201,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         @media (max-width: 1023px) {
           img.responsive-crop-pos,
           picture.responsive-crop-pos img {
-            object-fit: cover !important;
+            object-fit: var(--img-object-fit, cover) !important;
             object-position: var(--obj-pos-mobile, var(--obj-pos-desktop, center)) !important;
             clip-path: var(--clip-mobile, var(--clip-desktop, none)) !important;
             transform: var(--transform-mobile, var(--transform-desktop, none)) !important;
@@ -593,14 +593,21 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   }
 
   const classList = className.split(' ')
+  const hasExplicitContain = classList.some((c: string) => c === 'object-contain')
+  if (hasExplicitContain) {
+    customStyle['--img-object-fit'] = 'contain'
+  }
+
   const isCoverMode =
-    classList.some(
+    !hasExplicitContain &&
+    (classList.some(
       (c: string) =>
         c.startsWith('h-full') ||
         c.startsWith('h-screen') ||
         (c.startsWith('h-') && c !== 'h-auto') ||
         c.startsWith('aspect-')
-    ) || !!height
+    ) ||
+      !!height)
 
   const activeClientCrop = useClientCrop && hasCrop
 

@@ -63,7 +63,7 @@ export const ProductCard: React.FC<{product: Product}> = ({product}) => {
     <Link to={`/product/${product.id}`} className="group block w-full" onClick={handleClick}>
       <div className={`bg-[var(--bg-primary)] ${imageBorderClass} overflow-hidden`}>
         <div
-          className="relative overflow-hidden aspect-square w-full flex items-center justify-center bg-[var(--bg-primary)]"
+          className="relative overflow-hidden aspect-square w-full flex items-center justify-center bg-[var(--bg-primary)] p-2 sm:p-3"
           style={{
             transition: 'scale 0.9s cubic-bezier(0.25, 0.1, 0.25, 1)',
           }}
