@@ -244,7 +244,7 @@ export const HeaderSearchPanel: FC<HeaderSearchPanelProps> = ({
                                 : category.heroImage?.url || ''
                             }
                             alt={t(category.name)}
-                            className="w-12 h-12 object-cover rounded-md mr-4 flex-shrink-0"
+                            className="w-12 h-12 object-contain bg-[var(--bg-primary)] p-0.5 rounded-md mr-4 flex-shrink-0"
                           />
                           <div>
                             <p
