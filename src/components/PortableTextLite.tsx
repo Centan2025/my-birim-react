@@ -2,6 +2,7 @@ import {ReactNode, Fragment} from 'react'
 import {sanitizeText, sanitizeUrl} from '../lib/sanitize'
 import {OptimizedImage} from './OptimizedImage'
 import {urlFor} from '../lib/imageUrl'
+import {mapR2Metadata} from '../services/sanity/client'
 
 type Span = {_type: 'span'; text: string; marks?: string[]}
 type MarkDef = {
