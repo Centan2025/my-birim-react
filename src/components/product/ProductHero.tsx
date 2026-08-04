@@ -72,7 +72,6 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
   heroSlideIndex,
   draggedX,
   heroTransitionEnabled,
-  isMobile: _isMobile,
   isTitleVisible,
   isDesignerVisible,
   areDotsVisible,
