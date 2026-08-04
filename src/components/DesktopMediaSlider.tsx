@@ -125,8 +125,8 @@ export const DesktopMediaSlider: React.FC<DesktopMediaSliderProps> = ({items, ac
                     controls
                     autoPlay={isActive}
                     className="max-w-full max-h-full w-auto h-auto object-contain"
-                    preload={isActive ? 'metadata' : 'none'}
-                    loading={isActive ? 'eager' : 'lazy'}
+                    preload={isActive ? 'auto' : 'metadata'}
+                    loading="eager"
                   />
                 ) : (
                   <OptimizedImage

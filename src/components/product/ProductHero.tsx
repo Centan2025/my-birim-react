@@ -216,8 +216,8 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     } ${imageBorderClass} select-none`}
                     width={1600}
                     height={900}
-                    loading={shouldEagerLoad ? 'eager' : 'lazy'}
-                    fetchPriority={shouldEagerLoad ? 'high' : 'low'}
+                    loading="eager"
+                    fetchPriority={isActiveSlide || shouldEagerLoad ? 'high' : 'auto'}
                     quality={90}
                     crop={m.crop as R2ImageMetadata['crop']}
                     hotspot={m.hotspot as R2ImageMetadata['hotspot']}
@@ -251,8 +251,8 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     muted
                     loop
                     playsInline
-                    preload={isActiveSlide || shouldEagerLoad ? 'auto' : 'metadata'}
-                    loading={shouldEagerLoad ? 'eager' : 'lazy'}
+                    preload="auto"
+                    loading="eager"
                   />
                 ) : (
                   <iframe
