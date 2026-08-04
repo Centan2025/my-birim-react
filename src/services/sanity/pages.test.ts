@@ -70,4 +70,31 @@ describe('sanity pages service', () => {
     const content = await getHomePageContent()
     expect(content?.contentBlocks?.[0]?.imagePanels?.[0]?.crop).toEqual(mockCrop)
   })
+
+  it('getHomePageContent mobilde özel crop yapılmadığında cropMobile alanını undefined bırakır', async () => {
+    const mockCropDesktop = {x: 0.1, y: 0.2, width: 0.8, height: 0.6}
+    const {mapR2Metadata} = await import('./client')
+    vi.mocked(mapR2Metadata).mockImplementation((obj: any) => {
+      if (obj?.cropDesktop || obj?.image) {
+        return {crop: mockCropDesktop, origWidth: 1000, origHeight: 800}
+      }
+      return {}
+    })
+
+    vi.mocked(sanity.fetch).mockResolvedValue({
+      heroMedia: [],
+      contentBlocks: [
+        {
+          mediaType: 'image',
+          image: {url: 'https://example.com/block.jpg'},
+          cropDesktop: mockCropDesktop,
+        },
+      ],
+    })
+
+    const content = await getHomePageContent()
+    const block = content?.contentBlocks?.[0]
+    expect(block?.cropDesktop).toEqual(mockCropDesktop)
+    expect(block?.cropMobile).toBeUndefined()
+  })
 })

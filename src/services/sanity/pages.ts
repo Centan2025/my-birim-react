@@ -402,7 +402,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
               hotspotDesktop: meta.hotspot,
               origWidthDesktop: meta.origWidth,
               origHeightDesktop: meta.origHeight,
-              cropMobile: metaMobile.crop || meta.crop,
+              cropMobile: metaMobile.crop,
               hotspotMobile: metaMobile.hotspot || meta.hotspot,
               origWidthMobile: metaMobile.origWidth || meta.origWidth,
               origHeightMobile: metaMobile.origHeight || meta.origHeight,
@@ -584,7 +584,6 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
           const metaDesktop = mapR2Metadata(desktopImgObj)
 
           const mobileImgObj = {
-            ...(typeof b === 'object' && b !== null ? (b as Record<string, unknown>) : {}),
             ...(typeof imageMobileR2 === 'object' && imageMobileR2 !== null
               ? (imageMobileR2 as Record<string, unknown>)
               : {}),
@@ -627,8 +626,7 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
 
           const cropMobile =
             metaMobile.crop ||
-            (b['cropMobile'] ? mapR2Metadata({crop: b['cropMobile']}).crop : undefined) ||
-            cropDesktop
+            (b['cropMobile'] ? mapR2Metadata({crop: b['cropMobile']}).crop : undefined)
 
           const hotspotMobile =
             metaMobile.hotspot ||
@@ -708,7 +706,11 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
                     const pOrigWidth = panelMetaDesktop.origWidth || pRec['origWidth']
                     const pOrigHeight = panelMetaDesktop.origHeight || pRec['origHeight']
 
-                    const pCropMobile = panelMetaMobile.crop || pCrop
+                    const pCropMobile =
+                      panelMetaMobile.crop ||
+                      (pRec['cropMobile']
+                        ? mapR2Metadata({crop: pRec['cropMobile']}).crop
+                        : undefined)
                     const pHotspotMobile = panelMetaMobile.hotspot || pHotspot
                     const pOrigWidthMobile = panelMetaMobile.origWidth || pOrigWidth
                     const pOrigHeightMobile = panelMetaMobile.origHeight || pOrigHeight
