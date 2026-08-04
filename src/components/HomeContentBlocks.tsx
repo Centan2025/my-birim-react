@@ -160,11 +160,11 @@ const PanelSlider: React.FC<{
   const getWidthClass = () => {
     switch (panelSize) {
       case 'small':
-        return 'w-[45vw] md:w-[22vw] lg:w-[15vw]'
+        return 'w-[28vw] sm:w-[25vw] md:w-[22vw] lg:w-[15vw]'
       case 'large':
-        return 'w-[85vw] md:w-[60vw] lg:w-[45vw]'
+        return 'w-[70vw] sm:w-[65vw] md:w-[60vw] lg:w-[45vw]'
       default:
-        return 'w-[65vw] md:w-[35vw] lg:w-[25vw]'
+        return 'w-[36vw] sm:w-[32vw] md:w-[35vw] lg:w-[25vw]'
     }
   }
 
@@ -214,7 +214,7 @@ const PanelSlider: React.FC<{
               className={`flex-shrink-0 snap-start relative overflow-hidden ${imageBorderClass} ${
                 panelFit === 'natural' || itemHasCrop
                   ? 'h-auto max-h-[70vh]'
-                  : 'aspect-[4/5] sm:aspect-[3/4]'
+                  : 'aspect-square sm:aspect-[4/5] md:aspect-[3/4]'
               } group cursor-pointer ${getWidthClass()}`}
               onClick={() => {
                 if (!isDragging && onMediaClick) {
