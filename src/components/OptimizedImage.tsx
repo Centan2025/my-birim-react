@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useRef, useMemo} from 'react'
 import {R2ImageMetadata} from '../types'
-import {rewriteR2Url} from '../services/sanity/client'
+import {rewriteR2Url, safeEncodePathSegment} from '../services/sanity/client'
 import {mediaCropDebugger} from '../utils/mediaCropDebug'
 
 /**
@@ -10,19 +10,19 @@ import {mediaCropDebugger} from '../utils/mediaCropDebug'
 const encodeSrcSetUrl = (url: string): string => {
   if (!url) return url
   try {
-    // URL'deki segmentleri ayır ve trim et (Örn: "dosya .webp" -> "dosya.webp")
-    // Bu sayede sondaki boşluklardan kaynaklanan 404 hatalarını önleriz.
-    const parts = url.split('/')
-    const trimmedUrl = parts
+    const urlParts = url.split('?')
+    const basePath = urlParts[0] || ''
+    const searchParams = urlParts[1]
+
+    const parts = basePath.split('/')
+    const encodedPath = parts
       .map((p, i) => {
-        if (i < 3 && p.includes(':')) return p // protocol/domain kısmına dokunma
-        return p.trim()
+        if (i < 3 && (p.includes(':') || (i === 2 && parts[0]?.includes(':')))) return p
+        return safeEncodePathSegment(p)
       })
       .join('/')
 
-    // Önce decode et (eğer zaten encode edilmişse), sonra tekrar encode et.
-    const decoded = decodeURI(trimmedUrl)
-    return encodeURI(decoded).replace(/ /g, '%20')
+    return searchParams !== undefined ? `${encodedPath}?${searchParams}` : encodedPath
   } catch {
     return url.replace(/ /g, '%20')
   }

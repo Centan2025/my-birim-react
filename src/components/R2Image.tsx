@@ -1,5 +1,6 @@
 import React, {useMemo} from 'react'
 import {urlFor} from '../lib/imageUrl'
+import {safeEncodePathSegment} from '../services/sanity/client'
 
 interface R2Asset {
   url: string
@@ -49,7 +50,7 @@ const getR2Url = (
 
   const encodedPath = finalPath
     .split('/')
-    .map(segment => encodeURIComponent(decodeURIComponent(segment.trim())))
+    .map(segment => safeEncodePathSegment(segment))
     .join('/')
 
   // .r2.dev ve .workers.dev (ve free plan custom domain) domainleri image resizing desteklemez

@@ -123,6 +123,26 @@ export interface SanityProductMediaItem {
   videoFileDesktopR2?: {url?: string}
 }
 
+export const safeEncodePathSegment = (segment: string): string => {
+  if (!segment) return ''
+  const trimmed = segment.trim()
+  let decoded = trimmed
+  try {
+    decoded = decodeURIComponent(trimmed)
+  } catch {
+    decoded = trimmed
+  }
+  try {
+    return encodeURIComponent(decoded)
+      .replace(/%2F/g, '/')
+      .replace(/%3A/g, ':')
+      .replace(/\(/g, '%28')
+      .replace(/\)/g, '%29')
+  } catch {
+    return encodeURI(decoded)
+  }
+}
+
 export const rewriteR2Url = (url: string | undefined, _hasResponsiveSizes?: boolean): string => {
   if (!url || typeof url !== 'string') return url || ''
 
@@ -130,17 +150,17 @@ export const rewriteR2Url = (url: string | undefined, _hasResponsiveSizes?: bool
   let result = urlParts[0] || ''
   const searchParams = urlParts[1] || ''
 
-  // Varsayılan CDN domainimiz daima https://assets.birim.com'dur
+  // Varsayılan CDN domainimiz
   const activeDomain = R2_DOMAIN || 'https://assets.birim.com'
   const targetDomainNoProtocol = activeDomain.replace(/^https?:\/\//, '')
 
-  // 1. Tüm r2.dev ve workers.dev domainlerini https://assets.birim.com ile değiştir
-  if (result.includes('.r2.dev')) {
+  // 1. Tüm r2.dev ve workers.dev domainlerini aktif domain ile değiştir (eğer aktif domain aynı değilse)
+  if (result.includes('.r2.dev') && !activeDomain.includes('.r2.dev')) {
     result = result
       .replace(/^(https?:\/\/)?([^/]+\.r2\.dev)/i, activeDomain)
       .replace(/https?:\/\/[^/]+\.r2\.dev/gi, activeDomain)
   }
-  if (result.includes('.workers.dev')) {
+  if (result.includes('.workers.dev') && !activeDomain.includes('.workers.dev')) {
     result = result
       .replace(/^(https?:\/\/)?([^/]+\.workers\.dev)/i, activeDomain)
       .replace(/https?:\/\/[^/]+\.workers\.dev/gi, activeDomain)
@@ -169,22 +189,13 @@ export const rewriteR2Url = (url: string | undefined, _hasResponsiveSizes?: bool
     }
   }
 
-  // 3. Segment bazlı temizlik ve encode
+  // 3. Segment bazlı güvenli temizlik ve encode (Türkçe ve özel karakterleri HTTP/2 uyumlu hale getirir)
   try {
     const parts = result.split('/')
     result = parts
       .map((p, i) => {
-        if (i < 3 && p.includes(':')) return p // protocol
-        if (!p) return ''
-        try {
-          return encodeURIComponent(decodeURIComponent(p.trim()))
-            .replace(/%2F/g, '/')
-            .replace(/%3A/g, ':')
-            .replace(/\(/g, '%28')
-            .replace(/\)/g, '%29')
-        } catch {
-          return p.trim()
-        }
+        if (i < 3 && (p.includes(':') || (i === 2 && parts[0]?.includes(':')))) return p // protocol & domain
+        return safeEncodePathSegment(p)
       })
       .join('/')
   } catch {
