@@ -129,7 +129,7 @@ export function CategoriesPage() {
                   to={`/products/${category.id}`}
                   className="group block overflow-hidden rounded-none"
                 >
-                  <div className="relative h-[300px] sm:h-[350px] lg:h-[450px] overflow-hidden rounded-none border-none flex items-center justify-center bg-[var(--bg-primary)] p-1.5 sm:p-2">
+                  <div className="relative h-[300px] sm:h-[350px] lg:h-[450px] overflow-hidden rounded-none border-none flex items-center justify-center bg-[var(--bg-primary)] p-0 sm:p-0.5">
                     {category.displayImage && (
                       <OptimizedImage
                         src={
