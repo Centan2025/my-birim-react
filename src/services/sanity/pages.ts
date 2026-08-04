@@ -278,10 +278,18 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
               if (posterObj && typeof posterObj === 'object' && (posterObj as {url?: string}).url) {
                 result['poster'] = rewriteR2Url((posterObj as {url: string}).url)
               }
-              if (posterMobileObj && typeof posterMobileObj === 'object' && (posterMobileObj as {url?: string}).url) {
+              if (
+                posterMobileObj &&
+                typeof posterMobileObj === 'object' &&
+                (posterMobileObj as {url?: string}).url
+              ) {
                 result['posterMobile'] = rewriteR2Url((posterMobileObj as {url: string}).url)
               }
-              if (posterDesktopObj && typeof posterDesktopObj === 'object' && (posterDesktopObj as {url?: string}).url) {
+              if (
+                posterDesktopObj &&
+                typeof posterDesktopObj === 'object' &&
+                (posterDesktopObj as {url?: string}).url
+              ) {
                 result['posterDesktop'] = rewriteR2Url((posterDesktopObj as {url: string}).url)
               }
             }

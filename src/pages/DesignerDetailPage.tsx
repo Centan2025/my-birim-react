@@ -159,7 +159,10 @@ export function DesignerDetailPage() {
 
       <main className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto flex flex-col lg:flex-row flex-1 lg:overflow-hidden mt-4 lg:mt-8">
         {/* Sol Taraf: Büyük Görsel (Sabit) */}
-        <div className="w-full lg:w-1/2 h-[60vh] lg:h-full shrink-0 relative lg:overflow-y-auto custom-scrollbar bg-[var(--bg-designer-hero)] border border-[var(--border-primary)] mt-0 p-4 lg:p-10 xl:p-16 flex flex-col group transition-colors duration-500">
+        <div
+          className="w-full lg:w-1/2 h-[60vh] lg:h-full shrink-0 relative lg:overflow-y-auto custom-scrollbar bg-[var(--bg-designer-hero)] border border-[var(--border-primary)] mt-0 p-4 lg:p-10 xl:p-16 flex flex-col group transition-colors duration-500"
+          data-lenis-prevent
+        >
           <div className="flex-1 relative mt-0 flex items-start justify-center overflow-visible">
             <div
               ref={imageRef}
@@ -199,7 +202,10 @@ export function DesignerDetailPage() {
         </div>
 
         {/* Sağ Taraf: Bilgiler ve Tasarımlar (Scroll Edilebilir) */}
-        <div className="w-full lg:w-1/2 lg:flex-1 h-auto lg:h-full overflow-y-visible lg:overflow-y-auto custom-scrollbar bg-[var(--bg-secondary)] lg:border-l border-[var(--border-primary)] scroll-smooth pb-20 lg:pb-0">
+        <div
+          className="w-full lg:w-1/2 lg:flex-1 h-auto lg:h-full overflow-y-auto custom-scrollbar bg-[var(--bg-secondary)] lg:border-l border-[var(--border-primary)] scroll-smooth pb-20 lg:pb-0"
+          data-lenis-prevent
+        >
           <div className="pt-4 lg:pt-10 xl:pt-16 pb-12 lg:pb-24 px-6 lg:px-20 min-h-full flex flex-col justify-start">
             <div className="mb-12 lg:mb-16">
               <h1

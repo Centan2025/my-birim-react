@@ -28,7 +28,10 @@ export const BackToTopButton: React.FC = () => {
 
     // Lenis dinleyicisi ekle (Lenis window.scrollY dışındaki durumları tetiklerse)
     const win = window as unknown as {
-      lenis?: {on: (event: string, callback: () => void) => void; off: (event: string, callback: () => void) => void}
+      lenis?: {
+        on: (event: string, callback: () => void) => void
+        off: (event: string, callback: () => void) => void
+      }
     }
     if (win.lenis && typeof win.lenis.on === 'function') {
       win.lenis.on('scroll', handleScroll)
