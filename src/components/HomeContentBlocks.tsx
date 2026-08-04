@@ -727,6 +727,10 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   hotspot={block.hotspot}
                   origWidth={block.origWidth}
                   origHeight={block.origHeight}
+                  cropMobile={block.cropMobile}
+                  hotspotMobile={block.hotspotMobile}
+                  origWidthMobile={block.origWidthMobile}
+                  origHeightMobile={block.origHeightMobile}
                 />
                 {block.showButtonOnMedia && block.linkText && (
                   <div
@@ -765,7 +769,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 
         const textContentAbove = hasTopContent ? (
           <div
-            className={`${isFullWidth ? `w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-0 ${block.verticalAlignment === 'top' ? 'pt-0' : 'pt-6 md:pt-8'} pb-3` : isCenter ? `w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto ${block.verticalAlignment === 'top' ? 'pt-0' : 'pt-6 md:pt-8'} pb-3` : 'w-full mx-auto mb-4'} flex flex-col gap-4 ${titleAlign === 'center' ? 'items-center text-center' : titleAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
+            className={`${isFullWidth || isMobile ? `w-full max-w-full px-4 md:px-0 ${block.verticalAlignment === 'top' ? 'pt-0' : 'pt-4 md:pt-8'} pb-2 md:pb-3` : isCenter ? `w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto ${block.verticalAlignment === 'top' ? 'pt-0' : 'pt-6 md:pt-8'} pb-3` : 'w-full mx-auto mb-4'} flex flex-col gap-3 md:gap-4 ${titleAlign === 'center' ? 'items-center text-center' : titleAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
           >
             {titlePosition === 'above' && titleElement}
             {textPosition === 'above' && bodyElement}
@@ -774,7 +778,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 
         const textContentBelow = hasBottomContent ? (
           <div
-            className={`${isFullWidth ? `w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-0 ${block.verticalAlignment === 'top' ? 'pt-0' : 'pt-3'} pb-6 md:pb-8` : isCenter ? `w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto ${block.verticalAlignment === 'top' ? 'pt-0' : 'pt-3'} pb-6 md:pb-8` : `w-full mx-auto ${block.verticalAlignment === 'top' ? 'mt-0' : 'mt-4'}`} flex flex-col gap-4 ${titleAlign === 'center' ? 'items-center text-center' : titleAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
+            className={`${isFullWidth || isMobile ? `w-full max-w-full px-4 md:px-0 ${block.verticalAlignment === 'top' ? 'pt-0' : 'pt-2 md:pt-3'} pb-4 md:pb-8` : isCenter ? `w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto ${block.verticalAlignment === 'top' ? 'pt-0' : 'pt-3'} pb-6 md:pb-8` : `w-full mx-auto ${block.verticalAlignment === 'top' ? 'mt-0' : 'mt-4'}`} flex flex-col gap-3 md:gap-4 ${titleAlign === 'center' ? 'items-center text-center' : titleAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
           >
             {titlePosition === 'below' && titleElement}
             {textPosition === 'below' && bodyElement}
@@ -788,24 +792,34 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           <React.Fragment key={index}>
             <ContentBlockSnapWrapper>
               <section
-                className={`content-block-wrapper home-content-block-snap relative z-20 min-h-[85vh] lg:min-h-screen flex flex-col justify-center ${backgroundColor} transition-colors duration-500`}
+                className={`content-block-wrapper home-content-block-snap relative z-20 min-h-0 flex flex-col justify-start ${backgroundColor} transition-colors duration-500 py-0 my-0`}
                 style={{
-                  paddingTop: isSideBySide
-                    ? `${customPadding !== undefined ? customPadding : 32}px`
-                    : undefined,
-                  paddingBottom: isSideBySide
-                    ? `${customPadding !== undefined ? customPadding : 32}px`
-                    : !hasTextContent || index === sortedBlocks.length - 1
-                      ? 0
-                      : bottomSpacing > 0
-                        ? `${bottomSpacing}px`
-                        : undefined,
+                  paddingTop: isMobile
+                    ? 0
+                    : isSideBySide
+                      ? `${customPadding !== undefined ? customPadding : 24}px`
+                      : customPadding !== undefined
+                        ? `${customPadding}px`
+                        : '24px',
+                  paddingBottom: isMobile
+                    ? 0
+                    : isSideBySide
+                      ? `${customPadding !== undefined ? customPadding : 24}px`
+                      : !hasTextContent || index === sortedBlocks.length - 1
+                        ? customPadding !== undefined
+                          ? `${customPadding}px`
+                          : 0
+                        : bottomSpacing > 0
+                          ? `${bottomSpacing}px`
+                          : customPadding !== undefined
+                            ? `${customPadding}px`
+                            : '24px',
                 }}
                 data-block-index={index}
               >
                 {isFullWidth || isCenter ? (
                   <div
-                    className={`${isFullWidth ? 'w-full' : 'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto'} overflow-hidden flex flex-col items-center relative ${borderPaddingClass}`}
+                    className={`${isFullWidth || isMobile ? 'w-full max-w-full' : 'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto'} overflow-hidden flex flex-col items-center relative ${borderPaddingClass}`}
                     style={borderPaddingStyle}
                   >
                     {textContentAbove}
@@ -824,7 +838,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   </div>
                 ) : (
                   <div
-                    className={`w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 overflow-hidden relative ${borderPaddingClass}`}
+                    className={`w-full ${isMobile ? 'max-w-full px-0' : 'max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0'} overflow-hidden relative ${borderPaddingClass}`}
                   >
                     <div
                       className={
@@ -835,7 +849,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                                 : isRight
                                   ? 'md:flex-row-reverse'
                                   : 'md:flex-row'
-                            } ${block.verticalAlignment === 'top' ? 'gap-x-4 md:gap-x-6 gap-y-0' : 'gap-6 md:gap-12'} ${
+                            } ${block.verticalAlignment === 'top' ? 'gap-x-4 md:gap-x-6 gap-y-0' : 'gap-4 md:gap-12'} ${
                               block.verticalAlignment === 'top'
                                 ? 'items-start'
                                 : block.verticalAlignment === 'bottom'
@@ -858,7 +872,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       )}
                       {hasTextContent && (
                         <div
-                          className={`w-full ${hasMedia ? 'md:w-1/2' : 'md:w-full'} flex flex-col ${hasTitle && (hasDescription || block.linkText) ? 'gap-6' : 'gap-0'} ${block.verticalAlignment === 'top' ? 'self-start' : block.verticalAlignment === 'bottom' ? 'self-end' : 'self-center'} ${verticalAlignClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'pt-0 mt-0' : ''}`}
+                          className={`w-full ${hasMedia ? 'md:w-1/2' : 'md:w-full'} ${isMobile ? 'px-4 py-4 md:px-0 md:py-0' : ''} flex flex-col ${hasTitle && (hasDescription || block.linkText) ? 'gap-4 md:gap-6' : 'gap-0'} ${block.verticalAlignment === 'top' ? 'self-start' : block.verticalAlignment === 'bottom' ? 'self-end' : 'self-center'} ${verticalAlignClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'pt-0 mt-0' : ''}`}
                         >
                           {hasTitle && titleElement}
                           {bodyElement}

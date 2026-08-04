@@ -165,96 +165,7 @@ export function HomePage() {
     }
   }, [isMobile, viewportWidth, mobileHeroHeight])
 
-  // Robust Self-Healing Lenis Scroll Snap Controller
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    let isSnapping = false
-    let lockTimer: ReturnType<typeof setTimeout> | null = null
-    let pollTimer: ReturnType<typeof setInterval> | null = null
-
-    const unlock = () => {
-      isSnapping = false
-      if (lockTimer) {
-        clearTimeout(lockTimer)
-        lockTimer = null
-      }
-    }
-
-    const setupLenisSnap = () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const lenis = (window as any).lenis
-      if (!lenis || typeof lenis.on !== 'function') return false
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const handleLenisScroll = (e: any) => {
-        if (isSnapping) return
-        const direction = e.direction || 0
-        if (direction === 0) return
-
-        const sections = document.querySelectorAll<HTMLElement>(
-          '.home-content-block-snap, .content-block-wrapper, .scroll-snap-start'
-        )
-        if (!sections.length) return
-
-        for (let i = 0; i < sections.length; i++) {
-          const sec = sections[i]
-          if (!sec) continue
-          const rect = sec.getBoundingClientRect()
-
-          if (direction === 1) {
-            // Scrolling DOWN: Section top entering upper 65% of viewport
-            if (rect.top > 25 && rect.top < window.innerHeight * 0.65) {
-              isSnapping = true
-              if (lockTimer) clearTimeout(lockTimer)
-              lockTimer = setTimeout(unlock, 550)
-
-              lenis.scrollTo(sec, {
-                duration: 0.5,
-                easing: (t: number) => 1 - Math.pow(1 - t, 3),
-                onComplete: unlock,
-              })
-              break
-            }
-          } else if (direction === -1) {
-            // Scrolling UP: Section top entering lower threshold from above
-            if (rect.top < -25 && rect.top > -window.innerHeight * 0.65) {
-              isSnapping = true
-              if (lockTimer) clearTimeout(lockTimer)
-              lockTimer = setTimeout(unlock, 550)
-
-              lenis.scrollTo(sec, {
-                duration: 0.5,
-                easing: (t: number) => 1 - Math.pow(1 - t, 3),
-                onComplete: unlock,
-              })
-              break
-            }
-          }
-        }
-      }
-
-      lenis.on('scroll', handleLenisScroll)
-      return true
-    }
-
-    if (!setupLenisSnap()) {
-      pollTimer = setInterval(() => {
-        if (setupLenisSnap() && pollTimer) {
-          clearInterval(pollTimer)
-        }
-      }, 100)
-    }
-
-    return () => {
-      if (pollTimer) clearInterval(pollTimer)
-      if (lockTimer) clearTimeout(lockTimer)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const lenis = (window as any).lenis
-      if (lenis && typeof lenis.off === 'function') {
-        lenis.off('scroll')
-      }
-    }
-  }, [])
+  // Content blocks use natural fluid height without artificial 100vh height gaps
 
   if (!content || !settings) {
     return <div className="h-screen w-full bg-gray-900" />
@@ -506,6 +417,15 @@ export function HomePage() {
                 bottom: 0 !important;
                 transform: none !important;
                 box-sizing: border-box !important;
+              }
+              .home-content-block-snap,
+              .content-block-wrapper {
+                min-height: 0 !important;
+                height: auto !important;
+                padding-top: 0 !important;
+                padding-bottom: 0 !important;
+                margin-top: 0 !important;
+                margin-bottom: 0 !important;
               }
             }
           `}</style>

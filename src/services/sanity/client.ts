@@ -326,12 +326,15 @@ export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
       if (!val) return {}
       let str = ''
       if (typeof val === 'string') str = val
-      else if (typeof val === 'object' && val !== null && 'url' in val) str = String((val as {url: unknown}).url)
+      else if (typeof val === 'object' && val !== null && 'url' in val)
+        str = String((val as {url: unknown}).url)
       else if (typeof val === 'object' && val !== null && 'asset' in val) {
         const asset = (val as {asset: unknown}).asset
         if (typeof asset === 'string') str = asset
-        else if (typeof asset === 'object' && asset !== null && 'url' in asset) str = String((asset as {url: unknown}).url)
-        else if (typeof asset === 'object' && asset !== null && '_ref' in asset) str = String((asset as {_ref: unknown})._ref)
+        else if (typeof asset === 'object' && asset !== null && 'url' in asset)
+          str = String((asset as {url: unknown}).url)
+        else if (typeof asset === 'object' && asset !== null && '_ref' in asset)
+          str = String((asset as {_ref: unknown})._ref)
       }
 
       const match = str.match(/-(\d+)x(\d+)\./)
@@ -343,18 +346,48 @@ export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
 
     const targetObj = (i['imageR2'] || i['image'] || i) as Record<string, unknown>
     const dims = extractDimsFromUrl(targetObj)
-    const crop = parseCropObj(targetObj)
-    const hotspot = parseHotspotObj(targetObj)
-    const origWidth = Number(targetObj['width'] || targetObj['origWidth'] || i['width'] || i['origWidth']) || dims.w
-    const origHeight = Number(targetObj['height'] || targetObj['origHeight'] || i['height'] || i['origHeight']) || dims.h
-    const isMirrored = targetObj['isMirrored'] !== undefined ? !!targetObj['isMirrored'] : i['isMirrored'] !== undefined ? !!i['isMirrored'] : undefined
+    const crop = parseCropObj(targetObj) || parseCropObj(i)
+    const hotspot = parseHotspotObj(targetObj) || parseHotspotObj(i)
+    const origWidth =
+      Number(targetObj['width'] || targetObj['origWidth'] || i['width'] || i['origWidth']) || dims.w
+    const origHeight =
+      Number(targetObj['height'] || targetObj['origHeight'] || i['height'] || i['origHeight']) ||
+      dims.h
+    const isMirrored =
+      targetObj['isMirrored'] !== undefined
+        ? !!targetObj['isMirrored']
+        : i['isMirrored'] !== undefined
+          ? !!i['isMirrored']
+          : undefined
 
     const mobileAsset = i['imageMobileR2'] || i['imageMobile'] || targetObj['imageMobile']
     const dimsMobile = extractDimsFromUrl(mobileAsset)
-    const cropMobile = parseCropObj(mobileAsset || i['cropMobile'] || targetObj['cropMobile'])
-    const hotspotMobile = parseHotspotObj(mobileAsset || i['hotspotMobile'] || targetObj['hotspotMobile'])
-    const origWidthMobile = Number(i['origWidthMobile'] || i['widthMobile']) || dimsMobile.w || origWidth
-    const origHeightMobile = Number(i['origHeightMobile'] || i['heightMobile']) || dimsMobile.h || origHeight
+    const cropMobile =
+      parseCropObj(mobileAsset) ||
+      parseCropObj(i['cropMobile']) ||
+      parseCropObj(targetObj['cropMobile'])
+    const hotspotMobile =
+      parseHotspotObj(mobileAsset) ||
+      parseHotspotObj(i['hotspotMobile']) ||
+      parseHotspotObj(targetObj['hotspotMobile'])
+    const origWidthMobile =
+      Number(
+        i['origWidthMobile'] ||
+          i['widthMobile'] ||
+          targetObj['origWidthMobile'] ||
+          targetObj['widthMobile']
+      ) ||
+      dimsMobile.w ||
+      origWidth
+    const origHeightMobile =
+      Number(
+        i['origHeightMobile'] ||
+          i['heightMobile'] ||
+          targetObj['origHeightMobile'] ||
+          targetObj['heightMobile']
+      ) ||
+      dimsMobile.h ||
+      origHeight
 
     return {
       crop,
@@ -402,7 +435,14 @@ export const mapMediaUrl = (
   if (!type) {
     if (m?.videoFileR2?.url || m?.videoFileMobileR2?.url || m?.videoFileDesktopR2?.url) {
       type = 'video'
-    } else if (m?.imageR2?.url || m?.imageMobileR2?.url || m?.imageDesktopR2?.url || (m as Record<string, unknown>)['image'] || (m as Record<string, unknown>)['asset'] || m?.url) {
+    } else if (
+      m?.imageR2?.url ||
+      m?.imageMobileR2?.url ||
+      m?.imageDesktopR2?.url ||
+      (m as Record<string, unknown>)['image'] ||
+      (m as Record<string, unknown>)['asset'] ||
+      m?.url
+    ) {
       type = 'image'
     }
   }
@@ -410,9 +450,11 @@ export const mapMediaUrl = (
   if (type === 'image') {
     const r2Url =
       (isMobile ? m?.imageMobileR2?.url : isDesktop ? m?.imageDesktopR2?.url : undefined) ||
-      m?.imageR2?.url ||
-      m?.imageMobileR2?.url ||
-      m?.imageDesktopR2?.url
+      (isMobile
+        ? undefined
+        : isDesktop
+          ? undefined
+          : m?.imageR2?.url || m?.imageDesktopR2?.url || m?.imageMobileR2?.url)
     const hasResponsiveSizes = Boolean(
       isMobile
         ? (m?.imageMobileR2 as Record<string, unknown>)?.['hasResponsiveSizes']
@@ -423,7 +465,15 @@ export const mapMediaUrl = (
     if (r2Url) {
       return rewriteR2Url(r2Url, hasResponsiveSizes)
     }
-    const stdUrl = mapImage((m as Record<string, unknown>)['image'] as SanityImageLike) || mapImage((m as Record<string, unknown>)['asset'] as SanityImageLike) || m?.url
+
+    const rec = m as Record<string, unknown>
+    const stdObj = isMobile
+      ? rec['imageMobile'] || rec['image']
+      : isDesktop
+        ? rec['imageDesktop'] || rec['image']
+        : rec['image']
+    const stdUrl =
+      mapImage(stdObj as SanityImageLike) || mapImage(rec['asset'] as SanityImageLike) || m?.url
     return rewriteR2Url(stdUrl) || ''
   } else if (type === 'video') {
     const r2Url =

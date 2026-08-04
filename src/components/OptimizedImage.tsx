@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useRef, useMemo} from 'react'
 import {R2ImageMetadata} from '../types'
 import {rewriteR2Url} from '../services/sanity/client'
+import {mediaCropDebugger} from '../utils/mediaCropDebug'
 
 /**
  * srcset attribute'ünde boşluklar ayırıcıdır — URL'deki boşlukları %20 ile encode ederek
@@ -38,6 +39,7 @@ interface OptimizedImageProps {
   quality?: number
   sizes?: string
   srcSet?: string
+  componentName?: string
   // Art Direction: Farklı ekranlar için farklı görseller
   srcMobile?: string // Mobil için görsel (varsa)
   srcDesktop?: string // Desktop için görsel (varsa)
@@ -129,6 +131,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   quality = 85,
   sizes,
   srcSet,
+  componentName,
   srcMobile,
   srcDesktop,
   draggable,
@@ -175,7 +178,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         }
         img.responsive-crop-pos,
         picture.responsive-crop-pos img {
-          aspect-ratio: var(--aspect-desktop, auto) !important;
           object-position: var(--obj-pos-desktop, center) !important;
           clip-path: var(--clip-desktop, none) !important;
           transform: var(--transform-desktop, none) !important;
@@ -184,11 +186,54 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         @media (max-width: 1023px) {
           img.responsive-crop-pos,
           picture.responsive-crop-pos img {
-            aspect-ratio: var(--aspect-mobile, var(--aspect-desktop, auto)) !important;
             object-position: var(--obj-pos-mobile, var(--obj-pos-desktop, center)) !important;
             clip-path: var(--clip-mobile, var(--clip-desktop, none)) !important;
             transform: var(--transform-mobile, var(--transform-desktop, none)) !important;
             transform-origin: var(--transform-origin-mobile, var(--transform-origin-desktop, center)) !important;
+          }
+        }
+
+        .responsive-crop-wrapper {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+        }
+        .responsive-crop-wrapper.has-aspect {
+          aspect-ratio: var(--crop-aspect-desktop, auto);
+        }
+        .responsive-crop-inner {
+          width: var(--crop-scale-x-desktop, 100%) !important;
+          height: var(--crop-scale-y-desktop, 100%) !important;
+          left: var(--crop-left-desktop, 0%) !important;
+          top: var(--crop-top-desktop, 0%) !important;
+          position: absolute !important;
+          max-width: none !important;
+          max-height: none !important;
+        }
+        .responsive-crop-inner img,
+        .responsive-crop-inner picture,
+        .responsive-crop-inner picture img {
+          width: 100% !important;
+          height: 100% !important;
+          max-width: none !important;
+          max-height: none !important;
+          object-fit: cover !important;
+          object-position: center !important;
+        }
+        @media (max-width: 1023px) {
+          .responsive-crop-wrapper.has-aspect {
+            aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto));
+          }
+          .responsive-crop-inner {
+            width: var(--crop-scale-x-mobile, var(--crop-scale-x-desktop, 100%)) !important;
+            height: var(--crop-scale-y-mobile, var(--crop-scale-y-desktop, 100%)) !important;
+            left: var(--crop-left-mobile, var(--crop-left-desktop, 0%)) !important;
+            top: var(--crop-top-mobile, var(--crop-top-desktop, 0%)) !important;
+          }
+          .responsive-crop-inner img,
+          .responsive-crop-inner picture img {
+            object-position: center !important;
           }
         }
       `,
@@ -201,6 +246,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
   const imgRef = useRef<HTMLImageElement>(null)
+  const mediaId = useMemo(() => Math.random().toString(36).substring(2, 9), [])
 
   const [naturalDims, setNaturalDims] = useState<{w: number; h: number} | null>(
     origWidth && origHeight ? {w: origWidth, h: origHeight} : null
@@ -286,10 +332,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     onError?.()
   }
 
-  const activeSrc =
-    rewriteR2Url(currentSrc) || rewriteR2Url(srcMobile) || rewriteR2Url(srcDesktop) || ''
-  const activeMobileSrc = rewriteR2Url(srcMobile || currentSrc)
-  const activeDesktopSrc = rewriteR2Url(srcDesktop || currentSrc)
+  const activeMobileSrc = srcMobile ? rewriteR2Url(srcMobile) : undefined
+  const activeDesktopSrc = srcDesktop ? rewriteR2Url(srcDesktop) : undefined
+  const activeSrc = rewriteR2Url(currentSrc) || activeDesktopSrc || activeMobileSrc || ''
 
   // Cloudflare R2 / Image Resizing logic
   const r2Domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
@@ -303,16 +348,14 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     () => getActiveCrop(cropDesktop || crop),
     [cropDesktop, crop]
   )
-  const normalizedCropMobile = useMemo(
-    () => getActiveCrop(cropMobile || cropDesktop || crop),
-    [cropMobile, cropDesktop, crop]
-  )
+  const normalizedCropMobile = useMemo(() => getActiveCrop(cropMobile), [cropMobile])
 
   const activeCrop = normalizedCropDesktop || normalizedCropMobile
 
   // R2 URL'lerini optimize et
-  const getOptimizedUrl = (url: string): string => {
+  const getOptimizedUrl = (url: string, targetCrop?: typeof activeCrop): string => {
     if (!url) return placeholder
+    const cropToUse = targetCrop || activeCrop
 
     // Cloudflare R2 / Image Resizing
     if (r2Domain && url.startsWith(r2Domain) && !url.includes('/cdn-cgi/image/')) {
@@ -328,22 +371,15 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       if (height) params.push(`height=${height}`)
 
       // Add crop rect if available
-      if (activeCrop) {
-        if (
-          activeCrop.width < 1.0 ||
-          activeCrop.height < 1.0 ||
-          activeCrop.x > 0 ||
-          activeCrop.y > 0
-        ) {
+      if (cropToUse) {
+        if (cropToUse.width < 1.0 || cropToUse.height < 1.0 || cropToUse.x > 0 || cropToUse.y > 0) {
           if (origWidth && origHeight) {
             params.push(
-              `rect=${Math.round(activeCrop.x * origWidth)},${Math.round(activeCrop.y * origHeight)},${Math.round(activeCrop.width * origWidth)},${Math.round(activeCrop.height * origHeight)}`
+              `rect=${Math.round(cropToUse.x * origWidth)},${Math.round(cropToUse.y * origHeight)},${Math.round(cropToUse.width * origWidth)},${Math.round(cropToUse.height * origHeight)}`
             )
           }
         } else {
-          params.push(
-            `rect=${activeCrop.x},${activeCrop.y},${activeCrop.width},${activeCrop.height}`
-          )
+          params.push(`rect=${cropToUse.x},${cropToUse.y},${cropToUse.width},${cropToUse.height}`)
         }
       }
 
@@ -355,22 +391,22 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     }
 
     // Sanity CDN URL (rect parameter)
-    if (url.includes('cdn.sanity.io') && activeCrop && !url.includes('rect=')) {
+    if (url.includes('cdn.sanity.io') && cropToUse && !url.includes('rect=')) {
       const match = url.match(/-(\d+)x(\d+)\./)
       const w = origWidth || (match ? Number(match[1]) : undefined)
       const h = origHeight || (match ? Number(match[2]) : undefined)
       if (
         w &&
         h &&
-        (activeCrop.width < 0.999 ||
-          activeCrop.height < 0.999 ||
-          activeCrop.x > 0.001 ||
-          activeCrop.y > 0.001)
+        (cropToUse.width < 0.999 ||
+          cropToUse.height < 0.999 ||
+          cropToUse.x > 0.001 ||
+          cropToUse.y > 0.001)
       ) {
-        const rectX = Math.round(activeCrop.x * w)
-        const rectY = Math.round(activeCrop.y * h)
-        const rectW = Math.round(activeCrop.width * w)
-        const rectH = Math.round(activeCrop.height * h)
+        const rectX = Math.round(cropToUse.x * w)
+        const rectY = Math.round(cropToUse.y * h)
+        const rectW = Math.round(cropToUse.width * w)
+        const rectH = Math.round(cropToUse.height * h)
         const delim = url.includes('?') ? '&' : '?'
         return encodeSrcSetUrl(`${url}${delim}rect=${rectX},${rectY},${rectW},${rectH}`)
       }
@@ -380,13 +416,18 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   }
 
   // Optimize edilmiş URL'ler
-  const optimizedSrc = getOptimizedUrl(activeSrc)
-  const optimizedMobileSrc = activeMobileSrc ? getOptimizedUrl(activeMobileSrc) : undefined
-  const optimizedDesktopSrc = activeDesktopSrc ? getOptimizedUrl(activeDesktopSrc) : undefined
+  const optimizedSrc = getOptimizedUrl(activeSrc, normalizedCropDesktop || normalizedCropMobile)
+  const optimizedMobileSrc = activeMobileSrc
+    ? getOptimizedUrl(activeMobileSrc, normalizedCropMobile || normalizedCropDesktop)
+    : undefined
+  const optimizedDesktopSrc = activeDesktopSrc
+    ? getOptimizedUrl(activeDesktopSrc, normalizedCropDesktop)
+    : undefined
 
   // Responsive srcset oluştur
-  const generateSrcSet = (baseUrl: string): string => {
+  const generateSrcSet = (baseUrl: string, targetCrop?: typeof activeCrop): string => {
     if (srcSet) return srcSet
+    const cropToUse = targetCrop || activeCrop
 
     // R2 Logic
     const r2Domain =
@@ -420,22 +461,20 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       const buildR2 = (w: number) => {
         const params = [`width=${w}`, `quality=${quality}`, 'format=auto']
 
-        if (activeCrop) {
+        if (cropToUse) {
           if (
-            activeCrop.width < 1.0 ||
-            activeCrop.height < 1.0 ||
-            activeCrop.x > 0 ||
-            activeCrop.y > 0
+            cropToUse.width < 1.0 ||
+            cropToUse.height < 1.0 ||
+            cropToUse.x > 0 ||
+            cropToUse.y > 0
           ) {
             if (origWidth && origHeight) {
               params.push(
-                `rect=${Math.round(activeCrop.x * origWidth)},${Math.round(activeCrop.y * origHeight)},${Math.round(activeCrop.width * origWidth)},${Math.round(activeCrop.height * origHeight)}`
+                `rect=${Math.round(cropToUse.x * origWidth)},${Math.round(cropToUse.y * origHeight)},${Math.round(cropToUse.width * origWidth)},${Math.round(cropToUse.height * origHeight)}`
               )
             }
           } else {
-            params.push(
-              `rect=${activeCrop.x},${activeCrop.y},${activeCrop.width},${activeCrop.height}`
-            )
+            params.push(`rect=${cropToUse.x},${cropToUse.y},${cropToUse.width},${cropToUse.height}`)
           }
         }
 
@@ -470,52 +509,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   const customStyle = imgStyle as Record<string, string>
 
-  if (normalizedCropDesktop) {
-    const centerX = (normalizedCropDesktop.x + normalizedCropDesktop.width / 2) * 100
-    const centerY = (normalizedCropDesktop.y + normalizedCropDesktop.height / 2) * 100
-    const topP = (normalizedCropDesktop.y * 100).toFixed(2)
-    const rightP = ((1 - normalizedCropDesktop.x - normalizedCropDesktop.width) * 100).toFixed(2)
-    const bottomP = ((1 - normalizedCropDesktop.y - normalizedCropDesktop.height) * 100).toFixed(2)
-    const leftP = (normalizedCropDesktop.x * 100).toFixed(2)
-
-    customStyle['--obj-pos-desktop'] = `${centerX.toFixed(2)}% ${centerY.toFixed(2)}%`
-    customStyle['--clip-desktop'] = `inset(${topP}% ${rightP}% ${bottomP}% ${leftP}%)`
-
-    const oW = origWidthDesktop || origWidth || 1
-    const oH = origHeightDesktop || origHeight || 1
-    const cW = normalizedCropDesktop.width * oW
-    const cH = normalizedCropDesktop.height * oH
-    if (cW > 0 && cH > 0) {
-      customStyle['--aspect-desktop'] = `${cW.toFixed(4)} / ${cH.toFixed(4)}`
-    }
-  } else if (hotspotDesktop || hotspot) {
-    const hs = hotspotDesktop || hotspot!
-    customStyle['--obj-pos-desktop'] = `${hs.x * 100}% ${hs.y * 100}%`
-  }
-
-  if (normalizedCropMobile) {
-    const centerX = (normalizedCropMobile.x + normalizedCropMobile.width / 2) * 100
-    const centerY = (normalizedCropMobile.y + normalizedCropMobile.height / 2) * 100
-    const topP = (normalizedCropMobile.y * 100).toFixed(2)
-    const rightP = ((1 - normalizedCropMobile.x - normalizedCropMobile.width) * 100).toFixed(2)
-    const bottomP = ((1 - normalizedCropMobile.y - normalizedCropMobile.height) * 100).toFixed(2)
-    const leftP = (normalizedCropMobile.x * 100).toFixed(2)
-
-    customStyle['--obj-pos-mobile'] = `${centerX.toFixed(2)}% ${centerY.toFixed(2)}%`
-    customStyle['--clip-mobile'] = `inset(${topP}% ${rightP}% ${bottomP}% ${leftP}%)`
-
-    const oW = origWidthMobile || origWidth || 1
-    const oH = origHeightMobile || origHeight || 1
-    const cW = normalizedCropMobile.width * oW
-    const cH = normalizedCropMobile.height * oH
-    if (cW > 0 && cH > 0) {
-      customStyle['--aspect-mobile'] = `${cW.toFixed(4)} / ${cH.toFixed(4)}`
-    }
-  } else if (hotspotMobile || hotspot) {
-    const hs = hotspotMobile || hotspot!
-    customStyle['--obj-pos-mobile'] = `${hs.x * 100}% ${hs.y * 100}%`
-  }
-
   const hasCrop = !!(
     activeCrop &&
     activeCrop.width > 0 &&
@@ -536,6 +529,40 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   const useClientCrop = hasCrop && !isServerResizingActive
 
+  if (normalizedCropDesktop) {
+    const centerX = (normalizedCropDesktop.x + normalizedCropDesktop.width / 2) * 100
+    const centerY = (normalizedCropDesktop.y + normalizedCropDesktop.height / 2) * 100
+    customStyle['--obj-pos-desktop'] = `${centerX.toFixed(2)}% ${centerY.toFixed(2)}%`
+
+    const oW = origWidthDesktop || origWidth || 1
+    const oH = origHeightDesktop || origHeight || 1
+    const cW = normalizedCropDesktop.width * oW
+    const cH = normalizedCropDesktop.height * oH
+    if (cW > 0 && cH > 0) {
+      customStyle['--aspect-desktop'] = `${cW.toFixed(4)} / ${cH.toFixed(4)}`
+    }
+  } else if (hotspotDesktop || hotspot) {
+    const hs = hotspotDesktop || hotspot!
+    customStyle['--obj-pos-desktop'] = `${hs.x * 100}% ${hs.y * 100}%`
+  }
+
+  if (normalizedCropMobile) {
+    const centerX = (normalizedCropMobile.x + normalizedCropMobile.width / 2) * 100
+    const centerY = (normalizedCropMobile.y + normalizedCropMobile.height / 2) * 100
+    customStyle['--obj-pos-mobile'] = `${centerX.toFixed(2)}% ${centerY.toFixed(2)}%`
+
+    const oW = origWidthMobile || origWidth || 1
+    const oH = origHeightMobile || origHeight || 1
+    const cW = normalizedCropMobile.width * oW
+    const cH = normalizedCropMobile.height * oH
+    if (cW > 0 && cH > 0) {
+      customStyle['--aspect-mobile'] = `${cW.toFixed(4)} / ${cH.toFixed(4)}`
+    }
+  } else if (hotspotMobile || hotspot) {
+    const hs = hotspotMobile || hotspot!
+    customStyle['--obj-pos-mobile'] = `${hs.x * 100}% ${hs.y * 100}%`
+  }
+
   const classList = className.split(' ')
   const isCoverMode =
     classList.some(
@@ -547,45 +574,100 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         c.includes('min-h-')
     ) || !!height
 
+  const activeClientCrop = useClientCrop && hasCrop
+
+  const cropDesk = normalizedCropDesktop
+  const cropMob = normalizedCropMobile
+
+  const cropWDesk = cropDesk?.width || 1
+  const cropHDesk = cropDesk?.height || 1
+  const scaleXDesk = (1 / cropWDesk) * 100
+  const scaleYDesk = (1 / cropHDesk) * 100
+  const leftDesk = -((cropDesk?.x || 0) / cropWDesk) * 100
+  const topDesk = -((cropDesk?.y || 0) / cropHDesk) * 100
+  const imgWDesk = origWidthDesktop || origWidth || naturalDims?.w || 1
+  const imgHDesk = origHeightDesktop || origHeight || naturalDims?.h || 1
+  const aspectDesk = (cropWDesk * imgWDesk) / (cropHDesk * imgHDesk)
+
+  const cropWMob = cropMob?.width || 1
+  const cropHMob = cropMob?.height || 1
+  const scaleXMob = (1 / cropWMob) * 100
+  const scaleYMob = (1 / cropHMob) * 100
+  const leftMob = -((cropMob?.x || 0) / cropWMob) * 100
+  const topMob = -((cropMob?.y || 0) / cropHMob) * 100
+  const imgWMob = origWidthMobile || origWidth || naturalDims?.w || 1
+  const imgHMob = origHeightMobile || origHeight || naturalDims?.h || 1
+  const aspectMob = (cropWMob * imgWMob) / (cropHMob * imgHMob)
+
+  useEffect(() => {
+    mediaCropDebugger.record({
+      id: mediaId,
+      componentName,
+      src,
+      srcMobile,
+      srcDesktop,
+      cropDesktop: cropDesk,
+      cropMobile: cropMob,
+      isCoverMode,
+      useClientCrop,
+      activeClientCrop,
+      computedStyle: {
+        scaleXDesk: `${scaleXDesk.toFixed(2)}%`,
+        scaleYDesk: `${scaleYDesk.toFixed(2)}%`,
+        leftDesk: `${leftDesk.toFixed(2)}%`,
+        topDesk: `${topDesk.toFixed(2)}%`,
+        scaleXMob: `${scaleXMob.toFixed(2)}%`,
+        scaleYMob: `${scaleYMob.toFixed(2)}%`,
+        leftMob: `${leftMob.toFixed(2)}%`,
+        topMob: `${topMob.toFixed(2)}%`,
+      },
+    })
+  }, [
+    mediaId,
+    componentName,
+    src,
+    srcMobile,
+    srcDesktop,
+    cropDesk,
+    cropMob,
+    isCoverMode,
+    useClientCrop,
+    activeClientCrop,
+    scaleXDesk,
+    scaleYDesk,
+    leftDesk,
+    topDesk,
+    scaleXMob,
+    scaleYMob,
+    leftMob,
+    topMob,
+  ])
+
   const renderCroppedContent = (pictureContent: React.ReactNode) => {
-    if (!useClientCrop || !activeCrop) return pictureContent
+    if (!activeClientCrop || !hasCrop) return pictureContent
 
-    const cropW = activeCrop.width
-    const cropH = activeCrop.height
-    if (cropW >= 0.999 && cropH >= 0.999 && activeCrop.x <= 0.001 && activeCrop.y <= 0.001) {
-      return pictureContent
-    }
+    const cropStyle = {
+      '--crop-aspect-desktop': `${aspectDesk.toFixed(4)}`,
+      '--crop-scale-x-desktop': `${scaleXDesk.toFixed(4)}%`,
+      '--crop-scale-y-desktop': `${scaleYDesk.toFixed(4)}%`,
+      '--crop-left-desktop': `${leftDesk.toFixed(4)}%`,
+      '--crop-top-desktop': `${topDesk.toFixed(4)}%`,
 
-    const scaleX = (1 / cropW) * 100
-    const scaleY = (1 / cropH) * 100
-    const leftPercent = -(activeCrop.x / cropW) * 100
-    const topPercent = -(activeCrop.y / cropH) * 100
-
-    // Orijinal görsel boyutları (varsa naturalDims veya origWidth/origHeight)
-    const imgW = naturalDims?.w || origWidth || 1
-    const imgH = naturalDims?.h || origHeight || 1
-    const croppedAspect = (cropW * imgW) / (cropH * imgH)
+      '--crop-aspect-mobile': `${aspectMob.toFixed(4)}`,
+      '--crop-scale-x-mobile': `${scaleXMob.toFixed(4)}%`,
+      '--crop-scale-y-mobile': `${scaleYMob.toFixed(4)}%`,
+      '--crop-left-mobile': `${leftMob.toFixed(4)}%`,
+      '--crop-top-mobile': `${topMob.toFixed(4)}%`,
+    } as React.CSSProperties
 
     return (
       <div
-        className={`relative w-full ${isCoverMode ? 'h-full' : ''} overflow-hidden`}
-        style={{
-          aspectRatio: isCoverMode ? undefined : `${croppedAspect}`,
-        }}
-        data-crop={JSON.stringify(activeCrop)}
+        className={`responsive-crop-wrapper relative w-full overflow-hidden ${isCoverMode ? 'is-cover' : 'has-aspect'}`}
+        style={cropStyle}
+        data-crop={JSON.stringify({desktop: cropDesk, mobile: cropMob})}
+        data-debug-media-id={mediaId}
       >
-        <div
-          style={{
-            width: `${scaleX.toFixed(4)}%`,
-            height: `${scaleY.toFixed(4)}%`,
-            left: `${leftPercent.toFixed(4)}%`,
-            top: `${topPercent.toFixed(4)}%`,
-            position: 'absolute',
-          }}
-          className="w-full h-full"
-        >
-          {pictureContent}
-        </div>
+        <div className="responsive-crop-inner">{pictureContent}</div>
       </div>
     )
   }
@@ -622,7 +704,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       <picture className="w-full h-full block relative overflow-hidden responsive-crop-pos">
         {srcMobile && (
           <source
-            media="(max-width: 768px)"
+            media="(max-width: 1023px)"
             srcSet={
               mobileSrcSet || (optimizedMobileSrc ? encodeSrcSetUrl(optimizedMobileSrc) : undefined)
             }
@@ -632,7 +714,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
         {srcDesktop && (
           <source
-            media="(min-width: 769px)"
+            media="(min-width: 1024px)"
             srcSet={
               desktopSrcSet ||
               (optimizedDesktopSrc ? encodeSrcSetUrl(optimizedDesktopSrc) : undefined)
@@ -643,13 +725,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
         <img
           ref={imgRef}
-          src={
-            activeMobileSrc
-              ? optimizedMobileSrc
-              : activeDesktopSrc
-                ? optimizedDesktopSrc
-                : optimizedSrc
-          }
+          src={optimizedDesktopSrc || optimizedMobileSrc || optimizedSrc}
           alt={alt}
           width={width}
           height={height}

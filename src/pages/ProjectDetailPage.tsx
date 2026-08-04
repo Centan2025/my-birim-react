@@ -213,6 +213,14 @@ export function ProjectDetailPage() {
     project && project.cover && typeof project.cover === 'object'
       ? (project.cover as {hotspot?: R2ImageMetadata['hotspot']}).hotspot
       : undefined
+  const coverCropMobile =
+    project && project.cover && typeof project.cover === 'object'
+      ? (project.cover as {cropMobile?: R2ImageMetadata['crop']}).cropMobile
+      : undefined
+  const coverHotspotMobile =
+    project && project.cover && typeof project.cover === 'object'
+      ? (project.cover as {hotspotMobile?: R2ImageMetadata['hotspot']}).hotspotMobile
+      : undefined
 
   const mediaData = useMemo(() => {
     if (!project) return {all: [], gallery: []}
@@ -435,6 +443,8 @@ export function ProjectDetailPage() {
               quality={90}
               crop={coverCrop}
               hotspot={coverHotspot}
+              cropMobile={coverCropMobile}
+              hotspotMobile={coverHotspotMobile}
               origWidth={
                 project.cover && typeof project.cover === 'object'
                   ? (project.cover as {origWidth?: number}).origWidth

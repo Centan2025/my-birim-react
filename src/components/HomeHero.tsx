@@ -536,7 +536,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                       (media as unknown as Record<string, string>)['imageDesktop'] ||
                       (media as unknown as Record<string, string>)['urlDesktopPoster']
                     }
-                    className={`absolute inset-0 w-full h-full ${isMobile ? 'object-cover object-center' : 'object-cover'}`}
+                    className="absolute inset-0 w-full h-full object-cover"
                     autoPlay={isActiveSlide}
                     loop
                     muted
@@ -550,7 +550,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                     srcMobile={media.urlMobile}
                     srcDesktop={media.urlDesktop}
                     alt={t(media.title || '')}
-                    className={`absolute inset-0 w-full h-full ${isMobile ? 'object-cover object-center' : 'object-cover'}`}
+                    className="absolute inset-0 w-full h-full object-cover"
                     loading="eager"
                     fetchPriority={isActiveSlide || isInitialSlide ? 'high' : 'auto'}
                     sizes="100vw"

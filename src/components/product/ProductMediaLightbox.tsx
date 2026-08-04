@@ -16,6 +16,10 @@ export interface LightboxItem {
   hotspot?: R2ImageMetadata['hotspot']
   origWidth?: number
   origHeight?: number
+  cropMobile?: R2ImageMetadata['crop']
+  hotspotMobile?: R2ImageMetadata['hotspot']
+  origWidthMobile?: number
+  origHeightMobile?: number
   isMirrored?: boolean
   isMirroredMobile?: boolean
   isMirroredDesktop?: boolean
@@ -209,6 +213,10 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
                       hotspot={currentItem.hotspot}
                       origWidth={currentItem.origWidth as number}
                       origHeight={currentItem.origHeight as number}
+                      cropMobile={currentItem.cropMobile}
+                      hotspotMobile={currentItem.hotspotMobile}
+                      origWidthMobile={currentItem.origWidthMobile as number}
+                      origHeightMobile={currentItem.origHeightMobile as number}
                       placeholderColor="#111111"
                       isMirrored={currentItem.isMirrored}
                       isMirroredMobile={currentItem.isMirroredMobile}

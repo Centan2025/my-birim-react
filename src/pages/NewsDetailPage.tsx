@@ -49,6 +49,10 @@ const MediaComponent: FC<{media: NewsMedia}> = ({media}) => {
           hotspot={(media as any).hotspot}
           origWidth={(media as any).origWidth}
           origHeight={(media as any).origHeight}
+          cropMobile={(media as any).cropMobile}
+          hotspotMobile={(media as any).hotspotMobile}
+          origWidthMobile={(media as any).origWidthMobile}
+          origHeightMobile={(media as any).origHeightMobile}
         />
       )
     }

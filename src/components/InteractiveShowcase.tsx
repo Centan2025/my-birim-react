@@ -252,7 +252,8 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
                 {/* Background Visual (100% Full Screen Cover) */}
                 <div className="absolute inset-0 w-full h-full">
                   <OptimizedImage
-                    src={isMobile && slide.imageMobile ? slide.imageMobile : slide.image}
+                    src={slide.image}
+                    srcMobile={slide.imageMobile}
                     alt={slideTitle || 'İnteraktif Ürün Görseli'}
                     className="w-full h-full object-cover object-center"
                     loading="lazy"
@@ -261,6 +262,10 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
                     hotspot={slide.hotspot}
                     origWidth={slide.origWidth as number}
                     origHeight={slide.origHeight as number}
+                    cropMobile={slide.cropMobile}
+                    hotspotMobile={slide.hotspotMobile}
+                    origWidthMobile={slide.origWidthMobile as number}
+                    origHeightMobile={slide.origHeightMobile as number}
                   />
                   {/* Subtle vignette overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/30 pointer-events-none" />

@@ -219,6 +219,14 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     hotspot={m.hotspot as R2ImageMetadata['hotspot']}
                     origWidth={(m as Record<string, unknown>)['origWidth'] as number}
                     origHeight={(m as Record<string, unknown>)['origHeight'] as number}
+                    cropMobile={
+                      (m as Record<string, unknown>)['cropMobile'] as R2ImageMetadata['crop']
+                    }
+                    hotspotMobile={
+                      (m as Record<string, unknown>)['hotspotMobile'] as R2ImageMetadata['hotspot']
+                    }
+                    origWidthMobile={(m as Record<string, unknown>)['origWidthMobile'] as number}
+                    origHeightMobile={(m as Record<string, unknown>)['origHeightMobile'] as number}
                     isMirrored={m.isMirrored}
                     isMirroredMobile={m.isMirroredMobile}
                     isMirroredDesktop={m.isMirroredDesktop}

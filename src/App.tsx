@@ -18,6 +18,7 @@ import {SEOProvider} from './hooks/useSEO'
 import {PageLoader} from './components/PageLoader'
 import {ScrollToTop} from './components/ScrollToTop'
 import {BackToTopButton} from './components/BackToTopButton'
+import {MediaCropDebugOverlay} from './components/debug/MediaCropDebugOverlay'
 import {MainLayout} from './layouts/MainLayout'
 
 // Lazy load pages for code splitting
@@ -143,6 +144,7 @@ const AppContent = () => {
         <MainLayout />
       )}
       <BackToTopButton />
+      <MediaCropDebugOverlay />
       {import.meta.env.DEV && debugInfo && (
         <div className="fixed bottom-2 left-2 z-50 rounded bg-black/70 text-white text-[10px] px-2 py-1 font-mono text-left">
           <div>MAINT DEBUG</div>

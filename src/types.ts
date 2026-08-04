@@ -397,6 +397,10 @@ export interface ContentBlock {
   hotspot?: R2ImageMetadata['hotspot']
   origWidth?: number
   origHeight?: number
+  cropMobile?: R2ImageMetadata['crop']
+  hotspotMobile?: R2ImageMetadata['hotspot']
+  origWidthMobile?: number
+  origHeightMobile?: number
   /** URL for video or YouTube (for video/youtube types) */
   url?: string
   urlMobile?: string
@@ -468,6 +472,10 @@ export interface InteractiveShowcaseItem {
   hotspot?: R2ImageMetadata['hotspot']
   origWidth?: number
   origHeight?: number
+  cropMobile?: R2ImageMetadata['crop']
+  hotspotMobile?: R2ImageMetadata['hotspot']
+  origWidthMobile?: number
+  origHeightMobile?: number
   hotspots: ProductHotspot[]
 }
 

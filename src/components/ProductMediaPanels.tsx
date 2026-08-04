@@ -12,6 +12,10 @@ interface ProductMediaItem {
   hotspot?: R2ImageMetadata['hotspot']
   origWidth?: number
   origHeight?: number
+  cropMobile?: R2ImageMetadata['crop']
+  hotspotMobile?: R2ImageMetadata['hotspot']
+  origWidthMobile?: number
+  origHeightMobile?: number
   isMirrored?: boolean
   isMirroredMobile?: boolean
   isMirroredDesktop?: boolean
@@ -71,6 +75,10 @@ export function ProductMediaPanels({
                     hotspot={m.hotspot}
                     origWidth={m.origWidth as number}
                     origHeight={m.origHeight as number}
+                    cropMobile={m.cropMobile}
+                    hotspotMobile={m.hotspotMobile}
+                    origWidthMobile={m.origWidthMobile as number}
+                    origHeightMobile={m.origHeightMobile as number}
                     isMirrored={m.isMirrored}
                     isMirroredMobile={m.isMirroredMobile}
                     isMirroredDesktop={m.isMirroredDesktop}
