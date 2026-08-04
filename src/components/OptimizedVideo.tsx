@@ -63,10 +63,34 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
   const rawRwSrcMobile = rewriteR2Url(srcMobile)
   const rawRwSrcDesktop = rewriteR2Url(srcDesktop)
 
-  const handleLoadedData = () => {
+  const playVideo = useCallback(() => {
+    const video = videoRef.current
+    if (!video) return
+    video.defaultMuted = muted
+    video.muted = muted
+    if (typeof video.play === 'function') {
+      const playPromise = video.play()
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          if (
+            error.name !== 'AbortError' &&
+            error.name !== 'NotAllowedError' &&
+            error.name !== 'NotSupportedError'
+          ) {
+            /* silent catch */
+          }
+        })
+      }
+    }
+  }, [muted])
+
+  const handleLoadedData = useCallback(() => {
     setIsLoaded(true)
     onLoad?.()
-  }
+    if (autoPlay && videoRef.current && videoRef.current.paused) {
+      playVideo()
+    }
+  }, [autoPlay, onLoad, playVideo])
 
   const handleError = useCallback(
     (e?: React.SyntheticEvent<HTMLVideoElement, Event>) => {
@@ -197,22 +221,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     if (!video) return
 
     if (autoPlay) {
-      video.defaultMuted = muted
-      video.muted = muted
-      if (typeof video.play === 'function') {
-        const playPromise = video.play()
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            if (
-              error.name !== 'AbortError' &&
-              error.name !== 'NotAllowedError' &&
-              error.name !== 'NotSupportedError'
-            ) {
-              /* silent catch */
-            }
-          })
-        }
-      }
+      playVideo()
     } else {
       if (typeof video.pause === 'function') {
         try {
@@ -222,7 +231,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
         }
       }
     }
-  }, [autoPlay, muted])
+  }, [autoPlay, playVideo])
 
   // Source veya activeSrc değiştiğinde HTML5 video elementini reload et
   React.useEffect(() => {
@@ -241,7 +250,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     if (!video) return undefined
 
     if (video.readyState >= 1) {
-      setIsLoaded(true)
+      Promise.resolve().then(() => setIsLoaded(true))
     }
 
     const checkLoaded = () => {
@@ -313,6 +322,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
       <video
         key={activeSrc}
         ref={videoRef}
+        src={activeSrc}
         poster={posterUrl}
         autoPlay={autoPlay}
         loop={loop}

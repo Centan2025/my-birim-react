@@ -541,7 +541,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                     loop
                     muted
                     playsInline
-                    preload="auto"
+                    preload={isActiveSlide ? 'auto' : 'metadata'}
                     loading="eager"
                   />
                 ) : (

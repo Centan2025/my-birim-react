@@ -269,8 +269,22 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
               type = 'youtube'
             }
             const result: Record<string, unknown> = {...m, url: mainUrl, type}
-            if (urlMobile && urlMobile !== mainUrl) result['urlMobile'] = urlMobile
-            if (urlDesktop && urlDesktop !== mainUrl) result['urlDesktop'] = urlDesktop
+            if (urlMobile) result['urlMobile'] = urlMobile
+            if (urlDesktop) result['urlDesktop'] = urlDesktop
+            if (type === 'video') {
+              const posterObj = m['imageR2'] || m['thumbnailR2']
+              const posterMobileObj = m['imageMobileR2'] || posterObj
+              const posterDesktopObj = m['imageDesktopR2'] || posterObj
+              if (posterObj && typeof posterObj === 'object' && (posterObj as {url?: string}).url) {
+                result['poster'] = rewriteR2Url((posterObj as {url: string}).url)
+              }
+              if (posterMobileObj && typeof posterMobileObj === 'object' && (posterMobileObj as {url?: string}).url) {
+                result['posterMobile'] = rewriteR2Url((posterMobileObj as {url: string}).url)
+              }
+              if (posterDesktopObj && typeof posterDesktopObj === 'object' && (posterDesktopObj as {url?: string}).url) {
+                result['posterDesktop'] = rewriteR2Url((posterDesktopObj as {url: string}).url)
+              }
+            }
             if (palette) result['palette'] = palette
             const heroMeta = imageR2 ? mapR2Metadata(imageR2) : {}
             if (heroMeta.crop) result['crop'] = heroMeta.crop
