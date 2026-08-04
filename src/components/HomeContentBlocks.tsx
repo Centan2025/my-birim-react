@@ -215,7 +215,7 @@ const PanelSlider: React.FC<{
                 panelFit === 'natural' || itemHasCrop
                   ? 'h-auto max-h-[70vh]'
                   : 'aspect-square sm:aspect-[4/5] md:aspect-[3/4]'
-              } group cursor-pointer ${getWidthClass()} border-2 border-red-500`}
+              } group cursor-pointer ${getWidthClass()}`}
               onClick={() => {
                 if (!isDragging && onMediaClick) {
                   onMediaClick(item.url)
