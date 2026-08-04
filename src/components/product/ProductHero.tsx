@@ -72,7 +72,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
   heroSlideIndex,
   draggedX,
   heroTransitionEnabled,
-  isMobile,
+  isMobile: _isMobile,
   isTitleVisible,
   isDesignerVisible,
   areDotsVisible,
@@ -153,12 +153,9 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
         }
       `}</style>
       <div
-        className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing"
-        style={{
-          height: isMobile ? '100dvh' : !showHeroNavigation ? '100vh' : '85vh',
-          minHeight: isMobile ? '100dvh' : !showHeroNavigation ? '100vh' : '85vh',
-          maxHeight: isMobile ? '100dvh' : !showHeroNavigation ? '100vh' : '85vh',
-        }}
+        className={`relative w-full overflow-hidden cursor-grab active:cursor-grabbing h-[100dvh] ${
+          !showHeroNavigation ? 'md:h-[100vh]' : 'md:h-[85vh]'
+        }`}
         aria-label="Product Image Carousel"
         onMouseDown={onDragStart}
         onMouseMove={onDragMove}
@@ -276,7 +273,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
 
         <div
           className="absolute bottom-20 md:bottom-10 left-6 md:left-10 text-white z-40"
-          style={isMobile ? {bottom: 'max(64px, env(safe-area-inset-bottom, 0px) + 64px)'} : {}}
+          style={{bottom: 'max(64px, env(safe-area-inset-bottom, 0px) + 64px)'}}
         >
           <div
             style={{
@@ -312,8 +309,8 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
           )}
         </div>
 
-        {slideCount > 0 && !isMobile && (
-          <div className="pointer-events-none absolute bottom-10 right-3 md:bottom-10 md:right-8 z-30 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] px-4 md:px-8 lg:px-0">
+        {slideCount > 0 && (
+          <div className="hidden md:block pointer-events-none absolute bottom-10 right-3 md:bottom-10 md:right-8 z-30 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] px-4 md:px-8 lg:px-0">
             <div className="flex justify-end items-center gap-4">
               {slideCount > 1 && (
                 <>
@@ -407,7 +404,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
         {slideCount > 1 && (
           <div
             className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40 flex items-center space-x-2 md:space-x-4"
-            style={isMobile ? {bottom: 'max(16px, env(safe-area-inset-bottom, 0px) + 16px)'} : {}}
+            style={{bottom: 'max(16px, env(safe-area-inset-bottom, 0px) + 16px)'}}
           >
             {(() => {
               const normalizedSlideIndex =
@@ -459,14 +456,14 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
         )}
 
         {/* Mobile Fullscreen Button */}
-        {slideCount > 0 && isMobile && (
+        {slideCount > 0 && (
           <button
             type="button"
             onClick={e => {
               e.stopPropagation()
               onOpenFullscreen()
             }}
-            className="absolute bottom-4 right-4 z-50 group flex h-10 w-10 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
+            className="md:hidden absolute bottom-4 right-4 z-50 group flex h-10 w-10 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
             style={{
               opacity: isFullscreenButtonVisible ? 1 : 0,
               transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
