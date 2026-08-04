@@ -212,10 +212,8 @@ const PanelSlider: React.FC<{
             <div
               key={i}
               className={`flex-shrink-0 snap-start relative overflow-hidden ${imageBorderClass} ${
-                panelFit === 'natural' || itemHasCrop
-                  ? 'h-auto max-h-[70vh]'
-                  : 'aspect-square sm:aspect-[4/5] md:aspect-[3/4]'
-              } group cursor-pointer ${getWidthClass()}`}
+                panelFit === 'natural' || itemHasCrop ? 'h-auto max-h-[70vh]' : 'aspect-[3/4]'
+              } group cursor-pointer ${getWidthClass()} border-2 border-red-500`}
               onClick={() => {
                 if (!isDragging && onMediaClick) {
                   onMediaClick(item.url)
