@@ -267,11 +267,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     if (posterUrl) {
       return (
         <div className={`relative overflow-hidden ${className}`} style={style}>
-          <img
-            src={posterUrl}
-            alt=""
-            className="w-full h-full object-cover"
-          />
+          <img src={posterUrl} alt="" className="w-full h-full object-cover" />
         </div>
       )
     }
@@ -313,7 +309,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
         muted={muted}
         controls={controls}
         playsInline={playsInline}
-        {...({ 'webkit-playsinline': 'true' } as Record<string, string>)}
+        {...({'webkit-playsinline': 'true'} as Record<string, string>)}
         preload={preload}
         className={`relative z-10 w-full h-full object-cover ${
           isLoaded ? 'opacity-100' : posterUrl ? 'opacity-0' : 'opacity-100'
