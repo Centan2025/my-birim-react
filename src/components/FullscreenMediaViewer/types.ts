@@ -7,6 +7,8 @@ export type MediaItem = {
   urlDesktop?: string
   crop?: R2ImageMetadata['crop']
   hotspot?: R2ImageMetadata['hotspot']
+  origWidth?: number
+  origHeight?: number
   isMirrored?: boolean
   isMirroredMobile?: boolean
   isMirroredDesktop?: boolean

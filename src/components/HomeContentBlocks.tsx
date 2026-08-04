@@ -37,11 +37,17 @@ const ContentBlockSnapWrapper: React.FC<{children: React.ReactNode}> = ({childre
 const PanelSlider: React.FC<{
   media: Array<{
     url: string
+    urlMobile?: string
+    urlDesktop?: string
     type: 'image' | 'video'
     crop?: {x: number; y: number; width: number; height: number}
     hotspot?: {x: number; y: number}
     origWidth?: number
     origHeight?: number
+    cropMobile?: {x: number; y: number; width: number; height: number}
+    hotspotMobile?: {x: number; y: number}
+    origWidthMobile?: number
+    origHeightMobile?: number
   }>
   panelSize?: 'small' | 'medium' | 'large'
   panelFit?: 'cover' | 'contain' | 'natural'
@@ -219,14 +225,20 @@ const PanelSlider: React.FC<{
             ) : (
               <OptimizedImage
                 src={item.url}
+                srcMobile={item.urlMobile}
+                srcDesktop={item.urlDesktop}
                 alt=""
-                className={`w-full h-full ${getFitClass()} group-hover:scale-105 transition-transform duration-700 pointer-events-none`}
+                className={`w-full h-full ${getFitClass()} transition-transform duration-700 pointer-events-none`}
                 loading="lazy"
                 quality={85}
                 crop={item.crop}
                 hotspot={item.hotspot}
                 origWidth={item.origWidth}
                 origHeight={item.origHeight}
+                cropMobile={item.cropMobile}
+                hotspotMobile={item.hotspotMobile}
+                origWidthMobile={item.origWidthMobile}
+                origHeightMobile={item.origHeightMobile}
               />
             )}
           </div>

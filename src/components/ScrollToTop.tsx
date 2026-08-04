@@ -31,6 +31,10 @@ export const ScrollToTop = () => {
 
     // Route değişiminde yukarıya ANINDA aktar (smooth animasyonlar çakışabiliyor)
     window.scrollTo({top: 0, left: 0, behavior: 'instant'})
+    const win = window as unknown as {lenis?: {scrollTo: (target: number, opts?: {immediate?: boolean}) => void}}
+    if (win.lenis && typeof win.lenis.scrollTo === 'function') {
+      win.lenis.scrollTo(0, {immediate: true})
+    }
 
     // Dinamik detay sayfaları için
     // başlık ve pageview takibini ilgili sayfa bileşenleri yapıyor.

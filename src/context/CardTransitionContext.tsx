@@ -21,6 +21,8 @@ interface CardRect {
     x: number
     y: number
   }
+  origWidth?: number
+  origHeight?: number
   objectFit?: 'cover' | 'contain'
   initialBorderRadius?: string
   className?: string
@@ -207,6 +209,8 @@ export const CardTransitionProvider: React.FC<{children: React.ReactNode}> = ({c
                   srcDesktop={state.rect.imageDesktop}
                   crop={state.rect.crop}
                   hotspot={state.rect.hotspot}
+                  origWidth={state.rect.origWidth as number}
+                  origHeight={state.rect.origHeight as number}
                   alt=""
                   className={`w-full h-full ${state.rect.className || ''} ${state.rect.objectFit === 'cover' ? 'object-cover' : 'object-contain'}`}
                 />
@@ -239,6 +243,8 @@ export const CardTransitionProvider: React.FC<{children: React.ReactNode}> = ({c
                   srcDesktop={state.rect.imageDesktop}
                   crop={state.rect.crop}
                   hotspot={state.rect.hotspot}
+                  origWidth={state.rect.origWidth as number}
+                  origHeight={state.rect.origHeight as number}
                   alt=""
                   className={`w-full h-full ${state.rect.className || ''} ${
                     state.rect.objectFit === 'cover'

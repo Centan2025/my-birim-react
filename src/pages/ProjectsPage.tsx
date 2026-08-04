@@ -40,6 +40,8 @@ const ProjectCard: React.FC<{project: Project; index: number}> = ({project, inde
             quality={90}
             crop={typeof project.cover === 'object' ? project.cover.crop : undefined}
             hotspot={typeof project.cover === 'object' ? project.cover.hotspot : undefined}
+            origWidth={typeof project.cover === 'object' ? (project.cover as Record<string, unknown>)['origWidth'] as number : undefined}
+            origHeight={typeof project.cover === 'object' ? (project.cover as Record<string, unknown>)['origHeight'] as number : undefined}
           />
         )}
 

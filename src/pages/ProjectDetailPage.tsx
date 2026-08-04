@@ -595,6 +595,8 @@ export function ProjectDetailPage() {
                           className="w-full h-auto"
                           crop={m.crop}
                           hotspot={m.hotspot}
+                          origWidth={m.origWidth}
+                          origHeight={m.origHeight}
                         />
                       )}
                       {m.type === 'video' && (

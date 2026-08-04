@@ -44,7 +44,12 @@
 }
 
 html {
-  scroll-behavior: smooth !important;
+  scroll-behavior: auto !important;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
 }
 
 .scroll-snap-start {

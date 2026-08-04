@@ -10,6 +10,8 @@ interface ProductMediaItem {
   title?: LocalizedString | string
   crop?: R2ImageMetadata['crop']
   hotspot?: R2ImageMetadata['hotspot']
+  origWidth?: number
+  origHeight?: number
   isMirrored?: boolean
   isMirroredMobile?: boolean
   isMirroredDesktop?: boolean
@@ -67,6 +69,8 @@ export function ProductMediaPanels({
                     quality={85}
                     crop={m.crop}
                     hotspot={m.hotspot}
+                    origWidth={m.origWidth as number}
+                    origHeight={m.origHeight as number}
                     isMirrored={m.isMirrored}
                     isMirroredMobile={m.isMirroredMobile}
                     isMirroredDesktop={m.isMirroredDesktop}

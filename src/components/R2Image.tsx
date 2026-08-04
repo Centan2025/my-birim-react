@@ -94,19 +94,34 @@ export const R2Image: React.FC<R2ImageProps> = ({
   ...props
 }) => {
   // 0. Extract Crop & Hotspot
-  const hasCrop = source?.cropWidth !== undefined && source?.cropWidth > 0
+  const normalizedCrop = useMemo(() => {
+    if (!source) return undefined
+    if (source.cropWidth !== undefined && source.cropWidth > 0) {
+      return {
+        x: source.cropX || 0,
+        y: source.cropY || 0,
+        w: source.cropWidth || 1,
+        h: source.cropHeight || 1,
+        origW: source.width,
+        origH: source.height,
+      }
+    }
+    return undefined
+  }, [source])
+
+  const hasCrop = !!(
+    normalizedCrop &&
+    normalizedCrop.w > 0 &&
+    normalizedCrop.h > 0 &&
+    (normalizedCrop.w < 0.999 ||
+      normalizedCrop.h < 0.999 ||
+      normalizedCrop.x > 0.001 ||
+      normalizedCrop.y > 0.001)
+  )
+
   const cropData = useMemo(() => {
-    return hasCrop && source
-      ? {
-          x: source.cropX || 0,
-          y: source.cropY || 0,
-          w: source.cropWidth || 1,
-          h: source.cropHeight || 1,
-          origW: source.width,
-          origH: source.height,
-        }
-      : undefined
-  }, [hasCrop, source])
+    return hasCrop && normalizedCrop ? normalizedCrop : undefined
+  }, [hasCrop, normalizedCrop])
 
   // 1. Try R2 Source First
   const r2Src = useMemo(() => {
@@ -161,6 +176,46 @@ export const R2Image: React.FC<R2ImageProps> = ({
 
   // If R2 exists
   if (r2Src) {
+    const domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
+    const skipImageResizing =
+      domain.includes('.r2.dev') ||
+      domain.includes('.workers.dev') ||
+      domain.includes('assets.birim.com')
+
+    if (hasCrop && skipImageResizing && normalizedCrop) {
+      const scaleX = (1 / normalizedCrop.w) * 100
+      const scaleY = (1 / normalizedCrop.h) * 100
+      const leftPercent = -(normalizedCrop.x / normalizedCrop.w) * 100
+      const topPercent = -(normalizedCrop.y / normalizedCrop.h) * 100
+
+      return (
+        <div
+          className={`relative overflow-hidden ${className || ''}`}
+          style={{width, height, ...style}}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              width: `${scaleX.toFixed(4)}%`,
+              height: `${scaleY.toFixed(4)}%`,
+              left: `${leftPercent.toFixed(4)}%`,
+              top: `${topPercent.toFixed(4)}%`,
+            }}
+          >
+            <img
+              src={r2Src}
+              srcSet={r2SrcSet}
+              alt={source?.alt || alt}
+              className="w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
+              {...props}
+            />
+          </div>
+        </div>
+      )
+    }
+
     return (
       <img
         src={r2Src}
@@ -175,15 +230,6 @@ export const R2Image: React.FC<R2ImageProps> = ({
             objectPosition,
             WebkitBackfaceVisibility: 'hidden', // Titreme ve bozulmaları önlemek için GPU tetikler
             ...style,
-            ...(hasCrop
-              ? {
-                  clipPath: `inset(${source!.cropY! * 100}% ${
-                    (1 - source!.cropX! - source!.cropWidth!) * 100
-                  }% ${(1 - source!.cropY! - source!.cropHeight!) * 100}% ${
-                    source!.cropX! * 100
-                  }%)`,
-                }
-              : {}),
           } as React.CSSProperties
         }
         loading="lazy"

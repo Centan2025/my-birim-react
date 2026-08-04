@@ -265,41 +265,108 @@ export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
   try {
     const i = img as Record<string, unknown>
 
-    let crop: R2ImageMetadata['crop'] = undefined
-    if (i['cropX'] !== undefined && i['cropWidth'] !== undefined) {
-      crop = {
-        x: Number(i['cropX']) || 0,
-        y: Number(i['cropY']) || 0,
-        width: Number(i['cropWidth']) || 1,
-        height: Number(i['cropHeight']) || 1,
+    const parseCropObj = (obj: unknown) => {
+      if (!obj || typeof obj !== 'object') return undefined
+      const c = obj as Record<string, unknown>
+      if (c['cropX'] !== undefined && c['cropWidth'] !== undefined) {
+        return {
+          x: Number(c['cropX']) || 0,
+          y: Number(c['cropY']) || 0,
+          width: Number(c['cropWidth']) || 1,
+          height: Number(c['cropHeight']) || 1,
+        }
       }
-    } else if (i['crop'] && typeof i['crop'] === 'object') {
-      const c = i['crop'] as Record<string, unknown>
-      const left = Number(c['left']) || 0
-      const top = Number(c['top']) || 0
-      const right = Number(c['right']) || 0
-      const bottom = Number(c['bottom']) || 0
-      crop = {
-        x: left,
-        y: top,
-        width: Math.max(0, 1 - left - right),
-        height: Math.max(0, 1 - top - bottom),
+      if (c['crop'] && typeof c['crop'] === 'object') {
+        return parseCropObj(c['crop'])
       }
+      if (c['x'] !== undefined && c['width'] !== undefined) {
+        return {
+          x: Number(c['x']) || 0,
+          y: Number(c['y']) || 0,
+          width: Number(c['width']) || 1,
+          height: Number(c['height']) || 1,
+        }
+      }
+      if (
+        c['left'] !== undefined ||
+        c['top'] !== undefined ||
+        c['right'] !== undefined ||
+        c['bottom'] !== undefined
+      ) {
+        const left = Number(c['left']) || 0
+        const top = Number(c['top']) || 0
+        const right = Number(c['right']) || 0
+        const bottom = Number(c['bottom']) || 0
+        return {
+          x: left,
+          y: top,
+          width: Math.max(0.001, 1 - left - right),
+          height: Math.max(0.001, 1 - top - bottom),
+        }
+      }
+      return undefined
     }
 
-    let hotspot: R2ImageMetadata['hotspot'] = undefined
-    if (i['hotspotX'] !== undefined && i['hotspotY'] !== undefined) {
-      hotspot = {x: Number(i['hotspotX']) || 0.5, y: Number(i['hotspotY']) || 0.5}
-    } else if (i['hotspot'] && typeof i['hotspot'] === 'object') {
-      const h = i['hotspot'] as Record<string, unknown>
-      hotspot = {x: Number(h['x']) || 0.5, y: Number(h['y']) || 0.5}
+    const parseHotspotObj = (obj: unknown) => {
+      if (!obj || typeof obj !== 'object') return undefined
+      const h = obj as Record<string, unknown>
+      if (h['hotspotX'] !== undefined && h['hotspotY'] !== undefined) {
+        return {x: Number(h['hotspotX']) || 0.5, y: Number(h['hotspotY']) || 0.5}
+      }
+      if (h['hotspot'] && typeof h['hotspot'] === 'object') {
+        return parseHotspotObj(h['hotspot'])
+      }
+      if (h['x'] !== undefined && h['y'] !== undefined) {
+        return {x: Number(h['x']) || 0.5, y: Number(h['y']) || 0.5}
+      }
+      return undefined
     }
 
-    const origWidth = Number(i['width']) || undefined
-    const origHeight = Number(i['height']) || undefined
-    const isMirrored = i['isMirrored'] !== undefined ? !!i['isMirrored'] : undefined
+    const extractDimsFromUrl = (val: unknown): {w?: number; h?: number} => {
+      if (!val) return {}
+      let str = ''
+      if (typeof val === 'string') str = val
+      else if (typeof val === 'object' && val !== null && 'url' in val) str = String((val as {url: unknown}).url)
+      else if (typeof val === 'object' && val !== null && 'asset' in val) {
+        const asset = (val as {asset: unknown}).asset
+        if (typeof asset === 'string') str = asset
+        else if (typeof asset === 'object' && asset !== null && 'url' in asset) str = String((asset as {url: unknown}).url)
+        else if (typeof asset === 'object' && asset !== null && '_ref' in asset) str = String((asset as {_ref: unknown})._ref)
+      }
 
-    return {crop, hotspot, origWidth, origHeight, isMirrored}
+      const match = str.match(/-(\d+)x(\d+)\./)
+      if (match) {
+        return {w: Number(match[1]), h: Number(match[2])}
+      }
+      return {}
+    }
+
+    const targetObj = (i['imageR2'] || i['image'] || i) as Record<string, unknown>
+    const dims = extractDimsFromUrl(targetObj)
+    const crop = parseCropObj(targetObj)
+    const hotspot = parseHotspotObj(targetObj)
+    const origWidth = Number(targetObj['width'] || targetObj['origWidth'] || i['width'] || i['origWidth']) || dims.w
+    const origHeight = Number(targetObj['height'] || targetObj['origHeight'] || i['height'] || i['origHeight']) || dims.h
+    const isMirrored = targetObj['isMirrored'] !== undefined ? !!targetObj['isMirrored'] : i['isMirrored'] !== undefined ? !!i['isMirrored'] : undefined
+
+    const mobileAsset = i['imageMobileR2'] || i['imageMobile'] || targetObj['imageMobile']
+    const dimsMobile = extractDimsFromUrl(mobileAsset)
+    const cropMobile = parseCropObj(mobileAsset || i['cropMobile'] || targetObj['cropMobile'])
+    const hotspotMobile = parseHotspotObj(mobileAsset || i['hotspotMobile'] || targetObj['hotspotMobile'])
+    const origWidthMobile = Number(i['origWidthMobile'] || i['widthMobile']) || dimsMobile.w || origWidth
+    const origHeightMobile = Number(i['origHeightMobile'] || i['heightMobile']) || dimsMobile.h || origHeight
+
+    return {
+      crop,
+      hotspot,
+      origWidth,
+      origHeight,
+      isMirrored,
+      cropMobile,
+      hotspotMobile,
+      origWidthMobile,
+      origHeightMobile,
+    }
   } catch (err) {
     console.error('Error in mapR2Metadata:', err)
     return {}
@@ -315,7 +382,10 @@ export const extractPalette = (img: unknown): SanityImagePalette | undefined => 
 
   if (i['palette']) return i['palette'] as SanityImagePalette
 
-  const asset = i['asset'] as Record<string, unknown> | undefined
+  const targetObj = (i['imageR2'] || i['image'] || i) as Record<string, unknown>
+  if (targetObj['palette']) return targetObj['palette'] as SanityImagePalette
+
+  const asset = (targetObj['asset'] || i['asset']) as Record<string, unknown> | undefined
   const metadata = asset?.['metadata'] as Record<string, unknown> | undefined
   return metadata?.['palette'] as SanityImagePalette | undefined
 }
@@ -332,7 +402,7 @@ export const mapMediaUrl = (
   if (!type) {
     if (m?.videoFileR2?.url || m?.videoFileMobileR2?.url || m?.videoFileDesktopR2?.url) {
       type = 'video'
-    } else if (m?.imageR2?.url || m?.imageMobileR2?.url || m?.imageDesktopR2?.url) {
+    } else if (m?.imageR2?.url || m?.imageMobileR2?.url || m?.imageDesktopR2?.url || (m as Record<string, unknown>)['image'] || (m as Record<string, unknown>)['asset'] || m?.url) {
       type = 'image'
     }
   }
@@ -353,7 +423,8 @@ export const mapMediaUrl = (
     if (r2Url) {
       return rewriteR2Url(r2Url, hasResponsiveSizes)
     }
-    return rewriteR2Url(m?.url) || ''
+    const stdUrl = mapImage((m as Record<string, unknown>)['image'] as SanityImageLike) || mapImage((m as Record<string, unknown>)['asset'] as SanityImageLike) || m?.url
+    return rewriteR2Url(stdUrl) || ''
   } else if (type === 'video') {
     const r2Url =
       (isMobile ? m?.videoFileMobileR2?.url : isDesktop ? m?.videoFileDesktopR2?.url : undefined) ||

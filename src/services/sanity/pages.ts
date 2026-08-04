@@ -250,8 +250,8 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             const urlMobile = mapMediaUrl(m, true, false)
             const urlDesktop = mapMediaUrl(m, false, true)
             const mainUrl = url || urlMobile || urlDesktop
-            const imageR2 = m['imageR2']
-            const palette = extractPalette(imageR2)
+            const imgObj = m['imageR2'] || m['image'] || m
+            const palette = extractPalette(imgObj)
             let type = m['type'] as string | undefined
             if (!type) {
               if (mainUrl && (mainUrl.includes('youtube.com') || mainUrl.includes('youtu.be'))) {
@@ -272,9 +272,9 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             if (urlMobile) result['urlMobile'] = urlMobile
             if (urlDesktop) result['urlDesktop'] = urlDesktop
             if (type === 'video') {
-              const posterObj = m['imageR2'] || m['thumbnailR2']
-              const posterMobileObj = m['imageMobileR2'] || posterObj
-              const posterDesktopObj = m['imageDesktopR2'] || posterObj
+              const posterObj = m['imageR2'] || m['thumbnailR2'] || m['image']
+              const posterMobileObj = m['imageMobileR2'] || m['imageMobile'] || posterObj
+              const posterDesktopObj = m['imageDesktopR2'] || m['imageDesktop'] || posterObj
               if (posterObj && typeof posterObj === 'object' && (posterObj as {url?: string}).url) {
                 result['poster'] = rewriteR2Url((posterObj as {url: string}).url)
               }
@@ -294,9 +294,21 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
               }
             }
             if (palette) result['palette'] = palette
-            const heroMeta = imageR2 ? mapR2Metadata(imageR2) : {}
+            const heroMeta = mapR2Metadata(m)
             if (heroMeta.crop) result['crop'] = heroMeta.crop
             if (heroMeta.hotspot) result['hotspot'] = heroMeta.hotspot
+            if (heroMeta.origWidth) result['origWidth'] = heroMeta.origWidth
+            if (heroMeta.origHeight) result['origHeight'] = heroMeta.origHeight
+
+            const heroMobileMeta = m['imageMobileR2'] || m['imageMobile']
+              ? mapR2Metadata(m['imageMobileR2'] || m['imageMobile'])
+              : m['cropMobile']
+                ? mapR2Metadata({crop: m['cropMobile']})
+                : {}
+            if (heroMobileMeta.crop) result['cropMobile'] = heroMobileMeta.crop
+            if (heroMobileMeta.hotspot) result['hotspotMobile'] = heroMobileMeta.hotspot
+            if (heroMobileMeta.origWidth) result['origWidthMobile'] = heroMobileMeta.origWidth
+            if (heroMobileMeta.origHeight) result['origHeightMobile'] = heroMobileMeta.origHeight
             return result
           })
           .filter(
@@ -364,6 +376,8 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
               imageMobile,
               crop: meta.crop,
               hotspot: meta.hotspot,
+              origWidth: meta.origWidth,
+              origHeight: meta.origHeight,
               hotspots,
             }
           })
@@ -493,9 +507,13 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
           const imageDesktopR2 = b['imageDesktopR2']
 
           if (mediaType === 'image') {
-            image = mapImage(imageR2 as SanityImageLike)
-            imageMobile = mapImage(imageMobileR2 as SanityImageLike)
-            imageDesktop = mapImage(imageDesktopR2 as SanityImageLike)
+            image = mapImage(imageR2 as SanityImageLike) || mapImage(b['image'] as SanityImageLike)
+            imageMobile =
+              mapImage(imageMobileR2 as SanityImageLike) ||
+              mapImage(b['imageMobile'] as SanityImageLike)
+            imageDesktop =
+              mapImage(imageDesktopR2 as SanityImageLike) ||
+              mapImage(b['imageDesktop'] as SanityImageLike)
           } else if (mediaType === 'video') {
             const videoFileR2 = b['videoFileR2'] as Record<string, unknown> | undefined
             const videoFileMobileR2 = b['videoFileMobileR2'] as Record<string, unknown> | undefined
@@ -515,8 +533,20 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             url = b['url'] as string | undefined
           }
 
-          const meta = imageR2 ? mapR2Metadata(imageR2) : {}
+          const metaDesktop = mapR2Metadata(imageR2 || b['image'] || b)
+          const mobileImgObj = imageMobileR2 || b['imageMobile']
+          const metaMobile = mobileImgObj ? mapR2Metadata(mobileImgObj) : b['cropMobile'] ? mapR2Metadata({crop: b['cropMobile']}) : {}
           const borderColor = (b['borderColor'] as Record<string, unknown>)?.['hex']
+
+          const crop = metaDesktop.crop || b['crop']
+          const hotspot = metaDesktop.hotspot || b['hotspot']
+          const origWidth = metaDesktop.origWidth || b['origWidth']
+          const origHeight = metaDesktop.origHeight || b['origHeight']
+
+          const cropMobile = metaMobile.crop || crop
+          const hotspotMobile = metaMobile.hotspot || hotspot
+          const origWidthMobile = metaMobile.origWidth || origWidth
+          const origHeightMobile = metaMobile.origHeight || origHeight
 
           return {
             ...b,
@@ -527,56 +557,87 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             url,
             urlMobile,
             urlDesktop,
-            imagePanels: Array.isArray(b['imagePanels'])
-              ? b['imagePanels']
-                  .map((p: Record<string, unknown> | string) => {
-                    if (typeof p === 'string') {
-                      return {
-                        url: p,
-                        type: p.toLowerCase().match(/\.(mp4|webm|mov|avi|mkv)$/)
-                          ? 'video'
-                          : 'image',
-                      }
-                    }
-                    const imgR2 = p['imageR2'] as SanityImageLike
-                    const pUrl = typeof p['url'] === 'string' ? (p['url'] as string) : undefined
-                    const imgR2Url =
-                      typeof (imgR2 as Record<string, unknown> | undefined)?.['url'] === 'string'
-                        ? ((imgR2 as Record<string, unknown>)['url'] as string)
-                        : undefined
-                    const panelUrl =
-                      mapImage(p as SanityImageLike) || mapImage(imgR2) || pUrl || imgR2Url
-                    if (!panelUrl) return null
-                    const pMime =
-                      typeof p['mimeType'] === 'string' ? (p['mimeType'] as string) : undefined
-                    const pType = typeof p['type'] === 'string' ? (p['type'] as string) : undefined
-                    const type =
-                      pMime?.startsWith('video/') ||
-                      pType === 'video' ||
-                      panelUrl.toLowerCase().match(/\.(mp4|webm|mov|avi|mkv)$/)
-                        ? 'video'
-                        : 'image'
-                    const meta = mapR2Metadata(imgR2 || p)
-                    return {
-                      url: panelUrl,
-                      type,
-                      crop: meta.crop,
-                      hotspot: meta.hotspot,
-                      origWidth: meta.origWidth,
-                      origHeight: meta.origHeight,
-                    }
-                  })
-                  .filter(Boolean)
-              : b['imagePanels'],
-            panelSize: b['panelSize'],
-            panelFit: b['panelFit'],
-            panelGap: b['panelGap'],
-            crop: meta.crop,
-            hotspot: meta.hotspot,
-            origWidth: meta.origWidth,
-            origHeight: meta.origHeight,
+            crop,
+            hotspot,
+            origWidth,
+            origHeight,
+            cropMobile,
+            hotspotMobile,
+            origWidthMobile,
+            origHeightMobile,
             borderColor,
-          }
+              imagePanels: Array.isArray(b['imagePanels'])
+                ? b['imagePanels']
+                    .map((p: Record<string, unknown> | string) => {
+                      if (typeof p === 'string') {
+                        return {
+                          url: p,
+                          type: p.toLowerCase().match(/\.(mp4|webm|mov|avi|mkv)$/)
+                            ? 'video'
+                            : 'image',
+                        }
+                      }
+                      const imgR2 = p['imageR2'] as SanityImageLike
+                      const pUrl = typeof p['url'] === 'string' ? (p['url'] as string) : undefined
+                      const imgR2Url =
+                        typeof (imgR2 as Record<string, unknown> | undefined)?.['url'] === 'string'
+                          ? ((imgR2 as Record<string, unknown>)['url'] as string)
+                          : undefined
+                      const panelUrl =
+                        mapImage(p as SanityImageLike) || mapImage(imgR2) || pUrl || imgR2Url
+                      if (!panelUrl) return null
+                      const pMime =
+                        typeof p['mimeType'] === 'string' ? (p['mimeType'] as string) : undefined
+                      const pType = typeof p['type'] === 'string' ? (p['type'] as string) : undefined
+                      const type =
+                        pMime?.startsWith('video/') ||
+                        pType === 'video' ||
+                        panelUrl.toLowerCase().match(/\.(mp4|webm|mov|avi|mkv)$/)
+                          ? 'video'
+                          : 'image'
+                      const pRec = p as Record<string, unknown>
+                      const panelMetaDesktop = mapR2Metadata(imgR2 || pRec['image'] || p)
+                      const panelMobileImgObj = pRec['imageMobileR2'] || pRec['imageMobile']
+                      const panelMetaMobile = panelMobileImgObj ? mapR2Metadata(panelMobileImgObj) : pRec['cropMobile'] ? mapR2Metadata({crop: pRec['cropMobile']}) : {}
+
+                      const pCrop = panelMetaDesktop.crop || pRec['crop']
+                      const pHotspot = panelMetaDesktop.hotspot || pRec['hotspot']
+                      const pOrigWidth = panelMetaDesktop.origWidth || pRec['origWidth']
+                      const pOrigHeight = panelMetaDesktop.origHeight || pRec['origHeight']
+
+                      const pCropMobile = panelMetaMobile.crop || pCrop
+                      const pHotspotMobile = panelMetaMobile.hotspot || pHotspot
+                      const pOrigWidthMobile = panelMetaMobile.origWidth || pOrigWidth
+                      const pOrigHeightMobile = panelMetaMobile.origHeight || pOrigHeight
+
+                      const pUrlMobile =
+                        mapImage(pRec['imageMobile'] as SanityImageLike) ||
+                        (pRec['urlMobile'] as string | undefined)
+                      const pUrlDesktop =
+                        mapImage(pRec['imageDesktop'] as SanityImageLike) ||
+                        (pRec['urlDesktop'] as string | undefined)
+
+                      return {
+                        url: panelUrl,
+                        urlMobile: pUrlMobile,
+                        urlDesktop: pUrlDesktop,
+                        type,
+                        crop: pCrop,
+                        hotspot: pHotspot,
+                        origWidth: pOrigWidth,
+                        origHeight: pOrigHeight,
+                        cropMobile: pCropMobile,
+                        hotspotMobile: pHotspotMobile,
+                        origWidthMobile: pOrigWidthMobile,
+                        origHeightMobile: pOrigHeightMobile,
+                      }
+                    })
+                    .filter(Boolean)
+                : b['imagePanels'],
+              panelSize: b['panelSize'],
+              panelFit: b['panelFit'],
+              panelGap: b['panelGap'],
+            }
         })
       }
       if (data && !Array.isArray(data.featuredProductIds)) {

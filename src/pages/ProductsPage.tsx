@@ -204,6 +204,16 @@ export function ProductsPage() {
               hotspot={
                 typeof category?.heroImage === 'object' ? category.heroImage.hotspot : undefined
               }
+              origWidth={
+                typeof category?.heroImage === 'object'
+                  ? (category.heroImage as Record<string, unknown>)['origWidth'] as number
+                  : undefined
+              }
+              origHeight={
+                typeof category?.heroImage === 'object'
+                  ? (category.heroImage as Record<string, unknown>)['origHeight'] as number
+                  : undefined
+              }
             />
             <div className="absolute inset-0 bg-black/40"></div>
           </div>

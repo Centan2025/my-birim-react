@@ -27,6 +27,8 @@ export const ProductCard: React.FC<{product: Product}> = ({product}) => {
         urlDesktop?: string
         crop?: R2ImageMetadata['crop']
         hotspot?: R2ImageMetadata['hotspot']
+        origWidth?: number
+        origHeight?: number
         isMirrored?: boolean
         isMirroredMobile?: boolean
         isMirroredDesktop?: boolean
@@ -37,6 +39,8 @@ export const ProductCard: React.FC<{product: Product}> = ({product}) => {
   const mainImageDesktop = mainImageObj.urlDesktop
   const mainImageCrop = mainImageObj.crop
   const mainImageHotspot = mainImageObj.hotspot
+  const mainImageOrigWidth = mainImageObj.origWidth
+  const mainImageOrigHeight = mainImageObj.origHeight
   const mainImageIsMirrored =
     mainImageObj.isMirrored !== undefined ? !!mainImageObj.isMirrored : undefined
   const mainImageIsMirroredMobile =
@@ -74,6 +78,8 @@ export const ProductCard: React.FC<{product: Product}> = ({product}) => {
             quality={85}
             crop={mainImageCrop}
             hotspot={mainImageHotspot}
+            origWidth={mainImageOrigWidth}
+            origHeight={mainImageOrigHeight}
             isMirrored={mainImageIsMirrored}
             isMirroredMobile={mainImageIsMirroredMobile}
             isMirroredDesktop={mainImageIsMirroredDesktop}

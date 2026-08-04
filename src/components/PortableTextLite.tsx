@@ -222,29 +222,10 @@ export default function PortableTextLite({
           : ''
     const getImageAlt = (b: Block) => b.alt || b.imageR2?.alt || ''
 
-    // R2 görselleri için crop ve hotspot bilgisini çıkar
-    const getImageCrop = (b: Block) => {
-      const r2 = b.imageR2
-      if (
-        r2 &&
-        r2.cropWidth &&
-        r2.cropHeight &&
-        (r2.cropWidth < 0.999 ||
-          r2.cropHeight < 0.999 ||
-          (r2.cropX && r2.cropX > 0.001) ||
-          (r2.cropY && r2.cropY > 0.001))
-      ) {
-        return {x: r2.cropX || 0, y: r2.cropY || 0, width: r2.cropWidth, height: r2.cropHeight}
-      }
-      return undefined
-    }
-    const getImageHotspot = (b: Block) => {
-      const r2 = b.imageR2
-      if (r2 && r2.hotspotX !== undefined && r2.hotspotY !== undefined) {
-        return {x: r2.hotspotX, y: r2.hotspotY}
-      }
-      return undefined
-    }
+    const getImageCrop = (b: Block) => mapR2Metadata(b.imageR2 || b).crop
+    const getImageHotspot = (b: Block) => mapR2Metadata(b.imageR2 || b).hotspot
+    const getImageOrigWidth = (b: Block) => mapR2Metadata(b.imageR2 || b).origWidth
+    const getImageOrigHeight = (b: Block) => mapR2Metadata(b.imageR2 || b).origHeight
 
     if (isImageBlock(block) && (block.layout === 'left' || block.layout === 'right')) {
       let nextValidIndex = idx + 1
@@ -293,6 +274,8 @@ export default function PortableTextLite({
                   className="w-full h-auto shadow-sm cursor-pointer"
                   crop={getImageCrop(block)}
                   hotspot={getImageHotspot(block)}
+                  origWidth={getImageOrigWidth(block)}
+                  origHeight={getImageOrigHeight(block)}
                   onClick={() => onMediaClick?.(getImageSrc(block))}
                 />
               </div>
@@ -310,6 +293,8 @@ export default function PortableTextLite({
                   className="w-full h-auto shadow-sm cursor-pointer"
                   crop={getImageCrop(nextBlock)}
                   hotspot={getImageHotspot(nextBlock)}
+                  origWidth={getImageOrigWidth(nextBlock)}
+                  origHeight={getImageOrigHeight(nextBlock)}
                   onClick={() => onMediaClick?.(getImageSrc(nextBlock))}
                 />
               </div>
@@ -449,6 +434,8 @@ export default function PortableTextLite({
             className="w-full h-auto shadow-sm cursor-pointer"
             crop={getImageCrop(block)}
             hotspot={getImageHotspot(block)}
+            origWidth={getImageOrigWidth(block)}
+            origHeight={getImageOrigHeight(block)}
             onClick={() => onMediaClick?.(block.imageR2!.url!)}
           />
           {block.caption && (
@@ -479,6 +466,10 @@ export default function PortableTextLite({
             src={urlFor(block).url() || ''}
             alt={block.alt || ''}
             className="w-full h-auto shadow-sm cursor-pointer"
+            crop={getImageCrop(block)}
+            hotspot={getImageHotspot(block)}
+            origWidth={getImageOrigWidth(block)}
+            origHeight={getImageOrigHeight(block)}
             onClick={() => onMediaClick?.(urlFor(block).url() || '')}
           />
           {block.caption && (

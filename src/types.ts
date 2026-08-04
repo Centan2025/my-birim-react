@@ -34,6 +34,14 @@ export interface R2ImageMetadata {
   origWidth?: number
   origHeight?: number
   isMirrored?: boolean
+  cropMobile?: R2ImageMetadata['crop']
+  hotspotMobile?: R2ImageMetadata['hotspot']
+  origWidthMobile?: number
+  origHeightMobile?: number
+  cropDesktop?: R2ImageMetadata['crop']
+  hotspotDesktop?: R2ImageMetadata['hotspot']
+  origWidthDesktop?: number
+  origHeightDesktop?: number
 }
 
 // --- Core Site Configuration ---
@@ -91,6 +99,8 @@ export interface Category {
         urlDesktop?: string
         crop?: R2ImageMetadata['crop']
         hotspot?: R2ImageMetadata['hotspot']
+        origWidth?: number
+        origHeight?: number
         isMirrored?: boolean
       }
   /** URL for the menu image displayed in the products dropdown menu. */
@@ -102,6 +112,8 @@ export interface Category {
         urlDesktop?: string
         crop?: R2ImageMetadata['crop']
         hotspot?: R2ImageMetadata['hotspot']
+        origWidth?: number
+        origHeight?: number
         isMirrored?: boolean
       }
 }
@@ -223,6 +235,8 @@ export interface Product {
     urlDesktop?: string // Art Direction: Desktop için URL
     crop?: R2ImageMetadata['crop']
     hotspot?: R2ImageMetadata['hotspot']
+    origWidth?: number
+    origHeight?: number
     isMirrored?: boolean
     isMirroredMobile?: boolean
     isMirroredDesktop?: boolean
@@ -239,6 +253,8 @@ export interface Product {
     linkText?: LocalizedString
     crop?: R2ImageMetadata['crop']
     hotspot?: R2ImageMetadata['hotspot']
+    origWidth?: number
+    origHeight?: number
     isMirrored?: boolean
     isMirroredMobile?: boolean
     isMirroredDesktop?: boolean
@@ -340,6 +356,12 @@ export interface HeroMediaItem {
   crop?: R2ImageMetadata['crop']
   /** Optional hotspot data from R2 asset */
   hotspot?: R2ImageMetadata['hotspot']
+  origWidth?: number
+  origHeight?: number
+  cropMobile?: R2ImageMetadata['crop']
+  hotspotMobile?: R2ImageMetadata['hotspot']
+  origWidthMobile?: number
+  origHeightMobile?: number
 }
 
 /**
@@ -444,6 +466,8 @@ export interface InteractiveShowcaseItem {
   imageMobile?: string
   crop?: R2ImageMetadata['crop']
   hotspot?: R2ImageMetadata['hotspot']
+  origWidth?: number
+  origHeight?: number
   hotspots: ProductHotspot[]
 }
 

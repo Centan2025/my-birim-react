@@ -153,8 +153,8 @@ const MediaGallery = ({media, alt}: MediaGalleryProps) => {
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       crop={m.crop}
                       hotspot={m.hotspot}
-                      origWidth={m.origWidth}
-                      origHeight={m.origHeight}
+                      origWidth={m.origWidth as number}
+                      origHeight={m.origHeight as number}
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
                   </div>

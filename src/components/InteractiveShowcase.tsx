@@ -259,6 +259,8 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
                     quality={95}
                     crop={slide.crop}
                     hotspot={slide.hotspot}
+                    origWidth={slide.origWidth as number}
+                    origHeight={slide.origHeight as number}
                   />
                   {/* Subtle vignette overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/30 pointer-events-none" />

@@ -47,6 +47,8 @@ const MediaComponent: FC<{media: NewsMedia}> = ({media}) => {
           quality={85}
           crop={(media as any).crop}
           hotspot={(media as any).hotspot}
+          origWidth={(media as any).origWidth}
+          origHeight={(media as any).origHeight}
         />
       )
     }
@@ -317,6 +319,8 @@ export function NewsDetailPage() {
                 quality={90}
                 crop={(mainImageObj as any)?.crop}
                 hotspot={(mainImageObj as any)?.hotspot}
+                origWidth={(mainImageObj as any)?.origWidth}
+                origHeight={(mainImageObj as any)?.origHeight}
               />
             )}
 
