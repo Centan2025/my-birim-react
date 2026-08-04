@@ -12,6 +12,12 @@ export const ScrollToTop = () => {
   const prevPathnameRef = useRef(pathname)
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual'
+    }
+  }, [])
+
+  useEffect(() => {
     const state = location.state as {slideOver?: boolean}
     const prevPathname = prevPathnameRef.current
     prevPathnameRef.current = pathname

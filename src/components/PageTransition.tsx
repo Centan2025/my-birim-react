@@ -67,7 +67,13 @@ export const PageTransition: React.FC<PageTransitionProps> = ({children}) => {
   const exitTo = getExitTo(direction)
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual'
+    }
     window.scrollTo({top: 0, left: 0, behavior: 'instant'})
+    return () => {
+      window.scrollTo({top: 0, left: 0, behavior: 'instant'})
+    }
   }, [location.pathname])
 
   const isCardEntry = isExpanding || location.state?.fromCard
@@ -98,6 +104,9 @@ export const PageTransition: React.FC<PageTransitionProps> = ({children}) => {
               duration: shouldAnimate ? 1.6 : 0,
               ease: [0.12, 0.8, 0.2, 1],
             },
+      }}
+      onAnimationComplete={() => {
+        window.scrollTo({top: 0, left: 0, behavior: 'instant'})
       }}
       exit={
         isCardEntry

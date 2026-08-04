@@ -155,9 +155,9 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
       <div
         className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing"
         style={{
-          height: !showHeroNavigation ? '100vh' : isMobile ? '70vh' : '85vh',
-          minHeight: !showHeroNavigation ? '100vh' : isMobile ? '70vh' : '85vh',
-          maxHeight: !showHeroNavigation ? '100vh' : isMobile ? '70vh' : '85vh',
+          height: isMobile ? '100dvh' : !showHeroNavigation ? '100vh' : '85vh',
+          minHeight: isMobile ? '100dvh' : !showHeroNavigation ? '100vh' : '85vh',
+          maxHeight: isMobile ? '100dvh' : !showHeroNavigation ? '100vh' : '85vh',
         }}
         aria-label="Product Image Carousel"
         onMouseDown={onDragStart}
@@ -274,7 +274,10 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
           className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent pointer-events-none"
         />
 
-        <div className="absolute bottom-10 md:bottom-10 left-6 md:left-10 text-white z-40">
+        <div
+          className="absolute bottom-20 md:bottom-10 left-6 md:left-10 text-white z-40"
+          style={isMobile ? {bottom: 'max(64px, env(safe-area-inset-bottom, 0px) + 64px)'} : {}}
+        >
           <div
             style={{
               transform: isTitleVisible ? 'translateX(0)' : 'translateX(-40px)',
@@ -286,7 +289,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
               {t(product.name)}
             </h1>
           </div>
-          {designers.length > 0 && (
+          {(designers.length > 0 || Boolean(product.year)) && (
             <div
               className="mt-2 text-white/80 font-michroma"
               style={{
@@ -302,7 +305,8 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                   </Link>
                   {i < designers.length - 1 ? ' & ' : ''}
                 </span>
-              ))}{' '}
+              ))}
+              {designers.length > 0 && product.year && ' '}
               {product.year && <span>— {product.year}</span>}
             </div>
           )}

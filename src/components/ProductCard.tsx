@@ -45,6 +45,7 @@ export const ProductCard: React.FC<{product: Product}> = ({product}) => {
     mainImageObj.isMirroredDesktop !== undefined ? !!mainImageObj.isMirroredDesktop : undefined
 
   const handleClick = () => {
+    window.scrollTo({top: 0, left: 0, behavior: 'instant'})
     // We still want to handle analytics before navigation
     analytics.event({
       category: 'navigation',

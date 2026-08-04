@@ -76,13 +76,13 @@ export function ProductDetailPage() {
     }
   }, [mergedGroups])
 
-  // Animation visibility state — all start hidden for entrance animation
-  const [isFullscreenButtonVisible, setIsFullscreenButtonVisible] = useState(false)
-  const [isTitleVisible, setIsTitleVisible] = useState(false)
-  const [isDesignerVisible, setIsDesignerVisible] = useState(false)
-  const [areDotsVisible, setAreDotsVisible] = useState(false)
-  const [isThumbnailsVisible, setIsThumbnailsVisible] = useState(false)
-  const [isMainContentVisible, setIsMainContentVisible] = useState(false)
+  // Animation visibility state — default to true for instant visibility on mobile & desktop
+  const [isFullscreenButtonVisible, setIsFullscreenButtonVisible] = useState(true)
+  const [isTitleVisible, setIsTitleVisible] = useState(true)
+  const [isDesignerVisible, setIsDesignerVisible] = useState(true)
+  const [areDotsVisible, setAreDotsVisible] = useState(true)
+  const [isThumbnailsVisible, setIsThumbnailsVisible] = useState(true)
+  const [isMainContentVisible, setIsMainContentVisible] = useState(true)
 
   const {isLoggedIn, user} = useAuth()
   const {t, locale} = useTranslation()
@@ -155,54 +155,58 @@ export function ProductDetailPage() {
     analytics.trackEcommerce('view_item', product.id, (product as any)?.price || 0)
   }, [product, designer, category, t])
 
-  // Entrance animations - Synced with phase if coming from card
+  // Ensure page opens at top (y=0) when product detail mounts and during transition cleanup
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'manual'
+      }
+      window.scrollTo(0, 0)
+      document.documentElement.scrollTop = 0
+      document.body.scrollTop = 0
+
+      const t1 = setTimeout(() => window.scrollTo(0, 0), 50)
+      const t2 = setTimeout(() => window.scrollTo(0, 0), 200)
+      const t3 = setTimeout(() => window.scrollTo(0, 0), 500)
+      const t4 = setTimeout(() => window.scrollTo(0, 0), 850)
+      return () => {
+        clearTimeout(t1)
+        clearTimeout(t2)
+        clearTimeout(t3)
+        clearTimeout(t4)
+      }
+    }
+    return undefined
+  }, [productId])
+
+  // Entrance animations - ensure all elements are visible when product is available
   useEffect(() => {
     if (!product) return
-
-    const fromCard = (window.history.state?.usr as any)?.fromCard
-
-    if (!fromCard) {
-      // Standard page load / refresh: staggered entrance animation
-      setIsFullscreenButtonVisible(false)
-      setIsDesignerVisible(false)
-      setIsTitleVisible(false)
-      setAreDotsVisible(false)
-      setIsThumbnailsVisible(false)
-      setIsMainContentVisible(false)
-
-      // Stagger all elements in
-      setTimeout(() => setIsThumbnailsVisible(true), 100)
-      setTimeout(() => setIsMainContentVisible(true), 250)
-      setTimeout(() => setIsDesignerVisible(true), 400)
-      setTimeout(() => setIsFullscreenButtonVisible(true), 500)
-      setTimeout(() => setAreDotsVisible(true), 500)
-      setTimeout(() => setIsTitleVisible(true), 600)
-    }
+    setIsFullscreenButtonVisible(true)
+    setIsDesignerVisible(true)
+    setIsTitleVisible(true)
+    setAreDotsVisible(true)
+    setIsThumbnailsVisible(true)
+    setIsMainContentVisible(true)
   }, [product])
 
   useEffect(() => {
     const fromCard = (window.history.state?.usr as any)?.fromCard
     if (fromCard && product) {
       if (phase === 'animating') {
-        // Keep hidden initially to avoid them being overlapped by the transitioning image (z-index 9999)
         setIsFullscreenButtonVisible(false)
         setIsDesignerVisible(false)
         setIsTitleVisible(false)
         setAreDotsVisible(false)
         setIsThumbnailsVisible(false)
         setIsMainContentVisible(false)
-
-        // Make thumbnails start appearing much earlier in the animation
-        setTimeout(() => setIsThumbnailsVisible(true), 150)
-        setTimeout(() => setIsMainContentVisible(true), 350)
-      } else if (phase === 'holding' || phase === 'fading' || phase === null || phase === 'none') {
-        // Arrived at destination! Fade elements in now.
+      } else {
         setIsMainContentVisible(true)
-        setIsThumbnailsVisible(true) // Ensure thumbnails are visible if it arrived too early
-        setTimeout(() => setIsFullscreenButtonVisible(true), 0)
-        setTimeout(() => setIsDesignerVisible(true), 100)
-        setTimeout(() => setIsTitleVisible(true), 150)
-        setTimeout(() => setAreDotsVisible(true), 250)
+        setIsThumbnailsVisible(true)
+        setIsFullscreenButtonVisible(true)
+        setIsDesignerVisible(true)
+        setIsTitleVisible(true)
+        setAreDotsVisible(true)
       }
     }
   }, [phase, product])
