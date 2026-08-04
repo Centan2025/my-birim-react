@@ -132,9 +132,8 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
   let result = urlParts[0] || ''
   const searchParams = urlParts[1] || ''
 
-  // Video dosyaları Cloudflare Worker CDN üzerinde Accept-Ranges desteklemediği için R2 Origin domain kullanmalıdır
-  const isVideoFile = /\.(mp4|webm|mov|m4v|ogv)($|\?)/i.test(result)
-  const activeDomain = isVideoFile && R2_ORIGIN_DOMAIN ? R2_ORIGIN_DOMAIN : R2_DOMAIN
+  // Tüm medya dosyaları (görsel ve video) hızlı Worker CDN edge ağı üzerinden sunulmalıdır
+  const activeDomain = R2_DOMAIN || R2_ORIGIN_DOMAIN
 
   // 2. Domain Rewrite (Hepsini tek bir domain'e topla)
   // Regex pointer issue riskini azaltmak için string replace kullanıyoruz
