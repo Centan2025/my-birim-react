@@ -52,7 +52,7 @@ class MediaCropDebugger {
         logAll: () => this.logAll(),
       }
 
-      window.addEventListener('keydown', e => {
+      window.addEventListener('keydown', (e: KeyboardEvent) => {
         if (e.ctrlKey && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
           e.preventDefault()
           this.toggleOverlay()
@@ -61,32 +61,28 @@ class MediaCropDebugger {
     }
   }
 
-  public enable() {
+  public enable(): void {
     this.isEnabled = true
     this.showOverlay = true
     localStorage.setItem('debug_media_crop', 'true')
-    console.log(
-      '🔍 [MediaCropDebugger] Aktifleştirildi (Ctrl+Shift+D ile overlay açılıp kapatılabilir).'
-    )
     this.notify()
   }
 
-  public disable() {
+  public disable(): void {
     this.isEnabled = false
     this.showOverlay = false
     localStorage.setItem('debug_media_crop', 'false')
-    console.log('🚫 [MediaCropDebugger] Deaktife edildi.')
     this.notify()
   }
 
-  public toggleOverlay() {
+  public toggleOverlay(): void {
     this.showOverlay = !this.showOverlay
     this.isEnabled = this.showOverlay
     localStorage.setItem('debug_media_crop', this.showOverlay ? 'true' : 'false')
     this.notify()
   }
 
-  public toggleVisualOutlines() {
+  public toggleVisualOutlines(): void {
     this.showVisualOutlines = !this.showVisualOutlines
     localStorage.setItem('debug_media_crop_outlines', this.showVisualOutlines ? 'true' : 'false')
     this.notify()
@@ -100,29 +96,8 @@ class MediaCropDebugger {
     return this.showVisualOutlines
   }
 
-  public record(info: MediaCropDebugInfo) {
+  public record(info: MediaCropDebugInfo): void {
     this.records.set(info.id, info)
-
-    if (this.isEnabled) {
-      const screenType = window.innerWidth <= 1023 ? '📱 MOBİL (<1023px)' : '💻 DESKTOP (>=1024px)'
-      console.groupCollapsed(
-        `🖼️ [MediaCrop] ${info.componentName || 'OptimizedImage'} (${screenType}) - ${info.id.substring(0, 8)}`
-      )
-      console.log('🔗 URL (Src):', info.src)
-      if (info.srcMobile) console.log('📱 URL (Mobile):', info.srcMobile)
-      if (info.srcDesktop) console.log('💻 URL (Desktop):', info.srcDesktop)
-      console.log('📐 Masaüstü Crop:', info.cropDesktop || 'YOK (Tam Görsel)')
-      console.log('📐 Mobil Crop:', info.cropMobile || 'YOK (Masaüstü/Tam Görsel)')
-      console.log('⚙️ Mod:', {
-        isCoverMode: info.isCoverMode,
-        useClientCrop: info.useClientCrop,
-        activeClientCrop: info.activeClientCrop,
-      })
-      if (info.computedStyle) {
-        console.table(info.computedStyle)
-      }
-      console.groupEnd()
-    }
     this.notify()
   }
 
@@ -130,30 +105,21 @@ class MediaCropDebugger {
     return Array.from(this.records.values())
   }
 
-  public logAll() {
-    console.table(
-      Array.from(this.records.values()).map(r => ({
-        Bileşen: r.componentName || 'OptimizedImage',
-        Src: r.src.substring(0, 40) + '...',
-        MobilSrc: r.srcMobile ? 'EVET' : 'HAYIR',
-        DesktopCrop: r.cropDesktop
-          ? `${r.cropDesktop.width.toFixed(2)}x${r.cropDesktop.height.toFixed(2)}`
-          : 'YOK',
-        MobileCrop: r.cropMobile
-          ? `${r.cropMobile.width.toFixed(2)}x${r.cropMobile.height.toFixed(2)}`
-          : 'YOK',
-        CoverModu: r.isCoverMode ? 'EVET' : 'HAYIR',
-        ActiveCrop: r.activeClientCrop ? 'AKTİF' : 'PASİF',
-      }))
-    )
+  public logAll(): void {
+    const list = Array.from(this.records.values())
+    if (typeof console !== 'undefined' && console.table) {
+      console.table(list)
+    }
   }
 
-  public subscribe(listener: () => void) {
+  public subscribe(listener: () => void): () => void {
     this.listeners.add(listener)
-    return () => this.listeners.delete(listener)
+    return () => {
+      this.listeners.delete(listener)
+    }
   }
 
-  private notify() {
+  private notify(): void {
     this.listeners.forEach(l => l())
   }
 }
