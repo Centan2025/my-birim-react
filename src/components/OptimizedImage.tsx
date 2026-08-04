@@ -66,6 +66,7 @@ interface OptimizedImageProps {
   isMirrored?: boolean
   isMirroredMobile?: boolean
   isMirroredDesktop?: boolean
+  fitAuto?: boolean
 }
 
 /**
@@ -171,6 +172,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   isMirrored = false,
   isMirroredMobile,
   isMirroredDesktop,
+  fitAuto = false,
 }) => {
   const styleBlock = useMemo(() => {
     return (
@@ -592,26 +594,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     customStyle['--obj-pos-mobile'] = `${hs.x * 100}% ${hs.y * 100}%`
   }
 
-  const classList = className.split(' ')
-  const hasExplicitContain = classList.some((c: string) => c === 'object-contain')
-  if (hasExplicitContain) {
-    customStyle['--img-object-fit'] = 'contain'
-  }
-
-  const isCoverMode =
-    !hasCrop &&
-    !hasExplicitContain &&
-    (classList.some(
-      (c: string) =>
-        c.startsWith('h-full') ||
-        c.startsWith('h-screen') ||
-        (c.startsWith('h-') && c !== 'h-auto') ||
-        c.startsWith('aspect-')
-    ) ||
-      !!height)
-
-  const activeClientCrop = useClientCrop && hasCrop
-
   const cropDesk = normalizedCropDesktop
   const cropMob = normalizedCropMobile
 
@@ -639,6 +621,35 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       : undefined) ||
     9
   const aspectDesk = (cropWDesk * imgWDesk) / (cropHDesk * imgHDesk)
+
+  const classList = className.split(' ')
+  const hasExplicitContain = classList.some((c: string) => c === 'object-contain')
+
+  const isOverflowingAspect =
+    aspectDesk > 1.15 ||
+    aspectDesk < 0.85 ||
+    (cropDesk && (cropDesk.width < 0.98 || cropDesk.height < 0.98))
+
+  const effectiveContain = hasExplicitContain || (fitAuto && isOverflowingAspect)
+
+  if (effectiveContain) {
+    customStyle['--img-object-fit'] = 'contain'
+  } else {
+    customStyle['--img-object-fit'] = 'cover'
+  }
+
+  const isCoverMode =
+    !effectiveContain &&
+    (classList.some(
+      (c: string) =>
+        c.startsWith('h-full') ||
+        c.startsWith('h-screen') ||
+        (c.startsWith('h-') && c !== 'h-auto') ||
+        c.startsWith('aspect-')
+    ) ||
+      !!height)
+
+  const activeClientCrop = useClientCrop && hasCrop
 
   const cropWMob = cropMob?.width || 1
   const cropHMob = cropMob?.height || 1
