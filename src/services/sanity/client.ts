@@ -123,7 +123,7 @@ export interface SanityProductMediaItem {
   videoFileDesktopR2?: {url?: string}
 }
 
-export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boolean): string => {
+export const rewriteR2Url = (url: string | undefined, _hasResponsiveSizes?: boolean): string => {
   if (!url || typeof url !== 'string') return url || ''
 
   const urlParts = url.split('?')
@@ -136,16 +136,20 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
 
   // 1. Tüm r2.dev ve workers.dev domainlerini https://assets.birim.com ile değiştir
   if (result.includes('.r2.dev')) {
-    result = result.replace(/^(https?:\/\/)?([^/]+\.r2\.dev)/, activeDomain)
+    result = result
+      .replace(/^(https?:\/\/)?([^/]+\.r2\.dev)/i, activeDomain)
+      .replace(/https?:\/\/[^/]+\.r2\.dev/gi, activeDomain)
   }
   if (result.includes('.workers.dev')) {
-    result = result.replace(/^(https?:\/\/)?([^/]+\.workers\.dev)/, activeDomain)
+    result = result
+      .replace(/^(https?:\/\/)?([^/]+\.workers\.dev)/i, activeDomain)
+      .replace(/https?:\/\/[^/]+\.workers\.dev/gi, activeDomain)
   }
   if (result.startsWith('http://assets.birim.com')) {
     result = result.replace('http://assets.birim.com', 'https://assets.birim.com')
   }
 
-  // 3. Relatif yolları mutlak yap (lokal public görsellere /img/ dokunma)
+  // 2. Relatif yolları mutlak yap (lokal public görsellere /img/ dokunma)
   if (
     !result.startsWith('http') &&
     !result.startsWith('/img/') &&
@@ -187,13 +191,10 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
     /* ignore */
   }
 
-  // 4. Params ekle
+  // 4. Params ekle / temizle
   let finalUrl = result
   const params = new URLSearchParams(searchParams || '')
-
-  if (hasResponsiveSizes && !params.has('rs')) {
-    params.set('rs', '1')
-  }
+  params.delete('rs') // Kırık srcset ve 404 oluşturan rs=1 sorgu parametresini temizle
 
   const queryString = params.toString()
   if (queryString) {

@@ -4,6 +4,7 @@ import {
   sanity,
   useSanity,
   mapImage,
+  rewriteR2Url,
   mapR2Metadata,
   mapImages,
   extractPalette,
@@ -148,7 +149,10 @@ const mapProductMedia = (mediaArrRaw: unknown): unknown[] => {
       let urlDesktop: string | undefined = undefined
 
       if (type === 'image') {
-        url = mapImage(m?.['imageR2'] as SanityImageLike)
+        url =
+          mapImage(m?.['imageR2'] as SanityImageLike) ||
+          mapImage(m?.['image'] as SanityImageLike) ||
+          rewriteR2Url(m?.['url'] as string)
         urlMobile = (m?.['imageMobileR2'] as Record<string, string>)?.['url']
           ? mapImage(m?.['imageMobileR2'] as SanityImageLike)
           : undefined
@@ -156,7 +160,7 @@ const mapProductMedia = (mediaArrRaw: unknown): unknown[] => {
           ? mapImage(m?.['imageDesktopR2'] as SanityImageLike)
           : undefined
       } else if (type === 'video') {
-        url = mapImage(m?.['videoFileR2'] as SanityImageLike)
+        url = mapImage(m?.['videoFileR2'] as SanityImageLike) || rewriteR2Url(m?.['url'] as string)
         urlMobile = (m?.['videoFileMobileR2'] as Record<string, string>)?.['url']
           ? mapImage(m?.['videoFileMobileR2'] as SanityImageLike)
           : undefined
@@ -164,7 +168,7 @@ const mapProductMedia = (mediaArrRaw: unknown): unknown[] => {
           ? mapImage(m?.['videoFileDesktopR2'] as SanityImageLike)
           : undefined
       } else {
-        url = (m?.['url'] as string) || ''
+        url = rewriteR2Url((m?.['url'] as string) || '')
       }
 
       const metadata = {
@@ -197,7 +201,8 @@ const mapDimensionImages = (dimImgs: unknown[] | undefined): unknown[] => {
   return dimImgs
     .map((di: unknown) => {
       const row = di as Record<string, unknown>
-      const image = mapImage(row?.['imageR2'] as SanityImageLike)
+      const image =
+        mapImage(row?.['imageR2'] as SanityImageLike) || rewriteR2Url(row?.['image'] as string)
       const imgMobile = (row?.['imageMobileR2'] as Record<string, string>)?.['url']
         ? mapImage(row?.['imageMobileR2'] as SanityImageLike)
         : undefined
@@ -223,8 +228,11 @@ const mapProductRow = (r: Record<string, unknown>): Product => {
     let urlMobile: string | undefined = undefined
     let urlDesktop: string | undefined = undefined
 
-    if (coverItem['type'] === 'image') {
-      url = mapImage(coverItem['imageR2'] as SanityImageLike)
+    if (coverItem['type'] === 'image' || !coverItem['type']) {
+      url =
+        mapImage(coverItem['imageR2'] as SanityImageLike) ||
+        mapImage(coverItem['image'] as SanityImageLike) ||
+        rewriteR2Url(coverItem['url'] as string)
       urlMobile = (coverItem['imageMobileR2'] as Record<string, string>)?.['url']
         ? mapImage(coverItem['imageMobileR2'] as SanityImageLike)
         : undefined
@@ -232,7 +240,9 @@ const mapProductRow = (r: Record<string, unknown>): Product => {
         ? mapImage(coverItem['imageDesktopR2'] as SanityImageLike)
         : undefined
     } else if (coverItem['type'] === 'video') {
-      url = mapImage(coverItem['videoFileR2'] as SanityImageLike)
+      url =
+        mapImage(coverItem['videoFileR2'] as SanityImageLike) ||
+        rewriteR2Url(coverItem['url'] as string)
       urlMobile = (coverItem['videoFileMobileR2'] as Record<string, string>)?.['url']
         ? mapImage(coverItem['videoFileMobileR2'] as SanityImageLike)
         : undefined

@@ -680,7 +680,10 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
                         ? ((imgR2 as Record<string, unknown>)['url'] as string)
                         : undefined
                     const panelUrl =
-                      mapImage(p as SanityImageLike) || mapImage(imgR2) || pUrl || imgR2Url
+                      mapImage(p as SanityImageLike) ||
+                      mapImage(imgR2) ||
+                      rewriteR2Url(pUrl) ||
+                      rewriteR2Url(imgR2Url)
                     if (!panelUrl) return null
                     const pMime =
                       typeof p['mimeType'] === 'string' ? (p['mimeType'] as string) : undefined
