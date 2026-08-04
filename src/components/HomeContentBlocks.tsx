@@ -71,6 +71,20 @@ const PanelSlider: React.FC<{
   const [scrollLeftState, setScrollLeftState] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
 
+  const getGapPx = useCallback(() => {
+    const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false
+    switch (panelGap) {
+      case 'none':
+        return 0
+      case 'small':
+        return isMobile ? 6 : 12
+      case 'large':
+        return isMobile ? 12 : 32
+      default:
+        return isMobile ? 8 : 16
+    }
+  }, [panelGap])
+
   const handleScroll = useCallback(() => {
     if (!scrollRef.current) return
     const container = scrollRef.current
@@ -78,14 +92,14 @@ const PanelSlider: React.FC<{
     if (!item) return
 
     const itemWidth = item.clientWidth
-    const gap = panelGap === 'none' ? 0 : panelGap === 'small' ? 12 : panelGap === 'large' ? 40 : 16
+    const gap = getGapPx()
     const scrollLeft = container.scrollLeft
     const index = Math.round(scrollLeft / (itemWidth + gap))
 
     if (index !== activeIndex) {
       setActiveIndex(index)
     }
-  }, [activeIndex, panelGap])
+  }, [activeIndex, getGapPx])
 
   const scrollTo = (index: number) => {
     if (!scrollRef.current) return
@@ -94,7 +108,7 @@ const PanelSlider: React.FC<{
     if (!item) return
 
     const itemWidth = item.clientWidth
-    const gap = panelGap === 'none' ? 0 : panelGap === 'small' ? 12 : panelGap === 'large' ? 40 : 16
+    const gap = getGapPx()
     container.scrollTo({
       left: index * (itemWidth + gap),
       behavior: 'smooth',
@@ -159,11 +173,11 @@ const PanelSlider: React.FC<{
       case 'none':
         return 'gap-0'
       case 'small':
-        return 'gap-3'
+        return 'gap-1.5 md:gap-3'
       case 'large':
-        return 'gap-8 md:gap-10'
+        return 'gap-3 md:gap-8'
       default:
-        return 'gap-4'
+        return 'gap-2 md:gap-4'
     }
   }
 
