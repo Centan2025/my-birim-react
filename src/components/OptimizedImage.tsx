@@ -599,6 +599,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   }
 
   const isCoverMode =
+    !hasCrop &&
     !hasExplicitContain &&
     (classList.some(
       (c: string) =>
