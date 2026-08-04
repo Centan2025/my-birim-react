@@ -74,6 +74,48 @@ interface OptimizedImageProps {
  * - Placeholder gösterimi
  * - R2 tabanlı Art Direction
  */
+const getActiveCrop = (c: unknown): {x: number; y: number; width: number; height: number} | undefined => {
+  if (!c || typeof c !== 'object') return undefined
+  const obj = c as Record<string, unknown>
+  if (obj['cropX'] !== undefined && obj['cropWidth'] !== undefined) {
+    return {
+      x: Number(obj['cropX']) || 0,
+      y: Number(obj['cropY']) || 0,
+      width: Number(obj['cropWidth']) || 1,
+      height: Number(obj['cropHeight']) || 1,
+    }
+  }
+  if (obj['crop'] && typeof obj['crop'] === 'object') {
+    return getActiveCrop(obj['crop'])
+  }
+  if (obj['x'] !== undefined && obj['width'] !== undefined) {
+    return {
+      x: Number(obj['x']) || 0,
+      y: Number(obj['y']) || 0,
+      width: Number(obj['width']) || 1,
+      height: Number(obj['height']) || 1,
+    }
+  }
+  if (
+    obj['top'] !== undefined ||
+    obj['left'] !== undefined ||
+    obj['bottom'] !== undefined ||
+    obj['right'] !== undefined
+  ) {
+    const left = Number(obj['left']) || 0
+    const top = Number(obj['top']) || 0
+    const right = Number(obj['right']) || 0
+    const bottom = Number(obj['bottom']) || 0
+    return {
+      x: left,
+      y: top,
+      width: Math.max(0.001, 1 - left - right),
+      height: Math.max(0.001, 1 - top - bottom),
+    }
+  }
+  return undefined
+}
+
 export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   src,
   alt,
@@ -237,47 +279,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     r2Domain?.includes('.workers.dev') ||
     r2Domain?.includes('assets.birim.com')
 
-  const getActiveCrop = (c: unknown): {x: number; y: number; width: number; height: number} | undefined => {
-    if (!c || typeof c !== 'object') return undefined
-    const obj = c as Record<string, unknown>
-    if (obj['cropX'] !== undefined && obj['cropWidth'] !== undefined) {
-      return {
-        x: Number(obj['cropX']) || 0,
-        y: Number(obj['cropY']) || 0,
-        width: Number(obj['cropWidth']) || 1,
-        height: Number(obj['cropHeight']) || 1,
-      }
-    }
-    if (obj['crop'] && typeof obj['crop'] === 'object') {
-      return getActiveCrop(obj['crop'])
-    }
-    if (obj['x'] !== undefined && obj['width'] !== undefined) {
-      return {
-        x: Number(obj['x']) || 0,
-        y: Number(obj['y']) || 0,
-        width: Number(obj['width']) || 1,
-        height: Number(obj['height']) || 1,
-      }
-    }
-    if (
-      obj['top'] !== undefined ||
-      obj['left'] !== undefined ||
-      obj['bottom'] !== undefined ||
-      obj['right'] !== undefined
-    ) {
-      const left = Number(obj['left']) || 0
-      const top = Number(obj['top']) || 0
-      const right = Number(obj['right']) || 0
-      const bottom = Number(obj['bottom']) || 0
-      return {
-        x: left,
-        y: top,
-        width: Math.max(0.001, 1 - left - right),
-        height: Math.max(0.001, 1 - top - bottom),
-      }
-    }
-    return undefined
-  }
+
 
   const normalizedCropDesktop = useMemo(
     () => getActiveCrop(cropDesktop || crop),
@@ -434,6 +436,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       isMirroredDesktop !== undefined ? (isMirroredDesktop ? '-1' : '1') : isMirrored ? '-1' : '1',
   } as React.CSSProperties
 
+  const customStyle = imgStyle as Record<string, string>
+
   if (normalizedCropDesktop) {
     const centerX = (normalizedCropDesktop.x + normalizedCropDesktop.width / 2) * 100
     const centerY = (normalizedCropDesktop.y + normalizedCropDesktop.height / 2) * 100
@@ -442,19 +446,19 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     const bottomP = ((1 - normalizedCropDesktop.y - normalizedCropDesktop.height) * 100).toFixed(2)
     const leftP = (normalizedCropDesktop.x * 100).toFixed(2)
 
-    ;(imgStyle as Record<string, string>)['--obj-pos-desktop'] = `${centerX.toFixed(2)}% ${centerY.toFixed(2)}%`
-    ;(imgStyle as Record<string, string>)['--clip-desktop'] = `inset(${topP}% ${rightP}% ${bottomP}% ${leftP}%)`
+    customStyle['--obj-pos-desktop'] = `${centerX.toFixed(2)}% ${centerY.toFixed(2)}%`
+    customStyle['--clip-desktop'] = `inset(${topP}% ${rightP}% ${bottomP}% ${leftP}%)`
 
     const oW = origWidthDesktop || origWidth || 1
     const oH = origHeightDesktop || origHeight || 1
     const cW = normalizedCropDesktop.width * oW
     const cH = normalizedCropDesktop.height * oH
     if (cW > 0 && cH > 0) {
-      ;(imgStyle as Record<string, string>)['--aspect-desktop'] = `${cW.toFixed(4)} / ${cH.toFixed(4)}`
+      customStyle['--aspect-desktop'] = `${cW.toFixed(4)} / ${cH.toFixed(4)}`
     }
   } else if (hotspotDesktop || hotspot) {
     const hs = hotspotDesktop || hotspot!
-    ;(imgStyle as Record<string, string>)['--obj-pos-desktop'] = `${hs.x * 100}% ${hs.y * 100}%`
+    customStyle['--obj-pos-desktop'] = `${hs.x * 100}% ${hs.y * 100}%`
   }
 
   if (normalizedCropMobile) {
@@ -465,19 +469,19 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     const bottomP = ((1 - normalizedCropMobile.y - normalizedCropMobile.height) * 100).toFixed(2)
     const leftP = (normalizedCropMobile.x * 100).toFixed(2)
 
-    ;(imgStyle as Record<string, string>)['--obj-pos-mobile'] = `${centerX.toFixed(2)}% ${centerY.toFixed(2)}%`
-    ;(imgStyle as Record<string, string>)['--clip-mobile'] = `inset(${topP}% ${rightP}% ${bottomP}% ${leftP}%)`
+    customStyle['--obj-pos-mobile'] = `${centerX.toFixed(2)}% ${centerY.toFixed(2)}%`
+    customStyle['--clip-mobile'] = `inset(${topP}% ${rightP}% ${bottomP}% ${leftP}%)`
 
     const oW = origWidthMobile || origWidth || 1
     const oH = origHeightMobile || origHeight || 1
     const cW = normalizedCropMobile.width * oW
     const cH = normalizedCropMobile.height * oH
     if (cW > 0 && cH > 0) {
-      ;(imgStyle as Record<string, string>)['--aspect-mobile'] = `${cW.toFixed(4)} / ${cH.toFixed(4)}`
+      customStyle['--aspect-mobile'] = `${cW.toFixed(4)} / ${cH.toFixed(4)}`
     }
   } else if (hotspotMobile || hotspot) {
     const hs = hotspotMobile || hotspot!
-    ;(imgStyle as Record<string, string>)['--obj-pos-mobile'] = `${hs.x * 100}% ${hs.y * 100}%`
+    customStyle['--obj-pos-mobile'] = `${hs.x * 100}% ${hs.y * 100}%`
   }
 
   const hasCrop = !!(
