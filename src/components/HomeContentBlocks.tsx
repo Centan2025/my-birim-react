@@ -192,57 +192,62 @@ const PanelSlider: React.FC<{
           isMouseDown ? 'cursor-grabbing select-none snap-none' : 'cursor-grab'
         }`}
       >
-        {media.map((item, i) => (
-          <div
-            key={i}
-            className={`flex-shrink-0 snap-start relative overflow-hidden ${imageBorderClass} ${
-              panelFit === 'natural' ? 'h-auto max-h-[70vh]' : 'aspect-[4/5] sm:aspect-[3/4]'
-            } group cursor-pointer ${getWidthClass()}`}
-            onClick={() => {
-              if (!isDragging && onMediaClick) {
-                onMediaClick(item.url)
-              }
-            }}
-            onKeyDown={e => {
-              if (onMediaClick && (e.key === 'Enter' || e.key === ' ')) {
-                e.preventDefault()
-                onMediaClick(item.url)
-              }
-            }}
-            role="button"
-            tabIndex={0}
-          >
-            {item.type === 'video' ? (
-              <OptimizedVideo
-                src={item.url}
-                className={`w-full h-full ${getFitClass()} pointer-events-none`}
-                autoPlay
-                loop
-                muted
-                playsInline
-                controls={false}
-              />
-            ) : (
-              <OptimizedImage
-                src={item.url}
-                srcMobile={item.urlMobile}
-                srcDesktop={item.urlDesktop}
-                alt=""
-                className={`w-full h-full ${getFitClass()} transition-transform duration-700 pointer-events-none`}
-                loading="lazy"
-                quality={85}
-                crop={item.crop}
-                hotspot={item.hotspot}
-                origWidth={item.origWidth}
-                origHeight={item.origHeight}
-                cropMobile={item.cropMobile}
-                hotspotMobile={item.hotspotMobile}
-                origWidthMobile={item.origWidthMobile}
-                origHeightMobile={item.origHeightMobile}
-              />
-            )}
-          </div>
-        ))}
+        {media.map((item, i) => {
+          const itemHasCrop = !!(item.crop || item.cropMobile)
+          return (
+            <div
+              key={i}
+              className={`flex-shrink-0 snap-start relative overflow-hidden ${imageBorderClass} ${
+                panelFit === 'natural' || itemHasCrop
+                  ? 'h-auto max-h-[70vh]'
+                  : 'aspect-[4/5] sm:aspect-[3/4]'
+              } group cursor-pointer ${getWidthClass()}`}
+              onClick={() => {
+                if (!isDragging && onMediaClick) {
+                  onMediaClick(item.url)
+                }
+              }}
+              onKeyDown={e => {
+                if (onMediaClick && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault()
+                  onMediaClick(item.url)
+                }
+              }}
+              role="button"
+              tabIndex={0}
+            >
+              {item.type === 'video' ? (
+                <OptimizedVideo
+                  src={item.url}
+                  className={`w-full h-full ${getFitClass()} pointer-events-none`}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  controls={false}
+                />
+              ) : (
+                <OptimizedImage
+                  src={item.url}
+                  srcMobile={item.urlMobile}
+                  srcDesktop={item.urlDesktop}
+                  alt=""
+                  className={`w-full ${itemHasCrop ? 'h-auto' : 'h-full'} ${getFitClass()} transition-transform duration-700 pointer-events-none`}
+                  loading="lazy"
+                  quality={85}
+                  crop={item.crop}
+                  hotspot={item.hotspot}
+                  origWidth={item.origWidth}
+                  origHeight={item.origHeight}
+                  cropMobile={item.cropMobile}
+                  hotspotMobile={item.hotspotMobile}
+                  origWidthMobile={item.origWidthMobile}
+                  origHeightMobile={item.origHeightMobile}
+                />
+              )}
+            </div>
+          )
+        })}
       </div>
 
       {/* Sol / Sağ Ok Butonları (Desktop Daima Görünür) */}

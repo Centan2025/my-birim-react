@@ -297,10 +297,22 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             const desktopObj =
               m['imageDesktopR2'] || m['imageDesktop'] || m['imageR2'] || m['image'] || m
             const heroMeta = mapR2Metadata(desktopObj)
-            if (heroMeta.crop) result['crop'] = heroMeta.crop
-            if (heroMeta.hotspot) result['hotspot'] = heroMeta.hotspot
-            if (heroMeta.origWidth) result['origWidth'] = heroMeta.origWidth
-            if (heroMeta.origHeight) result['origHeight'] = heroMeta.origHeight
+            if (heroMeta.crop) {
+              result['crop'] = heroMeta.crop
+              result['cropDesktop'] = heroMeta.crop
+            }
+            if (heroMeta.hotspot) {
+              result['hotspot'] = heroMeta.hotspot
+              result['hotspotDesktop'] = heroMeta.hotspot
+            }
+            if (heroMeta.origWidth) {
+              result['origWidth'] = heroMeta.origWidth
+              result['origWidthDesktop'] = heroMeta.origWidth
+            }
+            if (heroMeta.origHeight) {
+              result['origHeight'] = heroMeta.origHeight
+              result['origHeightDesktop'] = heroMeta.origHeight
+            }
 
             const heroMobileMeta =
               m['imageMobileR2'] || m['imageMobile']
@@ -386,6 +398,10 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
               hotspot: meta.hotspot,
               origWidth: meta.origWidth,
               origHeight: meta.origHeight,
+              cropDesktop: meta.crop,
+              hotspotDesktop: meta.hotspot,
+              origWidthDesktop: meta.origWidth,
+              origHeightDesktop: meta.origHeight,
               cropMobile: metaMobile.crop || meta.crop,
               hotspotMobile: metaMobile.hotspot || meta.hotspot,
               origWidthMobile: metaMobile.origWidth || meta.origWidth,
@@ -548,29 +564,81 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             url = b['url'] as string | undefined
           }
 
-          const desktopImgObj = imageDesktopR2 || b['imageDesktop'] || imageR2 || b['image'] || b
+          const desktopImgObj = {
+            ...(typeof b === 'object' && b !== null ? (b as Record<string, unknown>) : {}),
+            ...(typeof imageR2 === 'object' && imageR2 !== null
+              ? (imageR2 as Record<string, unknown>)
+              : {}),
+            ...(typeof imageDesktopR2 === 'object' && imageDesktopR2 !== null
+              ? (imageDesktopR2 as Record<string, unknown>)
+              : {}),
+            crop:
+              b['cropDesktop'] ||
+              b['crop'] ||
+              (imageR2 as Record<string, unknown> | undefined)?.['crop'],
+            hotspot:
+              b['hotspotDesktop'] ||
+              b['hotspot'] ||
+              (imageR2 as Record<string, unknown> | undefined)?.['hotspot'],
+          }
           const metaDesktop = mapR2Metadata(desktopImgObj)
-          const mobileImgObj = imageMobileR2 || b['imageMobile']
-          const metaMobile = mobileImgObj
-            ? mapR2Metadata(mobileImgObj)
-            : b['cropMobile']
-              ? mapR2Metadata({crop: b['cropMobile']})
-              : {}
+
+          const mobileImgObj = {
+            ...(typeof b === 'object' && b !== null ? (b as Record<string, unknown>) : {}),
+            ...(typeof imageMobileR2 === 'object' && imageMobileR2 !== null
+              ? (imageMobileR2 as Record<string, unknown>)
+              : {}),
+            crop:
+              b['cropMobile'] || (imageMobileR2 as Record<string, unknown> | undefined)?.['crop'],
+            hotspot:
+              b['hotspotMobile'] ||
+              (imageMobileR2 as Record<string, unknown> | undefined)?.['hotspot'],
+          }
+          const metaMobile = mapR2Metadata(mobileImgObj)
           const borderColor = (b['borderColor'] as Record<string, unknown>)?.['hex']
 
-          const crop = metaDesktop.crop || b['crop']
-          const hotspot = metaDesktop.hotspot || b['hotspot']
+          const crop =
+            metaDesktop.crop ||
+            (b['crop'] ? mapR2Metadata({crop: b['crop']}).crop : undefined) ||
+            (b['image'] ? mapR2Metadata(b['image']).crop : undefined)
+
+          const hotspot =
+            metaDesktop.hotspot ||
+            (b['hotspot'] ? mapR2Metadata({hotspot: b['hotspot']}).hotspot : undefined) ||
+            (b['image'] ? mapR2Metadata(b['image']).hotspot : undefined)
+
           const origWidth = metaDesktop.origWidth || b['origWidth']
           const origHeight = metaDesktop.origHeight || b['origHeight']
 
+          const cropDesktop =
+            metaDesktop.crop ||
+            (b['cropDesktop'] ? mapR2Metadata({crop: b['cropDesktop']}).crop : undefined) ||
+            crop
+
+          const hotspotDesktop =
+            metaDesktop.hotspot ||
+            (b['hotspotDesktop']
+              ? mapR2Metadata({hotspot: b['hotspotDesktop']}).hotspot
+              : undefined) ||
+            hotspot
+
+          const origWidthDesktop = metaDesktop.origWidth || b['origWidthDesktop'] || origWidth
+          const origHeightDesktop = metaDesktop.origHeight || b['origHeightDesktop'] || origHeight
+
           const cropMobile =
             metaMobile.crop ||
-            (b['cropMobile'] ? mapR2Metadata({crop: b['cropMobile']}).crop : undefined)
+            (b['cropMobile'] ? mapR2Metadata({crop: b['cropMobile']}).crop : undefined) ||
+            cropDesktop
+
           const hotspotMobile =
             metaMobile.hotspot ||
-            (b['hotspotMobile'] ? mapR2Metadata({hotspot: b['hotspotMobile']}).hotspot : undefined)
-          const origWidthMobile = metaMobile.origWidth || origWidth
-          const origHeightMobile = metaMobile.origHeight || origHeight
+            (b['hotspotMobile']
+              ? mapR2Metadata({hotspot: b['hotspotMobile']}).hotspot
+              : undefined) ||
+            hotspotDesktop
+
+          const origWidthMobile = metaMobile.origWidth || origWidthDesktop
+          const origHeightMobile = metaMobile.origHeight || origHeightDesktop
 
           return {
             ...b,
@@ -585,6 +653,10 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             hotspot,
             origWidth,
             origHeight,
+            cropDesktop,
+            hotspotDesktop,
+            origWidthDesktop,
+            origHeightDesktop,
             cropMobile,
             hotspotMobile,
             origWidthMobile,

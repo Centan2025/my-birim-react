@@ -337,22 +337,51 @@ export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
           str = String((asset as {_ref: unknown})._ref)
       }
 
-      const match = str.match(/-(\d+)x(\d+)\./)
+      // Sanity / Asset name pattern: -1920x1080.webp or _1920x1080.webp
+      const match = str.match(/[-_](\d{2,5})x(\d{2,5})[._]/i)
       if (match) {
         return {w: Number(match[1]), h: Number(match[2])}
       }
+
+      // Query params pattern: w=1920&h=1080 or width=1920&height=1080
+      const wMatch = str.match(/[?&](?:w|width)=(\d+)/i)
+      const hMatch = str.match(/[?&](?:h|height)=(\d+)/i)
+      if (wMatch && hMatch) {
+        return {w: Number(wMatch[1]), h: Number(hMatch[2])}
+      }
+
       return {}
     }
 
     const targetObj = (i['imageR2'] || i['image'] || i) as Record<string, unknown>
     const dims = extractDimsFromUrl(targetObj)
-    const crop = parseCropObj(targetObj) || parseCropObj(i)
-    const hotspot = parseHotspotObj(targetObj) || parseHotspotObj(i)
     const origWidth =
       Number(targetObj['width'] || targetObj['origWidth'] || i['width'] || i['origWidth']) || dims.w
     const origHeight =
       Number(targetObj['height'] || targetObj['origHeight'] || i['height'] || i['origHeight']) ||
       dims.h
+
+    const normalizeCrop = (
+      c: {x: number; y: number; width: number; height: number} | undefined,
+      w?: number,
+      h?: number
+    ) => {
+      if (!c) return undefined
+      let {x, y, width, height} = c
+      if (width > 1 && w && w > 0) {
+        x = x / w
+        width = width / w
+      }
+      if (height > 1 && h && h > 0) {
+        y = y / h
+        height = height / h
+      }
+      return {x, y, width, height}
+    }
+
+    const rawCrop = parseCropObj(targetObj) || parseCropObj(i)
+    const crop = normalizeCrop(rawCrop, origWidth, origHeight)
+    const hotspot = parseHotspotObj(targetObj) || parseHotspotObj(i)
     const isMirrored =
       targetObj['isMirrored'] !== undefined
         ? !!targetObj['isMirrored']
@@ -362,14 +391,6 @@ export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
 
     const mobileAsset = i['imageMobileR2'] || i['imageMobile'] || targetObj['imageMobile']
     const dimsMobile = extractDimsFromUrl(mobileAsset)
-    const cropMobile =
-      parseCropObj(mobileAsset) ||
-      parseCropObj(i['cropMobile']) ||
-      parseCropObj(targetObj['cropMobile'])
-    const hotspotMobile =
-      parseHotspotObj(mobileAsset) ||
-      parseHotspotObj(i['hotspotMobile']) ||
-      parseHotspotObj(targetObj['hotspotMobile'])
     const origWidthMobile =
       Number(
         i['origWidthMobile'] ||
@@ -388,6 +409,16 @@ export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
       ) ||
       dimsMobile.h ||
       origHeight
+
+    const rawCropMobile =
+      parseCropObj(mobileAsset) ||
+      parseCropObj(i['cropMobile']) ||
+      parseCropObj(targetObj['cropMobile'])
+    const cropMobile = normalizeCrop(rawCropMobile, origWidthMobile, origHeightMobile)
+    const hotspotMobile =
+      parseHotspotObj(mobileAsset) ||
+      parseHotspotObj(i['hotspotMobile']) ||
+      parseHotspotObj(targetObj['hotspotMobile'])
 
     return {
       crop,

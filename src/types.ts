@@ -362,6 +362,10 @@ export interface HeroMediaItem {
   hotspotMobile?: R2ImageMetadata['hotspot']
   origWidthMobile?: number
   origHeightMobile?: number
+  cropDesktop?: R2ImageMetadata['crop']
+  hotspotDesktop?: R2ImageMetadata['hotspot']
+  origWidthDesktop?: number
+  origHeightDesktop?: number
 }
 
 /**
@@ -386,6 +390,14 @@ export interface ContentBlock {
     hotspot?: R2ImageMetadata['hotspot']
     origWidth?: number
     origHeight?: number
+    cropMobile?: R2ImageMetadata['crop']
+    hotspotMobile?: R2ImageMetadata['hotspot']
+    origWidthMobile?: number
+    origHeightMobile?: number
+    cropDesktop?: R2ImageMetadata['crop']
+    hotspotDesktop?: R2ImageMetadata['hotspot']
+    origWidthDesktop?: number
+    origHeightDesktop?: number
   }>
   /** Size for panels: small, medium, large */
   panelSize?: 'small' | 'medium' | 'large'
@@ -401,6 +413,10 @@ export interface ContentBlock {
   hotspotMobile?: R2ImageMetadata['hotspot']
   origWidthMobile?: number
   origHeightMobile?: number
+  cropDesktop?: R2ImageMetadata['crop']
+  hotspotDesktop?: R2ImageMetadata['hotspot']
+  origWidthDesktop?: number
+  origHeightDesktop?: number
   /** URL for video or YouTube (for video/youtube types) */
   url?: string
   urlMobile?: string

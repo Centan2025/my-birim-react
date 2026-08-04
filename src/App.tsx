@@ -34,13 +34,12 @@ const AppContent = () => {
   const {pathname} = useLocation()
   const {reset: resetHeaderTheme} = useHeaderTheme()
 
-  // Ultra-Soft Lenis Smooth Momentum Scroll Integration
+  // Ultra-Soft & Butter-Smooth Lenis Momentum Scroll Integration
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.4,
-      easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      lerp: 0.065, // Düşük lerp faktörü = tereyağı gibi ipeksi ve ultra yumuşak kayma
+      wheelMultiplier: 1.0,
       smoothWheel: true,
-      wheelMultiplier: 0.95,
       touchMultiplier: 1.5,
     })
 

@@ -52,9 +52,11 @@ html.lenis body {
   height: auto;
 }
 
-.scroll-snap-start {
-  scroll-snap-align: start !important;
-  scroll-snap-stop: always !important;
+@media (max-width: 1023px) {
+  .scroll-snap-start {
+    scroll-snap-align: start !important;
+    scroll-snap-stop: always !important;
+  }
 }
 
 /* Accessibility Focus Ring Styles */

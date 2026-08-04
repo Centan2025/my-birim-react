@@ -563,6 +563,10 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                     hotspotMobile={media.hotspotMobile}
                     origWidthMobile={media.origWidthMobile}
                     origHeightMobile={media.origHeightMobile}
+                    cropDesktop={media.cropDesktop || media.crop}
+                    hotspotDesktop={media.hotspotDesktop || media.hotspot}
+                    origWidthDesktop={media.origWidthDesktop || media.origWidth}
+                    origHeightDesktop={media.origHeightDesktop || media.origHeight}
                   />
                 )}
                 <div className="absolute inset-0 bg-black/10 z-10"></div>
