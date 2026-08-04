@@ -9,12 +9,10 @@ export const SANITY_DATASET = import.meta.env['VITE_SANITY_DATASET'] || 'product
 export const SANITY_API_VERSION = import.meta.env['VITE_SANITY_API_VERSION'] || '2025-01-01'
 export const useSanity = Boolean(SANITY_PROJECT_ID && SANITY_DATASET)
 
-const rawR2Domain =
-  import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
+const rawR2Domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://assets.birim.com'
 export const R2_DOMAIN = rawR2Domain.startsWith('http') ? rawR2Domain : `https://${rawR2Domain}`
 
-const rawOriginDomain =
-  import.meta.env['VITE_R2_ORIGIN_DOMAIN'] || 'https://pub-5e705b2a702d4bb1a3631c558917599d.r2.dev'
+const rawOriginDomain = import.meta.env['VITE_R2_ORIGIN_DOMAIN'] || 'https://assets.birim.com'
 export const R2_ORIGIN_DOMAIN = rawOriginDomain.startsWith('http')
   ? rawOriginDomain
   : `https://${rawOriginDomain}`
@@ -132,67 +130,44 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
   let result = urlParts[0] || ''
   const searchParams = urlParts[1] || ''
 
-  // Tüm medya dosyaları (görsel ve video) hızlı Worker CDN edge ağı üzerinden sunulmalıdır
-  const activeDomain = R2_DOMAIN || R2_ORIGIN_DOMAIN
+  // Varsayılan CDN domainimiz daima https://assets.birim.com'dur
+  const activeDomain = R2_DOMAIN || 'https://assets.birim.com'
+  const targetDomainNoProtocol = activeDomain.replace(/^https?:\/\//, '')
 
-  // 2. Domain Rewrite (Hepsini tek bir domain'e topla)
-  // Regex pointer issue riskini azaltmak için string replace kullanıyoruz
+  // 1. Eski veya geçici r2.dev / workers.dev domainlerini assets.birim.com ile değiştir
   const legacyDomains = [
-    'assets.birim.com',
-    'birim-assets.web-birim.workers.dev',
     'pub-5e705b2a702d4bb1a3631c558917599d.r2.dev',
+    'birim-assets.web-birim.workers.dev',
   ]
 
-  if (activeDomain) {
-    const r2DomainNoProtocol = activeDomain.replace(/^https?:\/\//, '')
-
-    // Domain Rewrite
-    if (result.includes('assets.birim.com')) {
-      result = result.replace('assets.birim.com', r2DomainNoProtocol)
+  for (const domain of legacyDomains) {
+    if (result.includes(domain)) {
+      result = result.replace(domain, targetDomainNoProtocol)
     }
+  }
 
-    for (const domain of legacyDomains) {
-      if (result.includes(domain) && domain !== 'assets.birim.com') {
-        result = result.replace(domain, r2DomainNoProtocol)
-      }
-    }
+  // 2. Jenerik *.r2.dev domainlerini assets.birim.com ile değiştir
+  if (result.includes('.r2.dev') && !result.includes(targetDomainNoProtocol)) {
+    result = result.replace(/https?:\/\/[^/]+\.r2\.dev/, activeDomain)
+  }
 
-    // Generic R2.dev rewrite
-    if (result.includes('.r2.dev') && !result.includes(r2DomainNoProtocol)) {
-      try {
-        const parts = result.split('/')
-        for (let i = 0; i < parts.length; i++) {
-          const part = parts[i]
-          if (part && part.includes('.r2.dev')) {
-            parts[i] = r2DomainNoProtocol
-            break
-          }
-        }
-        result = parts.join('/')
-      } catch {
-        /* ignore */
-      }
-    }
-
-    // New: Relatif yolları mutlak yap (lokal public görsellere /img/ dokunma)
-    if (
-      !result.startsWith('http') &&
-      !result.startsWith('/img/') &&
-      !result.startsWith('img/') &&
-      !result.startsWith('/logo') &&
-      !result.startsWith('data:') &&
-      result.length > 0
-    ) {
-      // Eğer zaten domain ile başlıyorsa (ama protokolü yoksa) sadece protokolü ekle
-      if (result.startsWith(r2DomainNoProtocol)) {
-        const cleanPath = result.replace(r2DomainNoProtocol, '').startsWith('/')
-          ? result.replace(r2DomainNoProtocol, '').substring(1)
-          : result.replace(r2DomainNoProtocol, '')
-        result = `${activeDomain}/${cleanPath}`
-      } else {
-        const cleanPath = result.startsWith('/') ? result.substring(1) : result
-        result = `${activeDomain}/${cleanPath}`
-      }
+  // 3. Relatif yolları mutlak yap (lokal public görsellere /img/ dokunma)
+  if (
+    !result.startsWith('http') &&
+    !result.startsWith('/img/') &&
+    !result.startsWith('img/') &&
+    !result.startsWith('/logo') &&
+    !result.startsWith('data:') &&
+    result.length > 0
+  ) {
+    if (result.startsWith(targetDomainNoProtocol)) {
+      const cleanPath = result.replace(targetDomainNoProtocol, '').startsWith('/')
+        ? result.replace(targetDomainNoProtocol, '').substring(1)
+        : result.replace(targetDomainNoProtocol, '')
+      result = `${activeDomain}/${cleanPath}`
+    } else {
+      const cleanPath = result.startsWith('/') ? result.substring(1) : result
+      result = `${activeDomain}/${cleanPath}`
     }
   }
 

@@ -340,7 +340,6 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
         onCanPlay={handleLoadedData}
       >
         <source src={activeSrc} type="video/mp4" />
-        {fallbackSrc && <source src={fallbackSrc} type="video/mp4" />}
         <track kind="captions" srcLang="en" label="English" />
       </video>
     </div>

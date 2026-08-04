@@ -280,7 +280,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   )
 
   const [hasTriedWithoutSrcSet, setHasTriedWithoutSrcSet] = useState(false)
-  const [hasTriedDirectOrigin, setHasTriedDirectOrigin] = useState(false)
 
   // src veya props değiştiğinde state'i sıfırla ve doğal boyutları önceden yükle
   useEffect(() => {
@@ -288,7 +287,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     setIsLoaded(false)
     setHasError(false)
     setHasTriedWithoutSrcSet(false)
-    setHasTriedDirectOrigin(false)
     if (targetOrigW && targetOrigH) {
       setNaturalDims({w: targetOrigW, h: targetOrigH})
     } else if (src) {
@@ -355,22 +353,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       setHasError(false)
       return
     }
-    if (!hasTriedDirectOrigin && currentSrc) {
-      const primaryDomain = (
-        import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
-      ).replace(/^https?:\/\//, '')
-      const originDomain = (
-        import.meta.env['VITE_R2_ORIGIN_DOMAIN'] ||
-        'https://pub-5e705b2a702d4bb1a3631c558917599d.r2.dev'
-      ).replace(/^https?:\/\//, '')
-      if (currentSrc.includes(primaryDomain)) {
-        const fallbackUrl = currentSrc.replace(primaryDomain, originDomain)
-        setHasTriedDirectOrigin(true)
-        setCurrentSrc(fallbackUrl)
-        setHasError(false)
-        return
-      }
-    }
     if (fallbackSrc && currentSrc !== fallbackSrc) {
       setCurrentSrc(fallbackSrc)
       setHasError(false)
@@ -386,7 +368,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const activeSrc = rewriteR2Url(currentSrc) || activeDesktopSrc || activeMobileSrc || ''
 
   // Cloudflare R2 / Image Resizing logic
-  const r2Domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
+  const r2Domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://assets.birim.com'
   // .r2.dev ve .workers.dev domainleri image resizing desteklemez
   const skipImageResizing =
     r2Domain?.includes('.r2.dev') ||
