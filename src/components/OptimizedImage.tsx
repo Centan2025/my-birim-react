@@ -468,8 +468,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     const cropToUse = targetCrop || activeCrop
 
     // R2 Logic
-    const r2Domain =
-      import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
+    const r2Domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://assets.birim.com'
     if (r2Domain && baseUrl.startsWith(r2Domain)) {
       if (
         r2Domain.includes('.r2.dev') ||

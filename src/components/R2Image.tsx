@@ -35,7 +35,7 @@ const getR2Url = (
   options: {width?: number; height?: number; quality?: number},
   crop?: {x: number; y: number; w: number; h: number; origW: number; origH: number}
 ) => {
-  const domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
+  const domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://assets.birim.com'
   if (!domain) return undefined
 
   // Encode the path to prevent 404s on files with spaces or special characters
@@ -132,7 +132,7 @@ export const R2Image: React.FC<R2ImageProps> = ({
   // 2. Generate SrcSet for R2
   const r2SrcSet = useMemo(() => {
     if (!source || !source.path) return undefined
-    const domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
+    const domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://assets.birim.com'
     const skipImageResizing =
       domain.includes('.r2.dev') ||
       domain.includes('.workers.dev') ||
@@ -176,7 +176,7 @@ export const R2Image: React.FC<R2ImageProps> = ({
 
   // If R2 exists
   if (r2Src) {
-    const domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
+    const domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://assets.birim.com'
     const skipImageResizing =
       domain.includes('.r2.dev') ||
       domain.includes('.workers.dev') ||
