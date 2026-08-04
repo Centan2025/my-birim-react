@@ -194,8 +194,8 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
             isLightMode ? 'text-black hover:text-gray-800' : 'text-white hover:text-gray-200'
           }`}
           style={{
-            fontSize: 'clamp(9px, 0.2rem + 0.5vw, 11px)',
-            letterSpacing: '0.05em',
+            fontSize: 'clamp(13px, 0.35rem + 0.65vw, 15px)',
+            letterSpacing: '0.06em',
             fontFamily: "'Inter', sans-serif",
           }}
           onClick={onClose}
