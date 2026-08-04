@@ -53,12 +53,11 @@ export default defineConfig({
         // Sanity CDN ve R2 görsellerini önbelleğe al (30 gün)
         runtimeCaching: [
           {
-            urlPattern:
-              /^https:\/\/assets\.birim\.com\/.*\.(webp|png|jpg|jpeg|svg|gif|ico)(\?.*)?$/i,
+            urlPattern: /^https:\/\/assets\.birim\.com\/.*/i,
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'birim-assets-images',
-              expiration: {maxEntries: 200, maxAgeSeconds: 30 * 24 * 60 * 60},
+              expiration: {maxEntries: 300, maxAgeSeconds: 30 * 24 * 60 * 60},
               cacheableResponse: {statuses: [0, 200]},
             },
           },
@@ -72,8 +71,16 @@ export default defineConfig({
             },
           },
           {
-            urlPattern:
-              /^https:\/\/birim-assets\.web-birim\.workers\.dev\/.*\.(webp|png|jpg|jpeg|svg|gif|ico)(\?.*)?$/i,
+            urlPattern: /^https:\/\/.*\.r2\.dev\/.*/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'legacy-r2-assets',
+              expiration: {maxEntries: 100, maxAgeSeconds: 7 * 24 * 60 * 60},
+              cacheableResponse: {statuses: [0, 200]},
+            },
+          },
+          {
+            urlPattern: /^https:\/\/birim-assets\.web-birim\.workers\.dev\/.*/i,
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'r2-cdn-assets',

@@ -182,10 +182,10 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
   const getPosterForScreen = useCallback((): string | undefined => {
     if (typeof window !== 'undefined') {
       const isMobileScreen = window.innerWidth <= 768
-      if (isMobileScreen && posterMobile) return posterMobile
-      if (!isMobileScreen && posterDesktop) return posterDesktop
+      if (isMobileScreen && posterMobile) return rewriteR2Url(posterMobile)
+      if (!isMobileScreen && posterDesktop) return rewriteR2Url(posterDesktop)
     }
-    return poster
+    return rewriteR2Url(poster)
   }, [poster, posterMobile, posterDesktop])
 
   // Poster'ı dinamik olarak güncelle

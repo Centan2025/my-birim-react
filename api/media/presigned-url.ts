@@ -97,7 +97,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     )
 
-    const defaultDomain = 'pub-5e705b2a702d4bb1a3631c558917599d.r2.dev'
+    const defaultDomain = 'assets.birim.com'
     const domainToUse = R2_DOMAIN && R2_DOMAIN !== 'undefined' ? R2_DOMAIN : defaultDomain
     const r2Domain = domainToUse.startsWith('http') ? domainToUse : `https://${domainToUse}`
     const finalFileUrl = `${r2Domain}/${key}`

@@ -134,21 +134,15 @@ export const rewriteR2Url = (url: string | undefined, hasResponsiveSizes?: boole
   const activeDomain = R2_DOMAIN || 'https://assets.birim.com'
   const targetDomainNoProtocol = activeDomain.replace(/^https?:\/\//, '')
 
-  // 1. Eski veya geçici r2.dev / workers.dev domainlerini assets.birim.com ile değiştir
-  const legacyDomains = [
-    'pub-5e705b2a702d4bb1a3631c558917599d.r2.dev',
-    'birim-assets.web-birim.workers.dev',
-  ]
-
-  for (const domain of legacyDomains) {
-    if (result.includes(domain)) {
-      result = result.replace(domain, targetDomainNoProtocol)
-    }
+  // 1. Tüm r2.dev ve workers.dev domainlerini https://assets.birim.com ile değiştir
+  if (result.includes('.r2.dev')) {
+    result = result.replace(/^(https?:\/\/)?([^/]+\.r2\.dev)/, activeDomain)
   }
-
-  // 2. Jenerik *.r2.dev domainlerini assets.birim.com ile değiştir
-  if (result.includes('.r2.dev') && !result.includes(targetDomainNoProtocol)) {
-    result = result.replace(/https?:\/\/[^/]+\.r2\.dev/, activeDomain)
+  if (result.includes('.workers.dev')) {
+    result = result.replace(/^(https?:\/\/)?([^/]+\.workers\.dev)/, activeDomain)
+  }
+  if (result.startsWith('http://assets.birim.com')) {
+    result = result.replace('http://assets.birim.com', 'https://assets.birim.com')
   }
 
   // 3. Relatif yolları mutlak yap (lokal public görsellere /img/ dokunma)

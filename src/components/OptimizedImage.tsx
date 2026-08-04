@@ -268,7 +268,11 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     )
   }, [])
 
-  const [currentSrc, setCurrentSrc] = useState<string>(src)
+  const safeSrc = useMemo(() => rewriteR2Url(src), [src])
+  const safeSrcMobile = useMemo(() => rewriteR2Url(srcMobile), [srcMobile])
+  const safeSrcDesktop = useMemo(() => rewriteR2Url(srcDesktop), [srcDesktop])
+
+  const [currentSrc, setCurrentSrc] = useState<string>(safeSrc)
   const [isLoaded, setIsLoaded] = useState(false)
   const [hasError, setHasError] = useState(false)
   const imgRef = useRef<HTMLImageElement>(null)
@@ -285,15 +289,15 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   // src veya props değiştiğinde state'i sıfırla ve doğal boyutları önceden yükle
   useEffect(() => {
-    setCurrentSrc(src)
+    setCurrentSrc(safeSrc)
     setIsLoaded(false)
     setHasError(false)
     setHasTriedWithoutSrcSet(false)
     if (targetOrigW && targetOrigH) {
       setNaturalDims({w: targetOrigW, h: targetOrigH})
-    } else if (src) {
+    } else if (safeSrc) {
       const loader = new Image()
-      loader.src = src
+      loader.src = safeSrc
       if (loader.complete && loader.naturalWidth > 0 && loader.naturalHeight > 0) {
         setNaturalDims({w: loader.naturalWidth, h: loader.naturalHeight})
       } else {
@@ -304,7 +308,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         }
       }
     }
-  }, [src, srcMobile, srcDesktop, targetOrigW, targetOrigH])
+  }, [safeSrc, safeSrcMobile, safeSrcDesktop, targetOrigW, targetOrigH])
 
   // Cache'den yüklenen görselleri yakalama & hızlı görünürlük zamanlayıcısı
   useEffect(() => {
@@ -465,62 +469,13 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     : undefined
 
   // Responsive srcset oluştur
-  const generateSrcSet = (baseUrl: string, targetCrop?: typeof activeCrop): string => {
+  const generateSrcSet = (baseUrl: string): string => {
     if (srcSet) return srcSet
-    const cropToUse = targetCrop || activeCrop
 
     // R2 Logic
     const r2Domain = import.meta.env['VITE_R2_DOMAIN'] || 'https://assets.birim.com'
     if (r2Domain && baseUrl.startsWith(r2Domain)) {
-      if (
-        r2Domain.includes('.r2.dev') ||
-        r2Domain.includes('.workers.dev') ||
-        r2Domain.includes('assets.birim.com')
-      ) {
-        // Sadece rs=1 (responsive sizes üretilmiş) olan webp görseller için srcset döndür
-        if (
-          baseUrl.includes('rs=1') &&
-          baseUrl.endsWith('.webp') &&
-          !baseUrl.includes('-400w.webp') &&
-          !baseUrl.includes('-800w.webp') &&
-          !baseUrl.includes('-1600w.webp')
-        ) {
-          const cleanUrl = baseUrl.replace('?rs=1', '').replace('&rs=1', '')
-          return [
-            `${encodeSrcSetUrl(cleanUrl.replace(/\.webp$/, '-400w.webp'))} 400w`,
-            `${encodeSrcSetUrl(cleanUrl.replace(/\.webp$/, '-800w.webp'))} 800w`,
-            `${encodeSrcSetUrl(cleanUrl.replace(/\.webp$/, '-1600w.webp'))} 1600w`,
-            `${encodeSrcSetUrl(cleanUrl)} 2560w`,
-          ].join(', ')
-        }
-        return ''
-      }
-
-      const sizes = [400, 800, 1200, 1600, 2000]
-      const buildR2 = (w: number) => {
-        const params = [`width=${w}`, `quality=${quality}`, 'format=auto']
-
-        if (cropToUse) {
-          if (
-            cropToUse.width < 1.0 ||
-            cropToUse.height < 1.0 ||
-            cropToUse.x > 0 ||
-            cropToUse.y > 0
-          ) {
-            if (origWidth && origHeight) {
-              params.push(
-                `rect=${Math.round(cropToUse.x * origWidth)},${Math.round(cropToUse.y * origHeight)},${Math.round(cropToUse.width * origWidth)},${Math.round(cropToUse.height * origHeight)}`
-              )
-            }
-          } else {
-            params.push(`rect=${cropToUse.x},${cropToUse.y},${cropToUse.width},${cropToUse.height}`)
-          }
-        }
-
-        const path = baseUrl.replace(r2Domain + '/', '')
-        return encodeSrcSetUrl(`${r2Domain}/cdn-cgi/image/${params.join(',')}/${path}`)
-      }
-      return sizes.map(w => `${buildR2(w)} ${w}w`).join(', ')
+      return ''
     }
 
     return ''
@@ -787,10 +742,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     .join(' ')
 
   if (useArtDirection) {
-    const mobileSrcSet =
-      (srcMobile ? generateSrcSet(srcMobile, normalizedCropMobile) : '') || undefined
-    const desktopSrcSet =
-      (activeDesktopSrc ? generateSrcSet(activeDesktopSrc, normalizedCropDesktop) : '') || undefined
+    const mobileSrcSet = (srcMobile ? generateSrcSet(srcMobile) : '') || undefined
+    const desktopSrcSet = (activeDesktopSrc ? generateSrcSet(activeDesktopSrc) : '') || undefined
 
     const pictureElement = (
       <picture className="w-full h-full block relative overflow-hidden responsive-crop-pos">
