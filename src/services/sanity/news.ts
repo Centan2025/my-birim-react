@@ -28,8 +28,10 @@ const mapMediaArray = (mediaArrRaw: unknown): unknown[] => {
       if (type === 'image' || !type) {
         const imgSource = m['imageR2'] || m['image'] || m
         url = mapImage(imgSource as SanityImageLike)
-        urlMobile = mapImage((m['imageMobileR2'] || m['imageMobile']) as SanityImageLike) || undefined
-        urlDesktop = mapImage((m['imageDesktopR2'] || m['imageDesktop']) as SanityImageLike) || undefined
+        urlMobile =
+          mapImage((m['imageMobileR2'] || m['imageMobile']) as SanityImageLike) || undefined
+        urlDesktop =
+          mapImage((m['imageDesktopR2'] || m['imageDesktop']) as SanityImageLike) || undefined
       } else if (type === 'video') {
         url = mapImage(m['videoFileR2'] as SanityImageLike)
         urlMobile = (m['videoFileMobileR2'] as Record<string, string>)?.['url']
@@ -65,8 +67,12 @@ const mapNewsRow = (r: Record<string, unknown>): NewsItem => {
     if (coverItem['type'] === 'image' || !coverItem['type']) {
       const imgSource = coverItem['imageR2'] || coverItem['image'] || coverItem
       url = mapImage(imgSource as SanityImageLike)
-      urlMobile = mapImage((coverItem['imageMobileR2'] || coverItem['imageMobile']) as SanityImageLike) || undefined
-      urlDesktop = mapImage((coverItem['imageDesktopR2'] || coverItem['imageDesktop']) as SanityImageLike) || undefined
+      urlMobile =
+        mapImage((coverItem['imageMobileR2'] || coverItem['imageMobile']) as SanityImageLike) ||
+        undefined
+      urlDesktop =
+        mapImage((coverItem['imageDesktopR2'] || coverItem['imageDesktop']) as SanityImageLike) ||
+        undefined
     } else if (coverItem['type'] === 'video') {
       url = mapImage(coverItem['videoFileR2'] as SanityImageLike)
       urlMobile = (coverItem['videoFileMobileR2'] as Record<string, string>)?.['url']
@@ -103,8 +109,12 @@ const mapProjectRow = (r: Record<string, unknown>): Project => {
   if (coverItem) {
     const imgSource = coverItem['imageR2'] || coverItem['image'] || coverItem
     const url = mapImage(imgSource as SanityImageLike)
-    const urlMobile = mapImage((coverItem['imageMobileR2'] || coverItem['imageMobile']) as SanityImageLike) || undefined
-    const urlDesktop = mapImage((coverItem['imageDesktopR2'] || coverItem['imageDesktop']) as SanityImageLike) || undefined
+    const urlMobile =
+      mapImage((coverItem['imageMobileR2'] || coverItem['imageMobile']) as SanityImageLike) ||
+      undefined
+    const urlDesktop =
+      mapImage((coverItem['imageDesktopR2'] || coverItem['imageDesktop']) as SanityImageLike) ||
+      undefined
     const metadata = mapR2Metadata(coverItem)
     cover = {
       url,

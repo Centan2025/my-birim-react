@@ -206,12 +206,12 @@ export function ProductsPage() {
               }
               origWidth={
                 typeof category?.heroImage === 'object'
-                  ? (category.heroImage as Record<string, unknown>)['origWidth'] as number
+                  ? ((category.heroImage as Record<string, unknown>)['origWidth'] as number)
                   : undefined
               }
               origHeight={
                 typeof category?.heroImage === 'object'
-                  ? (category.heroImage as Record<string, unknown>)['origHeight'] as number
+                  ? ((category.heroImage as Record<string, unknown>)['origHeight'] as number)
                   : undefined
               }
             />
