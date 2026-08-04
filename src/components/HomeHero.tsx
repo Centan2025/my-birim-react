@@ -521,12 +521,15 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                     src={media.url}
                     srcMobile={media.urlMobile}
                     srcDesktop={media.urlDesktop}
+                    poster={(media as unknown as Record<string, string>)['poster'] || (media as unknown as Record<string, string>)['image'] || (media as unknown as Record<string, string>)['urlPoster']}
+                    posterMobile={(media as unknown as Record<string, string>)['posterMobile'] || (media as unknown as Record<string, string>)['imageMobile'] || (media as unknown as Record<string, string>)['urlMobilePoster']}
+                    posterDesktop={(media as unknown as Record<string, string>)['posterDesktop'] || (media as unknown as Record<string, string>)['imageDesktop'] || (media as unknown as Record<string, string>)['urlDesktopPoster']}
                     className={`absolute inset-0 w-full h-full ${isMobile ? 'object-cover object-center' : 'object-cover'}`}
                     autoPlay={isActiveSlide}
                     loop
                     muted
                     playsInline
-                    preload={isInitialSlide ? 'auto' : 'metadata'}
+                    preload={isActiveSlide || isInitialSlide ? 'auto' : 'metadata'}
                     loading={isInitialSlide ? 'eager' : 'lazy'}
                   />
                 ) : (

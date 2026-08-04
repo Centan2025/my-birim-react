@@ -232,6 +232,9 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     src={m.url}
                     srcMobile={m.urlMobile}
                     srcDesktop={m.urlDesktop}
+                    poster={(m as unknown as Record<string, string>)['poster'] || (m as unknown as Record<string, string>)['image']}
+                    posterMobile={(m as unknown as Record<string, string>)['posterMobile'] || (m as unknown as Record<string, string>)['imageMobile']}
+                    posterDesktop={(m as unknown as Record<string, string>)['posterDesktop'] || (m as unknown as Record<string, string>)['imageDesktop']}
                     className={`w-full h-full ${
                       !m.urlMobile ? 'max-md:object-contain md:object-cover' : 'object-cover'
                     } ${imageBorderClass}`}
@@ -239,7 +242,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     muted
                     loop
                     playsInline
-                    preload={shouldEagerLoad ? 'auto' : 'metadata'}
+                    preload={isActiveSlide || shouldEagerLoad ? 'auto' : 'metadata'}
                     loading={shouldEagerLoad ? 'eager' : 'lazy'}
                   />
                 ) : (

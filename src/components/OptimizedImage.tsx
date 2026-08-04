@@ -170,7 +170,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   }
 
   const handleError = () => {
-    if (!hasTriedWithoutSrcSet) {
+    if (!hasTriedWithoutSrcSet && responsiveSrcSet) {
       setHasTriedWithoutSrcSet(true)
       setHasError(false)
       return

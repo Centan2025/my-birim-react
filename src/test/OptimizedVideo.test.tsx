@@ -8,9 +8,9 @@ describe('OptimizedVideo', () => {
     const {container} = render(
       <OptimizedVideo src="https://birim-assets.web-birim.workers.dev/sample.mp4" />
     )
-    const video = container.querySelector('video')
-    expect(video).toBeInTheDocument()
-    expect(video?.getAttribute('src')).toBe(
+    const source = container.querySelector('video source')
+    expect(source).toBeInTheDocument()
+    expect(source?.getAttribute('src')).toBe(
       'https://pub-5e705b2a702d4bb1a3631c558917599d.r2.dev/sample.mp4'
     )
   })

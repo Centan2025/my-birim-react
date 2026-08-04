@@ -137,13 +137,15 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
 
   const activeSrc = getActiveSrc()
 
-  // Fallback domain URL'i üret (Worker CDN -> Direct R2)
+  // Fallback domain URL'i üret (Worker CDN <-> Direct R2)
   const getFallbackUrl = (primaryUrl: string): string => {
     if (!primaryUrl) return ''
     if (R2_DOMAIN && R2_ORIGIN_DOMAIN && R2_DOMAIN !== R2_ORIGIN_DOMAIN) {
       const r2DomainNoProtocol = R2_DOMAIN.replace(/^https?:\/\//, '')
       const originDomainNoProtocol = R2_ORIGIN_DOMAIN.replace(/^https?:\/\//, '')
-      if (primaryUrl.includes(r2DomainNoProtocol)) {
+      if (primaryUrl.includes(originDomainNoProtocol)) {
+        return primaryUrl.replace(originDomainNoProtocol, r2DomainNoProtocol)
+      } else if (primaryUrl.includes(r2DomainNoProtocol)) {
         return primaryUrl.replace(r2DomainNoProtocol, originDomainNoProtocol)
       }
     }
@@ -259,7 +261,20 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     }
   }, [activeSrc])
 
+  const posterUrl = getPosterForScreen()
+
   if (hasError) {
+    if (posterUrl) {
+      return (
+        <div className={`relative overflow-hidden ${className}`} style={style}>
+          <img
+            src={posterUrl}
+            alt=""
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )
+    }
     return (
       <div
         className={`bg-gray-200 flex items-center justify-center ${className}`}
@@ -278,26 +293,40 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
   }
 
   return (
-    <video
-      ref={videoRef}
-      src={activeSrc}
-      poster={getPosterForScreen()}
-      autoPlay={autoPlay}
-      loop={loop}
-      muted={muted}
-      controls={controls}
-      playsInline={playsInline}
-      preload={preload}
-      className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 ${className}`}
-      style={style}
-      onClick={onClick}
-      onLoadedData={handleLoadedData}
-      onError={handleError}
-      onCanPlay={handleLoadedData}
-    >
-      <source src={activeSrc} type="video/mp4" />
-      {fallbackSrc && <source src={fallbackSrc} type="video/mp4" />}
-      <track kind="captions" srcLang="en" label="English" />
-    </video>
+    <div className={`relative ${className}`} style={style}>
+      {posterUrl && (
+        <img
+          src={posterUrl}
+          alt=""
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 z-0 ${
+            isLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
+          aria-hidden="true"
+        />
+      )}
+      <video
+        key={activeSrc}
+        ref={videoRef}
+        poster={posterUrl}
+        autoPlay={autoPlay}
+        loop={loop}
+        muted={muted}
+        controls={controls}
+        playsInline={playsInline}
+        {...({ 'webkit-playsinline': 'true' } as Record<string, string>)}
+        preload={preload}
+        className={`relative z-10 w-full h-full object-cover ${
+          isLoaded ? 'opacity-100' : posterUrl ? 'opacity-0' : 'opacity-100'
+        } transition-opacity duration-300`}
+        onClick={onClick}
+        onLoadedData={handleLoadedData}
+        onError={handleError}
+        onCanPlay={handleLoadedData}
+      >
+        <source src={activeSrc} type="video/mp4" />
+        {fallbackSrc && <source src={fallbackSrc} type="video/mp4" />}
+        <track kind="captions" srcLang="en" label="English" />
+      </video>
+    </div>
   )
 }
