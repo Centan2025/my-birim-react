@@ -212,30 +212,51 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     }
   }, [autoPlay])
 
-  // Video yükleme durumunu kontrol et
+  // Source veya activeSrc değiştiğinde HTML5 video elementini reload et
   React.useEffect(() => {
-    if (videoRef.current) {
-      const video = videoRef.current
-
-      if (video.readyState >= 2) {
-        setIsLoaded(true)
-      }
-
-      const checkLoaded = () => {
-        if (video.readyState >= 2) {
-          setIsLoaded(true)
-        }
-      }
-
-      video.addEventListener('loadeddata', checkLoaded)
-      video.addEventListener('canplay', checkLoaded)
-
-      return () => {
-        video.removeEventListener('loadeddata', checkLoaded)
-        video.removeEventListener('canplay', checkLoaded)
+    if (videoRef.current && typeof videoRef.current.load === 'function') {
+      try {
+        videoRef.current.load()
+      } catch {
+        /* ignore JSDOM / unhandled load errors */
       }
     }
-    return undefined
+  }, [activeSrc, fallbackSrc])
+
+  // Video yükleme durumunu kontrol et
+  React.useEffect(() => {
+    const video = videoRef.current
+    if (!video) return undefined
+
+    if (video.readyState >= 1) {
+      setIsLoaded(true)
+    }
+
+    const checkLoaded = () => {
+      if (video.readyState >= 1) {
+        setIsLoaded(true)
+      }
+    }
+
+    video.addEventListener('loadedmetadata', checkLoaded)
+    video.addEventListener('loadeddata', checkLoaded)
+    video.addEventListener('canplay', checkLoaded)
+    video.addEventListener('play', checkLoaded)
+    video.addEventListener('playing', checkLoaded)
+
+    // Mobil ve yavaş ağlar için fallback görünürlük zamanlayıcısı
+    const timer = setTimeout(() => {
+      setIsLoaded(true)
+    }, 1500)
+
+    return () => {
+      clearTimeout(timer)
+      video.removeEventListener('loadedmetadata', checkLoaded)
+      video.removeEventListener('loadeddata', checkLoaded)
+      video.removeEventListener('canplay', checkLoaded)
+      video.removeEventListener('play', checkLoaded)
+      video.removeEventListener('playing', checkLoaded)
+    }
   }, [activeSrc])
 
   if (hasError) {

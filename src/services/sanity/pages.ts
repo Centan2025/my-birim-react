@@ -249,18 +249,28 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             const url = mapMediaUrl(m)
             const urlMobile = mapMediaUrl(m, true, false)
             const urlDesktop = mapMediaUrl(m, false, true)
+            const mainUrl = url || urlMobile || urlDesktop
             const imageR2 = m['imageR2']
             const palette = extractPalette(imageR2)
             let type = m['type'] as string | undefined
-            if (
+            if (!type) {
+              if (mainUrl && (mainUrl.includes('youtube.com') || mainUrl.includes('youtu.be'))) {
+                type = 'youtube'
+              } else if (mainUrl && /\.(mp4|webm|mov|m4v)($|\?)/i.test(mainUrl)) {
+                type = 'video'
+              } else {
+                type = 'image'
+              }
+            } else if (
               type === 'video' &&
-              url &&
-              (url.includes('youtube.com') || url.includes('youtu.be'))
-            )
+              mainUrl &&
+              (mainUrl.includes('youtube.com') || mainUrl.includes('youtu.be'))
+            ) {
               type = 'youtube'
-            const result: Record<string, unknown> = {...m, url, type}
-            if (urlMobile && urlMobile !== url) result['urlMobile'] = urlMobile
-            if (urlDesktop && urlDesktop !== url) result['urlDesktop'] = urlDesktop
+            }
+            const result: Record<string, unknown> = {...m, url: mainUrl, type}
+            if (urlMobile && urlMobile !== mainUrl) result['urlMobile'] = urlMobile
+            if (urlDesktop && urlDesktop !== mainUrl) result['urlDesktop'] = urlDesktop
             if (palette) result['palette'] = palette
             const heroMeta = imageR2 ? mapR2Metadata(imageR2) : {}
             if (heroMeta.crop) result['crop'] = heroMeta.crop

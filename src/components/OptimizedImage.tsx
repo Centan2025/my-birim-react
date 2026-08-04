@@ -128,11 +128,14 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     origWidth && origHeight ? {w: origWidth, h: origHeight} : null
   )
 
+  const [hasTriedWithoutSrcSet, setHasTriedWithoutSrcSet] = useState(false)
+
   // src veya props değiştiğinde state'i sıfırla
   useEffect(() => {
     setCurrentSrc(src)
     setIsLoaded(false)
     setHasError(false)
+    setHasTriedWithoutSrcSet(false)
     if (origWidth && origHeight) {
       setNaturalDims({w: origWidth, h: origHeight})
     }
@@ -167,6 +170,11 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   }
 
   const handleError = () => {
+    if (!hasTriedWithoutSrcSet) {
+      setHasTriedWithoutSrcSet(true)
+      setHasError(false)
+      return
+    }
     if (fallbackSrc && currentSrc !== fallbackSrc) {
       setCurrentSrc(fallbackSrc)
       setHasError(false)
@@ -176,7 +184,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     onError?.()
   }
 
-  const activeSrc = rewriteR2Url(currentSrc)
+  const activeSrc = rewriteR2Url(currentSrc) || rewriteR2Url(srcMobile) || rewriteR2Url(srcDesktop) || ''
   const activeMobileSrc = rewriteR2Url(srcMobile || currentSrc)
   const activeDesktopSrc = rewriteR2Url(srcDesktop || currentSrc)
 
@@ -237,8 +245,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const generateSrcSet = (baseUrl: string): string => {
     if (srcSet) return srcSet
 
-    const sizes = [400, 800, 1200, 1600, 2000]
-
     // R2 Logic
     const r2Domain =
       import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
@@ -248,7 +254,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         r2Domain.includes('.workers.dev') ||
         r2Domain.includes('assets.birim.com')
       ) {
+        // Sadece rs=1 (responsive sizes üretilmiş) olan webp görseller için srcset döndür
         if (
+          baseUrl.includes('rs=1') &&
           baseUrl.endsWith('.webp') &&
           !baseUrl.includes('-400w.webp') &&
           !baseUrl.includes('-800w.webp') &&
@@ -265,6 +273,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         return ''
       }
 
+      const sizes = [400, 800, 1200, 1600, 2000]
       const buildR2 = (w: number) => {
         const params = [`width=${w}`, `quality=${quality}`, 'format=auto']
 
@@ -290,7 +299,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   }
 
   // Safari treats empty srcSet="" differently from absent srcSet — ensure empty becomes undefined
-  const responsiveSrcSet = generateSrcSet(activeSrc) || undefined
+  const responsiveSrcSet = hasTriedWithoutSrcSet
+    ? undefined
+    : generateSrcSet(activeSrc) || undefined
   const defaultSizes = sizes || '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 1200px'
 
   // Art Direction kullanılıyor mu?
