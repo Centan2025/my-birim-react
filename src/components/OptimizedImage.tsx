@@ -184,7 +184,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     onError?.()
   }
 
-  const activeSrc = rewriteR2Url(currentSrc) || rewriteR2Url(srcMobile) || rewriteR2Url(srcDesktop) || ''
+  const activeSrc =
+    rewriteR2Url(currentSrc) || rewriteR2Url(srcMobile) || rewriteR2Url(srcDesktop) || ''
   const activeMobileSrc = rewriteR2Url(srcMobile || currentSrc)
   const activeDesktopSrc = rewriteR2Url(srcDesktop || currentSrc)
 
