@@ -79,4 +79,29 @@ describe('OptimizedImage Mobile Crop & Metadata', () => {
     expect(styleAttr).toContain('--crop-left-mobile: 0.0000%')
     expect(styleAttr).toContain('--crop-aspect-mobile: 0.6667')
   })
+
+  it('generates uncropped Sanity CDN URL for mobile source when cropMobile is undefined', () => {
+    const cropDesktop = {x: 0, y: 0.2, width: 1.0, height: 0.6}
+    const sanityUrl = 'https://cdn.sanity.io/images/proj/dataset/abc-1000x800.jpg'
+
+    const {container} = render(
+      <OptimizedImage
+        src={sanityUrl}
+        alt="Sanity Test"
+        crop={cropDesktop}
+        origWidth={1000}
+        origHeight={800}
+      />
+    )
+
+    const mobileSource = container.querySelector('source[media="(max-width: 1023px)"]')
+    expect(mobileSource).toBeInTheDocument()
+    const mobileSrcSet = mobileSource?.getAttribute('srcset') || ''
+    expect(mobileSrcSet).not.toContain('rect=')
+
+    const desktopSource = container.querySelector('source[media="(min-width: 1024px)"]')
+    expect(desktopSource).toBeInTheDocument()
+    const desktopSrcSet = desktopSource?.getAttribute('srcset') || ''
+    expect(desktopSrcSet).toContain('rect=0,160,1000,480')
+  })
 })

@@ -397,9 +397,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const activeCrop = normalizedCropDesktop || normalizedCropMobile
 
   // R2 URL'lerini optimize et
-  const getOptimizedUrl = (url: string, targetCrop?: typeof activeCrop): string => {
+  const getOptimizedUrl = (url: string, targetCrop?: typeof activeCrop | null): string => {
     if (!url) return placeholder
-    const cropToUse = targetCrop || activeCrop
+    const cropToUse =
+      targetCrop === null ? undefined : targetCrop !== undefined ? targetCrop : activeCrop
 
     // Cloudflare R2 / Image Resizing
     if (r2Domain && url.startsWith(r2Domain) && !url.includes('/cdn-cgi/image/')) {
@@ -460,13 +461,16 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   }
 
   // Optimize edilmiş URL'ler
+  const mobileUrlToUse = activeMobileSrc || activeSrc
+  const desktopUrlToUse = activeDesktopSrc || activeSrc
+
+  const optimizedMobileSrc = mobileUrlToUse
+    ? getOptimizedUrl(mobileUrlToUse, normalizedCropMobile || null)
+    : undefined
+  const optimizedDesktopSrc = desktopUrlToUse
+    ? getOptimizedUrl(desktopUrlToUse, normalizedCropDesktop || null)
+    : undefined
   const optimizedSrc = getOptimizedUrl(activeSrc, normalizedCropDesktop || normalizedCropMobile)
-  const optimizedMobileSrc = activeMobileSrc
-    ? getOptimizedUrl(activeMobileSrc, normalizedCropMobile || normalizedCropDesktop)
-    : undefined
-  const optimizedDesktopSrc = activeDesktopSrc
-    ? getOptimizedUrl(activeDesktopSrc, normalizedCropDesktop)
-    : undefined
 
   // Responsive srcset oluştur
   const generateSrcSet = (baseUrl: string): string => {
@@ -488,7 +492,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const defaultSizes = sizes || '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 1200px'
 
   // Art Direction kullanılıyor mu?
-  const useArtDirection = Boolean(srcMobile || srcDesktop)
+  const useArtDirection = Boolean(
+    srcMobile ||
+      srcDesktop ||
+      (normalizedCropDesktop && !normalizedCropMobile) ||
+      (normalizedCropMobile && !normalizedCropDesktop)
+  )
 
   // Hotspot ve crop position style'a ekle
   const imgStyle: React.CSSProperties = {
@@ -747,7 +756,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
     const pictureElement = (
       <picture className="w-full h-full block relative overflow-hidden responsive-crop-pos">
-        {srcMobile && (
+        {optimizedMobileSrc && (
           <source
             media="(max-width: 1023px)"
             srcSet={
@@ -757,7 +766,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           />
         )}
 
-        {activeDesktopSrc && (
+        {optimizedDesktopSrc && (
           <source
             media="(min-width: 1024px)"
             srcSet={
