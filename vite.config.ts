@@ -71,15 +71,6 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /^https:\/\/.*\.r2\.dev\/.*/i,
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'legacy-r2-assets',
-              expiration: {maxEntries: 100, maxAgeSeconds: 7 * 24 * 60 * 60},
-              cacheableResponse: {statuses: [0, 200]},
-            },
-          },
-          {
             urlPattern: /^https:\/\/birim-assets\.web-birim\.workers\.dev\/.*/i,
             handler: 'StaleWhileRevalidate',
             options: {

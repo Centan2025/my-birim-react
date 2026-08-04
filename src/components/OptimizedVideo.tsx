@@ -1,5 +1,5 @@
 import React, {useState, useRef, useCallback} from 'react'
-import {rewriteR2Url, R2_DOMAIN, R2_ORIGIN_DOMAIN} from '../services/sanity/client'
+import {rewriteR2Url} from '../services/sanity/client'
 
 interface OptimizedVideoProps {
   src: string
@@ -161,18 +161,8 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
 
   const activeSrc = getActiveSrc()
 
-  // Fallback domain URL'i üret (Worker CDN <-> Direct R2)
-  const getFallbackUrl = (primaryUrl: string): string => {
-    if (!primaryUrl) return ''
-    if (R2_DOMAIN && R2_ORIGIN_DOMAIN && R2_DOMAIN !== R2_ORIGIN_DOMAIN) {
-      const r2DomainNoProtocol = R2_DOMAIN.replace(/^https?:\/\//, '')
-      const originDomainNoProtocol = R2_ORIGIN_DOMAIN.replace(/^https?:\/\//, '')
-      if (primaryUrl.includes(originDomainNoProtocol)) {
-        return primaryUrl.replace(originDomainNoProtocol, r2DomainNoProtocol)
-      } else if (primaryUrl.includes(r2DomainNoProtocol)) {
-        return primaryUrl.replace(r2DomainNoProtocol, originDomainNoProtocol)
-      }
-    }
+  // Direct R2 origin fallback disabled for CORS/PWA compliance (always use CDN)
+  const getFallbackUrl = (_primaryUrl: string): string => {
     return ''
   }
 

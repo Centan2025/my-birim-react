@@ -151,11 +151,12 @@ export const rewriteR2Url = (url: string | undefined, _hasResponsiveSizes?: bool
   const searchParams = urlParts[1] || ''
 
   // Varsayılan CDN domainimiz
-  const activeDomain = R2_DOMAIN || 'https://assets.birim.com'
+  const fallbackCdn = 'https://birim-assets.web-birim.workers.dev'
+  const activeDomain = R2_DOMAIN && !R2_DOMAIN.includes('.r2.dev') ? R2_DOMAIN : fallbackCdn
   const targetDomainNoProtocol = activeDomain.replace(/^https?:\/\//, '')
 
-  // 1. Tüm r2.dev ve workers.dev domainlerini aktif domain ile değiştir (eğer aktif domain aynı değilse)
-  if (result.includes('.r2.dev') && !activeDomain.includes('.r2.dev')) {
+  // 1. Tüm r2.dev ve varsayılan harici domainleri aktif CDN domaini ile değiştir
+  if (result.includes('.r2.dev')) {
     result = result
       .replace(/^(https?:\/\/)?([^/]+\.r2\.dev)/i, activeDomain)
       .replace(/https?:\/\/[^/]+\.r2\.dev/gi, activeDomain)
