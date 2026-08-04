@@ -141,13 +141,19 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     }
   }, [src, srcMobile, srcDesktop, origWidth, origHeight])
 
-  // Cache'den yüklenen görselleri yakalama — naturalDims hesapla
+  // Cache'den yüklenen görselleri yakalama & hızlı görünürlük zamanlayıcısı
   useEffect(() => {
     const img = imgRef.current
-    if (img && img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
+    if (img && img.complete && img.naturalWidth > 0) {
       setIsLoaded(true)
-      setNaturalDims({w: img.naturalWidth, h: img.naturalHeight})
+      if (img.naturalHeight > 0) {
+        setNaturalDims({w: img.naturalWidth, h: img.naturalHeight})
+      }
     }
+    const timer = setTimeout(() => {
+      setIsLoaded(true)
+    }, 800)
+    return () => clearTimeout(timer)
   }, [currentSrc, srcMobile, srcDesktop])
 
   // React henüz fetchPriority prop'unu DOM attribute olarak tanımıyor; uyarıyı

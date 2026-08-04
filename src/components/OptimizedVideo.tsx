@@ -183,12 +183,22 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     return undefined
   }, [posterMobile, posterDesktop, poster, getPosterForScreen])
 
+  // Set defaultMuted and muted explicitly on DOM element for mobile browser autoplay policies
+  React.useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.defaultMuted = muted
+      videoRef.current.muted = muted
+    }
+  }, [muted])
+
   // Handle autoPlay prop changes
   React.useEffect(() => {
     const video = videoRef.current
     if (!video) return
 
     if (autoPlay) {
+      video.defaultMuted = muted
+      video.muted = muted
       if (typeof video.play === 'function') {
         const playPromise = video.play()
         if (playPromise !== undefined) {
@@ -212,7 +222,7 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
         }
       }
     }
-  }, [autoPlay])
+  }, [autoPlay, muted])
 
   // Source veya activeSrc değiştiğinde HTML5 video elementini reload et
   React.useEffect(() => {
@@ -246,10 +256,10 @@ export const OptimizedVideo: React.FC<OptimizedVideoProps> = ({
     video.addEventListener('play', checkLoaded)
     video.addEventListener('playing', checkLoaded)
 
-    // Mobil ve yavaş ağlar için fallback görünürlük zamanlayıcısı
+    // Mobil ve yavaş ağlar için hızlı görünürlük zamanlayıcısı
     const timer = setTimeout(() => {
       setIsLoaded(true)
-    }, 1500)
+    }, 800)
 
     return () => {
       clearTimeout(timer)

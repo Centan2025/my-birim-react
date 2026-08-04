@@ -326,14 +326,24 @@ export const mapMediaUrl = (
   isMobile?: boolean,
   isDesktop?: boolean
 ): string => {
-  const type = m?.type
+  if (!m) return ''
+  let type = m?.type
+
+  // Type bilgisi Sanity'den boş gelirse R2 objelerinden akıllı çıkarım yap
+  if (!type) {
+    if (m?.videoFileR2?.url || m?.videoFileMobileR2?.url || m?.videoFileDesktopR2?.url) {
+      type = 'video'
+    } else if (m?.imageR2?.url || m?.imageMobileR2?.url || m?.imageDesktopR2?.url) {
+      type = 'image'
+    }
+  }
 
   if (type === 'image') {
-    const r2Url = isMobile
-      ? m?.imageMobileR2?.url
-      : isDesktop
-        ? m?.imageDesktopR2?.url
-        : m?.imageR2?.url
+    const r2Url =
+      (isMobile ? m?.imageMobileR2?.url : isDesktop ? m?.imageDesktopR2?.url : undefined) ||
+      m?.imageR2?.url ||
+      m?.imageMobileR2?.url ||
+      m?.imageDesktopR2?.url
     const hasResponsiveSizes = Boolean(
       isMobile
         ? (m?.imageMobileR2 as Record<string, unknown>)?.['hasResponsiveSizes']
@@ -346,16 +356,13 @@ export const mapMediaUrl = (
     }
     return rewriteR2Url(m?.url) || ''
   } else if (type === 'video') {
-    const r2Url = isMobile
-      ? m?.videoFileMobileR2?.url
-      : isDesktop
-        ? m?.videoFileDesktopR2?.url
-        : m?.videoFileR2?.url
+    const r2Url =
+      (isMobile ? m?.videoFileMobileR2?.url : isDesktop ? m?.videoFileDesktopR2?.url : undefined) ||
+      m?.videoFileR2?.url ||
+      m?.videoFileMobileR2?.url ||
+      m?.videoFileDesktopR2?.url
     if (r2Url) {
       return rewriteR2Url(r2Url)
-    }
-    if ((isMobile || isDesktop) && m?.videoFileR2?.url) {
-      return rewriteR2Url(m.videoFileR2.url)
     }
 
     const fallbackUrl = m?.url || ''
