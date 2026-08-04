@@ -2,6 +2,7 @@ import {describe, it, expect, vi} from 'vitest'
 import {render, fireEvent} from '@testing-library/react'
 import React from 'react'
 import {OptimizedVideo} from '../components/OptimizedVideo'
+import {rewriteR2Url} from '../services/sanity/client'
 
 describe('OptimizedVideo', () => {
   it('renders video element with given src', () => {
@@ -11,7 +12,7 @@ describe('OptimizedVideo', () => {
     const source = container.querySelector('video source')
     expect(source).toBeInTheDocument()
     expect(source?.getAttribute('src')).toBe(
-      'https://birim-assets.web-birim.workers.dev/sample.mp4'
+      rewriteR2Url('https://birim-assets.web-birim.workers.dev/sample.mp4')
     )
   })
 

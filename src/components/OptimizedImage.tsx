@@ -74,7 +74,9 @@ interface OptimizedImageProps {
  * - Placeholder gösterimi
  * - R2 tabanlı Art Direction
  */
-const getActiveCrop = (c: unknown): {x: number; y: number; width: number; height: number} | undefined => {
+const getActiveCrop = (
+  c: unknown
+): {x: number; y: number; width: number; height: number} | undefined => {
   if (!c || typeof c !== 'object') return undefined
   const obj = c as Record<string, unknown>
   if (obj['cropX'] !== undefined && obj['cropWidth'] !== undefined) {
@@ -205,6 +207,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   )
 
   const [hasTriedWithoutSrcSet, setHasTriedWithoutSrcSet] = useState(false)
+  const [hasTriedDirectOrigin, setHasTriedDirectOrigin] = useState(false)
 
   // src veya props değiştiğinde state'i sıfırla
   useEffect(() => {
@@ -212,6 +215,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     setIsLoaded(false)
     setHasError(false)
     setHasTriedWithoutSrcSet(false)
+    setHasTriedDirectOrigin(false)
     if (origWidth && origHeight) {
       setNaturalDims({w: origWidth, h: origHeight})
     }
@@ -257,6 +261,22 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       setHasError(false)
       return
     }
+    if (!hasTriedDirectOrigin && currentSrc) {
+      const primaryDomain = (
+        import.meta.env['VITE_R2_DOMAIN'] || 'https://birim-assets.web-birim.workers.dev'
+      ).replace(/^https?:\/\//, '')
+      const originDomain = (
+        import.meta.env['VITE_R2_ORIGIN_DOMAIN'] ||
+        'https://pub-5e705b2a702d4bb1a3631c558917599d.r2.dev'
+      ).replace(/^https?:\/\//, '')
+      if (currentSrc.includes(primaryDomain)) {
+        const fallbackUrl = currentSrc.replace(primaryDomain, originDomain)
+        setHasTriedDirectOrigin(true)
+        setCurrentSrc(fallbackUrl)
+        setHasError(false)
+        return
+      }
+    }
     if (fallbackSrc && currentSrc !== fallbackSrc) {
       setCurrentSrc(fallbackSrc)
       setHasError(false)
@@ -278,8 +298,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     r2Domain?.includes('.r2.dev') ||
     r2Domain?.includes('.workers.dev') ||
     r2Domain?.includes('assets.birim.com')
-
-
 
   const normalizedCropDesktop = useMemo(
     () => getActiveCrop(cropDesktop || crop),
@@ -311,14 +329,21 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
       // Add crop rect if available
       if (activeCrop) {
-        if (activeCrop.width < 1.0 || activeCrop.height < 1.0 || activeCrop.x > 0 || activeCrop.y > 0) {
+        if (
+          activeCrop.width < 1.0 ||
+          activeCrop.height < 1.0 ||
+          activeCrop.x > 0 ||
+          activeCrop.y > 0
+        ) {
           if (origWidth && origHeight) {
             params.push(
               `rect=${Math.round(activeCrop.x * origWidth)},${Math.round(activeCrop.y * origHeight)},${Math.round(activeCrop.width * origWidth)},${Math.round(activeCrop.height * origHeight)}`
             )
           }
         } else {
-          params.push(`rect=${activeCrop.x},${activeCrop.y},${activeCrop.width},${activeCrop.height}`)
+          params.push(
+            `rect=${activeCrop.x},${activeCrop.y},${activeCrop.width},${activeCrop.height}`
+          )
         }
       }
 
@@ -396,14 +421,21 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         const params = [`width=${w}`, `quality=${quality}`, 'format=auto']
 
         if (activeCrop) {
-          if (activeCrop.width < 1.0 || activeCrop.height < 1.0 || activeCrop.x > 0 || activeCrop.y > 0) {
+          if (
+            activeCrop.width < 1.0 ||
+            activeCrop.height < 1.0 ||
+            activeCrop.x > 0 ||
+            activeCrop.y > 0
+          ) {
             if (origWidth && origHeight) {
               params.push(
                 `rect=${Math.round(activeCrop.x * origWidth)},${Math.round(activeCrop.y * origHeight)},${Math.round(activeCrop.width * origWidth)},${Math.round(activeCrop.height * origHeight)}`
               )
             }
           } else {
-            params.push(`rect=${activeCrop.x},${activeCrop.y},${activeCrop.width},${activeCrop.height}`)
+            params.push(
+              `rect=${activeCrop.x},${activeCrop.y},${activeCrop.width},${activeCrop.height}`
+            )
           }
         }
 
@@ -577,7 +609,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     .filter(
       c => !c.startsWith('max-w-') && !c.startsWith('w-') && (!useClientCrop || !c.startsWith('h-'))
     )
-    .map(c => (useClientCrop && (c === 'object-contain' || c.startsWith('object-')) ? 'object-cover' : c))
+    .map(c =>
+      useClientCrop && (c === 'object-contain' || c.startsWith('object-')) ? 'object-cover' : c
+    )
     .join(' ')
 
   if (useArtDirection) {
