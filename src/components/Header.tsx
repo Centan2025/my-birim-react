@@ -555,7 +555,7 @@ export function Header() {
         >
           {children}
           <span
-            className="absolute -bottom-1 left-0 w-full h-[3px] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"
+            className="absolute -bottom-1 left-0 w-full h-[1px] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"
             style={{backgroundColor: headerForegroundColor}}
           ></span>
         </span>
@@ -802,7 +802,7 @@ export function Header() {
                     >
                       {t('products')}
                       <span
-                        className={`absolute -bottom-1 left-0 w-full h-[3px] transition-transform duration-300 ease-out origin-center ${isProductsOpen ? 'scale-x-0 opacity-0' : 'transform scale-x-0 group-hover:scale-x-100'}`}
+                        className={`absolute -bottom-1 left-0 w-full h-[1px] transition-transform duration-300 ease-out origin-center ${isProductsOpen ? 'scale-x-0 opacity-0' : 'transform scale-x-0 group-hover:scale-x-100'}`}
                         style={{backgroundColor: headerForegroundColor}}
                       ></span>
                     </span>

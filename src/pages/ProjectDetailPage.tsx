@@ -463,10 +463,25 @@ export function ProjectDetailPage() {
 
         <div className="absolute inset-0 bg-black/40 z-10" />
 
-        <div className="absolute inset-0 z-20 flex flex-col justify-start pt-24 md:pt-28 lg:pt-32">
-          <div className="w-full max-w-[95%] md:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
+        {/* Top-Left Breadcrumb overlay - White color */}
+        <div className="absolute top-[4.5rem] md:top-[5.5rem] left-0 right-0 z-40 pointer-events-none">
+          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
+            <Breadcrumbs
+              items={[
+                {label: t('homepage'), to: '/'},
+                {label: t('projects') || 'Projeler', to: '/projects'},
+                {label: t(project.title)},
+              ]}
+              className="pointer-events-auto inline-block text-white/90 drop-shadow-md [&_a]:!text-white/80 [&_a:hover]:!text-white [&_span.font-bold]:!text-white [&_span.text-gray-400]:!text-white/50"
+            />
+          </div>
+        </div>
+
+        {/* Bottom-Left Title & Project Info */}
+        <div className="absolute bottom-12 md:bottom-10 left-0 right-0 text-white z-30 pointer-events-none">
+          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
             <h1
-              className="text-3xl md:text-5xl lg:text-6xl font-light tracking-tight text-white mb-2 md:mb-4 font-michroma"
+              className="text-3xl md:text-5xl lg:text-6xl font-light tracking-tight text-white mb-2 md:mb-4 font-michroma pointer-events-auto"
               style={{
                 transform: isTitleVisible ? 'translateX(0)' : 'translateX(-40px)',
                 opacity: isTitleVisible ? 1 : 0,
@@ -479,7 +494,7 @@ export function ProjectDetailPage() {
 
             {project.date && (
               <p
-                className="text-base md:text-lg lg:text-xl text-white/90 font-light font-michroma"
+                className="text-base md:text-lg lg:text-xl text-white/90 font-light font-michroma pointer-events-auto"
                 style={{
                   transform: isLocationVisible ? 'translateX(0)' : 'translateX(-40px)',
                   opacity: isLocationVisible ? 1 : 0,
@@ -527,16 +542,6 @@ export function ProjectDetailPage() {
             </button>
           </div>
         )}
-      </div>
-
-      <div className="w-full max-w-[95%] md:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4">
-        <Breadcrumbs
-          items={[
-            {label: t('homepage'), to: '/'},
-            {label: t('projects') || 'Projeler', to: '/projects'},
-            {label: t(project.title)},
-          ]}
-        />
       </div>
 
       <div className="w-full bg-[var(--bg-secondary)]">

@@ -207,13 +207,12 @@ const PanelSlider: React.FC<{
         }`}
       >
         {media.map((item, i) => {
-          const itemHasCrop = !!(item.crop || item.cropMobile)
           return (
             <div
               key={i}
               className={`flex-shrink-0 snap-start relative overflow-hidden ${imageBorderClass} ${
-                panelFit === 'natural' || itemHasCrop ? 'h-auto max-h-[70vh]' : 'aspect-[3/4]'
-              } group cursor-pointer ${getWidthClass()} border-2 border-red-500`}
+                panelFit === 'natural' ? 'h-auto max-h-[70vh]' : 'aspect-[3/4]'
+              } group cursor-pointer ${getWidthClass()}`}
               onClick={() => {
                 if (!isDragging && onMediaClick) {
                   onMediaClick(item.url)
@@ -244,7 +243,7 @@ const PanelSlider: React.FC<{
                   srcMobile={item.urlMobile}
                   srcDesktop={item.urlDesktop}
                   alt=""
-                  className={`w-full ${itemHasCrop ? 'h-auto' : 'h-full'} ${getFitClass()} transition-transform duration-700 pointer-events-none`}
+                  className={`w-full ${panelFit === 'natural' ? 'h-auto' : 'h-full'} ${getFitClass()} transition-transform duration-700 pointer-events-none`}
                   loading="lazy"
                   quality={85}
                   crop={item.crop}
@@ -512,7 +511,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               className={`${isFullWidth ? 'text-2xl md:text-4xl lg:text-5xl' : 'text-xl md:text-3xl lg:text-4xl'} uppercase ${titleAlignClass} text-[var(--text-primary)] w-full ${block.verticalAlignment === 'top' ? 'mt-0' : ''} ${titleAlign === 'center' ? 'mx-auto' : titleAlign === 'right' ? 'ml-auto' : 'mr-auto'}`}
               style={{
                 fontWeight: titleFont === 'normal' || titleFont === 'Oswald' ? 200 : 'inherit',
-                letterSpacing: '0.18em',
+                letterSpacing: '0.04em',
               }}
             >
               {titleContent as string}

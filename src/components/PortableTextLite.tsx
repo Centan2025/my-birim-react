@@ -12,6 +12,7 @@ type MarkDef = {
   blank?: boolean
   reference?: {_ref: string; _type: string}
   color?: string
+  size?: string
 }
 
 type Block = {
@@ -77,6 +78,32 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
               {el}
             </code>
           )
+        let matchedFontSize: string | null = null
+
+        if (m === 'size-sm') matchedFontSize = '14px'
+        else if (m === 'size-md') matchedFontSize = '18px'
+        else if (m === 'size-lg') matchedFontSize = '24px'
+        else if (m === 'size-xl') matchedFontSize = '32px'
+        else if (m === 'size-2xl') matchedFontSize = '48px'
+        else if (m.startsWith('size-') || m.startsWith('font-size-')) {
+          const val = m.replace('font-size-', '').replace('size-', '')
+          if (val === 'xs') matchedFontSize = '12px'
+          else if (val === 'sm') matchedFontSize = '14px'
+          else if (val === 'base') matchedFontSize = '16px'
+          else if (val === 'md') matchedFontSize = '18px'
+          else if (val === 'lg') matchedFontSize = '24px'
+          else if (val === 'xl') matchedFontSize = '32px'
+          else if (val === '2xl') matchedFontSize = '48px'
+          else if (val === '3xl') matchedFontSize = '64px'
+          else if (/^\d+$/.test(val)) matchedFontSize = `${val}px`
+          else if (val.endsWith('px') || val.endsWith('em') || val.endsWith('rem') || val.endsWith('%')) {
+            matchedFontSize = val
+          }
+        }
+
+        if (matchedFontSize) {
+          el = <span key={i + '-' + m} style={{fontSize: matchedFontSize}}>{el}</span>
+        }
 
         // Annotations
         const def = markDefs.find(d => d?._key === m)
@@ -117,6 +144,18 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
             if (finalColor) {
               el = (
                 <span key={i + '-color'} style={{color: finalColor}}>
+                  {el}
+                </span>
+              )
+            }
+          }
+
+          // Font Size Support (Seçili metin boyutu)
+          if ((def._type === 'fontSize' || def._type === 'size') && (def.size || (def as Record<string, string>)['value'] || (def as Record<string, string>)['fontSize'])) {
+            const sizeVal = def.size || (def as Record<string, string>)['value'] || (def as Record<string, string>)['fontSize']
+            if (sizeVal) {
+              el = (
+                <span key={i + '-size'} style={{fontSize: sizeVal}}>
                   {el}
                 </span>
               )

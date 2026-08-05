@@ -5,7 +5,8 @@ import {OptimizedVideo} from '../OptimizedVideo'
 import {useTranslation} from '../../i18n'
 import {motion} from 'framer-motion'
 import {useCardTransition} from '../../context/CardTransitionContext'
-import type {LocalizedString, Designer, R2ImageMetadata} from '../../types'
+import type {LocalizedString, Designer, R2ImageMetadata, Category} from '../../types'
+import {Breadcrumbs} from '../Breadcrumbs'
 
 interface ProductHeroProps {
   product: {
@@ -13,6 +14,7 @@ interface ProductHeroProps {
     name: LocalizedString
     year?: string | number
   }
+  category?: Category
   designer?: Designer
   designers?: Designer[]
   heroMedia: {
@@ -64,6 +66,7 @@ const toYouTubeEmbed = (url: string, {autoplay = false} = {}) => {
 
 export const ProductHero: React.FC<ProductHeroProps> = ({
   product,
+  category,
   designer,
   designers: designersProp,
   heroMedia,
@@ -280,42 +283,58 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
           className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent pointer-events-none"
         />
 
-        <div
-          className="absolute bottom-20 md:bottom-10 left-6 md:left-10 text-white z-40"
-          style={{bottom: 'max(64px, env(safe-area-inset-bottom, 0px) + 64px)'}}
-        >
-          <div
-            style={{
-              transform: isTitleVisible ? 'translateX(0)' : 'translateX(-40px)',
-              opacity: isTitleVisible ? 1 : 0,
-              transition: 'transform 1000ms ease-out, opacity 1000ms ease-out',
-            }}
-          >
-            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg font-michroma">
-              {t(product.name)}
-            </h1>
+        {/* Top-Left Breadcrumb overlay - aligned with Header Search Icon */}
+        <div className="absolute top-[4.5rem] md:top-[5.5rem] left-0 right-0 z-40 pointer-events-none">
+          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
+            <Breadcrumbs
+              items={[
+                {label: t('homepage'), to: '/'},
+                ...(category ? [{label: t(category.name), to: `/products/${category.id}`}] : []),
+                {label: t(product.name)},
+              ]}
+              className="pointer-events-auto inline-block text-black [&_a]:!text-black/80 [&_a:hover]:!text-black [&_span.font-bold]:!text-black [&_span]:!text-black"
+            />
           </div>
-          {(designers.length > 0 || Boolean(product.year)) && (
+        </div>
+
+        <div
+          className="absolute bottom-12 md:bottom-10 left-0 right-0 text-white z-40 pointer-events-none"
+          style={{bottom: 'max(40px, env(safe-area-inset-bottom, 0px) + 40px)'}}
+        >
+          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
             <div
-              className="mt-2 text-white/80 font-michroma"
               style={{
-                transform: isDesignerVisible ? 'translateX(0)' : 'translateX(-40px)',
-                opacity: isDesignerVisible ? 1 : 0,
+                transform: isTitleVisible ? 'translateX(0)' : 'translateX(-40px)',
+                opacity: isTitleVisible ? 1 : 0,
                 transition: 'transform 1000ms ease-out, opacity 1000ms ease-out',
               }}
             >
-              {designers.map((d, i) => (
-                <span key={d.id}>
-                  <Link to={`/designer/${d.id}`} className="hover:text-white">
-                    {t(d.name)}
-                  </Link>
-                  {i < designers.length - 1 ? ' & ' : ''}
-                </span>
-              ))}
-              {designers.length > 0 && product.year && ' '}
-              {product.year && <span>— {product.year}</span>}
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight drop-shadow-lg font-michroma pointer-events-auto">
+                {t(product.name)}
+              </h1>
             </div>
-          )}
+            {(designers.length > 0 || Boolean(product.year)) && (
+              <div
+                className="mt-2 text-white/80 font-michroma pointer-events-auto"
+                style={{
+                  transform: isDesignerVisible ? 'translateX(0)' : 'translateX(-40px)',
+                  opacity: isDesignerVisible ? 1 : 0,
+                  transition: 'transform 1000ms ease-out, opacity 1000ms ease-out',
+                }}
+              >
+                {designers.map((d, i) => (
+                  <span key={d.id}>
+                    <Link to={`/designer/${d.id}`} className="hover:text-white">
+                      {t(d.name)}
+                    </Link>
+                    {i < designers.length - 1 ? ' & ' : ''}
+                  </span>
+                ))}
+                {designers.length > 0 && product.year && ' '}
+                {product.year && <span>— {product.year}</span>}
+              </div>
+            )}
+          </div>
         </div>
 
         {slideCount > 0 && (

@@ -240,6 +240,7 @@ export function ProductDetailPage() {
 
       <ProductHero
         product={product}
+        category={category}
         designer={designer || undefined}
         designers={designers}
         heroMedia={heroMedia as any}
@@ -296,7 +297,6 @@ export function ProductDetailPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 lg:pt-12">
           <ProductInfo
             product={product}
-            category={category}
             locale={locale}
             prevProduct={prevProduct}
             nextProduct={nextProduct}

@@ -3,7 +3,7 @@ import {Link} from 'react-router-dom'
 import {useTranslation} from '../../i18n'
 import ScrollReveal from '../ScrollReveal'
 import PortableTextLite from '../PortableTextLite'
-import type {LocalizedString, Category} from '../../types'
+import type {LocalizedString} from '../../types'
 
 const ArrowLeft = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -49,7 +49,6 @@ interface ProductInfoProps {
     price?: number
     currency?: string
   }
-  category?: Category
   locale: string
   prevProduct?: {id: string} | null
   nextProduct?: {id: string} | null
@@ -58,7 +57,6 @@ interface ProductInfoProps {
 
 export const ProductInfo: React.FC<ProductInfoProps> = ({
   product,
-  category,
   locale,
   prevProduct,
   nextProduct,
@@ -68,36 +66,6 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
 
   return (
     <section className="space-y-10">
-      {/* Breadcrumbs */}
-      <nav className="mb-0" aria-label="Breadcrumb">
-        <ol className="list-none p-0 inline-flex flex-wrap items-center font-inter text-[11px] sm:text-[13px] text-[var(--text-secondary)]">
-          <li>
-            <Link
-              to="/"
-              className="font-light text-[var(--text-primary)] hover:opacity-80 transition-colors"
-            >
-              {t('homepage')}
-            </Link>
-          </li>
-          <li className="font-light text-gray-400 mx-2">|</li>
-          {category && (
-            <>
-              <li>
-                <Link
-                  to={`/products/${category.id}`}
-                  className="font-light text-[var(--text-primary)] hover:opacity-80 transition-colors"
-                >
-                  {t(category.name)}
-                </Link>
-              </li>
-              <li className="font-light text-gray-400 mx-2">|</li>
-            </>
-          )}
-          <li className="font-bold text-[var(--text-primary)]" aria-current="page">
-            {t(product.name)}
-          </li>
-        </ol>
-      </nav>
 
       {/* Top Prev / Next controls */}
       {showProductPrevNext && (prevProduct || nextProduct) && (

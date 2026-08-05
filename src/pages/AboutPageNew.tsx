@@ -381,9 +381,11 @@ export function AboutPageNew() {
                 {heroBadgeText}
               </span>
             ) : null}
-            <h1 className="font-outfit text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extralight tracking-tight uppercase leading-tight sm:leading-none text-white break-words">
-              {heroTitleText || 'HAKKIMIZDA'}
-            </h1>
+            {heroTitleText ? (
+              <h1 className="font-outfit text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extralight tracking-tight uppercase leading-tight sm:leading-none text-white break-words">
+                {heroTitleText}
+              </h1>
+            ) : null}
           </motion.div>
           {heroSubtitleText ? (
             <motion.p

@@ -70,8 +70,8 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
                   isLightMode ? 'text-gray-800 hover:text-black' : 'text-gray-200 hover:text-white'
                 }`}
                 style={{
-                  fontSize: 'clamp(13px, 0.35rem + 0.65vw, 15px)',
-                  letterSpacing: '0.06em',
+                  fontSize: 'clamp(12px, 0.3rem + 0.5vw, 13.5px)',
+                  letterSpacing: '0.02em',
                   fontFamily: "'Inter', sans-serif",
                 }}
                 onClick={onClose}
@@ -80,7 +80,7 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
                 <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase">
                   {t(category.name)}
                   <span
-                    className={`absolute -bottom-1 left-0 w-full h-[3px] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center ${
+                    className={`absolute -bottom-1 left-0 w-full h-[1px] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center ${
                       isLightMode ? 'bg-black' : 'bg-white'
                     }`}
                   ></span>
@@ -194,8 +194,8 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
             isLightMode ? 'text-black hover:text-gray-800' : 'text-white hover:text-gray-200'
           }`}
           style={{
-            fontSize: 'clamp(13px, 0.35rem + 0.65vw, 15px)',
-            letterSpacing: '0.06em',
+            fontSize: 'clamp(12px, 0.3rem + 0.5vw, 13.5px)',
+            letterSpacing: '0.02em',
             fontFamily: "'Inter', sans-serif",
           }}
           onClick={onClose}
@@ -203,7 +203,7 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
           <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase">
             {t('view_all')}
             <span
-              className={`absolute -bottom-1 left-0 w-full h-[3px] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center ${
+              className={`absolute -bottom-1 left-0 w-full h-[1px] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center ${
                 isLightMode ? 'bg-black' : 'bg-white'
               }`}
             ></span>

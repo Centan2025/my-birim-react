@@ -1,8 +1,16 @@
+import React from 'react'
 import {defineType, defineField} from 'sanity'
-import {Palette} from 'lucide-react'
+import {Palette, Type} from 'lucide-react'
 import PortableTextImagePreview from '../../components/PortableTextImagePreview'
 import PortableTextImageInput from '../../components/PortableTextImageInput'
 import {browserOnly, browserOnlyInput} from '../utils/browserOnly'
+
+const createFontSizeDecorator = (title: string, value: string, px: string) => ({
+  title,
+  value,
+  icon: () => React.createElement('span', {style: {fontSize: '11px', fontWeight: 600, padding: '0 2px'}}, px),
+  component: (props: {children: React.ReactNode}) => React.createElement('span', {style: {fontSize: px}}, props.children),
+})
 
 /**
  * Zengin Metin (Portable Text) Editor Yapılandırması
@@ -12,14 +20,14 @@ const portableTextBlocks = [
   {
     type: 'block',
     styles: [
-      {title: 'Normal', value: 'normal'},
-      {title: 'Başlık 1', value: 'h1'},
-      {title: 'Başlık 2', value: 'h2'},
-      {title: 'Başlık 3', value: 'h3'},
-      {title: 'Başlık 4', value: 'h4'},
-      {title: 'Başlık 5', value: 'h5'},
-      {title: 'Başlık 6', value: 'h6'},
-      {title: 'Alıntı', value: 'blockquote'},
+      {title: 'Normal (Paragraf)', value: 'normal'},
+      {title: 'Paragraf Başlık 1 (H1)', value: 'h1'},
+      {title: 'Paragraf Başlık 2 (H2)', value: 'h2'},
+      {title: 'Paragraf Başlık 3 (H3)', value: 'h3'},
+      {title: 'Paragraf Başlık 4 (H4)', value: 'h4'},
+      {title: 'Paragraf Başlık 5 (H5)', value: 'h5'},
+      {title: 'Paragraf Başlık 6 (H6)', value: 'h6'},
+      {title: 'Alıntı (Blockquote)', value: 'blockquote'},
     ],
     lists: [
       {title: 'Madde İşaretli', value: 'bullet'},
@@ -32,6 +40,22 @@ const portableTextBlocks = [
         {title: 'Altı Çizili', value: 'underline'},
         {title: 'Üstü Çizili', value: 'strike-through'},
         {title: 'Kod', value: 'code'},
+        createFontSizeDecorator('Seçili Metin: 12px', 'size-12px', '12px'),
+        createFontSizeDecorator('Seçili Metin: 14px', 'size-14px', '14px'),
+        createFontSizeDecorator('Seçili Metin: 16px', 'size-16px', '16px'),
+        createFontSizeDecorator('Seçili Metin: 18px', 'size-18px', '18px'),
+        createFontSizeDecorator('Seçili Metin: 20px', 'size-20px', '20px'),
+        createFontSizeDecorator('Seçili Metin: 24px', 'size-24px', '24px'),
+        createFontSizeDecorator('Seçili Metin: 28px', 'size-28px', '28px'),
+        createFontSizeDecorator('Seçili Metin: 32px', 'size-32px', '32px'),
+        createFontSizeDecorator('Seçili Metin: 36px', 'size-36px', '36px'),
+        createFontSizeDecorator('Seçili Metin: 48px', 'size-48px', '48px'),
+        createFontSizeDecorator('Seçili Metin: 64px', 'size-64px', '64px'),
+        createFontSizeDecorator('Seçili Metin: Küçük (14px)', 'size-sm', '14px'),
+        createFontSizeDecorator('Seçili Metin: Orta (18px)', 'size-md', '18px'),
+        createFontSizeDecorator('Seçili Metin: Büyük (24px)', 'size-lg', '24px'),
+        createFontSizeDecorator('Seçili Metin: Çok Büyük (32px)', 'size-xl', '32px'),
+        createFontSizeDecorator('Seçili Metin: Dev (48px)', 'size-2xl', '48px'),
       ],
       annotations: [
         {
@@ -85,6 +109,44 @@ const portableTextBlocks = [
               name: 'color',
               title: 'Renk Seçin',
               type: 'color',
+            },
+          ],
+        },
+        {
+          name: 'fontSize',
+          type: 'object',
+          title: 'Metin Boyutu (Sadece Seçili Metin)',
+          icon: Type,
+          components: {
+            annotation: (props: {value?: {size?: string}; children: React.ReactNode}) =>
+              React.createElement(
+                'span',
+                {
+                  style: {
+                    fontSize: props.value?.size || 'inherit',
+                    display: 'inline',
+                  },
+                },
+                props.children,
+              ),
+          },
+          fields: [
+            {
+              name: 'size',
+              title: 'Font Boyutu',
+              type: 'string',
+              options: {
+                list: [
+                  {title: 'Çok Küçük (12px)', value: '12px'},
+                  {title: 'Küçük (14px)', value: '14px'},
+                  {title: 'Normal (16px)', value: '16px'},
+                  {title: 'Orta (18px)', value: '18px'},
+                  {title: 'Büyük (24px)', value: '24px'},
+                  {title: 'Çok Büyük (32px)', value: '32px'},
+                  {title: 'Dev (48px)', value: '48px'},
+                  {title: 'Dev+ (64px)', value: '64px'},
+                ],
+              },
             },
           ],
         },
