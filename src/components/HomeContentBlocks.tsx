@@ -505,6 +505,48 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           }
         }
 
+        const getOverlayPositionClasses = (pos?: string) => {
+          switch (pos) {
+            case 'top-left':
+              return 'top-4 left-4 md:top-8 md:left-8 justify-start items-start text-left'
+            case 'top-center':
+              return 'top-4 left-1/2 -translate-x-1/2 md:top-8 justify-center items-start text-center'
+            case 'top-right':
+              return 'top-4 right-4 md:top-8 md:right-8 justify-end items-start text-right'
+            case 'center-left':
+              return 'top-1/2 left-4 -translate-y-1/2 md:left-8 justify-start items-center text-left'
+            case 'center-right':
+              return 'top-1/2 right-4 -translate-y-1/2 md:right-8 justify-end items-center text-right'
+            case 'bottom-left':
+              return 'bottom-4 left-4 md:bottom-8 md:left-8 justify-start items-end text-left'
+            case 'bottom-center':
+              return 'bottom-4 left-1/2 -translate-x-1/2 md:bottom-8 justify-center items-end text-center'
+            case 'bottom-right':
+              return 'bottom-4 right-4 md:bottom-8 md:right-8 justify-end items-end text-right'
+            case 'center':
+            default:
+              return 'inset-0 justify-center items-center text-center'
+          }
+        }
+
+        const getOverlaySizeClasses = (size?: string) => {
+          switch (size) {
+            case 'small':
+              return 'text-xs md:text-sm tracking-widest uppercase font-medium'
+            case 'large':
+              return 'text-2xl md:text-4xl lg:text-5xl font-light tracking-tight'
+            case 'xlarge':
+              return 'text-3xl md:text-5xl lg:text-7xl font-extrabold tracking-tight'
+            case 'medium':
+            default:
+              return 'text-base md:text-xl lg:text-2xl font-light tracking-wide'
+          }
+        }
+
+        const getOverlayColorClasses = (color?: string) => {
+          return color === 'black' ? 'text-black drop-shadow-sm' : 'text-white drop-shadow-md'
+        }
+
         // Helper: ref callback to apply font-family with !important (React inline styles ignore !important)
         const applyFontRef = (fontFamily: string | undefined) => (el: HTMLElement | null) => {
           if (el && fontFamily) {
@@ -643,6 +685,24 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           typeof customOffset === 'number' && block.buttonPositionOnMedia !== 'center'
         const buttonOverlayPaddingClass = hasCustomOffset ? '' : 'p-2 md:p-8'
 
+        const overlayTextContent = block.overlayText ? t(block.overlayText) : ''
+        const hasOverlayText =
+          typeof overlayTextContent === 'string'
+            ? overlayTextContent.trim().length > 0
+            : !!overlayTextContent
+
+        const overlayTextElement = hasOverlayText && (
+          <div
+            className={`absolute z-30 flex pointer-events-none ${getOverlayPositionClasses(block.overlayTextPosition)}`}
+          >
+            <div
+              className={`max-w-3xl pointer-events-auto px-4 py-2 ${getOverlaySizeClasses(block.overlayTextSize)} ${getOverlayColorClasses(block.overlayTextColor)}`}
+            >
+              {overlayTextContent as string}
+            </div>
+          </div>
+        )
+
         const mediaContent = hasMedia ? (
           <ScrollReveal
             delay={50}
@@ -655,6 +715,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 className={`relative ${mediaWidthClass} ${isMobile ? 'w-full' : ''} aspect-video overflow-hidden`}
               >
                 <YouTubeBackground url={mediaUrl} />
+                {overlayTextElement}
                 {block.showButtonOnMedia && block.linkText && (
                   <div
                     className={`absolute z-30 flex pointer-events-none ${buttonOverlayPaddingClass} ${getButtonPositionClasses(block.buttonPositionOnMedia, hasCustomOffset)}`}
@@ -706,6 +767,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   preload="auto"
                   loading="lazy"
                 />
+                {overlayTextElement}
                 {block.showButtonOnMedia && block.linkText && (
                   <div
                     className={`absolute z-30 flex pointer-events-none ${buttonOverlayPaddingClass} ${getButtonPositionClasses(block.buttonPositionOnMedia, hasCustomOffset)}`}
@@ -773,6 +835,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   origWidthMobile={block.origWidthMobile}
                   origHeightMobile={block.origHeightMobile}
                 />
+                {overlayTextElement}
                 {block.showButtonOnMedia && block.linkText && (
                   <div
                     className={`absolute z-30 flex pointer-events-none ${buttonOverlayPaddingClass} ${getButtonPositionClasses(block.buttonPositionOnMedia, hasCustomOffset)}`}

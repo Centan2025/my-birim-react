@@ -459,6 +459,23 @@ export interface ContentBlock {
   padding?: number
   /** Border color (hex) */
   borderColor?: string
+  /** Text displayed directly on top of image/media */
+  overlayText?: LocalizedString
+  /** Position of overlay text on media */
+  overlayTextPosition?:
+    | 'top-left'
+    | 'top-center'
+    | 'top-right'
+    | 'center-left'
+    | 'center'
+    | 'center-right'
+    | 'bottom-left'
+    | 'bottom-center'
+    | 'bottom-right'
+  /** Size of overlay text on media */
+  overlayTextSize?: 'small' | 'medium' | 'large' | 'xlarge'
+  /** Color of overlay text on media */
+  overlayTextColor?: 'white' | 'black'
 }
 
 /**
