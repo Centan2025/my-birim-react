@@ -1124,6 +1124,23 @@ export const contentBlock = defineType({
         'Açıklama metninin yatay hizalamasını belirler. Başlık için özel hizalama seçilmediyse başlığı da etkiler.',
     }),
     defineField({
+      name: 'buttonAlignment',
+      title: 'Buton Hizalaması (Yatay)',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Sol', value: 'left'},
+          {title: 'Orta', value: 'center'},
+          {title: 'Sağ', value: 'right'},
+        ],
+        layout: 'radio',
+        direction: 'horizontal',
+      },
+      hidden: ({parent}) => !!parent?.showButtonOnMedia,
+      description:
+        'Buton metin alanındayken (medya üzerinde değilken) butonun bağımsız yatay hizalamasını belirler. Seçilmezse metin hizalamasını takip eder.',
+    }),
+    defineField({
       name: 'verticalAlignment',
       title: 'Metin Hizalaması (Dikey)',
       type: 'string',

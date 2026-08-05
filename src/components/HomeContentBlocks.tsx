@@ -462,6 +462,15 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               ? 'text-right'
               : 'text-left'
 
+        // Separate button alignment when not on media (falls back to textAlignment)
+        const buttonAlign = block.buttonAlignment || textAlign
+        const buttonAlignClass =
+          buttonAlign === 'center'
+            ? 'justify-center'
+            : buttonAlign === 'right'
+              ? 'justify-end'
+              : 'justify-start'
+
         const textPosition = block.textPosition || 'below'
         const titlePosition = block.titlePosition || 'below'
         const titleFont = block.titleFont || 'normal'
@@ -660,9 +669,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             )}
             {block.linkText && !block.showButtonOnMedia && (
               <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto">
-                <div
-                  className={`mt-6 ${textAlignClass} flex ${textAlign === 'center' ? 'justify-center' : textAlign === 'right' ? 'justify-end' : 'justify-start'}`}
-                >
+                <div className={`mt-6 w-full flex ${buttonAlignClass}`}>
                   {block.linkUrl ? (
                     <Link
                       to={block.linkUrl}
