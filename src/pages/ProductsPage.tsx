@@ -93,13 +93,21 @@ export function ProductsPage() {
         productsByCategory.get(catId)!.push(product)
       })
 
+      const sortFn = (a: Product, b: Product) => {
+        if (sortBy === 'name-asc') {
+          return t(a.name).localeCompare(t(b.name))
+        }
+        const orderA = typeof a.sortOrder === 'number' ? a.sortOrder : 999999
+        const orderB = typeof b.sortOrder === 'number' ? b.sortOrder : 999999
+        if (orderA !== orderB) {
+          return orderA - orderB
+        }
+        return b.year - a.year
+      }
+
       // Sort products within each category
       productsByCategory.forEach(categoryProducts => {
-        if (sortBy === 'name-asc') {
-          categoryProducts.sort((a, b) => t(a.name).localeCompare(t(b.name)))
-        } else if (sortBy === 'year-desc') {
-          categoryProducts.sort((a, b) => b.year - a.year)
-        }
+        categoryProducts.sort(sortFn)
       })
 
       // Category order lookup map for O(1) comparison (pre-calculated from CMS orderRank)
@@ -138,11 +146,17 @@ export function ProductsPage() {
 
     // If showing products from a specific category, just sort normally
     const sorted = [...products]
-    if (sortBy === 'name-asc') {
-      sorted.sort((a, b) => t(a.name).localeCompare(t(b.name)))
-    } else if (sortBy === 'year-desc') {
-      sorted.sort((a, b) => b.year - a.year)
-    }
+    sorted.sort((a, b) => {
+      if (sortBy === 'name-asc') {
+        return t(a.name).localeCompare(t(b.name))
+      }
+      const orderA = typeof a.sortOrder === 'number' ? a.sortOrder : 999999
+      const orderB = typeof b.sortOrder === 'number' ? b.sortOrder : 999999
+      if (orderA !== orderB) {
+        return orderA - orderB
+      }
+      return b.year - a.year
+    })
     return sorted
   }, [products, sortBy, t, categoryId, allProducts, categories])
 

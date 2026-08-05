@@ -1199,6 +1199,16 @@ export const contentBlock = defineType({
       description: 'Butonun medya (resim/video) üzerindeki duracağı konumu seçin.',
     }),
     defineField({
+      name: 'buttonOffsetOnMedia',
+      title: 'Butonun Kenarlardan Uzaklığı (px)',
+      type: 'number',
+      description:
+        'Butonun medya (resim/video) kenarlarından (üst, alt, sol, sağ) kaç piksel uzakta duracağını belirler (Varsayılan: 32px).',
+      initialValue: 32,
+      hidden: ({parent}) => !parent?.showButtonOnMedia,
+      validation: (Rule) => Rule.min(0).max(300),
+    }),
+    defineField({
       name: 'buttonColor',
       title: 'Buton Yazı Rengi',
       type: 'string',

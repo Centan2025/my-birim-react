@@ -472,19 +472,36 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               ? 'justify-end'
               : 'justify-center'
 
-        const getButtonPositionClasses = (pos?: string) => {
+        const getButtonPositionClasses = (pos?: string, hasCustomOffset?: boolean) => {
           switch (pos) {
             case 'top-left':
-              return 'top-4 left-4 md:top-8 md:left-8 justify-start items-start'
+              return `${hasCustomOffset ? '' : 'top-4 left-4 md:top-8 md:left-8'} justify-start items-start`
             case 'top-right':
-              return 'top-4 right-4 md:top-8 md:right-8 justify-end items-start'
+              return `${hasCustomOffset ? '' : 'top-4 right-4 md:top-8 md:right-8'} justify-end items-start`
             case 'bottom-left':
-              return 'bottom-4 left-4 md:bottom-8 md:left-8 justify-start items-end'
+              return `${hasCustomOffset ? '' : 'bottom-4 left-4 md:bottom-8 md:left-8'} justify-start items-end`
             case 'bottom-right':
-              return 'bottom-4 right-4 md:bottom-8 md:right-8 justify-end items-end'
+              return `${hasCustomOffset ? '' : 'bottom-4 right-4 md:bottom-8 md:right-8'} justify-end items-end`
             case 'center':
             default:
               return 'inset-0 justify-center items-center'
+          }
+        }
+
+        const getButtonPositionStyles = (pos?: string, offset?: number): React.CSSProperties => {
+          if (typeof offset !== 'number' || isNaN(offset) || pos === 'center') return {}
+          const px = `${offset}px`
+          switch (pos) {
+            case 'top-left':
+              return { top: px, left: px }
+            case 'top-right':
+              return { top: px, right: px }
+            case 'bottom-left':
+              return { bottom: px, left: px }
+            case 'bottom-right':
+              return { bottom: px, right: px }
+            default:
+              return {}
           }
         }
 
@@ -620,6 +637,10 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             Array.isArray(block.imagePanels) &&
             block.imagePanels.length > 0)
 
+        const customOffset = typeof block.buttonOffsetOnMedia === 'number' ? block.buttonOffsetOnMedia : undefined
+        const hasCustomOffset = typeof customOffset === 'number' && block.buttonPositionOnMedia !== 'center'
+        const buttonOverlayPaddingClass = hasCustomOffset ? '' : 'p-2 md:p-8'
+
         const mediaContent = hasMedia ? (
           <ScrollReveal
             delay={50}
@@ -634,7 +655,8 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 <YouTubeBackground url={mediaUrl} />
                 {block.showButtonOnMedia && block.linkText && (
                   <div
-                    className={`absolute z-30 flex pointer-events-none p-2 md:p-8 ${getButtonPositionClasses(block.buttonPositionOnMedia)}`}
+                    className={`absolute z-30 flex pointer-events-none ${buttonOverlayPaddingClass} ${getButtonPositionClasses(block.buttonPositionOnMedia, hasCustomOffset)}`}
+                    style={getButtonPositionStyles(block.buttonPositionOnMedia, customOffset)}
                   >
                     {block.linkUrl ? (
                       <Link
@@ -684,7 +706,8 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 />
                 {block.showButtonOnMedia && block.linkText && (
                   <div
-                    className={`absolute z-30 flex pointer-events-none p-2 md:p-8 ${getButtonPositionClasses(block.buttonPositionOnMedia)}`}
+                    className={`absolute z-30 flex pointer-events-none ${buttonOverlayPaddingClass} ${getButtonPositionClasses(block.buttonPositionOnMedia, hasCustomOffset)}`}
+                    style={getButtonPositionStyles(block.buttonPositionOnMedia, customOffset)}
                   >
                     {block.linkUrl ? (
                       <Link
@@ -750,7 +773,8 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 />
                 {block.showButtonOnMedia && block.linkText && (
                   <div
-                    className={`absolute z-30 flex pointer-events-none p-2 md:p-8 ${getButtonPositionClasses(block.buttonPositionOnMedia)}`}
+                    className={`absolute z-30 flex pointer-events-none ${buttonOverlayPaddingClass} ${getButtonPositionClasses(block.buttonPositionOnMedia, hasCustomOffset)}`}
+                    style={getButtonPositionStyles(block.buttonPositionOnMedia, customOffset)}
                   >
                     {block.linkUrl ? (
                       <Link

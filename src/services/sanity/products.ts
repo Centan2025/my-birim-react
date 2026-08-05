@@ -285,6 +285,7 @@ const mapProductRow = (r: Record<string, unknown>): Product => {
       ) as string[]),
     categoryId: ((r['category'] as Record<string, unknown>)?.['categoryId'] as string) || '',
     year: r['year'] as number,
+    sortOrder: typeof r['sortOrder'] === 'number' ? r['sortOrder'] : undefined,
     isPublished: r['isPublished'] !== undefined ? Boolean(r['isPublished']) : true,
     description: r['description'] as LocalizedString,
     mainImage: mainImage as Product['mainImage'],
@@ -328,7 +329,7 @@ const mapProductRow = (r: Record<string, unknown>): Product => {
 }
 
 const productQueryString = `
-  "id": id.current, name, year, isPublished, description, 
+  "id": id.current, name, year, sortOrder, isPublished, description, 
   media[]{ 
     type, url, imageR2, imageMobileR2, imageDesktopR2, title, description, link, linkText, 
     videoFileR2, videoFileMobileR2, videoFileDesktopR2, isCover, isMirrored 
@@ -341,7 +342,7 @@ const productQueryString = `
 
 export const getProducts = async (): Promise<Product[]> => {
   if (useSanity && sanity) {
-    const query = groq`*[_type == "product"] | order(year desc){ ${productQueryString} }`
+    const query = groq`*[_type == "product"] | order(coalesce(sortOrder, 999999) asc, year desc){ ${productQueryString} }`
     const rows = await sanity.fetch(query)
     return (rows as Record<string, unknown>[]).map((r: Record<string, unknown>) => mapProductRow(r))
   }
@@ -362,7 +363,7 @@ export const getProductById = async (id: string): Promise<Product | undefined> =
 
 export const getProductsByCategoryId = async (categoryId: string): Promise<Product[]> => {
   if (useSanity && sanity) {
-    const query = groq`*[_type == "product" && category->id.current == $categoryId && (!defined(isPublished) || isPublished == true)] | order(year desc){ ${productQueryString} }`
+    const query = groq`*[_type == "product" && category->id.current == $categoryId && (!defined(isPublished) || isPublished == true)] | order(coalesce(sortOrder, 999999) asc, year desc){ ${productQueryString} }`
     const rows = await sanity.fetch(query, {categoryId})
     return (rows as Record<string, unknown>[]).map((r: Record<string, unknown>) => mapProductRow(r))
   }
@@ -372,7 +373,7 @@ export const getProductsByCategoryId = async (categoryId: string): Promise<Produ
 
 export const getProductsByDesignerId = async (designerId: string): Promise<Product[]> => {
   if (useSanity && sanity) {
-    const query = groq`*[_type == "product" && (designer->id.current == $designerId || $designerId in designers[]->id.current) && (!defined(isPublished) || isPublished == true)] | order(year desc){ ${productQueryString} }`
+    const query = groq`*[_type == "product" && (designer->id.current == $designerId || $designerId in designers[]->id.current) && (!defined(isPublished) || isPublished == true)] | order(coalesce(sortOrder, 999999) asc, year desc){ ${productQueryString} }`
     const rows = await sanity.fetch(query, {designerId})
     return (rows as Record<string, unknown>[]).map((r: Record<string, unknown>) => mapProductRow(r))
   }

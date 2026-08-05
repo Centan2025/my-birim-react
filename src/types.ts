@@ -292,6 +292,8 @@ export interface Product {
   exclusiveContent: ExclusiveContent
   /** Sanity update timestamp. */
   _updatedAt?: string
+  /** Optional custom sort order number for ordering within categories. */
+  sortOrder?: number
 }
 
 // --- Product Sub-types ---
@@ -447,6 +449,8 @@ export interface ContentBlock {
   showButtonOnMedia?: boolean
   /** Position of the button on media */
   buttonPositionOnMedia?: 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+  /** Offset/distance of button from media edges in pixels */
+  buttonOffsetOnMedia?: number
   /** Bottom spacing in pixels */
   spacingBottom?: number
   /** Button text color */
