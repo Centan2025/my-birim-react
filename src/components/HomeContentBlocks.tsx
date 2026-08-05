@@ -351,6 +351,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
       blocks.forEach(b => {
         if (b.titleFont && b.titleFont !== 'normal') fonts.add(b.titleFont)
         if (b.contentFont && b.contentFont !== 'normal') fonts.add(b.contentFont)
+        if (b.overlayTextFont && b.overlayTextFont !== 'normal') fonts.add(b.overlayTextFont)
       })
     }
     return Array.from(fonts)
@@ -691,11 +692,23 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             ? overlayTextContent.trim().length > 0
             : !!overlayTextContent
 
+        const overlayTextFont = block.overlayTextFont || 'Oswald'
+        const isNormalOverlayFont =
+          overlayTextFont === 'normal' || overlayTextFont === 'Barlow Condensed'
+        const overlayFontFamily = isNormalOverlayFont
+          ? undefined
+          : overlayTextFont === 'serif'
+            ? 'serif'
+            : overlayTextFont === 'mono'
+              ? 'monospace'
+              : `"${overlayTextFont}", sans-serif`
+
         const overlayTextElement = hasOverlayText && (
           <div
             className={`absolute z-30 flex pointer-events-none ${getOverlayPositionClasses(block.overlayTextPosition)}`}
           >
             <div
+              ref={applyFontRef(overlayFontFamily)}
               className={`max-w-3xl pointer-events-auto px-4 py-2 ${getOverlaySizeClasses(block.overlayTextSize)} ${getOverlayColorClasses(block.overlayTextColor)}`}
             >
               {overlayTextContent as string}

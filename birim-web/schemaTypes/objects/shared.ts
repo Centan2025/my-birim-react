@@ -1308,6 +1308,16 @@ export const contentBlock = defineType({
       description: 'Görsel üzerindeki yazının rengini seçin.',
     }),
     defineField({
+      name: 'overlayTextFont',
+      title: 'Görsel Üzerindeki Yazı Fontu',
+      type: 'string',
+      components: {
+        input: browserOnlyInput(FontSelectorInput),
+      },
+      initialValue: 'Oswald',
+      description: 'Görsel üzerindeki yazı için font seçin (Varsayılan: Oswald).',
+    }),
+    defineField({
       name: 'padding',
       title: 'İç Boşluk (Padding - px)',
       type: 'number',

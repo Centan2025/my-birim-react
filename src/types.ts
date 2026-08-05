@@ -476,6 +476,8 @@ export interface ContentBlock {
   overlayTextSize?: 'small' | 'medium' | 'large' | 'xlarge'
   /** Color of overlay text on media */
   overlayTextColor?: 'white' | 'black'
+  /** Font family for overlay text on media */
+  overlayTextFont?: string
 }
 
 /**
