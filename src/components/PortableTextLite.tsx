@@ -96,13 +96,22 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
           else if (val === '2xl') matchedFontSize = '48px'
           else if (val === '3xl') matchedFontSize = '64px'
           else if (/^\d+$/.test(val)) matchedFontSize = `${val}px`
-          else if (val.endsWith('px') || val.endsWith('em') || val.endsWith('rem') || val.endsWith('%')) {
+          else if (
+            val.endsWith('px') ||
+            val.endsWith('em') ||
+            val.endsWith('rem') ||
+            val.endsWith('%')
+          ) {
             matchedFontSize = val
           }
         }
 
         if (matchedFontSize) {
-          el = <span key={i + '-' + m} style={{fontSize: matchedFontSize}}>{el}</span>
+          el = (
+            <span key={i + '-' + m} style={{fontSize: matchedFontSize}}>
+              {el}
+            </span>
+          )
         }
 
         // Annotations
@@ -151,8 +160,16 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
           }
 
           // Font Size Support (Seçili metin boyutu)
-          if ((def._type === 'fontSize' || def._type === 'size') && (def.size || (def as Record<string, string>)['value'] || (def as Record<string, string>)['fontSize'])) {
-            const sizeVal = def.size || (def as Record<string, string>)['value'] || (def as Record<string, string>)['fontSize']
+          if (
+            (def._type === 'fontSize' || def._type === 'size') &&
+            (def.size ||
+              (def as Record<string, string>)['value'] ||
+              (def as Record<string, string>)['fontSize'])
+          ) {
+            const sizeVal =
+              def.size ||
+              (def as Record<string, string>)['value'] ||
+              (def as Record<string, string>)['fontSize']
             if (sizeVal) {
               el = (
                 <span key={i + '-size'} style={{fontSize: sizeVal}}>

@@ -8,8 +8,10 @@ import {browserOnly, browserOnlyInput} from '../utils/browserOnly'
 const createFontSizeDecorator = (title: string, value: string, px: string) => ({
   title,
   value,
-  icon: () => React.createElement('span', {style: {fontSize: '11px', fontWeight: 600, padding: '0 2px'}}, px),
-  component: (props: {children: React.ReactNode}) => React.createElement('span', {style: {fontSize: px}}, props.children),
+  icon: () =>
+    React.createElement('span', {style: {fontSize: '11px', fontWeight: 600, padding: '0 2px'}}, px),
+  component: (props: {children: React.ReactNode}) =>
+    React.createElement('span', {style: {fontSize: px}}, props.children),
 })
 
 /**

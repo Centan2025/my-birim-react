@@ -493,13 +493,13 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           const px = `${offset}px`
           switch (pos) {
             case 'top-left':
-              return { top: px, left: px }
+              return {top: px, left: px}
             case 'top-right':
-              return { top: px, right: px }
+              return {top: px, right: px}
             case 'bottom-left':
-              return { bottom: px, left: px }
+              return {bottom: px, left: px}
             case 'bottom-right':
-              return { bottom: px, right: px }
+              return {bottom: px, right: px}
             default:
               return {}
           }
@@ -637,8 +637,10 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             Array.isArray(block.imagePanels) &&
             block.imagePanels.length > 0)
 
-        const customOffset = typeof block.buttonOffsetOnMedia === 'number' ? block.buttonOffsetOnMedia : undefined
-        const hasCustomOffset = typeof customOffset === 'number' && block.buttonPositionOnMedia !== 'center'
+        const customOffset =
+          typeof block.buttonOffsetOnMedia === 'number' ? block.buttonOffsetOnMedia : undefined
+        const hasCustomOffset =
+          typeof customOffset === 'number' && block.buttonPositionOnMedia !== 'center'
         const buttonOverlayPaddingClass = hasCustomOffset ? '' : 'p-2 md:p-8'
 
         const mediaContent = hasMedia ? (

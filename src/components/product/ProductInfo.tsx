@@ -66,7 +66,6 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
 
   return (
     <section className="space-y-10">
-
       {/* Top Prev / Next controls */}
       {showProductPrevNext && (prevProduct || nextProduct) && (
         <div className="flex items-center justify-between mt-2 mb-6">
