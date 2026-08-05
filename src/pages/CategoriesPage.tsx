@@ -210,22 +210,34 @@ export function CategoriesPage() {
                         }
                         isMirrored={
                           typeof category.displayImage === 'object' && category.displayImage
-                            ? Boolean((category.displayImage as Record<string, unknown>)['isMirrored'])
+                            ? Boolean(
+                                (category.displayImage as Record<string, unknown>)['isMirrored']
+                              )
                             : undefined
                         }
                         isMirroredMobile={
                           typeof category.displayImage === 'object' && category.displayImage
-                            ? (category.displayImage as Record<string, unknown>)['isMirroredMobile'] !==
-                              undefined
-                              ? Boolean((category.displayImage as Record<string, unknown>)['isMirroredMobile'])
+                            ? (category.displayImage as Record<string, unknown>)[
+                                'isMirroredMobile'
+                              ] !== undefined
+                              ? Boolean(
+                                  (category.displayImage as Record<string, unknown>)[
+                                    'isMirroredMobile'
+                                  ]
+                                )
                               : undefined
                             : undefined
                         }
                         isMirroredDesktop={
                           typeof category.displayImage === 'object' && category.displayImage
-                            ? (category.displayImage as Record<string, unknown>)['isMirroredDesktop'] !==
-                              undefined
-                              ? Boolean((category.displayImage as Record<string, unknown>)['isMirroredDesktop'])
+                            ? (category.displayImage as Record<string, unknown>)[
+                                'isMirroredDesktop'
+                              ] !== undefined
+                              ? Boolean(
+                                  (category.displayImage as Record<string, unknown>)[
+                                    'isMirroredDesktop'
+                                  ]
+                                )
                               : undefined
                             : undefined
                         }

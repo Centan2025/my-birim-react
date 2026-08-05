@@ -338,7 +338,6 @@ export function AboutPageNew() {
 
   return (
     <div className="bg-[var(--bg-primary)] text-[var(--text-primary)] animate-fade-in-up-subtle font-light selection:bg-[var(--text-primary)] selection:text-[var(--bg-primary)]">
-
       {/* Hero Header Section */}
       <div className="relative h-[60vh] sm:h-[75vh] min-h-[420px] sm:min-h-[550px] bg-gray-900 text-white flex items-center justify-center overflow-hidden hero-section">
         <div className="absolute inset-0 w-full h-full scale-105 animate-slow-zoom">

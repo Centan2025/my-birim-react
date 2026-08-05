@@ -130,19 +130,13 @@ export const deskStructure = (S: StructureBuilder, context: ConfigContext) => {
                 ),
               S.listItem()
                 .title('Gizlilik Politikası')
-                .child(
-                  S.document().schemaType('privacyPolicy').documentId('gizlilikPolitikasi'),
-                ),
+                .child(S.document().schemaType('privacyPolicy').documentId('gizlilikPolitikasi')),
               S.listItem()
                 .title('Kullanım Şartları')
-                .child(
-                  S.document().schemaType('termsOfService').documentId('kullanimSartlari'),
-                ),
+                .child(S.document().schemaType('termsOfService').documentId('kullanimSartlari')),
               S.listItem()
                 .title('KVKK Aydınlatma Metni')
-                .child(
-                  S.document().schemaType('kvkkPolicy').documentId('kvkkAydinlatmaMetni'),
-                ),
+                .child(S.document().schemaType('kvkkPolicy').documentId('kvkkAydinlatmaMetni')),
             ]),
         ),
       S.documentTypeListItem('materialGroup').title('Malzeme Grupları'),
