@@ -477,10 +477,18 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           switch (pos) {
             case 'top-left':
               return `${hasCustomOffset ? '' : 'top-4 left-4 md:top-8 md:left-8'} justify-start items-start`
+            case 'top-center':
+              return `${hasCustomOffset ? '' : 'top-4 left-1/2 -translate-x-1/2 md:top-8'} justify-center items-start`
             case 'top-right':
               return `${hasCustomOffset ? '' : 'top-4 right-4 md:top-8 md:right-8'} justify-end items-start`
+            case 'center-left':
+              return `${hasCustomOffset ? '' : 'top-1/2 left-4 -translate-y-1/2 md:left-8'} justify-start items-center`
+            case 'center-right':
+              return `${hasCustomOffset ? '' : 'top-1/2 right-4 -translate-y-1/2 md:right-8'} justify-end items-center`
             case 'bottom-left':
               return `${hasCustomOffset ? '' : 'bottom-4 left-4 md:bottom-8 md:left-8'} justify-start items-end`
+            case 'bottom-center':
+              return `${hasCustomOffset ? '' : 'bottom-4 left-1/2 -translate-x-1/2 md:bottom-8'} justify-center items-end`
             case 'bottom-right':
               return `${hasCustomOffset ? '' : 'bottom-4 right-4 md:bottom-8 md:right-8'} justify-end items-end`
             case 'center':
@@ -495,10 +503,18 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           switch (pos) {
             case 'top-left':
               return {top: px, left: px}
+            case 'top-center':
+              return {top: px, left: '50%', transform: 'translateX(-50%)'}
             case 'top-right':
               return {top: px, right: px}
+            case 'center-left':
+              return {top: '50%', left: px, transform: 'translateY(-50%)'}
+            case 'center-right':
+              return {top: '50%', right: px, transform: 'translateY(-50%)'}
             case 'bottom-left':
               return {bottom: px, left: px}
+            case 'bottom-center':
+              return {bottom: px, left: '50%', transform: 'translateX(-50%)'}
             case 'bottom-right':
               return {bottom: px, right: px}
             default:

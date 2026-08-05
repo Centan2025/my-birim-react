@@ -448,7 +448,16 @@ export interface ContentBlock {
   /** Toggles button visibility over media */
   showButtonOnMedia?: boolean
   /** Position of the button on media */
-  buttonPositionOnMedia?: 'center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+  buttonPositionOnMedia?:
+    | 'top-left'
+    | 'top-center'
+    | 'top-right'
+    | 'center-left'
+    | 'center'
+    | 'center-right'
+    | 'bottom-left'
+    | 'bottom-center'
+    | 'bottom-right'
   /** Offset/distance of button from media edges in pixels */
   buttonOffsetOnMedia?: number
   /** Bottom spacing in pixels */

@@ -1210,10 +1210,14 @@ export const contentBlock = defineType({
       type: 'string',
       options: {
         list: [
-          {title: 'Merkez', value: 'center'},
           {title: 'Sol Üst', value: 'top-left'},
+          {title: 'Üst Orta', value: 'top-center'},
           {title: 'Sağ Üst', value: 'top-right'},
+          {title: 'Sol Orta', value: 'center-left'},
+          {title: 'Merkez / Orta', value: 'center'},
+          {title: 'Sağ Orta', value: 'center-right'},
           {title: 'Sol Alt', value: 'bottom-left'},
+          {title: 'Alt Orta', value: 'bottom-center'},
           {title: 'Sağ Alt', value: 'bottom-right'},
         ],
         layout: 'radio',
