@@ -526,6 +526,8 @@ export interface HomePageContent {
   heroMedia: HeroMediaItem[]
   /** Toggles automatic slide transition for hero media. */
   heroAutoPlay?: boolean
+  /** Duration in seconds for each slide in automatic transition. */
+  heroAutoPlayInterval?: number
   /** Toggles the visibility of the hero text overlay. */
   isHeroTextVisible: boolean
   /** Dynamic fields for the quick action banner under Hero */

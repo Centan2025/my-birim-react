@@ -50,6 +50,17 @@ export default defineType({
       initialValue: true,
     }),
     defineField({
+      name: 'heroAutoPlayInterval',
+      title: 'Hero Otomatik Geçiş Hızı (Saniye)',
+      type: 'number',
+      fieldset: 'heroGroup',
+      hidden: ({parent}) => !parent?.heroAutoPlay,
+      description:
+        'Her bir hero slaytının ekranda kaç saniye kalacağını belirler (Varsayılan: 5 saniye).',
+      initialValue: 5,
+      validation: (Rule) => Rule.min(1).max(60),
+    }),
+    defineField({
       name: 'isHeroTextVisible',
       title: 'Hero Metnini Göster',
       type: 'boolean',

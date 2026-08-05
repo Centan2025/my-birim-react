@@ -330,10 +330,15 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
     }
     if (isDragging || isTransitioning) return
 
+    const intervalMs =
+      typeof content?.heroAutoPlayInterval === 'number' && content.heroAutoPlayInterval > 0
+        ? content.heroAutoPlayInterval * 1000
+        : 5000
+
     autoPlayIntervalRef.current = setInterval(() => {
       if (isDragging || isTransitioning) return
       goToNextSlide()
-    }, 5000)
+    }, intervalMs)
 
     return () => {
       if (autoPlayIntervalRef.current) {
@@ -341,7 +346,14 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
         autoPlayIntervalRef.current = null
       }
     }
-  }, [heroMedia, content?.heroAutoPlay, isDragging, isTransitioning, goToNextSlide])
+  }, [
+    heroMedia,
+    content?.heroAutoPlay,
+    content?.heroAutoPlayInterval,
+    isDragging,
+    isTransitioning,
+    goToNextSlide,
+  ])
 
   // Hero text animasyonu - slide değiştiğinde soldan gel
   useEffect(() => {
