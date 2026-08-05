@@ -36,99 +36,14 @@ export const deskStructure = (S: StructureBuilder, context: ConfigContext) => {
                 .icon(() => '👁️'),
             ]),
         ),
-      (() => {
-        const item = orderableDocumentListDeskItem({
-          type: 'category',
-          title: 'Ürünler (Kategoriler & Modeller)',
-          S,
-          context,
-          icon: () => '🪑',
-        })
-        if (item.child && typeof item.child === 'object') {
-          const componentPane = item.child as unknown as Record<string, unknown>
-          componentPane.child = (childId: string, childContext: unknown) => {
-            const ctxParams = childContext as
-              | {
-                  params?: Record<string, string>
-                  intent?: {type?: string; params?: Record<string, string>}
-                }
-              | undefined
-
-            const isEditor =
-              childId.includes('view=editor') ||
-              childId.includes('mode=edit') ||
-              childId.includes('edit=true') ||
-              childId.includes('type=category') ||
-              ctxParams?.intent?.type === 'edit' ||
-              ctxParams?.params?.['view'] === 'editor' ||
-              ctxParams?.params?.['view'] === 'edit' ||
-              ctxParams?.params?.['mode'] === 'edit' ||
-              ctxParams?.params?.['type'] === 'category'
-
-            const cleanId = (ctxParams?.params?.['id'] || childId)
-              .replace(/^drafts\./, '')
-              .replace(',view=editor', '')
-              .replace(';view=editor', '')
-              .split(',')[0]
-              .split(';')[0]
-              .split('?')[0]
-
-            if (isEditor) {
-              return S.document()
-                .schemaType('category')
-                .documentId(cleanId)
-                .views([
-                  S.view.form().title('Düzenle'),
-                  S.view
-                    .component(PreviewView)
-                    .title('Önizleme')
-                    .icon(() => '👁️'),
-                ])
-                .serialize()
-            }
-
-            return S.documentList()
-              .title('Modeller')
-              .schemaType('product')
-              .filter(
-                '_type == "product" && (category._ref == $catId || category._ref == $draftCatId)',
-              )
-              .params({
-                catId: cleanId,
-                draftCatId: `drafts.${cleanId}`,
-              })
-              .defaultOrdering([{field: 'orderRank', direction: 'asc'}])
-              .apiVersion('2024-01-01')
-              .menuItems([
-                S.menuItem()
-                  .title('Kategoriyi Düzenle')
-                  .icon(() => '✏️')
-                  .intent({
-                    type: 'edit',
-                    params: {id: cleanId, type: 'category'},
-                  }),
-                S.menuItem()
-                  .title('Yeni Model Ekle')
-                  .intent({type: 'create', params: {type: 'product'}}),
-              ])
-              .child((productId: string) =>
-                S.document()
-                  .schemaType('product')
-                  .documentId(productId)
-                  .views([
-                    S.view.form().title('Düzenle'),
-                    S.view
-                      .component(PreviewView)
-                      .title('Önizleme')
-                      .icon(() => '👁️'),
-                  ])
-                  .serialize(),
-              )
-              .serialize()
-          }
-        }
-        return item
-      })(),
+      orderableDocumentListDeskItem({
+        type: 'category',
+        title: 'Kategoriler & Modeller',
+        S,
+        context,
+        icon: () => '🪑',
+      }),
+      S.documentTypeListItem('product').title('Tüm Modeller'),
       orderableDocumentListDeskItem({
         type: 'designer',
         title: 'Tasarımcılar',
