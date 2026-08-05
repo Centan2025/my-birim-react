@@ -878,6 +878,11 @@ export const contentBlock = defineType({
   type: 'object',
   fieldsets: [
     {
+      name: 'textGroup',
+      title: '📝 Başlık ve Metin Ayarları',
+      options: {collapsible: true, collapsed: false},
+    },
+    {
       name: 'buttonGroup',
       title: '🔘 Düğme / Buton Ayarları',
       options: {collapsible: true, collapsed: false},
@@ -960,34 +965,39 @@ export const contentBlock = defineType({
       type: 'string',
       options: {
         list: [
-          {title: 'Kapsa / Tam Doldur (Cover - Kırpılabilir)', value: 'cover'},
-          {title: 'Sığdır / Tamamını Göster (Contain - Oranı Korur)', value: 'contain'},
-          {title: 'Doğal Boyut (Natural)', value: 'natural'},
+          {title: 'Tamamı Görünsün (Contain)', value: 'contain'},
+          {title: 'Alanı Kaplasın (Cover - Kırpma)', value: 'cover'},
         ],
         layout: 'radio',
         direction: 'horizontal',
       },
-      initialValue: 'cover',
+      initialValue: 'contain',
       hidden: ({parent}) => parent?.mediaType !== 'panels',
-      description: 'Görsellerin panel alanına nasıl sığdırılacağını veya oturacağını belirler.',
+      description:
+        'Contain seçilirse görseller kırpılmadan alanına sığdırılır. Cover seçilirse alanın tamamını doldurur (kırpılabilir).',
     }),
     defineField({
       name: 'panelGap',
-      title: 'Paneller Arası Boşluk',
+      title: 'Paneller Arası Boşluk (px)',
+      type: 'number',
+      initialValue: 12,
+      hidden: ({parent}) => parent?.mediaType !== 'panels',
+      validation: (Rule) => Rule.min(0).max(100),
+      description: 'Paneller arasındaki boşluk miktarını piksel cinsinden belirler.',
+    }),
+    defineField({
+      name: 'mediaWidth',
+      title: 'Medya Genişliği',
       type: 'string',
       options: {
         list: [
-          {title: 'Yok (0px)', value: 'none'},
-          {title: 'Küçük (12px)', value: 'small'},
-          {title: 'Orta (24px)', value: 'medium'},
-          {title: 'Büyük (40px)', value: 'large'},
+          {title: 'Ortalı / Standart', value: 'center'},
+          {title: 'Tam Genişlik', value: 'full'},
         ],
         layout: 'radio',
         direction: 'horizontal',
       },
-      initialValue: 'medium',
-      hidden: ({parent}) => parent?.mediaType !== 'panels',
-      description: 'Yan yana duran paneller arasındaki mesafeyi ayarlar.',
+      initialValue: 'center',
     }),
     // Görsel konumu – doğrudan görsel alanlarının altında
     defineField({
@@ -1042,14 +1052,16 @@ export const contentBlock = defineType({
 
     defineField({
       name: 'title',
-      title: 'Başlık',
+      title: 'Başlık Metni',
       type: 'localizedString',
+      fieldset: 'textGroup',
       description: 'İçerik bloğu için başlık metni',
     }),
     defineField({
       name: 'titleFont',
       title: 'Başlık Fontu',
       type: 'string',
+      fieldset: 'textGroup',
       components: {
         input: browserOnlyInput(FontSelectorInput),
       },
@@ -1057,23 +1069,14 @@ export const contentBlock = defineType({
       description: 'Başlık için font stili seçin.',
     }),
     defineField({
-      name: 'contentFont',
-      title: 'İçerik Fontu',
-      type: 'string',
-      components: {
-        input: browserOnlyInput(FontSelectorInput),
-      },
-      initialValue: 'normal',
-      description: 'Açıklama metni için font stili seçin.',
-    }),
-    defineField({
       name: 'titlePosition',
-      title: 'Başlık Konumu',
+      title: 'Başlık Konumu (Dikey)',
       type: 'string',
+      fieldset: 'textGroup',
       options: {
         list: [
-          {title: 'Altta', value: 'below'},
-          {title: 'Üstte', value: 'above'},
+          {title: 'Görselin Altında', value: 'below'},
+          {title: 'Görselin Üstünde', value: 'above'},
         ],
         layout: 'radio',
         direction: 'horizontal',
@@ -1085,6 +1088,7 @@ export const contentBlock = defineType({
       name: 'titleAlignment',
       title: 'Başlık Hizalaması (Yatay)',
       type: 'string',
+      fieldset: 'textGroup',
       options: {
         list: [
           {title: 'Sol', value: 'left'},
@@ -1101,27 +1105,41 @@ export const contentBlock = defineType({
       name: 'description',
       title: 'Açıklama Metni',
       type: 'localizedPortableText',
+      fieldset: 'textGroup',
+      description: 'İçerik bloğu için detaylı açıklama metni',
     }),
-    // Metin konumu seçeneği (Altta / Üstte)
+    defineField({
+      name: 'contentFont',
+      title: 'İçerik Fontu',
+      type: 'string',
+      fieldset: 'textGroup',
+      components: {
+        input: browserOnlyInput(FontSelectorInput),
+      },
+      initialValue: 'normal',
+      description: 'Açıklama metni için font stili seçin.',
+    }),
     defineField({
       name: 'textPosition',
-      title: 'Metin Konumu',
+      title: 'Metin Konumu (Dikey)',
       type: 'string',
+      fieldset: 'textGroup',
       options: {
         list: [
-          {title: 'Altta', value: 'below'},
-          {title: 'Üstte', value: 'above'},
+          {title: 'Görselin Altında (Altta)', value: 'below'},
+          {title: 'Görselin Üstünde (Üstte)', value: 'above'},
         ],
         layout: 'radio',
         direction: 'horizontal',
       },
       initialValue: 'below',
-      description: 'Yazıların görselin üstünde mi yoksa altında mı duracağını belirler.',
+      description: 'Açıklama metninin görselin üstünde mi yoksa altında mı duracağını belirler.',
     }),
     defineField({
       name: 'textAlignment',
       title: 'Metin Hizalaması (Yatay)',
       type: 'string',
+      fieldset: 'textGroup',
       options: {
         list: [
           {title: 'Sol', value: 'left'},
