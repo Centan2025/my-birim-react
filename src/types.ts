@@ -487,6 +487,8 @@ export interface ContentBlock {
     | 'bottom-right'
   /** Size of overlay text on media */
   overlayTextSize?: 'small' | 'medium' | 'large' | 'xlarge'
+  /** Font weight of overlay text on media */
+  overlayTextWeight?: 'light' | 'normal' | 'medium' | 'bold' | 'extrabold'
   /** Color of overlay text on media */
   overlayTextColor?: 'white' | 'black'
   /** Font family for overlay text on media */

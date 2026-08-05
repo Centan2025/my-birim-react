@@ -558,14 +558,31 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         const getOverlaySizeClasses = (size?: string) => {
           switch (size) {
             case 'small':
-              return 'text-xs md:text-sm tracking-widest uppercase font-medium'
+              return 'text-xs md:text-sm tracking-widest uppercase'
             case 'large':
-              return 'text-2xl md:text-4xl lg:text-5xl font-light tracking-tight'
+              return 'text-2xl md:text-4xl lg:text-5xl tracking-tight'
             case 'xlarge':
-              return 'text-3xl md:text-5xl lg:text-7xl font-extrabold tracking-tight'
+              return 'text-3xl md:text-5xl lg:text-7xl tracking-tight'
             case 'medium':
             default:
-              return 'text-base md:text-xl lg:text-2xl font-light tracking-wide'
+              return 'text-base md:text-xl lg:text-2xl tracking-wide'
+          }
+        }
+
+        const getOverlayWeightClass = (weight?: string) => {
+          switch (weight) {
+            case 'light':
+              return 'font-light'
+            case 'normal':
+              return 'font-normal'
+            case 'medium':
+              return 'font-medium'
+            case 'bold':
+              return 'font-bold'
+            case 'extrabold':
+              return 'font-extrabold'
+            default:
+              return 'font-light'
           }
         }
 
@@ -724,7 +741,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           >
             <div
               ref={applyFontRef(overlayFontFamily)}
-              className={`max-w-3xl pointer-events-auto px-4 py-2 ${getOverlaySizeClasses(block.overlayTextSize)} ${getOverlayColorClasses(block.overlayTextColor)}`}
+              className={`max-w-3xl pointer-events-auto px-4 py-2 ${getOverlaySizeClasses(block.overlayTextSize)} ${getOverlayWeightClass(block.overlayTextWeight)} ${getOverlayColorClasses(block.overlayTextColor)}`}
             >
               {overlayTextContent as string}
             </div>

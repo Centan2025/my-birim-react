@@ -1311,6 +1311,25 @@ export const contentBlock = defineType({
       description: 'Görsel üzerindeki yazının boyutunu seçin.',
     }),
     defineField({
+      name: 'overlayTextWeight',
+      title: 'Görsel Üzerindeki Yazı Kalınlığı',
+      type: 'string',
+      fieldset: 'overlayGroup',
+      options: {
+        list: [
+          {title: 'İnce (Light)', value: 'light'},
+          {title: 'Normal (Regular)', value: 'normal'},
+          {title: 'Yarı Kalın (Medium)', value: 'medium'},
+          {title: 'Kalın (Bold)', value: 'bold'},
+          {title: 'Ekstra Kalın (Extrabold)', value: 'extrabold'},
+        ],
+        layout: 'radio',
+        direction: 'horizontal',
+      },
+      initialValue: 'light',
+      description: 'Görsel üzerindeki yazının kalınlığını (weight) seçin.',
+    }),
+    defineField({
       name: 'overlayTextColor',
       title: 'Görsel Üzerindeki Yazı Rengi',
       type: 'string',
