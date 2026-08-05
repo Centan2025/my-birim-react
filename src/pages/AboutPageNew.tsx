@@ -338,20 +338,6 @@ export function AboutPageNew() {
 
   return (
     <div className="bg-[var(--bg-primary)] text-[var(--text-primary)] animate-fade-in-up-subtle font-light selection:bg-[var(--text-primary)] selection:text-[var(--bg-primary)]">
-      {/* Floating Design Switcher Banner */}
-      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
-        <div className="bg-[var(--bg-secondary)] border border-[var(--border-primary,#e5e7eb)]/40 text-[var(--text-primary)] px-3 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-xl flex items-center gap-2 sm:gap-3 text-[11px] sm:text-xs font-light backdrop-blur-md">
-          <span className="px-2 py-0.5 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-full font-normal uppercase text-[9px] sm:text-[10px] tracking-wider whitespace-nowrap">
-            Tasarım V2 (Varsayılan)
-          </span>
-          <Link
-            to="/about-v1"
-            className="hover:opacity-75 transition-opacity underline underline-offset-4 whitespace-nowrap"
-          >
-            V1 Klasik Tasarıma Geç
-          </Link>
-        </div>
-      </div>
 
       {/* Hero Header Section */}
       <div className="relative h-[60vh] sm:h-[75vh] min-h-[420px] sm:min-h-[550px] bg-gray-900 text-white flex items-center justify-center overflow-hidden hero-section">
