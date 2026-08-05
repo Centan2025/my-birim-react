@@ -876,6 +876,18 @@ export const contentBlock = defineType({
   name: 'contentBlock',
   title: 'İçerik Bloğu',
   type: 'object',
+  fieldsets: [
+    {
+      name: 'buttonGroup',
+      title: '🔘 Düğme / Buton Ayarları',
+      options: {collapsible: true, collapsed: false},
+    },
+    {
+      name: 'overlayGroup',
+      title: '🖼️ Görsel Üzerindeki Yazı Ayarları (Slogan / Overlay)',
+      options: {collapsible: true, collapsed: true},
+    },
+  ],
   fields: [
     defineField({
       name: 'mediaType',
@@ -1124,9 +1136,31 @@ export const contentBlock = defineType({
         'Açıklama metninin yatay hizalamasını belirler. Başlık için özel hizalama seçilmediyse başlığı da etkiler.',
     }),
     defineField({
+      name: 'linkText',
+      title: 'Link Metni',
+      type: 'localizedString',
+      fieldset: 'buttonGroup',
+    }),
+    defineField({
+      name: 'linkUrl',
+      title: 'Link URL',
+      type: 'string',
+      fieldset: 'buttonGroup',
+    }),
+    defineField({
+      name: 'showButtonOnMedia',
+      title: 'Butonu Görsel Üzerinde Göster',
+      type: 'boolean',
+      fieldset: 'buttonGroup',
+      description:
+        'Aktif edilirse buton metin alanında değil, resim/video üzerinde seçilen konumda görünür.',
+      initialValue: false,
+    }),
+    defineField({
       name: 'buttonAlignment',
       title: 'Buton Hizalaması (Yatay)',
       type: 'string',
+      fieldset: 'buttonGroup',
       options: {
         list: [
           {title: 'Sol', value: 'left'},
@@ -1145,6 +1179,7 @@ export const contentBlock = defineType({
       name: 'buttonPosition',
       title: 'Buton Konumu (Dikey)',
       type: 'string',
+      fieldset: 'buttonGroup',
       options: {
         list: [
           {title: 'Metnin Altında (Varsayılan)', value: 'below'},
@@ -1160,90 +1195,10 @@ export const contentBlock = defineType({
         'Buton metin alanındayken (medya üzerinde değilken) metnin ve başlığın neresinde duracağını belirler.',
     }),
     defineField({
-      name: 'verticalAlignment',
-      title: 'Metin Hizalaması (Dikey)',
-      type: 'string',
-      options: {
-        list: [
-          {title: 'Üst', value: 'top'},
-          {title: 'Orta', value: 'center'},
-          {title: 'Alt', value: 'bottom'},
-        ],
-        layout: 'radio',
-        direction: 'horizontal',
-      },
-      initialValue: 'center',
-      description:
-        'Görsel sol/sağ seçildiğinde, yanındaki metinlerin yukarı, orta veya aşağı yaslanmasını sağlar.',
-    }),
-    defineField({
-      name: 'linkText',
-      title: 'Link Metni',
-      type: 'localizedString',
-    }),
-    defineField({
-      name: 'linkUrl',
-      title: 'Link URL',
-      type: 'string',
-    }),
-    defineField({
-      name: 'order',
-      title: 'Sıra',
-      type: 'number',
-      description: 'Hero bölümünden sonra görünecek sıra (düşük sayı önce görünür)',
-      initialValue: 0,
-    }),
-    defineField({
-      name: 'backgroundColor',
-      title: 'Arka Plan Rengi',
-      type: 'string',
-      options: {
-        list: [
-          {title: 'Beyaz', value: 'white'},
-          {title: 'Gri', value: 'gray'},
-        ],
-        layout: 'radio',
-        direction: 'horizontal',
-      },
-      initialValue: 'white',
-      description: 'İçerik bloğunun arka plan rengi (varsayılan: Beyaz)',
-    }),
-    defineField({
-      name: 'hasBorder',
-      title: 'Çerçeve Göster',
-      type: 'boolean',
-      description: 'Aktif edilirse içerik bloğu kendi sınırları içinde çerçeve ile gösterilir.',
-      initialValue: false,
-    }),
-    defineField({
-      name: 'borderThickness',
-      title: 'Çerçeve Kalınlığı (px)',
-      type: 'number',
-      hidden: ({parent}) => !parent?.hasBorder,
-      initialValue: 1,
-      validation: (Rule) => Rule.min(1).max(12),
-      description: 'Çerçeve kalınlığını piksel cinsinden belirler (1-12).',
-    }),
-    defineField({
-      name: 'spacingBottom',
-      title: 'Alt Boşluk (px)',
-      type: 'number',
-      description: 'Bu bloğun altına eklenecek boşluk (piksel). Varsayılan: 0',
-      initialValue: 0,
-      validation: (Rule) => Rule.min(0).max(200),
-    }),
-    defineField({
-      name: 'showButtonOnMedia',
-      title: 'Butonu Medya Üzerinde Göster',
-      type: 'boolean',
-      description:
-        'Aktif edilirse buton metin alanında değil, resim/video üzerinde seçilen konumda görünür.',
-      initialValue: false,
-    }),
-    defineField({
       name: 'buttonPositionOnMedia',
       title: 'Butonun Medya Üzerindeki Konumu',
       type: 'string',
+      fieldset: 'buttonGroup',
       options: {
         list: [
           {title: 'Sol Üst', value: 'top-left'},
@@ -1267,6 +1222,7 @@ export const contentBlock = defineType({
       name: 'buttonOffsetOnMedia',
       title: 'Butonun Kenarlardan Uzaklığı (px)',
       type: 'number',
+      fieldset: 'buttonGroup',
       description:
         'Butonun medya (resim/video) kenarlarından (üst, alt, sol, sağ) kaç piksel uzakta duracağını belirler (Varsayılan: 32px).',
       initialValue: 32,
@@ -1277,6 +1233,7 @@ export const contentBlock = defineType({
       name: 'buttonColor',
       title: 'Buton Yazı Rengi',
       type: 'string',
+      fieldset: 'buttonGroup',
       options: {
         list: [
           {title: 'Siyah', value: 'black'},
@@ -1293,12 +1250,14 @@ export const contentBlock = defineType({
       name: 'overlayText',
       title: 'Görsel Üzerindeki Yazı (Opsiyonel)',
       type: 'localizedString',
+      fieldset: 'overlayGroup',
       description: 'Görselin/Medyanın tam üzerine yerleştirilecek metin (ör. Slogan, Başlık)',
     }),
     defineField({
       name: 'overlayTextPosition',
       title: 'Görsel Üzerindeki Yazının Konumu',
       type: 'string',
+      fieldset: 'overlayGroup',
       options: {
         list: [
           {title: 'Sol Üst', value: 'top-left'},
@@ -1319,6 +1278,7 @@ export const contentBlock = defineType({
       name: 'overlayTextSize',
       title: 'Görsel Üzerindeki Yazı Boyutu',
       type: 'string',
+      fieldset: 'overlayGroup',
       options: {
         list: [
           {title: 'Küçük (Small)', value: 'small'},
@@ -1336,6 +1296,7 @@ export const contentBlock = defineType({
       name: 'overlayTextColor',
       title: 'Görsel Üzerindeki Yazı Rengi',
       type: 'string',
+      fieldset: 'overlayGroup',
       options: {
         list: [
           {title: 'Beyaz', value: 'white'},
