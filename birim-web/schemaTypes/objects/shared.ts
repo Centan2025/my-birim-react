@@ -1349,6 +1349,7 @@ export const contentBlock = defineType({
       name: 'overlayTextFont',
       title: 'Görsel Üzerindeki Yazı Fontu',
       type: 'string',
+      fieldset: 'overlayGroup',
       components: {
         input: browserOnlyInput(FontSelectorInput),
       },
