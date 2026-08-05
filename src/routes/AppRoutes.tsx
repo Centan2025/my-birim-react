@@ -27,7 +27,6 @@ const ProjectsPage = lazy(() =>
 const ProjectDetailPage = lazy(() =>
   import('../pages/ProjectDetailPage').then(m => ({default: m.ProjectDetailPage}))
 )
-const AboutPage = lazy(() => import('../pages/AboutPage').then(m => ({default: m.AboutPage})))
 const AboutPageNew = lazy(() =>
   import('../pages/AboutPageNew').then(m => ({default: m.AboutPageNew}))
 )
@@ -168,14 +167,6 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
           element={
             <PageBoundary pageName="Hakkımızda">
               <AboutPageNew />
-            </PageBoundary>
-          }
-        />
-        <Route
-          path="/about-v1"
-          element={
-            <PageBoundary pageName="Hakkımızda (Klasik)">
-              <AboutPage />
             </PageBoundary>
           }
         />
