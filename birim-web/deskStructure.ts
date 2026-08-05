@@ -47,20 +47,31 @@ export const deskStructure = (S: StructureBuilder, context: ConfigContext) => {
         if (item.child && typeof item.child === 'object') {
           const componentPane = item.child as unknown as Record<string, unknown>
           componentPane.child = (childId: string, childContext: unknown) => {
+            const ctxParams = childContext as
+              | {
+                  params?: Record<string, string>
+                  intent?: {type?: string; params?: Record<string, string>}
+                }
+              | undefined
+
             const isEditor =
               childId.includes('view=editor') ||
               childId.includes('mode=edit') ||
-              (childContext as {params?: {view?: string; mode?: string}} | undefined)?.params
-                ?.view === 'editor' ||
-              (childContext as {params?: {view?: string; mode?: string}} | undefined)?.params
-                ?.mode === 'edit'
+              childId.includes('edit=true') ||
+              childId.includes('type=category') ||
+              ctxParams?.intent?.type === 'edit' ||
+              ctxParams?.params?.['view'] === 'editor' ||
+              ctxParams?.params?.['view'] === 'edit' ||
+              ctxParams?.params?.['mode'] === 'edit' ||
+              ctxParams?.params?.['type'] === 'category'
 
-            const cleanId = childId
-              .replace('drafts.', '')
+            const cleanId = (ctxParams?.params?.['id'] || childId)
+              .replace(/^drafts\./, '')
               .replace(',view=editor', '')
               .replace(';view=editor', '')
               .split(',')[0]
               .split(';')[0]
+              .split('?')[0]
 
             if (isEditor) {
               return S.document()
@@ -138,7 +149,7 @@ export const deskStructure = (S: StructureBuilder, context: ConfigContext) => {
         .child(
           S.document()
             .schemaType('aboutPage')
-            .documentId('aboutPage')
+            .documentId('about-page')
             .views([
               S.view.form().title('Düzenle'),
               S.view
@@ -180,7 +191,7 @@ export const deskStructure = (S: StructureBuilder, context: ConfigContext) => {
         .child(
           S.document()
             .schemaType('contactPage')
-            .documentId('contactPage')
+            .documentId('contact-page')
             .views([
               S.view.form().title('Düzenle'),
               S.view
@@ -211,16 +222,26 @@ export const deskStructure = (S: StructureBuilder, context: ConfigContext) => {
                 ),
               S.listItem()
                 .title('Çerez Politikası')
-                .child(S.document().schemaType('cookiesPolicy').documentId('cookiesPolicy')),
+                .child(
+                  S.document()
+                    .schemaType('cookiesPolicy')
+                    .documentId('c18719f0-4fb1-4a05-9b0e-52e2406ab118'),
+                ),
               S.listItem()
                 .title('Gizlilik Politikası')
-                .child(S.document().schemaType('privacyPolicy').documentId('privacyPolicy')),
+                .child(
+                  S.document().schemaType('privacyPolicy').documentId('gizlilikPolitikasi'),
+                ),
               S.listItem()
                 .title('Kullanım Şartları')
-                .child(S.document().schemaType('termsOfService').documentId('termsOfService')),
+                .child(
+                  S.document().schemaType('termsOfService').documentId('kullanimSartlari'),
+                ),
               S.listItem()
                 .title('KVKK Aydınlatma Metni')
-                .child(S.document().schemaType('kvkkPolicy').documentId('kvkkPolicy')),
+                .child(
+                  S.document().schemaType('kvkkPolicy').documentId('kvkkAydinlatmaMetni'),
+                ),
             ]),
         ),
       S.documentTypeListItem('materialGroup').title('Malzeme Grupları'),

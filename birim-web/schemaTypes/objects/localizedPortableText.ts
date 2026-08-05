@@ -114,44 +114,6 @@ const portableTextBlocks = [
             },
           ],
         },
-        {
-          name: 'fontSize',
-          type: 'object',
-          title: 'Metin Boyutu (Sadece Seçili Metin)',
-          icon: Type,
-          components: {
-            annotation: (props: {value?: {size?: string}; children: React.ReactNode}) =>
-              React.createElement(
-                'span',
-                {
-                  style: {
-                    fontSize: props.value?.size || 'inherit',
-                    display: 'inline',
-                  },
-                },
-                props.children,
-              ),
-          },
-          fields: [
-            {
-              name: 'size',
-              title: 'Font Boyutu',
-              type: 'string',
-              options: {
-                list: [
-                  {title: 'Çok Küçük (12px)', value: '12px'},
-                  {title: 'Küçük (14px)', value: '14px'},
-                  {title: 'Normal (16px)', value: '16px'},
-                  {title: 'Orta (18px)', value: '18px'},
-                  {title: 'Büyük (24px)', value: '24px'},
-                  {title: 'Çok Büyük (32px)', value: '32px'},
-                  {title: 'Dev (48px)', value: '48px'},
-                  {title: 'Dev+ (64px)', value: '64px'},
-                ],
-              },
-            },
-          ],
-        },
       ],
     },
   },

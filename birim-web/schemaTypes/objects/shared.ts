@@ -726,6 +726,31 @@ export const contactLocation = defineType({
       initialValue: true,
     }),
   ],
+  preview: {
+    select: {
+      titleTr: 'title.tr',
+      titleEn: 'title.en',
+      typeTr: 'type.tr',
+      typeEn: 'type.en',
+      address: 'address',
+    },
+    prepare(selection: Record<string, unknown>) {
+      const {titleTr, titleEn, typeTr, typeEn, address} = selection as {
+        titleTr?: string
+        titleEn?: string
+        typeTr?: string
+        typeEn?: string
+        address?: string
+      }
+      const title = titleTr || titleEn || 'İsimsiz Lokasyon'
+      const locType = typeTr || typeEn || ''
+      const subtitle = locType ? `${locType}${address ? ` — ${address}` : ''}` : address || ''
+      return {
+        title,
+        subtitle,
+      }
+    },
+  },
 })
 
 export const contactLocationMedia = defineType({

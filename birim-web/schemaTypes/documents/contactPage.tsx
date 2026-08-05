@@ -7,6 +7,11 @@ export default defineType({
   type: 'document',
   fieldsets: [
     {
+      name: 'generalGroup',
+      title: 'ℹ️ Genel Bilgiler',
+      options: {collapsible: true, collapsed: false},
+    },
+    {
       name: 'locationsGroup',
       title: '📍 Lokasyonlar & Şubeler',
       options: {collapsible: true, collapsed: false},
@@ -18,6 +23,20 @@ export default defineType({
     },
   ],
   fields: [
+    defineField({
+      name: 'title',
+      title: 'Sayfa Başlığı',
+      type: 'localizedString',
+      fieldset: 'generalGroup',
+      description: 'İletişim sayfasının ana başlığı (ör. İletişim / Contact)',
+    }),
+    defineField({
+      name: 'subtitle',
+      title: 'Alt Başlık / Açıklama',
+      type: 'localizedText',
+      fieldset: 'generalGroup',
+      description: 'İletişim sayfasında üstte görünen açıklama metni',
+    }),
     defineField({
       name: 'locations',
       title: 'Lokasyonlar',
