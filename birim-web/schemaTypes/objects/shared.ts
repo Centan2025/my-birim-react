@@ -1137,8 +1137,27 @@ export const contentBlock = defineType({
         direction: 'horizontal',
       },
       hidden: ({parent}) => !!parent?.showButtonOnMedia,
+      initialValue: 'left',
       description:
         'Buton metin alanındayken (medya üzerinde değilken) butonun bağımsız yatay hizalamasını belirler. Seçilmezse metin hizalamasını takip eder.',
+    }),
+    defineField({
+      name: 'buttonPosition',
+      title: 'Buton Konumu (Dikey)',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Metnin Altında (Varsayılan)', value: 'below'},
+          {title: 'Metnin Üstünde (Başlıktan Sonra)', value: 'above'},
+          {title: 'En Üstte (Başlıktan Önce)', value: 'top'},
+        ],
+        layout: 'radio',
+        direction: 'horizontal',
+      },
+      initialValue: 'below',
+      hidden: ({parent}) => !!parent?.showButtonOnMedia,
+      description:
+        'Buton metin alanındayken (medya üzerinde değilken) metnin ve başlığın neresinde duracağını belirler.',
     }),
     defineField({
       name: 'verticalAlignment',

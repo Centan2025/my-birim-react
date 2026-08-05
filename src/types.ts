@@ -445,6 +445,8 @@ export interface ContentBlock {
   titleAlignment?: 'left' | 'center' | 'right'
   /** Button Alignment when not on media: left, center, or right (independent of text) */
   buttonAlignment?: 'left' | 'center' | 'right'
+  /** Button Position when not on media: below text, above text (after title), or top (before title) */
+  buttonPosition?: 'below' | 'above' | 'top'
   /** Order for sorting blocks */
   order?: number
   /** Toggles button visibility over media */

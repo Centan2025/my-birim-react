@@ -613,81 +613,73 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               ? 'monospace'
               : `"${contentFont}", sans-serif`
 
-        const bodyElement = (hasDescription ||
-          (block.linkText && (!block.showButtonOnMedia || block.linkUrl))) && (
-          <div
-            className={`w-full ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0 pt-0' : ''}`}
+        const buttonPos = block.buttonPosition || 'below'
+
+        const descriptionElement = hasDescription && (
+          <ScrollReveal
+            delay={100}
+            threshold={0.1}
+            width="w-full"
+            className={`h-auto ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0 pb-0' : ''}`}
           >
-            {hasDescription && (
-              <ScrollReveal
-                delay={100}
-                threshold={0.1}
-                width="w-full"
-                className={`h-auto ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0 pb-0' : ''}`}
-              >
-                <div
-                  className={`prose max-w-none ${textAlignClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0 pt-0 prose-p:first-of-type:!mt-0 [&_.portable-text-container>*:first-child]:!mt-0' : ''}`}
-                >
-                  {(() => {
-                    const desc = descriptionContent
-                    const widthClass = textAlign === 'center' ? 'max-w-4xl' : 'w-full'
-                    const marginClass =
-                      textAlign === 'center'
-                        ? 'mx-auto'
-                        : textAlign === 'right'
-                          ? 'ml-auto'
-                          : 'mr-auto'
+            <div
+              className={`prose max-w-none ${textAlignClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0 pt-0 prose-p:first-of-type:!mt-0 [&_.portable-text-container>*:first-child]:!mt-0' : ''}`}
+            >
+              {(() => {
+                const desc = descriptionContent
+                const widthClass = textAlign === 'center' ? 'max-w-4xl' : 'w-full'
+                const marginClass =
+                  textAlign === 'center' ? 'mx-auto' : textAlign === 'right' ? 'ml-auto' : 'mr-auto'
 
-                    if (Array.isArray(desc)) {
-                      return (
-                        <div
-                          ref={!isNormalContentFont ? applyFontRef(contentFontFamily) : undefined}
-                          className={`${marginClass} ${widthClass} ${isNormalContentFont ? 'font-light text-base md:text-lg lg:text-xl' : ''} text-[var(--text-primary)] opacity-90 ${block.verticalAlignment === 'top' && !hasTitle ? '[&_.portable-text-container>*:first-child]:!mt-0' : ''}`}
-                          style={!isNormalContentFont ? {fontWeight: 300} : {}}
-                        >
-                          <PortableTextLite
-                            value={desc}
-                            removeTopMargin={block.verticalAlignment === 'top' && !hasTitle}
-                            onMediaClick={onMediaClick}
-                          />
-                        </div>
-                      )
-                    }
-
-                    return (
-                      <p
-                        ref={!isNormalContentFont ? applyFontRef(contentFontFamily) : undefined}
-                        className={`text-[var(--text-primary)] opacity-90 ${isNormalContentFont ? 'font-light text-base md:text-lg lg:text-xl' : ''} leading-relaxed ${widthClass} ${marginClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0' : ''}`}
-                        style={!isNormalContentFont ? {fontWeight: 300} : {}}
-                      >
-                        {desc}
-                      </p>
-                    )
-                  })()}
-                </div>
-              </ScrollReveal>
-            )}
-            {block.linkText && !block.showButtonOnMedia && (
-              <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto">
-                <div className={`mt-6 w-full flex ${buttonAlignClass}`}>
-                  {block.linkUrl ? (
-                    <Link
-                      to={block.linkUrl}
-                      className={`group inline-flex items-center text-[var(--text-primary)] hover:opacity-70 border border-gray-400 dark:border-gray-500 px-4 py-2.5 md:px-8 md:py-4 text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter transition-all duration-300`}
-                    >
-                      {t(block.linkText)}
-                    </Link>
-                  ) : (
+                if (Array.isArray(desc)) {
+                  return (
                     <div
-                      className={`inline-flex items-center text-[var(--text-primary)] px-4 py-2.5 md:px-8 md:py-4 text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
+                      ref={!isNormalContentFont ? applyFontRef(contentFontFamily) : undefined}
+                      className={`${marginClass} ${widthClass} ${isNormalContentFont ? 'font-light text-base md:text-lg lg:text-xl' : ''} text-[var(--text-primary)] opacity-90 ${block.verticalAlignment === 'top' && !hasTitle ? '[&_.portable-text-container>*:first-child]:!mt-0' : ''}`}
+                      style={!isNormalContentFont ? {fontWeight: 300} : {}}
                     >
-                      {t(block.linkText)}
+                      <PortableTextLite
+                        value={desc}
+                        removeTopMargin={block.verticalAlignment === 'top' && !hasTitle}
+                        onMediaClick={onMediaClick}
+                      />
                     </div>
-                  )}
+                  )
+                }
+
+                return (
+                  <p
+                    ref={!isNormalContentFont ? applyFontRef(contentFontFamily) : undefined}
+                    className={`text-[var(--text-primary)] opacity-90 ${isNormalContentFont ? 'font-light text-base md:text-lg lg:text-xl' : ''} leading-relaxed ${widthClass} ${marginClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0' : ''}`}
+                    style={!isNormalContentFont ? {fontWeight: 300} : {}}
+                  >
+                    {desc}
+                  </p>
+                )
+              })()}
+            </div>
+          </ScrollReveal>
+        )
+
+        const standaloneButtonElement = block.linkText && !block.showButtonOnMedia && (
+          <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto">
+            <div className={`w-full flex ${buttonAlignClass}`}>
+              {block.linkUrl ? (
+                <Link
+                  to={block.linkUrl}
+                  className={`group inline-flex items-center text-[var(--text-primary)] hover:opacity-70 border border-gray-400 dark:border-gray-500 px-4 py-2.5 md:px-8 md:py-4 text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter transition-all duration-300`}
+                >
+                  {t(block.linkText)}
+                </Link>
+              ) : (
+                <div
+                  className={`inline-flex items-center text-[var(--text-primary)] px-4 py-2.5 md:px-8 md:py-4 text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
+                >
+                  {t(block.linkText)}
                 </div>
-              </ScrollReveal>
-            )}
-          </div>
+              )}
+            </div>
+          </ScrollReveal>
         )
 
         const mediaWidthClass = isFullWidth
@@ -907,6 +899,15 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           (titlePosition === 'below' && hasTitle) ||
           (textPosition === 'below' &&
             (hasDescription || (block.linkText && !block.showButtonOnMedia)))
+
+        const bodyElement = (
+          <>
+            {buttonPos === 'top' && standaloneButtonElement}
+            {descriptionElement}
+            {buttonPos === 'above' && standaloneButtonElement}
+            {buttonPos === 'below' && standaloneButtonElement}
+          </>
+        )
 
         const textContentAbove = hasTopContent ? (
           <div
