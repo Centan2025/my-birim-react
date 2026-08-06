@@ -344,17 +344,19 @@ export function ProductDetailPage() {
               onOpenLightbox={(imgs, idx) => dimLightbox.open(imgs as any, idx)}
             />
 
-            <ProductMaterials
-              mergedGroups={mergedGroups}
-              grouped={(product as any).groupedMaterials || []}
-              flatMaterials={product.materials || []}
-              activeMaterialGroup={activeMaterialGroup}
-              activeBookIndex={activeBookIndex}
-              imageBorderClass={imageBorderClass}
-              onSetActiveMaterialGroup={setActiveMaterialGroup}
-              onSetActiveBookIndex={setActiveBookIndex}
-              onOpenMaterialLightbox={(imgs, idx) => materialLightbox.open(imgs as any, idx)}
-            />
+            {product.showMaterials !== false && (
+              <ProductMaterials
+                mergedGroups={mergedGroups}
+                grouped={(product as any).groupedMaterials || []}
+                flatMaterials={product.materials || []}
+                activeMaterialGroup={activeMaterialGroup}
+                activeBookIndex={activeBookIndex}
+                imageBorderClass={imageBorderClass}
+                onSetActiveMaterialGroup={setActiveMaterialGroup}
+                onSetActiveBookIndex={setActiveBookIndex}
+                onOpenMaterialLightbox={(imgs, idx) => materialLightbox.open(imgs as any, idx)}
+              />
+            )}
 
             <ProductDesignerSection designers={designers} t={t} />
 

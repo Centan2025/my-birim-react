@@ -288,6 +288,8 @@ export interface Product {
   materials: ProductMaterial[]
   /** Materials grouped by material group (for UI). */
   groupedMaterials?: ProductMaterialsGroup[]
+  /** Toggles material section visibility. */
+  showMaterials?: boolean
   /** Content accessible only to logged-in users. */
   exclusiveContent: ExclusiveContent
   /** Sanity update timestamp. */
