@@ -4,6 +4,7 @@ import {OptimizedImage} from '../OptimizedImage'
 import {OptimizedVideo} from '../OptimizedVideo'
 import {useTranslation} from '../../i18n'
 import type {R2ImageMetadata} from '../../types'
+import {mapImage, rewriteR2Url, SanityImageLike} from '../../services/sanity/client'
 
 export interface LightboxItem {
   url?: string
@@ -120,7 +121,9 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
   if (!currentItem) return null
 
   // Map item properties (handles different schemas for main media, dimensions, and materials)
-  const url = (currentItem.url || currentItem.image || '') as string
+  const rawUrl = (currentItem as any)?.url || (currentItem as any)?.image
+  const url =
+    typeof rawUrl === 'string' ? rewriteR2Url(rawUrl) : mapImage(rawUrl as SanityImageLike)
   const type = (currentItem.type || 'image') as string
   const title = currentItem.title || currentItem.name || ''
 

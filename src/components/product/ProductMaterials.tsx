@@ -3,6 +3,7 @@ import {OptimizedImage} from '../OptimizedImage'
 import {useTranslation} from '../../i18n'
 import ScrollReveal from '../ScrollReveal'
 import type {LocalizedString} from '../../types'
+import {mapImage, SanityImageLike} from '../../services/sanity/client'
 
 interface ProductMaterialsProps {
   mergedGroups: {
@@ -149,14 +150,17 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
   if (!hasMaterialGroups && flatMaterials.length === 0) return null
 
   const getMaterialsForLightbox = (
-    materials: {image?: string; name?: string | LocalizedString}[]
+    materials: {image?: unknown; name?: string | LocalizedString}[]
   ) =>
     materials
-      .filter(m => !!m.image)
-      .map(m => ({
-        image: m.image as string,
-        name: t(m.name || ''),
-      }))
+      .map(m => {
+        const imgUrl = typeof m.image === 'string' ? m.image : mapImage(m.image as SanityImageLike)
+        return {
+          image: imgUrl,
+          name: t(m.name || ''),
+        }
+      })
+      .filter(m => Boolean(m.image))
 
   return (
     <ScrollReveal delay={300} threshold={0.05}>
