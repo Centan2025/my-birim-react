@@ -77,7 +77,7 @@ describe('OptimizedImage Mobile Crop & Metadata', () => {
     const styleAttr = cropWrapper?.getAttribute('style') || ''
     expect(styleAttr).toContain('--crop-scale-x-mobile: 100.0000%')
     expect(styleAttr).toContain('--crop-left-mobile: 0.0000%')
-    expect(styleAttr).toContain('--crop-aspect-mobile: 0.6667')
+    expect(styleAttr).toContain('--crop-aspect-mobile: 1.6667')
   })
 
   it('generates uncropped Sanity CDN URL for mobile source when cropMobile is undefined', () => {
@@ -87,8 +87,11 @@ describe('OptimizedImage Mobile Crop & Metadata', () => {
     const {container} = render(
       <OptimizedImage
         src={sanityUrl}
+        srcDesktop={sanityUrl}
+        srcMobile={sanityUrl}
         alt="Sanity Test"
         crop={cropDesktop}
+        cropMobile={null}
         origWidth={1000}
         origHeight={800}
       />

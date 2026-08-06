@@ -197,7 +197,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
             return (
               <div
                 key={`slide-${index}-${m.url || index}`}
-                className="w-full h-full flex items-center justify-center relative p-0 max-md:px-4"
+                className="w-full h-full flex items-center justify-center relative p-0 max-md:px-4 overflow-hidden"
                 style={
                   {
                     width: `${100 / totalHeroSlides}%`,

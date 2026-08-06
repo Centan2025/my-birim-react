@@ -206,6 +206,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           position: relative;
           width: 100%;
           max-width: 100%;
+          max-height: 100%;
           margin: 0 auto;
           align-self: center;
           overflow: hidden;
@@ -213,11 +214,14 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           line-height: 0 !important;
         }
         .responsive-crop-wrapper.is-cover {
-          height: 100%;
+          height: 100% !important;
+          width: 100% !important;
+          max-height: 100% !important;
         }
         .responsive-crop-wrapper.has-aspect {
           height: auto !important;
           max-height: 100% !important;
+          max-width: 100% !important;
           aspect-ratio: var(--crop-aspect-desktop, auto);
         }
 
@@ -248,14 +252,22 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         @media (max-width: 1023px) {
           img.responsive-crop-pos,
           picture.responsive-crop-pos img {
-            object-fit: var(--img-object-fit-mobile, var(--img-object-fit, contain)) !important;
+            object-fit: var(--img-object-fit-mobile, var(--img-object-fit, cover)) !important;
             object-position: var(--obj-pos-mobile, var(--obj-pos-desktop, center)) !important;
           }
-          .responsive-crop-wrapper,
-          .responsive-crop-wrapper.has-aspect {
+          .responsive-crop-wrapper.has-aspect,
+          .responsive-crop-wrapper.is-contain-mobile {
             width: 100% !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
             height: auto !important;
             aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
+          }
+          .responsive-crop-wrapper.is-cover {
+            width: 100% !important;
+            height: 100% !important;
+            max-height: 100% !important;
+            aspect-ratio: unset !important;
           }
           .responsive-crop-inner {
             width: calc(var(--crop-scale-x-mobile, var(--crop-scale-x-desktop, 100%)) + 1px) !important;
@@ -393,6 +405,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     [cropDesktop, crop, targetW, targetH]
   )
   const normalizedCropMobile = useMemo(() => {
+    if (cropMobile === null) return null
     return getActiveCrop(cropMobile || cropDesktop || crop, targetWMob, targetHMob)
   }, [cropMobile, cropDesktop, crop, targetWMob, targetHMob])
 
@@ -517,8 +530,14 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   if (className.includes('max-md:object-contain') || className.includes('max-lg:object-contain')) {
     customStyle['--img-object-fit-mobile'] = 'contain'
   }
+  if (className.includes('max-md:object-cover') || className.includes('max-lg:object-cover')) {
+    customStyle['--img-object-fit-mobile'] = 'cover'
+  }
   if (className.includes('object-contain')) {
     customStyle['--img-object-fit'] = 'contain'
+  }
+  if (className.includes('object-cover')) {
+    customStyle['--img-object-fit'] = 'cover'
   }
   if (className.includes('md:object-cover') || className.includes('lg:object-cover')) {
     customStyle['--img-object-fit-desktop'] = 'cover'
