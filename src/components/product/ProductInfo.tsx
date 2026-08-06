@@ -125,14 +125,14 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
             if (isPortableText) {
               const blocks = Array.isArray(desc) ? desc : [desc]
               return (
-                <div className="mt-4 text-lg md:text-xl text-[var(--text-primary)] leading-relaxed max-w-3xl font-roboto-thin">
+                <div className="mt-4 text-lg md:text-xl text-black dark:text-white font-normal leading-relaxed max-w-3xl font-roboto-thin">
                   <PortableTextLite value={blocks} />
                 </div>
               )
             }
 
             return (
-              <p className="mt-4 text-lg md:text-xl text-[var(--text-primary)] leading-relaxed max-w-3xl font-roboto-thin">
+              <p className="mt-4 text-lg md:text-xl text-black dark:text-white font-normal leading-relaxed max-w-3xl font-roboto-thin">
                 {desc}
               </p>
             )
