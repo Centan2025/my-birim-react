@@ -391,10 +391,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     [cropDesktop, crop, targetW, targetH]
   )
   const normalizedCropMobile = useMemo(() => {
-    return getActiveCrop(cropMobile, targetWMob, targetHMob)
-  }, [cropMobile, targetWMob, targetHMob])
+    return getActiveCrop(cropMobile || cropDesktop || crop, targetWMob, targetHMob)
+  }, [cropMobile, cropDesktop, crop, targetWMob, targetHMob])
 
-  const activeCrop = normalizedCropDesktop || normalizedCropMobile
+  const activeCrop = normalizedCropMobile || normalizedCropDesktop
 
   // R2 URL'lerini optimize et
   const getOptimizedUrl = (url: string, targetCrop?: typeof activeCrop | null): string => {
