@@ -208,10 +208,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             outline-offset: -3px !important;
           }
           .responsive-crop-wrapper {
-            width: 100% !important;
+            width: auto !important;
             height: auto !important;
             max-width: 94vw !important;
-            max-height: 72dvh !important;
+            max-height: 56dvh !important;
             aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
             margin: auto !important;
           }
