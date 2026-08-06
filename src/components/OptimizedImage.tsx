@@ -255,6 +255,13 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           .responsive-crop-wrapper.has-aspect {
             aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto));
           }
+          .responsive-crop-wrapper.is-contain-mobile {
+            height: auto !important;
+            max-height: 100% !important;
+            max-width: 100% !important;
+            aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
+            margin: auto !important;
+          }
           .responsive-crop-inner {
             width: var(--crop-scale-x-mobile, var(--crop-scale-x-desktop, 100%)) !important;
             height: var(--crop-scale-y-mobile, var(--crop-scale-y-desktop, 100%)) !important;
@@ -724,9 +731,16 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       '--obj-pos-mobile': `${focalXMob.toFixed(2)}% ${focalYMob.toFixed(2)}%`,
     } as React.CSSProperties
 
+    const isMobileContain = classList.some(
+      (c: string) =>
+        c.includes('max-md:object-contain') ||
+        c.includes('max-lg:object-contain') ||
+        c.includes('object-contain')
+    )
+
     return (
       <div
-        className={`responsive-crop-wrapper relative w-full overflow-hidden ${isCoverMode ? 'is-cover' : 'has-aspect'}`}
+        className={`responsive-crop-wrapper relative w-full overflow-hidden ${isCoverMode ? 'is-cover' : 'has-aspect'} ${isMobileContain ? 'is-contain-mobile' : ''}`}
         style={cropStyle}
         data-crop={JSON.stringify({desktop: cropDesk, mobile: cropMob})}
         data-debug-media-id={mediaId}
