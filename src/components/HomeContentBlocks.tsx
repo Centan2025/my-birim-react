@@ -391,7 +391,8 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         const descriptionContent =
           Array.isArray(descriptionRaw) && descriptionRaw.length === 0 ? '' : descriptionRaw
         const rawTitleStr = typeof titleContent === 'string' ? titleContent.trim() : ''
-        const rawOverlayStr = typeof overlayTextContent === 'string' ? overlayTextContent.trim() : ''
+        const rawOverlayStr =
+          typeof overlayTextContent === 'string' ? overlayTextContent.trim() : ''
         const hasTitle =
           (rawTitleStr.length > 0 || !!titleContent) &&
           (!rawOverlayStr || rawTitleStr !== rawOverlayStr)

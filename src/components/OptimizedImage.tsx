@@ -405,7 +405,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     [cropDesktop, crop, targetW, targetH]
   )
   const normalizedCropMobile = useMemo(() => {
-    if (cropMobile === null) return null
+    if (cropMobile === null) return undefined
     return getActiveCrop(cropMobile || cropDesktop || crop, targetWMob, targetHMob)
   }, [cropMobile, cropDesktop, crop, targetWMob, targetHMob])
 
@@ -480,7 +480,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const desktopUrlToUse = activeDesktopSrc || activeSrc
 
   const optimizedMobileSrc = mobileUrlToUse
-    ? getOptimizedUrl(mobileUrlToUse, normalizedCropMobile || null)
+    ? getOptimizedUrl(mobileUrlToUse, cropMobile === null ? null : normalizedCropMobile)
     : undefined
   const optimizedDesktopSrc = desktopUrlToUse
     ? getOptimizedUrl(desktopUrlToUse, normalizedCropDesktop || null)

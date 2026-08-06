@@ -104,7 +104,13 @@ select:focus-visible {
   span,
   li,
   a {
-    font-family: 'Roboto', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family:
+      'Roboto',
+      'Inter',
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      sans-serif;
   }
   body {
     background-color: var(--bg-secondary);
@@ -271,26 +277,31 @@ select {
   font-weight: 300;
 }
 
-/* Roboto Light utility - Refined for Rich Text support */
+/* Roboto Description utility */
 .font-roboto-thin,
 .font-roboto-thin * {
   font-family: 'Roboto', 'Inter', sans-serif !important;
-  letter-spacing: 0.02em !important;
+  letter-spacing: 0.01em !important;
 }
 
 .font-roboto-thin {
   font-weight: 300;
-  font-size: 1.05em;
+  font-size: 1.02em;
+  color: #0d0d0d;
 }
 
-/* Allow headings to be slightly bolder (300) even in a Thin utility for hierarchy */
+.dark .font-roboto-thin {
+  color: #f3f4f6;
+}
+
+/* Allow headings to be slightly bolder (400) even in a Thin utility for hierarchy */
 .font-roboto-thin h1,
 .font-roboto-thin h2,
 .font-roboto-thin h3,
 .font-roboto-thin h4,
 .font-roboto-thin h5,
 .font-roboto-thin h6 {
-  font-weight: 300 !important;
+  font-weight: 400 !important;
   color: inherit !important;
 }
 

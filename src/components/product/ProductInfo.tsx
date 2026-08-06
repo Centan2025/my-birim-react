@@ -100,7 +100,7 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
 
       {product.buyable && product.price && product.price > 0 && (
         <div>
-          <p className="text-3xl font-light text-gray-600">
+          <p className="text-3xl font-medium text-gray-900 dark:text-gray-100">
             {new Intl.NumberFormat(locale, {
               style: 'currency',
               currency: product.currency || 'TRY',
@@ -125,14 +125,14 @@ export const ProductInfo: React.FC<ProductInfoProps> = ({
             if (isPortableText) {
               const blocks = Array.isArray(desc) ? desc : [desc]
               return (
-                <div className="mt-4 text-lg md:text-xl text-black dark:text-white font-normal leading-relaxed max-w-3xl font-roboto-thin">
+                <div className="mt-4 text-lg md:text-xl text-black dark:text-gray-100 leading-relaxed max-w-3xl font-roboto-thin">
                   <PortableTextLite value={blocks} />
                 </div>
               )
             }
 
             return (
-              <p className="mt-4 text-lg md:text-xl text-black dark:text-white font-normal leading-relaxed max-w-3xl font-roboto-thin">
+              <p className="mt-4 text-lg md:text-xl text-black dark:text-gray-100 leading-relaxed max-w-3xl font-roboto-thin">
                 {desc}
               </p>
             )
