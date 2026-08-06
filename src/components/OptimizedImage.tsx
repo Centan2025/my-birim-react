@@ -236,7 +236,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           height: 100% !important;
           max-width: none !important;
           max-height: none !important;
-          object-fit: cover !important;
+          object-fit: fill !important;
           object-position: center !important;
         }
 
@@ -250,9 +250,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           .responsive-crop-wrapper,
           .responsive-crop-wrapper.is-cover,
           .responsive-crop-wrapper.has-aspect {
-            width: auto !important;
+            width: 100% !important;
             height: auto !important;
-            max-width: calc(100vw - 32px) !important;
+            max-width: min(calc(100vw - 32px), calc(calc(100dvh - 220px) * var(--crop-aspect-mobile, var(--crop-aspect-desktop, 1)))) !important;
             max-height: calc(100dvh - 220px) !important;
             aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
             margin: auto !important;
