@@ -173,7 +173,7 @@ export function HomePage() {
     let snapLockTimer: ReturnType<typeof setTimeout> | null = null
     let wheelTimeout: ReturnType<typeof setTimeout> | null = null
     let accumulatedDelta = 0
-    const SCROLL_THRESHOLD = 25 // Belli bir kaydırmadan sonra tetikleme eşiği
+    const SCROLL_THRESHOLD = 15 // Belli bir kaydırmadan sonra tetikleme eşiği
 
     const unlockSnapping = () => {
       isSnapping = false
@@ -186,6 +186,8 @@ export function HomePage() {
     const handleWheel = (e: WheelEvent) => {
       // Yatay kaydırma veya Ctrl+zoom hareketlerini es geç
       if (Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.ctrlKey) return
+
+      if (isSnapping) return
 
       accumulatedDelta += e.deltaY
 
@@ -210,21 +212,28 @@ export function HomePage() {
         const scrollY = window.scrollY
         const docHeight = document.documentElement.scrollHeight
 
-        // Sayfanın en üstünde veya en altında aşırı snap yapılmasını önle
-        if (direction === 'up' && scrollY < 50) return
-        if (direction === 'down' && winHeight + scrollY >= docHeight - 60) return
-
-        const blocks = Array.from(
+        // Hero ve içerik bloklarını snap hedefleri olarak al
+        const heroElem = document.getElementById('home-hero-section')
+        const blockElems = Array.from(
           document.querySelectorAll<HTMLElement>('.home-content-block-snap')
         )
-        if (blocks.length === 0) return
+
+        const targets: HTMLElement[] = []
+        if (heroElem) targets.push(heroElem)
+        targets.push(...blockElems)
+
+        if (targets.length === 0) return
+
+        // Sayfanın en üstünde yukarı veya en altında aşağı aşırı snap yapılmasını önle
+        if (direction === 'up' && scrollY < 30) return
+        if (direction === 'down' && winHeight + scrollY >= docHeight - 60) return
 
         // Aktif ekrandaki en yakın bloğun indeksini bul
         let currentIndex = 0
         let closestDist = Infinity
 
-        for (let i = 0; i < blocks.length; i++) {
-          const el = blocks[i]
+        for (let i = 0; i < targets.length; i++) {
+          const el = targets[i]
           if (!el) continue
           const rect = el.getBoundingClientRect()
           const dist = Math.abs(rect.top)
@@ -234,60 +243,70 @@ export function HomePage() {
           }
         }
 
-        const currentBlock = blocks[currentIndex]
-        if (!currentBlock) return
-        const currentRect = currentBlock.getBoundingClientRect()
-        let targetBlock: HTMLElement | null = null
+        let targetElem: HTMLElement | null = null
 
         if (direction === 'down') {
-          // Bloğun üstündeysek bir sonraki bloğa kay
-          if (Math.abs(currentRect.top) < 20 && currentIndex < blocks.length - 1) {
-            targetBlock = blocks[currentIndex + 1] || null
-          } else if (currentRect.top < -30 && currentIndex < blocks.length - 1) {
-            // Blok çok uzunsa (%130 viewport'tan büyük) kullanıcı bloğu okuyorsa hemen kaydırma
-            if (currentRect.height > winHeight * 1.3 && currentRect.bottom > winHeight * 0.7) {
-              targetBlock = null
-            } else {
-              targetBlock = blocks[currentIndex + 1] || null
+          if (currentIndex === 0) {
+            // Herodayız -> İlk İçerik Bloğuna kaydır
+            targetElem = targets[1] || null
+          } else {
+            const currentBlock = targets[currentIndex]
+            if (!currentBlock) return
+            const currentRect = currentBlock.getBoundingClientRect()
+            if (Math.abs(currentRect.top) < 30 && currentIndex < targets.length - 1) {
+              targetElem = targets[currentIndex + 1] || null
+            } else if (currentRect.top < -30 && currentIndex < targets.length - 1) {
+              if (currentRect.height > winHeight * 1.3 && currentRect.bottom > winHeight * 0.7) {
+                targetElem = null
+              } else {
+                targetElem = targets[currentIndex + 1] || null
+              }
+            } else if (currentRect.top > 30) {
+              targetElem = currentBlock
             }
-          } else if (currentRect.top > 20) {
-            targetBlock = currentBlock
           }
         } else {
-          // Yukarı kaydırmada bir önceki bloğa kay
-          if (Math.abs(currentRect.top) < 20 && currentIndex > 0) {
-            targetBlock = blocks[currentIndex - 1] || null
-          } else if (currentRect.top > 20 && currentIndex > 0) {
-            targetBlock = blocks[currentIndex - 1] || null
-          } else if (currentRect.top < -20) {
-            targetBlock = currentBlock
+          // Yukarı kaydırma
+          if (currentIndex === 1 || scrollY < winHeight * 0.8) {
+            // 1. İçerik bloğunda veya Hero'ya yakın alandayız -> Hero'ya snap et
+            targetElem = targets[0] || null
+          } else if (currentIndex > 1) {
+            const currentBlock = targets[currentIndex]
+            if (!currentBlock) return
+            const currentRect = currentBlock.getBoundingClientRect()
+            if (Math.abs(currentRect.top) < 30 && currentIndex > 0) {
+              targetElem = targets[currentIndex - 1] || null
+            } else if (currentRect.top > 30 && currentIndex > 0) {
+              targetElem = targets[currentIndex - 1] || null
+            } else if (currentRect.top < -30) {
+              targetElem = currentBlock
+            }
           }
         }
 
-        if (targetBlock) {
-          const targetRect = targetBlock.getBoundingClientRect()
+        if (targetElem) {
+          const targetRect = targetElem.getBoundingClientRect()
           if (Math.abs(targetRect.top) < 10) return
 
           isSnapping = true
-          // Emniyet zamanlayıcısı: Lenis iptal etse bile kilidin kalıcı kalması 100% önlenir
           if (snapLockTimer) clearTimeout(snapLockTimer)
-          snapLockTimer = setTimeout(unlockSnapping, 900)
+          snapLockTimer = setTimeout(unlockSnapping, 800)
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const win = window as any
           if (win.lenis && typeof win.lenis.scrollTo === 'function') {
-            win.lenis.scrollTo(targetBlock, {
+            win.lenis.scrollTo(targetElem, {
               offset: 0,
               duration: 0.75,
-              easing: (t: number) => 1 - Math.pow(1 - t, 2.5), // Seri ve pürüzsüz sonlanma
+              easing: (t: number) => 1 - Math.pow(1 - t, 2.5),
               onComplete: unlockSnapping,
             })
           } else {
-            targetBlock.scrollIntoView({behavior: 'smooth', block: 'start'})
+            targetElem.scrollIntoView({behavior: 'smooth', block: 'start'})
             setTimeout(unlockSnapping, 600)
           }
         }
-      }, 120)
+      }, 40)
     }
 
     window.addEventListener('wheel', handleWheel, {passive: true})
@@ -563,7 +582,7 @@ export function HomePage() {
               }
             }
           `}</style>
-          <div className="scroll-snap-start">
+          <div id="home-hero-section" className="scroll-snap-start">
             <HomeHero content={content} settings={settings} />
           </div>
         </>

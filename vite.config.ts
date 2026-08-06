@@ -116,9 +116,6 @@ export default defineConfig({
   server: {
     port: 3001,
     host: true,
-    hmr: {
-      port: 3001,
-    },
     proxy: {
       '/api/sanity': {
         target: 'https://wn3a082f.api.sanity.io',
