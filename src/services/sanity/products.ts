@@ -1,11 +1,5 @@
 import groq from 'groq'
-import type {
-  Product,
-  ProductMaterial,
-  ProductMaterialsGroup,
-  LocalizedString,
-  R2ImageMetadata,
-} from '../../types'
+import type {Product, ProductMaterial, ProductMaterialsGroup, LocalizedString} from '../../types'
 import {
   sanity,
   useSanity,

@@ -108,7 +108,7 @@ const MaterialCard: React.FC<{
           style={{
             transform: 'scale(1.75)',
             transformOrigin: 'center center',
-            imageRendering: 'smooth',
+            imageRendering: 'auto',
           }}
         />
       </motion.div>
@@ -143,11 +143,15 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
       : undefined
   const books = Array.isArray(activeGroup?.books) ? activeGroup.books : []
   const safeBookIndex = Math.min(Math.max(activeBookIndex, 0), Math.max(books.length - 1, 0))
+  const activeGroupObj = activeGroup as Record<string, unknown> | undefined
+  const activeGroupMaterials = Array.isArray(activeGroupObj?.['materials'])
+    ? (activeGroupObj['materials'] as {image: string; name: LocalizedString}[])
+    : undefined
   const currentMaterials: {image: string; name: LocalizedString}[] =
     Array.isArray(books[safeBookIndex]?.materials) && books[safeBookIndex].materials.length > 0
       ? books[safeBookIndex].materials
-      : Array.isArray((activeGroup as any)?.materials) && (activeGroup as any).materials.length > 0
-        ? (activeGroup as any).materials
+      : activeGroupMaterials && activeGroupMaterials.length > 0
+        ? activeGroupMaterials
         : Array.isArray(grouped[safeActiveIndex]?.materials)
           ? grouped[safeActiveIndex].materials
           : []

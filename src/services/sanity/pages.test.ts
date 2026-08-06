@@ -74,8 +74,9 @@ describe('sanity pages service', () => {
   it('getHomePageContent mobilde özel crop yapılmadığında cropMobile alanını undefined bırakır', async () => {
     const mockCropDesktop = {x: 0.1, y: 0.2, width: 0.8, height: 0.6}
     const {mapR2Metadata} = await import('./client')
-    vi.mocked(mapR2Metadata).mockImplementation((obj: any) => {
-      if (obj?.cropDesktop || obj?.image) {
+    vi.mocked(mapR2Metadata).mockImplementation((obj: unknown) => {
+      const o = obj as Record<string, unknown> | undefined
+      if (o?.['cropDesktop'] || o?.['image']) {
         return {crop: mockCropDesktop, origWidth: 1000, origHeight: 800}
       }
       return {}

@@ -347,7 +347,9 @@ export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
       return {}
     }
 
-    const desktopAsset = (i['imageDesktopR2'] || i['imageR2'] || i['image']) as Record<string, unknown> | undefined
+    const desktopAsset = (i['imageDesktopR2'] || i['imageR2'] || i['image']) as
+      | Record<string, unknown>
+      | undefined
     const targetObj = (desktopAsset || i) as Record<string, unknown>
     const dims = extractDimsFromUrl(targetObj)
     const origWidth =

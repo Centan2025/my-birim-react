@@ -121,7 +121,8 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
   if (!currentItem) return null
 
   // Map item properties (handles different schemas for main media, dimensions, and materials)
-  const rawUrl = (currentItem as any)?.url || (currentItem as any)?.image
+  const itemObj = currentItem as Record<string, unknown>
+  const rawUrl = (itemObj['url'] || itemObj['image']) as string | SanityImageLike | undefined
   const url =
     typeof rawUrl === 'string' ? rewriteR2Url(rawUrl) : mapImage(rawUrl as SanityImageLike)
   const type = (currentItem.type || 'image') as string

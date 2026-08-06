@@ -89,14 +89,10 @@ export const HeaderThemeProvider = ({children}: PropsWithChildren) => {
   return <HeaderThemeContext.Provider value={value}>{children}</HeaderThemeContext.Provider>
 }
 
-const defaultHeaderThemeCtx: HeaderThemeContextType = {
-  isDark: false,
-  navTheme: 'dark',
-  logoTheme: 'dark',
-  opacity: 0,
-  setNavTheme: () => {},
-  setLogoTheme: () => {},
-  setOpacity: () => {},
+const defaultHeaderThemeCtx: HeaderThemeContextValue = {
+  theme: {brightness: null},
+  setFromPalette: () => {},
+  setBrightness: () => {},
   reset: () => {},
 }
 
