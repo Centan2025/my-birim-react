@@ -57,6 +57,14 @@ const getAssetKey = (img: unknown): string | null => {
   return asset.url || asset._id || asset._ref || null
 }
 
+const cleanNameKey = (str: string): string => {
+  if (!str) return ''
+  return str
+    .toLowerCase()
+    .replace(/^[0-9]+/, '')
+    .replace(/[^a-z0-9]/g, '')
+}
+
 const getMaterialKey = (item: Record<string, unknown>): string | null => {
   if (!item) return null
   const imgObj = item['imageR2'] || item['image']
@@ -80,32 +88,53 @@ const mapMaterialsFromSelections = (
   for (const sel of selections || []) {
     const group = (sel as Record<string, unknown>)['group'] as Record<string, unknown>
     const books = (group?.['books'] as Record<string, unknown>[]) || []
-    const groupMaterialByKey = new Map<string, {name?: LocalizedString; image?: unknown}>()
+    const groupMaterialByKey = new Map<string, Record<string, unknown>>()
+    const groupMaterialByName = new Map<string, Record<string, unknown>>()
 
     for (const book of books) {
       const items = (book?.['items'] as Record<string, unknown>[]) || []
       for (const item of items) {
         const key = getMaterialKey(item)
-        if (!key) continue
-        const imgObj = item['imageR2'] || item['image']
-        if (!groupMaterialByKey.has(key)) {
-          groupMaterialByKey.set(key, {name: item['name'] as LocalizedString, image: imgObj})
+        if (key && !groupMaterialByKey.has(key)) {
+          groupMaterialByKey.set(key, item)
+        }
+        const nameObj = item['name'] as LocalizedString & {tr?: string; en?: string}
+        const nameStr =
+          nameObj?.tr || nameObj?.en || (typeof item['name'] === 'string' ? item['name'] : '')
+        if (nameStr) {
+          const lowerName = nameStr.trim().toLowerCase()
+          const cleanKey = cleanNameKey(nameStr)
+          if (!groupMaterialByName.has(lowerName)) groupMaterialByName.set(lowerName, item)
+          if (cleanKey && !groupMaterialByName.has(cleanKey))
+            groupMaterialByName.set(cleanKey, item)
         }
       }
     }
 
     for (const m of (sel['materials'] as Record<string, unknown>[]) || []) {
       const key = getMaterialKey(m)
-      if (!key || seenKeys.has(key)) continue
-      const source = (groupMaterialByKey.get(key) || m) as Record<string, unknown>
-      const imgObj = source['image'] || source['imageR2'] || m['image'] || m['imageR2'] || source
+      const nameObj = m['name'] as LocalizedString & {tr?: string; en?: string}
+      const nameStr = nameObj?.tr || nameObj?.en || (typeof m['name'] === 'string' ? m['name'] : '')
+      const lowerName = nameStr ? nameStr.trim().toLowerCase() : ''
+      const cleanKey = cleanNameKey(nameStr)
+
+      const master =
+        (key ? groupMaterialByKey.get(key) : null) ||
+        (lowerName ? groupMaterialByName.get(lowerName) : null) ||
+        (cleanKey ? groupMaterialByName.get(cleanKey) : null) ||
+        m
+
+      const dedupKey = key || lowerName || cleanKey || String(m['_key'] || '')
+      if (!dedupKey || seenKeys.has(dedupKey)) continue
+
+      const imgObj = master['imageR2'] || master['image'] || m['imageR2'] || m['image'] || master
+      const finalName = (master['name'] ?? m['name'] ?? '') as LocalizedString
+
       result.push({
-        name: ((source['name'] as LocalizedString) ??
-          (m['name'] as LocalizedString) ??
-          '') as LocalizedString,
+        name: finalName,
         image: mapImage(imgObj as SanityImageLike),
       })
-      seenKeys.add(key)
+      seenKeys.add(dedupKey)
     }
   }
   return result
@@ -126,6 +155,37 @@ const mapGroupedMaterials = (
       for (const m of selectedMats) {
         const key = getMaterialKey(m)
         if (key) selectedKeys.add(key)
+        const nameObj = m['name'] as LocalizedString & {tr?: string; en?: string}
+        const nameStr =
+          nameObj?.tr || nameObj?.en || (typeof m['name'] === 'string' ? m['name'] : '')
+        if (nameStr) {
+          selectedKeys.add(nameStr.trim().toLowerCase())
+          const cleanKey = cleanNameKey(nameStr)
+          if (cleanKey) selectedKeys.add(cleanKey)
+        }
+      }
+
+      const groupMaterialByKey = new Map<string, Record<string, unknown>>()
+      const groupMaterialByName = new Map<string, Record<string, unknown>>()
+
+      for (const book of books) {
+        const items = (book?.['items'] as Record<string, unknown>[]) || []
+        for (const item of items) {
+          const key = getMaterialKey(item)
+          if (key && !groupMaterialByKey.has(key)) {
+            groupMaterialByKey.set(key, item)
+          }
+          const nameObj = item['name'] as LocalizedString & {tr?: string; en?: string}
+          const nameStr =
+            nameObj?.tr || nameObj?.en || (typeof item['name'] === 'string' ? item['name'] : '')
+          if (nameStr) {
+            const lowerName = nameStr.trim().toLowerCase()
+            const cleanKey = cleanNameKey(nameStr)
+            if (!groupMaterialByName.has(lowerName)) groupMaterialByName.set(lowerName, item)
+            if (cleanKey && !groupMaterialByName.has(cleanKey))
+              groupMaterialByName.set(cleanKey, item)
+          }
+        }
       }
 
       let mappedBooks = books
@@ -134,7 +194,20 @@ const mapGroupedMaterials = (
           const items = (book?.['items'] as Record<string, unknown>[]) || []
           for (const item of items) {
             const key = getMaterialKey(item)
-            if (selectedKeys.size > 0 && (!key || !selectedKeys.has(key))) continue
+            const nameObj = item['name'] as LocalizedString & {tr?: string; en?: string}
+            const nameStr =
+              nameObj?.tr || nameObj?.en || (typeof item['name'] === 'string' ? item['name'] : '')
+            const lowerName = nameStr ? nameStr.trim().toLowerCase() : ''
+            const cleanKey = cleanNameKey(nameStr)
+
+            const isSelected =
+              selectedKeys.size === 0 ||
+              (key && selectedKeys.has(key)) ||
+              (lowerName && selectedKeys.has(lowerName)) ||
+              (cleanKey && selectedKeys.has(cleanKey))
+
+            if (!isSelected) continue
+
             const imgObj = item['imageR2'] || item['image'] || item
             materials.push({
               name: ((item['name'] as LocalizedString) ?? '') as LocalizedString,
@@ -155,9 +228,29 @@ const mapGroupedMaterials = (
       if (allMaterials.length === 0 && selectedMats.length > 0) {
         const directMats: ProductMaterial[] = selectedMats
           .map(m => {
-            const imgObj = m['imageR2'] || m['image'] || m
+            const key = getMaterialKey(m)
+            const nameObj = m['name'] as LocalizedString & {tr?: string; en?: string}
+            const nameStr =
+              nameObj?.tr || nameObj?.en || (typeof m['name'] === 'string' ? m['name'] : '')
+            const lowerName = nameStr ? nameStr.trim().toLowerCase() : ''
+            const cleanKey = cleanNameKey(nameStr)
+
+            const masterItem =
+              (key ? groupMaterialByKey.get(key) : null) ||
+              (lowerName ? groupMaterialByName.get(lowerName) : null) ||
+              (cleanKey ? groupMaterialByName.get(cleanKey) : null) ||
+              m
+
+            const imgObj =
+              masterItem['imageR2'] ||
+              masterItem['image'] ||
+              m['imageR2'] ||
+              m['image'] ||
+              masterItem
+            const finalName = (masterItem['name'] ?? m['name'] ?? '') as LocalizedString
+
             return {
-              name: ((m['name'] as LocalizedString) ?? '') as LocalizedString,
+              name: finalName,
               image: mapImage(imgObj as SanityImageLike),
             }
           })

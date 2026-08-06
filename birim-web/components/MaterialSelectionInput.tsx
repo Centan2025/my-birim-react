@@ -219,6 +219,7 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
           name: m?.name,
           _key: sourceKey,
         }
+        if (m?.imageR2) toAdd.imageR2 = m.imageR2
         if (imgObj) toAdd.image = imgObj
 
         // Aynı id'ye sahip eski kaydı sil, yenisini ekle
@@ -393,6 +394,7 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
                             name: m?.name,
                             _key: sourceKey,
                           }
+                          if (m?.imageR2) toAdd.imageR2 = m.imageR2
                           if (imgObj) toAdd.image = imgObj
                           // prevent duplicate push
                           nextArr = nextArr.filter((x) => materialIdLoose(x) !== id)
