@@ -517,9 +517,9 @@ export function LoginPage() {
 
               {/* Role Selection Buttons */}
               <div className="pt-1">
-                <label className="block text-xs uppercase tracking-wider text-[var(--text-primary)] mb-1.5 font-medium">
+                <span className="block text-xs uppercase tracking-wider text-[var(--text-primary)] mb-1.5 font-medium">
                   Üyelik Tipi *
-                </label>
+                </span>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"

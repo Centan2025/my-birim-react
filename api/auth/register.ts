@@ -78,7 +78,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           })
           .commit()
 
-        const u = updatedUser as any
+interface SanityUserRecord {
+  _id: string
+  email?: string
+  firstName?: string
+  lastName?: string
+  name?: string
+  role?: string
+  architectVerificationStatus?: string
+  [key: string]: unknown
+}
+
+        const u = updatedUser as SanityUserRecord
         return res.status(200).json({
           success: true,
           message: 'Bülten aboneliğiniz üye hesabına dönüştürüldü.',
@@ -126,7 +137,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       createdAt: new Date().toISOString(),
     })
 
-    const nu = newUser as any
+    const nu = newUser as SanityUserRecord
     return res.status(201).json({
       success: true,
       user: {

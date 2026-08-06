@@ -58,7 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .unset(['verificationToken'])
       .commit()
 
-    const u = updatedUser as any
+    const u = updatedUser as {_id: string; [key: string]: unknown}
     return res.status(200).json({
       success: true,
       message: 'E-posta adresiniz başarıyla doğrulandı.',
