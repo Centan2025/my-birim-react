@@ -298,6 +298,14 @@ export const verifyUserByToken = async (token: string): Promise<User | null> => 
       console.error('Verify token failed:', e)
     }
   }
+
+  const users = getItem<User[]>(KEYS.USERS) || []
+  const localUser = users.find(u => u.verificationToken === token || u._id === token)
+  if (localUser) {
+    localUser.isVerified = true
+    setItem(KEYS.USERS, users)
+    return localUser
+  }
   return null
 }
 
