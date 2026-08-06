@@ -203,11 +203,14 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         @media (max-width: 1023px) {
           img.responsive-crop-pos,
           picture.responsive-crop-pos img {
-            object-fit: var(--img-object-fit-mobile, var(--img-object-fit-desktop, var(--img-object-fit, cover))) !important;
+            object-fit: var(--img-object-fit-mobile, var(--img-object-fit-desktop, var(--img-object-fit, contain))) !important;
             object-position: var(--obj-pos-mobile, var(--obj-pos-desktop, center)) !important;
             clip-path: var(--clip-mobile, var(--clip-desktop, none)) !important;
             transform: var(--transform-mobile, var(--transform-desktop, none)) !important;
             transform-origin: var(--transform-origin-mobile, var(--transform-origin-desktop, center)) !important;
+            max-height: 72dvh !important;
+            max-width: 94vw !important;
+            margin: auto !important;
           }
         }
 
@@ -255,8 +258,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           .responsive-crop-wrapper {
             width: 100% !important;
             height: auto !important;
-            max-width: 100% !important;
-            max-height: 58dvh !important;
+            max-width: 94vw !important;
+            max-height: 72dvh !important;
             aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
             margin: auto !important;
           }
