@@ -258,7 +258,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             object-position: var(--obj-pos-mobile, var(--obj-pos-desktop, center)) !important;
           }
           .responsive-crop-wrapper.has-aspect,
-          .responsive-crop-wrapper.is-contain-mobile {
+          .responsive-crop-wrapper.is-contain-mobile:not(.is-cover) {
             width: 100% !important;
             max-width: 100% !important;
             max-height: 100% !important;

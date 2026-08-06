@@ -279,8 +279,8 @@ const extractMediaMetadata = (item: Record<string, unknown>): Record<string, unk
     ? mapR2Metadata(item['imageMobileR2'] as SanityImageLike)
     : {}
 
-  const crop = r2Meta.crop || (item?.['imageR2'] ? undefined : baseMeta.crop)
-  const cropDesktop = desktopMeta.crop || r2Meta.crop
+  const crop = desktopMeta.crop || r2Meta.crop || baseMeta.crop
+  const cropDesktop = desktopMeta.crop || r2Meta.crop || baseMeta.crop
   const cropMobile = mobileMeta.crop || baseMeta.cropMobile
 
   const result: Record<string, unknown> = {
