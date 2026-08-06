@@ -944,7 +944,8 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           </div>
         ) : null
 
-        const bottomSpacing = block.spacingBottom !== undefined ? block.spacingBottom : 24
+        const isLastBlock = index === sortedBlocks.length - 1
+        const bottomSpacing = block.spacingBottom !== undefined ? block.spacingBottom : (isLastBlock ? 0 : 24)
         const topPaddingVal = block.paddingTop !== undefined ? block.paddingTop : (isMobile ? 0 : 24)
         const bottomPaddingVal = block.paddingBottom !== undefined ? block.paddingBottom : 0
         const isSideBySide = !isFullWidth && !isCenter
