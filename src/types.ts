@@ -466,6 +466,10 @@ export interface ContentBlock {
   buttonOffsetOnMedia?: number
   /** Bottom spacing in pixels */
   spacingBottom?: number
+  /** Top padding in pixels */
+  paddingTop?: number
+  /** Bottom padding in pixels */
+  paddingBottom?: number
   /** Button text color */
   buttonColor?: 'black' | 'white'
   /** Internal padding in pixels */

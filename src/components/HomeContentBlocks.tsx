@@ -948,7 +948,6 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         const bottomSpacing = block.spacingBottom !== undefined ? block.spacingBottom : (isLastBlock ? 0 : 24)
         const topPaddingVal = block.paddingTop !== undefined ? block.paddingTop : (isMobile ? 0 : 24)
         const bottomPaddingVal = block.paddingBottom !== undefined ? block.paddingBottom : 0
-        const isSideBySide = !isFullWidth && !isCenter
 
         return (
           <React.Fragment key={index}>
