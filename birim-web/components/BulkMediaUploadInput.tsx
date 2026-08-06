@@ -191,6 +191,8 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
               folderPath = `migration/home/panels`
             } else if (docType === 'factoryPage') {
               folderPath = `migration/factory/gallery`
+            } else if (docType === 'materialGroup') {
+              folderPath = `migration/materials/${docId}/swatches`
             }
 
             const r2Domain = R2_DOMAIN?.startsWith('http') ? R2_DOMAIN : `https://${R2_DOMAIN}`
@@ -307,6 +309,16 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
               item = {
                 ...r2Asset,
                 _key: `bulk-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              }
+            } else if (itemType === 'productMaterial') {
+              item = {
+                _type: 'productMaterial',
+                _key: `bulk-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                name: {
+                  tr: file.name.replace(/\.[^/.]+$/, ''),
+                  en: file.name.replace(/\.[^/.]+$/, ''),
+                },
+                imageR2: r2Asset,
               }
             } else {
               item = {

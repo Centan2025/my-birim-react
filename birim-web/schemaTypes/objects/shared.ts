@@ -174,6 +174,9 @@ export const materialSwatchBook = defineType({
       title: 'Malzemeler',
       type: 'array',
       of: [{type: 'productMaterial'}],
+      components: {
+        input: BulkMediaUploadInput,
+      },
     }),
   ],
 })
