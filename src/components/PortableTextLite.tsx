@@ -189,10 +189,12 @@ export default function PortableTextLite({
   value,
   removeTopMargin = false,
   onMediaClick,
+  isOverlay = false,
 }: {
   value: Block[] | undefined
   removeTopMargin?: boolean
   onMediaClick?: (url: string) => void
+  isOverlay?: boolean
 }) {
   if (!Array.isArray(value) || value.length === 0) return null
 
@@ -373,100 +375,178 @@ export default function PortableTextLite({
       const style = block.style || 'normal'
       const content = renderInline(block.children as Span[], block.markDefs || [])
 
-      switch (style) {
-        case 'h1':
-          nodes.push(
-            <h1
-              className={applyTopMarginRemoval(
-                'text-4xl md:text-5xl lg:text-6xl font-bold my-8 leading-tight text-[var(--text-primary)]'
-              )}
-              key={blockKey}
-            >
-              {content}
-            </h1>
-          )
-          break
-        case 'h2':
-          nodes.push(
-            <h2
-              className={applyTopMarginRemoval(
-                'text-3xl md:text-4xl lg:text-5xl font-bold my-7 leading-snug text-[var(--text-primary)]'
-              )}
-              key={blockKey}
-            >
-              {content}
-            </h2>
-          )
-          break
-        case 'h3':
-          nodes.push(
-            <h3
-              className={applyTopMarginRemoval(
-                'text-2xl md:text-3xl lg:text-4xl font-semibold my-6 text-[var(--text-primary)]'
-              )}
-              key={blockKey}
-            >
-              {content}
-            </h3>
-          )
-          break
-        case 'h4':
-          nodes.push(
-            <h4
-              className={applyTopMarginRemoval(
-                'text-xl md:text-2xl lg:text-3xl font-semibold my-5 text-[var(--text-primary)]'
-              )}
-              key={blockKey}
-            >
-              {content}
-            </h4>
-          )
-          break
-        case 'h5':
-          nodes.push(
-            <h5
-              className={applyTopMarginRemoval(
-                'text-lg md:text-xl lg:text-2xl font-medium my-4 text-[var(--text-primary)]'
-              )}
-              key={blockKey}
-            >
-              {content}
-            </h5>
-          )
-          break
-        case 'h6':
-          nodes.push(
-            <h6
-              className={applyTopMarginRemoval(
-                'text-base md:text-lg lg:text-xl font-medium my-3 text-[var(--text-primary)]'
-              )}
-              key={blockKey}
-            >
-              {content}
-            </h6>
-          )
-          break
-        case 'blockquote':
-          nodes.push(
-            <blockquote
-              className={applyTopMarginRemoval(
-                'border-l-4 border-[var(--border-primary)] pl-6 my-8 italic text-xl md:text-2xl text-[var(--text-secondary)] leading-relaxed'
-              )}
-              key={blockKey}
-            >
-              {content}
-            </blockquote>
-          )
-          break
-        default:
-          nodes.push(
-            <p
-              className={applyTopMarginRemoval('my-4 leading-relaxed text-[var(--text-primary)]')}
-              key={blockKey}
-            >
-              {content}
-            </p>
-          )
+      if (isOverlay) {
+        switch (style) {
+          case 'h1':
+            nodes.push(
+              <h1 className="text-[1.3em] font-bold my-1 leading-tight text-inherit" key={blockKey}>
+                {content}
+              </h1>
+            )
+            break
+          case 'h2':
+            nodes.push(
+              <h2
+                className="text-[1.15em] font-bold my-1 leading-tight text-inherit"
+                key={blockKey}
+              >
+                {content}
+              </h2>
+            )
+            break
+          case 'h3':
+            nodes.push(
+              <h3
+                className="text-[1.05em] font-semibold my-1 leading-snug text-inherit"
+                key={blockKey}
+              >
+                {content}
+              </h3>
+            )
+            break
+          case 'h4':
+            nodes.push(
+              <h4
+                className="text-[0.9em] font-medium my-1 leading-snug text-inherit"
+                key={blockKey}
+              >
+                {content}
+              </h4>
+            )
+            break
+          case 'h5':
+            nodes.push(
+              <h5
+                className="text-[0.8em] font-medium my-1 leading-normal text-inherit"
+                key={blockKey}
+              >
+                {content}
+              </h5>
+            )
+            break
+          case 'h6':
+            nodes.push(
+              <h6
+                className="text-[0.7em] font-normal my-1 leading-normal text-inherit"
+                key={blockKey}
+              >
+                {content}
+              </h6>
+            )
+            break
+          case 'blockquote':
+            nodes.push(
+              <blockquote
+                className="border-l-2 border-current pl-4 my-2 italic text-[0.9em] opacity-90 leading-relaxed text-inherit"
+                key={blockKey}
+              >
+                {content}
+              </blockquote>
+            )
+            break
+          default:
+            nodes.push(
+              <p className="my-1 leading-relaxed text-inherit" key={blockKey}>
+                {content}
+              </p>
+            )
+        }
+      } else {
+        switch (style) {
+          case 'h1':
+            nodes.push(
+              <h1
+                className={applyTopMarginRemoval(
+                  'text-4xl md:text-5xl lg:text-6xl font-bold my-8 leading-tight text-[var(--text-primary)]'
+                )}
+                key={blockKey}
+              >
+                {content}
+              </h1>
+            )
+            break
+          case 'h2':
+            nodes.push(
+              <h2
+                className={applyTopMarginRemoval(
+                  'text-3xl md:text-4xl lg:text-5xl font-bold my-7 leading-snug text-[var(--text-primary)]'
+                )}
+                key={blockKey}
+              >
+                {content}
+              </h2>
+            )
+            break
+          case 'h3':
+            nodes.push(
+              <h3
+                className={applyTopMarginRemoval(
+                  'text-2xl md:text-3xl lg:text-4xl font-semibold my-6 text-[var(--text-primary)]'
+                )}
+                key={blockKey}
+              >
+                {content}
+              </h3>
+            )
+            break
+          case 'h4':
+            nodes.push(
+              <h4
+                className={applyTopMarginRemoval(
+                  'text-xl md:text-2xl lg:text-3xl font-semibold my-5 text-[var(--text-primary)]'
+                )}
+                key={blockKey}
+              >
+                {content}
+              </h4>
+            )
+            break
+          case 'h5':
+            nodes.push(
+              <h5
+                className={applyTopMarginRemoval(
+                  'text-lg md:text-xl lg:text-2xl font-medium my-4 text-[var(--text-primary)]'
+                )}
+                key={blockKey}
+              >
+                {content}
+              </h5>
+            )
+            break
+          case 'h6':
+            nodes.push(
+              <h6
+                className={applyTopMarginRemoval(
+                  'text-base md:text-lg lg:text-xl font-medium my-3 text-[var(--text-primary)]'
+                )}
+                key={blockKey}
+              >
+                {content}
+              </h6>
+            )
+            break
+          case 'blockquote':
+            nodes.push(
+              <blockquote
+                className={applyTopMarginRemoval(
+                  'border-l-4 border-[var(--border-primary)] pl-6 my-8 italic text-xl md:text-2xl text-[var(--text-secondary)] leading-relaxed'
+                )}
+                key={blockKey}
+              >
+                {content}
+              </blockquote>
+            )
+            break
+          default:
+            nodes.push(
+              <p
+                className={applyTopMarginRemoval('my-4 leading-relaxed text-[var(--text-primary)]')}
+                key={blockKey}
+              >
+                {content}
+              </p>
+            )
+        }
       }
       isFirstNode = false
       continue

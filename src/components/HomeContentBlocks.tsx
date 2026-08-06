@@ -592,7 +592,15 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         }
 
         const getOverlayColorClasses = (color?: string) => {
-          return color === 'black' ? 'text-black drop-shadow-sm' : 'text-white drop-shadow-md'
+          switch (color) {
+            case 'black':
+              return 'text-black drop-shadow-sm [&_*]:!text-inherit'
+            case 'gray':
+              return 'text-gray-300 drop-shadow-sm [&_*]:!text-inherit'
+            case 'white':
+            default:
+              return 'text-white drop-shadow-md [&_*]:!text-inherit'
+          }
         }
 
         // Helper: ref callback to apply font-family with !important (React inline styles ignore !important)
@@ -683,19 +691,28 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           </ScrollReveal>
         )
 
+        const hasButtonBorder = block.showButtonBorder !== false
+        const standaloneBorderClass = hasButtonBorder
+          ? 'border border-gray-400 dark:border-gray-500'
+          : 'border-0'
+
+        const buttonPaddingClass = hasButtonBorder
+          ? 'px-4 py-2.5 md:px-8 md:py-4'
+          : 'px-0 py-2.5 md:px-0 md:py-4'
+
         const standaloneButtonElement = block.linkText && !block.showButtonOnMedia && (
           <ScrollReveal delay={200} threshold={0.1} width="w-full" className="h-auto">
             <div className={`w-full flex ${buttonAlignClass}`}>
               {block.linkUrl ? (
                 <Link
                   to={block.linkUrl}
-                  className={`group inline-flex items-center text-[var(--text-primary)] hover:opacity-70 border border-gray-400 dark:border-gray-500 px-4 py-2.5 md:px-8 md:py-4 text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter transition-all duration-300`}
+                  className={`group inline-flex items-center ${buttonPaddingClass} text-[9px] md:text-[11px] leading-none uppercase tracking-[0.2em] font-medium font-inter text-[var(--text-primary)] hover:opacity-70 ${standaloneBorderClass} transition-all duration-300`}
                 >
                   {t(block.linkText)}
                 </Link>
               ) : (
                 <div
-                  className={`inline-flex items-center text-[var(--text-primary)] px-4 py-2.5 md:px-8 md:py-4 text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
+                  className={`inline-flex items-center ${buttonPaddingClass} text-[9px] md:text-[11px] leading-none uppercase tracking-[0.2em] font-medium font-inter text-[var(--text-primary)] ${standaloneBorderClass}`}
                 >
                   {t(block.linkText)}
                 </div>
@@ -710,6 +727,11 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
 
         const isButtonWhite = block.buttonColor === 'white'
         const buttonTextColorClass = isButtonWhite ? 'text-white' : 'text-[var(--text-primary)]'
+        const buttonBorderClass = hasButtonBorder
+          ? isButtonWhite
+            ? 'border border-gray-300/80'
+            : 'border border-gray-400 dark:border-gray-500'
+          : 'border-0'
 
         const hasMedia =
           !!mediaUrl ||
@@ -723,10 +745,34 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           typeof customOffset === 'number' && block.buttonPositionOnMedia !== 'center'
         const buttonOverlayPaddingClass = hasCustomOffset ? '' : 'p-2 md:p-8'
 
-        const hasOverlayText =
-          typeof overlayTextContent === 'string'
-            ? overlayTextContent.trim().length > 0
-            : !!overlayTextContent
+        const isOverlayArray = Array.isArray(overlayTextContent)
+        const isOverlayPortableText =
+          isOverlayArray ||
+          (typeof overlayTextContent === 'object' &&
+            overlayTextContent !== null &&
+            (overlayTextContent as {_type?: string})._type === 'block')
+
+        const renderedOverlayText = isOverlayPortableText ? (
+          <PortableTextLite
+            value={
+              (isOverlayArray ? overlayTextContent : [overlayTextContent]) as Parameters<
+                typeof PortableTextLite
+              >[0]['value']
+            }
+            isOverlay={true}
+          />
+        ) : (
+          (overlayTextContent as string)
+        )
+
+        const hasOverlayText = Boolean(
+          overlayTextContent &&
+            (typeof overlayTextContent === 'string'
+              ? overlayTextContent.trim().length > 0
+              : isOverlayArray
+                ? (overlayTextContent as unknown[]).length > 0
+                : true)
+        )
 
         const overlayTextFont = block.overlayTextFont || 'Oswald'
         const isNormalOverlayFont =
@@ -745,12 +791,89 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           >
             <div
               ref={applyFontRef(overlayFontFamily)}
-              className={`max-w-3xl pointer-events-auto px-4 py-2 ${getOverlaySizeClasses(block.overlayTextSize)} ${getOverlayWeightClass(block.overlayTextWeight)} ${getOverlayColorClasses(block.overlayTextColor)}`}
+              className={`max-w-3xl pointer-events-auto px-0 py-1 ${getOverlaySizeClasses(block.overlayTextSize)} ${getOverlayWeightClass(block.overlayTextWeight)} ${getOverlayColorClasses(block.overlayTextColor)}`}
             >
-              {overlayTextContent as string}
+              {renderedOverlayText}
             </div>
           </div>
         )
+
+        const isSameOverlayPos =
+          hasOverlayText &&
+          block.showButtonOnMedia &&
+          !!block.linkText &&
+          (block.overlayTextPosition || 'center') === (block.buttonPositionOnMedia || 'center')
+
+        const combinedPos = block.overlayTextPosition || 'center'
+        const isLeftPos = combinedPos.includes('left')
+        const isRightPos = combinedPos.includes('right')
+        const combinedAlignClass = isLeftPos
+          ? 'items-start text-left'
+          : isRightPos
+            ? 'items-end text-right'
+            : 'items-center text-center'
+
+        const combinedOverlayElement = isSameOverlayPos && (
+          <div
+            className={`absolute z-30 flex flex-col gap-2 md:gap-3 pointer-events-none ${buttonOverlayPaddingClass} ${getButtonPositionClasses(combinedPos, hasCustomOffset)} ${combinedAlignClass}`}
+            style={getButtonPositionStyles(combinedPos, customOffset)}
+          >
+            <div
+              ref={applyFontRef(overlayFontFamily)}
+              className={`max-w-3xl pointer-events-auto px-0 py-1 ${getOverlaySizeClasses(block.overlayTextSize)} ${getOverlayWeightClass(block.overlayTextWeight)} ${getOverlayColorClasses(block.overlayTextColor)}`}
+            >
+              {renderedOverlayText}
+            </div>
+            <div className="pointer-events-auto inline-flex">
+              {block.linkUrl ? (
+                <Link
+                  to={block.linkUrl}
+                  className={`group inline-flex items-center ${buttonPaddingClass} text-[9px] md:text-[11px] leading-none uppercase tracking-[0.2em] font-medium font-inter ${buttonTextColorClass} hover:opacity-50 transition-opacity duration-300 bg-transparent ${buttonBorderClass}`}
+                >
+                  {t(block.linkText)}
+                </Link>
+              ) : (
+                <div
+                  className={`inline-flex items-center ${buttonPaddingClass} text-[9px] md:text-[11px] leading-none uppercase tracking-[0.2em] font-medium font-inter ${buttonTextColorClass} bg-transparent ${buttonBorderClass}`}
+                >
+                  {t(block.linkText)}
+                </div>
+              )}
+            </div>
+          </div>
+        )
+
+        const renderMediaOverlays = () => {
+          if (isSameOverlayPos) {
+            return combinedOverlayElement
+          }
+          return (
+            <>
+              {overlayTextElement}
+              {block.showButtonOnMedia && block.linkText && (
+                <div
+                  className={`absolute z-30 flex pointer-events-none ${buttonOverlayPaddingClass} ${getButtonPositionClasses(block.buttonPositionOnMedia, hasCustomOffset)}`}
+                  style={getButtonPositionStyles(block.buttonPositionOnMedia, customOffset)}
+                >
+                  {block.linkUrl ? (
+                    <Link
+                      to={block.linkUrl}
+                      className={`group pointer-events-auto inline-flex items-center ${buttonPaddingClass} text-[9px] md:text-[11px] leading-none uppercase tracking-[0.2em] font-medium font-inter ${buttonTextColorClass} hover:opacity-50 transition-opacity duration-300 bg-transparent ${buttonBorderClass}`}
+                    >
+                      {t(block.linkText)}
+                    </Link>
+                  ) : (
+                    <div
+                      className={`pointer-events-auto inline-flex items-center ${buttonPaddingClass} text-[9px] md:text-[11px] leading-none uppercase tracking-[0.2em] font-medium font-inter ${buttonTextColorClass} bg-transparent ${buttonBorderClass}`}
+                    >
+                      {t(block.linkText)}
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )
+        }
 
         const mediaContent = hasMedia ? (
           <ScrollReveal
@@ -764,28 +887,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 className={`relative ${mediaWidthClass} ${isMobile ? 'w-full' : ''} aspect-video overflow-hidden`}
               >
                 <YouTubeBackground url={mediaUrl} />
-                {overlayTextElement}
-                {block.showButtonOnMedia && block.linkText && (
-                  <div
-                    className={`absolute z-30 flex pointer-events-none ${buttonOverlayPaddingClass} ${getButtonPositionClasses(block.buttonPositionOnMedia, hasCustomOffset)}`}
-                    style={getButtonPositionStyles(block.buttonPositionOnMedia, customOffset)}
-                  >
-                    {block.linkUrl ? (
-                      <Link
-                        to={block.linkUrl}
-                        className={`group pointer-events-auto inline-flex items-center ${buttonTextColorClass} hover:opacity-50 px-3 py-1.5 md:px-8 md:py-4 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-gray-300/80' : 'border-gray-400 dark:border-gray-500'} text-[8.5px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
-                      >
-                        {t(block.linkText)}
-                      </Link>
-                    ) : (
-                      <div
-                        className={`pointer-events-auto inline-flex items-center ${buttonTextColorClass} px-3 py-1.5 md:px-8 md:py-4 bg-transparent text-[8.5px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
-                      >
-                        {t(block.linkText)}
-                      </div>
-                    )}
-                  </div>
-                )}
+                {renderMediaOverlays()}
               </div>
             ) : block.mediaType === 'video' ? (
               <div
@@ -816,28 +918,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   preload="auto"
                   loading="lazy"
                 />
-                {overlayTextElement}
-                {block.showButtonOnMedia && block.linkText && (
-                  <div
-                    className={`absolute z-30 flex pointer-events-none ${buttonOverlayPaddingClass} ${getButtonPositionClasses(block.buttonPositionOnMedia, hasCustomOffset)}`}
-                    style={getButtonPositionStyles(block.buttonPositionOnMedia, customOffset)}
-                  >
-                    {block.linkUrl ? (
-                      <Link
-                        to={block.linkUrl}
-                        className={`group pointer-events-auto inline-flex items-center ${buttonTextColorClass} hover:opacity-50 px-3 py-1.5 md:px-8 md:py-4 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-gray-300/80' : 'border-gray-400 dark:border-gray-500'} text-[8.5px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
-                      >
-                        {t(block.linkText)}
-                      </Link>
-                    ) : (
-                      <div
-                        className={`pointer-events-auto inline-flex items-center ${buttonTextColorClass} px-3 py-1.5 md:px-8 md:py-4 bg-transparent text-[8.5px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
-                      >
-                        {t(block.linkText)}
-                      </div>
-                    )}
-                  </div>
-                )}
+                {renderMediaOverlays()}
               </div>
             ) : block.mediaType === 'panels' ? (
               <div className={`relative ${mediaWidthClass}`}>
@@ -884,28 +965,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   origWidthMobile={block.origWidthMobile}
                   origHeightMobile={block.origHeightMobile}
                 />
-                {overlayTextElement}
-                {block.showButtonOnMedia && block.linkText && (
-                  <div
-                    className={`absolute z-30 flex pointer-events-none ${buttonOverlayPaddingClass} ${getButtonPositionClasses(block.buttonPositionOnMedia, hasCustomOffset)}`}
-                    style={getButtonPositionStyles(block.buttonPositionOnMedia, customOffset)}
-                  >
-                    {block.linkUrl ? (
-                      <Link
-                        to={block.linkUrl}
-                        className={`group pointer-events-auto inline-flex items-center ${buttonTextColorClass} hover:opacity-50 px-3 py-1.5 md:px-8 md:py-4 transition-opacity duration-300 bg-transparent border ${isButtonWhite ? 'border-gray-300/80' : 'border-gray-400 dark:border-gray-500'} text-[8.5px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
-                      >
-                        {t(block.linkText)}
-                      </Link>
-                    ) : (
-                      <div
-                        className={`pointer-events-auto inline-flex items-center ${buttonTextColorClass} px-3 py-1.5 md:px-8 md:py-4 bg-transparent text-[8.5px] md:text-[11px] uppercase tracking-[0.2em] font-medium font-inter`}
-                      >
-                        {t(block.linkText)}
-                      </div>
-                    )}
-                  </div>
-                )}
+                {renderMediaOverlays()}
               </div>
             )}
           </ScrollReveal>

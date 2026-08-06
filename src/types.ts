@@ -472,6 +472,8 @@ export interface ContentBlock {
   paddingBottom?: number
   /** Button text color */
   buttonColor?: 'black' | 'white'
+  /** Toggles button border visibility */
+  showButtonBorder?: boolean
   /** Internal padding in pixels */
   padding?: number
   /** Border color (hex) */

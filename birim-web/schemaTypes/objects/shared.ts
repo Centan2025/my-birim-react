@@ -1270,6 +1270,15 @@ export const contentBlock = defineType({
       description: 'Medya üzerindeki buton metninin rengini seçin.',
     }),
     defineField({
+      name: 'showButtonBorder',
+      title: 'Buton Çerçevesi Göster',
+      type: 'boolean',
+      fieldset: 'buttonGroup',
+      initialValue: true,
+      description:
+        'Buton etrafındaki kenarlık çizgisinin görünüp görünmeyeceğini belirler (Varsayılan: Açık).',
+    }),
+    defineField({
       name: 'spacingBottom',
       title: 'Blok Alt Boşluğu (Piksel)',
       type: 'number',
@@ -1298,9 +1307,10 @@ export const contentBlock = defineType({
     defineField({
       name: 'overlayText',
       title: 'Görsel Üzerindeki Yazı (Opsiyonel)',
-      type: 'localizedString',
+      type: 'localizedPortableText',
       fieldset: 'overlayGroup',
-      description: 'Görselin/Medyanın tam üzerine yerleştirilecek metin (ör. Slogan, Başlık)',
+      description:
+        'Görselin/Medyanın tam üzerine yerleştirilecek zengin metin (ör. Slogan, Başlık, Paragraf)',
     }),
     defineField({
       name: 'overlayTextPosition',
@@ -1369,6 +1379,7 @@ export const contentBlock = defineType({
         list: [
           {title: 'Beyaz', value: 'white'},
           {title: 'Siyah', value: 'black'},
+          {title: 'Gri', value: 'gray'},
         ],
         layout: 'radio',
         direction: 'horizontal',
