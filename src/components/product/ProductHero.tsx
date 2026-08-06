@@ -211,7 +211,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     srcMobile={m.urlMobile}
                     srcDesktop={m.urlDesktop}
                     alt={`${t(product.name)} ${index + 1}`}
-                    className={`w-full h-full max-md:max-h-[58vh] max-md:object-contain md:object-cover ${imageBorderClass} select-none`}
+                    className={`w-full h-full max-md:object-contain md:object-cover ${imageBorderClass} select-none`}
                     width={1600}
                     height={900}
                     loading="eager"
@@ -252,7 +252,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                       (m as unknown as Record<string, string>)['posterDesktop'] ||
                       (m as unknown as Record<string, string>)['imageDesktop']
                     }
-                    className={`w-full h-full max-md:max-h-[58vh] max-md:object-contain md:object-cover ${imageBorderClass}`}
+                    className={`w-full h-full max-md:object-contain md:object-cover ${imageBorderClass}`}
                     autoPlay={isActiveSlide}
                     muted
                     loop
