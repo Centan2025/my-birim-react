@@ -222,17 +222,29 @@ export const mapImage = (img: SanityImageLike | undefined): string => {
 
   try {
     const i = img as Record<string, unknown>
-    const r2Asset = i['r2Asset'] as Record<string, unknown> | undefined
-    const r2Url = r2Asset?.['url'] as string | undefined
-    const standardUrl = i['url'] as string | undefined
+    const r2Asset = (i['r2Asset'] || i['imageR2']) as Record<string, unknown> | undefined
+    const r2Url = (r2Asset?.['url'] || i['url'] || i['path']) as string | undefined
     const asset = i['asset'] as Record<string, unknown> | string | undefined
     const assetUrl = typeof asset === 'string' ? asset : (asset?.['url'] as string | undefined)
 
-    const rawUrl = r2Url || standardUrl || assetUrl
+    const rawUrl = r2Url || assetUrl
     const hasResponsiveSizes = Boolean(r2Asset?.['hasResponsiveSizes'] || i['hasResponsiveSizes'])
 
     if (rawUrl) {
       return rewriteR2Url(rawUrl, hasResponsiveSizes)
+    }
+
+    const ref = (typeof asset === 'object' && asset !== null && asset?.['_ref']) || i['_ref']
+    if (typeof ref === 'string' && ref.startsWith('image-')) {
+      const parts = ref.replace(/^image-/, '').split('-')
+      const format = parts.pop()
+      const dimensions = parts.pop()
+      const id = parts.join('-')
+      if (id && dimensions && format) {
+        const projectId = (import.meta.env['VITE_SANITY_PROJECT_ID'] as string) || 'wn3a082f'
+        const dataset = (import.meta.env['VITE_SANITY_DATASET'] as string) || 'production'
+        return `https://cdn.sanity.io/images/${projectId}/${dataset}/${id}-${dimensions}.${format}`
+      }
     }
   } catch (err) {
     console.error('Error in mapImage:', err)

@@ -136,6 +136,15 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
       ? mergedGroups[safeActiveIndex]
       : undefined
   const books = Array.isArray(activeGroup?.books) ? activeGroup.books : []
+  const safeBookIndex = Math.min(Math.max(activeBookIndex, 0), Math.max(books.length - 1, 0))
+  const currentMaterials: {image: string; name: LocalizedString}[] =
+    Array.isArray(books[safeBookIndex]?.materials) && books[safeBookIndex].materials.length > 0
+      ? books[safeBookIndex].materials
+      : Array.isArray((activeGroup as any)?.materials) && (activeGroup as any).materials.length > 0
+        ? (activeGroup as any).materials
+        : Array.isArray(grouped[safeActiveIndex]?.materials)
+          ? grouped[safeActiveIndex].materials
+          : []
 
   if (!hasMaterialGroups && flatMaterials.length === 0) return null
 
@@ -184,80 +193,45 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
             {/* Content area with animation */}
             {activeMaterialGroup !== null ? (
               <AnimatedContent animKey={`group-${safeActiveIndex}`}>
-                {books.length > 0 ? (
-                  <>
-                    {/* Swatch books tabs */}
-                    <div className="flex flex-wrap gap-0 border-b border-gray-200 mb-6">
-                      {books.map((book, idx: number) => (
-                        <button
-                          key={`book-${idx}`}
-                          onClick={() => onSetActiveBookIndex(idx)}
-                          className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${
-                            activeBookIndex === idx
-                              ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--text-primary)]'
-                              : 'bg-transparent text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]'
-                          }`}
-                        >
-                          {t(book.bookTitle)}
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Materials with staggered animation */}
-                    <motion.div
-                      key={`book-${safeActiveIndex}-${activeBookIndex}`}
-                      initial="revealOff"
-                      animate="revealOn"
-                      variants={sideReveal['container']}
-                      className="grid grid-cols-3 sm:flex sm:flex-wrap gap-3 md:gap-6"
-                    >
-                      {(Array.isArray(books[activeBookIndex]?.materials)
-                        ? books[activeBookIndex].materials
-                        : []
-                      ).map((material, index: number) => (
-                        <MaterialCard
-                          key={`mat-${index}-${material.image || index}`}
-                          material={material}
-                          imageBorderClass={imageBorderClass}
-                          t={t}
-                          onClick={() => {
-                            const allMaterials = Array.isArray(books[activeBookIndex]?.materials)
-                              ? books[activeBookIndex].materials
-                              : []
-                            onOpenMaterialLightbox(getMaterialsForLightbox(allMaterials), index)
-                          }}
-                        />
-                      ))}
-                    </motion.div>
-                  </>
-                ) : (
-                  /* Fallback: Direct materials if no books */
-                  <motion.div
-                    key={`group-direct-${safeActiveIndex}`}
-                    initial="revealOff"
-                    animate="revealOn"
-                    variants={sideReveal['container']}
-                    className="grid grid-cols-3 sm:flex sm:flex-wrap gap-3 md:gap-6"
-                  >
-                    {(Array.isArray(grouped[safeActiveIndex]?.materials)
-                      ? grouped[safeActiveIndex].materials
-                      : []
-                    ).map((material, index: number) => (
-                      <MaterialCard
-                        key={`mat-${index}-${material.image || index}`}
-                        material={material}
-                        imageBorderClass={imageBorderClass}
-                        t={t}
-                        onClick={() => {
-                          const allMaterials = Array.isArray(grouped[safeActiveIndex]?.materials)
-                            ? grouped[safeActiveIndex].materials
-                            : []
-                          onOpenMaterialLightbox(getMaterialsForLightbox(allMaterials), index)
-                        }}
-                      />
+                {/* Swatch books tabs (only render sub-tabs if group has multiple books) */}
+                {books.length > 1 && (
+                  <div className="flex flex-wrap gap-0 border-b border-gray-200 mb-6">
+                    {books.map((book, idx: number) => (
+                      <button
+                        key={`book-${idx}`}
+                        onClick={() => onSetActiveBookIndex(idx)}
+                        className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${
+                          safeBookIndex === idx
+                            ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--text-primary)]'
+                            : 'bg-transparent text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]'
+                        }`}
+                      >
+                        {t(book.bookTitle)}
+                      </button>
                     ))}
-                  </motion.div>
+                  </div>
                 )}
+
+                {/* Materials with staggered animation */}
+                <motion.div
+                  key={`book-${safeActiveIndex}-${safeBookIndex}`}
+                  initial="revealOff"
+                  animate="revealOn"
+                  variants={sideReveal['container']}
+                  className="grid grid-cols-3 sm:flex sm:flex-wrap gap-3 md:gap-6"
+                >
+                  {currentMaterials.map((material, index: number) => (
+                    <MaterialCard
+                      key={`mat-${index}-${material.image || index}`}
+                      material={material}
+                      imageBorderClass={imageBorderClass}
+                      t={t}
+                      onClick={() => {
+                        onOpenMaterialLightbox(getMaterialsForLightbox(currentMaterials), index)
+                      }}
+                    />
+                  ))}
+                </motion.div>
               </AnimatedContent>
             ) : (
               <div className="py-8 text-left text-[var(--text-secondary)] font-light">
