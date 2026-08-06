@@ -79,11 +79,11 @@ export default defineConfig({
         if (previewTypes.includes(schemaType)) {
           if (schemaType === 'category') {
             return S.document().views([
-              S.view.form().title('Düzenle'),
               S.view
                 .component(CategoryProductsView)
                 .title('Modeller')
                 .icon(() => '📦'),
+              S.view.form().title('Düzenle'),
               S.view
                 .component(PreviewView)
                 .title('Önizleme')
