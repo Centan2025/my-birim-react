@@ -494,19 +494,8 @@ export default function R2AssetInput(props: ObjectInputProps) {
           height: cropHeight * 100,
         })
         setAspect(undefined)
-      } else if (recommendedPreset?.value) {
-        // Automatically default to recommended aspect ratio for uncropped images
-        setAspect(recommendedPreset.value)
-        if (modalImageRef.current) {
-          const {width, height, naturalWidth, naturalHeight} = modalImageRef.current
-          const w = width || naturalWidth
-          const h = height || naturalHeight
-          if (w > 0 && h > 0) {
-            setCrop(centerAspectCrop(w, h, recommendedPreset.value))
-          }
-        }
       } else {
-        // No crop exists, start with undefined
+        // No crop exists, start clean without an automatic crop selection
         setCrop(undefined)
         setAspect(undefined)
       }
@@ -1119,15 +1108,8 @@ export default function R2AssetInput(props: ObjectInputProps) {
                       ref={modalImageRef}
                       src={previewUrl}
                       alt="Crop Preview"
-                      onLoad={(e) => {
-                        const img = e.currentTarget
-                        if (aspect && !hasCrop && (!crop || crop.width === 0)) {
-                          const w = img.width || img.naturalWidth
-                          const h = img.height || img.naturalHeight
-                          if (w > 0 && h > 0) {
-                            setCrop(centerAspectCrop(w, h, aspect))
-                          }
-                        }
+                      onLoad={() => {
+                        // Keep image loaded without forcing automatic crop box
                       }}
                       style={{maxHeight: '70vh', maxWidth: '100%'}}
                     />
