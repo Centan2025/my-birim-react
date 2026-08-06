@@ -1,5 +1,7 @@
 import {createClient} from '@sanity/client'
 import bcrypt from 'bcryptjs'
+import {randomUUID} from 'crypto'
+import type {VercelRequest, VercelResponse} from '@vercel/node'
 
 const SANITY_PROJECT_ID = process.env['VITE_SANITY_PROJECT_ID'] || 'wn3a082f'
 const SANITY_DATASET = process.env['VITE_SANITY_DATASET'] || 'production'
@@ -14,15 +16,54 @@ const client = createClient({
   useCdn: false,
 })
 
-import type {VercelRequest, VercelResponse} from '@vercel/node'
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({error: 'Method Not Allowed'})
   }
 
-  const {token, newPassword} = req.body
+  const {token, newPassword, email, action} = req.body || {}
 
+  // Action: Request Password Reset Token
+  if (action === 'request' || (email && !newPassword && !token)) {
+    if (!email) {
+      return res.status(400).json({error: 'E-posta adresi gereklidir.'})
+    }
+
+    const normEmail = email.trim().toLowerCase()
+
+    try {
+      const user = await client.fetch(
+        `*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]`,
+        {email: normEmail}
+      )
+
+      if (!user) {
+        return res.status(404).json({error: 'Kullanıcı bulunamadı.'})
+      }
+
+      const resetToken = randomUUID()
+      const resetPasswordExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+
+      await client
+        .patch(user._id)
+        .set({
+          resetPasswordToken: resetToken,
+          resetPasswordExpires,
+        })
+        .commit()
+
+      return res.status(200).json({
+        success: true,
+        message: 'Şifre sıfırlama bağlantısı oluşturuldu.',
+        resetToken,
+      })
+    } catch (error: unknown) {
+      console.error('Reset request error:', error)
+      return res.status(500).json({error: 'Sıfırlama isteğinde bir hata oluştu.'})
+    }
+  }
+
+  // Action: Reset Password with Token
   if (!token || !newPassword) {
     return res.status(400).json({error: 'Token ve yeni şifre gereklidir.'})
   }

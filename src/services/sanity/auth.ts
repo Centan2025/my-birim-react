@@ -71,9 +71,10 @@ export const subscribeProfessional = async (data: {
   if (!normEmail) throw new Error('Geçerli bir e-posta adresi girin')
 
   if (useSanity) {
-    const result = await apiFetch('subscribe-prof', {
+    const result = await apiFetch('subscribe', {
       ...data,
       email: normEmail,
+      isProfessional: true,
     })
 
     if (result.verificationToken) {
@@ -231,7 +232,7 @@ export const verifyEmail = async (token: string): Promise<boolean> => {
 export const requestPasswordReset = async (email: string): Promise<void> => {
   const normEmail = normalizeEmail(email)
   if (useSanity) {
-    const data = await apiFetch('reset-request', {email: normEmail})
+    const data = await apiFetch('reset-password', {email: normEmail, action: 'request'})
 
     // E-posta gönderimini tetikle
     try {
