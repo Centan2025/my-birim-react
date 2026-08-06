@@ -108,7 +108,7 @@ const MaterialCard: React.FC<{
         />
       </motion.div>
     </motion.div>
-    <p className="mt-2 md:mt-3 text-[11px] leading-tight md:text-sm text-[var(--text-secondary)] font-thin tracking-wider w-full break-words">
+    <p className="mt-2 md:mt-3 text-[11px] leading-tight md:text-sm text-[var(--text-primary)] font-normal tracking-wider w-full break-words">
       {t(material.name)}
     </p>
   </motion.div>
@@ -183,9 +183,9 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                 <button
                   key={`group-${idx}`}
                   onClick={() => onSetActiveMaterialGroup(idx)}
-                  className={`px-5 py-3 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${
+                  className={`px-5 py-3 text-sm font-normal tracking-wider transition-all duration-200 border-b-2 rounded-none ${
                     activeMaterialGroup === idx
-                      ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--text-primary)]'
+                      ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--text-primary)] font-medium'
                       : 'bg-transparent text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]'
                   }`}
                 >
@@ -204,9 +204,9 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                       <button
                         key={`book-${idx}`}
                         onClick={() => onSetActiveBookIndex(idx)}
-                        className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${
+                        className={`px-4 py-2 text-sm font-normal tracking-wider transition-all duration-200 border-b-2 rounded-none ${
                           safeBookIndex === idx
-                            ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--text-primary)] font-normal'
+                            ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--text-primary)] font-medium'
                             : 'bg-transparent text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]'
                         }`}
                       >

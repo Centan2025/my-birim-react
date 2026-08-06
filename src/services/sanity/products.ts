@@ -1,5 +1,11 @@
 import groq from 'groq'
-import type {Product, ProductMaterial, ProductMaterialsGroup, LocalizedString} from '../../types'
+import type {
+  Product,
+  ProductMaterial,
+  ProductMaterialsGroup,
+  LocalizedString,
+  R2ImageMetadata,
+} from '../../types'
 import {
   sanity,
   useSanity,
@@ -269,6 +275,19 @@ const mapGroupedMaterials = (
     .filter((g): g is ProductMaterialsGroup => Boolean(g))
 }
 
+const mergeMetadata = (
+  base: Record<string, unknown> | R2ImageMetadata,
+  override: Record<string, unknown> | R2ImageMetadata
+): Record<string, unknown> => {
+  const result = {...(base as Record<string, unknown>)}
+  for (const [key, val] of Object.entries(override as Record<string, unknown>)) {
+    if (val !== undefined) {
+      result[key] = val
+    }
+  }
+  return result
+}
+
 const mapProductMedia = (mediaArrRaw: unknown): unknown[] => {
   const mediaArr = Array.isArray(mediaArrRaw) ? mediaArrRaw : []
   return mediaArr
@@ -279,16 +298,19 @@ const mapProductMedia = (mediaArrRaw: unknown): unknown[] => {
       let urlDesktop: string | undefined = undefined
 
       if (type === 'image') {
-        url =
+        const desktopUrl =
           mapImage(m?.['imageR2'] as SanityImageLike) ||
           mapImage(m?.['image'] as SanityImageLike) ||
           rewriteR2Url(m?.['url'] as string)
         urlMobile = (m?.['imageMobileR2'] as Record<string, string>)?.['url']
           ? mapImage(m?.['imageMobileR2'] as SanityImageLike)
-          : undefined
+          : (m?.['imageMobile'] as Record<string, string>)?.['url']
+            ? mapImage(m?.['imageMobile'] as SanityImageLike)
+            : undefined
         urlDesktop = (m?.['imageDesktopR2'] as Record<string, string>)?.['url']
           ? mapImage(m?.['imageDesktopR2'] as SanityImageLike)
           : undefined
+        url = desktopUrl || urlMobile || urlDesktop || ''
       } else if (type === 'video') {
         url = mapImage(m?.['videoFileR2'] as SanityImageLike) || rewriteR2Url(m?.['url'] as string)
         urlMobile = (m?.['videoFileMobileR2'] as Record<string, string>)?.['url']
@@ -301,10 +323,27 @@ const mapProductMedia = (mediaArrRaw: unknown): unknown[] => {
         url = rewriteR2Url((m?.['url'] as string) || '')
       }
 
-      const metadata = {
-        ...mapR2Metadata(m),
-        ...(m?.['imageR2'] ? mapR2Metadata(m['imageR2'] as SanityImageLike) : {}),
-      }
+      const baseMeta = mapR2Metadata(m)
+      const r2Meta = m?.['imageR2'] ? mapR2Metadata(m['imageR2'] as SanityImageLike) : {}
+      const desktopMeta = m?.['imageDesktopR2']
+        ? mapR2Metadata(m['imageDesktopR2'] as SanityImageLike)
+        : {}
+      const mobileMeta = m?.['imageMobileR2']
+        ? mapR2Metadata(m['imageMobileR2'] as SanityImageLike)
+        : {}
+
+      const cropDesktop = desktopMeta.crop || r2Meta.crop || baseMeta.crop
+      const cropMobile = mobileMeta.crop || baseMeta.cropMobile
+      const crop = r2Meta.crop || baseMeta.crop
+
+      const metadata = mergeMetadata(
+        mergeMetadata(mergeMetadata(baseMeta, r2Meta), desktopMeta),
+        mobileMeta
+      )
+      if (cropDesktop) metadata['cropDesktop'] = cropDesktop
+      if (cropMobile) metadata['cropMobile'] = cropMobile
+      if (crop) metadata['crop'] = crop
+
       const result: Record<string, unknown> = {
         type,
         url,
@@ -383,10 +422,14 @@ const mapProductRow = (r: Record<string, unknown>): Product => {
       url = (coverItem['url'] as string) || ''
     }
 
-    const metadata = {
-      ...mapR2Metadata(coverItem),
-      ...(coverItem?.['imageR2'] ? mapR2Metadata(coverItem['imageR2']) : {}),
-    }
+    const baseMeta = mapR2Metadata(coverItem)
+    const r2Meta = coverItem?.['imageR2']
+      ? mapR2Metadata(coverItem['imageR2'] as SanityImageLike)
+      : {}
+    const mobileMeta = coverItem?.['imageMobileR2']
+      ? mapR2Metadata(coverItem['imageMobileR2'] as SanityImageLike)
+      : {}
+    const metadata = mergeMetadata(mergeMetadata(baseMeta, r2Meta), mobileMeta)
     mainImage = {
       url,
       palette: extractPalette(coverItem['imageR2']),
@@ -462,7 +505,7 @@ const mapProductRow = (r: Record<string, unknown>): Product => {
 const productQueryString = `
   "id": id.current, name, year, sortOrder, isPublished, description, 
   media[]{ 
-    type, url, imageR2, imageMobileR2, imageDesktopR2, title, description, link, linkText, 
+    type, url, image, imageMobile, imageR2, imageMobileR2, imageDesktopR2, cropMobile, hotspotMobile, title, description, link, linkText, 
     videoFileR2, videoFileMobileR2, videoFileDesktopR2, isCover, isMirrored 
   },
   mediaSectionTitle, mediaSectionText, showMediaPanels, showHeroNavigation, buyable, price, currency, sku, stockStatus, showMaterials,

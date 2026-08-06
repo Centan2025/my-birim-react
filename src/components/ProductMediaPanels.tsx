@@ -79,6 +79,22 @@ export function ProductMediaPanels({
                     hotspotMobile={m.hotspotMobile}
                     origWidthMobile={m.origWidthMobile as number}
                     origHeightMobile={m.origHeightMobile as number}
+                    cropDesktop={
+                      (m as unknown as Record<string, unknown>)[
+                        'cropDesktop'
+                      ] as R2ImageMetadata['crop']
+                    }
+                    hotspotDesktop={
+                      (m as unknown as Record<string, unknown>)[
+                        'hotspotDesktop'
+                      ] as R2ImageMetadata['hotspot']
+                    }
+                    origWidthDesktop={
+                      (m as unknown as Record<string, unknown>)['origWidthDesktop'] as number
+                    }
+                    origHeightDesktop={
+                      (m as unknown as Record<string, unknown>)['origHeightDesktop'] as number
+                    }
                     isMirrored={m.isMirrored}
                     isMirroredMobile={m.isMirroredMobile}
                     isMirroredDesktop={m.isMirroredDesktop}

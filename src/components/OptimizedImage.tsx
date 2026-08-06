@@ -261,6 +261,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             max-width: 100% !important;
             max-height: 100% !important;
             height: auto !important;
+            margin: auto !important;
+            align-self: center !important;
             aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
           }
           .responsive-crop-wrapper.is-cover {
@@ -409,7 +411,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     return getActiveCrop(cropMobile || cropDesktop || crop, targetWMob, targetHMob)
   }, [cropMobile, cropDesktop, crop, targetWMob, targetHMob])
 
-  const activeCrop = normalizedCropMobile || normalizedCropDesktop
+  const activeCrop = normalizedCropDesktop || normalizedCropMobile
 
   // R2 URL'lerini optimize et
   const getOptimizedUrl = (url: string, targetCrop?: typeof activeCrop | null): string => {
@@ -480,12 +482,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const desktopUrlToUse = activeDesktopSrc || activeSrc
 
   const optimizedMobileSrc = mobileUrlToUse
-    ? getOptimizedUrl(mobileUrlToUse, cropMobile === null ? null : normalizedCropMobile)
+    ? getOptimizedUrl(mobileUrlToUse, cropMobile === null ? null : normalizedCropMobile || null)
     : undefined
   const optimizedDesktopSrc = desktopUrlToUse
     ? getOptimizedUrl(desktopUrlToUse, normalizedCropDesktop || null)
     : undefined
-  const optimizedSrc = getOptimizedUrl(activeSrc, normalizedCropDesktop || normalizedCropMobile)
+  const optimizedSrc = getOptimizedUrl(activeSrc, normalizedCropDesktop || null)
 
   // Responsive srcset oluştur
   const generateSrcSet = (baseUrl: string): string => {
@@ -510,6 +512,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const useArtDirection = Boolean(
     srcMobile ||
       srcDesktop ||
+      cropMobile ||
+      normalizedCropMobile ||
       (normalizedCropDesktop && !normalizedCropMobile) ||
       (normalizedCropMobile && !normalizedCropDesktop)
   )
@@ -862,7 +866,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             aria-hidden="true"
           />
         )}
-        {renderCroppedContent(pictureElement)}
+        {useClientCrop ? renderCroppedContent(pictureElement) : pictureElement}
       </div>
     )
   }
@@ -922,7 +926,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           aria-hidden="true"
         />
       )}
-      {renderCroppedContent(pictureElement)}
+      {useClientCrop ? renderCroppedContent(pictureElement) : pictureElement}
     </div>
   )
 }
