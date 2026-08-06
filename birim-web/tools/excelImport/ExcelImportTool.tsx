@@ -414,7 +414,8 @@ export function ExcelImportTool() {
 
     let res: Response
     try {
-      res = await fetch(getApiUrl('/api/media/presigned-url'), {
+      // 1. Try Production API first
+      res = await fetch('https://birim-web-antigravity.vercel.app/api/media/presigned-url', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -426,9 +427,9 @@ export function ExcelImportTool() {
         }),
       })
     } catch {
-      const fallbackUrl = `https://birim-web-antigravity.vercel.app/api/media/presigned-url`
+      // 2. Fallback to Local API
       try {
-        res = await fetch(fallbackUrl, {
+        res = await fetch(getApiUrl('/api/media/presigned-url'), {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
