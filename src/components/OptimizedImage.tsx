@@ -826,7 +826,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
     return (
       <div
-        className={`relative overflow-hidden ${className}`}
+        className={`relative overflow-hidden flex items-center justify-center ${className}`}
         style={style}
         onClick={onClick}
         onKeyDown={
