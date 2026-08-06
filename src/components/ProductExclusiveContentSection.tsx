@@ -48,19 +48,41 @@ export function ProductExclusiveContentSection({
 }: ExclusiveContentSectionProps) {
   if (!exclusiveContent) return null
 
-  const canDownload = isLoggedIn && user?.userType === 'full_member' && user?.isVerified
+  const isVerifiedArchitect =
+    isLoggedIn &&
+    user &&
+    user.isVerified &&
+    (user.role === 'admin' ||
+      (user.role === 'architect' && user.architectVerificationStatus === 'verified'))
 
-  const handleDownloadClick = (e: React.MouseEvent<HTMLAnchorElement>, _url: string) => {
-    if (!canDownload) {
+  const handleDownloadClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    _url: string,
+    isProAsset: boolean = false
+  ) => {
+    if (!isLoggedIn) {
       e.preventDefault()
-      // Kullanıcı kayıtlı ama email doğrulamadıysa
-      if (isLoggedIn && user && !user.isVerified) {
-        alert(
-          'Email adresiniz henüz doğrulanmamış. Lütfen email kutunuzu kontrol ederek hesabınızı doğrulayın.'
-        )
-        return
-      }
       navigate('/login')
+      return
+    }
+
+    if (user && !user.isVerified) {
+      e.preventDefault()
+      alert('Email adresiniz henüz doğrulanmamış. Lütfen email kutunuzu kontrol edin.')
+      return
+    }
+
+    if (isProAsset && !isVerifiedArchitect) {
+      e.preventDefault()
+      if (user?.role === 'architect') {
+        alert(
+          'CAD, DWG ve BIM dosyaları doğrulanmış "Mimar Programı" üyelerine özeldir. Başvurunuz şu anda inceleme aşamasındadır.'
+        )
+      } else {
+        alert(
+          'CAD, DWG, 3DS ve BIM dosyaları yalnızca doğrulanmış Mimarlar ve İç Mimarlar ("Mimar Programı") için erişilebilirdir. Profilinizden mimar doğrulaması talep edebilirsiniz.'
+        )
+      }
       return
     }
   }
@@ -154,7 +176,7 @@ export function ProductExclusiveContentSection({
                     <a
                       href={model.url}
                       download
-                      onClick={e => handleDownloadClick(e, model.url)}
+                      onClick={e => handleDownloadClick(e, model.url, true)}
                       className="flex items-center gap-2 px-3 py-2 rounded-none border border-[var(--border-primary)] bg-[var(--bg-primary)] hover:border-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors"
                     >
                       <span className="shrink-0 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">

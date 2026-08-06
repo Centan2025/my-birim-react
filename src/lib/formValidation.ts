@@ -70,8 +70,47 @@ export const validateLoginForm = (email: string, password: string): ValidationRe
   }
 }
 
+export const validateShortRegisterForm = (
+  firstName: string,
+  lastName: string,
+  email: string,
+  password: string,
+  role: 'consumer' | 'architect'
+): ValidationResult => {
+  const errors: Record<string, string> = {}
+
+  if (!firstName || !firstName.trim()) {
+    errors['firstName'] = 'Ad gereklidir'
+  }
+
+  if (!lastName || !lastName.trim()) {
+    errors['lastName'] = 'Soyad gereklidir'
+  }
+
+  if (!email || !email.trim()) {
+    errors['email'] = 'E-posta adresi gereklidir'
+  } else if (!validateEmail(email)) {
+    errors['email'] = 'Geçerli bir e-posta adresi giriniz'
+  }
+
+  if (!password) {
+    errors['password'] = 'Şifre gereklidir'
+  } else if (!validatePassword(password, 8)) {
+    errors['password'] = 'Şifre en az 8 karakter olmalıdır'
+  }
+
+  if (!role || (role !== 'consumer' && role !== 'architect')) {
+    errors['role'] = 'Lütfen rol seçimi yapınız'
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors,
+  }
+}
+
 /**
- * Register form validation
+ * Register form validation (legacy full form)
  */
 export const validateRegisterForm = (
   email: string,

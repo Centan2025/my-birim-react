@@ -8,18 +8,27 @@ const KEYS = {USERS: 'birim_users'}
 const normalizeEmail = (value: string): string => (value || '').trim().toLowerCase()
 
 const apiFetch = async (endpoint: string, body: Record<string, unknown>) => {
-  const response = await fetch(`/api/auth/${endpoint}`, {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify(body),
-  })
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}))
-    const errorMsg = errorData.error || 'Bir hata oluştu'
-    const fullMsg = errorData.details ? `${errorMsg}\n\nDetay:\n${errorData.details}` : errorMsg
-    throw new Error(fullMsg)
+  try {
+    const response = await fetch(`/api/auth/${endpoint}`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body),
+    })
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      const errorMsg =
+        errorData.error ||
+        `Yerel API sunucusuna erişilemedi (${response.status}). Lütfen 'npm run dev:full' çalıştırıldığından emin olun.`
+      const fullMsg = errorData.details ? `${errorMsg}\n\nDetay:\n${errorData.details}` : errorMsg
+      throw new Error(fullMsg)
+    }
+    return await response.json()
+  } catch (err: unknown) {
+    if (err instanceof Error) throw err
+    throw new Error(
+      'API sunucusu ile iletişim kurulamadı. Lütfen projenizi "npm run dev:full" komutuyla çalıştırın.'
+    )
   }
-  return await response.json()
 }
 
 export const subscribeEmail = async (email: string): Promise<User> => {
@@ -38,6 +47,7 @@ export const subscribeEmail = async (email: string): Promise<User> => {
     _id: `user_${Date.now()}`,
     email: normEmail,
     name: '',
+    role: 'consumer',
     company: '',
     profession: '',
     userType: 'email_subscriber',
@@ -66,7 +76,6 @@ export const subscribeProfessional = async (data: {
       email: normEmail,
     })
 
-    // Doğrulama e-postasını tetikle — registerUser ile aynı pattern
     if (result.verificationToken) {
       try {
         const siteUrl = import.meta.env['VITE_SITE_URL'] || window.location.origin
@@ -98,6 +107,8 @@ export const subscribeProfessional = async (data: {
     _id: `user_${Date.now()}`,
     email: normEmail,
     name: data.name || '',
+    role: 'architect',
+    architectVerificationStatus: 'pending_verification',
     company: data.company || '',
     profession: data.profession || '',
     country: data.country || '',
@@ -113,26 +124,32 @@ export const subscribeProfessional = async (data: {
 export const registerUser = async (
   email: string,
   password: string,
-  name?: string,
-  company?: string,
-  profession?: string,
-  country?: string
+  firstName?: string,
+  lastName?: string,
+  role: 'consumer' | 'architect' = 'consumer',
+  extraProfile?: {
+    company?: string
+    phone?: string
+    city?: string
+    country?: string
+    website?: string
+  }
 ): Promise<User> => {
   const normEmail = normalizeEmail(email)
   if (!normEmail) throw new Error('Geçerli bir e-posta adresi girin')
+  const fullName = `${firstName || ''} ${lastName || ''}`.trim() || normEmail.split('@')[0]
 
   if (useSanity) {
     const data = await apiFetch('register', {
       email: normEmail,
       password,
-      name,
-      company,
-      profession,
-      country,
+      firstName,
+      lastName,
+      name: fullName,
+      role,
+      ...extraProfile,
     })
 
-    // E-posta gönderimini tetikle (Client side'da kalabilir veya API içine taşınabilir)
-    // Mevcut email-server.js'e istek atıyoruz
     try {
       const siteUrl = import.meta.env['VITE_SITE_URL'] || window.location.origin
       const verificationUrl = `${siteUrl}/#/verify-email?token=${data.user.verificationToken}`
@@ -157,13 +174,21 @@ export const registerUser = async (
   const users = getItem<User[]>(KEYS.USERS) || []
   if (users.find(u => normalizeEmail(u.email) === normEmail))
     throw new Error('E-posta adresi kullanımda')
+
   const newUser: User = {
     _id: `user_${Date.now()}`,
     email: normEmail,
-    name: name || '',
-    company: company || '',
-    profession: profession || '',
-    country: country || '',
+    firstName: firstName || '',
+    lastName: lastName || '',
+    name: fullName,
+    role,
+    architectVerificationStatus: role === 'architect' ? 'pending_verification' : 'not_requested',
+    company: extraProfile?.company || '',
+    phone: extraProfile?.phone || '',
+    city: extraProfile?.city || '',
+    country: extraProfile?.country || '',
+    website: extraProfile?.website || '',
+    profession: role === 'architect' ? 'Mimar / İç Mimar' : 'Son Kullanıcı',
     userType: 'full_member',
     isActive: true,
     isVerified: true,
@@ -257,11 +282,8 @@ export const verifyUserByToken = async (token: string): Promise<User | null> => 
   if (useSanity) {
     try {
       const data = await apiFetch('verify', {token})
-      if (data.success) {
-        // Doğrulandıktan sonra kullanıcıyı çekmek için mevcut read-only client'ı kullanabiliriz
-        return await sanity!.fetch(
-          groq`*[_type == "user" && verificationToken == null][0]{ ..., isVerified }`
-        ) // Bu mantık biraz riskli olabilir, ama şimdilik dönecek API'dan user dönmek daha iyi olurdu.
+      if (data.success && data.user) {
+        return data.user as User
       }
     } catch (e) {
       console.error('Verify token failed:', e)

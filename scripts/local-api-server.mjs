@@ -253,10 +253,29 @@ app.post('/api/auth/verify', async (req, res) => {
       token,
     })
     if (!user) return res.status(400).json({ error: 'Geçersiz veya süresi dolmuş token.' })
-    if (user.isVerified)
-      return res.status(200).json({ success: true, message: 'E-posta zaten doğrulanmış.' })
-    await sanityClient.patch(user._id).set({ isVerified: true, isActive: true }).unset(['verificationToken']).commit()
-    return res.status(200).json({ success: true, message: 'E-posta adresiniz başarıyla doğrulandı.' })
+
+    const updatedUser = await sanityClient
+      .patch(user._id)
+      .set({ isVerified: true, isActive: true })
+      .unset(['verificationToken'])
+      .commit()
+
+    return res.status(200).json({
+      success: true,
+      message: 'E-posta adresiniz başarıyla doğrulandı.',
+      user: {
+        _id: updatedUser._id,
+        email: updatedUser.email,
+        name: updatedUser.name,
+        company: updatedUser.company,
+        profession: updatedUser.profession,
+        country: updatedUser.country,
+        userType: updatedUser.userType,
+        isActive: updatedUser.isActive,
+        isVerified: updatedUser.isVerified,
+        createdAt: updatedUser.createdAt || updatedUser._createdAt,
+      },
+    })
   } catch (err) {
     console.error('Verification error:', err)
     return res.status(500).json({ error: `Doğrulama hatası: ${err.message || 'Bir hata oluştu.'}` })

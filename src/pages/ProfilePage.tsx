@@ -157,16 +157,57 @@ export function ProfilePage() {
 
               {/* Account Information */}
               <section>
-                <h2 className="text-[11px] font-bold text-gray-900 uppercase tracking-[0.3em] mb-8 flex items-center gap-3">
-                  {t('account_info')}
-                  <div className="h-px flex-1 bg-black/5" />
-                </h2>
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-[11px] font-bold text-gray-900 uppercase tracking-[0.3em] flex items-center gap-3">
+                    {t('account_info')}
+                  </h2>
+                  {/* Role Badge */}
+                  <span className={`px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold border ${
+                    auth.user.role === 'architect'
+                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-900'
+                      : 'bg-black/5 border-black/10 text-gray-800'
+                  }`}>
+                    {auth.user.role === 'architect' ? 'Mimar / İç Mimar' : 'Son Kullanıcı'}
+                  </span>
+                </div>
+
+                {/* Mimar Programı Status Banner */}
+                {auth.user.role === 'architect' && (
+                  <div className={`p-6 mb-8 border ${
+                    auth.user.architectVerificationStatus === 'verified'
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                      : 'bg-amber-50 border-amber-200 text-amber-900'
+                  }`}>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="font-bold text-xs uppercase tracking-widest mb-1 flex items-center gap-2">
+                          <span>✨ Mimar Programı Durumu:</span>
+                          <span className="font-extrabold underline">
+                            {auth.user.architectVerificationStatus === 'verified'
+                              ? 'DOĞRULANDI (AKTİF)'
+                              : auth.user.architectVerificationStatus === 'rejected'
+                              ? 'REDDEDİLDİ'
+                              : 'ONAY BEKLİYOR'}
+                          </span>
+                        </h3>
+                        <p className="text-xs leading-relaxed opacity-90 mt-1">
+                          {auth.user.architectVerificationStatus === 'verified'
+                            ? 'Tebrikler! Mimar Programı avantajlarınız aktiftir. Tüm CAD, DWG, 3DS ve BIM çizimlerine ürün sayfalarından doğrudan erişebilirsiniz.'
+                            : 'Mimar hesabınız admin inceleme kuyruğundadır. Onaylandıktan sonra tüm profesyonel CAD/BIM çizimleri otomatik açılacaktır.'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
                   <InfoItem label={t('email')} value={auth.user.email} icon={Mail} />
-                  <InfoItem label={t('full_name')} value={auth.user.name} icon={User} />
+                  <InfoItem label={t('full_name')} value={auth.user.name || `${auth.user.firstName || ''} ${auth.user.lastName || ''}`.trim()} icon={User} />
+                  <InfoItem label="Telefon" value={auth.user.phone} icon={Briefcase} />
                   <InfoItem label={t('company')} value={auth.user.company} icon={Building} />
+                  <InfoItem label="Şehir" value={auth.user.city} icon={Globe} />
                   <InfoItem label={t('country')} value={auth.user.country} icon={Globe} />
+                  <InfoItem label="Web Sitesi / Portfolyo" value={auth.user.website} icon={Globe} />
                   <InfoItem label={t('profession')} value={auth.user.profession} icon={Briefcase} />
                   <InfoItem
                     label={t('registration_date')}
@@ -180,14 +221,16 @@ export function ProfilePage() {
                 </div>
               </section>
 
-              {/* Exclusive Content Section */}
+              {/* Mimar Programı / Exclusive Assets Access */}
               {auth.user.isVerified !== false && (
                 <section className="bg-gray-50/50 p-8 border border-black/5">
                   <h2 className="text-[11px] font-bold text-gray-900 uppercase tracking-[0.3em] mb-4">
-                    {t('exclusive_access')}
+                    {auth.user.role === 'architect' ? 'Mimar Programı & Çizim Kütüphanesi' : t('exclusive_access')}
                   </h2>
                   <p className="text-xs md:text-sm text-gray-500 font-inter mb-8 tracking-wide leading-relaxed max-w-xl">
-                    {t('exclusive_access_desc')}
+                    {auth.user.role === 'architect'
+                      ? 'Ürün detay sayfalarında yer alan CAD, DWG, 3DS ve BIM modellerini indirerek projelerinize doğrudan entegre edebilirsiniz.'
+                      : t('exclusive_access_desc')}
                   </p>
                   <Link
                     to="/products"

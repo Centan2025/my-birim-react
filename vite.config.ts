@@ -145,6 +145,19 @@ export default defineConfig({
         target: 'http://localhost:3002',
         changeOrigin: true,
         secure: false,
+        configure: (proxy) => {
+          proxy.on('error', (_err, _req, res) => {
+            if (res && 'writeHead' in res && !res.headersSent) {
+              res.writeHead(503, {'Content-Type': 'application/json'})
+              res.end(
+                JSON.stringify({
+                  error:
+                    'Yerel API Sunucusu (Port 3002) çalışmıyor. Lütfen projenizi "npm run dev:full" komutu ile başlatın.',
+                })
+              )
+            }
+          })
+        },
       },
     },
     watch: {

@@ -149,30 +149,119 @@ export interface Designer {
 /**
  * Represents a registered user/member.
  */
+export type UserRole =
+  | 'consumer'
+  | 'architect'
+  | 'dealer'
+  | 'distributor'
+  | 'contract'
+  | 'employee'
+  | 'admin'
+
+export type ArchitectVerificationStatus =
+  | 'not_requested'
+  | 'pending_verification'
+  | 'verified'
+  | 'rejected'
+
 export type UserType = 'email_subscriber' | 'full_member' | 'professional_subscriber'
 
 export interface User {
-  /** Unique identifier for the user (Sanity _id). */
+  /** Unique identifier for the user. */
   _id: string
-  /** User's email address (unique identifier). */
+  /** User's email address. */
   email: string
+  /** User's first name. */
+  firstName?: string
+  /** User's last name. */
+  lastName?: string
   /** User's full name. */
   name?: string
-  /** User's company name. */
+  /** User's company name (architect profile). */
   company?: string
   /** User's profession. */
   profession?: string
-  /** User's country (e.g. 'Türkiye'). */
+  /** User's phone number. */
+  phone?: string
+  /** User's city. */
+  city?: string
+  /** User's country. */
   country?: string
-  /** Type of user: email subscriber or full member. */
+  /** User's website or portfolio URL (architect profile). */
+  website?: string
+  /** Role of member: consumer, architect, admin, etc. */
+  role: UserRole
+  /** Architect verification level for Mimar Programı */
+  architectVerificationStatus?: ArchitectVerificationStatus
+  /** Notes / reasons from admin verification review */
+  verificationNotes?: string
+  /** Deprecated userType for backward compatibility. */
   userType?: UserType
-  /** Whether the user's email has been verified. */
+  /** Whether email is verified. */
   isVerified?: boolean
-  /** Internal token used for email verification flow. */
+  /** Verification token. */
   verificationToken?: string | null
-  /** Whether the user account is active. */
+  /** Whether account is active. */
   isActive: boolean
-  /** Registration date. */
+  /** Registration timestamp. */
+  createdAt: string
+}
+
+export interface ProjectItem {
+  id: string
+  productId: string
+  productName: string
+  variantId?: string
+  quantity: number
+  finishNotes?: string
+  designerNotes?: string
+}
+
+export interface ProjectCollection {
+  id: string
+  userId: string
+  title: string
+  projectType?: string
+  description?: string
+  items: ProjectItem[]
+  createdAt: string
+  updatedAt: string
+}
+
+export type LeadRequestType = 'information' | 'quotation'
+export type LeadRequestStatus =
+  | 'new'
+  | 'in_review'
+  | 'contacted'
+  | 'quoted'
+  | 'closed_won'
+  | 'closed_lost'
+
+export interface LeadRequestItem {
+  productId: string
+  productName: string
+  variantName?: string
+  quantity: number
+  finishNotes?: string
+}
+
+export interface LeadRequest {
+  id: string
+  requestNumber: string
+  userId: string
+  userName: string
+  userEmail: string
+  userRole: UserRole
+  requestType: LeadRequestType
+  status: LeadRequestStatus
+  projectId?: string
+  projectTitle?: string
+  items: LeadRequestItem[]
+  message?: string
+  contactPhone: string
+  contactCity: string
+  contactCountry: string
+  adminNotes?: string
   createdAt: string
 }
 

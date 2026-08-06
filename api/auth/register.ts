@@ -33,13 +33,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({error: 'SANITY_TOKEN is not configured'})
   }
 
-  const {email, password, name, company, profession, country} = req.body
+  const {email, password, firstName, lastName, name, role, company, profession, country, phone, city, website} = req.body
 
   if (!email || !password) {
     return res.status(400).json({error: 'Email ve şifre gereklidir.'})
   }
 
   const normEmail = email.trim().toLowerCase()
+  const userRole = role === 'architect' ? 'architect' : 'consumer'
+  const displayName = name || `${firstName || ''} ${lastName || ''}`.trim() || normEmail.split('@')[0]
+  const verificationStatus = userRole === 'architect' ? 'pending_verification' : 'not_requested'
 
   try {
     // Kullanıcı var mı kontrol et
@@ -49,27 +52,47 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     )
 
     if (existingUser) {
-      // Eğer email abonesi ise tam üyeliğe yükselt
-      if (existingUser.userType === 'email_subscriber') {
+      // Eğer email abonesi ise üye hesabına yükselt (Bülten abonesi hesap değildir, kayıtta hesaba dönüşür)
+      if (existingUser.userType === 'email_subscriber' || !existingUser.password) {
         const passwordHash = await bcrypt.hash(password, 12)
+        const verificationToken = crypto.randomUUID()
         const updatedUser = await client
           .patch(existingUser._id)
           .set({
             password: passwordHash,
-            name: name || '',
+            firstName: firstName || '',
+            lastName: lastName || '',
+            name: displayName,
+            role: userRole,
+            architectVerificationStatus: verificationStatus,
             company: company || '',
-            profession: profession || '',
+            profession: profession || (userRole === 'architect' ? 'Mimar / İç Mimar' : 'Son Kullanıcı'),
             country: country || existingUser.country || '',
+            phone: phone || '',
+            city: city || '',
+            website: website || '',
             userType: 'full_member',
             isVerified: false,
-            verificationToken: crypto.randomUUID(),
+            verificationToken,
           })
           .commit()
 
         return res.status(200).json({
           success: true,
-          message: 'Abonelik hesabınız tam üyeliğe yükseltildi.',
-          user: {id: updatedUser['_id'], email: updatedUser['email'], userType: 'full_member'},
+          message: 'Bülten aboneliğiniz üye hesabına dönüştürüldü.',
+          user: {
+            _id: updatedUser._id,
+            id: updatedUser._id,
+            email: updatedUser.email,
+            firstName: updatedUser.firstName,
+            lastName: updatedUser.lastName,
+            name: updatedUser.name,
+            role: updatedUser.role,
+            architectVerificationStatus: updatedUser.architectVerificationStatus,
+            verificationToken,
+            isVerified: false,
+            isActive: true,
+          },
         })
       }
       return res.status(400).json({error: 'Bu e-posta adresi zaten kayıtlı.'})
@@ -83,10 +106,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       _type: 'user',
       email: normEmail,
       password: passwordHash,
-      name: name || '',
+      firstName: firstName || '',
+      lastName: lastName || '',
+      name: displayName,
+      role: userRole,
+      architectVerificationStatus: verificationStatus,
       company: company || '',
-      profession: profession || '',
+      profession: profession || (userRole === 'architect' ? 'Mimar / İç Mimar' : 'Son Kullanıcı'),
       country: country || '',
+      phone: phone || '',
+      city: city || '',
+      website: website || '',
       userType: 'full_member',
       isActive: true,
       isVerified: false,
@@ -97,9 +127,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(201).json({
       success: true,
       user: {
+        _id: newUser._id,
         id: newUser._id,
         email: newUser.email,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
         name: newUser.name,
+        role: newUser.role,
+        architectVerificationStatus: newUser.architectVerificationStatus,
+        verificationToken,
+        isVerified: false,
+        isActive: true,
       },
     })
   } catch (error: unknown) {

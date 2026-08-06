@@ -31,7 +31,16 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
         const storedUser = localStorage.getItem('birim_user')
         if (storedUser) {
           try {
-            setUser(JSON.parse(storedUser))
+            const parsedUser: User = JSON.parse(storedUser)
+            setUser(parsedUser)
+            const userId = parsedUser._id || (parsedUser as unknown as {id?: string}).id || parsedUser.email
+            if (userId) {
+              analytics.identifyUser(userId, {
+                email: parsedUser.email,
+                name: parsedUser.name,
+                userType: parsedUser.userType,
+              })
+            }
           } catch (e) {
             try {
               localStorage.removeItem('birim_user')
@@ -60,6 +69,11 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
       email: userData.email,
       name: userData.name,
     })
+    analytics.identifyUser(userData._id, {
+      email: userData.email,
+      name: userData.name,
+      userType: userData.userType,
+    })
     analytics.trackUserAction('login', userData._id)
   }
 
@@ -73,6 +87,7 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
       // Storage erişilemiyorsa sessizce devam et
     }
     errorReporter.clearUser()
+    analytics.resetUser()
   }
 
   const value = {

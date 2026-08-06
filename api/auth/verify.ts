@@ -33,15 +33,46 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({error: 'Geçersiz veya süresi dolmuş token.'})
     }
 
-    if (user.isVerified) {
-      return res.status(200).json({success: true, message: 'E-posta zaten doğrulanmış.'})
+    if (user.isVerified && user.isActive) {
+      return res.status(200).json({
+        success: true,
+        message: 'E-posta zaten doğrulanmış.',
+        user: {
+          _id: user._id,
+          email: user.email,
+          name: user.name,
+          company: user.company,
+          profession: user.profession,
+          country: user.country,
+          userType: user.userType,
+          isActive: true,
+          isVerified: true,
+          createdAt: user.createdAt || user._createdAt,
+        },
+      })
     }
 
-    await client.patch(user._id).set({isVerified: true}).unset(['verificationToken']).commit()
+    const updatedUser = await client
+      .patch(user._id)
+      .set({isVerified: true, isActive: true})
+      .unset(['verificationToken'])
+      .commit()
 
     return res.status(200).json({
       success: true,
       message: 'E-posta adresiniz başarıyla doğrulandı.',
+      user: {
+        _id: updatedUser._id,
+        email: updatedUser.email,
+        name: updatedUser.name,
+        company: updatedUser.company,
+        profession: updatedUser.profession,
+        country: updatedUser.country,
+        userType: updatedUser.userType,
+        isActive: updatedUser.isActive,
+        isVerified: updatedUser.isVerified,
+        createdAt: updatedUser.createdAt || updatedUser._createdAt,
+      },
     })
   } catch (error: unknown) {
     console.error('Verification error:', error)

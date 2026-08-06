@@ -8,6 +8,7 @@
  */
 
 import ReactGA from 'react-ga4'
+import posthog from 'posthog-js'
 
 interface AnalyticsEvent {
   action: string
@@ -23,6 +24,8 @@ class Analytics {
   private isInitialized = false
   private googleAnalyticsId: string | null = null
   private plausibleDomain: string | null = null
+  private posthogKey: string | null = null
+  private posthogHost: string | null = null
   private hasRejectionHandler = false
   private hasErrorHandler = false
   private storagePatched = false
@@ -37,6 +40,14 @@ class Analytics {
     // "Access to storage is not allowed..." hataları development'ta konsolu kirletmesin.
     this.patchStorageIfNeeded()
 
+    // PostHog Analytics
+    this.posthogKey =
+      import.meta.env['VITE_POSTHOG_KEY'] || 'phc_obys5oBjGrg83u3X2tcyAD2qJ3Cs67fk8ZUfZJFzD5Gm'
+    this.posthogHost = import.meta.env['VITE_POSTHOG_HOST'] || 'https://us.i.posthog.com'
+    if (this.posthogKey) {
+      this.initPostHog(this.posthogKey, this.posthogHost || 'https://us.i.posthog.com')
+    }
+
     // Google Analytics
     this.googleAnalyticsId = import.meta.env['VITE_GA_ID'] || null
     if (this.googleAnalyticsId) {
@@ -50,6 +61,20 @@ class Analytics {
     }
 
     this.isInitialized = true
+  }
+
+  private initPostHog(key: string, host: string) {
+    if (typeof window === 'undefined') return
+    try {
+      posthog.init(key, {
+        api_host: host,
+        person_profiles: 'identified_only',
+        autocapture: true,
+        capture_pageview: true,
+      })
+    } catch (_e: unknown) {
+      // PostHog init hatasını sessizce yut
+    }
   }
 
   private initGoogleAnalytics(gaId: string) {
@@ -238,6 +263,15 @@ class Analytics {
       plausibleWindow.plausible('pageview', {url: path})
     }
 
+    // PostHog
+    if (this.posthogKey) {
+      try {
+        posthog.capture('$pageview', {$current_url: path, title})
+      } catch (_e: unknown) {
+        // Suppress
+      }
+    }
+
     if (import.meta.env.DEV && DEBUG_LOGS) {
       console.debug('[Analytics] Pageview:', path, title)
     }
@@ -281,8 +315,47 @@ class Analytics {
       })
     }
 
+    // PostHog
+    if (this.posthogKey) {
+      try {
+        posthog.capture(event.action, {
+          category: event.category,
+          label: event.label,
+          value: safeValue,
+        })
+      } catch (_e: unknown) {
+        // Suppress
+      }
+    }
+
     if (import.meta.env.DEV && DEBUG_LOGS) {
       console.debug('[Analytics] Event:', event)
+    }
+  }
+
+  /**
+   * Identify user in PostHog / analytics
+   */
+  identifyUser(userId: string, userProps?: Record<string, unknown>) {
+    if (this.posthogKey && userId && typeof userId === 'string' && userId.trim()) {
+      try {
+        posthog.identify(userId, userProps)
+      } catch (_e: unknown) {
+        // Suppress
+      }
+    }
+  }
+
+  /**
+   * Reset user session on logout
+   */
+  resetUser() {
+    if (this.posthogKey) {
+      try {
+        posthog.reset()
+      } catch (_e: unknown) {
+        // Suppress
+      }
     }
   }
 

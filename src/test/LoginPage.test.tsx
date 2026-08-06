@@ -107,8 +107,8 @@ describe('LoginPage', () => {
   it('renders login form by default', () => {
     renderLoginPage()
 
-    expect(screen.getByLabelText('E-posta')).toBeInTheDocument()
-    expect(screen.getByLabelText('Şifre')).toBeInTheDocument()
+    expect(screen.getByLabelText(/e-posta/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/şifre/i)).toBeInTheDocument()
     // Submit button'u bul (type="submit" olan)
     const submitButtons = screen.getAllByRole('button', {name: 'Giriş Yap'})
     const submitButton = submitButtons.find(btn => btn.getAttribute('type') === 'submit')
@@ -124,9 +124,8 @@ describe('LoginPage', () => {
       await user.click(registerTab)
     })
 
-    expect(screen.getByLabelText(/ad soyad/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/firma/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/meslek/i)).toBeInTheDocument()
+    expect(screen.getByLabelText('Ad *')).toBeInTheDocument()
+    expect(screen.getByLabelText('Soyad *')).toBeInTheDocument()
   })
 
   it('handles login form submission', async () => {
@@ -138,6 +137,7 @@ describe('LoginPage', () => {
       name: 'Test User',
       company: '',
       profession: '',
+      role: 'consumer',
       userType: 'full_member',
       isActive: true,
       createdAt: new Date().toISOString(),
@@ -145,8 +145,8 @@ describe('LoginPage', () => {
 
     renderLoginPage()
 
-    const emailInput = screen.getByLabelText('E-posta')
-    const passwordInput = screen.getByLabelText('Şifre')
+    const emailInput = screen.getByLabelText(/e-posta/i)
+    const passwordInput = screen.getByLabelText(/şifre/i)
     const submitButtons = screen.getAllByRole('button', {name: 'Giriş Yap'})
     const submitButton = submitButtons.find(btn => (btn as HTMLButtonElement).type === 'submit')!
 
@@ -168,8 +168,8 @@ describe('LoginPage', () => {
 
     renderLoginPage()
 
-    const emailInput = screen.getByLabelText('E-posta')
-    const passwordInput = screen.getByLabelText('Şifre')
+    const emailInput = screen.getByLabelText(/e-posta/i)
+    const passwordInput = screen.getByLabelText(/şifre/i)
     const submitButtons = screen.getAllByRole('button', {name: 'Giriş Yap'})
     const submitButton = submitButtons.find(btn => (btn as HTMLButtonElement).type === 'submit')!
 
@@ -194,8 +194,8 @@ describe('LoginPage', () => {
 
     renderLoginPage()
 
-    const emailInput = screen.getByLabelText('E-posta')
-    const passwordInput = screen.getByLabelText('Şifre')
+    const emailInput = screen.getByLabelText(/e-posta/i)
+    const passwordInput = screen.getByLabelText(/şifre/i)
     const submitButtons = screen.getAllByRole('button', {name: 'Giriş Yap'})
     const submitButton = submitButtons.find(btn => (btn as HTMLButtonElement).type === 'submit')!
 
@@ -216,9 +216,11 @@ describe('LoginPage', () => {
     mockRegister.mockResolvedValue({
       _id: 'user-1',
       email: 'newuser@example.com',
-      name: 'New User',
-      company: 'Test Company',
-      profession: 'Designer',
+      firstName: 'John',
+      lastName: 'Doe',
+      name: 'John Doe',
+      role: 'consumer',
+      company: '',
       userType: 'full_member',
       isActive: true,
       createdAt: new Date().toISOString(),
@@ -232,18 +234,18 @@ describe('LoginPage', () => {
       await user.click(registerTab)
     })
 
-    const emailInput = screen.getByLabelText('E-posta')
-    const passwordInput = screen.getByLabelText('Şifre')
-    const nameInput = screen.getByLabelText(/ad soyad/i)
-    const countryInput = screen.getByLabelText(/ülke/i)
+    const firstNameInput = screen.getByLabelText('Ad *')
+    const lastNameInput = screen.getByLabelText('Soyad *')
+    const emailInput = screen.getByLabelText('E-posta *')
+    const passwordInput = screen.getByLabelText('Şifre *')
     const submitButtons = screen.getAllByRole('button', {name: 'Üye Ol'})
     const submitButton = submitButtons.find(btn => (btn as HTMLButtonElement).type === 'submit')!
 
     await act(async () => {
+      await user.type(firstNameInput, 'John')
+      await user.type(lastNameInput, 'Doe')
       await user.type(emailInput, 'newuser@example.com')
       await user.type(passwordInput, 'password123')
-      await user.type(nameInput, 'New User')
-      await user.type(countryInput, 'Turkey')
       await user.click(submitButton)
     })
 
@@ -251,10 +253,10 @@ describe('LoginPage', () => {
       expect(mockRegister).toHaveBeenCalledWith(
         'newuser@example.com',
         'password123',
-        'New User',
-        '',
-        '',
-        'Turkey'
+        'John',
+        'Doe',
+        'consumer',
+        {company: ''}
       )
     })
   })
@@ -269,16 +271,17 @@ describe('LoginPage', () => {
       await user.click(registerTab)
     })
 
+    const submitButtons = screen.getAllByRole('button', {name: 'Üye Ol'})
+    const submitButton = submitButtons.find(btn => (btn as HTMLButtonElement).type === 'submit')!
+
     await act(async () => {
-      const forms = document.querySelectorAll('form')
-      const registerForm = forms[0]
-      if (registerForm) fireEvent.submit(registerForm)
+      await user.click(submitButton)
     })
 
     await waitFor(() => {
+      expect(screen.getByText('Ad gereklidir')).toBeInTheDocument()
+      expect(screen.getByText('Soyad gereklidir')).toBeInTheDocument()
       expect(screen.getByText('E-posta adresi gereklidir')).toBeInTheDocument()
-      expect(screen.getByText('Ad soyad gereklidir')).toBeInTheDocument()
-      expect(screen.getByText('Ülke gereklidir')).toBeInTheDocument()
     })
   })
 
