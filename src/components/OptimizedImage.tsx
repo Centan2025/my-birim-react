@@ -252,15 +252,11 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         }
 
         @media (max-width: 1023px) {
-          .responsive-crop-wrapper.has-aspect {
-            aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto));
-          }
-          .responsive-crop-wrapper.is-contain-mobile {
-            height: auto !important;
-            max-height: 100% !important;
+          .responsive-crop-wrapper {
+            width: 100% !important;
+            height: 100% !important;
             max-width: 100% !important;
-            aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
-            margin: auto !important;
+            max-height: 100% !important;
           }
           .responsive-crop-inner {
             width: var(--crop-scale-x-mobile, var(--crop-scale-x-desktop, 100%)) !important;
