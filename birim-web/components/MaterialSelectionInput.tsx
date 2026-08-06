@@ -47,6 +47,7 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
 
   const groupId = useId()
   const bookId = useId()
+  const checkboxPrefix = useId()
 
   useEffect(() => {
     setLoading(true)
@@ -237,8 +238,6 @@ export default function MaterialSelectionInput(props: ObjectInputProps) {
     setLocalSelectedIds(nextIds)
     onChange(set(nextArr, ['materials']))
   }
-
-  const checkboxPrefix = useId()
 
   return (
     <div style={{display: 'grid', gap: 10}}>
