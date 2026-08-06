@@ -194,7 +194,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         }
         img.responsive-crop-pos,
         picture.responsive-crop-pos img {
-          object-fit: var(--img-object-fit, cover) !important;
+          object-fit: var(--img-object-fit-desktop, var(--img-object-fit, cover)) !important;
           object-position: var(--obj-pos-desktop, center) !important;
           clip-path: var(--clip-desktop, none) !important;
           transform: var(--transform-desktop, none) !important;
@@ -203,7 +203,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         @media (max-width: 1023px) {
           img.responsive-crop-pos,
           picture.responsive-crop-pos img {
-            object-fit: var(--img-object-fit, cover) !important;
+            object-fit: var(--img-object-fit-mobile, var(--img-object-fit, cover)) !important;
             object-position: var(--obj-pos-mobile, var(--obj-pos-desktop, center)) !important;
             clip-path: var(--clip-mobile, var(--clip-desktop, none)) !important;
             transform: var(--transform-mobile, var(--transform-desktop, none)) !important;
@@ -260,6 +260,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             height: var(--crop-scale-y-mobile, var(--crop-scale-y-desktop, 100%)) !important;
             left: var(--crop-left-mobile, var(--crop-left-desktop, 0%)) !important;
             top: var(--crop-top-mobile, var(--crop-top-desktop, 0%)) !important;
+          }
+          .responsive-crop-inner img,
+          .responsive-crop-inner picture img {
+            object-fit: var(--img-object-fit-mobile, cover) !important;
           }
         }
       `,
@@ -511,6 +515,13 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   } as React.CSSProperties
 
   const customStyle = imgStyle as Record<string, string>
+
+  if (className?.includes('max-md:object-contain')) {
+    customStyle['--img-object-fit-mobile'] = 'contain'
+  } else if (className?.includes('object-contain')) {
+    customStyle['--img-object-fit-mobile'] = 'contain'
+    customStyle['--img-object-fit-desktop'] = 'contain'
+  }
 
   const hasCrop = !!(
     activeCrop &&
