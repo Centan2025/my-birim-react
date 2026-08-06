@@ -944,35 +944,20 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           </div>
         ) : null
 
-        const bottomSpacing = block.spacingBottom || 0
+        const bottomSpacing = block.spacingBottom !== undefined ? block.spacingBottom : 24
+        const topPaddingVal = block.paddingTop !== undefined ? block.paddingTop : (isMobile ? 0 : 24)
+        const bottomPaddingVal = block.paddingBottom !== undefined ? block.paddingBottom : 0
         const isSideBySide = !isFullWidth && !isCenter
 
         return (
           <React.Fragment key={index}>
             <ContentBlockSnapWrapper>
               <section
-                className={`content-block-wrapper home-content-block-snap relative z-20 min-h-0 flex flex-col justify-start ${backgroundColor} transition-colors duration-500 py-0 my-0`}
+                className={`content-block-wrapper home-content-block-snap relative z-20 min-h-0 flex flex-col justify-start ${backgroundColor} transition-colors duration-500 py-0`}
                 style={{
-                  paddingTop: isMobile
-                    ? 0
-                    : isSideBySide
-                      ? `${customPadding !== undefined ? customPadding : 24}px`
-                      : customPadding !== undefined
-                        ? `${customPadding}px`
-                        : '24px',
-                  paddingBottom: isMobile
-                    ? 0
-                    : isSideBySide
-                      ? `${customPadding !== undefined ? customPadding : 24}px`
-                      : !hasTextContent || index === sortedBlocks.length - 1
-                        ? customPadding !== undefined
-                          ? `${customPadding}px`
-                          : 0
-                        : bottomSpacing > 0
-                          ? `${bottomSpacing}px`
-                          : customPadding !== undefined
-                            ? `${customPadding}px`
-                            : '24px',
+                  paddingTop: `${topPaddingVal}px`,
+                  paddingBottom: `${bottomPaddingVal}px`,
+                  marginBottom: `${bottomSpacing}px`,
                 }}
                 data-block-index={index}
               >

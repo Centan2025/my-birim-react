@@ -892,6 +892,11 @@ export const contentBlock = defineType({
       title: '🖼️ Görsel Üzerindeki Yazı Ayarları (Slogan / Overlay)',
       options: {collapsible: true, collapsed: true},
     },
+    {
+      name: 'spacingGroup',
+      title: '📏 Blok Boşluk Ayarları (Alt / Üst Boşluk)',
+      options: {collapsible: true, collapsed: true},
+    },
   ],
   fields: [
     defineField({
@@ -1263,6 +1268,32 @@ export const contentBlock = defineType({
       initialValue: 'black',
       hidden: ({parent}) => !parent?.showButtonOnMedia,
       description: 'Medya üzerindeki buton metninin rengini seçin.',
+    }),
+    defineField({
+      name: 'spacingBottom',
+      title: 'Blok Alt Boşluğu (Piksel)',
+      type: 'number',
+      fieldset: 'spacingGroup',
+      initialValue: 24,
+      validation: (Rule) => Rule.min(0).max(300),
+      description:
+        'Bu bloğun altındaki boşluk miktarını piksel cinsinden belirler (örneğin: 0, 24, 48, 80).',
+    }),
+    defineField({
+      name: 'paddingTop',
+      title: 'Blok Üst İç Boşluğu (Piksel)',
+      type: 'number',
+      fieldset: 'spacingGroup',
+      validation: (Rule) => Rule.min(0).max(300),
+      description: 'Bloğun üst iç boşluğu (opsiyonel).',
+    }),
+    defineField({
+      name: 'paddingBottom',
+      title: 'Blok Alt İç Boşluğu (Piksel)',
+      type: 'number',
+      fieldset: 'spacingGroup',
+      validation: (Rule) => Rule.min(0).max(300),
+      description: 'Bloğun alt iç boşluğu (opsiyonel).',
     }),
     defineField({
       name: 'overlayText',
