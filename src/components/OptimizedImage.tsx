@@ -241,11 +241,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         }
 
         @media (max-width: 1023px) {
-          img.responsive-crop-pos,
-          picture.responsive-crop-pos img,
           .responsive-crop-wrapper {
-            outline: 3px dashed #ff0055 !important;
-            outline-offset: -3px !important;
+            border: 3px solid #ff0055 !important;
+            box-sizing: border-box !important;
           }
           .responsive-crop-wrapper,
           .responsive-crop-wrapper.is-cover,
