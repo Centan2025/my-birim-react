@@ -703,7 +703,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   ])
 
   const renderCroppedContent = (pictureContent: React.ReactNode) => {
-    if (!activeClientCrop || !hasCrop) return pictureContent
 
     const uniformScaleDesk = Math.max(1, 1 / Math.min(cropWDesk, cropHDesk))
     const uniformScaleMob = Math.max(1, 1 / Math.min(cropWMob, cropHMob))
