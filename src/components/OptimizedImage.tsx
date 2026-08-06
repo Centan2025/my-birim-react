@@ -247,16 +247,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           picture.responsive-crop-pos img {
             object-fit: var(--img-object-fit-mobile, var(--img-object-fit, contain)) !important;
             object-position: var(--obj-pos-mobile, var(--obj-pos-desktop, center)) !important;
+          }
           .responsive-crop-wrapper,
-          .responsive-crop-wrapper.is-cover,
           .responsive-crop-wrapper.has-aspect {
             width: 100% !important;
             height: auto !important;
-            max-width: min(calc(100vw - 32px), calc(calc(100dvh - 200px) * var(--crop-aspect-mobile, var(--crop-aspect-desktop, 1)))) !important;
-            max-height: calc(100dvh - 200px) !important;
             aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
-            margin: auto !important;
-            align-self: center !important;
           }
           .responsive-crop-inner {
             width: var(--crop-scale-x-mobile, var(--crop-scale-x-desktop, 100%)) !important;
