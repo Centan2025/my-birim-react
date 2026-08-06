@@ -408,6 +408,33 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
     }
   }
 
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent) => {
+      const clipboardData = e.clipboardData
+      if (!clipboardData) return
+
+      const pastedFiles: File[] = []
+      if (clipboardData.files && clipboardData.files.length > 0) {
+        pastedFiles.push(...Array.from(clipboardData.files))
+      } else if (clipboardData.items && clipboardData.items.length > 0) {
+        for (let i = 0; i < clipboardData.items.length; i++) {
+          const item = clipboardData.items[i]
+          if (item.type.startsWith('image/') || item.type.startsWith('video/')) {
+            const file = item.getAsFile()
+            if (file) pastedFiles.push(file)
+          }
+        }
+      }
+
+      if (pastedFiles.length > 0) {
+        e.preventDefault()
+        e.stopPropagation()
+        processFiles(pastedFiles)
+      }
+    },
+    [processFiles],
+  )
+
   return (
     <Stack space={3}>
       {renderDefault(props)}
@@ -416,14 +443,17 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
         padding={3}
         border
         radius={2}
+        tabIndex={0}
         tone={isDragging ? 'primary' : 'transparent'}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
+        onPaste={handlePaste}
         style={{
           transition: 'all 0.2s ease',
           borderStyle: isDragging ? 'dashed' : 'solid',
+          outline: 'none',
         }}
       >
         <Stack space={3}>
@@ -433,7 +463,8 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
                 Toplu Medya Yükleme (R2)
               </Text>
               <Text size={1} muted>
-                Birden fazla görsel veya video seçip tek seferde R2'ye yükleyebilirsiniz.
+                Dosya sürükleyin, seçin veya kopyaladığınız görselleri Ctrl + V / Yapıştır ile
+                buraya ekleyin.
               </Text>
             </Stack>
             <Box>

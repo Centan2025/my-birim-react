@@ -839,6 +839,36 @@ export default function R2AssetInput(props: ObjectInputProps) {
     }
   }
 
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent) => {
+      const clipboardData = e.clipboardData
+      if (!clipboardData) return
+
+      let pastedFile: File | null = null
+      if (clipboardData.files && clipboardData.files.length > 0) {
+        pastedFile = clipboardData.files[0]
+      } else if (clipboardData.items && clipboardData.items.length > 0) {
+        for (let i = 0; i < clipboardData.items.length; i++) {
+          const item = clipboardData.items[i]
+          if (item.type.startsWith('image/') || item.type.startsWith('video/')) {
+            const file = item.getAsFile()
+            if (file) {
+              pastedFile = file
+              break
+            }
+          }
+        }
+      }
+
+      if (pastedFile) {
+        e.preventDefault()
+        e.stopPropagation()
+        handleUpload(pastedFile)
+      }
+    },
+    [handleUpload],
+  )
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (files && files.length > 0) {
@@ -861,12 +891,14 @@ export default function R2AssetInput(props: ObjectInputProps) {
     <Stack space={3}>
       <DropZone
         padding={hasValue ? 2 : 4}
+        tabIndex={0}
         $isDragging={isDragging}
         $hasValue={hasValue}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
+        onPaste={handlePaste}
         onClick={(e) => {
           if (!hasValue && !isUploading && !isEditMode) {
             document.getElementById(props.id)?.click()
@@ -1025,7 +1057,9 @@ export default function R2AssetInput(props: ObjectInputProps) {
             </Text>
             <Stack space={2} style={{textAlign: 'center'}}>
               <Text weight="bold" size={2}>
-                {isDragging ? 'Buraya Bırakın' : 'Görseli Sürükleyin veya Seçin'}
+                {isDragging
+                  ? 'Buraya Bırakın'
+                  : 'Görseli Sürükleyin, Seçin veya Yapıştırın (Ctrl + V)'}
               </Text>
               <Text size={1} muted>
                 Dosya otomatik olarak WebP'ye dönüştürülüp R2'ye yüklenecektir.
