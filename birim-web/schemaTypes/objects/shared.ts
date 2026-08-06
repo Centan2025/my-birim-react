@@ -1264,6 +1264,8 @@ export const contentBlock = defineType({
         list: [
           {title: 'Siyah', value: 'black'},
           {title: 'Beyaz', value: 'white'},
+          {title: 'Dinamik (Mobil Beyaz / Desktop Siyah)', value: 'responsive'},
+          {title: 'Dinamik (Mobil Siyah / Desktop Beyaz)', value: 'responsive-reverse'},
         ],
         layout: 'radio',
         direction: 'horizontal',

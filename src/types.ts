@@ -473,7 +473,7 @@ export interface ContentBlock {
   /** Bottom padding in pixels */
   paddingBottom?: number
   /** Button text color */
-  buttonColor?: 'black' | 'white'
+  buttonColor?: 'black' | 'white' | 'responsive' | 'responsive-reverse'
   /** Toggles button border visibility */
   showButtonBorder?: boolean
   /** Internal padding in pixels */

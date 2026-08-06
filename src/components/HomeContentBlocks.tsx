@@ -726,11 +726,25 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           : 'w-full md:max-w-[92%] lg:max-w-[80vw] mx-auto'
 
         const isButtonWhite = block.buttonColor === 'white'
-        const buttonTextColorClass = isButtonWhite ? 'text-white' : 'text-[var(--text-primary)]'
+        const isButtonResponsive = block.buttonColor === 'responsive'
+        const isButtonResponsiveReverse = block.buttonColor === 'responsive-reverse'
+
+        const buttonTextColorClass = isButtonResponsive
+          ? 'text-white md:text-[var(--text-primary)]'
+          : isButtonResponsiveReverse
+            ? 'text-[var(--text-primary)] md:text-white'
+            : isButtonWhite
+              ? 'text-white'
+              : 'text-[var(--text-primary)]'
+
         const buttonBorderClass = hasButtonBorder
-          ? isButtonWhite
-            ? 'border border-gray-300/80'
-            : 'border border-gray-400 dark:border-gray-500'
+          ? isButtonResponsive
+            ? 'border border-white/80 md:border-gray-400 md:dark:border-gray-500'
+            : isButtonResponsiveReverse
+              ? 'border border-gray-400 dark:border-gray-500 md:border-white/80'
+              : isButtonWhite
+                ? 'border border-gray-300/80'
+                : 'border border-gray-400 dark:border-gray-500'
           : 'border-0'
 
         const hasMedia =
