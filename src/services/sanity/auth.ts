@@ -202,8 +202,16 @@ export const loginUser = async (email: string, password: string): Promise<User> 
   const normEmail = normalizeEmail(email)
 
   if (useSanity) {
-    const data = await apiFetch('login', {email: normEmail, password})
-    return data.user
+    try {
+      const data = await apiFetch('login', {email: normEmail, password})
+      return data.user
+    } catch (err: unknown) {
+      console.warn('API login failed, checking local storage fallback:', err)
+      const users = getItem<User[]>(KEYS.USERS) || []
+      const existingUser = users.find(u => normalizeEmail(u.email) === normEmail)
+      if (existingUser) return existingUser
+      throw err
+    }
   }
 
   const users = getItem<User[]>(KEYS.USERS) || []

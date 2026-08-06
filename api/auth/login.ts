@@ -81,6 +81,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     })
   } catch (error: unknown) {
     console.error('Login error:', error)
-    return res.status(500).json({error: 'Giriş sırasında bir teknik hata oluştu.'})
+    const details = error instanceof Error ? error.message : String(error)
+    return res.status(500).json({
+      error: 'Giriş sırasında bir teknik hata oluştu.',
+      details,
+    })
   }
 }
