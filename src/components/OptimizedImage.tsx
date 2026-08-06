@@ -206,9 +206,11 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           position: relative;
           width: 100%;
           max-width: 100%;
-          margin: auto;
+          margin: 0 auto;
           align-self: center;
           overflow: hidden;
+          display: block !important;
+          line-height: 0 !important;
         }
         .responsive-crop-wrapper.is-cover {
           height: 100%;
@@ -221,8 +223,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
         .responsive-crop-inner {
           position: absolute !important;
-          width: var(--crop-scale-x-desktop, 100%) !important;
-          height: var(--crop-scale-y-desktop, 100%) !important;
+          width: calc(var(--crop-scale-x-desktop, 100%) + 1px) !important;
+          height: calc(var(--crop-scale-y-desktop, 100%) + 2px) !important;
           left: var(--crop-left-desktop, 0%) !important;
           top: var(--crop-top-desktop, 0%) !important;
           max-width: none !important;
@@ -240,6 +242,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           max-height: none !important;
           object-fit: cover !important;
           object-position: center !important;
+          display: block !important;
         }
 
         @media (max-width: 1023px) {
@@ -255,8 +258,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
           }
           .responsive-crop-inner {
-            width: var(--crop-scale-x-mobile, var(--crop-scale-x-desktop, 100%)) !important;
-            height: var(--crop-scale-y-mobile, var(--crop-scale-y-desktop, 100%)) !important;
+            width: calc(var(--crop-scale-x-mobile, var(--crop-scale-x-desktop, 100%)) + 1px) !important;
+            height: calc(var(--crop-scale-y-mobile, var(--crop-scale-y-desktop, 100%)) + 2px) !important;
             left: var(--crop-left-mobile, var(--crop-left-desktop, 0%)) !important;
             top: var(--crop-top-mobile, var(--crop-top-desktop, 0%)) !important;
           }

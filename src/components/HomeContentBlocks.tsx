@@ -386,11 +386,15 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
       )}
       {sortedBlocks.map((block, index) => {
         const titleContent = block.title ? t(block.title) : ''
+        const overlayTextContent = block.overlayText ? t(block.overlayText) : ''
         const descriptionRaw = block.description ? t(block.description) : ''
         const descriptionContent =
           Array.isArray(descriptionRaw) && descriptionRaw.length === 0 ? '' : descriptionRaw
+        const rawTitleStr = typeof titleContent === 'string' ? titleContent.trim() : ''
+        const rawOverlayStr = typeof overlayTextContent === 'string' ? overlayTextContent.trim() : ''
         const hasTitle =
-          typeof titleContent === 'string' ? titleContent.trim().length > 0 : !!titleContent
+          (rawTitleStr.length > 0 || !!titleContent) &&
+          (!rawOverlayStr || rawTitleStr !== rawOverlayStr)
         const hasDescription = Array.isArray(descriptionContent)
           ? descriptionContent.length > 0
           : typeof descriptionContent === 'string'
@@ -718,7 +722,6 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           typeof customOffset === 'number' && block.buttonPositionOnMedia !== 'center'
         const buttonOverlayPaddingClass = hasCustomOffset ? '' : 'p-2 md:p-8'
 
-        const overlayTextContent = block.overlayText ? t(block.overlayText) : ''
         const hasOverlayText =
           typeof overlayTextContent === 'string'
             ? overlayTextContent.trim().length > 0
@@ -848,7 +851,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               </div>
             ) : (
               <div
-                className={`relative w-full h-auto ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`}
+                className={`relative w-full h-auto leading-none block overflow-hidden ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`}
                 onClick={() => onMediaClick && !block.linkUrl && onMediaClick(mediaUrl)}
                 onKeyDown={
                   onMediaClick && !block.linkUrl
@@ -907,15 +910,18 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           </ScrollReveal>
         ) : null
 
-        const hasTopContent =
-          (titlePosition === 'above' && hasTitle) ||
-          (textPosition === 'above' &&
-            (hasDescription || (block.linkText && !block.showButtonOnMedia)))
+        const hasTopTitle = titlePosition === 'above' && !!titleElement
+        const hasTopBody =
+          textPosition === 'above' &&
+          (hasDescription ||
+            ((buttonPos === 'above' || buttonPos === 'top') && !!standaloneButtonElement))
+        const hasTopContent = hasTopTitle || hasTopBody
 
-        const hasBottomContent =
-          (titlePosition === 'below' && hasTitle) ||
-          (textPosition === 'below' &&
-            (hasDescription || (block.linkText && !block.showButtonOnMedia)))
+        const hasBottomTitle = titlePosition === 'below' && !!titleElement
+        const hasBottomBody =
+          textPosition === 'below' &&
+          (hasDescription || (buttonPos === 'below' && !!standaloneButtonElement))
+        const hasBottomContent = hasBottomTitle || hasBottomBody
 
         const bodyElement = (
           <>
@@ -930,23 +936,31 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           <div
             className={`${isFullWidth || isMobile ? `w-full max-w-full px-4 md:px-0 ${block.verticalAlignment === 'top' ? 'pt-0' : 'pt-4 md:pt-8'} pb-2 md:pb-3` : isCenter ? `w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto ${block.verticalAlignment === 'top' ? 'pt-0' : 'pt-6 md:pt-8'} pb-3` : 'w-full mx-auto mb-4'} flex flex-col gap-3 md:gap-4 ${titleAlign === 'center' ? 'items-center text-center' : titleAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
           >
-            {titlePosition === 'above' && titleElement}
-            {textPosition === 'above' && bodyElement}
-          </div>
-        ) : null
-
-        const textContentBelow = hasBottomContent ? (
-          <div
-            className={`${isFullWidth || isMobile ? `w-full max-w-full px-4 md:px-0 ${block.verticalAlignment === 'top' ? 'pt-0' : 'pt-2 md:pt-3'} pb-4 md:pb-8` : isCenter ? `w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto ${block.verticalAlignment === 'top' ? 'pt-0' : 'pt-3'} pb-6 md:pb-8` : `w-full mx-auto ${block.verticalAlignment === 'top' ? 'mt-0' : 'mt-4'}`} flex flex-col gap-3 md:gap-4 ${titleAlign === 'center' ? 'items-center text-center' : titleAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
-          >
-            {titlePosition === 'below' && titleElement}
-            {textPosition === 'below' && bodyElement}
+            {hasTopTitle && titleElement}
+            {hasTopBody && bodyElement}
           </div>
         ) : null
 
         const isLastBlock = index === sortedBlocks.length - 1
-        const bottomSpacing =
-          block.spacingBottom !== undefined ? block.spacingBottom : isLastBlock ? 0 : 24
+        const isInteractiveShowcaseAfterThis =
+          hasInteractiveShowcase &&
+          (index + 1 === targetIndex || (isLastBlock && targetIndex > index + 1))
+        const isTrulyLast = isLastBlock && !isInteractiveShowcaseAfterThis
+
+        const textContentBelow = hasBottomContent ? (
+          <div
+            className={`${isFullWidth || isMobile ? `w-full max-w-full px-4 md:px-0 ${block.verticalAlignment === 'top' || isTrulyLast ? 'pt-0' : 'pt-2 md:pt-3'} ${isTrulyLast ? 'pb-0' : 'pb-4 md:pb-8'}` : isCenter ? `w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto ${block.verticalAlignment === 'top' || isTrulyLast ? 'pt-0' : 'pt-3'} ${isTrulyLast ? 'pb-0' : 'pb-6 md:pb-8'}` : `w-full mx-auto ${block.verticalAlignment === 'top' || isTrulyLast ? 'mt-0' : 'mt-4'}`} flex flex-col ${isTrulyLast ? 'gap-0 [&_p]:!mb-0 [&_p:last-child]:!mb-0 [&_h2]:!mb-0 [&_.prose]:!mb-0 [&_.portable-text-container]:!mb-0 mb-0 pb-0 pt-0' : 'gap-3 md:gap-4'} ${titleAlign === 'center' ? 'items-center text-center' : titleAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}
+          >
+            {hasBottomTitle && titleElement}
+            {hasBottomBody && bodyElement}
+          </div>
+        ) : null
+
+        const bottomSpacing = isTrulyLast
+          ? 0
+          : block.spacingBottom !== undefined
+            ? block.spacingBottom
+            : 24
         const topPaddingVal = block.paddingTop !== undefined ? block.paddingTop : isMobile ? 0 : 24
         const bottomPaddingVal = block.paddingBottom !== undefined ? block.paddingBottom : 0
 
