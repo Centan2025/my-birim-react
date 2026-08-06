@@ -193,8 +193,8 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
             {/* Content area with animation */}
             {activeMaterialGroup !== null ? (
               <AnimatedContent animKey={`group-${safeActiveIndex}`}>
-                {/* Swatch books tabs (only render sub-tabs if group has multiple books) */}
-                {books.length > 1 && (
+                {/* Swatch books tabs */}
+                {books.length > 0 && (
                   <div className="flex flex-wrap gap-0 border-b border-gray-200 mb-6">
                     {books.map((book, idx: number) => (
                       <button
@@ -202,7 +202,7 @@ export const ProductMaterials: React.FC<ProductMaterialsProps> = ({
                         onClick={() => onSetActiveBookIndex(idx)}
                         className={`px-4 py-2 text-sm font-thin tracking-wider transition-all duration-200 border-b-2 rounded-none ${
                           safeBookIndex === idx
-                            ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--text-primary)]'
+                            ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] border-[var(--text-primary)] font-normal'
                             : 'bg-transparent text-[var(--text-secondary)] border-transparent hover:text-[var(--text-primary)]'
                         }`}
                       >

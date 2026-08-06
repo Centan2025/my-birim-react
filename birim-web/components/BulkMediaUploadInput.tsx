@@ -71,10 +71,10 @@ async function uploadFileViaPresignedUrl(
   const folder = key.substring(0, lastSlash)
   const filename = key.substring(lastSlash + 1)
 
-  // 1. Get Presigned URL
+  // 1. Get Presigned URL (production endpoint first for 100% availability in Sanity Studio)
   let res: Response
   try {
-    res = await fetch(getApiUrl('/api/media/presigned-url'), {
+    res = await fetch('https://birim-web-antigravity.vercel.app/api/media/presigned-url', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -86,9 +86,8 @@ async function uploadFileViaPresignedUrl(
       }),
     })
   } catch {
-    const fallbackUrl = `https://birim-web-antigravity.vercel.app/api/media/presigned-url`
     try {
-      res = await fetch(fallbackUrl, {
+      res = await fetch(getApiUrl('/api/media/presigned-url'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,7 +100,7 @@ async function uploadFileViaPresignedUrl(
       })
     } catch {
       throw new Error(
-        'Media API sunucusuna bağlanılamadı. Lütfen yerel API sunucusunun (port 3002) çalıştığından emin olun ("npm run api:server").',
+        'Media API sunucusuna bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.',
       )
     }
   }

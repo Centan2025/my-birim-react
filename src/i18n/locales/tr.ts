@@ -36,7 +36,7 @@ export default {
   homepage: 'ANASAYFA',
   description: 'Açıklama',
   dimensions: 'Ölçüler',
-  material_alternatives: 'Bitişler',
+  material_alternatives: 'Malzeme Alternatifleri',
   add_to_cart: 'Sepete ekle',
   added_to_cart: '{0} sepete eklendi!',
   exclusive_content: 'Özel İçerik',
