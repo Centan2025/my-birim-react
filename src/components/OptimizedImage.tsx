@@ -262,6 +262,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             max-height: 72dvh !important;
             aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
             margin: auto !important;
+            outline: 2px dashed #ff0055 !important;
+            outline-offset: -2px !important;
           }
           .responsive-crop-inner {
             width: var(--crop-scale-x-mobile, var(--crop-scale-x-desktop, 100%)) !important;
