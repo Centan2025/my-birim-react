@@ -200,6 +200,46 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           transform: var(--transform-desktop, none) !important;
           transform-origin: var(--transform-origin-desktop, center) !important;
         }
+        .responsive-crop-wrapper {
+          position: relative;
+          width: 100%;
+          max-width: 100%;
+          margin-left: auto;
+          margin-right: auto;
+          overflow: hidden;
+        }
+        .responsive-crop-wrapper.is-cover {
+          height: 100%;
+        }
+        .responsive-crop-wrapper.has-aspect {
+          height: auto !important;
+          max-height: 100% !important;
+          aspect-ratio: var(--crop-aspect-desktop, auto);
+        }
+
+        .responsive-crop-inner {
+          position: absolute !important;
+          width: var(--crop-scale-x-desktop, 100%) !important;
+          height: var(--crop-scale-y-desktop, 100%) !important;
+          left: var(--crop-left-desktop, 0%) !important;
+          top: var(--crop-top-desktop, 0%) !important;
+          max-width: none !important;
+          max-height: none !important;
+        }
+        .responsive-crop-inner img,
+        .responsive-crop-inner picture,
+        .responsive-crop-inner picture img {
+          position: absolute !important;
+          top: 0 !important;
+          left: 0 !important;
+          width: 100% !important;
+          height: 100% !important;
+          max-width: none !important;
+          max-height: none !important;
+          object-fit: cover !important;
+          object-position: center !important;
+        }
+
         @media (max-width: 1023px) {
           img.responsive-crop-pos,
           picture.responsive-crop-pos img,
@@ -547,7 +587,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     (imgRef.current?.naturalWidth && imgRef.current.naturalWidth > 0
       ? imgRef.current.naturalWidth
       : undefined) ||
-    16
+    1
   const imgHDesk =
     origHeightDesktop ||
     origHeight ||
@@ -555,7 +595,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     (imgRef.current?.naturalHeight && imgRef.current.naturalHeight > 0
       ? imgRef.current.naturalHeight
       : undefined) ||
-    9
+    1
   const aspectDesk = (cropWDesk * imgWDesk) / (cropHDesk * imgHDesk)
 
   const classList = className.split(' ')
@@ -601,7 +641,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     (imgRef.current?.naturalWidth && imgRef.current.naturalWidth > 0
       ? imgRef.current.naturalWidth
       : undefined) ||
-    16
+    1
   const imgHMob =
     origHeightMobile ||
     origHeight ||
@@ -609,7 +649,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     (imgRef.current?.naturalHeight && imgRef.current.naturalHeight > 0
       ? imgRef.current.naturalHeight
       : undefined) ||
-    9
+    1
   const aspectMob = (cropWMob * imgWMob) / (cropHMob * imgHMob)
 
   useEffect(() => {
