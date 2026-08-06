@@ -67,6 +67,7 @@ interface OptimizedImageProps {
   isMirroredMobile?: boolean
   isMirroredDesktop?: boolean
   fitAuto?: boolean
+  disableResizing?: boolean
 }
 
 /**
@@ -173,6 +174,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   isMirroredMobile,
   isMirroredDesktop,
   fitAuto = false,
+  disableResizing = false,
 }) => {
   const styleBlock = useMemo(() => {
     return (
@@ -413,9 +415,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   const activeCrop = normalizedCropDesktop || normalizedCropMobile
 
-  // R2 URL'lerini optimize et
+  // R2 / Sanity URL'lerini optimize et
   const getOptimizedUrl = (url: string, targetCrop?: typeof activeCrop | null): string => {
     if (!url) return placeholder
+    if (disableResizing) {
+      return encodeSrcSetUrl(url.replace('?rs=1', '').replace('&rs=1', ''))
+    }
     const cropToUse =
       targetCrop === null ? undefined : targetCrop !== undefined ? targetCrop : activeCrop
 
@@ -452,12 +457,16 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       return encodeSrcSetUrl(`${r2Domain}/cdn-cgi/image/${params.join(',')}/${path}`)
     }
 
-    // Sanity CDN URL (rect parameter)
-    if (url.includes('cdn.sanity.io') && cropToUse && !url.includes('rect=')) {
+    // Sanity CDN URL (rect, w, h, q, auto=format)
+    if (url.includes('cdn.sanity.io')) {
       const match = url.match(/-(\d+)x(\d+)\./)
       const w = origWidth || (match ? Number(match[1]) : undefined)
       const h = origHeight || (match ? Number(match[2]) : undefined)
+      const params: string[] = []
+
       if (
+        cropToUse &&
+        !url.includes('rect=') &&
         w &&
         h &&
         (cropToUse.width < 0.999 ||
@@ -469,8 +478,17 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         const rectY = Math.round(cropToUse.y * h)
         const rectW = Math.round(cropToUse.width * w)
         const rectH = Math.round(cropToUse.height * h)
+        params.push(`rect=${rectX},${rectY},${rectW},${rectH}`)
+      }
+
+      if (width && !url.includes('w=')) params.push(`w=${width}`)
+      if (height && !url.includes('h=')) params.push(`h=${height}`)
+      if (quality && !url.includes('q=')) params.push(`q=${quality}`)
+      if (!url.includes('auto=')) params.push('auto=format')
+
+      if (params.length > 0) {
         const delim = url.includes('?') ? '&' : '?'
-        return encodeSrcSetUrl(`${url}${delim}rect=${rectX},${rectY},${rectW},${rectH}`)
+        return encodeSrcSetUrl(`${url}${delim}${params.join('&')}`)
       }
     }
 

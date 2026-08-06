@@ -74,7 +74,7 @@ export function ProductExclusiveContentSection({
       <div className="relative rounded-none border border-[var(--border-primary)] bg-[var(--bg-primary)]/70 backdrop-blur p-6 sm:p-8 pb-10">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl md:text-3xl font-light text-[var(--text-primary)]">
-            {t('downloadable_files') || 'İndirilebilir Dosyalar'}
+            {t('downloadable_files') || 'Ürün Kaynakları'}
           </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

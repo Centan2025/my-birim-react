@@ -98,13 +98,18 @@ const MaterialCard: React.FC<{
       variants={sideReveal['wrapper']}
       className="relative overflow-hidden w-full aspect-square sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-sm shadow-sm"
     >
-      <motion.div variants={sideReveal['image']} className="w-full h-full">
+      <motion.div variants={sideReveal['image']} className="w-full h-full overflow-hidden">
         <OptimizedImage
           src={material.image}
           alt={t(material.name)}
-          className={`w-full h-full object-cover border border-[var(--border-primary)] group-hover:opacity-80 transition-all duration-200 group-hover:scale-105 ${imageBorderClass}`}
+          className={`w-full h-full object-cover border border-[var(--border-primary)] group-hover:opacity-80 transition-all duration-300 ${imageBorderClass}`}
           loading="lazy"
-          quality={80}
+          disableResizing={true}
+          style={{
+            transform: 'scale(1.75)',
+            transformOrigin: 'center center',
+            imageRendering: 'smooth',
+          }}
         />
       </motion.div>
     </motion.div>

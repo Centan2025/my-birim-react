@@ -242,7 +242,7 @@ export default {
   min_read: 'MIN READ',
   continue_reading: 'CONTINUE READING',
   designers_description: 'Visionary minds creating the perfect harmony of aesthetics and function.',
-  downloadable_files: 'Downloadable Files',
+  downloadable_files: 'Product Resources',
   additional_image: 'Additional Image',
   no_additional_images: 'No additional images available',
   no_technical_drawings: 'No technical drawings available',

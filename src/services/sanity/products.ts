@@ -275,16 +275,43 @@ const mapGroupedMaterials = (
     .filter((g): g is ProductMaterialsGroup => Boolean(g))
 }
 
-const mergeMetadata = (
-  base: Record<string, unknown> | R2ImageMetadata,
-  override: Record<string, unknown> | R2ImageMetadata
-): Record<string, unknown> => {
-  const result = {...(base as Record<string, unknown>)}
-  for (const [key, val] of Object.entries(override as Record<string, unknown>)) {
-    if (val !== undefined) {
-      result[key] = val
-    }
+const extractMediaMetadata = (item: Record<string, unknown>): Record<string, unknown> => {
+  const baseMeta = mapR2Metadata(item)
+  const r2Meta = item?.['imageR2'] ? mapR2Metadata(item['imageR2'] as SanityImageLike) : {}
+  const desktopMeta = item?.['imageDesktopR2']
+    ? mapR2Metadata(item['imageDesktopR2'] as SanityImageLike)
+    : {}
+  const mobileMeta = item?.['imageMobileR2']
+    ? mapR2Metadata(item['imageMobileR2'] as SanityImageLike)
+    : {}
+
+  const crop = r2Meta.crop || (item?.['imageR2'] ? undefined : baseMeta.crop)
+  const cropDesktop = desktopMeta.crop || r2Meta.crop
+  const cropMobile = mobileMeta.crop || baseMeta.cropMobile
+
+  const result: Record<string, unknown> = {
+    origWidth: desktopMeta.origWidth || r2Meta.origWidth || baseMeta.origWidth,
+    origHeight: desktopMeta.origHeight || r2Meta.origHeight || baseMeta.origHeight,
+    hotspot: desktopMeta.hotspot || r2Meta.hotspot || baseMeta.hotspot,
   }
+
+  if (crop) result['crop'] = crop
+  if (cropDesktop) result['cropDesktop'] = cropDesktop
+  if (cropMobile) result['cropMobile'] = cropMobile
+
+  if (mobileMeta.crop || baseMeta.cropMobile) {
+    result['cropMobile'] = mobileMeta.crop || baseMeta.cropMobile
+  }
+  if (mobileMeta.hotspot || baseMeta.hotspotMobile) {
+    result['hotspotMobile'] = mobileMeta.hotspot || baseMeta.hotspotMobile
+  }
+  if (mobileMeta.origWidth || baseMeta.origWidthMobile) {
+    result['origWidthMobile'] = mobileMeta.origWidth || baseMeta.origWidthMobile
+  }
+  if (mobileMeta.origHeight || baseMeta.origHeightMobile) {
+    result['origHeightMobile'] = mobileMeta.origHeight || baseMeta.origHeightMobile
+  }
+
   return result
 }
 
@@ -323,26 +350,7 @@ const mapProductMedia = (mediaArrRaw: unknown): unknown[] => {
         url = rewriteR2Url((m?.['url'] as string) || '')
       }
 
-      const baseMeta = mapR2Metadata(m)
-      const r2Meta = m?.['imageR2'] ? mapR2Metadata(m['imageR2'] as SanityImageLike) : {}
-      const desktopMeta = m?.['imageDesktopR2']
-        ? mapR2Metadata(m['imageDesktopR2'] as SanityImageLike)
-        : {}
-      const mobileMeta = m?.['imageMobileR2']
-        ? mapR2Metadata(m['imageMobileR2'] as SanityImageLike)
-        : {}
-
-      const cropDesktop = desktopMeta.crop || r2Meta.crop || baseMeta.crop
-      const cropMobile = mobileMeta.crop || baseMeta.cropMobile
-      const crop = r2Meta.crop || baseMeta.crop
-
-      const metadata = mergeMetadata(
-        mergeMetadata(mergeMetadata(baseMeta, r2Meta), desktopMeta),
-        mobileMeta
-      )
-      if (cropDesktop) metadata['cropDesktop'] = cropDesktop
-      if (cropMobile) metadata['cropMobile'] = cropMobile
-      if (crop) metadata['crop'] = crop
+      const metadata = extractMediaMetadata(m)
 
       const result: Record<string, unknown> = {
         type,
@@ -422,14 +430,7 @@ const mapProductRow = (r: Record<string, unknown>): Product => {
       url = (coverItem['url'] as string) || ''
     }
 
-    const baseMeta = mapR2Metadata(coverItem)
-    const r2Meta = coverItem?.['imageR2']
-      ? mapR2Metadata(coverItem['imageR2'] as SanityImageLike)
-      : {}
-    const mobileMeta = coverItem?.['imageMobileR2']
-      ? mapR2Metadata(coverItem['imageMobileR2'] as SanityImageLike)
-      : {}
-    const metadata = mergeMetadata(mergeMetadata(baseMeta, r2Meta), mobileMeta)
+    const metadata = extractMediaMetadata(coverItem)
     mainImage = {
       url,
       palette: extractPalette(coverItem['imageR2']),

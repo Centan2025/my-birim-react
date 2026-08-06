@@ -89,9 +89,19 @@ export const HeaderThemeProvider = ({children}: PropsWithChildren) => {
   return <HeaderThemeContext.Provider value={value}>{children}</HeaderThemeContext.Provider>
 }
 
+const defaultHeaderThemeCtx: HeaderThemeContextType = {
+  isDark: false,
+  navTheme: 'dark',
+  logoTheme: 'dark',
+  opacity: 0,
+  setNavTheme: () => {},
+  setLogoTheme: () => {},
+  setOpacity: () => {},
+  reset: () => {},
+}
+
 // eslint-disable-next-line react-refresh/only-export-components
 export const useHeaderTheme = () => {
   const ctx = useContext(HeaderThemeContext)
-  if (!ctx) throw new Error('useHeaderTheme must be used within HeaderThemeProvider')
-  return ctx
+  return ctx || defaultHeaderThemeCtx
 }

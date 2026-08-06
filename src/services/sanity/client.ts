@@ -347,7 +347,8 @@ export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
       return {}
     }
 
-    const targetObj = (i['imageR2'] || i['image'] || i) as Record<string, unknown>
+    const desktopAsset = (i['imageDesktopR2'] || i['imageR2'] || i['image']) as Record<string, unknown> | undefined
+    const targetObj = (desktopAsset || i) as Record<string, unknown>
     const dims = extractDimsFromUrl(targetObj)
     const origWidth =
       Number(targetObj['width'] || targetObj['origWidth'] || i['width'] || i['origWidth']) || dims.w
@@ -373,7 +374,11 @@ export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
       return {x, y, width, height}
     }
 
-    const rawCrop = parseCropObj(targetObj) || parseCropObj(i)
+    const rawCrop =
+      parseCropObj(desktopAsset) ||
+      parseCropObj(i['cropDesktop']) ||
+      parseCropObj(i['crop']) ||
+      (!i['imageMobileR2'] && !i['cropMobile'] ? parseCropObj(i) : undefined)
     const crop = normalizeCrop(rawCrop, origWidth, origHeight)
     const hotspot = parseHotspotObj(targetObj) || parseHotspotObj(i)
     const isMirrored =

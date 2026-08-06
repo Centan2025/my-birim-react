@@ -259,11 +259,22 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
 }
 
+const defaultI18nContext: II18nContext = {
+  locale: 'tr',
+  setLocale: () => {},
+  t: (keyOrObject: string | LocalizedString | undefined) => {
+    if (typeof keyOrObject === 'string') return keyOrObject
+    if (typeof keyOrObject === 'object' && keyOrObject !== null) {
+      const obj = keyOrObject as Record<string, string>
+      return obj['tr'] || obj['en'] || Object.values(obj)[0] || ''
+    }
+    return ''
+  },
+  supportedLocales: ['tr', 'en'],
+}
+
 // eslint-disable-next-line react-refresh/only-export-components
 export const useTranslation = () => {
   const context = useContext(I18nContext)
-  if (!context) {
-    throw new Error('useTranslation must be used within an I18nProvider')
-  }
-  return context
+  return context || defaultI18nContext
 }

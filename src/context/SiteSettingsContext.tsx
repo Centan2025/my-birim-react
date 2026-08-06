@@ -15,10 +15,7 @@ const SiteSettingsContext = createContext<SiteSettingsContextType | null>(null)
 // eslint-disable-next-line react-refresh/only-export-components
 export function useSiteSettings() {
   const context = useContext(SiteSettingsContext)
-  if (!context) {
-    throw new Error('useSiteSettings must be used within a SiteSettingsProvider')
-  }
-  return context
+  return context || { settings: null, isLoading: false, error: null }
 }
 
 export const SiteSettingsProvider = ({children}: PropsWithChildren) => {
