@@ -204,8 +204,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           position: relative;
           width: 100%;
           max-width: 100%;
-          margin-left: auto;
-          margin-right: auto;
+          margin: auto;
+          align-self: center;
           overflow: hidden;
         }
         .responsive-crop-wrapper.is-cover {
@@ -879,7 +879,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   return (
     <div
-      className={`relative overflow-hidden ${className}`}
+      className={`relative overflow-hidden flex items-center justify-center ${className}`}
       style={style}
       onClick={onClick}
       onKeyDown={
