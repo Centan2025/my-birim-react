@@ -213,7 +213,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             width: 100% !important;
             height: auto !important;
             max-width: 100% !important;
-            max-height: 58dvh !important;
+            max-height: 65dvh !important;
             aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
             margin: auto !important;
           }
@@ -574,13 +574,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     customStyle['--img-object-fit'] = 'cover'
   }
 
-  const hasMobileContain = classList.some(
-    (c: string) => c.includes('max-md:object-contain') || c.includes('max-lg:object-contain')
-  )
-
   const isCoverMode =
     !effectiveContain &&
-    !hasMobileContain &&
     (classList.some(
       (c: string) =>
         c.startsWith('h-full') ||
