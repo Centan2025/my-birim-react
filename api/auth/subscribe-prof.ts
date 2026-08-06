@@ -85,7 +85,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const verificationToken = randomUUID()
 
-    const newUserObj: Record<string, unknown> = {
+    const newUserObj: any = {
       _type: 'user',
       email: normEmail,
       name: name || '',

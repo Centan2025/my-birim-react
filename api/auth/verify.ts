@@ -58,20 +58,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .unset(['verificationToken'])
       .commit()
 
+    const u = updatedUser as any
     return res.status(200).json({
       success: true,
       message: 'E-posta adresiniz başarıyla doğrulandı.',
       user: {
-        _id: updatedUser._id,
-        email: updatedUser.email,
-        name: updatedUser.name,
-        company: updatedUser.company,
-        profession: updatedUser.profession,
-        country: updatedUser.country,
-        userType: updatedUser.userType,
-        isActive: updatedUser.isActive,
-        isVerified: updatedUser.isVerified,
-        createdAt: updatedUser.createdAt || updatedUser._createdAt,
+        _id: u._id,
+        email: u.email,
+        name: u.name,
+        company: u.company,
+        profession: u.profession,
+        country: u.country,
+        userType: u.userType,
+        isActive: u.isActive,
+        isVerified: u.isVerified,
+        createdAt: u.createdAt || u._createdAt,
       },
     })
   } catch (error: unknown) {

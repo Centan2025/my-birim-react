@@ -77,18 +77,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           })
           .commit()
 
+        const u = updatedUser as any
         return res.status(200).json({
           success: true,
           message: 'Bülten aboneliğiniz üye hesabına dönüştürüldü.',
           user: {
-            _id: updatedUser._id,
-            id: updatedUser._id,
-            email: updatedUser.email,
-            firstName: updatedUser.firstName,
-            lastName: updatedUser.lastName,
-            name: updatedUser.name,
-            role: updatedUser.role,
-            architectVerificationStatus: updatedUser.architectVerificationStatus,
+            _id: u._id,
+            id: u._id,
+            email: u.email,
+            firstName: u.firstName,
+            lastName: u.lastName,
+            name: u.name,
+            role: u.role,
+            architectVerificationStatus: u.architectVerificationStatus,
             verificationToken,
             isVerified: false,
             isActive: true,
@@ -124,17 +125,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       createdAt: new Date().toISOString(),
     })
 
+    const nu = newUser as any
     return res.status(201).json({
       success: true,
       user: {
-        _id: newUser._id,
-        id: newUser._id,
-        email: newUser.email,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        name: newUser.name,
-        role: newUser.role,
-        architectVerificationStatus: newUser.architectVerificationStatus,
+        _id: nu._id,
+        id: nu._id,
+        email: nu.email,
+        firstName: nu.firstName,
+        lastName: nu.lastName,
+        name: nu.name,
+        role: nu.role,
+        architectVerificationStatus: nu.architectVerificationStatus,
         verificationToken,
         isVerified: false,
         isActive: true,
