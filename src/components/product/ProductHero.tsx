@@ -197,6 +197,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
             return (
               <div
                 key={`slide-${index}-${m.url || index}`}
+                className="w-full h-full flex items-center justify-center relative p-0 max-md:pt-28 max-md:pb-32 max-md:px-4"
                 style={
                   {
                     width: `${100 / totalHeroSlides}%`,
@@ -210,9 +211,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     srcMobile={m.urlMobile}
                     srcDesktop={m.urlDesktop}
                     alt={`${t(product.name)} ${index + 1}`}
-                    className={`w-full h-full ${
-                      !m.urlMobile ? 'max-md:object-contain md:object-cover' : 'object-cover'
-                    } ${imageBorderClass} select-none`}
+                    className={`w-full h-full max-md:object-contain md:object-cover ${imageBorderClass} select-none`}
                     width={1600}
                     height={900}
                     loading="eager"
@@ -253,9 +252,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                       (m as unknown as Record<string, string>)['posterDesktop'] ||
                       (m as unknown as Record<string, string>)['imageDesktop']
                     }
-                    className={`w-full h-full ${
-                      !m.urlMobile ? 'max-md:object-contain md:object-cover' : 'object-cover'
-                    } ${imageBorderClass}`}
+                    className={`w-full h-full max-md:object-contain md:object-cover ${imageBorderClass}`}
                     autoPlay={isActiveSlide}
                     muted
                     loop
