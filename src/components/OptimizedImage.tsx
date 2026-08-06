@@ -247,11 +247,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           picture.responsive-crop-pos img {
             object-fit: var(--img-object-fit-mobile, var(--img-object-fit, contain)) !important;
             object-position: var(--obj-pos-mobile, var(--obj-pos-desktop, center)) !important;
-          }
-          .responsive-crop-wrapper {
-            border: 3px solid #ff0055 !important;
-            box-sizing: border-box !important;
-          }
           .responsive-crop-wrapper,
           .responsive-crop-wrapper.is-cover,
           .responsive-crop-wrapper.has-aspect {
