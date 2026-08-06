@@ -803,7 +803,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           height={height}
           loading={loading}
           {...fetchPriorityAttr}
-          className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${useClientCrop ? 'h-full' : isHeightDefined ? '' : 'h-auto'} ${innerImgClassName} responsive-mirror responsive-crop-pos`}
+          className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${useClientCrop || isHeightDefined ? 'h-full' : 'h-auto'} ${innerImgClassName} responsive-mirror responsive-crop-pos`}
           draggable={draggable}
           onLoad={handleLoad}
           onError={handleError}
@@ -863,7 +863,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         {...fetchPriorityAttr}
         srcSet={responsiveSrcSet}
         sizes={responsiveSrcSet ? defaultSizes : undefined}
-        className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${useClientCrop ? 'h-full' : isHeightDefined ? '' : 'h-auto'} ${innerImgClassName} responsive-mirror responsive-crop-pos`}
+        className={`${isLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 w-full ${useClientCrop || isHeightDefined ? 'h-full' : 'h-auto'} ${innerImgClassName} responsive-mirror responsive-crop-pos`}
         draggable={draggable}
         onLoad={handleLoad}
         onError={handleError}
