@@ -59,13 +59,14 @@ const getAssetKey = (img: unknown): string | null => {
 
 const getMaterialKey = (item: Record<string, unknown>): string | null => {
   if (!item) return null
-  if (typeof item['_key'] === 'string' && item['_key']) return item['_key'] as string
   const imgObj = item['imageR2'] || item['image']
   const assetKey = getAssetKey(imgObj)
   if (assetKey) return assetKey
-  const nameObj = item['name'] as LocalizedString & {tr?: string}
-  const nameTr = nameObj?.tr || (typeof item['name'] === 'string' ? item['name'] : '')
-  if (nameTr) return nameTr
+  const nameObj = item['name'] as LocalizedString & {tr?: string; en?: string}
+  const nameTr =
+    nameObj?.tr || nameObj?.en || (typeof item['name'] === 'string' ? item['name'] : '')
+  if (nameTr) return nameTr.trim().toLowerCase()
+  if (typeof item['_key'] === 'string' && item['_key']) return item['_key'] as string
   return null
 }
 
@@ -97,7 +98,7 @@ const mapMaterialsFromSelections = (
       const key = getMaterialKey(m)
       if (!key || seenKeys.has(key)) continue
       const source = (groupMaterialByKey.get(key) || m) as Record<string, unknown>
-      const imgObj = source['image'] || source['imageR2'] || m['image'] || m['imageR2']
+      const imgObj = source['image'] || source['imageR2'] || m['image'] || m['imageR2'] || source
       result.push({
         name: ((source['name'] as LocalizedString) ??
           (m['name'] as LocalizedString) ??
@@ -127,14 +128,14 @@ const mapGroupedMaterials = (
         if (key) selectedKeys.add(key)
       }
 
-      const mappedBooks = books
+      let mappedBooks = books
         .map((book: Record<string, unknown>) => {
           const materials: ProductMaterial[] = []
           const items = (book?.['items'] as Record<string, unknown>[]) || []
           for (const item of items) {
             const key = getMaterialKey(item)
             if (selectedKeys.size > 0 && (!key || !selectedKeys.has(key))) continue
-            const imgObj = item['imageR2'] || item['image']
+            const imgObj = item['imageR2'] || item['image'] || item
             materials.push({
               name: ((item['name'] as LocalizedString) ?? '') as LocalizedString,
               image: mapImage(imgObj as SanityImageLike),
@@ -147,9 +148,26 @@ const mapGroupedMaterials = (
         })
         .filter((b: Record<string, unknown>) => (b['materials'] as unknown[])?.length > 0)
 
-      const allMaterials = mappedBooks.flatMap(
+      let allMaterials = mappedBooks.flatMap(
         (b: Record<string, unknown>) => b['materials'] as ProductMaterial[]
       )
+
+      if (allMaterials.length === 0 && selectedMats.length > 0) {
+        const directMats: ProductMaterial[] = selectedMats
+          .map(m => {
+            const imgObj = m['imageR2'] || m['image'] || m
+            return {
+              name: ((m['name'] as LocalizedString) ?? '') as LocalizedString,
+              image: mapImage(imgObj as SanityImageLike),
+            }
+          })
+          .filter(m => Boolean(m.image || m.name))
+
+        if (directMats.length > 0) {
+          mappedBooks = [{bookTitle: groupTitle, materials: directMats}]
+          allMaterials = directMats
+        }
+      }
 
       if (allMaterials.length === 0) return null
 
