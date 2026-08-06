@@ -206,25 +206,34 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
                   </button>
 
                   {type === 'image' ? (
-                    <OptimizedImage
-                      src={url}
-                      alt="Enlarged view"
-                      className="max-w-full max-h-[70vh] object-contain shadow-2xl"
-                      loading="eager"
-                      quality={95}
-                      crop={currentItem.crop}
-                      hotspot={currentItem.hotspot}
-                      origWidth={currentItem.origWidth as number}
-                      origHeight={currentItem.origHeight as number}
-                      cropMobile={currentItem.cropMobile}
-                      hotspotMobile={currentItem.hotspotMobile}
-                      origWidthMobile={currentItem.origWidthMobile as number}
-                      origHeightMobile={currentItem.origHeightMobile as number}
-                      placeholderColor="#111111"
-                      isMirrored={currentItem.isMirrored}
-                      isMirroredMobile={currentItem.isMirroredMobile}
-                      isMirroredDesktop={currentItem.isMirroredDesktop}
-                    />
+                    currentItem.crop ? (
+                      <OptimizedImage
+                        src={url}
+                        alt="Enlarged view"
+                        className="max-w-full max-h-[70vh] object-contain shadow-2xl"
+                        loading="eager"
+                        quality={95}
+                        crop={currentItem.crop}
+                        hotspot={currentItem.hotspot}
+                        origWidth={currentItem.origWidth as number}
+                        origHeight={currentItem.origHeight as number}
+                        cropMobile={currentItem.cropMobile}
+                        hotspotMobile={currentItem.hotspotMobile}
+                        origWidthMobile={currentItem.origWidthMobile as number}
+                        origHeightMobile={currentItem.origHeightMobile as number}
+                        placeholderColor="#111111"
+                        isMirrored={currentItem.isMirrored}
+                        isMirroredMobile={currentItem.isMirroredMobile}
+                        isMirroredDesktop={currentItem.isMirroredDesktop}
+                      />
+                    ) : (
+                      <img
+                        src={url}
+                        alt="Enlarged view"
+                        className="max-w-[85vw] max-h-[70vh] w-auto h-auto object-contain shadow-2xl rounded-sm block"
+                        loading="eager"
+                      />
+                    )
                   ) : type === 'video' ? (
                     <OptimizedVideo
                       src={url}
