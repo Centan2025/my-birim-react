@@ -1,5 +1,6 @@
 import {createClient} from '@sanity/client'
 import bcrypt from 'bcryptjs'
+import {randomUUID} from 'crypto'
 import {isRateLimitedAsync, getClientIp} from './_rateLimiter'
 
 const SANITY_PROJECT_ID = process.env['VITE_SANITY_PROJECT_ID'] || 'wn3a082f'
@@ -55,7 +56,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // Eğer email abonesi ise üye hesabına yükselt (Bülten abonesi hesap değildir, kayıtta hesaba dönüşür)
       if (existingUser.userType === 'email_subscriber' || !existingUser.password) {
         const passwordHash = await bcrypt.hash(password, 12)
-        const verificationToken = crypto.randomUUID()
+        const verificationToken = randomUUID()
         const updatedUser = await client
           .patch(existingUser._id)
           .set({
@@ -101,7 +102,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Yeni kullanıcı oluştur
     const passwordHash = await bcrypt.hash(password, 12)
-    const verificationToken = crypto.randomUUID()
+    const verificationToken = randomUUID()
 
     const newUser = await client.create({
       _type: 'user',

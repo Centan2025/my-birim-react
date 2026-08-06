@@ -1,4 +1,5 @@
 import {createClient} from '@sanity/client'
+import {randomUUID} from 'crypto'
 
 const SANITY_PROJECT_ID = process.env['VITE_SANITY_PROJECT_ID'] || 'wn3a082f'
 const SANITY_DATASET = process.env['VITE_SANITY_DATASET'] || 'production'
@@ -38,7 +39,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(404).json({error: 'Kullanıcı bulunamadı.'})
     }
 
-    const resetToken = crypto.randomUUID()
+    const resetToken = randomUUID()
     const resetPasswordExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
 
     await client
