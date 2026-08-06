@@ -271,11 +271,11 @@ select {
   font-weight: 300;
 }
 
-/* Barlow Condensed Thin 100 utility - Refined for Rich Text support */
+/* Roboto Light utility - Refined for Rich Text support */
 .font-roboto-thin,
 .font-roboto-thin * {
-  font-family: 'Barlow Condensed', sans-serif !important;
-  letter-spacing: 0.05em !important;
+  font-family: 'Roboto', 'Inter', sans-serif !important;
+  letter-spacing: 0.02em !important;
 }
 
 .font-roboto-thin {
