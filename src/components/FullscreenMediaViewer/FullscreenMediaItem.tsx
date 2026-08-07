@@ -26,9 +26,6 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
 }) => {
   if (!item) return null
 
-  const itemMaxHeight = isMobile && !isLandscape ? 'calc(100dvh - 24px)' : 'calc(100dvh - 48px)'
-  const itemMaxWidth = isMobile ? 'calc(100vw - 12px)' : 'calc(100vw - 64px)'
-
   return (
     <div
       ref={itemRef}
@@ -53,7 +50,7 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
         justifyContent: 'center',
         scrollSnapAlign: 'center',
         scrollSnapStop: 'always',
-        padding: isMobile ? '8px 4px' : '16px 24px',
+        padding: '0',
       }}
     >
       {item.type === 'image' ? (
@@ -62,14 +59,14 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
           srcMobile={item.urlMobile}
           srcDesktop={item.urlDesktop}
           alt=""
-          className="w-auto h-auto object-contain mx-auto select-none pointer-events-none drop-shadow-md"
+          className="w-full h-full object-contain mx-auto select-none pointer-events-none"
           sizes="100vw"
           fetchPriority="high"
           style={{
-            maxHeight: itemMaxHeight,
-            maxWidth: itemMaxWidth,
-            width: 'auto',
-            height: 'auto',
+            maxHeight: '100dvh',
+            maxWidth: '100vw',
+            width: '100%',
+            height: '100%',
             display: 'block',
             WebkitBackfaceVisibility: 'hidden',
             objectFit: 'contain',
@@ -89,12 +86,12 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
           src={item.url}
           srcMobile={item.urlMobile}
           srcDesktop={item.urlDesktop}
-          className="w-auto h-auto object-contain mx-auto shadow-lg"
+          className="w-full h-full object-contain mx-auto"
           style={{
-            maxHeight: itemMaxHeight,
-            maxWidth: itemMaxWidth,
-            width: 'auto',
-            height: 'auto',
+            maxHeight: '100dvh',
+            maxWidth: '100vw',
+            width: '100%',
+            height: '100%',
             display: 'block',
             objectFit: 'contain',
           }}
@@ -107,14 +104,14 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
         />
       ) : (
         <iframe
-          className="w-full h-full max-w-[95vw] max-h-[90vh]"
+          className="w-full h-full max-w-[100vw] max-h-[100dvh]"
           title={`fullscreen-media-youtube-${index}`}
           src={item.url}
           allow="autoplay; encrypted-media; fullscreen"
           frameBorder="0"
           style={{
-            height: itemMaxHeight,
-            width: itemMaxWidth,
+            height: '100dvh',
+            width: '100vw',
             aspectRatio: '16/9',
           }}
         />
