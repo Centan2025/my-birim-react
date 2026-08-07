@@ -272,15 +272,15 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   )
 
   const handleScrollLeft = useCallback(() => {
-    if (activeIndexRef.current > 0) {
-      scrollToIndex(activeIndexRef.current - 1)
-    }
-  }, [scrollToIndex])
+    if (slideCount <= 1) return
+    const nextIdx = activeIndexRef.current <= 0 ? slideCount - 1 : activeIndexRef.current - 1
+    scrollToIndex(nextIdx)
+  }, [slideCount, scrollToIndex])
 
   const handleScrollRight = useCallback(() => {
-    if (activeIndexRef.current < slideCount - 1) {
-      scrollToIndex(activeIndexRef.current + 1)
-    }
+    if (slideCount <= 1) return
+    const nextIdx = activeIndexRef.current >= slideCount - 1 ? 0 : activeIndexRef.current + 1
+    scrollToIndex(nextIdx)
   }, [slideCount, scrollToIndex])
 
   const handleWheel = (e: React.WheelEvent) => {
