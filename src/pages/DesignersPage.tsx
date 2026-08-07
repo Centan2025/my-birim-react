@@ -147,6 +147,46 @@ export function DesignersPage() {
                   srcDesktop={
                     typeof designer.image === 'object' ? designer.image.urlDesktop : undefined
                   }
+                  crop={typeof designer.image === 'object' ? designer.image.crop : undefined}
+                  hotspot={
+                    typeof designer.image === 'object' ? designer.image.hotspot : undefined
+                  }
+                  origWidth={
+                    typeof designer.image === 'object' ? designer.image.origWidth : undefined
+                  }
+                  origHeight={
+                    typeof designer.image === 'object' ? designer.image.origHeight : undefined
+                  }
+                  cropMobile={
+                    typeof designer.image === 'object' ? designer.image.cropMobile : undefined
+                  }
+                  hotspotMobile={
+                    typeof designer.image === 'object' ? designer.image.hotspotMobile : undefined
+                  }
+                  origWidthMobile={
+                    typeof designer.image === 'object' ? designer.image.origWidthMobile : undefined
+                  }
+                  origHeightMobile={
+                    typeof designer.image === 'object'
+                      ? designer.image.origHeightMobile
+                      : undefined
+                  }
+                  cropDesktop={
+                    typeof designer.image === 'object' ? designer.image.cropDesktop : undefined
+                  }
+                  hotspotDesktop={
+                    typeof designer.image === 'object' ? designer.image.hotspotDesktop : undefined
+                  }
+                  origWidthDesktop={
+                    typeof designer.image === 'object'
+                      ? designer.image.origWidthDesktop
+                      : undefined
+                  }
+                  origHeightDesktop={
+                    typeof designer.image === 'object'
+                      ? designer.image.origHeightDesktop
+                      : undefined
+                  }
                 />
 
                 {/* Refined Overlays */}

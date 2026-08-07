@@ -139,6 +139,16 @@ export interface Designer {
         urlDesktop?: string
         crop?: R2ImageMetadata['crop']
         hotspot?: R2ImageMetadata['hotspot']
+        origWidth?: number
+        origHeight?: number
+        cropMobile?: R2ImageMetadata['crop']
+        hotspotMobile?: R2ImageMetadata['hotspot']
+        origWidthMobile?: number
+        origHeightMobile?: number
+        cropDesktop?: R2ImageMetadata['crop']
+        hotspotDesktop?: R2ImageMetadata['hotspot']
+        origWidthDesktop?: number
+        origHeightDesktop?: number
       }
   /** Art Direction: Mobil için görsel URL (opsiyonel) */
   imageMobile?: string

@@ -799,9 +799,77 @@ interface FormattedEra {
                           <div className="relative aspect-[3/4] w-full overflow-hidden rounded-none grayscale">
                             <OptimizedImage
                               src={dImgUrl}
+                              srcMobile={
+                                typeof designer.image === 'object'
+                                  ? designer.image.urlMobile
+                                  : undefined
+                              }
+                              srcDesktop={
+                                typeof designer.image === 'object'
+                                  ? designer.image.urlDesktop
+                                  : undefined
+                              }
                               fallbackSrc={DEFAULT_IMAGES.identity}
                               alt={dName}
                               className="w-full h-full object-cover grayscale"
+                              crop={
+                                typeof designer.image === 'object' ? designer.image.crop : undefined
+                              }
+                              hotspot={
+                                typeof designer.image === 'object'
+                                  ? designer.image.hotspot
+                                  : undefined
+                              }
+                              origWidth={
+                                typeof designer.image === 'object'
+                                  ? designer.image.origWidth
+                                  : undefined
+                              }
+                              origHeight={
+                                typeof designer.image === 'object'
+                                  ? designer.image.origHeight
+                                  : undefined
+                              }
+                              cropMobile={
+                                typeof designer.image === 'object'
+                                  ? designer.image.cropMobile
+                                  : undefined
+                              }
+                              hotspotMobile={
+                                typeof designer.image === 'object'
+                                  ? designer.image.hotspotMobile
+                                  : undefined
+                              }
+                              origWidthMobile={
+                                typeof designer.image === 'object'
+                                  ? designer.image.origWidthMobile
+                                  : undefined
+                              }
+                              origHeightMobile={
+                                typeof designer.image === 'object'
+                                  ? designer.image.origHeightMobile
+                                  : undefined
+                              }
+                              cropDesktop={
+                                typeof designer.image === 'object'
+                                  ? designer.image.cropDesktop
+                                  : undefined
+                              }
+                              hotspotDesktop={
+                                typeof designer.image === 'object'
+                                  ? designer.image.hotspotDesktop
+                                  : undefined
+                              }
+                              origWidthDesktop={
+                                typeof designer.image === 'object'
+                                  ? designer.image.origWidthDesktop
+                                  : undefined
+                              }
+                              origHeightDesktop={
+                                typeof designer.image === 'object'
+                                  ? designer.image.origHeightDesktop
+                                  : undefined
+                              }
                             />
                           </div>
                           <div className="space-y-2">
@@ -971,9 +1039,79 @@ interface FormattedEra {
                             <div className="col-span-6 relative aspect-[3/4] overflow-hidden rounded-none grayscale">
                               <OptimizedImage
                                 src={currentImgUrl}
+                                srcMobile={
+                                  typeof currentDesigner.image === 'object'
+                                    ? currentDesigner.image.urlMobile
+                                    : undefined
+                                }
+                                srcDesktop={
+                                  typeof currentDesigner.image === 'object'
+                                    ? currentDesigner.image.urlDesktop
+                                    : undefined
+                                }
                                 fallbackSrc={DEFAULT_IMAGES.identity}
                                 alt={getPlainText(t(currentDesigner.name))}
                                 className="w-full h-full object-cover grayscale"
+                                crop={
+                                  typeof currentDesigner.image === 'object'
+                                    ? currentDesigner.image.crop
+                                    : undefined
+                                }
+                                hotspot={
+                                  typeof currentDesigner.image === 'object'
+                                    ? currentDesigner.image.hotspot
+                                    : undefined
+                                }
+                                origWidth={
+                                  typeof currentDesigner.image === 'object'
+                                    ? currentDesigner.image.origWidth
+                                    : undefined
+                                }
+                                origHeight={
+                                  typeof currentDesigner.image === 'object'
+                                    ? currentDesigner.image.origHeight
+                                    : undefined
+                                }
+                                cropMobile={
+                                  typeof currentDesigner.image === 'object'
+                                    ? currentDesigner.image.cropMobile
+                                    : undefined
+                                }
+                                hotspotMobile={
+                                  typeof currentDesigner.image === 'object'
+                                    ? currentDesigner.image.hotspotMobile
+                                    : undefined
+                                }
+                                origWidthMobile={
+                                  typeof currentDesigner.image === 'object'
+                                    ? currentDesigner.image.origWidthMobile
+                                    : undefined
+                                }
+                                origHeightMobile={
+                                  typeof currentDesigner.image === 'object'
+                                    ? currentDesigner.image.origHeightMobile
+                                    : undefined
+                                }
+                                cropDesktop={
+                                  typeof currentDesigner.image === 'object'
+                                    ? currentDesigner.image.cropDesktop
+                                    : undefined
+                                }
+                                hotspotDesktop={
+                                  typeof currentDesigner.image === 'object'
+                                    ? currentDesigner.image.hotspotDesktop
+                                    : undefined
+                                }
+                                origWidthDesktop={
+                                  typeof currentDesigner.image === 'object'
+                                    ? currentDesigner.image.origWidthDesktop
+                                    : undefined
+                                }
+                                origHeightDesktop={
+                                  typeof currentDesigner.image === 'object'
+                                    ? currentDesigner.image.origHeightDesktop
+                                    : undefined
+                                }
                               />
                             </div>
 
