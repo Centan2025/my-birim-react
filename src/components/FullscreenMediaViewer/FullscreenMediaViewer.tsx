@@ -13,6 +13,14 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   const [isVisible, setIsVisible] = useState(false)
   const [isButtonVisible, setIsButtonVisible] = useState(false)
   const [visibleIndices, setVisibleIndices] = useState<number[]>([])
+  const [, setActiveIndex] = useState(initialIndex)
+  const activeIndexRef = useRef(initialIndex)
+  const lastWheelTime = useRef(0)
+
+  const updateActiveIndex = useCallback((idx: number) => {
+    setActiveIndex(idx)
+    activeIndexRef.current = idx
+  }, [])
   const [isMobile, setIsMobile] = useState(false)
   const [isLandscape, setIsLandscape] = useState(false)
   const closingVisibleIndicesRef = useRef<number[]>([])
@@ -243,7 +251,54 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     }, 300)
   }
 
-  // Scroll effects
+  // Navigation & Scroll Handlers
+
+  const scrollToIndex = useCallback(
+    (index: number) => {
+      if (!scrollContainerRef.current) return
+      const container = scrollContainerRef.current
+      const targetEl = itemRefs.current[index]
+      if (targetEl) {
+        const isHorizontal = (isMobile && isLandscape) || !isMobile
+        if (isHorizontal) {
+          container.scrollTo({left: targetEl.offsetLeft, behavior: 'smooth'})
+        } else {
+          container.scrollTo({top: targetEl.offsetTop, behavior: 'smooth'})
+        }
+        updateActiveIndex(index)
+      }
+    },
+    [isMobile, isLandscape, updateActiveIndex]
+  )
+
+  const handleScrollLeft = useCallback(() => {
+    if (activeIndexRef.current > 0) {
+      scrollToIndex(activeIndexRef.current - 1)
+    }
+  }, [scrollToIndex])
+
+  const handleScrollRight = useCallback(() => {
+    if (activeIndexRef.current < slideCount - 1) {
+      scrollToIndex(activeIndexRef.current + 1)
+    }
+  }, [slideCount, scrollToIndex])
+
+  const handleWheel = (e: React.WheelEvent) => {
+    const isHorizontal = (isMobile && isLandscape) || !isMobile
+    const delta = isHorizontal ? e.deltaY || e.deltaX : e.deltaY
+    const now = Date.now()
+
+    if (Math.abs(delta) > 10 && now - lastWheelTime.current > 300) {
+      lastWheelTime.current = now
+      if (delta > 0) {
+        handleScrollRight()
+      } else {
+        handleScrollLeft()
+      }
+    }
+  }
+
+  // Scroll effects & active index tracking
   useEffect(() => {
     if (!scrollContainerRef.current || typeof window === 'undefined') return
 
@@ -258,20 +313,41 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
         setShowScrollToTop(false)
 
         const visible: number[] = []
+        let centerItemIndex = 0
+        let minDistanceToCenter = Infinity
+        const containerCenter = containerLeft + container.clientWidth / 2
+
         itemRefs.current.forEach((ref, index) => {
           if (!ref) return
+          const itemCenter = ref.offsetLeft + ref.offsetWidth / 2
+          const distance = Math.abs(containerCenter - itemCenter)
+          if (distance < minDistanceToCenter) {
+            minDistanceToCenter = distance
+            centerItemIndex = index
+          }
           if (ref.offsetLeft + ref.offsetWidth > containerLeft && ref.offsetLeft < containerRight) {
             visible.push(index)
           }
         })
         setVisibleIndices(visible)
+        updateActiveIndex(centerItemIndex)
       } else {
         const containerTop = container.scrollTop
         setShowScrollToTop(isMobile && !isLandscape && containerTop > 200)
 
         const visible: number[] = []
+        let centerItemIndex = 0
+        let minDistanceToCenter = Infinity
+        const containerCenter = containerTop + container.clientHeight / 2
+
         itemRefs.current.forEach((ref, index) => {
           if (!ref) return
+          const itemCenter = ref.offsetTop + ref.offsetHeight / 2
+          const distance = Math.abs(containerCenter - itemCenter)
+          if (distance < minDistanceToCenter) {
+            minDistanceToCenter = distance
+            centerItemIndex = index
+          }
           if (
             ref.offsetTop + ref.offsetHeight > containerTop &&
             ref.offsetTop < containerTop + container.clientHeight
@@ -280,6 +356,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
           }
         })
         setVisibleIndices(visible)
+        updateActiveIndex(centerItemIndex)
       }
     }
 
@@ -290,41 +367,28 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       container.removeEventListener('scroll', updateVisibleIndices)
       window.removeEventListener('resize', updateVisibleIndices)
     }
-  }, [items.length, isMobile, isLandscape])
+  }, [items.length, isMobile, isLandscape, updateActiveIndex])
 
-  const scrollToIndex = useCallback(
-    (index: number) => {
-      if (!scrollContainerRef.current) return
-      const container = scrollContainerRef.current
-      const targetEl = itemRefs.current[index]
-      if (targetEl) {
-        if (!isMobile || (isMobile && isLandscape)) {
-          container.scrollTo({left: targetEl.offsetLeft, behavior: 'smooth'})
-        } else {
-          container.scrollTo({top: targetEl.offsetTop, behavior: 'smooth'})
-        }
+  // Keydown listener for arrow navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') {
+        handleScrollRight()
+      } else if (e.key === 'ArrowLeft') {
+        handleScrollLeft()
+      } else if (e.key === 'Escape') {
+        handleClose()
       }
-    },
-    [isMobile, isLandscape]
-  )
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [handleScrollRight, handleScrollLeft, handleClose])
 
   useEffect(() => {
     if (initialIndex >= 0 && scrollContainerRef.current) {
       setTimeout(() => scrollToIndex(initialIndex), 100)
     }
   }, [initialIndex, scrollToIndex])
-
-  const handleScrollLeft = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({left: -window.innerWidth / 2, behavior: 'smooth'})
-    }
-  }
-
-  const handleScrollRight = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({left: window.innerWidth / 2, behavior: 'smooth'})
-    }
-  }
 
   const handleScrollToTop = () => {
     scrollContainerRef.current?.scrollTo({top: 0, behavior: 'smooth'})
@@ -371,14 +435,14 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
             ref={scrollContainerRef}
             className={`w-full overflow-y-auto md:overflow-y-hidden md:overflow-x-auto flex ${
               isMobile && isLandscape ? 'flex-row' : isMobile ? 'flex-col' : 'flex-row'
-            } items-start md:items-stretch ${slideCount === 1 ? 'justify-center' : 'justify-start'} px-0 md:px-4 md:cursor-grab md:select-none`}
+            } items-start md:items-stretch ${slideCount === 1 ? 'justify-center' : 'justify-start'} px-0 md:px-0 md:cursor-grab md:select-none`}
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
               height: '100dvh',
-              paddingTop: isMobile && isLandscape ? '4px' : '0',
-              paddingBottom: isMobile && isLandscape ? '4px' : '0',
-              gap: isMobile && isLandscape ? '4px' : isMobile ? '0' : '6px',
+              paddingTop: '0',
+              paddingBottom: '0',
+              gap: '0',
               cursor: isDragging && !isMobile ? 'grabbing' : !isMobile ? 'grab' : 'default',
               overflowY: isMobile && isLandscape ? 'hidden' : isMobile ? 'auto' : 'hidden',
               overflowX: isMobile && isLandscape ? 'auto' : isMobile ? 'hidden' : 'auto',
@@ -388,6 +452,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
+            onWheel={handleWheel}
           >
             <style>{`div::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; } * { scrollbar-width: none !important; -ms-overflow-style: none !important; }`}</style>
             {items.map((item, i) => {

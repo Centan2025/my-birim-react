@@ -28,9 +28,9 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
 
   // Desktop ve mobil landscape için sabit yükseklik hesapla
   const fixedHeight =
-    isMobile && isLandscape ? 'calc(100dvh - 12px)' : !isMobile ? 'calc(100vh - 16px)' : 'auto'
+    isMobile && isLandscape ? 'calc(100dvh - 12px)' : !isMobile ? 'calc(100dvh - 24px)' : 'auto'
 
-  const itemWidth = isMobile && isLandscape ? 'auto' : !isMobile ? 'auto' : '100%'
+  const itemWidth = isMobile && !isLandscape ? '100vw' : '100vw'
 
   return (
     <div
@@ -47,16 +47,17 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
         minHeight: fixedHeight === 'auto' ? 'auto' : fixedHeight,
         maxHeight: fixedHeight === 'auto' ? 'none' : fixedHeight,
         width: itemWidth,
-        minWidth: isMobile && isLandscape ? '0' : !isMobile ? '0' : '100%',
-        maxWidth: isMobile && isLandscape ? 'none' : !isMobile ? 'none' : '100%',
+        minWidth: itemWidth,
+        maxWidth: itemWidth,
         marginTop: isMobile && isLandscape ? '0' : isMobile ? (index === 0 ? '0' : '2px') : '0',
-        marginBottom: isMobile && isLandscape ? '0' : '0',
+        marginBottom: '0',
         boxSizing: 'border-box',
         overflow: 'hidden',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        scrollSnapAlign: (isMobile && isLandscape) || !isMobile ? 'start' : 'none',
+        scrollSnapAlign: 'center',
+        scrollSnapStop: 'always',
       }}
     >
       {item.type === 'image' ? (
@@ -65,18 +66,17 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
           srcMobile={item.urlMobile}
           srcDesktop={item.urlDesktop}
           alt=""
-          className="h-full w-auto max-w-none"
+          className="max-h-[85vh] max-w-[90vw] object-contain mx-auto"
           sizes="100vw"
           fetchPriority="high"
           style={{
             height: fixedHeight === 'auto' ? 'auto' : '100%',
-            maxHeight: fixedHeight === 'auto' ? 'none' : '100%',
-            maxWidth: 'none',
-            width:
-              isMobile && isLandscape ? 'auto' : fixedHeight === 'auto' ? '100%' : 'fit-content',
-            minWidth: isMobile && isLandscape ? '0' : 'auto',
+            maxHeight: fixedHeight === 'auto' ? 'none' : '85vh',
+            maxWidth: '90vw',
+            width: 'auto',
             display: 'block',
             WebkitBackfaceVisibility: 'hidden',
+            objectFit: 'contain',
           }}
           loading="eager"
           quality={100}
@@ -93,15 +93,14 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
           src={item.url}
           srcMobile={item.urlMobile}
           srcDesktop={item.urlDesktop}
-          className="h-full w-auto max-w-none"
+          className="max-h-[85vh] max-w-[90vw] object-contain mx-auto"
           style={{
             height: fixedHeight === 'auto' ? 'auto' : '100%',
-            maxHeight: fixedHeight === 'auto' ? 'none' : '100%',
-            maxWidth: 'none',
-            width:
-              isMobile && isLandscape ? 'auto' : fixedHeight === 'auto' ? '100%' : 'fit-content',
-            minWidth: isMobile && isLandscape ? '0' : 'auto',
+            maxHeight: fixedHeight === 'auto' ? 'none' : '85vh',
+            maxWidth: '90vw',
+            width: 'auto',
             display: 'block',
+            objectFit: 'contain',
           }}
           autoPlay
           muted
@@ -112,16 +111,14 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
         />
       ) : (
         <iframe
-          className="w-full h-full"
+          className="max-h-[85vh] max-w-[90vw]"
           title={`fullscreen-media-youtube-${index}`}
           src={item.url}
           allow="autoplay; encrypted-media; fullscreen"
           frameBorder="0"
           style={{
-            height: fixedHeight === 'auto' ? '60vh' : '100%',
-            width: isMobile && isLandscape ? 'auto' : fixedHeight === 'auto' ? '100%' : 'auto',
-            maxWidth: isMobile && isLandscape ? 'none' : 'none',
-            minWidth: isMobile && isLandscape ? '0' : 'auto',
+            height: fixedHeight === 'auto' ? '60vh' : '85vh',
+            width: '90vw',
             aspectRatio: '16/9',
           }}
         />
