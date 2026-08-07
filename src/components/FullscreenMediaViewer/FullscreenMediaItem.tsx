@@ -26,11 +26,8 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
 }) => {
   if (!item) return null
 
-  // Desktop ve mobil landscape için sabit yükseklik hesapla
-  const fixedHeight =
-    isMobile && isLandscape ? 'calc(100dvh - 12px)' : !isMobile ? 'calc(100dvh - 24px)' : 'auto'
-
-  const itemWidth = isMobile && !isLandscape ? '100vw' : '100vw'
+  const itemMaxHeight = isMobile && !isLandscape ? 'calc(100dvh - 24px)' : 'calc(100dvh - 48px)'
+  const itemMaxWidth = isMobile ? 'calc(100vw - 12px)' : 'calc(100vw - 64px)'
 
   return (
     <div
@@ -43,13 +40,11 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
       style={{
         transitionDelay: `${animationDelay}ms`,
         transitionDuration: '500ms',
-        height: fixedHeight,
-        minHeight: fixedHeight === 'auto' ? 'auto' : fixedHeight,
-        maxHeight: fixedHeight === 'auto' ? 'none' : fixedHeight,
-        width: itemWidth,
-        minWidth: itemWidth,
-        maxWidth: itemWidth,
-        marginTop: isMobile && isLandscape ? '0' : isMobile ? (index === 0 ? '0' : '2px') : '0',
+        height: '100dvh',
+        width: '100vw',
+        minWidth: '100vw',
+        maxWidth: '100vw',
+        marginTop: '0',
         marginBottom: '0',
         boxSizing: 'border-box',
         overflow: 'hidden',
@@ -58,6 +53,7 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
         justifyContent: 'center',
         scrollSnapAlign: 'center',
         scrollSnapStop: 'always',
+        padding: isMobile ? '8px 4px' : '16px 24px',
       }}
     >
       {item.type === 'image' ? (
@@ -66,14 +62,14 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
           srcMobile={item.urlMobile}
           srcDesktop={item.urlDesktop}
           alt=""
-          className="max-h-[85vh] max-w-[90vw] object-contain mx-auto"
+          className="w-auto h-auto object-contain mx-auto select-none pointer-events-none drop-shadow-md"
           sizes="100vw"
           fetchPriority="high"
           style={{
-            height: fixedHeight === 'auto' ? 'auto' : '100%',
-            maxHeight: fixedHeight === 'auto' ? 'none' : '85vh',
-            maxWidth: '90vw',
+            maxHeight: itemMaxHeight,
+            maxWidth: itemMaxWidth,
             width: 'auto',
+            height: 'auto',
             display: 'block',
             WebkitBackfaceVisibility: 'hidden',
             objectFit: 'contain',
@@ -93,12 +89,12 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
           src={item.url}
           srcMobile={item.urlMobile}
           srcDesktop={item.urlDesktop}
-          className="max-h-[85vh] max-w-[90vw] object-contain mx-auto"
+          className="w-auto h-auto object-contain mx-auto shadow-lg"
           style={{
-            height: fixedHeight === 'auto' ? 'auto' : '100%',
-            maxHeight: fixedHeight === 'auto' ? 'none' : '85vh',
-            maxWidth: '90vw',
+            maxHeight: itemMaxHeight,
+            maxWidth: itemMaxWidth,
             width: 'auto',
+            height: 'auto',
             display: 'block',
             objectFit: 'contain',
           }}
@@ -111,14 +107,14 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
         />
       ) : (
         <iframe
-          className="max-h-[85vh] max-w-[90vw]"
+          className="w-full h-full max-w-[95vw] max-h-[90vh]"
           title={`fullscreen-media-youtube-${index}`}
           src={item.url}
           allow="autoplay; encrypted-media; fullscreen"
           frameBorder="0"
           style={{
-            height: fixedHeight === 'auto' ? '60vh' : '85vh',
-            width: '90vw',
+            height: itemMaxHeight,
+            width: itemMaxWidth,
             aspectRatio: '16/9',
           }}
         />
