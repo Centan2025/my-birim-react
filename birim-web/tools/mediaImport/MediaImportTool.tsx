@@ -148,6 +148,23 @@ const getApiUrl = (path: string): string => {
   return `${base}${path}`
 }
 
+const fetchApiWithFallback = async (path: string, init?: RequestInit): Promise<Response> => {
+  const isLocal =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+
+  if (isLocal) {
+    try {
+      const res = await fetch(`http://localhost:3002${path}`, init)
+      return res
+    } catch {
+      // Local port 3002 is not running, fallback to production Vercel deployment
+    }
+  }
+
+  return fetch(`https://birim-web-antigravity.vercel.app${path}`, init)
+}
+
 const uploadFileViaPresignedUrl = async (
   blob: Blob | File,
   key: string,
@@ -1581,27 +1598,51 @@ export default function MediaImportTool() {
     setIsCleaning(true)
     try {
       // 1. Sanity'den TÜM dökümanları çek (hiçbir alanı atlamamak için)
-      // Sadece URL içermesi muhtemel alanları içeren dökümanları çekmek daha performanslı olur ama
-      // risk almamak için tüm dökümanları çekip derinlemesine tarıyoruz.
       const docs = await client.fetch('*')
       const usedKeys = new Set<string>()
+      const usedBaseKeys = new Set<string>()
 
       // R2 Key ayıklama yardımcısı
-      const extractKey = (url: string): string | null => {
-        if (!url || typeof url !== 'string') return null
+      const extractKey = (rawUrl: string): string | null => {
+        if (!rawUrl || typeof rawUrl !== 'string') return null
+        let url = rawUrl
+        try {
+          url = decodeURIComponent(rawUrl)
+        } catch {
+          // ignore
+        }
+
+        // Eğer proxy URL ise (örneğin /api/proxy-image?url=...), url parametresini çıkar
+        if (url.includes('proxy-image') && url.includes('url=')) {
+          const match = url.match(/[?&]url=([^&]+)/)
+          if (match && match[1]) {
+            let extracted = match[1]
+            try {
+              extracted = decodeURIComponent(extracted)
+            } catch {
+              // ignore
+            }
+            url = extracted
+          }
+        }
+
         if (
           !url.includes('birim-assets') &&
           !url.includes('assets.birim.com') &&
-          !url.includes('.r2.dev')
-        )
+          !url.includes('.r2.dev') &&
+          !url.includes('pub-')
+        ) {
+          if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('/')) {
+            return url.trim()
+          }
           return null
+        }
 
         try {
-          // URL'den domain'i ve query'yi temizle, sadece yolu (key) al
           let path = url.split('?')[0]
-          // Domainleri temizle
-          path = path.replace(/https?:\/\/[^\/]+\//, '')
-          return path
+          path = path.replace(/^https?:\/\/[^\/]+\//, '')
+          path = path.replace(/^birim-assets\//, '')
+          return path.trim()
         } catch {
           return null
         }
@@ -1611,17 +1652,25 @@ export default function MediaImportTool() {
         if (!val) return
         if (typeof val === 'string') {
           const key = extractKey(val)
-          if (key) usedKeys.add(key)
+          if (key) {
+            usedKeys.add(key)
+            const baseKey = key.replace(/\.[^/.]+$/, '').replace(/-(1600w|800w|400w|1200w|600w|300w|thumb)$/, '')
+            usedBaseKeys.add(baseKey)
+          }
         } else if (Array.isArray(val)) {
           val.forEach(scanValue)
         } else if (typeof val === 'object') {
           const obj = val as Record<string, unknown>
-          // r2Asset veya benzeri objelerdeki url alanını yakala
-          if (obj.url && typeof obj.url === 'string') {
-            const key = extractKey(obj.url)
-            if (key) usedKeys.add(key)
-          }
-          // Tüm obje değerlerini derinlemesine tara
+          ['url', 'key', 'r2Key', 'path', 'assetUrl'].forEach((prop) => {
+            if (obj[prop] && typeof obj[prop] === 'string') {
+              const k = extractKey(obj[prop] as string)
+              if (k) {
+                usedKeys.add(k)
+                const baseK = k.replace(/\.[^/.]+$/, '').replace(/-(1600w|800w|400w|1200w|600w|300w|thumb)$/, '')
+                usedBaseKeys.add(baseK)
+              }
+            }
+          })
           Object.values(obj).forEach(scanValue)
         }
       }
@@ -1635,7 +1684,7 @@ export default function MediaImportTool() {
       let continuationToken: string | undefined = undefined
 
       do {
-        const res: Response = await fetch(getApiUrl('/api/media/list'), {
+        const res: Response = await fetchApiWithFallback('/api/media/list', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1663,22 +1712,25 @@ export default function MediaImportTool() {
         if (!obj.Key) continue
         const currentKey = obj.Key
 
-        // Eğer bu dosya doğrudan kullanılıyorsa koru
         let isUsed = usedKeys.has(currentKey)
 
         if (!isUsed) {
-          // Eğer bir responsive varyasyon ise, ana dosyanın kullanılıp kullanılmadığına bak
-          const variantSuffixes = ['-1600w.webp', '-800w.webp', '-400w.webp']
-          const matchingSuffix = variantSuffixes.find((s) => currentKey.endsWith(s))
+          const currentBaseKey = currentKey
+            .replace(/\.[^/.]+$/, '')
+            .replace(/-(1600w|800w|400w|1200w|600w|300w|thumb)$/, '')
 
-          if (matchingSuffix) {
-            // Ana dosya adını bul: foo-800w.webp -> foo.webp
-            // VEYA foo-webp-800w.webp -> foo-webp (uzantı yoksa)
-            const mainKey = currentKey.replace(matchingSuffix, '.webp')
-            const mainKeyNoExt = currentKey.replace(matchingSuffix, '')
+          if (usedBaseKeys.has(currentBaseKey)) {
+            isUsed = true
+          }
+        }
 
-            if (usedKeys.has(mainKey) || usedKeys.has(mainKeyNoExt)) {
+        if (!isUsed) {
+          const currentBaseNoExt = currentKey.replace(/\.[^/.]+$/, '')
+          for (const uKey of usedKeys) {
+            const uKeyBase = uKey.replace(/\.[^/.]+$/, '')
+            if (currentKey.startsWith(uKeyBase) || uKey.startsWith(currentBaseNoExt)) {
               isUsed = true
+              break
             }
           }
         }
@@ -1707,7 +1759,7 @@ export default function MediaImportTool() {
 
       for (let i = 0; i < orphanedKeys.length; i += 1000) {
         const chunk = orphanedKeys.slice(i, i + 1000)
-        const res = await fetch(getApiUrl('/api/media/delete-batch'), {
+        const res = await fetchApiWithFallback('/api/media/delete-batch', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

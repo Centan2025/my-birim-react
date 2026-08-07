@@ -18,11 +18,6 @@ export default defineType({
       options: {collapsible: true, collapsed: true},
     },
     {
-      name: 'historyGroup',
-      title: '📜 Tarihçe Bölümü',
-      options: {collapsible: true, collapsed: true},
-    },
-    {
       name: 'identityGroup',
       title: '🆔 Kimlik Bölümü',
       options: {collapsible: true, collapsed: true},
@@ -30,11 +25,6 @@ export default defineType({
     {
       name: 'qualityGroup',
       title: '⭐ Kalite Bölümü',
-      options: {collapsible: true, collapsed: true},
-    },
-    {
-      name: 'valuesGroup',
-      title: '💎 Kurumsal Değerler',
       options: {collapsible: true, collapsed: true},
     },
     {
@@ -118,29 +108,6 @@ export default defineType({
       ],
     }),
     defineField({
-      name: 'historySection',
-      title: 'Tarihçe Bölümü',
-      type: 'object',
-      fieldset: 'historyGroup',
-      options: {collapsible: true, collapsed: false},
-      fields: [
-        defineField({name: 'title', title: 'Bölüm Başlığı', type: 'localizedString'}),
-        defineField({
-          name: 'content',
-          title: 'Tarihçe Metni',
-          type: 'localizedPortableText',
-        }),
-        defineField({name: 'imageR2', title: 'Ana Görsel (R2)', type: 'r2Asset'}),
-        defineField({
-          name: 'media',
-          title: 'Medya Galerisi',
-          type: 'array',
-          of: [{type: 'productPanelMediaItem'}],
-          description: 'Bölüm için ek görseller veya videolar.',
-        }),
-      ],
-    }),
-    defineField({
       name: 'identitySection',
       title: 'Kimlik Bölümü',
       type: 'object',
@@ -184,33 +151,6 @@ export default defineType({
           of: [{type: 'productPanelMediaItem'}],
           description: 'Bölüm için ek görseller veya videolar.',
         }),
-      ],
-    }),
-    defineField({
-      name: 'values',
-      title: 'Değerler',
-      type: 'array',
-      fieldset: 'valuesGroup',
-      of: [
-        {
-          type: 'object',
-          name: 'valueItem',
-          fields: [
-            defineField({name: 'title', title: 'Başlık', type: 'localizedString'}),
-            defineField({name: 'description', title: 'Açıklama', type: 'localizedString'}),
-          ],
-          preview: {
-            select: {
-              title: 'title.tr',
-              subtitle: 'title.en',
-            },
-            prepare({title, subtitle}) {
-              return {
-                title: title || subtitle || 'Değer',
-              }
-            },
-          },
-        },
       ],
     }),
     defineField({

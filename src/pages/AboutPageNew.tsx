@@ -222,11 +222,37 @@ export function AboutPageNew() {
   const qualityImgUrl = getSanitizedImage(content?.qualitySection?.image, DEFAULT_IMAGES.quality)
   const qualityImgMobileUrl = getSanitizedImage(content?.qualitySection?.imageMobile, '')
 
+  const getImageMeta = (img: unknown) => {
+    if (typeof img === 'object' && img !== null) {
+      const obj = img as Record<string, unknown>
+      return {
+        crop: obj['crop'] as any,
+        hotspot: obj['hotspot'] as any,
+        origWidth: obj['origWidth'] as number | undefined,
+        origHeight: obj['origHeight'] as number | undefined,
+      }
+    }
+    return {}
+  }
+
+  const identityImgMeta = getImageMeta(content?.identitySection?.image)
+  const identityImgMobMeta = getImageMeta(content?.identitySection?.imageMobile)
+  const qualityImgMeta = getImageMeta(content?.qualitySection?.image)
+  const qualityImgMobMeta = getImageMeta(content?.qualitySection?.imageMobile)
+
   const identitySection = {
     title: content?.identitySection?.title,
     content: content?.identitySection?.content,
     image: identityImgUrl,
     imageMobile: identityImgMobileUrl,
+    crop: identityImgMeta.crop,
+    hotspot: identityImgMeta.hotspot,
+    origWidth: identityImgMeta.origWidth,
+    origHeight: identityImgMeta.origHeight,
+    cropMobile: identityImgMobMeta.crop,
+    hotspotMobile: identityImgMobMeta.hotspot,
+    origWidthMobile: identityImgMobMeta.origWidth,
+    origHeightMobile: identityImgMobMeta.origHeight,
     media: content?.identitySection?.media,
   }
 
@@ -235,6 +261,14 @@ export function AboutPageNew() {
     content: content?.qualitySection?.content,
     image: qualityImgUrl,
     imageMobile: qualityImgMobileUrl,
+    crop: qualityImgMeta.crop,
+    hotspot: qualityImgMeta.hotspot,
+    origWidth: qualityImgMeta.origWidth,
+    origHeight: qualityImgMeta.origHeight,
+    cropMobile: qualityImgMobMeta.crop,
+    hotspotMobile: qualityImgMobMeta.hotspot,
+    origWidthMobile: qualityImgMobMeta.origWidth,
+    origHeightMobile: qualityImgMobMeta.origHeight,
     media: content?.qualitySection?.media,
   }
 
@@ -292,15 +326,50 @@ export function AboutPageNew() {
   const timelineTitle = getPlainText(t(content?.timelineTitle))
   const timelineSubtitle = getPlainText(t(content?.timelineSubtitle))
 
-  const eras =
+interface FormattedEra {
+  year: string
+  title: string
+  description: string
+  image: string
+  imageMobile: string
+  crop?: any
+  hotspot?: any
+  origWidth?: number
+  origHeight?: number
+  cropMobile?: any
+  hotspotMobile?: any
+  origWidthMobile?: number
+  origHeightMobile?: number
+}
+
+  const eras: FormattedEra[] =
     content?.eras && content.eras.length > 0
-      ? content.eras.map((era, idx) => ({
-          year: era.year || `${1970 + idx * 15}`,
-          title: getPlainText(t(era.title)),
-          description: getPlainText(t(era.description)),
-          image: getSanitizedImage(era.image, DEFAULT_IMAGES.history),
-          imageMobile: getSanitizedImage(era.imageMobile, ''),
-        }))
+      ? content.eras.map((era, idx) => {
+          const imgMeta =
+            typeof era.image === 'object' && era.image !== null
+              ? (era.image as Record<string, unknown>)
+              : {}
+          const imgMobMeta =
+            typeof era.imageMobile === 'object' && era.imageMobile !== null
+              ? (era.imageMobile as Record<string, unknown>)
+              : {}
+
+          return {
+            year: era.year || `${1970 + idx * 15}`,
+            title: getPlainText(t(era.title)),
+            description: getPlainText(t(era.description)),
+            image: getSanitizedImage(era.image, DEFAULT_IMAGES.history),
+            imageMobile: getSanitizedImage(era.imageMobile, ''),
+            crop: imgMeta['crop'] as any,
+            hotspot: imgMeta['hotspot'] as any,
+            origWidth: imgMeta['origWidth'] as number | undefined,
+            origHeight: imgMeta['origHeight'] as number | undefined,
+            cropMobile: imgMobMeta['crop'] as any,
+            hotspotMobile: imgMobMeta['hotspot'] as any,
+            origWidthMobile: imgMobMeta['origWidth'] as number | undefined,
+            origHeightMobile: imgMobMeta['origHeight'] as number | undefined,
+          }
+        })
       : [
           {
             year: '1970',
@@ -500,6 +569,14 @@ export function AboutPageNew() {
                                 fallbackSrc={DEFAULT_IMAGES.history}
                                 alt="Era History"
                                 className="w-full h-full object-cover"
+                                crop={era.crop}
+                                hotspot={era.hotspot}
+                                origWidth={era.origWidth}
+                                origHeight={era.origHeight}
+                                cropMobile={era.cropMobile}
+                                hotspotMobile={era.hotspotMobile}
+                                origWidthMobile={era.origWidthMobile}
+                                origHeightMobile={era.origHeightMobile}
                               />
                             </div>
                           </div>
@@ -514,22 +591,25 @@ export function AboutPageNew() {
             {/* DESKTOP ONLY: Classic Grid & Showcase Box (hidden lg:block) */}
             <div className="hidden lg:block">
               {/* Timeline Era Selector Grid */}
-              <div className="grid grid-cols-4 gap-4 mb-12">
+              <div
+                className="grid gap-3 lg:gap-4 mb-12"
+                style={{ gridTemplateColumns: `repeat(${eras.length}, minmax(0, 1fr))` }}
+              >
                 {eras.map((era, idx) => (
                   <button
                     key={idx}
                     onClick={() => setActiveEraIndex(idx)}
-                    className={`p-6 text-left border rounded-none transition-all duration-300 ${
+                    className={`p-4 lg:p-5 text-left border rounded-none transition-all duration-300 ${
                       activeEraIndex === idx || (activeEraIndex === -1 && idx === 0)
                         ? 'border-[var(--text-primary)] bg-[var(--bg-secondary)] shadow-sm'
                         : 'border-neutral-500/40 hover:border-[var(--text-primary)]/50'
                     }`}
                   >
-                    <span className="font-outfit text-3xl md:text-4xl font-light tracking-tight block text-[var(--text-primary)]">
+                    <span className="font-outfit text-2xl lg:text-3xl xl:text-4xl font-light tracking-tight block text-[var(--text-primary)]">
                       {era.year}
                     </span>
                     {era.title ? (
-                      <span className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mt-2 block font-normal truncate">
+                      <span className="text-[11px] lg:text-xs uppercase tracking-wider text-[var(--text-secondary)] mt-1.5 block font-normal truncate">
                         {era.title}
                       </span>
                     ) : null}
@@ -575,6 +655,14 @@ export function AboutPageNew() {
                               fallbackSrc={DEFAULT_IMAGES.history}
                               alt="Era History"
                               className="w-full h-full object-cover"
+                              crop={currentEra.crop}
+                              hotspot={currentEra.hotspot}
+                              origWidth={currentEra.origWidth}
+                              origHeight={currentEra.origHeight}
+                              cropMobile={currentEra.cropMobile}
+                              hotspotMobile={currentEra.hotspotMobile}
+                              origWidthMobile={currentEra.origWidthMobile}
+                              origHeightMobile={currentEra.origHeightMobile}
                             />
                           </div>
                         </div>
@@ -614,6 +702,14 @@ export function AboutPageNew() {
                     fallbackSrc={DEFAULT_IMAGES.identity}
                     alt="Identity"
                     className="w-full h-full object-cover"
+                    crop={identitySection.crop}
+                    hotspot={identitySection.hotspot}
+                    origWidth={identitySection.origWidth}
+                    origHeight={identitySection.origHeight}
+                    cropMobile={identitySection.cropMobile}
+                    hotspotMobile={identitySection.hotspotMobile}
+                    origWidthMobile={identitySection.origWidthMobile}
+                    origHeightMobile={identitySection.origHeightMobile}
                   />
                 </div>
               </div>
@@ -636,6 +732,14 @@ export function AboutPageNew() {
                     fallbackSrc={DEFAULT_IMAGES.quality}
                     alt="Quality"
                     className="w-full h-full object-cover"
+                    crop={qualitySection.crop}
+                    hotspot={qualitySection.hotspot}
+                    origWidth={qualitySection.origWidth}
+                    origHeight={qualitySection.origHeight}
+                    cropMobile={qualitySection.cropMobile}
+                    hotspotMobile={qualitySection.hotspotMobile}
+                    origWidthMobile={qualitySection.origWidthMobile}
+                    origHeightMobile={qualitySection.origHeightMobile}
                   />
                 </div>
               </div>
@@ -665,21 +769,13 @@ export function AboutPageNew() {
         {designersWithImage.length > 0 && (
           <section className="py-12 sm:py-24 border-t border-[var(--border-primary,#e5e7eb)]/30">
             <div className={containerClass}>
-              <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-16 gap-3 sm:gap-4">
-                <div>
-                  <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[var(--text-secondary)]">
-                    İŞBİRLİKLERİ
-                  </span>
-                  <h2 className="font-outfit text-2xl sm:text-4xl md:text-5xl font-extralight text-[var(--text-primary)] uppercase tracking-tight mt-1 sm:mt-2">
-                    Tasarımcı Ekosistemi
-                  </h2>
-                </div>
-                <Link
-                  to="/designers"
-                  className="mt-4 md:mt-0 text-xs uppercase tracking-widest text-[var(--text-primary)] hover:opacity-75 transition-opacity underline underline-offset-4"
-                >
-                  Tüm Tasarımcılar
-                </Link>
+              <div className="mb-8 sm:mb-16">
+                <span className="text-[10px] sm:text-xs uppercase tracking-widest text-[var(--text-secondary)]">
+                  İŞBİRLİKLERİ
+                </span>
+                <h2 className="font-outfit text-2xl sm:text-4xl md:text-5xl font-extralight text-[var(--text-primary)] uppercase tracking-tight mt-1 sm:mt-2">
+                  Tasarımcı Ortaklarımız
+                </h2>
               </div>
 
               {/* MOBILE ONLY: Horizontal Swipeable Designer Cards Carousel (lg:hidden) */}
@@ -748,10 +844,16 @@ export function AboutPageNew() {
                     )
                   })}
                 </div>
-                <div className="flex items-center justify-center gap-1.5 mt-2">
+                <div className="flex items-center justify-between mt-4 px-1">
                   <span className="text-[10px] uppercase tracking-widest text-[var(--text-secondary)] font-light opacity-60">
                     Kaydırın &rarr;
                   </span>
+                  <Link
+                    to="/designers"
+                    className="text-xs uppercase tracking-widest text-[var(--text-primary)] hover:opacity-75 transition-opacity underline underline-offset-4"
+                  >
+                    Tüm Tasarımcılar
+                  </Link>
                 </div>
               </div>
 
@@ -770,67 +872,89 @@ export function AboutPageNew() {
                   return (
                     <div className="grid grid-cols-12 gap-8 items-stretch">
                       {/* Left Column: Interactive Designer List */}
-                      <div className="col-span-5 flex flex-col justify-center space-y-3">
-                        {designersWithImage.slice(0, 5).map((designer, idx) => {
-                          const isActive =
-                            (activeDesignerIndex === -1 ? 0 : activeDesignerIndex) === idx
-                          const dName = getPlainText(t(designer.name))
-                          const dRoleText = getPlainText(t(designer.role))
-                          const dBioText = getPlainText(t(designer.bio))
-                          const dSubtext =
-                            dRoleText || (dBioText ? dBioText.slice(0, 45) + '...' : '')
+                      <div className="col-span-5 flex flex-col justify-between">
+                        <div className="space-y-3">
+                          {designersWithImage.slice(0, 5).map((designer, idx) => {
+                            const isActive =
+                              (activeDesignerIndex === -1 ? 0 : activeDesignerIndex) === idx
+                            const dName = getPlainText(t(designer.name))
+                            const dRoleText = getPlainText(t(designer.role))
+                            const dBioText = getPlainText(t(designer.bio))
+                            const dSubtext =
+                              dRoleText || (dBioText ? dBioText.slice(0, 45) + '...' : '')
 
-                          return (
-                            <div
-                              key={designer.id || idx}
-                              onMouseEnter={() => setActiveDesignerIndex(idx)}
-                              onClick={() => setActiveDesignerIndex(idx)}
-                              onKeyDown={e => {
-                                if (e.key === 'Enter' || e.key === ' ') {
-                                  e.preventDefault()
-                                  setActiveDesignerIndex(idx)
-                                }
-                              }}
-                              role="button"
-                              tabIndex={0}
-                              className={`p-6 border rounded-none transition-all duration-300 cursor-pointer group ${
-                                isActive
-                                  ? 'bg-[var(--bg-secondary)] border-[var(--text-primary)] translate-x-2 shadow-sm'
-                                  : 'border-neutral-500/40 hover:border-[var(--text-primary)]/40'
-                              }`}
-                            >
-                              <div className="flex items-center justify-between gap-4">
-                                <div>
-                                  <h3 className="text-xl md:text-2xl font-light uppercase tracking-tight text-[var(--text-primary)] mt-1">
-                                    {dName}
-                                  </h3>
-                                  {dSubtext && (
-                                    <span className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mt-0.5 block font-light truncate max-w-xs">
-                                      {dSubtext}
-                                    </span>
-                                  )}
+                            return (
+                              <div
+                                key={designer.id || idx}
+                                onMouseEnter={() => setActiveDesignerIndex(idx)}
+                                onClick={() => setActiveDesignerIndex(idx)}
+                                onKeyDown={e => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault()
+                                    setActiveDesignerIndex(idx)
+                                  }
+                                }}
+                                role="button"
+                                tabIndex={0}
+                                className={`p-6 border rounded-none transition-all duration-300 cursor-pointer group ${
+                                  isActive
+                                    ? 'bg-[var(--bg-secondary)] border-[var(--text-primary)] translate-x-2 shadow-sm'
+                                    : 'border-neutral-500/40 hover:border-[var(--text-primary)]/40'
+                                }`}
+                              >
+                                <div className="flex items-center justify-between gap-4">
+                                  <div>
+                                    <h3 className="text-xl md:text-2xl font-light uppercase tracking-tight text-[var(--text-primary)] mt-1">
+                                      {dName}
+                                    </h3>
+                                    {dSubtext && (
+                                      <span className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mt-0.5 block font-light truncate max-w-xs">
+                                        {dSubtext}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <svg
+                                    className={`w-5 h-5 ml-auto flex-shrink-0 transition-all duration-300 ${
+                                      isActive
+                                        ? 'text-[var(--text-primary)] translate-x-1 opacity-100'
+                                        : 'text-[var(--text-secondary)] opacity-30 group-hover:opacity-70 group-hover:translate-x-0.5'
+                                    }`}
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    strokeWidth="1.2"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      d="M3 12h18L13.5 4.5"
+                                    />
+                                  </svg>
                                 </div>
-                                <svg
-                                  className={`w-5 h-5 ml-auto flex-shrink-0 transition-all duration-300 ${
-                                    isActive
-                                      ? 'text-[var(--text-primary)] translate-x-1 opacity-100'
-                                      : 'text-[var(--text-secondary)] opacity-30 group-hover:opacity-70 group-hover:translate-x-0.5'
-                                  }`}
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                  strokeWidth="1.2"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-                                  />
-                                </svg>
                               </div>
-                            </div>
-                          )
-                        })}
+                            )
+                          })}
+                        </div>
+
+                        <Link
+                          to="/designers"
+                          className="group inline-flex items-center justify-between text-xs uppercase tracking-widest text-[var(--text-primary)] border border-neutral-500/40 hover:border-[var(--text-primary)] bg-[var(--bg-secondary)] px-6 py-4 transition-all font-light w-full shadow-sm"
+                        >
+                          <span>Tüm Tasarımcılar</span>
+                          <svg
+                            className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth="1.2"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M3 12h18L13.5 4.5"
+                            />
+                          </svg>
+                        </Link>
                       </div>
 
                       {/* Right Column: Featured Active Designer Exhibition Card */}

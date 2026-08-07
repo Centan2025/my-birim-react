@@ -92,13 +92,24 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
         }
       }
       if (Array.isArray(data.eras)) {
-        data.eras = data.eras.map((era: Record<string, unknown>) => ({
-          ...era,
-          image: era['imageR2'] ? mapImage(era['imageR2'] as never) : era['image'],
-          imageMobile: era['imageMobileR2']
-            ? mapImage(era['imageMobileR2'] as never)
-            : era['imageMobile'],
-        }))
+        data.eras = data.eras.map((era: Record<string, unknown>) => {
+          const imgR2 = (era['imageR2'] || era['image']) as SanityImageLike | undefined
+          const imgMobR2 = (era['imageMobileR2'] || era['imageMobile']) as SanityImageLike | undefined
+          const imgMeta = imgR2 ? mapR2Metadata(imgR2) : {}
+          const imgMobMeta = imgMobR2 ? mapR2Metadata(imgMobR2) : {}
+
+          return {
+            ...era,
+            image: {
+              url: mapImage(imgR2),
+              ...imgMeta,
+            },
+            imageMobile: {
+              url: mapImage(imgMobR2),
+              ...imgMobMeta,
+            },
+          }
+        })
       }
       if (data.historySection) {
         const hsMeta = mapR2Metadata(data.historySection.imageR2)

@@ -6,40 +6,78 @@ export default defineType({
   name: 'aboutPageV2',
   title: 'Hakkımızda (Mimari V2)',
   type: 'document',
+  fieldsets: [
+    {
+      name: 'heroGroup',
+      title: '🎬 Hero Bölümü (Ana Görsel & Başlıklar)',
+      options: {collapsible: true, collapsed: false},
+    },
+    {
+      name: 'manifestoGroup',
+      title: '💬 Manifesto & Felsefe Bölümü',
+      options: {collapsible: true, collapsed: false},
+    },
+    {
+      name: 'timelineGroup',
+      title: '⏳ Tarihçe Zaman Çizelgesi (Timeline)',
+      options: {collapsible: true, collapsed: false},
+    },
+    {
+      name: 'identityGroup',
+      title: '🆔 Kimlik Bölümü',
+      options: {collapsible: true, collapsed: false},
+    },
+    {
+      name: 'qualityGroup',
+      title: '⭐ Kalite Bölümü',
+      options: {collapsible: true, collapsed: false},
+    },
+    {
+      name: 'seoGroup',
+      title: '🔍 SEO Ayarları',
+      options: {collapsible: true, collapsed: true},
+    },
+  ],
   fields: [
     defineField({
       name: 'heroImageR2',
       title: 'Hero Görseli (Masaüstü R2)',
       type: 'r2Asset',
+      fieldset: 'heroGroup',
     }),
     defineField({
       name: 'heroImageMobileR2',
       title: 'Hero Görseli (Mobil R2)',
       type: 'r2Asset',
+      fieldset: 'heroGroup',
     }),
-    defineField({name: 'heroBadge', title: 'Hero Üst Etiketi', type: 'localizedString'}),
-    defineField({name: 'heroTitle', title: 'Hero Başlığı', type: 'localizedString'}),
-    defineField({name: 'heroSubtitle', title: 'Hero Alt Başlığı', type: 'localizedString'}),
-    defineField({name: 'manifestoLabel', title: 'Manifesto Etiketi', type: 'localizedString'}),
+    defineField({name: 'heroBadge', title: 'Hero Üst Etiketi', type: 'localizedString', fieldset: 'heroGroup'}),
+    defineField({name: 'heroTitle', title: 'Hero Başlığı', type: 'localizedString', fieldset: 'heroGroup'}),
+    defineField({name: 'heroSubtitle', title: 'Hero Alt Başlığı', type: 'localizedString', fieldset: 'heroGroup'}),
+    defineField({name: 'manifestoLabel', title: 'Manifesto Etiketi', type: 'localizedString', fieldset: 'manifestoGroup'}),
     defineField({
       name: 'manifestoQuote',
       title: 'Felsefe / Manifesto Alıntısı',
       type: 'localizedString',
+      fieldset: 'manifestoGroup',
     }),
     defineField({
       name: 'timelineTitle',
       title: 'Tarihçe Zaman Çizelgesi Başlığı',
       type: 'localizedString',
+      fieldset: 'timelineGroup',
     }),
     defineField({
       name: 'timelineSubtitle',
       title: 'Tarihçe Zaman Çizelgesi Alt Başlığı',
       type: 'localizedString',
+      fieldset: 'timelineGroup',
     }),
     defineField({
       name: 'eras',
       title: 'Tarihçe Dönemleri / Dönüm Noktaları',
       type: 'array',
+      fieldset: 'timelineGroup',
       of: [
         {
           type: 'object',
@@ -80,33 +118,11 @@ export default defineType({
         },
       ],
     }),
-    // Özel üçlü bölüm: Tarihçe / Kimlik / Kalite
-    defineField({
-      name: 'historySection',
-      title: 'Tarihçe Bölümü',
-      type: 'object',
-      fields: [
-        defineField({name: 'title', title: 'Bölüm Başlığı', type: 'localizedString'}),
-        defineField({
-          name: 'content',
-          title: 'Tarihçe Metni',
-          type: 'localizedPortableText',
-        }),
-        defineField({name: 'imageR2', title: 'Ana Görsel (Masaüstü R2)', type: 'r2Asset'}),
-        defineField({name: 'imageMobileR2', title: 'Ana Görsel (Mobil R2)', type: 'r2Asset'}),
-        defineField({
-          name: 'media',
-          title: 'Medya Galerisi',
-          type: 'array',
-          of: [{type: 'productPanelMediaItem'}],
-          description: 'Bölüm için ek görseller veya videolar (R2).',
-        }),
-      ],
-    }),
     defineField({
       name: 'identitySection',
       title: 'Kimlik Bölümü',
       type: 'object',
+      fieldset: 'identityGroup',
       fields: [
         defineField({name: 'title', title: 'Bölüm Başlığı', type: 'localizedString'}),
         defineField({
@@ -129,6 +145,7 @@ export default defineType({
       name: 'qualitySection',
       title: 'Kalite Bölümü',
       type: 'object',
+      fieldset: 'qualityGroup',
       fields: [
         defineField({name: 'title', title: 'Bölüm Başlığı', type: 'localizedString'}),
         defineField({
@@ -151,6 +168,7 @@ export default defineType({
       name: 'seo',
       title: 'SEO & Arama Motoru Ayarları',
       type: 'seoFields',
+      fieldset: 'seoGroup',
     }),
   ],
   preview: {
