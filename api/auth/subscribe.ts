@@ -21,7 +21,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({error: 'Method Not Allowed'})
   }
 
-  const {email, password, name, company, profession, country, phone, isProfessional} = req.body || {}
+  const {email, password, name, company, profession, country, phone, isProfessional} =
+    req.body || {}
 
   if (!email) {
     return res.status(400).json({error: 'E-posta adresi gereklidir.'})
@@ -101,7 +102,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       return res.status(201).json({
         success: true,
-        message: 'Başvurunuz alındı. Lütfen e-posta adresinize gönderilen onay mailini kontrol edin.',
+        message:
+          'Başvurunuz alındı. Lütfen e-posta adresinize gönderilen onay mailini kontrol edin.',
         verificationToken,
         email: normEmail,
       })

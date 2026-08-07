@@ -326,21 +326,21 @@ export function AboutPageNew() {
   const timelineTitle = getPlainText(t(content?.timelineTitle))
   const timelineSubtitle = getPlainText(t(content?.timelineSubtitle))
 
-interface FormattedEra {
-  year: string
-  title: string
-  description: string
-  image: string
-  imageMobile: string
-  crop?: any
-  hotspot?: any
-  origWidth?: number
-  origHeight?: number
-  cropMobile?: any
-  hotspotMobile?: any
-  origWidthMobile?: number
-  origHeightMobile?: number
-}
+  interface FormattedEra {
+    year: string
+    title: string
+    description: string
+    image: string
+    imageMobile: string
+    crop?: any
+    hotspot?: any
+    origWidth?: number
+    origHeight?: number
+    cropMobile?: any
+    hotspotMobile?: any
+    origWidthMobile?: number
+    origHeightMobile?: number
+  }
 
   const eras: FormattedEra[] =
     content?.eras && content.eras.length > 0
@@ -593,7 +593,7 @@ interface FormattedEra {
               {/* Timeline Era Selector Grid */}
               <div
                 className="grid gap-3 lg:gap-4 mb-12"
-                style={{ gridTemplateColumns: `repeat(${eras.length}, minmax(0, 1fr))` }}
+                style={{gridTemplateColumns: `repeat(${eras.length}, minmax(0, 1fr))`}}
               >
                 {eras.map((era, idx) => (
                   <button

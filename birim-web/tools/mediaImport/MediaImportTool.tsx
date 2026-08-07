@@ -1654,19 +1654,23 @@ export default function MediaImportTool() {
           const key = extractKey(val)
           if (key) {
             usedKeys.add(key)
-            const baseKey = key.replace(/\.[^/.]+$/, '').replace(/-(1600w|800w|400w|1200w|600w|300w|thumb)$/, '')
+            const baseKey = key
+              .replace(/\.[^/.]+$/, '')
+              .replace(/-(1600w|800w|400w|1200w|600w|300w|thumb)$/, '')
             usedBaseKeys.add(baseKey)
           }
         } else if (Array.isArray(val)) {
           val.forEach(scanValue)
         } else if (typeof val === 'object') {
           const obj = val as Record<string, unknown>
-          ['url', 'key', 'r2Key', 'path', 'assetUrl'].forEach((prop) => {
+          ;['url', 'key', 'r2Key', 'path', 'assetUrl'].forEach((prop) => {
             if (obj[prop] && typeof obj[prop] === 'string') {
               const k = extractKey(obj[prop] as string)
               if (k) {
                 usedKeys.add(k)
-                const baseK = k.replace(/\.[^/.]+$/, '').replace(/-(1600w|800w|400w|1200w|600w|300w|thumb)$/, '')
+                const baseK = k
+                  .replace(/\.[^/.]+$/, '')
+                  .replace(/-(1600w|800w|400w|1200w|600w|300w|thumb)$/, '')
                 usedBaseKeys.add(baseK)
               }
             }

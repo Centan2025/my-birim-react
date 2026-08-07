@@ -7,7 +7,11 @@ import {useTranslation} from '../i18n'
 import {registerUser, loginUser} from '../services/cms'
 import {loginRateLimiter, registerRateLimiter} from '../lib/rateLimiter'
 import {analytics} from '../lib/analytics'
-import {validateLoginForm, validateShortRegisterForm, getPasswordStrength} from '../lib/formValidation'
+import {
+  validateLoginForm,
+  validateShortRegisterForm,
+  getPasswordStrength,
+} from '../lib/formValidation'
 import {useSEO} from '../hooks/useSEO'
 import {useHeaderTheme} from '../context/HeaderThemeContext'
 import {Breadcrumbs} from '../components/Breadcrumbs'
@@ -38,11 +42,14 @@ export function LoginPage() {
     return () => reset()
   }, [reset])
 
-  const pageTitle = isLoginMode ? `BIRIM - ${t('login') || 'Giriş Yap'}` : `BIRIM - ${t('sign_up') || 'Üye Ol'}`
+  const pageTitle = isLoginMode
+    ? `BIRIM - ${t('login') || 'Giriş Yap'}`
+    : `BIRIM - ${t('sign_up') || 'Üye Ol'}`
 
   useSEO({
     title: pageTitle,
-    description: t('login_subtitle') || t('register_subtitle') || 'Birim Mobilya üyelik ve giriş portalı',
+    description:
+      t('login_subtitle') || t('register_subtitle') || 'Birim Mobilya üyelik ve giriş portalı',
     siteName: 'BIRIM',
     type: 'website',
     locale: 'tr_TR',
@@ -69,8 +76,12 @@ export function LoginPage() {
     return (
       <div className="bg-[var(--bg-secondary)] min-h-screen text-[var(--text-primary)] flex items-center justify-center p-8 pt-28">
         <div className="text-center space-y-4 max-w-sm bg-[var(--bg-primary)] p-8 border border-[var(--border-primary)]">
-          <h2 className="text-2xl font-light tracking-tight">{t('welcome_back') || 'Hoş Geldiniz'}</h2>
-          <p className="text-sm text-[var(--text-secondary)]">{auth.user.name || auth.user.email}</p>
+          <h2 className="text-2xl font-light tracking-tight">
+            {t('welcome_back') || 'Hoş Geldiniz'}
+          </h2>
+          <p className="text-sm text-[var(--text-secondary)]">
+            {auth.user.name || auth.user.email}
+          </p>
           <Link
             to="/profile"
             className="inline-block w-full bg-[#111827] dark:bg-white text-white dark:text-black py-3 text-xs font-semibold uppercase tracking-widest hover:bg-[#c5a059] transition-colors"
@@ -161,7 +172,7 @@ export function LoginPage() {
       auth.login(user)
       analytics.trackUserAction('register', user._id)
       if (user._id.startsWith('user_')) {
-        setSuccess("Kayıt başarılı! Hesabınız oluşturuldu.")
+        setSuccess('Kayıt başarılı! Hesabınız oluşturuldu.')
       } else {
         setSuccess('Kayıt başarılı! Lütfen e-posta kutunuzu kontrol edin ve üyeliğinizi onaylayın.')
       }
@@ -201,7 +212,6 @@ export function LoginPage() {
 
       {/* Main Container */}
       <div className="w-full max-w-md mx-auto px-4 sm:px-6 pt-4">
-        
         {/* Page Heading */}
         <div className="text-center mb-8">
           <h1 className="text-2xl sm:text-3xl font-light text-[var(--text-primary)] tracking-tight uppercase">
@@ -216,7 +226,6 @@ export function LoginPage() {
 
         {/* Minimal Auth Box */}
         <div className="bg-[var(--bg-primary)] border border-[var(--border-primary)] p-6 sm:p-8 shadow-sm">
-          
           {/* Tab Switcher */}
           <div className="flex border-b border-[var(--border-primary)] mb-6">
             <button
@@ -279,7 +288,10 @@ export function LoginPage() {
           {isLoginMode ? (
             <form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
               <div>
-                <label htmlFor="email" className="block text-xs uppercase tracking-wider text-[var(--text-primary)] mb-1 font-medium">
+                <label
+                  htmlFor="email"
+                  className="block text-xs uppercase tracking-wider text-[var(--text-primary)] mb-1 font-medium"
+                >
                   {t('email') || 'E-posta'} *
                 </label>
                 <input
@@ -309,7 +321,10 @@ export function LoginPage() {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-xs uppercase tracking-wider text-[var(--text-primary)] mb-1 font-medium">
+                <label
+                  htmlFor="password"
+                  className="block text-xs uppercase tracking-wider text-[var(--text-primary)] mb-1 font-medium"
+                >
                   {t('password') || 'Şifre'} *
                 </label>
                 <input
@@ -329,7 +344,9 @@ export function LoginPage() {
                     }
                   }}
                   className={`w-full px-3.5 py-3 bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] focus:border-[#c5a059] transition-colors ${
-                    validationErrors['password'] ? 'border-red-500' : 'border-[var(--border-primary)]'
+                    validationErrors['password']
+                      ? 'border-red-500'
+                      : 'border-[var(--border-primary)]'
                   }`}
                   placeholder="••••••••"
                 />
@@ -377,7 +394,10 @@ export function LoginPage() {
             <form onSubmit={handleRegister} className="space-y-3.5" autoComplete="off">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="firstName" className="block text-xs uppercase tracking-wider text-[var(--text-primary)] mb-1 font-medium">
+                  <label
+                    htmlFor="firstName"
+                    className="block text-xs uppercase tracking-wider text-[var(--text-primary)] mb-1 font-medium"
+                  >
                     Ad *
                   </label>
                   <input
@@ -396,7 +416,9 @@ export function LoginPage() {
                       }
                     }}
                     className={`w-full px-3.5 py-2.5 bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] focus:border-[#c5a059] transition-colors ${
-                      validationErrors['firstName'] ? 'border-red-500' : 'border-[var(--border-primary)]'
+                      validationErrors['firstName']
+                        ? 'border-red-500'
+                        : 'border-[var(--border-primary)]'
                     }`}
                     placeholder="Adınız"
                   />
@@ -406,7 +428,10 @@ export function LoginPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="lastName" className="block text-xs uppercase tracking-wider text-[var(--text-primary)] mb-1 font-medium">
+                  <label
+                    htmlFor="lastName"
+                    className="block text-xs uppercase tracking-wider text-[var(--text-primary)] mb-1 font-medium"
+                  >
                     Soyad *
                   </label>
                   <input
@@ -425,7 +450,9 @@ export function LoginPage() {
                       }
                     }}
                     className={`w-full px-3.5 py-2.5 bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] focus:border-[#c5a059] transition-colors ${
-                      validationErrors['lastName'] ? 'border-red-500' : 'border-[var(--border-primary)]'
+                      validationErrors['lastName']
+                        ? 'border-red-500'
+                        : 'border-[var(--border-primary)]'
                     }`}
                     placeholder="Soyadınız"
                   />
@@ -436,7 +463,10 @@ export function LoginPage() {
               </div>
 
               <div>
-                <label htmlFor="register-email" className="block text-xs uppercase tracking-wider text-[var(--text-primary)] mb-1 font-medium">
+                <label
+                  htmlFor="register-email"
+                  className="block text-xs uppercase tracking-wider text-[var(--text-primary)] mb-1 font-medium"
+                >
                   E-posta *
                 </label>
                 <input
@@ -466,7 +496,10 @@ export function LoginPage() {
               </div>
 
               <div>
-                <label htmlFor="register-password" className="block text-xs uppercase tracking-wider text-[var(--text-primary)] mb-1 font-medium">
+                <label
+                  htmlFor="register-password"
+                  className="block text-xs uppercase tracking-wider text-[var(--text-primary)] mb-1 font-medium"
+                >
                   Şifre *
                 </label>
                 <input
@@ -488,7 +521,9 @@ export function LoginPage() {
                     }
                   }}
                   className={`w-full px-3.5 py-2.5 bg-[var(--bg-secondary)] border text-sm text-[var(--text-primary)] focus:border-[#c5a059] transition-colors ${
-                    validationErrors['password'] ? 'border-red-500' : 'border-[var(--border-primary)]'
+                    validationErrors['password']
+                      ? 'border-red-500'
+                      : 'border-[var(--border-primary)]'
                   }`}
                   placeholder="En az 8 karakter"
                 />
@@ -509,7 +544,11 @@ export function LoginPage() {
                       />
                     </div>
                     <span className="text-[10px] text-[var(--text-secondary)] font-mono">
-                      {passwordStrength === 'weak' ? 'Zayıf' : passwordStrength === 'medium' ? 'Orta' : 'Güçlü'}
+                      {passwordStrength === 'weak'
+                        ? 'Zayıf'
+                        : passwordStrength === 'medium'
+                          ? 'Orta'
+                          : 'Güçlü'}
                     </span>
                   </div>
                 )}
@@ -549,7 +588,8 @@ export function LoginPage() {
                   <div className="mt-2 p-2.5 bg-[#c5a059]/10 border border-[#c5a059]/30 text-xs text-[var(--text-primary)] flex items-start gap-2">
                     <UserCheck className="w-4 h-4 text-[#c5a059] shrink-0 mt-0.5" />
                     <span>
-                      <strong>Mimar Programı:</strong> Üyeliğiniz doğrulanınca CAD/BIM çizimleri erişime açılır.
+                      <strong>Mimar Programı:</strong> Üyeliğiniz doğrulanınca CAD/BIM çizimleri
+                      erişime açılır.
                     </span>
                   </div>
                 )}
@@ -557,7 +597,9 @@ export function LoginPage() {
 
               <div className="pt-1 text-[11px] text-[var(--text-secondary)] flex items-center gap-1.5 font-light">
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#c5a059] shrink-0" />
-                <span>E-posta bülten abonesi olmak için alt bilgideki bülteni kullanabilirsiniz.</span>
+                <span>
+                  E-posta bülten abonesi olmak için alt bilgideki bülteni kullanabilirsiniz.
+                </span>
               </div>
 
               {error && (
@@ -587,7 +629,6 @@ export function LoginPage() {
               </button>
             </form>
           )}
-
         </div>
       </div>
     </div>

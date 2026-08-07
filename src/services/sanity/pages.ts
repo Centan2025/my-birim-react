@@ -94,7 +94,9 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
       if (Array.isArray(data.eras)) {
         data.eras = data.eras.map((era: Record<string, unknown>) => {
           const imgR2 = (era['imageR2'] || era['image']) as SanityImageLike | undefined
-          const imgMobR2 = (era['imageMobileR2'] || era['imageMobile']) as SanityImageLike | undefined
+          const imgMobR2 = (era['imageMobileR2'] || era['imageMobile']) as
+            | SanityImageLike
+            | undefined
           const imgMeta = imgR2 ? mapR2Metadata(imgR2) : {}
           const imgMobMeta = imgMobR2 ? mapR2Metadata(imgMobR2) : {}
 

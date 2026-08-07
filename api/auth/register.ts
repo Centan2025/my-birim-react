@@ -34,7 +34,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({error: 'SANITY_TOKEN is not configured'})
   }
 
-  const {email, password, firstName, lastName, name, role, company, profession, country, phone, city, website} = req.body
+  const {
+    email,
+    password,
+    firstName,
+    lastName,
+    name,
+    role,
+    company,
+    profession,
+    country,
+    phone,
+    city,
+    website,
+  } = req.body
 
   if (!email || !password) {
     return res.status(400).json({error: 'Email ve şifre gereklidir.'})
@@ -42,7 +55,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const normEmail = email.trim().toLowerCase()
   const userRole = role === 'architect' ? 'architect' : 'consumer'
-  const displayName = name || `${firstName || ''} ${lastName || ''}`.trim() || normEmail.split('@')[0]
+  const displayName =
+    name || `${firstName || ''} ${lastName || ''}`.trim() || normEmail.split('@')[0]
   const verificationStatus = userRole === 'architect' ? 'pending_verification' : 'not_requested'
 
   try {
@@ -67,7 +81,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             role: userRole,
             architectVerificationStatus: verificationStatus,
             company: company || '',
-            profession: profession || (userRole === 'architect' ? 'Mimar / İç Mimar' : 'Son Kullanıcı'),
+            profession:
+              profession || (userRole === 'architect' ? 'Mimar / İç Mimar' : 'Son Kullanıcı'),
             country: country || existingUser.country || '',
             phone: phone || '',
             city: city || '',
@@ -78,16 +93,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           })
           .commit()
 
-interface SanityUserRecord {
-  _id: string
-  email?: string
-  firstName?: string
-  lastName?: string
-  name?: string
-  role?: string
-  architectVerificationStatus?: string
-  [key: string]: unknown
-}
+        interface SanityUserRecord {
+          _id: string
+          email?: string
+          firstName?: string
+          lastName?: string
+          name?: string
+          role?: string
+          architectVerificationStatus?: string
+          [key: string]: unknown
+        }
 
         const u = updatedUser as SanityUserRecord
         return res.status(200).json({

@@ -33,7 +33,8 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
           try {
             const parsedUser: User = JSON.parse(storedUser)
             setUser(parsedUser)
-            const userId = parsedUser._id || (parsedUser as unknown as {id?: string}).id || parsedUser.email
+            const userId =
+              parsedUser._id || (parsedUser as unknown as {id?: string}).id || parsedUser.email
             if (userId) {
               analytics.identifyUser(userId, {
                 email: parsedUser.email,

@@ -186,12 +186,8 @@ export function DesignerDetailPage() {
                 className={`w-full h-full object-cover portrait-frame filter grayscale transition-all duration-700 group-hover:grayscale-0 ${imageBorderClass} ${phase === 'animating' ? 'opacity-0' : 'opacity-100'}`}
                 loading="eager"
                 quality={90}
-                crop={
-                  typeof designer.image === 'object' ? designer.image.crop : undefined
-                }
-                hotspot={
-                  typeof designer.image === 'object' ? designer.image.hotspot : undefined
-                }
+                crop={typeof designer.image === 'object' ? designer.image.crop : undefined}
+                hotspot={typeof designer.image === 'object' ? designer.image.hotspot : undefined}
                 origWidth={
                   typeof designer.image === 'object' ? designer.image.origWidth : undefined
                 }
@@ -220,9 +216,7 @@ export function DesignerDetailPage() {
                   typeof designer.image === 'object' ? designer.image.origWidthDesktop : undefined
                 }
                 origHeightDesktop={
-                  typeof designer.image === 'object'
-                    ? designer.image.origHeightDesktop
-                    : undefined
+                  typeof designer.image === 'object' ? designer.image.origHeightDesktop : undefined
                 }
               />
             </div>

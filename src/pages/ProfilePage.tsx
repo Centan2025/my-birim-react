@@ -162,22 +162,26 @@ export function ProfilePage() {
                     {t('account_info')}
                   </h2>
                   {/* Role Badge */}
-                  <span className={`px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold border ${
-                    auth.user.role === 'architect'
-                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-900'
-                      : 'bg-black/5 border-black/10 text-gray-800'
-                  }`}>
+                  <span
+                    className={`px-3 py-1.5 text-[10px] uppercase tracking-widest font-bold border ${
+                      auth.user.role === 'architect'
+                        ? 'bg-amber-500/10 border-amber-500/30 text-amber-900'
+                        : 'bg-black/5 border-black/10 text-gray-800'
+                    }`}
+                  >
                     {auth.user.role === 'architect' ? 'Mimar / İç Mimar' : 'Son Kullanıcı'}
                   </span>
                 </div>
 
                 {/* Mimar Programı Status Banner */}
                 {auth.user.role === 'architect' && (
-                  <div className={`p-6 mb-8 border ${
-                    auth.user.architectVerificationStatus === 'verified'
-                      ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
-                      : 'bg-amber-50 border-amber-200 text-amber-900'
-                  }`}>
+                  <div
+                    className={`p-6 mb-8 border ${
+                      auth.user.architectVerificationStatus === 'verified'
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                        : 'bg-amber-50 border-amber-200 text-amber-900'
+                    }`}
+                  >
                     <div className="flex items-start justify-between">
                       <div>
                         <h3 className="font-bold text-xs uppercase tracking-widest mb-1 flex items-center gap-2">
@@ -186,8 +190,8 @@ export function ProfilePage() {
                             {auth.user.architectVerificationStatus === 'verified'
                               ? 'DOĞRULANDI (AKTİF)'
                               : auth.user.architectVerificationStatus === 'rejected'
-                              ? 'REDDEDİLDİ'
-                              : 'ONAY BEKLİYOR'}
+                                ? 'REDDEDİLDİ'
+                                : 'ONAY BEKLİYOR'}
                           </span>
                         </h3>
                         <p className="text-xs leading-relaxed opacity-90 mt-1">
@@ -202,7 +206,14 @@ export function ProfilePage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
                   <InfoItem label={t('email')} value={auth.user.email} icon={Mail} />
-                  <InfoItem label={t('full_name')} value={auth.user.name || `${auth.user.firstName || ''} ${auth.user.lastName || ''}`.trim()} icon={User} />
+                  <InfoItem
+                    label={t('full_name')}
+                    value={
+                      auth.user.name ||
+                      `${auth.user.firstName || ''} ${auth.user.lastName || ''}`.trim()
+                    }
+                    icon={User}
+                  />
                   <InfoItem label="Telefon" value={auth.user.phone} icon={Briefcase} />
                   <InfoItem label={t('company')} value={auth.user.company} icon={Building} />
                   <InfoItem label="Şehir" value={auth.user.city} icon={Globe} />
@@ -225,7 +236,9 @@ export function ProfilePage() {
               {auth.user.isVerified !== false && (
                 <section className="bg-gray-50/50 p-8 border border-black/5">
                   <h2 className="text-[11px] font-bold text-gray-900 uppercase tracking-[0.3em] mb-4">
-                    {auth.user.role === 'architect' ? 'Mimar Programı & Çizim Kütüphanesi' : t('exclusive_access')}
+                    {auth.user.role === 'architect'
+                      ? 'Mimar Programı & Çizim Kütüphanesi'
+                      : t('exclusive_access')}
                   </h2>
                   <p className="text-xs md:text-sm text-gray-500 font-inter mb-8 tracking-wide leading-relaxed max-w-xl">
                     {auth.user.role === 'architect'

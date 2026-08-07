@@ -145,7 +145,7 @@ export default defineConfig({
         target: 'http://localhost:3002',
         changeOrigin: true,
         secure: false,
-        configure: (proxy) => {
+        configure: proxy => {
           proxy.on('error', (_err, _req, res) => {
             if (res && 'writeHead' in res && !res.headersSent) {
               res.writeHead(503, {'Content-Type': 'application/json'})
