@@ -221,7 +221,6 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     const container = scrollContainerRef.current
     container.style.cursor = 'grab'
 
-    // Snap to nearest
     const scrollLeft = container.scrollLeft
     let nearestIndex = 0
     let minDistance = Infinity
@@ -236,13 +235,14 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       }
     })
 
-    const targetRef = itemRefs.current[nearestIndex]
-    if (targetRef) {
-      container.scrollTo({
-        left: targetRef.offsetLeft - container.offsetLeft,
-        behavior: 'smooth',
-      })
+    const maxScrollLeft = container.scrollWidth - container.clientWidth
+    if (scrollLeft < -30) {
+      nearestIndex = slideCount - 1
+    } else if (scrollLeft > maxScrollLeft + 30) {
+      nearestIndex = 0
     }
+
+    scrollToIndex(nearestIndex)
 
     setTimeout(() => {
       if (scrollContainerRef.current) {
