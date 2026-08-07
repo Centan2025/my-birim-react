@@ -51,6 +51,13 @@ export default defineType({
       fieldset: 'heroGroup',
     }),
     defineField({
+      name: 'heroImage',
+      title: 'Hero Görseli (Sanity Görsel)',
+      type: 'image',
+      options: {hotspot: true},
+      fieldset: 'heroGroup',
+    }),
+    defineField({
       name: 'heroTitle',
       title: 'Hero Başlığı',
       type: 'localizedString',

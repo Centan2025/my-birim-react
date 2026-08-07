@@ -73,12 +73,22 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
           palette: extractPalette(data.heroImageR2),
           ...mapR2Metadata(data.heroImageR2),
         }
+      } else if (data.heroImage) {
+        data.heroImage = {
+          url: mapImage(data.heroImage as SanityImageLike),
+          palette: extractPalette(data.heroImage as SanityImageLike),
+        }
       }
       if (data.heroImageMobileR2?.url) {
         data.heroImageMobile = {
           url: mapImage(data.heroImageMobileR2),
           palette: extractPalette(data.heroImageMobileR2),
           ...mapR2Metadata(data.heroImageMobileR2),
+        }
+      } else if (data.heroImageMobile) {
+        data.heroImageMobile = {
+          url: mapImage(data.heroImageMobile as SanityImageLike),
+          palette: extractPalette(data.heroImageMobile as SanityImageLike),
         }
       }
       if (Array.isArray(data.eras)) {

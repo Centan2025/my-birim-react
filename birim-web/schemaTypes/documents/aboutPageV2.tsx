@@ -13,9 +13,21 @@ export default defineType({
       type: 'r2Asset',
     }),
     defineField({
+      name: 'heroImage',
+      title: 'Hero Görseli (Masaüstü Sanity Görsel)',
+      type: 'image',
+      options: {hotspot: true},
+    }),
+    defineField({
       name: 'heroImageMobileR2',
       title: 'Hero Görseli (Mobil R2)',
       type: 'r2Asset',
+    }),
+    defineField({
+      name: 'heroImageMobile',
+      title: 'Hero Görseli (Mobil Sanity Görsel)',
+      type: 'image',
+      options: {hotspot: true},
     }),
     defineField({name: 'heroBadge', title: 'Hero Üst Etiketi', type: 'localizedString'}),
     defineField({name: 'heroTitle', title: 'Hero Başlığı', type: 'localizedString'}),
