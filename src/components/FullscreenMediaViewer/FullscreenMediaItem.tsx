@@ -20,6 +20,8 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
   isVisible,
   isClosing,
   animationDelay,
+  isMobile: _isMobile,
+  isLandscape: _isLandscape,
   itemRef,
 }) => {
   if (!item) return null

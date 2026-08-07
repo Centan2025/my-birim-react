@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {createPortal} from 'react-dom'
 import {FullscreenMediaViewerProps} from './types'
 import {FullscreenMediaItem} from './FullscreenMediaItem'
@@ -13,17 +13,26 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   const [isVisible, setIsVisible] = useState(false)
   const [isButtonVisible, setIsButtonVisible] = useState(false)
   const [visibleIndices, setVisibleIndices] = useState<number[]>([])
-  const [, setActiveIndex] = useState(initialIndex)
-  const activeIndexRef = useRef(initialIndex)
-  const lastWheelTime = useRef(0)
-
-  const updateActiveIndex = useCallback((idx: number) => {
-    setActiveIndex(idx)
-    activeIndexRef.current = idx
-  }, [])
   const [isMobile, setIsMobile] = useState(false)
   const [isLandscape, setIsLandscape] = useState(false)
   const closingVisibleIndicesRef = useRef<number[]>([])
+
+  const slideCount = items?.length ?? 0
+  const hasItems = slideCount > 0
+  const isLooping = slideCount > 1
+
+  // Cloned Track for continuous infinite smooth scrolling
+  const displayItems = useMemo(() => {
+    if (!items || items.length <= 1) return items || []
+    const first = items[0]!
+    const last = items[items.length - 1]!
+    return [last, ...items, first]
+  }, [items])
+
+  const displayCount = displayItems.length
+  const currentDisplayIndexRef = useRef(isLooping ? initialIndex + 1 : initialIndex)
+  const isJumpingRef = useRef(false)
+  const lastWheelTime = useRef(0)
 
   // Mouse drag için state'ler (desktop için)
   const [isDragging, setIsDragging] = useState(false)
@@ -32,9 +41,6 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
 
   // Mobilde yukarı git butonu için state
   const [showScrollToTop, setShowScrollToTop] = useState(false)
-
-  const slideCount = items?.length ?? 0
-  const hasItems = slideCount > 0
 
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const itemRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -237,12 +243,12 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
 
     const maxScrollLeft = container.scrollWidth - container.clientWidth
     if (scrollLeft < -30) {
-      nearestIndex = slideCount - 1
+      scrollToDisplayIndex(0)
     } else if (scrollLeft > maxScrollLeft + 30) {
-      nearestIndex = 0
+      scrollToDisplayIndex(displayCount - 1)
+    } else {
+      scrollToDisplayIndex(nearestIndex)
     }
-
-    scrollToIndex(nearestIndex)
 
     setTimeout(() => {
       if (scrollContainerRef.current) {
@@ -253,35 +259,41 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
 
   // Navigation & Scroll Handlers
 
-  const scrollToIndex = useCallback(
-    (index: number) => {
+  const scrollToDisplayIndex = useCallback(
+    (index: number, smooth: boolean = true) => {
       if (!scrollContainerRef.current) return
       const container = scrollContainerRef.current
       const targetEl = itemRefs.current[index]
       if (targetEl) {
         const isHorizontal = (isMobile && isLandscape) || !isMobile
         if (isHorizontal) {
-          container.scrollTo({left: targetEl.offsetLeft, behavior: 'smooth'})
+          container.scrollTo({
+            left: targetEl.offsetLeft,
+            behavior: smooth ? 'smooth' : 'auto',
+          })
         } else {
-          container.scrollTo({top: targetEl.offsetTop, behavior: 'smooth'})
+          container.scrollTo({
+            top: targetEl.offsetTop,
+            behavior: smooth ? 'smooth' : 'auto',
+          })
         }
-        updateActiveIndex(index)
+        currentDisplayIndexRef.current = index
       }
     },
-    [isMobile, isLandscape, updateActiveIndex]
+    [isMobile, isLandscape]
   )
 
   const handleScrollLeft = useCallback(() => {
-    if (slideCount <= 1) return
-    const nextIdx = activeIndexRef.current <= 0 ? slideCount - 1 : activeIndexRef.current - 1
-    scrollToIndex(nextIdx)
-  }, [slideCount, scrollToIndex])
+    if (!isLooping) return
+    const nextDisplayIdx = currentDisplayIndexRef.current - 1
+    scrollToDisplayIndex(nextDisplayIdx, true)
+  }, [isLooping, scrollToDisplayIndex])
 
   const handleScrollRight = useCallback(() => {
-    if (slideCount <= 1) return
-    const nextIdx = activeIndexRef.current >= slideCount - 1 ? 0 : activeIndexRef.current + 1
-    scrollToIndex(nextIdx)
-  }, [slideCount, scrollToIndex])
+    if (!isLooping) return
+    const nextDisplayIdx = currentDisplayIndexRef.current + 1
+    scrollToDisplayIndex(nextDisplayIdx, true)
+  }, [isLooping, scrollToDisplayIndex])
 
   const handleWheel = (e: React.WheelEvent) => {
     const isHorizontal = (isMobile && isLandscape) || !isMobile
@@ -298,7 +310,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     }
   }
 
-  // Scroll effects & active index tracking
+  // Scroll effects & silent boundary wrapping
   useEffect(() => {
     if (!scrollContainerRef.current || typeof window === 'undefined') return
 
@@ -330,7 +342,40 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
           }
         })
         setVisibleIndices(visible)
-        updateActiveIndex(centerItemIndex)
+        currentDisplayIndexRef.current = centerItemIndex
+
+        // Check if we hit end clone (index displayCount - 1) or start clone (index 0)
+        if (isLooping && !isJumpingRef.current) {
+          if (centerItemIndex >= displayCount - 1) {
+            const realFirstEl = itemRefs.current[1]
+            const cloneFirstEl = itemRefs.current[displayCount - 1]
+            if (realFirstEl && cloneFirstEl) {
+              const clonePos = realFirstEl.offsetLeft
+              if (Math.abs(container.scrollLeft - cloneFirstEl.offsetLeft) < 25) {
+                isJumpingRef.current = true
+                container.scrollLeft = clonePos
+                currentDisplayIndexRef.current = 1
+                setTimeout(() => {
+                  isJumpingRef.current = false
+                }, 50)
+              }
+            }
+          } else if (centerItemIndex <= 0) {
+            const realLastEl = itemRefs.current[slideCount]
+            const cloneLastEl = itemRefs.current[0]
+            if (realLastEl && cloneLastEl) {
+              const clonePos = realLastEl.offsetLeft
+              if (Math.abs(container.scrollLeft - cloneLastEl.offsetLeft) < 25) {
+                isJumpingRef.current = true
+                container.scrollLeft = clonePos
+                currentDisplayIndexRef.current = slideCount
+                setTimeout(() => {
+                  isJumpingRef.current = false
+                }, 50)
+              }
+            }
+          }
+        }
       } else {
         const containerTop = container.scrollTop
         setShowScrollToTop(isMobile && !isLandscape && containerTop > 200)
@@ -356,7 +401,39 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
           }
         })
         setVisibleIndices(visible)
-        updateActiveIndex(centerItemIndex)
+        currentDisplayIndexRef.current = centerItemIndex
+
+        if (isLooping && !isJumpingRef.current) {
+          if (centerItemIndex >= displayCount - 1) {
+            const realFirstEl = itemRefs.current[1]
+            const cloneFirstEl = itemRefs.current[displayCount - 1]
+            if (realFirstEl && cloneFirstEl) {
+              const clonePos = realFirstEl.offsetTop
+              if (Math.abs(container.scrollTop - cloneFirstEl.offsetTop) < 25) {
+                isJumpingRef.current = true
+                container.scrollTop = clonePos
+                currentDisplayIndexRef.current = 1
+                setTimeout(() => {
+                  isJumpingRef.current = false
+                }, 50)
+              }
+            }
+          } else if (centerItemIndex <= 0) {
+            const realLastEl = itemRefs.current[slideCount]
+            const cloneLastEl = itemRefs.current[0]
+            if (realLastEl && cloneLastEl) {
+              const clonePos = realLastEl.offsetTop
+              if (Math.abs(container.scrollTop - cloneLastEl.offsetTop) < 25) {
+                isJumpingRef.current = true
+                container.scrollTop = clonePos
+                currentDisplayIndexRef.current = slideCount
+                setTimeout(() => {
+                  isJumpingRef.current = false
+                }, 50)
+              }
+            }
+          }
+        }
       }
     }
 
@@ -367,7 +444,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       container.removeEventListener('scroll', updateVisibleIndices)
       window.removeEventListener('resize', updateVisibleIndices)
     }
-  }, [items.length, isMobile, isLandscape, updateActiveIndex])
+  }, [displayCount, slideCount, isLooping, isMobile, isLandscape])
 
   // Keydown listener for arrow navigation
   useEffect(() => {
@@ -384,11 +461,13 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [handleScrollRight, handleScrollLeft, handleClose])
 
+  // Initial scroll positioning
   useEffect(() => {
     if (initialIndex >= 0 && scrollContainerRef.current) {
-      setTimeout(() => scrollToIndex(initialIndex), 100)
+      const targetIdx = isLooping ? initialIndex + 1 : initialIndex
+      setTimeout(() => scrollToDisplayIndex(targetIdx, false), 80)
     }
-  }, [initialIndex, scrollToIndex])
+  }, [initialIndex, isLooping, scrollToDisplayIndex])
 
   const handleScrollToTop = () => {
     scrollContainerRef.current?.scrollTo({top: 0, behavior: 'smooth'})
@@ -435,7 +514,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
             ref={scrollContainerRef}
             className={`w-full overflow-y-auto md:overflow-y-hidden md:overflow-x-auto flex ${
               isMobile && isLandscape ? 'flex-row' : isMobile ? 'flex-col' : 'flex-row'
-            } items-start md:items-stretch ${slideCount === 1 ? 'justify-center' : 'justify-start'} px-0 md:px-0 md:cursor-grab md:select-none`}
+            } items-start md:items-stretch ${displayCount === 1 ? 'justify-center' : 'justify-start'} px-0 md:px-0 md:cursor-grab md:select-none`}
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
@@ -455,7 +534,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
             onWheel={handleWheel}
           >
             <style>{`div::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; } * { scrollbar-width: none !important; -ms-overflow-style: none !important; }`}</style>
-            {items.map((item, i) => {
+            {displayItems.map((item, i) => {
               let animationDelay = 0
               const currentVisible =
                 closingVisibleIndicesRef.current.length > 0
@@ -466,7 +545,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
                 const reverseIndex =
                   visibleIndex >= 0
                     ? currentVisible.length - 1 - visibleIndex
-                    : items.length - 1 - i
+                    : displayCount - 1 - i
                 animationDelay = reverseIndex * 60
               } else {
                 animationDelay = isVisible ? i * 100 : 0
@@ -474,7 +553,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
 
               return (
                 <FullscreenMediaItem
-                  key={i}
+                  key={`${item.url || i}-${i}`}
                   item={item}
                   index={i}
                   isVisible={isVisible}
