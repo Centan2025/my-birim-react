@@ -274,6 +274,8 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     }
   }
 
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   // Scroll effects & silent boundary wrapping
   useEffect(() => {
     if (!scrollContainerRef.current || typeof window === 'undefined') return
@@ -305,38 +307,50 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       setVisibleIndices(visible)
       currentDisplayIndexRef.current = centerItemIndex
 
-      // Check if we hit end clone (index displayCount - 1) or start clone (index 0)
-      if (isLooping && !isJumpingRef.current) {
-        if (centerItemIndex >= displayCount - 1) {
+      // Smooth debounced boundary jump without flickering or snapping conflicts
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current)
+      }
+
+      scrollTimeoutRef.current = setTimeout(() => {
+        if (!scrollContainerRef.current || !isLooping || isJumpingRef.current) return
+        const c = scrollContainerRef.current
+        const currIdx = currentDisplayIndexRef.current
+
+        if (currIdx >= displayCount - 1) {
           const realFirstEl = itemRefs.current[1]
-          const cloneFirstEl = itemRefs.current[displayCount - 1]
-          if (realFirstEl && cloneFirstEl) {
-            const clonePos = realFirstEl.offsetLeft
-            if (Math.abs(container.scrollLeft - cloneFirstEl.offsetLeft) < 25) {
-              isJumpingRef.current = true
-              container.scrollLeft = clonePos
-              currentDisplayIndexRef.current = 1
+          if (realFirstEl) {
+            isJumpingRef.current = true
+            c.style.scrollSnapType = 'none'
+            c.scrollLeft = realFirstEl.offsetLeft
+            currentDisplayIndexRef.current = 1
+            requestAnimationFrame(() => {
               setTimeout(() => {
+                if (scrollContainerRef.current) {
+                  scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
+                }
                 isJumpingRef.current = false
               }, 50)
-            }
+            })
           }
-        } else if (centerItemIndex <= 0) {
+        } else if (currIdx <= 0) {
           const realLastEl = itemRefs.current[slideCount]
-          const cloneLastEl = itemRefs.current[0]
-          if (realLastEl && cloneLastEl) {
-            const clonePos = realLastEl.offsetLeft
-            if (Math.abs(container.scrollLeft - cloneLastEl.offsetLeft) < 25) {
-              isJumpingRef.current = true
-              container.scrollLeft = clonePos
-              currentDisplayIndexRef.current = slideCount
+          if (realLastEl) {
+            isJumpingRef.current = true
+            c.style.scrollSnapType = 'none'
+            c.scrollLeft = realLastEl.offsetLeft
+            currentDisplayIndexRef.current = slideCount
+            requestAnimationFrame(() => {
               setTimeout(() => {
+                if (scrollContainerRef.current) {
+                  scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
+                }
                 isJumpingRef.current = false
               }, 50)
-            }
+            })
           }
         }
-      }
+      }, 100)
     }
 
     const container = scrollContainerRef.current
@@ -345,6 +359,9 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     return () => {
       container.removeEventListener('scroll', updateVisibleIndices)
       window.removeEventListener('resize', updateVisibleIndices)
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current)
+      }
     }
   }, [displayCount, slideCount, isLooping])
 
