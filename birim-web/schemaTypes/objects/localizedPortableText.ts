@@ -234,6 +234,19 @@ const portableTextBlocks = [
         },
         initialValue: 'primary',
       },
+      {
+        name: 'align',
+        type: 'string',
+        title: 'Buton Konumu (Hizalama)',
+        options: {
+          list: [
+            {title: 'Sol', value: 'left'},
+            {title: 'Ortala', value: 'center'},
+            {title: 'Sağ', value: 'right'},
+          ],
+        },
+        initialValue: 'center',
+      },
     ],
   },
 ]

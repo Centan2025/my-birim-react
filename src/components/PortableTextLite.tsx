@@ -31,6 +31,7 @@ type Block = {
   layout?: 'full' | 'center' | 'left' | 'right'
   url?: string
   style_type?: string // for divider or cta
+  align?: 'left' | 'center' | 'right' // for cta positioning
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   text?: any // for cta (localized)
   link?: string // for cta
@@ -661,25 +662,40 @@ export default function PortableTextLite({
       isFirstNode = false
     }
 
-    if (block._type === 'cta' && block.link) {
-      // Simple CTA Button
+    if (block._type === 'cta' && (block.link || block.url)) {
+      const linkUrl = block.link || block.url || '#'
+      const alignClass =
+        block.align === 'left' || block.layout === 'left'
+          ? 'justify-start'
+          : block.align === 'right' || block.layout === 'right'
+            ? 'justify-end'
+            : 'justify-center'
+
       const btnStyle =
         block.style === 'secondary'
-          ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--text-primary)] hover:opacity-80'
+          ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--text-primary)] hover:bg-[var(--text-primary)] hover:text-[var(--bg-primary)]'
           : block.style === 'outline'
             ? 'bg-transparent text-[var(--text-primary)] border border-[var(--border-primary)] hover:border-[var(--text-primary)]'
-            : 'bg-[var(--text-primary)] text-[var(--bg-primary)] hover:opacity-80'
+            : 'bg-[var(--text-primary)] text-[var(--bg-primary)] border border-[var(--text-primary)] hover:bg-transparent hover:text-[var(--text-primary)]'
 
       const label =
-        typeof block.text === 'string' ? block.text : block.text?.tr || block.text?.en || 'Devam Et'
+        typeof block.text === 'string'
+          ? block.text
+          : typeof block.text === 'object' && block.text !== null
+            ? (block.text as Record<string, string>)['tr'] ||
+              (block.text as Record<string, string>)['en'] ||
+              'Devam Et'
+            : 'Devam Et'
+
+      const isExternal = linkUrl.startsWith('http://') || linkUrl.startsWith('https://')
 
       nodes.push(
-        <div key={blockKey} className={`flex justify-center ${applyTopMarginRemoval('my-8')}`}>
+        <div key={blockKey} className={`flex ${alignClass} ${applyTopMarginRemoval('my-8')}`}>
           <a
-            href={block.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`inline-block px-8 py-3 font-bold transition-all duration-300 ${btnStyle}`}
+            href={linkUrl}
+            target={isExternal ? '_blank' : undefined}
+            rel={isExternal ? 'noopener noreferrer' : undefined}
+            className={`inline-flex items-center px-8 py-3.5 text-[9px] md:text-[11px] leading-none uppercase tracking-[0.2em] font-medium font-inter transition-all duration-300 ${btnStyle}`}
           >
             {label}
           </a>
