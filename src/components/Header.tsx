@@ -57,7 +57,9 @@ export function Header() {
   const {isDarkMode} = useDarkMode()
   const {isLoggedIn} = useAuth()
   const {cartCount, toggleCart} = useCart()
-  const [headerOpacity, setHeaderOpacity] = useState(0)
+  const [headerOpacity, setHeaderOpacity] = useState(() =>
+    typeof window !== 'undefined' && isDarkHeroPageUtil(window.location.pathname) ? 0 : 0.7
+  )
   const [isHeaderVisible, setIsHeaderVisible] = useState(true)
 
   // Logic to determine if we are on a "Dark Hero" page (transparent header potential)
@@ -154,40 +156,26 @@ export function Header() {
     getFooterContent().then(setFooterContent)
   }, [])
 
-  // Route değiştiğinde brightness'i sıfırla ve header opacity'yi ayarla (sayfa geçişlerinde hemen güncelle)
+  // Sayfa değiştiğinde state'leri ve scroll takibini sıfırla
   useEffect(() => {
-    // Route değiştiğini ref'e kaydet
     currentRouteRef.current = location.pathname
 
-    // Sayfa değiştiğinde brightness'i hemen sıfırla
-    // This is now handled by useHeroBrightness hook internally
-    // setHeroBrightness(null)
-
-    // Scroll pozisyonunu sıfırla (ScrollToTop component'i bunu yapıyor ama biz de garantilemek için)
     lastScrollYRef.current = 0
-    // Flag'i sıfırla (route değiştiğinde)
     opacitySetByHandleScrollRef.current = false
-    // Header opacity'yi hemen 0 yap (route değiştiğinde)
-    setHeaderOpacity(0)
+    // Header opacity'yi sayfa türüne göre ayarla (koyu hero varsa 0, ürün detayı gibi standart sayfalarda 0.7)
+    setHeaderOpacity(isDarkHeroPageUtil(location.pathname) ? 0 : 0.7)
 
-    // Sayfa geçişlerinde scroll pozisyonunu kontrol et
-    // ScrollToTop component'i scroll'u 0'a ayarlıyor ama biraz gecikme olabilir
-    // Bu yüzden kısa bir gecikme ile kontrol ediyoruz
     const checkScroll = () => {
-      // Route değiştiyse işlemi durdur
       if (currentRouteRef.current !== location.pathname) {
         return
       }
 
       const currentScrollY = window.scrollY
       if (isMobile && currentScrollY === 0) {
-        // Sayfa en üstteyse ve brightness henüz hesaplanmadıysa, header'ı şeffaf yap
-        setHeaderOpacity(0)
+        setHeaderOpacity(isDarkHeroPageUtil(location.pathname) ? 0 : 0.7)
       }
     }
-    // Hemen kontrol et
     checkScroll()
-    // ScrollToTop'un çalışması için kısa bir gecikme ile tekrar kontrol et
     const timeoutId = setTimeout(checkScroll, 50)
     return () => clearTimeout(timeoutId)
   }, [location.pathname, isMobile])

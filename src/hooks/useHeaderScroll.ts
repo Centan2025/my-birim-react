@@ -92,7 +92,7 @@ export function useHeaderScroll({
 
         if (currentScrollY === 0) {
           if (currentPath !== locationPathname) {
-            setHeaderOpacity(0)
+            setHeaderOpacity(isDarkHeroPage(path) ? 0 : 0.7)
             setIsHeaderVisible(true)
             opacitySetByHandleScrollRef.current = true
           } else {
@@ -103,9 +103,9 @@ export function useHeaderScroll({
             if (isProjectsList || isNewsList || isDesignersList) {
               setHeaderOpacity(0.7)
               opacitySetByHandleScrollRef.current = true
-            } else if (currentHeroBrightness !== null) {
+            } else if (currentHeroBrightness !== null && isDarkHeroPage(path)) {
               if (currentPath !== locationPathname) {
-                setHeaderOpacity(0)
+                setHeaderOpacity(isDarkHeroPage(path) ? 0 : 0.7)
                 setIsHeaderVisible(true)
                 opacitySetByHandleScrollRef.current = true
               } else {
