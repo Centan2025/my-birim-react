@@ -84,10 +84,10 @@ const NewsCard: React.FC<{item: NewsItem}> = ({item}) => {
               }
               alt={t(item.title)}
               className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] will-change-transform"
-              width={600}
-              height={400}
+              width={1200}
+              height={800}
               loading="lazy"
-              quality={85}
+              quality={95}
             />
           </div>
         </div>

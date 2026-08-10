@@ -43,8 +43,9 @@ const MediaComponent: FC<{media: NewsMedia}> = ({media}) => {
           srcDesktop={media.urlDesktop}
           alt={t(media.caption) || ''}
           className={`w-full h-auto object-cover ${imageBorderClass}`}
+          width={1920}
           loading="lazy"
-          quality={85}
+          quality={95}
           crop={(media as any).crop}
           hotspot={(media as any).hotspot}
           origWidth={(media as any).origWidth}
@@ -327,10 +328,10 @@ export function NewsDetailPage() {
                 srcDesktop={mainImageObj?.urlDesktop}
                 alt={t(item.title)}
                 className={`w-full h-auto object-cover ${settings?.imageBorderStyle === 'rounded' ? 'rounded-lg' : 'rounded-none'}`}
-                width={1200}
-                height={675}
+                width={1920}
+                height={1080}
                 loading="eager"
-                quality={90}
+                quality={95}
                 crop={(mainImageObj as any)?.crop}
                 hotspot={(mainImageObj as any)?.hotspot}
                 origWidth={(mainImageObj as any)?.origWidth}
