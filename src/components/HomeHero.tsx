@@ -360,6 +360,22 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
     }
   }, [])
 
+  const isDraggingRef = useRef(isDragging)
+  const isTransitioningRef = useRef(isTransitioning)
+  const goToNextSlideRef = useRef(goToNextSlide)
+
+  useEffect(() => {
+    isDraggingRef.current = isDragging
+  }, [isDragging])
+
+  useEffect(() => {
+    isTransitioningRef.current = isTransitioning
+  }, [isTransitioning])
+
+  useEffect(() => {
+    goToNextSlideRef.current = goToNextSlide
+  }, [goToNextSlide])
+
   // Otomatik geçiş
   useEffect(() => {
     if (autoPlayIntervalRef.current) {
@@ -373,7 +389,6 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
     if (content?.heroAutoPlay !== true) {
       return
     }
-    if (isDragging || isTransitioning) return
 
     const intervalMs =
       typeof content?.heroAutoPlayInterval === 'number' && content.heroAutoPlayInterval > 0
@@ -381,8 +396,8 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
         : 5000
 
     autoPlayIntervalRef.current = setInterval(() => {
-      if (isDragging || isTransitioning) return
-      goToNextSlide()
+      if (isDraggingRef.current || isTransitioningRef.current) return
+      goToNextSlideRef.current()
     }, intervalMs)
 
     return () => {
@@ -391,14 +406,7 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
         autoPlayIntervalRef.current = null
       }
     }
-  }, [
-    heroMedia,
-    content?.heroAutoPlay,
-    content?.heroAutoPlayInterval,
-    isDragging,
-    isTransitioning,
-    goToNextSlide,
-  ])
+  }, [heroMedia, content?.heroAutoPlay, content?.heroAutoPlayInterval])
 
   const activeSlideIndex =
     slideCount > 0 ? ((currentSlide % slideCount) + slideCount) % slideCount : 0
