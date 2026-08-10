@@ -579,12 +579,16 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   const mapFocalCoord = (val: number): number => {
     if (val <= 0.15) return 0
-    if (val >= 0.80) return 100
-    return Math.round(((val - 0.15) / (0.80 - 0.15)) * 100)
+    if (val >= 0.8) return 100
+    return Math.round(((val - 0.15) / (0.8 - 0.15)) * 100)
   }
 
   const activeHsDesktop = hotspotDesktop || hotspot
-  if (activeHsDesktop && typeof activeHsDesktop.x === 'number' && typeof activeHsDesktop.y === 'number') {
+  if (
+    activeHsDesktop &&
+    typeof activeHsDesktop.x === 'number' &&
+    typeof activeHsDesktop.y === 'number'
+  ) {
     const posX = `${mapFocalCoord(activeHsDesktop.x)}%`
     const posY = `${mapFocalCoord(activeHsDesktop.y)}%`
     customStyle['--obj-pos-desktop'] = `${posX} ${posY}`
@@ -609,7 +613,11 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   }
 
   const activeHsMobile = hotspotMobile || hotspot
-  if (activeHsMobile && typeof activeHsMobile.x === 'number' && typeof activeHsMobile.y === 'number') {
+  if (
+    activeHsMobile &&
+    typeof activeHsMobile.x === 'number' &&
+    typeof activeHsMobile.y === 'number'
+  ) {
     const posX = `${mapFocalCoord(activeHsMobile.x)}%`
     const posY = `${mapFocalCoord(activeHsMobile.y)}%`
     customStyle['--obj-pos-mobile'] = `${posX} ${posY}`
@@ -762,8 +770,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     const activeHsDesk = hotspotDesktop || hotspot
     const activeHsMob = hotspotMobile || hotspot
 
-    const focalXDesk = activeHsDesk ? activeHsDesk.x * 100 : ((cropDesk?.x || 0) + cropWDesk / 2) * 100
-    const focalYDesk = activeHsDesk ? activeHsDesk.y * 100 : ((cropDesk?.y || 0) + cropHDesk / 2) * 100
+    const focalXDesk = activeHsDesk
+      ? activeHsDesk.x * 100
+      : ((cropDesk?.x || 0) + cropWDesk / 2) * 100
+    const focalYDesk = activeHsDesk
+      ? activeHsDesk.y * 100
+      : ((cropDesk?.y || 0) + cropHDesk / 2) * 100
 
     const focalXMob = activeHsMob ? activeHsMob.x * 100 : ((cropMob?.x || 0) + cropWMob / 2) * 100
     const focalYMob = activeHsMob ? activeHsMob.y * 100 : ((cropMob?.y || 0) + cropHMob / 2) * 100
