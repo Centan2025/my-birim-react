@@ -190,29 +190,69 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     }
   }, [])
 
-  // Navigation & Scroll Handlers
-  const scrollToDisplayIndex = useCallback((index: number, smooth: boolean = true) => {
-    if (!scrollContainerRef.current) return
+  // Silent instant boundary wrap function for true continuous infinite looping
+  const checkBoundaryWrap = useCallback(() => {
+    if (!scrollContainerRef.current || !isLooping || isDraggingRef.current || isJumpingRef.current)
+      return
     const container = scrollContainerRef.current
-    const targetEl = itemRefs.current[index]
-    if (targetEl) {
-      if (smooth) {
-        container.style.scrollSnapType = 'none'
-        if (snapTimeoutRef.current) clearTimeout(snapTimeoutRef.current)
-        snapTimeoutRef.current = setTimeout(() => {
-          if (scrollContainerRef.current && !isDraggingRef.current) {
-            scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
-          }
-        }, 400)
-      }
+    const curr = currentDisplayIndexRef.current
 
-      container.scrollTo({
-        left: targetEl.offsetLeft,
-        behavior: smooth ? 'smooth' : 'auto',
-      })
-      currentDisplayIndexRef.current = index
+    if (curr >= displayCount - 1) {
+      const realFirstEl = itemRefs.current[1]
+      if (realFirstEl) {
+        isJumpingRef.current = true
+        container.style.scrollSnapType = 'none'
+        container.style.scrollBehavior = 'auto'
+        container.scrollLeft = realFirstEl.offsetLeft
+        currentDisplayIndexRef.current = 1
+        requestAnimationFrame(() => {
+          container.style.scrollBehavior = 'smooth'
+          isJumpingRef.current = false
+        })
+      }
+    } else if (curr <= 0) {
+      const realLastEl = itemRefs.current[slideCount]
+      if (realLastEl) {
+        isJumpingRef.current = true
+        container.style.scrollSnapType = 'none'
+        container.style.scrollBehavior = 'auto'
+        container.scrollLeft = realLastEl.offsetLeft
+        currentDisplayIndexRef.current = slideCount
+        requestAnimationFrame(() => {
+          container.style.scrollBehavior = 'smooth'
+          isJumpingRef.current = false
+        })
+      }
     }
-  }, [])
+  }, [displayCount, slideCount, isLooping])
+
+  // Navigation & Scroll Handlers
+  const scrollToDisplayIndex = useCallback(
+    (index: number, smooth: boolean = true) => {
+      if (!scrollContainerRef.current) return
+      const container = scrollContainerRef.current
+      const targetEl = itemRefs.current[index]
+      if (targetEl) {
+        if (smooth) {
+          container.style.scrollSnapType = 'none'
+          if (snapTimeoutRef.current) clearTimeout(snapTimeoutRef.current)
+          snapTimeoutRef.current = setTimeout(() => {
+            if (scrollContainerRef.current && !isDraggingRef.current) {
+              scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
+            }
+            checkBoundaryWrap()
+          }, 350)
+        }
+
+        container.scrollTo({
+          left: targetEl.offsetLeft,
+          behavior: smooth ? 'smooth' : 'auto',
+        })
+        currentDisplayIndexRef.current = index
+      }
+    },
+    [checkBoundaryWrap]
+  )
 
   // Drag Handlers (Desktop Mouse Drag via Window Event Listeners for zero stutter)
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -220,15 +260,39 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     if (e.button !== 0) return
     e.preventDefault()
 
+    const container = scrollContainerRef.current
+    let curr = currentDisplayIndexRef.current
+
+    if (isLooping) {
+      if (curr >= displayCount - 1) {
+        const realFirstEl = itemRefs.current[1]
+        if (realFirstEl) {
+          container.style.scrollSnapType = 'none'
+          container.style.scrollBehavior = 'auto'
+          container.scrollLeft = realFirstEl.offsetLeft
+          curr = 1
+          currentDisplayIndexRef.current = 1
+        }
+      } else if (curr <= 0) {
+        const realLastEl = itemRefs.current[slideCount]
+        if (realLastEl) {
+          container.style.scrollSnapType = 'none'
+          container.style.scrollBehavior = 'auto'
+          container.scrollLeft = realLastEl.offsetLeft
+          curr = slideCount
+          currentDisplayIndexRef.current = slideCount
+        }
+      }
+    }
+
     isDraggingRef.current = true
     setIsDraggingState(true)
     dragStartX.current = e.clientX
     currentMouseXRef.current = e.clientX
-    dragStartScrollLeft.current = scrollContainerRef.current.scrollLeft
+    dragStartScrollLeft.current = container.scrollLeft
     dragStartDisplayIndex.current = currentDisplayIndexRef.current
     targetScrollLeftRef.current = dragStartScrollLeft.current
 
-    const container = scrollContainerRef.current
     container.style.cursor = 'grabbing'
     container.style.scrollSnapType = 'none'
   }
@@ -295,7 +359,9 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
         targetIdx = nearestIndex
       }
 
-      targetIdx = Math.max(0, Math.min(displayCount - 1, targetIdx))
+      if (!isLooping) {
+        targetIdx = Math.max(0, Math.min(displayCount - 1, targetIdx))
+      }
       scrollToDisplayIndex(targetIdx, true)
     }
 
@@ -308,19 +374,47 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
         cancelAnimationFrame(rafIdRef.current)
       }
     }
-  }, [isMobile, displayCount, scrollToDisplayIndex])
+  }, [isMobile, isLooping, displayCount, scrollToDisplayIndex])
 
   const handleScrollLeft = useCallback(() => {
-    if (!isLooping) return
-    const nextDisplayIdx = currentDisplayIndexRef.current - 1
+    if (!isLooping || !scrollContainerRef.current) return
+    const container = scrollContainerRef.current
+    let curr = currentDisplayIndexRef.current
+
+    if (curr <= 0) {
+      const realLastEl = itemRefs.current[slideCount]
+      if (realLastEl) {
+        container.style.scrollSnapType = 'none'
+        container.style.scrollBehavior = 'auto'
+        container.scrollLeft = realLastEl.offsetLeft
+        curr = slideCount
+        currentDisplayIndexRef.current = slideCount
+      }
+    }
+
+    const nextDisplayIdx = curr - 1
     scrollToDisplayIndex(nextDisplayIdx, true)
-  }, [isLooping, scrollToDisplayIndex])
+  }, [isLooping, slideCount, scrollToDisplayIndex])
 
   const handleScrollRight = useCallback(() => {
-    if (!isLooping) return
-    const nextDisplayIdx = currentDisplayIndexRef.current + 1
+    if (!isLooping || !scrollContainerRef.current) return
+    const container = scrollContainerRef.current
+    let curr = currentDisplayIndexRef.current
+
+    if (curr >= displayCount - 1) {
+      const realFirstEl = itemRefs.current[1]
+      if (realFirstEl) {
+        container.style.scrollSnapType = 'none'
+        container.style.scrollBehavior = 'auto'
+        container.scrollLeft = realFirstEl.offsetLeft
+        curr = 1
+        currentDisplayIndexRef.current = 1
+      }
+    }
+
+    const nextDisplayIdx = curr + 1
     scrollToDisplayIndex(nextDisplayIdx, true)
-  }, [isLooping, scrollToDisplayIndex])
+  }, [isLooping, displayCount, scrollToDisplayIndex])
 
   const handleWheel = (e: React.WheelEvent) => {
     const delta = e.deltaY || e.deltaX
@@ -386,49 +480,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       }
 
       scrollTimeoutRef.current = setTimeout(() => {
-        if (
-          !scrollContainerRef.current ||
-          !isLooping ||
-          isJumpingRef.current ||
-          isDraggingRef.current
-        )
-          return
-        const c = scrollContainerRef.current
-        const currIdx = currentDisplayIndexRef.current
-
-        if (currIdx >= displayCount - 1) {
-          const realFirstEl = itemRefs.current[1]
-          if (realFirstEl) {
-            isJumpingRef.current = true
-            c.style.scrollSnapType = 'none'
-            c.scrollLeft = realFirstEl.offsetLeft
-            currentDisplayIndexRef.current = 1
-            requestAnimationFrame(() => {
-              setTimeout(() => {
-                if (scrollContainerRef.current && !isDraggingRef.current) {
-                  scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
-                }
-                isJumpingRef.current = false
-              }, 50)
-            })
-          }
-        } else if (currIdx <= 0) {
-          const realLastEl = itemRefs.current[slideCount]
-          if (realLastEl) {
-            isJumpingRef.current = true
-            c.style.scrollSnapType = 'none'
-            c.scrollLeft = realLastEl.offsetLeft
-            currentDisplayIndexRef.current = slideCount
-            requestAnimationFrame(() => {
-              setTimeout(() => {
-                if (scrollContainerRef.current && !isDraggingRef.current) {
-                  scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
-                }
-                isJumpingRef.current = false
-              }, 50)
-            })
-          }
-        }
+        checkBoundaryWrap()
       }, 150)
     }
 
