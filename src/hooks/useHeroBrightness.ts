@@ -13,6 +13,12 @@ export function useHeroBrightness(
     heroBrightnessRef.current = contextBrightness
   }, [contextBrightness])
 
+  // Reset brightness when navigating to a new route
+  useEffect(() => {
+    setHeroBrightness(null)
+    heroBrightnessRef.current = null
+  }, [pathname])
+
   useEffect(() => {
     if (contextBrightness !== null) return
     if (window.scrollY > 0) {

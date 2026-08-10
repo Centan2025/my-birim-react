@@ -62,7 +62,6 @@ export function useHeaderScroll({
       const currentScrollY = window.scrollY
       const path = locationPathname
       const currentPath = currentRouteRef.current
-      const currentHeroBrightness = heroBrightnessRef.current
       const {
         isMobileMenuOpen: menuOpen,
         isSearchOpen: searchOpen,
@@ -91,39 +90,15 @@ export function useHeaderScroll({
         }
 
         if (currentScrollY === 0) {
-          if (currentPath !== locationPathname) {
-            setHeaderOpacity(isDarkHeroPage(path) ? 0 : 0.7)
+          if (!isDarkHeroPage(path)) {
+            setHeaderOpacity(0.7)
             setIsHeaderVisible(true)
             opacitySetByHandleScrollRef.current = true
           } else {
-            const isProjectsList = path === '/projects' || path === '/projects/'
-            const isNewsList = path === '/news' || path === '/news/'
-            const isDesignersList = path === '/designers' || path === '/designers/'
-
-            if (isProjectsList || isNewsList || isDesignersList) {
-              setHeaderOpacity(0.7)
-              opacitySetByHandleScrollRef.current = true
-            } else if (currentHeroBrightness !== null && isDarkHeroPage(path)) {
-              if (currentPath !== locationPathname) {
-                setHeaderOpacity(isDarkHeroPage(path) ? 0 : 0.7)
-                setIsHeaderVisible(true)
-                opacitySetByHandleScrollRef.current = true
-              } else {
-                // Brightness yüksek olsa bile en üstte şeffaf kalsın (Açılışta beyaz flash'ı önlemek için)
-                // Brightness'a bağlı opaklaşma scroll başladığında (calculateBackgroundColor içinde) devreye girecek
-                setHeaderOpacity(0)
-                opacitySetByHandleScrollRef.current = true
-              }
-            } else {
-              if (isDarkHeroPage(path)) {
-                setHeaderOpacity(0)
-              } else {
-                setHeaderOpacity(0.7)
-              }
-              opacitySetByHandleScrollRef.current = true
-            }
+            setHeaderOpacity(0)
+            setIsHeaderVisible(true)
+            opacitySetByHandleScrollRef.current = true
           }
-          setIsHeaderVisible(true)
         } else {
           if (!isDarkHeroPage(path)) {
             setHeaderOpacity(0.7)
