@@ -7,11 +7,39 @@ export default defineType({
   name: 'newsItem',
   title: 'Haber',
   type: 'document',
+  fieldsets: [
+    {
+      name: 'basicInfo',
+      title: '📌 Temel Bilgiler (Başlık, ID & Tarih)',
+      options: {collapsible: true, collapsed: false},
+    },
+    {
+      name: 'publishing',
+      title: '🌐 Yayın & Sıralama Ayarları',
+      options: {collapsible: true, collapsed: true},
+    },
+    {
+      name: 'contentGroup',
+      title: '📝 Haber Metni & İçerik Blokları',
+      options: {collapsible: true, collapsed: false},
+    },
+    {
+      name: 'mediaGroup',
+      title: '🖼️ Haber Medyası & Görseller',
+      options: {collapsible: true, collapsed: false},
+    },
+    {
+      name: 'seoGroup',
+      title: '🔍 SEO & Arama Motoru Ayarları',
+      options: {collapsible: true, collapsed: true},
+    },
+  ],
   fields: [
     defineField({
       name: 'id',
       title: 'ID (Slug)',
       type: 'slug',
+      fieldset: 'basicInfo',
       options: {source: (doc: any) => doc.title?.tr || doc.title?.en, maxLength: 96},
       validation: (Rule) => Rule.required(),
     }),
@@ -19,13 +47,20 @@ export default defineType({
       name: 'title',
       title: 'Başlık',
       type: 'localizedString',
+      fieldset: 'basicInfo',
       validation: (Rule) => Rule.required(),
     }),
-    defineField({name: 'date', title: 'Tarih (Görünecek Tarih)', type: 'datetime'}),
+    defineField({
+      name: 'date',
+      title: 'Tarih (Görünecek Tarih)',
+      type: 'datetime',
+      fieldset: 'basicInfo',
+    }),
     defineField({
       name: 'isPublished',
       title: 'Yayında Göster',
       type: 'boolean',
+      fieldset: 'publishing',
       initialValue: true,
       description: 'Bu haberin web sitesinde listelerde görünüp görünmeyeceğini belirler.',
     }),
@@ -33,6 +68,7 @@ export default defineType({
       name: 'publishAt',
       title: 'Yayın Tarihi (Opsiyonel)',
       type: 'datetime',
+      fieldset: 'publishing',
       description:
         'Belirli bir tarihten sonra görünsün istiyorsanız kullanın. Boş bırakırsanız hemen yayına girer.',
     }),
@@ -40,15 +76,22 @@ export default defineType({
       name: 'sortOrder',
       title: 'Sıra (Opsiyonel)',
       type: 'number',
+      fieldset: 'publishing',
       description:
         'Küçük sayı önce gelir. Boş bırakırsanız tarih alanına göre (yeniden eskiye) sıralanır.',
     }),
-    defineField({name: 'content', title: 'İçerik', type: 'localizedPortableText'}),
+    defineField({
+      name: 'content',
+      title: 'İçerik',
+      type: 'localizedPortableText',
+      fieldset: 'contentGroup',
+    }),
 
     defineField({
       name: 'media',
       title: 'Haber Medyası',
       type: 'array',
+      fieldset: 'mediaGroup',
       components: {
         input: BulkMediaUploadInput,
       },
@@ -176,6 +219,7 @@ export default defineType({
       name: 'seo',
       title: 'SEO & Arama Motoru Ayarları',
       type: 'seoFields',
+      fieldset: 'seoGroup',
     }),
   ],
   preview: {
