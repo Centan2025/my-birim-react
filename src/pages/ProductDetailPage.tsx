@@ -155,7 +155,7 @@ export function ProductDetailPage() {
     analytics.trackEcommerce('view_item', product.id, (product as any)?.price || 0)
   }, [product, designer, category, t])
 
-  // Ensure page opens at top (y=0) when product detail mounts and during transition cleanup
+  // Ensure page opens at top (y=0) when product detail mounts
   useEffect(() => {
     if (typeof window !== 'undefined') {
       if ('scrollRestoration' in window.history) {
@@ -164,19 +164,10 @@ export function ProductDetailPage() {
       window.scrollTo(0, 0)
       document.documentElement.scrollTop = 0
       document.body.scrollTop = 0
-
-      const t1 = setTimeout(() => window.scrollTo(0, 0), 50)
-      const t2 = setTimeout(() => window.scrollTo(0, 0), 200)
-      const t3 = setTimeout(() => window.scrollTo(0, 0), 500)
-      const t4 = setTimeout(() => window.scrollTo(0, 0), 850)
-      return () => {
-        clearTimeout(t1)
-        clearTimeout(t2)
-        clearTimeout(t3)
-        clearTimeout(t4)
-      }
+      requestAnimationFrame(() => {
+        window.scrollTo(0, 0)
+      })
     }
-    return undefined
   }, [productId])
 
   // Entrance animations - ensure all elements are visible when product is available
