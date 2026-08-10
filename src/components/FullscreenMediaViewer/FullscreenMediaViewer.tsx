@@ -35,10 +35,16 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   const isJumpingRef = useRef(false)
   const lastWheelTime = useRef(0)
 
-  // Mouse drag için state'ler (desktop için)
-  const [isDragging, setIsDragging] = useState(false)
+  // Mouse drag için ref ve state'ler (desktop için)
+  const isDraggingRef = useRef(false)
+  const [isDraggingState, setIsDraggingState] = useState(false)
   const dragStartX = useRef(0)
+  const currentMouseXRef = useRef(0)
   const dragStartScrollLeft = useRef(0)
+  const dragStartDisplayIndex = useRef(initialIndex)
+  const rafIdRef = useRef<number | null>(null)
+  const targetScrollLeftRef = useRef(0)
+  const snapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Mobilde yukarı git butonu için state
   const [showScrollToTop, setShowScrollToTop] = useState(false)
@@ -184,68 +190,22 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     }
   }, [])
 
-  // Drag Handlers
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (isMobile || !scrollContainerRef.current) return
-    e.preventDefault()
-    setIsDragging(true)
-    dragStartX.current = e.clientX
-    dragStartScrollLeft.current = scrollContainerRef.current.scrollLeft
-    scrollContainerRef.current.style.cursor = 'grabbing'
-    scrollContainerRef.current.style.scrollSnapType = 'none'
-  }
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isMobile || !isDragging || !scrollContainerRef.current) return
-    e.preventDefault()
-    const x = e.clientX
-    const walk = (dragStartX.current - x) * 1.5
-    scrollContainerRef.current.scrollLeft = dragStartScrollLeft.current + walk
-  }
-
-  const handleMouseUp = () => {
-    if (isMobile || !isDragging || !scrollContainerRef.current) return
-    setIsDragging(false)
-    const container = scrollContainerRef.current
-    container.style.cursor = 'grab'
-
-    const scrollLeft = container.scrollLeft
-    let nearestIndex = 0
-    let minDistance = Infinity
-
-    itemRefs.current.forEach((ref, index) => {
-      if (!ref) return
-      const itemLeft = ref.offsetLeft - container.offsetLeft
-      const distance = Math.abs(scrollLeft - itemLeft)
-      if (distance < minDistance) {
-        minDistance = distance
-        nearestIndex = index
-      }
-    })
-
-    const maxScrollLeft = container.scrollWidth - container.clientWidth
-    if (scrollLeft < -30) {
-      scrollToDisplayIndex(0)
-    } else if (scrollLeft > maxScrollLeft + 30) {
-      scrollToDisplayIndex(displayCount - 1)
-    } else {
-      scrollToDisplayIndex(nearestIndex)
-    }
-
-    setTimeout(() => {
-      if (scrollContainerRef.current) {
-        scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
-      }
-    }, 300)
-  }
-
   // Navigation & Scroll Handlers
-
   const scrollToDisplayIndex = useCallback((index: number, smooth: boolean = true) => {
     if (!scrollContainerRef.current) return
     const container = scrollContainerRef.current
     const targetEl = itemRefs.current[index]
     if (targetEl) {
+      if (smooth) {
+        container.style.scrollSnapType = 'none'
+        if (snapTimeoutRef.current) clearTimeout(snapTimeoutRef.current)
+        snapTimeoutRef.current = setTimeout(() => {
+          if (scrollContainerRef.current && !isDraggingRef.current) {
+            scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
+          }
+        }, 400)
+      }
+
       container.scrollTo({
         left: targetEl.offsetLeft,
         behavior: smooth ? 'smooth' : 'auto',
@@ -253,6 +213,102 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       currentDisplayIndexRef.current = index
     }
   }, [])
+
+  // Drag Handlers (Desktop Mouse Drag via Window Event Listeners for zero stutter)
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (isMobile || !scrollContainerRef.current) return
+    if (e.button !== 0) return
+    e.preventDefault()
+
+    isDraggingRef.current = true
+    setIsDraggingState(true)
+    dragStartX.current = e.clientX
+    currentMouseXRef.current = e.clientX
+    dragStartScrollLeft.current = scrollContainerRef.current.scrollLeft
+    dragStartDisplayIndex.current = currentDisplayIndexRef.current
+    targetScrollLeftRef.current = dragStartScrollLeft.current
+
+    const container = scrollContainerRef.current
+    container.style.cursor = 'grabbing'
+    container.style.scrollSnapType = 'none'
+  }
+
+  useEffect(() => {
+    if (isMobile) return
+
+    const handleWindowMouseMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current || !scrollContainerRef.current) return
+
+      const x = e.clientX
+      currentMouseXRef.current = x
+      const walk = (dragStartX.current - x) * 1.8
+      targetScrollLeftRef.current = dragStartScrollLeft.current + walk
+
+      if (rafIdRef.current === null) {
+        rafIdRef.current = requestAnimationFrame(() => {
+          if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollLeft = targetScrollLeftRef.current
+          }
+          rafIdRef.current = null
+        })
+      }
+    }
+
+    const handleWindowMouseUp = () => {
+      if (!isDraggingRef.current || !scrollContainerRef.current) return
+      isDraggingRef.current = false
+      setIsDraggingState(false)
+
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current)
+        rafIdRef.current = null
+      }
+
+      const container = scrollContainerRef.current
+      container.style.cursor = 'grab'
+
+      const deltaX = dragStartX.current - currentMouseXRef.current
+      const threshold = Math.min(80, window.innerWidth * 0.08)
+
+      let targetIdx = dragStartDisplayIndex.current
+      if (deltaX > threshold) {
+        // Dragged left -> Next image
+        targetIdx = dragStartDisplayIndex.current + 1
+      } else if (deltaX < -threshold) {
+        // Dragged right -> Previous image
+        targetIdx = dragStartDisplayIndex.current - 1
+      } else {
+        // Find nearest item if drag was tiny or slow
+        const currentScroll = container.scrollLeft
+        let nearestIndex = currentDisplayIndexRef.current
+        let minDistance = Infinity
+
+        itemRefs.current.forEach((ref, index) => {
+          if (!ref) return
+          const itemLeft = ref.offsetLeft
+          const distance = Math.abs(currentScroll - itemLeft)
+          if (distance < minDistance) {
+            minDistance = distance
+            nearestIndex = index
+          }
+        })
+        targetIdx = nearestIndex
+      }
+
+      targetIdx = Math.max(0, Math.min(displayCount - 1, targetIdx))
+      scrollToDisplayIndex(targetIdx, true)
+    }
+
+    window.addEventListener('mousemove', handleWindowMouseMove)
+    window.addEventListener('mouseup', handleWindowMouseUp)
+    return () => {
+      window.removeEventListener('mousemove', handleWindowMouseMove)
+      window.removeEventListener('mouseup', handleWindowMouseUp)
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current)
+      }
+    }
+  }, [isMobile, displayCount, scrollToDisplayIndex])
 
   const handleScrollLeft = useCallback(() => {
     if (!isLooping) return
@@ -294,7 +350,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       setShowScrollToTop(false)
 
       const visible: number[] = []
-      let centerItemIndex = 0
+      let centerItemIndex = currentDisplayIndexRef.current
       let minDistanceToCenter = Infinity
       const containerCenter = containerLeft + container.clientWidth / 2
 
@@ -310,8 +366,19 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
           visible.push(index)
         }
       })
-      setVisibleIndices(visible)
+
       currentDisplayIndexRef.current = centerItemIndex
+
+      // Prevent redundant state updates during scrolling to avoid React re-render lags
+      setVisibleIndices(prev => {
+        if (prev.length === visible.length && prev.every((val, i) => val === visible[i])) {
+          return prev
+        }
+        return visible
+      })
+
+      // Skip boundary wrapping while user is dragging
+      if (isDraggingRef.current) return
 
       // Smooth debounced boundary jump without flickering or snapping conflicts
       if (scrollTimeoutRef.current) {
@@ -319,7 +386,13 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       }
 
       scrollTimeoutRef.current = setTimeout(() => {
-        if (!scrollContainerRef.current || !isLooping || isJumpingRef.current) return
+        if (
+          !scrollContainerRef.current ||
+          !isLooping ||
+          isJumpingRef.current ||
+          isDraggingRef.current
+        )
+          return
         const c = scrollContainerRef.current
         const currIdx = currentDisplayIndexRef.current
 
@@ -332,7 +405,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
             currentDisplayIndexRef.current = 1
             requestAnimationFrame(() => {
               setTimeout(() => {
-                if (scrollContainerRef.current) {
+                if (scrollContainerRef.current && !isDraggingRef.current) {
                   scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
                 }
                 isJumpingRef.current = false
@@ -348,7 +421,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
             currentDisplayIndexRef.current = slideCount
             requestAnimationFrame(() => {
               setTimeout(() => {
-                if (scrollContainerRef.current) {
+                if (scrollContainerRef.current && !isDraggingRef.current) {
                   scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
                 }
                 isJumpingRef.current = false
@@ -356,7 +429,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
             })
           }
         }
-      }, 100)
+      }, 150)
     }
 
     const container = scrollContainerRef.current
@@ -447,16 +520,13 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
               paddingTop: '0',
               paddingBottom: '0',
               gap: '0',
-              cursor: isDragging && !isMobile ? 'grabbing' : !isMobile ? 'grab' : 'default',
+              cursor: isDraggingState && !isMobile ? 'grabbing' : !isMobile ? 'grab' : 'default',
               overflowY: 'hidden',
               overflowX: 'auto',
-              scrollSnapType: 'x mandatory',
+              scrollSnapType: isDraggingState ? 'none' : 'x mandatory',
               WebkitOverflowScrolling: 'touch',
             }}
             onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
             onWheel={handleWheel}
           >
             <style>{`div::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; } * { scrollbar-width: none !important; -ms-overflow-style: none !important; }`}</style>
