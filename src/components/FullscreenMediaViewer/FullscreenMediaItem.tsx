@@ -59,7 +59,7 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
           srcMobile={item.urlMobile}
           srcDesktop={item.urlDesktop}
           alt=""
-          className="w-full h-full object-contain mx-auto select-none pointer-events-none"
+          className="w-full h-full object-contain mx-auto my-auto select-none pointer-events-none"
           sizes="100vw"
           fetchPriority="high"
           style={{
@@ -70,8 +70,10 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            margin: 'auto',
             WebkitBackfaceVisibility: 'hidden',
             objectFit: 'contain',
+            objectPosition: 'center',
           }}
           loading="eager"
           quality={100}
@@ -88,14 +90,16 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
           src={item.url}
           srcMobile={item.urlMobile}
           srcDesktop={item.urlDesktop}
-          className="w-full h-full object-contain mx-auto"
+          className="w-full h-full object-contain mx-auto my-auto"
           style={{
             maxHeight: '100dvh',
             maxWidth: '100vw',
             width: '100%',
             height: '100%',
             display: 'block',
+            margin: 'auto',
             objectFit: 'contain',
+            objectPosition: 'center',
           }}
           autoPlay
           muted
@@ -106,7 +110,7 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
         />
       ) : (
         <iframe
-          className="w-full h-full max-w-[100vw] max-h-[100dvh]"
+          className="w-full h-full max-w-[100vw] max-h-[100dvh] mx-auto my-auto"
           title={`fullscreen-media-youtube-${index}`}
           src={item.url}
           allow="autoplay; encrypted-media; fullscreen"
@@ -115,6 +119,7 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
             height: '100dvh',
             width: '100vw',
             aspectRatio: '16/9',
+            margin: 'auto',
           }}
         />
       )}
