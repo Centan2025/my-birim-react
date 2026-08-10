@@ -1001,6 +1001,29 @@ export default function R2AssetInput(props: ObjectInputProps) {
                         onChange(set(!isMirrored, ['isMirrored']))
                       }}
                     />
+                    <Button
+                      mode="ghost"
+                      tone="default"
+                      fontSize={1}
+                      padding={2}
+                      text="🎯 Odak Merkezle"
+                      title="Odak noktasını (hotspot) merkeze (%50, %50) getir"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onChange(
+                          set({
+                            ...asset,
+                            hotspotX: 0.5,
+                            hotspotY: 0.5,
+                          }),
+                        )
+                        toast.push({
+                          status: 'info',
+                          title: 'Odak Merkezlendi',
+                          description: 'Odak noktası %50, %50 (Merkez) olarak ayarlandı.',
+                        })
+                      }}
+                    />
                   </>
                 )}
                 <Button
