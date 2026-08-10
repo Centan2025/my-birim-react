@@ -12,6 +12,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   const [isClosing, setIsClosing] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
   const [isButtonVisible, setIsButtonVisible] = useState(false)
+  const [hasEntered, setHasEntered] = useState(false)
   const [visibleIndices, setVisibleIndices] = useState<number[]>([])
   const [isMobile, setIsMobile] = useState(false)
   const [isLandscape, setIsLandscape] = useState(false)
@@ -73,9 +74,14 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       })
     }, 400)
 
+    const timer3 = setTimeout(() => {
+      setHasEntered(true)
+    }, 600)
+
     return () => {
       clearTimeout(timer1)
       clearTimeout(timer2)
+      clearTimeout(timer3)
     }
   }, [])
 
@@ -467,17 +473,20 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
                     ? currentVisible.length - 1 - visibleIndex
                     : displayCount - 1 - i
                 animationDelay = reverseIndex * 60
+              } else if (!hasEntered) {
+                animationDelay = isVisible ? i * 80 : 0
               } else {
-                animationDelay = isVisible ? i * 100 : 0
+                animationDelay = 0
               }
 
               return (
                 <FullscreenMediaItem
-                  key={`${item.url || i}-${i}`}
+                  key={`fs-item-${i}-${item.url || ''}`}
                   item={item}
                   index={i}
                   isVisible={isVisible}
                   isClosing={isClosing}
+                  hasEntered={hasEntered}
                   animationDelay={animationDelay}
                   isMobile={isMobile}
                   isLandscape={isLandscape}

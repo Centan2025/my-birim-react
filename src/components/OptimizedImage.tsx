@@ -310,7 +310,12 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   // src veya props değiştiğinde state'i sıfırla ve doğal boyutları önceden yükle
   useEffect(() => {
     setCurrentSrc(safeSrc)
-    setIsLoaded(false)
+    const img = imgRef.current
+    if (img && img.complete && img.naturalWidth > 0) {
+      setIsLoaded(true)
+    } else {
+      setIsLoaded(false)
+    }
     setHasError(false)
     setHasTriedWithoutSrcSet(false)
     if (targetOrigW && targetOrigH) {

@@ -8,6 +8,7 @@ interface FullscreenMediaItemProps {
   index: number
   isVisible: boolean
   isClosing: boolean
+  hasEntered?: boolean
   animationDelay: number
   isMobile: boolean
   isLandscape: boolean
@@ -19,6 +20,7 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
   index,
   isVisible,
   isClosing,
+  hasEntered,
   animationDelay,
   isMobile: _isMobile,
   isLandscape: _isLandscape,
@@ -29,14 +31,18 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
   return (
     <div
       ref={itemRef}
-      className={`flex-shrink-0 flex items-center justify-center transition-all cubic-bezier(0.23, 1, 0.32, 1) ${
-        isVisible && !isClosing
+      className={`flex-shrink-0 flex items-center justify-center ${
+        hasEntered && !isClosing
           ? 'opacity-100 translate-y-0 scale-100'
-          : 'opacity-0 translate-y-12 scale-95'
+          : `transition-all cubic-bezier(0.23, 1, 0.32, 1) ${
+              isVisible && !isClosing
+                ? 'opacity-100 translate-y-0 scale-100'
+                : 'opacity-0 translate-y-12 scale-95'
+            }`
       }`}
       style={{
-        transitionDelay: `${animationDelay}ms`,
-        transitionDuration: '500ms',
+        transitionDelay: hasEntered && !isClosing ? '0ms' : `${animationDelay}ms`,
+        transitionDuration: hasEntered && !isClosing ? '0ms' : '500ms',
         height: '100dvh',
         width: '100vw',
         minWidth: '100vw',
