@@ -198,33 +198,46 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     const curr = currentDisplayIndexRef.current
 
     if (curr >= displayCount - 1) {
+      const clonedFirstEl = itemRefs.current[displayCount - 1]
       const realFirstEl = itemRefs.current[1]
-      if (realFirstEl) {
-        isJumpingRef.current = true
-        container.style.scrollSnapType = 'none'
-        container.style.scrollBehavior = 'auto'
-        container.scrollLeft = realFirstEl.offsetLeft
-        currentDisplayIndexRef.current = 1
-        requestAnimationFrame(() => {
-          container.style.scrollBehavior = 'smooth'
-          isJumpingRef.current = false
-        })
+      if (clonedFirstEl && realFirstEl) {
+        // Only swap if scroll is at or very near cloned element
+        const distToCloned = Math.abs(container.scrollLeft - clonedFirstEl.offsetLeft)
+        if (distToCloned < 100) {
+          isJumpingRef.current = true
+          if (!isMobile) container.style.scrollSnapType = 'none'
+          container.style.scrollBehavior = 'auto'
+          container.scrollLeft = realFirstEl.offsetLeft
+          currentDisplayIndexRef.current = 1
+          requestAnimationFrame(() => {
+            if (scrollContainerRef.current) {
+              scrollContainerRef.current.style.scrollBehavior = 'smooth'
+            }
+            isJumpingRef.current = false
+          })
+        }
       }
     } else if (curr <= 0) {
+      const clonedLastEl = itemRefs.current[0]
       const realLastEl = itemRefs.current[slideCount]
-      if (realLastEl) {
-        isJumpingRef.current = true
-        container.style.scrollSnapType = 'none'
-        container.style.scrollBehavior = 'auto'
-        container.scrollLeft = realLastEl.offsetLeft
-        currentDisplayIndexRef.current = slideCount
-        requestAnimationFrame(() => {
-          container.style.scrollBehavior = 'smooth'
-          isJumpingRef.current = false
-        })
+      if (clonedLastEl && realLastEl) {
+        const distToCloned = Math.abs(container.scrollLeft - clonedLastEl.offsetLeft)
+        if (distToCloned < 100) {
+          isJumpingRef.current = true
+          if (!isMobile) container.style.scrollSnapType = 'none'
+          container.style.scrollBehavior = 'auto'
+          container.scrollLeft = realLastEl.offsetLeft
+          currentDisplayIndexRef.current = slideCount
+          requestAnimationFrame(() => {
+            if (scrollContainerRef.current) {
+              scrollContainerRef.current.style.scrollBehavior = 'smooth'
+            }
+            isJumpingRef.current = false
+          })
+        }
       }
     }
-  }, [displayCount, slideCount, isLooping])
+  }, [displayCount, slideCount, isLooping, isMobile])
 
   // Navigation & Scroll Handlers
   const scrollToDisplayIndex = useCallback(
@@ -234,10 +247,10 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       const targetEl = itemRefs.current[index]
       if (targetEl) {
         if (smooth) {
-          container.style.scrollSnapType = 'none'
+          if (!isMobile) container.style.scrollSnapType = 'none'
           if (snapTimeoutRef.current) clearTimeout(snapTimeoutRef.current)
           snapTimeoutRef.current = setTimeout(() => {
-            if (scrollContainerRef.current && !isDraggingRef.current) {
+            if (scrollContainerRef.current && !isDraggingRef.current && !isMobile) {
               scrollContainerRef.current.style.scrollSnapType = 'x mandatory'
             }
             checkBoundaryWrap()
@@ -251,7 +264,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
         currentDisplayIndexRef.current = index
       }
     },
-    [checkBoundaryWrap]
+    [isMobile, checkBoundaryWrap]
   )
 
   // Drag Handlers (Desktop Mouse Drag via Window Event Listeners for zero stutter)
@@ -381,10 +394,10 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     const container = scrollContainerRef.current
     let curr = currentDisplayIndexRef.current
 
-    if (curr <= 0) {
+    if (curr <= 0 && Math.abs(container.scrollLeft - itemRefs.current[0]!.offsetLeft) < 50) {
       const realLastEl = itemRefs.current[slideCount]
       if (realLastEl) {
-        container.style.scrollSnapType = 'none'
+        if (!isMobile) container.style.scrollSnapType = 'none'
         container.style.scrollBehavior = 'auto'
         container.scrollLeft = realLastEl.offsetLeft
         curr = slideCount
@@ -394,17 +407,20 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
 
     const nextDisplayIdx = curr - 1
     scrollToDisplayIndex(nextDisplayIdx, true)
-  }, [isLooping, slideCount, scrollToDisplayIndex])
+  }, [isLooping, slideCount, isMobile, scrollToDisplayIndex])
 
   const handleScrollRight = useCallback(() => {
     if (!isLooping || !scrollContainerRef.current) return
     const container = scrollContainerRef.current
     let curr = currentDisplayIndexRef.current
 
-    if (curr >= displayCount - 1) {
+    if (
+      curr >= displayCount - 1 &&
+      Math.abs(container.scrollLeft - itemRefs.current[displayCount - 1]!.offsetLeft) < 50
+    ) {
       const realFirstEl = itemRefs.current[1]
       if (realFirstEl) {
-        container.style.scrollSnapType = 'none'
+        if (!isMobile) container.style.scrollSnapType = 'none'
         container.style.scrollBehavior = 'auto'
         container.scrollLeft = realFirstEl.offsetLeft
         curr = 1
@@ -414,7 +430,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
 
     const nextDisplayIdx = curr + 1
     scrollToDisplayIndex(nextDisplayIdx, true)
-  }, [isLooping, displayCount, scrollToDisplayIndex])
+  }, [isLooping, displayCount, isMobile, scrollToDisplayIndex])
 
   const handleWheel = (e: React.WheelEvent) => {
     const delta = e.deltaY || e.deltaX
@@ -575,7 +591,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
               cursor: isDraggingState && !isMobile ? 'grabbing' : !isMobile ? 'grab' : 'default',
               overflowY: 'hidden',
               overflowX: 'auto',
-              scrollSnapType: isDraggingState ? 'none' : 'x mandatory',
+              scrollSnapType: isMobile ? 'x mandatory' : isDraggingState ? 'none' : 'x mandatory',
               WebkitOverflowScrolling: 'touch',
             }}
             onMouseDown={handleMouseDown}

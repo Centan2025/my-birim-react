@@ -28,13 +28,9 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
 }) => {
   if (!item) return null
 
-  const activeUrl = isMobile
-    ? item.urlMobile || item.url
-    : item.urlDesktop || item.url
+  const activeUrl = isMobile ? item.urlMobile || item.url : item.urlDesktop || item.url
 
-  const activeCrop = isMobile
-    ? item.cropMobile || item.crop
-    : item.cropDesktop || item.crop
+  const activeCrop = isMobile ? item.cropMobile || item.crop : item.cropDesktop || item.crop
 
   const activeHotspot = isMobile
     ? item.hotspotMobile || item.hotspot
@@ -78,7 +74,7 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        scrollSnapAlign: 'center',
+        scrollSnapAlign: 'start',
         scrollSnapStop: 'always',
         padding: '0',
       }}
