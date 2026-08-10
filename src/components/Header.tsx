@@ -161,6 +161,7 @@ export function Header() {
     currentRouteRef.current = location.pathname
 
     lastScrollYRef.current = 0
+    lastScrollForHeader.current = 0
     opacitySetByHandleScrollRef.current = false
     setIsHeaderVisible(true)
     resetHeaderTheme()
@@ -176,6 +177,7 @@ export function Header() {
       const currentScrollY = window.scrollY
       if (isMobile && currentScrollY === 0) {
         setHeaderOpacity(isDarkHeroPageUtil(location.pathname) ? 0 : 0.7)
+        setIsHeaderVisible(true)
       }
     }
     checkScroll()
@@ -596,7 +598,9 @@ export function Header() {
         }`}
         style={{
           transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-100%)',
-          // Opacity ve scale dış kapsayıcıdan kaldırıldı (sınırların görünmemesi için)
+          transition: isMobile
+            ? 'transform 0.2s ease-out'
+            : 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       >
         <div
@@ -632,8 +636,9 @@ export function Header() {
               opacity: isHeaderVisible ? 1 : 0,
               scale: isHeaderVisible ? '1' : '0.8',
               transformOrigin: 'top center',
-              transition:
-                'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), scale 0.4s cubic-bezier(0.4, 0, 0.2, 1), all 0.8s cubic-bezier(0.23, 1, 0.32, 1)',
+              transition: isMobile
+                ? 'opacity 0.15s ease-out, transform 0.15s ease-out'
+                : 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), scale 0.4s cubic-bezier(0.4, 0, 0.2, 1), all 0.8s cubic-bezier(0.23, 1, 0.32, 1)',
             }}
           >
             {/* Üst satır: grid stretch (tam yükseklik), içindeki hücreler alttan hizalı */}
