@@ -2,7 +2,7 @@ import {useState, useEffect} from 'react'
 import {Link} from 'react-router-dom'
 import {motion, AnimatePresence} from 'framer-motion'
 import {getAboutPageContent, getDesigners} from '../services/cms'
-import type {AboutPageContent, NewsMedia, Designer} from '../types'
+import type {AboutPageContent, NewsMedia, Designer, R2ImageMetadata} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
@@ -319,52 +319,12 @@ export function AboutPageNew() {
   const heroBadgeText = getPlainText(t(content?.heroBadge))
   const heroTitleText = getPlainText(t(content?.heroTitle))
   const heroSubtitleText = getPlainText(t(content?.heroSubtitle || content?.storyTitle))
-  const galleryItems: NewsMedia[] = [
-    ...(heroImgUrl
-      ? [
-          {
-            type: 'image' as const,
-            url: heroImgUrl,
-            urlDesktop: heroImgUrl,
-            urlMobile: heroImgMobileUrl || undefined,
-            caption: t(content?.heroTitle) || 'Hero',
-          },
-        ]
-      : []),
-    ...(identityImgUrl
-      ? [
-          {
-            type: 'image' as const,
-            url: identityImgUrl,
-            urlDesktop: identityImgUrl,
-            urlMobile: identityImgMobileUrl || undefined,
-            caption: t(content?.identitySection?.title) || 'Kurumsal Kimlik',
-          },
-        ]
-      : []),
-    ...(qualityImgUrl
-      ? [
-          {
-            type: 'image' as const,
-            url: qualityImgUrl,
-            urlDesktop: qualityImgUrl,
-            urlMobile: qualityImgMobileUrl || undefined,
-            caption: t(content?.qualitySection?.title) || 'Kalite ve Üretim',
-          },
-        ]
-      : []),
-  ]
 
-  const _openLightboxAt = (url: string) => {
-    const idx = galleryItems.findIndex(item => item.url === url || item.urlDesktop === url)
-    if (idx !== -1) {
-      setViewerIndex(idx)
-      setViewerOpen(true)
-    } else {
-      setViewerIndex(0)
-      setViewerOpen(true)
-    }
-  }
+  const manifestoLabel = getPlainText(t(content?.manifestoLabel))
+  const manifestoQuote = getPlainText(t(content?.manifestoQuote))
+
+  const timelineTitle = getPlainText(t(content?.timelineTitle))
+  const timelineSubtitle = getPlainText(t(content?.timelineSubtitle))
 
   interface FormattedEra {
     year: string
