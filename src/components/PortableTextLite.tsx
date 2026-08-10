@@ -671,12 +671,14 @@ export default function PortableTextLite({
             ? 'justify-end'
             : 'justify-center'
 
-      const btnStyle =
-        block.style === 'secondary'
-          ? 'bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--text-primary)] hover:bg-[var(--text-primary)] hover:text-[var(--bg-primary)]'
+      const isTextOnly = block.style === 'text'
+      const btnStyle = isTextOnly
+        ? 'inline-block bg-transparent text-[var(--text-primary)] border-none p-0 underline hover:no-underline font-normal text-base transition-opacity duration-300 hover:opacity-70'
+        : block.style === 'secondary'
+          ? 'inline-flex items-center px-8 py-3.5 text-[9px] md:text-[11px] leading-none uppercase tracking-[0.2em] font-medium font-inter bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--text-primary)] hover:bg-[var(--text-primary)] hover:text-[var(--bg-primary)] transition-all duration-300'
           : block.style === 'outline'
-            ? 'bg-transparent text-[var(--text-primary)] border border-[var(--text-primary)] hover:bg-[var(--text-primary)] hover:text-[var(--bg-primary)]'
-            : 'bg-[var(--text-primary)] text-[var(--bg-primary)] border border-[var(--text-primary)] hover:bg-transparent hover:text-[var(--text-primary)]'
+            ? 'inline-flex items-center px-8 py-3.5 text-[9px] md:text-[11px] leading-none uppercase tracking-[0.2em] font-medium font-inter bg-transparent text-[var(--text-primary)] border border-[var(--text-primary)] hover:bg-[var(--text-primary)] hover:text-[var(--bg-primary)] transition-all duration-300'
+            : 'inline-flex items-center px-8 py-3.5 text-[9px] md:text-[11px] leading-none uppercase tracking-[0.2em] font-medium font-inter bg-[var(--text-primary)] text-[var(--bg-primary)] border border-[var(--text-primary)] hover:bg-transparent hover:text-[var(--text-primary)] transition-all duration-300'
 
       const label =
         typeof block.text === 'string'
@@ -695,7 +697,7 @@ export default function PortableTextLite({
             href={linkUrl}
             target={isExternal ? '_blank' : undefined}
             rel={isExternal ? 'noopener noreferrer' : undefined}
-            className={`inline-flex items-center px-8 py-3.5 text-[9px] md:text-[11px] leading-none uppercase tracking-[0.2em] font-medium font-inter transition-all duration-300 ${btnStyle}`}
+            className={btnStyle}
           >
             {label}
           </a>

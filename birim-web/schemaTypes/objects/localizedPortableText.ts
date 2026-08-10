@@ -230,6 +230,7 @@ const portableTextBlocks = [
             {title: 'Siyah Buton', value: 'primary'},
             {title: 'Beyaz Buton', value: 'secondary'},
             {title: 'Çerçeveli', value: 'outline'},
+            {title: 'Sadece Metin (Çerçevesiz)', value: 'text'},
           ],
         },
         initialValue: 'primary',
