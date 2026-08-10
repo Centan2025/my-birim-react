@@ -600,17 +600,16 @@ export default function R2AssetInput(props: ObjectInputProps) {
             {width: 400, suffix: '-400w', maxSizeMB: 0.2},
           ]
 
-          // Zaten .webp olan veya 1.5MB altındaki dosyaları ana görsel için sıkıştırma (kalite kaybını önle)
+          // Zaten .webp olan dosyaları ana görsel için sıkıştırma (kalite kaybını önle)
           const isAlreadyWebP =
             file.type === 'image/webp' || file.name.toLowerCase().endsWith('.webp')
-          const isSmallFile = file.size < 1.5 * 1024 * 1024
 
           const uploadPromises = sizes.map(async (size) => {
             let blobToUpload: Blob | File = file
 
             if (size.suffix === '') {
-              // Ana orijinal görsel: Zaten WebP veya küçükse orijinal dosyayı direkt yükle
-              if (isAlreadyWebP || isSmallFile) {
+              // Ana orijinal görsel: Zaten WebP ise orijinal dosyayı direkt yükle, değilse WebP'ye dönüştür
+              if (isAlreadyWebP) {
                 blobToUpload = file
               } else {
                 try {
@@ -644,10 +643,7 @@ export default function R2AssetInput(props: ObjectInputProps) {
             }
 
             const currentKey = size.suffix ? key.replace(/\.webp$/, `${size.suffix}.webp`) : key
-            const mime =
-              size.suffix === '' && (isAlreadyWebP || isSmallFile)
-                ? file.type || 'image/webp'
-                : 'image/webp'
+            const mime = 'image/webp'
             return uploadFileViaPresignedUrl(blobToUpload, currentKey, mime)
           })
 
