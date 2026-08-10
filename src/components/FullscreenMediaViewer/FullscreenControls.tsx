@@ -76,66 +76,81 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
         </button>
       </div>
 
-      {/* Navigasyon Düğmeleri (Desktop ve Mobil Landscape) */}
-      {(!isMobile || isLandscape) && slideCount > 1 && (
-        <div
-          className="flex absolute left-1/2 -translate-x-1/2 items-center gap-4 z-20"
-          style={{
-            bottom: isMobile ? 'max(16px, env(safe-area-inset-bottom, 0px) + 8px)' : '32px',
-            opacity: isButtonVisible && !isClosing ? 1 : 0,
-            transform: `translateX(-50%) ${isButtonVisible && !isClosing ? 'translateY(0)' : 'translateY(40px)'}`,
-            transition:
-              'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
-            willChange: 'transform, opacity',
-          }}
-        >
-          <button
-            type="button"
-            onClick={onPrev}
-            className={`group flex items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/60 active:scale-95 shadow-lg ${
-              isMobile ? 'h-10 w-10' : 'h-14 w-14'
-            }`}
-            aria-label="Previous"
+      {/* Navigasyon Düğmeleri (Sol ve Sağ Yanlarda, Ekranı Dikeyde Ortalar) */}
+      {slideCount > 1 && (
+        <>
+          {/* Önceki Düğmesi */}
+          <div
+            className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 z-20 pointer-events-auto"
+            style={{
+              opacity: isButtonVisible && !isClosing ? 1 : 0,
+              transform: `translateY(-50%) ${isButtonVisible && !isClosing ? 'scale(1)' : 'scale(0)'}`,
+              transition:
+                'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+              willChange: 'transform, opacity',
+            }}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="0.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className={`${isMobile ? 'h-7 w-7' : 'h-11 w-11'} -ml-0.5 transition-transform duration-300 group-hover:-translate-x-1`}
+            <button
+              type="button"
+              onClick={onPrev}
+              className={`group flex items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/60 active:scale-95 shadow-lg ${
+                isMobile ? 'h-10 w-10' : 'h-14 w-14'
+              }`}
+              aria-label="Previous"
             >
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            onClick={onNext}
-            className={`group flex items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/60 active:scale-95 shadow-lg ${
-              isMobile ? 'h-10 w-10' : 'h-14 w-14'
-            }`}
-            aria-label="Next"
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="0.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={`${isMobile ? 'h-7 w-7' : 'h-11 w-11'} -ml-0.5 transition-transform duration-300 group-hover:-translate-x-1`}
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Sonraki Düğmesi */}
+          <div
+            className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 z-20 pointer-events-auto"
+            style={{
+              opacity: isButtonVisible && !isClosing ? 1 : 0,
+              transform: `translateY(-50%) ${isButtonVisible && !isClosing ? 'scale(1)' : 'scale(0)'}`,
+              transition:
+                'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+              willChange: 'transform, opacity',
+            }}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="0.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className={`${isMobile ? 'h-7 w-7' : 'h-11 w-11'} ml-0.5 transition-transform duration-300 group-hover:translate-x-1`}
+            <button
+              type="button"
+              onClick={onNext}
+              className={`group flex items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/60 active:scale-95 shadow-lg ${
+                isMobile ? 'h-10 w-10' : 'h-14 w-14'
+              }`}
+              aria-label="Next"
             >
-              <path d="M9 18l6-6-6-6" />
-            </svg>
-          </button>
-        </div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="0.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={`${isMobile ? 'h-7 w-7' : 'h-11 w-11'} ml-0.5 transition-transform duration-300 group-hover:translate-x-1`}
+              >
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </button>
+          </div>
+        </>
       )}
 
       {/* Mobil Yukar-Git Düğmesi */}
