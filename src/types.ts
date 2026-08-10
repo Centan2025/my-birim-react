@@ -854,6 +854,7 @@ export interface NewsMedia {
   origWidth?: number
   /** Original Height */
   origHeight?: number
+  isCover?: boolean
 }
 
 // --- Footer Content Models ---

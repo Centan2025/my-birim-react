@@ -191,6 +191,16 @@ export function NewsDetailPage() {
       ? item.mainImage
       : undefined
 
+  const additionalMedia = useMemo(() => {
+    if (!item?.media) return []
+    return item.media.filter(media => {
+      if (!media.url) return false
+      if (media.isCover) return false
+      if (mainImageUrl && media.url === mainImageUrl) return false
+      return true
+    })
+  }, [item?.media, mainImageUrl])
+
   useSEO({
     title: newsTitle ? `BIRIM - ${t('news') || 'Haberler'} - ${newsTitle}` : 'BIRIM - Haberler',
     description: newsDescription || 'BIRIM ile ilgili güncel haberler ve duyurular',
@@ -329,8 +339,9 @@ export function NewsDetailPage() {
             )}
 
             <div className="flex flex-col">
-              {item.media &&
-                item.media.map((media, index) => <MediaComponent key={index} media={media} />)}
+              {additionalMedia.map((media, index) => (
+                <MediaComponent key={index} media={media} />
+              ))}
             </div>
           </div>
 

@@ -74,7 +74,7 @@ const ProjectCard: React.FC<{project: Project; index: number}> = ({project, inde
           </div>
 
           {/* Title */}
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-normal tracking-tight text-white uppercase leading-[1.1] mb-2 group-hover:text-white transition-colors">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-normal tracking-tight text-white uppercase leading-[1.1] mb-2 group-hover:text-white transition-colors">
             {t(project.title)}
           </h2>
 

@@ -305,13 +305,23 @@ export const mapR2Metadata = (img: unknown): R2ImageMetadata => {
       if (!obj || typeof obj !== 'object') return undefined
       const h = obj as Record<string, unknown>
       if (h['hotspotX'] !== undefined && h['hotspotY'] !== undefined) {
-        return {x: Number(h['hotspotX']) || 0.5, y: Number(h['hotspotY']) || 0.5}
+        const x = Number(h['hotspotX'])
+        const y = Number(h['hotspotY'])
+        return {
+          x: isNaN(x) ? 0.5 : x,
+          y: isNaN(y) ? 0.5 : y,
+        }
       }
       if (h['hotspot'] && typeof h['hotspot'] === 'object') {
         return parseHotspotObj(h['hotspot'])
       }
       if (h['x'] !== undefined && h['y'] !== undefined) {
-        return {x: Number(h['x']) || 0.5, y: Number(h['y']) || 0.5}
+        const x = Number(h['x'])
+        const y = Number(h['y'])
+        return {
+          x: isNaN(x) ? 0.5 : x,
+          y: isNaN(y) ? 0.5 : y,
+        }
       }
       return undefined
     }

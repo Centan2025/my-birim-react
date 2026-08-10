@@ -481,7 +481,7 @@ export function ProjectDetailPage() {
         <div className="absolute bottom-12 md:bottom-10 left-0 right-0 text-white z-30 pointer-events-none">
           <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
             <h1
-              className="text-3xl md:text-5xl lg:text-6xl font-light tracking-tight text-white mb-2 md:mb-4 font-michroma pointer-events-auto"
+              className="text-xl md:text-2xl lg:text-3xl font-light tracking-tight text-white mb-2 md:mb-4 font-michroma pointer-events-auto"
               style={{
                 transform: isTitleVisible ? 'translateX(0)' : 'translateX(-40px)',
                 opacity: isTitleVisible ? 1 : 0,

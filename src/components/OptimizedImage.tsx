@@ -577,11 +577,28 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   const useClientCrop = hasCrop
 
-  if (normalizedCropDesktop) {
+  const mapFocalCoord = (val: number): number => {
+    if (val <= 0.15) return 0
+    if (val >= 0.80) return 100
+    return Math.round(((val - 0.15) / (0.80 - 0.15)) * 100)
+  }
+
+  const activeHsDesktop = hotspotDesktop || hotspot
+  if (activeHsDesktop && typeof activeHsDesktop.x === 'number' && typeof activeHsDesktop.y === 'number') {
+    const posX = `${mapFocalCoord(activeHsDesktop.x)}%`
+    const posY = `${mapFocalCoord(activeHsDesktop.y)}%`
+    customStyle['--obj-pos-desktop'] = `${posX} ${posY}`
+    imgStyle.objectPosition = `${posX} ${posY}`
+  } else if (normalizedCropDesktop) {
     const centerX = (normalizedCropDesktop.x + normalizedCropDesktop.width / 2) * 100
     const centerY = (normalizedCropDesktop.y + normalizedCropDesktop.height / 2) * 100
-    customStyle['--obj-pos-desktop'] = `${centerX.toFixed(2)}% ${centerY.toFixed(2)}%`
+    const posX = `${centerX.toFixed(2)}%`
+    const posY = `${centerY.toFixed(2)}%`
+    customStyle['--obj-pos-desktop'] = `${posX} ${posY}`
+    imgStyle.objectPosition = `${posX} ${posY}`
+  }
 
+  if (normalizedCropDesktop) {
     const oW = origWidthDesktop || origWidth || 1
     const oH = origHeightDesktop || origHeight || 1
     const cW = normalizedCropDesktop.width * oW
@@ -589,16 +606,20 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     if (cW > 0 && cH > 0) {
       customStyle['--aspect-desktop'] = `${cW.toFixed(4)} / ${cH.toFixed(4)}`
     }
-  } else if (hotspotDesktop || hotspot) {
-    const hs = hotspotDesktop || hotspot!
-    customStyle['--obj-pos-desktop'] = `${hs.x * 100}% ${hs.y * 100}%`
   }
 
-  if (normalizedCropMobile) {
+  const activeHsMobile = hotspotMobile || hotspot
+  if (activeHsMobile && typeof activeHsMobile.x === 'number' && typeof activeHsMobile.y === 'number') {
+    const posX = `${mapFocalCoord(activeHsMobile.x)}%`
+    const posY = `${mapFocalCoord(activeHsMobile.y)}%`
+    customStyle['--obj-pos-mobile'] = `${posX} ${posY}`
+  } else if (normalizedCropMobile) {
     const centerX = (normalizedCropMobile.x + normalizedCropMobile.width / 2) * 100
     const centerY = (normalizedCropMobile.y + normalizedCropMobile.height / 2) * 100
     customStyle['--obj-pos-mobile'] = `${centerX.toFixed(2)}% ${centerY.toFixed(2)}%`
+  }
 
+  if (normalizedCropMobile) {
     const oW = origWidthMobile || origWidth || 1
     const oH = origHeightMobile || origHeight || 1
     const cW = normalizedCropMobile.width * oW
@@ -606,9 +627,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     if (cW > 0 && cH > 0) {
       customStyle['--aspect-mobile'] = `${cW.toFixed(4)} / ${cH.toFixed(4)}`
     }
-  } else if (hotspotMobile || hotspot) {
-    const hs = hotspotMobile || hotspot!
-    customStyle['--obj-pos-mobile'] = `${hs.x * 100}% ${hs.y * 100}%`
   }
 
   const cropDesk = normalizedCropDesktop
@@ -741,11 +759,14 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     const uniformScaleDesk = Math.max(1, 1 / Math.min(cropWDesk, cropHDesk))
     const uniformScaleMob = Math.max(1, 1 / Math.min(cropWMob, cropHMob))
 
-    const focalXDesk = ((cropDesk?.x || 0) + cropWDesk / 2) * 100
-    const focalYDesk = ((cropDesk?.y || 0) + cropHDesk / 2) * 100
+    const activeHsDesk = hotspotDesktop || hotspot
+    const activeHsMob = hotspotMobile || hotspot
 
-    const focalXMob = ((cropMob?.x || 0) + cropWMob / 2) * 100
-    const focalYMob = ((cropMob?.y || 0) + cropHMob / 2) * 100
+    const focalXDesk = activeHsDesk ? activeHsDesk.x * 100 : ((cropDesk?.x || 0) + cropWDesk / 2) * 100
+    const focalYDesk = activeHsDesk ? activeHsDesk.y * 100 : ((cropDesk?.y || 0) + cropHDesk / 2) * 100
+
+    const focalXMob = activeHsMob ? activeHsMob.x * 100 : ((cropMob?.x || 0) + cropWMob / 2) * 100
+    const focalYMob = activeHsMob ? activeHsMob.y * 100 : ((cropMob?.y || 0) + cropHMob / 2) * 100
 
     const cropStyle = {
       '--crop-aspect-desktop': `${aspectDesk.toFixed(4)}`,

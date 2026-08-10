@@ -285,8 +285,9 @@ export const getProjects = async (): Promise<Project[]> => {
         "id": id.current, title, date, projectCategory, publishAt, isPublished, sortOrder,
         excerpt,
         media[]{ 
-          type, url, caption, imageR2, imageMobileR2, imageDesktopR2, 
-          videoFileR2, videoFileMobileR2, videoFileDesktopR2, isCover 
+          type, url, caption, image, imageR2, imageMobileR2, imageDesktopR2, 
+          videoFileR2, videoFileMobileR2, videoFileDesktopR2, isCover,
+          crop, hotspot, cropDesktop, hotspotDesktop, cropMobile, hotspotMobile
         }
       }`
     const rows = await sanity.fetch(q)
@@ -301,8 +302,9 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
       "id": id.current, title, date, 
       excerpt, body, 
       media[]{ 
-        type, url, caption, imageR2, imageMobileR2, imageDesktopR2, 
-        videoFileR2, videoFileMobileR2, videoFileDesktopR2, isCover 
+        type, url, caption, image, imageR2, imageMobileR2, imageDesktopR2, 
+        videoFileR2, videoFileMobileR2, videoFileDesktopR2, isCover,
+        crop, hotspot, cropDesktop, hotspotDesktop, cropMobile, hotspotMobile
       },
       contentBlocks[]{ 
         ..., 
