@@ -226,8 +226,8 @@ export function AboutPageNew() {
     if (typeof img === 'object' && img !== null) {
       const obj = img as Record<string, unknown>
       return {
-        crop: obj['crop'] as any,
-        hotspot: obj['hotspot'] as any,
+        crop: obj['crop'] as R2ImageMetadata['crop'],
+        hotspot: obj['hotspot'] as R2ImageMetadata['hotspot'],
         origWidth: obj['origWidth'] as number | undefined,
         origHeight: obj['origHeight'] as number | undefined,
       }
@@ -319,12 +319,52 @@ export function AboutPageNew() {
   const heroBadgeText = getPlainText(t(content?.heroBadge))
   const heroTitleText = getPlainText(t(content?.heroTitle))
   const heroSubtitleText = getPlainText(t(content?.heroSubtitle || content?.storyTitle))
+  const galleryItems: NewsMedia[] = [
+    ...(heroImgUrl
+      ? [
+          {
+            type: 'image' as const,
+            url: heroImgUrl,
+            urlDesktop: heroImgUrl,
+            urlMobile: heroImgMobileUrl || undefined,
+            caption: t(content?.heroTitle) || 'Hero',
+          },
+        ]
+      : []),
+    ...(identityImgUrl
+      ? [
+          {
+            type: 'image' as const,
+            url: identityImgUrl,
+            urlDesktop: identityImgUrl,
+            urlMobile: identityImgMobileUrl || undefined,
+            caption: t(content?.identitySection?.title) || 'Kurumsal Kimlik',
+          },
+        ]
+      : []),
+    ...(qualityImgUrl
+      ? [
+          {
+            type: 'image' as const,
+            url: qualityImgUrl,
+            urlDesktop: qualityImgUrl,
+            urlMobile: qualityImgMobileUrl || undefined,
+            caption: t(content?.qualitySection?.title) || 'Kalite ve Üretim',
+          },
+        ]
+      : []),
+  ]
 
-  const manifestoLabel = getPlainText(t(content?.manifestoLabel))
-  const manifestoQuote = getPlainText(t(content?.manifestoQuote))
-
-  const timelineTitle = getPlainText(t(content?.timelineTitle))
-  const timelineSubtitle = getPlainText(t(content?.timelineSubtitle))
+  const _openLightboxAt = (url: string) => {
+    const idx = galleryItems.findIndex(item => item.url === url || item.urlDesktop === url)
+    if (idx !== -1) {
+      setViewerIndex(idx)
+      setViewerOpen(true)
+    } else {
+      setViewerIndex(0)
+      setViewerOpen(true)
+    }
+  }
 
   interface FormattedEra {
     year: string
@@ -332,12 +372,12 @@ export function AboutPageNew() {
     description: string
     image: string
     imageMobile: string
-    crop?: any
-    hotspot?: any
+    crop?: R2ImageMetadata['crop']
+    hotspot?: R2ImageMetadata['hotspot']
     origWidth?: number
     origHeight?: number
-    cropMobile?: any
-    hotspotMobile?: any
+    cropMobile?: R2ImageMetadata['crop']
+    hotspotMobile?: R2ImageMetadata['hotspot']
     origWidthMobile?: number
     origHeightMobile?: number
   }
@@ -360,12 +400,12 @@ export function AboutPageNew() {
             description: getPlainText(t(era.description)),
             image: getSanitizedImage(era.image, DEFAULT_IMAGES.history),
             imageMobile: getSanitizedImage(era.imageMobile, ''),
-            crop: imgMeta['crop'] as any,
-            hotspot: imgMeta['hotspot'] as any,
+            crop: imgMeta['crop'] as R2ImageMetadata['crop'],
+            hotspot: imgMeta['hotspot'] as R2ImageMetadata['hotspot'],
             origWidth: imgMeta['origWidth'] as number | undefined,
             origHeight: imgMeta['origHeight'] as number | undefined,
-            cropMobile: imgMobMeta['crop'] as any,
-            hotspotMobile: imgMobMeta['hotspot'] as any,
+            cropMobile: imgMobMeta['crop'] as R2ImageMetadata['crop'],
+            hotspotMobile: imgMobMeta['hotspot'] as R2ImageMetadata['hotspot'],
             origWidthMobile: imgMobMeta['origWidth'] as number | undefined,
             origHeightMobile: imgMobMeta['origHeight'] as number | undefined,
           }

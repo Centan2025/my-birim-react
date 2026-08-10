@@ -92,7 +92,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   }, [])
 
   // Kapanış animasyonu
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     const currentVisible: number[] = []
     if (scrollContainerRef.current) {
       const container = scrollContainerRef.current
@@ -137,7 +137,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
         onClose()
       }, 200)
     }, totalImageAnimation)
-  }
+  }, [onClose, items.length])
 
   // Scroll kilitleme ve elementleri gizleme
   useEffect(() => {
@@ -510,7 +510,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
         clearTimeout(scrollTimeoutRef.current)
       }
     }
-  }, [displayCount, slideCount, isLooping])
+  }, [displayCount, slideCount, isLooping, checkBoundaryWrap])
 
   // Keydown listener for arrow navigation
   useEffect(() => {

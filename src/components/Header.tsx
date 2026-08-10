@@ -603,9 +603,7 @@ export function Header() {
       <header
         className={`fixed top-0 left-0 right-0 z-50 header-scroll-transition ${
           // Overlay mobil menü açıkken header ile panelin tam aynı renkte görünmesi için özel sınıf
-          isOverlayMobileMenu && isMobileMenuOpen
-            ? 'overlay-menu-open'
-            : ''
+          isOverlayMobileMenu && isMobileMenuOpen ? 'overlay-menu-open' : ''
         }`}
         style={{
           transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-100%)',
