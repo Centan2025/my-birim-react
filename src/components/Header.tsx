@@ -52,7 +52,7 @@ export function Header() {
   const mobileMenuCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const mobileLocaleTimeoutRef = useRef<number | null>(null)
   const [submenuOffset, setSubmenuOffset] = useState(0)
-  const {theme: headerTheme} = useHeaderTheme()
+  const {theme: headerTheme, reset: resetHeaderTheme} = useHeaderTheme()
 
   const {isDarkMode} = useDarkMode()
   const {isLoggedIn} = useAuth()
@@ -101,8 +101,8 @@ export function Header() {
   const headerForegroundColor = isLightMode ? '#000000' : '#ffffff'
   const headerLogoFilter = isLightMode ? 'invert(1) brightness(0.95)' : 'none'
   const iconBrightness = isLightMode ? 'brightness(0)' : 'none'
-  // Smooth color transition at hero boundary
-  const colorTransition = 'color 0.25s ease, filter 0.25s ease'
+  // Color transition only when scrolling on Dark Hero pages to prevent white-to-black morphing flash
+  const colorTransition = isDarkHero ? 'color 0.25s ease, filter 0.25s ease' : 'none'
 
   const lastScrollYRef = useRef(0)
   const headerVisibilityLastChanged = useRef(0)
@@ -162,6 +162,9 @@ export function Header() {
 
     lastScrollYRef.current = 0
     opacitySetByHandleScrollRef.current = false
+    setIsHeaderVisible(true)
+    resetHeaderTheme()
+
     // Header opacity'yi sayfa türüne göre ayarla (koyu hero varsa 0, ürün detayı gibi standart sayfalarda 0.7)
     setHeaderOpacity(isDarkHeroPageUtil(location.pathname) ? 0 : 0.7)
 
@@ -178,7 +181,7 @@ export function Header() {
     checkScroll()
     const timeoutId = setTimeout(checkScroll, 50)
     return () => clearTimeout(timeoutId)
-  }, [location.pathname, isMobile])
+  }, [location.pathname, isMobile, resetHeaderTheme])
 
   // Mobil kontrolü
   useEffect(() => {
