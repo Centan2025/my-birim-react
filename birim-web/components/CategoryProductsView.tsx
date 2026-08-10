@@ -16,8 +16,9 @@ interface CategoryProductsViewProps {
 interface ProductMediaItem {
   type: string
   isCover?: boolean
-  imageR2?: {url: string}
-  thumbnailR2?: {url: string}
+  isMirrored?: boolean
+  imageR2?: {url: string; isMirrored?: boolean}
+  thumbnailR2?: {url: string; isMirrored?: boolean}
 }
 
 interface Product {
@@ -45,8 +46,9 @@ export function CategoryProductsView(props: CategoryProductsViewProps) {
       media[] {
         type,
         isCover,
-        imageR2 { url },
-        thumbnailR2 { url }
+        isMirrored,
+        imageR2 { url, isMirrored },
+        thumbnailR2 { url, isMirrored }
       }
     }`
     client
@@ -197,6 +199,10 @@ export function CategoryProductsView(props: CategoryProductsViewProps) {
                   ? coverItem?.imageR2?.url
                   : coverItem?.thumbnailR2?.url || coverItem?.imageR2?.url
               const previewUrl = getPreviewUrl(rawUrl)
+              const isMirrored =
+                !!coverItem?.imageR2?.isMirrored ||
+                !!coverItem?.thumbnailR2?.isMirrored ||
+                !!coverItem?.isMirrored
 
               return (
                 <Card
@@ -235,6 +241,7 @@ export function CategoryProductsView(props: CategoryProductsViewProps) {
                             width: '100%',
                             height: '100%',
                             objectFit: 'cover',
+                            transform: isMirrored ? 'scaleX(-1)' : 'none',
                           }}
                         />
                       </Box>

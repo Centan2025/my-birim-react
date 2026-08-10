@@ -285,6 +285,7 @@ export default defineType({
         !!(coverItem as any)?.imageR2?.isMirrored ||
         !!(coverItem as any)?.imageMobileR2?.isMirrored ||
         !!(coverItem as any)?.imageDesktopR2?.isMirrored ||
+        !!(coverItem as any)?.thumbnailR2?.isMirrored ||
         !!(coverItem as any)?.isMirrored
 
       return {
