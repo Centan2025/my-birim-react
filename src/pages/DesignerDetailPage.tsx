@@ -38,6 +38,17 @@ export function DesignerDetailPage() {
     if (productsData.length > 0) setFrozenProducts(productsData)
   }, [designerData, productsData])
 
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== 'undefined') return window.innerWidth < 1024
+    return false
+  })
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   const designer = designerData || frozenDesigner
   const products = productsData.length > 0 ? productsData : frozenProducts
 
@@ -161,7 +172,7 @@ export function DesignerDetailPage() {
         {/* Sol Taraf: Büyük Görsel (Sabit) */}
         <div
           className="w-full lg:w-1/2 h-[60vh] lg:h-full shrink-0 relative lg:overflow-y-auto custom-scrollbar bg-[var(--bg-designer-hero)] border border-[var(--border-primary)] mt-0 p-4 lg:p-10 xl:p-16 flex flex-col group transition-colors duration-500"
-          data-lenis-prevent
+          {...(!isMobile ? {'data-lenis-prevent': true} : {})}
         >
           <div className="flex-1 relative mt-0 flex items-start justify-center overflow-visible">
             <div
@@ -225,8 +236,8 @@ export function DesignerDetailPage() {
 
         {/* Sağ Taraf: Bilgiler ve Tasarımlar (Scroll Edilebilir) */}
         <div
-          className="w-full lg:w-1/2 lg:flex-1 h-auto lg:h-full overflow-y-auto custom-scrollbar bg-[var(--bg-secondary)] lg:border-l border-[var(--border-primary)] scroll-smooth pb-20 lg:pb-0"
-          data-lenis-prevent
+          className="w-full lg:w-1/2 lg:flex-1 h-auto lg:h-full lg:overflow-y-auto custom-scrollbar bg-[var(--bg-secondary)] lg:border-l border-[var(--border-primary)] scroll-smooth pb-20 lg:pb-0"
+          {...(!isMobile ? {'data-lenis-prevent': true} : {})}
         >
           <div className="pt-4 lg:pt-10 xl:pt-16 pb-12 lg:pb-24 px-6 lg:px-20 min-h-full flex flex-col justify-start">
             <div className="mb-12 lg:mb-16">
