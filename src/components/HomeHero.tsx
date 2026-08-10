@@ -143,11 +143,10 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
       transitionTimeoutRef.current = setTimeout(() => {
         setIsTransitioning(true)
         setCurrentSlide(0)
-        innerTimeoutRef.current = setTimeout(() => {
+        requestAnimationFrame(() => {
           setIsTransitioning(false)
           transitionTimeoutRef.current = null
-          innerTimeoutRef.current = null
-        }, 50)
+        })
       }, 750)
     } else {
       setIsTransitioning(false)
@@ -179,11 +178,10 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
       transitionTimeoutRef.current = setTimeout(() => {
         setIsTransitioning(true)
         setCurrentSlide(count - 1)
-        innerTimeoutRef.current = setTimeout(() => {
+        requestAnimationFrame(() => {
           setIsTransitioning(false)
           transitionTimeoutRef.current = null
-          innerTimeoutRef.current = null
-        }, 50)
+        })
       }, 750)
     } else {
       setIsTransitioning(false)
@@ -402,14 +400,17 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
     goToNextSlide,
   ])
 
-  // Hero text animasyonu - slide değiştiğinde soldan gel
+  const activeSlideIndex =
+    slideCount > 0 ? ((currentSlide % slideCount) + slideCount) % slideCount : 0
+
+  // Hero text animasyonu - slide değiştiğinde soldan gel (sadece gerçek slide indeksi değiştiğinde)
   useEffect(() => {
     setIsHeroTextVisible(false)
     const timer = setTimeout(() => {
       setIsHeroTextVisible(true)
     }, 400)
     return () => clearTimeout(timer)
-  }, [currentSlide])
+  }, [activeSlideIndex])
 
   // Dots animasyonu - ilk açılışta sağdan ve soldan birlikte gel
   useEffect(() => {
