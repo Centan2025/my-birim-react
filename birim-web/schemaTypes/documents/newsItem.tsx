@@ -2,6 +2,7 @@ import React from 'react'
 import {defineField, defineType} from 'sanity'
 import BulkMediaUploadInput from '../../components/BulkMediaUploadInput'
 import {getPreviewUrl} from '../utils/previewUrl'
+import {renderPreviewMedia} from '../objects/shared'
 
 export default defineType({
   name: 'newsItem',
@@ -231,18 +232,18 @@ export default defineType({
       const coverItem = media?.find((m: any) => m.isCover) || media?.[0]
       const r2Url = coverItem?.imageR2?.url || coverItem?.thumbnailR2?.url
       let finalUrl = getPreviewUrl(r2Url)
+      const isMirrored =
+        !!(coverItem as any)?.imageR2?.isMirrored ||
+        !!(coverItem as any)?.thumbnailR2?.isMirrored ||
+        !!(coverItem as any)?.isMirrored
 
       return {
         title: title || 'Haber',
-        media: finalUrl
-          ? () => (
-              <img
-                src={finalUrl}
-                alt={title || 'Haber'}
-                style={{width: '100%', height: '100%', objectFit: 'cover'}}
-              />
-            )
-          : undefined,
+        media: renderPreviewMedia(
+          finalUrl,
+          (coverItem as any)?.mediaType || (coverItem as any)?.type,
+          isMirrored,
+        ),
       }
     },
   },

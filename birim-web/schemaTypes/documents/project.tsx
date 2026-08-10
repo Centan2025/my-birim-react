@@ -1,6 +1,7 @@
 import React from 'react'
 import {defineField, defineType} from 'sanity'
 import {getPreviewUrl} from '../utils/previewUrl'
+import {renderPreviewMedia} from '../objects/shared'
 import BulkMediaUploadInput from '../../components/BulkMediaUploadInput'
 import {orderRankField} from '@sanity/orderable-document-list'
 
@@ -134,18 +135,14 @@ export default defineType({
       const r2Url = coverItem?.imageR2?.url || coverItem?.thumbnailR2?.url
       let finalUrl = getPreviewUrl(r2Url)
       const displayTitle = titleObj?.tr || titleObj?.en || 'İsimsiz Proje'
+      const isMirrored =
+        !!(coverItem as any)?.imageR2?.isMirrored ||
+        !!(coverItem as any)?.thumbnailR2?.isMirrored ||
+        !!(coverItem as any)?.isMirrored
 
       return {
         title: displayTitle,
-        media: finalUrl
-          ? () => (
-              <img
-                src={finalUrl}
-                alt={displayTitle}
-                style={{width: '100%', height: '100%', objectFit: 'cover'}}
-              />
-            )
-          : undefined,
+        media: renderPreviewMedia(finalUrl, (coverItem as any)?.type, isMirrored),
       }
     },
   },
