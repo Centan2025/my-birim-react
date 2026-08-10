@@ -39,24 +39,9 @@ class MediaCropDebugger {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search)
       const hasParam = urlParams.get('debugMedia') === 'true' || urlParams.get('debug') === 'media'
-      const isDev = Boolean(import.meta.env.DEV)
-
-      // Canlı (PROD) ortamda URL'de debug parametresi yoksa localStorage verilerini temizle ve varsayılan kapalı tut
-      if (!isDev && !hasParam) {
-        try {
-          localStorage.removeItem('debug_media_crop')
-          localStorage.removeItem('debug_media_crop_outlines')
-        } catch {
-          // ignore storage errors
-        }
-      }
-
-      const hasStorage = isDev ? localStorage.getItem('debug_media_crop') === 'true' : false
-      this.isEnabled = hasParam || hasStorage
-      this.showOverlay = this.isEnabled
-      this.showVisualOutlines = isDev
-        ? localStorage.getItem('debug_media_crop_outlines') === 'true'
-        : false
+      this.isEnabled = hasParam
+      this.showOverlay = hasParam
+      this.showVisualOutlines = hasParam
       ;(window as unknown as Record<string, unknown>)['__DEBUG_MEDIA_CROP__'] = {
         enable: () => this.enable(),
         disable: () => this.disable(),
