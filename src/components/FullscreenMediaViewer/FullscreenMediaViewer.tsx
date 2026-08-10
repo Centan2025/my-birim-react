@@ -84,49 +84,25 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     const currentVisible: number[] = []
     if (scrollContainerRef.current) {
       const container = scrollContainerRef.current
-      const isHorizontal = (isMobile && isLandscape) || !isMobile
+      const containerLeft = container.scrollLeft
+      const containerRight = containerLeft + container.clientWidth
 
-      if (isHorizontal) {
-        const containerLeft = container.scrollLeft
-        const containerRight = containerLeft + container.clientWidth
+      itemRefs.current.forEach((ref, index) => {
+        if (!ref) return
+        const itemLeft = ref.offsetLeft
+        const itemRight = itemLeft + ref.offsetWidth
 
-        itemRefs.current.forEach((ref, index) => {
-          if (!ref) return
-          const itemLeft = ref.offsetLeft
-          const itemRight = itemLeft + ref.offsetWidth
+        if (itemRight > containerLeft && itemLeft < containerRight) {
+          currentVisible.push(index)
+        }
+      })
 
-          if (itemRight > containerLeft && itemLeft < containerRight) {
-            currentVisible.push(index)
-          }
-        })
-
-        currentVisible.sort((a, b) => {
-          const refA = itemRefs.current[a]
-          const refB = itemRefs.current[b]
-          if (!refA || !refB) return 0
-          return refA.offsetLeft - refB.offsetLeft
-        })
-      } else {
-        const containerTop = container.scrollTop
-        const containerBottom = containerTop + container.clientHeight
-
-        itemRefs.current.forEach((ref, index) => {
-          if (!ref) return
-          const itemTop = ref.offsetTop
-          const itemBottom = itemTop + ref.offsetHeight
-
-          if (itemBottom > containerTop && itemTop < containerBottom) {
-            currentVisible.push(index)
-          }
-        })
-
-        currentVisible.sort((a, b) => {
-          const refA = itemRefs.current[a]
-          const refB = itemRefs.current[b]
-          if (!refA || !refB) return 0
-          return refA.offsetTop - refB.offsetTop
-        })
-      }
+      currentVisible.sort((a, b) => {
+        const refA = itemRefs.current[a]
+        const refB = itemRefs.current[b]
+        if (!refA || !refB) return 0
+        return refA.offsetLeft - refB.offsetLeft
+      })
 
       setVisibleIndices(currentVisible)
       closingVisibleIndicesRef.current = currentVisible
@@ -259,29 +235,18 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
 
   // Navigation & Scroll Handlers
 
-  const scrollToDisplayIndex = useCallback(
-    (index: number, smooth: boolean = true) => {
-      if (!scrollContainerRef.current) return
-      const container = scrollContainerRef.current
-      const targetEl = itemRefs.current[index]
-      if (targetEl) {
-        const isHorizontal = (isMobile && isLandscape) || !isMobile
-        if (isHorizontal) {
-          container.scrollTo({
-            left: targetEl.offsetLeft,
-            behavior: smooth ? 'smooth' : 'auto',
-          })
-        } else {
-          container.scrollTo({
-            top: targetEl.offsetTop,
-            behavior: smooth ? 'smooth' : 'auto',
-          })
-        }
-        currentDisplayIndexRef.current = index
-      }
-    },
-    [isMobile, isLandscape]
-  )
+  const scrollToDisplayIndex = useCallback((index: number, smooth: boolean = true) => {
+    if (!scrollContainerRef.current) return
+    const container = scrollContainerRef.current
+    const targetEl = itemRefs.current[index]
+    if (targetEl) {
+      container.scrollTo({
+        left: targetEl.offsetLeft,
+        behavior: smooth ? 'smooth' : 'auto',
+      })
+      currentDisplayIndexRef.current = index
+    }
+  }, [])
 
   const handleScrollLeft = useCallback(() => {
     if (!isLooping) return
@@ -296,8 +261,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
   }, [isLooping, scrollToDisplayIndex])
 
   const handleWheel = (e: React.WheelEvent) => {
-    const isHorizontal = (isMobile && isLandscape) || !isMobile
-    const delta = isHorizontal ? e.deltaY || e.deltaX : e.deltaY
+    const delta = e.deltaY || e.deltaX
     const now = Date.now()
 
     if (Math.abs(delta) > 10 && now - lastWheelTime.current > 300) {
@@ -317,120 +281,58 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
     const updateVisibleIndices = () => {
       if (!scrollContainerRef.current) return
       const container = scrollContainerRef.current
-      const isHorizontal = (isMobile && isLandscape) || !isMobile
+      const containerLeft = container.scrollLeft
+      const containerRight = containerLeft + container.clientWidth
+      setShowScrollToTop(false)
 
-      if (isHorizontal) {
-        const containerLeft = container.scrollLeft
-        const containerRight = containerLeft + container.clientWidth
-        setShowScrollToTop(false)
+      const visible: number[] = []
+      let centerItemIndex = 0
+      let minDistanceToCenter = Infinity
+      const containerCenter = containerLeft + container.clientWidth / 2
 
-        const visible: number[] = []
-        let centerItemIndex = 0
-        let minDistanceToCenter = Infinity
-        const containerCenter = containerLeft + container.clientWidth / 2
-
-        itemRefs.current.forEach((ref, index) => {
-          if (!ref) return
-          const itemCenter = ref.offsetLeft + ref.offsetWidth / 2
-          const distance = Math.abs(containerCenter - itemCenter)
-          if (distance < minDistanceToCenter) {
-            minDistanceToCenter = distance
-            centerItemIndex = index
-          }
-          if (ref.offsetLeft + ref.offsetWidth > containerLeft && ref.offsetLeft < containerRight) {
-            visible.push(index)
-          }
-        })
-        setVisibleIndices(visible)
-        currentDisplayIndexRef.current = centerItemIndex
-
-        // Check if we hit end clone (index displayCount - 1) or start clone (index 0)
-        if (isLooping && !isJumpingRef.current) {
-          if (centerItemIndex >= displayCount - 1) {
-            const realFirstEl = itemRefs.current[1]
-            const cloneFirstEl = itemRefs.current[displayCount - 1]
-            if (realFirstEl && cloneFirstEl) {
-              const clonePos = realFirstEl.offsetLeft
-              if (Math.abs(container.scrollLeft - cloneFirstEl.offsetLeft) < 25) {
-                isJumpingRef.current = true
-                container.scrollLeft = clonePos
-                currentDisplayIndexRef.current = 1
-                setTimeout(() => {
-                  isJumpingRef.current = false
-                }, 50)
-              }
-            }
-          } else if (centerItemIndex <= 0) {
-            const realLastEl = itemRefs.current[slideCount]
-            const cloneLastEl = itemRefs.current[0]
-            if (realLastEl && cloneLastEl) {
-              const clonePos = realLastEl.offsetLeft
-              if (Math.abs(container.scrollLeft - cloneLastEl.offsetLeft) < 25) {
-                isJumpingRef.current = true
-                container.scrollLeft = clonePos
-                currentDisplayIndexRef.current = slideCount
-                setTimeout(() => {
-                  isJumpingRef.current = false
-                }, 50)
-              }
-            }
-          }
+      itemRefs.current.forEach((ref, index) => {
+        if (!ref) return
+        const itemCenter = ref.offsetLeft + ref.offsetWidth / 2
+        const distance = Math.abs(containerCenter - itemCenter)
+        if (distance < minDistanceToCenter) {
+          minDistanceToCenter = distance
+          centerItemIndex = index
         }
-      } else {
-        const containerTop = container.scrollTop
-        setShowScrollToTop(isMobile && !isLandscape && containerTop > 200)
+        if (ref.offsetLeft + ref.offsetWidth > containerLeft && ref.offsetLeft < containerRight) {
+          visible.push(index)
+        }
+      })
+      setVisibleIndices(visible)
+      currentDisplayIndexRef.current = centerItemIndex
 
-        const visible: number[] = []
-        let centerItemIndex = 0
-        let minDistanceToCenter = Infinity
-        const containerCenter = containerTop + container.clientHeight / 2
-
-        itemRefs.current.forEach((ref, index) => {
-          if (!ref) return
-          const itemCenter = ref.offsetTop + ref.offsetHeight / 2
-          const distance = Math.abs(containerCenter - itemCenter)
-          if (distance < minDistanceToCenter) {
-            minDistanceToCenter = distance
-            centerItemIndex = index
-          }
-          if (
-            ref.offsetTop + ref.offsetHeight > containerTop &&
-            ref.offsetTop < containerTop + container.clientHeight
-          ) {
-            visible.push(index)
-          }
-        })
-        setVisibleIndices(visible)
-        currentDisplayIndexRef.current = centerItemIndex
-
-        if (isLooping && !isJumpingRef.current) {
-          if (centerItemIndex >= displayCount - 1) {
-            const realFirstEl = itemRefs.current[1]
-            const cloneFirstEl = itemRefs.current[displayCount - 1]
-            if (realFirstEl && cloneFirstEl) {
-              const clonePos = realFirstEl.offsetTop
-              if (Math.abs(container.scrollTop - cloneFirstEl.offsetTop) < 25) {
-                isJumpingRef.current = true
-                container.scrollTop = clonePos
-                currentDisplayIndexRef.current = 1
-                setTimeout(() => {
-                  isJumpingRef.current = false
-                }, 50)
-              }
+      // Check if we hit end clone (index displayCount - 1) or start clone (index 0)
+      if (isLooping && !isJumpingRef.current) {
+        if (centerItemIndex >= displayCount - 1) {
+          const realFirstEl = itemRefs.current[1]
+          const cloneFirstEl = itemRefs.current[displayCount - 1]
+          if (realFirstEl && cloneFirstEl) {
+            const clonePos = realFirstEl.offsetLeft
+            if (Math.abs(container.scrollLeft - cloneFirstEl.offsetLeft) < 25) {
+              isJumpingRef.current = true
+              container.scrollLeft = clonePos
+              currentDisplayIndexRef.current = 1
+              setTimeout(() => {
+                isJumpingRef.current = false
+              }, 50)
             }
-          } else if (centerItemIndex <= 0) {
-            const realLastEl = itemRefs.current[slideCount]
-            const cloneLastEl = itemRefs.current[0]
-            if (realLastEl && cloneLastEl) {
-              const clonePos = realLastEl.offsetTop
-              if (Math.abs(container.scrollTop - cloneLastEl.offsetTop) < 25) {
-                isJumpingRef.current = true
-                container.scrollTop = clonePos
-                currentDisplayIndexRef.current = slideCount
-                setTimeout(() => {
-                  isJumpingRef.current = false
-                }, 50)
-              }
+          }
+        } else if (centerItemIndex <= 0) {
+          const realLastEl = itemRefs.current[slideCount]
+          const cloneLastEl = itemRefs.current[0]
+          if (realLastEl && cloneLastEl) {
+            const clonePos = realLastEl.offsetLeft
+            if (Math.abs(container.scrollLeft - cloneLastEl.offsetLeft) < 25) {
+              isJumpingRef.current = true
+              container.scrollLeft = clonePos
+              currentDisplayIndexRef.current = slideCount
+              setTimeout(() => {
+                isJumpingRef.current = false
+              }, 50)
             }
           }
         }
@@ -444,7 +346,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
       container.removeEventListener('scroll', updateVisibleIndices)
       window.removeEventListener('resize', updateVisibleIndices)
     }
-  }, [displayCount, slideCount, isLooping, isMobile, isLandscape])
+  }, [displayCount, slideCount, isLooping])
 
   // Keydown listener for arrow navigation
   useEffect(() => {
@@ -512,9 +414,9 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
             role="region"
             aria-label="Fullscreen media scroll container"
             ref={scrollContainerRef}
-            className={`w-full overflow-y-auto md:overflow-y-hidden md:overflow-x-auto flex ${
-              isMobile && isLandscape ? 'flex-row' : isMobile ? 'flex-col' : 'flex-row'
-            } items-start md:items-stretch ${displayCount === 1 ? 'justify-center' : 'justify-start'} px-0 md:px-0 md:cursor-grab md:select-none`}
+            className={`w-full overflow-x-auto overflow-y-hidden flex flex-row items-center ${
+              displayCount === 1 ? 'justify-center' : 'justify-start'
+            } px-0 select-none`}
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
@@ -523,9 +425,10 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
               paddingBottom: '0',
               gap: '0',
               cursor: isDragging && !isMobile ? 'grabbing' : !isMobile ? 'grab' : 'default',
-              overflowY: isMobile && isLandscape ? 'hidden' : isMobile ? 'auto' : 'hidden',
-              overflowX: isMobile && isLandscape ? 'auto' : isMobile ? 'hidden' : 'auto',
-              scrollSnapType: (isMobile && isLandscape) || !isMobile ? 'x mandatory' : 'none',
+              overflowY: 'hidden',
+              overflowX: 'auto',
+              scrollSnapType: 'x mandatory',
+              WebkitOverflowScrolling: 'touch',
             }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
