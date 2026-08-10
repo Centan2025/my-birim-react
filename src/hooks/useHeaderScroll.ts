@@ -1,4 +1,4 @@
-import {useEffect, MutableRefObject} from 'react'
+import {useEffect, useRef, MutableRefObject} from 'react'
 import {isDarkHeroPage} from '../utils/headerUtils'
 
 type MenuState = {
@@ -49,6 +49,18 @@ export function useHeaderScroll({
   setIsProductsOpen,
   isMobileMenuOpen,
 }: UseHeaderScrollOptions) {
+  const routeChangedTimeRef = useRef<number>(Date.now())
+  const prevPathnameRef = useRef<string>(locationPathname)
+
+  useEffect(() => {
+    if (prevPathnameRef.current !== locationPathname) {
+      prevPathnameRef.current = locationPathname
+      routeChangedTimeRef.current = Date.now()
+      lastScrollYRef.current = typeof window !== 'undefined' ? window.scrollY : 0
+      setIsHeaderVisible(true)
+    }
+  }, [locationPathname, lastScrollYRef, setIsHeaderVisible])
+
   useEffect(() => {
     let scrollListener: (() => void) | null = null
     let rafId: number | null = null
@@ -89,14 +101,13 @@ export function useHeaderScroll({
           return
         }
 
-        if (currentScrollY === 0) {
-          if (!isDarkHeroPage(path)) {
-            setHeaderOpacity(0.7)
-            setIsHeaderVisible(true)
-            opacitySetByHandleScrollRef.current = true
-          } else {
-            setHeaderOpacity(0)
-            setIsHeaderVisible(true)
+        // Route change grace period (300ms): sayfa geçişi sırasında scroll diff nedeniyle header'ın aniden kaybolmasını engelle
+        const isRecentlyNavigated = now - routeChangedTimeRef.current < 300
+
+        if (currentScrollY === 0 || isRecentlyNavigated) {
+          setIsHeaderVisible(true)
+          if (currentScrollY === 0) {
+            setHeaderOpacity(isDarkHeroPage(path) ? 0 : 0.7)
             opacitySetByHandleScrollRef.current = true
           }
         } else {
@@ -116,7 +127,6 @@ export function useHeaderScroll({
             setHeaderOpacity(opacity)
           }
 
-          const now = Date.now()
           const timeSinceLastChange = now - (headerVisibilityLastChanged.current || 0)
 
           if (timeSinceLastChange > 150) {

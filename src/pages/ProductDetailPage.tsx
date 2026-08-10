@@ -404,15 +404,30 @@ export function ProductDetailPage() {
       {/* Fullscreen viewer */}
       {isFullscreenOpen && bandMedia.length > 0 && (
         <FullscreenMediaViewer
-          items={bandMedia.map(m => ({
-            type: m.type,
-            url: m.url,
-            urlMobile: m.urlMobile,
-            urlDesktop: m.urlDesktop,
-            crop: m.crop,
-            hotspot: m.hotspot,
-            isMirrored: m.isMirrored,
-          }))}
+          items={bandMedia.map(m => {
+            const item = m as unknown as Record<string, unknown>
+            return {
+              type: m.type,
+              url: m.url,
+              urlMobile: m.urlMobile,
+              urlDesktop: m.urlDesktop,
+              crop: m.crop,
+              cropMobile: item['cropMobile'] as any,
+              cropDesktop: item['cropDesktop'] as any,
+              hotspot: m.hotspot,
+              hotspotMobile: item['hotspotMobile'] as any,
+              hotspotDesktop: item['hotspotDesktop'] as any,
+              origWidth: item['origWidth'] as number | undefined,
+              origWidthMobile: item['origWidthMobile'] as number | undefined,
+              origWidthDesktop: item['origWidthDesktop'] as number | undefined,
+              origHeight: item['origHeight'] as number | undefined,
+              origHeightMobile: item['origHeightMobile'] as number | undefined,
+              origHeightDesktop: item['origHeightDesktop'] as number | undefined,
+              isMirrored: m.isMirrored,
+              isMirroredMobile: item['isMirroredMobile'] as boolean | undefined,
+              isMirroredDesktop: item['isMirroredDesktop'] as boolean | undefined,
+            }
+          })}
           initialIndex={heroHook.currentImageIndex}
           onClose={() => setIsFullscreenOpen(false)}
         />

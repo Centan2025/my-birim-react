@@ -22,11 +22,35 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
   isClosing,
   hasEntered,
   animationDelay,
-  isMobile: _isMobile,
+  isMobile,
   isLandscape: _isLandscape,
   itemRef,
 }) => {
   if (!item) return null
+
+  const activeUrl = isMobile
+    ? item.urlMobile || item.url
+    : item.urlDesktop || item.url
+
+  const activeCrop = isMobile
+    ? item.cropMobile || item.crop
+    : item.cropDesktop || item.crop
+
+  const activeHotspot = isMobile
+    ? item.hotspotMobile || item.hotspot
+    : item.hotspotDesktop || item.hotspot
+
+  const activeOrigWidth = isMobile
+    ? item.origWidthMobile || item.origWidth
+    : item.origWidthDesktop || item.origWidth
+
+  const activeOrigHeight = isMobile
+    ? item.origHeightMobile || item.origHeight
+    : item.origHeightDesktop || item.origHeight
+
+  const activeIsMirrored = isMobile
+    ? Boolean(item.isMirroredMobile || (item.isMirrored && !item.urlMobile))
+    : Boolean(item.isMirroredDesktop || (item.isMirrored && !item.urlDesktop))
 
   return (
     <div
@@ -61,7 +85,7 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
     >
       {item.type === 'image' ? (
         <OptimizedImage
-          src={item.url}
+          src={activeUrl}
           srcMobile={item.urlMobile}
           srcDesktop={item.urlDesktop}
           alt=""
@@ -83,25 +107,25 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
           }}
           loading="eager"
           quality={100}
-          crop={item.crop}
+          crop={activeCrop}
           cropMobile={item.cropMobile || item.crop}
           cropDesktop={item.cropDesktop || item.crop}
-          hotspot={item.hotspot}
+          hotspot={activeHotspot}
           hotspotMobile={item.hotspotMobile || item.hotspot}
           hotspotDesktop={item.hotspotDesktop || item.hotspot}
-          origWidth={item.origWidth as number}
-          origHeight={item.origHeight as number}
+          origWidth={activeOrigWidth as number}
+          origHeight={activeOrigHeight as number}
           origWidthMobile={item.origWidthMobile as number}
           origHeightMobile={item.origHeightMobile as number}
           origWidthDesktop={item.origWidthDesktop as number}
           origHeightDesktop={item.origHeightDesktop as number}
-          isMirrored={item.isMirrored}
+          isMirrored={activeIsMirrored}
           isMirroredMobile={item.isMirroredMobile}
           isMirroredDesktop={item.isMirroredDesktop}
         />
       ) : item.type === 'video' ? (
         <OptimizedVideo
-          src={item.url}
+          src={activeUrl}
           srcMobile={item.urlMobile}
           srcDesktop={item.urlDesktop}
           className="w-full h-full object-contain mx-auto my-auto"

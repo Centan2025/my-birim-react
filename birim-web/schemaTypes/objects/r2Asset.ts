@@ -41,8 +41,9 @@ export default defineType({
       url: 'url',
       alt: 'alt',
       path: 'path',
+      isMirrored: 'isMirrored',
     },
-    prepare({url, alt, path}) {
+    prepare({url, alt, path, isMirrored}) {
       const fileName = path ? path.split('/').pop() : 'R2 Görseli'
       return {
         title: alt || fileName || 'Görsel',
@@ -50,7 +51,12 @@ export default defineType({
           ? React.createElement('img', {
               src: url,
               alt: alt || '',
-              style: {width: '100%', height: '100%', objectFit: 'cover'},
+              style: {
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                transform: isMirrored ? 'scaleX(-1)' : 'none',
+              },
             })
           : undefined,
       }

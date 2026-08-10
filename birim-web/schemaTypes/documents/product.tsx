@@ -275,11 +275,17 @@ export default defineType({
       const coverItem = media?.find((m) => (m as any).isCover) || media?.[0]
       const r2Url =
         (coverItem as any)?.imageR2?.url ||
+        (coverItem as any)?.imageMobileR2?.url ||
+        (coverItem as any)?.imageDesktopR2?.url ||
         (coverItem as any)?.videoFileR2?.url ||
-        (coverItem as any)?.thumbnailR2?.url
+        (coverItem as any)?.thumbnailR2?.url ||
+        (coverItem as any)?.url
       let finalUrl = getPreviewUrl(r2Url)
       const isMirrored =
-        !!(coverItem as any)?.imageR2?.isMirrored || !!(coverItem as any)?.isMirrored
+        !!(coverItem as any)?.imageR2?.isMirrored ||
+        !!(coverItem as any)?.imageMobileR2?.isMirrored ||
+        !!(coverItem as any)?.imageDesktopR2?.isMirrored ||
+        !!(coverItem as any)?.isMirrored
 
       return {
         title: name?.tr || name?.en || 'İsimsiz Ürün',

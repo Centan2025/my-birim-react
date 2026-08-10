@@ -96,7 +96,7 @@ export function Header() {
   // Mobile overlay menu: always dark text.
   const isLightMode =
     (!isDarkHero || headerTheme.mode === 'light' || isPastHero || isSearchOpen) &&
-    !(isMobile && (isMobileMenuOpen || isMobileMenuClosing))
+    !(isMobile && isMobileMenuOpen)
 
   const headerForegroundColor = isLightMode ? '#000000' : '#ffffff'
   const headerLogoFilter = isLightMode ? 'invert(1) brightness(0.95)' : 'none'
@@ -165,6 +165,15 @@ export function Header() {
     opacitySetByHandleScrollRef.current = false
     setIsHeaderVisible(true)
     resetHeaderTheme()
+    setIsMobileMenuOpen(false)
+    setIsMobileMenuClosing(false)
+    setIsSearchOpen(false)
+    setIsProductsOpen(false)
+    mobileMenuJustClosedUntilRef.current = 0
+    if (mobileMenuCloseTimeoutRef.current) {
+      clearTimeout(mobileMenuCloseTimeoutRef.current)
+      mobileMenuCloseTimeoutRef.current = null
+    }
 
     // Header opacity'yi sayfa türüne göre ayarla (koyu hero varsa 0, ürün detayı gibi standart sayfalarda 0.7)
     setHeaderOpacity(isDarkHeroPageUtil(location.pathname) ? 0 : 0.7)
@@ -265,6 +274,7 @@ export function Header() {
     isMobileMenuOpen,
   })
 
+  const prevIsMobileMenuOpenRef = useRef(isMobileMenuOpen)
   // Mobil menü açıldığında/kapandığında opacity'yi güncelle
   useEffect(() => {
     if (isMobile) {
@@ -277,14 +287,15 @@ export function Header() {
         // Arama açıldığında arama paneli ile aynı opacity (0.7)
         setHeaderOpacity(0.7)
         setIsHeaderVisible(true)
-      } else {
+      } else if (prevIsMobileMenuOpenRef.current && !isMobileMenuOpen) {
         // Menü KAPANIRKEN: belirli bir süre boyunca header'ın gizlenmesini engelle
         // Böylece kullanıcı close'a bastığı anda header kaybolmaz.
         mobileMenuJustClosedUntilRef.current = Date.now() + 800 // 800ms grace süresi
         setIsHeaderVisible(true)
       }
     }
-  }, [isMobile, isMobileMenuOpen, isSearchOpen, location.pathname])
+    prevIsMobileMenuOpenRef.current = isMobileMenuOpen
+  }, [isMobile, isMobileMenuOpen, isSearchOpen])
 
   // Mobil menü AÇIKKEN body scroll'unu kilitle
   useBodyScrollLock(isMobile && isMobileMenuOpen)
@@ -592,7 +603,7 @@ export function Header() {
       <header
         className={`fixed top-0 left-0 right-0 z-50 header-scroll-transition ${
           // Overlay mobil menü açıkken header ile panelin tam aynı renkte görünmesi için özel sınıf
-          isOverlayMobileMenu && (isMobileMenuOpen || isMobileMenuClosing)
+          isOverlayMobileMenu && isMobileMenuOpen
             ? 'overlay-menu-open'
             : ''
         }`}

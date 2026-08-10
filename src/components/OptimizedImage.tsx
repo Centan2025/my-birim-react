@@ -182,16 +182,16 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         dangerouslySetInnerHTML={{
           __html: `
         img.responsive-mirror {
-          scale: var(--is-mirrored-general, 1) 1 !important;
+          transform: scaleX(var(--is-mirrored-general, 1)) !important;
         }
         @media (max-width: 768px) {
           img.responsive-mirror {
-            scale: var(--is-mirrored-mobile, var(--is-mirrored-general, 1)) 1 !important;
+            transform: scaleX(var(--is-mirrored-mobile, var(--is-mirrored-general, 1))) !important;
           }
         }
         @media (min-width: 769px) {
           img.responsive-mirror {
-            scale: var(--is-mirrored-desktop, var(--is-mirrored-general, 1)) 1 !important;
+            transform: scaleX(var(--is-mirrored-desktop, var(--is-mirrored-general, 1))) !important;
           }
         }
         @media (min-width: 1024px) {
@@ -200,7 +200,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             object-fit: var(--img-object-fit-desktop, var(--img-object-fit, cover)) !important;
             object-position: var(--obj-pos-desktop, center) !important;
             clip-path: var(--clip-desktop, none) !important;
-            transform: var(--transform-desktop, none) !important;
+            transform: var(--transform-desktop, scaleX(var(--is-mirrored-desktop, var(--is-mirrored-general, 1)))) !important;
             transform-origin: var(--transform-origin-desktop, center) !important;
           }
         }
@@ -543,15 +543,23 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       (normalizedCropMobile && !normalizedCropDesktop)
   )
 
+  const effectiveIsMirroredDesktop =
+    isMirroredDesktop !== undefined
+      ? isMirroredDesktop || (Boolean(isMirrored) && !srcDesktop)
+      : Boolean(isMirrored)
+
+  const effectiveIsMirroredMobile =
+    isMirroredMobile !== undefined
+      ? isMirroredMobile || (Boolean(isMirrored) && !srcMobile)
+      : Boolean(isMirrored)
+
   // Hotspot ve crop position style'a ekle
   const imgStyle: React.CSSProperties = {
     ...style,
     // SSR-stable CSS custom properties
     '--is-mirrored-general': isMirrored ? '-1' : '1',
-    '--is-mirrored-mobile':
-      isMirroredMobile !== undefined ? (isMirroredMobile ? '-1' : '1') : isMirrored ? '-1' : '1',
-    '--is-mirrored-desktop':
-      isMirroredDesktop !== undefined ? (isMirroredDesktop ? '-1' : '1') : isMirrored ? '-1' : '1',
+    '--is-mirrored-mobile': effectiveIsMirroredMobile ? '-1' : '1',
+    '--is-mirrored-desktop': effectiveIsMirroredDesktop ? '-1' : '1',
   } as React.CSSProperties
 
   const customStyle = imgStyle as Record<string, string>

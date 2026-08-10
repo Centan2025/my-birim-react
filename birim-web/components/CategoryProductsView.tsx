@@ -1,6 +1,7 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useState, useMemo} from 'react'
 import {useClient} from 'sanity'
-import {Card, Stack, Text, Spinner, Box, Flex, Heading} from '@sanity/ui'
+import {Card, Stack, Text, Spinner, Box, Flex, Heading, TextInput, Button} from '@sanity/ui'
+import {SearchIcon, CloseIcon} from '@sanity/icons'
 import {useRouter} from 'sanity/router'
 import {getPreviewUrl} from '../schemaTypes/utils/previewUrl'
 
@@ -28,6 +29,7 @@ interface Product {
 export function CategoryProductsView(props: CategoryProductsViewProps) {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
   const client = useClient({apiVersion: '2024-01-01'})
   const categoryId = props.document.displayed._id
   const router = useRouter()
@@ -69,6 +71,17 @@ export function CategoryProductsView(props: CategoryProductsViewProps) {
         setLoading(false)
       })
   }, [categoryId, client])
+
+  const filteredProducts = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+    if (!q) return products
+    return products.filter((p) => {
+      const trName = p.name?.tr?.toLowerCase() || ''
+      const enName = p.name?.en?.toLowerCase() || ''
+      const idStr = p._id.toLowerCase()
+      return trName.includes(q) || enName.includes(q) || idStr.includes(q)
+    })
+  }, [products, searchQuery])
 
   const handleProductClick = (productId: string) => {
     const cleanCatId = categoryId.replace('drafts.', '')
@@ -117,11 +130,41 @@ export function CategoryProductsView(props: CategoryProductsViewProps) {
           </button>
         </Flex>
 
-        <Card padding={3} radius={2} shadow={1} tone="primary">
-          <Text size={2} weight="semibold">
-            Toplam {products.length} model
-          </Text>
+        <TextInput
+          icon={SearchIcon}
+          placeholder="Model adı ile ara (TR / EN)..."
+          value={searchQuery}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setSearchQuery(e.currentTarget.value)
+          }
+          clearButton={searchQuery.length > 0}
+          onClear={() => setSearchQuery('')}
+          fontSize={2}
+          padding={3}
+          radius={2}
+        />
+
+        <Card padding={3} radius={2} shadow={1} tone={searchQuery ? 'caution' : 'primary'}>
+          <Flex align="center" justify="space-between">
+            <Text size={2} weight="semibold">
+              {searchQuery
+                ? `${filteredProducts.length} model bulundu (Toplam ${products.length} model)`
+                : `Toplam ${products.length} model`}
+            </Text>
+            {searchQuery && (
+              <Button
+                mode="bleed"
+                tone="critical"
+                icon={CloseIcon}
+                text="Filtreyi Temizle"
+                fontSize={1}
+                padding={2}
+                onClick={() => setSearchQuery('')}
+              />
+            )}
+          </Flex>
         </Card>
+
         {products.length === 0 ? (
           <Card padding={4} tone="transparent" border radius={2}>
             <Text align="center" muted size={2}>
@@ -130,9 +173,23 @@ export function CategoryProductsView(props: CategoryProductsViewProps) {
               Yeni model eklemek için sol menüden "Tüm Modeller" bölümüne gidin.
             </Text>
           </Card>
+        ) : filteredProducts.length === 0 ? (
+          <Card padding={4} tone="transparent" border radius={2}>
+            <Flex direction="column" align="center" gap={3}>
+              <Text align="center" muted size={2}>
+                "{searchQuery}" aramasına uygun model bulunamadı.
+              </Text>
+              <Button
+                mode="ghost"
+                tone="default"
+                text="Tüm Modelleri Göster"
+                onClick={() => setSearchQuery('')}
+              />
+            </Flex>
+          </Card>
         ) : (
           <Stack space={2}>
-            {products.map((product: Product) => {
+            {filteredProducts.map((product: Product) => {
               const coverItem =
                 product.media?.find((m: ProductMediaItem) => m.isCover) || product.media?.[0]
               const rawUrl =

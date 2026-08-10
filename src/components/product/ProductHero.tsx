@@ -185,7 +185,11 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
               : 'none',
             opacity: phase === 'animating' ? 0 : 1,
           }}
-          onTransitionEnd={onTransitionEnd}
+          onTransitionEnd={e => {
+            if (e.target === e.currentTarget) {
+              onTransitionEnd()
+            }
+          }}
         >
           {Array.from({length: totalHeroSlides}).map((_, index) => {
             // Ensure index is mapped correctly back to the base `heroMedia` array
@@ -322,7 +326,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
             </div>
             {(designers.length > 0 || Boolean(product.year)) && (
               <div
-                className="mt-2 text-white/80 font-michroma pointer-events-auto"
+                className="mt-2 text-xs md:text-sm text-white/80 font-michroma pointer-events-auto [&_a]:font-michroma [&_span]:font-michroma"
                 style={{
                   transform: isDesignerVisible ? 'translateX(0)' : 'translateX(-40px)',
                   opacity: isDesignerVisible ? 1 : 0,
@@ -331,7 +335,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
               >
                 {designers.map((d, i) => (
                   <span key={d.id}>
-                    <Link to={`/designer/${d.id}`} className="hover:text-white">
+                    <Link to={`/designer/${d.id}`} className="hover:text-white font-michroma">
                       {t(d.name)}
                     </Link>
                     {i < designers.length - 1 ? ' & ' : ''}

@@ -1144,7 +1144,12 @@ export default function R2AssetInput(props: ObjectInputProps) {
                       onLoad={() => {
                         // Keep image loaded without forcing automatic crop box
                       }}
-                      style={{maxHeight: '70vh', maxWidth: '100%'}}
+                      style={{
+                        maxHeight: '70vh',
+                        maxWidth: '100%',
+                        transform: isMirrored ? 'scaleX(-1)' : 'none',
+                        transition: 'transform 0.3s ease-in-out',
+                      }}
                     />
                   </ReactCrop>
                 </CropOverlayCSS>

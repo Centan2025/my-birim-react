@@ -31,30 +31,92 @@ export function useProductHero(slideCount: number) {
   // Transition recovery
   useEffect(() => {
     if (!heroTransitionEnabled) {
-      const id = requestAnimationFrame(() => setHeroTransitionEnabled(true))
-      return () => cancelAnimationFrame(id)
+      let id2: number
+      const id1 = requestAnimationFrame(() => {
+        id2 = requestAnimationFrame(() => {
+          setHeroTransitionEnabled(true)
+        })
+      })
+      return () => {
+        cancelAnimationFrame(id1)
+        if (id2) cancelAnimationFrame(id2)
+      }
     }
     return undefined
   }, [heroTransitionEnabled])
 
+  // Fallback timer to guarantee boundary reset if onTransitionEnd event is missed or cancelled
+  useEffect(() => {
+    if (slideCount <= 1) return undefined
+    if (heroSlideIndex === totalHeroSlides - 1) {
+      const timer = setTimeout(() => {
+        if (heroSlideIndexRef.current === totalHeroSlides - 1) {
+          setHeroTransitionEnabled(false)
+          updateSlideIndex(1)
+        }
+      }, 1050)
+      return () => clearTimeout(timer)
+    }
+    if (heroSlideIndex === 0) {
+      const timer = setTimeout(() => {
+        if (heroSlideIndexRef.current === 0) {
+          setHeroTransitionEnabled(false)
+          updateSlideIndex(totalHeroSlides - 2)
+        }
+      }, 1050)
+      return () => clearTimeout(timer)
+    }
+    return undefined
+  }, [heroSlideIndex, slideCount, totalHeroSlides, updateSlideIndex])
+
   const heroNext = useCallback(() => {
-    if (slideCount <= 1 || !heroTransitionEnabled) return
-    if (heroSlideIndexRef.current >= totalHeroSlides - 1) return // Sınırı aşmasını engelle
+    if (slideCount <= 1) return
+
+    if (heroSlideIndexRef.current >= totalHeroSlides - 1) {
+      setHeroTransitionEnabled(false)
+      updateSlideIndex(1)
+      setCurrentImageIndex(1 % slideCount)
+      requestAnimationFrame(() => {
+        setHeroTransitionEnabled(true)
+        updateSlideIndex(2)
+      })
+      return
+    }
+
+    if (heroSlideIndexRef.current <= 0) {
+      setHeroTransitionEnabled(false)
+      updateSlideIndex(totalHeroSlides - 2)
+    }
 
     updateSlideIndex(heroSlideIndexRef.current + 1)
     setCurrentImageIndex(prev => (prev + 1) % slideCount)
-  }, [slideCount, heroTransitionEnabled, totalHeroSlides, updateSlideIndex])
+  }, [slideCount, totalHeroSlides, updateSlideIndex])
 
   const heroPrev = useCallback(() => {
-    if (slideCount <= 1 || !heroTransitionEnabled) return
-    if (heroSlideIndexRef.current <= 0) return // Sınırı aşmasını engelle
+    if (slideCount <= 1) return
+
+    if (heroSlideIndexRef.current <= 0) {
+      setHeroTransitionEnabled(false)
+      updateSlideIndex(totalHeroSlides - 2)
+      setCurrentImageIndex((slideCount - 2 + slideCount) % slideCount)
+      requestAnimationFrame(() => {
+        setHeroTransitionEnabled(true)
+        updateSlideIndex(totalHeroSlides - 3)
+      })
+      return
+    }
+
+    if (heroSlideIndexRef.current >= totalHeroSlides - 1) {
+      setHeroTransitionEnabled(false)
+      updateSlideIndex(1)
+    }
 
     updateSlideIndex(heroSlideIndexRef.current - 1)
     setCurrentImageIndex(prev => (prev - 1 + slideCount) % slideCount)
-  }, [slideCount, heroTransitionEnabled, updateSlideIndex])
+  }, [slideCount, totalHeroSlides, updateSlideIndex])
 
   const handleHeroTransitionEnd = useCallback(() => {
-    if (slideCount <= 1 || !heroTransitionEnabled) return
+    if (slideCount <= 1) return
     if (heroSlideIndexRef.current === totalHeroSlides - 1) {
       setHeroTransitionEnabled(false)
       updateSlideIndex(1)
@@ -62,11 +124,22 @@ export function useProductHero(slideCount: number) {
       setHeroTransitionEnabled(false)
       updateSlideIndex(totalHeroSlides - 2)
     }
-  }, [slideCount, heroTransitionEnabled, totalHeroSlides, updateSlideIndex])
+  }, [slideCount, totalHeroSlides, updateSlideIndex])
 
   const handleHeroDragStart = useCallback(
     (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
       if (e.target instanceof HTMLElement && e.target.closest('a, button')) return
+
+      if (slideCount > 1) {
+        if (heroSlideIndexRef.current === totalHeroSlides - 1) {
+          setHeroTransitionEnabled(false)
+          updateSlideIndex(1)
+        } else if (heroSlideIndexRef.current === 0) {
+          setHeroTransitionEnabled(false)
+          updateSlideIndex(totalHeroSlides - 2)
+        }
+      }
+
       const x =
         'touches' in e && e.touches && e.touches.length > 0
           ? e.touches[0]?.clientX
@@ -91,7 +164,7 @@ export function useProductHero(slideCount: number) {
         e.preventDefault()
       }
     },
-    []
+    [slideCount, totalHeroSlides, updateSlideIndex]
   )
 
   const handleHeroDragMove = useCallback(

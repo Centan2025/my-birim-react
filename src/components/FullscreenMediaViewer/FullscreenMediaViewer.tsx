@@ -411,7 +411,7 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
         width: '100vw',
         height: '100dvh',
         zIndex: 99999,
-        backgroundColor: '#e5e7eb',
+        backgroundColor: '#ffffff',
       }}
     >
       <div
