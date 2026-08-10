@@ -76,11 +76,12 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
         </button>
       </div>
 
-      {/* Navigasyon Düğmeleri (Ekranın Altında, Yan Yana) */}
+      {/* Navigasyon Düğmeleri (Ekranın Altında, Yan Yana ve Yatayda Tam Ortalanmış) */}
       {slideCount > 1 && (
         <div
-          className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3 z-20 pointer-events-auto"
+          className="absolute flex items-center justify-center gap-3 z-20 pointer-events-auto"
           style={{
+            left: '50%',
             bottom: isMobile ? 'max(16px, env(safe-area-inset-bottom, 0px) + 12px)' : '32px',
             opacity: isButtonVisible && !isClosing ? 1 : 0,
             transform: `translateX(-50%) ${isButtonVisible && !isClosing ? 'translateY(0)' : 'translateY(24px)'}`,
