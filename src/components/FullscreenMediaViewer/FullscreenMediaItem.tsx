@@ -67,7 +67,9 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
             maxWidth: '100vw',
             width: '100%',
             height: '100%',
-            display: 'block',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             WebkitBackfaceVisibility: 'hidden',
             objectFit: 'contain',
           }}
