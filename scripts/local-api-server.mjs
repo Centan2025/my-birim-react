@@ -112,7 +112,7 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3001')
   }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
   if (req.method === 'OPTIONS') return res.sendStatus(200)
   next()
 })
@@ -723,18 +723,28 @@ app.post('/api/media/presigned-url', async (req, res) => {
     const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3')
     const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner')
 
-    const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || process.env.SANITY_STUDIO_R2_ACCOUNT_ID
-    const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID
-    const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY
+    const originDomain = process.env.VITE_R2_ORIGIN_DOMAIN || ''
+    const hashMatch = originDomain.match(/pub-([a-f0-9]+)\.r2\.dev/)
+    const defaultAccountId = hashMatch ? hashMatch[1] : '114e37dc2d51e58147e027097a68470b'
+
+    const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || process.env.SANITY_STUDIO_R2_ACCOUNT_ID || process.env.VITE_R2_ACCOUNT_ID || defaultAccountId
+    const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID || process.env.VITE_R2_ACCESS_KEY_ID
+    const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY || process.env.VITE_R2_SECRET_ACCESS_KEY
     const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || process.env.SANITY_STUDIO_R2_BUCKET_NAME || 'birim-web'
-    const R2_DOMAIN = process.env.R2_DOMAIN || process.env.SANITY_STUDIO_R2_DOMAIN
+    const R2_DOMAIN = process.env.R2_DOMAIN || process.env.SANITY_STUDIO_R2_DOMAIN || process.env.VITE_R2_DOMAIN || 'https://assets.birim.com'
+
+    if (!R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY) {
+      return res.status(500).json({
+        error: 'Cloudflare R2 erişim anahtarları (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY) .env.local dosyasında tanımlı değil.',
+      })
+    }
 
     const r2Client = new S3Client({
       region: 'auto',
       endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
       credentials: {
-        accessKeyId: R2_ACCESS_KEY_ID || '',
-        secretAccessKey: R2_SECRET_ACCESS_KEY || '',
+        accessKeyId: R2_ACCESS_KEY_ID,
+        secretAccessKey: R2_SECRET_ACCESS_KEY,
       },
     })
 
