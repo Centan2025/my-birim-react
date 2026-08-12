@@ -741,3 +741,25 @@ footer input:-webkit-autofill:active {
   caret-color: #ffffff !important;
   transition: background-color 5000s ease-in-out 0s !important;
 }
+
+/* Header Top Scroll Mask: Header altına giren içeriklerin yavaşça silikleşmesi */
+.header-scroll-fade-zone {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 20px,
+    rgba(0, 0, 0, 0.15) 50px,
+    rgba(0, 0, 0, 0.6) 90px,
+    black 140px,
+    black 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 20px,
+    rgba(0, 0, 0, 0.15) 50px,
+    rgba(0, 0, 0, 0.6) 90px,
+    black 140px,
+    black 100%
+  );
+}

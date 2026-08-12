@@ -15,10 +15,18 @@ export const MainLayout: React.FC = () => {
   return (
     <>
       <SkipLink />
+      {/* Top Header Fade Backdrop: Content scrolling under header gradually fades out */}
+      <div
+        aria-hidden="true"
+        className="fixed top-0 left-0 right-0 h-28 md:h-36 pointer-events-none z-40 bg-gradient-to-b from-[var(--bg-primary)] via-[var(--bg-primary)]/80 to-transparent transition-opacity duration-300"
+      />
       <Header />
       <CartSidebar />
       <FloatingAuthPanel />
-      <main id="main-content" className="flex flex-col flex-grow relative overflow-x-clip">
+      <main
+        id="main-content"
+        className="flex flex-col flex-grow relative overflow-x-clip header-scroll-fade-zone"
+      >
         <AnimatePresence mode="sync" initial={true}>
           <PageTransitionWrapper key={location.pathname} location={location} />
         </AnimatePresence>
