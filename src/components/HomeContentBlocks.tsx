@@ -895,16 +895,8 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         }
 
         const isSideBySide = !isFullWidth && !isCenter
-        const mediaHeightClass = hasTextContent
-          ? isSideBySide
-            ? 'max-md:h-auto md:h-full'
-            : 'h-full'
-          : 'h-auto'
-        const mediaImgHeightClass = hasTextContent
-          ? isSideBySide
-            ? 'max-md:h-auto max-md:object-contain md:h-full md:object-cover'
-            : 'h-full object-cover'
-          : 'h-auto'
+        const mediaHeightClass = 'h-auto'
+        const mediaImgHeightClass = 'h-auto object-contain'
 
         const mediaContent = hasMedia ? (
           <ScrollReveal
@@ -1116,7 +1108,9 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       {hasMedia && (
                         <div
                           className={`w-full ${
-                            !hasTextContent ? 'md:w-full flex flex-col items-center' : 'md:w-1/2'
+                            !hasTextContent
+                              ? 'md:w-full flex flex-col items-center'
+                              : 'md:w-1/2 flex flex-col'
                           } overflow-visible`}
                         >
                           {mediaContent}
@@ -1124,7 +1118,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       )}
                       {hasTextContent && (
                         <div
-                          className={`w-full ${hasMedia ? 'md:w-1/2' : 'md:w-full'} ${isMobile ? 'px-4 py-4 md:px-0 md:py-0' : ''} flex flex-col h-full flex-1 min-h-0 self-stretch ${hasTitle && (hasDescription || block.linkText) ? 'gap-4 md:gap-6' : 'gap-0'} ${verticalAlignClass}`}
+                          className={`w-full ${hasMedia ? 'md:w-1/2' : 'md:w-full'} ${isMobile ? 'px-4 py-4 md:px-0 md:py-0' : ''} flex flex-col min-h-full flex-1 self-stretch ${hasTitle && (hasDescription || block.linkText) ? 'gap-4 md:gap-6' : 'gap-0'} ${verticalAlignClass}`}
                         >
                           {hasTitle && titleElement}
                           {bodyElement}

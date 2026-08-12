@@ -1178,7 +1178,8 @@ export const contentBlock = defineType({
       title: 'Açıklama Metni',
       type: 'localizedPortableText',
       fieldset: 'textGroup',
-      description: 'İçerik bloğu için detaylı açıklama metni',
+      description:
+        'İçerik bloğu için detaylı açıklama metni. (İpucu: "Alta Yanaşık" görseller sol ana görselin alt çizgisine kilitlenir. Aradaki dikey boşluğu daraltmak için metninizi uzatabilir veya Shift+Enter ile boş satır ekleyebilirsiniz.)',
     }),
     defineField({
       name: 'contentFont',

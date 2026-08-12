@@ -230,6 +230,11 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           margin-bottom: auto !important;
           aspect-ratio: var(--crop-aspect-desktop, auto);
         }
+        .responsive-crop-wrapper.is-bottom-aligned {
+          margin-top: auto !important;
+          margin-bottom: 0 !important;
+          align-self: flex-end !important;
+        }
 
         .responsive-crop-inner {
           position: absolute !important;
@@ -705,10 +710,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     !effectiveContain &&
     (classList.some(
       (c: string) =>
-        c.startsWith('h-full') ||
-        c.startsWith('h-screen') ||
-        (c.startsWith('h-') && c !== 'h-auto') ||
-        c.startsWith('aspect-')
+        c.includes('h-full') ||
+        c.includes('h-screen') ||
+        (c.includes('h-') && !c.includes('h-auto')) ||
+        c.includes('aspect-')
     ) ||
       !!height)
 
@@ -825,9 +830,18 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         c.includes('object-contain')
     )
 
+    const isBottomAligned = classList.some(
+      (c: string) =>
+        c === 'items-end' ||
+        c === 'self-end' ||
+        c === 'align-bottom' ||
+        c === 'object-bottom' ||
+        c === '!mb-0'
+    )
+
     return (
       <div
-        className={`responsive-crop-wrapper relative w-full overflow-hidden ${isCoverMode ? 'is-cover' : 'has-aspect'} ${isMobileContain ? 'is-contain-mobile' : ''}`}
+        className={`responsive-crop-wrapper relative w-full overflow-hidden ${isCoverMode ? 'is-cover' : 'has-aspect'} ${isMobileContain ? 'is-contain-mobile' : ''} ${isBottomAligned ? 'is-bottom-aligned' : ''}`}
         style={cropStyle}
         data-crop={JSON.stringify({desktop: cropDesk, mobile: cropMob})}
         data-debug-media-id={mediaId}
@@ -860,6 +874,20 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         (!useClientCrop || (!c.startsWith('h-') && !c.startsWith('object-')))
     )
     .join(' ')
+
+  const isBottomAligned = classList.some(
+    (c: string) =>
+      c === 'items-end' ||
+      c === 'self-end' ||
+      c === 'align-bottom' ||
+      c === 'object-bottom' ||
+      c === '!mb-0'
+  )
+  const alignFlexClass = isBottomAligned
+    ? 'items-end'
+    : isCoverMode || classList.some(c => c.includes('h-full'))
+      ? 'items-stretch h-full'
+      : 'items-center'
 
   if (useArtDirection) {
     const mobileSrcSet = (srcMobile ? generateSrcSet(srcMobile) : '') || undefined
@@ -912,7 +940,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
     return (
       <div
-        className={`relative overflow-hidden flex items-center justify-center ${className}`}
+        className={`relative overflow-hidden flex ${alignFlexClass} justify-center ${className}`}
         style={style}
         onClick={onClick}
         onKeyDown={
@@ -972,7 +1000,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   return (
     <div
-      className={`relative overflow-hidden flex items-center justify-center ${className}`}
+      className={`relative overflow-hidden flex ${alignFlexClass} justify-center ${className}`}
       style={style}
       onClick={onClick}
       onKeyDown={

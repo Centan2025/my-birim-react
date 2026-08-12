@@ -240,7 +240,7 @@ export default function PortableTextLite({
     const block = sortedValue[idx]
     if (!block) continue
 
-    // Check if block is practically empty text (to avoid removing margin from invisible blocks)
+    // Check if block is practically empty text
     let isEmptyText = false
     if (block._type === 'block' && block.children) {
       const text = block.children
@@ -254,7 +254,6 @@ export default function PortableTextLite({
         isEmptyText = true
       }
     }
-    if (isEmptyText) continue // Skip empty paragraphs entirely
 
     const blockKey = block._key || `block-${idx}`
 
@@ -466,8 +465,11 @@ export default function PortableTextLite({
             break
           default:
             nodes.push(
-              <p className="my-1 leading-relaxed text-inherit" key={blockKey}>
-                {content}
+              <p
+                className="my-1 leading-relaxed text-inherit whitespace-pre-line min-h-[1.5em]"
+                key={blockKey}
+              >
+                {isEmptyText ? '\u00A0' : content}
               </p>
             )
         }
@@ -560,10 +562,12 @@ export default function PortableTextLite({
           default:
             nodes.push(
               <p
-                className={applyTopMarginRemoval('my-4 leading-relaxed text-[var(--text-primary)]')}
+                className={applyTopMarginRemoval(
+                  'my-4 leading-relaxed text-[var(--text-primary)] whitespace-pre-line min-h-[1.5em]'
+                )}
                 key={blockKey}
               >
-                {content}
+                {isEmptyText ? '\u00A0' : content}
               </p>
             )
         }
