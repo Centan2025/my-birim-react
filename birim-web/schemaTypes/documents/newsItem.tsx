@@ -274,8 +274,6 @@ export default defineType({
           },
         },
       ],
-      description:
-        'Haber içerisindeki görseller ve videolar. Birini kapak olarak işaretleyebilirsiniz.',
     }),
     defineField({
       name: 'seo',
