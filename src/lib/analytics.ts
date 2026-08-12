@@ -60,7 +60,47 @@ class Analytics {
       this.initPlausible(this.plausibleDomain)
     }
 
+    // KVKK & GDPR Çerez Onayı Dinleyicisi
+    if (typeof window !== 'undefined') {
+      window.addEventListener('cookie_consent_updated', ((e: CustomEvent) => {
+        const detail = e.detail
+        if (detail?.analytics === false || detail?.rejected) {
+          try {
+            posthog.opt_out_capturing()
+          } catch (_err) {
+            // Ignore
+          }
+        } else if (detail?.analytics === true) {
+          try {
+            posthog.opt_in_capturing()
+          } catch (_err) {
+            // Ignore
+          }
+        }
+      }) as EventListener)
+
+      if (!this.isConsentGranted()) {
+        try {
+          posthog.opt_out_capturing()
+        } catch (_err) {
+          // Ignore
+        }
+      }
+    }
+
     this.isInitialized = true
+  }
+
+  private isConsentGranted(): boolean {
+    if (typeof window === 'undefined') return true
+    try {
+      const consentStr = localStorage.getItem('cookie_consent_v2')
+      if (!consentStr) return true
+      const consent = JSON.parse(consentStr)
+      return consent.analytics !== false && !consent.rejected
+    } catch {
+      return true
+    }
   }
 
   private initPostHog(key: string, host: string) {
@@ -238,6 +278,8 @@ class Analytics {
    * Track page view
    */
   pageview(path: string, title?: string) {
+    if (!this.isConsentGranted()) return
+
     // Google Analytics (GA4 via react-ga4)
     if (this.googleAnalyticsId) {
       try {
@@ -281,6 +323,8 @@ class Analytics {
    * Track event
    */
   event(event: AnalyticsEvent) {
+    if (!this.isConsentGranted()) return
+
     const safeValue =
       typeof event.value === 'number' && Number.isFinite(event.value) ? event.value : undefined
 

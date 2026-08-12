@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react'
 import {motion, AnimatePresence} from 'framer-motion'
+import {Link} from 'react-router-dom'
 
 const STORAGE_KEY = 'cookie_consent_v2'
 
@@ -24,7 +25,11 @@ export default function CookieBanner() {
 
   const saveConsent = (data: {necessary: boolean; analytics: boolean; rejected?: boolean}) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({...data, ts: Date.now()}))
+      const payload = {...data, ts: Date.now()}
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('cookie_consent_updated', {detail: payload}))
+      }
     } catch (error) {
       console.warn('localStorage access error:', error)
     }
@@ -53,12 +58,12 @@ export default function CookieBanner() {
               <p className="text-[12px] md:text-[13px] leading-relaxed text-gray-300 font-light tracking-wide">
                 BİRİM olarak web sitemizde deneyiminizi iyileştirmek, içerikleri kişiselleştirmek ve
                 trafik analizi yapmak için çerezler kullanıyoruz. Detaylı bilgi için{' '}
-                <a
-                  href="#/cookies"
+                <Link
+                  to="/cookies"
                   className="text-white underline underline-offset-4 hover:text-white/60 transition-colors decoration-white/20 hover:decoration-white/60"
                 >
                   Çerez Politikası
-                </a>
+                </Link>
                 'nı inceleyebilirsiniz.
               </p>
             </div>
