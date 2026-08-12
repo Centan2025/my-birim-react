@@ -7,19 +7,19 @@ const R2_ACCOUNT_ID = (
   process.env['R2_ACCOUNT_ID'] ||
   process.env['SANITY_STUDIO_R2_ACCOUNT_ID'] ||
   process.env['VITE_R2_ACCOUNT_ID'] ||
-  '114e37dc2d51e58147e027097a68470b'
+  ''
 ).trim()
 const R2_ACCESS_KEY_ID = (
   process.env['R2_ACCESS_KEY_ID'] ||
   process.env['SANITY_STUDIO_R2_ACCESS_KEY_ID'] ||
   process.env['VITE_R2_ACCESS_KEY_ID'] ||
-  'e3e007695ed61d30021abb8646a6ac83'
+  ''
 ).trim()
 const R2_SECRET_ACCESS_KEY = (
   process.env['R2_SECRET_ACCESS_KEY'] ||
   process.env['SANITY_STUDIO_R2_SECRET_ACCESS_KEY'] ||
   process.env['VITE_R2_SECRET_ACCESS_KEY'] ||
-  '41675d4749c4f51462925a2c154f12aa9651963f2b54b83eaa415778e89153b5'
+  ''
 ).trim()
 const R2_BUCKET_NAME = (
   process.env['R2_BUCKET_NAME'] ||
@@ -36,7 +36,7 @@ const R2_DOMAIN = (
 
 const r2Client = new S3Client({
   region: 'auto',
-  endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  endpoint: R2_ACCOUNT_ID ? `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com` : '',
   credentials: {
     accessKeyId: R2_ACCESS_KEY_ID || '',
     secretAccessKey: R2_SECRET_ACCESS_KEY || '',
@@ -62,18 +62,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({error: 'Method Not Allowed'})
   }
 
-  // Auth check: require JWT session, admin key, or request from Sanity Studio / local Studio
+  // Auth check: require valid JWT session or valid admin secret token
   const token = getAuthTokenFromReq(req)
   const payload = token ? verifyToken(token) : null
   const adminSecret = process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET']
   const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
   const headerToken =
     typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
-  const isSanityStudioOrigin =
-    origin.endsWith('.sanity.studio') ||
-    origin.includes('localhost:3333') ||
-    origin.includes('127.0.0.1:3333')
-  const isAdminAuthorized = (adminSecret && headerToken === adminSecret) || isSanityStudioOrigin
+  const isAdminAuthorized = Boolean(adminSecret && headerToken && headerToken === adminSecret)
 
   if (!payload && !isAdminAuthorized) {
     return res.status(401).json({error: 'Dosya yükleme bileti almak için yetkiniz yok.'})

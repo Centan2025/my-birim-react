@@ -19,15 +19,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({error: 'Missing query parameter'})
   }
 
-  // Block sensitive queries targeting users, passwords, or verification tokens
-  const lowerQuery = query.toLowerCase()
-  if (
-    lowerQuery.includes('_type == "user"') ||
-    lowerQuery.includes("_type == 'user'") ||
-    lowerQuery.includes('password') ||
-    lowerQuery.includes('verificationtoken') ||
-    lowerQuery.includes('resetpasswordtoken')
-  ) {
+  // Block sensitive queries targeting users, passwords, or tokens (normalize by removing all whitespace)
+  const normalizedQuery = query.toLowerCase().replace(/[\s\r\n\t'"`]/g, '')
+  const sensitiveKeywords = [
+    'user',
+    'password',
+    'verificationtoken',
+    'resetpasswordtoken',
+    'resettoken',
+    'secret',
+  ]
+
+  if (sensitiveKeywords.some(kw => normalizedQuery.includes(kw))) {
     return res.status(403).json({error: 'Hassas veri kaynaklarına erişim engellendi.'})
   }
 
