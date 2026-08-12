@@ -1,6 +1,12 @@
-import {S3Client, PutObjectCommand} from '@aws-sdk/client-s3'
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectsCommand,
+  ListObjectsV2Command,
+} from '@aws-sdk/client-s3'
 import {getSignedUrl} from '@aws-sdk/s3-request-presigner'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
+import {getAuthTokenFromReq, verifyToken} from '../auth/_token'
 
 const R2_ACCOUNT_ID =
   process.env['R2_ACCOUNT_ID'] ||
@@ -33,10 +39,25 @@ const r2Client = new S3Client({
   },
 })
 
-import {getAuthTokenFromReq, verifyToken} from '../auth/_token'
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS configuration
+  const rawAction = req.query['action']
+  const action = Array.isArray(rawAction)
+    ? rawAction[0]
+    : rawAction || req.url?.split('?')[0].split('/').pop()
+
+  switch (action) {
+    case 'presigned-url':
+      return handlePresignedUrl(req, res)
+    case 'delete-batch':
+      return handleDeleteBatch(req, res)
+    case 'list':
+      return handleList(req, res)
+    default:
+      return res.status(404).json({error: `Bilinmeyen media aksiyonu: ${action}`})
+  }
+}
+
+async function handlePresignedUrl(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Credentials', 'true')
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -53,7 +74,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({error: 'Method Not Allowed'})
   }
 
-  // Auth check: require JWT session or admin key
   const token = getAuthTokenFromReq(req)
   const payload = token ? verifyToken(token) : null
   const adminSecret = process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET']
@@ -93,7 +113,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({error: 'Desteklenmeyen dosya formatı.'})
   }
 
-  // Path traversal koruması
   if (filename.includes('..') || (folder && typeof folder === 'string' && folder.includes('..'))) {
     return res.status(400).json({error: 'Geçersiz klasör veya dosya adı.'})
   }
@@ -118,7 +137,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ContentType: contentType,
     })
 
-    // Presigned URL valid for 15 minutes
     const url = await getSignedUrl(
       r2Client as unknown as Parameters<typeof getSignedUrl>[0],
       command,
@@ -142,5 +160,100 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.error('Presigned URL error:', error)
     const message = error instanceof Error ? error.message : 'Bilinmeyen hata'
     return res.status(500).json({error: `Presigned URL olusturulamadi: ${message}`})
+  }
+}
+
+async function handleDeleteBatch(req: VercelRequest, res: VercelResponse) {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).json({})
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({error: 'Method Not Allowed'})
+  }
+
+  const expectedToken = process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET']
+  if (!expectedToken) {
+    return res.status(500).json({error: 'Sunucu yetkilendirme anahtarı yapılandırılmamış.'})
+  }
+
+  const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
+  const tokenStr =
+    typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
+  if (tokenStr !== expectedToken) {
+    return res.status(401).json({error: 'Yetkisiz erişim.'})
+  }
+
+  const {keys} = req.body || {}
+
+  if (!Array.isArray(keys) || keys.length === 0) {
+    return res.status(400).json({error: 'keys parametresi bos olamaz.'})
+  }
+
+  const safeKeys: string[] = []
+  for (const k of keys) {
+    if (typeof k !== 'string' || k.includes('..')) {
+      return res.status(400).json({error: 'Geçersiz dosya anahtarı tespit edildi.'})
+    }
+    safeKeys.push(k)
+  }
+
+  try {
+    const command = new DeleteObjectsCommand({
+      Bucket: R2_BUCKET_NAME,
+      Delete: {
+        Objects: safeKeys.map((key: string) => ({Key: key})),
+        Quiet: true,
+      },
+    })
+
+    await r2Client.send(command)
+
+    return res.status(200).json({
+      success: true,
+      deletedCount: safeKeys.length,
+    })
+  } catch (error: unknown) {
+    console.error('R2 delete error:', error)
+    return res.status(500).json({error: 'Dosyalar silinemedi. Lütfen daha sonra tekrar deneyin.'})
+  }
+}
+
+async function handleList(req: VercelRequest, res: VercelResponse) {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).json({})
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({error: 'Method Not Allowed'})
+  }
+
+  const {continuationToken} = req.body || {}
+
+  try {
+    const command = new ListObjectsV2Command({
+      Bucket: R2_BUCKET_NAME,
+      ContinuationToken: continuationToken as string | undefined,
+    })
+
+    const response = await r2Client.send(command)
+
+    return res.status(200).json({
+      success: true,
+      contents: response.Contents || [],
+      nextContinuationToken: response.NextContinuationToken,
+    })
+  } catch (error: unknown) {
+    console.error('R2 list error:', error)
+    const message = error instanceof Error ? error.message : 'Bilinmeyen hata'
+    return res.status(500).json({error: `Dosyalar listelenemedi: ${message}`})
   }
 }
