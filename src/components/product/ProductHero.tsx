@@ -348,14 +348,17 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
         </div>
 
         {slideCount > 0 && (
-          <div className="hidden md:block pointer-events-none absolute bottom-10 right-3 md:bottom-10 md:right-8 z-30 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] px-4 md:px-8 lg:px-0">
-            <div className="flex justify-end items-center gap-4">
+          <div
+            className="hidden md:block landscape:flex pointer-events-none absolute right-4 md:right-8 z-40"
+            style={{bottom: 'max(16px, env(safe-area-inset-bottom, 0px) + 16px)'}}
+          >
+            <div className="flex justify-end items-center gap-2 md:gap-4">
               {slideCount > 1 && (
                 <>
                   <button
                     type="button"
                     onClick={onPrev}
-                    className="group pointer-events-auto flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                    className="group pointer-events-auto flex h-8 w-8 md:h-14 md:w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
                     style={arrowInLeft}
                     aria-label="Previous hero slide"
                   >
@@ -369,7 +372,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                       strokeWidth="0.4"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className="h-11 w-11 transition-transform duration-300 group-hover:-translate-x-1"
+                      className="h-5 w-5 md:h-11 md:w-11 transition-transform duration-300 group-hover:-translate-x-1"
                     >
                       <path d="M15 18l-6-6 6-6" />
                     </svg>
@@ -377,7 +380,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                   <button
                     type="button"
                     onClick={onNext}
-                    className="group pointer-events-auto flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                    className="group pointer-events-auto flex h-8 w-8 md:h-14 md:w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
                     style={arrowInRight}
                     aria-label="Next hero slide"
                   >
@@ -391,7 +394,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                       strokeWidth="0.4"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className="h-11 w-11 transition-transform duration-300 group-hover:translate-x-1"
+                      className="h-5 w-5 md:h-11 md:w-11 transition-transform duration-300 group-hover:translate-x-1"
                     >
                       <path d="M9 18l6-6-6-6" />
                     </svg>
@@ -404,7 +407,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                   e.stopPropagation()
                   onOpenFullscreen()
                 }}
-                className="group pointer-events-auto flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                className="group pointer-events-auto flex h-8 w-8 md:h-14 md:w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
                 style={{
                   opacity: isFullscreenButtonVisible ? 1 : 0,
                   transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
@@ -427,7 +430,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                   strokeWidth="0.8"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="transition-transform duration-500 group-hover:scale-110 h-10 w-10"
+                  className="transition-transform duration-500 group-hover:scale-110 h-5 w-5 md:h-10 md:w-10"
                 >
                   <path d="M15 3h6v6" />
                   <path d="M9 21H3v-6" />
@@ -501,7 +504,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
               e.stopPropagation()
               onOpenFullscreen()
             }}
-            className="md:hidden absolute bottom-4 right-4 z-50 group flex h-10 w-10 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
+            className="md:hidden landscape:hidden absolute bottom-4 right-4 z-50 group flex h-10 w-10 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
             style={{
               opacity: isFullscreenButtonVisible ? 1 : 0,
               transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
