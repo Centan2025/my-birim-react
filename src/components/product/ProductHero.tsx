@@ -201,7 +201,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
             return (
               <div
                 key={`slide-${index}-${m.url || index}`}
-                className="w-full h-full flex items-center justify-center relative p-0 max-md:px-4 overflow-hidden"
+                className="w-full h-full flex items-center justify-center relative p-0 max-md:px-4 landscape:px-0 overflow-hidden"
                 style={
                   {
                     width: `${100 / totalHeroSlides}%`,
@@ -309,8 +309,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
         </div>
 
         <div
-          className="absolute bottom-12 md:bottom-10 left-0 right-0 text-white z-40 pointer-events-none"
-          style={{bottom: 'max(40px, env(safe-area-inset-bottom, 0px) + 40px)'}}
+          className="absolute bottom-12 landscape:bottom-4 md:bottom-10 left-0 right-0 text-white z-40 pointer-events-none"
         >
           <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
             <div
@@ -320,13 +319,13 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                 transition: 'transform 1000ms ease-out, opacity 1000ms ease-out',
               }}
             >
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold tracking-tight drop-shadow-lg font-michroma pointer-events-auto">
+              <h1 className="text-3xl landscape:text-xl md:text-5xl lg:text-6xl font-extrabold tracking-tight drop-shadow-lg font-michroma pointer-events-auto">
                 {t(product.name)}
               </h1>
             </div>
             {(designers.length > 0 || Boolean(product.year)) && (
               <div
-                className="mt-2 text-xs md:text-sm text-white/80 font-michroma pointer-events-auto [&_a]:font-michroma [&_span]:font-michroma"
+                className="mt-2 text-xs landscape:text-[11px] md:text-sm text-white/80 font-michroma pointer-events-auto [&_a]:font-michroma [&_span]:font-michroma"
                 style={{
                   transform: isDesignerVisible ? 'translateX(0)' : 'translateX(-40px)',
                   opacity: isDesignerVisible ? 1 : 0,

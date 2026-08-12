@@ -224,6 +224,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           height: auto !important;
           max-height: 100% !important;
           max-width: 100% !important;
+          margin-left: auto !important;
+          margin-right: auto !important;
           margin-top: auto !important;
           margin-bottom: auto !important;
           aspect-ratio: var(--crop-aspect-desktop, auto);
@@ -265,7 +267,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             max-width: 100% !important;
             max-height: 100% !important;
             height: auto !important;
-            margin: auto !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            margin-top: auto !important;
+            margin-bottom: auto !important;
             align-self: center !important;
             aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
           }
