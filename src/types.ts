@@ -823,7 +823,17 @@ export interface NewsItem {
   /** Localized main content/body of the news item. */
   content: LocalizedString
   /** URL for the main image used on the news list page card. */
-  mainImage: string | {url: string; urlMobile?: string; urlDesktop?: string}
+  mainImage:
+    | string
+    | {
+        url: string
+        urlMobile?: string
+        urlDesktop?: string
+        crop?: R2ImageMetadata['crop']
+        hotspot?: R2ImageMetadata['hotspot']
+        origWidth?: number
+        origHeight?: number
+      }
   /** Array of media items (images, videos) within the article. */
   media: NewsMedia[]
   /** Whether this news item is published on the site. */
@@ -834,6 +844,20 @@ export interface NewsItem {
   sortOrder?: number
   /** Sanity update timestamp. */
   _updatedAt?: string
+  /** Optional category string or localized string (e.g. Press, Event, Award) */
+  category?: LocalizedString
+  /** Estimated reading time (e.g., '3 min read' or '3 dk okuma') */
+  readTime?: string
+  /** Whether this article is featured at the top of the news page */
+  featured?: boolean
+  /** Optional custom title/label for the featured spotlight badge (e.g. 'ÖNE ÇIKAN HİKAYE', 'EDİTÖRÜN SEÇİMİ') */
+  featuredBadgeTitle?: LocalizedString
+  /** Optional direct link to downloadable Press Kit asset (ZIP / PDF) */
+  pressKitUrl?: string
+  /** Optional related product slug/id */
+  relatedProductId?: string
+  /** Optional related designer slug/id */
+  relatedDesignerId?: string
 }
 
 /**

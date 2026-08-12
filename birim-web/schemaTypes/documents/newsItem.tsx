@@ -52,10 +52,61 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'category',
+      title: 'Haber Türü / Kategori',
+      type: 'string',
+      fieldset: 'basicInfo',
+      description: 'Haberin kategorisi: Basın, Sergi & Etkinlik, Ödüller, Lansman vb.',
+      options: {
+        list: [
+          {title: 'Basın (Press)', value: 'press'},
+          {title: 'Sergi & Etkinlik (Exhibition & Events)', value: 'events'},
+          {title: 'Ödüller (Awards)', value: 'awards'},
+          {title: 'Lansman (Launch)', value: 'launch'},
+        ],
+        layout: 'dropdown',
+      },
+      initialValue: 'press',
+    }),
+    defineField({
+      name: 'readTime',
+      title: 'Okuma Süresi (Opsiyonel)',
+      type: 'string',
+      fieldset: 'basicInfo',
+      description:
+        'Örn: "3 dk okuma" veya "3 min read". Boş bırakılırsa içerik uzunluğuna göre otomatik hesaplanır.',
+    }),
+    defineField({
       name: 'date',
       title: 'Tarih (Görünecek Tarih)',
       type: 'datetime',
       fieldset: 'basicInfo',
+    }),
+    defineField({
+      name: 'featured',
+      title: 'Öne Çıkan / Manşet Haber',
+      type: 'boolean',
+      fieldset: 'publishing',
+      initialValue: false,
+      description:
+        'Aktif edilirse bu haber, Haberler sayfasının en üstünde manşet görseliyle öne çıkarılır.',
+    }),
+    defineField({
+      name: 'featuredBadgeTitle',
+      title: 'Öne Çıkan Rozet Metni (Opsiyonel)',
+      type: 'localizedString',
+      fieldset: 'publishing',
+      description:
+        'Manşet görseli üzerindeki rozet metni. Örn: "ÖNE ÇIKAN HİKAYE", "EDİTÖRÜN SEÇİMİ", "ÖZEL HABER". Boş bırakılırsa varsayılan metin gösterilir.',
+      hidden: ({document}) => !document?.featured,
+    }),
+    defineField({
+      name: 'pressKitUrl',
+      title: 'Basın Kiti / Medya İndirme Bağlantısı (Opsiyonel)',
+      type: 'url',
+      fieldset: 'publishing',
+      description:
+        'Basın veya mimarlar için haber ile ilgili indirilebilir materyal bağlantısı (ZIP / PDF).',
     }),
     defineField({
       name: 'isPublished',
@@ -93,6 +144,8 @@ export default defineType({
       title: 'Haber Medyası',
       type: 'array',
       fieldset: 'mediaGroup',
+      description:
+        '💡 GÖRSEL ORAN ÖNERİSİ: Liste kartı kapak fotoğrafları için 4:3 (1200x900px) veya 3:2 (1200x800px) yatay editoryal oranlar; Manşet (Öne Çıkan) kartı için 16:9 (1920x1080px) yatay oran kullanılması tavsiye edilir.',
       components: {
         input: BulkMediaUploadInput,
       },
@@ -127,12 +180,16 @@ export default defineType({
               title: 'Kapak Görseli mi?',
               type: 'boolean',
               initialValue: false,
+              description:
+                'Bu görsel haber kapak fotoğrafı olur. 📐 Önerilen Oran: Liste kartı için 4:3 (1200x900px), Manşet kartı için 16:9 (1920x1080px).',
             }),
             defineField({
               name: 'imageR2',
               title: 'Görsel (Tüm Cihazlar)',
               type: 'r2Asset',
               fieldset: 'artDirection',
+              description:
+                '📐 Önerilen Oran: 16:9 veya 4:3 yatay editoryal format (Örn: 1920x1080px veya 1200x900px).',
               hidden: ({parent}) => !!parent?.type && parent?.type !== 'image',
             }),
             defineField({
@@ -140,6 +197,8 @@ export default defineType({
               title: 'Görsel (Mobil)',
               type: 'r2Asset',
               fieldset: 'artDirection',
+              description:
+                '📐 Mobil ekranlar için önerilen oran: 4:3 veya 1:1 kare (Örn: 800x600px veya 800x800px).',
               hidden: ({parent}) => !!parent?.type && parent?.type !== 'image',
             }),
             defineField({
@@ -147,6 +206,8 @@ export default defineType({
               title: 'Görsel (Desktop)',
               type: 'r2Asset',
               fieldset: 'artDirection',
+              description:
+                '📐 Geniş ekranlar için önerilen oran: 16:9 sinematik yatay format (Örn: 1920x1080px).',
               hidden: ({parent}) => !!parent?.type && parent?.type !== 'image',
             }),
             defineField({

@@ -247,7 +247,7 @@ export const getNews = async (): Promise<NewsItem[]> => {
     const q = groq`*[_type == "newsItem"] 
         | order(coalesce(sortOrder, 999999) asc, coalesce(publishAt, date, _createdAt) desc){
           "id": id.current, 
-          title, date, publishAt, isPublished, sortOrder, content, 
+          title, date, publishAt, isPublished, sortOrder, content, category, readTime, featured, featuredBadgeTitle, pressKitUrl,
           media[]{ 
             type, url, caption, imageR2, imageMobileR2, imageDesktopR2, 
             videoFileR2, videoFileMobileR2, videoFileDesktopR2, isCover 
@@ -264,7 +264,7 @@ export const getNewsById = async (id: string): Promise<NewsItem | undefined> => 
   if (useSanity && sanity) {
     const q = groq`*[_type == "newsItem" && (_id == $id || _id == "drafts." + $id || id.current == $id)][0]{
           "id": id.current, 
-          title, date, publishAt, isPublished, sortOrder, content, 
+          title, date, publishAt, isPublished, sortOrder, content, category, readTime, featured, featuredBadgeTitle, pressKitUrl,
           media[]{ 
             type, url, caption, imageR2, imageMobileR2, imageDesktopR2, 
             videoFileR2, videoFileMobileR2, videoFileDesktopR2, isCover 
