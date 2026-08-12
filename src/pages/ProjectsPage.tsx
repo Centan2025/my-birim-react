@@ -36,14 +36,14 @@ const ProjectHorizontalCard: React.FC<{
       const isMobile = windowWidth < 768
 
       if (isMobile) {
-        // Vertical Parallax for Mobile
+        // Subtle & Smooth Vertical Parallax for Mobile
         const cardCenterY = rect.top + rect.height / 2
         const screenCenterY = windowHeight / 2
         const normalizedPosY = (cardCenterY - screenCenterY) / (windowHeight / 2)
-        const clampedPosY = Math.max(-1.5, Math.min(1.5, normalizedPosY))
-        const shiftY = clampedPosY * -160 // 160px vertical parallax shift on mobile
+        const clampedPosY = Math.max(-1.2, Math.min(1.2, normalizedPosY))
+        const shiftY = clampedPosY * -65 // Smooth 65px vertical parallax shift on mobile
 
-        imageWrapperRef.current.style.transform = `scale(1.45) translate3d(0px, ${shiftY.toFixed(1)}px, 0px)`
+        imageWrapperRef.current.style.transform = `scale(1.25) translate3d(0px, ${shiftY.toFixed(1)}px, 0px)`
       } else {
         // Ultra-Dramatic 250px Horizontal Parallax for Desktop
         const cardCenterX = rect.left + rect.width / 2

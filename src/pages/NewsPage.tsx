@@ -100,15 +100,53 @@ export function NewsPage() {
       const summaryMatch = item.summary.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesSearch = titleMatch || summaryMatch
 
-      if (selectedCategory === 'all') return matchesSearch
-      return (
-        matchesSearch &&
-        (item.categoryLabel.toLowerCase().includes(selectedCategory.toLowerCase()) ||
-          (selectedCategory === 'press' && item.categoryLabel.includes('BASIN')) ||
-          (selectedCategory === 'events' &&
-            (item.categoryLabel.includes('SERGİ') || item.categoryLabel.includes('EXHIBITION'))) ||
-          (selectedCategory === 'awards' && item.categoryLabel.includes('ÖDÜL')))
-      )
+      if (!matchesSearch) return false
+      if (selectedCategory === 'all') return true
+
+      const catRaw = String(
+        typeof item.category === 'string'
+          ? item.category
+          : typeof item.category === 'object' && item.category
+            ? (item.category as any).tr || (item.category as any).en || ''
+            : ''
+      ).toLowerCase()
+      const catLabel = (item.categoryLabel || '').toLowerCase()
+      const sel = selectedCategory.toLowerCase()
+
+      if (sel === 'press')
+        return (
+          catRaw.includes('press') ||
+          catRaw.includes('basın') ||
+          catLabel.includes('press') ||
+          catLabel.includes('basın')
+        )
+      if (sel === 'events')
+        return (
+          catRaw.includes('event') ||
+          catRaw.includes('exhibition') ||
+          catRaw.includes('sergi') ||
+          catRaw.includes('etkinlik') ||
+          catLabel.includes('event') ||
+          catLabel.includes('exhibition') ||
+          catLabel.includes('sergi') ||
+          catLabel.includes('etkinlik')
+        )
+      if (sel === 'awards')
+        return (
+          catRaw.includes('award') ||
+          catRaw.includes('ödül') ||
+          catLabel.includes('award') ||
+          catLabel.includes('ödül')
+        )
+      if (sel === 'launch')
+        return (
+          catRaw.includes('launch') ||
+          catRaw.includes('lansman') ||
+          catLabel.includes('launch') ||
+          catLabel.includes('lansman')
+        )
+
+      return catRaw.includes(sel) || catLabel.includes(sel)
     })
   }, [processedNews, selectedCategory, searchQuery, t])
 
@@ -129,26 +167,60 @@ export function NewsPage() {
 
   // Filter categories to only include those that have at least one article
   const categories = useMemo(() => {
-    const allCategoryDefinitions = [
+    const predefinedCategories = [
       {id: 'all', label: t('news_all') || 'TÜMÜ'},
       {id: 'press', label: t('news_press') || 'BASIN'},
       {id: 'events', label: t('news_events') || 'SERGİ & ETKİNLİK'},
       {id: 'awards', label: t('news_awards') || 'ÖDÜLLER'},
+      {id: 'launch', label: t('news_launch') || 'LANSMAN'},
     ]
 
-    return allCategoryDefinitions.filter(cat => {
+    return predefinedCategories.filter(cat => {
       if (cat.id === 'all') return true
       return processedNews.some(item => {
-        const catLabel = item.categoryLabel.toLowerCase()
-        if (cat.id === 'press') return catLabel.includes('BASIN') || catLabel.includes('PRESS')
+        const catRaw = String(
+          typeof item.category === 'string'
+            ? item.category
+            : typeof item.category === 'object' && item.category
+              ? (item.category as any).tr || (item.category as any).en || ''
+              : ''
+        ).toLowerCase()
+        const catLabel = (item.categoryLabel || '').toLowerCase()
+
+        if (cat.id === 'press')
+          return (
+            catRaw.includes('press') ||
+            catRaw.includes('basın') ||
+            catLabel.includes('press') ||
+            catLabel.includes('basın')
+          )
         if (cat.id === 'events')
           return (
-            catLabel.includes('SERGİ') ||
-            catLabel.includes('EXHIBITION') ||
-            catLabel.includes('ETKİNLİK')
+            catRaw.includes('event') ||
+            catRaw.includes('exhibition') ||
+            catRaw.includes('sergi') ||
+            catRaw.includes('etkinlik') ||
+            catLabel.includes('event') ||
+            catLabel.includes('exhibition') ||
+            catLabel.includes('sergi') ||
+            catLabel.includes('etkinlik')
           )
-        if (cat.id === 'awards') return catLabel.includes('ÖDÜL') || catLabel.includes('AWARD')
-        return catLabel.includes(cat.id)
+        if (cat.id === 'awards')
+          return (
+            catRaw.includes('award') ||
+            catRaw.includes('ödül') ||
+            catLabel.includes('award') ||
+            catLabel.includes('ödül')
+          )
+        if (cat.id === 'launch')
+          return (
+            catRaw.includes('launch') ||
+            catRaw.includes('lansman') ||
+            catLabel.includes('launch') ||
+            catLabel.includes('lansman')
+          )
+
+        return catRaw.includes(cat.id) || catLabel.includes(cat.id)
       })
     })
   }, [processedNews, t])
@@ -281,11 +353,6 @@ export function NewsPage() {
                         : undefined
                     }
                   />
-                  <div className="absolute top-4 left-4 bg-[var(--bg-primary)]/90 backdrop-blur-md px-3 py-1 text-[10px] font-mono tracking-widest text-[var(--text-primary)] uppercase">
-                    {featuredArticle.featuredBadgeTitle
-                      ? t(featuredArticle.featuredBadgeTitle)
-                      : t('featured_story') || 'ÖNE ÇIKAN HİKAYE'}
-                  </div>
                 </div>
 
                 {/* Hero Details */}
