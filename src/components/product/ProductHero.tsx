@@ -349,10 +349,11 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
 
         {slideCount > 0 && (
           <div
-            className="hidden md:block landscape:flex pointer-events-none absolute right-4 md:right-8 z-40"
+            className="hidden md:block landscape:flex pointer-events-none absolute left-0 right-0 z-40"
             style={{bottom: 'max(16px, env(safe-area-inset-bottom, 0px) + 16px)'}}
           >
-            <div className="flex justify-end items-center gap-2 md:gap-4">
+            <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex justify-end">
+              <div className="flex items-center gap-2 md:gap-4">
               {slideCount > 1 && (
                 <>
                   <button
@@ -440,6 +441,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
               </button>
             </div>
           </div>
+        </div>
         )}
 
         {slideCount > 1 && (
