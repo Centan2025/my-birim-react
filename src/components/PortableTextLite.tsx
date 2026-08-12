@@ -334,20 +334,23 @@ export default function PortableTextLite({
           pairVAlign === 'center'
             ? 'items-center !order-50 !my-auto'
             : pairVAlign === 'bottom'
-              ? 'items-end !order-last !mt-auto !mb-0'
+              ? 'items-end !order-last !mt-auto !mb-0 !pb-0'
               : 'items-start !order-first'
+
+        const gridMarginClass = pairVAlign === 'bottom' ? '!mt-auto !mb-0 !pb-0 !my-0' : 'my-2'
+        const figureMarginClass = pairVAlign === 'bottom' ? '!mb-0 !pb-0 leading-none' : ''
 
         nodes.push(
           <div
             key={`pair-${blockKey}`}
-            className={`grid grid-cols-2 gap-2 my-2 clear-both ${vAlignClass} ${applyTopMarginRemoval('')}`}
+            className={`grid grid-cols-2 gap-2 clear-both ${vAlignClass} ${gridMarginClass} ${applyTopMarginRemoval('')}`}
           >
-            <figure className="flex flex-col">
-              <div className="relative w-full overflow-hidden">
+            <figure className={`flex flex-col ${figureMarginClass}`}>
+              <div className="relative w-full overflow-hidden leading-none">
                 <OptimizedImage
                   src={getImageSrc(block)}
                   alt={getImageAlt(block)}
-                  className="w-full h-auto shadow-sm cursor-pointer"
+                  className="w-full h-auto shadow-sm cursor-pointer block"
                   crop={getImageCrop(block)}
                   hotspot={getImageHotspot(block)}
                   origWidth={getImageOrigWidth(block)}
@@ -361,12 +364,12 @@ export default function PortableTextLite({
                 </figcaption>
               )}
             </figure>
-            <figure className="flex flex-col">
-              <div className="relative w-full overflow-hidden">
+            <figure className={`flex flex-col ${figureMarginClass}`}>
+              <div className="relative w-full overflow-hidden leading-none">
                 <OptimizedImage
                   src={getImageSrc(nextBlock)}
                   alt={getImageAlt(nextBlock)}
-                  className="w-full h-auto shadow-sm cursor-pointer"
+                  className="w-full h-auto shadow-sm cursor-pointer block"
                   crop={getImageCrop(nextBlock)}
                   hotspot={getImageHotspot(nextBlock)}
                   origWidth={getImageOrigWidth(nextBlock)}
