@@ -51,7 +51,7 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
         }
       }}
       id="mobile-menu"
-      className="lg:hidden border-t border-white/10 bg-transparent"
+      className="lg:hidden border-t border-white/10 bg-transparent max-h-[calc(100vh-3.5rem)] overflow-y-auto overscroll-contain"
       role="menu"
       aria-label={t('main_menu') || 'Ana menü'}
     >
