@@ -91,7 +91,7 @@ export function DesignersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] overflow-x-hidden pt-20 md:pt-24 lg:pt-24 pb-32">
+    <div className="min-h-screen bg-[var(--bg-primary)] overflow-x-hidden pt-20 landscape:pt-14 md:pt-24 lg:pt-24 pb-32">
       {/* Background Decorative Text */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden select-none z-0 opacity-[0.03] dark:opacity-[0.05]">
         <h2 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[30vw] font-bold leading-none outline-text whitespace-nowrap uppercase tracking-tighter">
@@ -100,7 +100,7 @@ export function DesignersPage() {
       </div>
 
       {/* Breadcrumb Section */}
-      <div className="relative z-20 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 text-gray-400">
+      <div className="relative z-20 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 landscape:py-1 text-gray-400">
         <Breadcrumbs
           items={[{label: t('homepage'), to: '/'}, {label: t('designers') || 'Tasarımcılar'}]}
         />

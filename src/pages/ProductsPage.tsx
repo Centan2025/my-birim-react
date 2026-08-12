@@ -203,7 +203,7 @@ export function ProductsPage() {
   }
 
   return (
-    <div className={`bg-[var(--bg-secondary)] ${!heroImageUrl ? 'pt-20 md:pt-24 lg:pt-24' : ''}`}>
+    <div className={`bg-[var(--bg-secondary)] ${!heroImageUrl ? 'pt-20 landscape:pt-14 md:pt-24 lg:pt-24' : ''}`}>
       {/* Category Hero Image */}
       {heroImageUrl ? (
         <div className="relative h-[450px] animate-fade-in-down hero-section">
@@ -231,7 +231,7 @@ export function ProductsPage() {
             />
             <div className="absolute inset-0 bg-black/40"></div>
           </div>
-          <div className="relative h-full flex items-center justify-center text-center text-white pt-20">
+          <div className="relative h-full flex items-center justify-center text-center text-white pt-20 landscape:pt-12">
             <motion.div
               initial={{opacity: 0, y: 20}}
               animate={{opacity: 1, y: 0}}
@@ -250,7 +250,7 @@ export function ProductsPage() {
 
       {/* Breadcrumb and Sort Band */}
       <div className="w-full relative z-20">
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 flex flex-row flex-wrap items-center justify-between gap-4">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 landscape:py-1 flex flex-row flex-wrap items-center justify-between gap-4">
           <Breadcrumbs
             items={
               category
