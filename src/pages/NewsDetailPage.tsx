@@ -270,11 +270,11 @@ export function NewsDetailPage() {
   return (
     <div
       key={newsId}
-      className="bg-[var(--bg-secondary)] animate-fade-in-up-subtle pt-20 md:pt-28 lg:pt-32"
+      className="bg-[var(--bg-secondary)] animate-fade-in-up-subtle pt-20 md:pt-22 lg:pt-22"
     >
       {/* Breadcrumb Band */}
       <div className="w-full relative z-20">
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 md:py-6 lg:py-8">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 md:py-2 lg:py-3">
           <Breadcrumbs
             items={[
               {label: t('homepage'), to: '/'},

@@ -165,10 +165,10 @@ export function FactoryPage() {
     'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0'
 
   return (
-    <div className="bg-[var(--bg-primary)] min-h-screen animate-fade-in-up-subtle pt-20 md:pt-28 lg:pt-32">
+    <div className="bg-[var(--bg-primary)] min-h-screen animate-fade-in-up-subtle pt-20 md:pt-22 lg:pt-22">
       {/* Breadcrumb Band */}
       <div className="w-full relative z-20">
-        <div className={containerClass + ' py-4 md:py-6 lg:py-8'}>
+        <div className={containerClass + ' py-4 md:py-2 lg:py-3'}>
           <Breadcrumbs
             items={[{label: t('homepage'), to: '/'}, {label: t('factory') || 'Fabrika'}]}
           />
