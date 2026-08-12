@@ -165,27 +165,30 @@ export function FactoryPage() {
     'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0'
 
   return (
-    <div className="bg-[var(--bg-primary)] min-h-screen animate-fade-in-up-subtle pt-20 md:pt-20 lg:pt-20">
-      {/* Breadcrumb Band */}
-      <div className="w-full relative z-20">
-        <div className={containerClass + ' py-4'}>
-          <Breadcrumbs
-            items={[{label: t('homepage'), to: '/'}, {label: t('factory') || 'Fabrika'}]}
-          />
+    <div className="bg-[var(--bg-primary)] min-h-screen animate-fade-in-up-subtle pt-20 md:pt-16 lg:pt-20 selection:bg-primary selection:text-black">
+      {/* Top Section: Breadcrumb & Title (Projeler sayfası ile 1:1 aynı konum) */}
+      <div>
+        {/* Breadcrumb Band */}
+        <div className="w-full relative z-20">
+          <div className={containerClass + ' py-3 text-gray-400'}>
+            <Breadcrumbs
+              items={[{label: t('homepage'), to: '/'}, {label: t('factory') || 'Fabrika'}]}
+            />
+          </div>
         </div>
-      </div>
 
-      {/* Sayfa Başlığı (Haberler sayfası gibi ortalı) */}
-      <div className={containerClass + ' pt-4 md:pt-12 pb-12'}>
-        <motion.div
-          initial={{opacity: 0, y: 20}}
-          animate={{opacity: 1, y: 0}}
-          transition={{duration: 1, ease: 'easeOut'}}
-        >
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-center uppercase">
-            {t(content.title) || t('factory') || 'FABRİKA'}
-          </h1>
-        </motion.div>
+        {/* Sayfa Başlığı (Ortalanmış, Projeler sayfası ile birebir aynı konum) */}
+        <div className={containerClass + ' pt-2 md:pt-6 pb-6 md:pb-8 text-center'}>
+          <motion.div
+            initial={{opacity: 0, y: 15}}
+            animate={{opacity: 1, y: 0}}
+            transition={{duration: 0.8, ease: 'easeOut'}}
+          >
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight uppercase text-center">
+              {t(content.title) || t('factory') || 'FABRİKA'}
+            </h1>
+          </motion.div>
+        </div>
       </div>
 
       {/* Main Content Sections */}
