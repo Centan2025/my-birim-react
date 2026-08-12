@@ -832,59 +832,81 @@ export function ProjectDetailPage() {
       </div>
 
       {/* Hero Altı Gri Bant (Dikey Ortalanmış Navigasyon Düğmeleri) */}
-      <div className="w-full bg-[#484d54] text-white flex items-center min-h-[48px] md:min-h-[56px] py-2 md:py-2.5">
-        <div className="w-full max-w-[95%] md:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex items-center justify-between">
-          <div>
+      <div className="w-full bg-[#787f8a] text-white flex items-center min-h-[48px] md:min-h-[56px] py-2 md:py-2.5">
+        <div className="w-full max-w-[95%] md:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex items-center justify-between gap-2">
+          <div className="flex-1 min-w-0 flex justify-start">
             {prevProject ? (
               <Link
                 to={`/projects/${prevProject.id}`}
-                className="group flex h-8 w-8 md:h-10 md:w-10 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
-                aria-label="Previous project"
+                className="group inline-flex items-center gap-1.5 md:gap-2.5 text-white hover:text-gray-200 transition-colors max-w-full"
+                aria-label={t(prevProject.title)}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="0.4"
+                  strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="h-5 w-5 md:h-7 md:w-7 transition-transform duration-300 group-hover:-translate-x-1"
+                  className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0 transition-transform duration-300 group-hover:-translate-x-1"
                 >
                   <path d="M15 18l-6-6 6-6" />
                 </svg>
+                <span className="text-[11px] md:text-[12px] font-light max-w-[120px] sm:max-w-[220px] md:max-w-[340px] lg:max-w-[460px] truncate whitespace-nowrap overflow-hidden text-ellipsis opacity-90 group-hover:opacity-100">
+                  {t(prevProject.title)}
+                </span>
               </Link>
             ) : (
-              <span className="w-8 h-8 md:w-10 md:h-10" />
+              <span className="w-8 h-8" />
             )}
           </div>
 
-          <div>
+          <div className="flex-shrink-0 px-2">
+            <Link
+              to="/projects"
+              title={t('all_projects') || 'Tüm Projeler'}
+              aria-label={t('all_projects') || 'Tüm Projeler'}
+              className="flex items-center justify-center p-2 rounded hover:bg-white/10 transition-all duration-300 text-white/80 hover:text-white active:scale-95"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <rect x="1" y="1" width="6" height="6" rx="1" />
+                <rect x="9" y="1" width="6" height="6" rx="1" />
+                <rect x="1" y="9" width="6" height="6" rx="1" />
+                <rect x="9" y="9" width="6" height="6" rx="1" />
+              </svg>
+            </Link>
+          </div>
+
+          <div className="flex-1 min-w-0 flex justify-end">
             {nextProject ? (
               <Link
                 to={`/projects/${nextProject.id}`}
-                className="group flex h-8 w-8 md:h-10 md:w-10 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
-                aria-label="Next project"
+                className="group inline-flex items-center gap-1.5 md:gap-2.5 text-white hover:text-gray-200 transition-colors max-w-full justify-end"
+                aria-label={t(nextProject.title)}
               >
+                <span className="text-[11px] md:text-[12px] font-light max-w-[120px] sm:max-w-[220px] md:max-w-[340px] lg:max-w-[460px] truncate whitespace-nowrap overflow-hidden text-ellipsis opacity-90 group-hover:opacity-100 text-right">
+                  {t(nextProject.title)}
+                </span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
+                  width="20"
+                  height="20"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="0.4"
+                  strokeWidth="1.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="h-5 w-5 md:h-7 md:w-7 transition-transform duration-300 group-hover:translate-x-1"
+                  className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0 transition-transform duration-300 group-hover:translate-x-1"
                 >
                   <path d="M9 18l6-6-6-6" />
                 </svg>
               </Link>
             ) : (
-              <span className="w-8 h-8 md:w-10 md:h-10" />
+              <span className="w-8 h-8" />
             )}
           </div>
         </div>
