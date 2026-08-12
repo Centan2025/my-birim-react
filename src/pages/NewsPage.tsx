@@ -288,14 +288,14 @@ export function NewsPage() {
           </div>
 
           {/* Arama */}
-          <div className="flex items-center gap-4 self-end sm:self-auto">
+          <div className="flex items-center gap-4 self-start sm:self-auto">
             <div className="relative">
               <input
                 type="text"
                 placeholder={t('search_placeholder') || 'Ara...'}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="bg-transparent border-b border-[var(--border-primary)] focus:border-[var(--text-primary)] text-xs md:text-sm py-1 px-2 text-[var(--text-primary)] placeholder-[var(--text-secondary)] outline-none transition-colors w-32 md:w-48 font-light"
+                className="bg-transparent border-b border-[var(--border-primary)] focus:border-[var(--text-primary)] text-xs md:text-sm py-1 px-2 text-[var(--text-primary)] placeholder-[var(--text-secondary)] outline-none transition-colors w-36 sm:w-48 font-light"
               />
             </div>
           </div>
