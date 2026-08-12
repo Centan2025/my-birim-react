@@ -18,8 +18,6 @@ import PortableTextLite from '../components/PortableTextLite'
 import {HomeContentBlocks} from '../components/HomeContentBlocks'
 import type {ContentBlock, R2ImageMetadata} from '../types'
 
-
-
 interface MediaItem {
   type: 'image' | 'video' | 'youtube'
   url: string
@@ -97,8 +95,10 @@ export function ProjectDetailPage() {
     if (!project || allProjects.length < 2) return {prevProject: null, nextProject: null}
     const currentIndex = allProjects.findIndex(p => p.id === project.id)
     if (currentIndex === -1) return {prevProject: null, nextProject: null}
-    const prev = currentIndex > 0 ? allProjects[currentIndex - 1] : allProjects[allProjects.length - 1]
-    const next = currentIndex < allProjects.length - 1 ? allProjects[currentIndex + 1] : allProjects[0]
+    const prev =
+      currentIndex > 0 ? allProjects[currentIndex - 1] : allProjects[allProjects.length - 1]
+    const next =
+      currentIndex < allProjects.length - 1 ? allProjects[currentIndex + 1] : allProjects[0]
     return {prevProject: prev, nextProject: next}
   }, [project, allProjects])
 
@@ -191,7 +191,6 @@ export function ProjectDetailPage() {
   const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const autoPlayIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const dragStartY = useRef<number>(0)
-
 
   const heroMedia = useMemo(() => {
     if (!project) return []

@@ -34,10 +34,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const user = await client.fetch(
-      `*[_type == "user" && _id == $id && !defined(_deleted)][0]`,
-      {id: payload.sub}
-    )
+    const user = await client.fetch(`*[_type == "user" && _id == $id && !defined(_deleted)][0]`, {
+      id: payload.sub,
+    })
 
     if (!user || !user.isActive) {
       return res.status(200).json({authenticated: false, user: null})

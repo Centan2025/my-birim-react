@@ -485,12 +485,11 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         const isVertBottom = block.verticalAlignment === 'bottom'
         const isVertTop = block.verticalAlignment === 'top' || (!isVertCenter && !isVertBottom)
 
-        const verticalAlignClass =
-          isVertTop
-            ? 'justify-start'
-            : isVertBottom
-              ? 'justify-end'
-              : 'justify-center'
+        const verticalAlignClass = isVertTop
+          ? 'justify-start'
+          : isVertBottom
+            ? 'justify-end'
+            : 'justify-center'
 
         const getButtonPositionClasses = (pos?: string, hasCustomOffset?: boolean) => {
           switch (pos) {

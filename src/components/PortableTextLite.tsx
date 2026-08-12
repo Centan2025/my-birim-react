@@ -594,7 +594,10 @@ export default function PortableTextLite({
           : applyTopMarginRemoval('my-2')
 
       nodes.push(
-        <figure key={blockKey} className={`${marginClassForFigure} ${isSideBySide && block.verticalAlign !== 'bottom' && block.verticalAlign !== 'center' ? '' : 'clear-both'} ${vAlignClass} ${layoutClass}`}>
+        <figure
+          key={blockKey}
+          className={`${marginClassForFigure} ${isSideBySide && block.verticalAlign !== 'bottom' && block.verticalAlign !== 'center' ? '' : 'clear-both'} ${vAlignClass} ${layoutClass}`}
+        >
           <OptimizedImage
             src={block.imageR2.url}
             alt={block.alt || block.imageR2.alt || ''}
@@ -641,7 +644,10 @@ export default function PortableTextLite({
           : applyTopMarginRemoval('my-2')
 
       nodes.push(
-        <figure key={blockKey} className={`${marginClassForFigure} ${isSideBySide && block.verticalAlign !== 'bottom' && block.verticalAlign !== 'center' ? '' : 'clear-both'} ${vAlignClass} ${layoutClass}`}>
+        <figure
+          key={blockKey}
+          className={`${marginClassForFigure} ${isSideBySide && block.verticalAlign !== 'bottom' && block.verticalAlign !== 'center' ? '' : 'clear-both'} ${vAlignClass} ${layoutClass}`}
+        >
           <OptimizedImage
             src={urlFor(block).url() || ''}
             alt={block.alt || ''}
@@ -750,5 +756,9 @@ export default function PortableTextLite({
   }
 
   flushList()
-  return <div className="portable-text-container flex flex-col flex-1 min-h-0 h-full w-full">{nodes}</div>
+  return (
+    <div className="portable-text-container flex flex-col flex-1 min-h-0 h-full w-full">
+      {nodes}
+    </div>
+  )
 }

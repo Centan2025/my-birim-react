@@ -58,7 +58,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const payload = token ? verifyToken(token) : null
   const adminSecret = process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET']
   const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
-  const headerToken = typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
+  const headerToken =
+    typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
   const isAdminAuthorized = adminSecret && headerToken === adminSecret
 
   if (!payload && !isAdminAuthorized) {

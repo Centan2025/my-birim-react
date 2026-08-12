@@ -3,9 +3,12 @@ import bcrypt from 'bcryptjs'
 import {randomUUID} from 'crypto'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 
-const SANITY_PROJECT_ID = process.env['SANITY_PROJECT_ID'] || process.env['VITE_SANITY_PROJECT_ID'] || 'wn3a082f'
-const SANITY_DATASET = process.env['SANITY_DATASET'] || process.env['VITE_SANITY_DATASET'] || 'production'
-const SANITY_API_VERSION = process.env['SANITY_API_VERSION'] || process.env['VITE_SANITY_API_VERSION'] || '2025-01-01'
+const SANITY_PROJECT_ID =
+  process.env['SANITY_PROJECT_ID'] || process.env['VITE_SANITY_PROJECT_ID'] || 'wn3a082f'
+const SANITY_DATASET =
+  process.env['SANITY_DATASET'] || process.env['VITE_SANITY_DATASET'] || 'production'
+const SANITY_API_VERSION =
+  process.env['SANITY_API_VERSION'] || process.env['VITE_SANITY_API_VERSION'] || '2025-01-01'
 const SANITY_TOKEN = process.env['SANITY_TOKEN']
 
 const client = createClient({

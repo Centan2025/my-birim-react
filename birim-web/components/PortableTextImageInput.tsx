@@ -21,7 +21,6 @@ export default function PortableTextImageInput(props: ObjectInputProps) {
 
   return (
     <div>
-
       {/* Yerleşim İkonları */}
       <div
         style={{

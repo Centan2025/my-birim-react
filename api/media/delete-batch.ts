@@ -50,7 +50,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
-  const tokenStr = typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
+  const tokenStr =
+    typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
   if (tokenStr !== expectedToken) {
     return res.status(401).json({error: 'Yetkisiz erişim.'})
   }

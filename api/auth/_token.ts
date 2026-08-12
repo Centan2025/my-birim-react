@@ -8,11 +8,7 @@ const JWT_SECRET =
 
 function base64UrlEncode(str: string | Buffer): string {
   const buf = typeof str === 'string' ? Buffer.from(str) : str
-  return buf
-    .toString('base64')
-    .replace(/=/g, '')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
+  return buf.toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
 }
 
 function base64UrlDecode(str: string): string {
@@ -34,7 +30,10 @@ export interface TokenPayload {
 /**
  * Creates a signed JWT token using HMAC-SHA256
  */
-export function createToken(payload: {sub: string; email: string; role?: string}, expiresInSeconds = 604800): string {
+export function createToken(
+  payload: {sub: string; email: string; role?: string},
+  expiresInSeconds = 604800
+): string {
   const header = {alg: 'HS256', typ: 'JWT'}
   const now = Math.floor(Date.now() / 1000)
   const fullPayload: TokenPayload = {
@@ -47,10 +46,7 @@ export function createToken(payload: {sub: string; email: string; role?: string}
   const encodedPayload = base64UrlEncode(JSON.stringify(fullPayload))
 
   const signatureInput = `${encodedHeader}.${encodedPayload}`
-  const signature = crypto
-    .createHmac('sha256', JWT_SECRET)
-    .update(signatureInput)
-    .digest()
+  const signature = crypto.createHmac('sha256', JWT_SECRET).update(signatureInput).digest()
   const encodedSignature = base64UrlEncode(signature)
 
   return `${encodedHeader}.${encodedPayload}.${encodedSignature}`
@@ -69,10 +65,7 @@ export function verifyToken(token: string): TokenPayload | null {
 
   const signatureInput = `${encodedHeader}.${encodedPayload}`
   const expectedSignature = base64UrlEncode(
-    crypto
-      .createHmac('sha256', JWT_SECRET)
-      .update(signatureInput)
-      .digest()
+    crypto.createHmac('sha256', JWT_SECRET).update(signatureInput).digest()
   )
 
   const sigBuffer = Buffer.from(encodedSignature)
