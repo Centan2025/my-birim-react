@@ -270,7 +270,7 @@ export function NewsDetailPage() {
   return (
     <div
       key={newsId}
-      className="bg-[var(--bg-secondary)] animate-fade-in-up-subtle pt-20 md:pt-22 lg:pt-22"
+      className="bg-[var(--bg-secondary)] animate-fade-in-up-subtle pt-20 md:pt-20 lg:pt-20"
     >
       {/* Breadcrumb Band */}
       <div className="w-full relative z-20">

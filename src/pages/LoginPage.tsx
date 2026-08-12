@@ -199,7 +199,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="bg-[var(--bg-secondary)] min-h-screen text-[var(--text-primary)] transition-colors duration-500 pt-20 md:pt-22 lg:pt-22 pb-20 font-inter">
+    <div className="bg-[var(--bg-secondary)] min-h-screen text-[var(--text-primary)] transition-colors duration-500 pt-20 md:pt-20 lg:pt-20 pb-20 font-inter">
       {/* Breadcrumbs */}
       <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 md:py-2 lg:py-3 text-gray-400">
         <Breadcrumbs
