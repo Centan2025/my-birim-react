@@ -82,7 +82,7 @@ const ProjectHorizontalCard: React.FC<{
     <div
       ref={cardRef}
       data-project-card="true"
-      className="flex-shrink-0 w-full md:w-[84vw] lg:w-[78vw] max-w-[1450px] snap-center pr-3 md:pr-5 mb-6 md:mb-0"
+      className="flex-shrink-0 w-full md:w-[84vw] lg:w-[78vw] max-w-[1450px] snap-center px-0 md:px-0 md:pr-5 mb-8 md:mb-0"
     >
       <Link
         to={`/projects/${project.id}`}
@@ -439,7 +439,7 @@ export function ProjectsPage() {
             onScroll={handleScroll}
             onMouseDown={handleMouseDown}
             onDragStart={e => e.preventDefault()}
-            className="flex flex-col md:flex-row items-center overflow-y-visible md:overflow-x-auto scrollbar-none pl-4 md:pl-[calc(4%+32px)] lg:pl-[10vw] pr-4 md:pr-[10vw] py-4 cursor-default md:cursor-grab active:md:cursor-grabbing select-none"
+            className="w-full max-w-[95%] sm:max-w-[92%] md:max-w-none mx-auto flex flex-col md:flex-row items-center overflow-y-visible md:overflow-x-auto scrollbar-none px-0 md:pl-[calc(4%+32px)] lg:pl-[10vw] md:pr-[10vw] py-4 cursor-default md:cursor-grab active:md:cursor-grabbing select-none"
             style={{
               scrollbarWidth: 'none',
               msOverflowStyle: 'none',
