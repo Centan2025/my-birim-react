@@ -53,6 +53,10 @@ export const ProductCard: React.FC<{product: Product}> = ({product}) => {
   const mainImageHotspotDesktop = mainImageObj.hotspotDesktop
   const mainImageOrigWidth = mainImageObj.origWidth
   const mainImageOrigHeight = mainImageObj.origHeight
+  const mainImageOrigWidthMobile = mainImageObj.origWidthMobile
+  const mainImageOrigHeightMobile = mainImageObj.origHeightMobile
+  const mainImageOrigWidthDesktop = mainImageObj.origWidthDesktop
+  const mainImageOrigHeightDesktop = mainImageObj.origHeightDesktop
   const mainImageIsMirrored =
     mainImageObj.isMirrored !== undefined ? !!mainImageObj.isMirrored : undefined
   const mainImageIsMirroredMobile =
@@ -96,9 +100,14 @@ export const ProductCard: React.FC<{product: Product}> = ({product}) => {
             hotspotDesktop={mainImageHotspotDesktop}
             origWidth={mainImageOrigWidth}
             origHeight={mainImageOrigHeight}
+            origWidthMobile={mainImageOrigWidthMobile}
+            origHeightMobile={mainImageOrigHeightMobile}
+            origWidthDesktop={mainImageOrigWidthDesktop}
+            origHeightDesktop={mainImageOrigHeightDesktop}
             isMirrored={mainImageIsMirrored}
             isMirroredMobile={mainImageIsMirroredMobile}
             isMirroredDesktop={mainImageIsMirroredDesktop}
+            fitAuto={true}
           />
         </div>
         <div className="px-2.5 py-2 sm:px-3 sm:py-2 transition-colors duration-500">

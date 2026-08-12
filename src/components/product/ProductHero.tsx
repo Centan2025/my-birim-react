@@ -153,6 +153,16 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
           from { opacity: 0; transform: scale(0); }
           to { opacity: 1; transform: scale(1); }
         }
+        @media (orientation: landscape) and (max-height: 600px) {
+          .product-hero-title {
+            font-size: 1.25rem !important;
+            line-height: 1.2 !important;
+          }
+          .product-hero-details {
+            font-size: 0.75rem !important;
+            margin-top: 0.25rem !important;
+          }
+        }
       `}</style>
       <div
         className={`relative w-full overflow-hidden cursor-grab active:cursor-grabbing h-[100dvh] ${
@@ -295,8 +305,8 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
         />
 
         {/* Top-Left Breadcrumb overlay - aligned with Header Search Icon */}
-        <div className="absolute top-20 landscape:top-12 md:top-20 lg:top-20 left-0 right-0 z-40 pointer-events-none">
-          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 landscape:py-0">
+        <div className="absolute top-20 max-lg:landscape:top-12 md:top-20 lg:top-20 left-0 right-0 z-40 pointer-events-none">
+          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 max-lg:landscape:py-0">
             <Breadcrumbs
               items={[
                 {label: t('homepage'), to: '/'},
@@ -319,13 +329,13 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                 transition: 'transform 1000ms ease-out, opacity 1000ms ease-out',
               }}
             >
-              <h1 className="text-3xl landscape:text-xl md:text-5xl lg:text-6xl font-extrabold tracking-tight drop-shadow-lg font-michroma pointer-events-auto">
+              <h1 className="product-hero-title text-lg max-md:landscape:text-sm md:text-6xl lg:text-7xl font-extrabold tracking-tight drop-shadow-lg font-michroma pointer-events-auto">
                 {t(product.name)}
               </h1>
             </div>
             {(designers.length > 0 || Boolean(product.year)) && (
               <div
-                className="mt-2 text-xs landscape:text-[11px] md:text-sm text-white/80 font-michroma pointer-events-auto [&_a]:font-michroma [&_span]:font-michroma"
+                className="product-hero-details mt-2 text-xs max-md:landscape:text-[9px] md:text-base lg:text-xl text-white/80 font-michroma pointer-events-auto [&_a]:font-michroma [&_span]:font-michroma"
                 style={{
                   transform: isDesignerVisible ? 'translateX(0)' : 'translateX(-40px)',
                   opacity: isDesignerVisible ? 1 : 0,

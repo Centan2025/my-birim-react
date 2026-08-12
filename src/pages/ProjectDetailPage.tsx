@@ -430,6 +430,18 @@ export function ProjectDetailPage() {
         isPageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-20'
       }`}
     >
+      <style>{`
+        @media (orientation: landscape) and (max-height: 600px) {
+          .project-hero-title {
+            font-size: 1.15rem !important;
+            line-height: 1.2 !important;
+            margin-bottom: 0.25rem !important;
+          }
+          .project-hero-date {
+            font-size: 0.75rem !important;
+          }
+        }
+      `}</style>
       <div className="relative w-full h-[60vh] md:h-[75vh] overflow-hidden">
         {coverUrl ? (
           <div className="absolute inset-0">
@@ -464,8 +476,8 @@ export function ProjectDetailPage() {
         <div className="absolute inset-0 bg-black/40 z-10" />
 
         {/* Top-Left Breadcrumb overlay - White color */}
-        <div className="absolute top-20 landscape:top-12 md:top-20 lg:top-20 left-0 right-0 z-40 pointer-events-none">
-          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 landscape:py-0">
+        <div className="absolute top-20 max-lg:landscape:top-12 md:top-20 lg:top-20 left-0 right-0 z-40 pointer-events-none">
+          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 max-lg:landscape:py-0">
             <Breadcrumbs
               items={[
                 {label: t('homepage'), to: '/'},
@@ -481,7 +493,7 @@ export function ProjectDetailPage() {
         <div className="absolute bottom-12 landscape:bottom-4 md:bottom-10 left-0 right-0 text-white z-30 pointer-events-none">
           <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
             <h1
-              className="text-xl landscape:text-lg md:text-2xl lg:text-3xl font-light tracking-tight text-white mb-2 md:mb-4 font-michroma pointer-events-auto"
+              className="project-hero-title text-base max-md:landscape:text-base md:text-3xl lg:text-5xl font-light tracking-tight text-white mb-2 md:mb-4 font-michroma pointer-events-auto"
               style={{
                 transform: isTitleVisible ? 'translateX(0)' : 'translateX(-40px)',
                 opacity: isTitleVisible ? 1 : 0,
@@ -494,7 +506,7 @@ export function ProjectDetailPage() {
 
             {project.date && (
               <p
-                className="text-base landscape:text-xs md:text-lg lg:text-xl text-white/90 font-light font-michroma pointer-events-auto"
+                className="project-hero-date text-xs max-md:landscape:text-xs md:text-lg lg:text-2xl text-white/90 font-light font-michroma pointer-events-auto"
                 style={{
                   transform: isLocationVisible ? 'translateX(0)' : 'translateX(-40px)',
                   opacity: isLocationVisible ? 1 : 0,
