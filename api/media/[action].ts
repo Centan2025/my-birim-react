@@ -11,31 +11,26 @@ import {getAuthTokenFromReq, verifyToken} from '../../lib/server/token.js'
 const R2_ACCOUNT_ID = (
   process.env['R2_ACCOUNT_ID'] ||
   process.env['SANITY_STUDIO_R2_ACCOUNT_ID'] ||
-  process.env['VITE_R2_ACCOUNT_ID'] ||
   '114e37dc2d51e58147e027097a68470b'
 ).trim()
 const R2_ACCESS_KEY_ID = (
   process.env['R2_ACCESS_KEY_ID'] ||
   process.env['SANITY_STUDIO_R2_ACCESS_KEY_ID'] ||
-  process.env['VITE_R2_ACCESS_KEY_ID'] ||
-  'e3e007695ed61d30021abb8646a6ac83'
+  ''
 ).trim()
 const R2_SECRET_ACCESS_KEY = (
   process.env['R2_SECRET_ACCESS_KEY'] ||
   process.env['SANITY_STUDIO_R2_SECRET_ACCESS_KEY'] ||
-  process.env['VITE_R2_SECRET_ACCESS_KEY'] ||
-  '41675d4749c4f51462925a2c154f12aa9651963f2b54b83eaa415778e89153b5'
+  ''
 ).trim()
 const R2_BUCKET_NAME = (
   process.env['R2_BUCKET_NAME'] ||
   process.env['SANITY_STUDIO_R2_BUCKET_NAME'] ||
-  process.env['VITE_R2_BUCKET_NAME'] ||
   'birim-web'
 ).trim()
 const R2_DOMAIN = (
   process.env['R2_DOMAIN'] ||
   process.env['SANITY_STUDIO_R2_DOMAIN'] ||
-  process.env['VITE_R2_DOMAIN'] ||
   'https://assets.birim.com'
 ).trim()
 
@@ -49,10 +44,24 @@ const r2Client = new S3Client({
 })
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const origin =
-    typeof req.headers.origin === 'string' && req.headers.origin ? req.headers.origin : '*'
-  res.setHeader('Access-Control-Allow-Credentials', 'true')
-  res.setHeader('Access-Control-Allow-Origin', origin)
+  const requestOrigin = typeof req.headers.origin === 'string' ? req.headers.origin : ''
+  const ALLOWED_ORIGINS = [
+    'https://www.birim.com',
+    'https://birim.com',
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:5173',
+  ]
+  const isAllowedOrigin =
+    ALLOWED_ORIGINS.includes(requestOrigin) ||
+    requestOrigin.endsWith('.birim.com') ||
+    requestOrigin.endsWith('.vercel.app')
+
+  if (isAllowedOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', requestOrigin)
+    res.setHeader('Access-Control-Allow-Credentials', 'true')
+  }
+
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
   res.setHeader(
     'Access-Control-Allow-Headers',

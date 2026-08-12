@@ -8,6 +8,31 @@ const SANITY_API_VERSION =
   process.env['VITE_SANITY_API_VERSION'] || process.env['SANITY_API_VERSION'] || '2025-01-01'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const requestOrigin = typeof req.headers.origin === 'string' ? req.headers.origin : ''
+  const ALLOWED_ORIGINS = [
+    'https://www.birim.com',
+    'https://birim.com',
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:5173',
+  ]
+  const isAllowedOrigin =
+    ALLOWED_ORIGINS.includes(requestOrigin) ||
+    requestOrigin.endsWith('.birim.com') ||
+    requestOrigin.endsWith('.vercel.app')
+
+  if (isAllowedOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', requestOrigin)
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', 'https://www.birim.com')
+  }
+
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    return res.status(200).end()
+  }
+
   if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({error: 'Method not allowed'})
   }
@@ -19,8 +44,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({error: 'Missing query parameter'})
   }
 
-  // Block sensitive queries targeting users, passwords, or tokens (normalize by removing all whitespace)
-  const normalizedQuery = query.toLowerCase().replace(/[\s\r\n\t'"`]/g, '')
+  // Block sensitive queries targeting users, passwords, tokens (normalize string)
+  const normalizedQuery = query.toLowerCase().replace(/[\s\r\n\t'"`+=_]/g, '')
   const sensitiveKeywords = [
     'user',
     'password',
@@ -28,6 +53,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     'resetpasswordtoken',
     'resettoken',
     'secret',
+    'token',
   ]
 
   if (sensitiveKeywords.some(kw => normalizedQuery.includes(kw))) {

@@ -1,6 +1,7 @@
 import {GoogleGenAI} from '@google/genai'
 import {S3Client, PutObjectCommand} from '@aws-sdk/client-s3'
 import crypto from 'crypto'
+import {getAuthTokenFromReq, verifyToken} from '../../lib/server/token.js'
 
 // Rate Limiting (In-Memory IP Tracker)
 interface RateLimitRecord {
@@ -98,7 +99,10 @@ async function getBase64FromImageInput(
       throw new Error('Geçersiz görsel URL adresi.')
     }
 
-    const fetchRes = await fetch(targetUrl)
+    const fetchRes = await fetch(targetUrl, {redirect: 'manual'})
+    if (fetchRes.status >= 300 && fetchRes.status < 400) {
+      throw new Error('Yönlendirme yapılan URL adresleri kabul edilmemektedir.')
+    }
     if (!fetchRes.ok) {
       throw new Error(`Referans görsel indirilemedi: ${fetchRes.statusText}`)
     }
@@ -160,9 +164,26 @@ async function uploadToR2OrFallback(
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    res.setHeader('Access-Control-Allow-Origin', '*')
+    const requestOrigin = typeof req.headers.origin === 'string' ? req.headers.origin : ''
+    const ALLOWED_ORIGINS = [
+      'https://www.birim.com',
+      'https://birim.com',
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:5173',
+    ]
+    const isAllowedOrigin =
+      ALLOWED_ORIGINS.includes(requestOrigin) ||
+      requestOrigin.endsWith('.birim.com') ||
+      requestOrigin.endsWith('.vercel.app')
+
+    if (isAllowedOrigin) {
+      res.setHeader('Access-Control-Allow-Origin', requestOrigin)
+      res.setHeader('Access-Control-Allow-Credentials', 'true')
+    }
+
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
 
     if (req.method === 'OPTIONS') {
       return res.status(200).json({})
@@ -170,6 +191,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (req.method !== 'POST') {
       return res.status(405).json({error: 'Method Not Allowed'})
+    }
+
+    // Require authentication session or admin token for Imagen 3 AI generation
+    const token = getAuthTokenFromReq(req)
+    const payload = token ? verifyToken(token) : null
+    const adminSecret = process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET']
+    const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
+    const headerToken =
+      typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
+    const isAdminAuthorized = Boolean(adminSecret && headerToken && headerToken === adminSecret)
+
+    if (!payload && !isAdminAuthorized && process.env['NODE_ENV'] === 'production') {
+      return res
+        .status(401)
+        .json({error: 'Oda tasarlama AI servisini kullanmak için oturum açmanız gerekmektedir.'})
     }
 
     const clientIp =
@@ -206,7 +242,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const cleanPrompt = sanitizePrompt(customPrompt, 150)
 
-    const apiKey = process.env['GEMINI_API_KEY'] || process.env['VITE_GEMINI_API_KEY']
+    const apiKey = process.env['GEMINI_API_KEY']
     if (!apiKey) {
       return res.status(500).json({
         error:

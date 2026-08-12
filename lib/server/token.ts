@@ -1,9 +1,15 @@
 import crypto from 'crypto'
 import type {VercelRequest} from '@vercel/node'
 
-const JWT_SECRET = process.env['JWT_SECRET'] || process.env['SANITY_TOKEN'] || ''
-if (!JWT_SECRET && process.env['NODE_ENV'] === 'production') {
-  console.error('[Token Helper] Critical Warning: JWT_SECRET environment variable is missing!')
+function getJwtSecret(): string {
+  const secret = process.env['JWT_SECRET'] || process.env['SANITY_TOKEN']
+  if (!secret || secret.trim() === '') {
+    if (process.env['NODE_ENV'] === 'production') {
+      throw new Error('[Token Helper] Critical Error: JWT_SECRET environment variable is missing!')
+    }
+    return 'birim_dev_fallback_jwt_secret_key_2026_do_not_use_in_prod'
+  }
+  return secret
 }
 
 function base64UrlEncode(str: string | Buffer): string {
@@ -34,6 +40,7 @@ export function createToken(
   payload: {sub: string; email: string; role?: string},
   expiresInSeconds = 604800
 ): string {
+  const secret = getJwtSecret()
   const header = {alg: 'HS256', typ: 'JWT'}
   const now = Math.floor(Date.now() / 1000)
   const fullPayload: TokenPayload = {
@@ -46,7 +53,7 @@ export function createToken(
   const encodedPayload = base64UrlEncode(JSON.stringify(fullPayload))
 
   const signatureInput = `${encodedHeader}.${encodedPayload}`
-  const signature = crypto.createHmac('sha256', JWT_SECRET).update(signatureInput).digest()
+  const signature = crypto.createHmac('sha256', secret).update(signatureInput).digest()
   const encodedSignature = base64UrlEncode(signature)
 
   return `${encodedHeader}.${encodedPayload}.${encodedSignature}`
@@ -63,9 +70,10 @@ export function verifyToken(token: string): TokenPayload | null {
   const [encodedHeader, encodedPayload, encodedSignature] = parts
   if (!encodedHeader || !encodedPayload || !encodedSignature) return null
 
+  const secret = getJwtSecret()
   const signatureInput = `${encodedHeader}.${encodedPayload}`
   const expectedSignature = base64UrlEncode(
-    crypto.createHmac('sha256', JWT_SECRET).update(signatureInput).digest()
+    crypto.createHmac('sha256', secret).update(signatureInput).digest()
   )
 
   const sigBuffer = Buffer.from(encodedSignature)
