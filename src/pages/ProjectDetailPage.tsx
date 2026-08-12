@@ -464,7 +464,7 @@ export function ProjectDetailPage() {
         <div className="absolute inset-0 bg-black/40 z-10" />
 
         {/* Top-Left Breadcrumb overlay - White color */}
-        <div className="absolute top-20 landscape:top-12 md:top-24 lg:top-28 left-0 right-0 z-40 pointer-events-none py-4 landscape:py-0">
+        <div className="absolute top-20 landscape:top-12 md:top-32 lg:top-36 left-0 right-0 z-40 pointer-events-none py-4 landscape:py-0">
           <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
             <Breadcrumbs
               items={[
