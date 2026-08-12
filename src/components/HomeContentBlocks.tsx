@@ -894,12 +894,24 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           )
         }
 
+        const isSideBySide = !isFullWidth && !isCenter
+        const mediaHeightClass = hasTextContent
+          ? isSideBySide
+            ? 'max-md:h-auto md:h-full'
+            : 'h-full'
+          : 'h-auto'
+        const mediaImgHeightClass = hasTextContent
+          ? isSideBySide
+            ? 'max-md:h-auto max-md:object-contain md:h-full md:object-cover'
+            : 'h-full object-cover'
+          : 'h-auto'
+
         const mediaContent = hasMedia ? (
           <ScrollReveal
             delay={50}
             threshold={0.1}
             width={isFullWidth || isCenter ? 'w-full' : 'w-auto'}
-            className={`h-full w-full ${isFullWidth || isCenter ? 'w-full' : ''} ${isCenter ? 'flex justify-center' : ''}`}
+            className={`w-full ${isSideBySide && hasTextContent ? 'max-md:h-auto md:h-full' : 'h-full'} ${isFullWidth || isCenter ? 'w-full' : ''} ${isCenter ? 'flex justify-center' : ''}`}
           >
             {block.mediaType === 'youtube' ? (
               <div
@@ -910,7 +922,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               </div>
             ) : block.mediaType === 'video' ? (
               <div
-                className={`relative w-full ${hasTextContent ? 'h-full' : 'h-auto'} ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`}
+                className={`relative w-full ${mediaHeightClass} ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`}
                 onClick={() => onMediaClick && !block.linkUrl && onMediaClick(mediaUrl)}
                 onKeyDown={
                   onMediaClick && !block.linkUrl
@@ -929,7 +941,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   src={mediaUrl}
                   srcMobile={mediaMobileUrl}
                   srcDesktop={mediaDesktopUrl}
-                  className={`${isFullWidthMedia ? 'w-full' : `${mediaWidthClass} ${imageBorderClass}`} w-full ${hasTextContent ? 'h-full object-cover' : 'h-auto'} ${isMobile ? 'object-cover' : 'object-cover'} block`}
+                  className={`${isFullWidthMedia ? 'w-full' : `${mediaWidthClass} ${imageBorderClass}`} w-full ${mediaImgHeightClass} ${isMobile ? 'object-cover' : 'object-cover'} block`}
                   autoPlay
                   loop
                   muted
@@ -940,7 +952,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 {renderMediaOverlays()}
               </div>
             ) : block.mediaType === 'panels' ? (
-              <div className={`relative ${mediaWidthClass} ${hasTextContent ? 'h-full' : ''}`}>
+              <div className={`relative ${mediaWidthClass} ${mediaHeightClass}`}>
                 <PanelSlider
                   media={block.imagePanels || []}
                   panelSize={block.panelSize}
@@ -952,7 +964,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               </div>
             ) : (
               <div
-                className={`relative w-full ${hasTextContent ? 'h-full' : 'h-auto'} leading-none block overflow-hidden ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`}
+                className={`relative w-full ${mediaHeightClass} leading-none block overflow-hidden ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`}
                 onClick={() => onMediaClick && !block.linkUrl && onMediaClick(mediaUrl)}
                 onKeyDown={
                   onMediaClick && !block.linkUrl
@@ -972,7 +984,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   srcMobile={mediaMobileUrl}
                   srcDesktop={mediaDesktopUrl}
                   alt=""
-                  className={`${isFullWidthMedia ? 'w-full' : `${mediaWidthClass} ${imageBorderClass}`} w-full ${hasTextContent ? 'h-full object-cover' : 'h-auto'} block`}
+                  className={`${isFullWidthMedia ? 'w-full' : `${mediaWidthClass} ${imageBorderClass}`} w-full ${mediaImgHeightClass} block`}
                   loading="lazy"
                   quality={85}
                   crop={block.crop}
