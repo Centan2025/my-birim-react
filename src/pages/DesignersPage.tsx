@@ -100,7 +100,7 @@ export function DesignersPage() {
       </div>
 
       {/* Breadcrumb Section */}
-      <div className="relative z-20 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 md:py-2 lg:py-3 text-gray-400">
+      <div className="relative z-20 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 text-gray-400">
         <Breadcrumbs
           items={[{label: t('homepage'), to: '/'}, {label: t('designers') || 'Tasarımcılar'}]}
         />

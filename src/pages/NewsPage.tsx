@@ -125,7 +125,7 @@ export function NewsPage() {
     <div className="bg-[var(--bg-primary)] min-h-screen animate-fade-in-up-subtle pt-20 md:pt-20 lg:pt-20">
       {/* Breadcrumb Band */}
       <div className="w-full relative z-20">
-        <div className={containerClass + ' py-4 md:py-2 lg:py-3'}>
+        <div className={containerClass + ' py-4'}>
           <Breadcrumbs items={[{label: t('homepage'), to: '/'}, {label: t('news')}]} />
         </div>
       </div>

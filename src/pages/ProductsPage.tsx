@@ -250,7 +250,7 @@ export function ProductsPage() {
 
       {/* Breadcrumb and Sort Band */}
       <div className="w-full relative z-20">
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 md:py-2 lg:py-3 flex flex-row flex-wrap items-center justify-between gap-4">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 flex flex-row flex-wrap items-center justify-between gap-4">
           <Breadcrumbs
             items={
               category
