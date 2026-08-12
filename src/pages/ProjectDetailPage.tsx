@@ -476,7 +476,7 @@ export function ProjectDetailPage() {
         <div className="absolute inset-0 bg-black/40 z-10" />
 
         {/* Top-Left Breadcrumb overlay - White color */}
-        <div className="absolute top-20 max-lg:landscape:top-12 md:top-20 lg:top-20 left-0 right-0 z-40 pointer-events-none">
+        <div className="absolute top-10 max-lg:landscape:top-12 md:top-20 lg:top-20 left-0 right-0 z-40 pointer-events-none">
           <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 max-lg:landscape:py-0">
             <Breadcrumbs
               items={[
@@ -489,75 +489,81 @@ export function ProjectDetailPage() {
           </div>
         </div>
 
-        {/* Bottom-Left Title & Project Info */}
-        <div className="absolute bottom-12 landscape:bottom-4 md:bottom-10 left-0 right-0 text-white z-30 pointer-events-none">
-          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
-            <h1
-              className="project-hero-title text-base max-md:landscape:text-base md:text-3xl lg:text-5xl font-light tracking-tight text-white mb-2 md:mb-4 font-michroma pointer-events-auto"
-              style={{
-                transform: isTitleVisible ? 'translateX(0)' : 'translateX(-40px)',
-                opacity: isTitleVisible ? 1 : 0,
-                transition: 'transform 1000ms ease-out, opacity 1000ms ease-out',
-                textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-              }}
-            >
-              {t(project.title)}
-            </h1>
-
-            {project.date && (
-              <p
-                className="project-hero-date text-xs max-md:landscape:text-xs md:text-lg lg:text-2xl text-white/90 font-light font-michroma pointer-events-auto"
+        {/* Bottom Title & Fullscreen Button overlay */}
+        <div
+          className="absolute left-0 right-0 z-30 pointer-events-none"
+          style={{
+            bottom: 'max(16px, env(safe-area-inset-bottom, 0px) + 16px)',
+          }}
+        >
+          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex items-end justify-between gap-4">
+            {/* Bottom-Left Title & Project Info */}
+            <div className="flex-1">
+              <h1
+                className="project-hero-title text-base max-md:landscape:text-base md:text-3xl lg:text-5xl font-light tracking-tight text-white mb-1 md:mb-4 font-michroma pointer-events-auto"
                 style={{
-                  transform: isLocationVisible ? 'translateX(0)' : 'translateX(-40px)',
-                  opacity: isLocationVisible ? 1 : 0,
-                  transition: 'transform 1000ms ease-out, opacity 1000ms ease-out 100ms',
-                  textShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                  transform: isTitleVisible ? 'translateX(0)' : 'translateX(-40px)',
+                  opacity: isTitleVisible ? 1 : 0,
+                  transition: 'transform 1000ms ease-out, opacity 1000ms ease-out',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.3)',
                 }}
               >
-                {t(project.date)}
-              </p>
+                {t(project.title)}
+              </h1>
+
+              {project.date && (
+                <p
+                  className="project-hero-date text-xs max-md:landscape:text-xs md:text-lg lg:text-2xl text-white/90 font-light font-michroma pointer-events-auto"
+                  style={{
+                    transform: isLocationVisible ? 'translateX(0)' : 'translateX(-40px)',
+                    opacity: isLocationVisible ? 1 : 0,
+                    transition: 'transform 1000ms ease-out, opacity 1000ms ease-out 100ms',
+                    textShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                  }}
+                >
+                  {t(project.date)}
+                </p>
+              )}
+            </div>
+
+            {/* Bottom-Right Fullscreen Button */}
+            {allMedia.length > 0 && (
+              <div
+                className="pointer-events-none flex-shrink-0"
+                style={{
+                  opacity: isFullscreenButtonVisible ? 1 : 0,
+                  transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
+                  transition:
+                    'opacity 700ms ease-out, transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+                }}
+              >
+                <button
+                  onClick={() => {
+                    setIdx(0)
+                    setIsFullscreenOpen(true)
+                  }}
+                  className="pointer-events-auto flex h-8 w-8 md:h-12 md:w-12 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all hover:bg-white/10"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="0.8"
+                    className="h-5 w-5 md:h-8 md:w-8"
+                  >
+                    <path d="M15 3h6v6" />
+                    <path d="M9 21H3v-6" />
+                    <path d="M21 3l-7 7" />
+                    <path d="M3 21l7-7" />
+                  </svg>
+                </button>
+              </div>
             )}
           </div>
         </div>
-
-        {allMedia.length > 0 && (
-          <div
-            className="absolute left-0 right-0 z-30 pointer-events-none"
-            style={{
-              bottom: 'max(16px, env(safe-area-inset-bottom, 0px) + 16px)',
-              opacity: isFullscreenButtonVisible ? 1 : 0,
-              transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
-              transition:
-                'opacity 700ms ease-out, transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
-            }}
-          >
-            <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex justify-end">
-              <button
-                onClick={() => {
-                  setIdx(0)
-                  setIsFullscreenOpen(true)
-                }}
-                className="pointer-events-auto flex h-8 w-8 md:h-12 md:w-12 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all hover:bg-white/10"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="0.8"
-                  className="h-5 w-5 md:h-8 md:w-8"
-                >
-                  <path d="M15 3h6v6" />
-                  <path d="M9 21H3v-6" />
-                  <path d="M21 3l-7 7" />
-                  <path d="M3 21l7-7" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       <div className="w-full bg-[var(--bg-secondary)]">

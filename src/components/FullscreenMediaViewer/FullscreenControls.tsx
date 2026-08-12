@@ -41,7 +41,7 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
           type="button"
           onClick={handleClose}
           className={`group flex items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/60 active:scale-95 shadow-lg ${
-            isMobile ? 'h-10 w-10' : 'h-14 w-14'
+            isMobile ? 'h-8 w-8' : 'h-14 w-14'
           }`}
           style={{
             opacity: isClosing ? 0 : isButtonVisible ? 1 : 0,
@@ -62,7 +62,7 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
             strokeWidth="0.6"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className={`${isMobile ? 'h-7 w-7' : 'h-11 w-11'} transition-all duration-500 ease-in-out ${
+            className={`${isMobile ? 'h-5 w-5' : 'h-11 w-11'} transition-all duration-500 ease-in-out ${
               isButtonVisible && !isClosing ? 'opacity-100 rotate-0' : 'opacity-0 rotate-90'
             }`}
             style={{
@@ -95,7 +95,7 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
             type="button"
             onClick={onPrev}
             className={`group flex items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/60 active:scale-95 shadow-lg ${
-              isMobile ? 'h-11 w-11' : 'h-14 w-14'
+              isMobile ? 'h-8 w-8' : 'h-14 w-14'
             }`}
             aria-label="Previous"
           >
@@ -109,7 +109,7 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
               strokeWidth="0.4"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={`${isMobile ? 'h-7 w-7' : 'h-11 w-11'} -ml-0.5 transition-transform duration-300 group-hover:-translate-x-1`}
+              className={`${isMobile ? 'h-5 w-5' : 'h-11 w-11'} -ml-0.5 transition-transform duration-300 group-hover:-translate-x-1`}
             >
               <path d="M15 18l-6-6 6-6" />
             </svg>
@@ -120,7 +120,7 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
             type="button"
             onClick={onNext}
             className={`group flex items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/60 active:scale-95 shadow-lg ${
-              isMobile ? 'h-11 w-11' : 'h-14 w-14'
+              isMobile ? 'h-8 w-8' : 'h-14 w-14'
             }`}
             aria-label="Next"
           >
@@ -134,7 +134,7 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
               strokeWidth="0.4"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={`${isMobile ? 'h-7 w-7' : 'h-11 w-11'} ml-0.5 transition-transform duration-300 group-hover:translate-x-1`}
+              className={`${isMobile ? 'h-5 w-5' : 'h-11 w-11'} ml-0.5 transition-transform duration-300 group-hover:translate-x-1`}
             >
               <path d="M9 18l6-6-6-6" />
             </svg>
@@ -147,7 +147,7 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
         <button
           type="button"
           onClick={handleScrollToTop}
-          className={`absolute bottom-6 right-6 flex h-10 w-10 items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 z-30 shadow-lg ${
+          className={`absolute bottom-6 right-6 flex h-8 w-8 items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 z-30 shadow-lg ${
             showScrollToTop
               ? 'opacity-100 translate-y-0'
               : 'opacity-0 translate-y-4 pointer-events-none'
@@ -167,7 +167,7 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
             strokeWidth="0.4"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="h-7 w-7 -mt-0.5"
+            className="h-5 w-5 -mt-0.5"
           >
             <path d="m18 15-6-6-6 6" />
           </svg>

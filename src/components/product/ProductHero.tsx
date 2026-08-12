@@ -305,7 +305,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
         />
 
         {/* Top-Left Breadcrumb overlay - aligned with Header Search Icon */}
-        <div className="absolute top-20 max-lg:landscape:top-12 md:top-20 lg:top-20 left-0 right-0 z-40 pointer-events-none">
+        <div className="absolute top-10 max-lg:landscape:top-12 md:top-20 lg:top-20 left-0 right-0 z-40 pointer-events-none">
           <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 max-lg:landscape:py-0">
             <Breadcrumbs
               items={[
@@ -318,39 +318,87 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
           </div>
         </div>
 
-        <div className="absolute bottom-12 landscape:bottom-4 md:bottom-10 left-0 right-0 text-white z-40 pointer-events-none">
-          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
-            <div
-              style={{
-                transform: isTitleVisible ? 'translateX(0)' : 'translateX(-40px)',
-                opacity: isTitleVisible ? 1 : 0,
-                transition: 'transform 1000ms ease-out, opacity 1000ms ease-out',
-              }}
-            >
-              <h1 className="product-hero-title text-lg max-md:landscape:text-sm md:text-6xl lg:text-7xl font-extrabold tracking-tight drop-shadow-lg font-michroma pointer-events-auto">
-                {t(product.name)}
-              </h1>
-            </div>
-            {(designers.length > 0 || Boolean(product.year)) && (
+        {/* Bottom Title & Mobile Fullscreen Button Container */}
+        <div
+          className="absolute left-0 right-0 z-40 pointer-events-none"
+          style={{bottom: 'max(16px, env(safe-area-inset-bottom, 0px) + 16px)'}}
+        >
+          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex items-end justify-between gap-4">
+            {/* Left Info: Product Name & Designer */}
+            <div className="flex-1">
               <div
-                className="product-hero-details mt-2 text-xs max-md:landscape:text-[9px] md:text-base lg:text-xl text-white/80 font-michroma pointer-events-auto [&_a]:font-michroma [&_span]:font-michroma"
                 style={{
-                  transform: isDesignerVisible ? 'translateX(0)' : 'translateX(-40px)',
-                  opacity: isDesignerVisible ? 1 : 0,
+                  transform: isTitleVisible ? 'translateX(0)' : 'translateX(-40px)',
+                  opacity: isTitleVisible ? 1 : 0,
                   transition: 'transform 1000ms ease-out, opacity 1000ms ease-out',
                 }}
               >
-                {designers.map((d, i) => (
-                  <span key={d.id}>
-                    <Link to={`/designer/${d.id}`} className="hover:text-white font-michroma">
-                      {t(d.name)}
-                    </Link>
-                    {i < designers.length - 1 ? ' & ' : ''}
-                  </span>
-                ))}
-                {designers.length > 0 && product.year && ' '}
-                {product.year && <span>— {product.year}</span>}
+                <h1 className="product-hero-title text-white text-lg max-md:landscape:text-sm md:text-6xl lg:text-7xl font-extrabold tracking-tight drop-shadow-lg font-michroma pointer-events-auto">
+                  {t(product.name)}
+                </h1>
               </div>
+              {(designers.length > 0 || Boolean(product.year)) && (
+                <div
+                  className="product-hero-details mt-1 md:mt-2 text-xs max-md:landscape:text-[9px] md:text-base lg:text-xl text-white/80 font-michroma pointer-events-auto [&_a]:font-michroma [&_span]:font-michroma"
+                  style={{
+                    transform: isDesignerVisible ? 'translateX(0)' : 'translateX(-40px)',
+                    opacity: isDesignerVisible ? 1 : 0,
+                    transition: 'transform 1000ms ease-out, opacity 1000ms ease-out',
+                  }}
+                >
+                  {designers.map((d, i) => (
+                    <span key={d.id}>
+                      <Link to={`/designer/${d.id}`} className="hover:text-white font-michroma">
+                        {t(d.name)}
+                      </Link>
+                      {i < designers.length - 1 ? ' & ' : ''}
+                    </span>
+                  ))}
+                  {designers.length > 0 && product.year && ' '}
+                  {product.year && <span>— {product.year}</span>}
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Portrait Fullscreen Button */}
+            {slideCount > 0 && (
+              <button
+                type="button"
+                onClick={e => {
+                  e.stopPropagation()
+                  onOpenFullscreen()
+                }}
+                className="md:hidden landscape:hidden flex-shrink-0 group pointer-events-auto flex h-10 w-10 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
+                style={{
+                  opacity: isFullscreenButtonVisible ? 1 : 0,
+                  transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
+                  transition:
+                    'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  willChange: 'transform, opacity',
+                  animation: isFullscreenButtonVisible
+                    ? 'home-button-grow 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 300ms forwards'
+                    : 'none',
+                }}
+                aria-label="Tam Ekran"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="0.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-7 w-7"
+                >
+                  <path d="M15 3h6v6" />
+                  <path d="M9 21H3v-6" />
+                  <path d="M21 3l-7 7" />
+                  <path d="M3 21l7-7" />
+                </svg>
+              </button>
             )}
           </div>
         </div>
@@ -454,8 +502,8 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
 
         {slideCount > 1 && (
           <div
-            className="absolute bottom-10 left-1/2 -translate-x-1/2 z-40 flex items-center space-x-2 md:space-x-4"
-            style={{bottom: 'max(16px, env(safe-area-inset-bottom, 0px) + 16px)'}}
+            className="absolute left-1/2 -translate-x-1/2 z-40 flex items-center space-x-2 md:space-x-4 max-md:bottom-20 max-md:landscape:bottom-[max(16px,env(safe-area-inset-bottom,0px)+16px)] md:bottom-[max(16px,env(safe-area-inset-bottom,0px)+16px)]"
+            style={{bottom: 'calc(max(16px, env(safe-area-inset-bottom, 0px) + 16px) + 64px)'}}
           >
             {(() => {
               const normalizedSlideIndex =
@@ -504,48 +552,6 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
               })
             })()}
           </div>
-        )}
-
-        {/* Mobile Fullscreen Button */}
-        {slideCount > 0 && (
-          <button
-            type="button"
-            onClick={e => {
-              e.stopPropagation()
-              onOpenFullscreen()
-            }}
-            className="md:hidden landscape:hidden absolute bottom-4 right-4 z-50 group flex h-10 w-10 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
-            style={{
-              opacity: isFullscreenButtonVisible ? 1 : 0,
-              transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
-              transition:
-                'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
-              willChange: 'transform, opacity',
-              animation: isFullscreenButtonVisible
-                ? 'home-button-grow 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 300ms forwards'
-                : 'none',
-              bottom: 'max(16px, env(safe-area-inset-bottom, 0px) + 16px)',
-            }}
-            aria-label="Tam Ekran"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="0.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-7 w-7"
-            >
-              <path d="M15 3h6v6" />
-              <path d="M9 21H3v-6" />
-              <path d="M21 3l-7 7" />
-              <path d="M3 21l7-7" />
-            </svg>
-          </button>
         )}
       </div>
     </header>

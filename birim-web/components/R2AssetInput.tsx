@@ -386,7 +386,7 @@ async function uploadFileViaPresignedUrl(
   return fileUrl
 }
 
-export default function R2AssetInput(props: ObjectInputProps) {
+export function R2AssetInput(props: ObjectInputProps) {
   const {value, onChange} = props
   const toast = useToast()
   const [isDragging, setIsDragging] = useState(false)
@@ -1218,3 +1218,5 @@ export default function R2AssetInput(props: ObjectInputProps) {
     </Stack>
   )
 }
+
+export default R2AssetInput
