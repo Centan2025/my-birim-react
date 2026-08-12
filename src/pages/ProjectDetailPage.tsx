@@ -589,8 +589,11 @@ export function ProjectDetailPage() {
           }
         }
       `}</style>
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
       <div
         ref={heroContainerRef}
+        role="region"
+        aria-label="Hero slider"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
