@@ -19,6 +19,17 @@ const client = createClient({
 import {createToken, setAuthCookie} from './_token'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 
+export interface SanityUserRecord {
+  _id: string
+  email?: string
+  firstName?: string
+  lastName?: string
+  name?: string
+  role?: string
+  architectVerificationStatus?: string
+  [key: string]: unknown
+}
+
 async function sendServerVerificationEmail(email: string, verificationUrl: string) {
   const smtpPass = process.env['SMTP_PASSWORD']
   if (!smtpPass) return
@@ -141,17 +152,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         sendServerVerificationEmail(normEmail, verificationUrl).catch(err =>
           console.error('Verification email error:', err)
         )
-
-        interface SanityUserRecord {
-          _id: string
-          email?: string
-          firstName?: string
-          lastName?: string
-          name?: string
-          role?: string
-          architectVerificationStatus?: string
-          [key: string]: unknown
-        }
 
         const u = updatedUser as SanityUserRecord
         const token = createToken({

@@ -126,9 +126,6 @@ export default defineType({
       type: 'array',
       fieldset: 'blocksGroup',
       of: [{type: 'contentBlock'}],
-      options: {
-        modal: {type: 'popover'},
-      },
       description: 'Hero bölümünün altında görünecek içerik blokları',
     }),
     defineField({

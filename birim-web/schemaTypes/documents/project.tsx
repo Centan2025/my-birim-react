@@ -115,9 +115,6 @@ export default defineType({
       type: 'array',
       fieldset: 'contentGroup',
       of: [{type: 'contentBlock'}],
-      options: {
-        modal: {type: 'popover'},
-      },
       description:
         'Proje detay sayfasında gösterilecek içerik blokları (ana sayfa ile aynı sistem)',
     }),

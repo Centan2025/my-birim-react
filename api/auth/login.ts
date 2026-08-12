@@ -1,5 +1,6 @@
 import {createClient} from '@sanity/client'
 import bcrypt from 'bcryptjs'
+import type {VercelRequest, VercelResponse} from '@vercel/node'
 import {isRateLimitedAsync, getClientIp} from './_rateLimiter'
 
 const SANITY_PROJECT_ID = process.env['SANITY_PROJECT_ID'] || process.env['VITE_SANITY_PROJECT_ID'] || 'wn3a082f'

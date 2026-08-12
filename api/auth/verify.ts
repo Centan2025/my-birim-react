@@ -58,21 +58,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .unset(['verificationToken'])
       .commit()
 
-    const u = updatedUser as {_id: string; [key: string]: unknown}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const u = updatedUser as Record<string, any>
     return res.status(200).json({
       success: true,
       message: 'E-posta adresiniz başarıyla doğrulandı.',
       user: {
-        _id: u._id,
-        email: u.email,
-        name: u.name,
-        company: u.company,
-        profession: u.profession,
-        country: u.country,
-        userType: u.userType,
-        isActive: u.isActive,
-        isVerified: u.isVerified,
-        createdAt: u.createdAt || u._createdAt,
+        _id: u['_id'] || u['_id'],
+        email: u['email'],
+        name: u['name'],
+        company: u['company'],
+        profession: u['profession'],
+        country: u['country'],
+        userType: u['userType'],
+        isActive: u['isActive'],
+        isVerified: u['isVerified'],
+        createdAt: u['createdAt'] || u['_createdAt'],
       },
     })
   } catch (error: unknown) {

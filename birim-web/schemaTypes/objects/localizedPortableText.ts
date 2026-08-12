@@ -122,9 +122,6 @@ const portableTextBlocks = [
     name: 'portableTextImage',
     type: 'object',
     title: 'Görsel (R2)',
-    options: {
-      modal: {type: 'popover'},
-    },
     fields: [
       {
         name: 'imageR2',
