@@ -478,10 +478,10 @@ export function ProjectDetailPage() {
         </div>
 
         {/* Bottom-Left Title & Project Info */}
-        <div className="absolute bottom-12 md:bottom-10 left-0 right-0 text-white z-30 pointer-events-none">
+        <div className="absolute bottom-12 landscape:bottom-4 md:bottom-10 left-0 right-0 text-white z-30 pointer-events-none">
           <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
             <h1
-              className="text-xl md:text-2xl lg:text-3xl font-light tracking-tight text-white mb-2 md:mb-4 font-michroma pointer-events-auto"
+              className="text-xl landscape:text-lg md:text-2xl lg:text-3xl font-light tracking-tight text-white mb-2 md:mb-4 font-michroma pointer-events-auto"
               style={{
                 transform: isTitleVisible ? 'translateX(0)' : 'translateX(-40px)',
                 opacity: isTitleVisible ? 1 : 0,
@@ -494,7 +494,7 @@ export function ProjectDetailPage() {
 
             {project.date && (
               <p
-                className="text-base md:text-lg lg:text-xl text-white/90 font-light font-michroma pointer-events-auto"
+                className="text-base landscape:text-xs md:text-lg lg:text-xl text-white/90 font-light font-michroma pointer-events-auto"
                 style={{
                   transform: isLocationVisible ? 'translateX(0)' : 'translateX(-40px)',
                   opacity: isLocationVisible ? 1 : 0,
@@ -510,36 +510,40 @@ export function ProjectDetailPage() {
 
         {allMedia.length > 0 && (
           <div
-            className="absolute bottom-10 right-4 md:right-8 z-30"
+            className="absolute left-0 right-0 z-30 pointer-events-none"
             style={{
+              bottom: 'max(16px, env(safe-area-inset-bottom, 0px) + 16px)',
               opacity: isFullscreenButtonVisible ? 1 : 0,
               transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
               transition:
                 'opacity 700ms ease-out, transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
             }}
           >
-            <button
-              onClick={() => {
-                setIdx(0)
-                setIsFullscreenOpen(true)
-              }}
-              className="flex h-12 w-12 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all hover:bg-white/10"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="0.8"
+            <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex justify-end">
+              <button
+                onClick={() => {
+                  setIdx(0)
+                  setIsFullscreenOpen(true)
+                }}
+                className="pointer-events-auto flex h-8 w-8 md:h-12 md:w-12 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all hover:bg-white/10"
               >
-                <path d="M15 3h6v6" />
-                <path d="M9 21H3v-6" />
-                <path d="M21 3l-7 7" />
-                <path d="M3 21l7-7" />
-              </svg>
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="0.8"
+                  className="h-5 w-5 md:h-8 md:w-8"
+                >
+                  <path d="M15 3h6v6" />
+                  <path d="M9 21H3v-6" />
+                  <path d="M21 3l-7 7" />
+                  <path d="M3 21l7-7" />
+                </svg>
+              </button>
+            </div>
           </div>
         )}
       </div>
