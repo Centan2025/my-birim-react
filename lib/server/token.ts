@@ -98,16 +98,39 @@ export function getAuthTokenFromReq(req: VercelRequest): string | null {
 
   const cookieHeader = req.headers?.['cookie']
   if (cookieHeader && typeof cookieHeader === 'string') {
-    const cookies = cookieHeader.split(';').reduce<Record<string, string>>((acc, cookie) => {
-      const [key, value] = cookie.trim().split('=')
-      if (key && value) acc[key] = decodeURIComponent(value)
+    const cookies = cookieHeader.split(';').reduce<Record<string, string>>((acc, pair) => {
+      const idx = pair.indexOf('=')
+      if (idx > 0) {
+        const key = pair.substring(0, idx).trim()
+        const val = pair.substring(idx + 1).trim()
+        acc[key] = decodeURIComponent(val)
+      }
       return acc
     }, {})
-
-    if (cookies['birim_auth_token']) {
-      return cookies['birim_auth_token']
+    if (cookies['birim_token']) {
+      return cookies['birim_token']
     }
   }
 
   return null
+}
+
+/**
+ * Sets HttpOnly Secure SameSite Cookie on VercelResponse
+ */
+export function setAuthCookie(res: VercelResponse, token: string) {
+  const maxAge = 604800 // 7 days
+  const isProd = process.env['NODE_ENV'] === 'production'
+  const cookieStr = `birim_token=${encodeURIComponent(token)}; Path=/; Max-Age=${maxAge}; HttpOnly; ${
+    isProd ? 'Secure; ' : ''
+  }SameSite=Lax`
+  res.setHeader('Set-Cookie', cookieStr)
+}
+
+/**
+ * Clears Auth Cookie on VercelResponse
+ */
+export function clearAuthCookie(res: VercelResponse) {
+  const cookieStr = `birim_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax`
+  res.setHeader('Set-Cookie', cookieStr)
 }
