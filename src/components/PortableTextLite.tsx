@@ -229,6 +229,7 @@ export default function PortableTextLite({
   }
 
   let isFirstNode = removeTopMargin
+  let hasSeenContent = false
 
   const applyTopMarginRemoval = (className: string) => {
     if (!isFirstNode) return className
@@ -254,6 +255,12 @@ export default function PortableTextLite({
         isEmptyText = true
       }
     }
+
+    // Skip empty text blocks that appear at the very beginning of the document before any content
+    if (isEmptyText && !hasSeenContent) {
+      continue
+    }
+    hasSeenContent = true
 
     const blockKey = block._key || `block-${idx}`
 
