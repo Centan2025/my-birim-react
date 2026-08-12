@@ -176,7 +176,7 @@ export function FactoryPage() {
       </div>
 
       {/* Sayfa Başlığı (Haberler sayfası gibi ortalı) */}
-      <div className={containerClass + ' pt-4 md:pt-12 pb-12'}>
+      <div className={containerClass + ' pt-4 landscape:pt-1 md:pt-12 pb-12 landscape:pb-3'}>
         <motion.div
           initial={{opacity: 0, y: 20}}
           animate={{opacity: 1, y: 0}}

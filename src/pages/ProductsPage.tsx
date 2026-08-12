@@ -206,7 +206,7 @@ export function ProductsPage() {
     <div className={`bg-[var(--bg-secondary)] ${!heroImageUrl ? 'pt-20 landscape:pt-14 md:pt-24 lg:pt-24' : ''}`}>
       {/* Category Hero Image */}
       {heroImageUrl ? (
-        <div className="relative h-[450px] animate-fade-in-down hero-section">
+        <div className="relative h-[450px] landscape:h-[260px] animate-fade-in-down hero-section">
           <div className="absolute inset-0">
             <OptimizedImage
               src={heroImageUrl}
