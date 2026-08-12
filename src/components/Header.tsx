@@ -651,9 +651,9 @@ export function Header() {
             }}
           >
             {/* Üst satır: grid stretch (tam yükseklik), içindeki hücreler alttan hizalı */}
-            <div className="relative flex w-full h-full items-center lg:grid lg:grid-cols-[1fr_auto_1fr] header-layout-transition">
-              {/* Sol taraf - Arama + sol menü (desktop) ve arama + logo (mobil) */}
-              <div className="flex flex-1 h-full items-center lg:items-end lg:justify-start lg:gap-6 xl:gap-8 lg:pb-6 lg:translate-y-[6px] header-layout-transition">
+            <div className="grid grid-cols-[1fr_auto_1fr] w-full h-full items-center header-layout-transition">
+              {/* Sol taraf - Arama + sol menü (desktop) ve arama (mobil) */}
+              <div className="flex h-full items-center lg:items-end justify-start lg:gap-6 xl:gap-8 lg:pb-6 lg:translate-y-[6px] header-layout-transition">
                 {/* Mobil Arama - Solda */}
                 {isMobile && (
                   <button
@@ -704,21 +704,6 @@ export function Header() {
                     </span>
                   </button>
                 )}
-
-                {/* Mobil Logo - Ortada */}
-                <div className="lg:hidden flex items-center absolute left-1/2 -translate-x-1/2">
-                  <Link
-                    to="/"
-                    className="flex items-center gap-1.5 transition-colors"
-                    style={{color: headerForegroundColor}}
-                  >
-                    <SiteLogo
-                      logoUrl={settings?.logoUrl}
-                      className="w-32 h-5"
-                      style={{filter: headerLogoFilter, transition: colorTransition}}
-                    />
-                  </Link>
-                </div>
                 {/* Desktop Arama (masaüstü) - Sol tarafta */}
                 {!isMobile && (
                   <button
@@ -836,29 +821,25 @@ export function Header() {
                 </div>
               </div>
 
-              {/* Orta - Logo (Desktop) */}
-              <div className="hidden lg:flex h-full items-end justify-center lg:pb-6 header-layout-transition-delayed">
+              {/* Orta - Logo (Tüm Ekranlar için Grid Sütun 2) */}
+              <div className="flex h-full items-center lg:items-end justify-center lg:pb-6 px-2 header-layout-transition-delayed pointer-events-auto">
                 <Link
                   to="/"
-                  className="flex items-end gap-3 transition-colors"
+                  className="flex items-center lg:items-end gap-3 transition-colors"
                   style={{color: headerForegroundColor}}
                 >
-                  <div
-                    style={{
-                      width: 'clamp(110px, 10vw + 50px, 288px)', // Smaller minimum to avoid collision
-                    }}
-                  >
+                  <div className="w-28 sm:w-32 lg:w-[clamp(110px,10vw+50px,288px)]">
                     <SiteLogo
                       logoUrl={settings?.logoUrl}
                       className="w-full h-auto"
-                      style={{filter: headerLogoFilter}}
+                      style={{filter: headerLogoFilter, transition: colorTransition}}
                     />
                   </div>
                 </Link>
               </div>
 
               {/* Sağ taraf - Logo'nun sağındaki linkler + ikonlar */}
-              <div className="flex flex-1 h-full items-center lg:items-end justify-end lg:justify-end lg:gap-6 xl:gap-8 lg:pb-6 lg:translate-y-[6px] header-layout-transition">
+              <div className="flex h-full items-center lg:items-end justify-end gap-3 lg:gap-6 xl:gap-8 lg:pb-6 lg:translate-y-[6px] header-layout-transition">
                 {/* Desktop Menü - Logo'nun sağındaki linkler (eşit aralıklarla dağıtılmış) */}
                 <div className="hidden lg:flex items-end">
                   <NavItem
