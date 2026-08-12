@@ -110,13 +110,17 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
         }
       }}
       id="mobile-menu"
-      className={`mobile-menu-overlay fixed top-0 left-0 right-0 bottom-0 lg:hidden z-40 flex flex-col text-white pb-8 px-6 overflow-y-auto overscroll-contain transition-all duration-400 ease-[cubic-bezier(0.76,0,0.24,1)] ${
+      className={`mobile-menu-overlay fixed inset-0 lg:hidden z-40 block overflow-y-auto overscroll-contain text-white pb-8 px-6 transition-all duration-400 ease-[cubic-bezier(0.76,0,0.24,1)] ${
         isMobileMenuOpen
           ? 'translate-y-0 opacity-100 pointer-events-auto'
           : 'translate-y-2 opacity-0 pointer-events-none'
       }`}
       style={{
         paddingTop: `${headerHeight + 16}px`, // Header height + some spacing
+        height: '100vh',
+        maxHeight: '100vh',
+        WebkitOverflowScrolling: 'touch',
+        touchAction: 'pan-y',
         // Kapanırken panel animasyonunu, linklerin ters sırada kaybolma animasyonundan sonra başlat
         transitionDelay: isMobileMenuOpen ? '0ms' : `${mobileMenuCloseDelay}ms`,
         fontFamily: "'Inter', sans-serif",
