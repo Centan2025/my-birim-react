@@ -26,8 +26,13 @@ export default defineType({
       options: {collapsible: true, collapsed: true},
     },
     {
-      name: 'contentGroup',
-      title: '📝 İçerik & Bloklar',
+      name: 'excerptGroup',
+      title: '📝 Proje Kısa Açıklaması',
+      options: {collapsible: true, collapsed: false},
+    },
+    {
+      name: 'blocksGroup',
+      title: '📑 İçerik Blokları',
       options: {collapsible: true, collapsed: true},
     },
     {
@@ -107,13 +112,13 @@ export default defineType({
       name: 'excerpt',
       title: 'Kısa Açıklama',
       type: 'localizedPortableText',
-      fieldset: 'contentGroup',
+      fieldset: 'excerptGroup',
     }),
     defineField({
       name: 'contentBlocks',
       title: 'İçerik Blokları',
       type: 'array',
-      fieldset: 'contentGroup',
+      fieldset: 'blocksGroup',
       of: [{type: 'contentBlock'}],
       description:
         'Proje detay sayfasında gösterilecek içerik blokları (ana sayfa ile aynı sistem)',
