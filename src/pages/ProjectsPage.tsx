@@ -236,10 +236,12 @@ export function ProjectsPage() {
 
     // Wheel listener: Capture phase 100% trap to prevent vertical page scroll when mouse is over project cards
     const handleWheel = (e: WheelEvent) => {
-      if (window.innerWidth < 768) return // Native vertical scroll on mobile
+      const containerEl = scrollContainerRef.current
+      if (!containerEl) return
+      const isHorizontal = containerEl.scrollWidth > containerEl.clientWidth + 10
+      if (!isHorizontal) return // Allow native vertical scroll when in mobile portrait mode
 
       const targetEl = e.target as HTMLElement | null
-      const containerEl = scrollContainerRef.current
 
       // Check if mouse wheel target is inside or hovering any project card or gallery container
       const isOverProjectCard =
@@ -262,7 +264,10 @@ export function ProjectsPage() {
         isDraggingRef.current = false
         return
       }
-      if (!isDraggingRef.current || !container || window.innerWidth < 768) return
+      if (!isDraggingRef.current || !container) return
+      const isHorizontal = container.scrollWidth > container.clientWidth + 10
+      if (!isHorizontal) return
+
       e.preventDefault()
       const x = e.pageX - container.offsetLeft
       const walk = (x - startXRef.current) * 1.8
@@ -276,6 +281,45 @@ export function ProjectsPage() {
       isDraggingRef.current = false
     }
 
+    // Finger Touch Drag Event Handlers for Mobile Horizontal Scroll
+    const handleTouchStart = (e: TouchEvent) => {
+      const containerEl = scrollContainerRef.current
+      if (!containerEl) return
+      const isHorizontal = containerEl.scrollWidth > containerEl.clientWidth + 10
+      if (!isHorizontal) return
+
+      const touch = e.touches[0]
+      if (touch) {
+        isDraggingRef.current = true
+        hasDraggedRef.current = false
+        startXRef.current = touch.pageX - containerEl.offsetLeft
+        scrollLeftStartRef.current = containerEl.scrollLeft
+        targetScrollLeftRef.current = containerEl.scrollLeft
+      }
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const containerEl = scrollContainerRef.current
+      if (!isDraggingRef.current || !containerEl) return
+      const isHorizontal = containerEl.scrollWidth > containerEl.clientWidth + 10
+      if (!isHorizontal) return
+
+      const touch = e.touches[0]
+      if (touch) {
+        const x = touch.pageX - containerEl.offsetLeft
+        const walk = (x - startXRef.current) * 1.8
+        if (Math.abs(walk) > 5) {
+          hasDraggedRef.current = true
+          if (e.cancelable) e.preventDefault()
+        }
+        targetScrollLeftRef.current = scrollLeftStartRef.current - walk
+      }
+    }
+
+    const handleTouchEnd = () => {
+      isDraggingRef.current = false
+    }
+
     // Capture phase (capture: true) traps wheel BEFORE browser computes page scroll
     window.addEventListener('wheel', handleWheel, {passive: false, capture: true})
     window.addEventListener('mousemove', handleWindowMouseMove)
@@ -283,6 +327,9 @@ export function ProjectsPage() {
     window.addEventListener('mouseleave', handleWindowMouseUp)
     window.addEventListener('blur', handleWindowMouseUp)
     window.addEventListener('dragend', handleWindowMouseUp)
+    window.addEventListener('touchstart', handleTouchStart, {passive: true})
+    window.addEventListener('touchmove', handleTouchMove, {passive: false})
+    window.addEventListener('touchend', handleTouchEnd, {passive: true})
 
     return () => {
       if (lerpRafId !== null) cancelAnimationFrame(lerpRafId)
@@ -292,6 +339,9 @@ export function ProjectsPage() {
       window.removeEventListener('mouseleave', handleWindowMouseUp)
       window.removeEventListener('blur', handleWindowMouseUp)
       window.removeEventListener('dragend', handleWindowMouseUp)
+      window.removeEventListener('touchstart', handleTouchStart)
+      window.removeEventListener('touchmove', handleTouchMove)
+      window.removeEventListener('touchend', handleTouchEnd)
     }
   }, [projects])
 
@@ -309,6 +359,9 @@ export function ProjectsPage() {
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     const container = scrollContainerRef.current
     if (!container) return
+    const isHorizontal = container.scrollWidth > container.clientWidth + 10
+    if (!isHorizontal) return
+
     isDraggingRef.current = true
     hasDraggedRef.current = false
     startXRef.current = e.pageX - container.offsetLeft
