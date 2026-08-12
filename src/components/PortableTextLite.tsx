@@ -337,7 +337,7 @@ export default function PortableTextLite({
               ? 'items-end !order-last !mt-auto !mb-0 !pb-0'
               : 'items-start !order-first'
 
-        const gridMarginClass = pairVAlign === 'bottom' ? '!mt-auto !mb-0 !pb-0 !my-0' : 'my-2'
+        const gridMarginClass = pairVAlign === 'bottom' ? '!mt-auto !mb-0 !pb-0' : 'my-2'
         const figureMarginClass = pairVAlign === 'bottom' ? '!mb-0 !pb-0 leading-none' : ''
 
         nodes.push(
