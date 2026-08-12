@@ -295,8 +295,8 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
         />
 
         {/* Top-Left Breadcrumb overlay - aligned with Header Search Icon */}
-        <div className="absolute top-20 landscape:top-12 md:top-20 lg:top-20 left-0 right-0 z-40 pointer-events-none pt-4 landscape:pt-0 md:pt-4 lg:pt-4">
-          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
+        <div className="absolute top-20 landscape:top-12 md:top-20 lg:top-20 left-0 right-0 z-40 pointer-events-none">
+          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 landscape:py-0">
             <Breadcrumbs
               items={[
                 {label: t('homepage'), to: '/'},
