@@ -43,7 +43,8 @@ export const productHotspot = defineType({
       x: 'x',
       y: 'y',
     },
-    prepare({productTitle, productSlug, x, y}) {
+    prepare(selection: any = {}) {
+      const {productTitle, productSlug, x, y} = selection
       return {
         title: productTitle || productSlug || 'İlişkili Ürün',
         subtitle: `Konum: X: %${x ?? 50}, Y: %${y ?? 50}`,

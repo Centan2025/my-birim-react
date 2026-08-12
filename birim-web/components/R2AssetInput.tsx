@@ -393,6 +393,23 @@ export function R2AssetInput(props: ObjectInputProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
 
+  const editButtonRef = useRef<HTMLButtonElement>(null)
+
+  const handleCloseEditMode = useCallback((e?: React.SyntheticEvent) => {
+    if (e) {
+      e.stopPropagation()
+      if ('preventDefault' in e && typeof e.preventDefault === 'function') {
+        e.preventDefault()
+      }
+    }
+    setIsEditMode(false)
+    setTimeout(() => {
+      if (editButtonRef.current) {
+        editButtonRef.current.focus()
+      }
+    }, 50)
+  }, [])
+
   // Crop state
   const [crop, setCrop] = useState<Crop>()
   const [aspect, setAspect] = useState<number | undefined>(undefined)
@@ -788,37 +805,46 @@ export function R2AssetInput(props: ObjectInputProps) {
     [asset, hasValue, onChange, toast, isEditMode],
   )
 
-  const handleSaveCrop = () => {
-    if (crop) {
-      onChange(
-        PatchEvent.from(
-          set({
-            _type: 'r2Asset',
-            ...asset,
-            cropX: Number((crop.x / 100).toFixed(4)),
-            cropY: Number((crop.y / 100).toFixed(4)),
-            cropWidth: Number((crop.width / 100).toFixed(4)),
-            cropHeight: Number((crop.height / 100).toFixed(4)),
-          }),
-        ),
-      )
-      toast.push({status: 'success', title: 'Kırpma Kaydedildi'})
-    } else {
-      // Clear crop
-      const {cropX, cropY, cropWidth, cropHeight, ...rest} = asset
-      onChange(
-        PatchEvent.from([
-          set({_type: 'r2Asset', ...rest}),
-          unset(['cropX']),
-          unset(['cropY']),
-          unset(['cropWidth']),
-          unset(['cropHeight']),
-        ]),
-      )
-      toast.push({status: 'info', title: 'Kırpma Sıfırlandı'})
-    }
-    setIsEditMode(false)
-  }
+  const handleSaveCrop = useCallback(
+    (e?: React.SyntheticEvent) => {
+      if (e) {
+        e.stopPropagation()
+        if ('preventDefault' in e && typeof e.preventDefault === 'function') {
+          e.preventDefault()
+        }
+      }
+      if (crop) {
+        onChange(
+          PatchEvent.from(
+            set({
+              _type: 'r2Asset',
+              ...asset,
+              cropX: Number((crop.x / 100).toFixed(4)),
+              cropY: Number((crop.y / 100).toFixed(4)),
+              cropWidth: Number((crop.width / 100).toFixed(4)),
+              cropHeight: Number((crop.height / 100).toFixed(4)),
+            }),
+          ),
+        )
+        toast.push({status: 'success', title: 'Kırpma Kaydedildi'})
+      } else {
+        // Clear crop
+        const {cropX, cropY, cropWidth, cropHeight, ...rest} = asset
+        onChange(
+          PatchEvent.from([
+            set({_type: 'r2Asset', ...rest}),
+            unset(['cropX']),
+            unset(['cropY']),
+            unset(['cropWidth']),
+            unset(['cropHeight']),
+          ]),
+        )
+        toast.push({status: 'info', title: 'Kırpma Sıfırlandı'})
+      }
+      handleCloseEditMode(e)
+    },
+    [asset, crop, handleCloseEditMode, onChange, toast],
+  )
 
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault()
@@ -992,6 +1018,7 @@ export function R2AssetInput(props: ObjectInputProps) {
                 {!isVideo && (
                   <>
                     <Button
+                      ref={editButtonRef}
                       icon={CropIcon}
                       mode="ghost"
                       tone="primary"
@@ -1000,6 +1027,7 @@ export function R2AssetInput(props: ObjectInputProps) {
                       text="Düzenle"
                       onClick={(e) => {
                         e.stopPropagation()
+                        e.preventDefault()
                         setIsEditMode(true)
                       }}
                     />
@@ -1114,106 +1142,125 @@ export function R2AssetInput(props: ObjectInputProps) {
 
       {/* Edit Modal */}
       {isEditMode && (
-        <Dialog
-          header="Görsel Düzenle (Kırp)"
-          id="crop-dialog"
-          onClose={() => setIsEditMode(false)}
-          width={2}
-          zOffset={1000}
+        <div
+          onKeyDown={(e) => {
+            e.stopPropagation()
+            if (e.key === 'Escape') {
+              if (e.nativeEvent) {
+                e.nativeEvent.stopImmediatePropagation()
+              }
+              handleCloseEditMode(e)
+            }
+          }}
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
         >
-          <Box padding={4}>
-            <Stack space={4}>
-              <Text size={1} muted>
-                Kırpmak istediğiniz alanı seçin. Değişiklikler R2 dosyasını etkilemez, sadece
-                gösterimi değiştirir.
-              </Text>
+          <Dialog
+            header="Görsel Düzenle (Kırp)"
+            id="crop-dialog"
+            onClose={handleCloseEditMode}
+            width={2}
+            zOffset={1000}
+          >
+            <Box padding={4}>
+              <Stack space={4}>
+                <Text size={1} muted>
+                  Kırpmak istediğiniz alanı seçin. Değişiklikler R2 dosyasını etkilemez, sadece
+                  gösterimi değiştirir.
+                </Text>
 
-              {/* Oranlı Seçim Araçları */}
-              <Stack space={2}>
-                <Flex align="center" justify="space-between" wrap="wrap" gap={2}>
-                  <Text size={1} weight="bold">
-                    Oranlı Seçim Araçları (Aspect Ratio):
-                  </Text>
-                  {recommendedPreset?.recommendationReason ? (
-                    <Card tone="positive" padding={2} radius={2}>
-                      <Text size={1} weight="semibold">
-                        ⭐ {recommendedPreset.recommendationReason}
-                      </Text>
-                    </Card>
-                  ) : aspect ? (
-                    <Text size={1} muted>
-                      Sabit Oran: {aspect.toFixed(2)}
+                {/* Oranlı Seçim Araçları */}
+                <Stack space={2}>
+                  <Flex align="center" justify="space-between" wrap="wrap" gap={2}>
+                    <Text size={1} weight="bold">
+                      Oranlı Seçim Araçları (Aspect Ratio):
                     </Text>
-                  ) : null}
-                </Flex>
-                <Flex gap={2} wrap="wrap">
-                  {presets.map((preset) => {
-                    const isSelected = aspect === preset.value
-                    return (
-                      <Button
-                        key={preset.label}
-                        size={1}
-                        text={preset.isRecommended ? `⭐ ${preset.label}` : preset.label}
-                        mode={isSelected ? 'default' : 'outline'}
-                        tone={
-                          isSelected ? 'primary' : preset.isRecommended ? 'positive' : 'default'
-                        }
-                        onClick={() => handleAspectSelect(preset.value)}
+                    {recommendedPreset?.recommendationReason ? (
+                      <Card tone="positive" padding={2} radius={2}>
+                        <Text size={1} weight="semibold">
+                          ⭐ {recommendedPreset.recommendationReason}
+                        </Text>
+                      </Card>
+                    ) : aspect ? (
+                      <Text size={1} muted>
+                        Sabit Oran: {aspect.toFixed(2)}
+                      </Text>
+                    ) : null}
+                  </Flex>
+                  <Flex gap={2} wrap="wrap">
+                    {presets.map((preset) => {
+                      const isSelected = aspect === preset.value
+                      return (
+                        <Button
+                          key={preset.label}
+                          size={1}
+                          text={preset.isRecommended ? `⭐ ${preset.label}` : preset.label}
+                          mode={isSelected ? 'default' : 'outline'}
+                          tone={
+                            isSelected ? 'primary' : preset.isRecommended ? 'positive' : 'default'
+                          }
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleAspectSelect(preset.value)
+                          }}
+                        />
+                      )
+                    })}
+                  </Flex>
+                </Stack>
+
+                <Box
+                  style={{
+                    background: '#000',
+                    borderRadius: '4px',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <CropOverlayCSS>
+                    <ReactCrop
+                      crop={crop}
+                      onChange={(_, percentCrop) => setCrop(percentCrop)}
+                      aspect={aspect}
+                    >
+                      <img
+                        ref={modalImageRef}
+                        src={previewUrl}
+                        alt="Crop Preview"
+                        onLoad={() => {
+                          // Keep image loaded without forcing automatic crop box
+                        }}
+                        style={{
+                          maxHeight: '70vh',
+                          maxWidth: '100%',
+                          transform: isMirrored ? 'scaleX(-1)' : 'none',
+                          transition: 'transform 0.3s ease-in-out',
+                        }}
                       />
-                    )
-                  })}
+                    </ReactCrop>
+                  </CropOverlayCSS>
+                </Box>
+
+                <Flex justify="flex-end" gap={3}>
+                  <Button text="İptal" mode="ghost" onClick={handleCloseEditMode} />
+                  <Button
+                    text="Kırpmayı Sıfırla"
+                    mode="ghost"
+                    tone="critical"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setCrop(undefined)
+                      setAspect(undefined)
+                    }}
+                  />
+                  <Button text="Kaydet ve Uygula" tone="primary" onClick={handleSaveCrop} />
                 </Flex>
               </Stack>
-
-              <Box
-                style={{
-                  background: '#000',
-                  borderRadius: '4px',
-                  overflow: 'hidden',
-                  display: 'flex',
-                  justifyContent: 'center',
-                }}
-              >
-                <CropOverlayCSS>
-                  <ReactCrop
-                    crop={crop}
-                    onChange={(_, percentCrop) => setCrop(percentCrop)}
-                    aspect={aspect}
-                  >
-                    <img
-                      ref={modalImageRef}
-                      src={previewUrl}
-                      alt="Crop Preview"
-                      onLoad={() => {
-                        // Keep image loaded without forcing automatic crop box
-                      }}
-                      style={{
-                        maxHeight: '70vh',
-                        maxWidth: '100%',
-                        transform: isMirrored ? 'scaleX(-1)' : 'none',
-                        transition: 'transform 0.3s ease-in-out',
-                      }}
-                    />
-                  </ReactCrop>
-                </CropOverlayCSS>
-              </Box>
-
-              <Flex justify="flex-end" gap={3}>
-                <Button text="İptal" mode="ghost" onClick={() => setIsEditMode(false)} />
-                <Button
-                  text="Kırpmayı Sıfırla"
-                  mode="ghost"
-                  tone="critical"
-                  onClick={() => {
-                    setCrop(undefined)
-                    setAspect(undefined)
-                  }}
-                />
-                <Button text="Kaydet ve Uygula" tone="primary" onClick={handleSaveCrop} />
-              </Flex>
-            </Stack>
-          </Box>
-        </Dialog>
+            </Box>
+          </Dialog>
+        </div>
       )}
     </Stack>
   )

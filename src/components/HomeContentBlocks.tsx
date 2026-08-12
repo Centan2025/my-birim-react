@@ -413,6 +413,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         const isLeft = block.position === 'left'
         const isRight = block.position === 'right'
         const isCenter = block.position === 'center'
+        const isFullWidthMedia = block.mediaWidth === 'full' || isFullWidth
 
         const backgroundColor = overrideBackgroundColor
           ? overrideBackgroundColor
@@ -480,10 +481,14 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
         const titlePosition = block.titlePosition || 'below'
         const titleFont = block.titleFont || 'normal'
         const contentFont = block.contentFont || 'normal'
+        const isVertCenter = block.verticalAlignment === 'center'
+        const isVertBottom = block.verticalAlignment === 'bottom'
+        const isVertTop = block.verticalAlignment === 'top' || (!isVertCenter && !isVertBottom)
+
         const verticalAlignClass =
-          block.verticalAlignment === 'top'
+          isVertTop
             ? 'justify-start'
-            : block.verticalAlignment === 'bottom'
+            : isVertBottom
               ? 'justify-end'
               : 'justify-center'
 
@@ -644,16 +649,17 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               : `"${contentFont}", sans-serif`
 
         const buttonPos = block.buttonPosition || 'below'
+        const isTopBody = isVertTop && (titlePosition !== 'above' || !hasTitle)
 
         const descriptionElement = hasDescription && (
           <ScrollReveal
             delay={100}
             threshold={0.1}
             width="w-full"
-            className={`h-auto ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0 pb-0' : ''}`}
+            className={`h-full w-full flex flex-col flex-1 min-h-0 ${isTopBody ? 'mt-0 pt-0 pb-0' : ''}`}
           >
             <div
-              className={`prose max-w-none ${textAlignClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0 pt-0 prose-p:first-of-type:!mt-0 [&_.portable-text-container>*:first-child]:!mt-0' : ''}`}
+              className={`prose max-w-none h-full w-full flex flex-col flex-1 min-h-0 ${textAlignClass} ${isTopBody ? 'mt-0 pt-0 prose-p:first-of-type:!mt-0' : ''}`}
             >
               {(() => {
                 const desc = descriptionContent
@@ -665,12 +671,12 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   return (
                     <div
                       ref={!isNormalContentFont ? applyFontRef(contentFontFamily) : undefined}
-                      className={`${marginClass} ${widthClass} ${isNormalContentFont ? 'font-light text-base md:text-lg lg:text-xl' : ''} text-[var(--text-primary)] opacity-90 ${block.verticalAlignment === 'top' && !hasTitle ? '[&_.portable-text-container>*:first-child]:!mt-0' : ''}`}
+                      className={`${marginClass} ${widthClass} h-full w-full flex flex-col flex-1 min-h-0 ${isNormalContentFont ? 'font-light text-base md:text-lg lg:text-xl' : ''} text-[var(--text-primary)] opacity-90`}
                       style={!isNormalContentFont ? {fontWeight: 300} : {}}
                     >
                       <PortableTextLite
                         value={desc}
-                        removeTopMargin={block.verticalAlignment === 'top' && !hasTitle}
+                        removeTopMargin={isTopBody}
                         onMediaClick={onMediaClick}
                       />
                     </div>
@@ -680,7 +686,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 return (
                   <p
                     ref={!isNormalContentFont ? applyFontRef(contentFontFamily) : undefined}
-                    className={`text-[var(--text-primary)] opacity-90 ${isNormalContentFont ? 'font-light text-base md:text-lg lg:text-xl' : ''} leading-relaxed ${widthClass} ${marginClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'mt-0' : ''}`}
+                    className={`text-[var(--text-primary)] opacity-90 ${isNormalContentFont ? 'font-light text-base md:text-lg lg:text-xl' : ''} leading-relaxed ${widthClass} ${marginClass} ${isTopBody ? 'mt-0' : ''}`}
                     style={!isNormalContentFont ? {fontWeight: 300} : {}}
                   >
                     {desc}
@@ -721,7 +727,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           </ScrollReveal>
         )
 
-        const mediaWidthClass = isFullWidth
+        const mediaWidthClass = isFullWidthMedia
           ? 'w-full'
           : 'w-full md:max-w-[92%] lg:max-w-[80vw] mx-auto'
 
@@ -894,18 +900,18 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             delay={50}
             threshold={0.1}
             width={isFullWidth || isCenter ? 'w-full' : 'w-auto'}
-            className={`h-auto ${isFullWidth || isCenter ? 'w-full' : ''} ${isCenter ? 'flex justify-center' : ''}`}
+            className={`h-full w-full ${isFullWidth || isCenter ? 'w-full' : ''} ${isCenter ? 'flex justify-center' : ''}`}
           >
             {block.mediaType === 'youtube' ? (
               <div
-                className={`relative ${mediaWidthClass} ${isMobile ? 'w-full' : ''} aspect-video overflow-hidden`}
+                className={`relative ${mediaWidthClass} ${isMobile ? 'w-full' : ''} ${hasTextContent ? 'h-full min-h-[300px]' : 'aspect-video'} overflow-hidden`}
               >
                 <YouTubeBackground url={mediaUrl} />
                 {renderMediaOverlays()}
               </div>
             ) : block.mediaType === 'video' ? (
               <div
-                className={`relative w-full h-full ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`}
+                className={`relative w-full ${hasTextContent ? 'h-full' : 'h-auto'} ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`}
                 onClick={() => onMediaClick && !block.linkUrl && onMediaClick(mediaUrl)}
                 onKeyDown={
                   onMediaClick && !block.linkUrl
@@ -924,7 +930,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   src={mediaUrl}
                   srcMobile={mediaMobileUrl}
                   srcDesktop={mediaDesktopUrl}
-                  className={`${isFullWidth ? 'w-full h-auto max-w-full' : `${mediaWidthClass} ${imageBorderClass}`} ${isMobile ? 'w-full object-cover' : 'object-cover'} block`}
+                  className={`${isFullWidthMedia ? 'w-full' : `${mediaWidthClass} ${imageBorderClass}`} w-full ${hasTextContent ? 'h-full object-cover' : 'h-auto'} ${isMobile ? 'object-cover' : 'object-cover'} block`}
                   autoPlay
                   loop
                   muted
@@ -935,7 +941,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                 {renderMediaOverlays()}
               </div>
             ) : block.mediaType === 'panels' ? (
-              <div className={`relative ${mediaWidthClass}`}>
+              <div className={`relative ${mediaWidthClass} ${hasTextContent ? 'h-full' : ''}`}>
                 <PanelSlider
                   media={block.imagePanels || []}
                   panelSize={block.panelSize}
@@ -947,7 +953,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
               </div>
             ) : (
               <div
-                className={`relative w-full h-auto leading-none block overflow-hidden ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`}
+                className={`relative w-full ${hasTextContent ? 'h-full' : 'h-auto'} leading-none block overflow-hidden ${onMediaClick && !block.linkUrl ? 'cursor-pointer' : ''}`}
                 onClick={() => onMediaClick && !block.linkUrl && onMediaClick(mediaUrl)}
                 onKeyDown={
                   onMediaClick && !block.linkUrl
@@ -967,7 +973,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   srcMobile={mediaMobileUrl}
                   srcDesktop={mediaDesktopUrl}
                   alt=""
-                  className={`${isFullWidth ? 'w-full h-auto' : `${mediaWidthClass} ${imageBorderClass}`} w-full h-auto block`}
+                  className={`${isFullWidthMedia ? 'w-full' : `${mediaWidthClass} ${imageBorderClass}`} w-full ${hasTextContent ? 'h-full object-cover' : 'h-auto'} block`}
                   loading="lazy"
                   quality={85}
                   crop={block.crop}
@@ -1038,6 +1044,12 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
             : 24
         const topPaddingVal = block.paddingTop !== undefined ? block.paddingTop : isMobile ? 0 : 24
         const bottomPaddingVal = block.paddingBottom !== undefined ? block.paddingBottom : 0
+        const columnGapPx =
+          block.columnGap !== undefined
+            ? Number(block.columnGap)
+            : topPaddingVal === 0 && bottomPaddingVal === 0
+              ? 0
+              : undefined
 
         return (
           <React.Fragment key={index}>
@@ -1072,7 +1084,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   </div>
                 ) : (
                   <div
-                    className={`w-full ${isMobile ? 'max-w-full px-0' : 'max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0'} overflow-hidden relative ${borderPaddingClass}`}
+                    className={`w-full ${isMobile || isFullWidthMedia ? 'max-w-full px-0' : 'max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0'} overflow-hidden relative ${borderPaddingClass}`}
                   >
                     <div
                       className={
@@ -1083,17 +1095,12 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                                 : isRight
                                   ? 'md:flex-row-reverse'
                                   : 'md:flex-row'
-                            } ${block.verticalAlignment === 'top' ? 'gap-x-4 md:gap-x-6 gap-y-0' : 'gap-4 md:gap-12'} ${
-                              block.verticalAlignment === 'top'
-                                ? 'items-start'
-                                : block.verticalAlignment === 'bottom'
-                                  ? 'items-end'
-                                  : 'items-center'
-                            }`
+                            } ${columnGapPx === undefined ? (isVertTop ? 'gap-6 md:gap-10' : 'gap-6 md:gap-12') : ''} items-stretch md:items-stretch`
                           : hasTextContent && !hasMedia
                             ? 'flex flex-col'
                             : 'flex flex-col items-center gap-4 md:gap-6'
                       }
+                      style={columnGapPx !== undefined ? {gap: `${columnGapPx}px`} : undefined}
                     >
                       {hasMedia && (
                         <div
@@ -1106,7 +1113,7 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                       )}
                       {hasTextContent && (
                         <div
-                          className={`w-full ${hasMedia ? 'md:w-1/2' : 'md:w-full'} ${isMobile ? 'px-4 py-4 md:px-0 md:py-0' : ''} flex flex-col ${hasTitle && (hasDescription || block.linkText) ? 'gap-4 md:gap-6' : 'gap-0'} ${block.verticalAlignment === 'top' ? 'self-start' : block.verticalAlignment === 'bottom' ? 'self-end' : 'self-center'} ${verticalAlignClass} ${block.verticalAlignment === 'top' && !hasTitle ? 'pt-0 mt-0' : ''}`}
+                          className={`w-full ${hasMedia ? 'md:w-1/2' : 'md:w-full'} ${isMobile ? 'px-4 py-4 md:px-0 md:py-0' : ''} flex flex-col h-full flex-1 min-h-0 self-stretch ${hasTitle && (hasDescription || block.linkText) ? 'gap-4 md:gap-6' : 'gap-0'} ${verticalAlignClass}`}
                         >
                           {hasTitle && titleElement}
                           {bodyElement}

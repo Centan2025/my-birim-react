@@ -122,6 +122,9 @@ const portableTextBlocks = [
     name: 'portableTextImage',
     type: 'object',
     title: 'Görsel (R2)',
+    options: {
+      modal: {type: 'popover'},
+    },
     fields: [
       {
         name: 'imageR2',
@@ -152,6 +155,20 @@ const portableTextBlocks = [
           ],
         },
         initialValue: 'full',
+      },
+      {
+        name: 'verticalAlign',
+        type: 'string',
+        title: 'Dikey Hizalama',
+        options: {
+          list: [
+            {title: 'Üste Yasla', value: 'top'},
+            {title: 'Ortala', value: 'center'},
+            {title: 'Alta Yasla', value: 'bottom'},
+          ],
+        },
+        initialValue: 'top',
+        description: 'Yan yana duran görsellerin dikey hiza seçeneği (Üste, Ortala, Alta).',
       },
     ],
     components: {

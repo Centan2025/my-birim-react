@@ -1374,6 +1374,15 @@ export const contentBlock = defineType({
       description: 'Bloğun alt iç boşluğu (opsiyonel).',
     }),
     defineField({
+      name: 'columnGap',
+      title: 'Sol-Sağ Sütun Arası Boşluk (Piksel)',
+      type: 'number',
+      fieldset: 'spacingGroup',
+      validation: (Rule) => Rule.min(0).max(300),
+      description:
+        'Sol görsel ile sağ metin alanı arasındaki yatay boşluğu piksel cinsinden belirler (örneğin: 0 sıfır yapışık, 24 standart, 48 geniş).',
+    }),
+    defineField({
       name: 'overlayText',
       title: 'Görsel Üzerindeki Yazı (Opsiyonel)',
       type: 'localizedPortableText',

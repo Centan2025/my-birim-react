@@ -162,7 +162,8 @@ export default defineType({
   ],
   preview: {
     select: {r2Url: 'heroImageR2.url'},
-    prepare({r2Url}) {
+    prepare(selection: any = {}) {
+      const {r2Url} = selection
       let finalUrl = getPreviewUrl(r2Url)
       return {
         title: 'Hakkımızda',

@@ -538,6 +538,10 @@ export interface ContentBlock {
   linkUrl?: string
   /** Position: left, right, center, or full */
   position: 'left' | 'right' | 'center' | 'full'
+  /** Media Width: center or full */
+  mediaWidth?: 'center' | 'full'
+  /** Column Gap: horizontal space between left and right columns in pixels */
+  columnGap?: number
   /** Text Position: above or below the media */
   textPosition?: 'above' | 'below'
   /** Title Position: above or below the media */

@@ -41,7 +41,8 @@ export const interactiveShowcaseItem = defineType({
       title: 'title.tr',
       hotspots: 'hotspots',
     },
-    prepare({title, hotspots}) {
+    prepare(selection: any = {}) {
+      const {title, hotspots} = selection
       const count = Array.isArray(hotspots) ? hotspots.length : 0
       return {
         title: title || 'İnteraktif Slayt Görseli',

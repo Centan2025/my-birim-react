@@ -1,4 +1,4 @@
-import {useMemo, useState, useEffect} from 'react'
+import {useMemo, useState, useEffect, useRef, useCallback} from 'react'
 import {useQuery} from '@tanstack/react-query'
 import {useParams, Link} from 'react-router-dom'
 import {OptimizedImage} from '../components/OptimizedImage'
@@ -97,8 +97,8 @@ export function ProjectDetailPage() {
     if (!project || allProjects.length < 2) return {prevProject: null, nextProject: null}
     const currentIndex = allProjects.findIndex(p => p.id === project.id)
     if (currentIndex === -1) return {prevProject: null, nextProject: null}
-    const prev = currentIndex > 0 ? allProjects[currentIndex - 1] : null
-    const next = currentIndex < allProjects.length - 1 ? allProjects[currentIndex + 1] : null
+    const prev = currentIndex > 0 ? allProjects[currentIndex - 1] : allProjects[allProjects.length - 1]
+    const next = currentIndex < allProjects.length - 1 ? allProjects[currentIndex + 1] : allProjects[0]
     return {prevProject: prev, nextProject: next}
   }, [project, allProjects])
 
@@ -179,23 +179,25 @@ export function ProjectDetailPage() {
     project && project.cover && typeof project.cover === 'object'
       ? (project.cover as {hotspot?: R2ImageMetadata['hotspot']}).hotspot
       : undefined
-  const coverCropMobile =
-    project && project.cover && typeof project.cover === 'object'
-      ? (project.cover as {cropMobile?: R2ImageMetadata['crop']}).cropMobile
-      : undefined
-  const coverHotspotMobile =
-    project && project.cover && typeof project.cover === 'object'
-      ? (project.cover as {hotspotMobile?: R2ImageMetadata['hotspot']}).hotspotMobile
-      : undefined
+  const [currentHeroSlide, setCurrentHeroSlide] = useState(0)
+  const [isHeroDragging, setIsHeroDragging] = useState(false)
+  const [dragStartX, setDragStartX] = useState(0)
+  const [draggedX, setDraggedX] = useState(0)
+  const [isHeroTransitioning, setIsHeroTransitioning] = useState(false)
+  const [areDotsVisible, setAreDotsVisible] = useState(false)
 
-  const mediaData = useMemo(() => {
-    if (!project) return {all: [], gallery: []}
+  const DRAG_THRESHOLD = 40
+  const heroContainerRef = useRef<HTMLDivElement>(null)
+  const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const autoPlayIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const dragStartY = useRef<number>(0)
 
-    const media: MediaItem[] = []
 
-    // 1. Kapak Görseli
+  const heroMedia = useMemo(() => {
+    if (!project) return []
+    const list: MediaItem[] = []
     if (coverUrl) {
-      media.push({
+      list.push({
         type: 'image',
         url: coverUrl,
         urlMobile: coverMobile,
@@ -204,15 +206,12 @@ export function ProjectDetailPage() {
         hotspot: coverHotspot,
       })
     }
-
-    // 2. Ana Galeri
     if (project.media && Array.isArray(project.media)) {
       project.media.forEach(m => {
-        const u = m.url
-        if (u) {
-          media.push({
+        if (m.url && m.url !== coverUrl) {
+          list.push({
             type: m.type || 'image',
-            url: u,
+            url: m.url,
             urlMobile: m.urlMobile,
             urlDesktop: m.urlDesktop,
             crop: m.crop,
@@ -221,8 +220,189 @@ export function ProjectDetailPage() {
         }
       })
     }
+    return list
+  }, [project, coverUrl, coverMobile, coverDesktop, coverCrop, coverHotspot])
 
-    // 3. İçerik Blokları
+  const heroCount = heroMedia.length
+  const safeHeroIndex = heroCount > 0 ? ((currentHeroSlide % heroCount) + heroCount) % heroCount : 0
+
+  const extendedHeroMedia = useMemo(() => {
+    if (heroCount <= 1) return heroMedia
+    const last = heroMedia[heroCount - 1]
+    const first = heroMedia[0]
+    if (!last || !first) return heroMedia
+    return [last, ...heroMedia, first]
+  }, [heroMedia, heroCount])
+
+  const resetHeroCloneIfNeeded = useCallback(() => {
+    if (heroCount <= 1) return
+    if (transitionTimeoutRef.current) {
+      clearTimeout(transitionTimeoutRef.current)
+      transitionTimeoutRef.current = null
+    }
+    const safeCurrent = ((currentHeroSlide % heroCount) + heroCount) % heroCount
+    if (safeCurrent !== currentHeroSlide) {
+      setIsHeroTransitioning(true)
+      setCurrentHeroSlide(safeCurrent)
+    }
+  }, [currentHeroSlide, heroCount])
+
+  const goToNextHeroSlide = useCallback(() => {
+    if (heroCount <= 1) {
+      setDraggedX(0)
+      return
+    }
+    const safeCurrent = ((currentHeroSlide % heroCount) + heroCount) % heroCount
+    const nextSlide = safeCurrent + 1
+
+    if (transitionTimeoutRef.current) {
+      clearTimeout(transitionTimeoutRef.current)
+    }
+
+    if (nextSlide >= heroCount) {
+      setIsHeroTransitioning(false)
+      setCurrentHeroSlide(heroCount)
+      transitionTimeoutRef.current = setTimeout(() => {
+        setIsHeroTransitioning(true)
+        setCurrentHeroSlide(0)
+        requestAnimationFrame(() => {
+          setIsHeroTransitioning(false)
+          transitionTimeoutRef.current = null
+        })
+      }, 750)
+    } else {
+      setIsHeroTransitioning(false)
+      setCurrentHeroSlide(nextSlide)
+    }
+    setDraggedX(0)
+  }, [currentHeroSlide, heroCount])
+
+  const goToPrevHeroSlide = useCallback(() => {
+    if (heroCount <= 1) {
+      setDraggedX(0)
+      return
+    }
+    const safeCurrent = ((currentHeroSlide % heroCount) + heroCount) % heroCount
+    const prevSlide = safeCurrent - 1
+
+    if (transitionTimeoutRef.current) {
+      clearTimeout(transitionTimeoutRef.current)
+    }
+
+    if (prevSlide < 0) {
+      setIsHeroTransitioning(false)
+      setCurrentHeroSlide(-1)
+      transitionTimeoutRef.current = setTimeout(() => {
+        setIsHeroTransitioning(true)
+        setCurrentHeroSlide(heroCount - 1)
+        requestAnimationFrame(() => {
+          setIsHeroTransitioning(false)
+          transitionTimeoutRef.current = null
+        })
+      }, 750)
+    } else {
+      setIsHeroTransitioning(false)
+      setCurrentHeroSlide(prevSlide)
+    }
+    setDraggedX(0)
+  }, [currentHeroSlide, heroCount])
+
+  // Otomatik Oynatma (Auto-play 5s)
+  useEffect(() => {
+    if (heroCount <= 1 || isHeroDragging) return
+    autoPlayIntervalRef.current = setInterval(() => {
+      goToNextHeroSlide()
+    }, 5000)
+    return () => {
+      if (autoPlayIntervalRef.current) clearInterval(autoPlayIntervalRef.current)
+    }
+  }, [heroCount, isHeroDragging, goToNextHeroSlide])
+
+  // Mouse & Touch Sürükleme Event Handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (heroCount <= 1) return
+    if (e.target instanceof HTMLElement && e.target.closest('a, button')) return
+    resetHeroCloneIfNeeded()
+    setIsHeroDragging(true)
+    setDragStartX(e.clientX)
+    dragStartY.current = e.clientY
+    setDraggedX(0)
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isHeroDragging || heroCount <= 1) return
+    setDraggedX(e.clientX - dragStartX)
+  }
+
+  const handleMouseUp = () => {
+    if (!isHeroDragging) return
+    setIsHeroDragging(false)
+    if (draggedX < -DRAG_THRESHOLD) {
+      goToNextHeroSlide()
+    } else if (draggedX > DRAG_THRESHOLD) {
+      goToPrevHeroSlide()
+    } else {
+      setDraggedX(0)
+    }
+  }
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (heroCount <= 1) return
+    if (e.target instanceof HTMLElement && e.target.closest('a, button')) return
+    const touch = e.touches[0]
+    if (!touch) return
+    resetHeroCloneIfNeeded()
+    setIsHeroDragging(true)
+    setDragStartX(touch.clientX)
+    dragStartY.current = touch.clientY
+    setDraggedX(0)
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isHeroDragging || heroCount <= 1) return
+    const touch = e.touches[0]
+    if (!touch) return
+    const deltaX = Math.abs(touch.clientX - dragStartX)
+    const deltaY = Math.abs(touch.clientY - dragStartY.current)
+    if (deltaY > deltaX * 2.5 && deltaY > 15) {
+      setIsHeroDragging(false)
+      setDraggedX(0)
+      return
+    }
+    setDraggedX(touch.clientX - dragStartX)
+  }
+
+  // Dots animasyonu
+  useEffect(() => {
+    if (!project) return
+    setAreDotsVisible(false)
+    const timer = setTimeout(() => {
+      setAreDotsVisible(true)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [project])
+
+  const handleTouchEnd = () => {
+    if (!isHeroDragging) return
+    setIsHeroDragging(false)
+    if (draggedX < -DRAG_THRESHOLD) {
+      goToNextHeroSlide()
+    } else if (draggedX > DRAG_THRESHOLD) {
+      goToPrevHeroSlide()
+    } else {
+      setDraggedX(0)
+    }
+  }
+
+  const mediaData = useMemo(() => {
+    if (!project) return {all: [], gallery: []}
+
+    const media: MediaItem[] = []
+
+    // 1. Hero Medyaları
+    heroMedia.forEach(m => media.push(m))
+
+    // 2. İçerik Blokları
     if (project.contentBlocks && Array.isArray(project.contentBlocks)) {
       project.contentBlocks.forEach((block: ContentBlock) => {
         const mUrl = block.image || block.url
@@ -274,7 +454,7 @@ export function ProjectDetailPage() {
       })
     }
 
-    // 4. Body
+    // 3. Body
     const scanDeep = (val: unknown, target: MediaItem[]) => {
       if (!val) return
       if (Array.isArray(val)) {
@@ -317,7 +497,8 @@ export function ProjectDetailPage() {
     })
 
     const excludedUrls = new Set<string>()
-    if (coverUrl) excludedUrls.add(coverUrl)
+    // Hero medyaları altta tekrar sıralanmayacak
+    heroMedia.forEach(m => excludedUrls.add(m.url))
     if (project.contentBlocks) {
       project.contentBlocks.forEach((block: ContentBlock) => {
         const url = block.image || block.url
@@ -338,7 +519,7 @@ export function ProjectDetailPage() {
     const galleryItems = masterMedia.filter(m => !excludedUrls.has(m.url))
 
     return {all: masterMedia, gallery: galleryItems}
-  }, [project, coverUrl, coverMobile, coverDesktop, coverCrop, coverHotspot, t])
+  }, [project, heroMedia, t])
 
   const allMedia = mediaData.all
   const galleryMedia = mediaData.gallery
@@ -408,38 +589,108 @@ export function ProjectDetailPage() {
           }
         }
       `}</style>
-      <div className="relative w-full h-[calc(100vh-48px)] md:h-[calc(100vh-56px)] overflow-hidden">
-        {coverUrl ? (
-          <div className="absolute inset-0">
-            <OptimizedImage
-              src={coverUrl}
-              srcMobile={coverMobile}
-              srcDesktop={coverDesktop}
-              alt={t(project.title)}
-              className="w-full h-full object-cover"
-              loading="eager"
-              quality={90}
-              crop={coverCrop}
-              hotspot={coverHotspot}
-              cropMobile={coverCropMobile}
-              hotspotMobile={coverHotspotMobile}
-              origWidth={
-                project.cover && typeof project.cover === 'object'
-                  ? (project.cover as {origWidth?: number}).origWidth
-                  : undefined
-              }
-              origHeight={
-                project.cover && typeof project.cover === 'object'
-                  ? (project.cover as {origHeight?: number}).origHeight
-                  : undefined
-              }
-            />
+      <div
+        ref={heroContainerRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className="relative w-full h-[calc(100vh-48px)] md:h-[calc(100vh-56px)] overflow-hidden select-none"
+      >
+        {heroCount > 0 ? (
+          <div className="absolute inset-0 overflow-hidden">
+            <div
+              className={`flex h-full w-full ${
+                isHeroDragging ? 'cursor-grabbing' : heroCount > 1 ? 'cursor-grab' : ''
+              }`}
+              style={{
+                transform:
+                  heroCount > 1
+                    ? `translateX(calc(-${(currentHeroSlide + 1) * 100}% + ${draggedX}px))`
+                    : 'translateX(0)',
+                transition: isHeroTransitioning
+                  ? 'none'
+                  : isHeroDragging
+                    ? 'none'
+                    : 'transform 750ms cubic-bezier(0.25, 1, 0.5, 1)',
+              }}
+            >
+              {extendedHeroMedia.map((m, i) => (
+                <div key={i} className="relative w-full h-full flex-shrink-0">
+                  {m.type === 'video' ? (
+                    <OptimizedVideo
+                      src={m.url}
+                      srcMobile={m.urlMobile}
+                      srcDesktop={m.urlDesktop}
+                      className="w-full h-full object-cover pointer-events-none"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                    />
+                  ) : (
+                    <OptimizedImage
+                      src={m.url}
+                      srcMobile={m.urlMobile}
+                      srcDesktop={m.urlDesktop}
+                      alt={`${t(project.title)} ${i + 1}`}
+                      className="w-full h-full object-cover pointer-events-none"
+                      loading={i === 1 || heroCount === 1 ? 'eager' : 'lazy'}
+                      quality={90}
+                      crop={m.crop}
+                      hotspot={m.hotspot}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Slayt Noktaları (Indicators - HomeHero Stili) */}
+            {heroCount > 1 && (
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 pointer-events-auto">
+                {(() => {
+                  const centerIndex = Math.floor(heroCount / 2)
+                  return heroMedia.map((_, index) => {
+                    const isActive = index === safeHeroIndex
+                    const distanceFromCenter = Math.abs(index - centerIndex)
+                    const animationDelay = distanceFromCenter * 50
+
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          setIsHeroTransitioning(false)
+                          setCurrentHeroSlide(index)
+                        }}
+                        className={`relative h-2 rounded-none transition-all duration-500 ease-in-out group ${
+                          areDotsVisible ? 'animate-dot-grow' : 'opacity-0 scale-0'
+                        } ${isActive ? 'w-2 bg-red-900' : 'w-2 bg-white/40 hover:bg-white/60'}`}
+                        style={{
+                          transitionDelay: `${animationDelay}ms`,
+                        }}
+                        aria-label={`Go to slide ${index + 1}`}
+                      >
+                        {isActive && (
+                          <div
+                            key={`${safeHeroIndex}-${index}`}
+                            className="absolute top-0 left-0 h-full rounded-none bg-red-900 animate-fill-line"
+                          />
+                        )}
+                      </button>
+                    )
+                  })
+                })()}
+              </div>
+            )}
           </div>
         ) : (
           <div className="absolute inset-0 bg-[var(--bg-secondary)]" />
         )}
 
-        <div className="absolute inset-0 bg-black/40 z-10" />
+        <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
 
         {/* Top-Left Breadcrumb overlay - White color */}
         <div className="absolute top-0 left-0 right-0 z-40 pointer-events-none pt-20 lg:pt-20 max-lg:landscape:pt-12">
@@ -466,7 +717,7 @@ export function ProjectDetailPage() {
             {/* Bottom-Left Title & Project Info */}
             <div className="flex-1">
               <h1
-                className="project-hero-title text-base max-md:landscape:text-base md:text-3xl lg:text-5xl font-light tracking-tight text-white mb-1 md:mb-4 font-michroma pointer-events-auto"
+                className="project-hero-title text-base max-md:landscape:text-base md:text-2xl lg:text-3xl font-light tracking-tight text-white mb-1 md:mb-3 font-michroma pointer-events-auto"
                 style={{
                   transform: isTitleVisible ? 'translateX(0)' : 'translateX(-40px)',
                   opacity: isTitleVisible ? 1 : 0,
@@ -479,7 +730,7 @@ export function ProjectDetailPage() {
 
               {project.date && (
                 <p
-                  className="project-hero-date text-xs max-md:landscape:text-xs md:text-lg lg:text-2xl text-white/90 font-light font-michroma pointer-events-auto"
+                  className="project-hero-date text-xs max-md:landscape:text-xs md:text-base lg:text-lg text-white/90 font-light font-michroma pointer-events-auto"
                   style={{
                     transform: isLocationVisible ? 'translateX(0)' : 'translateX(-40px)',
                     opacity: isLocationVisible ? 1 : 0,
@@ -550,7 +801,7 @@ export function ProjectDetailPage() {
                 >
                   <button
                     onClick={() => {
-                      setIdx(0)
+                      setIdx(safeHeroIndex)
                       setIsFullscreenOpen(true)
                     }}
                     className="pointer-events-auto flex h-8 w-8 md:h-12 md:w-12 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all hover:bg-white/10"
@@ -658,7 +909,7 @@ export function ProjectDetailPage() {
       )}
 
       {project.contentBlocks && project.contentBlocks.length > 0 && (
-        <div className="mt-10">
+        <div>
           <HomeContentBlocks
             blocks={project.contentBlocks}
             isMobile={isMobile}
@@ -668,7 +919,7 @@ export function ProjectDetailPage() {
       )}
 
       {galleryMedia.length > 0 && (
-        <div className="mt-10 bg-[var(--bg-secondary)] pb-10">
+        <div className="bg-[var(--bg-secondary)] pb-10">
           <div className="w-full max-w-[95%] md:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
             <div className="space-y-0">
               {galleryMedia.map((m, i) => {

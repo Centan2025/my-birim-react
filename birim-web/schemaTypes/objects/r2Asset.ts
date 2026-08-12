@@ -43,7 +43,8 @@ export default defineType({
       path: 'path',
       isMirrored: 'isMirrored',
     },
-    prepare({url, alt, path, isMirrored}) {
+    prepare(selection: any = {}) {
+      const {url, alt, path, isMirrored} = selection
       const fileName = path ? path.split('/').pop() : 'R2 Görseli'
       return {
         title: alt || fileName || 'Görsel',

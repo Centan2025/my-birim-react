@@ -29,6 +29,7 @@ type Block = {
   alt?: string
   caption?: string
   layout?: 'full' | 'center' | 'left' | 'right'
+  verticalAlign?: 'top' | 'center' | 'bottom'
   url?: string
   style_type?: string // for divider or cta
   align?: 'left' | 'center' | 'right' // for cta positioning
@@ -199,6 +200,13 @@ export default function PortableTextLite({
 }) {
   if (!Array.isArray(value) || value.length === 0) return null
 
+  // Sort blocks stably by verticalAlign so bottom-aligned items are placed last in DOM order
+  const sortedValue = [...value].sort((a, b) => {
+    const rankA = a.verticalAlign === 'bottom' ? 2 : a.verticalAlign === 'center' ? 1 : 0
+    const rankB = b.verticalAlign === 'bottom' ? 2 : b.verticalAlign === 'center' ? 1 : 0
+    return rankA - rankB
+  })
+
   const nodes: ReactNode[] = []
   let listBuffer: {type: 'ul' | 'ol'; items: ReactNode[]} | null = null
   let listCounter = 0
@@ -228,8 +236,8 @@ export default function PortableTextLite({
     return newClass.includes('!mt-0') ? newClass : `${newClass} !mt-0`
   }
 
-  for (let idx = 0; idx < value.length; idx++) {
-    const block = value[idx]
+  for (let idx = 0; idx < sortedValue.length; idx++) {
+    const block = sortedValue[idx]
     if (!block) continue
 
     // Check if block is practically empty text (to avoid removing margin from invisible blocks)
@@ -289,7 +297,7 @@ export default function PortableTextLite({
 
     if (isImageBlock(block) && (block.layout === 'left' || block.layout === 'right')) {
       let nextValidIndex = idx + 1
-      let nextBlock = value[nextValidIndex]
+      let nextBlock = sortedValue[nextValidIndex]
 
       while (nextBlock) {
         let isNextEmptyText = false
@@ -311,7 +319,7 @@ export default function PortableTextLite({
           break
         }
         nextValidIndex++
-        nextBlock = value[nextValidIndex]
+        nextBlock = sortedValue[nextValidIndex]
       }
 
       if (
@@ -320,11 +328,19 @@ export default function PortableTextLite({
         (nextBlock.layout === 'left' || nextBlock.layout === 'right') &&
         nextBlock.layout !== block.layout
       ) {
-        // PAIR DETECTED — eşit yükseklik için aspect-ratio container + object-cover
+        // PAIR DETECTED — dynamic vertical align (top, center, bottom)
+        const pairVAlign = block.verticalAlign || nextBlock.verticalAlign || 'top'
+        const vAlignClass =
+          pairVAlign === 'center'
+            ? 'items-center !order-50 !my-auto'
+            : pairVAlign === 'bottom'
+              ? 'items-end !order-last !mt-auto !mb-0'
+              : 'items-start !order-first'
+
         nodes.push(
           <div
             key={`pair-${blockKey}`}
-            className={`grid grid-cols-2 gap-2 my-2 clear-both items-start ${applyTopMarginRemoval('')}`}
+            className={`grid grid-cols-2 gap-2 my-2 clear-both ${vAlignClass} ${applyTopMarginRemoval('')}`}
           >
             <figure className="flex flex-col">
               <div className="relative w-full overflow-hidden">
@@ -555,17 +571,30 @@ export default function PortableTextLite({
 
     // Handle Custom Objects - R2 portableTextImage (new)
     if (block._type === 'portableTextImage' && block.imageR2?.url) {
+      const isSideBySide = block.layout === 'left' || block.layout === 'right'
+      const vAlignClass =
+        block.verticalAlign === 'center'
+          ? 'align-middle self-center !my-auto !order-50'
+          : block.verticalAlign === 'bottom'
+            ? 'align-bottom !mt-auto !order-last'
+            : 'align-top self-start !order-first'
+
       const layoutClass =
         block.layout === 'left'
-          ? 'md:float-left md:mr-8 md:mb-4 md:w-1/2'
+          ? `${block.verticalAlign === 'bottom' || block.verticalAlign === 'center' ? 'clear-both' : 'clear-none float-left'} w-[calc(50%-0.5rem)] mr-2 ${block.verticalAlign === 'bottom' ? '!mb-0' : 'mb-4'}`
           : block.layout === 'right'
-            ? 'md:float-right md:ml-8 md:mb-4 md:w-1/2'
+            ? `${block.verticalAlign === 'bottom' || block.verticalAlign === 'center' ? 'clear-both ml-auto' : 'clear-none float-right'} w-[calc(50%-0.5rem)] ml-2 ${block.verticalAlign === 'bottom' ? '!mb-0' : 'mb-4'}`
             : block.layout === 'center'
-              ? 'mx-auto md:w-3/4'
-              : 'w-full'
+              ? `clear-both mx-auto md:w-3/4 ${block.verticalAlign === 'bottom' ? '!mb-0' : 'mb-4'}`
+              : `clear-both w-full ${block.verticalAlign === 'bottom' ? '!mb-0' : 'mb-4'}`
+
+      const marginClassForFigure =
+        block.verticalAlign === 'bottom' || block.verticalAlign === 'center'
+          ? '!mb-0 !pb-0 leading-none'
+          : applyTopMarginRemoval('my-2')
 
       nodes.push(
-        <figure key={blockKey} className={`my-2 clear-both ${layoutClass}`}>
+        <figure key={blockKey} className={`${marginClassForFigure} ${isSideBySide && block.verticalAlign !== 'bottom' && block.verticalAlign !== 'center' ? '' : 'clear-both'} ${vAlignClass} ${layoutClass}`}>
           <OptimizedImage
             src={block.imageR2.url}
             alt={block.alt || block.imageR2.alt || ''}
@@ -589,17 +618,30 @@ export default function PortableTextLite({
 
     // Handle Custom Objects - Legacy Sanity native image
     if (block._type === 'image' && block.asset) {
+      const isSideBySide = block.layout === 'left' || block.layout === 'right'
+      const vAlignClass =
+        block.verticalAlign === 'center'
+          ? 'align-middle self-center !my-auto !order-50'
+          : block.verticalAlign === 'bottom'
+            ? 'align-bottom !mt-auto !order-last'
+            : 'align-top self-start !order-first'
+
       const layoutClass =
         block.layout === 'left'
-          ? 'md:float-left md:mr-8 md:mb-4 md:w-1/2'
+          ? `${block.verticalAlign === 'bottom' || block.verticalAlign === 'center' ? 'clear-both' : 'clear-none float-left'} w-[calc(50%-0.5rem)] mr-2 ${block.verticalAlign === 'bottom' ? '!mb-0' : 'mb-4'}`
           : block.layout === 'right'
-            ? 'md:float-right md:ml-8 md:mb-4 md:w-1/2'
+            ? `${block.verticalAlign === 'bottom' || block.verticalAlign === 'center' ? 'clear-both ml-auto' : 'clear-none float-right'} w-[calc(50%-0.5rem)] ml-2 ${block.verticalAlign === 'bottom' ? '!mb-0' : 'mb-4'}`
             : block.layout === 'center'
-              ? 'mx-auto md:w-3/4'
-              : 'w-full'
+              ? `clear-both mx-auto md:w-3/4 ${block.verticalAlign === 'bottom' ? '!mb-0' : 'mb-4'}`
+              : `clear-both w-full ${block.verticalAlign === 'bottom' ? '!mb-0' : 'mb-4'}`
+
+      const marginClassForFigure =
+        block.verticalAlign === 'bottom' || block.verticalAlign === 'center'
+          ? '!mb-0 !pb-0 leading-none'
+          : applyTopMarginRemoval('my-2')
 
       nodes.push(
-        <figure key={blockKey} className={`my-2 clear-both ${layoutClass}`}>
+        <figure key={blockKey} className={`${marginClassForFigure} ${isSideBySide && block.verticalAlign !== 'bottom' && block.verticalAlign !== 'center' ? '' : 'clear-both'} ${vAlignClass} ${layoutClass}`}>
           <OptimizedImage
             src={urlFor(block).url() || ''}
             alt={block.alt || ''}
@@ -708,5 +750,5 @@ export default function PortableTextLite({
   }
 
   flushList()
-  return <div className="portable-text-container">{nodes}</div>
+  return <div className="portable-text-container flex flex-col flex-1 min-h-0 h-full w-full">{nodes}</div>
 }

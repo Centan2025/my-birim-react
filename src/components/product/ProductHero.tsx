@@ -333,13 +333,13 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                   transition: 'transform 1000ms ease-out, opacity 1000ms ease-out',
                 }}
               >
-                <h1 className="product-hero-title text-white text-lg max-md:landscape:text-sm md:text-6xl lg:text-7xl font-extrabold tracking-tight drop-shadow-lg font-michroma pointer-events-auto">
+                <h1 className="product-hero-title text-white text-lg max-md:landscape:text-sm md:text-4xl lg:text-5xl font-extrabold tracking-tight drop-shadow-lg font-michroma pointer-events-auto">
                   {t(product.name)}
                 </h1>
               </div>
               {(designers.length > 0 || Boolean(product.year)) && (
                 <div
-                  className="product-hero-details mt-1 md:mt-2 text-xs max-md:landscape:text-[9px] md:text-base lg:text-xl text-white/80 font-michroma pointer-events-auto [&_a]:font-michroma [&_span]:font-michroma"
+                  className="product-hero-details mt-1 md:mt-2 text-xs max-md:landscape:text-[9px] md:text-sm lg:text-lg text-white/80 font-michroma pointer-events-auto [&_a]:font-michroma [&_span]:font-michroma"
                   style={{
                     transform: isDesignerVisible ? 'translateX(0)' : 'translateX(-40px)',
                     opacity: isDesignerVisible ? 1 : 0,
@@ -501,10 +501,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
         )}
 
         {slideCount > 1 && (
-          <div
-            className="absolute left-1/2 -translate-x-1/2 z-40 flex items-center space-x-2 md:space-x-4 max-md:bottom-20 max-md:landscape:bottom-[max(16px,env(safe-area-inset-bottom,0px)+16px)] md:bottom-[max(16px,env(safe-area-inset-bottom,0px)+16px)]"
-            style={{bottom: 'calc(max(16px, env(safe-area-inset-bottom, 0px) + 16px) + 64px)'}}
-          >
+          <div className="absolute left-1/2 -translate-x-1/2 z-40 flex items-center space-x-2 md:space-x-4 max-md:bottom-20 max-md:landscape:bottom-[max(16px,env(safe-area-inset-bottom,0px)+16px)] md:bottom-[max(16px,env(safe-area-inset-bottom,0px)+16px)]">
             {(() => {
               const normalizedSlideIndex =
                 slideCount <= 1

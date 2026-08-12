@@ -68,7 +68,10 @@ export function PreviewView({document}: PreviewViewProps) {
 
   // Preview token
   const previewToken =
-    process.env['SANITY_STUDIO_PREVIEW_TOKEN'] || process.env['SANITY_TOKEN'] || ''
+    (typeof import.meta !== 'undefined' && import.meta.env?.['SANITY_STUDIO_PREVIEW_TOKEN']) ||
+    (typeof process !== 'undefined' && process.env?.['SANITY_STUDIO_PREVIEW_TOKEN']) ||
+    (typeof process !== 'undefined' && process.env?.['SANITY_TOKEN']) ||
+    ''
 
   const url = `${baseUrl}/#${path}${path.includes('?') ? '&' : '?'}preview=${previewToken}`
 

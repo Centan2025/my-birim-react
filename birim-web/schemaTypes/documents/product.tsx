@@ -271,7 +271,8 @@ export default defineType({
       name: 'name',
       media: 'media',
     },
-    prepare({name, media}: {name?: {tr?: string; en?: string}; media?: any[]}) {
+    prepare(selection: any = {}) {
+      const {name, media} = selection
       const coverItem = media?.find((m) => (m as any).isCover) || media?.[0]
       const r2Url =
         (coverItem as any)?.imageR2?.url ||

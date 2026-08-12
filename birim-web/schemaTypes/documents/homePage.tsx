@@ -126,6 +126,9 @@ export default defineType({
       type: 'array',
       fieldset: 'blocksGroup',
       of: [{type: 'contentBlock'}],
+      options: {
+        modal: {type: 'popover'},
+      },
       description: 'Hero bölümünün altında görünecek içerik blokları',
     }),
     defineField({
@@ -137,7 +140,8 @@ export default defineType({
   ],
   preview: {
     select: {r2Url: 'heroMedia.0.imageR2.url'},
-    prepare({r2Url}) {
+    prepare(selection: any = {}) {
+      const {r2Url} = selection
       let finalUrl = getPreviewUrl(r2Url)
       return {
         title: 'Ana Sayfa',

@@ -71,7 +71,10 @@ export default function PortableTextImageInput(props: ObjectInputProps) {
               key={opt.value}
               type="button"
               title={opt.label}
-              onClick={() => handleLayoutChange(opt.value)}
+              onClick={(e) => {
+                e.stopPropagation()
+                handleLayoutChange(opt.value)
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',

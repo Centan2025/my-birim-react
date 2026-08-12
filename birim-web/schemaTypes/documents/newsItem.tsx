@@ -228,7 +228,8 @@ export default defineType({
       title: 'title.tr',
       media: 'media',
     },
-    prepare({title, media}) {
+    prepare(selection: any = {}) {
+      const {title, media} = selection
       const coverItem = media?.find((m: any) => m.isCover) || media?.[0]
       const r2Url = coverItem?.imageR2?.url || coverItem?.thumbnailR2?.url
       let finalUrl = getPreviewUrl(r2Url)

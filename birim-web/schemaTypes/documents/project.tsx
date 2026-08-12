@@ -115,6 +115,9 @@ export default defineType({
       type: 'array',
       fieldset: 'contentGroup',
       of: [{type: 'contentBlock'}],
+      options: {
+        modal: {type: 'popover'},
+      },
       description:
         'Proje detay sayfasında gösterilecek içerik blokları (ana sayfa ile aynı sistem)',
     }),
@@ -130,7 +133,8 @@ export default defineType({
       titleObj: 'title',
       media: 'media',
     },
-    prepare({titleObj, media}: {titleObj?: {tr?: string; en?: string}; media?: any[]}) {
+    prepare(selection: any = {}) {
+      const {titleObj, media} = selection
       const coverItem = media?.find((m: any) => m.isCover) || media?.[0]
       const r2Url = coverItem?.imageR2?.url || coverItem?.thumbnailR2?.url
       let finalUrl = getPreviewUrl(r2Url)
