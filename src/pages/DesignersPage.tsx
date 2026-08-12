@@ -91,7 +91,7 @@ export function DesignersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] overflow-x-hidden pt-20 md:pt-32 lg:pt-36 pb-32">
+    <div className="min-h-screen bg-[var(--bg-primary)] overflow-x-hidden pt-20 md:pt-20 lg:pt-20 pb-32">
       {/* Background Decorative Text */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden select-none z-0 opacity-[0.03] dark:opacity-[0.05]">
         <h2 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[30vw] font-bold leading-none outline-text whitespace-nowrap uppercase tracking-tighter">

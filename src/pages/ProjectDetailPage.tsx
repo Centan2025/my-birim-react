@@ -464,15 +464,15 @@ export function ProjectDetailPage() {
         <div className="absolute inset-0 bg-black/40 z-10" />
 
         {/* Top-Left Breadcrumb overlay - White color */}
-        <div className="absolute top-20 landscape:top-12 md:top-32 lg:top-36 left-0 right-0 z-40 pointer-events-none py-4 landscape:py-0">
-          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
+        <div className="absolute top-20 landscape:top-12 md:top-24 lg:top-28 left-0 right-0 z-40 pointer-events-none">
+          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 landscape:py-0">
             <Breadcrumbs
               items={[
                 {label: t('homepage'), to: '/'},
                 {label: t('projects') || 'Projeler', to: '/projects'},
                 {label: t(project.title)},
               ]}
-              className="pointer-events-auto inline-block text-white/90 drop-shadow-md [&_a]:!text-white/80 [&_a:hover]:!text-white [&_span.font-bold]:!text-white [&_span.text-gray-400]:!text-white/50"
+              className="pointer-events-auto text-white/90 drop-shadow-md [&_a]:!text-white/80 [&_a:hover]:!text-white [&_span.font-bold]:!text-white [&_span.text-gray-400]:!text-white/50"
             />
           </div>
         </div>

@@ -295,15 +295,15 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
         />
 
         {/* Top-Left Breadcrumb overlay - aligned with Header Search Icon */}
-        <div className="absolute top-20 landscape:top-12 md:top-32 lg:top-36 left-0 right-0 z-40 pointer-events-none py-4 landscape:py-0">
-          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
+        <div className="absolute top-20 landscape:top-12 md:top-24 lg:top-28 left-0 right-0 z-40 pointer-events-none">
+          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 landscape:py-0">
             <Breadcrumbs
               items={[
                 {label: t('homepage'), to: '/'},
                 ...(category ? [{label: t(category.name), to: `/products/${category.id}`}] : []),
                 {label: t(product.name)},
               ]}
-              className="pointer-events-auto inline-block text-black [&_a]:!text-black/80 [&_a:hover]:!text-black [&_span.font-bold]:!text-black [&_span]:!text-black"
+              className="pointer-events-auto text-black [&_a]:!text-black/80 [&_a:hover]:!text-black [&_span.font-bold]:!text-black [&_span]:!text-black"
             />
           </div>
         </div>

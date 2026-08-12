@@ -89,7 +89,7 @@ export function CategoriesPage() {
   }
 
   return (
-    <div className="bg-[var(--bg-secondary)] min-h-screen transition-colors duration-500 pt-20 md:pt-32 lg:pt-36 selection:bg-primary selection:text-black">
+    <div className="bg-[var(--bg-secondary)] min-h-screen transition-colors duration-500 pt-20 md:pt-20 lg:pt-20 selection:bg-primary selection:text-black">
       {/* Breadcrumb Band */}
       <div className="w-full relative z-20">
         <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 text-gray-400">
