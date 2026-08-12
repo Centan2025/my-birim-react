@@ -116,10 +116,10 @@ export function ProjectsPage() {
   }
 
   return (
-    <div className="bg-[var(--bg-primary)] min-h-screen animate-fade-in-up-subtle pt-20 landscape:pt-14 md:pt-24 lg:pt-24 selection:bg-primary selection:text-black">
+    <div className="bg-[var(--bg-primary)] min-h-screen animate-fade-in-up-subtle pt-20 landscape:pt-14 md:pt-28 lg:pt-32 selection:bg-primary selection:text-black">
       {/* Breadcrumb Band */}
       <div className="w-full relative z-20">
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 landscape:py-1 text-gray-400">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 landscape:py-1 md:py-6 lg:py-8 text-gray-400">
           <Breadcrumbs
             items={[{label: t('homepage'), to: '/'}, {label: t('projects') || 'Projeler'}]}
           />
@@ -127,7 +127,7 @@ export function ProjectsPage() {
       </div>
 
       {/* Sayfa Başlığı */}
-      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 landscape:pt-1 md:pt-12 pb-12 landscape:pb-3">
+      <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 md:pt-12 pb-12">
         <motion.div
           initial={{opacity: 0, y: 20}}
           animate={{opacity: 1, y: 0}}

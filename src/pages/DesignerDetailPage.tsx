@@ -153,11 +153,11 @@ export function DesignerDetailPage() {
 
   return (
     <div
-      className={`h-auto min-h-screen lg:h-screen flex flex-col bg-[var(--bg-secondary)] selection:bg-primary selection:text-black transition-colors duration-500 lg:overflow-hidden text-[var(--text-primary)] pt-20 landscape:pt-14 ${fromCard ? '' : 'animate-fade-in-up-subtle'}`}
+      className={`h-auto min-h-screen lg:h-screen flex flex-col bg-[var(--bg-secondary)] selection:bg-primary selection:text-black transition-colors duration-500 lg:overflow-hidden text-[var(--text-primary)] pt-20 landscape:pt-14 md:pt-28 lg:pt-32 ${fromCard ? '' : 'animate-fade-in-up-subtle'}`}
     >
       {/* Breadcrumb Band */}
       <div className="w-full relative z-20">
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 landscape:py-1">
+        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 landscape:py-1 md:py-6 lg:py-8">
           <Breadcrumbs
             items={[
               {label: t('homepage'), to: '/'},
