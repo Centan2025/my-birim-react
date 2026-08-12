@@ -78,6 +78,13 @@ export const HeaderMobileMenuOverlay: FC<HeaderMobileMenuOverlayProps> = props =
     }
   }, [])
 
+  // Menü her açıldığında veya kapandığında scroll pozisyonunu en üste sıfırla
+  useEffect(() => {
+    if (isMobileMenuOpen && mobileMenuRef.current) {
+      mobileMenuRef.current.scrollTop = 0
+    }
+  }, [isMobileMenuOpen, mobileMenuRef])
+
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToastMessage(message)
     setToastType(type)

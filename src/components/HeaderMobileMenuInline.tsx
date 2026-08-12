@@ -1,4 +1,4 @@
-import {FC, MutableRefObject} from 'react'
+import {FC, MutableRefObject, useEffect} from 'react'
 import {NavLink} from 'react-router-dom'
 import type {Category, SiteSettings} from '../types'
 import {CrossFadeText, HeaderTranslateFn, UserIcon, UserLoggedInIcon} from './HeaderShared'
@@ -38,6 +38,13 @@ export const HeaderMobileMenuInline: FC<HeaderMobileMenuInlineProps> = ({
   mobileMenuRef,
   mobileMenuFocusTrap,
 }) => {
+  // Menü her açıldığında scroll pozisyonunu en üste sıfırla
+  useEffect(() => {
+    if (isOpen && mobileMenuRef.current) {
+      mobileMenuRef.current.scrollTop = 0
+    }
+  }, [isOpen, mobileMenuRef])
+
   if (!isOpen) return null
 
   return (
