@@ -1,7 +1,7 @@
 import React, {useCallback, useState, useRef, useEffect} from 'react'
 import {Box, Button, Card, Flex, Stack, Text, useToast, Inline, Spinner, Dialog} from '@sanity/ui'
 import {UploadIcon, TrashIcon, CheckmarkIcon, EditIcon, CropIcon, CloseIcon} from '@sanity/icons'
-import {ObjectInputProps, set, unset, useFormValue} from 'sanity'
+import {ObjectInputProps, PatchEvent, set, unset, useFormValue} from 'sanity'
 import imageCompression from 'browser-image-compression'
 import styled from 'styled-components'
 import ReactCrop, {
@@ -721,7 +721,7 @@ export default function R2AssetInput(props: ObjectInputProps) {
           hasResponsiveSizes: isResponsive,
         }
 
-        onChange(set(assetValue))
+        onChange(PatchEvent.from(set(assetValue)))
 
         toast.push({
           status: 'success',
@@ -767,11 +767,14 @@ export default function R2AssetInput(props: ObjectInputProps) {
 
       // Update Sanity value directly
       onChange(
-        set({
-          ...asset,
-          hotspotX: Number(relativeX.toFixed(4)),
-          hotspotY: Number(relativeY.toFixed(4)),
-        }),
+        PatchEvent.from(
+          set({
+            _type: 'r2Asset',
+            ...asset,
+            hotspotX: Number(relativeX.toFixed(4)),
+            hotspotY: Number(relativeY.toFixed(4)),
+          }),
+        ),
       )
 
       toast.push({
@@ -788,20 +791,30 @@ export default function R2AssetInput(props: ObjectInputProps) {
   const handleSaveCrop = () => {
     if (crop) {
       onChange(
-        set({
-          ...asset,
-          cropX: Number((crop.x / 100).toFixed(4)),
-          cropY: Number((crop.y / 100).toFixed(4)),
-          cropWidth: Number((crop.width / 100).toFixed(4)),
-          cropHeight: Number((crop.height / 100).toFixed(4)),
-        }),
+        PatchEvent.from(
+          set({
+            _type: 'r2Asset',
+            ...asset,
+            cropX: Number((crop.x / 100).toFixed(4)),
+            cropY: Number((crop.y / 100).toFixed(4)),
+            cropWidth: Number((crop.width / 100).toFixed(4)),
+            cropHeight: Number((crop.height / 100).toFixed(4)),
+          }),
+        ),
       )
       toast.push({status: 'success', title: 'Kırpma Kaydedildi'})
     } else {
       // Clear crop
       const {cropX, cropY, cropWidth, cropHeight, ...rest} = asset
-      // ... same clear logic ...
-      onChange([unset(['cropX']), unset(['cropY']), unset(['cropWidth']), unset(['cropHeight'])])
+      onChange(
+        PatchEvent.from([
+          set({_type: 'r2Asset', ...rest}),
+          unset(['cropX']),
+          unset(['cropY']),
+          unset(['cropWidth']),
+          unset(['cropHeight']),
+        ]),
+      )
       toast.push({status: 'info', title: 'Kırpma Sıfırlandı'})
     }
     setIsEditMode(false)
@@ -879,7 +892,7 @@ export default function R2AssetInput(props: ObjectInputProps) {
         "Bu görseli kaldırmak istediğinize emin misiniz? (R2'den silinmez, sadece kaydı temizlenir)",
       )
     ) {
-      onChange(unset())
+      onChange(PatchEvent.from(unset()))
     }
   }
 
@@ -998,7 +1011,15 @@ export default function R2AssetInput(props: ObjectInputProps) {
                       text={isMirrored ? '↔️ Aynalandı' : '🔄 Aynala'}
                       onClick={(e) => {
                         e.stopPropagation()
-                        onChange(set(!isMirrored, ['isMirrored']))
+                        onChange(
+                          PatchEvent.from(
+                            set({
+                              _type: 'r2Asset',
+                              ...asset,
+                              isMirrored: !isMirrored,
+                            }),
+                          ),
+                        )
                       }}
                     />
                     <Button
@@ -1011,11 +1032,14 @@ export default function R2AssetInput(props: ObjectInputProps) {
                       onClick={(e) => {
                         e.stopPropagation()
                         onChange(
-                          set({
-                            ...asset,
-                            hotspotX: 0.5,
-                            hotspotY: 0.5,
-                          }),
+                          PatchEvent.from(
+                            set({
+                              _type: 'r2Asset',
+                              ...asset,
+                              hotspotX: 0.5,
+                              hotspotY: 0.5,
+                            }),
+                          ),
                         )
                         toast.push({
                           status: 'info',
