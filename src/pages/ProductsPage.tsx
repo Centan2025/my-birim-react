@@ -203,7 +203,7 @@ export function ProductsPage() {
   }
 
   return (
-    <div className={`bg-[var(--bg-secondary)] ${!heroImageUrl ? 'pt-20 md:pt-20 lg:pt-20' : ''}`}>
+    <div className={`bg-[var(--bg-secondary)] ${!heroImageUrl ? 'pt-20 md:pt-24 lg:pt-28' : ''}`}>
       {/* Category Hero Image */}
       {heroImageUrl ? (
         <div className="relative h-[450px] animate-fade-in-down hero-section">
