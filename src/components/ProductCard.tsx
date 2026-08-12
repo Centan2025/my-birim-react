@@ -86,7 +86,6 @@ export const ProductCard: React.FC<{product: Product}> = ({product}) => {
             srcDesktop={mainImageDesktop}
             alt={t(product.name)}
             className="w-full h-full transform transition-transform duration-700 group-hover:scale-[1.04]"
-            fitAuto={true}
             loading="lazy"
             quality={85}
             crop={mainImageCrop}
