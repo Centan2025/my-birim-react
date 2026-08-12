@@ -48,6 +48,17 @@ export function ProductExclusiveContentSection({
 }: ExclusiveContentSectionProps) {
   if (!exclusiveContent) return null
 
+  const hasImages = Array.isArray(exclusiveContent.images) && exclusiveContent.images.length > 0
+  const hasDrawings =
+    Array.isArray(exclusiveContent.drawings) && exclusiveContent.drawings.length > 0
+  const hasModels3d =
+    Array.isArray(exclusiveContent.models3d) && exclusiveContent.models3d.length > 0
+
+  const totalActiveColumns = [hasImages, hasDrawings, hasModels3d].filter(Boolean).length
+
+  // Do not render section if there are no downloadable files at all
+  if (totalActiveColumns === 0) return null
+
   const isVerifiedArchitect =
     isLoggedIn &&
     user &&
@@ -91,6 +102,13 @@ export function ProductExclusiveContentSection({
     return `${t('additional_image') || 'Ek Görsel'} ${idx + 1}`
   }
 
+  const gridColsClass =
+    totalActiveColumns === 3
+      ? 'md:grid-cols-3'
+      : totalActiveColumns === 2
+        ? 'md:grid-cols-2'
+        : 'md:grid-cols-1'
+
   return (
     <ScrollReveal delay={600} threshold={0.05}>
       <div className="relative rounded-none border border-[var(--border-primary)] bg-[var(--bg-primary)]/70 backdrop-blur p-6 sm:p-8 pb-10">
@@ -99,14 +117,14 @@ export function ProductExclusiveContentSection({
             {t('downloadable_files') || 'Ürün Kaynakları'}
           </h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="rounded-none border border-[var(--border-primary)] bg-[var(--bg-secondary)] p-4">
-            <div className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mb-3">
-              {t('additional_images') || 'Ek Görseller'}
-            </div>
-            {exclusiveContent.images && exclusiveContent.images.length > 0 ? (
+        <div className={`grid grid-cols-1 ${gridColsClass} gap-6`}>
+          {hasImages && (
+            <div className="rounded-none border border-[var(--border-primary)] bg-[var(--bg-secondary)] p-4">
+              <div className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mb-3">
+                {t('additional_images') || 'Ek Görseller'}
+              </div>
               <ul className="space-y-2">
-                {exclusiveContent.images.map((img, idx) => {
+                {exclusiveContent.images!.map((img, idx) => {
                   const url = typeof img === 'string' ? img : img?.url || img?.image || ''
                   const label = getExtraImageLabel(img, idx)
                   return (
@@ -129,19 +147,16 @@ export function ProductExclusiveContentSection({
                   )
                 })}
               </ul>
-            ) : (
-              <p className="text-[var(--text-secondary)] opacity-50 text-sm">
-                {t('no_additional_images') || 'Ek görsel bulunmuyor'}
-              </p>
-            )}
-          </div>
-          <div className="rounded-none border border-[var(--border-primary)] bg-[var(--bg-secondary)] p-4">
-            <div className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mb-3">
-              {t('technical_drawings') || 'Teknik Çizimler'}
             </div>
-            {exclusiveContent.drawings && exclusiveContent.drawings.length > 0 ? (
+          )}
+
+          {hasDrawings && (
+            <div className="rounded-none border border-[var(--border-primary)] bg-[var(--bg-secondary)] p-4">
+              <div className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mb-3">
+                {t('technical_drawings') || 'Teknik Çizimler'}
+              </div>
               <ul className="space-y-2">
-                {exclusiveContent.drawings.map((doc, idx) => (
+                {exclusiveContent.drawings!.map((doc, idx) => (
                   <li key={idx} className="group">
                     <a
                       href={doc.url}
@@ -159,19 +174,16 @@ export function ProductExclusiveContentSection({
                   </li>
                 ))}
               </ul>
-            ) : (
-              <p className="text-[var(--text-secondary)] opacity-50 text-sm">
-                {t('no_technical_drawings') || 'Teknik çizim bulunmuyor'}
-              </p>
-            )}
-          </div>
-          <div className="rounded-none border border-[var(--border-primary)] bg-[var(--bg-secondary)] p-4">
-            <div className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mb-3">
-              {t('3d_models') || '3D Modeller'}
             </div>
-            {exclusiveContent.models3d && exclusiveContent.models3d.length > 0 ? (
+          )}
+
+          {hasModels3d && (
+            <div className="rounded-none border border-[var(--border-primary)] bg-[var(--bg-secondary)] p-4">
+              <div className="text-xs uppercase tracking-wider text-[var(--text-secondary)] mb-3">
+                {t('3d_models') || '3D Modeller'}
+              </div>
               <ul className="space-y-2">
-                {exclusiveContent.models3d.map((model, idx) => (
+                {exclusiveContent.models3d!.map((model, idx) => (
                   <li key={idx} className="group">
                     <a
                       href={model.url}
@@ -189,12 +201,8 @@ export function ProductExclusiveContentSection({
                   </li>
                 ))}
               </ul>
-            ) : (
-              <p className="text-[var(--text-secondary)] opacity-50 text-sm">
-                {t('no_3d_models') || '3D model bulunmuyor'}
-              </p>
-            )}
-          </div>
+            </div>
+          )}
         </div>
         {/* Alt çizgi: kartın tam alt kenarında, kenarlara kadar */}
         <div className="absolute left-0 right-0 bottom-0 h-px bg-[var(--border-primary)]" />
