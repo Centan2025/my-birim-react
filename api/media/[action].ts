@@ -8,30 +8,36 @@ import {getSignedUrl} from '@aws-sdk/s3-request-presigner'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 import {getAuthTokenFromReq, verifyToken} from '../../lib/server/token.js'
 
-const R2_ACCOUNT_ID =
+const R2_ACCOUNT_ID = (
   process.env['R2_ACCOUNT_ID'] ||
   process.env['SANITY_STUDIO_R2_ACCOUNT_ID'] ||
   process.env['VITE_R2_ACCOUNT_ID'] ||
   '114e37dc2d51e58147e027097a68470b'
-const R2_ACCESS_KEY_ID =
+).trim()
+const R2_ACCESS_KEY_ID = (
   process.env['R2_ACCESS_KEY_ID'] ||
   process.env['SANITY_STUDIO_R2_ACCESS_KEY_ID'] ||
   process.env['VITE_R2_ACCESS_KEY_ID'] ||
   'e3e007695ed61d30021abb8646a6ac83'
-const R2_SECRET_ACCESS_KEY =
+).trim()
+const R2_SECRET_ACCESS_KEY = (
   process.env['R2_SECRET_ACCESS_KEY'] ||
   process.env['SANITY_STUDIO_R2_SECRET_ACCESS_KEY'] ||
   process.env['VITE_R2_SECRET_ACCESS_KEY'] ||
   '41675d4749c4f51462925a2c154f12aa9651963f2b54b83eaa415778e89153b5'
-const R2_BUCKET_NAME =
+).trim()
+const R2_BUCKET_NAME = (
   process.env['R2_BUCKET_NAME'] ||
   process.env['SANITY_STUDIO_R2_BUCKET_NAME'] ||
   process.env['VITE_R2_BUCKET_NAME'] ||
   'birim-web'
-const R2_DOMAIN =
+).trim()
+const R2_DOMAIN = (
   process.env['R2_DOMAIN'] ||
   process.env['SANITY_STUDIO_R2_DOMAIN'] ||
-  process.env['VITE_R2_DOMAIN']
+  process.env['VITE_R2_DOMAIN'] ||
+  'https://assets.birim.com'
+).trim()
 
 const r2Client = new S3Client({
   region: 'auto',
