@@ -3,14 +3,14 @@ import bcrypt from 'bcryptjs'
 import {randomUUID} from 'crypto'
 import {S3Client} from '@aws-sdk/client-s3'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
-import {isRateLimitedAsync, getClientIp} from '../../lib/server/rateLimiter'
+import {isRateLimitedAsync, getClientIp} from '../../lib/server/rateLimiter.js'
 import {
   createToken,
   setAuthCookie,
   getAuthTokenFromReq,
   verifyToken,
   clearAuthCookie,
-} from '../../lib/server/token'
+} from '../../lib/server/token.js'
 
 const SANITY_PROJECT_ID =
   process.env['SANITY_PROJECT_ID'] || process.env['VITE_SANITY_PROJECT_ID'] || 'wn3a082f'

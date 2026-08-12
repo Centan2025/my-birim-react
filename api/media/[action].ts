@@ -6,7 +6,7 @@ import {
 } from '@aws-sdk/client-s3'
 import {getSignedUrl} from '@aws-sdk/s3-request-presigner'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
-import {getAuthTokenFromReq, verifyToken} from '../../lib/server/token'
+import {getAuthTokenFromReq, verifyToken} from '../../lib/server/token.js'
 
 const R2_ACCOUNT_ID =
   process.env['R2_ACCOUNT_ID'] ||
