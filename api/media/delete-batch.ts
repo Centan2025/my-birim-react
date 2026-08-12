@@ -33,7 +33,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS configuration
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
 
   if (req.method === 'OPTIONS') {
     return res.status(200).json({})
@@ -41,6 +41,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method !== 'POST') {
     return res.status(405).json({error: 'Method Not Allowed'})
+  }
+
+  // Authorization check - mandatory SANITY_TOKEN or MEDIA_ADMIN_SECRET
+  const expectedToken = process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET']
+  if (!expectedToken) {
+    return res.status(500).json({error: 'Sunucu yetkilendirme anahtarı yapılandırılmamış.'})
+  }
+
+  const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
+  const tokenStr = typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
+  if (tokenStr !== expectedToken) {
+    return res.status(401).json({error: 'Yetkisiz erişim.'})
   }
 
   const {keys} = req.body || {}
@@ -75,7 +87,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     })
   } catch (error: unknown) {
     console.error('R2 delete error:', error)
-    const message = error instanceof Error ? error.message : 'Bilinmeyen hata'
-    return res.status(500).json({error: `Dosyalar silinemedi: ${message}`})
+    return res.status(500).json({error: 'Dosyalar silinemedi. Lütfen daha sonra tekrar deneyin.'})
   }
 }

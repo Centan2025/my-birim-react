@@ -13,8 +13,8 @@ import DOMPurify from 'dompurify'
  */
 export const sanitizeHtml = (dirty: string, options?: import('dompurify').Config): string => {
   if (typeof window === 'undefined') {
-    // SSR için fallback
-    return dirty
+    // SSR için fallback: zararlı script ve event handler'ları temizle
+    return dirty.replace(/<script\b[^<]*>[\s\S]*?<\/script>/gi, '').replace(/\son\w+=["'][^"']*["']/gi, '')
   }
   const sanitized = DOMPurify.sanitize(dirty, {
     ALLOWED_TAGS: [
@@ -97,7 +97,7 @@ export const sanitizeHtml = (dirty: string, options?: import('dompurify').Config
  */
 export const sanitizeText = (dirty: string): string => {
   if (typeof window === 'undefined') {
-    return dirty
+    return dirty.replace(/<[^>]*>?/gm, '')
   }
   return DOMPurify.sanitize(dirty, {ALLOWED_TAGS: []})
 }

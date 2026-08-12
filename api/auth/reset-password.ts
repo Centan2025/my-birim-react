@@ -3,10 +3,10 @@ import bcrypt from 'bcryptjs'
 import {randomUUID} from 'crypto'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 
-const SANITY_PROJECT_ID = process.env['VITE_SANITY_PROJECT_ID'] || 'wn3a082f'
-const SANITY_DATASET = process.env['VITE_SANITY_DATASET'] || 'production'
-const SANITY_API_VERSION = process.env['VITE_SANITY_API_VERSION'] || '2025-01-01'
-const SANITY_TOKEN = process.env['SANITY_TOKEN'] || process.env['VITE_SANITY_TOKEN']
+const SANITY_PROJECT_ID = process.env['SANITY_PROJECT_ID'] || process.env['VITE_SANITY_PROJECT_ID'] || 'wn3a082f'
+const SANITY_DATASET = process.env['SANITY_DATASET'] || process.env['VITE_SANITY_DATASET'] || 'production'
+const SANITY_API_VERSION = process.env['SANITY_API_VERSION'] || process.env['VITE_SANITY_API_VERSION'] || '2025-01-01'
+const SANITY_TOKEN = process.env['SANITY_TOKEN']
 
 const client = createClient({
   projectId: SANITY_PROJECT_ID,
@@ -37,25 +37,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         {email: normEmail}
       )
 
-      if (!user) {
-        return res.status(404).json({error: 'Kullanıcı bulunamadı.'})
+      if (user) {
+        const resetToken = randomUUID()
+        const resetPasswordExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+
+        await client
+          .patch(user._id)
+          .set({
+            resetPasswordToken: resetToken,
+            resetPasswordExpires,
+          })
+          .commit()
       }
 
-      const resetToken = randomUUID()
-      const resetPasswordExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-
-      await client
-        .patch(user._id)
-        .set({
-          resetPasswordToken: resetToken,
-          resetPasswordExpires,
-        })
-        .commit()
-
+      // Security: Always return generic success response without leaking token or user existence
       return res.status(200).json({
         success: true,
-        message: 'Şifre sıfırlama bağlantısı oluşturuldu.',
-        resetToken,
+        message: 'Eğer e-posta adresi sistemimizde kayıtlı ise şifre sıfırlama bağlantısı oluşturulmuştur.',
       })
     } catch (error: unknown) {
       console.error('Reset request error:', error)

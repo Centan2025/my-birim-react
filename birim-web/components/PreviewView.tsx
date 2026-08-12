@@ -68,7 +68,7 @@ export function PreviewView({document}: PreviewViewProps) {
 
   // Preview token
   const previewToken =
-    'sk3hcgzMrsNDGtMbwCUGbh3PJ0eRfnpnGI4LBXI0lWGZdvD8oYDB2cqZEdATKCUrmDceAAgkoG0zoYUuGw2N3dfXoNaU4ZvOUoTeraWE1la5BCdjg967sQawjJydQJMq1jtsomH56RPKaD3hpY2XhRBr6Z4Zf7dO157WTvDzbDyRNtxK3bsw'
+    process.env['SANITY_STUDIO_PREVIEW_TOKEN'] || process.env['SANITY_TOKEN'] || ''
 
   const url = `${baseUrl}/#${path}${path.includes('?') ? '&' : '?'}preview=${previewToken}`
 

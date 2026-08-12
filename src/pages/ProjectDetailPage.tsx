@@ -18,41 +18,7 @@ import PortableTextLite from '../components/PortableTextLite'
 import {HomeContentBlocks} from '../components/HomeContentBlocks'
 import type {ContentBlock, R2ImageMetadata} from '../types'
 
-const ArrowLeft = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="28"
-    height="28"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="0.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <path d="M8 6 2 12" />
-    <path d="M2 12h20" />
-  </svg>
-)
 
-const ArrowRight = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="28"
-    height="28"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="0.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <path d="M16 6 22 12" />
-    <path d="M22 12H2" />
-  </svg>
-)
 
 interface MediaItem {
   type: 'image' | 'video' | 'youtube'
@@ -442,7 +408,7 @@ export function ProjectDetailPage() {
           }
         }
       `}</style>
-      <div className="relative w-full h-[60vh] md:h-[75vh] overflow-hidden">
+      <div className="relative w-full h-[calc(100vh-48px)] md:h-[calc(100vh-56px)] overflow-hidden">
         {coverUrl ? (
           <div className="absolute inset-0">
             <OptimizedImage
@@ -476,7 +442,7 @@ export function ProjectDetailPage() {
         <div className="absolute inset-0 bg-black/40 z-10" />
 
         {/* Top-Left Breadcrumb overlay - White color */}
-        <div className="absolute top-10 max-lg:landscape:top-12 md:top-20 lg:top-20 left-0 right-0 z-40 pointer-events-none">
+        <div className="absolute top-0 left-0 right-0 z-40 pointer-events-none pt-20 lg:pt-20 max-lg:landscape:pt-12">
           <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 max-lg:landscape:py-0">
             <Breadcrumbs
               items={[
@@ -526,23 +492,13 @@ export function ProjectDetailPage() {
               )}
             </div>
 
-            {/* Bottom-Right Fullscreen Button */}
-            {allMedia.length > 0 && (
-              <div
-                className="pointer-events-none flex-shrink-0"
-                style={{
-                  opacity: isFullscreenButtonVisible ? 1 : 0,
-                  transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
-                  transition:
-                    'opacity 700ms ease-out, transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
-                }}
-              >
-                <button
-                  onClick={() => {
-                    setIdx(0)
-                    setIsFullscreenOpen(true)
-                  }}
-                  className="pointer-events-auto flex h-8 w-8 md:h-12 md:w-12 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all hover:bg-white/10"
+            {/* Bottom-Right Hero Navigation & Fullscreen Buttons */}
+            <div className="flex items-center gap-2 md:gap-4 pointer-events-none flex-shrink-0">
+              {prevProject && (
+                <Link
+                  to={`/projects/${prevProject.id}`}
+                  className="group pointer-events-auto flex h-8 w-8 md:h-12 md:w-12 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                  aria-label="Previous project"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -551,37 +507,140 @@ export function ProjectDetailPage() {
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="0.8"
-                    className="h-5 w-5 md:h-8 md:w-8"
+                    strokeWidth="0.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-5 w-5 md:h-8 md:w-8 transition-transform duration-300 group-hover:-translate-x-1"
                   >
-                    <path d="M15 3h6v6" />
-                    <path d="M9 21H3v-6" />
-                    <path d="M21 3l-7 7" />
-                    <path d="M3 21l7-7" />
+                    <path d="M15 18l-6-6 6-6" />
                   </svg>
-                </button>
-              </div>
+                </Link>
+              )}
+              {nextProject && (
+                <Link
+                  to={`/projects/${nextProject.id}`}
+                  className="group pointer-events-auto flex h-8 w-8 md:h-12 md:w-12 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                  aria-label="Next project"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="0.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-5 w-5 md:h-8 md:w-8 transition-transform duration-300 group-hover:translate-x-1"
+                  >
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </Link>
+              )}
+              {allMedia.length > 0 && (
+                <div
+                  className="pointer-events-none flex-shrink-0"
+                  style={{
+                    opacity: isFullscreenButtonVisible ? 1 : 0,
+                    transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
+                    transition:
+                      'opacity 700ms ease-out, transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  }}
+                >
+                  <button
+                    onClick={() => {
+                      setIdx(0)
+                      setIsFullscreenOpen(true)
+                    }}
+                    className="pointer-events-auto flex h-8 w-8 md:h-12 md:w-12 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all hover:bg-white/10"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="0.8"
+                      className="h-5 w-5 md:h-8 md:w-8"
+                    >
+                      <path d="M15 3h6v6" />
+                      <path d="M9 21H3v-6" />
+                      <path d="M21 3l-7 7" />
+                      <path d="M3 21l7-7" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Hero Altı Gri Bant (Dikey Ortalanmış Navigasyon Düğmeleri) */}
+      <div className="w-full bg-[#484d54] text-white flex items-center min-h-[48px] md:min-h-[56px] py-2 md:py-2.5">
+        <div className="w-full max-w-[95%] md:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex items-center justify-between">
+          <div>
+            {prevProject ? (
+              <Link
+                to={`/projects/${prevProject.id}`}
+                className="group flex h-8 w-8 md:h-10 md:w-10 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                aria-label="Previous project"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="0.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-5 w-5 md:h-7 md:w-7 transition-transform duration-300 group-hover:-translate-x-1"
+                >
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </Link>
+            ) : (
+              <span className="w-8 h-8 md:w-10 md:h-10" />
+            )}
+          </div>
+
+          <div>
+            {nextProject ? (
+              <Link
+                to={`/projects/${nextProject.id}`}
+                className="group flex h-8 w-8 md:h-10 md:w-10 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                aria-label="Next project"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="0.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-5 w-5 md:h-7 md:w-7 transition-transform duration-300 group-hover:translate-x-1"
+                >
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              </Link>
+            ) : (
+              <span className="w-8 h-8 md:w-10 md:h-10" />
             )}
           </div>
         </div>
       </div>
 
-      <div className="w-full bg-[var(--bg-secondary)]">
-        <div className="w-full max-w-[95%] md:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-8">
-          <div className="flex justify-between mb-8">
-            {prevProject && (
-              <Link to={`/projects/${prevProject.id}`}>
-                <ArrowLeft />
-              </Link>
-            )}
-            {nextProject && (
-              <Link to={`/projects/${nextProject.id}`}>
-                <ArrowRight />
-              </Link>
-            )}
-          </div>
-
-          <div className="space-y-6">
+      {/* Proje Detay Metin İçeriği */}
+      {(project.excerpt || project.body) && (
+        <div className="w-full bg-[var(--bg-primary)] py-8 md:py-12">
+          <div className="w-full max-w-[95%] md:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 space-y-6">
             {project.excerpt && (
               <div className="text-[var(--text-primary)] font-roboto-thin text-lg md:text-xl leading-relaxed">
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
@@ -596,7 +655,7 @@ export function ProjectDetailPage() {
             )}
           </div>
         </div>
-      </div>
+      )}
 
       {project.contentBlocks && project.contentBlocks.length > 0 && (
         <div className="mt-10">

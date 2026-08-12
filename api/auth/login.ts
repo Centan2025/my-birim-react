@@ -2,10 +2,10 @@ import {createClient} from '@sanity/client'
 import bcrypt from 'bcryptjs'
 import {isRateLimitedAsync, getClientIp} from './_rateLimiter'
 
-const SANITY_PROJECT_ID = process.env['VITE_SANITY_PROJECT_ID'] || 'wn3a082f'
-const SANITY_DATASET = process.env['VITE_SANITY_DATASET'] || 'production'
-const SANITY_API_VERSION = process.env['VITE_SANITY_API_VERSION'] || '2025-01-01'
-const SANITY_TOKEN = process.env['SANITY_TOKEN'] || process.env['VITE_SANITY_TOKEN']
+const SANITY_PROJECT_ID = process.env['SANITY_PROJECT_ID'] || process.env['VITE_SANITY_PROJECT_ID'] || 'wn3a082f'
+const SANITY_DATASET = process.env['SANITY_DATASET'] || process.env['VITE_SANITY_DATASET'] || 'production'
+const SANITY_API_VERSION = process.env['SANITY_API_VERSION'] || process.env['VITE_SANITY_API_VERSION'] || '2025-01-01'
+const SANITY_TOKEN = process.env['SANITY_TOKEN']
 
 const client = createClient({
   projectId: SANITY_PROJECT_ID,
@@ -15,7 +15,7 @@ const client = createClient({
   useCdn: false,
 })
 
-import type {VercelRequest, VercelResponse} from '@vercel/node'
+import {createToken, setAuthCookie} from './_token'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -44,7 +44,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     )
 
     if (!user) {
-      return res.status(401).json({error: 'Kullanıcı bulunamadı veya hatalı bilgiler.'})
+      return res.status(401).json({error: 'E-posta adresi veya şifre hatalı.'})
     }
 
     if (user.userType === 'email_subscriber') {
@@ -58,14 +58,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Şifre kontrolü
     const isPasswordCorrect = await bcrypt.compare(password, user.password || '')
     if (!isPasswordCorrect) {
-      // SHA-256 fallback (legacy hesaplar için src/services/sanity/auth.ts:22-27'ye benzer mantık gerekebilir)
-      // Ancak yeni sistemde her şey bcrypt olmalı.
-      // Şimdilik sadece bcrypt.
-      return res.status(401).json({error: 'Hatalı şifre.'})
+      return res.status(401).json({error: 'E-posta adresi veya şifre hatalı.'})
     }
+
+    // Server-side signed JWT Token creation
+    const token = createToken({
+      sub: user._id,
+      email: user.email,
+      role: user.role || 'consumer',
+    })
+
+    setAuthCookie(res, token)
 
     return res.status(200).json({
       success: true,
+      token,
       user: {
         _id: user._id,
         email: user.email,
@@ -73,6 +80,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         company: user.company,
         profession: user.profession,
         country: user.country,
+        role: user.role,
         userType: user.userType,
         isActive: user.isActive,
         isVerified: user.isVerified,
@@ -81,10 +89,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     })
   } catch (error: unknown) {
     console.error('Login error:', error)
-    const details = error instanceof Error ? error.message : String(error)
     return res.status(500).json({
       error: 'Giriş sırasında bir teknik hata oluştu.',
-      details,
     })
   }
 }

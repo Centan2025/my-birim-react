@@ -3,10 +3,10 @@ import bcrypt from 'bcryptjs'
 import {randomUUID} from 'crypto'
 import {isRateLimitedAsync, getClientIp} from './_rateLimiter'
 
-const SANITY_PROJECT_ID = process.env['VITE_SANITY_PROJECT_ID'] || 'wn3a082f'
-const SANITY_DATASET = process.env['VITE_SANITY_DATASET'] || 'production'
-const SANITY_API_VERSION = process.env['VITE_SANITY_API_VERSION'] || '2025-01-01'
-const SANITY_TOKEN = process.env['SANITY_TOKEN'] || process.env['VITE_SANITY_TOKEN']
+const SANITY_PROJECT_ID = process.env['SANITY_PROJECT_ID'] || process.env['VITE_SANITY_PROJECT_ID'] || 'wn3a082f'
+const SANITY_DATASET = process.env['SANITY_DATASET'] || process.env['VITE_SANITY_DATASET'] || 'production'
+const SANITY_API_VERSION = process.env['SANITY_API_VERSION'] || process.env['VITE_SANITY_API_VERSION'] || '2025-01-01'
+const SANITY_TOKEN = process.env['SANITY_TOKEN']
 
 const client = createClient({
   projectId: SANITY_PROJECT_ID,
@@ -16,7 +16,49 @@ const client = createClient({
   useCdn: false,
 })
 
+import {createToken, setAuthCookie} from './_token'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
+
+async function sendServerVerificationEmail(email: string, verificationUrl: string) {
+  const smtpPass = process.env['SMTP_PASSWORD']
+  if (!smtpPass) return
+  try {
+    const nodemailer = (await import('nodemailer')).default
+    const transporter = nodemailer.createTransport({
+      host: 'smtpout.secureserver.net',
+      port: 465,
+      secure: true,
+      auth: {
+        user: 'birimdesign@birim.com',
+        pass: smtpPass,
+      },
+    })
+    await transporter.sendMail({
+      from: '"Birim Design" <birimdesign@birim.com>',
+      to: email,
+      subject: 'Birim Üyelik Doğrulaması',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head><meta charset="utf-8"></head>
+        <body style="font-family: sans-serif; background-color: #f9fafb; padding: 20px;">
+          <div style="max-width: 600px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; border: 1px solid #e5e7eb;">
+            <h2 style="margin-top: 0; color: #1a1f3a;">BİRİM ÜYELİK DOĞRULAMASI</h2>
+            <p>Merhaba,</p>
+            <p>Birim hesabınızı doğrulamak için lütfen aşağıdaki butona tıklayın:</p>
+            <p style="margin: 24px 0;">
+              <a href="${verificationUrl}" style="background: #1a1f3a; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">Üyeliğimi Doğrula</a>
+            </p>
+            <p style="font-size: 12px; color: #6b7280;">Veya şu adresi tarayıcınıza yapıştırın: ${verificationUrl}</p>
+          </div>
+        </body>
+        </html>
+      `,
+    })
+  } catch (err) {
+    console.error('[Email Helper] Send email error:', err)
+  }
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -93,6 +135,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           })
           .commit()
 
+        // Send verification email server-side securely
+        const siteUrl = process.env['VITE_SITE_URL'] || 'https://www.birim.com'
+        const verificationUrl = `${siteUrl}/#/verify-email?token=${verificationToken}`
+        sendServerVerificationEmail(normEmail, verificationUrl).catch(err =>
+          console.error('Verification email error:', err)
+        )
+
         interface SanityUserRecord {
           _id: string
           email?: string
@@ -105,8 +154,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
 
         const u = updatedUser as SanityUserRecord
+        const token = createToken({
+          sub: u._id,
+          email: u.email || normEmail,
+          role: u.role || userRole,
+        })
+        setAuthCookie(res, token)
+
         return res.status(200).json({
           success: true,
+          token,
           message: 'Bülten aboneliğiniz üye hesabına dönüştürüldü.',
           user: {
             _id: u._id,
@@ -117,7 +174,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             name: u.name,
             role: u.role,
             architectVerificationStatus: u.architectVerificationStatus,
-            verificationToken,
             isVerified: false,
             isActive: true,
           },
@@ -152,9 +208,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       createdAt: new Date().toISOString(),
     })
 
+    // Send verification email server-side securely
+    const siteUrl = process.env['VITE_SITE_URL'] || 'https://www.birim.com'
+    const verificationUrl = `${siteUrl}/#/verify-email?token=${verificationToken}`
+    sendServerVerificationEmail(normEmail, verificationUrl).catch(err =>
+      console.error('Verification email error:', err)
+    )
+
     const nu = newUser as SanityUserRecord
+    const token = createToken({
+      sub: nu._id,
+      email: nu.email || normEmail,
+      role: nu.role || userRole,
+    })
+    setAuthCookie(res, token)
+
     return res.status(201).json({
       success: true,
+      token,
       user: {
         _id: nu._id,
         id: nu._id,
@@ -164,7 +235,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         name: nu.name,
         role: nu.role,
         architectVerificationStatus: nu.architectVerificationStatus,
-        verificationToken,
         isVerified: false,
         isActive: true,
       },

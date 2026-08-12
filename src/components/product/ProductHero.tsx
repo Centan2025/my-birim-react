@@ -305,7 +305,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
         />
 
         {/* Top-Left Breadcrumb overlay - aligned with Header Search Icon */}
-        <div className="absolute top-10 max-lg:landscape:top-12 md:top-20 lg:top-20 left-0 right-0 z-40 pointer-events-none">
+        <div className="absolute top-0 left-0 right-0 z-40 pointer-events-none pt-20 lg:pt-20 max-lg:landscape:pt-12">
           <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 max-lg:landscape:py-0">
             <Breadcrumbs
               items={[

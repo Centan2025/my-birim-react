@@ -144,13 +144,13 @@ app.post('/api/auth/login', async (req, res) => {
       `*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]`,
       { email: normEmail }
     )
-    if (!user) return res.status(401).json({ error: 'Kullanıcı bulunamadı veya hatalı bilgiler.' })
+    if (!user) return res.status(401).json({ error: 'E-posta adresi veya şifre hatalı.' })
     if (user.userType === 'email_subscriber')
       return res.status(403).json({ error: 'Bu sadece abonelik kaydı, lütfen tam üyelik alın.' })
     if (!user.isActive) return res.status(403).json({ error: 'Hesabınız aktif değil.' })
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password || '')
-    if (!isPasswordCorrect) return res.status(401).json({ error: 'Hatalı şifre.' })
+    if (!isPasswordCorrect) return res.status(401).json({ error: 'E-posta adresi veya şifre hatalı.' })
 
     return res.status(200).json({
       success: true,
@@ -170,6 +170,51 @@ app.post('/api/auth/login', async (req, res) => {
   } catch (err) {
     console.error('Login error:', err)
     return res.status(500).json({ error: `Giriş hatası: ${err.message || 'Teknik bir hata oluştu.'}` })
+  }
+})
+
+// ─── /api/auth/me ──────────────────────────────────────────────────────────
+app.all('/api/auth/me', async (req, res) => {
+  const authHeader = req.headers['authorization']
+  const token = authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
+    ? authHeader.substring(7).trim()
+    : null
+
+  if (!token) {
+    return res.status(200).json({ authenticated: false, user: null })
+  }
+
+  try {
+    const user = await sanityClient.fetch(
+      `*[_type == "user" && _id == $id && !defined(_deleted)][0]`,
+      { id: token }
+    )
+
+    if (!user || !user.isActive) {
+      return res.status(200).json({ authenticated: false, user: null })
+    }
+
+    return res.status(200).json({
+      authenticated: true,
+      user: {
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        company: user.company,
+        profession: user.profession,
+        country: user.country,
+        userType: user.userType,
+        isActive: user.isActive,
+        isVerified: user.isVerified,
+        createdAt: user.createdAt || user._createdAt,
+      },
+    })
+  } catch (err) {
+    console.error('Me endpoint error:', err)
+    return res.status(500).json({ authenticated: false, error: 'Sunucu hatası.' })
   }
 })
 

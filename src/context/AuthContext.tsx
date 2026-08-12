@@ -3,6 +3,7 @@ import {useState, useContext, createContext, PropsWithChildren, useEffect} from 
 import type {User} from '../types'
 import {errorReporter} from '../lib/errorReporting'
 import {analytics} from '../lib/analytics'
+import {getCurrentSessionUser} from '../services/cms'
 
 interface AuthContextType {
   isLoggedIn: boolean
@@ -24,46 +25,70 @@ export function useAuth() {
 export const AuthProvider = ({children}: PropsWithChildren) => {
   const [user, setUser] = useState<User | null>(null)
 
-  // Load user from localStorage on mount
+  // Verify server-side session on mount with local storage fallback
   useEffect(() => {
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const storedUser = localStorage.getItem('birim_user')
-        if (storedUser) {
-          try {
-            const parsedUser: User = JSON.parse(storedUser)
-            setUser(parsedUser)
-            const userId =
-              parsedUser._id || (parsedUser as unknown as {id?: string}).id || parsedUser.email
-            if (userId) {
-              analytics.identifyUser(userId, {
-                email: parsedUser.email,
-                name: parsedUser.name,
-                userType: parsedUser.userType,
-              })
-            }
-          } catch (e) {
+    let isMounted = true
+    async function verifySession() {
+      // 1. Initial cached user from localStorage for instant render
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          const storedUser = localStorage.getItem('birim_user')
+          if (storedUser && isMounted) {
             try {
-              localStorage.removeItem('birim_user')
+              const parsedUser: User = JSON.parse(storedUser)
+              setUser(parsedUser)
             } catch {
-              // Storage erişilemiyorsa sessizce devam et
+              localStorage.removeItem('birim_user')
             }
           }
         }
+      } catch {
+        // Storage error ignored
       }
-    } catch {
-      // Storage erişilemiyorsa sessizce devam et
+
+      // 2. Verify authentic session with backend /api/auth/me
+      try {
+        const serverUser = await getCurrentSessionUser()
+        if (isMounted) {
+          if (serverUser) {
+            setUser(serverUser)
+            if (typeof window !== 'undefined' && window.localStorage) {
+              localStorage.setItem('birim_user', JSON.stringify(serverUser))
+            }
+            const userId = serverUser._id || serverUser.email
+            if (userId) {
+              analytics.identifyUser(userId, {
+                email: serverUser.email,
+                name: serverUser.name,
+                userType: serverUser.userType,
+              })
+            }
+          }
+        }
+      } catch {
+        // Fallback to local session state
+      }
+    }
+
+    verifySession()
+
+    return () => {
+      isMounted = false
     }
   }, [])
 
-  const login = (userData: User) => {
+  const login = (userData: User & {token?: string}) => {
     setUser(userData)
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
-        localStorage.setItem('birim_user', JSON.stringify(userData))
+        if (userData.token) {
+          localStorage.setItem('birim_token', userData.token)
+        }
+        const {token: _, ...cleanUser} = userData
+        localStorage.setItem('birim_user', JSON.stringify(cleanUser))
       }
     } catch {
-      // Storage erişilemiyorsa sessizce devam et
+      // Storage error ignored
     }
     errorReporter.setUser({
       id: userData._id,
@@ -83,9 +108,11 @@ export const AuthProvider = ({children}: PropsWithChildren) => {
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
         localStorage.removeItem('birim_user')
+        localStorage.removeItem('birim_token')
       }
+      fetch('/api/auth/logout', {method: 'POST', credentials: 'same-origin'}).catch(() => {})
     } catch {
-      // Storage erişilemiyorsa sessizce devam et
+      // Storage error ignored
     }
     errorReporter.clearUser()
     analytics.resetUser()

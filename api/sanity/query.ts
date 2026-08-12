@@ -19,6 +19,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({error: 'Missing query parameter'})
   }
 
+  // Block sensitive queries targeting users, passwords, or verification tokens
+  const lowerQuery = query.toLowerCase()
+  if (
+    lowerQuery.includes('_type == "user"') ||
+    lowerQuery.includes("_type == 'user'") ||
+    lowerQuery.includes('password') ||
+    lowerQuery.includes('verificationtoken') ||
+    lowerQuery.includes('resetpasswordtoken')
+  ) {
+    return res.status(403).json({error: 'Hassas veri kaynaklarına erişim engellendi.'})
+  }
+
   const sanityUrl = new URL(
     `https://${SANITY_PROJECT_ID}.api.sanity.io/v${SANITY_API_VERSION}/data/query/${SANITY_DATASET}`
   )

@@ -7,13 +7,30 @@ const KEYS = {USERS: 'birim_users'}
 
 const normalizeEmail = (value: string): string => (value || '').trim().toLowerCase()
 
-const apiFetch = async (endpoint: string, body: Record<string, unknown>) => {
+const apiFetch = async (
+  endpoint: string,
+  body?: Record<string, unknown>,
+  method: 'POST' | 'GET' = 'POST'
+) => {
   try {
-    const response = await fetch(`/api/auth/${endpoint}`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(body),
-    })
+    const headers: Record<string, string> = {'Content-Type': 'application/json'}
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const storedToken = localStorage.getItem('birim_token')
+      if (storedToken) {
+        headers['Authorization'] = `Bearer ${storedToken}`
+      }
+    }
+
+    const options: RequestInit = {
+      method,
+      headers,
+      credentials: 'same-origin',
+    }
+    if (method === 'POST' && body) {
+      options.body = JSON.stringify(body)
+    }
+
+    const response = await fetch(`/api/auth/${endpoint}`, options)
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
       const errorMsg =
@@ -29,6 +46,20 @@ const apiFetch = async (endpoint: string, body: Record<string, unknown>) => {
       'API sunucusu ile iletişim kurulamadı. Lütfen projenizi "npm run dev:full" komutuyla çalıştırın.'
     )
   }
+}
+
+export const getCurrentSessionUser = async (): Promise<User | null> => {
+  if (useSanity) {
+    try {
+      const data = await apiFetch('me', undefined, 'GET')
+      if (data && data.authenticated && data.user) {
+        return data.user as User
+      }
+    } catch {
+      return null
+    }
+  }
+  return null
 }
 
 export const subscribeEmail = async (email: string): Promise<User> => {
@@ -207,10 +238,7 @@ export const loginUser = async (email: string, password: string): Promise<User> 
       const data = await apiFetch('login', {email: normEmail, password})
       return data.user
     } catch (err: unknown) {
-      console.warn('API login failed, checking local storage fallback:', err)
-      const users = getItem<User[]>(KEYS.USERS) || []
-      const existingUser = users.find(u => normalizeEmail(u.email) === normEmail)
-      if (existingUser) return existingUser
+      console.error('API login failed:', err)
       throw err
     }
   }
@@ -232,27 +260,7 @@ export const verifyEmail = async (token: string): Promise<boolean> => {
 export const requestPasswordReset = async (email: string): Promise<void> => {
   const normEmail = normalizeEmail(email)
   if (useSanity) {
-    const data = await apiFetch('reset-password', {email: normEmail, action: 'request'})
-
-    // E-posta gönderimini tetikle
-    try {
-      const siteUrl = import.meta.env['VITE_SITE_URL'] || window.location.origin
-      const resetUrl = `${siteUrl}/#/reset-password?token=${data.resetToken}`
-      const emailServerUrl = import.meta.env['VITE_EMAIL_SERVER_URL'] || 'http://localhost:3002'
-
-      fetch(`${emailServerUrl}/api/send-password-reset`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          email: normEmail,
-          resetUrl,
-          logoUrl: `${siteUrl}/logo.png`,
-        }),
-      }).catch(e => console.error('Şifre sıfırlama e-postası gönderilemedi:', e))
-    } catch (e) {
-      console.error('Şifre sıfırlama e-posta tetikleme hatası:', e)
-    }
-
+    await apiFetch('reset-password', {email: normEmail, action: 'request'})
     return
   }
   throw new Error('Sanity not configured.')

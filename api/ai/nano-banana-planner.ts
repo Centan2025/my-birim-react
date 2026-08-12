@@ -68,16 +68,34 @@ async function getBase64FromImageInput(
 
   if (imageInput.startsWith('http://') || imageInput.startsWith('https://')) {
     let targetUrl = imageInput
-    if (targetUrl.includes('cdn.sanity.io') && !targetUrl.includes('w=')) {
-      try {
-        const urlObj = new URL(targetUrl)
-        urlObj.searchParams.set('w', '512')
-        urlObj.searchParams.set('q', '60')
-        urlObj.searchParams.set('auto', 'format')
-        targetUrl = urlObj.toString()
-      } catch {
-        // use default targetUrl
+    try {
+      const parsedUrl = new URL(targetUrl)
+      const hostname = parsedUrl.hostname.toLowerCase()
+
+      // SSRF Protection: Block internal IPs and Cloud metadata IP addresses
+      if (
+        hostname === 'localhost' ||
+        hostname === '127.0.0.1' ||
+        hostname === '0.0.0.0' ||
+        hostname === '169.254.169.254' ||
+        hostname.startsWith('10.') ||
+        hostname.startsWith('192.168.') ||
+        /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname)
+      ) {
+        throw new Error('Dahili ağ URL adreslerine erişim engellendi.')
       }
+
+      if (targetUrl.includes('cdn.sanity.io') && !targetUrl.includes('w=')) {
+        parsedUrl.searchParams.set('w', '512')
+        parsedUrl.searchParams.set('q', '60')
+        parsedUrl.searchParams.set('auto', 'format')
+        targetUrl = parsedUrl.toString()
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message.includes('Dahili')) {
+        throw err
+      }
+      throw new Error('Geçersiz görsel URL adresi.')
     }
 
     const fetchRes = await fetch(targetUrl)

@@ -19,6 +19,16 @@ const transporter = nodemailer.createTransport({
   },
 })
 
+function isValidHttpUrl(urlStr) {
+  if (!urlStr || typeof urlStr !== 'string') return false
+  try {
+    const parsed = new URL(urlStr)
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
 app.post('/api/send-verification', async (req, res) => {
   const {email, verificationUrl, logoUrl} = req.body || {}
 
@@ -26,8 +36,8 @@ app.post('/api/send-verification', async (req, res) => {
     return res.status(500).json({error: 'SMTP_PASSWORD environment variable is not set'})
   }
 
-  if (!email || !verificationUrl) {
-    return res.status(400).json({error: 'email and verificationUrl are required'})
+  if (!email || !verificationUrl || !isValidHttpUrl(verificationUrl)) {
+    return res.status(400).json({error: 'Geçerli email ve verificationUrl gereklidir.'})
   }
 
   // Logo URL'ini kontrol et ve logla
@@ -131,8 +141,8 @@ app.post('/api/send-password-reset', async (req, res) => {
     return res.status(500).json({error: 'SMTP_PASSWORD environment variable is not set'})
   }
 
-  if (!email || !resetUrl) {
-    return res.status(400).json({error: 'email and resetUrl are required'})
+  if (!email || !resetUrl || !isValidHttpUrl(resetUrl)) {
+    return res.status(400).json({error: 'Geçerli email ve resetUrl gereklidir.'})
   }
 
   console.log('[Email Server] Password reset requested for:', email)

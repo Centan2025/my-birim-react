@@ -32,7 +32,7 @@ const r2Client = new S3Client({
   },
 })
 
-import type {VercelRequest, VercelResponse} from '@vercel/node'
+import {getAuthTokenFromReq, verifyToken} from '../auth/_token'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS configuration
@@ -52,6 +52,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({error: 'Method Not Allowed'})
   }
 
+  // Auth check: require JWT session or admin key
+  const token = getAuthTokenFromReq(req)
+  const payload = token ? verifyToken(token) : null
+  const adminSecret = process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET']
+  const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
+  const headerToken = typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
+  const isAdminAuthorized = adminSecret && headerToken === adminSecret
+
+  if (!payload && !isAdminAuthorized) {
+    return res.status(401).json({error: 'Dosya yükleme bileti almak için yetkiniz yok.'})
+  }
+
   const {filename, contentType, folder} = req.body || {}
 
   if (
@@ -61,6 +73,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     typeof contentType !== 'string'
   ) {
     return res.status(400).json({error: 'filename ve contentType parametreleri gereklidir.'})
+  }
+
+  const ALLOWED_MIME_TYPES = [
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/avif',
+    'image/gif',
+    'image/svg+xml',
+    'video/mp4',
+    'video/webm',
+    'application/pdf',
+  ]
+
+  if (!ALLOWED_MIME_TYPES.includes(contentType.toLowerCase())) {
+    return res.status(400).json({error: 'Desteklenmeyen dosya formatı.'})
   }
 
   // Path traversal koruması

@@ -99,4 +99,5 @@ export {
   getUserById,
   verifyUserByToken,
   deleteUserAccount,
+  getCurrentSessionUser,
 } from './sanity/auth'
