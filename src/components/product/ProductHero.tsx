@@ -318,9 +318,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
           </div>
         </div>
 
-        <div
-          className="absolute bottom-12 landscape:bottom-4 md:bottom-10 left-0 right-0 text-white z-40 pointer-events-none"
-        >
+        <div className="absolute bottom-12 landscape:bottom-4 md:bottom-10 left-0 right-0 text-white z-40 pointer-events-none">
           <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
             <div
               style={{
@@ -364,94 +362,94 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
           >
             <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex justify-end">
               <div className="flex items-center gap-2 md:gap-4">
-              {slideCount > 1 && (
-                <>
-                  <button
-                    type="button"
-                    onClick={onPrev}
-                    className="group pointer-events-auto flex h-8 w-8 md:h-14 md:w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
-                    style={arrowInLeft}
-                    aria-label="Previous hero slide"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="0.4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 md:h-11 md:w-11 transition-transform duration-300 group-hover:-translate-x-1"
+                {slideCount > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={onPrev}
+                      className="group pointer-events-auto flex h-8 w-8 md:h-14 md:w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                      style={arrowInLeft}
+                      aria-label="Previous hero slide"
                     >
-                      <path d="M15 18l-6-6 6-6" />
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onNext}
-                    className="group pointer-events-auto flex h-8 w-8 md:h-14 md:w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
-                    style={arrowInRight}
-                    aria-label="Next hero slide"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="0.4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-5 w-5 md:h-11 md:w-11 transition-transform duration-300 group-hover:translate-x-1"
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="0.4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-5 w-5 md:h-11 md:w-11 transition-transform duration-300 group-hover:-translate-x-1"
+                      >
+                        <path d="M15 18l-6-6 6-6" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={onNext}
+                      className="group pointer-events-auto flex h-8 w-8 md:h-14 md:w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                      style={arrowInRight}
+                      aria-label="Next hero slide"
                     >
-                      <path d="M9 18l6-6-6-6" />
-                    </svg>
-                  </button>
-                </>
-              )}
-              <button
-                type="button"
-                onClick={e => {
-                  e.stopPropagation()
-                  onOpenFullscreen()
-                }}
-                className="group pointer-events-auto flex h-8 w-8 md:h-14 md:w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
-                style={{
-                  opacity: isFullscreenButtonVisible ? 1 : 0,
-                  transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
-                  transition:
-                    'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
-                  willChange: 'transform, opacity',
-                  animation: isFullscreenButtonVisible
-                    ? 'home-button-grow 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 300ms forwards'
-                    : 'none',
-                }}
-                aria-label="Tam Ekran"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="0.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="transition-transform duration-500 group-hover:scale-110 h-5 w-5 md:h-10 md:w-10"
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="0.4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-5 w-5 md:h-11 md:w-11 transition-transform duration-300 group-hover:translate-x-1"
+                      >
+                        <path d="M9 18l6-6-6-6" />
+                      </svg>
+                    </button>
+                  </>
+                )}
+                <button
+                  type="button"
+                  onClick={e => {
+                    e.stopPropagation()
+                    onOpenFullscreen()
+                  }}
+                  className="group pointer-events-auto flex h-8 w-8 md:h-14 md:w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                  style={{
+                    opacity: isFullscreenButtonVisible ? 1 : 0,
+                    transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
+                    transition:
+                      'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    willChange: 'transform, opacity',
+                    animation: isFullscreenButtonVisible
+                      ? 'home-button-grow 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 300ms forwards'
+                      : 'none',
+                  }}
+                  aria-label="Tam Ekran"
                 >
-                  <path d="M15 3h6v6" />
-                  <path d="M9 21H3v-6" />
-                  <path d="M21 3l-7 7" />
-                  <path d="M3 21l7-7" />
-                </svg>
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="0.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="transition-transform duration-500 group-hover:scale-110 h-5 w-5 md:h-10 md:w-10"
+                  >
+                    <path d="M15 3h6v6" />
+                    <path d="M9 21H3v-6" />
+                    <path d="M21 3l-7 7" />
+                    <path d="M3 21l7-7" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
         )}
 
         {slideCount > 1 && (
