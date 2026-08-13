@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect, useCallback} from 'react'
+import React, {useState, useRef, useEffect, useCallback, useMemo} from 'react'
 import {Link} from 'react-router-dom'
 import {InteractiveShowcaseItem, ProductHotspot, LocalizedString} from '../types'
 import {useTranslation} from '../i18n'
@@ -12,6 +12,10 @@ interface InteractiveShowcaseProps {
 export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items}) => {
   const {locale} = useTranslation()
   const [activeIndex, setActiveIndex] = useState(0)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const transitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const innerTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   const [activeHotspot, setActiveHotspot] = useState<{
     slideIndex: number
     hotspot: ProductHotspot
@@ -37,6 +41,12 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
   const VERTICAL_SCROLL_TOLERANCE = 1.2
   const MIN_VERTICAL_DELTA = 8
 
+  const slideCount = items?.length || 0
+  const clonedItems = useMemo(() => {
+    if (!items || items.length <= 1) return items || []
+    return [items[items.length - 1], ...items, items[0]]
+  }, [items])
+
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
@@ -45,13 +55,109 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
-  const handlePrev = useCallback(() => {
-    setActiveIndex(prev => (prev === 0 ? (items?.length || 1) - 1 : prev - 1))
-  }, [items?.length])
+  // Timeout cleanup
+  useEffect(() => {
+    return () => {
+      if (transitionTimeoutRef.current) clearTimeout(transitionTimeoutRef.current)
+      if (innerTimeoutRef.current) clearTimeout(innerTimeoutRef.current)
+    }
+  }, [])
+
+  const resetCloneIfNeeded = useCallback(() => {
+    if (slideCount <= 1) return
+    if (transitionTimeoutRef.current) {
+      clearTimeout(transitionTimeoutRef.current)
+      transitionTimeoutRef.current = null
+    }
+    if (innerTimeoutRef.current) {
+      clearTimeout(innerTimeoutRef.current)
+      innerTimeoutRef.current = null
+    }
+    const safeCurrent = ((activeIndex % slideCount) + slideCount) % slideCount
+    if (safeCurrent !== activeIndex) {
+      setIsTransitioning(true)
+      setActiveIndex(safeCurrent)
+    }
+  }, [activeIndex, slideCount])
 
   const handleNext = useCallback(() => {
-    setActiveIndex(prev => (prev === (items?.length || 1) - 1 ? 0 : prev + 1))
-  }, [items?.length])
+    if (slideCount <= 1) {
+      setDraggedX(0)
+      return
+    }
+
+    const safeCurrent = ((activeIndex % slideCount) + slideCount) % slideCount
+    const nextSlide = safeCurrent + 1
+
+    if (transitionTimeoutRef.current) clearTimeout(transitionTimeoutRef.current)
+    if (innerTimeoutRef.current) clearTimeout(innerTimeoutRef.current)
+
+    if (nextSlide >= slideCount) {
+      setIsTransitioning(false)
+      setActiveIndex(slideCount)
+      transitionTimeoutRef.current = setTimeout(() => {
+        setIsTransitioning(true)
+        setActiveIndex(0)
+        requestAnimationFrame(() => {
+          setIsTransitioning(false)
+          transitionTimeoutRef.current = null
+        })
+      }, 1000)
+    } else {
+      setIsTransitioning(false)
+      setActiveIndex(nextSlide)
+    }
+    setDraggedX(0)
+  }, [activeIndex, slideCount])
+
+  const handlePrev = useCallback(() => {
+    if (slideCount <= 1) {
+      setDraggedX(0)
+      return
+    }
+
+    const safeCurrent = ((activeIndex % slideCount) + slideCount) % slideCount
+    const prevSlide = safeCurrent - 1
+
+    if (transitionTimeoutRef.current) clearTimeout(transitionTimeoutRef.current)
+    if (innerTimeoutRef.current) clearTimeout(innerTimeoutRef.current)
+
+    if (prevSlide < 0) {
+      setIsTransitioning(false)
+      setActiveIndex(-1)
+      transitionTimeoutRef.current = setTimeout(() => {
+        setIsTransitioning(true)
+        setActiveIndex(slideCount - 1)
+        requestAnimationFrame(() => {
+          setIsTransitioning(false)
+          transitionTimeoutRef.current = null
+        })
+      }, 1000)
+    } else {
+      setIsTransitioning(false)
+      setActiveIndex(prevSlide)
+    }
+    setDraggedX(0)
+  }, [activeIndex, slideCount])
+
+  const goToSlide = useCallback(
+    (index: number) => {
+      if (slideCount <= 1) return
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current)
+        transitionTimeoutRef.current = null
+      }
+      if (innerTimeoutRef.current) {
+        clearTimeout(innerTimeoutRef.current)
+        innerTimeoutRef.current = null
+      }
+      setIsTransitioning(false)
+      const target = Math.max(0, Math.min(index, slideCount - 1))
+      setActiveIndex(target)
+      setDraggedX(0)
+    },
+    [slideCount]
+  )
 
   // Touch event'ler – dikey scroll'a izin ver, yatay sürüklemeyi koru (HomeHero ile aynı)
   useEffect(() => {
@@ -63,6 +169,7 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
         return
       }
       if (!e.touches || e.touches.length === 0) return
+      resetCloneIfNeeded()
       setIsDragging(true)
       const startX = e.touches[0]?.clientX ?? 0
       const startY = e.touches[0]?.clientY ?? 0
@@ -116,7 +223,7 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
       container.removeEventListener('touchmove', handleTouchMove)
       container.removeEventListener('touchend', handleTouchEnd)
     }
-  }, [isDragging, dragStartX, draggedX, items?.length, handleNext, handlePrev])
+  }, [isDragging, dragStartX, draggedX, items?.length, handleNext, handlePrev, resetCloneIfNeeded])
 
   // Close popover when active slide changes
   useEffect(() => {
@@ -156,6 +263,7 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
     if (e.target instanceof HTMLElement && e.target.closest('a, button')) {
       return
     }
+    resetCloneIfNeeded()
     setIsDragging(true)
     const startX =
       'touches' in e && e.touches && e.touches.length > 0
@@ -211,6 +319,20 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
     }
   }
 
+  const getTransform = () => {
+    if (slideCount <= 1) return `translateX(${draggedX}px)`
+
+    let virtualSlide = activeIndex
+    if (virtualSlide < -1) virtualSlide = -1
+    if (virtualSlide > slideCount) virtualSlide = slideCount
+
+    const translateX = -(virtualSlide + 1) * 100
+    return `translateX(calc(${translateX}% + ${draggedX}px))`
+  }
+
+  const normalizedActiveIndex =
+    slideCount > 0 ? ((activeIndex % slideCount) + slideCount) % slideCount : 0
+
   return (
     <section
       className="w-full relative bg-[var(--bg-primary)] py-0 my-0 overflow-hidden select-none leading-none scroll-snap-start home-content-block-snap"
@@ -237,16 +359,29 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
         <div
           className="flex w-full"
           style={{
-            transform: `translateX(calc(-${activeIndex * 100}% + ${draggedX}px))`,
-            transition: isDragging ? 'none' : 'transform 1000ms cubic-bezier(0.16, 1, 0.3, 1)',
+            transform: getTransform(),
+            transition:
+              isDragging || isTransitioning
+                ? 'none'
+                : 'transform 1000ms cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         >
-          {items.map((slide, slideIdx) => {
+          {clonedItems.map((slide, index) => {
+            const isClone = slideCount > 1 && (index === 0 || index === slideCount + 1)
+            const realSlideIdx =
+              slideCount > 1
+                ? index === 0
+                  ? slideCount - 1
+                  : index === slideCount + 1
+                    ? 0
+                    : index - 1
+                : index
             const slideTitle = getLocVal(slide.title)
 
             return (
               <div
-                key={slideIdx}
+                key={`${realSlideIdx}-${index}`}
+                aria-hidden={isClone ? 'true' : undefined}
                 className="w-full flex-shrink-0 relative h-[80vh] min-h-[550px] md:h-[90vh] lg:h-screen bg-neutral-900 overflow-hidden"
               >
                 {/* Background Visual (100% Full Screen Cover) */}
@@ -254,7 +389,7 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
                   <OptimizedImage
                     src={slide.image}
                     srcMobile={slide.imageMobile}
-                    alt={slideTitle || 'İnteraktif Ürün Görseli'}
+                    alt={!isClone && slideTitle ? slideTitle : 'İnteraktif Ürün Görseli'}
                     className="w-full h-full object-cover object-center"
                     loading="lazy"
                     quality={95}
@@ -272,7 +407,7 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
                 </div>
 
                 {/* Slide Title Overlay (No background color, no border, modern typography) */}
-                {slideTitle ? (
+                {!isClone && slideTitle ? (
                   <div className="absolute top-6 left-6 md:top-10 md:left-10 z-20 pointer-events-none">
                     <span className="text-white text-sm md:text-xl font-light uppercase tracking-[0.3em] drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)] font-sans">
                       {slideTitle}
@@ -281,11 +416,11 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
                 ) : null}
 
                 {/* Hotspot Pins for this slide */}
-                {slide.hotspots && slide.hotspots.length > 0 && (
+                {!isClone && slide.hotspots && slide.hotspots.length > 0 && (
                   <div className="absolute inset-0 z-20 pointer-events-none">
                     {slide.hotspots.map((hs, hsIdx) => {
                       const isActive =
-                        activeHotspot?.slideIndex === slideIdx &&
+                        activeHotspot?.slideIndex === realSlideIdx &&
                         activeHotspot?.hotspotIndex === hsIdx
 
                       const prod = hs.product
@@ -307,7 +442,7 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
                                 setActiveHotspot(null)
                               } else {
                                 setActiveHotspot({
-                                  slideIndex: slideIdx,
+                                  slideIndex: realSlideIdx,
                                   hotspot: hs,
                                   hotspotIndex: hsIdx,
                                 })
@@ -511,12 +646,12 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center space-x-4">
             <div className="flex items-center gap-3">
               {items.map((_, index) => {
-                const isActive = activeIndex === index
+                const isActive = normalizedActiveIndex === index
                 return (
                   <button
                     key={index}
                     type="button"
-                    onClick={() => setActiveIndex(index)}
+                    onClick={() => goToSlide(index)}
                     className={`relative h-2 rounded-none transition-all duration-500 ease-in-out group ${
                       isActive ? 'w-2 bg-red-900' : 'w-2 bg-white/40 hover:bg-white/60'
                     }`}
@@ -524,7 +659,7 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
                   >
                     {isActive && (
                       <div
-                        key={`${activeIndex}-${index}`}
+                        key={`${normalizedActiveIndex}-${index}`}
                         className="absolute top-0 left-0 h-full rounded-none bg-red-900 animate-fill-line"
                       />
                     )}

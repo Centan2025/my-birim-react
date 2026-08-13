@@ -54,7 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     requestOrigin.endsWith('.vercel.app') ||
     requestOrigin.endsWith('.sanity.studio')
 
-  if (requestOrigin) {
+  if (requestOrigin && isAllowedOrigin) {
     res.setHeader('Access-Control-Allow-Origin', requestOrigin)
     res.setHeader('Access-Control-Allow-Credentials', 'true')
   } else {

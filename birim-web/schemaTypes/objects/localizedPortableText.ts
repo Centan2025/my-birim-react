@@ -3,6 +3,7 @@ import {defineType, defineField} from 'sanity'
 import {Palette, Type} from 'lucide-react'
 import PortableTextImagePreview from '../../components/PortableTextImagePreview'
 import PortableTextImageInput from '../../components/PortableTextImageInput'
+import PortableTextArrayInput from '../../components/PortableTextArrayInput'
 import {browserOnly, browserOnlyInput} from '../utils/browserOnly'
 
 const createFontSizeDecorator = (title: string, value: string, px: string) => ({
@@ -14,13 +15,26 @@ const createFontSizeDecorator = (title: string, value: string, px: string) => ({
     React.createElement('span', {style: {fontSize: px}}, props.children),
 })
 
-const createTextAlignDecorator = (title: string, value: string, label: string, alignVal: string) => ({
+const createTextAlignDecorator = (
+  title: string,
+  value: string,
+  label: string,
+  alignVal: string,
+) => ({
   title,
   value,
   icon: () =>
-    React.createElement('span', {style: {fontSize: '11px', fontWeight: 700, padding: '0 2px'}}, label),
+    React.createElement(
+      'span',
+      {style: {fontSize: '11px', fontWeight: 700, padding: '0 2px'}},
+      label,
+    ),
   component: (props: {children: React.ReactNode}) =>
-    React.createElement('span', {style: {display: 'block', textAlign: alignVal as any}}, props.children),
+    React.createElement(
+      'span',
+      {style: {display: 'block', textAlign: alignVal as any}},
+      props.children,
+    ),
 })
 
 /**
@@ -57,7 +71,12 @@ const portableTextBlocks = [
         createTextAlignDecorator('Hizalama: Sola Yasla', 'align-left', '👈 Sol', 'left'),
         createTextAlignDecorator('Hizalama: Ortala', 'align-center', '↔️ Orta', 'center'),
         createTextAlignDecorator('Hizalama: Sağa Yasla', 'align-right', '👉 Sağ', 'right'),
-        createTextAlignDecorator('Hizalama: İki Yana Yasla', 'align-justify', '↕️ Yasla', 'justify'),
+        createTextAlignDecorator(
+          'Hizalama: İki Yana Yasla',
+          'align-justify',
+          '↕️ Yasla',
+          'justify',
+        ),
         createFontSizeDecorator('Boyut: 12px', 'size-12px', '12px'),
         createFontSizeDecorator('Boyut: 14px', 'size-14px', '14px'),
         createFontSizeDecorator('Boyut: 16px', 'size-16px', '16px'),
@@ -283,6 +302,9 @@ export const localizedPortableText = defineType({
       title: 'Türkçe',
       type: 'array',
       of: portableTextBlocks,
+      components: {
+        input: browserOnlyInput(PortableTextArrayInput),
+      },
       options: {
         // Bu alanların arama sonuçlarını kirletmemesi için ağırlığını (weight) çok düşürüyoruz
         search: {weight: 0},
@@ -293,6 +315,9 @@ export const localizedPortableText = defineType({
       title: 'English',
       type: 'array',
       of: portableTextBlocks,
+      components: {
+        input: browserOnlyInput(PortableTextArrayInput),
+      },
       options: {
         search: {weight: 0},
       },
@@ -302,6 +327,9 @@ export const localizedPortableText = defineType({
       title: 'Italiano',
       type: 'array',
       of: portableTextBlocks,
+      components: {
+        input: browserOnlyInput(PortableTextArrayInput),
+      },
       options: {
         search: {weight: 0},
       },
@@ -311,6 +339,9 @@ export const localizedPortableText = defineType({
       title: 'Deutsch',
       type: 'array',
       of: portableTextBlocks,
+      components: {
+        input: browserOnlyInput(PortableTextArrayInput),
+      },
       options: {
         search: {weight: 0},
       },
@@ -320,6 +351,9 @@ export const localizedPortableText = defineType({
       title: 'Français',
       type: 'array',
       of: portableTextBlocks,
+      components: {
+        input: browserOnlyInput(PortableTextArrayInput),
+      },
       options: {
         search: {weight: 0},
       },
@@ -329,6 +363,9 @@ export const localizedPortableText = defineType({
       title: 'Español',
       type: 'array',
       of: portableTextBlocks,
+      components: {
+        input: browserOnlyInput(PortableTextArrayInput),
+      },
       options: {
         search: {weight: 0},
       },

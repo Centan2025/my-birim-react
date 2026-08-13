@@ -101,19 +101,31 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
           )
         if (m === 'align-center' || m === 'alignCenter')
           el = (
-            <span key={i + '-align-center'} className="block text-center" style={{textAlign: 'center'}}>
+            <span
+              key={i + '-align-center'}
+              className="block text-center"
+              style={{textAlign: 'center'}}
+            >
               {el}
             </span>
           )
         if (m === 'align-right' || m === 'alignRight')
           el = (
-            <span key={i + '-align-right'} className="block text-right" style={{textAlign: 'right'}}>
+            <span
+              key={i + '-align-right'}
+              className="block text-right"
+              style={{textAlign: 'right'}}
+            >
               {el}
             </span>
           )
         if (m === 'align-justify' || m === 'alignJustify')
           el = (
-            <span key={i + '-align-justify'} className="block text-justify" style={{textAlign: 'justify'}}>
+            <span
+              key={i + '-align-justify'}
+              className="block text-justify"
+              style={{textAlign: 'justify'}}
+            >
               {el}
             </span>
           )
