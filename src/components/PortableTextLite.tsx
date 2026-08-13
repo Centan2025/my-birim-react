@@ -80,6 +80,30 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
               {el}
             </code>
           )
+        if (m === 'align-left' || m === 'alignLeft')
+          el = (
+            <span key={i + '-align-left'} className="block text-left" style={{textAlign: 'left'}}>
+              {el}
+            </span>
+          )
+        if (m === 'align-center' || m === 'alignCenter')
+          el = (
+            <span key={i + '-align-center'} className="block text-center" style={{textAlign: 'center'}}>
+              {el}
+            </span>
+          )
+        if (m === 'align-right' || m === 'alignRight')
+          el = (
+            <span key={i + '-align-right'} className="block text-right" style={{textAlign: 'right'}}>
+              {el}
+            </span>
+          )
+        if (m === 'align-justify' || m === 'alignJustify')
+          el = (
+            <span key={i + '-align-justify'} className="block text-justify" style={{textAlign: 'justify'}}>
+              {el}
+            </span>
+          )
         let matchedFontSize: string | null = null
 
         if (m === 'size-sm') matchedFontSize = '14px'
@@ -470,6 +494,39 @@ export default function PortableTextLite({
               </blockquote>
             )
             break
+          case 'alignCenter':
+            nodes.push(
+              <p
+                className="my-1 leading-relaxed text-inherit whitespace-pre-line min-h-[1.5em] text-center"
+                style={{textAlign: 'center'}}
+                key={blockKey}
+              >
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'alignRight':
+            nodes.push(
+              <p
+                className="my-1 leading-relaxed text-inherit whitespace-pre-line min-h-[1.5em] text-right"
+                style={{textAlign: 'right'}}
+                key={blockKey}
+              >
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'alignJustify':
+            nodes.push(
+              <p
+                className="my-1 leading-relaxed text-inherit whitespace-pre-line min-h-[1.5em] text-justify"
+                style={{textAlign: 'justify'}}
+                key={blockKey}
+              >
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
           default:
             nodes.push(
               <p
@@ -564,6 +621,45 @@ export default function PortableTextLite({
               >
                 {content}
               </blockquote>
+            )
+            break
+          case 'alignCenter':
+            nodes.push(
+              <p
+                className={applyTopMarginRemoval(
+                  'my-4 leading-relaxed text-[var(--text-primary)] whitespace-pre-line min-h-[1.5em] text-center'
+                )}
+                style={{textAlign: 'center'}}
+                key={blockKey}
+              >
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'alignRight':
+            nodes.push(
+              <p
+                className={applyTopMarginRemoval(
+                  'my-4 leading-relaxed text-[var(--text-primary)] whitespace-pre-line min-h-[1.5em] text-right'
+                )}
+                style={{textAlign: 'right'}}
+                key={blockKey}
+              >
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'alignJustify':
+            nodes.push(
+              <p
+                className={applyTopMarginRemoval(
+                  'my-4 leading-relaxed text-[var(--text-primary)] whitespace-pre-line min-h-[1.5em] text-justify'
+                )}
+                style={{textAlign: 'justify'}}
+                key={blockKey}
+              >
+                {isEmptyText ? '\u00A0' : content}
+              </p>
             )
             break
           default:
