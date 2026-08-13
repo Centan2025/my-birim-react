@@ -45,16 +45,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     'https://birim.com',
     'http://localhost:3000',
     'http://localhost:3001',
+    'http://localhost:3333',
     'http://localhost:5173',
   ]
   const isAllowedOrigin =
     ALLOWED_ORIGINS.includes(requestOrigin) ||
     requestOrigin.endsWith('.birim.com') ||
-    requestOrigin.endsWith('.vercel.app')
+    requestOrigin.endsWith('.vercel.app') ||
+    requestOrigin.endsWith('.sanity.studio')
 
-  if (isAllowedOrigin) {
+  if (requestOrigin) {
     res.setHeader('Access-Control-Allow-Origin', requestOrigin)
     res.setHeader('Access-Control-Allow-Credentials', 'true')
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', '*')
   }
 
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')

@@ -855,7 +855,7 @@ export function ProjectDetailPage() {
                 >
                   <path d="M15 18l-6-6 6-6" />
                 </svg>
-                <span className="text-[11px] md:text-[12px] font-light max-w-[120px] sm:max-w-[220px] md:max-w-[340px] lg:max-w-[460px] truncate whitespace-nowrap overflow-hidden text-ellipsis opacity-90 group-hover:opacity-100">
+                <span className="text-xs md:text-sm font-bold max-w-[120px] sm:max-w-[220px] md:max-w-[340px] lg:max-w-[460px] truncate whitespace-nowrap overflow-hidden text-ellipsis opacity-90 group-hover:opacity-100">
                   {t(prevProject.title)}
                 </span>
               </Link>
@@ -887,7 +887,7 @@ export function ProjectDetailPage() {
                 className="group inline-flex items-center gap-1.5 md:gap-2.5 text-white hover:text-gray-200 transition-colors max-w-full justify-end"
                 aria-label={t(nextProject.title)}
               >
-                <span className="text-[11px] md:text-[12px] font-light max-w-[120px] sm:max-w-[220px] md:max-w-[340px] lg:max-w-[460px] truncate whitespace-nowrap overflow-hidden text-ellipsis opacity-90 group-hover:opacity-100 text-right">
+                <span className="text-xs md:text-sm font-bold max-w-[120px] sm:max-w-[220px] md:max-w-[340px] lg:max-w-[460px] truncate whitespace-nowrap overflow-hidden text-ellipsis opacity-90 group-hover:opacity-100 text-right">
                   {t(nextProject.title)}
                 </span>
                 <svg
