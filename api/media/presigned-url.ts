@@ -6,17 +6,17 @@ import {getAuthTokenFromReq, verifyToken} from '../../lib/server/token.js'
 const R2_ACCOUNT_ID = (
   process.env['R2_ACCOUNT_ID'] ||
   process.env['SANITY_STUDIO_R2_ACCOUNT_ID'] ||
-  ''
+  '114e37dc2d51e58147e027097a68470b'
 ).trim()
 const R2_ACCESS_KEY_ID = (
   process.env['R2_ACCESS_KEY_ID'] ||
   process.env['SANITY_STUDIO_R2_ACCESS_KEY_ID'] ||
-  ''
+  'e3e007695ed61d30021abb8646a6ac83'
 ).trim()
 const R2_SECRET_ACCESS_KEY = (
   process.env['R2_SECRET_ACCESS_KEY'] ||
   process.env['SANITY_STUDIO_R2_SECRET_ACCESS_KEY'] ||
-  ''
+  '41675d4749c4f51462925a2c154f12aa9651963f2b54b83eaa415778e89153b5'
 ).trim()
 const R2_BUCKET_NAME = (
   process.env['R2_BUCKET_NAME'] ||
