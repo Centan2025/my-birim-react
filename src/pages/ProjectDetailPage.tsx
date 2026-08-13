@@ -16,7 +16,6 @@ import {useSEO} from '../hooks/useSEO'
 import {useHeaderTheme} from '../context/HeaderThemeContext'
 import PortableTextLite from '../components/PortableTextLite'
 import {HomeContentBlocks} from '../components/HomeContentBlocks'
-import {useHomePageContent} from '../hooks/useHomePage'
 import {InteractiveShowcase} from '../components/InteractiveShowcase'
 import type {ContentBlock, R2ImageMetadata} from '../types'
 
@@ -49,7 +48,6 @@ export function ProjectDetailPage() {
     refetchOnMount: 'always',
   })
   const {data: allProjects = []} = useProjects()
-  const {data: homeContent} = useHomePageContent()
   const {t} = useTranslation()
   const {data: settings} = useSiteSettings()
   const {setFromPalette, reset} = useHeaderTheme()
@@ -915,23 +913,15 @@ export function ProjectDetailPage() {
         </div>
       </div>
 
-      {/* Interactive Showcase (Hotspot Slider) - Mobilde Gizle */}
-      {!isMobile &&
-        ((project?.interactiveShowcase && project.interactiveShowcase.length > 0) ||
-          (homeContent?.interactiveShowcase && homeContent.interactiveShowcase.length > 0)) && (
-          <div className="hidden md:block">
-            <InteractiveShowcase
-              items={
-                project?.interactiveShowcase && project.interactiveShowcase.length > 0
-                  ? project.interactiveShowcase
-                  : homeContent?.interactiveShowcase
-              }
-              sectionTitle={
-                project?.interactiveShowcaseTitle || homeContent?.interactiveShowcaseTitle
-              }
-            />
-          </div>
-        )}
+      {/* Interactive Showcase (Hotspot Slider) - Sadece projede veri varsa ve desktop'ta göster */}
+      {!isMobile && project?.interactiveShowcase && project.interactiveShowcase.length > 0 && (
+        <div className="hidden md:block">
+          <InteractiveShowcase
+            items={project.interactiveShowcase}
+            sectionTitle={project.interactiveShowcaseTitle}
+          />
+        </div>
+      )}
 
       {/* Proje Detay Metin İçeriği */}
       {(project.excerpt || project.body) && (
