@@ -116,10 +116,11 @@ async function handlePresignedUrl(req: VercelRequest, res: VercelResponse) {
   const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
   const headerToken =
     typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
+  const reqOrigin = typeof req.headers.origin === 'string' ? req.headers.origin : ''
   const isSanityStudioOrigin =
-    origin.endsWith('.sanity.studio') ||
-    origin.includes('localhost:3333') ||
-    origin.includes('127.0.0.1:3333')
+    reqOrigin.endsWith('.sanity.studio') ||
+    reqOrigin.includes('localhost:3333') ||
+    reqOrigin.includes('127.0.0.1:3333')
   const isAdminAuthorized = (adminSecret && headerToken === adminSecret) || isSanityStudioOrigin
 
   if (!payload && !isAdminAuthorized) {
