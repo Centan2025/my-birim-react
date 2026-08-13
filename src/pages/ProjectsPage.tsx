@@ -130,7 +130,7 @@ const ProjectHorizontalCard: React.FC<{
         </div>
 
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent opacity-80 group-hover:opacity-40 transition-opacity duration-700 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent opacity-40 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none" />
 
         {/* Floating Architectural Details with Glassmorphism */}
         <div className="absolute inset-x-0 bottom-0 p-6 md:p-10 z-10 pointer-events-none transition-all duration-700 bg-gradient-to-t from-black/95 via-black/70 to-transparent group-hover:backdrop-blur-md border-t border-transparent group-hover:border-white/15">

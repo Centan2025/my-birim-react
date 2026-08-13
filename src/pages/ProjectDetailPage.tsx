@@ -692,7 +692,7 @@ export function ProjectDetailPage() {
           <div className="absolute inset-0 bg-[var(--bg-secondary)]" />
         )}
 
-        <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
+        <div className="absolute inset-0 bg-black/10 z-10 pointer-events-none" />
 
         {/* Top-Left Breadcrumb overlay - White color */}
         <div className="absolute top-0 left-0 right-0 z-40 pointer-events-none pt-20 lg:pt-20 max-lg:landscape:pt-12">
