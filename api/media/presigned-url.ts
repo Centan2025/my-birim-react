@@ -82,15 +82,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
   const headerToken =
     typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
-  const isAdminAuthorized = Boolean(adminSecret && headerToken && headerToken === adminSecret)
-  const requestReferer = typeof req.headers.referer === 'string' ? req.headers.referer : ''
+  const reqOrigin = typeof req.headers.origin === 'string' ? req.headers.origin : ''
+  const reqReferer = typeof req.headers.referer === 'string' ? req.headers.referer : ''
   const isStudioOrigin =
-    requestOrigin.endsWith('.sanity.studio') ||
-    requestOrigin.includes('localhost:3333') ||
-    requestReferer.includes('sanity.studio') ||
-    requestReferer.includes('localhost:3333')
+    reqOrigin.includes('sanity.studio') ||
+    reqReferer.includes('sanity.studio') ||
+    reqOrigin.includes('localhost') ||
+    reqReferer.includes('localhost')
+  const isAdminAuthorized =
+    Boolean(adminSecret && headerToken && headerToken === adminSecret) || isStudioOrigin
 
-  if (!payload && !isAdminAuthorized && !isStudioOrigin) {
+  if (!payload && !isAdminAuthorized) {
     return res.status(401).json({error: 'Dosya yükleme bileti almak için yetkiniz yok.'})
   }
 

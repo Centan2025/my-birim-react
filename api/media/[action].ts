@@ -112,16 +112,15 @@ async function handlePresignedUrl(req: VercelRequest, res: VercelResponse) {
 
   const token = getAuthTokenFromReq(req)
   const payload = token ? verifyToken(token) : null
-  const adminSecret = process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET']
-  const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
-  const headerToken =
-    typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
   const reqOrigin = typeof req.headers.origin === 'string' ? req.headers.origin : ''
+  const reqReferer = typeof req.headers.referer === 'string' ? req.headers.referer : ''
   const isSanityStudioOrigin =
-    reqOrigin.endsWith('.sanity.studio') ||
-    reqOrigin.includes('localhost:3333') ||
-    reqOrigin.includes('127.0.0.1:3333')
-  const isAdminAuthorized = (adminSecret && headerToken === adminSecret) || isSanityStudioOrigin
+    reqOrigin.includes('sanity.studio') ||
+    reqReferer.includes('sanity.studio') ||
+    reqOrigin.includes('localhost') ||
+    reqReferer.includes('localhost')
+  const isAdminAuthorized =
+    Boolean(adminSecret && headerToken && headerToken === adminSecret) || isSanityStudioOrigin
 
   if (!payload && !isAdminAuthorized) {
     return res.status(401).json({error: 'Dosya yükleme bileti almak için yetkiniz yok.'})
