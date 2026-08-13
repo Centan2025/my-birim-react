@@ -93,7 +93,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     Boolean(adminSecret && headerToken && headerToken === adminSecret) || isStudioOrigin
 
   if (!payload && !isAdminAuthorized) {
-    return res.status(401).json({error: 'Dosya yükleme bileti almak için yetkiniz yok.'})
+    return res.status(401).json({
+      error: 'Dosya yükleme bileti almak için yetkiniz yok.',
+      debug: {
+        requestOrigin,
+        reqOrigin,
+        reqReferer,
+        isStudioOrigin,
+        isAdminAuthorized,
+        headers: req.headers,
+      },
+    })
   }
 
   const {filename, contentType, folder} = req.body || {}
