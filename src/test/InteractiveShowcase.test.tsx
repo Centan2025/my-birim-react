@@ -72,4 +72,13 @@ describe('InteractiveShowcase component', () => {
 
     expect(screen.getByText('Dining Room Design')).toBeInTheDocument()
   })
+
+  it('wraps around infinitely when clicking prev on first slide', () => {
+    renderWithProviders(<InteractiveShowcase items={mockItems} />)
+
+    const prevBtn = screen.getByLabelText('Önceki Görsel')
+    fireEvent.click(prevBtn)
+
+    expect(screen.getByText('Dining Room Design')).toBeInTheDocument()
+  })
 })

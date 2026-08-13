@@ -3,6 +3,7 @@ import {defineType, defineField} from 'sanity'
 import {Palette, Type} from 'lucide-react'
 import PortableTextImagePreview from '../../components/PortableTextImagePreview'
 import PortableTextImageInput from '../../components/PortableTextImageInput'
+import PortableTextArrayInput from '../../components/PortableTextArrayInput'
 import {browserOnly, browserOnlyInput} from '../utils/browserOnly'
 
 const createFontSizeDecorator = (title: string, value: string, px: string) => ({
@@ -283,6 +284,9 @@ export const localizedPortableText = defineType({
       title: 'Türkçe',
       type: 'array',
       of: portableTextBlocks,
+      components: {
+        input: browserOnlyInput(PortableTextArrayInput),
+      },
       options: {
         // Bu alanların arama sonuçlarını kirletmemesi için ağırlığını (weight) çok düşürüyoruz
         search: {weight: 0},
@@ -293,6 +297,9 @@ export const localizedPortableText = defineType({
       title: 'English',
       type: 'array',
       of: portableTextBlocks,
+      components: {
+        input: browserOnlyInput(PortableTextArrayInput),
+      },
       options: {
         search: {weight: 0},
       },
@@ -302,6 +309,9 @@ export const localizedPortableText = defineType({
       title: 'Italiano',
       type: 'array',
       of: portableTextBlocks,
+      components: {
+        input: browserOnlyInput(PortableTextArrayInput),
+      },
       options: {
         search: {weight: 0},
       },
@@ -311,6 +321,9 @@ export const localizedPortableText = defineType({
       title: 'Deutsch',
       type: 'array',
       of: portableTextBlocks,
+      components: {
+        input: browserOnlyInput(PortableTextArrayInput),
+      },
       options: {
         search: {weight: 0},
       },
@@ -320,6 +333,9 @@ export const localizedPortableText = defineType({
       title: 'Français',
       type: 'array',
       of: portableTextBlocks,
+      components: {
+        input: browserOnlyInput(PortableTextArrayInput),
+      },
       options: {
         search: {weight: 0},
       },
@@ -329,6 +345,9 @@ export const localizedPortableText = defineType({
       title: 'Español',
       type: 'array',
       of: portableTextBlocks,
+      components: {
+        input: browserOnlyInput(PortableTextArrayInput),
+      },
       options: {
         search: {weight: 0},
       },
