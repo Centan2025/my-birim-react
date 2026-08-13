@@ -56,6 +56,19 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
     let el: ReactNode = sanitizedText
 
     if (s.marks && s.marks.length) {
+      const isFontSizeMark = (markName: string) =>
+        markName === 'size-sm' ||
+        markName === 'size-md' ||
+        markName === 'size-lg' ||
+        markName === 'size-xl' ||
+        markName === 'size-2xl' ||
+        markName.startsWith('size-') ||
+        markName.startsWith('font-size-')
+
+      const fontSizeMarks = s.marks.filter(isFontSizeMark)
+      const lastFontSizeMark =
+        fontSizeMarks.length > 0 ? fontSizeMarks[fontSizeMarks.length - 1] : null
+
       // Sort marks to ensure consistent nesting (decorators first, then annotations)
       const sortedMarks = [...s.marks].sort((a, b) => {
         const aIsDef = markDefs.some(d => d._key === a)
@@ -104,40 +117,48 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
               {el}
             </span>
           )
-        let matchedFontSize: string | null = null
 
-        if (m === 'size-sm') matchedFontSize = '14px'
-        else if (m === 'size-md') matchedFontSize = '18px'
-        else if (m === 'size-lg') matchedFontSize = '24px'
-        else if (m === 'size-xl') matchedFontSize = '32px'
-        else if (m === 'size-2xl') matchedFontSize = '48px'
-        else if (m.startsWith('size-') || m.startsWith('font-size-')) {
-          const val = m.replace('font-size-', '').replace('size-', '')
-          if (val === 'xs') matchedFontSize = '12px'
-          else if (val === 'sm') matchedFontSize = '14px'
-          else if (val === 'base') matchedFontSize = '16px'
-          else if (val === 'md') matchedFontSize = '18px'
-          else if (val === 'lg') matchedFontSize = '24px'
-          else if (val === 'xl') matchedFontSize = '32px'
-          else if (val === '2xl') matchedFontSize = '48px'
-          else if (val === '3xl') matchedFontSize = '64px'
-          else if (/^\d+$/.test(val)) matchedFontSize = `${val}px`
-          else if (
-            val.endsWith('px') ||
-            val.endsWith('em') ||
-            val.endsWith('rem') ||
-            val.endsWith('%')
-          ) {
-            matchedFontSize = val
+        if (isFontSizeMark(m)) {
+          // If multiple font size marks were stacked, only apply the LAST font size mark
+          if (m !== lastFontSizeMark) {
+            return
           }
-        }
 
-        if (matchedFontSize) {
-          el = (
-            <span key={i + '-' + m} style={{fontSize: matchedFontSize}}>
-              {el}
-            </span>
-          )
+          let matchedFontSize: string | null = null
+
+          if (m === 'size-sm') matchedFontSize = '14px'
+          else if (m === 'size-md') matchedFontSize = '18px'
+          else if (m === 'size-lg') matchedFontSize = '24px'
+          else if (m === 'size-xl') matchedFontSize = '32px'
+          else if (m === 'size-2xl') matchedFontSize = '48px'
+          else if (m.startsWith('size-') || m.startsWith('font-size-')) {
+            const val = m.replace('font-size-', '').replace('size-', '')
+            if (val === 'xs') matchedFontSize = '12px'
+            else if (val === 'sm') matchedFontSize = '14px'
+            else if (val === 'base') matchedFontSize = '16px'
+            else if (val === 'md') matchedFontSize = '18px'
+            else if (val === 'lg') matchedFontSize = '24px'
+            else if (val === 'xl') matchedFontSize = '32px'
+            else if (val === '2xl') matchedFontSize = '48px'
+            else if (val === '3xl') matchedFontSize = '64px'
+            else if (/^\d+$/.test(val)) matchedFontSize = `${val}px`
+            else if (
+              val.endsWith('px') ||
+              val.endsWith('em') ||
+              val.endsWith('rem') ||
+              val.endsWith('%')
+            ) {
+              matchedFontSize = val
+            }
+          }
+
+          if (matchedFontSize) {
+            el = (
+              <span key={i + '-' + m} style={{fontSize: matchedFontSize}}>
+                {el}
+              </span>
+            )
+          }
         }
 
         // Annotations
