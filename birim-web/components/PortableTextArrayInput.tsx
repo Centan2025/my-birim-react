@@ -12,17 +12,49 @@ const FONT_SIZE_MARKS = [
   'size-48px',
 ]
 
+const INDENT_MARKS = ['indent-24px', 'indent-48px']
+
+const ALIGNMENT_MARKS = [
+  'align-left',
+  'align-center',
+  'align-right',
+  'align-justify',
+  'alignLeft',
+  'alignCenter',
+  'alignRight',
+  'alignJustify',
+]
+
 const isFontSizeMark = (m: string) =>
   FONT_SIZE_MARKS.includes(m) || m.startsWith('size-') || m.startsWith('font-size-')
+
+const isIndentMark = (m: string) =>
+  INDENT_MARKS.includes(m) || m.startsWith('indent-')
+
+const isAlignmentMark = (m: string) =>
+  ALIGNMENT_MARKS.includes(m) || m.startsWith('align-')
 
 function cleanMarksArray(marks: string[]): string[] {
   if (!Array.isArray(marks) || marks.length <= 1) return marks
   const fontMarks = marks.filter(isFontSizeMark)
-  if (fontMarks.length <= 1) return marks
+  const indentMarks = marks.filter(isIndentMark)
+  const alignMarks = marks.filter(isAlignmentMark)
+  if (fontMarks.length <= 1 && indentMarks.length <= 1 && alignMarks.length <= 1) return marks
 
-  // Keep only the last font size mark added
-  const lastFontMark = fontMarks[fontMarks.length - 1]
-  return marks.filter((m) => !isFontSizeMark(m) || m === lastFontMark)
+  let result = marks
+  if (fontMarks.length > 1) {
+    const lastFontMark = fontMarks[fontMarks.length - 1]
+    result = result.filter((m) => !isFontSizeMark(m) || m === lastFontMark)
+  }
+  if (indentMarks.length > 1) {
+    const lastIndentMark = indentMarks[indentMarks.length - 1]
+    result = result.filter((m) => !isIndentMark(m) || m === lastIndentMark)
+  }
+  if (alignMarks.length > 1) {
+    const lastAlignMark = alignMarks[alignMarks.length - 1]
+    result = result.filter((m) => !isAlignmentMark(m) || m === lastAlignMark)
+  }
+  return result
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -9,12 +9,12 @@
  */
 
 import express from 'express'
-import { createRequire } from 'module'
-import { readFileSync, existsSync } from 'fs'
-import { resolve, dirname } from 'path'
-import { fileURLToPath } from 'url'
+import {createRequire} from 'module'
+import {readFileSync, existsSync} from 'fs'
+import {resolve, dirname} from 'path'
+import {fileURLToPath} from 'url'
 import crypto from 'crypto'
-import { randomUUID } from 'crypto'
+import {randomUUID} from 'crypto'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -55,7 +55,7 @@ function loadEnvVars() {
 loadEnvVars()
 
 // sanity client ve bcrypt'i dynamic import ile yükle
-const { createClient } = await import('@sanity/client')
+const {createClient} = await import('@sanity/client')
 const bcrypt = (await import('bcryptjs')).default
 const nodemailer = (await import('nodemailer')).default
 
@@ -93,8 +93,8 @@ const sanityClient = createClient({
 })
 
 const app = express()
-app.use(express.json({ limit: '50mb' }))
-app.use(express.urlencoded({ limit: '50mb', extended: true }))
+app.use(express.json({limit: '50mb'}))
+app.use(express.urlencoded({limit: '50mb', extended: true}))
 
 const ALLOWED_ORIGINS = [
   'http://localhost:3001',
@@ -106,7 +106,12 @@ const ALLOWED_ORIGINS = [
 // CORS - Dinamik origin destegi
 app.use((req, res, next) => {
   const origin = req.headers.origin
-  if (origin && (ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.sanity.studio') || origin.endsWith('.vercel.app'))) {
+  if (
+    origin &&
+    (ALLOWED_ORIGINS.includes(origin) ||
+      origin.endsWith('.sanity.studio') ||
+      origin.endsWith('.vercel.app'))
+  ) {
     res.setHeader('Access-Control-Allow-Origin', origin)
   } else {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3001')
@@ -135,22 +140,23 @@ testSanity()
 
 // ─── /api/auth/login ───────────────────────────────────────────────────────
 app.post('/api/auth/login', async (req, res) => {
-  const { email, password } = req.body
-  if (!email || !password) return res.status(400).json({ error: 'Email ve şifre gereklidir.' })
+  const {email, password} = req.body
+  if (!email || !password) return res.status(400).json({error: 'Email ve şifre gereklidir.'})
 
   const normEmail = email.trim().toLowerCase()
   try {
     const user = await sanityClient.fetch(
       `*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]`,
-      { email: normEmail }
+      {email: normEmail}
     )
-    if (!user) return res.status(401).json({ error: 'E-posta adresi veya şifre hatalı.' })
+    if (!user) return res.status(401).json({error: 'E-posta adresi veya şifre hatalı.'})
     if (user.userType === 'email_subscriber')
-      return res.status(403).json({ error: 'Bu sadece abonelik kaydı, lütfen tam üyelik alın.' })
-    if (!user.isActive) return res.status(403).json({ error: 'Hesabınız aktif değil.' })
+      return res.status(403).json({error: 'Bu sadece abonelik kaydı, lütfen tam üyelik alın.'})
+    if (!user.isActive) return res.status(403).json({error: 'Hesabınız aktif değil.'})
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password || '')
-    if (!isPasswordCorrect) return res.status(401).json({ error: 'E-posta adresi veya şifre hatalı.' })
+    if (!isPasswordCorrect)
+      return res.status(401).json({error: 'E-posta adresi veya şifre hatalı.'})
 
     return res.status(200).json({
       success: true,
@@ -169,29 +175,32 @@ app.post('/api/auth/login', async (req, res) => {
     })
   } catch (err) {
     console.error('Login error:', err)
-    return res.status(500).json({ error: `Giriş hatası: ${err.message || 'Teknik bir hata oluştu.'}` })
+    return res
+      .status(500)
+      .json({error: `Giriş hatası: ${err.message || 'Teknik bir hata oluştu.'}`})
   }
 })
 
 // ─── /api/auth/me ──────────────────────────────────────────────────────────
 app.all('/api/auth/me', async (req, res) => {
   const authHeader = req.headers['authorization']
-  const token = authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
-    ? authHeader.substring(7).trim()
-    : null
+  const token =
+    authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
+      ? authHeader.substring(7).trim()
+      : null
 
   if (!token) {
-    return res.status(200).json({ authenticated: false, user: null })
+    return res.status(200).json({authenticated: false, user: null})
   }
 
   try {
     const user = await sanityClient.fetch(
       `*[_type == "user" && _id == $id && !defined(_deleted)][0]`,
-      { id: token }
+      {id: token}
     )
 
     if (!user || !user.isActive) {
-      return res.status(200).json({ authenticated: false, user: null })
+      return res.status(200).json({authenticated: false, user: null})
     }
 
     return res.status(200).json({
@@ -214,21 +223,21 @@ app.all('/api/auth/me', async (req, res) => {
     })
   } catch (err) {
     console.error('Me endpoint error:', err)
-    return res.status(500).json({ authenticated: false, error: 'Sunucu hatası.' })
+    return res.status(500).json({authenticated: false, error: 'Sunucu hatası.'})
   }
 })
 
 // ─── /api/auth/register ───────────────────────────────────────────────────
 app.post('/api/auth/register', async (req, res) => {
-  if (!SANITY_TOKEN) return res.status(500).json({ error: 'SANITY_TOKEN is not configured' })
-  const { email, password, name, company, profession, country } = req.body
-  if (!email || !password) return res.status(400).json({ error: 'Email ve şifre gereklidir.' })
+  if (!SANITY_TOKEN) return res.status(500).json({error: 'SANITY_TOKEN is not configured'})
+  const {email, password, name, company, profession, country} = req.body
+  if (!email || !password) return res.status(400).json({error: 'Email ve şifre gereklidir.'})
 
   const normEmail = email.trim().toLowerCase()
   try {
     const existingUser = await sanityClient.fetch(
       `*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]`,
-      { email: normEmail }
+      {email: normEmail}
     )
     if (existingUser) {
       if (existingUser.userType === 'email_subscriber') {
@@ -246,15 +255,13 @@ app.post('/api/auth/register', async (req, res) => {
             verificationToken: randomUUID(),
           })
           .commit()
-        return res
-          .status(200)
-          .json({
-            success: true,
-            message: 'Abonelik hesabınız tam üyeliğe yükseltildi.',
-            user: { id: updatedUser._id, email: updatedUser.email, userType: 'full_member' },
-          })
+        return res.status(200).json({
+          success: true,
+          message: 'Abonelik hesabınız tam üyeliğe yükseltildi.',
+          user: {id: updatedUser._id, email: updatedUser.email, userType: 'full_member'},
+        })
       }
-      return res.status(400).json({ error: 'Bu e-posta adresi zaten kayıtlı.' })
+      return res.status(400).json({error: 'Bu e-posta adresi zaten kayıtlı.'})
     }
 
     const passwordHash = await bcrypt.hash(password, 10)
@@ -273,35 +280,35 @@ app.post('/api/auth/register', async (req, res) => {
       verificationToken,
       createdAt: new Date().toISOString(),
     })
-    return res
-      .status(201)
-      .json({
-        success: true,
-        user: {
-          id: newUser._id,
-          email: newUser.email,
-          name: newUser.name,
-          verificationToken: newUser.verificationToken,
-        },
-      })
+    return res.status(201).json({
+      success: true,
+      user: {
+        id: newUser._id,
+        email: newUser.email,
+        name: newUser.name,
+        verificationToken: newUser.verificationToken,
+      },
+    })
   } catch (err) {
-    return res.status(500).json({ error: `Hata: ${err.message || 'Kayıt sırasında bir hata oluştu.'}` })
+    return res
+      .status(500)
+      .json({error: `Hata: ${err.message || 'Kayıt sırasında bir hata oluştu.'}`})
   }
 })
 
 // ─── /api/auth/verify ─────────────────────────────────────────────────────
 app.post('/api/auth/verify', async (req, res) => {
-  const { token } = req.body
-  if (!token) return res.status(400).json({ error: "Doğrulama token'ı gereklidir." })
+  const {token} = req.body
+  if (!token) return res.status(400).json({error: "Doğrulama token'ı gereklidir."})
   try {
     const user = await sanityClient.fetch(`*[_type == "user" && verificationToken == $token][0]`, {
       token,
     })
-    if (!user) return res.status(400).json({ error: 'Geçersiz veya süresi dolmuş token.' })
+    if (!user) return res.status(400).json({error: 'Geçersiz veya süresi dolmuş token.'})
 
     const updatedUser = await sanityClient
       .patch(user._id)
-      .set({ isVerified: true, isActive: true })
+      .set({isVerified: true, isActive: true})
       .unset(['verificationToken'])
       .commit()
 
@@ -323,22 +330,22 @@ app.post('/api/auth/verify', async (req, res) => {
     })
   } catch (err) {
     console.error('Verification error:', err)
-    return res.status(500).json({ error: `Doğrulama hatası: ${err.message || 'Bir hata oluştu.'}` })
+    return res.status(500).json({error: `Doğrulama hatası: ${err.message || 'Bir hata oluştu.'}`})
   }
 })
 
 // ─── /api/auth/subscribe ──────────────────────────────────────────────────
 app.post('/api/auth/subscribe', async (req, res) => {
-  if (!SANITY_TOKEN) return res.status(500).json({ error: 'SANITY_TOKEN is not configured' })
-  const { email } = req.body
-  if (!email) return res.status(400).json({ error: 'E-posta adresi gereklidir.' })
+  if (!SANITY_TOKEN) return res.status(500).json({error: 'SANITY_TOKEN is not configured'})
+  const {email} = req.body
+  if (!email) return res.status(400).json({error: 'E-posta adresi gereklidir.'})
   const normEmail = email.trim().toLowerCase()
   try {
     const existing = await sanityClient.fetch(
       `*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]`,
-      { email: normEmail }
+      {email: normEmail}
     )
-    if (existing) return res.status(400).json({ error: 'Bu e-posta adresi zaten kayıtlı.' })
+    if (existing) return res.status(400).json({error: 'Bu e-posta adresi zaten kayıtlı.'})
     const newUser = await sanityClient.create({
       _type: 'user',
       email: normEmail,
@@ -349,24 +356,29 @@ app.post('/api/auth/subscribe', async (req, res) => {
       isActive: true,
       createdAt: new Date().toISOString(),
     })
-    return res.status(201).json({ success: true, user: newUser })
+    return res.status(201).json({success: true, user: newUser})
   } catch (err) {
     console.error('Subscribe error:', err)
-    return res.status(500).json({ error: `Abonelik hatası: ${err.message || 'İşlem sırasında bir hata oluştu.'}`, details: err.toString() })
+    return res
+      .status(500)
+      .json({
+        error: `Abonelik hatası: ${err.message || 'İşlem sırasında bir hata oluştu.'}`,
+        details: err.toString(),
+      })
   }
 })
 
 // ─── /api/auth/subscribe-prof ─────────────────────────────────────────────
 app.post('/api/auth/subscribe-prof', async (req, res) => {
-  if (!SANITY_TOKEN) return res.status(500).json({ error: 'SANITY_TOKEN is not configured' })
-  const { email, password, name, company, profession, country, phone } = req.body
-  if (!email) return res.status(400).json({ error: 'E-posta adresi gereklidir.' })
+  if (!SANITY_TOKEN) return res.status(500).json({error: 'SANITY_TOKEN is not configured'})
+  const {email, password, name, company, profession, country, phone} = req.body
+  if (!email) return res.status(400).json({error: 'E-posta adresi gereklidir.'})
 
   const normEmail = email.trim().toLowerCase()
   try {
     const existing = await sanityClient.fetch(
       `*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]`,
-      { email: normEmail }
+      {email: normEmail}
     )
 
     let passwordHash = null
@@ -394,22 +406,27 @@ app.post('/api/auth/subscribe-prof', async (req, res) => {
           patchData.password = passwordHash
         }
 
-        await sanityClient
-          .patch(existing._id)
-          .set(patchData)
-          .commit()
+        await sanityClient.patch(existing._id).set(patchData).commit()
 
         return res.status(200).json({
           success: true,
-          message: 'Başvurunuz alındı. Lütfen e-posta adresinize gönderilen onay mailini kontrol edin.',
+          message:
+            'Başvurunuz alındı. Lütfen e-posta adresinize gönderilen onay mailini kontrol edin.',
           verificationToken,
           email: normEmail,
         })
       }
       if (existing.userType === 'professional_subscriber' && !existing.isVerified) {
-        return res.status(400).json({ error: 'Bu e-posta adresi zaten kayıtlı ve onay bekliyor. Lütfen e-postanızı kontrol edin.' })
+        return res
+          .status(400)
+          .json({
+            error:
+              'Bu e-posta adresi zaten kayıtlı ve onay bekliyor. Lütfen e-postanızı kontrol edin.',
+          })
       }
-      return res.status(400).json({ error: 'Bu e-posta adresi ile zaten kayıtlı profesyonel hesabınız var.' })
+      return res
+        .status(400)
+        .json({error: 'Bu e-posta adresi ile zaten kayıtlı profesyonel hesabınız var.'})
     }
 
     const verificationToken = randomUUID()
@@ -444,87 +461,98 @@ app.post('/api/auth/subscribe-prof', async (req, res) => {
     })
   } catch (err) {
     console.error('Subscribe Prof error:', err)
-    return res.status(500).json({ error: `Başvuru hatası: ${err.message || 'İşlem sırasında bir hata oluştu.'}` })
+    return res
+      .status(500)
+      .json({error: `Başvuru hatası: ${err.message || 'İşlem sırasında bir hata oluştu.'}`})
   }
 })
 
 // ─── /api/auth/reset-request ──────────────────────────────────────────────
 app.post('/api/auth/reset-request', async (req, res) => {
-  if (!SANITY_TOKEN) return res.status(500).json({ error: 'SANITY_TOKEN yapılandırılmamış.' })
-  const { email } = req.body
-  if (!email) return res.status(400).json({ error: 'E-posta adresi gereklidir.' })
+  if (!SANITY_TOKEN) return res.status(500).json({error: 'SANITY_TOKEN yapılandırılmamış.'})
+  const {email} = req.body
+  if (!email) return res.status(400).json({error: 'E-posta adresi gereklidir.'})
   const normEmail = email.trim().toLowerCase()
   try {
     const user = await sanityClient.fetch(
       `*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]`,
-      { email: normEmail }
+      {email: normEmail}
     )
-    if (!user) return res.status(404).json({ error: 'Kullanıcı bulunamadı.' })
+    if (!user) return res.status(404).json({error: 'Kullanıcı bulunamadı.'})
     const resetToken = randomUUID()
     const resetPasswordExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
     await sanityClient
       .patch(user._id)
-      .set({ resetPasswordToken: resetToken, resetPasswordExpires })
+      .set({resetPasswordToken: resetToken, resetPasswordExpires})
       .commit()
     return res
       .status(200)
-      .json({ success: true, resetToken, message: 'Şifre sıfırlama kodu oluşturuldu.' })
+      .json({success: true, resetToken, message: 'Şifre sıfırlama kodu oluşturuldu.'})
   } catch (err) {
     console.error('Reset request error:', err)
-    return res.status(500).json({ error: `Hata: ${err.message || 'Süreç sırasında bir hata oluştu.'}`, details: err.toString() })
+    return res
+      .status(500)
+      .json({
+        error: `Hata: ${err.message || 'Süreç sırasında bir hata oluştu.'}`,
+        details: err.toString(),
+      })
   }
 })
 
 // ─── /api/auth/reset-password ─────────────────────────────────────────────
 app.post('/api/auth/reset-password', async (req, res) => {
-  const { token, newPassword } = req.body
+  const {token, newPassword} = req.body
   if (!token || !newPassword)
-    return res.status(400).json({ error: 'Token ve yeni şifre gereklidir.' })
+    return res.status(400).json({error: 'Token ve yeni şifre gereklidir.'})
   try {
     const user = await sanityClient.fetch(
       `*[_type == "user" && resetPasswordToken == $token && resetPasswordExpires > $now][0]`,
-      { token, now: new Date().toISOString() }
+      {token, now: new Date().toISOString()}
     )
-    if (!user) return res.status(400).json({ error: 'Geçersiz veya süresi dolmuş token.' })
+    if (!user) return res.status(400).json({error: 'Geçersiz veya süresi dolmuş token.'})
     const passwordHash = await bcrypt.hash(newPassword, 10)
     await sanityClient
       .patch(user._id)
-      .set({ password: passwordHash })
+      .set({password: passwordHash})
       .unset(['resetPasswordToken', 'resetPasswordExpires'])
       .commit()
-    return res.status(200).json({ success: true, message: 'Şifreniz başarıyla değiştirildi.' })
+    return res.status(200).json({success: true, message: 'Şifreniz başarıyla değiştirildi.'})
   } catch (err) {
     console.error('Reset password error:', err)
-    return res.status(500).json({ error: `Şifre değiştirme hatası: ${err.message || 'Bir hata oluştu.'}` })
+    return res
+      .status(500)
+      .json({error: `Şifre değiştirme hatası: ${err.message || 'Bir hata oluştu.'}`})
   }
 })
 
 // ─── /api/auth/delete-account ─────────────────────────────────────────────
 app.post('/api/auth/delete-account', async (req, res) => {
-  const { id } = req.body
-  if (!id) return res.status(400).json({ error: 'Kullanıcı ID gereklidir.' })
+  const {id} = req.body
+  if (!id) return res.status(400).json({error: 'Kullanıcı ID gereklidir.'})
   try {
     await sanityClient.delete(id)
-    return res.status(200).json({ success: true })
+    return res.status(200).json({success: true})
   } catch (err) {
     console.error('Delete account error:', err)
-    return res.status(500).json({ error: 'Hesap silinirken bir hata oluştu.' })
+    return res.status(500).json({error: 'Hesap silinirken bir hata oluştu.'})
   }
 })
 
 // ─── /api/send-verification ───────────────────────────────────────────────
 app.post('/api/send-verification', async (req, res) => {
-  const { email, verificationUrl, logoUrl } = req.body || {}
+  const {email, verificationUrl, logoUrl} = req.body || {}
 
   if (!mailTransporter || !SMTP_PASSWORD) {
-    console.warn('⚠️  SMTP_PASSWORD yok, e-posta gönderilemedi. .env dosyasına SMTP_PASSWORD ekleyin.')
+    console.warn(
+      '⚠️  SMTP_PASSWORD yok, e-posta gönderilemedi. .env dosyasına SMTP_PASSWORD ekleyin.'
+    )
     console.log(`📧 [SIMÜLASYON] Doğrulama maili gönderilecekti → ${email}`)
     console.log(`   Doğrulama URL: ${verificationUrl}`)
-    return res.json({ ok: true, simulated: true })
+    return res.json({ok: true, simulated: true})
   }
 
   if (!email || !verificationUrl) {
-    return res.status(400).json({ error: 'email and verificationUrl are required' })
+    return res.status(400).json({error: 'email and verificationUrl are required'})
   }
 
   console.log('[Email] Logo URL received:', logoUrl)
@@ -590,7 +618,9 @@ app.post('/api/send-verification', async (req, res) => {
                 <a href="${verificationUrl}" style="color:#1a1f3a; text-decoration: underline;">${verificationUrl}</a>
               </p>
             </div>
-            ${logoUrl ? `
+            ${
+              logoUrl
+                ? `
             <div style="text-align: center; margin-top: 24px;">
               <img
                 src="${logoUrl}"
@@ -598,7 +628,9 @@ app.post('/api/send-verification', async (req, res) => {
                 style="height: 40px; width: auto; max-width: 200px; display: block; margin: 0 auto;"
               />
             </div>
-            ` : ''}
+            `
+                : ''
+            }
           </div>
         </body>
         </html>
@@ -606,26 +638,28 @@ app.post('/api/send-verification', async (req, res) => {
     })
 
     console.log('✅ Verification email sent to', email)
-    res.json({ ok: true })
+    res.json({ok: true})
   } catch (err) {
     console.error('❌ Mail gönderim hatası:', err)
-    res.status(500).json({ error: 'Failed to send email' })
+    res.status(500).json({error: 'Failed to send email'})
   }
 })
 
 // ─── /api/send-password-reset ─────────────────────────────────────────────
 app.post('/api/send-password-reset', async (req, res) => {
-  const { email, resetUrl, logoUrl } = req.body || {}
+  const {email, resetUrl, logoUrl} = req.body || {}
 
   if (!mailTransporter || !SMTP_PASSWORD) {
-    console.warn('⚠️  SMTP_PASSWORD yok, e-posta gönderilemedi. .env dosyasına SMTP_PASSWORD ekleyin.')
+    console.warn(
+      '⚠️  SMTP_PASSWORD yok, e-posta gönderilemedi. .env dosyasına SMTP_PASSWORD ekleyin.'
+    )
     console.log(`📧 [SIMÜLASYON] Şifre sıfırlama maili gönderilecekti → ${email}`)
     console.log(`   Sıfırlama URL: ${resetUrl}`)
-    return res.json({ ok: true, simulated: true })
+    return res.json({ok: true, simulated: true})
   }
 
   if (!email || !resetUrl) {
-    return res.status(400).json({ error: 'email and resetUrl are required' })
+    return res.status(400).json({error: 'email and resetUrl are required'})
   }
 
   try {
@@ -689,7 +723,9 @@ app.post('/api/send-password-reset', async (req, res) => {
                 <a href="${resetUrl}" style="color:#1a1f3a; text-decoration: underline;">${resetUrl}</a>
               </p>
             </div>
-            ${logoUrl ? `
+            ${
+              logoUrl
+                ? `
             <div style="text-align: center; margin-top: 24px;">
               <img
                 src="${logoUrl}"
@@ -697,7 +733,9 @@ app.post('/api/send-password-reset', async (req, res) => {
                 style="height: 40px; width: auto; max-width: 200px; display: block; margin: 0 auto;"
               />
             </div>
-            ` : ''}
+            `
+                : ''
+            }
           </div>
         </body>
         </html>
@@ -705,37 +743,53 @@ app.post('/api/send-password-reset', async (req, res) => {
     })
 
     console.log('✅ Password reset email sent to', email)
-    res.json({ ok: true })
+    res.json({ok: true})
   } catch (err) {
     console.error('❌ Sıfırlama maili gönderim hatası:', err)
-    res.status(500).json({ error: 'Failed to send reset email' })
+    res.status(500).json({error: 'Failed to send reset email'})
   }
 })
 
 // ─── /api/media/presigned-url ──────────────────────────────────────────────
 app.post('/api/media/presigned-url', async (req, res) => {
-  const { filename, contentType, folder } = req.body || {}
+  const {filename, contentType, folder} = req.body || {}
   if (!filename || !contentType) {
-    return res.status(400).json({ error: 'filename ve contentType parametreleri gereklidir.' })
+    return res.status(400).json({error: 'filename ve contentType parametreleri gereklidir.'})
   }
 
   try {
-    const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3')
-    const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner')
+    const {S3Client, PutObjectCommand} = await import('@aws-sdk/client-s3')
+    const {getSignedUrl} = await import('@aws-sdk/s3-request-presigner')
 
     const originDomain = process.env.VITE_R2_ORIGIN_DOMAIN || ''
     const hashMatch = originDomain.match(/pub-([a-f0-9]+)\.r2\.dev/)
     const defaultAccountId = hashMatch ? hashMatch[1] : '114e37dc2d51e58147e027097a68470b'
 
-    const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || process.env.SANITY_STUDIO_R2_ACCOUNT_ID || process.env.VITE_R2_ACCOUNT_ID || defaultAccountId
-    const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID || process.env.VITE_R2_ACCESS_KEY_ID
-    const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY || process.env.VITE_R2_SECRET_ACCESS_KEY
-    const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || process.env.SANITY_STUDIO_R2_BUCKET_NAME || 'birim-web'
-    const R2_DOMAIN = process.env.R2_DOMAIN || process.env.SANITY_STUDIO_R2_DOMAIN || process.env.VITE_R2_DOMAIN || 'https://assets.birim.com'
+    const R2_ACCOUNT_ID =
+      process.env.R2_ACCOUNT_ID ||
+      process.env.SANITY_STUDIO_R2_ACCOUNT_ID ||
+      process.env.VITE_R2_ACCOUNT_ID ||
+      defaultAccountId
+    const R2_ACCESS_KEY_ID =
+      process.env.R2_ACCESS_KEY_ID ||
+      process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID ||
+      process.env.VITE_R2_ACCESS_KEY_ID
+    const R2_SECRET_ACCESS_KEY =
+      process.env.R2_SECRET_ACCESS_KEY ||
+      process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY ||
+      process.env.VITE_R2_SECRET_ACCESS_KEY
+    const R2_BUCKET_NAME =
+      process.env.R2_BUCKET_NAME || process.env.SANITY_STUDIO_R2_BUCKET_NAME || 'birim-web'
+    const R2_DOMAIN =
+      process.env.R2_DOMAIN ||
+      process.env.SANITY_STUDIO_R2_DOMAIN ||
+      process.env.VITE_R2_DOMAIN ||
+      'https://assets.birim.com'
 
     if (!R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY) {
       return res.status(500).json({
-        error: 'Cloudflare R2 erişim anahtarları (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY) .env.local dosyasında tanımlı değil.',
+        error:
+          'Cloudflare R2 erişim anahtarları (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY) .env.local dosyasında tanımlı değil.',
       })
     }
 
@@ -755,7 +809,7 @@ app.post('/api/media/presigned-url', async (req, res) => {
       ContentType: contentType,
     })
 
-    const url = await getSignedUrl(r2Client, command, { expiresIn: 900 })
+    const url = await getSignedUrl(r2Client, command, {expiresIn: 900})
     const r2Domain = R2_DOMAIN?.startsWith('http') ? R2_DOMAIN : `https://${R2_DOMAIN}`
     const finalFileUrl = `${r2Domain}/${key}`
 
@@ -767,7 +821,7 @@ app.post('/api/media/presigned-url', async (req, res) => {
     })
   } catch (error) {
     console.error('Presigned URL error:', error)
-    return res.status(500).json({ error: `Presigned URL oluşturulamadı: ${error.message}` })
+    return res.status(500).json({error: `Presigned URL oluşturulamadı: ${error.message}`})
   }
 })
 
@@ -782,7 +836,7 @@ app.post('/api/ai/nano-banana-planner', async (req, res) => {
 
   const rec = rateLimitStore.get(clientIp)
   if (!rec || now > rec.resetTime) {
-    rateLimitStore.set(clientIp, { count: 1, resetTime: now + windowMs })
+    rateLimitStore.set(clientIp, {count: 1, resetTime: now + windowMs})
   } else if (rec.count >= limit) {
     console.warn(`⚠️ IP Rate limit aşıldı: ${clientIp}`)
     return res.status(429).json({
@@ -793,9 +847,17 @@ app.post('/api/ai/nano-banana-planner', async (req, res) => {
     rec.count += 1
   }
 
-  const { roomImage, productImage, customPrompt, angle, alignmentInstruction, productName, productDetails } = req.body || {}
+  const {
+    roomImage,
+    productImage,
+    customPrompt,
+    angle,
+    alignmentInstruction,
+    productName,
+    productDetails,
+  } = req.body || {}
   if (!roomImage || !productImage) {
-    return res.status(400).json({ error: 'roomImage ve productImage parametreleri zorunludur.' })
+    return res.status(400).json({error: 'roomImage ve productImage parametreleri zorunludur.'})
   }
 
   // Input Sanitization for customPrompt
@@ -817,13 +879,13 @@ app.post('/api/ai/nano-banana-planner', async (req, res) => {
   }
 
   try {
-    const { GoogleGenAI } = await import('@google/genai')
+    const {GoogleGenAI} = await import('@google/genai')
 
     // Helper to get base64 & mimeType
-    const parseImg = async (inputStr) => {
+    const parseImg = async inputStr => {
       if (inputStr.startsWith('data:')) {
         const matches = inputStr.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/)
-        if (matches) return { mimeType: matches[1], base64Data: matches[2] }
+        if (matches) return {mimeType: matches[1], base64Data: matches[2]}
       }
       if (inputStr.startsWith('http://') || inputStr.startsWith('https://')) {
         let targetUrl = inputStr
@@ -841,15 +903,20 @@ app.post('/api/ai/nano-banana-planner', async (req, res) => {
         const fRes = await fetch(targetUrl)
         if (!fRes.ok) throw new Error(`Görsel indirilemedi: ${fRes.statusText}`)
         const buf = Buffer.from(await fRes.arrayBuffer())
-        return { mimeType: fRes.headers.get('content-type') || 'image/jpeg', base64Data: buf.toString('base64') }
+        return {
+          mimeType: fRes.headers.get('content-type') || 'image/jpeg',
+          base64Data: buf.toString('base64'),
+        }
       }
-      return { mimeType: 'image/jpeg', base64Data: inputStr }
+      return {mimeType: 'image/jpeg', base64Data: inputStr}
     }
 
     const roomImg = await parseImg(roomImage)
     const productImg = await parseImg(productImage)
 
-    let promptText = cleanPrompt ? cleanPrompt : `
+    let promptText = cleanPrompt
+      ? cleanPrompt
+      : `
 You are an ultra-precise photorealistic 3D interior renderer and product-exact visualizer engine.
 
 INPUT IMAGES:
@@ -886,7 +953,8 @@ ZERO-TOLERANCE MANDATORY PRODUCT CONSTRAINTS:
       if (productDetails.material) detailsList.push(`- Material/Fabric: ${productDetails.material}`)
       if (productDetails.legStyle) detailsList.push(`- Leg Style: ${productDetails.legStyle}`)
       if (productDetails.color) detailsList.push(`- Color/Finish: ${productDetails.color}`)
-      if (productDetails.description) detailsList.push(`- Description: ${productDetails.description}`)
+      if (productDetails.description)
+        detailsList.push(`- Description: ${productDetails.description}`)
       if (detailsList.length > 0) {
         promptText += `\n\nEXACT PRODUCT SPECIFICATIONS TO KEEP UNCHANGED:\n${detailsList.join('\n')}`
       }
@@ -918,15 +986,15 @@ ZERO-TOLERANCE MANDATORY PRODUCT CONSTRAINTS:
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`
         const apiRes = await fetch(url, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
             contents: [
               {
                 role: 'user',
                 parts: [
-                  { text: promptText },
-                  { inlineData: { mimeType: roomImg.mimeType, data: roomImg.base64Data } },
-                  { inlineData: { mimeType: productImg.mimeType, data: productImg.base64Data } },
+                  {text: promptText},
+                  {inlineData: {mimeType: roomImg.mimeType, data: roomImg.base64Data}},
+                  {inlineData: {mimeType: productImg.mimeType, data: productImg.base64Data}},
                 ],
               },
             ],
@@ -978,29 +1046,40 @@ ZERO-TOLERANCE MANDATORY PRODUCT CONSTRAINTS:
         success: true,
         imageUrl: roomImage,
         isDemo: true,
-        message: 'Google Gemini API kotanız (Free Tier) dolduğu için oda görseli hazırlandı. Kotanız yenilendiğinde canlı 3D sentezleme yapılacaktır.',
+        message:
+          'Google Gemini API kotanız (Free Tier) dolduğu için oda görseli hazırlandı. Kotanız yenilendiğinde canlı 3D sentezleme yapılacaktır.',
       })
     }
 
     // Try Cloudflare R2 Upload if available
     const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || process.env.SANITY_STUDIO_R2_ACCOUNT_ID
-    const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID
-    const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY
-    const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || process.env.SANITY_STUDIO_R2_BUCKET_NAME || 'birim-web'
+    const R2_ACCESS_KEY_ID =
+      process.env.R2_ACCESS_KEY_ID || process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID
+    const R2_SECRET_ACCESS_KEY =
+      process.env.R2_SECRET_ACCESS_KEY || process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY
+    const R2_BUCKET_NAME =
+      process.env.R2_BUCKET_NAME || process.env.SANITY_STUDIO_R2_BUCKET_NAME || 'birim-web'
     const R2_DOMAIN = process.env.R2_DOMAIN || process.env.SANITY_STUDIO_R2_DOMAIN
 
     let finalUrl = `data:${outputMime};base64,${outputBuffer.toString('base64')}`
 
     if (R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY) {
       try {
-        const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3')
+        const {S3Client, PutObjectCommand} = await import('@aws-sdk/client-s3')
         const r2Client = new S3Client({
           region: 'auto',
           endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-          credentials: { accessKeyId: R2_ACCESS_KEY_ID, secretAccessKey: R2_SECRET_ACCESS_KEY },
+          credentials: {accessKeyId: R2_ACCESS_KEY_ID, secretAccessKey: R2_SECRET_ACCESS_KEY},
         })
         const key = `ai-room-planner/${Date.now()}_${randomUUID().slice(0, 8)}.png`
-        await r2Client.send(new PutObjectCommand({ Bucket: R2_BUCKET_NAME, Key: key, Body: outputBuffer, ContentType: outputMime }))
+        await r2Client.send(
+          new PutObjectCommand({
+            Bucket: R2_BUCKET_NAME,
+            Key: key,
+            Body: outputBuffer,
+            ContentType: outputMime,
+          })
+        )
         const domain = R2_DOMAIN?.startsWith('http') ? R2_DOMAIN : `https://${R2_DOMAIN}`
         finalUrl = `${domain}/${key}`
       } catch (err) {
@@ -1016,7 +1095,10 @@ ZERO-TOLERANCE MANDATORY PRODUCT CONSTRAINTS:
   } catch (err) {
     console.error('Local AI Room Planner error:', err)
     const errStr = String(err?.message || err)
-    const isQuotaExceeded = errStr.includes('RESOURCE_EXHAUSTED') || errStr.includes('Quota exceeded') || errStr.includes('429')
+    const isQuotaExceeded =
+      errStr.includes('RESOURCE_EXHAUSTED') ||
+      errStr.includes('Quota exceeded') ||
+      errStr.includes('429')
 
     if (isQuotaExceeded) {
       console.warn('⚠️ Gemini API kotası/limiti dolduğu için Demo önizleme modu aktif edildi.')
@@ -1024,17 +1106,18 @@ ZERO-TOLERANCE MANDATORY PRODUCT CONSTRAINTS:
         success: true,
         imageUrl: roomImage,
         isDemo: true,
-        message: 'Google Gemini API kotanız (Free Tier) dolduğu için Demo modunda çalıştırıldı. Kotanız yenilendiğinde canlı AI sentezi yapılacaktır.',
+        message:
+          'Google Gemini API kotanız (Free Tier) dolduğu için Demo modunda çalıştırıldı. Kotanız yenilendiğinde canlı AI sentezi yapılacaktır.',
       })
     }
 
-    return res.status(500).json({ error: `AI Oda Tasarımı hatası: ${err.message}` })
+    return res.status(500).json({error: `AI Oda Tasarımı hatası: ${err.message}`})
   }
 })
 
 // ─── 404 ──────────────────────────────────────────────────────────────────
 app.use((req, res) => {
-  res.status(404).json({ error: `Route not found: ${req.method} ${req.path}` })
+  res.status(404).json({error: `Route not found: ${req.method} ${req.path}`})
 })
 
 const PORT = 3002

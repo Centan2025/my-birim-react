@@ -15,28 +15,6 @@ const createFontSizeDecorator = (title: string, value: string, px: string) => ({
     React.createElement('span', {style: {fontSize: px}}, props.children),
 })
 
-const createTextAlignDecorator = (
-  title: string,
-  value: string,
-  label: string,
-  alignVal: string,
-) => ({
-  title,
-  value,
-  icon: () =>
-    React.createElement(
-      'span',
-      {style: {fontSize: '11px', fontWeight: 700, padding: '0 2px'}},
-      label,
-    ),
-  component: (props: {children: React.ReactNode}) =>
-    React.createElement(
-      'span',
-      {style: {display: 'block', textAlign: alignVal as any}},
-      props.children,
-    ),
-})
-
 /**
  * Zengin Metin (Portable Text) Editor Yapılandırması
  * Bu yapılandırma Türkçe ve İngilizce alanlar için ortak kullanılır.
@@ -46,6 +24,36 @@ const portableTextBlocks = [
     type: 'block',
     styles: [
       {title: 'Normal (Paragraf)', value: 'normal'},
+      {
+        title: 'Paragraf (Ortalı)',
+        value: 'alignCenter',
+        component: (props: {children: React.ReactNode}) =>
+          React.createElement('p', {style: {textAlign: 'center', margin: 0}}, props.children),
+      },
+      {
+        title: 'Paragraf (Sağ Hizalı)',
+        value: 'alignRight',
+        component: (props: {children: React.ReactNode}) =>
+          React.createElement('p', {style: {textAlign: 'right', margin: 0}}, props.children),
+      },
+      {
+        title: 'Paragraf (İki Yana Yaslı)',
+        value: 'alignJustify',
+        component: (props: {children: React.ReactNode}) =>
+          React.createElement('p', {style: {textAlign: 'justify', margin: 0}}, props.children),
+      },
+      {
+        title: 'Paragraf (Girintili - 24px)',
+        value: 'indent1',
+        component: (props: {children: React.ReactNode}) =>
+          React.createElement('p', {style: {paddingLeft: '24px', margin: 0}}, props.children),
+      },
+      {
+        title: 'Paragraf (Girintili - 48px)',
+        value: 'indent2',
+        component: (props: {children: React.ReactNode}) =>
+          React.createElement('p', {style: {paddingLeft: '48px', margin: 0}}, props.children),
+      },
       {title: 'Paragraf Başlık 1 (H1)', value: 'h1'},
       {title: 'Paragraf Başlık 2 (H2)', value: 'h2'},
       {title: 'Paragraf Başlık 3 (H3)', value: 'h3'},
@@ -53,9 +61,6 @@ const portableTextBlocks = [
       {title: 'Paragraf Başlık 5 (H5)', value: 'h5'},
       {title: 'Paragraf Başlık 6 (H6)', value: 'h6'},
       {title: 'Alıntı (Blockquote)', value: 'blockquote'},
-      {title: 'Paragraf (Ortalı)', value: 'alignCenter'},
-      {title: 'Paragraf (Sağ Hizalı)', value: 'alignRight'},
-      {title: 'Paragraf (İki Yana Yaslı)', value: 'alignJustify'},
     ],
     lists: [
       {title: 'Madde İşaretli', value: 'bullet'},
@@ -68,15 +73,6 @@ const portableTextBlocks = [
         {title: 'Altı Çizili', value: 'underline'},
         {title: 'Üstü Çizili', value: 'strike-through'},
         {title: 'Kod', value: 'code'},
-        createTextAlignDecorator('Hizalama: Sola Yasla', 'align-left', '👈 Sol', 'left'),
-        createTextAlignDecorator('Hizalama: Ortala', 'align-center', '↔️ Orta', 'center'),
-        createTextAlignDecorator('Hizalama: Sağa Yasla', 'align-right', '👉 Sağ', 'right'),
-        createTextAlignDecorator(
-          'Hizalama: İki Yana Yasla',
-          'align-justify',
-          '↕️ Yasla',
-          'justify',
-        ),
         createFontSizeDecorator('Boyut: 12px', 'size-12px', '12px'),
         createFontSizeDecorator('Boyut: 14px', 'size-14px', '14px'),
         createFontSizeDecorator('Boyut: 16px', 'size-16px', '16px'),

@@ -129,6 +129,18 @@ function renderInline(spans: Span[] = [], markDefs: MarkDef[] = []) {
               {el}
             </span>
           )
+        if (m === 'indent-24px' || m === 'indent1')
+          el = (
+            <span key={i + '-indent-24'} className="inline-block" style={{paddingLeft: '24px'}}>
+              {el}
+            </span>
+          )
+        if (m === 'indent-48px' || m === 'indent2')
+          el = (
+            <span key={i + '-indent-48'} className="inline-block" style={{paddingLeft: '48px'}}>
+              {el}
+            </span>
+          )
 
         if (isFontSizeMark(m)) {
           // If multiple font size marks were stacked, only apply the LAST font size mark
@@ -560,6 +572,126 @@ export default function PortableTextLite({
               </p>
             )
             break
+          case 'indent1':
+            nodes.push(
+              <p
+                className="my-1 leading-relaxed text-inherit whitespace-pre-line min-h-[1.5em]"
+                style={{paddingLeft: '24px'}}
+                key={blockKey}
+              >
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'indent2':
+            nodes.push(
+              <p
+                className="my-1 leading-relaxed text-inherit whitespace-pre-line min-h-[1.5em]"
+                style={{paddingLeft: '48px'}}
+                key={blockKey}
+              >
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size10':
+            nodes.push(
+              <p className="my-1 leading-relaxed text-inherit whitespace-pre-line min-h-[1.5em]" style={{fontSize: '10px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size12':
+            nodes.push(
+              <p className="my-1 leading-relaxed text-inherit whitespace-pre-line min-h-[1.5em]" style={{fontSize: '12px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size14':
+            nodes.push(
+              <p className="my-1 leading-relaxed text-inherit whitespace-pre-line min-h-[1.5em]" style={{fontSize: '14px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size16':
+            nodes.push(
+              <p className="my-1 leading-relaxed text-inherit whitespace-pre-line min-h-[1.5em]" style={{fontSize: '16px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size18':
+            nodes.push(
+              <p className="my-1 leading-relaxed text-inherit whitespace-pre-line min-h-[1.5em]" style={{fontSize: '18px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size20':
+            nodes.push(
+              <p className="my-1 leading-relaxed text-inherit whitespace-pre-line min-h-[1.5em]" style={{fontSize: '20px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size24':
+            nodes.push(
+              <p className="my-1 leading-relaxed text-inherit whitespace-pre-line min-h-[1.5em]" style={{fontSize: '24px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size28':
+            nodes.push(
+              <p className="my-1 leading-relaxed text-inherit whitespace-pre-line min-h-[1.5em]" style={{fontSize: '28px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size32':
+            nodes.push(
+              <p className="my-1 leading-relaxed text-inherit whitespace-pre-line min-h-[1.5em]" style={{fontSize: '32px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size36':
+            nodes.push(
+              <p className="my-1 leading-relaxed text-inherit whitespace-pre-line min-h-[1.5em]" style={{fontSize: '36px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size40':
+            nodes.push(
+              <p className="my-1 leading-relaxed text-inherit whitespace-pre-line min-h-[1.5em]" style={{fontSize: '40px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size48':
+            nodes.push(
+              <p className="my-1 leading-relaxed text-inherit whitespace-pre-line min-h-[1.5em]" style={{fontSize: '48px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size56':
+            nodes.push(
+              <p className="my-1 leading-relaxed text-inherit whitespace-pre-line min-h-[1.5em]" style={{fontSize: '56px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size64':
+            nodes.push(
+              <p className="my-1 leading-relaxed text-inherit whitespace-pre-line min-h-[1.5em]" style={{fontSize: '64px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
           default:
             nodes.push(
               <p
@@ -691,6 +823,130 @@ export default function PortableTextLite({
                 style={{textAlign: 'justify'}}
                 key={blockKey}
               >
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'indent1':
+            nodes.push(
+              <p
+                className={applyTopMarginRemoval(
+                  'my-4 leading-relaxed text-[var(--text-primary)] whitespace-pre-line min-h-[1.5em]'
+                )}
+                style={{paddingLeft: '24px'}}
+                key={blockKey}
+              >
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'indent2':
+            nodes.push(
+              <p
+                className={applyTopMarginRemoval(
+                  'my-4 leading-relaxed text-[var(--text-primary)] whitespace-pre-line min-h-[1.5em]'
+                )}
+                style={{paddingLeft: '48px'}}
+                key={blockKey}
+              >
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size10':
+            nodes.push(
+              <p className={applyTopMarginRemoval('my-4 leading-relaxed text-[var(--text-primary)] whitespace-pre-line min-h-[1.5em]')} style={{fontSize: '10px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size12':
+            nodes.push(
+              <p className={applyTopMarginRemoval('my-4 leading-relaxed text-[var(--text-primary)] whitespace-pre-line min-h-[1.5em]')} style={{fontSize: '12px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size14':
+            nodes.push(
+              <p className={applyTopMarginRemoval('my-4 leading-relaxed text-[var(--text-primary)] whitespace-pre-line min-h-[1.5em]')} style={{fontSize: '14px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size16':
+            nodes.push(
+              <p className={applyTopMarginRemoval('my-4 leading-relaxed text-[var(--text-primary)] whitespace-pre-line min-h-[1.5em]')} style={{fontSize: '16px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size18':
+            nodes.push(
+              <p className={applyTopMarginRemoval('my-4 leading-relaxed text-[var(--text-primary)] whitespace-pre-line min-h-[1.5em]')} style={{fontSize: '18px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size20':
+            nodes.push(
+              <p className={applyTopMarginRemoval('my-4 leading-relaxed text-[var(--text-primary)] whitespace-pre-line min-h-[1.5em]')} style={{fontSize: '20px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size24':
+            nodes.push(
+              <p className={applyTopMarginRemoval('my-4 leading-relaxed text-[var(--text-primary)] whitespace-pre-line min-h-[1.5em]')} style={{fontSize: '24px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size28':
+            nodes.push(
+              <p className={applyTopMarginRemoval('my-4 leading-relaxed text-[var(--text-primary)] whitespace-pre-line min-h-[1.5em]')} style={{fontSize: '28px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size32':
+            nodes.push(
+              <p className={applyTopMarginRemoval('my-4 leading-relaxed text-[var(--text-primary)] whitespace-pre-line min-h-[1.5em]')} style={{fontSize: '32px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size36':
+            nodes.push(
+              <p className={applyTopMarginRemoval('my-4 leading-relaxed text-[var(--text-primary)] whitespace-pre-line min-h-[1.5em]')} style={{fontSize: '36px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size40':
+            nodes.push(
+              <p className={applyTopMarginRemoval('my-4 leading-relaxed text-[var(--text-primary)] whitespace-pre-line min-h-[1.5em]')} style={{fontSize: '40px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size48':
+            nodes.push(
+              <p className={applyTopMarginRemoval('my-4 leading-relaxed text-[var(--text-primary)] whitespace-pre-line min-h-[1.5em]')} style={{fontSize: '48px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size56':
+            nodes.push(
+              <p className={applyTopMarginRemoval('my-4 leading-relaxed text-[var(--text-primary)] whitespace-pre-line min-h-[1.5em]')} style={{fontSize: '56px'}} key={blockKey}>
+                {isEmptyText ? '\u00A0' : content}
+              </p>
+            )
+            break
+          case 'size64':
+            nodes.push(
+              <p className={applyTopMarginRemoval('my-4 leading-relaxed text-[var(--text-primary)] whitespace-pre-line min-h-[1.5em]')} style={{fontSize: '64px'}} key={blockKey}>
                 {isEmptyText ? '\u00A0' : content}
               </p>
             )

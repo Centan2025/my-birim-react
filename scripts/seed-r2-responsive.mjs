@@ -34,14 +34,38 @@ function makeR2(url, alt) {
 
 const CDN = 'https://cdn.sanity.io/images/wn3a082f/production'
 const R2 = {
-  hero: makeR2(`${CDN}/a4153e64072bc1dc15af2c48341ceac852974cc1-1376x768.jpg`, 'Birim Mimari Hero (Desktop R2)'),
-  heroMob: makeR2(`${CDN}/a4153e64072bc1dc15af2c48341ceac852974cc1-1376x768.jpg`, 'Birim Mimari Hero (Mobile R2)'),
-  history: makeR2(`${CDN}/3b4cc2074bdd4fc4ac300b20d3b4823e60d82a7a-1200x896.jpg`, 'Tarihçe Zanaat (Desktop R2)'),
-  historyMob: makeR2(`${CDN}/3b4cc2074bdd4fc4ac300b20d3b4823e60d82a7a-1200x896.jpg`, 'Tarihçe Zanaat (Mobile R2)'),
-  identity: makeR2(`${CDN}/a8cf353ed31aa3f590884cc0577f23ce18173352-1200x896.jpg`, 'Mimari Kimlik (Desktop R2)'),
-  identityMob: makeR2(`${CDN}/a8cf353ed31aa3f590884cc0577f23ce18173352-1200x896.jpg`, 'Mimari Kimlik (Mobile R2)'),
-  quality: makeR2(`${CDN}/9a01b97278ab4e82cccde6980c97878f34f33cae-1376x768.jpg`, 'Üretim Kalitesi (Desktop R2)'),
-  qualityMob: makeR2(`${CDN}/9a01b97278ab4e82cccde6980c97878f34f33cae-1376x768.jpg`, 'Üretim Kalitesi (Mobile R2)'),
+  hero: makeR2(
+    `${CDN}/a4153e64072bc1dc15af2c48341ceac852974cc1-1376x768.jpg`,
+    'Birim Mimari Hero (Desktop R2)'
+  ),
+  heroMob: makeR2(
+    `${CDN}/a4153e64072bc1dc15af2c48341ceac852974cc1-1376x768.jpg`,
+    'Birim Mimari Hero (Mobile R2)'
+  ),
+  history: makeR2(
+    `${CDN}/3b4cc2074bdd4fc4ac300b20d3b4823e60d82a7a-1200x896.jpg`,
+    'Tarihçe Zanaat (Desktop R2)'
+  ),
+  historyMob: makeR2(
+    `${CDN}/3b4cc2074bdd4fc4ac300b20d3b4823e60d82a7a-1200x896.jpg`,
+    'Tarihçe Zanaat (Mobile R2)'
+  ),
+  identity: makeR2(
+    `${CDN}/a8cf353ed31aa3f590884cc0577f23ce18173352-1200x896.jpg`,
+    'Mimari Kimlik (Desktop R2)'
+  ),
+  identityMob: makeR2(
+    `${CDN}/a8cf353ed31aa3f590884cc0577f23ce18173352-1200x896.jpg`,
+    'Mimari Kimlik (Mobile R2)'
+  ),
+  quality: makeR2(
+    `${CDN}/9a01b97278ab4e82cccde6980c97878f34f33cae-1376x768.jpg`,
+    'Üretim Kalitesi (Desktop R2)'
+  ),
+  qualityMob: makeR2(
+    `${CDN}/9a01b97278ab4e82cccde6980c97878f34f33cae-1376x768.jpg`,
+    'Üretim Kalitesi (Mobile R2)'
+  ),
 }
 
 async function seedPureR2() {
@@ -260,7 +284,10 @@ async function seedPureR2() {
 
   try {
     const res = await client.createOrReplace(doc)
-    console.log('✅ Sadece R2 (Masaüstü + Mobil) alanları ile Hakkımızda V2 güncellendi! ID:', res._id)
+    console.log(
+      '✅ Sadece R2 (Masaüstü + Mobil) alanları ile Hakkımızda V2 güncellendi! ID:',
+      res._id
+    )
   } catch (err) {
     console.error('❌ Yükleme sırasında hata oluştu:', err)
   }

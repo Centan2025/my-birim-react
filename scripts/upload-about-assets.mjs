@@ -33,9 +33,18 @@ async function uploadImage(filePath, filename) {
 async function main() {
   try {
     const heroAsset = await uploadImage(path.resolve('public/img/about/hero.jpg'), 'hero.jpg')
-    const historyAsset = await uploadImage(path.resolve('public/img/about/history.jpg'), 'history.jpg')
-    const identityAsset = await uploadImage(path.resolve('public/img/about/identity.jpg'), 'identity.jpg')
-    const qualityAsset = await uploadImage(path.resolve('public/img/about/quality.jpg'), 'quality.jpg')
+    const historyAsset = await uploadImage(
+      path.resolve('public/img/about/history.jpg'),
+      'history.jpg'
+    )
+    const identityAsset = await uploadImage(
+      path.resolve('public/img/about/identity.jpg'),
+      'identity.jpg'
+    )
+    const qualityAsset = await uploadImage(
+      path.resolve('public/img/about/quality.jpg'),
+      'quality.jpg'
+    )
 
     function toSanityImage(asset) {
       return {
@@ -267,7 +276,10 @@ async function main() {
     }
 
     const res = await client.createOrReplace(doc)
-    console.log('🎉 TÜM GÖRSELLER SANITY MEDIA DEPOSUNA VE ABOUT PAGE V2 DOKÜMANINA YÜKLENDİ! ID:', res._id)
+    console.log(
+      '🎉 TÜM GÖRSELLER SANITY MEDIA DEPOSUNA VE ABOUT PAGE V2 DOKÜMANINA YÜKLENDİ! ID:',
+      res._id
+    )
   } catch (err) {
     console.error('❌ Hata oluştu:', err)
   }

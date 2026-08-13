@@ -1,11 +1,13 @@
-const sanityClient = require('@sanity/client');
+const sanityClient = require('@sanity/client')
 const client = sanityClient.createClient({
   projectId: 'wn3a082f',
   dataset: 'production',
   apiVersion: '2023-01-01',
-  useCdn: false
-});
-client.fetch(`*[_type=='project' && defined(contentBlocks) && length(contentBlocks) > 0] | order(_createdAt desc) [0]{
+  useCdn: false,
+})
+client
+  .fetch(
+    `*[_type=='project' && defined(contentBlocks) && length(contentBlocks) > 0] | order(_createdAt desc) [0]{
   "id": id.current, title, date, 
   contentBlocks[]{ 
     ..., 
@@ -14,4 +16,6 @@ client.fetch(`*[_type=='project' && defined(contentBlocks) && length(contentBloc
     videoFile{..., asset->{url, _ref, _id}},
     videoFileR2{...}
   }
-}`).then(res => console.log(JSON.stringify(res, null, 2)));
+}`
+  )
+  .then(res => console.log(JSON.stringify(res, null, 2)))
