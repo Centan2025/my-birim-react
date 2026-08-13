@@ -5,15 +5,6 @@ import PortableTextImagePreview from '../../components/PortableTextImagePreview'
 import PortableTextImageInput from '../../components/PortableTextImageInput'
 import {browserOnly, browserOnlyInput} from '../utils/browserOnly'
 
-const createFontSizeDecorator = (title: string, value: string, px: string) => ({
-  title,
-  value,
-  icon: () =>
-    React.createElement('span', {style: {fontSize: '11px', fontWeight: 600, padding: '0 2px'}}, px),
-  component: (props: {children: React.ReactNode}) =>
-    React.createElement('span', {style: {fontSize: px}}, props.children),
-})
-
 const createTextAlignDecorator = (title: string, value: string, label: string, alignVal: string) => ({
   title,
   value,
@@ -58,17 +49,6 @@ const portableTextBlocks = [
         createTextAlignDecorator('Hizalama: Ortala', 'align-center', '↔️ Orta', 'center'),
         createTextAlignDecorator('Hizalama: Sağa Yasla', 'align-right', '👉 Sağ', 'right'),
         createTextAlignDecorator('Hizalama: İki Yana Yasla', 'align-justify', '↕️ Yasla', 'justify'),
-        createFontSizeDecorator('Metin Boyutu: 12px', 'size-12px', '12px'),
-        createFontSizeDecorator('Metin Boyutu: 14px', 'size-14px', '14px'),
-        createFontSizeDecorator('Metin Boyutu: 16px', 'size-16px', '16px'),
-        createFontSizeDecorator('Metin Boyutu: 18px', 'size-18px', '18px'),
-        createFontSizeDecorator('Metin Boyutu: 20px', 'size-20px', '20px'),
-        createFontSizeDecorator('Metin Boyutu: 24px', 'size-24px', '24px'),
-        createFontSizeDecorator('Metin Boyutu: 28px', 'size-28px', '28px'),
-        createFontSizeDecorator('Metin Boyutu: 32px', 'size-32px', '32px'),
-        createFontSizeDecorator('Metin Boyutu: 36px', 'size-36px', '36px'),
-        createFontSizeDecorator('Metin Boyutu: 48px', 'size-48px', '48px'),
-        createFontSizeDecorator('Metin Boyutu: 64px', 'size-64px', '64px'),
       ],
       annotations: [
         {
