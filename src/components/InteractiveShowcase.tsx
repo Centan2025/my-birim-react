@@ -367,6 +367,7 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
           }}
         >
           {clonedItems.map((slide, index) => {
+            if (!slide) return null
             const isClone = slideCount > 1 && (index === 0 || index === slideCount + 1)
             const realSlideIdx =
               slideCount > 1

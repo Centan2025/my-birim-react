@@ -9,22 +9,37 @@ import {useNews} from '../hooks/useNews'
 import {useSEO} from '../hooks/useSEO'
 import ScrollReveal from '../components/ScrollReveal'
 
+interface SanityBlockChild {
+  _type?: string
+  text?: string
+}
+
+interface SanityBlockItem {
+  _type?: string
+  children?: SanityBlockChild[]
+}
+
+interface CategoryObj {
+  tr?: string
+  en?: string
+}
+
 // Helper to convert Sanity block content to plain text
 const blockToPlainText = (blocks: unknown): string => {
   if (!blocks) return ''
   if (typeof blocks === 'string') return blocks
   if (!Array.isArray(blocks)) return ''
-  return blocks
+  return (blocks as SanityBlockItem[])
     .map(block => {
       if (
         !block ||
         typeof block !== 'object' ||
-        (block as Record<string, unknown>)._type !== 'block' ||
-        !Array.isArray((block as Record<string, unknown>).children)
+        block._type !== 'block' ||
+        !Array.isArray(block.children)
       ) {
         return ''
       }
-      return ((block as Record<string, unknown>).children as Array<Record<string, unknown>>)
+      return block.children
         .map(child => (typeof child?.text === 'string' ? child.text : ''))
         .join('')
     })
@@ -114,9 +129,7 @@ export function NewsPage() {
         typeof item.category === 'string'
           ? item.category
           : typeof item.category === 'object' && item.category
-            ? (item.category as Record<string, string>).tr ||
-              (item.category as Record<string, string>).en ||
-              ''
+            ? (item.category as CategoryObj).tr || (item.category as CategoryObj).en || ''
             : ''
       ).toLowerCase()
       const catLabel = (item.categoryLabel || '').toLowerCase()
@@ -191,9 +204,7 @@ export function NewsPage() {
           typeof item.category === 'string'
             ? item.category
             : typeof item.category === 'object' && item.category
-              ? (item.category as Record<string, string>).tr ||
-                (item.category as Record<string, string>).en ||
-                ''
+              ? (item.category as CategoryObj).tr || (item.category as CategoryObj).en || ''
               : ''
         ).toLowerCase()
         const catLabel = (item.categoryLabel || '').toLowerCase()
