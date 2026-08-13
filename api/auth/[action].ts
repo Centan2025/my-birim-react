@@ -1,7 +1,6 @@
 import {createClient} from '@sanity/client'
 import bcrypt from 'bcryptjs'
 import {randomUUID} from 'crypto'
-import {S3Client} from '@aws-sdk/client-s3'
 import type {VercelRequest, VercelResponse} from '@vercel/node'
 import {isRateLimitedAsync, getClientIp} from '../../lib/server/rateLimiter.js'
 import {

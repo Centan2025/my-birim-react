@@ -10,16 +10,23 @@ import {useSEO} from '../hooks/useSEO'
 import ScrollReveal from '../components/ScrollReveal'
 
 // Helper to convert Sanity block content to plain text
-const blockToPlainText = (blocks: any): string => {
+const blockToPlainText = (blocks: unknown): string => {
   if (!blocks) return ''
   if (typeof blocks === 'string') return blocks
   if (!Array.isArray(blocks)) return ''
   return blocks
     .map(block => {
-      if (block._type !== 'block' || !block.children) {
+      if (
+        !block ||
+        typeof block !== 'object' ||
+        (block as Record<string, unknown>)._type !== 'block' ||
+        !Array.isArray((block as Record<string, unknown>).children)
+      ) {
         return ''
       }
-      return block.children.map((child: any) => child.text).join('')
+      return ((block as Record<string, unknown>).children as Array<Record<string, unknown>>)
+        .map(child => (typeof child?.text === 'string' ? child.text : ''))
+        .join('')
     })
     .join(' ')
 }
@@ -42,7 +49,7 @@ const estimateReadTime = (text: string): number => {
   return Math.max(1, Math.ceil(words / 180))
 }
 
-const getCategoryLabel = (category: any, t: (key: string) => string): string => {
+const getCategoryLabel = (category: unknown, t: (key: string) => string): string => {
   if (!category) return (t('news_press') || 'BASIN').toUpperCase()
   if (typeof category === 'string') {
     const key = category.toLowerCase()
@@ -52,7 +59,7 @@ const getCategoryLabel = (category: any, t: (key: string) => string): string => 
     if (key === 'launch') return (t('news_launch') || 'LANSMAN').toUpperCase()
     return category.toUpperCase()
   }
-  const translated = t(category)
+  const translated = t(String(category))
   if (translated) return translated.toUpperCase()
   return (t('news_press') || 'BASIN').toUpperCase()
 }
@@ -107,7 +114,9 @@ export function NewsPage() {
         typeof item.category === 'string'
           ? item.category
           : typeof item.category === 'object' && item.category
-            ? (item.category as any).tr || (item.category as any).en || ''
+            ? (item.category as Record<string, string>).tr ||
+              (item.category as Record<string, string>).en ||
+              ''
             : ''
       ).toLowerCase()
       const catLabel = (item.categoryLabel || '').toLowerCase()
@@ -182,7 +191,9 @@ export function NewsPage() {
           typeof item.category === 'string'
             ? item.category
             : typeof item.category === 'object' && item.category
-              ? (item.category as any).tr || (item.category as any).en || ''
+              ? (item.category as Record<string, string>).tr ||
+                (item.category as Record<string, string>).en ||
+                ''
               : ''
         ).toLowerCase()
         const catLabel = (item.categoryLabel || '').toLowerCase()

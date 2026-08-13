@@ -1,5 +1,5 @@
-import { createClient } from '@sanity/client'
-import { randomBytes } from 'crypto'
+import {createClient} from '@sanity/client'
+import {randomBytes} from 'crypto'
 
 const generateKey = () => randomBytes(8).toString('hex')
 
@@ -9,7 +9,7 @@ async function run() {
     dataset: 'production',
     useCdn: false,
     apiVersion: '2024-04-15',
-    token: process.env.SANITY_TOKEN
+    token: process.env.SANITY_TOKEN,
   })
 
   const types = ['product', 'designer', 'category', 'project']
@@ -18,8 +18,8 @@ async function run() {
   console.log('--- ARRAY KEY TARAMASI BAŞLATILDI ---')
 
   for (const type of types) {
-    const docs = await client.fetch(`*[_type == $type]`, { type })
-    
+    const docs = await client.fetch(`*[_type == $type]`, {type})
+
     for (const doc of docs) {
       let needsFix = false
       const patches = {}
@@ -27,10 +27,10 @@ async function run() {
       // Check all fields for arrays
       for (const [key, value] of Object.entries(doc)) {
         if (Array.isArray(value)) {
-          const newArray = value.map(item => {
+          const newArray = value.map((item) => {
             if (item && typeof item === 'object' && !item._key) {
               needsFix = true
-              return { ...item, _key: generateKey() }
+              return {...item, _key: generateKey()}
             }
             return item
           })

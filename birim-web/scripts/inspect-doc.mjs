@@ -1,4 +1,4 @@
-import { createClient } from '@sanity/client'
+import {createClient} from '@sanity/client'
 
 async function run() {
   const client = createClient({
@@ -6,7 +6,7 @@ async function run() {
     dataset: 'production',
     useCdn: false,
     apiVersion: '2024-04-15',
-    token: process.env.SANITY_TOKEN
+    token: process.env.SANITY_TOKEN,
   })
 
   const doc = await client.fetch('*[_id == "644cMkYzFf9ZhJ6dLMFJ4A"][0]')
