@@ -1,5 +1,5 @@
 import groq from 'groq'
-import type {NewsItem, Project} from '../../types'
+import type {NewsItem, Project, LocalizedString} from '../../types'
 import {
   sanity,
   useSanity,
@@ -234,11 +234,96 @@ const mapProjectRow = (r: Record<string, unknown>): Project => {
       })
     : undefined
 
+  let interactiveShowcaseMapped: Project['interactiveShowcase'] = undefined
+  if (r?.['interactiveShowcase'] && Array.isArray(r['interactiveShowcase'])) {
+    interactiveShowcaseMapped = (r['interactiveShowcase'] as Record<string, unknown>[]).map(
+      item => {
+        const imgR2 = item['imageR2']
+        const imgMobileR2 = item['imageMobileR2']
+        const image =
+          mapImage(imgR2 as SanityImageLike) ||
+          (typeof item['image'] === 'string' ? item['image'] : '')
+        const imageMobile =
+          mapImage(imgMobileR2 as SanityImageLike) ||
+          (typeof item['imageMobile'] === 'string' ? item['imageMobile'] : undefined)
+        const meta = mapR2Metadata(imgR2 || item['image'] || item)
+        const metaMobile = imgMobileR2
+          ? mapR2Metadata(imgMobileR2)
+          : item['cropMobile']
+            ? mapR2Metadata({crop: item['cropMobile']})
+            : {}
+
+        const rawHotspots = Array.isArray(item['hotspots']) ? item['hotspots'] : []
+        const hotspots = rawHotspots.map((hs: Record<string, unknown>) => {
+          const prod = hs['product'] as Record<string, unknown> | undefined
+          let mappedProd = undefined
+          if (prod) {
+            const prodMedia = Array.isArray(prod['media'])
+              ? (prod['media'] as Record<string, unknown>[])
+              : []
+            const coverItem = prodMedia.find(m => m['isCover']) || prodMedia[0]
+            const imageR2Obj =
+              (coverItem?.['imageR2'] as Record<string, unknown> | undefined) ||
+              (prod['mainImageR2'] as Record<string, unknown> | undefined)
+
+            const resolvedUrl =
+              (typeof imageR2Obj?.['url'] === 'string'
+                ? mapImage(imageR2Obj as SanityImageLike)
+                : '') ||
+              mapImage(coverItem?.['imageR2'] as SanityImageLike) ||
+              mapImage(prod['mainImageR2'] as SanityImageLike) ||
+              mapImage(prod['mainImage'] as SanityImageLike) ||
+              (typeof coverItem?.['url'] === 'string' ? coverItem['url'] : '') ||
+              (typeof prod['mainImage'] === 'string' ? prod['mainImage'] : '')
+
+            mappedProd = {
+              id: (prod['id'] as string) || (prod['_id'] as string) || '',
+              name: prod['name'] as LocalizedString,
+              mainImage: resolvedUrl || undefined,
+              price: typeof prod['price'] === 'number' ? prod['price'] : undefined,
+              currency: typeof prod['currency'] === 'string' ? prod['currency'] : 'TRY',
+              categoryName: prod['categoryName'] as LocalizedString,
+              designerName: prod['designerName'] as string,
+            }
+          }
+
+          return {
+            x: typeof hs['x'] === 'number' ? hs['x'] : 50,
+            y: typeof hs['y'] === 'number' ? hs['y'] : 50,
+            label: hs['label'] as LocalizedString,
+            product: mappedProd,
+          }
+        })
+
+        return {
+          title: item['title'] as LocalizedString,
+          image,
+          imageMobile,
+          crop: meta.crop,
+          hotspot: meta.hotspot,
+          origWidth: meta.origWidth,
+          origHeight: meta.origHeight,
+          cropDesktop: meta.crop,
+          hotspotDesktop: meta.hotspot,
+          origWidthDesktop: meta.origWidth,
+          origHeightDesktop: meta.origHeight,
+          cropMobile: metaMobile.crop,
+          hotspotMobile: metaMobile.hotspot,
+          origWidthMobile: metaMobile.origWidth,
+          origHeightMobile: metaMobile.origHeight,
+          hotspots,
+        }
+      }
+    )
+  }
+
   return {
     ...r,
     cover: cover as Project['cover'],
     media: mapMediaArray(r['media']),
     contentBlocks: contentBlocks as Project['contentBlocks'],
+    interactiveShowcaseTitle: r['interactiveShowcaseTitle'] as Project['interactiveShowcaseTitle'],
+    interactiveShowcase: interactiveShowcaseMapped,
   } as Project
 }
 
@@ -313,6 +398,34 @@ export const getProjectById = async (id: string): Promise<Project | undefined> =
         imageR2, imageMobileR2, imageDesktopR2, 
         videoFileR2, videoFileMobileR2, videoFileDesktopR2,
         imagePanels[]{ ..., imageR2, image{ asset->{url} } }
+      },
+      interactiveShowcaseTitle,
+      interactiveShowcase[]{
+        title,
+        imageR2,
+        imageMobileR2,
+        hotspots[]{
+          x,
+          y,
+          label,
+          product->{
+            _id,
+            "id": coalesce(slug.current, _id),
+            name,
+            mainImage,
+            mainImageR2,
+            media[]{
+              type,
+              isCover,
+              imageR2,
+              url
+            },
+            price,
+            currency,
+            "categoryName": category->name,
+            "designerName": coalesce(designers[0]->name, designer->name)
+          }
+        }
       }
     }`
     const r = await sanity.fetch(q, {id})

@@ -36,6 +36,11 @@ export default defineType({
       options: {collapsible: true, collapsed: true},
     },
     {
+      name: 'showcaseGroup',
+      title: '🎯 İnteraktif Ürün Görselleri (Hotspot Slider)',
+      options: {collapsible: true, collapsed: true},
+    },
+    {
       name: 'seoGroup',
       title: '🔍 SEO & Arama Motoru',
       options: {collapsible: true, collapsed: true},
@@ -122,6 +127,22 @@ export default defineType({
       of: [{type: 'contentBlock'}],
       description:
         'Proje detay sayfasında gösterilecek içerik blokları (ana sayfa ile aynı sistem)',
+    }),
+    defineField({
+      name: 'interactiveShowcaseTitle',
+      title: 'İnteraktif Ürün Görselleri - Bölüm Başlığı',
+      type: 'localizedString',
+      fieldset: 'showcaseGroup',
+      description: 'İnteraktif alanın üstünde görünecek başlık (TR / EN)',
+    }),
+    defineField({
+      name: 'interactiveShowcase',
+      title: 'İnteraktif Ürün Görselleri (Hotspot Slider)',
+      type: 'array',
+      fieldset: 'showcaseGroup',
+      of: [{type: 'interactiveShowcaseItem'}],
+      description:
+        'Ürünlerin kullanıldığı tam ekran görseller ve üzerlerindeki tıklanabilir ürün noktaları (Boş bırakılırsa ana sayfadaki interaktif görseller kullanılır)',
     }),
     defineField({
       name: 'seo',

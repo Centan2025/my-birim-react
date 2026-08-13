@@ -1016,6 +1016,10 @@ export interface Project {
   body?: LocalizedString
   /** Content blocks displayed on project detail page (same system as homepage) */
   contentBlocks?: ContentBlock[]
+  /** Title for the interactive showcase section */
+  interactiveShowcaseTitle?: LocalizedString
+  /** Interactive product showcase items with hotspots */
+  interactiveShowcase?: InteractiveShowcaseItem[]
   /** Whether this project is published on the site. */
   isPublished?: boolean
   /** Optional scheduled publish date used for filtering/sorting. */
