@@ -75,7 +75,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({error: 'Method Not Allowed'})
   }
 
-  // Auth check: require valid JWT session or valid admin secret token
+  // Auth check: require valid JWT session, valid admin secret token, or request from Sanity Studio
   const token = getAuthTokenFromReq(req)
   const payload = token ? verifyToken(token) : null
   const adminSecret = process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET']
@@ -83,8 +83,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const headerToken =
     typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
   const isAdminAuthorized = Boolean(adminSecret && headerToken && headerToken === adminSecret)
+  const isStudioOrigin = requestOrigin.endsWith('.sanity.studio') || requestOrigin.includes('localhost:3333')
 
-  if (!payload && !isAdminAuthorized) {
+  if (!payload && !isAdminAuthorized && !isStudioOrigin) {
     return res.status(401).json({error: 'Dosya yükleme bileti almak için yetkiniz yok.'})
   }
 
