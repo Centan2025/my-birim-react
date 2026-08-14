@@ -837,8 +837,8 @@ export function ProjectDetailPageV1() {
         </div>
       </div>
 
-      {/* Hero Altı Gri Bant (Dikey Ortalanmış Navigasyon Düğmeleri) */}
-      <div className="w-full bg-[#787f8a] text-white flex items-center min-h-[48px] md:min-h-[56px] py-2 md:py-2.5">
+      {/* Hero Altı Koyu Gri Bant (Dikey Ortalanmış Navigasyon Düğmeleri) */}
+      <div className="w-full bg-[#1c1f24] text-white flex items-center min-h-[48px] md:min-h-[56px] py-2 md:py-2.5">
         <div className="w-full max-w-[95%] md:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex items-center justify-between gap-2">
           <div className="flex-1 min-w-0 flex justify-start">
             {prevProject ? (
