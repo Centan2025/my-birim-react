@@ -580,7 +580,7 @@ export function ProjectDetailPageV3() {
             {allMedia.length > 1 && (
               <div className="space-y-2 pt-2 border-t border-neutral-200">
                 <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-semibold uppercase block">
-                  {isTr ? 'GÖRSEL İNDEKSİ' : 'IMAGE INDEX'}
+                  {isTr ? 'PROJE GÖRSELLERİ' : 'PROJECT IMAGES'}
                 </span>
                 <div className="grid grid-cols-6 gap-2">
                   {allMedia.map((m, idx) => {
