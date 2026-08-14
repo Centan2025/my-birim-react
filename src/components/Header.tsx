@@ -90,18 +90,6 @@ export function Header() {
     return () => window.removeEventListener('scroll', update)
   }, [isDarkHero, headerHeight, location.pathname])
 
-  const [isScrolled, setIsScrolled] = useState(() =>
-    typeof window !== 'undefined' ? window.scrollY > 20 : false
-  )
-
-  useEffect(() => {
-    const handleScrollState = () => {
-      setIsScrolled(window.scrollY > 20)
-    }
-    handleScrollState()
-    window.addEventListener('scroll', handleScrollState, {passive: true})
-    return () => window.removeEventListener('scroll', handleScrollState)
-  }, [location.pathname])
 
   // isDarkHero pages: white text at top, black after hero bottom boundary.
   // Standard pages: always dark text.
@@ -610,9 +598,6 @@ export function Header() {
     isLightMode,
   })
 
-  const isBottomLineVisible =
-    (isScrolled || isProductsOpen || (isMobile && isMobileMenuOpen) || isSearchOpen) &&
-    headerBgColor !== 'transparent'
 
   return (
     <>
@@ -1076,17 +1061,6 @@ export function Header() {
             setIsMobileProductsMenuOpen={setIsMobileProductsMenuOpen}
             mobileMenuRef={mobileMenuRef}
             mobileMenuFocusTrap={mobileMenuFocusTrap}
-          />
-          {/* Animated Bottom Border Line - en üste çıkınca uzaklaşarak (scaleX-0 / opacity-0) kaybolur */}
-          <div
-            className="absolute bottom-0 left-0 right-0 h-[1px] pointer-events-none origin-center"
-            style={{
-              backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)',
-              opacity: isBottomLineVisible ? 1 : 0,
-              transform: isBottomLineVisible ? 'scaleX(1)' : 'scaleX(0)',
-              transition: 'transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease-out',
-            }}
-            aria-hidden="true"
           />
         </div>
       </header>
