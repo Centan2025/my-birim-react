@@ -269,7 +269,6 @@ export function ProjectsPage() {
 
     lerpRafId = requestAnimationFrame(smoothLerpLoop)
 
-
     const handleWindowMouseMove = (e: MouseEvent) => {
       if (e.buttons !== 1) {
         isDraggingRef.current = false

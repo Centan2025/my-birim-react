@@ -491,7 +491,9 @@ export function ProjectDetailPageV3() {
                   <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-semibold uppercase">
                     {isTr ? 'DONATI' : 'FURNITURE'}
                   </span>
-                  <p className="text-xs font-semibold text-neutral-900 truncate">Birim Collection</p>
+                  <p className="text-xs font-semibold text-neutral-900 truncate">
+                    Birim Collection
+                  </p>
                 </div>
               </div>
             </div>
@@ -539,9 +541,7 @@ export function ProjectDetailPageV3() {
                   {isTr ? 'MEKAN DETAYI' : 'SPATIAL DETAIL'}
                 </span>
                 <div className="font-mono text-base font-michroma flex items-center gap-2 text-neutral-900">
-                  <span className="font-bold">
-                    {String(activeMediaIndex + 1).padStart(2, '0')}
-                  </span>
+                  <span className="font-bold">{String(activeMediaIndex + 1).padStart(2, '0')}</span>
                   <span className="text-neutral-300 font-light">/</span>
                   <span className="text-neutral-500 text-xs">
                     {String(allMedia.length).padStart(2, '0')}

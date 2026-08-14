@@ -5,11 +5,7 @@ import {ProjectDetailPageV2} from './ProjectDetailPageV2'
 import {ProjectDetailPageV3} from './ProjectDetailPageV3'
 import {ProjectVersionSwitcher} from '../components/ProjectVersionSwitcher'
 
-export function ProjectDetailPage({
-  defaultVersion = 'v1',
-}: {
-  defaultVersion?: 'v1' | 'v2' | 'v3'
-}) {
+export function ProjectDetailPage({defaultVersion = 'v1'}: {defaultVersion?: 'v1' | 'v2' | 'v3'}) {
   const [searchParams, setSearchParams] = useSearchParams()
   const paramVersion = searchParams.get('v')
 
