@@ -536,7 +536,7 @@ export function ProjectDetailPageV3() {
             <div className="p-4 bg-white border border-neutral-300 text-neutral-900 rounded-none flex items-center justify-between shadow-sm">
               <div className="space-y-0.5">
                 <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-semibold uppercase">
-                  {isTr ? 'AKTİF GÖRSEL' : 'ACTIVE FRAME'}
+                  {isTr ? 'MEKAN DETAYI' : 'SPATIAL DETAIL'}
                 </span>
                 <div className="font-mono text-base font-michroma flex items-center gap-2 text-neutral-900">
                   <span className="font-bold">
