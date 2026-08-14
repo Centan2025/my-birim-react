@@ -27,11 +27,11 @@ describe('useHeaderBackgroundColor', () => {
     Object.defineProperty(window, 'scrollY', {value: 0, configurable: true})
   })
 
-  it('ürün detay sayfasında minimum 0.7 opacity döndürmeli', () => {
+  it('ürün detay sayfasında minimum 0.78 opacity döndürmeli', () => {
     const {result} = renderHook(() => useHeaderBackgroundColor({...baseParams, headerOpacity: 0}), {
       wrapper: wrapper('/product/sandalye-1'),
     })
-    expect(result.current).toBe('rgba(255, 255, 255, 0.6)')
+    expect(result.current).toBe('rgba(255, 255, 255, 0.78)')
   })
 
   it('products dropdown açıkken 0.95 opacity döndürmeli (açık renk sayfa)', () => {
@@ -54,17 +54,17 @@ describe('useHeaderBackgroundColor', () => {
     const {result} = renderHook(() => useHeaderBackgroundColor({...baseParams, isDarkMode: true}), {
       wrapper: wrapper('/contact'),
     })
-    expect(result.current).toBe('rgba(10, 10, 10, 0.6)')
+    expect(result.current).toBe('rgba(10, 10, 10, 0.78)')
   })
 
-  it('dark olmayan sayfada scroll yoksa (veya azsa) minimum 0.6 opacity döndürmeli', () => {
+  it('dark olmayan sayfada scroll yoksa (veya azsa) minimum 0.78 opacity döndürmeli', () => {
     const {result} = renderHook(() => useHeaderBackgroundColor({...baseParams}), {
       wrapper: wrapper('/contact'),
     })
-    expect(result.current).toBe('rgba(255, 255, 255, 0.6)')
+    expect(result.current).toBe('rgba(255, 255, 255, 0.78)')
   })
 
-  it('inline mobil menü açıkken opacity 0.75 ile sınırlandırılmalı', () => {
+  it('inline mobil menü açıkken opacity 0.85 ile sınırlandırılmalı', () => {
     const {result} = renderHook(
       () =>
         useHeaderBackgroundColor({
@@ -75,7 +75,7 @@ describe('useHeaderBackgroundColor', () => {
         }),
       {wrapper: wrapper('/')}
     )
-    expect(result.current).toBe('rgba(16, 24, 32, 0.7)')
+    expect(result.current).toBe('rgba(16, 24, 32, 0.85)')
   })
 
   it('mobilde heroBrightness düşük ve headerOpacity düşükse transparent döner', () => {
