@@ -269,26 +269,6 @@ export function ProjectsPage() {
 
     lerpRafId = requestAnimationFrame(smoothLerpLoop)
 
-    const handleWheel = (e: WheelEvent) => {
-      const containerEl = scrollContainerRef.current
-      if (!containerEl) return
-      const isMobile = window.innerWidth < 768
-      if (isMobile) return
-
-      const targetEl = e.target as HTMLElement | null
-
-      const isOverProjectCard =
-        Boolean(targetEl?.closest?.('[data-project-card="true"]')) ||
-        Boolean(targetEl?.closest?.('.project-gallery-wrapper')) ||
-        Boolean(containerEl?.contains(targetEl as Node))
-
-      if (isOverProjectCard) {
-        e.preventDefault()
-        e.stopPropagation()
-        const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX
-        targetScrollLeftRef.current += delta * 2.2
-      }
-    }
 
     const handleWindowMouseMove = (e: MouseEvent) => {
       if (e.buttons !== 1) {
@@ -350,7 +330,6 @@ export function ProjectsPage() {
       isDraggingRef.current = false
     }
 
-    window.addEventListener('wheel', handleWheel, {passive: false, capture: true})
     window.addEventListener('mousemove', handleWindowMouseMove)
     window.addEventListener('mouseup', handleWindowMouseUp)
     window.addEventListener('mouseleave', handleWindowMouseUp)
@@ -362,7 +341,6 @@ export function ProjectsPage() {
 
     return () => {
       if (lerpRafId !== null) cancelAnimationFrame(lerpRafId)
-      window.removeEventListener('wheel', handleWheel, {capture: true} as AddEventListenerOptions)
       window.removeEventListener('mousemove', handleWindowMouseMove)
       window.removeEventListener('mouseup', handleWindowMouseUp)
       window.removeEventListener('mouseleave', handleWindowMouseUp)
@@ -469,12 +447,6 @@ export function ProjectsPage() {
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
                 onMouseDown={handleMouseDown}
-                onWheel={e => {
-                  if (window.innerWidth >= 768) {
-                    const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX
-                    targetScrollLeftRef.current += delta * 2.2
-                  }
-                }}
                 onDragStart={e => e.preventDefault()}
                 className="w-full max-w-[95%] sm:max-w-[92%] md:max-w-none mx-auto flex flex-col md:flex-row items-start overflow-y-visible md:overflow-x-auto scrollbar-none px-0 md:pl-[calc(4%+32px)] lg:pl-[10vw] md:pr-[10vw] pt-0 pb-4 cursor-default md:cursor-grab active:md:cursor-grabbing select-none"
                 style={{

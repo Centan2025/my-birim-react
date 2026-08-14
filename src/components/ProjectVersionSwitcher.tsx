@@ -2,17 +2,18 @@ import {motion} from 'framer-motion'
 import {useTranslation} from '../i18n'
 
 interface ProjectVersionSwitcherProps {
-  activeVersion: 'v1' | 'v2'
-  onChange: (version: 'v1' | 'v2') => void
+  activeVersion: 'v1' | 'v2' | 'v3'
+  onChange: (version: 'v1' | 'v2' | 'v3') => void
 }
 
 export function ProjectVersionSwitcher({activeVersion, onChange}: ProjectVersionSwitcherProps) {
   const {locale} = useTranslation()
   const isTr = locale === 'tr'
 
-  const versions: {id: 'v1' | 'v2'; label: string; descTr: string; descEn: string}[] = [
+  const versions: {id: 'v1' | 'v2' | 'v3'; label: string; descTr: string; descEn: string}[] = [
     {id: 'v1', label: 'V1', descTr: 'Klasik', descEn: 'Classic'},
-    {id: 'v2', label: 'V2', descTr: 'Editoryal', descEn: 'Editorial'},
+    {id: 'v2', label: 'V2', descTr: 'Koyu', descEn: 'Dark'},
+    {id: 'v3', label: 'V3', descTr: 'Beyaz', descEn: 'White'},
   ]
 
   return (
