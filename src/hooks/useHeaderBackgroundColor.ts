@@ -45,25 +45,24 @@ export function useHeaderBackgroundColor({
       return 'rgba(255, 255, 255, 0.95)'
     }
 
-    // Üstte koyu hero görseli bulunan sayfalar: header tam şeffaf olmalı.
+    // Üstte koyu hero görseli bulunmayan sayfalar (Tasarımcılar, Haberler vb.):
     if (!isDarkHeroMatched) {
-      // Beyaz sayfalarda: bg-white/60 + backdrop-blur-md (buz etkisi)
-      // Dark mode'da: bg-black/60 + backdrop-blur-md
+      // Yarı şeffaf beyaz buz efekti: bg-white/78 + backdrop-blur-xl
       const baseColor = isDarkMode ? 'rgba(10, 10, 10, ' : 'rgba(255, 255, 255, '
-      return `${baseColor}${Math.max(headerOpacity, 0.6)})`
+      return `${baseColor}${Math.max(headerOpacity, 0.78)})`
     }
 
-    // Koyu hero görseli olan sayfalar (Ana Sayfa, Hakkımızda, Proje Detay vb.) için şeffaflık kuralları:
-    // Metin rengi değişene kadar (0.75) tam şeffaf kalsın, sonra buz etkili beyaz fona geç
+    // Koyu hero görseli olan sayfalar (Ana Sayfa, Hakkımızda, Proje Detay, Fabrika V2 vb.):
+    // Hero üzerindeyken tam şeffaf:
     if (headerOpacity < 0.75) return 'transparent'
 
     if (isMobileMenuOpen && !isOverlayMobileMenu) {
-      return isDarkMode ? 'rgba(0, 0, 0, 0.8)' : `rgba(16, 24, 32, 0.7)`
+      return isDarkMode ? 'rgba(0, 0, 0, 0.85)' : `rgba(16, 24, 32, 0.85)`
     }
 
-    // Dark mode'da koyu hero altındaki bölümde koyu arka plan, normal modda beyaz arka plan
-    const baseColor = isDarkMode ? 'rgba(0, 0, 0, ' : 'rgba(255, 255, 255, '
-    return `${baseColor}${Math.max(headerOpacity, 0.75)})`
+    // Hero altından itibaren: yarı şeffaf beyaz buz efekti
+    const baseColor = isDarkMode ? 'rgba(10, 10, 10, ' : 'rgba(255, 255, 255, '
+    return `${baseColor}${Math.max(headerOpacity, 0.78)})`
   }
 
   return calculateBackgroundColor()

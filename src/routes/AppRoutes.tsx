@@ -179,6 +179,14 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
           }
         />
         <Route
+          path="/factory-v2"
+          element={
+            <PageBoundary pageName="Fabrika">
+              <FactoryPage defaultVersion="v2" />
+            </PageBoundary>
+          }
+        />
+        <Route
           path="/contact"
           element={
             <PageBoundary pageName="İletişim">

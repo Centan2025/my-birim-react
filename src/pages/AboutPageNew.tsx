@@ -415,14 +415,14 @@ export function AboutPageNew() {
             srcMobile={heroImageMobileUrl || undefined}
             fallbackSrc={DEFAULT_IMAGES.hero}
             alt={getPlainText(t(content?.heroTitle)) || 'Hakkımızda'}
-            className="w-full h-full opacity-60 object-cover"
+            className="w-full h-full opacity-85 object-cover"
             width={1920}
             height={1080}
             loading="eager"
             sizes="100vw"
             quality={90}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/40" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/50" />
         </div>
         <div className="relative z-10 text-center px-4 sm:px-6 max-w-5xl mx-auto">
           <motion.div
@@ -509,7 +509,7 @@ export function AboutPageNew() {
                     className={`border transition-all duration-300 rounded-none overflow-hidden ${
                       isActive
                         ? 'border-[var(--text-primary)] bg-[var(--bg-secondary)] shadow-sm'
-                        : 'border-neutral-500/40 hover:border-[var(--text-primary)]/50'
+                        : 'border-neutral-500/20 hover:border-[var(--text-primary)]/40'
                     }`}
                   >
                     <button
@@ -546,7 +546,7 @@ export function AboutPageNew() {
                           exit={{height: 0, opacity: 0}}
                           transition={{duration: 0.35, ease: 'easeInOut'}}
                         >
-                          <div className="p-4 pt-0 border-t border-neutral-500/30 space-y-4">
+                          <div className="p-4 pt-0 border-t border-neutral-500/20 space-y-4">
                             <div className="space-y-2 pt-3">
                               <span className="font-outfit text-3xl font-extralight text-[var(--text-secondary)]/40 block">
                                 {era.year}
@@ -602,7 +602,7 @@ export function AboutPageNew() {
                     className={`p-4 lg:p-5 text-left border rounded-none transition-all duration-300 ${
                       activeEraIndex === idx || (activeEraIndex === -1 && idx === 0)
                         ? 'border-[var(--text-primary)] bg-[var(--bg-secondary)] shadow-sm'
-                        : 'border-neutral-500/40 hover:border-[var(--text-primary)]/50'
+                        : 'border-neutral-500/20 hover:border-[var(--text-primary)]/40'
                     }`}
                   >
                     <span className="font-outfit text-2xl lg:text-3xl xl:text-4xl font-light tracking-tight block text-[var(--text-primary)]">
@@ -622,7 +622,7 @@ export function AboutPageNew() {
                 const currentIdx = activeEraIndex === -1 ? 0 : activeEraIndex
                 const currentEra = eras[currentIdx] ?? eras[0]!
                 return (
-                  <div className="p-12 bg-[var(--bg-secondary)] border border-neutral-500/40 rounded-none">
+                  <div className="p-12 bg-[var(--bg-secondary)] border border-neutral-500/20 rounded-none">
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={currentIdx}

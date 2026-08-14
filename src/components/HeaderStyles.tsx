@@ -154,6 +154,12 @@ export function HeaderStyles() {
           -webkit-tap-highlight-color: rgba(255, 255, 255, 0.08);
         }
 
+        /* Frosted Glass (Buz Efekti) with high-definition blur and saturation */
+        .header-frosted-glass {
+          backdrop-filter: blur(24px) saturate(180%) !important;
+          -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+        }
+
         /* Neutral gray focus outlines for mobile menu */
         #mobile-menu a:focus,
         #mobile-menu a:focus-visible,

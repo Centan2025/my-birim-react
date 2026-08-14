@@ -18,5 +18,28 @@ export const isDarkHeroPage = (p: string): boolean => {
     return true
   }
 
+  // Fabrika sayfası: Sadece V2 (karanlık sinematik hero) koyu hero kabul edilir
+  if (path.startsWith('/factory')) {
+    if (typeof window !== 'undefined') {
+      const search = window.location.search || window.location.hash
+      if (
+        search.includes('v=3') ||
+        search.includes('v=v3') ||
+        search.includes('v=1') ||
+        search.includes('v=v1')
+      ) {
+        return false
+      }
+      if (search.includes('v=2') || search.includes('v=v2')) {
+        return true
+      }
+    }
+    if (typeof document !== 'undefined') {
+      const hero = document.querySelector('.hero-section')
+      if (hero) return true
+    }
+    return false
+  }
+
   return false
 }

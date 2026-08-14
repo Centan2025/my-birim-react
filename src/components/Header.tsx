@@ -619,16 +619,22 @@ export function Header() {
               ? 'h-[3.5rem] min-h-[3.5rem] max-h-[3.5rem]'
               : 'h-[5rem] min-h-[5rem] max-h-[5rem]'
           } ${
-            // Arka plan blur'ü: opacity 0 ise blur'ü kaldır (Products açıkken blur aktif)
-            headerOpacity <= 0 && !isProductsOpen ? '' : 'backdrop-blur-lg'
+            // Arka plan buz efekti: şeffafken blur yok, yarı şeffaf beyaz/siyahken buz efekti aktif
+            headerBgColor === 'transparent' && !isProductsOpen
+              ? ''
+              : 'header-frosted-glass backdrop-blur-xl backdrop-saturate-150 border-b border-neutral-200/40 dark:border-neutral-800/40 shadow-sm'
           } ${
             // Sadece menü açıldığında transition ve max-height değişimi
             isProductsOpen || (isMobileMenuOpen && !isOverlayMobileMenu)
               ? 'transition-all duration-700 ease-in-out'
-              : ''
+              : 'transition-[background-color,backdrop-filter,border-color] duration-300'
           }`}
           style={{
             backgroundColor: headerBgColor,
+            WebkitBackdropFilter:
+              headerBgColor === 'transparent' && !isProductsOpen
+                ? 'none'
+                : 'blur(24px) saturate(180%)',
             minHeight: isMobile ? '3.5rem' : '5rem',
             maxHeight:
               isMobileMenuOpen && !isOverlayMobileMenu ? '40rem' : isMobile ? '3.5rem' : '5rem',
