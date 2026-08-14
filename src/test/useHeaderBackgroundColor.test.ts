@@ -34,12 +34,12 @@ describe('useHeaderBackgroundColor', () => {
     expect(result.current).toBe('rgba(255, 255, 255, 0.78)')
   })
 
-  it('products dropdown açıkken 0.95 opacity döndürmeli (açık renk sayfa)', () => {
+  it('products dropdown açıkken hafif koyulaşmış arka plan döndürmeli (açık renk sayfa)', () => {
     const {result} = renderHook(
       () => useHeaderBackgroundColor({...baseParams, isProductsOpen: true}),
       {wrapper: wrapper('/contact')}
     )
-    expect(result.current).toBe('rgba(255, 255, 255, 0.95)')
+    expect(result.current).toBe('rgba(238, 239, 242, 0.98)')
   })
 
   it('products dropdown açıkken koyu arka plan döndürmeli (koyu hero sayfa)', () => {
