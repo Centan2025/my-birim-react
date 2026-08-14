@@ -36,16 +36,12 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
       className={`hidden lg:block transition-all duration-500 ease-in-out ${
         isOpen
           ? 'opacity-100 translate-y-0 max-h-[800px]'
-          : 'opacity-0 -translate-y-2 max-h-0 overflow-hidden'
+          : 'opacity-0 -translate-y-3 max-h-0 overflow-hidden pointer-events-none'
       }`}
       style={{
-        backgroundColor: isOpen
-          ? isLightMode
-            ? 'rgba(238, 239, 242, 0.98)'
-            : 'rgba(0, 0, 0, 0.85)'
-          : 'transparent',
-        backdropFilter: isOpen ? 'blur(16px)' : 'none',
-        WebkitBackdropFilter: isOpen ? 'blur(16px)' : 'none',
+        backgroundColor: isLightMode ? 'rgba(238, 239, 242, 0.98)' : 'rgba(0, 0, 0, 0.85)',
+        backdropFilter: 'blur(24px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(24px) saturate(180%)',
       }}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}

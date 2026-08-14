@@ -623,12 +623,7 @@ export function Header() {
             headerBgColor === 'transparent' && !isProductsOpen
               ? ''
               : 'header-frosted-glass backdrop-blur-xl backdrop-saturate-150'
-          } ${
-            // Sadece menü açıldığında transition ve max-height değişimi
-            isProductsOpen || (isMobileMenuOpen && !isOverlayMobileMenu)
-              ? 'transition-all duration-700 ease-in-out'
-              : 'transition-[background-color,backdrop-filter] duration-300'
-          }`}
+          } transition-all duration-500 ease-in-out`}
           style={{
             backgroundColor: headerBgColor,
             WebkitBackdropFilter:
