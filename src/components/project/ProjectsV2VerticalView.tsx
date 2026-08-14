@@ -131,11 +131,12 @@ const ProjectVerticalCard: React.FC<ProjectVerticalCardProps> = ({project, index
 
               {/* Title */}
               <h2
-                className={`font-light tracking-tight text-white uppercase leading-tight mb-3 transition-colors duration-300 group-hover:text-white font-michroma ${
+                className={`font-light tracking-[-0.05em] text-white uppercase leading-tight mb-3 transition-colors duration-300 group-hover:text-white font-michroma ${
                   isFeatured
                     ? 'text-2xl sm:text-3xl md:text-4xl'
                     : 'text-xl sm:text-2xl md:text-3xl'
                 }`}
+                style={{letterSpacing: '-0.05em'}}
               >
                 {t(project.title)}
               </h2>

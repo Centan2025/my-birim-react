@@ -1,6 +1,6 @@
 import React, {useRef, useState, useEffect} from 'react'
 import {motion} from 'framer-motion'
-import {Link} from 'react-router-dom'
+import {Link, useSearchParams} from 'react-router-dom'
 import type {Project} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {PageLoading} from '../components/LoadingSpinner'
@@ -9,6 +9,7 @@ import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useProjects} from '../hooks/useProjects'
 import {useSEO} from '../hooks/useSEO'
 import {ProjectsV2VerticalView} from '../components/project/ProjectsV2VerticalView'
+import {ProjectsV3VerticalView} from '../components/project/ProjectsV3VerticalView'
 
 /**
  * Architectural Horizontal Gallery Card with 3D Parallax Displacement
@@ -93,7 +94,7 @@ const ProjectHorizontalCard: React.FC<{
             e.stopPropagation()
           }
         }}
-        className="group relative block w-full aspect-[4/3] sm:aspect-[16/10] md:aspect-[16/9] overflow-hidden bg-zinc-950 border-[0.5px] border-white/10 hover:border-white/80 shadow-2xl hover:shadow-[0_0_40px_rgba(255,255,255,0.18)] transition-all duration-700"
+        className="group relative block w-full aspect-[4/3] sm:aspect-[16/10] md:aspect-[16/9] overflow-hidden bg-zinc-950 border-[0.5px] border-white/10 hover:border-white/80 shadow-2xl hover:shadow-[0_0_40px_rgba(255,255,255,0.18)] transition-all duration-700 rounded-none"
       >
         {/* Project Image Wrapper with 60FPS Ultra-Dramatic Parallax Displacement */}
         <div
@@ -155,7 +156,7 @@ const ProjectHorizontalCard: React.FC<{
             {t(project.title)}
           </h2>
 
-          {/* Minimal Bottom Line with Location/Category Hover Transition (Option 2) */}
+          {/* Minimal Bottom Line */}
           <div className="relative overflow-hidden h-7 mt-3 pt-2 border-t border-white/15">
             {/* Default State: BIRIM / YEAR */}
             <span className="text-[10px] font-mono tracking-widest text-white/50 group-hover:-translate-y-full group-hover:opacity-0 transition-all duration-500 ease-out absolute left-0 top-2">
@@ -164,7 +165,7 @@ const ProjectHorizontalCard: React.FC<{
 
             {/* Hover State: LOCATION / CATEGORY */}
             <span className="text-[10px] font-mono tracking-widest text-white font-medium translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out absolute left-0 top-2 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              <span className="w-1.5 h-1.5 bg-white rounded-none animate-pulse" />
               {(() => {
                 const projObj = project as unknown as Record<string, unknown>
                 const cat = project.projectCategory ? t(project.projectCategory) : ''
@@ -187,21 +188,36 @@ export function ProjectsPage() {
   const {t} = useTranslation()
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [scrollProgress, setScrollProgress] = useState(0)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const paramVersion = searchParams.get('v')
 
-  // Layout View Version: 'v1' (Horizontal Parallax) or 'v2' (Vertical Editorial)
-  const [viewVersion, setViewVersion] = useState<'v1' | 'v2'>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('birim_projects_view_version')
-      if (saved === 'v1' || saved === 'v2') return saved
-    }
-    return 'v1'
-  })
+  // Layout View Version: 'v1' | 'v2' | 'v3'
+  const initialVersion: 'v1' | 'v2' | 'v3' =
+    paramVersion === '3' || paramVersion === 'v3'
+      ? 'v3'
+      : paramVersion === '2' || paramVersion === 'v2'
+        ? 'v2'
+        : paramVersion === '1' || paramVersion === 'v1'
+          ? 'v1'
+          : typeof window !== 'undefined' &&
+              (localStorage.getItem('birim_projects_view_version') as 'v1' | 'v2' | 'v3') || 'v1'
 
-  const handleVersionChange = (v: 'v1' | 'v2') => {
+  const [viewVersion, setViewVersion] = useState<'v1' | 'v2' | 'v3'>(initialVersion)
+
+  useEffect(() => {
+    if (paramVersion === '3' || paramVersion === 'v3') setViewVersion('v3')
+    else if (paramVersion === '2' || paramVersion === 'v2') setViewVersion('v2')
+    else if (paramVersion === '1' || paramVersion === 'v1') setViewVersion('v1')
+  }, [paramVersion])
+
+  const handleVersionChange = (v: 'v1' | 'v2' | 'v3') => {
     setViewVersion(v)
     if (typeof window !== 'undefined') {
       localStorage.setItem('birim_projects_view_version', v)
     }
+    const newParams = new URLSearchParams(searchParams)
+    newParams.set('v', v === 'v3' ? '3' : v === 'v2' ? '2' : '1')
+    setSearchParams(newParams, {replace: true})
   }
 
   // Mouse Drag & Smooth Inertia Scroll State
@@ -252,16 +268,14 @@ export function ProjectsPage() {
 
     lerpRafId = requestAnimationFrame(smoothLerpLoop)
 
-    // Wheel listener: Capture phase 100% trap to prevent vertical page scroll when mouse is over project cards
     const handleWheel = (e: WheelEvent) => {
       const containerEl = scrollContainerRef.current
       if (!containerEl) return
       const isMobile = window.innerWidth < 768
-      if (isMobile) return // Allow native vertical scroll when in mobile portrait mode
+      if (isMobile) return
 
       const targetEl = e.target as HTMLElement | null
 
-      // Check if mouse wheel target is inside or hovering any project card or gallery container
       const isOverProjectCard =
         Boolean(targetEl?.closest?.('[data-project-card="true"]')) ||
         Boolean(targetEl?.closest?.('.project-gallery-wrapper')) ||
@@ -275,9 +289,7 @@ export function ProjectsPage() {
       }
     }
 
-    // Global Window MouseMove listener for smooth inertia dragging
     const handleWindowMouseMove = (e: MouseEvent) => {
-      // If left mouse button is no longer pressed, immediately terminate dragging
       if (e.buttons !== 1) {
         isDraggingRef.current = false
         return
@@ -299,7 +311,6 @@ export function ProjectsPage() {
       isDraggingRef.current = false
     }
 
-    // Finger Touch Drag Event Handlers for Mobile Horizontal Scroll
     const handleTouchStart = (e: TouchEvent) => {
       const containerEl = scrollContainerRef.current
       if (!containerEl) return
@@ -338,7 +349,6 @@ export function ProjectsPage() {
       isDraggingRef.current = false
     }
 
-    // Capture phase (capture: true) traps wheel BEFORE browser computes page scroll
     window.addEventListener('wheel', handleWheel, {passive: false, capture: true})
     window.addEventListener('mousemove', handleWindowMouseMove)
     window.addEventListener('mouseup', handleWindowMouseUp)
@@ -363,7 +373,6 @@ export function ProjectsPage() {
     }
   }, [projects, viewVersion, loading])
 
-  // Track scroll progress
   const handleScroll = () => {
     const container = scrollContainerRef.current
     if (!container) return
@@ -373,7 +382,6 @@ export function ProjectsPage() {
     }
   }
 
-  // Mouse Drag Event Handlers
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     const container = scrollContainerRef.current
     if (!container) return
@@ -423,7 +431,9 @@ export function ProjectsPage() {
 
   return (
     <>
-      {viewVersion === 'v2' ? (
+      {viewVersion === 'v3' ? (
+        <ProjectsV3VerticalView projects={projects} />
+      ) : viewVersion === 'v2' ? (
         <ProjectsV2VerticalView projects={projects} />
       ) : (
         <div className="bg-[var(--bg-primary)] min-h-screen md:h-screen md:max-h-screen animate-fade-in-up-subtle pt-20 md:pt-20 lg:pt-20 selection:bg-primary selection:text-black flex flex-col justify-between overflow-x-hidden md:overflow-hidden">
@@ -450,7 +460,7 @@ export function ProjectsPage() {
             </header>
           </div>
 
-          {/* Exhibition Gallery Stream (Vertical on Mobile, Horizontal Runway on Desktop) */}
+          {/* Exhibition Gallery Stream */}
           <div className="w-full flex-1 min-h-0 flex items-start">
             {projects.length > 0 ? (
               /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */
@@ -491,7 +501,7 @@ export function ProjectsPage() {
             )}
           </div>
 
-          {/* Bottom Navigation & Segmented Dash Progress Bar (Desktop Only) */}
+          {/* Bottom Navigation & Segmented Dash Progress Bar */}
           <div className="hidden md:block flex-shrink-0 w-full py-4 md:py-4 bg-zinc-950/90 backdrop-blur-md border-t border-zinc-800 mt-auto">
             <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex items-center justify-center relative">
               {/* Centered Segmented Dash Bar */}
@@ -503,7 +513,7 @@ export function ProjectsPage() {
                     <button
                       key={p.id || idx}
                       onClick={() => scrollToProjectIndex(idx)}
-                      className={`flex-1 rounded-full transition-all duration-300 cursor-pointer ${
+                      className={`flex-1 transition-all duration-300 cursor-pointer rounded-none ${
                         isActive
                           ? 'bg-white h-[4px] scale-y-125'
                           : isPast
@@ -516,11 +526,11 @@ export function ProjectsPage() {
                 })}
               </div>
 
-              {/* Clean Flat Square Arrow Buttons (Right-aligned) */}
+              {/* Clean Flat Square Arrow Buttons */}
               <div className="absolute right-0 flex items-center gap-2">
                 <button
                   onClick={scrollLeft}
-                  className="w-10 h-10 bg-zinc-900 hover:bg-white text-zinc-300 hover:text-black border border-zinc-700 hover:border-white flex items-center justify-center transition-all duration-300 active:scale-95 group"
+                  className="w-10 h-10 bg-zinc-900 hover:bg-white text-zinc-300 hover:text-black border border-zinc-700 hover:border-white flex items-center justify-center transition-all duration-300 active:scale-95 group rounded-none"
                   aria-label="Scroll left"
                 >
                   <svg
@@ -539,7 +549,7 @@ export function ProjectsPage() {
                 </button>
                 <button
                   onClick={scrollRight}
-                  className="w-10 h-10 bg-zinc-900 hover:bg-white text-zinc-300 hover:text-black border border-zinc-700 hover:border-white flex items-center justify-center transition-all duration-300 active:scale-95 group"
+                  className="w-10 h-10 bg-zinc-900 hover:bg-white text-zinc-300 hover:text-black border border-zinc-700 hover:border-white flex items-center justify-center transition-all duration-300 active:scale-95 group rounded-none"
                   aria-label="Scroll right"
                 >
                   <svg
@@ -562,36 +572,50 @@ export function ProjectsPage() {
         </div>
       )}
 
-      {/* Floating Version Comparison Switcher (V1 / V2) */}
-      <div className="fixed bottom-6 right-6 z-50 flex items-center gap-1.5 bg-zinc-950/90 backdrop-blur-lg border border-white/20 p-1.5 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.6)] select-none">
-        <span className="text-[10px] font-mono uppercase tracking-widest text-white/50 pl-2 pr-1 hidden sm:inline-block">
-          Görünüm:
-        </span>
-        <button
-          type="button"
-          onClick={() => handleVersionChange('v1')}
-          className={`px-3 py-1.5 rounded-full text-xs font-mono transition-all duration-300 ${
-            viewVersion === 'v1'
-              ? 'bg-white text-black font-bold shadow-md'
-              : 'text-white/70 hover:text-white hover:bg-white/10'
-          }`}
-          title="V1 - Yatay Parallax Galeri"
-        >
-          V1 (Yatay)
-        </button>
-        <button
-          type="button"
-          onClick={() => handleVersionChange('v2')}
-          className={`px-3 py-1.5 rounded-full text-xs font-mono transition-all duration-300 ${
-            viewVersion === 'v2'
-              ? 'bg-white text-black font-bold shadow-md'
-              : 'text-white/70 hover:text-white hover:bg-white/10'
-          }`}
-          title="V2 - Dikey Küratörlü Portfolyo"
-        >
-          V2 (Dikey)
-        </button>
-      </div>
+      {/* Floating Version Comparison Switcher (V1 / V2 / V3 - Keskin Köşeli) */}
+      <aside
+        aria-label="Projeler Görünüm Seçici"
+        className="fixed bottom-6 right-6 z-50 flex items-center select-none"
+      >
+        <div className="flex items-center gap-1 p-1 bg-neutral-950/95 text-white backdrop-blur-xl border border-white/20 shadow-[0_12px_40px_rgba(0,0,0,0.6)] rounded-none">
+          <button
+            type="button"
+            onClick={() => handleVersionChange('v1')}
+            className={`px-3 py-1.5 text-xs font-mono tracking-wider uppercase transition-colors rounded-none cursor-pointer ${
+              viewVersion === 'v1'
+                ? 'bg-white text-black font-semibold'
+                : 'text-neutral-300 hover:text-white'
+            }`}
+            title="V1 - Yatay Parallax Galeri"
+          >
+            V1 <span className="text-[10px] opacity-70 hidden sm:inline">Yatay</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleVersionChange('v2')}
+            className={`px-3 py-1.5 text-xs font-mono tracking-wider uppercase transition-colors rounded-none cursor-pointer ${
+              viewVersion === 'v2'
+                ? 'bg-white text-black font-semibold'
+                : 'text-neutral-300 hover:text-white'
+            }`}
+            title="V2 - Dikey Küratörlü Grid"
+          >
+            V2 <span className="text-[10px] opacity-70 hidden sm:inline">Grid</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleVersionChange('v3')}
+            className={`px-3 py-1.5 text-xs font-mono tracking-wider uppercase transition-colors rounded-none cursor-pointer ${
+              viewVersion === 'v3'
+                ? 'bg-white text-black font-semibold'
+                : 'text-neutral-300 hover:text-white'
+            }`}
+            title="V3 - Dikey Monolitik Lookbook"
+          >
+            V3 <span className="text-[10px] opacity-70 hidden sm:inline">Dikey</span>
+          </button>
+        </div>
+      </aside>
     </>
   )
 }
