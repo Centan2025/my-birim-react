@@ -28,11 +28,9 @@ const ALIGNMENT_MARKS = [
 const isFontSizeMark = (m: string) =>
   FONT_SIZE_MARKS.includes(m) || m.startsWith('size-') || m.startsWith('font-size-')
 
-const isIndentMark = (m: string) =>
-  INDENT_MARKS.includes(m) || m.startsWith('indent-')
+const isIndentMark = (m: string) => INDENT_MARKS.includes(m) || m.startsWith('indent-')
 
-const isAlignmentMark = (m: string) =>
-  ALIGNMENT_MARKS.includes(m) || m.startsWith('align-')
+const isAlignmentMark = (m: string) => ALIGNMENT_MARKS.includes(m) || m.startsWith('align-')
 
 function cleanMarksArray(marks: string[]): string[] {
   if (!Array.isArray(marks) || marks.length <= 1) return marks

@@ -867,7 +867,6 @@ export function ProjectDetailPage() {
             )}
           </div>
 
-
           <div className="flex-1 min-w-0 flex justify-end">
             {nextProject ? (
               <Link

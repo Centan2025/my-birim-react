@@ -13,11 +13,7 @@ interface ProjectVerticalCardProps {
   isFeatured: boolean
 }
 
-const ProjectVerticalCard: React.FC<ProjectVerticalCardProps> = ({
-  project,
-  index,
-  isFeatured,
-}) => {
+const ProjectVerticalCard: React.FC<ProjectVerticalCardProps> = ({project, index, isFeatured}) => {
   const {t} = useTranslation()
   const cardRef = useRef<HTMLDivElement>(null)
   const imageWrapperRef = useRef<HTMLDivElement>(null)
@@ -59,18 +55,13 @@ const ProjectVerticalCard: React.FC<ProjectVerticalCardProps> = ({
     }
   }, [])
 
-  const dateVal =
-    typeof project.date === 'string' ? project.date : t(project.date as never)
-  const year =
-    typeof dateVal === 'string' ? dateVal.match(/\d{4}/)?.[0] || dateVal : ''
+  const dateVal = typeof project.date === 'string' ? project.date : t(project.date as never)
+  const year = typeof dateVal === 'string' ? dateVal.match(/\d{4}/)?.[0] || dateVal : ''
   const projObj = project as unknown as Record<string, unknown>
   const location = projObj['location'] ? t(projObj['location'] as never) : ''
 
   return (
-    <div
-      ref={cardRef}
-      className={`w-full ${isFeatured ? 'md:col-span-2' : 'md:col-span-1'}`}
-    >
+    <div ref={cardRef} className={`w-full ${isFeatured ? 'md:col-span-2' : 'md:col-span-1'}`}>
       <ScrollReveal delay={index * 60} distance={25} duration={0.7}>
         <Link
           to={`/projects/${project.id}`}
@@ -93,29 +84,19 @@ const ProjectVerticalCard: React.FC<ProjectVerticalCardProps> = ({
             >
               {project.cover && (
                 <OptimizedImage
-                  src={
-                    typeof project.cover === 'string'
-                      ? project.cover
-                      : project.cover?.url || ''
-                  }
+                  src={typeof project.cover === 'string' ? project.cover : project.cover?.url || ''}
                   srcMobile={
-                    typeof project.cover === 'object'
-                      ? project.cover.urlMobile
-                      : undefined
+                    typeof project.cover === 'object' ? project.cover.urlMobile : undefined
                   }
                   srcDesktop={
-                    typeof project.cover === 'object'
-                      ? project.cover.urlDesktop
-                      : undefined
+                    typeof project.cover === 'object' ? project.cover.urlDesktop : undefined
                   }
                   alt={t(project.title)}
                   className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   loading={index < 2 ? 'eager' : 'lazy'}
                   quality={90}
                   crop={typeof project.cover === 'object' ? project.cover.crop : undefined}
-                  hotspot={
-                    typeof project.cover === 'object' ? project.cover.hotspot : undefined
-                  }
+                  hotspot={typeof project.cover === 'object' ? project.cover.hotspot : undefined}
                 />
               )}
             </div>
@@ -132,9 +113,7 @@ const ProjectVerticalCard: React.FC<ProjectVerticalCardProps> = ({
                     {year}
                   </span>
                 )}
-                {year && project.projectCategory && (
-                  <div className="w-5 h-px bg-white/40" />
-                )}
+                {year && project.projectCategory && <div className="w-5 h-px bg-white/40" />}
                 {project.projectCategory && (
                   <span className="text-[10px] md:text-[11px] font-medium tracking-[0.25em] text-white/70 uppercase">
                     {t(project.projectCategory)}
