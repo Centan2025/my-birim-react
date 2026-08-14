@@ -443,13 +443,13 @@ export function ProjectDetailPageV3() {
             <div className="space-y-3 pb-6 border-b border-neutral-200">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-[2px] bg-black inline-block" />
-                <span className="text-[11px] font-mono tracking-widest uppercase text-neutral-500 font-medium">
+                <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-semibold uppercase">
                   {isTr ? 'MİMARİ DOSYA' : 'ARCHITECTURAL DOSSIER'}
                 </span>
                 {projectCategory && (
                   <>
                     <span className="text-neutral-300">/</span>
-                    <span className="text-[11px] font-mono tracking-widest uppercase text-neutral-800 font-medium">
+                    <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-semibold uppercase">
                       {projectCategory}
                     </span>
                   </>
@@ -464,7 +464,7 @@ export function ProjectDetailPageV3() {
             <div className="border border-neutral-200 bg-neutral-50/70 p-5 space-y-4 rounded-none">
               <div className="grid grid-cols-2 gap-4 text-left">
                 <div className="space-y-1 border-l-2 border-neutral-900 pl-3">
-                  <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-medium uppercase">
+                  <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-semibold uppercase">
                     {isTr ? 'KONUM' : 'LOCATION'}
                   </span>
                   <p className="text-xs font-semibold text-neutral-900 truncate">
@@ -472,7 +472,7 @@ export function ProjectDetailPageV3() {
                   </p>
                 </div>
                 <div className="space-y-1 border-l-2 border-neutral-400 pl-3">
-                  <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-medium uppercase">
+                  <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-semibold uppercase">
                     {isTr ? 'DÖNEM' : 'PERIOD'}
                   </span>
                   <p className="text-xs font-semibold text-neutral-900 font-mono">
@@ -480,7 +480,7 @@ export function ProjectDetailPageV3() {
                   </p>
                 </div>
                 <div className="space-y-1 border-l-2 border-neutral-400 pl-3">
-                  <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-medium uppercase">
+                  <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-semibold uppercase">
                     {isTr ? 'TİPOLOJİ' : 'TYPOLOGY'}
                   </span>
                   <p className="text-xs font-semibold text-neutral-900 uppercase truncate">
@@ -488,7 +488,7 @@ export function ProjectDetailPageV3() {
                   </p>
                 </div>
                 <div className="space-y-1 border-l-2 border-neutral-400 pl-3">
-                  <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-medium uppercase">
+                  <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-semibold uppercase">
                     {isTr ? 'DONATI' : 'FURNITURE'}
                   </span>
                   <p className="text-xs font-semibold text-neutral-900 truncate">Birim Collection</p>
@@ -500,7 +500,7 @@ export function ProjectDetailPageV3() {
             <div className="space-y-3 pt-2">
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 bg-black rounded-none inline-block" />
-                <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-medium uppercase">
+                <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-semibold uppercase">
                   {isTr ? 'PROJE HAKKINDA' : 'PROJECT STORY'}
                 </span>
               </div>
@@ -535,7 +535,7 @@ export function ProjectDetailPageV3() {
             {/* Projeye Uygun Açık/Şık Aktif Görsel Kontrol Bandı */}
             <div className="p-4 bg-white border border-neutral-300 text-neutral-900 rounded-none flex items-center justify-between shadow-sm">
               <div className="space-y-0.5">
-                <span className="text-[10px] font-mono tracking-widest text-neutral-600 uppercase font-semibold">
+                <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-semibold uppercase">
                   {isTr ? 'AKTİF GÖRSEL' : 'ACTIVE FRAME'}
                 </span>
                 <div className="font-mono text-base font-michroma flex items-center gap-2 text-neutral-900">
