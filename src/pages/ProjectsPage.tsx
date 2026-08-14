@@ -199,8 +199,9 @@ export function ProjectsPage() {
         ? 'v2'
         : paramVersion === '1' || paramVersion === 'v1'
           ? 'v1'
-          : typeof window !== 'undefined' &&
-              (localStorage.getItem('birim_projects_view_version') as 'v1' | 'v2' | 'v3') || 'v1'
+          : (typeof window !== 'undefined' &&
+              (localStorage.getItem('birim_projects_view_version') as 'v1' | 'v2' | 'v3')) ||
+            'v1'
 
   const [viewVersion, setViewVersion] = useState<'v1' | 'v2' | 'v3'>(initialVersion)
 

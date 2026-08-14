@@ -242,7 +242,9 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
                           {category && (
                             <>
                               <span className="text-neutral-300">/</span>
-                              <span className="text-neutral-700 uppercase font-medium">{category}</span>
+                              <span className="text-neutral-700 uppercase font-medium">
+                                {category}
+                              </span>
                             </>
                           )}
                         </div>
@@ -290,9 +292,7 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
                       </div>
 
                       {/* Image Column (7 Cols) */}
-                      <div
-                        className={`lg:col-span-7 ${!isEven ? 'lg:order-1' : 'lg:order-2'}`}
-                      >
+                      <div className={`lg:col-span-7 ${!isEven ? 'lg:order-1' : 'lg:order-2'}`}>
                         <ScrollReveal delay={100}>
                           <Link
                             to={`/projects/${project.id}`}
@@ -302,8 +302,8 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
                               <OptimizedImage
                                 src={
                                   typeof project.cover === 'string'
-                                  ? project.cover
-                                  : project.cover?.url || ''
+                                    ? project.cover
+                                    : project.cover?.url || ''
                                 }
                                 srcMobile={
                                   typeof project.cover === 'object'
@@ -320,9 +320,7 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
                                 loading="lazy"
                                 quality={90}
                                 crop={
-                                  typeof project.cover === 'object'
-                                    ? project.cover.crop
-                                    : undefined
+                                  typeof project.cover === 'object' ? project.cover.crop : undefined
                                 }
                                 hotspot={
                                   typeof project.cover === 'object'
