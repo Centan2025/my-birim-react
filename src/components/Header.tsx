@@ -624,13 +624,13 @@ export function Header() {
             // Arka plan buz efekti: şeffafken blur yok, yarı şeffaf beyaz/siyahken buz efekti aktif
             headerBgColor === 'transparent' && !isProductsOpen
               ? ''
-              : 'header-frosted-glass backdrop-blur-xl backdrop-saturate-150 shadow-sm'
+              : 'header-frosted-glass backdrop-blur-xl backdrop-saturate-150'
           } ${
             // Sadece menü açıldığında transition ve max-height değişimi
             isProductsOpen || (isMobileMenuOpen && !isOverlayMobileMenu)
               ? 'transition-all duration-700 ease-in-out'
               : 'transition-[background-color,backdrop-filter] duration-300'
-          } relative`}
+          }`}
           style={{
             backgroundColor: headerBgColor,
             WebkitBackdropFilter:

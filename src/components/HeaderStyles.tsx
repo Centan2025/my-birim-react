@@ -121,10 +121,6 @@ export function HeaderStyles() {
           border-bottom: none !important;
         }
 
-        /* INLINE MENU SPECIFIC */
-        header:has(#mobile-menu) > div {
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-        }
 
         /* Consistent font sizing for mobile menu items */
         #mobile-menu nav button,
