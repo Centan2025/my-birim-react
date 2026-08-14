@@ -7,14 +7,19 @@ export const isDarkHeroPage = (p: string): boolean => {
     return false
   }
 
-  // Koyu hero kapak görseli olan sayfalar (Ana Sayfa, Hakkımızda, Projeler)
-  if (
-    path === '/' ||
-    path === '' ||
-    path.startsWith('/about') ||
-    path.startsWith('/project/') ||
-    path.startsWith('/projects/')
-  ) {
+  // Proje Detay sayfaları: V3 (beyaz versiyon) seçiliyse header elemanları siyah olmalı (isDarkHero = false)
+  if (path.startsWith('/project/') || path.startsWith('/projects/')) {
+    if (typeof window !== 'undefined') {
+      const search = window.location.search || window.location.hash
+      if (search.includes('v=3') || search.includes('v=v3')) {
+        return false
+      }
+    }
+    return true
+  }
+
+  // Koyu hero kapak görseli olan sayfalar (Ana Sayfa, Hakkımızda)
+  if (path === '/' || path === '' || path.startsWith('/about')) {
     return true
   }
 

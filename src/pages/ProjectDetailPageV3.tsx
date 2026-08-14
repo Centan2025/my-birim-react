@@ -1,7 +1,6 @@
-import {useMemo, useState, useEffect, useCallback} from 'react'
+import React, {useMemo, useState, useEffect, useRef} from 'react'
 import {useQuery} from '@tanstack/react-query'
 import {useParams, Link} from 'react-router-dom'
-import {motion, AnimatePresence} from 'framer-motion'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {OptimizedVideo} from '../components/OptimizedVideo'
 import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
@@ -13,6 +12,7 @@ import {getProjectById} from '../services/cms'
 import {analytics} from '../lib/analytics'
 import ScrollReveal from '../components/ScrollReveal'
 import {useSEO} from '../hooks/useSEO'
+import {useHeaderTheme} from '../context/HeaderThemeContext'
 import PortableTextLite from '../components/PortableTextLite'
 import {HomeContentBlocks} from '../components/HomeContentBlocks'
 import {InteractiveShowcase} from '../components/InteractiveShowcase'
@@ -30,6 +30,159 @@ interface MediaItem {
   hotspot?: R2ImageMetadata['hotspot']
   origWidth?: number
   origHeight?: number
+}
+
+/**
+ * 60FPS Parallax Vertical Media Item Card
+ */
+const ParallaxMediaCard: React.FC<{
+  media: MediaItem
+  index: number
+  total: number
+  year: string
+  projectTitle: string
+  onOpenFullscreen: (url: string) => void
+  onRegisterRef: (el: HTMLDivElement | null) => void
+}> = ({media, index, year, projectTitle, onOpenFullscreen, onRegisterRef}) => {
+  const cardRef = useRef<HTMLDivElement>(null)
+  const imageWrapperRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    let animationFrameId: number | null = null
+
+    const updateParallax = () => {
+      if (!cardRef.current || !imageWrapperRef.current) return
+      const rect = cardRef.current.getBoundingClientRect()
+      const windowHeight = window.innerHeight || document.documentElement.clientHeight
+
+      // Only calculate when visible in viewport range
+      if (rect.bottom >= -150 && rect.top <= windowHeight + 150) {
+        const cardCenterY = rect.top + rect.height / 2
+        const screenCenterY = windowHeight / 2
+        const normalizedPosY = (cardCenterY - screenCenterY) / (windowHeight / 2)
+        const clampedPosY = Math.max(-1.4, Math.min(1.4, normalizedPosY))
+        const shiftY = clampedPosY * -55 // 55px Smooth Parallax Displacement
+
+        imageWrapperRef.current.style.transform = `scale(1.22) translate3d(0px, ${shiftY.toFixed(1)}px, 0px)`
+      }
+    }
+
+    const onScroll = () => {
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId)
+      animationFrameId = requestAnimationFrame(updateParallax)
+    }
+
+    updateParallax()
+    window.addEventListener('scroll', onScroll, {passive: true})
+    window.addEventListener('resize', onScroll, {passive: true})
+
+    return () => {
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+    }
+  }, [])
+
+  return (
+    <ScrollReveal delay={index < 2 ? 0 : 80}>
+      <div
+        ref={node => {
+          // @ts-expect-error mutable ref
+          cardRef.current = node
+          onRegisterRef(node)
+        }}
+        className="group relative bg-neutral-100 border border-neutral-300 hover:border-neutral-900 transition-all duration-500 shadow-sm hover:shadow-xl rounded-none overflow-hidden"
+      >
+        {/* Card Header Strip */}
+        <div className="flex items-center justify-between px-4 py-2.5 bg-white border-b border-neutral-200 text-[11px] font-mono tracking-widest text-neutral-700">
+          <div className="flex items-center gap-2 font-semibold">
+            <span className="w-1.5 h-1.5 bg-black rounded-none inline-block" />
+            <span>{String(index + 1).padStart(2, '0')}</span>
+          </div>
+          <span className="text-neutral-400 uppercase text-[10px]">
+            BIRIM ARCHITECTURAL / {year || '2024'}
+          </span>
+        </div>
+
+        {/* Visual Media Container with Parallax Effect */}
+        <div
+          className="relative aspect-[16/10] md:aspect-[16/11] w-full overflow-hidden bg-neutral-900 cursor-pointer"
+          onClick={() => onOpenFullscreen(media.url)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ' ') onOpenFullscreen(media.url)
+          }}
+        >
+          <div
+            ref={imageWrapperRef}
+            className="w-full h-full will-change-transform pointer-events-none"
+            style={{
+              transform: 'scale(1.22) translate3d(0px, 0px, 0px)',
+            }}
+          >
+            {media.type === 'image' && (
+              <OptimizedImage
+                src={media.url}
+                srcMobile={media.urlMobile}
+                srcDesktop={media.urlDesktop}
+                alt={`${projectTitle} - ${index + 1}`}
+                className="w-full h-full object-cover"
+                loading={index < 2 ? 'eager' : 'lazy'}
+                quality={92}
+                crop={media.crop}
+                hotspot={media.hotspot}
+                origWidth={media.origWidth}
+                origHeight={media.origHeight}
+              />
+            )}
+            {media.type === 'video' && (
+              <OptimizedVideo
+                src={media.url}
+                srcMobile={media.urlMobile}
+                srcDesktop={media.urlDesktop}
+                className="w-full h-full object-cover"
+                autoPlay
+                loop
+                muted
+                playsInline
+              />
+            )}
+          </div>
+
+          {/* Fullscreen Button (Ultra Şeffaf & Hafif Cam Efektli) */}
+          <button
+            type="button"
+            onClick={e => {
+              e.stopPropagation()
+              onOpenFullscreen(media.url)
+            }}
+            title="Tam Ekran"
+            aria-label="Tam Ekran"
+            className="group pointer-events-auto absolute bottom-3 right-3 flex h-8 w-8 md:h-10 md:w-10 items-center justify-center border-[0.5px] border-white/25 bg-black/10 text-white/90 hover:text-white backdrop-blur-md transition-all duration-300 hover:bg-black/35 hover:border-white/60 active:scale-95 shadow-sm rounded-none z-10"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth="1.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="transition-transform duration-500 group-hover:scale-110 h-4 w-4 md:h-5 md:w-5 text-white"
+            >
+              <path d="M15 3h6v6" />
+              <path d="M9 21H3v-6" />
+              <path d="M21 3l-7 7" />
+              <path d="M3 21l7-7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </ScrollReveal>
+  )
 }
 
 export function ProjectDetailPageV3() {
@@ -51,6 +204,13 @@ export function ProjectDetailPageV3() {
   const {t, locale} = useTranslation()
   const isTr = locale === 'tr'
   const imageBorderClass = 'rounded-none'
+  const {setBrightness, reset} = useHeaderTheme()
+
+  // Header temasını beyaz zemin (siyah elemanlar) olarak zorla
+  useEffect(() => {
+    setBrightness(1)
+    return () => reset()
+  }, [setBrightness, reset])
 
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window !== 'undefined') return window.innerWidth < 1024
@@ -63,10 +223,11 @@ export function ProjectDetailPageV3() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  const [currentSlide, setCurrentSlide] = useState(0)
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
   const [fullscreenIdx, setFullscreenIdx] = useState(0)
-  const [isAutoplayPaused, setIsAutoplayPaused] = useState(false)
+  const [activeMediaIndex, setActiveMediaIndex] = useState(0)
+
+  const mediaItemRefs = useRef<(HTMLDivElement | null)[]>([])
 
   // Prev / Next project calculation
   const {prevProject, nextProject} = useMemo(() => {
@@ -87,7 +248,7 @@ export function ProjectDetailPageV3() {
     analytics.pageview(window.location.pathname, pageTitle)
     analytics.event({
       category: 'project',
-      action: 'view_project_v3',
+      action: 'view_project_v3_split',
       label: t(project.title),
     })
   }, [project, t])
@@ -114,8 +275,8 @@ export function ProjectDetailPageV3() {
       ? (project.cover as {hotspot?: R2ImageMetadata['hotspot']}).hotspot
       : undefined
 
-  // Hero Media List
-  const heroMedia = useMemo(() => {
+  // Extract All Medias
+  const allMedia = useMemo(() => {
     if (!project) return []
     const list: MediaItem[] = []
     if (coverUrl) {
@@ -142,44 +303,12 @@ export function ProjectDetailPageV3() {
         }
       })
     }
-    return list
-  }, [project, coverUrl, coverMobile, coverDesktop, coverCrop, coverHotspot])
 
-  const heroCount = heroMedia.length
-
-  const nextHeroSlide = useCallback(() => {
-    if (heroCount <= 1) return
-    setCurrentSlide(prev => (prev + 1) % heroCount)
-  }, [heroCount])
-
-  const prevHeroSlide = useCallback(() => {
-    if (heroCount <= 1) return
-    setCurrentSlide(prev => (prev - 1 + heroCount) % heroCount)
-  }, [heroCount])
-
-  // Autoplay for Hero Slider
-  useEffect(() => {
-    if (heroCount <= 1 || isAutoplayPaused) return
-    const timer = setInterval(() => {
-      nextHeroSlide()
-    }, 6000)
-    return () => clearInterval(timer)
-  }, [heroCount, isAutoplayPaused, nextHeroSlide])
-
-  // Gallery & All Media Extract
-  const mediaData = useMemo(() => {
-    if (!project) return {all: [], gallery: []}
-    const media: MediaItem[] = []
-
-    // 1. Hero Medias
-    heroMedia.forEach(m => media.push(m))
-
-    // 2. Content blocks
     if (project.contentBlocks && Array.isArray(project.contentBlocks)) {
       project.contentBlocks.forEach((block: ContentBlock) => {
         const mUrl = block.image || block.url
         if (mUrl && block.mediaType !== 'panels') {
-          media.push({
+          list.push({
             type: (block.mediaType as 'image' | 'video' | 'youtube') || 'image',
             url: mUrl,
             urlMobile: block.imageMobile || block.urlMobile,
@@ -188,33 +317,10 @@ export function ProjectDetailPageV3() {
             hotspot: block.hotspot,
           })
         }
-
-        const scanPortableText = (val: unknown) => {
-          if (!val) return
-          const blks = Array.isArray(val) ? val : [val]
-          blks.forEach(b => {
-            const item = b as Record<string, unknown>
-            if (item?.['_type'] === 'portableTextImage') {
-              const r2 = item['imageR2'] as {url?: string} | undefined
-              const img = item['image'] as {asset?: {url?: string}} | undefined
-              const url = r2?.url || img?.asset?.url
-              if (url) {
-                media.push({
-                  type: 'image',
-                  url,
-                  urlMobile: (item['imageMobileR2'] as {url?: string})?.url,
-                  urlDesktop: (item['imageDesktopR2'] as {url?: string})?.url,
-                })
-              }
-            }
-          })
-        }
-        scanPortableText(t(block.description as never))
-
         if (block.mediaType === 'panels' && Array.isArray(block.imagePanels)) {
           block.imagePanels.forEach(p => {
             if (p.url) {
-              media.push({
+              list.push({
                 type: p.type || 'image',
                 url: p.url,
                 crop: p.crop,
@@ -226,71 +332,61 @@ export function ProjectDetailPageV3() {
       })
     }
 
-    // 3. Body deep scan
-    const scanDeep = (val: unknown, target: MediaItem[]) => {
-      if (!val) return
-      if (Array.isArray(val)) {
-        val.forEach(v => scanDeep(v, target))
-      } else if (typeof val === 'object' && val !== null) {
-        const obj = val as Record<string, unknown>
-        if (
-          obj?.['_type'] === 'portableTextImage' ||
-          obj?.['_type'] === 'image' ||
-          obj?.['imageR2']
-        ) {
-          const r2 = obj['imageR2'] as {url?: string} | undefined
-          const img = obj['image'] as {asset?: {url?: string}} | undefined
-          const url = r2?.url || img?.asset?.url || (obj['url'] as string)
-
-          if (typeof url === 'string' && url) {
-            target.push({
-              type: 'image',
-              url,
-              urlMobile:
-                (obj['imageMobileR2'] as {url?: string})?.url || (obj['urlMobile'] as string),
-              urlDesktop:
-                (obj['imageDesktopR2'] as {url?: string})?.url || (obj['urlDesktop'] as string),
-            })
-          }
-        }
-        Object.values(obj).forEach(v => scanDeep(v, target))
-      }
-    }
-    if (project.body) {
-      scanDeep(t(project.body as never), media)
-    }
-
     const seen = new Set<string>()
-    const masterMedia = media.filter(m => {
+    return list.filter(m => {
       const u = String(m.url || '').trim()
       if (!u || seen.has(u)) return false
       seen.add(u)
       return true
     })
+  }, [project, coverUrl, coverMobile, coverDesktop, coverCrop, coverHotspot])
 
-    const excludedUrls = new Set<string>()
-    heroMedia.forEach(m => excludedUrls.add(m.url))
-    if (project.contentBlocks) {
-      project.contentBlocks.forEach((block: ContentBlock) => {
-        const url = block.image || block.url
-        if (url) excludedUrls.add(url)
+  // Track active media item on scroll
+  useEffect(() => {
+    if (allMedia.length === 0) return
+
+    const handleScroll = () => {
+      const windowCenter = window.innerHeight / 2
+      let closestIdx = 0
+      let minDistance = Infinity
+
+      mediaItemRefs.current.forEach((el, idx) => {
+        if (!el) return
+        const rect = el.getBoundingClientRect()
+        const elCenter = rect.top + rect.height / 2
+        const distance = Math.abs(elCenter - windowCenter)
+        if (distance < minDistance) {
+          minDistance = distance
+          closestIdx = idx
+        }
       })
+
+      setActiveMediaIndex(closestIdx)
     }
 
-    const galleryItems = masterMedia.filter(m => !excludedUrls.has(m.url))
-    return {all: masterMedia, gallery: galleryItems}
-  }, [project, heroMedia, t])
+    window.addEventListener('scroll', handleScroll, {passive: true})
+    handleScroll()
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [allMedia])
 
-  const allMedia = mediaData.all
-  const galleryMedia = mediaData.gallery
+  const scrollToMediaItem = (index: number) => {
+    const target = mediaItemRefs.current[index]
+    if (target) {
+      target.scrollIntoView({behavior: 'smooth', block: 'center'})
+    }
+  }
+
   const projectTitle = project ? t(project.title) : ''
   const projObj = (project || {}) as unknown as Record<string, unknown>
   const projectLocation = projObj['location'] ? t(projObj['location'] as never) : ''
   const projectCategory = project?.projectCategory ? t(project.projectCategory) : ''
-  const dateVal = project?.date ? (typeof project.date === 'string' ? project.date : t(project.date as never)) : ''
+  const dateVal = project?.date
+    ? typeof project.date === 'string'
+      ? project.date
+      : t(project.date as never)
+    : ''
   const year = typeof dateVal === 'string' ? dateVal.match(/\d{4}/)?.[0] || dateVal : ''
 
-  // Open fullscreen at index
   const openFullscreen = (mediaItemUrl: string) => {
     const foundIdx = allMedia.findIndex(m => m.url === mediaItemUrl)
     setFullscreenIdx(foundIdx !== -1 ? foundIdx : 0)
@@ -322,12 +418,10 @@ export function ProjectDetailPageV3() {
     )
   }
 
-  const currentHeroMedia = heroMedia[currentSlide] || heroMedia[0]
-
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] selection:bg-black selection:text-white pt-20 md:pt-24 pb-36">
-      {/* 1. TOP BREADCRUMB */}
-      <div className="relative z-20 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[85vw] mx-auto px-4 md:px-8 lg:px-0 py-4 text-neutral-500">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] selection:bg-black selection:text-white pt-20 md:pt-24 pb-36 font-sans">
+      {/* 1. TOP BREADCRUMB STRIP */}
+      <div className="w-full max-w-[96%] lg:max-w-[90vw] mx-auto px-4 md:px-8 lg:px-0 py-3 border-b border-neutral-200 text-neutral-500">
         <Breadcrumbs
           items={[
             {label: t('homepage'), to: '/'},
@@ -338,425 +432,267 @@ export function ProjectDetailPageV3() {
         />
       </div>
 
-      {/* 2. EDITORIAL MONOGRAPH HEADER */}
-      <header className="relative z-10 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[85vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 pb-10 border-b border-neutral-200">
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
-          <div className="space-y-3 max-w-3xl">
-            <div className="flex items-center gap-3">
-              <span className="w-8 h-[1px] bg-neutral-400" />
-              <span className="text-xs font-mono tracking-widest uppercase text-neutral-500">
-                {isTr ? 'MİMARİ PROJE MONOGRAFİSİ' : 'ARCHITECTURAL PROJECT MONOGRAPH'}
-              </span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light font-michroma tracking-tight text-neutral-900 uppercase leading-tight md:leading-[1.1]">
-              {projectTitle}
-            </h1>
-          </div>
-
-          {/* Quick Meta Stats */}
-          <div className="flex flex-wrap items-center gap-6 text-xs font-mono tracking-widest text-neutral-500">
-            {year && (
-              <div className="border-l border-neutral-300 pl-4 py-1">
-                <span className="text-neutral-900 font-semibold text-sm font-michroma mr-1.5">{year}</span>
-                <span>{isTr ? 'DÖNEM' : 'PERIOD'}</span>
-              </div>
-            )}
-            {projectCategory && (
-              <div className="border-l border-neutral-300 pl-4 py-1">
-                <span className="text-neutral-900 font-medium uppercase mr-1.5">{projectCategory}</span>
-                <span>{isTr ? 'TİP' : 'TYPE'}</span>
-              </div>
-            )}
-            <div className="border-l border-neutral-300 pl-4 py-1">
-              <span className="text-neutral-900 font-semibold text-sm font-michroma mr-1.5">{allMedia.length}</span>
-              <span>{isTr ? 'KARE' : 'PLATES'}</span>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* 3. HERO SHOWCASE STAGE (Beyaz/Aydınlık Çerçeveli Slider) */}
-      <section
-        className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[85vw] mx-auto px-4 md:px-8 lg:px-0 pt-8"
-        onMouseEnter={() => setIsAutoplayPaused(true)}
-        onMouseLeave={() => setIsAutoplayPaused(false)}
-      >
-        <div className="relative w-full aspect-[16/10] md:aspect-[21/10] bg-neutral-100 border border-neutral-300 overflow-hidden shadow-xl rounded-none">
-          <AnimatePresence mode="wait">
-            {currentHeroMedia && (
-              <motion.div
-                key={currentHeroMedia.url}
-                initial={{opacity: 0, scale: 1.03}}
-                animate={{opacity: 1, scale: 1}}
-                exit={{opacity: 0}}
-                transition={{duration: 0.7, ease: 'easeOut'}}
-                className="absolute inset-0 w-full h-full cursor-pointer"
-                onClick={() => openFullscreen(currentHeroMedia.url)}
-              >
-                {currentHeroMedia.type === 'video' ? (
-                  <OptimizedVideo
-                    src={currentHeroMedia.url}
-                    srcMobile={currentHeroMedia.urlMobile}
-                    srcDesktop={currentHeroMedia.urlDesktop}
-                    className="w-full h-full object-cover"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                  />
-                ) : (
-                  <OptimizedImage
-                    src={currentHeroMedia.url}
-                    srcMobile={currentHeroMedia.urlMobile}
-                    srcDesktop={currentHeroMedia.urlDesktop}
-                    alt={projectTitle}
-                    className="w-full h-full object-cover"
-                    quality={95}
-                    crop={currentHeroMedia.crop}
-                    hotspot={currentHeroMedia.hotspot}
-                  />
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Floating Slider Controls (Keskin Köşeli) */}
-          <div className="absolute bottom-4 right-4 z-20 flex items-center gap-3 backdrop-blur-md bg-white/90 border border-neutral-300 px-4 py-2 rounded-none shadow-md text-neutral-900">
-            {heroCount > 1 && (
-              <button
-                type="button"
-                onClick={e => {
-                  e.stopPropagation()
-                  prevHeroSlide()
-                }}
-                aria-label="Previous Slide"
-                className="p-1 hover:text-black transition-colors hover:scale-110 active:scale-95"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-            )}
-
-            <div className="font-mono text-xs tracking-widest text-neutral-800">
-              <span className="font-bold">{String(currentSlide + 1).padStart(2, '0')}</span>
-              <span className="opacity-40 mx-1">/</span>
-              <span className="opacity-60">{String(heroCount).padStart(2, '0')}</span>
-            </div>
-
-            {heroCount > 1 && (
-              <button
-                type="button"
-                onClick={e => {
-                  e.stopPropagation()
-                  nextHeroSlide()
-                }}
-                aria-label="Next Slide"
-                className="p-1 hover:text-black transition-colors hover:scale-110 active:scale-95"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            )}
-
-            <div className="w-[1px] h-3.5 bg-neutral-300" />
-
-            {/* Fullscreen Button */}
-            <button
-              type="button"
-              onClick={e => {
-                e.stopPropagation()
-                openFullscreen(currentHeroMedia?.url || '')
-              }}
-              title={isTr ? 'Tam Ekranda Aç' : 'View Fullscreen'}
-              className="p-1 text-neutral-700 hover:text-black transition-transform hover:scale-110 active:scale-95"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Top Frame Tag */}
-          <div className="absolute top-4 left-4 px-3 py-1 bg-white/90 backdrop-blur-md border border-neutral-300 text-[10px] font-mono tracking-widest text-neutral-800 rounded-none shadow-sm pointer-events-none">
-            PLATE {String(currentSlide + 1).padStart(2, '0')}
-          </div>
-        </div>
-
-        {/* Micro Thumbnails Strip (Keskin Köşeli) */}
-        {heroCount > 1 && (
-          <div className="mt-4 pt-2 flex items-center gap-3 overflow-x-auto no-scrollbar pb-2">
-            {heroMedia.map((m, idx) => {
-              const isActive = idx === currentSlide
-              return (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setCurrentSlide(idx)}
-                  className={`relative flex-shrink-0 h-14 w-24 rounded-none overflow-hidden transition-all duration-200 ${
-                    isActive
-                      ? 'border-2 border-neutral-900 opacity-100 shadow-md scale-100'
-                      : 'border border-neutral-300 opacity-50 hover:opacity-90'
-                  }`}
-                >
-                  <OptimizedImage
-                    src={m.url}
-                    alt={`Thumb ${idx + 1}`}
-                    className="w-full h-full object-cover"
-                    quality={40}
-                  />
-                </button>
-              )
-            })}
-          </div>
-        )}
-      </section>
-
-      {/* 4. MONOGRAPH ARCHITECTURAL SPECS BAR */}
-      <section className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[85vw] mx-auto px-4 md:px-8 lg:px-0 mt-14 pt-8 border-t border-neutral-200">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-left bg-neutral-50/80 border border-neutral-200 p-6 rounded-none">
-          <div className="space-y-1">
-            <span className="text-[10px] font-mono tracking-widest text-neutral-400 uppercase">
-              {isTr ? 'Proje Adı' : 'Project Title'}
-            </span>
-            <p className="text-sm font-medium text-neutral-900 truncate">{projectTitle}</p>
-          </div>
-
-          <div className="space-y-1">
-            <span className="text-[10px] font-mono tracking-widest text-neutral-400 uppercase">
-              {isTr ? 'Lokasyon' : 'Location'}
-            </span>
-            <p className="text-sm font-medium text-neutral-900">{projectLocation || 'İstanbul, TR'}</p>
-          </div>
-
-          <div className="space-y-1">
-            <span className="text-[10px] font-mono tracking-widest text-neutral-400 uppercase">
-              {isTr ? 'Yıl / Dönem' : 'Year / Period'}
-            </span>
-            <p className="text-sm font-medium text-neutral-900 font-mono">{year || '—'}</p>
-          </div>
-
-          <div className="space-y-1">
-            <span className="text-[10px] font-mono tracking-widest text-neutral-400 uppercase">
-              {isTr ? 'Tasarım & Donatı' : 'Curated By'}
-            </span>
-            <p className="text-sm font-medium text-neutral-900">Birim Architectural</p>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. EDITORIAL NARRATIVE (Hikaye & Konsept Bölümü) */}
-      {(project.excerpt || project.body) && (
-        <section className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[85vw] mx-auto px-4 md:px-8 lg:px-0 py-20">
-          <ScrollReveal>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-              {/* Left Column: Architectural Concept Statement */}
-              <div className="lg:col-span-5 space-y-6">
-                <span className="inline-block text-xs font-mono tracking-widest uppercase text-neutral-500 border-b border-neutral-300 pb-2">
-                  {isTr ? 'MİMARİ MANİFESTO' : 'ARCHITECTURAL MANIFESTO'}
+      {/* 2. SPLIT ARCHITECTURAL WORKSPACE */}
+      <main className="w-full max-w-[96%] lg:max-w-[90vw] mx-auto px-4 md:px-8 lg:px-0 pt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
+          {/* ============================================================ */}
+          {/* SOL PANEL (STICKY ARCHITECTURAL DOSSIER - SABİT MİMARİ DOSYA) */}
+          {/* ============================================================ */}
+          <aside className="lg:col-span-5 lg:sticky lg:top-24 space-y-7 pb-10">
+            {/* Tag & Title Header */}
+            <div className="space-y-3 pb-6 border-b border-neutral-200">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-[2px] bg-black inline-block" />
+                <span className="text-[11px] font-mono tracking-widest uppercase text-neutral-500 font-medium">
+                  {isTr ? 'MİMARİ DOSYA' : 'ARCHITECTURAL DOSSIER'}
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-light leading-relaxed text-neutral-900 font-michroma">
-                  {isTr
-                    ? 'Mekanın fonksiyonel sınırlarını aşan, zarafet ve malzeme ustalığı.'
-                    : 'Transcending spatial boundaries through structural elegance and artisanal material precision.'}
-                </h2>
-                <div className="w-16 h-[2px] bg-neutral-900" />
+                {projectCategory && (
+                  <>
+                    <span className="text-neutral-300">/</span>
+                    <span className="text-[11px] font-mono tracking-widest uppercase text-neutral-800 font-medium">
+                      {projectCategory}
+                    </span>
+                  </>
+                )}
+              </div>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light font-oswald tracking-wide text-neutral-900 uppercase leading-snug whitespace-nowrap truncate">
+                {projectTitle}
+              </h1>
+            </div>
+
+            {/* Architectural Index Specs Table */}
+            <div className="border border-neutral-200 bg-neutral-50/70 p-5 space-y-4 rounded-none">
+              <div className="grid grid-cols-2 gap-4 text-left">
+                <div className="space-y-1 border-l-2 border-neutral-900 pl-3">
+                  <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-medium uppercase">
+                    {isTr ? 'KONUM' : 'LOCATION'}
+                  </span>
+                  <p className="text-xs font-semibold text-neutral-900 truncate">
+                    {projectLocation || 'İstanbul, TR'}
+                  </p>
+                </div>
+                <div className="space-y-1 border-l-2 border-neutral-400 pl-3">
+                  <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-medium uppercase">
+                    {isTr ? 'DÖNEM' : 'PERIOD'}
+                  </span>
+                  <p className="text-xs font-semibold text-neutral-900 font-mono">
+                    {year || '2024'}
+                  </p>
+                </div>
+                <div className="space-y-1 border-l-2 border-neutral-400 pl-3">
+                  <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-medium uppercase">
+                    {isTr ? 'TİPOLOJİ' : 'TYPOLOGY'}
+                  </span>
+                  <p className="text-xs font-semibold text-neutral-900 uppercase truncate">
+                    {projectCategory || 'Architectural'}
+                  </p>
+                </div>
+                <div className="space-y-1 border-l-2 border-neutral-400 pl-3">
+                  <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-medium uppercase">
+                    {isTr ? 'DONATI' : 'FURNITURE'}
+                  </span>
+                  <p className="text-xs font-semibold text-neutral-900 truncate">Birim Collection</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Project Narrative & Description (Proje Açıklama Alanı) */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-black rounded-none inline-block" />
+                <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-medium uppercase">
+                  {isTr ? 'PROJE HAKKINDA' : 'PROJECT STORY'}
+                </span>
               </div>
 
-              {/* Right Column: PortableText Body */}
-              <div className="lg:col-span-7 space-y-6 text-neutral-700 font-light text-base md:text-lg leading-relaxed">
-                {project.excerpt && (
-                  <div className="p-6 rounded-none bg-neutral-50 border border-neutral-200 text-neutral-900 leading-relaxed font-normal shadow-sm">
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    <PortableTextLite value={t(project.excerpt as never) as any} />
+              <div className="space-y-4 text-neutral-700 font-normal text-base md:text-[16px] leading-relaxed max-h-[440px] overflow-y-auto pr-2 scrollbar-thin">
+                {project.excerpt ? (
+                  <div className="p-4 sm:p-5 bg-white border-l-2 border-neutral-900 text-neutral-800 leading-relaxed font-normal text-base md:text-[16.5px] shadow-sm">
+                    {typeof t(project.excerpt as never) === 'string' ? (
+                      <p className="leading-relaxed">{String(t(project.excerpt as never))}</p>
+                    ) : (
+                      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+                      <PortableTextLite value={t(project.excerpt as never) as any} />
+                    )}
                   </div>
-                )}
+                ) : null}
 
-                {project.body && (
-                  <div className="prose max-w-none text-neutral-700 prose-p:leading-relaxed prose-headings:font-michroma prose-headings:text-neutral-900">
+                {project.body ? (
+                  <div className="prose max-w-none text-neutral-700 text-base md:text-[16px] leading-relaxed prose-p:text-neutral-700 prose-p:leading-relaxed prose-headings:font-michroma prose-headings:text-neutral-800">
                     {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     <PortableTextLite value={t(project.body as never) as any} />
                   </div>
-                )}
+                ) : !project.excerpt ? (
+                  <p className="text-sm text-neutral-600 italic leading-relaxed">
+                    {isTr
+                      ? `${projectTitle}, Birim koleksiyonunun çağdaş mimari ve mekan kurgusunu yansıtan özel bir projesidir.`
+                      : `${projectTitle} is a bespoke project curated with Birim furniture collection, reflecting contemporary spatial architecture.`}
+                  </p>
+                ) : null}
               </div>
             </div>
-          </ScrollReveal>
-        </section>
-      )}
 
-      {/* 6. INTERACTIVE SHOWCASE (Hotspots) */}
-      {!isMobile && project?.interactiveShowcase && project.interactiveShowcase.length > 0 && (
-        <section className="py-16 bg-neutral-50 border-y border-neutral-200 my-12">
-          <div className="max-w-7xl mx-auto px-6 md:px-12">
-            <div className="mb-10 text-center space-y-2">
-              <span className="text-xs font-mono tracking-widest uppercase text-neutral-500">
-                {isTr ? 'ÜRÜN ETKİLEŞİMİ' : 'FURNITURE DISCOVERY'}
-              </span>
-              <h3 className="text-2xl md:text-3xl font-michroma font-light text-neutral-900">
-                {project.interactiveShowcaseTitle ? t(project.interactiveShowcaseTitle) : (isTr ? 'Projede Kullanılan Birim Tasarımları' : 'Birim Pieces in the Project')}
-              </h3>
+            {/* Projeye Uygun Açık/Şık Aktif Görsel Kontrol Bandı */}
+            <div className="p-4 bg-white border border-neutral-300 text-neutral-900 rounded-none flex items-center justify-between shadow-sm">
+              <div className="space-y-0.5">
+                <span className="text-[10px] font-mono tracking-widest text-neutral-600 uppercase font-semibold">
+                  {isTr ? 'AKTİF GÖRSEL' : 'ACTIVE FRAME'}
+                </span>
+                <div className="font-mono text-base font-michroma flex items-center gap-2 text-neutral-900">
+                  <span className="font-bold">
+                    {String(activeMediaIndex + 1).padStart(2, '0')}
+                  </span>
+                  <span className="text-neutral-300 font-light">/</span>
+                  <span className="text-neutral-500 text-xs">
+                    {String(allMedia.length).padStart(2, '0')}
+                  </span>
+                </div>
+              </div>
+
+              {/* Fullscreen Expand CTA */}
+              <button
+                type="button"
+                onClick={() => openFullscreen(allMedia[activeMediaIndex]?.url || '')}
+                className="group px-4 py-2 bg-white hover:bg-neutral-100 text-neutral-900 border border-neutral-300 hover:border-neutral-400 text-xs font-mono tracking-wider uppercase font-medium transition-colors duration-200 rounded-none flex items-center gap-2 shadow-sm active:scale-95 cursor-pointer"
+              >
+                <span>{isTr ? 'BÜYÜT' : 'EXPAND'}</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-3.5 h-3.5 transition-transform duration-300 group-hover:scale-110"
+                >
+                  <path d="M15 3h6v6" />
+                  <path d="M9 21H3v-6" />
+                  <path d="M21 3l-7 7" />
+                  <path d="M3 21l7-7" />
+                </svg>
+              </button>
             </div>
-            <InteractiveShowcase
-              items={project.interactiveShowcase}
-              sectionTitle={project.interactiveShowcaseTitle}
-            />
-          </div>
-        </section>
-      )}
 
-      {/* 7. CONTENT BLOCKS */}
-      {project.contentBlocks && project.contentBlocks.length > 0 && (
-        <section className="py-12 bg-white">
-          <div className="max-w-7xl mx-auto px-6 md:px-12">
-            <HomeContentBlocks
-              blocks={project.contentBlocks}
-              isMobile={isMobile}
-              imageBorderClass={imageBorderClass}
-            />
-          </div>
-        </section>
-      )}
-
-      {/* 8. MONOGRAPH PLATES GALLERY (Küratörlü Mimari Galeri) */}
-      {galleryMedia.length > 0 && (
-        <section className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[85vw] mx-auto px-4 md:px-8 lg:px-0 py-20">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 pb-6 border-b border-neutral-200 gap-4">
-            <div>
-              <span className="text-xs font-mono tracking-widest uppercase text-neutral-500">
-                {isTr ? 'MİMARİ PLAKALAR' : 'ARCHITECTURAL PLATES'}
-              </span>
-              <h3 className="text-2xl md:text-4xl font-light font-michroma text-neutral-900 mt-1">
-                {isTr ? 'Detay ve Mekan Galerisi' : 'Spatial & Detail Plates'}
-              </h3>
-            </div>
-            <p className="text-xs font-mono text-neutral-500">
-              {isTr ? 'Görsellere tıklayarak yüksek çözünürlükte inceleyin' : 'Click plates to view in full resolution'}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8">
-            {galleryMedia.map((m, i) => {
-              const patternIdx = i % 5
-              let colSpan = 'md:col-span-6'
-              if (patternIdx === 0) colSpan = 'md:col-span-12'
-              else if (patternIdx === 3) colSpan = 'md:col-span-8'
-              else if (patternIdx === 4) colSpan = 'md:col-span-4'
-
-              return (
-                <ScrollReveal key={i} delay={(i % 4) * 80}>
-                  <div
-                    className={`${colSpan} group relative rounded-none overflow-hidden bg-neutral-100 border border-neutral-300 hover:border-neutral-900 transition-all duration-500 cursor-pointer shadow-md hover:shadow-xl`}
-                    onClick={() => openFullscreen(m.url)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter' || e.key === ' ') openFullscreen(m.url)
-                    }}
-                  >
-                    <div className="relative aspect-[16/10] md:aspect-auto overflow-hidden">
-                      {m.type === 'image' && (
+            {/* Micro Thumbnail Grid for Instant Navigation */}
+            {allMedia.length > 1 && (
+              <div className="space-y-2 pt-2 border-t border-neutral-200">
+                <span className="text-[10px] font-mono tracking-widest text-neutral-600 font-semibold uppercase block">
+                  {isTr ? 'GÖRSEL İNDEKSİ' : 'IMAGE INDEX'}
+                </span>
+                <div className="grid grid-cols-6 gap-2">
+                  {allMedia.map((m, idx) => {
+                    const isActive = idx === activeMediaIndex
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => scrollToMediaItem(idx)}
+                        className={`relative aspect-[4/3] rounded-none overflow-hidden border transition-all duration-200 ${
+                          isActive
+                            ? 'border-2 border-black ring-1 ring-black scale-105 opacity-100 z-10'
+                            : 'border-neutral-300 opacity-40 hover:opacity-80'
+                        }`}
+                        title={`Görsel ${idx + 1}`}
+                      >
                         <OptimizedImage
                           src={m.url}
-                          srcMobile={m.urlMobile}
-                          srcDesktop={m.urlDesktop}
-                          alt={`${projectTitle} Plate ${i + 1}`}
-                          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                          crop={m.crop}
-                          hotspot={m.hotspot}
-                          origWidth={m.origWidth}
-                          origHeight={m.origHeight}
-                        />
-                      )}
-                      {m.type === 'video' && (
-                        <OptimizedVideo
-                          src={m.url}
-                          srcMobile={m.urlMobile}
-                          srcDesktop={m.urlDesktop}
+                          alt={`Thumbnail ${idx + 1}`}
                           className="w-full h-full object-cover"
-                          autoPlay
-                          loop
-                          muted
-                          playsInline
+                          quality={30}
                         />
-                      )}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
 
-                      {/* Hover Overlay */}
-                      <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <div className="p-3.5 rounded-none bg-white text-black shadow-2xl transform scale-75 group-hover:scale-100 transition-transform duration-300">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
-                          </svg>
-                        </div>
-                      </div>
+            {/* Prev / Next Quick Nav Strip */}
+            <div className="flex items-center justify-between pt-4 border-t border-neutral-200 text-xs font-mono uppercase tracking-widest text-neutral-600">
+              {prevProject ? (
+                <Link
+                  to={`/projects/${prevProject.id}`}
+                  className="hover:text-black transition-colors flex items-center gap-1.5"
+                >
+                  <span>←</span>
+                  <span className="truncate max-w-[140px]">{t(prevProject.title)}</span>
+                </Link>
+              ) : (
+                <span />
+              )}
+              {nextProject ? (
+                <Link
+                  to={`/projects/${nextProject.id}`}
+                  className="hover:text-black transition-colors flex items-center gap-1.5"
+                >
+                  <span className="truncate max-w-[140px]">{t(nextProject.title)}</span>
+                  <span>→</span>
+                </Link>
+              ) : (
+                <span />
+              )}
+            </div>
+          </aside>
 
-                      {/* Bottom Image Plate Tag */}
-                      <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-none bg-white/95 text-[10px] font-mono tracking-widest text-neutral-900 border border-neutral-300 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                        PLATE {String(i + 1).padStart(2, '0')}
-                      </div>
-                    </div>
+          {/* ============================================================ */}
+          {/* SAĞ PANEL (DEV MİMARİ PARALLAX GÖRSEL AKIŞI) */}
+          {/* ============================================================ */}
+          <section className="lg:col-span-7 space-y-12 lg:space-y-16">
+            {allMedia.map((m, i) => (
+              <ParallaxMediaCard
+                key={i}
+                media={m}
+                index={i}
+                total={allMedia.length}
+                year={year}
+                projectTitle={projectTitle}
+                onOpenFullscreen={openFullscreen}
+                onRegisterRef={el => {
+                  mediaItemRefs.current[i] = el
+                }}
+              />
+            ))}
+
+            {/* Interactive Showcase (varsa alt bölüme entegre) */}
+            {!isMobile &&
+              project?.interactiveShowcase &&
+              project.interactiveShowcase.length > 0 && (
+                <div className="py-8 bg-neutral-50 border border-neutral-200 p-6 rounded-none">
+                  <div className="mb-6 space-y-1">
+                    <span className="text-xs font-mono tracking-widest uppercase text-neutral-500">
+                      {isTr ? 'ÜRÜN ETKİLEŞİMİ' : 'FURNITURE DISCOVERY'}
+                    </span>
+                    <h3 className="text-xl md:text-2xl font-michroma font-light text-neutral-900">
+                      {project.interactiveShowcaseTitle
+                        ? t(project.interactiveShowcaseTitle)
+                        : isTr
+                          ? 'Projede Kullanılan Birim Tasarımları'
+                          : 'Birim Pieces in the Project'}
+                    </h3>
                   </div>
-                </ScrollReveal>
-              )
-            })}
-          </div>
-        </section>
-      )}
+                  <InteractiveShowcase
+                    items={project.interactiveShowcase}
+                    sectionTitle={project.interactiveShowcaseTitle}
+                  />
+                </div>
+              )}
 
-      {/* 9. PREV / NEXT MONOGRAPH NAVIGATOR (Beyaz Zemin) */}
-      <section className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[85vw] mx-auto px-4 md:px-8 lg:px-0 pt-16 border-t border-neutral-200">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Prev Project Card */}
-          {prevProject ? (
-            <Link
-              to={`/projects/${prevProject.id}`}
-              className="group relative flex flex-col justify-between p-8 rounded-none bg-white border border-neutral-300 hover:border-neutral-900 hover:shadow-xl transition-all duration-300"
-            >
-              <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-neutral-500 group-hover:text-neutral-900 uppercase transition-colors">
-                <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-                </svg>
-                <span>{isTr ? 'Önceki Proje' : 'Previous Project'}</span>
+            {/* Additional Content Blocks (varsa) */}
+            {project.contentBlocks && project.contentBlocks.length > 0 && (
+              <div className="py-6 border-t border-neutral-200">
+                <HomeContentBlocks
+                  blocks={project.contentBlocks}
+                  isMobile={isMobile}
+                  imageBorderClass={imageBorderClass}
+                />
               </div>
-              <div className="mt-6">
-                <h4 className="text-xl md:text-2xl font-michroma font-light text-neutral-800 group-hover:text-neutral-900 truncate">
-                  {t(prevProject.title)}
-                </h4>
-                {prevProject.date && (
-                  <p className="text-xs font-mono text-neutral-400 mt-1">{t(prevProject.date)}</p>
-                )}
-              </div>
-            </Link>
-          ) : (
-            <div />
-          )}
-
-          {/* Next Project Card */}
-          {nextProject ? (
-            <Link
-              to={`/projects/${nextProject.id}`}
-              className="group relative flex flex-col justify-between p-8 rounded-none bg-white border border-neutral-300 hover:border-neutral-900 hover:shadow-xl transition-all duration-300 text-right"
-            >
-              <div className="flex items-center justify-end gap-2 text-xs font-mono tracking-widest text-neutral-500 group-hover:text-neutral-900 uppercase transition-colors">
-                <span>{isTr ? 'Sonraki Proje' : 'Next Project'}</span>
-                <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-              <div className="mt-6">
-                <h4 className="text-xl md:text-2xl font-michroma font-light text-neutral-800 group-hover:text-neutral-900 truncate">
-                  {t(nextProject.title)}
-                </h4>
-                {nextProject.date && (
-                  <p className="text-xs font-mono text-neutral-400 mt-1">{t(nextProject.date)}</p>
-                )}
-              </div>
-            </Link>
-          ) : (
-            <div />
-          )}
+            )}
+          </section>
         </div>
-      </section>
+      </main>
 
       {/* Fullscreen Media Viewer */}
       {isFullscreenOpen && allMedia.length > 0 && (

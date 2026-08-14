@@ -372,7 +372,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                   e.stopPropagation()
                   onOpenFullscreen()
                 }}
-                className="md:hidden landscape:hidden flex-shrink-0 group pointer-events-auto flex h-10 w-10 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
+                className="md:hidden landscape:hidden flex-shrink-0 group pointer-events-auto flex h-8 w-8 items-center justify-center rounded-none border-[0.5px] border-white/80 bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
                 style={{
                   opacity: isFullscreenButtonVisible ? 1 : 0,
                   transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
@@ -395,7 +395,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                   strokeWidth="0.8"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="h-7 w-7"
+                  className="h-4 w-4"
                 >
                   <path d="M15 3h6v6" />
                   <path d="M9 21H3v-6" />
@@ -413,13 +413,13 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
             style={{bottom: 'max(16px, env(safe-area-inset-bottom, 0px) + 16px)'}}
           >
             <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex justify-end">
-              <div className="flex items-center gap-2 md:gap-4">
+              <div className="flex items-center gap-2 md:gap-3">
                 {slideCount > 1 && (
                   <>
                     <button
                       type="button"
                       onClick={onPrev}
-                      className="group pointer-events-auto flex h-8 w-8 md:h-14 md:w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                      className="group pointer-events-auto flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-none border-[0.5px] border-white/80 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
                       style={arrowInLeft}
                       aria-label="Previous hero slide"
                     >
@@ -429,11 +429,11 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                         height="24"
                         viewBox="0 0 24 24"
                         fill="none"
-                        stroke="currentColor"
-                        strokeWidth="0.4"
+                        stroke="#ffffff"
+                        strokeWidth="1.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="h-5 w-5 md:h-11 md:w-11 transition-transform duration-300 group-hover:-translate-x-1"
+                        className="h-4 w-4 md:h-5 md:w-5 transition-transform duration-300 group-hover:-translate-x-1 text-white"
                       >
                         <path d="M15 18l-6-6 6-6" />
                       </svg>
@@ -441,7 +441,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     <button
                       type="button"
                       onClick={onNext}
-                      className="group pointer-events-auto flex h-8 w-8 md:h-14 md:w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                      className="group pointer-events-auto flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-none border-[0.5px] border-white/80 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
                       style={arrowInRight}
                       aria-label="Next hero slide"
                     >
@@ -451,11 +451,11 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                         height="24"
                         viewBox="0 0 24 24"
                         fill="none"
-                        stroke="currentColor"
-                        strokeWidth="0.4"
+                        stroke="#ffffff"
+                        strokeWidth="1.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="h-5 w-5 md:h-11 md:w-11 transition-transform duration-300 group-hover:translate-x-1"
+                        className="h-4 w-4 md:h-5 md:w-5 transition-transform duration-300 group-hover:translate-x-1 text-white"
                       >
                         <path d="M9 18l6-6-6-6" />
                       </svg>
@@ -468,7 +468,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     e.stopPropagation()
                     onOpenFullscreen()
                   }}
-                  className="group pointer-events-auto flex h-8 w-8 md:h-14 md:w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                  className="group pointer-events-auto flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-none border-[0.5px] border-white/80 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
                   style={{
                     opacity: isFullscreenButtonVisible ? 1 : 0,
                     transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
@@ -487,11 +487,11 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     height="24"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="currentColor"
-                    strokeWidth="0.8"
+                    stroke="#ffffff"
+                    strokeWidth="1.2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="transition-transform duration-500 group-hover:scale-110 h-5 w-5 md:h-10 md:w-10"
+                    className="transition-transform duration-500 group-hover:scale-110 h-4 w-4 md:h-5 md:w-5 text-white"
                   >
                     <path d="M15 3h6v6" />
                     <path d="M9 21H3v-6" />

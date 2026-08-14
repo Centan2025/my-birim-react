@@ -747,13 +747,13 @@ export function ProjectDetailPageV1() {
             </div>
 
             {/* Bottom-Right Hero Navigation & Fullscreen Buttons */}
-            <div className="flex items-center gap-2 md:gap-4 pointer-events-none flex-shrink-0">
+            <div className="flex items-center gap-2 md:gap-3 pointer-events-none flex-shrink-0">
               {heroCount > 1 && (
                 <>
                   <button
                     type="button"
                     onClick={goToPrevHeroSlide}
-                    className="group pointer-events-auto flex h-8 w-8 md:h-12 md:w-12 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                    className="group pointer-events-auto flex h-8 w-8 md:h-10 md:w-10 items-center justify-center border-[0.5px] border-white/80 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
                     aria-label="Previous slide"
                   >
                     <svg
@@ -762,11 +762,11 @@ export function ProjectDetailPageV1() {
                       height="24"
                       viewBox="0 0 24 24"
                       fill="none"
-                      stroke="currentColor"
-                      strokeWidth="0.4"
+                      stroke="#ffffff"
+                      strokeWidth="1.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className="h-5 w-5 md:h-8 md:w-8 transition-transform duration-300 group-hover:-translate-x-1"
+                      className="h-4 w-4 md:h-5 md:w-5 transition-transform duration-300 group-hover:-translate-x-1 text-white"
                     >
                       <path d="M15 18l-6-6 6-6" />
                     </svg>
@@ -774,7 +774,7 @@ export function ProjectDetailPageV1() {
                   <button
                     type="button"
                     onClick={goToNextHeroSlide}
-                    className="group pointer-events-auto flex h-8 w-8 md:h-12 md:w-12 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                    className="group pointer-events-auto flex h-8 w-8 md:h-10 md:w-10 items-center justify-center border-[0.5px] border-white/80 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
                     aria-label="Next slide"
                   >
                     <svg
@@ -783,11 +783,11 @@ export function ProjectDetailPageV1() {
                       height="24"
                       viewBox="0 0 24 24"
                       fill="none"
-                      stroke="currentColor"
-                      strokeWidth="0.4"
+                      stroke="#ffffff"
+                      strokeWidth="1.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className="h-5 w-5 md:h-8 md:w-8 transition-transform duration-300 group-hover:translate-x-1"
+                      className="h-4 w-4 md:h-5 md:w-5 transition-transform duration-300 group-hover:translate-x-1 text-white"
                     >
                       <path d="M9 18l6-6-6-6" />
                     </svg>
@@ -809,7 +809,8 @@ export function ProjectDetailPageV1() {
                       setIdx(safeHeroIndex)
                       setIsFullscreenOpen(true)
                     }}
-                    className="pointer-events-auto flex h-8 w-8 md:h-12 md:w-12 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all hover:bg-white/10"
+                    className="group pointer-events-auto flex h-8 w-8 md:h-10 md:w-10 items-center justify-center border-[0.5px] border-white/80 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                    aria-label="Tam Ekran"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -817,9 +818,11 @@ export function ProjectDetailPageV1() {
                       height="24"
                       viewBox="0 0 24 24"
                       fill="none"
-                      stroke="currentColor"
-                      strokeWidth="0.8"
-                      className="h-5 w-5 md:h-8 md:w-8"
+                      stroke="#ffffff"
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="transition-transform duration-500 group-hover:scale-110 h-4 w-4 md:h-5 md:w-5 text-white"
                     >
                       <path d="M15 3h6v6" />
                       <path d="M9 21H3v-6" />

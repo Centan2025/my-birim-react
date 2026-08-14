@@ -95,7 +95,7 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
                 >
                   <span className="flex items-center gap-1.5">
                     {isCatActive && (
-                      <span className="w-1.5 h-1.5 bg-[#c5a059] rounded-full inline-block" />
+                      <span className="w-1.5 h-1.5 bg-black dark:bg-white rounded-none inline-block" />
                     )}
                     <span>{label}</span>
                   </span>

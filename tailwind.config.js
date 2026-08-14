@@ -14,6 +14,7 @@ export default {
         display: ['"Inter"', 'sans-serif'],
         sans: ['"Inter"', 'sans-serif'],
         accent: ['"Oswald"', 'sans-serif'],
+        oswald: ['"Oswald"', 'sans-serif'],
         jura: ['"Jura"', 'sans-serif'],
         michroma: ['"Michroma"', 'sans-serif'],
       },
