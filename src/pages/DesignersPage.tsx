@@ -139,7 +139,7 @@ export function DesignersPage() {
               <div className="w-full h-full overflow-hidden relative">
                 <OptimizedImage
                   alt={t(designer.name)}
-                  className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105 portrait-frame group-hover:grayscale-0"
+                  className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105 portrait-frame group-hover:grayscale-0 brightness-[1.08] contrast-[1.02]"
                   src={getImageUrl(designer)}
                   srcMobile={
                     typeof designer.image === 'object' ? designer.image.urlMobile : undefined
@@ -184,7 +184,7 @@ export function DesignersPage() {
                 />
 
                 {/* Refined Overlays */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-80 group-hover:opacity-40 transition-opacity duration-700"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-50 group-hover:opacity-25 transition-opacity duration-700"></div>
                 <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
               </div>
 
