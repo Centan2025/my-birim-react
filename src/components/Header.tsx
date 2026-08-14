@@ -90,7 +90,6 @@ export function Header() {
     return () => window.removeEventListener('scroll', update)
   }, [isDarkHero, headerHeight, location.pathname])
 
-
   // isDarkHero pages: white text at top, black after hero bottom boundary.
   // Standard pages: always dark text.
   // Search open: always dark text (white panel bg).
@@ -597,7 +596,6 @@ export function Header() {
     isDarkMode,
     isLightMode,
   })
-
 
   return (
     <>
