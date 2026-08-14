@@ -613,7 +613,7 @@ export function Header() {
         }}
       >
         <div
-          className={`${isOverlayMobileMenu || (isProductsOpen && !isMobile) ? '' : 'overflow-hidden'} ${
+          className={`${isOverlayMobileMenu ? '' : 'overflow-hidden'} ${
             // Header yüksekliği: mobil ve desktop için sabit yükseklik - her zaman
             isMobile
               ? 'h-[3.5rem] min-h-[3.5rem] max-h-[3.5rem]'
@@ -634,7 +634,7 @@ export function Header() {
             maxHeight:
               isMobileMenuOpen && !isOverlayMobileMenu ? '40rem' : isMobile ? '3.5rem' : '5rem',
             // Products dropdown için overflow visible
-            overflow: isProductsOpen && !isMobile ? 'visible' : undefined,
+            overflow: !isMobile ? 'visible' : undefined,
           }}
           ref={headerContainerRef}
         >

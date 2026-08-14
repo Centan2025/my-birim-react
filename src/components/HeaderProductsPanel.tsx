@@ -33,10 +33,10 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
   return (
     // Ürün kategorileri paneli - header içinde genişleyip daralır
     <div
-      className={`hidden lg:block transition-all duration-500 ease-in-out ${
+      className={`hidden lg:block overflow-hidden transition-[max-height,opacity,transform] duration-500 ease-in-out ${
         isOpen
           ? 'opacity-100 translate-y-0 max-h-[800px]'
-          : 'opacity-0 -translate-y-3 max-h-0 overflow-hidden pointer-events-none'
+          : 'opacity-0 -translate-y-4 max-h-0 pointer-events-none'
       }`}
       style={{
         backgroundColor: isLightMode ? 'rgba(238, 239, 242, 0.98)' : 'rgba(0, 0, 0, 0.85)',
