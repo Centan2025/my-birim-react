@@ -748,49 +748,51 @@ export function ProjectDetailPage() {
 
             {/* Bottom-Right Hero Navigation & Fullscreen Buttons */}
             <div className="flex items-center gap-2 md:gap-4 pointer-events-none flex-shrink-0">
-              {prevProject && (
-                <Link
-                  to={`/projects/${prevProject.id}`}
-                  className="group pointer-events-auto flex h-8 w-8 md:h-12 md:w-12 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
-                  aria-label="Previous project"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="0.4"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-5 w-5 md:h-8 md:w-8 transition-transform duration-300 group-hover:-translate-x-1"
+              {heroCount > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={goToPrevHeroSlide}
+                    className="group pointer-events-auto flex h-8 w-8 md:h-12 md:w-12 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                    aria-label="Previous slide"
                   >
-                    <path d="M15 18l-6-6 6-6" />
-                  </svg>
-                </Link>
-              )}
-              {nextProject && (
-                <Link
-                  to={`/projects/${nextProject.id}`}
-                  className="group pointer-events-auto flex h-8 w-8 md:h-12 md:w-12 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
-                  aria-label="Next project"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="0.4"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-5 w-5 md:h-8 md:w-8 transition-transform duration-300 group-hover:translate-x-1"
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="0.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-5 w-5 md:h-8 md:w-8 transition-transform duration-300 group-hover:-translate-x-1"
+                    >
+                      <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={goToNextHeroSlide}
+                    className="group pointer-events-auto flex h-8 w-8 md:h-12 md:w-12 items-center justify-center border-[0.5px] border-white/40 bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                    aria-label="Next slide"
                   >
-                    <path d="M9 18l6-6-6-6" />
-                  </svg>
-                </Link>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="0.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-5 w-5 md:h-8 md:w-8 transition-transform duration-300 group-hover:translate-x-1"
+                    >
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  </button>
+                </>
               )}
               {allMedia.length > 0 && (
                 <div
@@ -865,21 +867,6 @@ export function ProjectDetailPage() {
             )}
           </div>
 
-          <div className="flex-shrink-0 px-2">
-            <Link
-              to="/projects"
-              title={t('all_projects') || 'Tüm Projeler'}
-              aria-label={t('all_projects') || 'Tüm Projeler'}
-              className="flex items-center justify-center p-2 rounded hover:bg-white/10 transition-all duration-300 text-white/80 hover:text-white active:scale-95"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                <rect x="1" y="1" width="6" height="6" rx="1" />
-                <rect x="9" y="1" width="6" height="6" rx="1" />
-                <rect x="1" y="9" width="6" height="6" rx="1" />
-                <rect x="9" y="9" width="6" height="6" rx="1" />
-              </svg>
-            </Link>
-          </div>
 
           <div className="flex-1 min-w-0 flex justify-end">
             {nextProject ? (

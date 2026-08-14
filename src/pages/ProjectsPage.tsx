@@ -8,6 +8,7 @@ import {useTranslation} from '../i18n'
 import {Breadcrumbs} from '../components/Breadcrumbs'
 import {useProjects} from '../hooks/useProjects'
 import {useSEO} from '../hooks/useSEO'
+import {ProjectsV2VerticalView} from '../components/project/ProjectsV2VerticalView'
 
 /**
  * Architectural Horizontal Gallery Card with 3D Parallax Displacement
@@ -82,7 +83,7 @@ const ProjectHorizontalCard: React.FC<{
     <div
       ref={cardRef}
       data-project-card="true"
-      className="flex-shrink-0 w-full md:w-[84vw] lg:w-[78vw] max-w-[1450px] snap-center px-0 md:px-0 md:pr-5 mb-8 md:mb-0"
+      className="flex-shrink-0 w-full md:w-[min(84vw,calc((100vh-270px)*16/9))] lg:w-[min(78vw,calc((100vh-270px)*16/9))] max-w-[1450px] snap-center px-0 md:px-0 md:pr-5 mb-8 md:mb-0"
     >
       <Link
         to={`/projects/${project.id}`}
@@ -187,6 +188,22 @@ export function ProjectsPage() {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [scrollProgress, setScrollProgress] = useState(0)
 
+  // Layout View Version: 'v1' (Horizontal Parallax) or 'v2' (Vertical Editorial)
+  const [viewVersion, setViewVersion] = useState<'v1' | 'v2'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('birim_projects_view_version')
+      if (saved === 'v1' || saved === 'v2') return saved
+    }
+    return 'v1'
+  })
+
+  const handleVersionChange = (v: 'v1' | 'v2') => {
+    setViewVersion(v)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('birim_projects_view_version', v)
+    }
+  }
+
   // Mouse Drag & Smooth Inertia Scroll State
   const isDraggingRef = useRef(false)
   const startXRef = useRef(0)
@@ -204,8 +221,9 @@ export function ProjectsPage() {
     section: 'Projects',
   })
 
-  // Smooth Inertia Scroll & Window Event Listeners
+  // Smooth Inertia Scroll & Window Event Listeners (Only active in V1 view)
   useEffect(() => {
+    if (viewVersion !== 'v1') return
     const container = scrollContainerRef.current
     if (!container) return
 
@@ -238,8 +256,8 @@ export function ProjectsPage() {
     const handleWheel = (e: WheelEvent) => {
       const containerEl = scrollContainerRef.current
       if (!containerEl) return
-      const isHorizontal = containerEl.scrollWidth > containerEl.clientWidth + 10
-      if (!isHorizontal) return // Allow native vertical scroll when in mobile portrait mode
+      const isMobile = window.innerWidth < 768
+      if (isMobile) return // Allow native vertical scroll when in mobile portrait mode
 
       const targetEl = e.target as HTMLElement | null
 
@@ -265,8 +283,8 @@ export function ProjectsPage() {
         return
       }
       if (!isDraggingRef.current || !container) return
-      const isHorizontal = container.scrollWidth > container.clientWidth + 10
-      if (!isHorizontal) return
+      const isMobile = window.innerWidth < 768
+      if (isMobile) return
 
       e.preventDefault()
       const x = e.pageX - container.offsetLeft
@@ -285,8 +303,8 @@ export function ProjectsPage() {
     const handleTouchStart = (e: TouchEvent) => {
       const containerEl = scrollContainerRef.current
       if (!containerEl) return
-      const isHorizontal = containerEl.scrollWidth > containerEl.clientWidth + 10
-      if (!isHorizontal) return
+      const isMobile = window.innerWidth < 768
+      if (isMobile) return
 
       const touch = e.touches[0]
       if (touch) {
@@ -301,8 +319,8 @@ export function ProjectsPage() {
     const handleTouchMove = (e: TouchEvent) => {
       const containerEl = scrollContainerRef.current
       if (!isDraggingRef.current || !containerEl) return
-      const isHorizontal = containerEl.scrollWidth > containerEl.clientWidth + 10
-      if (!isHorizontal) return
+      const isMobile = window.innerWidth < 768
+      if (isMobile) return
 
       const touch = e.touches[0]
       if (touch) {
@@ -343,7 +361,7 @@ export function ProjectsPage() {
       window.removeEventListener('touchmove', handleTouchMove)
       window.removeEventListener('touchend', handleTouchEnd)
     }
-  }, [projects])
+  }, [projects, viewVersion, loading])
 
   // Track scroll progress
   const handleScroll = () => {
@@ -404,135 +422,176 @@ export function ProjectsPage() {
   )
 
   return (
-    <div className="bg-[var(--bg-primary)] min-h-screen animate-fade-in-up-subtle pt-20 md:pt-16 lg:pt-20 selection:bg-primary selection:text-black flex flex-col justify-between overflow-x-hidden">
-      {/* Top Section: Breadcrumb & Title */}
-      <div>
-        {/* Breadcrumb Band */}
-        <div className="w-full relative z-20">
-          <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-3 text-gray-400">
-            <Breadcrumbs
-              items={[{label: t('homepage'), to: '/'}, {label: t('projects') || 'Projeler'}]}
-            />
-          </div>
-        </div>
-
-        {/* Sayfa Başlığı (Ortalanmış) */}
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-2 md:pt-6 pb-6 md:pb-8 text-center">
-          <motion.div
-            initial={{opacity: 0, y: 15}}
-            animate={{opacity: 1, y: 0}}
-            transition={{duration: 0.8, ease: 'easeOut'}}
-          >
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight uppercase text-center">
-              {t('projects') || 'Projeler'}
-            </h1>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* Exhibition Gallery Stream (Vertical on Mobile, Horizontal Runway on Desktop) */}
-      <div className="w-full my-auto py-4">
-        {projects.length > 0 ? (
-          /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */
-          <div
-            ref={scrollContainerRef}
-            onScroll={handleScroll}
-            onMouseDown={handleMouseDown}
-            onDragStart={e => e.preventDefault()}
-            className="w-full max-w-[95%] sm:max-w-[92%] md:max-w-none mx-auto flex flex-col md:flex-row items-center overflow-y-visible md:overflow-x-auto scrollbar-none px-0 md:pl-[calc(4%+32px)] lg:pl-[10vw] md:pr-[10vw] py-4 cursor-default md:cursor-grab active:md:cursor-grabbing select-none"
-            style={{
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-              WebkitOverflowScrolling: 'touch',
-            }}
-          >
-            {projects.map(project => (
-              <ProjectHorizontalCard
-                key={project.id}
-                project={project}
-                total={projects.length}
-                scrollContainerRef={scrollContainerRef}
-                hasDraggedRef={hasDraggedRef}
+    <>
+      {viewVersion === 'v2' ? (
+        <ProjectsV2VerticalView projects={projects} />
+      ) : (
+        <div className="bg-[var(--bg-primary)] min-h-screen md:h-screen md:max-h-screen animate-fade-in-up-subtle pt-20 md:pt-20 lg:pt-20 selection:bg-primary selection:text-black flex flex-col justify-between overflow-x-hidden md:overflow-hidden">
+          {/* Top Section: Breadcrumb & Title */}
+          <div className="flex-shrink-0">
+            {/* Breadcrumb Section */}
+            <div className="relative z-20 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 text-gray-400">
+              <Breadcrumbs
+                items={[{label: t('homepage'), to: '/'}, {label: t('projects') || 'Projeler'}]}
               />
-            ))}
-          </div>
-        ) : (
-          <div className="py-24 text-center">
-            <p className="text-[var(--text-secondary)] text-lg italic font-light tracking-widest">
-              {t('project_not_found')}
-            </p>
-          </div>
-        )}
-      </div>
+            </div>
 
-      {/* Bottom Navigation & Segmented Dash Progress Bar (Desktop Only) */}
-      <div className="hidden md:block w-full py-5 md:py-6 bg-zinc-950/90 backdrop-blur-md border-t border-zinc-800 mt-auto">
-        <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex items-center justify-center relative">
-          {/* Centered Segmented Dash Bar */}
-          <div className="w-full max-w-md flex items-center justify-center gap-2.5 py-2 mx-auto">
-            {projects.map((p, idx) => {
-              const isActive = idx === activeIndex
-              const isPast = idx < activeIndex
-              return (
+            {/* Header Section */}
+            <header className="relative z-10 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-4 md:pt-12 pb-12 text-center">
+              <motion.div
+                initial={{opacity: 0, y: 20}}
+                animate={{opacity: 1, y: 0}}
+                transition={{duration: 1, ease: 'easeOut'}}
+              >
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-light text-[var(--text-primary)] tracking-tight text-center uppercase">
+                  {t('projects') || 'Projeler'}
+                </h1>
+              </motion.div>
+            </header>
+          </div>
+
+          {/* Exhibition Gallery Stream (Vertical on Mobile, Horizontal Runway on Desktop) */}
+          <div className="w-full flex-1 min-h-0 flex items-start">
+            {projects.length > 0 ? (
+              /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */
+              <div
+                ref={scrollContainerRef}
+                onScroll={handleScroll}
+                onMouseDown={handleMouseDown}
+                onWheel={e => {
+                  if (window.innerWidth >= 768) {
+                    const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX
+                    targetScrollLeftRef.current += delta * 2.2
+                  }
+                }}
+                onDragStart={e => e.preventDefault()}
+                className="w-full max-w-[95%] sm:max-w-[92%] md:max-w-none mx-auto flex flex-col md:flex-row items-start overflow-y-visible md:overflow-x-auto scrollbar-none px-0 md:pl-[calc(4%+32px)] lg:pl-[10vw] md:pr-[10vw] pt-0 pb-4 cursor-default md:cursor-grab active:md:cursor-grabbing select-none"
+                style={{
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                  WebkitOverflowScrolling: 'touch',
+                }}
+              >
+                {projects.map(project => (
+                  <ProjectHorizontalCard
+                    key={project.id}
+                    project={project}
+                    total={projects.length}
+                    scrollContainerRef={scrollContainerRef}
+                    hasDraggedRef={hasDraggedRef}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="py-24 text-center">
+                <p className="text-[var(--text-secondary)] text-lg italic font-light tracking-widest">
+                  {t('project_not_found')}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Bottom Navigation & Segmented Dash Progress Bar (Desktop Only) */}
+          <div className="hidden md:block flex-shrink-0 w-full py-4 md:py-4 bg-zinc-950/90 backdrop-blur-md border-t border-zinc-800 mt-auto">
+            <div className="w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex items-center justify-center relative">
+              {/* Centered Segmented Dash Bar */}
+              <div className="w-full max-w-md flex items-center justify-center gap-2.5 py-2 mx-auto">
+                {projects.map((p, idx) => {
+                  const isActive = idx === activeIndex
+                  const isPast = idx < activeIndex
+                  return (
+                    <button
+                      key={p.id || idx}
+                      onClick={() => scrollToProjectIndex(idx)}
+                      className={`flex-1 rounded-full transition-all duration-300 cursor-pointer ${
+                        isActive
+                          ? 'bg-white h-[4px] scale-y-125'
+                          : isPast
+                            ? 'bg-zinc-400 hover:bg-white h-[3px]'
+                            : 'bg-zinc-700 hover:bg-zinc-500 h-[3px]'
+                      }`}
+                      aria-label={`Project ${idx + 1}`}
+                    />
+                  )
+                })}
+              </div>
+
+              {/* Clean Flat Square Arrow Buttons (Right-aligned) */}
+              <div className="absolute right-0 flex items-center gap-2">
                 <button
-                  key={p.id || idx}
-                  onClick={() => scrollToProjectIndex(idx)}
-                  className={`flex-1 rounded-full transition-all duration-300 cursor-pointer ${
-                    isActive
-                      ? 'bg-white h-[4px] scale-y-125'
-                      : isPast
-                        ? 'bg-zinc-400 hover:bg-white h-[3px]'
-                        : 'bg-zinc-700 hover:bg-zinc-500 h-[3px]'
-                  }`}
-                  aria-label={`Project ${idx + 1}`}
-                />
-              )
-            })}
-          </div>
-
-          {/* Clean Flat Square Arrow Buttons (Right-aligned) */}
-          <div className="absolute right-0 flex items-center gap-2">
-            <button
-              onClick={scrollLeft}
-              className="w-10 h-10 bg-zinc-900 hover:bg-white text-zinc-300 hover:text-black border border-zinc-700 hover:border-white flex items-center justify-center transition-all duration-300 active:scale-95 group"
-              aria-label="Scroll left"
-            >
-              <svg
-                className="w-4 h-4 transition-transform group-hover:-translate-x-0.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-            <button
-              onClick={scrollRight}
-              className="w-10 h-10 bg-zinc-900 hover:bg-white text-zinc-300 hover:text-black border border-zinc-700 hover:border-white flex items-center justify-center transition-all duration-300 active:scale-95 group"
-              aria-label="Scroll right"
-            >
-              <svg
-                className="w-4 h-4 transition-transform group-hover:translate-x-0.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
+                  onClick={scrollLeft}
+                  className="w-10 h-10 bg-zinc-900 hover:bg-white text-zinc-300 hover:text-black border border-zinc-700 hover:border-white flex items-center justify-center transition-all duration-300 active:scale-95 group"
+                  aria-label="Scroll left"
+                >
+                  <svg
+                    className="w-4 h-4 transition-transform group-hover:-translate-x-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+                <button
+                  onClick={scrollRight}
+                  className="w-10 h-10 bg-zinc-900 hover:bg-white text-zinc-300 hover:text-black border border-zinc-700 hover:border-white flex items-center justify-center transition-all duration-300 active:scale-95 group"
+                  aria-label="Scroll right"
+                >
+                  <svg
+                    className="w-4 h-4 transition-transform group-hover:translate-x-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
+      )}
+
+      {/* Floating Version Comparison Switcher (V1 / V2) */}
+      <div className="fixed bottom-6 right-6 z-50 flex items-center gap-1.5 bg-zinc-950/90 backdrop-blur-lg border border-white/20 p-1.5 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.6)] select-none">
+        <span className="text-[10px] font-mono uppercase tracking-widest text-white/50 pl-2 pr-1 hidden sm:inline-block">
+          Görünüm:
+        </span>
+        <button
+          type="button"
+          onClick={() => handleVersionChange('v1')}
+          className={`px-3 py-1.5 rounded-full text-xs font-mono transition-all duration-300 ${
+            viewVersion === 'v1'
+              ? 'bg-white text-black font-bold shadow-md'
+              : 'text-white/70 hover:text-white hover:bg-white/10'
+          }`}
+          title="V1 - Yatay Parallax Galeri"
+        >
+          V1 (Yatay)
+        </button>
+        <button
+          type="button"
+          onClick={() => handleVersionChange('v2')}
+          className={`px-3 py-1.5 rounded-full text-xs font-mono transition-all duration-300 ${
+            viewVersion === 'v2'
+              ? 'bg-white text-black font-bold shadow-md'
+              : 'text-white/70 hover:text-white hover:bg-white/10'
+          }`}
+          title="V2 - Dikey Küratörlü Portfolyo"
+        >
+          V2 (Dikey)
+        </button>
       </div>
-    </div>
+    </>
   )
 }
