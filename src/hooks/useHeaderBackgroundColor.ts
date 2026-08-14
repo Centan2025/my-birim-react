@@ -42,7 +42,7 @@ export function useHeaderBackgroundColor({
 
     if (isProductsOpen && !isMobile) {
       if (isDarkMode || !effectiveIsLight) return 'rgba(0, 0, 0, 0.85)'
-      return 'rgba(255, 255, 255, 0.95)'
+      return 'rgba(238, 239, 242, 0.98)'
     }
 
     // Üstte koyu hero görseli bulunmayan sayfalar (Tasarımcılar, Haberler vb.):

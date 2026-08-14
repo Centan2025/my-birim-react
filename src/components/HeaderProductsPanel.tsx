@@ -41,7 +41,7 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
       style={{
         backgroundColor: isOpen
           ? isLightMode
-            ? 'rgba(255, 255, 255, 0.95)'
+            ? 'rgba(238, 239, 242, 0.98)'
             : 'rgba(0, 0, 0, 0.85)'
           : 'transparent',
         backdropFilter: isOpen ? 'blur(16px)' : 'none',
