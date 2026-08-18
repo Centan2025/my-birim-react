@@ -111,7 +111,7 @@ export const getSiteSettings = async (): Promise<SiteSettings> => {
   if (useSanity && sanity) {
     try {
       const q = groq`*[_type == "siteSettings" && !(_id in path("drafts.**"))] | order(_updatedAt desc)[0]{ ..., logo, logoR2 }`
-      const s = await sanity.fetch(q)
+      const s = await sanity.fetch(q, {}, {useCdn: false})
       return {
         logoUrl: s?.logoR2?.url || (s?.logo ? mapImage(s.logo) : s?.logoUrl || ''),
         topBannerText: s?.topBannerText || '',

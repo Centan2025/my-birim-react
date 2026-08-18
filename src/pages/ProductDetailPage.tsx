@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {useState, useEffect} from 'react'
+import {useState, useEffect, startTransition} from 'react'
 import {useParams, useNavigate} from 'react-router-dom'
 import {useAuth} from '../context/AuthContext'
 import {PageLoading} from '../components/LoadingSpinner'
@@ -391,12 +391,14 @@ export function ProductDetailPage() {
                     return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : ''
                   }}
                   openPanelLightbox={idx => {
-                    setLightboxSource('panel')
-                    const panelMedia =
-                      Array.isArray(product.bottomMedia) && product.bottomMedia.length > 0
-                        ? product.bottomMedia
-                        : product.media || []
-                    mediaLightbox.open(panelMedia as any, idx)
+                    startTransition(() => {
+                      setLightboxSource('panel')
+                      const panelMedia =
+                        Array.isArray(product.bottomMedia) && product.bottomMedia.length > 0
+                          ? product.bottomMedia
+                          : product.media || []
+                      mediaLightbox.open(panelMedia as any, idx)
+                    })
                   }}
                   t={t}
                 />

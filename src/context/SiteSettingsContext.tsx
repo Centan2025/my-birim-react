@@ -28,7 +28,8 @@ export const SiteSettingsProvider = ({children}: PropsWithChildren) => {
   } = useQuery({
     queryKey: ['siteSettings'],
     queryFn: getSiteSettings,
-    staleTime: 1000 * 60 * 30, // 30 dakika cache
+    staleTime: 1000 * 30, // 30 saniye cache (bakım modu ve ayarlar anında yansısın)
+    refetchOnWindowFocus: true,
   })
 
   useEffect(() => {

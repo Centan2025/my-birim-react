@@ -83,7 +83,14 @@ const AppContent = () => {
   const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '')
   let bypassParam = searchParams.get('bypass') || hashParams.get('bypass')
 
-  if (bypassParam && allowedBypassSecrets.includes(bypassParam)) {
+  if (bypassParam === 'clear' || bypassParam === 'off' || bypassParam === 'false') {
+    try {
+      sessionStorage.removeItem('maintenance_bypass')
+      bypassParam = null
+    } catch {
+      // ignore
+    }
+  } else if (bypassParam && allowedBypassSecrets.includes(bypassParam)) {
     try {
       sessionStorage.setItem('maintenance_bypass', bypassParam)
     } catch {

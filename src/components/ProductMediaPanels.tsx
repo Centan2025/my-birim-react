@@ -1,3 +1,4 @@
+import {startTransition} from 'react'
 import {OptimizedImage} from './OptimizedImage'
 import ScrollReveal from './ScrollReveal'
 import type {LocalizedString, Product, R2ImageMetadata} from '../types'
@@ -65,8 +66,13 @@ export function ProductMediaPanels({
           {media.map((m, idx) => (
             <div key={idx} className="overflow-hidden">
               <button
-                onClick={() => openPanelLightbox(idx)}
-                className="relative w-full aspect-video bg-gray-200 flex items-center justify-center"
+                type="button"
+                onClick={() => {
+                  startTransition(() => {
+                    openPanelLightbox(idx)
+                  })
+                }}
+                className="relative w-full aspect-video bg-gray-200 flex items-center justify-center cursor-pointer"
               >
                 {m.type === 'image' ? (
                   <OptimizedImage
