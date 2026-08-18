@@ -196,7 +196,9 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         }
         @media (min-width: 1024px) {
           img.responsive-crop-pos,
-          picture.responsive-crop-pos img {
+          picture.responsive-crop-pos img,
+          .responsive-crop-inner img,
+          .responsive-crop-inner picture img {
             object-fit: var(--img-object-fit-desktop, var(--img-object-fit, cover)) !important;
             object-position: var(--obj-pos-desktop, center) !important;
             clip-path: var(--clip-desktop, none) !important;
@@ -256,13 +258,15 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           max-width: none !important;
           max-height: none !important;
           object-fit: cover !important;
-          object-position: center !important;
+          object-position: var(--obj-pos-desktop, center) !important;
           display: block !important;
         }
 
         @media (max-width: 1023px) {
           img.responsive-crop-pos,
-          picture.responsive-crop-pos img {
+          picture.responsive-crop-pos img,
+          .responsive-crop-inner img,
+          .responsive-crop-inner picture img {
             object-fit: var(--img-object-fit-mobile, var(--img-object-fit, cover)) !important;
             object-position: var(--obj-pos-mobile, var(--obj-pos-desktop, center)) !important;
           }
@@ -603,9 +607,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const useClientCrop = hasCrop
 
   const mapFocalCoord = (val: number): number => {
-    if (val <= 0.15) return 0
-    if (val >= 0.8) return 100
-    return Math.round(((val - 0.15) / (0.8 - 0.15)) * 100)
+    return Math.min(100, Math.max(0, Math.round(val * 100)))
   }
 
   const activeHsDesktop = hotspotDesktop || hotspot
@@ -616,14 +618,18 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   ) {
     const posX = `${mapFocalCoord(activeHsDesktop.x)}%`
     const posY = `${mapFocalCoord(activeHsDesktop.y)}%`
+    const imgStyleRecord = imgStyle as Record<string, string | number | undefined>
     customStyle['--obj-pos-desktop'] = `${posX} ${posY}`
+    imgStyleRecord['--obj-pos-desktop'] = `${posX} ${posY}`
     imgStyle.objectPosition = `${posX} ${posY}`
   } else if (normalizedCropDesktop) {
     const centerX = (normalizedCropDesktop.x + normalizedCropDesktop.width / 2) * 100
     const centerY = (normalizedCropDesktop.y + normalizedCropDesktop.height / 2) * 100
     const posX = `${centerX.toFixed(2)}%`
     const posY = `${centerY.toFixed(2)}%`
+    const imgStyleRecord = imgStyle as Record<string, string | number | undefined>
     customStyle['--obj-pos-desktop'] = `${posX} ${posY}`
+    imgStyleRecord['--obj-pos-desktop'] = `${posX} ${posY}`
     imgStyle.objectPosition = `${posX} ${posY}`
   }
 
@@ -645,11 +651,15 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   ) {
     const posX = `${mapFocalCoord(activeHsMobile.x)}%`
     const posY = `${mapFocalCoord(activeHsMobile.y)}%`
+    const imgStyleRecord = imgStyle as Record<string, string | number | undefined>
     customStyle['--obj-pos-mobile'] = `${posX} ${posY}`
+    imgStyleRecord['--obj-pos-mobile'] = `${posX} ${posY}`
   } else if (normalizedCropMobile) {
     const centerX = (normalizedCropMobile.x + normalizedCropMobile.width / 2) * 100
     const centerY = (normalizedCropMobile.y + normalizedCropMobile.height / 2) * 100
+    const imgStyleRecord = imgStyle as Record<string, string | number | undefined>
     customStyle['--obj-pos-mobile'] = `${centerX.toFixed(2)}% ${centerY.toFixed(2)}%`
+    imgStyleRecord['--obj-pos-mobile'] = `${centerX.toFixed(2)}% ${centerY.toFixed(2)}%`
   }
 
   if (normalizedCropMobile) {
@@ -706,8 +716,13 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     customStyle['--img-object-fit'] = 'cover'
   }
 
+  const isExplicitAutoHeight = classList.some(
+    (c: string) => c === 'h-auto' || c.includes('h-auto')
+  )
+
   const isCoverMode =
     !effectiveContain &&
+    !isExplicitAutoHeight &&
     (classList.some(
       (c: string) =>
         c.includes('h-full') ||
@@ -715,7 +730,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         (c.includes('h-') && !c.includes('h-auto')) ||
         c.includes('aspect-')
     ) ||
-      !!height)
+      (!!height && !width))
 
   const activeClientCrop = useClientCrop && hasCrop
 

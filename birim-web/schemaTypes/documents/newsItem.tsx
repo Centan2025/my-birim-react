@@ -145,7 +145,7 @@ export default defineType({
       type: 'array',
       fieldset: 'mediaGroup',
       description:
-        '💡 GÖRSEL ORAN ÖNERİSİ: Liste kartı kapak fotoğrafları için 4:3 (1200x900px) veya 3:2 (1200x800px) yatay editoryal oranlar; Manşet (Öne Çıkan) kartı için 16:9 (1920x1080px) yatay oran kullanılması tavsiye edilir.',
+        '💡 GÖRSEL ORAN ÖNERİSİ: Manşet & Detay Kapak için 16:9 (1920x1080px) veya 3:2 (1800x1200px); Liste Kartları için 16:9 veya 21:9 yatay sinematik format; Mobil için 4:3 (1200x900px) veya 1:1 kare format tavsiye edilir.',
       components: {
         input: BulkMediaUploadInput,
       },
@@ -181,7 +181,7 @@ export default defineType({
               type: 'boolean',
               initialValue: false,
               description:
-                'Bu görsel haber kapak fotoğrafı olur. 📐 Önerilen Oran: Liste kartı için 4:3 (1200x900px), Manşet kartı için 16:9 (1920x1080px).',
+                'Bu görsel haber kapak fotoğrafı olur. 📐 Önerilen Oran: Manşet ve Detay için 16:9 (1920x1080px) veya 3:2; Liste kartı için 16:9 / 21:9 yatay format.',
             }),
             defineField({
               name: 'imageR2',
@@ -189,7 +189,7 @@ export default defineType({
               type: 'r2Asset',
               fieldset: 'artDirection',
               description:
-                '📐 Önerilen Oran: 16:9 veya 4:3 yatay editoryal format (Örn: 1920x1080px veya 1200x900px).',
+                '📐 Önerilen Oran: 16:9 (1920x1080px) veya 3:2 (1800x1200px) yüksek çözünürlüklü yatay format.',
               hidden: ({parent}) => !!parent?.type && parent?.type !== 'image',
             }),
             defineField({
@@ -198,7 +198,7 @@ export default defineType({
               type: 'r2Asset',
               fieldset: 'artDirection',
               description:
-                '📐 Mobil ekranlar için önerilen oran: 4:3 veya 1:1 kare (Örn: 800x600px veya 800x800px).',
+                '📐 Mobil ekranlar için önerilen oran: 4:3 (1200x900px) veya 1:1 kare (1000x1000px).',
               hidden: ({parent}) => !!parent?.type && parent?.type !== 'image',
             }),
             defineField({
@@ -207,7 +207,7 @@ export default defineType({
               type: 'r2Asset',
               fieldset: 'artDirection',
               description:
-                '📐 Geniş ekranlar için önerilen oran: 16:9 sinematik yatay format (Örn: 1920x1080px).',
+                '📐 Geniş ekranlar için önerilen oran: 16:9 (1920x1080px) veya 21:9 sinematik yatay format.',
               hidden: ({parent}) => !!parent?.type && parent?.type !== 'image',
             }),
             defineField({

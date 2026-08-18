@@ -73,14 +73,18 @@ const MediaComponent: FC<{media: NewsMedia; onImageClick?: (url: string) => void
             width={1920}
             loading="lazy"
             quality={95}
-            crop={(media as any).crop}
-            hotspot={(media as any).hotspot}
-            origWidth={(media as any).origWidth}
-            origHeight={(media as any).origHeight}
-            cropMobile={(media as any).cropMobile}
-            hotspotMobile={(media as any).hotspotMobile}
-            origWidthMobile={(media as any).origWidthMobile}
-            origHeightMobile={(media as any).origHeightMobile}
+            crop={media.crop}
+            hotspot={media.hotspot}
+            origWidth={media.origWidth}
+            origHeight={media.origHeight}
+            cropMobile={media.cropMobile}
+            hotspotMobile={media.hotspotMobile}
+            origWidthMobile={media.origWidthMobile}
+            origHeightMobile={media.origHeightMobile}
+            cropDesktop={media.cropDesktop}
+            hotspotDesktop={media.hotspotDesktop}
+            origWidthDesktop={media.origWidthDesktop}
+            origHeightDesktop={media.origHeightDesktop}
           />
         </div>
       )
@@ -383,6 +387,18 @@ export function NewsDetailPage() {
                   height={1080}
                   loading="eager"
                   quality={95}
+                  crop={mainImageObj?.crop}
+                  hotspot={mainImageObj?.hotspot}
+                  origWidth={mainImageObj?.origWidth}
+                  origHeight={mainImageObj?.origHeight}
+                  cropMobile={mainImageObj?.cropMobile}
+                  hotspotMobile={mainImageObj?.hotspotMobile}
+                  origWidthMobile={mainImageObj?.origWidthMobile}
+                  origHeightMobile={mainImageObj?.origHeightMobile}
+                  cropDesktop={mainImageObj?.cropDesktop}
+                  hotspotDesktop={mainImageObj?.hotspotDesktop}
+                  origWidthDesktop={mainImageObj?.origWidthDesktop}
+                  origHeightDesktop={mainImageObj?.origHeightDesktop}
                 />
               </div>
             )}

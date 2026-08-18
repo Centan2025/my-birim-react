@@ -458,6 +458,7 @@ const mapProductRow = (r: Record<string, unknown>): Product => {
     description: r['description'] as LocalizedString,
     mainImage: mainImage as Product['mainImage'],
     media: mapProductMedia(r['media']),
+    bottomMedia: mapProductMedia(r['bottomMedia']),
     showMediaPanels: Boolean(r?.['showMediaPanels']),
     showHeroNavigation: Boolean(r?.['showHeroNavigation']),
     dimensionImages: mapDimensionImages(r?.['dimensionImages'] as unknown[]),
@@ -500,6 +501,10 @@ const mapProductRow = (r: Record<string, unknown>): Product => {
 const productQueryString = `
   "id": id.current, name, year, sortOrder, isPublished, description, 
   media[]{ 
+    type, url, image, imageMobile, imageR2, imageMobileR2, imageDesktopR2, cropMobile, hotspotMobile, title, description, link, linkText, 
+    videoFileR2, videoFileMobileR2, videoFileDesktopR2, isCover, isMirrored 
+  },
+  bottomMedia[]{ 
     type, url, image, imageMobile, imageR2, imageMobileR2, imageDesktopR2, cropMobile, hotspotMobile, title, description, link, linkText, 
     videoFileR2, videoFileMobileR2, videoFileDesktopR2, isCover, isMirrored 
   },

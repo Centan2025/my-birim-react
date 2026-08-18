@@ -374,6 +374,46 @@ export function NewsPage() {
                         ? (featuredArticle.mainImage.origHeight as number)
                         : undefined
                     }
+                    cropMobile={
+                      typeof featuredArticle.mainImage === 'object'
+                        ? featuredArticle.mainImage.cropMobile
+                        : undefined
+                    }
+                    hotspotMobile={
+                      typeof featuredArticle.mainImage === 'object'
+                        ? featuredArticle.mainImage.hotspotMobile
+                        : undefined
+                    }
+                    origWidthMobile={
+                      typeof featuredArticle.mainImage === 'object'
+                        ? featuredArticle.mainImage.origWidthMobile
+                        : undefined
+                    }
+                    origHeightMobile={
+                      typeof featuredArticle.mainImage === 'object'
+                        ? featuredArticle.mainImage.origHeightMobile
+                        : undefined
+                    }
+                    cropDesktop={
+                      typeof featuredArticle.mainImage === 'object'
+                        ? featuredArticle.mainImage.cropDesktop
+                        : undefined
+                    }
+                    hotspotDesktop={
+                      typeof featuredArticle.mainImage === 'object'
+                        ? featuredArticle.mainImage.hotspotDesktop
+                        : undefined
+                    }
+                    origWidthDesktop={
+                      typeof featuredArticle.mainImage === 'object'
+                        ? featuredArticle.mainImage.origWidthDesktop
+                        : undefined
+                    }
+                    origHeightDesktop={
+                      typeof featuredArticle.mainImage === 'object'
+                        ? featuredArticle.mainImage.origHeightDesktop
+                        : undefined
+                    }
                   />
                 </div>
 
@@ -454,6 +494,46 @@ export function NewsPage() {
                       origHeight={
                         typeof item.mainImage === 'object'
                           ? (item.mainImage.origHeight as number)
+                          : undefined
+                      }
+                      cropMobile={
+                        typeof item.mainImage === 'object'
+                          ? item.mainImage.cropMobile
+                          : undefined
+                      }
+                      hotspotMobile={
+                        typeof item.mainImage === 'object'
+                          ? item.mainImage.hotspotMobile
+                          : undefined
+                      }
+                      origWidthMobile={
+                        typeof item.mainImage === 'object'
+                          ? item.mainImage.origWidthMobile
+                          : undefined
+                      }
+                      origHeightMobile={
+                        typeof item.mainImage === 'object'
+                          ? item.mainImage.origHeightMobile
+                          : undefined
+                      }
+                      cropDesktop={
+                        typeof item.mainImage === 'object'
+                          ? item.mainImage.cropDesktop
+                          : undefined
+                      }
+                      hotspotDesktop={
+                        typeof item.mainImage === 'object'
+                          ? item.mainImage.hotspotDesktop
+                          : undefined
+                      }
+                      origWidthDesktop={
+                        typeof item.mainImage === 'object'
+                          ? item.mainImage.origWidthDesktop
+                          : undefined
+                      }
+                      origHeightDesktop={
+                        typeof item.mainImage === 'object'
+                          ? item.mainImage.origHeightDesktop
                           : undefined
                       }
                     />

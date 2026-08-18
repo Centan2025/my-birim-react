@@ -358,6 +358,24 @@ export interface Product {
     isMirroredMobile?: boolean
     isMirroredDesktop?: boolean
   }[]
+  /** Bottom media panels (Alt Medya Panelleri) */
+  bottomMedia?: {
+    type: 'image' | 'video' | 'youtube'
+    url: string
+    urlMobile?: string
+    urlDesktop?: string
+    title?: LocalizedString
+    description?: LocalizedString
+    link?: string
+    linkText?: LocalizedString
+    crop?: R2ImageMetadata['crop']
+    hotspot?: R2ImageMetadata['hotspot']
+    origWidth?: number
+    origHeight?: number
+    isMirrored?: boolean
+    isMirroredMobile?: boolean
+    isMirroredDesktop?: boolean
+  }[]
   /** Custom title for the bottom media section */
   mediaSectionTitle?: LocalizedString
   /** Custom text/description for the bottom media section */
@@ -833,6 +851,14 @@ export interface NewsItem {
         hotspot?: R2ImageMetadata['hotspot']
         origWidth?: number
         origHeight?: number
+        cropMobile?: R2ImageMetadata['crop']
+        hotspotMobile?: R2ImageMetadata['hotspot']
+        origWidthMobile?: number
+        origHeightMobile?: number
+        cropDesktop?: R2ImageMetadata['crop']
+        hotspotDesktop?: R2ImageMetadata['hotspot']
+        origWidthDesktop?: number
+        origHeightDesktop?: number
       }
   /** Array of media items (images, videos) within the article. */
   media: NewsMedia[]
@@ -882,6 +908,14 @@ export interface NewsMedia {
   origWidth?: number
   /** Original Height */
   origHeight?: number
+  cropMobile?: R2ImageMetadata['crop']
+  hotspotMobile?: R2ImageMetadata['hotspot']
+  origWidthMobile?: number
+  origHeightMobile?: number
+  cropDesktop?: R2ImageMetadata['crop']
+  hotspotDesktop?: R2ImageMetadata['hotspot']
+  origWidthDesktop?: number
+  origHeightDesktop?: number
   isCover?: boolean
 }
 

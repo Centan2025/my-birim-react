@@ -377,8 +377,8 @@ export function ProductDetailPage() {
                 : 'opacity-100 translate-y-0 delay-200'
             }`}
           >
-            {Array.isArray(product?.media) &&
-              product.media.length > 0 &&
+            {((Array.isArray(product?.bottomMedia) && product.bottomMedia.length > 0) ||
+              (Array.isArray(product?.media) && product.media.length > 0)) &&
               product.showMediaPanels !== false && (
                 <ProductMediaPanels
                   product={product}
@@ -392,7 +392,11 @@ export function ProductDetailPage() {
                   }}
                   openPanelLightbox={idx => {
                     setLightboxSource('panel')
-                    mediaLightbox.open((product.media || []) as any, idx)
+                    const panelMedia =
+                      Array.isArray(product.bottomMedia) && product.bottomMedia.length > 0
+                        ? product.bottomMedia
+                        : product.media || []
+                    mediaLightbox.open(panelMedia as any, idx)
                   }}
                   t={t}
                 />

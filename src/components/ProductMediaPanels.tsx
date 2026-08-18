@@ -23,6 +23,7 @@ interface ProductMediaItem {
 
 interface ProductWithMedia extends Product {
   media?: ProductMediaItem[]
+  bottomMedia?: ProductMediaItem[]
   mediaSectionTitle?: LocalizedString | string
 }
 
@@ -41,11 +42,16 @@ export function ProductMediaPanels({
   openPanelLightbox,
   t,
 }: ProductMediaPanelsProps) {
-  if (!Array.isArray(product?.media) || product.media.length === 0) {
+  const media =
+    Array.isArray(product?.bottomMedia) && product.bottomMedia.length > 0
+      ? product.bottomMedia
+      : Array.isArray(product?.media) && product.media.length > 0
+        ? product.media
+        : []
+
+  if (media.length === 0) {
     return null
   }
-
-  const media = product.media || []
   const sectionTitle =
     product?.mediaSectionTitle && String(product.mediaSectionTitle).trim().length > 0
       ? t(product.mediaSectionTitle)

@@ -44,8 +44,28 @@ const mapMediaArray = (mediaArrRaw: unknown): unknown[] => {
         url = (m['url'] as string) || ''
       }
 
-      const metadata = mapR2Metadata(m)
-      const result: Record<string, unknown> = {type, url, caption: m['caption'], ...metadata}
+      const metadata = mapR2Metadata(m['imageR2'] || m['image'] || m)
+      const mobMetadata = m['imageMobileR2'] ? mapR2Metadata(m['imageMobileR2']) : {}
+      const deskMetadata = m['imageDesktopR2'] ? mapR2Metadata(m['imageDesktopR2']) : {}
+
+      const result: Record<string, unknown> = {
+        type,
+        url,
+        caption: m['caption'],
+        ...metadata,
+        cropMobile: mobMetadata.crop || metadata.cropMobile || metadata.crop,
+        hotspotMobile: mobMetadata.hotspot || metadata.hotspotMobile || metadata.hotspot,
+        origWidthMobile:
+          mobMetadata.origWidth || metadata.origWidthMobile || metadata.origWidth,
+        origHeightMobile:
+          mobMetadata.origHeight || metadata.origHeightMobile || metadata.origHeight,
+        cropDesktop: deskMetadata.crop || metadata.cropDesktop || metadata.crop,
+        hotspotDesktop: deskMetadata.hotspot || metadata.hotspotDesktop || metadata.hotspot,
+        origWidthDesktop:
+          deskMetadata.origWidth || metadata.origWidthDesktop || metadata.origWidth,
+        origHeightDesktop:
+          deskMetadata.origHeight || metadata.origHeightDesktop || metadata.origHeight,
+      }
       if (urlMobile && urlMobile !== url) result['urlMobile'] = urlMobile
       if (urlDesktop && urlDesktop !== url) result['urlDesktop'] = urlDesktop
       result['isCover'] = !!m['isCover']
@@ -85,10 +105,25 @@ const mapNewsRow = (r: Record<string, unknown>): NewsItem => {
       url = (coverItem['url'] as string) || ''
     }
 
-    const metadata = mapR2Metadata(coverItem)
+    const metadata = mapR2Metadata(coverItem['imageR2'] || coverItem['image'] || coverItem)
+    const mobMetadata = coverItem['imageMobileR2'] ? mapR2Metadata(coverItem['imageMobileR2']) : {}
+    const deskMetadata = coverItem['imageDesktopR2'] ? mapR2Metadata(coverItem['imageDesktopR2']) : {}
+
     mainImage = {
       url,
       ...metadata,
+      cropMobile: mobMetadata.crop || metadata.cropMobile || metadata.crop,
+      hotspotMobile: mobMetadata.hotspot || metadata.hotspotMobile || metadata.hotspot,
+      origWidthMobile:
+        mobMetadata.origWidth || metadata.origWidthMobile || metadata.origWidth,
+      origHeightMobile:
+        mobMetadata.origHeight || metadata.origHeightMobile || metadata.origHeight,
+      cropDesktop: deskMetadata.crop || metadata.cropDesktop || metadata.crop,
+      hotspotDesktop: deskMetadata.hotspot || metadata.hotspotDesktop || metadata.hotspot,
+      origWidthDesktop:
+        deskMetadata.origWidth || metadata.origWidthDesktop || metadata.origWidth,
+      origHeightDesktop:
+        deskMetadata.origHeight || metadata.origHeightDesktop || metadata.origHeight,
     }
     if (urlMobile && urlMobile !== url) mainImage['urlMobile'] = urlMobile
     if (urlDesktop && urlDesktop !== url) mainImage['urlDesktop'] = urlDesktop

@@ -104,14 +104,18 @@ export const getDesigners = async (): Promise<Designer[]> => {
           urlMobile: imageMobile && imageMobile !== imageFinal ? imageMobile : undefined,
           urlDesktop: imageDesktop && imageDesktop !== imageFinal ? imageDesktop : undefined,
           ...metadata,
-          cropMobile: mobMetadata.crop,
-          hotspotMobile: mobMetadata.hotspot,
-          origWidthMobile: mobMetadata.origWidth,
-          origHeightMobile: mobMetadata.origHeight,
-          cropDesktop: deskMetadata.crop,
-          hotspotDesktop: deskMetadata.hotspot,
-          origWidthDesktop: deskMetadata.origWidth,
-          origHeightDesktop: deskMetadata.origHeight,
+          cropMobile: mobMetadata.crop || metadata.cropMobile || metadata.crop,
+          hotspotMobile: mobMetadata.hotspot || metadata.hotspotMobile || metadata.hotspot,
+          origWidthMobile:
+            mobMetadata.origWidth || metadata.origWidthMobile || metadata.origWidth,
+          origHeightMobile:
+            mobMetadata.origHeight || metadata.origHeightMobile || metadata.origHeight,
+          cropDesktop: deskMetadata.crop || metadata.cropDesktop || metadata.crop,
+          hotspotDesktop: deskMetadata.hotspot || metadata.hotspotDesktop || metadata.hotspot,
+          origWidthDesktop:
+            deskMetadata.origWidth || metadata.origWidthDesktop || metadata.origWidth,
+          origHeightDesktop:
+            deskMetadata.origHeight || metadata.origHeightDesktop || metadata.origHeight,
         },
         imageMobile: imageMobile && imageMobile !== imageFinal ? imageMobile : undefined,
         imageDesktop: imageDesktop && imageDesktop !== imageFinal ? imageDesktop : undefined,
@@ -148,14 +152,18 @@ export const getDesignerById = async (id: string): Promise<Designer | undefined>
         urlMobile: imageMobile && imageMobile !== image ? imageMobile : undefined,
         urlDesktop: imageDesktop && imageDesktop !== image ? imageDesktop : undefined,
         ...metadata,
-        cropMobile: mobMetadata.crop,
-        hotspotMobile: mobMetadata.hotspot,
-        origWidthMobile: mobMetadata.origWidth,
-        origHeightMobile: mobMetadata.origHeight,
-        cropDesktop: deskMetadata.crop,
-        hotspotDesktop: deskMetadata.hotspot,
-        origWidthDesktop: deskMetadata.origWidth,
-        origHeightDesktop: deskMetadata.origHeight,
+        cropMobile: mobMetadata.crop || metadata.cropMobile || metadata.crop,
+        hotspotMobile: mobMetadata.hotspot || metadata.hotspotMobile || metadata.hotspot,
+        origWidthMobile:
+          mobMetadata.origWidth || metadata.origWidthMobile || metadata.origWidth,
+        origHeightMobile:
+          mobMetadata.origHeight || metadata.origHeightMobile || metadata.origHeight,
+        cropDesktop: deskMetadata.crop || metadata.cropDesktop || metadata.crop,
+        hotspotDesktop: deskMetadata.hotspot || metadata.hotspotDesktop || metadata.hotspot,
+        origWidthDesktop:
+          deskMetadata.origWidth || metadata.origWidthDesktop || metadata.origWidth,
+        origHeightDesktop:
+          deskMetadata.origHeight || metadata.origHeightDesktop || metadata.origHeight,
       },
       imageMobile: imageMobile && imageMobile !== image ? imageMobile : undefined,
       imageDesktop: imageDesktop && imageDesktop !== image ? imageDesktop : undefined,
@@ -170,7 +178,7 @@ export const getDesignersByIds = async (ids: string[]): Promise<Designer[]> => {
     const query = groq`*[_type == "designer" && id.current in $ids] | order(orderRank asc){
           "id": id.current, 
           name, 
-          role,
+          role, 
           bio, 
           image,
           imageR2,
@@ -187,6 +195,8 @@ export const getDesignersByIds = async (ids: string[]): Promise<Designer[]> => {
         ? mapImage(r.imageDesktopR2)
         : undefined
       const metadata = r.imageR2 ? mapR2Metadata(r.imageR2) : r.image ? mapR2Metadata(r.image) : {}
+      const mobMetadata = r.imageMobileR2 ? mapR2Metadata(r.imageMobileR2) : {}
+      const deskMetadata = r.imageDesktopR2 ? mapR2Metadata(r.imageDesktopR2) : {}
       return {
         id: r.id,
         name: r.name,
@@ -197,6 +207,18 @@ export const getDesignersByIds = async (ids: string[]): Promise<Designer[]> => {
           urlMobile: imageMobile && imageMobile !== imageFinal ? imageMobile : undefined,
           urlDesktop: imageDesktop && imageDesktop !== imageFinal ? imageDesktop : undefined,
           ...metadata,
+          cropMobile: mobMetadata.crop || metadata.cropMobile || metadata.crop,
+          hotspotMobile: mobMetadata.hotspot || metadata.hotspotMobile || metadata.hotspot,
+          origWidthMobile:
+            mobMetadata.origWidth || metadata.origWidthMobile || metadata.origWidth,
+          origHeightMobile:
+            mobMetadata.origHeight || metadata.origHeightMobile || metadata.origHeight,
+          cropDesktop: deskMetadata.crop || metadata.cropDesktop || metadata.crop,
+          hotspotDesktop: deskMetadata.hotspot || metadata.hotspotDesktop || metadata.hotspot,
+          origWidthDesktop:
+            deskMetadata.origWidth || metadata.origWidthDesktop || metadata.origWidth,
+          origHeightDesktop:
+            deskMetadata.origHeight || metadata.origHeightDesktop || metadata.origHeight,
         },
         imageMobile: imageMobile && imageMobile !== imageFinal ? imageMobile : undefined,
         imageDesktop: imageDesktop && imageDesktop !== imageFinal ? imageDesktop : undefined,
