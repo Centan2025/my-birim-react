@@ -582,9 +582,9 @@ export function ProjectsPage() {
                 ? 'bg-white text-black font-semibold'
                 : 'text-neutral-300 hover:text-white'
             }`}
-            title="V3 - Dikey Monolitik Lookbook"
+            title="V3 - Açık Mimari Bento & Lookbook"
           >
-            V3 <span className="text-[10px] opacity-70 hidden sm:inline">Dikey</span>
+            V3 <span className="text-[10px] opacity-70 hidden sm:inline">Bento</span>
           </button>
         </div>
       </aside>

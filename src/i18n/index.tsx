@@ -11,6 +11,7 @@ import tr from './locales/tr'
 import en from './locales/en'
 import {LocalizedString} from '../types'
 import {getLanguages, getTranslations} from '../services/cms'
+import {toPlainText} from '../utils/portableText'
 
 export type Locale = string
 
@@ -176,7 +177,12 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
       }
 
       if (typeof keyOrObject === 'object' && keyOrObject !== null) {
-        const obj = keyOrObject as Record<string, string | undefined>
+        // Direct PortableText array or block object
+        if (Array.isArray(keyOrObject) || ('_type' in keyOrObject && 'children' in keyOrObject)) {
+          return toPlainText(keyOrObject)
+        }
+
+        const obj = keyOrObject as Record<string, unknown>
 
         const currentVal = typeof obj[locale] === 'string' ? (obj[locale] as string).trim() : ''
         const trVal = typeof obj['tr'] === 'string' ? (obj['tr'] as string).trim() : ''
@@ -191,14 +197,21 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
           if (baseTrans) return baseTrans
         }
 
-        // Önce mevcut locale'i kontrol et (boş string değilse veya diziyse)
+        // Önce mevcut locale'i kontrol et
         if (
           locale in obj &&
           obj[locale] !== undefined &&
-          obj[locale] !== null &&
-          (typeof obj[locale] !== 'string' || (obj[locale] as string).trim())
+          obj[locale] !== null
         ) {
-          return obj[locale] as string
+          const val = obj[locale]
+          if (typeof val === 'string' && val.trim()) return val
+          if (Array.isArray(val)) return val as never
+          if (typeof val === 'object' && val !== null) {
+            if ('_type' in val && 'children' in val) {
+              return toPlainText(val)
+            }
+            return val as never
+          }
         }
 
         // Locale yoksa veya boşsa, TR veya EN değerini alıp sözlüklerde (cms/base) çevirisi var mı kontrol et
@@ -216,19 +229,33 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
         if (
           'tr' in obj &&
           obj['tr'] !== undefined &&
-          obj['tr'] !== null &&
-          (typeof obj['tr'] !== 'string' || (obj['tr'] as string).trim())
+          obj['tr'] !== null
         ) {
-          return obj['tr'] as string
+          const val = obj['tr']
+          if (typeof val === 'string' && val.trim()) return val
+          if (Array.isArray(val)) return val as never
+          if (typeof val === 'object' && val !== null) {
+            if ('_type' in val && 'children' in val) {
+              return toPlainText(val)
+            }
+            return val as never
+          }
         }
         // 'tr' de yoksa, 'en' fallback'i dene
         if (
           'en' in obj &&
           obj['en'] !== undefined &&
-          obj['en'] !== null &&
-          (typeof obj['en'] !== 'string' || (obj['en'] as string).trim())
+          obj['en'] !== null
         ) {
-          return obj['en'] as string
+          const val = obj['en']
+          if (typeof val === 'string' && val.trim()) return val
+          if (Array.isArray(val)) return val as never
+          if (typeof val === 'object' && val !== null) {
+            if ('_type' in val && 'children' in val) {
+              return toPlainText(val)
+            }
+            return val as never
+          }
         }
         // Hiçbiri yoksa, object'teki ilk geçerli değeri al
         const firstValue = Object.values(obj).find(val => {
@@ -236,7 +263,14 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
           if (typeof val === 'string') return !!val.trim()
           return true
         })
-        return (firstValue as string) || ''
+        if (typeof firstValue === 'string') return firstValue
+        if (firstValue && typeof firstValue === 'object') {
+          if ('_type' in firstValue && 'children' in firstValue) {
+            return toPlainText(firstValue)
+          }
+          return firstValue as never
+        }
+        return ''
       }
 
       return ''
