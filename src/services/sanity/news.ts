@@ -55,14 +55,12 @@ const mapMediaArray = (mediaArrRaw: unknown): unknown[] => {
         ...metadata,
         cropMobile: mobMetadata.crop || metadata.cropMobile || metadata.crop,
         hotspotMobile: mobMetadata.hotspot || metadata.hotspotMobile || metadata.hotspot,
-        origWidthMobile:
-          mobMetadata.origWidth || metadata.origWidthMobile || metadata.origWidth,
+        origWidthMobile: mobMetadata.origWidth || metadata.origWidthMobile || metadata.origWidth,
         origHeightMobile:
           mobMetadata.origHeight || metadata.origHeightMobile || metadata.origHeight,
         cropDesktop: deskMetadata.crop || metadata.cropDesktop || metadata.crop,
         hotspotDesktop: deskMetadata.hotspot || metadata.hotspotDesktop || metadata.hotspot,
-        origWidthDesktop:
-          deskMetadata.origWidth || metadata.origWidthDesktop || metadata.origWidth,
+        origWidthDesktop: deskMetadata.origWidth || metadata.origWidthDesktop || metadata.origWidth,
         origHeightDesktop:
           deskMetadata.origHeight || metadata.origHeightDesktop || metadata.origHeight,
       }
@@ -107,21 +105,20 @@ const mapNewsRow = (r: Record<string, unknown>): NewsItem => {
 
     const metadata = mapR2Metadata(coverItem['imageR2'] || coverItem['image'] || coverItem)
     const mobMetadata = coverItem['imageMobileR2'] ? mapR2Metadata(coverItem['imageMobileR2']) : {}
-    const deskMetadata = coverItem['imageDesktopR2'] ? mapR2Metadata(coverItem['imageDesktopR2']) : {}
+    const deskMetadata = coverItem['imageDesktopR2']
+      ? mapR2Metadata(coverItem['imageDesktopR2'])
+      : {}
 
     mainImage = {
       url,
       ...metadata,
       cropMobile: mobMetadata.crop || metadata.cropMobile || metadata.crop,
       hotspotMobile: mobMetadata.hotspot || metadata.hotspotMobile || metadata.hotspot,
-      origWidthMobile:
-        mobMetadata.origWidth || metadata.origWidthMobile || metadata.origWidth,
-      origHeightMobile:
-        mobMetadata.origHeight || metadata.origHeightMobile || metadata.origHeight,
+      origWidthMobile: mobMetadata.origWidth || metadata.origWidthMobile || metadata.origWidth,
+      origHeightMobile: mobMetadata.origHeight || metadata.origHeightMobile || metadata.origHeight,
       cropDesktop: deskMetadata.crop || metadata.cropDesktop || metadata.crop,
       hotspotDesktop: deskMetadata.hotspot || metadata.hotspotDesktop || metadata.hotspot,
-      origWidthDesktop:
-        deskMetadata.origWidth || metadata.origWidthDesktop || metadata.origWidth,
+      origWidthDesktop: deskMetadata.origWidth || metadata.origWidthDesktop || metadata.origWidth,
       origHeightDesktop:
         deskMetadata.origHeight || metadata.origHeightDesktop || metadata.origHeight,
     }

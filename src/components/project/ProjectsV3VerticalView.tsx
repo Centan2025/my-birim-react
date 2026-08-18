@@ -258,7 +258,10 @@ const BentoGridItem: React.FC<{
       className={colSpanClass}
     >
       <BentoSpotlightCard className="h-full flex flex-col justify-between p-3 sm:p-3.5 bg-white">
-        <Link to={`/projects/${project.id}`} className="group/card flex flex-col h-full justify-between space-y-3.5">
+        <Link
+          to={`/projects/${project.id}`}
+          className="group/card flex flex-col h-full justify-between space-y-3.5"
+        >
           {/* Visual Container (Uniform Height across all cards) */}
           <div className="relative w-full h-[260px] sm:h-[320px] md:h-[360px] overflow-hidden bg-neutral-100 border border-neutral-200/80">
             {coverUrl && (
@@ -304,7 +307,9 @@ const BentoGridItem: React.FC<{
 
             <div className="pt-2.5 border-t border-neutral-200 flex items-center justify-between text-[11px] font-mono text-neutral-500 group-hover/card:text-neutral-900 transition-colors">
               <span className="tracking-[0.15em] uppercase">İNCELE</span>
-              <span className="font-bold transition-transform duration-300 group-hover/card:translate-x-1">→</span>
+              <span className="font-bold transition-transform duration-300 group-hover/card:translate-x-1">
+                →
+              </span>
             </div>
           </div>
         </Link>
@@ -434,7 +439,9 @@ const EditorialLookbookCard: React.FC<{
               className="group/btn w-full inline-flex items-center justify-between px-6 py-3.5 bg-transparent border border-neutral-900 text-neutral-900 hover:bg-neutral-900 hover:text-white font-mono text-xs uppercase tracking-[0.2em] transition-all duration-300 rounded-none shadow-xs font-medium"
             >
               <span>{isTr ? 'PROJEYİ İNCELE' : 'VIEW CASE STUDY'}</span>
-              <span className="transition-transform duration-300 group-hover/btn:translate-x-1.5 font-bold">→</span>
+              <span className="transition-transform duration-300 group-hover/btn:translate-x-1.5 font-bold">
+                →
+              </span>
             </Link>
           </div>
         </div>
@@ -551,7 +558,9 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
                   type="button"
                   onClick={() => setSelectedCategory(cat)}
                   className={`text-xs font-mono tracking-[0.2em] uppercase transition-all duration-300 whitespace-nowrap relative py-1.5 cursor-pointer rounded-none ${
-                    isActive ? 'text-neutral-900 font-semibold' : 'text-neutral-400 hover:text-neutral-900'
+                    isActive
+                      ? 'text-neutral-900 font-semibold'
+                      : 'text-neutral-400 hover:text-neutral-900'
                   }`}
                 >
                   <span>{label}</span>
@@ -575,7 +584,9 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
                 type="button"
                 onClick={() => setViewMode('bento')}
                 className={`px-3 py-1 text-[10px] font-mono tracking-wider uppercase transition-colors cursor-pointer rounded-none ${
-                  viewMode === 'bento' ? 'bg-neutral-900 text-white font-medium' : 'text-neutral-600 hover:text-black'
+                  viewMode === 'bento'
+                    ? 'bg-neutral-900 text-white font-medium'
+                    : 'text-neutral-600 hover:text-black'
                 }`}
                 title="Bento Grid"
               >
@@ -585,7 +596,9 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
                 type="button"
                 onClick={() => setViewMode('editorial')}
                 className={`px-3 py-1 text-[10px] font-mono tracking-wider uppercase transition-colors cursor-pointer rounded-none ${
-                  viewMode === 'editorial' ? 'bg-neutral-900 text-white font-medium' : 'text-neutral-600 hover:text-black'
+                  viewMode === 'editorial'
+                    ? 'bg-neutral-900 text-white font-medium'
+                    : 'text-neutral-600 hover:text-black'
                 }`}
                 title="Editorial Lookbook"
               >
@@ -650,11 +663,7 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
             {viewMode === 'bento' && (
               <div>
                 {/* 1. Hero Master Bento Hub */}
-                {heroProject && (
-                  <HeroBentoSection
-                    project={heroProject}
-                  />
-                )}
+                {heroProject && <HeroBentoSection project={heroProject} />}
 
                 {/* 2. Modular Asymmetric Bento Grid */}
                 {gridProjects.length > 0 && (
@@ -686,10 +695,7 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
             {viewMode === 'editorial' && (
               <div className="space-y-6">
                 {filteredProjects.map(project => (
-                  <EditorialLookbookCard
-                    key={project.id}
-                    project={project}
-                  />
+                  <EditorialLookbookCard key={project.id} project={project} />
                 ))}
               </div>
             )}

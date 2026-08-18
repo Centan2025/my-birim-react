@@ -106,8 +106,7 @@ export const getDesigners = async (): Promise<Designer[]> => {
           ...metadata,
           cropMobile: mobMetadata.crop || metadata.cropMobile || metadata.crop,
           hotspotMobile: mobMetadata.hotspot || metadata.hotspotMobile || metadata.hotspot,
-          origWidthMobile:
-            mobMetadata.origWidth || metadata.origWidthMobile || metadata.origWidth,
+          origWidthMobile: mobMetadata.origWidth || metadata.origWidthMobile || metadata.origWidth,
           origHeightMobile:
             mobMetadata.origHeight || metadata.origHeightMobile || metadata.origHeight,
           cropDesktop: deskMetadata.crop || metadata.cropDesktop || metadata.crop,
@@ -154,14 +153,12 @@ export const getDesignerById = async (id: string): Promise<Designer | undefined>
         ...metadata,
         cropMobile: mobMetadata.crop || metadata.cropMobile || metadata.crop,
         hotspotMobile: mobMetadata.hotspot || metadata.hotspotMobile || metadata.hotspot,
-        origWidthMobile:
-          mobMetadata.origWidth || metadata.origWidthMobile || metadata.origWidth,
+        origWidthMobile: mobMetadata.origWidth || metadata.origWidthMobile || metadata.origWidth,
         origHeightMobile:
           mobMetadata.origHeight || metadata.origHeightMobile || metadata.origHeight,
         cropDesktop: deskMetadata.crop || metadata.cropDesktop || metadata.crop,
         hotspotDesktop: deskMetadata.hotspot || metadata.hotspotDesktop || metadata.hotspot,
-        origWidthDesktop:
-          deskMetadata.origWidth || metadata.origWidthDesktop || metadata.origWidth,
+        origWidthDesktop: deskMetadata.origWidth || metadata.origWidthDesktop || metadata.origWidth,
         origHeightDesktop:
           deskMetadata.origHeight || metadata.origHeightDesktop || metadata.origHeight,
       },
@@ -209,8 +206,7 @@ export const getDesignersByIds = async (ids: string[]): Promise<Designer[]> => {
           ...metadata,
           cropMobile: mobMetadata.crop || metadata.cropMobile || metadata.crop,
           hotspotMobile: mobMetadata.hotspot || metadata.hotspotMobile || metadata.hotspot,
-          origWidthMobile:
-            mobMetadata.origWidth || metadata.origWidthMobile || metadata.origWidth,
+          origWidthMobile: mobMetadata.origWidth || metadata.origWidthMobile || metadata.origWidth,
           origHeightMobile:
             mobMetadata.origHeight || metadata.origHeightMobile || metadata.origHeight,
           cropDesktop: deskMetadata.crop || metadata.cropDesktop || metadata.crop,

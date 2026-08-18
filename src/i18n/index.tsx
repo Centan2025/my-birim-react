@@ -198,11 +198,7 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
         }
 
         // Önce mevcut locale'i kontrol et
-        if (
-          locale in obj &&
-          obj[locale] !== undefined &&
-          obj[locale] !== null
-        ) {
+        if (locale in obj && obj[locale] !== undefined && obj[locale] !== null) {
           const val = obj[locale]
           if (typeof val === 'string' && val.trim()) return val
           if (Array.isArray(val)) return val as never
@@ -226,11 +222,7 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
         }
 
         // Locale yoksa veya boşsa, 'tr' fallback'i kullan
-        if (
-          'tr' in obj &&
-          obj['tr'] !== undefined &&
-          obj['tr'] !== null
-        ) {
+        if ('tr' in obj && obj['tr'] !== undefined && obj['tr'] !== null) {
           const val = obj['tr']
           if (typeof val === 'string' && val.trim()) return val
           if (Array.isArray(val)) return val as never
@@ -242,11 +234,7 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
           }
         }
         // 'tr' de yoksa, 'en' fallback'i dene
-        if (
-          'en' in obj &&
-          obj['en'] !== undefined &&
-          obj['en'] !== null
-        ) {
+        if ('en' in obj && obj['en'] !== undefined && obj['en'] !== null) {
           const val = obj['en']
           if (typeof val === 'string' && val.trim()) return val
           if (Array.isArray(val)) return val as never

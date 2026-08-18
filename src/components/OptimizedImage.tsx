@@ -716,9 +716,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     customStyle['--img-object-fit'] = 'cover'
   }
 
-  const isExplicitAutoHeight = classList.some(
-    (c: string) => c === 'h-auto' || c.includes('h-auto')
-  )
+  const isExplicitAutoHeight = classList.some((c: string) => c === 'h-auto' || c.includes('h-auto'))
 
   const isCoverMode =
     !effectiveContain &&

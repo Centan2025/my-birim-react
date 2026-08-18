@@ -497,9 +497,7 @@ export function NewsPage() {
                           : undefined
                       }
                       cropMobile={
-                        typeof item.mainImage === 'object'
-                          ? item.mainImage.cropMobile
-                          : undefined
+                        typeof item.mainImage === 'object' ? item.mainImage.cropMobile : undefined
                       }
                       hotspotMobile={
                         typeof item.mainImage === 'object'
@@ -517,9 +515,7 @@ export function NewsPage() {
                           : undefined
                       }
                       cropDesktop={
-                        typeof item.mainImage === 'object'
-                          ? item.mainImage.cropDesktop
-                          : undefined
+                        typeof item.mainImage === 'object' ? item.mainImage.cropDesktop : undefined
                       }
                       hotspotDesktop={
                         typeof item.mainImage === 'object'
