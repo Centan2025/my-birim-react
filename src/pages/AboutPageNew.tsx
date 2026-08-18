@@ -215,13 +215,6 @@ export function AboutPageNew() {
     }
   }, [])
 
-  const heroImageUrl = getSanitizedImage(content?.heroImage, DEFAULT_IMAGES.hero)
-  const heroImageMobileUrl = getSanitizedImage(content?.heroImageMobile, '')
-  const identityImgUrl = getSanitizedImage(content?.identitySection?.image, DEFAULT_IMAGES.identity)
-  const identityImgMobileUrl = getSanitizedImage(content?.identitySection?.imageMobile, '')
-  const qualityImgUrl = getSanitizedImage(content?.qualitySection?.image, DEFAULT_IMAGES.quality)
-  const qualityImgMobileUrl = getSanitizedImage(content?.qualitySection?.imageMobile, '')
-
   const getImageMeta = (img: unknown) => {
     if (typeof img === 'object' && img !== null) {
       const obj = img as Record<string, unknown>
@@ -234,6 +227,33 @@ export function AboutPageNew() {
     }
     return {}
   }
+
+  const heroImageObj =
+    typeof content?.heroImage === 'object' && content?.heroImage !== null
+      ? (content.heroImage as Record<string, unknown>)
+      : null
+  const heroImageMobileObj =
+    typeof content?.heroImageMobile === 'object' && content?.heroImageMobile !== null
+      ? (content.heroImageMobile as Record<string, unknown>)
+      : null
+
+  const heroImageUrl = getSanitizedImage(
+    heroImageObj?.['url'] || content?.heroImage,
+    DEFAULT_IMAGES.hero
+  )
+  const heroImageMobileUrl = getSanitizedImage(
+    heroImageMobileObj?.['url'] ||
+      (heroImageObj?.['urlMobile'] as string | undefined) ||
+      content?.heroImageMobile,
+    ''
+  )
+
+  const heroImgMeta = getImageMeta(content?.heroImage)
+  const heroImgMobMeta = getImageMeta(content?.heroImageMobile)
+  const identityImgUrl = getSanitizedImage(content?.identitySection?.image, DEFAULT_IMAGES.identity)
+  const identityImgMobileUrl = getSanitizedImage(content?.identitySection?.imageMobile, '')
+  const qualityImgUrl = getSanitizedImage(content?.qualitySection?.image, DEFAULT_IMAGES.quality)
+  const qualityImgMobileUrl = getSanitizedImage(content?.qualitySection?.imageMobile, '')
 
   const identityImgMeta = getImageMeta(content?.identitySection?.image)
   const identityImgMobMeta = getImageMeta(content?.identitySection?.imageMobile)
@@ -421,6 +441,14 @@ export function AboutPageNew() {
             loading="eager"
             sizes="100vw"
             quality={90}
+            crop={heroImgMeta.crop}
+            hotspot={heroImgMeta.hotspot}
+            origWidth={heroImgMeta.origWidth}
+            origHeight={heroImgMeta.origHeight}
+            cropMobile={heroImgMobMeta.crop}
+            hotspotMobile={heroImgMobMeta.hotspot}
+            origWidthMobile={heroImgMobMeta.origWidth}
+            origHeightMobile={heroImgMobMeta.origHeight}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/50" />
         </div>

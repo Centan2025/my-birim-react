@@ -407,7 +407,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     onError?.()
   }
 
-  const activeMobileSrc = srcMobile ? rewriteR2Url(srcMobile) : undefined
+  const activeMobileSrc =
+    currentSrc === fallbackSrc ? undefined : srcMobile ? rewriteR2Url(srcMobile) : undefined
   const activeDesktopSrc =
     (srcDesktop ? rewriteR2Url(srcDesktop) : undefined) || rewriteR2Url(currentSrc)
   const activeSrc = rewriteR2Url(currentSrc) || activeDesktopSrc || activeMobileSrc || ''
@@ -908,7 +909,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
     const pictureElement = (
       <picture className="w-full h-full block relative overflow-hidden responsive-crop-pos">
-        {optimizedMobileSrc && (
+        {optimizedMobileSrc && !hasError && currentSrc !== fallbackSrc && (
           <source
             media="(max-width: 1023px)"
             srcSet={
