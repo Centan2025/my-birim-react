@@ -948,7 +948,10 @@ export function Header() {
                           {!isLast && (
                             <span
                               className="mx-1"
-                              style={{color: `${headerForegroundColor}40`, transition: colorTransition}}
+                              style={{
+                                color: `${headerForegroundColor}40`,
+                                transition: colorTransition,
+                              }}
                             >
                               |
                             </span>
