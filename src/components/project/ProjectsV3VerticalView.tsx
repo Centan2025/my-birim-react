@@ -523,16 +523,16 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
   const gridProjects = filteredProjects.slice(1)
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] text-neutral-900 overflow-x-hidden pt-16 md:pt-20 pb-24 selection:bg-neutral-900 selection:text-white">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-neutral-900 overflow-x-hidden pt-20 md:pt-20 lg:pt-20 pb-24 selection:bg-neutral-900 selection:text-white">
       {/* Top Breadcrumb */}
-      <div className="relative z-20 w-full max-w-[98%] sm:max-w-[95%] lg:max-w-[90vw] mx-auto px-2 sm:px-4 py-2 text-neutral-400">
+      <div className="relative z-20 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 py-4 text-gray-400">
         <Breadcrumbs
           items={[{label: t('homepage'), to: '/'}, {label: t('projects') || 'Projeler'}]}
         />
       </div>
 
       {/* Header & Minimalist Architectural Filter Hub */}
-      <header className="relative z-10 w-full max-w-[98%] sm:max-w-[95%] lg:max-w-[90vw] mx-auto px-2 sm:px-4 pt-2 pb-6">
+      <header className="relative z-10 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 pt-2 pb-6">
         <motion.div
           initial={{opacity: 0, y: 15}}
           animate={{opacity: 1, y: 0}}
@@ -656,7 +656,7 @@ export const ProjectsV3VerticalView: React.FC<ProjectsV3VerticalViewProps> = ({p
       </header>
 
       {/* Main Exhibition Stage */}
-      <main className="relative z-10 w-full max-w-[98%] sm:max-w-[95%] lg:max-w-[90vw] mx-auto px-2 sm:px-4">
+      <main className="relative z-10 w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0">
         {filteredProjects.length > 0 ? (
           <div>
             {/* VIEW MODE 1: ASYMMETRIC BENTO GRID */}
