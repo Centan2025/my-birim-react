@@ -47,6 +47,9 @@ export function useHeaderBackgroundColor({
 
     // Üstte koyu hero görseli bulunmayan sayfalar (Tasarımcılar, Haberler vb.):
     if (!isDarkHeroMatched) {
+      if (!effectiveIsLight && !isDarkMode) {
+        return 'rgba(0, 0, 0, 0.85)'
+      }
       // Yarı şeffaf beyaz buz efekti: bg-white/78 + backdrop-blur-xl
       const baseColor = isDarkMode ? 'rgba(10, 10, 10, ' : 'rgba(255, 255, 255, '
       return `${baseColor}${Math.max(headerOpacity, 0.78)})`

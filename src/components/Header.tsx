@@ -40,6 +40,7 @@ export function Header() {
   const [hoveredCategoryId, setHoveredCategoryId] = useState<string | null>(null)
   const [categoryProducts, setCategoryProducts] = useState<Map<string, Product[]>>(new Map())
   const productsTimeoutRef = useRef<number | null>(null)
+  const productsCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const searchPanelRef = useRef<HTMLDivElement>(null)
   const searchButtonRef = useRef<HTMLButtonElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -71,6 +72,9 @@ export function Header() {
   const [headerHeight, setHeaderHeight] = useState(56) // 3.5rem = 56px (mobil için varsayılan)
   const [isMobileMenuClosing, setIsMobileMenuClosing] = useState(false)
   const isDarkHero = isDarkHeroPage(location.pathname)
+  const isDesignersPage =
+    location.pathname.startsWith('/designers') || location.pathname.startsWith('/designer')
+  const isDarkHeroHovered = isDesignersPage && isProductsOpen && !isSearchOpen && !isMobile
 
   // Track whether scroll has passed the hero bottom boundary
   const [isPastHero, setIsPastHero] = useState(false)
@@ -96,13 +100,16 @@ export function Header() {
   // Mobile overlay menu: always dark text.
   const isLightMode =
     (!isDarkHero || headerTheme.mode === 'light' || isPastHero || isSearchOpen) &&
-    !(isMobile && isMobileMenuOpen)
+    !(isMobile && isMobileMenuOpen) &&
+    !isDarkHeroHovered
 
   const headerForegroundColor = isLightMode ? '#000000' : '#ffffff'
   const headerLogoFilter = isLightMode ? 'invert(1) brightness(0.95)' : 'none'
   const iconBrightness = isLightMode ? 'brightness(0)' : 'none'
-  // Color transition only when scrolling on Dark Hero pages to prevent white-to-black morphing flash
-  const colorTransition = isDarkHero ? 'color 0.25s ease, filter 0.25s ease' : 'none'
+  // Smooth transitions for colors, backgrounds, and icon/logo filters
+  const colorTransition =
+    'color 0.4s cubic-bezier(0.4, 0, 0.2, 1), filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), fill 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+  const bgTransition = 'background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
 
   const lastScrollYRef = useRef(0)
   const headerVisibilityLastChanged = useRef(0)
@@ -429,15 +436,28 @@ export function Header() {
       clearTimeout(productsTimeoutRef.current)
       productsTimeoutRef.current = null
     }
-    setHoveredCategoryId(null) // Menü açıldığında görsel alanı temizle
+    if (productsCloseTimeoutRef.current) {
+      clearTimeout(productsCloseTimeoutRef.current)
+      productsCloseTimeoutRef.current = null
+    }
     setIsProductsOpen(true)
   }
 
   const handleProductsLeave = () => {
+    if (productsTimeoutRef.current) {
+      clearTimeout(productsTimeoutRef.current)
+    }
     productsTimeoutRef.current = window.setTimeout(() => {
       setIsProductsOpen(false)
-      setHoveredCategoryId(null) // Menü kapandığında görsel alanı temizle
       productsTimeoutRef.current = null
+
+      if (productsCloseTimeoutRef.current) {
+        clearTimeout(productsCloseTimeoutRef.current)
+      }
+      productsCloseTimeoutRef.current = setTimeout(() => {
+        setHoveredCategoryId(null) // Only clear after panel collapse completes to prevent flicker
+        productsCloseTimeoutRef.current = null
+      }, 350)
     }, 200)
   }
 
@@ -447,7 +467,13 @@ export function Header() {
       productsTimeoutRef.current = null
     }
     setIsProductsOpen(false)
-    setHoveredCategoryId(null) // Menü kapandığında görsel alanı temizle
+    if (productsCloseTimeoutRef.current) {
+      clearTimeout(productsCloseTimeoutRef.current)
+    }
+    productsCloseTimeoutRef.current = setTimeout(() => {
+      setHoveredCategoryId(null)
+      productsCloseTimeoutRef.current = null
+    }, 350)
   }
 
   const navLinkClasses =
@@ -560,7 +586,10 @@ export function Header() {
           {children}
           <span
             className="absolute -bottom-1 left-0 w-full h-[1px] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"
-            style={{backgroundColor: headerForegroundColor}}
+            style={{
+              backgroundColor: headerForegroundColor,
+              transition: `transform 300ms ease-out, ${bgTransition}`,
+            }}
           ></span>
         </span>
       </NavLink>
@@ -635,6 +664,8 @@ export function Header() {
               isMobileMenuOpen && !isOverlayMobileMenu ? '40rem' : isMobile ? '3.5rem' : '5rem',
             // Products dropdown için overflow visible
             overflow: !isMobile ? 'visible' : undefined,
+            transition:
+              'background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), -webkit-backdrop-filter 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
           ref={headerContainerRef}
         >
@@ -779,6 +810,7 @@ export function Header() {
                       fontFamily: "'Inter', sans-serif",
                       lineHeight: '1.25rem',
                       color: headerForegroundColor,
+                      transition: colorTransition,
                     }}
                   >
                     <span
@@ -789,15 +821,20 @@ export function Header() {
                         letterSpacing: '0.05em',
                         fontFamily: "'Inter', sans-serif",
                         lineHeight: '1.25rem',
+                        color: headerForegroundColor,
+                        transition: colorTransition,
                       }}
                     >
                       {t('products')}
                       <span
-                        className={`absolute -bottom-1 left-0 w-full h-[1px] transition-transform duration-300 ease-out origin-center ${isProductsOpen ? 'scale-x-0 opacity-0' : 'transform scale-x-0 group-hover:scale-x-100'}`}
-                        style={{backgroundColor: headerForegroundColor}}
+                        className={`absolute -bottom-1 left-0 w-full h-[1px] origin-center ${isProductsOpen ? 'scale-x-0 opacity-0' : 'transform scale-x-0 group-hover:scale-x-100'}`}
+                        style={{
+                          backgroundColor: headerForegroundColor,
+                          transition: `transform 300ms ease-out, opacity 300ms ease-out, ${bgTransition}`,
+                        }}
                       ></span>
                     </span>
-                    <div style={{filter: iconBrightness}}>
+                    <div style={{filter: iconBrightness, transition: colorTransition}}>
                       <ChevronDownIcon />
                     </div>
                   </Link>
@@ -826,8 +863,8 @@ export function Header() {
               <div className="flex h-full items-center lg:items-end justify-center lg:pb-6 px-2 header-layout-transition-delayed pointer-events-auto">
                 <Link
                   to="/"
-                  className="flex items-center lg:items-end gap-3 transition-colors"
-                  style={{color: headerForegroundColor}}
+                  className="flex items-center lg:items-end gap-3"
+                  style={{color: headerForegroundColor, transition: colorTransition}}
                 >
                   <div className="w-28 sm:w-32 lg:w-[clamp(110px,10vw+50px,288px)]">
                     <SiteLogo
@@ -893,7 +930,7 @@ export function Header() {
                         <Fragment key={langCode}>
                           <button
                             onClick={() => setLocale(langCode)}
-                            className={`relative transition-all duration-300 lowercase`}
+                            className={`relative lowercase`}
                             style={{
                               fontWeight: 500,
                               fontFamily: "'Inter', sans-serif",
@@ -903,12 +940,16 @@ export function Header() {
                                 ? headerForegroundColor
                                 : `${headerForegroundColor}80`, // 50% opacity for inactive
                               opacity: isActive ? 1 : 0.6,
+                              transition: colorTransition,
                             }}
                           >
                             {langCode.toLowerCase()}
                           </button>
                           {!isLast && (
-                            <span className="mx-1" style={{color: `${headerForegroundColor}40`}}>
+                            <span
+                              className="mx-1"
+                              style={{color: `${headerForegroundColor}40`, transition: colorTransition}}
+                            >
                               |
                             </span>
                           )}

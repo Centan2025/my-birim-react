@@ -33,15 +33,17 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
   return (
     // Ürün kategorileri paneli - header içinde genişleyip daralır
     <div
-      className={`hidden lg:block overflow-hidden transition-[max-height,opacity,transform] duration-500 ease-in-out ${
+      className={`hidden lg:block overflow-hidden ${
         isOpen
           ? 'opacity-100 translate-y-0 max-h-[800px]'
-          : 'opacity-0 -translate-y-4 max-h-0 pointer-events-none'
+          : 'opacity-0 -translate-y-2 max-h-0 pointer-events-none'
       }`}
       style={{
         backgroundColor: isLightMode ? 'rgba(238, 239, 242, 0.98)' : 'rgba(0, 0, 0, 0.85)',
         backdropFilter: 'blur(24px) saturate(180%)',
         WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+        transition:
+          'max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease-out, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       }}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
@@ -49,6 +51,7 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
       {/* Ayırıcı çizgi */}
       <div
         className={`w-full border-t ${isLightMode ? 'border-black/10' : 'border-white/50'}`}
+        style={{transition: 'border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1)'}}
       ></div>
 
       <div
@@ -62,13 +65,14 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
               <NavLink
                 key={category.id}
                 to={`/products/${category.id}`}
-                className={`group relative px-0 py-2 font-medium uppercase transition-colors duration-300 ${
+                className={`group relative px-0 py-2 font-medium uppercase ${
                   isLightMode ? 'text-gray-800 hover:text-black' : 'text-gray-200 hover:text-white'
                 }`}
                 style={{
                   fontSize: 'clamp(12px, 0.3rem + 0.5vw, 13.5px)',
                   letterSpacing: '0.02em',
                   fontFamily: "'Inter', sans-serif",
+                  transition: 'color 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                 }}
                 onClick={onClose}
                 onMouseEnter={() => onHoveredCategoryChange(category.id)}
@@ -79,6 +83,10 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
                     className={`absolute -bottom-1 left-0 w-full h-[1px] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center ${
                       isLightMode ? 'bg-black' : 'bg-white'
                     }`}
+                    style={{
+                      transition:
+                        'transform 300ms ease-out, background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    }}
                   ></span>
                 </span>
               </NavLink>
