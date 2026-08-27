@@ -72,9 +72,7 @@ export function Header() {
   const [headerHeight, setHeaderHeight] = useState(56) // 3.5rem = 56px (mobil için varsayılan)
   const [isMobileMenuClosing, setIsMobileMenuClosing] = useState(false)
   const isDarkHero = isDarkHeroPage(location.pathname)
-  const isDesignersPage =
-    location.pathname.startsWith('/designers') || location.pathname.startsWith('/designer')
-  const isDarkHeroHovered = isDesignersPage && isProductsOpen && !isSearchOpen && !isMobile
+  const isProductsHovered = isProductsOpen && !isSearchOpen && !isMobile
 
   // Track whether scroll has passed the hero bottom boundary
   const [isPastHero, setIsPastHero] = useState(false)
@@ -98,18 +96,18 @@ export function Header() {
   // Standard pages: always dark text.
   // Search open: always dark text (white panel bg).
   // Mobile overlay menu: always dark text.
+  // Desktop products menu open: always dark text/theme (matching designers page).
   const isLightMode =
     (!isDarkHero || headerTheme.mode === 'light' || isPastHero || isSearchOpen) &&
     !(isMobile && isMobileMenuOpen) &&
-    !isDarkHeroHovered
+    !isProductsHovered
 
   const headerForegroundColor = isLightMode ? '#000000' : '#ffffff'
   const headerLogoFilter = isLightMode ? 'invert(1) brightness(0.95)' : 'none'
   const iconBrightness = isLightMode ? 'brightness(0)' : 'none'
   // Smooth transitions for colors, backgrounds, and icon/logo filters
   const colorTransition =
-    'color 0.4s cubic-bezier(0.4, 0, 0.2, 1), filter 0.4s cubic-bezier(0.4, 0, 0.2, 1), fill 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-  const bgTransition = 'background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+    'color 0.4s cubic-bezier(0.25, 1, 0.5, 1), filter 0.4s cubic-bezier(0.25, 1, 0.5, 1), fill 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1)'
 
   const lastScrollYRef = useRef(0)
   const headerVisibilityLastChanged = useRef(0)
@@ -485,7 +483,7 @@ export function Header() {
   }
   const iconBaseSize = 'clamp(16px, 0.8rem + 0.3vw, 20px)'
   const iconClasses =
-    'text-gray-300 hover:text-white transition-all duration-300 transform hover:scale-125'
+    'text-gray-300 hover:text-white transition-opacity duration-300 ease-out hover:opacity-80'
   const sharedIconStyle = {
     width: iconBaseSize,
     height: iconBaseSize,
@@ -494,7 +492,7 @@ export function Header() {
     justifyContent: 'center',
     color: headerForegroundColor,
     filter: iconBrightness,
-    transition: colorTransition,
+    transition: `opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1), ${colorTransition}`,
   }
 
   const mobileMenuLinks: {to: string; label: string}[] = [
@@ -580,15 +578,18 @@ export function Header() {
         })}
       >
         <span
-          className="relative flex items-end transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase header-nav-text"
-          style={{...baseStyle, display: 'flex', alignItems: 'flex-end'}}
+          className="relative flex items-end uppercase header-nav-text"
+          style={{
+            ...baseStyle,
+            display: 'flex',
+            alignItems: 'flex-end',
+          }}
         >
           {children}
           <span
-            className="absolute -bottom-1 left-0 w-full h-[1px] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center"
+            className="header-nav-underline"
             style={{
               backgroundColor: headerForegroundColor,
-              transition: `transform 300ms ease-out, ${bgTransition}`,
             }}
           ></span>
         </span>
@@ -814,7 +815,7 @@ export function Header() {
                     }}
                   >
                     <span
-                      className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase header-nav-text"
+                      className="relative inline-block uppercase header-nav-text"
                       style={{
                         fontSize: 'clamp(12px, 0.35rem + 0.5vw, 13.5px)',
                         fontWeight: 500, // Re-applying the 500 from previous request
@@ -822,19 +823,25 @@ export function Header() {
                         fontFamily: "'Inter', sans-serif",
                         lineHeight: '1.25rem',
                         color: headerForegroundColor,
-                        transition: colorTransition,
                       }}
                     >
                       {t('products')}
                       <span
-                        className={`absolute -bottom-1 left-0 w-full h-[1px] origin-center ${isProductsOpen ? 'scale-x-0 opacity-0' : 'transform scale-x-0 group-hover:scale-x-100'}`}
+                        className={`header-nav-underline ${
+                          isProductsOpen ? 'opacity-0 scale-x-0' : ''
+                        }`}
                         style={{
                           backgroundColor: headerForegroundColor,
-                          transition: `transform 300ms ease-out, opacity 300ms ease-out, ${bgTransition}`,
                         }}
                       ></span>
                     </span>
-                    <div style={{filter: iconBrightness, transition: colorTransition}}>
+                    <div
+                      className={`transform ${isProductsOpen ? 'rotate-180' : ''}`}
+                      style={{
+                        filter: iconBrightness,
+                        transition: `transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), filter 0.4s cubic-bezier(0.25, 1, 0.5, 1)`,
+                      }}
+                    >
                       <ChevronDownIcon />
                     </div>
                   </Link>
@@ -863,7 +870,7 @@ export function Header() {
               <div className="flex h-full items-center lg:items-end justify-center lg:pb-6 px-2 header-layout-transition-delayed pointer-events-auto">
                 <Link
                   to="/"
-                  className="flex items-center lg:items-end gap-3"
+                  className="flex items-center lg:items-end gap-3 transition-opacity duration-300 hover:opacity-80"
                   style={{color: headerForegroundColor, transition: colorTransition}}
                 >
                   <div className="w-28 sm:w-32 lg:w-[clamp(110px,10vw+50px,288px)]">
@@ -930,7 +937,7 @@ export function Header() {
                         <Fragment key={langCode}>
                           <button
                             onClick={() => setLocale(langCode)}
-                            className={`relative lowercase`}
+                            className={`relative lowercase transition-opacity duration-300 hover:opacity-100`}
                             style={{
                               fontWeight: 500,
                               fontFamily: "'Inter', sans-serif",
@@ -972,7 +979,7 @@ export function Header() {
                       <ShoppingBagIcon />
                       {cartCount > 0 && (
                         <span
-                          className="absolute -top-1 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white border-white border"
+                          className="absolute -top-1 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white border-white border transition-transform duration-300 ease-out"
                           aria-hidden="true"
                         >
                           {cartCount}

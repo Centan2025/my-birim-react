@@ -60,46 +60,59 @@ export function HeaderStyles() {
         header nav .header-nav-item.active,
         header nav a.header-nav-item,
         header nav a.header-nav-item.active,
-        header nav a[href*="/designers"],
-        header nav a[href*="/projects"],
-        header nav a[href*="/news"],
-        header nav a[href*="/about"],
-        header nav a[href*="/contact"],
-        header nav a[href*="/categories"] {
+        header nav .header-nav-text {
           font-size: clamp(12px, 0.35rem + 0.5vw, 13.5px) !important;
           font-weight: 500 !important;
           letter-spacing: 0.05em !important;
           font-family: 'Inter', sans-serif !important;
         }
 
-        header nav .header-nav-text,
-        header nav .header-nav-item .header-nav-text,
-        header nav .header-nav-item.active .header-nav-text,
-        header nav a.header-nav-item span.header-nav-text,
-        header nav a.header-nav-item.active span.header-nav-text,
-        header nav a[href*="/designers"] span,
-        header nav a[href*="/projects"] span,
-        header nav a[href*="/news"] span,
-        header nav a[href*="/about"] span,
-        header nav a[href*="/contact"] span,
-        header nav a[href*="/categories"] span {
-          font-size: clamp(12px, 0.35rem + 0.5vw, 13.5px) !important;
-          font-weight: 500 !important;
-          letter-spacing: 0.05em !important;
+        header nav .header-nav-text {
           line-height: 1.25rem !important;
           display: inline-block !important;
-          font-family: 'Inter', sans-serif !important;
+          transition: color 0.35s cubic-bezier(0.25, 1, 0.5, 1), font-weight 0.3s ease, text-shadow 0.3s ease !important;
         }
 
         /* React Router active state override */
-        header nav a[class*="active"] span,
-        header nav a.active span,
-        header nav a[aria-current="page"] span {
+        header nav a[class*="active"] .header-nav-text,
+        header nav a.active .header-nav-text,
+        header nav a[aria-current="page"] .header-nav-text {
           font-size: clamp(12px, 0.35rem + 0.5vw, 13.5px) !important;
           font-weight: 500 !important;
           letter-spacing: 0.05em !important;
           line-height: 1.25rem !important;
           font-family: 'Inter', sans-serif !important;
+        }
+
+        /* Smooth bold effect on hover without changing position */
+        header nav .header-nav-item:hover .header-nav-text,
+        header nav a.header-nav-item:hover .header-nav-text,
+        header nav .group:hover .header-nav-text,
+        header nav a:hover .header-nav-text,
+        .group:hover > .header-nav-text {
+          font-weight: 600 !important;
+          text-shadow: 0.25px 0 0.1px currentColor !important;
+        }
+
+        /* Underline animation - smooth expansion from center to left & right with uniform thickness */
+        .header-nav-underline {
+          position: absolute;
+          bottom: -4px;
+          left: 0;
+          width: 100%;
+          height: 1.5px;
+          transform: scaleX(0);
+          transform-origin: center center;
+          transition: transform 350ms cubic-bezier(0.25, 1, 0.5, 1), background-color 400ms cubic-bezier(0.25, 1, 0.5, 1) !important;
+          pointer-events: none;
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+        }
+
+        .group:hover .header-nav-underline,
+        .header-nav-item:hover .header-nav-underline,
+        a:hover .header-nav-underline {
+          transform: scaleX(1) !important;
         }
 
         /* Overlay mobile menu panel background */

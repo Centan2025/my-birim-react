@@ -72,21 +72,21 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
                   fontSize: 'clamp(12px, 0.3rem + 0.5vw, 13.5px)',
                   letterSpacing: '0.02em',
                   fontFamily: "'Inter', sans-serif",
-                  transition: 'color 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transition: 'color 0.35s cubic-bezier(0.25, 1, 0.5, 1)',
                 }}
                 onClick={onClose}
                 onMouseEnter={() => onHoveredCategoryChange(category.id)}
               >
-                <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase">
+                <span
+                  className="relative inline-block uppercase group-hover:font-semibold"
+                  style={{
+                    transition:
+                      'font-weight 0.3s ease, text-shadow 0.3s ease, color 0.35s cubic-bezier(0.25, 1, 0.5, 1)',
+                  }}
+                >
                   {t(category.name)}
                   <span
-                    className={`absolute -bottom-1 left-0 w-full h-[1px] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center ${
-                      isLightMode ? 'bg-black' : 'bg-white'
-                    }`}
-                    style={{
-                      transition:
-                        'transform 300ms ease-out, background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                    }}
+                    className={`header-nav-underline ${isLightMode ? 'bg-black' : 'bg-white'}`}
                   ></span>
                 </span>
               </NavLink>
@@ -194,22 +194,27 @@ export const HeaderProductsPanel: FC<HeaderProductsPanelProps> = ({
       <div className="pt-3 pb-3" style={{paddingLeft: submenuOffset, paddingRight: '5rem'}}>
         <NavLink
           to="/products"
-          className={`group relative inline-block px-0 py-2 font-medium uppercase transition-colors duration-300 ${
+          className={`group relative inline-block px-0 py-2 font-medium uppercase ${
             isLightMode ? 'text-black hover:text-gray-800' : 'text-white hover:text-gray-200'
           }`}
           style={{
             fontSize: 'clamp(12px, 0.3rem + 0.5vw, 13.5px)',
             letterSpacing: '0.02em',
             fontFamily: "'Inter', sans-serif",
+            transition: 'color 0.35s cubic-bezier(0.25, 1, 0.5, 1)',
           }}
           onClick={onClose}
         >
-          <span className="relative inline-block transition-transform duration-300 ease-out group-hover:-translate-y-0.5 uppercase">
+          <span
+            className="relative inline-block uppercase group-hover:font-semibold"
+            style={{
+              transition:
+                'font-weight 0.3s ease, text-shadow 0.3s ease, color 0.35s cubic-bezier(0.25, 1, 0.5, 1)',
+            }}
+          >
             {t('view_all')}
             <span
-              className={`absolute -bottom-1 left-0 w-full h-[1px] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-center ${
-                isLightMode ? 'bg-black' : 'bg-white'
-              }`}
+              className={`header-nav-underline ${isLightMode ? 'bg-black' : 'bg-white'}`}
             ></span>
           </span>
         </NavLink>

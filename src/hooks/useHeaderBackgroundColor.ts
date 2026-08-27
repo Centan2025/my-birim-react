@@ -41,8 +41,7 @@ export function useHeaderBackgroundColor({
     }
 
     if (isProductsOpen && !isMobile) {
-      if (isDarkMode || !effectiveIsLight) return 'rgba(0, 0, 0, 0.85)'
-      return 'rgba(238, 239, 242, 0.98)'
+      return 'rgba(0, 0, 0, 0.85)'
     }
 
     // Üstte koyu hero görseli bulunmayan sayfalar (Tasarımcılar, Haberler vb.):
