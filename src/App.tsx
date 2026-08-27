@@ -36,11 +36,16 @@ const AppContent = () => {
 
   // Ultra-Soft & Butter-Smooth Lenis Momentum Scroll Integration
   useEffect(() => {
+    const isTouchDevice =
+      typeof window !== 'undefined' &&
+      ('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth < 768)
+
     const lenis = new Lenis({
-      lerp: 0.065, // Düşük lerp faktörü = tereyağı gibi ipeksi ve ultra yumuşak kayma
+      lerp: 0.065, // Masaüstünde ipeksi kayma
       wheelMultiplier: 1.0,
-      smoothWheel: true,
-      touchMultiplier: 1.5,
+      smoothWheel: !isTouchDevice,
+      touchMultiplier: 0, // Mobilde parmak bırakıldığında ilave kayma (sliding) olmaması için 0
+      syncTouch: false,
     })
 
     const win = window as unknown as {lenis: unknown}
