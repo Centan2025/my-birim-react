@@ -364,12 +364,14 @@ export function ProjectDetailPageV1() {
     if (!touch) return
     const deltaX = Math.abs(touch.clientX - dragStartX)
     const deltaY = Math.abs(touch.clientY - dragStartY.current)
-    if (deltaY > deltaX * 2.5 && deltaY > 15) {
+    if (deltaY > deltaX || deltaY > 8) {
       setIsHeroDragging(false)
       setDraggedX(0)
       return
     }
-    setDraggedX(touch.clientX - dragStartX)
+    if (deltaX > 15 && deltaX > deltaY * 1.5) {
+      setDraggedX(touch.clientX - dragStartX)
+    }
   }
 
   // Dots animasyonu

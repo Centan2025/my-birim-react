@@ -187,12 +187,12 @@ export function useProductHero(slideCount: number) {
 
       const deltaX = Math.abs(x - dragStartX)
       const deltaY = Math.abs(y - dragStartY.current)
-      if (deltaY > deltaX || deltaY > 10) {
+      if (deltaY > deltaX || deltaY > 8) {
         setIsDragging(false)
         setDraggedX(0)
         return
       }
-      if (deltaX > 8) {
+      if (deltaX > 15 && deltaX > deltaY * 1.5) {
         setDraggedX(x - dragStartX)
       }
 

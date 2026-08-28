@@ -162,11 +162,6 @@ export function ProductDetailPage() {
         window.history.scrollRestoration = 'manual'
       }
       window.scrollTo(0, 0)
-      document.documentElement.scrollTop = 0
-      document.body.scrollTop = 0
-      requestAnimationFrame(() => {
-        window.scrollTo(0, 0)
-      })
     }
   }, [productId])
 

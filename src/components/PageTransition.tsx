@@ -105,9 +105,6 @@ export const PageTransition: React.FC<PageTransitionProps> = ({children}) => {
               ease: [0.12, 0.8, 0.2, 1],
             },
       }}
-      onAnimationComplete={() => {
-        window.scrollTo({top: 0, left: 0, behavior: 'instant'})
-      }}
       exit={
         isCardEntry
           ? {
