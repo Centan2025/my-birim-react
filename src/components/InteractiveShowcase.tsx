@@ -479,7 +479,6 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
                           {/* Desktop Popover Card (Large Image Banner White Square Card) with smooth fluid animation */}
                           <AnimatePresence>
                             {!isMobile && isActive && prod && (
-                              /* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */
                               <motion.div
                                 key={`hotspot-card-${hsIdx}`}
                                 initial={{
@@ -700,7 +699,6 @@ export const InteractiveShowcase: React.FC<InteractiveShowcaseProps> = ({items})
       {/* Mobile Active Hotspot Drawer (Görselli Beyaz Dik Köşeli Mobil Kart) with fluid animation */}
       <AnimatePresence>
         {isMobile && activeHotspot && activeHotspot.hotspot.product && (
-          /* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */
           <motion.div
             key="mobile-hotspot-drawer"
             initial={{opacity: 0, y: '100%'}}
