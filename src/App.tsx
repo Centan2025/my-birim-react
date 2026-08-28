@@ -34,18 +34,20 @@ const AppContent = () => {
   const {pathname} = useLocation()
   const {reset: resetHeaderTheme} = useHeaderTheme()
 
-  // Ultra-Soft & Butter-Smooth Lenis Momentum Scroll Integration
+  // Ultra-Soft & Butter-Smooth Lenis Momentum Scroll Integration for Desktop only
   useEffect(() => {
     const isTouchDevice =
       typeof window !== 'undefined' &&
       ('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth < 768)
 
+    if (isTouchDevice) {
+      return undefined
+    }
+
     const lenis = new Lenis({
       lerp: 0.065, // Masaüstünde ipeksi kayma
       wheelMultiplier: 1.0,
-      smoothWheel: !isTouchDevice,
-      touchMultiplier: 0, // Mobilde parmak bırakıldığında ilave kayma (sliding) olmaması için 0
-      syncTouch: false,
+      smoothWheel: true,
     })
 
     const win = window as unknown as {lenis: unknown}

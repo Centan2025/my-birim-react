@@ -169,9 +169,10 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
         }
       `}</style>
       <div
-        className={`relative w-full overflow-hidden cursor-grab active:cursor-grabbing h-[100dvh] ${
+        className={`relative w-full overflow-hidden cursor-grab active:cursor-grabbing h-[100svh] touch-pan-y ${
           !showHeroNavigation ? 'md:h-[100vh]' : 'md:h-[85vh]'
         }`}
+        style={{touchAction: 'pan-y'}}
         aria-label="Product Image Carousel"
         onMouseDown={onDragStart}
         onMouseMove={onDragMove}

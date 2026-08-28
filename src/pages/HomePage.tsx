@@ -165,156 +165,133 @@ export function HomePage() {
     }
   }, [isMobile, viewportWidth, mobileHeroHeight])
 
-  // Desktop Home Page Section-to-Section Smooth Gliding Scroll Snap Controller
+  // Desktop Home Page Section-to-Section Smooth Gliding Scroll Snap Controller (Strict intentional wheel only)
   useEffect(() => {
     if (isMobile) return
 
     let isSnapping = false
-    let snapLockTimer: ReturnType<typeof setTimeout> | null = null
-    let wheelTimeout: ReturnType<typeof setTimeout> | null = null
+    let lastSnapTime = 0
     let accumulatedDelta = 0
-    const SCROLL_THRESHOLD = 15 // Belli bir kaydırmadan sonra tetikleme eşiği
-
-    const unlockSnapping = () => {
-      isSnapping = false
-      if (snapLockTimer) {
-        clearTimeout(snapLockTimer)
-        snapLockTimer = null
-      }
-    }
+    let resetTimer: ReturnType<typeof setTimeout> | null = null
+    const INTENTIONAL_THRESHOLD = 75 // Sadece belirgin ve bilinçli tekerlek kaydırmalarında tetikle
+    const COOLDOWN_MS = 900 // Snap animasyonu ve atalet boyunca kilit
 
     const handleWheel = (e: WheelEvent) => {
-      // Yatay kaydırma veya Ctrl+zoom hareketlerini es geç
+      // Yatay kaydırma, Ctrl+zoom es geç
       if (Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.ctrlKey) return
 
-      if (isSnapping) return
+      // Dialog, input veya menü içi etkileşimlerde es geç
+      if (
+        e.target instanceof HTMLElement &&
+        e.target.closest('input, textarea, select, [role="dialog"], .no-scroll-snap')
+      ) {
+        return
+      }
+
+      const now = Date.now()
+      if (isSnapping || now - lastSnapTime < COOLDOWN_MS) {
+        accumulatedDelta = 0
+        return
+      }
+
+      // Mikro titreşimleri ve hafif parmak temaslarını yoksay
+      if (Math.abs(e.deltaY) < 20) {
+        return
+      }
 
       accumulatedDelta += e.deltaY
 
-      if (wheelTimeout) clearTimeout(wheelTimeout)
-
-      wheelTimeout = setTimeout(() => {
-        if (isSnapping) {
-          accumulatedDelta = 0
-          return
-        }
-
-        const absDelta = Math.abs(accumulatedDelta)
-        if (absDelta < SCROLL_THRESHOLD) {
-          accumulatedDelta = 0
-          return
-        }
-
-        const direction = accumulatedDelta > 0 ? 'down' : 'up'
+      if (resetTimer) clearTimeout(resetTimer)
+      resetTimer = setTimeout(() => {
         accumulatedDelta = 0
+      }, 150)
 
-        const winHeight = window.innerHeight
-        const scrollY = window.scrollY
-        const docHeight = document.documentElement.scrollHeight
+      if (Math.abs(accumulatedDelta) < INTENTIONAL_THRESHOLD) {
+        return
+      }
 
-        // Hero ve içerik bloklarını snap hedefleri olarak al
-        const heroElem = document.getElementById('home-hero-section')
-        const blockElems = Array.from(
-          document.querySelectorAll<HTMLElement>('.home-content-block-snap')
-        )
+      const direction = accumulatedDelta > 0 ? 'down' : 'up'
+      accumulatedDelta = 0
 
-        const targets: HTMLElement[] = []
-        if (heroElem) targets.push(heroElem)
-        targets.push(...blockElems)
+      const winHeight = window.innerHeight
+      const scrollY = window.scrollY
+      const docHeight = document.documentElement.scrollHeight
 
-        if (targets.length === 0) return
+      // Hero ve içerik bloklarını snap hedefleri olarak al
+      const heroElem = document.getElementById('home-hero-section')
+      const blockElems = Array.from(
+        document.querySelectorAll<HTMLElement>('.home-content-block-snap')
+      )
 
-        // Sayfanın en üstünde yukarı veya en altında aşağı aşırı snap yapılmasını önle
-        if (direction === 'up' && scrollY < 30) return
-        if (direction === 'down' && winHeight + scrollY >= docHeight - 60) return
+      const targets: HTMLElement[] = []
+      if (heroElem) targets.push(heroElem)
+      targets.push(...blockElems)
 
-        // Aktif ekrandaki en yakın bloğun indeksini bul
-        let currentIndex = 0
-        let closestDist = Infinity
+      if (targets.length === 0) return
 
-        for (let i = 0; i < targets.length; i++) {
-          const el = targets[i]
-          if (!el) continue
-          const rect = el.getBoundingClientRect()
-          const dist = Math.abs(rect.top)
-          if (dist < closestDist) {
-            closestDist = dist
-            currentIndex = i
-          }
+      // Sayfanın en üstünde yukarı veya en altında aşağı aşırı snap yapılmasını önle
+      if (direction === 'up' && scrollY < 40) return
+      if (direction === 'down' && winHeight + scrollY >= docHeight - 80) return
+
+      // Aktif ekrandaki en yakın bloğu bul
+      let currentIndex = 0
+      let closestDist = Infinity
+
+      for (let i = 0; i < targets.length; i++) {
+        const el = targets[i]
+        if (!el) continue
+        const rect = el.getBoundingClientRect()
+        const dist = Math.abs(rect.top)
+        if (dist < closestDist) {
+          closestDist = dist
+          currentIndex = i
+        }
+      }
+
+      let targetElem: HTMLElement | null = null
+
+      if (direction === 'down') {
+        if (currentIndex < targets.length - 1) {
+          targetElem = targets[currentIndex + 1] || null
+        }
+      } else {
+        if (currentIndex > 0) {
+          targetElem = targets[currentIndex - 1] || null
+        }
+      }
+
+      if (targetElem) {
+        const targetRect = targetElem.getBoundingClientRect()
+        if (Math.abs(targetRect.top) < 15) return
+
+        isSnapping = true
+        lastSnapTime = Date.now()
+
+        const unlock = () => {
+          isSnapping = false
         }
 
-        let targetElem: HTMLElement | null = null
-
-        if (direction === 'down') {
-          if (currentIndex === 0) {
-            // Herodayız -> İlk İçerik Bloğuna kaydır
-            targetElem = targets[1] || null
-          } else {
-            const currentBlock = targets[currentIndex]
-            if (!currentBlock) return
-            const currentRect = currentBlock.getBoundingClientRect()
-            if (Math.abs(currentRect.top) < 30 && currentIndex < targets.length - 1) {
-              targetElem = targets[currentIndex + 1] || null
-            } else if (currentRect.top < -30 && currentIndex < targets.length - 1) {
-              if (currentRect.height > winHeight * 1.3 && currentRect.bottom > winHeight * 0.7) {
-                targetElem = null
-              } else {
-                targetElem = targets[currentIndex + 1] || null
-              }
-            } else if (currentRect.top > 30) {
-              targetElem = currentBlock
-            }
-          }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const win = window as any
+        if (win.lenis && typeof win.lenis.scrollTo === 'function') {
+          win.lenis.scrollTo(targetElem, {
+            offset: 0,
+            duration: 0.8,
+            easing: (t: number) => 1 - Math.pow(1 - t, 3),
+            onComplete: unlock,
+          })
         } else {
-          // Yukarı kaydırma
-          if (currentIndex === 1 || scrollY < winHeight * 0.8) {
-            // 1. İçerik bloğunda veya Hero'ya yakın alandayız -> Hero'ya snap et
-            targetElem = targets[0] || null
-          } else if (currentIndex > 1) {
-            const currentBlock = targets[currentIndex]
-            if (!currentBlock) return
-            const currentRect = currentBlock.getBoundingClientRect()
-            if (Math.abs(currentRect.top) < 30 && currentIndex > 0) {
-              targetElem = targets[currentIndex - 1] || null
-            } else if (currentRect.top > 30 && currentIndex > 0) {
-              targetElem = targets[currentIndex - 1] || null
-            } else if (currentRect.top < -30) {
-              targetElem = currentBlock
-            }
-          }
+          targetElem.scrollIntoView({behavior: 'smooth', block: 'start'})
+          setTimeout(unlock, 700)
         }
-
-        if (targetElem) {
-          const targetRect = targetElem.getBoundingClientRect()
-          if (Math.abs(targetRect.top) < 10) return
-
-          isSnapping = true
-          if (snapLockTimer) clearTimeout(snapLockTimer)
-          snapLockTimer = setTimeout(unlockSnapping, 800)
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const win = window as any
-          if (win.lenis && typeof win.lenis.scrollTo === 'function') {
-            win.lenis.scrollTo(targetElem, {
-              offset: 0,
-              duration: 0.75,
-              easing: (t: number) => 1 - Math.pow(1 - t, 2.5),
-              onComplete: unlockSnapping,
-            })
-          } else {
-            targetElem.scrollIntoView({behavior: 'smooth', block: 'start'})
-            setTimeout(unlockSnapping, 600)
-          }
-        }
-      }, 40)
+      }
     }
 
     window.addEventListener('wheel', handleWheel, {passive: true})
 
     return () => {
       window.removeEventListener('wheel', handleWheel)
-      if (wheelTimeout) clearTimeout(wheelTimeout)
-      if (snapLockTimer) clearTimeout(snapLockTimer)
+      if (resetTimer) clearTimeout(resetTimer)
     }
   }, [isMobile])
 

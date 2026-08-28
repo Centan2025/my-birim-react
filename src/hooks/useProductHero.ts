@@ -187,12 +187,14 @@ export function useProductHero(slideCount: number) {
 
       const deltaX = Math.abs(x - dragStartX)
       const deltaY = Math.abs(y - dragStartY.current)
-      if (deltaY > deltaX && deltaY > 10) {
+      if (deltaY > deltaX || deltaY > 10) {
         setIsDragging(false)
         setDraggedX(0)
         return
       }
-      setDraggedX(x - dragStartX)
+      if (deltaX > 8) {
+        setDraggedX(x - dragStartX)
+      }
 
       if (!('touches' in e)) {
         e.preventDefault()
