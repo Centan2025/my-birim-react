@@ -32,6 +32,7 @@ interface ProductHeroProps {
   totalHeroSlides: number
   heroSlideIndex: number
   draggedX: number
+  isDragging?: boolean
   heroTransitionEnabled: boolean
   isMobile: boolean
   isTitleVisible: boolean
@@ -74,6 +75,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
   totalHeroSlides,
   heroSlideIndex,
   draggedX,
+  isDragging = false,
   heroTransitionEnabled,
   isTitleVisible,
   isDesignerVisible,
@@ -195,9 +197,11 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
             transform: `translateX(calc(-${
               (heroSlideIndex * 100) / totalHeroSlides
             }% + ${draggedX}px))`,
-            transition: heroTransitionEnabled
-              ? 'transform 1s cubic-bezier(0.1, 1, 0.2, 1)'
-              : 'none',
+            transition: isDragging
+              ? 'none'
+              : heroTransitionEnabled
+                ? 'transform 1s cubic-bezier(0.1, 1, 0.2, 1)'
+                : 'none',
             opacity: phase === 'animating' ? 0 : 1,
           }}
           onTransitionEnd={e => {
@@ -365,45 +369,101 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
               )}
             </div>
 
-            {/* Mobile Portrait Fullscreen Button */}
+            {/* Mobile Portrait Controls (Prev, Next, Fullscreen) */}
             {slideCount > 0 && (
-              <button
-                type="button"
-                onClick={e => {
-                  e.stopPropagation()
-                  onOpenFullscreen()
-                }}
-                className="md:hidden landscape:hidden flex-shrink-0 group pointer-events-auto flex h-8 w-8 items-center justify-center rounded-none border-[0.5px] border-white/80 bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
-                style={{
-                  opacity: isFullscreenButtonVisible ? 1 : 0,
-                  transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
-                  transition:
-                    'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
-                  willChange: 'transform, opacity',
-                  animation: isFullscreenButtonVisible
-                    ? 'home-button-grow 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 300ms forwards'
-                    : 'none',
-                }}
-                aria-label="Tam Ekran"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="0.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-4 w-4"
+              <div className="md:hidden landscape:hidden flex items-center gap-2 flex-shrink-0">
+                {slideCount > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={e => {
+                        e.stopPropagation()
+                        onPrev()
+                      }}
+                      className="group pointer-events-auto flex h-8 w-8 items-center justify-center rounded-none border-[0.5px] border-white/80 bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
+                      style={arrowInLeft}
+                      aria-label="Önceki görsel"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="0.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-5 w-5"
+                      >
+                        <path d="M15 18l-6-6 6-6" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={e => {
+                        e.stopPropagation()
+                        onNext()
+                      }}
+                      className="group pointer-events-auto flex h-8 w-8 items-center justify-center rounded-none border-[0.5px] border-white/80 bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
+                      style={arrowInRight}
+                      aria-label="Sonraki görsel"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="0.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-5 w-5"
+                      >
+                        <path d="M9 18l6-6-6-6" />
+                      </svg>
+                    </button>
+                  </>
+                )}
+                <button
+                  type="button"
+                  onClick={e => {
+                    e.stopPropagation()
+                    onOpenFullscreen()
+                  }}
+                  className="group pointer-events-auto flex h-8 w-8 items-center justify-center rounded-none border-[0.5px] border-white/80 bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
+                  style={{
+                    opacity: isFullscreenButtonVisible ? 1 : 0,
+                    transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
+                    transition:
+                      'opacity 700ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    willChange: 'transform, opacity',
+                    animation: isFullscreenButtonVisible
+                      ? 'home-button-grow 600ms cubic-bezier(0.34, 1.56, 0.64, 1) 300ms forwards'
+                      : 'none',
+                  }}
+                  aria-label="Tam Ekran"
                 >
-                  <path d="M15 3h6v6" />
-                  <path d="M9 21H3v-6" />
-                  <path d="M21 3l-7 7" />
-                  <path d="M3 21l7-7" />
-                </svg>
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="0.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4"
+                  >
+                    <path d="M15 3h6v6" />
+                    <path d="M9 21H3v-6" />
+                    <path d="M21 3l-7 7" />
+                    <path d="M3 21l7-7" />
+                  </svg>
+                </button>
+              </div>
             )}
           </div>
         </div>

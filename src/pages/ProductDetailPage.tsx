@@ -234,6 +234,7 @@ export function ProductDetailPage() {
         totalHeroSlides={heroHook.totalHeroSlides}
         heroSlideIndex={heroHook.heroSlideIndex}
         draggedX={heroHook.draggedX}
+        isDragging={heroHook.isDragging}
         heroTransitionEnabled={heroHook.heroTransitionEnabled}
         isMobile={isMobile}
         isTitleVisible={isTitleVisible}

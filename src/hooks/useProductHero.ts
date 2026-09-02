@@ -72,6 +72,8 @@ export function useProductHero(slideCount: number) {
   const heroNext = useCallback(() => {
     if (slideCount <= 1) return
 
+    setHeroTransitionEnabled(true)
+
     if (heroSlideIndexRef.current >= totalHeroSlides - 1) {
       setHeroTransitionEnabled(false)
       updateSlideIndex(1)
@@ -94,6 +96,8 @@ export function useProductHero(slideCount: number) {
 
   const heroPrev = useCallback(() => {
     if (slideCount <= 1) return
+
+    setHeroTransitionEnabled(true)
 
     if (heroSlideIndexRef.current <= 0) {
       setHeroTransitionEnabled(false)
@@ -167,6 +171,9 @@ export function useProductHero(slideCount: number) {
     [slideCount, totalHeroSlides, updateSlideIndex]
   )
 
+  const VERTICAL_SCROLL_TOLERANCE = 2.5
+  const MIN_VERTICAL_DELTA = 15
+
   const handleHeroDragMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
       if (!isDragging) return
@@ -187,14 +194,16 @@ export function useProductHero(slideCount: number) {
 
       const deltaX = Math.abs(x - dragStartX)
       const deltaY = Math.abs(y - dragStartY.current)
-      if (deltaY > deltaX || deltaY > 8) {
+
+      // Dikey scroll yapılıyorsa (sayfa aşağı kaydırılıyorsa) yatay sürüklemeyi iptal et
+      if (deltaY > deltaX * VERTICAL_SCROLL_TOLERANCE && deltaY > MIN_VERTICAL_DELTA) {
         setIsDragging(false)
         setDraggedX(0)
         return
       }
-      if (deltaX > 15 && deltaX > deltaY * 1.5) {
-        setDraggedX(x - dragStartX)
-      }
+
+      // Yatay swipe: parmağı takip et
+      setDraggedX(x - dragStartX)
 
       if (!('touches' in e)) {
         e.preventDefault()
@@ -206,8 +215,11 @@ export function useProductHero(slideCount: number) {
   const handleHeroDragEnd = useCallback(() => {
     if (!isDragging) return
     setIsDragging(false)
-    if (draggedX < -DRAG_THRESHOLD) heroNext()
-    else if (draggedX > DRAG_THRESHOLD) heroPrev()
+    if (draggedX < -DRAG_THRESHOLD) {
+      heroNext()
+    } else if (draggedX > DRAG_THRESHOLD) {
+      heroPrev()
+    }
     setDraggedX(0)
   }, [isDragging, draggedX, heroNext, heroPrev])
 
@@ -219,6 +231,7 @@ export function useProductHero(slideCount: number) {
     heroTransitionEnabled,
     setHeroTransitionEnabled,
     draggedX,
+    isDragging,
     totalHeroSlides,
     heroNext,
     heroPrev,
