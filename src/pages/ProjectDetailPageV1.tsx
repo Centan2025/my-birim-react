@@ -358,20 +358,25 @@ export function ProjectDetailPageV1() {
     setDraggedX(0)
   }
 
+  const VERTICAL_SCROLL_TOLERANCE = 2.5
+  const MIN_VERTICAL_DELTA = 15
+
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isHeroDragging || heroCount <= 1) return
     const touch = e.touches[0]
     if (!touch) return
     const deltaX = Math.abs(touch.clientX - dragStartX)
     const deltaY = Math.abs(touch.clientY - dragStartY.current)
-    if (deltaY > deltaX || deltaY > 8) {
+
+    // Dikey sayfa kaydırması yapılıyorsa slider sürüklemesini iptal et
+    if (deltaY > deltaX * VERTICAL_SCROLL_TOLERANCE && deltaY > MIN_VERTICAL_DELTA) {
       setIsHeroDragging(false)
       setDraggedX(0)
       return
     }
-    if (deltaX > 15 && deltaX > deltaY * 1.5) {
-      setDraggedX(touch.clientX - dragStartX)
-    }
+
+    // Yatay swipe: parmağı takip et
+    setDraggedX(touch.clientX - dragStartX)
   }
 
   // Dots animasyonu
@@ -603,7 +608,8 @@ export function ProjectDetailPageV1() {
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className="relative w-full h-[calc(100vh-48px)] md:h-[calc(100vh-56px)] overflow-hidden select-none"
+        style={{touchAction: 'pan-y'}}
+        className="relative w-full h-[calc(100dvh-48px)] md:h-[calc(100dvh-56px)] overflow-hidden select-none touch-pan-y"
       >
         {heroCount > 0 ? (
           <div className="absolute inset-0 overflow-hidden">
@@ -840,8 +846,8 @@ export function ProjectDetailPageV1() {
       </div>
 
       {/* Hero Altı Koyu Gri Bant (Dikey Ortalanmış Navigasyon Düğmeleri) */}
-      <div className="w-full bg-[#1c1f24] text-white flex items-center min-h-[48px] md:min-h-[56px] py-2 md:py-2.5">
-        <div className="w-full max-w-[95%] md:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex items-center justify-between gap-2">
+      <div className="w-full bg-[#1c1f24] text-white flex items-center h-12 md:h-14">
+        <div className="w-full max-w-[95%] md:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0 flex items-center justify-between gap-2 h-full">
           <div className="flex-1 min-w-0 flex justify-start">
             {prevProject ? (
               <Link
