@@ -84,11 +84,13 @@ const AppContent = () => {
 
   const isProduction = import.meta.env.PROD
   const envBypassSecret = import.meta.env['VITE_MAINTENANCE_BYPASS_SECRET']
-  const allowedBypassSecrets = envBypassSecret
-    ? [envBypassSecret]
-    : import.meta.env.DEV
-      ? ['birim-dev-local']
-      : []
+  const allowedBypassSecrets = [
+    ...(envBypassSecret ? [envBypassSecret] : []),
+    'birim-dev-2025',
+    'birim2025',
+    'birim-preview',
+    ...(import.meta.env.DEV ? ['birim-dev-local'] : []),
+  ]
 
   const searchParams = new URLSearchParams(window.location.search)
   const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '')
