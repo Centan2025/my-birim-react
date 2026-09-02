@@ -49,7 +49,7 @@ export function Header() {
   const productsButtonRef = useRef<HTMLDivElement>(null)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null)
-  const mobileMenuFocusTrap = useFocusTrap(isMobileMenuOpen)
+  const mobileMenuFocusTrap = useFocusTrap(isMobileMenuOpen, () => setIsMobileMenuOpen(false))
   const mobileMenuCloseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const mobileLocaleTimeoutRef = useRef<number | null>(null)
   const [submenuOffset, setSubmenuOffset] = useState(0)
@@ -59,7 +59,7 @@ export function Header() {
   const {isLoggedIn} = useAuth()
   const {cartCount, toggleCart} = useCart()
   const [headerOpacity, setHeaderOpacity] = useState(() =>
-    typeof window !== 'undefined' && isDarkHeroPageUtil(window.location.pathname) ? 0 : 0.7
+    isDarkHeroPageUtil(location.pathname) ? 0 : 0.7
   )
   const [isHeaderVisible, setIsHeaderVisible] = useState(true)
 

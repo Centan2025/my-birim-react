@@ -108,26 +108,6 @@ export const subscribeProfessional = async (data: {
       isProfessional: true,
     })
 
-    if (result.verificationToken) {
-      try {
-        const siteUrl = import.meta.env['VITE_SITE_URL'] || window.location.origin
-        const verificationUrl = `${siteUrl}/#/verify-email?token=${result.verificationToken}`
-        const emailServerUrl = import.meta.env['VITE_EMAIL_SERVER_URL'] || 'http://localhost:3002'
-
-        fetch(`${emailServerUrl}/api/send-verification`, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            email: normEmail,
-            verificationUrl,
-            logoUrl: `${siteUrl}/logo.png`,
-          }),
-        }).catch(e => console.error('E-posta gönderilemedi:', e))
-      } catch (e) {
-        console.error('E-posta tetikleme hatası:', e)
-      }
-    }
-
     return result
   }
 
@@ -279,7 +259,22 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
   if (useSanity && sanity)
     return (
       (await sanity.fetch(
-        groq`*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]{ ..., isVerified }`,
+        groq`*[_type == "user" && lower(email) == $email && !defined(_deleted)][0]{
+          _id,
+          name,
+          firstName,
+          lastName,
+          email,
+          role,
+          company,
+          profession,
+          country,
+          phone,
+          userType,
+          isVerified,
+          isActive,
+          createdAt
+        }`,
         {email: normEmail}
       )) || null
     )
@@ -289,8 +284,25 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
 export const getUserById = async (id: string): Promise<User | null> => {
   if (useSanity && sanity)
     return (
-      (await sanity.fetch(groq`*[_type == "user" && _id == $id][0]{ ..., isVerified }`, {id})) ||
-      null
+      (await sanity.fetch(
+        groq`*[_type == "user" && _id == $id][0]{
+          _id,
+          name,
+          firstName,
+          lastName,
+          email,
+          role,
+          company,
+          profession,
+          country,
+          phone,
+          userType,
+          isVerified,
+          isActive,
+          createdAt
+        }`,
+        {id}
+      )) || null
     )
   return getItem<User[]>(KEYS.USERS)?.find(u => u._id === id) || null
 }

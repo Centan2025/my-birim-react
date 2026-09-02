@@ -110,7 +110,7 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
           path="/product/:productId"
           element={
             <PageBoundary pageName="Ürün Detayı">
-              <ProductDetailPage />
+              <ProductDetailPage key={frozenLocation.pathname} />
             </PageBoundary>
           }
         />
@@ -174,7 +174,7 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
           path="/factory"
           element={
             <PageBoundary pageName="Fabrika">
-              <FactoryPage />
+              <FactoryPage defaultVersion="v2" />
             </PageBoundary>
           }
         />

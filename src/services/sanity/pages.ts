@@ -168,8 +168,14 @@ export const getAboutPageContent = async (): Promise<AboutPageContent> => {
 export const getFactoryPageContent = async (): Promise<FactoryPageContent> => {
   if (useSanity && sanity) {
     try {
-      const q = groq`*[_type == "factoryPage" && !(_id in path("drafts.**"))] | order(_updatedAt desc)[0]{
+      const q = groq`*[_id == "factoryPage" || (_type == "factoryPage" && !(_id in path("drafts.**")))] | order((_id == "factoryPage") desc, _updatedAt desc)[0]{
         ...,
+        heroImageR2,
+        metrics[],
+        disciplines[]{
+          ...,
+          imageR2
+        },
         gallery[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 },
         media[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 },
         images[]{ ..., imageR2, imageMobileR2, imageDesktopR2, videoFileR2 }
@@ -178,6 +184,14 @@ export const getFactoryPageContent = async (): Promise<FactoryPageContent> => {
       if (data) {
         const rawGallery = data.gallery ?? data.media ?? data.images
         data.gallery = Array.isArray(rawGallery) ? mapProductMedia({media: rawGallery}) : []
+        if (Array.isArray(data.disciplines)) {
+          data.disciplines = data.disciplines.map((d: Record<string, unknown>) => ({
+            ...d,
+            image: d['imageR2']
+              ? mapImage(d['imageR2'] as never)
+              : (d['image'] as string | undefined),
+          }))
+        }
         return data
       }
     } catch {

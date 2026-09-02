@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {useMemo, useEffect, useState, FC} from 'react'
-import {useParams, Link} from 'react-router-dom'
+import {useParams, Link, useLocation} from 'react-router-dom'
 import {motion, AnimatePresence} from 'framer-motion'
 import type {NewsMedia} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
@@ -158,6 +158,7 @@ export function NewsDetailPage() {
   const {newsId} = useParams<{newsId: string}>()
   const {data: item, isLoading: loading} = useNewsItem(newsId)
   const {data: allNews = []} = useNews()
+  const location = useLocation()
   const {t, locale} = useTranslation()
 
   const [scrollProgress, setScrollProgress] = useState(0)
@@ -245,14 +246,14 @@ export function NewsDetailPage() {
     if (typeof window === 'undefined') return
 
     const pageTitle = `BIRIM - ${t('news') || 'Haberler'} - ${t(item.title)}`
-    analytics.pageview(window.location.pathname, pageTitle)
+    analytics.pageview(location.pathname, pageTitle)
 
     analytics.event({
       category: 'news',
       action: 'view_news',
       label: t(item.title),
     })
-  }, [item, t])
+  }, [item, t, location.pathname])
 
   const handleCopyLink = () => {
     if (typeof window !== 'undefined') {

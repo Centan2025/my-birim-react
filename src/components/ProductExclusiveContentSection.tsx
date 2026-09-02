@@ -19,6 +19,7 @@ interface ExclusiveContentSectionProps {
   user: User | null
   navigate: NavigateFunction
   t: (value: string | LocalizedString) => string
+  onOpenImageFullscreen?: (index: number) => void
 }
 
 const DownloadIcon = () => (
@@ -45,6 +46,7 @@ export function ProductExclusiveContentSection({
   user,
   navigate,
   t,
+  onOpenImageFullscreen,
 }: ExclusiveContentSectionProps) {
   if (!exclusiveContent) return null
 
@@ -98,6 +100,25 @@ export function ProductExclusiveContentSection({
     }
   }
 
+  const handleImageClick = (e: React.MouseEvent, _url: string, idx: number) => {
+    if (!isLoggedIn) {
+      e.preventDefault()
+      navigate('/login')
+      return
+    }
+
+    if (user && !user.isVerified) {
+      e.preventDefault()
+      alert('Email adresiniz henüz doğrulanmamış. Lütfen email kutunuzu kontrol edin.')
+      return
+    }
+
+    if (onOpenImageFullscreen) {
+      e.preventDefault()
+      onOpenImageFullscreen(idx)
+    }
+  }
+
   const getExtraImageLabel = (_img: string | {url?: string; image?: string}, idx: number) => {
     return `${t('additional_image') || 'Ek Görsel'} ${idx + 1}`
   }
@@ -129,20 +150,46 @@ export function ProductExclusiveContentSection({
                   const label = getExtraImageLabel(img, idx)
                   return (
                     <li key={idx} className="group">
-                      <a
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={e => handleDownloadClick(e, url)}
-                        className="flex items-center gap-2 px-3 py-2 rounded-none border border-[var(--border-primary)] bg-[var(--bg-primary)] hover:border-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors"
-                      >
-                        <span className="shrink-0 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
+                      <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-none border border-[var(--border-primary)] bg-[var(--bg-primary)] hover:border-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)] transition-colors">
+                        <button
+                          type="button"
+                          onClick={e => handleImageClick(e, url, idx)}
+                          className="flex items-center gap-2 flex-grow text-left cursor-pointer select-none overflow-hidden"
+                          title={label}
+                        >
+                          <span className="shrink-0 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M15 3h6v6" />
+                              <path d="M9 21H3v-6" />
+                              <path d="M21 3l-7 7" />
+                              <path d="M3 21l7-7" />
+                            </svg>
+                          </span>
+                          <span className="text-sm text-[var(--text-primary)] group-hover:text-[var(--text-primary)] truncate">
+                            {label}
+                          </span>
+                        </button>
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={e => handleDownloadClick(e, url)}
+                          className="shrink-0 p-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                          title="İndir"
+                        >
                           <DownloadIcon />
-                        </span>
-                        <span className="text-sm text-[var(--text-primary)] group-hover:text-[var(--text-primary)] break-all">
-                          {label}
-                        </span>
-                      </a>
+                        </a>
+                      </div>
                     </li>
                   )
                 })}

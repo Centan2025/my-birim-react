@@ -38,12 +38,14 @@ const getPreviewToken = () => {
 
 const previewToken = getPreviewToken()
 
+const isDev = Boolean(import.meta.env?.DEV)
+
 const rawSanity = useSanity
   ? createClient({
       projectId: SANITY_PROJECT_ID,
       dataset: SANITY_DATASET,
       apiVersion: SANITY_API_VERSION,
-      useCdn: false,
+      useCdn: isDev ? false : !previewToken,
       token: previewToken || undefined,
       perspective: previewToken ? 'drafts' : 'published',
       ignoreBrowserTokenWarning: true,

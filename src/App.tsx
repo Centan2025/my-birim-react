@@ -1,5 +1,5 @@
 import {Suspense, lazy, useEffect} from 'react'
-import {HashRouter, Routes, Route, useLocation} from 'react-router-dom'
+import {BrowserRouter, Routes, Route, useLocation, useNavigate} from 'react-router-dom'
 import {QueryClientProvider} from '@tanstack/react-query'
 
 import {I18nProvider} from './i18n'
@@ -83,8 +83,12 @@ const AppContent = () => {
   const enableTransitions = settings?.enablePageTransitions ?? true
 
   const isProduction = import.meta.env.PROD
-  const envBypassSecret = import.meta.env['VITE_MAINTENANCE_BYPASS_SECRET'] || 'birim-dev-2025'
-  const allowedBypassSecrets = Array.from(new Set(['birim-dev-2025', envBypassSecret]))
+  const envBypassSecret = import.meta.env['VITE_MAINTENANCE_BYPASS_SECRET']
+  const allowedBypassSecrets = envBypassSecret
+    ? [envBypassSecret]
+    : import.meta.env.DEV
+      ? ['birim-dev-local']
+      : []
 
   const searchParams = new URLSearchParams(window.location.search)
   const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '')
@@ -181,9 +185,28 @@ const AppContent = () => {
 
 import {DarkModeProvider} from './context/DarkModeContext'
 
+/**
+ * Geriye dönük uyumluluk: Eski #/link yer imlerini veya harici bağlantıları
+ * anında standart temiz URL yapısına yönlendirir.
+ */
+function HashRedirector() {
+  const navigate = useNavigate()
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hash = window.location.hash
+      if (hash.startsWith('#/')) {
+        const target = hash.slice(1) // '#/about' -> '/about'
+        navigate(target, {replace: true})
+      }
+    }
+  }, [navigate])
+  return null
+}
+
 export default function App() {
   return (
-    <HashRouter future={{v7_startTransition: true, v7_relativeSplatPath: true}}>
+    <BrowserRouter future={{v7_startTransition: true, v7_relativeSplatPath: true}}>
+      <HashRedirector />
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <I18nProvider>
@@ -203,6 +226,6 @@ export default function App() {
           </I18nProvider>
         </AuthProvider>
       </QueryClientProvider>
-    </HashRouter>
+    </BrowserRouter>
   )
 }

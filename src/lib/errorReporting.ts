@@ -5,7 +5,7 @@
  * Supports Sentry for production error tracking.
  */
 
-import * as Sentry from '@sentry/react'
+type SentryModule = typeof import('@sentry/react')
 
 const DEBUG_LOGS = (import.meta.env as {VITE_DEBUG_LOGS?: string}).VITE_DEBUG_LOGS === 'true'
 
@@ -21,18 +21,21 @@ interface ErrorContext {
 class ErrorReporter {
   private isInitialized = false
   private dsn: string | null = null
+  private sentryInstance: SentryModule | null = null
 
   /**
    * Initialize error reporting service
    * @param dsn - Data Source Name (e.g., Sentry DSN)
    */
-  init(dsn?: string) {
+  async init(dsn?: string) {
     if (this.isInitialized) return
 
     this.dsn = dsn || (import.meta.env['VITE_SENTRY_DSN'] as string | undefined) || null
 
     if (this.dsn) {
       try {
+        const Sentry = await import('@sentry/react')
+        this.sentryInstance = Sentry
         Sentry.init({
           dsn: this.dsn,
           environment: (import.meta.env.MODE as string | undefined) || 'development',
@@ -98,9 +101,9 @@ class ErrorReporter {
       console.error('[ErrorReporter] Exception:', error, context)
     }
 
-    if (this.dsn) {
+    if (this.sentryInstance) {
       try {
-        Sentry.captureException(error, {
+        this.sentryInstance.captureException(error, {
           user: context?.user,
           tags: context?.tags,
           extra: context?.extra,
@@ -123,10 +126,10 @@ class ErrorReporter {
       console.debug(`[ErrorReporter] ${level.toUpperCase()}:`, message, context)
     }
 
-    if (this.dsn) {
+    if (this.sentryInstance) {
       try {
-        Sentry.captureMessage(message, {
-          level: level as Sentry.SeverityLevel,
+        this.sentryInstance.captureMessage(message, {
+          level: level as import('@sentry/react').SeverityLevel,
           user: context?.user,
           tags: context?.tags,
           extra: context?.extra,
@@ -141,9 +144,9 @@ class ErrorReporter {
    * Set user context
    */
   setUser(user: {id?: string; email?: string; name?: string}) {
-    if (this.dsn) {
+    if (this.sentryInstance) {
       try {
-        Sentry.setUser(user)
+        this.sentryInstance.setUser(user)
       } catch (err) {
         console.error('[ErrorReporter] Failed to set user:', err)
       }
@@ -154,9 +157,9 @@ class ErrorReporter {
    * Clear user context
    */
   clearUser() {
-    if (this.dsn) {
+    if (this.sentryInstance) {
       try {
-        Sentry.setUser(null)
+        this.sentryInstance.setUser(null)
       } catch (err) {
         console.error('[ErrorReporter] Failed to clear user:', err)
       }

@@ -54,16 +54,11 @@ const staticPages: SitemapUrl[] = [
 ]
 
 /**
- * Generates clean canonical URLs and HashRouter URLs for maximum SEO compatibility.
+ * Generates clean canonical URLs for maximum SEO compatibility.
  */
 const buildCleanUrl = (path: string): string => {
   const cleanPath = path.startsWith('/') ? path : `/${path}`
   return `${BASE_URL}${cleanPath}`
-}
-
-const buildHashUrl = (path: string): string => {
-  const cleanPath = path.startsWith('/') ? path : `/${path}`
-  return `${BASE_URL}/#${cleanPath}`
 }
 
 // XML sitemap oluşturucu (Sitemap Protocol 0.9 + xhtml:link for hreflang)
@@ -72,19 +67,11 @@ const generateSitemapXml = (urls: SitemapUrl[]): string => {
 
   for (const url of urls) {
     const cleanLoc = buildCleanUrl(url.loc)
-    const hashLoc = buildHashUrl(url.loc)
 
     // Clean Canonical URL Entry
     urlEntries.push(`  <url>
     <loc>${cleanLoc}</loc>
 ${url.lastmod ? `    <lastmod>${url.lastmod}</lastmod>\n` : ''}${url.changefreq ? `    <changefreq>${url.changefreq}</changefreq>\n` : ''}${url.priority !== undefined ? `    <priority>${url.priority}</priority>\n` : ''}  </url>`)
-
-    // HashRouter URL Entry (if path is not root '/')
-    if (url.loc !== '/') {
-      urlEntries.push(`  <url>
-    <loc>${hashLoc}</loc>
-${url.lastmod ? `    <lastmod>${url.lastmod}</lastmod>\n` : ''}${url.changefreq ? `    <changefreq>${url.changefreq}</changefreq>\n` : ''}${url.priority !== undefined ? `    <priority>${url.priority ? Math.max(0.1, url.priority - 0.1) : 0.5}</priority>\n` : ''}  </url>`)
-    }
   }
 
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -107,11 +94,11 @@ async function run() {
   try {
     const dynamicData = (await sanityClient.fetch(`
       {
-        "products": *[_type == "product" && defined(slug.current)] { "slug": slug.current, _updatedAt },
-        "news": *[_type == "newsItem" && defined(slug.current)] { "slug": slug.current, _updatedAt },
-        "projects": *[_type == "project" && defined(slug.current)] { "slug": slug.current, _updatedAt },
-        "designers": *[_type == "designer" && defined(slug.current)] { "slug": slug.current, _updatedAt },
-        "categories": *[_type == "category" && defined(slug.current)] { "slug": slug.current, _updatedAt }
+        "products": *[_type == "product" && (defined(id.current) || defined(slug.current))] { "slug": coalesce(id.current, slug.current), _updatedAt },
+        "news": *[_type == "newsItem" && (defined(id.current) || defined(slug.current))] { "slug": coalesce(id.current, slug.current), _updatedAt },
+        "projects": *[_type == "project" && (defined(id.current) || defined(slug.current))] { "slug": coalesce(id.current, slug.current), _updatedAt },
+        "designers": *[_type == "designer" && (defined(id.current) || defined(slug.current))] { "slug": coalesce(id.current, slug.current), _updatedAt },
+        "categories": *[_type == "category" && (defined(id.current) || defined(slug.current))] { "slug": coalesce(id.current, slug.current), _updatedAt }
       }
     `)) as {
       products: SanityDoc[]

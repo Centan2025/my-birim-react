@@ -506,7 +506,7 @@ export const getManufacturingBusinessSchema = (data: {
 }
 
 /**
- * BIRIM site URL'sini döndürür (HashRouter uyumlu)
+ * BIRIM site URL'sini döndürür
  */
 export const getSiteUrl = (): string => {
   if (typeof window !== 'undefined') return window.location.origin
@@ -514,10 +514,10 @@ export const getSiteUrl = (): string => {
 }
 
 /**
- * HashRouter URL'si oluşturur (SEO canonical URL için)
+ * Temiz standart Canonical URL oluşturur (SEO uyumlu)
  */
 export const getCanonicalUrl = (path: string): string => {
   const base = getSiteUrl()
   const cleanPath = path.startsWith('/') ? path : `/${path}`
-  return `${base}/#${cleanPath}`
+  return `${base}${cleanPath}`
 }

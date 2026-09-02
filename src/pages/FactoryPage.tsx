@@ -5,7 +5,7 @@ import {FactoryPageV2} from './FactoryPageV2'
 import {FactoryPageV3} from './FactoryPageV3'
 import {FactoryVersionSwitcher} from '../components/FactoryVersionSwitcher'
 
-export function FactoryPage({defaultVersion = 'v1'}: {defaultVersion?: 'v1' | 'v2' | 'v3'}) {
+export function FactoryPage({defaultVersion = 'v2'}: {defaultVersion?: 'v1' | 'v2' | 'v3'}) {
   const [searchParams, setSearchParams] = useSearchParams()
   const paramVersion = searchParams.get('v')
 

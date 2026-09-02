@@ -47,11 +47,21 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
-        // Uygulama kabuğu (HTML, JS, CSS) — stale-while-revalidate
+        // Uygulama kabuğu (HTML, JS, CSS, Font) — stale-while-revalidate
         navigateFallback: '/index.html',
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{js,css,html,woff2,svg}', 'manifest.webmanifest'],
+        globIgnores: ['img/**', '**/img/**', '**/*.png', '**/*.jpg', '**/*.jpeg'],
         // Sanity CDN ve R2 görsellerini önbelleğe al (30 gün)
         runtimeCaching: [
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|svg|webp|avif)$/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'static-local-images',
+              expiration: {maxEntries: 100, maxAgeSeconds: 30 * 24 * 60 * 60},
+              cacheableResponse: {statuses: [0, 200]},
+            },
+          },
           {
             urlPattern: /^https:\/\/assets\.birim\.com\/.*/i,
             handler: 'StaleWhileRevalidate',
@@ -178,6 +188,12 @@ export default defineConfig({
         manualChunks: {
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           'sanity-vendor': ['@sanity/client', '@sanity/image-url'],
+          'animation-vendor': ['framer-motion', 'lenis'],
+          'icons-vendor': ['lucide-react', 'react-icons'],
+          'query-vendor': ['@tanstack/react-query'],
+          'utils-vendor': ['zod', 'dompurify'],
+          'sentry-vendor': ['@sentry/react'],
+          'posthog-vendor': ['posthog-js'],
         },
       },
     },

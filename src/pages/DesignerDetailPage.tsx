@@ -116,14 +116,14 @@ export function DesignerDetailPage() {
     if (!designer) return
     if (typeof window === 'undefined') return
 
-    analytics.pageview(window.location.pathname, pageTitle)
+    analytics.pageview(location.pathname, pageTitle)
 
     analytics.event({
       category: 'designer',
       action: 'view_designer',
       label: t(designer.name), // ID yerine tasarımcı adı
     })
-  }, [designer, pageTitle, t])
+  }, [designer, pageTitle, t, location.pathname])
 
   // Tasarımcı adı animasyonu - soldan fade ile gel
   useEffect(() => {

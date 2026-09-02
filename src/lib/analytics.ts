@@ -8,7 +8,8 @@
  */
 
 import ReactGA from 'react-ga4'
-import posthog from 'posthog-js'
+
+type PostHogClient = typeof import('posthog-js').default
 
 interface AnalyticsEvent {
   action: string
@@ -26,6 +27,7 @@ class Analytics {
   private plausibleDomain: string | null = null
   private posthogKey: string | null = null
   private posthogHost: string | null = null
+  private posthogClient: PostHogClient | null = null
   private hasRejectionHandler = false
   private hasErrorHandler = false
   private storagePatched = false
@@ -66,13 +68,13 @@ class Analytics {
         const detail = e.detail
         if (detail?.analytics === false || detail?.rejected) {
           try {
-            posthog.opt_out_capturing()
+            this.posthogClient?.opt_out_capturing()
           } catch (_err) {
             // Ignore
           }
         } else if (detail?.analytics === true) {
           try {
-            posthog.opt_in_capturing()
+            this.posthogClient?.opt_in_capturing()
           } catch (_err) {
             // Ignore
           }
@@ -81,7 +83,7 @@ class Analytics {
 
       if (!this.isConsentGranted()) {
         try {
-          posthog.opt_out_capturing()
+          this.posthogClient?.opt_out_capturing()
         } catch (_err) {
           // Ignore
         }
@@ -103,15 +105,24 @@ class Analytics {
     }
   }
 
-  private initPostHog(key: string, host: string) {
+  private async initPostHog(key: string, host: string) {
     if (typeof window === 'undefined') return
     try {
-      posthog.init(key, {
+      const {default: ph} = await import('posthog-js')
+      this.posthogClient = ph
+      ph.init(key, {
         api_host: host,
         person_profiles: 'identified_only',
         autocapture: true,
         capture_pageview: true,
       })
+      if (!this.isConsentGranted()) {
+        try {
+          ph.opt_out_capturing()
+        } catch {
+          // Ignore
+        }
+      }
     } catch (_e: unknown) {
       // PostHog init hatasını sessizce yut
     }
@@ -308,7 +319,7 @@ class Analytics {
     // PostHog
     if (this.posthogKey) {
       try {
-        posthog.capture('$pageview', {$current_url: path, title})
+        this.posthogClient?.capture('$pageview', {$current_url: path, title})
       } catch (_e: unknown) {
         // Suppress
       }
@@ -362,7 +373,7 @@ class Analytics {
     // PostHog
     if (this.posthogKey) {
       try {
-        posthog.capture(event.action, {
+        this.posthogClient?.capture(event.action, {
           category: event.category,
           label: event.label,
           value: safeValue,
@@ -383,7 +394,7 @@ class Analytics {
   identifyUser(userId: string, userProps?: Record<string, unknown>) {
     if (this.posthogKey && userId && typeof userId === 'string' && userId.trim()) {
       try {
-        posthog.identify(userId, userProps)
+        this.posthogClient?.identify(userId, userProps)
       } catch (_e: unknown) {
         // Suppress
       }
@@ -396,7 +407,7 @@ class Analytics {
   resetUser() {
     if (this.posthogKey) {
       try {
-        posthog.reset()
+        this.posthogClient?.reset()
       } catch (_e: unknown) {
         // Suppress
       }

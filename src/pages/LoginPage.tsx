@@ -62,16 +62,6 @@ export function LoginPage() {
     }
   }, [auth.isLoggedIn, navigate])
 
-  // İlk yüklemede tarayıcı otomatik doldurmuş olsa bile alanları temizle
-  useEffect(() => {
-    if (auth.isLoggedIn) return
-    const timer = setTimeout(() => {
-      setEmail('')
-      setPassword('')
-    }, 50)
-    return () => clearTimeout(timer)
-  }, [auth.isLoggedIn])
-
   if (auth.isLoggedIn && auth.user) {
     return (
       <div className="bg-[var(--bg-secondary)] min-h-screen text-[var(--text-primary)] flex items-center justify-center p-8 pt-28">

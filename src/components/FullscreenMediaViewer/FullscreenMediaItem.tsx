@@ -3,6 +3,21 @@ import {OptimizedImage} from '../OptimizedImage'
 import {OptimizedVideo} from '../OptimizedVideo'
 import {MediaItem} from './types'
 
+const toYouTubeEmbed = (url: string) => {
+  if (!url) return ''
+  let id = ''
+  if (url.includes('youtube.com/watch?v=')) {
+    id = url.split('v=')[1]?.split('&')[0] || ''
+  } else if (url.includes('youtu.be/')) {
+    id = url.split('youtu.be/')[1]?.split('?')[0] || ''
+  } else if (url.includes('youtube.com/embed/')) {
+    id = url.split('embed/')[1]?.split('?')[0] || ''
+  }
+  return id
+    ? `https://www.youtube.com/embed/${id}?autoplay=1&mute=0&controls=1&playlist=${id}&loop=1`
+    : url
+}
+
 interface FullscreenMediaItemProps {
   item: MediaItem
   index: number
@@ -146,7 +161,7 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
         <iframe
           className="w-full h-full max-w-[100vw] max-h-[100dvh] mx-auto my-auto"
           title={`fullscreen-media-youtube-${index}`}
-          src={item.url}
+          src={toYouTubeEmbed(item.url)}
           allow="autoplay; encrypted-media; fullscreen"
           frameBorder="0"
           style={{

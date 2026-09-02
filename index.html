@@ -77,17 +77,32 @@
     <link rel="mask-icon" href="/favicon.svg" color="#0a0a0a" />
 
     <!-- Preconnect for Critical Resources -->
+    <link rel="preconnect" href="https://assets.birim.com" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://cdn.sanity.io" crossorigin />
+    <link rel="dns-prefetch" href="https://assets.birim.com" />
     <link rel="dns-prefetch" href="https://www.google-analytics.com" />
     <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
 
-    <!-- Fonts -->
+    <!-- Fonts (Non-render-blocking with FOIT prevention) -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@100;300;400;700;800&family=Inter:wght@100..900&family=Jura:wght@300..700&family=Michroma&family=Oswald:wght@200..700&family=Outfit:wght@100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Jura:wght@400;600&family=Michroma&family=Oswald:wght@300;400&family=Roboto:wght@300;400&display=swap"
     />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Jura:wght@400;600&family=Michroma&family=Oswald:wght@300;400&family=Roboto:wght@300;400&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Jura:wght@400;600&family=Michroma&family=Oswald:wght@300;400&family=Roboto:wght@300;400&display=swap"
+      />
+    </noscript>
 
     <!-- Structured Data: Organization (Static Fallback) -->
     <script type="application/ld+json">
@@ -129,7 +144,7 @@
           "@type": "SearchAction",
           "target": {
             "@type": "EntryPoint",
-            "urlTemplate": "https://www.birim.com/#/products?q={search_term_string}"
+            "urlTemplate": "https://www.birim.com/products?q={search_term_string}"
           },
           "query-input": "required name=search_term_string"
         }

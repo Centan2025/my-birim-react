@@ -169,11 +169,10 @@ export const useSEO = ({
   const schemaString = JSON.stringify(schema)
 
   useEffect(() => {
-    // Base URL oluştur (HashRouter için)
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+    // Base URL oluştur (Standart temiz URL yapısı)
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://www.birim.com'
     const path = location.pathname || '/'
-    const hash = location.hash || ''
-    const fullUrl = `${baseUrl}${path}${hash}`
+    const fullUrl = `${baseUrl}${path}`
 
     const nextData: SEOState = {
       title: title || DEFAULT_TITLE,
@@ -191,7 +190,6 @@ export const useSEO = ({
   }, [
     description,
     image,
-    location.hash,
     location.pathname,
     locale,
     setSeoData,

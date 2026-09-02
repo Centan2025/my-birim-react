@@ -87,6 +87,48 @@ async function sendServerVerificationEmail(email: string, verificationUrl: strin
   }
 }
 
+async function sendServerPasswordResetEmail(email: string, resetUrl: string) {
+  const smtpPass = process.env['SMTP_PASSWORD']
+  if (!smtpPass) return
+  try {
+    const nodemailer = (await import('nodemailer')).default
+    const transporter = nodemailer.createTransport({
+      host: 'smtpout.secureserver.net',
+      port: 465,
+      secure: true,
+      auth: {
+        user: 'birimdesign@birim.com',
+        pass: smtpPass,
+      },
+    })
+    await transporter.sendMail({
+      from: '"Birim Design" <birimdesign@birim.com>',
+      to: email,
+      subject: 'Birim Şifre Sıfırlama Talebi',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head><meta charset="utf-8"></head>
+        <body style="font-family: sans-serif; background-color: #f9fafb; padding: 20px;">
+          <div style="max-width: 600px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; border: 1px solid #e5e7eb;">
+            <h2 style="margin-top: 0; color: #1a1f3a;">ŞİFRE SIFIRLAMA TALEBİ</h2>
+            <p>Merhaba,</p>
+            <p>Birim hesabınızın şifresini sıfırlamak için bir talep aldık. İşleme devam etmek için lütfen aşağıdaki butona tıklayın:</p>
+            <p style="margin: 24px 0;">
+              <a href="${resetUrl}" style="background: #1a1f3a; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">Şifremi Sıfırla</a>
+            </p>
+            <p style="font-size: 12px; color: #6b7280;">Veya şu adresi tarayıcınıza yapıştırın: ${resetUrl}</p>
+            <p style="font-size: 12px; color: #9ca3af; margin-top: 24px;">Eğer bu talebi siz yapmadıysanız, bu e-postayı dikkate almayabilirsiniz.</p>
+          </div>
+        </body>
+        </html>
+      `,
+    })
+  } catch (err) {
+    console.error('[Email Helper] Send reset email error:', err)
+  }
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const rawAction = req.query['action']
   const action = Array.isArray(rawAction)
@@ -262,7 +304,7 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
           .commit()) as SanityUserRecord
 
         const siteUrl = process.env['VITE_SITE_URL'] || 'https://www.birim.com'
-        const verificationUrl = `${siteUrl}/#/verify-email?token=${verificationToken}`
+        const verificationUrl = `${siteUrl}/verify-email?token=${verificationToken}`
         sendServerVerificationEmail(normEmail, verificationUrl).catch(err =>
           console.error('Verification email error:', err)
         )
@@ -321,7 +363,7 @@ async function handleRegister(req: VercelRequest, res: VercelResponse) {
     })) as SanityUserRecord
 
     const siteUrl = process.env['VITE_SITE_URL'] || 'https://www.birim.com'
-    const verificationUrl = `${siteUrl}/#/verify-email?token=${verificationToken}`
+    const verificationUrl = `${siteUrl}/verify-email?token=${verificationToken}`
     sendServerVerificationEmail(normEmail, verificationUrl).catch(err =>
       console.error('Verification email error:', err)
     )
@@ -510,6 +552,12 @@ async function handleResetPassword(req: VercelRequest, res: VercelResponse) {
             resetPasswordExpires,
           })
           .commit()
+
+        const siteUrl = process.env['VITE_SITE_URL'] || 'https://www.birim.com'
+        const resetUrl = `${siteUrl}/reset-password?token=${resetToken}`
+        sendServerPasswordResetEmail(normEmail, resetUrl).catch(err =>
+          console.error('Password reset email error:', err)
+        )
       }
 
       return res.status(200).json({
@@ -652,10 +700,16 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
 
           await client.patch(existing._id).set(patchData).commit()
 
+          const siteUrl = process.env['VITE_SITE_URL'] || 'https://www.birim.com'
+          const verificationUrl = `${siteUrl}/verify-email?token=${verificationToken}`
+          sendServerVerificationEmail(normEmail, verificationUrl).catch(err =>
+            console.error('Subscribe verification email error:', err)
+          )
+
           return res.status(200).json({
             success: true,
-            message: 'Aboneliğiniz mimar programı başvurusuna dönüştürüldü.',
-            verificationToken,
+            message:
+              'Aboneliğiniz mimar programı başvurusuna dönüştürüldü. Lütfen e-posta adresinize gönderilen onay bağlantısını kontrol edin.',
             email: normEmail,
           })
         }
@@ -685,11 +739,16 @@ async function handleSubscribe(req: VercelRequest, res: VercelResponse) {
 
       await client.create(newUserObj)
 
+      const siteUrl = process.env['VITE_SITE_URL'] || 'https://www.birim.com'
+      const verificationUrl = `${siteUrl}/verify-email?token=${verificationToken}`
+      sendServerVerificationEmail(normEmail, verificationUrl).catch(err =>
+        console.error('Subscribe verification email error:', err)
+      )
+
       return res.status(201).json({
         success: true,
         message:
           'Başvurunuz alındı. Lütfen e-posta adresinize gönderilen onay mailini kontrol edin.',
-        verificationToken,
         email: normEmail,
       })
     } catch (err: unknown) {

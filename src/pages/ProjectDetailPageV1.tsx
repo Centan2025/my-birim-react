@@ -1,6 +1,6 @@
 import {useMemo, useState, useEffect, useRef, useCallback} from 'react'
 import {useQuery} from '@tanstack/react-query'
-import {useParams, Link} from 'react-router-dom'
+import {useParams, Link, useLocation} from 'react-router-dom'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {OptimizedVideo} from '../components/OptimizedVideo'
 import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
@@ -35,6 +35,7 @@ interface MediaItem {
 
 export function ProjectDetailPageV1() {
   const {projectId} = useParams<{projectId: string}>()
+  const location = useLocation()
 
   const {data: project, isLoading: loading} = useQuery({
     queryKey: ['project', projectId],
@@ -118,14 +119,14 @@ export function ProjectDetailPageV1() {
     if (typeof window === 'undefined') return
 
     const pageTitle = `BIRIM - ${t('projects') || 'Projeler'} - ${t(project.title)}`
-    analytics.pageview(window.location.pathname, pageTitle)
+    analytics.pageview(location.pathname, pageTitle)
 
     analytics.event({
       category: 'project',
       action: 'view_project',
       label: t(project.title),
     })
-  }, [project, t])
+  }, [project, t, location.pathname])
 
   // Fullscreen buton animasyonu
   useEffect(() => {

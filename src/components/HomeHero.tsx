@@ -609,8 +609,8 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                     loop
                     muted
                     playsInline
-                    preload={isActiveSlide ? 'auto' : 'metadata'}
-                    loading="eager"
+                    preload={isActiveSlide ? 'auto' : 'none'}
+                    loading={isActiveSlide ? 'eager' : 'lazy'}
                   />
                 ) : (
                   <OptimizedImage
@@ -619,8 +619,8 @@ export const HomeHero: React.FC<HomeHeroProps> = ({content}) => {
                     srcDesktop={media.urlDesktop}
                     alt={t(media.title || '')}
                     className="absolute inset-0 w-full h-full object-cover"
-                    loading="eager"
-                    fetchPriority={isActiveSlide || isInitialSlide ? 'high' : 'auto'}
+                    loading={isActiveSlide || isInitialSlide ? 'eager' : 'lazy'}
+                    fetchPriority={isActiveSlide || isInitialSlide ? 'high' : 'low'}
                     sizes="100vw"
                     quality={90}
                     crop={media.crop}

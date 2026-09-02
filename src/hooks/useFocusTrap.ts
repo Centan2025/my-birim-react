@@ -2,70 +2,82 @@ import {useEffect, useRef} from 'react'
 
 /**
  * Focus trap hook for modals and dropdowns
- * Traps focus within a container element
+ * Traps focus within a container element, handles Escape key,
+ * and restores focus to previous element upon exit.
  */
-export function useFocusTrap(isActive: boolean) {
+export function useFocusTrap(isActive: boolean, onClose?: () => void) {
   const containerRef = useRef<HTMLElement>(null)
+  const previousActiveElementRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
-    if (!isActive || !containerRef.current) return
+    if (!isActive) return
+
+    if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+      previousActiveElementRef.current = document.activeElement
+    }
 
     const container = containerRef.current
+    if (!container) return
+
     const focusableElements = container.querySelectorAll<HTMLElement>(
       'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
     )
 
-    if (focusableElements.length === 0) return
-
     const firstElement = focusableElements[0]
     const lastElement = focusableElements[focusableElements.length - 1]
 
-    if (!firstElement || !lastElement) return
-
-    // Focus first element when trap activates, but mümkünse sayfayı kaydırmadan
+    // Focus first element when trap activates, without disturbing scroll
     if (firstElement && typeof firstElement.focus === 'function') {
       try {
-        // Modern tarayıcılarda scroll'u tetiklemeden odaklan
         firstElement.focus({preventScroll: true})
       } catch {
-        // Eski tarayıcılar için normal focus'a geri dön
         firstElement.focus()
       }
     }
 
-    const handleTab = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && onClose) {
+        e.preventDefault()
+        e.stopPropagation()
+        onClose()
+        return
+      }
 
-      if (e.shiftKey) {
-        // Shift + Tab
-        if (document.activeElement === firstElement) {
-          e.preventDefault()
-          lastElement.focus()
-        }
-      } else {
-        // Tab
-        if (document.activeElement === lastElement) {
-          e.preventDefault()
-          firstElement.focus()
+      if (e.key === 'Tab') {
+        if (!firstElement || !lastElement) return
+
+        if (e.shiftKey) {
+          // Shift + Tab
+          if (document.activeElement === firstElement) {
+            e.preventDefault()
+            lastElement.focus()
+          }
+        } else {
+          // Tab
+          if (document.activeElement === lastElement) {
+            e.preventDefault()
+            firstElement.focus()
+          }
         }
       }
     }
 
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        // Allow escape to close modal/dropdown
-        // This should be handled by the component using this hook
-      }
-    }
-
-    container.addEventListener('keydown', handleTab)
-    container.addEventListener('keydown', handleEscape)
+    window.addEventListener('keydown', handleKeyDown)
 
     return () => {
-      container.removeEventListener('keydown', handleTab)
-      container.removeEventListener('keydown', handleEscape)
+      window.removeEventListener('keydown', handleKeyDown)
+      if (
+        previousActiveElementRef.current &&
+        typeof previousActiveElementRef.current.focus === 'function'
+      ) {
+        try {
+          previousActiveElementRef.current.focus({preventScroll: true})
+        } catch {
+          // Ignore
+        }
+      }
     }
-  }, [isActive])
+  }, [isActive, onClose])
 
   return containerRef
 }

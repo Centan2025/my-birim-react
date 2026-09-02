@@ -102,9 +102,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const data = await response.json()
 
-    // Cache for 60s on CDN, 10s on browser
-    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300, max-age=10')
-    res.setHeader('Access-Control-Allow-Origin', '*')
+    // Cache for 60s on CDN only if public and not preview/authenticated
+    if (authHeader || perspective === 'drafts') {
+      res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate')
+    } else {
+      res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300, max-age=10')
+    }
 
     return res.status(response.status).json(data)
   } catch (err) {

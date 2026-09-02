@@ -3,14 +3,17 @@ import {motion, AnimatePresence} from 'framer-motion'
 import {User, X, LogOut, ArrowRight} from 'lucide-react'
 import {useAuth} from '../context/AuthContext'
 import {useTranslation} from '../i18n'
-import {Link} from 'react-router-dom'
+import {useNavigate, Link} from 'react-router-dom'
 import {loginUser} from '../services/cms'
 import {loginRateLimiter} from '../lib/rateLimiter'
+import {useFocusTrap} from '../hooks/useFocusTrap'
 
 export const FloatingAuthPanel: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false)
   const {isLoggedIn, user, login, logout} = useAuth()
   const {t} = useTranslation()
+  const navigate = useNavigate()
+  const focusTrapRef = useFocusTrap(isOpen, () => setIsOpen(false))
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -127,6 +130,10 @@ export const FloatingAuthPanel: React.FC = () => {
 
             {/* Panel */}
             <motion.div
+              ref={focusTrapRef as React.RefObject<HTMLDivElement>}
+              role="dialog"
+              aria-modal="true"
+              aria-label={isLoggedIn ? t('profile') : t('login')}
               initial={{x: '100%'}}
               animate={{x: 0}}
               exit={{x: '100%'}}
@@ -140,7 +147,8 @@ export const FloatingAuthPanel: React.FC = () => {
                 </h2>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[var(--text-primary)]/5 transition-colors group"
+                  aria-label={t('close') || 'Kapat'}
+                  className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full hover:bg-[var(--text-primary)]/5 transition-colors group"
                 >
                   <X className="w-5 h-5 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
                 </button>
@@ -179,7 +187,7 @@ export const FloatingAuthPanel: React.FC = () => {
                         onClick={() => {
                           logout()
                           setIsOpen(false)
-                          window.location.href = '/'
+                          navigate('/')
                         }}
                         className="flex items-center justify-between w-full p-5 border border-[var(--border-primary)]/20 text-[var(--text-secondary)] hover:text-red-600 hover:border-red-600/30 transition-all duration-500 uppercase tracking-[0.25em] text-[11px] font-bold font-inter group"
                       >
@@ -192,10 +200,14 @@ export const FloatingAuthPanel: React.FC = () => {
                   <div className="space-y-10">
                     <form onSubmit={handleLogin} className="space-y-8">
                       <div className="relative group">
-                        <label className="block text-[10px] uppercase tracking-[0.3em] font-bold text-[var(--text-secondary)] mb-2 transition-colors group-focus-within:text-[var(--text-primary)]">
+                        <label
+                          htmlFor="floating-auth-email"
+                          className="block text-[10px] uppercase tracking-[0.3em] font-bold text-[var(--text-secondary)] mb-2 transition-colors group-focus-within:text-[var(--text-primary)]"
+                        >
                           {t('email')}
                         </label>
                         <input
+                          id="floating-auth-email"
                           type="email"
                           required
                           value={email}
@@ -206,10 +218,14 @@ export const FloatingAuthPanel: React.FC = () => {
                         />
                       </div>
                       <div className="relative group">
-                        <label className="block text-[10px] uppercase tracking-[0.3em] font-bold text-[var(--text-secondary)] mb-2 transition-colors group-focus-within:text-[var(--text-primary)]">
+                        <label
+                          htmlFor="floating-auth-password"
+                          className="block text-[10px] uppercase tracking-[0.3em] font-bold text-[var(--text-secondary)] mb-2 transition-colors group-focus-within:text-[var(--text-primary)]"
+                        >
                           {t('password')}
                         </label>
                         <input
+                          id="floating-auth-password"
                           type="password"
                           required
                           value={password}

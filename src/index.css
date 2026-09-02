@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@plugin "tailwind-scrollbar-hide";
 
 @theme {
   /* Tasarımcı isimleri için kullanılan font (İnter Regular 400) */
@@ -61,14 +62,11 @@ html.lenis body {
   outline-offset: 2px;
 }
 
-input:focus,
 input:focus-visible,
-textarea:focus,
 textarea:focus-visible,
-select:focus,
 select:focus-visible {
-  outline: none !important;
-  box-shadow: none !important;
+  outline: 2px solid #c5a059 !important;
+  outline-offset: 1px !important;
 }
 
 .font-arial-regular {
@@ -736,4 +734,16 @@ footer input:-webkit-autofill:active {
   -webkit-text-fill-color: #ffffff !important;
   caret-color: #ffffff !important;
   transition: background-color 5000s ease-in-out 0s !important;
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

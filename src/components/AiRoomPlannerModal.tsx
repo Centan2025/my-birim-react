@@ -43,6 +43,7 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [toastType, setToastType] = useState<'error' | 'success'>('error')
   const [showQuotaModal, setShowQuotaModal] = useState(false)
+  const [showAuthRequiredModal, setShowAuthRequiredModal] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -295,9 +296,18 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
         resizeImageUrlOrBase64(prodImage, 512, 0.6),
       ])
 
+      const headers: Record<string, string> = {'Content-Type': 'application/json'}
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const storedToken = localStorage.getItem('birim_token')
+        if (storedToken) {
+          headers['Authorization'] = `Bearer ${storedToken}`
+        }
+      }
+
       const response = await fetch('/api/ai/nano-banana-planner', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers,
+        credentials: 'same-origin',
         body: JSON.stringify({
           roomImage: compressedRoomImage,
           productImage: compressedProductImage,
@@ -307,6 +317,11 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
           alignmentInstruction: activeAlignment,
         }),
       })
+
+      if (response.status === 401) {
+        setShowAuthRequiredModal(true)
+        return
+      }
 
       let data: {
         success?: boolean
@@ -858,6 +873,50 @@ export const AiRoomPlannerModal: React.FC<AiRoomPlannerModalProps> = ({
               </a>
               <button
                 onClick={() => setShowQuotaModal(false)}
+                className="w-full py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs rounded-none border border-neutral-700 font-medium transition-all font-sans cursor-pointer shadow-none"
+              >
+                Kapat
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Auth Required Modal */}
+      {showAuthRequiredModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-fade-in">
+          <div className="bg-neutral-900 border border-neutral-800 p-6 sm:p-8 rounded-none max-w-md w-full text-center space-y-5 shadow-none relative">
+            <button
+              onClick={() => setShowAuthRequiredModal(false)}
+              className="absolute top-4 right-4 text-neutral-400 hover:text-white text-lg font-sans"
+            >
+              ✕
+            </button>
+            <div className="w-14 h-14 rounded-none bg-neutral-800 text-white border border-neutral-700 flex items-center justify-center mx-auto text-2xl">
+              🔒
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold text-white font-sans">
+                Ücretsiz AI Tasarım İçin Giriş Yapın
+              </h3>
+              <p className="text-xs text-neutral-400 leading-relaxed font-sans">
+                AI Oda Tasarım motorunu kullanabilmek için lütfen ücretsiz üye olun veya hesabınıza
+                giriş yapın.
+              </p>
+            </div>
+            <div className="space-y-2.5 pt-2">
+              <a
+                href="/#/login"
+                onClick={() => {
+                  setShowAuthRequiredModal(false)
+                  onClose()
+                }}
+                className="block w-full py-3 bg-white hover:bg-neutral-100 text-black font-semibold text-xs rounded-none border border-neutral-300 transition-all shadow-none font-sans"
+              >
+                Giriş Yap / Üye Ol
+              </a>
+              <button
+                onClick={() => setShowAuthRequiredModal(false)}
                 className="w-full py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs rounded-none border border-neutral-700 font-medium transition-all font-sans cursor-pointer shadow-none"
               >
                 Kapat

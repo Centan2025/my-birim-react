@@ -1,6 +1,6 @@
 import {useMemo, useState, useEffect, useRef, useCallback} from 'react'
 import {useQuery} from '@tanstack/react-query'
-import {useParams, Link} from 'react-router-dom'
+import {useParams, Link, useLocation} from 'react-router-dom'
 import {motion, AnimatePresence} from 'framer-motion'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {OptimizedVideo} from '../components/OptimizedVideo'
@@ -35,6 +35,7 @@ interface MediaItem {
 
 export function ProjectDetailPageV2() {
   const {projectId} = useParams<{projectId: string}>()
+  const location = useLocation()
 
   const {data: project, isLoading: loading} = useQuery({
     queryKey: ['project', projectId],
@@ -107,13 +108,13 @@ export function ProjectDetailPageV2() {
   useEffect(() => {
     if (!project || typeof window === 'undefined') return
     const pageTitle = `BIRIM - ${t('projects') || 'Projeler'} - ${t(project.title)}`
-    analytics.pageview(window.location.pathname, pageTitle)
+    analytics.pageview(location.pathname, pageTitle)
     analytics.event({
       category: 'project',
       action: 'view_project_v2',
       label: t(project.title),
     })
-  }, [project, t])
+  }, [project, t, location.pathname])
 
   const coverUrl = project?.cover
     ? typeof project.cover === 'string'

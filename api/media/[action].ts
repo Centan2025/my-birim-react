@@ -11,7 +11,7 @@ import {getAuthTokenFromReq, verifyToken} from '../../lib/server/token.js'
 const R2_ACCOUNT_ID = (
   process.env['R2_ACCOUNT_ID'] ||
   process.env['SANITY_STUDIO_R2_ACCOUNT_ID'] ||
-  '114e37dc2d51e58147e027097a68470b'
+  ''
 ).trim()
 const R2_ACCESS_KEY_ID = (
   process.env['R2_ACCESS_KEY_ID'] ||
@@ -36,7 +36,7 @@ const R2_DOMAIN = (
 
 const r2Client = new S3Client({
   region: 'auto',
-  endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  endpoint: R2_ACCOUNT_ID ? `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com` : '',
   credentials: {
     accessKeyId: R2_ACCESS_KEY_ID || '',
     secretAccessKey: R2_SECRET_ACCESS_KEY || '',
@@ -63,7 +63,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader('Access-Control-Allow-Origin', requestOrigin)
     res.setHeader('Access-Control-Allow-Credentials', 'true')
   } else {
-    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Origin', 'https://www.birim.com')
   }
 
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -94,36 +94,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 }
 
 async function handlePresignedUrl(req: VercelRequest, res: VercelResponse) {
-  res.setHeader('Access-Control-Allow-Credentials', 'true')
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
-  )
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end()
-  }
-
   if (req.method !== 'POST') {
     return res.status(405).json({error: 'Method Not Allowed'})
   }
 
   const token = getAuthTokenFromReq(req)
   const payload = token ? verifyToken(token) : null
-  const reqOrigin = typeof req.headers.origin === 'string' ? req.headers.origin : ''
-  const reqReferer = typeof req.headers.referer === 'string' ? req.headers.referer : ''
-  const isSanityStudioOrigin =
-    reqOrigin.includes('sanity.studio') ||
-    reqReferer.includes('sanity.studio') ||
-    reqOrigin.includes('localhost') ||
-    reqReferer.includes('localhost')
-  const isAdminAuthorized =
-    Boolean(adminSecret && headerToken && headerToken === adminSecret) || isSanityStudioOrigin
+  const adminSecret = process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET']
+  const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
+  const headerToken =
+    typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
+  const isAdminAuthorized = Boolean(adminSecret && headerToken && headerToken === adminSecret)
+  const isUserAdmin = Boolean(payload && payload.role === 'admin')
 
-  if (!payload && !isAdminAuthorized) {
-    return res.status(401).json({error: 'Dosya yükleme bileti almak için yetkiniz yok.'})
+  if (!isUserAdmin && !isAdminAuthorized) {
+    return res
+      .status(401)
+      .json({error: 'Dosya yükleme bileti almak için yönetici yetkisi gereklidir.'})
   }
 
   const {filename, contentType, folder} = req.body || {}
@@ -204,14 +191,6 @@ async function handlePresignedUrl(req: VercelRequest, res: VercelResponse) {
 }
 
 async function handleDeleteBatch(req: VercelRequest, res: VercelResponse) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).json({})
-  }
-
   if (req.method !== 'POST') {
     return res.status(405).json({error: 'Method Not Allowed'})
   }
@@ -264,16 +243,21 @@ async function handleDeleteBatch(req: VercelRequest, res: VercelResponse) {
 }
 
 async function handleList(req: VercelRequest, res: VercelResponse) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).json({})
-  }
-
   if (req.method !== 'POST') {
     return res.status(405).json({error: 'Method Not Allowed'})
+  }
+
+  const token = getAuthTokenFromReq(req)
+  const payload = token ? verifyToken(token) : null
+  const adminSecret = process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET']
+  const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
+  const headerToken =
+    typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
+  const isAdminAuthorized = Boolean(adminSecret && headerToken && headerToken === adminSecret)
+  const isUserAdmin = Boolean(payload && payload.role === 'admin')
+
+  if (!isAdminAuthorized && !isUserAdmin) {
+    return res.status(401).json({error: 'Dosya listesini görüntüleme yetkiniz yok.'})
   }
 
   const {continuationToken} = req.body || {}

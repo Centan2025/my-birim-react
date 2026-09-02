@@ -23,7 +23,19 @@ function isValidHttpUrl(urlStr) {
   if (!urlStr || typeof urlStr !== 'string') return false
   try {
     const parsed = new URL(urlStr)
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+    const isHttp = parsed.protocol === 'http:' || parsed.protocol === 'https:'
+    if (!isHttp) return false
+
+    const hostname = parsed.hostname.toLowerCase()
+    const isAllowedHost =
+      hostname === 'birim.com' ||
+      hostname === 'www.birim.com' ||
+      hostname.endsWith('.birim.com') ||
+      hostname.endsWith('.vercel.app') ||
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1'
+
+    return isAllowedHost
   } catch {
     return false
   }

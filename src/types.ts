@@ -772,13 +772,56 @@ export interface AboutPageContent {
   }
 }
 
+export interface FactoryMetric {
+  value: LocalizedString
+  label: LocalizedString
+}
+
+export interface FactoryDiscipline {
+  id?: string
+  title: LocalizedString
+  subtitle?: LocalizedString
+  description?: LocalizedString
+  features?: LocalizedString[]
+  imageR2?: {
+    url?: string
+    [key: string]: unknown
+  }
+  image?: string
+}
+
 /**
  * Defines the content structure for the Factory page.
  */
 export interface FactoryPageContent {
   title: LocalizedString
+  heroTitle?: LocalizedString
+  heroDescription?: LocalizedString
+  heroImageR2?: {
+    url?: string
+    [key: string]: unknown
+  }
+  metrics?: FactoryMetric[]
+  disciplinesTag?: LocalizedString
+  disciplinesTitle?: LocalizedString
+  disciplinesDescription?: LocalizedString
+  disciplines?: FactoryDiscipline[]
+  philosophyTag?: LocalizedString
+  philosophyTitle?: LocalizedString
+  philosophySubtitle?: LocalizedString
   content?: LocalizedString
+  galleryTag?: LocalizedString
+  galleryTitle?: LocalizedString
+  gallerySubtitle?: LocalizedString
   gallery?: NewsMedia[]
+  sustainabilityTag?: LocalizedString
+  sustainabilityTitle?: LocalizedString
+  sustainabilityDescription?: LocalizedString
+  ctaPrimaryText?: LocalizedString
+  ctaPrimaryLink?: string
+  ctaSecondaryText?: LocalizedString
+  ctaSecondaryLink?: string
+  seo?: Record<string, unknown>
 }
 
 /**

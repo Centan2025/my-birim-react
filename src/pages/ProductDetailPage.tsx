@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {useState, useEffect, startTransition} from 'react'
-import {useParams, useNavigate} from 'react-router-dom'
+import {useParams, useNavigate, useLocation} from 'react-router-dom'
 import {useAuth} from '../context/AuthContext'
 import {PageLoading} from '../components/LoadingSpinner'
 import {useTranslation} from '../i18n'
 import {useSEO} from '../hooks/useSEO'
-import {FullscreenMediaViewer} from '../components/FullscreenMediaViewer'
+import {FullscreenMediaViewer, type MediaItem} from '../components/FullscreenMediaViewer'
 import {analytics} from '../lib/analytics'
 import {useProductDetail} from '../hooks/useProductDetail'
 import {useLightbox} from '../hooks/useLightbox'
@@ -28,11 +28,10 @@ import {AiRoomPlannerModal} from '../components/AiRoomPlannerModal'
 
 export function ProductDetailPage() {
   const {productId: liveId} = useParams<{productId: string}>()
-  // Sayfa geçişlerinde param sıfırlandığı için ilk id'yi kilitliyoruz
-  const [frozenId] = useState(liveId)
-  const productId = frozenId || liveId
+  const productId = liveId
 
   const navigate = useNavigate()
+  const location = useLocation()
 
   // All data, derived state, and responsive detection
   const {
@@ -55,9 +54,61 @@ export function ProductDetailPage() {
     nextProduct,
   } = useProductDetail(productId)
   const {phase} = useCardTransition()
+  // Fullscreen viewer state for hero media, bottom panels, and additional images
+  const [fullscreenData, setFullscreenData] = useState<{
+    isOpen: boolean
+    items: MediaItem[]
+    initialIndex: number
+  }>({
+    isOpen: false,
+    items: [],
+    initialIndex: 0,
+  })
+
+  const formatToMediaItems = (items: any[]): MediaItem[] => {
+    return (items || [])
+      .map(m => {
+        const item = (typeof m === 'string' ? {url: m, type: 'image'} : m) as Record<
+          string,
+          unknown
+        >
+        const rawUrl = (item['url'] || item['image']) as string | undefined
+        return {
+          type: ((item['type'] as string) || 'image') as 'image' | 'video' | 'youtube',
+          url: typeof rawUrl === 'string' ? rawUrl : '',
+          urlMobile: item['urlMobile'] as string | undefined,
+          urlDesktop: item['urlDesktop'] as string | undefined,
+          crop: item['crop'] as any,
+          cropMobile: item['cropMobile'] as any,
+          cropDesktop: item['cropDesktop'] as any,
+          hotspot: item['hotspot'] as any,
+          hotspotMobile: item['hotspotMobile'] as any,
+          hotspotDesktop: item['hotspotDesktop'] as any,
+          origWidth: item['origWidth'] as number | undefined,
+          origWidthMobile: item['origWidthMobile'] as number | undefined,
+          origWidthDesktop: item['origWidthDesktop'] as number | undefined,
+          origHeight: item['origHeight'] as number | undefined,
+          origHeightMobile: item['origHeightMobile'] as number | undefined,
+          origHeightDesktop: item['origHeightDesktop'] as number | undefined,
+          isMirrored: item['isMirrored'] as boolean | undefined,
+          isMirroredMobile: item['isMirroredMobile'] as boolean | undefined,
+          isMirroredDesktop: item['isMirroredDesktop'] as boolean | undefined,
+        }
+      })
+      .filter(m => Boolean(m.url))
+  }
+
+  const openFullscreenViewer = (rawItems: any[], initialIndex: number = 0) => {
+    const formatted = formatToMediaItems(rawItems)
+    if (formatted.length === 0) return
+    setFullscreenData({
+      isOpen: true,
+      items: formatted,
+      initialIndex: Math.max(0, Math.min(initialIndex, formatted.length - 1)),
+    })
+  }
+
   // Lightbox state (reusable hook for each lightbox)
-  const [isFullscreenOpen, setIsFullscreenOpen] = useState(false)
-  const [lightboxSource, setLightboxSource] = useState<'band' | 'panel'>('band')
   const mediaLightbox = useLightbox()
   const dimLightbox = useLightbox()
   const materialLightbox = useLightbox()
@@ -151,9 +202,9 @@ export function ProductDetailPage() {
     const catName = category ? t(category.name) : ''
     const seoTitle = catName ? `${catName} - ${productName}` : productName
 
-    analytics.pageview(window.location.pathname, seoTitle)
+    analytics.pageview(location.pathname, seoTitle)
     analytics.trackEcommerce('view_item', product.id, (product as any)?.price || 0)
-  }, [product, designer, category, t])
+  }, [product, designer, category, t, location.pathname])
 
   // Ensure page opens at top (y=0) when product detail mounts
   useEffect(() => {
@@ -250,7 +301,7 @@ export function ProductDetailPage() {
         onDragMove={heroHook.handleHeroDragMove}
         onDragEnd={heroHook.handleHeroDragEnd}
         onTransitionEnd={heroHook.handleHeroTransitionEnd}
-        onOpenFullscreen={() => setIsFullscreenOpen(true)}
+        onOpenFullscreen={() => openFullscreenViewer(bandMedia, heroHook.currentImageIndex)}
         onSetSlideIndex={heroHook.setHeroSlideIndex}
         onSetCurrentImageIndex={heroHook.setCurrentImageIndex}
         onSetTransitionEnabled={heroHook.setHeroTransitionEnabled}
@@ -360,6 +411,11 @@ export function ProductDetailPage() {
                 user={user}
                 navigate={navigate}
                 t={t}
+                onOpenImageFullscreen={idx => {
+                  startTransition(() => {
+                    openFullscreenViewer(product.exclusiveContent?.images || [], idx)
+                  })
+                }}
               />
             )}
 
@@ -388,12 +444,11 @@ export function ProductDetailPage() {
                   }}
                   openPanelLightbox={idx => {
                     startTransition(() => {
-                      setLightboxSource('panel')
                       const panelMedia =
                         Array.isArray(product.bottomMedia) && product.bottomMedia.length > 0
                           ? product.bottomMedia
                           : product.media || []
-                      mediaLightbox.open(panelMedia as any, idx)
+                      openFullscreenViewer(panelMedia, idx)
                     })
                   }}
                   t={t}
@@ -404,38 +459,20 @@ export function ProductDetailPage() {
       </main>
 
       {/* Fullscreen viewer */}
-      {isFullscreenOpen && bandMedia.length > 0 && (
+      {fullscreenData.isOpen && fullscreenData.items.length > 0 && (
         <FullscreenMediaViewer
-          items={bandMedia.map(m => {
-            const item = m as unknown as Record<string, unknown>
-            return {
-              type: m.type,
-              url: m.url,
-              urlMobile: m.urlMobile,
-              urlDesktop: m.urlDesktop,
-              crop: m.crop,
-              cropMobile: item['cropMobile'] as any,
-              cropDesktop: item['cropDesktop'] as any,
-              hotspot: m.hotspot,
-              hotspotMobile: item['hotspotMobile'] as any,
-              hotspotDesktop: item['hotspotDesktop'] as any,
-              origWidth: item['origWidth'] as number | undefined,
-              origWidthMobile: item['origWidthMobile'] as number | undefined,
-              origWidthDesktop: item['origWidthDesktop'] as number | undefined,
-              origHeight: item['origHeight'] as number | undefined,
-              origHeightMobile: item['origHeightMobile'] as number | undefined,
-              origHeightDesktop: item['origHeightDesktop'] as number | undefined,
-              isMirrored: m.isMirrored,
-              isMirroredMobile: item['isMirroredMobile'] as boolean | undefined,
-              isMirroredDesktop: item['isMirroredDesktop'] as boolean | undefined,
-            }
-          })}
-          initialIndex={heroHook.currentImageIndex}
-          onClose={() => setIsFullscreenOpen(false)}
+          items={fullscreenData.items}
+          initialIndex={fullscreenData.initialIndex}
+          onClose={() =>
+            setFullscreenData(prev => ({
+              ...prev,
+              isOpen: false,
+            }))
+          }
         />
       )}
 
-      {/* Media lightbox (band or panel) */}
+      {/* Media lightbox */}
       {mediaLightbox.isOpen && (
         <ProductMediaLightbox
           items={mediaLightbox.images}
@@ -443,7 +480,6 @@ export function ProductDetailPage() {
           onClose={mediaLightbox.close}
           onNext={mediaLightbox.next}
           onPrev={mediaLightbox.prev}
-          showMetadata={lightboxSource === 'panel'}
         />
       )}
 

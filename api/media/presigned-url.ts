@@ -6,17 +6,17 @@ import {getAuthTokenFromReq, verifyToken} from '../../lib/server/token.js'
 const R2_ACCOUNT_ID = (
   process.env['R2_ACCOUNT_ID'] ||
   process.env['SANITY_STUDIO_R2_ACCOUNT_ID'] ||
-  '114e37dc2d51e58147e027097a68470b'
+  ''
 ).trim()
 const R2_ACCESS_KEY_ID = (
   process.env['R2_ACCESS_KEY_ID'] ||
   process.env['SANITY_STUDIO_R2_ACCESS_KEY_ID'] ||
-  'e3e007695ed61d30021abb8646a6ac83'
+  ''
 ).trim()
 const R2_SECRET_ACCESS_KEY = (
   process.env['R2_SECRET_ACCESS_KEY'] ||
   process.env['SANITY_STUDIO_R2_SECRET_ACCESS_KEY'] ||
-  '41675d4749c4f51462925a2c154f12aa9651963f2b54b83eaa415778e89153b5'
+  ''
 ).trim()
 const R2_BUCKET_NAME = (
   process.env['R2_BUCKET_NAME'] ||
@@ -58,7 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader('Access-Control-Allow-Origin', requestOrigin)
     res.setHeader('Access-Control-Allow-Credentials', 'true')
   } else {
-    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Origin', 'https://www.birim.com')
   }
 
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -75,34 +75,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({error: 'Method Not Allowed'})
   }
 
-  // Auth check: require valid JWT session, valid admin secret token, or request from Sanity Studio
+  // Auth check: require valid admin JWT session or valid admin secret token
   const token = getAuthTokenFromReq(req)
   const payload = token ? verifyToken(token) : null
   const adminSecret = process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET']
   const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
   const headerToken =
     typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
-  const reqOrigin = typeof req.headers.origin === 'string' ? req.headers.origin : ''
-  const reqReferer = typeof req.headers.referer === 'string' ? req.headers.referer : ''
-  const isStudioOrigin =
-    reqOrigin.includes('sanity.studio') ||
-    reqReferer.includes('sanity.studio') ||
-    reqOrigin.includes('localhost') ||
-    reqReferer.includes('localhost')
-  const isAdminAuthorized =
-    Boolean(adminSecret && headerToken && headerToken === adminSecret) || isStudioOrigin
+  const isAdminAuthorized = Boolean(adminSecret && headerToken && headerToken === adminSecret)
+  const isUserAdmin = Boolean(payload && payload.role === 'admin')
 
-  if (!payload && !isAdminAuthorized) {
+  if (!isUserAdmin && !isAdminAuthorized) {
     return res.status(401).json({
-      error: 'Dosya yükleme bileti almak için yetkiniz yok.',
-      debug: {
-        requestOrigin,
-        reqOrigin,
-        reqReferer,
-        isStudioOrigin,
-        isAdminAuthorized,
-        headers: req.headers,
-      },
+      error: 'Dosya yükleme bileti almak için yönetici yetkisi gereklidir.',
     })
   }
 

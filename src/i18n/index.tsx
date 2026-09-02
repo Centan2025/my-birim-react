@@ -184,81 +184,28 @@ export const I18nProvider = ({children}: PropsWithChildren) => {
 
         const obj = keyOrObject as Record<string, unknown>
 
-        const currentVal = typeof obj[locale] === 'string' ? (obj[locale] as string).trim() : ''
-        const trVal = typeof obj['tr'] === 'string' ? (obj['tr'] as string).trim() : ''
+        // LocalizedString veya dilli bir içerik nesnesi mi?
+        const isLocalizedObject =
+          obj['_type'] === 'localizedString' ||
+          obj['_type'] === 'localizedPortableText' ||
+          'tr' in obj ||
+          'en' in obj
 
-        // Eğer mevcut locale değeri TR değeriyle aynıysa (ve locale TR değilse),
-        // bu durum genellikle CMS'te çevrilmediği için TR değerinin kopyalandığını gösterir.
-        // Bu durumda önce yerel sözlüklerde (cms/base) TR değeri için bir çeviri arayalım.
-        if (locale !== 'tr' && currentVal && trVal && currentVal === trVal) {
-          const cmsTrans = findInDict(cmsTranslations[locale], trVal)
-          const baseTrans = findInDict(baseTranslations[locale], trVal)
-          if (cmsTrans) return cmsTrans
-          if (baseTrans) return baseTrans
-        }
-
-        // Önce mevcut locale'i kontrol et
-        if (locale in obj && obj[locale] !== undefined && obj[locale] !== null) {
+        if (isLocalizedObject) {
+          // Seçili dildeki değeri al
           const val = obj[locale]
-          if (typeof val === 'string' && val.trim()) return val
-          if (Array.isArray(val)) return val as never
-          if (typeof val === 'object' && val !== null) {
-            if ('_type' in val && 'children' in val) {
-              return toPlainText(val)
-            }
-            return val as never
+          if (typeof val === 'string') {
+            return val.trim()
           }
-        }
-
-        // Locale yoksa veya boşsa, TR veya EN değerini alıp sözlüklerde (cms/base) çevirisi var mı kontrol et
-        const enVal = typeof obj['en'] === 'string' ? obj['en'].trim() : ''
-        const lookupKey = trVal || enVal
-
-        if (lookupKey) {
-          const cmsTrans = findInDict(cmsTranslations[locale], lookupKey)
-          const baseTrans = findInDict(baseTranslations[locale], lookupKey)
-          if (cmsTrans) return cmsTrans
-          if (baseTrans) return baseTrans
-        }
-
-        // Locale yoksa veya boşsa, 'tr' fallback'i kullan
-        if ('tr' in obj && obj['tr'] !== undefined && obj['tr'] !== null) {
-          const val = obj['tr']
-          if (typeof val === 'string' && val.trim()) return val
-          if (Array.isArray(val)) return val as never
-          if (typeof val === 'object' && val !== null) {
-            if ('_type' in val && 'children' in val) {
-              return toPlainText(val)
-            }
-            return val as never
+          if (
+            Array.isArray(val) ||
+            (typeof val === 'object' && val !== null && '_type' in val && 'children' in val)
+          ) {
+            return toPlainText(val as never)
           }
+          // Seçili dilde alan boş bırakılmışsa veya silinmişse, başka dile fallback YAPMA, boş döndür!
+          return ''
         }
-        // 'tr' de yoksa, 'en' fallback'i dene
-        if ('en' in obj && obj['en'] !== undefined && obj['en'] !== null) {
-          const val = obj['en']
-          if (typeof val === 'string' && val.trim()) return val
-          if (Array.isArray(val)) return val as never
-          if (typeof val === 'object' && val !== null) {
-            if ('_type' in val && 'children' in val) {
-              return toPlainText(val)
-            }
-            return val as never
-          }
-        }
-        // Hiçbiri yoksa, object'teki ilk geçerli değeri al
-        const firstValue = Object.values(obj).find(val => {
-          if (val === undefined || val === null) return false
-          if (typeof val === 'string') return !!val.trim()
-          return true
-        })
-        if (typeof firstValue === 'string') return firstValue
-        if (firstValue && typeof firstValue === 'object') {
-          if ('_type' in firstValue && 'children' in firstValue) {
-            return toPlainText(firstValue)
-          }
-          return firstValue as never
-        }
-        return ''
       }
 
       return ''

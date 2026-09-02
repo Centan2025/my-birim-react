@@ -1,7 +1,7 @@
 import {useCart} from '../context/CartContext'
 import {useTranslation} from '../i18n'
 import {useFocusTrap} from '../hooks/useFocusTrap'
-import {Link} from 'react-router-dom'
+import {useNavigate, Link} from 'react-router-dom'
 
 const CloseIcon = () => (
   <svg
@@ -54,15 +54,25 @@ const MinusIcon = () => (
 )
 
 export function CartSidebar() {
-  const {isCartOpen, toggleCart, cartItems, removeFromCart, updateQuantity, cartTotal, clearCart} =
-    useCart()
+  const {isCartOpen, toggleCart, cartItems, removeFromCart, updateQuantity, cartTotal} = useCart()
   const {t, locale} = useTranslation()
-  const cartFocusTrap = useFocusTrap(isCartOpen)
+  const cartFocusTrap = useFocusTrap(isCartOpen, toggleCart)
+  const navigate = useNavigate()
 
   const handleCheckout = () => {
-    alert('Thank you for your order!')
-    clearCart()
     toggleCart()
+    const summary = cartItems
+      .map(
+        item =>
+          `${typeof item.product.name === 'string' ? item.product.name : t(item.product.name)} (x${item.quantity})`
+      )
+      .join(', ')
+    try {
+      sessionStorage.setItem('birim_cart_quote', summary)
+    } catch {
+      // ignore
+    }
+    navigate('/contact?source=cart')
   }
 
   return (
@@ -87,7 +97,7 @@ export function CartSidebar() {
             </h2>
             <button
               onClick={toggleCart}
-              className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white p-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059]"
+              className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059]"
               aria-label={t('close_cart') || 'Sepeti kapat'}
             >
               <CloseIcon />
@@ -150,32 +160,35 @@ export function CartSidebar() {
 
               <div className="p-6 border-t border-gray-200 dark:border-gray-800">
                 <div className="flex justify-between items-center font-semibold text-lg text-gray-800 dark:text-gray-100">
-                  <span>Subtotal</span>
+                  <span>{t('subtotal') || 'Ara Toplam'}</span>
                   <span>
                     {new Intl.NumberFormat(locale, {style: 'currency', currency: 'TRY'}).format(
                       cartTotal
                     )}
                   </span>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Shipping and taxes calculated at checkout.
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {t('shipping_taxes_calculated') ||
+                    'Kargo ve teslimat detayları teklif sürecinde netleştirilir.'}
                 </p>
                 <button
                   onClick={handleCheckout}
-                  className="w-full mt-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold py-3 rounded-lg hover:bg-gray-700 dark:hover:bg-gray-200 transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059]"
+                  className="w-full mt-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold py-3 rounded-none hover:bg-gray-700 dark:hover:bg-gray-200 transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059]"
                 >
-                  Checkout
+                  {t('request_quote') || 'Teklif Talebi Oluştur'}
                 </button>
               </div>
             </>
           ) : (
             <div className="flex-grow flex flex-col items-center justify-center p-6 text-center">
-              <p className="text-gray-600 dark:text-gray-400">Your cart is empty.</p>
+              <p className="text-gray-600 dark:text-gray-400">
+                {t('cart_empty') || 'Sepetiniz henüz boş.'}
+              </p>
               <button
                 onClick={toggleCart}
                 className="mt-4 text-gray-800 dark:text-gray-200 font-semibold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059]"
               >
-                Continue Shopping
+                {t('continue_shopping') || 'Ürünleri İncele'}
               </button>
             </div>
           )}

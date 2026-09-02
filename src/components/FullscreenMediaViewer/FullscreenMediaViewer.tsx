@@ -543,6 +543,9 @@ export const FullscreenMediaViewer: React.FC<FullscreenMediaViewerProps> = ({
 
   return createPortal(
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Tam Ekran Medya Görüntüleyici"
       className="fixed flex flex-col overflow-hidden"
       style={{
         top: 0,
