@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useMemo} from 'react'
 import {motion} from 'framer-motion'
 import {Lock, KeyRound, ShieldAlert, ArrowRight} from 'lucide-react'
 import {AnalyticsDashboard} from '../components/analytics/AnalyticsDashboard'
@@ -15,6 +15,17 @@ export default function AnalyticsPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const [pinInput, setPinInput] = useState('')
   const [error, setError] = useState(false)
+
+  const isStudioBypass = useMemo(() => {
+    if (typeof window === 'undefined') return false
+    const params = new URLSearchParams(window.location.search)
+    return (
+      params.get('bypass') === 'birim-dev-2025' ||
+      params.get('bypass') === 'birim2025' ||
+      params.get('studioAuth') === '1' ||
+      window.self !== window.top
+    )
+  }, [])
 
   useEffect(() => {
     // Check session or URL bypass parameters (e.g. from Sanity Studio)
@@ -117,8 +128,14 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-28 pb-20 px-4 sm:px-6 lg:px-12 transition-colors">
-      <div className="max-w-7xl mx-auto">
+    <div
+      className={`min-h-screen bg-slate-50 dark:bg-slate-950 ${
+        isStudioBypass
+          ? 'pt-6 pb-8 px-4 sm:px-6 lg:px-8'
+          : 'pt-24 pb-16 px-4 sm:px-6 md:px-8 lg:px-12'
+      } transition-colors w-full`}
+    >
+      <div className="w-full">
         <div className="flex justify-end mb-4">
           <button
             onClick={handleLogout}
