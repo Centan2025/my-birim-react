@@ -18,35 +18,14 @@ import {randomUUID} from 'crypto'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-// .env.local ve .env dosyalarından SANITY_TOKEN'ı yükle
-function loadEnvVars() {
-  const envFiles = ['.env.local', '.env']
-  for (const file of envFiles) {
-    const envPath = resolve(__dirname, '..', file)
-    if (existsSync(envPath)) {
-      const content = readFileSync(envPath, 'utf-8')
-      for (const line of content.split('\n')) {
-        const trimmed = line.trim()
-        if (!trimmed || trimmed.startsWith('#')) continue
-        const eqIdx = trimmed.indexOf('=')
-        if (eqIdx === -1) continue
-        const key = trimmed.slice(0, eqIdx).trim()
-        const val = trimmed
-          .slice(eqIdx + 1)
-          .trim()
-          .replace(/^["']|["']$/g, '')
+import dotenv from 'dotenv'
 
-        // Boş değilse veya önceden hiç set edilmemişse set et (boş olanı dolu olanla ez)
-        if (val && (!process.env[key] || process.env[key] === '')) {
-          process.env[key] = val
-        } else if (!process.env[key]) {
-          process.env[key] = val
-        }
-      }
-    }
-  }
+// .env.local ve .env dosyalarından ortam değişkenlerini yükle
+function loadEnvVars() {
+  dotenv.config({path: resolve(__dirname, '..', '.env.local')})
+  dotenv.config({path: resolve(__dirname, '..', '.env')})
+
   // VITE_ prefixli değerleri hem prefix'li hem prefix'siz olarak set et
-  // (API fonksiyonları process.env.VITE_SANITY_TOKEN de okuyabilir)
   if (!process.env.SANITY_TOKEN && process.env.VITE_SANITY_TOKEN) {
     process.env.SANITY_TOKEN = process.env.VITE_SANITY_TOKEN
   }
