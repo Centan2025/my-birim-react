@@ -282,7 +282,7 @@ export function NewsPage() {
 
       <div className={containerClass + ' mb-6 md:mb-8'}>
         {/* Filtre Barı & Arama */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1 md:pt-2 pb-4 border-b border-[var(--border-primary)]/40">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1 md:pt-2 pb-4 border-b border-black/[0.06] dark:border-white/[0.08]">
           {/* Kategoriler */}
           <div className="flex items-center gap-6 overflow-x-auto no-scrollbar py-1">
             {categories.map(cat => {
@@ -317,7 +317,7 @@ export function NewsPage() {
                 placeholder={t('search_placeholder') || 'Ara...'}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="bg-transparent border-b border-[var(--border-primary)] focus:border-[var(--text-primary)] text-xs md:text-sm py-1 px-2 text-[var(--text-primary)] placeholder-[var(--text-secondary)] outline-none transition-colors w-36 sm:w-48 font-light"
+                className="bg-transparent border-b border-black/[0.08] dark:border-white/[0.1] focus:border-[var(--text-primary)] text-xs md:text-sm py-1 px-2 text-[var(--text-primary)] placeholder-[var(--text-secondary)] outline-none transition-colors w-36 sm:w-48 font-light"
               />
             </div>
           </div>
@@ -329,7 +329,7 @@ export function NewsPage() {
         <div className={containerClass + ' mb-10 md:mb-14'}>
           <ScrollReveal threshold={0.05} direction="up" distance={20}>
             <Link to={`/news/${featuredArticle.id}`} className="group block relative">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-center bg-[var(--bg-secondary)]/80 p-6 md:p-10 border border-neutral-300/18 dark:border-neutral-700/20 transition-all duration-500 hover:border-[var(--text-primary)]/40">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-center bg-[var(--bg-secondary)]/80 p-6 md:p-10 border border-black/[0.05] dark:border-white/[0.06] transition-all duration-500 hover:border-black/20 dark:hover:border-white/20">
                 {/* Hero Photo */}
                 <div className="lg:col-span-7 h-[300px] md:h-[450px] overflow-hidden relative">
                   <OptimizedImage
@@ -435,7 +435,7 @@ export function NewsPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-end pt-4 border-t border-neutral-300/18 dark:border-neutral-700/20 text-xs font-mono tracking-widest uppercase text-[var(--text-primary)]">
+                  <div className="flex items-center justify-end pt-4 border-t border-black/[0.05] dark:border-white/[0.06] text-xs font-mono tracking-widest uppercase text-[var(--text-primary)]">
                     <span className="flex items-center gap-1 group-hover:translate-x-2 transition-transform duration-300">
                       OKU <span className="text-base">↗</span>
                     </span>
@@ -461,9 +461,9 @@ export function NewsPage() {
               >
                 <Link
                   to={`/news/${item.id}`}
-                  className="group block flex flex-col h-full border border-neutral-300/18 dark:border-neutral-700/20 p-6 hover:border-[var(--text-primary)]/40 transition-all duration-500 bg-[var(--bg-secondary)]/50"
+                  className="group block flex flex-col h-full border border-black/[0.05] dark:border-white/[0.06] p-6 hover:border-black/20 dark:hover:border-white/20 transition-all duration-500 bg-[var(--bg-secondary)]/50"
                 >
-                  <div className="w-full aspect-[21/9] overflow-hidden relative mb-6 border border-neutral-200/15 dark:border-neutral-800/20 bg-neutral-900/10">
+                  <div className="w-full aspect-[21/9] overflow-hidden relative mb-6 border border-black/[0.03] dark:border-white/[0.04] bg-neutral-900/10">
                     <OptimizedImage
                       src={
                         typeof item.mainImage === 'string'
@@ -547,7 +547,7 @@ export function NewsPage() {
                         {item.summary}
                       </p>
                     </div>
-                    <div className="flex items-center justify-between pt-4 border-t border-neutral-300/18 dark:border-neutral-700/20 text-[11px] font-mono uppercase tracking-widest text-[var(--text-primary)] mt-auto">
+                    <div className="flex items-center justify-between pt-4 border-t border-black/[0.05] dark:border-white/[0.06] text-[11px] font-mono uppercase tracking-widest text-[var(--text-primary)] mt-auto">
                       <span className="text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors font-light">
                         {t('read_more') || 'DEVAMINI OKU'}
                       </span>

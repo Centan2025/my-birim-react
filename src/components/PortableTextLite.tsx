@@ -1289,7 +1289,6 @@ export default function PortableTextLite({
             className={btnStyle}
           >
             {label}
-            {isTextOnly && <span aria-hidden="true">→</span>}
           </a>
         </div>
       )
