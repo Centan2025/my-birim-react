@@ -56,13 +56,14 @@ const AnalyticsPage = lazy(() => import('../pages/AnalyticsPage'))
 interface PageBoundaryProps {
   children: React.ReactNode
   pageName?: string
+  hideFooter?: boolean
 }
 
-const PageBoundary: React.FC<PageBoundaryProps> = ({children}) => (
+const PageBoundary: React.FC<PageBoundaryProps> = ({children, hideFooter = false}) => (
   <ErrorBoundary>
     <div className="flex flex-col min-h-screen">
       <div className="flex-grow">{children}</div>
-      <Footer />
+      {!hideFooter && <Footer />}
     </div>
   </ErrorBoundary>
 )
@@ -278,7 +279,7 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
         <Route
           path="/site-analitigi"
           element={
-            <PageBoundary pageName="Site Analitiği">
+            <PageBoundary pageName="Site Analitiği" hideFooter>
               <AnalyticsPage />
             </PageBoundary>
           }
@@ -286,7 +287,7 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
         <Route
           path="/analytics"
           element={
-            <PageBoundary pageName="Site Analitiği">
+            <PageBoundary pageName="Site Analitiği" hideFooter>
               <AnalyticsPage />
             </PageBoundary>
           }

@@ -11,19 +11,20 @@ import {AppRoutes} from '../routes/AppRoutes'
 
 export const MainLayout: React.FC = () => {
   const location = useLocation()
+  const isAnalytics = location.pathname === '/site-analitigi' || location.pathname === '/analytics'
 
   return (
     <>
       <SkipLink />
-      <Header />
-      <CartSidebar />
-      <FloatingAuthPanel />
+      {!isAnalytics && <Header />}
+      {!isAnalytics && <CartSidebar />}
+      {!isAnalytics && <FloatingAuthPanel />}
       <main id="main-content" className="flex flex-col flex-grow relative overflow-x-clip">
         <AnimatePresence mode="sync" initial={true}>
           <PageTransitionWrapper key={location.pathname} location={location} />
         </AnimatePresence>
       </main>
-      <CookieBanner />
+      {!isAnalytics && <CookieBanner />}
     </>
   )
 }

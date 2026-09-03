@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useMemo} from 'react'
+import {Link} from 'react-router-dom'
 import {motion} from 'framer-motion'
-import {Lock, KeyRound, ShieldAlert, ArrowRight} from 'lucide-react'
+import {Lock, KeyRound, ShieldAlert, ArrowRight, ArrowLeft} from 'lucide-react'
 import {AnalyticsDashboard} from '../components/analytics/AnalyticsDashboard'
 import {useSEO} from '../hooks/useSEO'
 
@@ -144,20 +145,28 @@ export default function AnalyticsPage() {
   return (
     <div
       className={`min-h-screen bg-slate-50 text-slate-900 ${
-        isStudioBypass
-          ? 'pt-6 pb-8 px-4 sm:px-6 lg:px-8'
-          : 'pt-24 pb-16 px-4 sm:px-6 md:px-8 lg:px-12'
+        isStudioBypass ? 'p-4 sm:p-6' : 'pt-6 pb-16 px-4 sm:px-6 md:px-8 lg:px-12'
       } transition-colors w-full`}
     >
       <div className="w-full">
-        <div className="flex justify-end mb-4">
-          <button
-            onClick={handleLogout}
-            className="text-xs text-slate-400 hover:text-slate-800 transition underline underline-offset-4 cursor-pointer"
-          >
-            Güvenli Çıkış Yap
-          </button>
-        </div>
+        {!isStudioBypass && (
+          <div className="flex items-center justify-between pb-4 mb-6 border-b border-slate-200">
+            <Link
+              to="/"
+              className="flex items-center gap-2 text-xs font-medium text-slate-600 hover:text-slate-900 transition group"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+              <span>Ana Siteye Dön</span>
+            </Link>
+
+            <button
+              onClick={handleLogout}
+              className="text-xs text-slate-500 hover:text-rose-600 transition underline underline-offset-4 cursor-pointer"
+            >
+              Güvenli Çıkış Yap
+            </button>
+          </div>
+        )}
         <AnalyticsDashboard />
       </div>
     </div>
