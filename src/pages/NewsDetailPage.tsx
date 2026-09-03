@@ -417,23 +417,40 @@ export function NewsDetailPage() {
           <div className="lg:col-span-5 lg:sticky lg:top-28 flex flex-col w-full">
             <div className="text-[var(--text-primary)] leading-relaxed font-light text-base md:text-lg space-y-6">
               {(() => {
-                const content = t(item.content)
-                const isPortableText =
-                  Array.isArray(content) ||
-                  (typeof content === 'object' &&
-                    content !== null &&
-                    (content as any)._type === 'block')
+                const rawContent = item.content as Record<string, unknown> | unknown[] | undefined
+                let blocks: unknown[] | null = null
 
-                if (isPortableText) {
-                  const blocks = Array.isArray(content) ? content : [content]
-                  return <PortableTextLite value={blocks} />
+                if (Array.isArray(rawContent)) {
+                  blocks = rawContent
+                } else if (rawContent && typeof rawContent === 'object') {
+                  const localizedMap = rawContent as Record<string, unknown[]>
+                  if (Array.isArray(localizedMap[locale])) {
+                    blocks = localizedMap[locale]
+                  } else if (Array.isArray(localizedMap['tr'])) {
+                    blocks = localizedMap['tr']
+                  } else if (Array.isArray(localizedMap['en'])) {
+                    blocks = localizedMap['en']
+                  }
                 }
 
-                return (
-                  <p className="text-[var(--text-primary)] leading-relaxed font-light text-base md:text-lg whitespace-pre-line">
-                    {content as string}
-                  </p>
-                )
+                if (blocks && Array.isArray(blocks) && blocks.length > 0) {
+                  return (
+                    <PortableTextLite
+                      value={blocks as Parameters<typeof PortableTextLite>[0]['value']}
+                    />
+                  )
+                }
+
+                const fallbackText = t(item.content)
+                if (fallbackText) {
+                  return (
+                    <p className="text-[var(--text-primary)] leading-relaxed font-light text-base md:text-lg whitespace-pre-line">
+                      {fallbackText}
+                    </p>
+                  )
+                }
+
+                return null
               })()}
             </div>
 

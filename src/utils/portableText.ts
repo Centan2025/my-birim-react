@@ -33,9 +33,23 @@ export function toPlainText(val: unknown): string {
         .trim()
     }
 
+    // CTA Block specifically
+    if (obj['_type'] === 'cta') {
+      if (typeof obj['text'] === 'string') return (obj['text'] as string).trim()
+      if (typeof obj['text'] === 'object' && obj['text'] !== null) {
+        const textObj = obj['text'] as Record<string, string>
+        return textObj['tr'] || textObj['en'] || Object.values(textObj)[0] || ''
+      }
+      return ''
+    }
+
     // Direct text property
     if (typeof obj['text'] === 'string') {
       return (obj['text'] as string).trim()
+    }
+    if (typeof obj['text'] === 'object' && obj['text'] !== null) {
+      const extracted = toPlainText(obj['text'])
+      if (extracted) return extracted
     }
 
     // Localized object ({ tr: ..., en: ... })
@@ -46,9 +60,21 @@ export function toPlainText(val: unknown): string {
       return toPlainText(obj['en'])
     }
 
-    // Fallback: search other non-metadata properties
+    // Fallback: search other non-metadata properties (exclude layout/align properties)
     for (const key of Object.keys(obj)) {
-      if (!['_key', '_type', 'markDefs', 'style'].includes(key)) {
+      if (
+        ![
+          '_key',
+          '_type',
+          'markDefs',
+          'style',
+          'align',
+          'layout',
+          'verticalAlign',
+          'url',
+          'link',
+        ].includes(key)
+      ) {
         const extracted = toPlainText(obj[key])
         if (extracted) return extracted
       }

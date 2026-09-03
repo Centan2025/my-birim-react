@@ -1260,33 +1260,36 @@ export default function PortableTextLite({
 
       const isTextOnly = block.style === 'text'
       const btnStyle = isTextOnly
-        ? 'inline-block bg-transparent text-[var(--text-primary)] border-none p-0 underline hover:no-underline font-normal text-base transition-opacity duration-300 hover:opacity-70'
+        ? 'inline-flex items-center gap-1.5 text-[var(--text-primary)] hover:opacity-75 transition-opacity font-normal text-sm md:text-base underline underline-offset-4 cursor-pointer'
         : block.style === 'secondary'
           ? 'inline-flex items-center px-8 py-3.5 text-[9px] md:text-[11px] leading-none uppercase tracking-[0.2em] font-medium font-inter bg-[var(--bg-primary)] text-[var(--text-primary)] border border-[var(--text-primary)] hover:bg-[var(--text-primary)] hover:text-[var(--bg-primary)] transition-all duration-300'
           : block.style === 'outline'
             ? 'inline-flex items-center px-8 py-3.5 text-[9px] md:text-[11px] leading-none uppercase tracking-[0.2em] font-medium font-inter bg-transparent text-[var(--text-primary)] border border-[var(--text-primary)] hover:bg-[var(--text-primary)] hover:text-[var(--bg-primary)] transition-all duration-300'
             : 'inline-flex items-center px-8 py-3.5 text-[9px] md:text-[11px] leading-none uppercase tracking-[0.2em] font-medium font-inter bg-[var(--text-primary)] text-[var(--bg-primary)] border border-[var(--text-primary)] hover:bg-transparent hover:text-[var(--text-primary)] transition-all duration-300'
 
-      const label =
-        typeof block.text === 'string'
-          ? block.text
-          : typeof block.text === 'object' && block.text !== null
-            ? (block.text as Record<string, string>)['tr'] ||
-              (block.text as Record<string, string>)['en'] ||
-              'Devam Et'
-            : 'Devam Et'
+      let label = 'Devam Et'
+      if (typeof block.text === 'string' && block.text.trim()) {
+        label = block.text.trim()
+      } else if (typeof block.text === 'object' && block.text !== null) {
+        const textObj = block.text as Record<string, string>
+        label = textObj['tr'] || textObj['en'] || Object.values(textObj)[0] || 'Devam Et'
+      }
 
-      const isExternal = linkUrl.startsWith('http://') || linkUrl.startsWith('https://')
+      const isExternal =
+        linkUrl.startsWith('http://') ||
+        linkUrl.startsWith('https://') ||
+        linkUrl.startsWith('mailto:')
 
       nodes.push(
-        <div key={blockKey} className={`flex ${alignClass} ${applyTopMarginRemoval('my-8')}`}>
+        <div key={blockKey} className={`flex ${alignClass} ${applyTopMarginRemoval('my-6')}`}>
           <a
-            href={linkUrl}
-            target={isExternal ? '_blank' : undefined}
-            rel={isExternal ? 'noopener noreferrer' : undefined}
+            href={sanitizeUrl(linkUrl)}
+            target={isExternal && !linkUrl.startsWith('mailto:') ? '_blank' : undefined}
+            rel={isExternal && !linkUrl.startsWith('mailto:') ? 'noopener noreferrer' : undefined}
             className={btnStyle}
           >
             {label}
+            {isTextOnly && <span aria-hidden="true">→</span>}
           </a>
         </div>
       )

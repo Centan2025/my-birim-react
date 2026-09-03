@@ -285,6 +285,32 @@ const portableTextBlocks = [
         initialValue: 'center',
       },
     ],
+    preview: {
+      select: {
+        textTr: 'text.tr',
+        textEn: 'text.en',
+        link: 'link',
+        style: 'style',
+        align: 'align',
+      },
+      prepare(selection: Record<string, any>) {
+        const {textTr, textEn, link, style, align} = selection
+        const title = textTr || textEn || 'Buton'
+        const alignLabel = align === 'left' ? 'Sol' : align === 'right' ? 'Sağ' : 'Orta'
+        const styleLabel =
+          style === 'text'
+            ? 'Metin Link'
+            : style === 'outline'
+              ? 'Çerçeveli'
+              : style === 'secondary'
+                ? 'Beyaz Buton'
+                : 'Siyah Buton'
+        return {
+          title: `🔗 ${title}`,
+          subtitle: `${link || 'Bağlantı yok'} • ${styleLabel} • Hizalama: ${alignLabel}`,
+        }
+      },
+    },
   },
 ]
 
