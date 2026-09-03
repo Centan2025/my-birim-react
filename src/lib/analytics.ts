@@ -51,7 +51,7 @@ class Analytics {
     }
 
     // Google Analytics
-    this.googleAnalyticsId = import.meta.env['VITE_GA_ID'] || null
+    this.googleAnalyticsId = import.meta.env['VITE_GA_ID'] || 'G-CV9BKX26XF'
     if (this.googleAnalyticsId) {
       this.initGoogleAnalytics(this.googleAnalyticsId)
     }
