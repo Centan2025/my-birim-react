@@ -2,11 +2,17 @@ import type {StructureBuilder} from 'sanity/structure'
 import type {ConfigContext} from 'sanity'
 import {orderableDocumentListDeskItem} from '@sanity/orderable-document-list'
 import {PreviewView} from './components/PreviewView'
+import {AnalyticsStudioView} from './components/AnalyticsStudioView'
 
 export const deskStructure = (S: StructureBuilder, context: ConfigContext) => {
   return S.list()
     .title('İçerik')
     .items([
+      S.listItem()
+        .title('Site Analitiği')
+        .icon(() => '📊')
+        .child(S.component(AnalyticsStudioView).title('Google Analytics Raporu')),
+      S.divider(),
       S.listItem()
         .title('Site Ayarları')
         .child(

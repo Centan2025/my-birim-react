@@ -51,6 +51,7 @@ const KvkkPage = lazy(() => import('../pages/KvkkPage').then(m => ({default: m.d
 const AiRoomPlannerPage = lazy(() =>
   import('../pages/AiRoomPlannerPage').then(m => ({default: m.AiRoomPlannerPage}))
 )
+const AnalyticsPage = lazy(() => import('../pages/AnalyticsPage'))
 
 interface PageBoundaryProps {
   children: React.ReactNode
@@ -271,6 +272,22 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({frozenLocation}) => {
           element={
             <PageBoundary>
               <KvkkPage />
+            </PageBoundary>
+          }
+        />
+        <Route
+          path="/site-analitigi"
+          element={
+            <PageBoundary pageName="Site Analitiği">
+              <AnalyticsPage />
+            </PageBoundary>
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <PageBoundary pageName="Site Analitiği">
+              <AnalyticsPage />
             </PageBoundary>
           }
         />

@@ -1115,6 +1115,26 @@ ZERO-TOLERANCE MANDATORY PRODUCT CONSTRAINTS:
   }
 })
 
+// ─── GOOGLE ANALYTICS API ───────────────────────────────────────────────────
+app.get('/api/analytics', async (req, res) => {
+  try {
+    const {startDate = '30daysAgo', endDate = 'today', type = 'all'} = req.query
+    // Dynamic import to support analytics module
+    const {getAllAnalyticsData, getRealtimeData} = await import('../api/analytics.ts')
+
+    if (type === 'realtime') {
+      const realtime = await getRealtimeData()
+      return res.status(200).json({success: true, data: {realtime}})
+    }
+
+    const data = await getAllAnalyticsData(String(startDate), String(endDate))
+    return res.status(200).json({success: true, data})
+  } catch (err) {
+    console.error('Local Analytics API error:', err)
+    return res.status(500).json({success: false, error: err.message || 'Analytics fetch failed'})
+  }
+})
+
 // ─── 404 ──────────────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({error: `Route not found: ${req.method} ${req.path}`})
