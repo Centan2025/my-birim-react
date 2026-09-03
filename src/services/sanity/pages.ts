@@ -572,13 +572,17 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
           const imageDesktopR2 = b['imageDesktopR2']
 
           if (mediaType === 'image') {
-            image = mapImage(imageR2 as SanityImageLike) || mapImage(b['image'] as SanityImageLike)
-            imageMobile =
-              mapImage(imageMobileR2 as SanityImageLike) ||
-              mapImage(b['imageMobile'] as SanityImageLike)
             imageDesktop =
               mapImage(imageDesktopR2 as SanityImageLike) ||
               mapImage(b['imageDesktop'] as SanityImageLike)
+            imageMobile =
+              mapImage(imageMobileR2 as SanityImageLike) ||
+              mapImage(b['imageMobile'] as SanityImageLike)
+            image =
+              mapImage(imageR2 as SanityImageLike) ||
+              mapImage(b['image'] as SanityImageLike) ||
+              imageDesktop ||
+              imageMobile
             url = imageDesktop || image || url
             urlMobile = imageMobile || url
             urlDesktop = imageDesktop || image || url
@@ -601,19 +605,48 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             url = b['url'] as string | undefined
           }
 
+          const imageR2Obj =
+            typeof imageR2 === 'object' && imageR2 !== null
+              ? (imageR2 as Record<string, unknown>)
+              : undefined
+          const imageDesktopR2Obj =
+            typeof imageDesktopR2 === 'object' && imageDesktopR2 !== null
+              ? (imageDesktopR2 as Record<string, unknown>)
+              : undefined
+
+          const isSameDesktopImage = Boolean(
+            imageR2Obj &&
+              imageDesktopR2Obj &&
+              imageR2Obj['url'] &&
+              imageDesktopR2Obj['url'] &&
+              imageR2Obj['url'] === imageDesktopR2Obj['url']
+          )
+
+          const hasImageR2Crop = Boolean(
+            imageR2Obj &&
+              ((imageR2Obj['cropWidth'] !== undefined && Number(imageR2Obj['cropWidth']) < 0.999) ||
+                (imageR2Obj['cropHeight'] !== undefined &&
+                  Number(imageR2Obj['cropHeight']) < 0.999) ||
+                (imageR2Obj['cropX'] !== undefined && Number(imageR2Obj['cropX']) > 0.001) ||
+                (imageR2Obj['cropY'] !== undefined && Number(imageR2Obj['cropY']) > 0.001) ||
+                imageR2Obj['crop'])
+          )
+
           const desktopImgObj = {
             ...(typeof b === 'object' && b !== null ? (b as Record<string, unknown>) : {}),
-            ...(typeof imageR2 === 'object' && imageR2 !== null
-              ? (imageR2 as Record<string, unknown>)
-              : {}),
-            ...(typeof imageDesktopR2 === 'object' && imageDesktopR2 !== null
-              ? (imageDesktopR2 as Record<string, unknown>)
-              : {}),
+            ...(imageR2Obj || {}),
+            ...(!isSameDesktopImage || !hasImageR2Crop ? imageDesktopR2Obj || {} : {}),
             crop:
+              (isSameDesktopImage && hasImageR2Crop
+                ? (imageR2Obj?.['crop'] as Record<string, unknown> | undefined)
+                : undefined) ||
               b['cropDesktop'] ||
               b['crop'] ||
               (imageR2 as Record<string, unknown> | undefined)?.['crop'],
             hotspot:
+              (isSameDesktopImage && hasImageR2Crop
+                ? (imageR2Obj?.['hotspot'] as Record<string, unknown> | undefined)
+                : undefined) ||
               b['hotspotDesktop'] ||
               b['hotspot'] ||
               (imageR2 as Record<string, unknown> | undefined)?.['hotspot'],

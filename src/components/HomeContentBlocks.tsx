@@ -48,6 +48,10 @@ const PanelSlider: React.FC<{
     hotspotMobile?: {x: number; y: number}
     origWidthMobile?: number
     origHeightMobile?: number
+    cropDesktop?: {x: number; y: number; width: number; height: number}
+    hotspotDesktop?: {x: number; y: number}
+    origWidthDesktop?: number
+    origHeightDesktop?: number
   }>
   panelSize?: 'small' | 'medium' | 'large'
   panelFit?: 'cover' | 'contain' | 'natural'
@@ -254,6 +258,10 @@ const PanelSlider: React.FC<{
                   hotspotMobile={item.hotspotMobile}
                   origWidthMobile={item.origWidthMobile}
                   origHeightMobile={item.origHeightMobile}
+                  cropDesktop={item.cropDesktop}
+                  hotspotDesktop={item.hotspotDesktop}
+                  origWidthDesktop={item.origWidthDesktop}
+                  origHeightDesktop={item.origHeightDesktop}
                 />
               )}
             </div>
@@ -406,9 +414,14 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
           hasDescription ||
           !!(block.linkText && (!block.showButtonOnMedia || block.linkUrl))
 
-        const mediaUrl = block.mediaType === 'image' ? block.image || '' : block.url || ''
-        const mediaMobileUrl = block.mediaType === 'image' ? block.imageMobile : block.urlMobile
-        const mediaDesktopUrl = block.mediaType === 'image' ? block.imageDesktop : block.urlDesktop
+        const mediaUrl =
+          block.mediaType === 'image'
+            ? block.image || block.imageDesktop || block.imageMobile || block.url || ''
+            : block.url || ''
+        const mediaMobileUrl =
+          block.mediaType === 'image' ? block.imageMobile || mediaUrl : block.urlMobile
+        const mediaDesktopUrl =
+          block.mediaType === 'image' ? block.imageDesktop || mediaUrl : block.urlDesktop
         const isFullWidth = block.position === 'full'
         const isLeft = block.position === 'left'
         const isRight = block.position === 'right'
@@ -987,6 +1000,10 @@ export const HomeContentBlocks: React.FC<HomeContentBlocksProps> = ({
                   hotspotMobile={block.hotspotMobile}
                   origWidthMobile={block.origWidthMobile}
                   origHeightMobile={block.origHeightMobile}
+                  cropDesktop={block.cropDesktop}
+                  hotspotDesktop={block.hotspotDesktop}
+                  origWidthDesktop={block.origWidthDesktop}
+                  origHeightDesktop={block.origHeightDesktop}
                 />
                 {renderMediaOverlays()}
               </div>

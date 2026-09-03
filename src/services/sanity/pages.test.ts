@@ -6,7 +6,7 @@ vi.mock('./client', () => ({
     withConfig: vi.fn().mockReturnThis(),
   },
   useSanity: true,
-  mapImage: vi.fn(_val => _val?.url || 'http://image.url'),
+  mapImage: vi.fn(_val => (_val ? _val.url || 'http://image.url' : '')),
   mapImages: vi.fn(_val => []),
   extractPalette: vi.fn(_val => ({})),
   mapR2Metadata: vi.fn(_val => ({})),
@@ -97,5 +97,112 @@ describe('sanity pages service', () => {
     const block = content?.contentBlocks?.[0]
     expect(block?.cropDesktop).toEqual(mockCropDesktop)
     expect(block?.cropMobile).toBeUndefined()
+  })
+
+  it('getHomePageContent uses imageR2 crop when imageDesktopR2 has the same URL and imageR2 is cropped', async () => {
+    const {mapR2Metadata} = await import('./client')
+    vi.mocked(mapR2Metadata).mockImplementation((obj: unknown) => {
+      const o = obj as Record<string, unknown> | undefined
+      if (o?.['cropX'] !== undefined) {
+        return {
+          crop: {
+            x: Number(o['cropX']),
+            y: Number(o['cropY'] || 0),
+            width: Number(o['cropWidth']),
+            height: Number(o['cropHeight'] || 1),
+          },
+          origWidth: Number(o['width'] || 2560),
+          origHeight: Number(o['height'] || 1440),
+        }
+      }
+      return {}
+    })
+
+    vi.mocked(sanity.fetch).mockResolvedValue({
+      heroMedia: [],
+      contentBlocks: [
+        {
+          mediaType: 'image',
+          imageR2: {
+            url: 'https://example.com/same-image.webp',
+            cropX: 0.486,
+            cropY: 0,
+            cropWidth: 0.2252,
+            cropHeight: 1,
+            width: 2560,
+            height: 1440,
+          },
+          imageDesktopR2: {
+            url: 'https://example.com/same-image.webp',
+            cropX: 0,
+            cropY: 0.073,
+            cropWidth: 1,
+            cropHeight: 0.8999,
+            width: 2560,
+            height: 1440,
+          },
+        },
+      ],
+    })
+
+    const content = await getHomePageContent()
+    const block = content?.contentBlocks?.[0]
+    expect(block?.crop).toEqual({
+      x: 0.486,
+      y: 0,
+      width: 0.2252,
+      height: 1,
+    })
+  })
+
+  it('getHomePageContent populates image and url when imageR2 is undefined but imageDesktopR2 is present', async () => {
+    const {mapR2Metadata} = await import('./client')
+    vi.mocked(mapR2Metadata).mockImplementation((obj: unknown) => {
+      const o = obj as Record<string, unknown> | undefined
+      if (o?.['cropX'] !== undefined) {
+        return {
+          crop: {
+            x: Number(o['cropX']),
+            y: Number(o['cropY'] || 0),
+            width: Number(o['cropWidth']),
+            height: Number(o['cropHeight'] || 1),
+          },
+          origWidth: Number(o['width'] || 2560),
+          origHeight: Number(o['height'] || 1440),
+        }
+      }
+      return {}
+    })
+
+    vi.mocked(sanity.fetch).mockResolvedValue({
+      heroMedia: [],
+      contentBlocks: [
+        {
+          mediaType: 'image',
+          imageDesktopR2: {
+            url: 'https://example.com/desktop-only.webp',
+            cropX: 0,
+            cropY: 0,
+            cropWidth: 1,
+            cropHeight: 1,
+            width: 2560,
+            height: 1440,
+          },
+          imageMobileR2: {
+            url: 'https://example.com/mobile-only.webp',
+            width: 1037,
+            height: 2000,
+          },
+        },
+      ],
+    })
+
+    const content = await getHomePageContent()
+    const block = content?.contentBlocks?.[0]
+    expect(block?.image).toBe('https://example.com/desktop-only.webp')
+    expect(block?.imageDesktop).toBe('https://example.com/desktop-only.webp')
+    expect(block?.url).toBe('https://example.com/desktop-only.webp')
+    expect(block?.urlDesktop).toBe('https://example.com/desktop-only.webp')
+    expect(block?.urlMobile).toBe('https://example.com/mobile-only.webp')
   })
 })
