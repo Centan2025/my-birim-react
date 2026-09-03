@@ -350,10 +350,10 @@ export function ProjectDetailPageV2() {
   const currentHeroMedia = heroMedia[currentSlide] || heroMedia[0]
 
   return (
-    <div className="min-h-screen bg-[#0d0d0f] text-neutral-100 selection:bg-neutral-100 selection:text-black">
+    <div className="min-h-screen bg-white text-[var(--text-primary)] selection:bg-neutral-900 selection:text-white font-sans">
       {/* 1. CINEMATIC FULL-BLEED HERO BANNER */}
       <section
-        className="relative w-full h-screen min-h-[640px] flex flex-col justify-end overflow-hidden"
+        className="relative w-full h-[calc(100dvh-48px)] md:h-[calc(100dvh-56px)] min-h-[600px] flex flex-col justify-end overflow-hidden"
         onMouseEnter={() => setIsAutoplayPaused(true)}
         onMouseLeave={() => setIsAutoplayPaused(false)}
       >
@@ -396,9 +396,9 @@ export function ProjectDetailPageV2() {
             )}
           </AnimatePresence>
 
-          {/* Luxury Vignette & Dark Gradients */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d0f] via-[#0d0d0f]/40 to-black/60 z-10 pointer-events-none" />
-          <div className="absolute inset-0 bg-radial-gradient from-transparent via-black/20 to-black/70 z-10 pointer-events-none" />
+          {/* Subtle Gradient Overlays for High-Contrast Hero Text & Clear Image Visibility */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent z-10 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent z-10 pointer-events-none" />
         </div>
 
         {/* Top-Left Breadcrumb overlay - White color (Exact V1 Position) */}
@@ -416,10 +416,10 @@ export function ProjectDetailPageV2() {
         </div>
 
         {/* Bottom Hero Content */}
-        <div className="relative z-20 pb-10 md:pb-14 px-6 md:px-12 lg:px-16 w-full max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
+        <div className="relative z-20 pb-8 md:pb-12 px-6 md:px-12 lg:px-16 w-full max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-end">
             {/* Left: Project Title */}
-            <div className="lg:col-span-8 space-y-4">
+            <div className="lg:col-span-8 space-y-3">
               <motion.div
                 initial={{opacity: 0, y: 30}}
                 animate={{opacity: 1, y: 0}}
@@ -427,8 +427,8 @@ export function ProjectDetailPageV2() {
                 className="space-y-3"
               >
                 <div className="flex items-center gap-3">
-                  <span className="inline-block h-[1px] w-10 bg-white/60" />
-                  <span className="text-xs md:text-sm font-mono tracking-widest uppercase text-neutral-300">
+                  <span className="inline-block h-[2px] w-8 bg-white/80" />
+                  <span className="text-xs md:text-sm font-mono tracking-widest uppercase text-white/90 drop-shadow">
                     {project.date
                       ? t(project.date)
                       : isTr
@@ -436,40 +436,40 @@ export function ProjectDetailPageV2() {
                         : 'Birim Architectural Project'}
                   </span>
                 </div>
-                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light font-michroma tracking-tight text-white leading-snug drop-shadow-lg">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light font-michroma tracking-tight text-white leading-tight drop-shadow-lg">
                   {projectTitle}
                 </h1>
               </motion.div>
             </div>
 
-            {/* Right: Slider Controls & Actions (Keskin Köşeli) */}
-            <div className="lg:col-span-4 flex flex-col items-start lg:items-end justify-end gap-5">
+            {/* Right: Slider Controls & Actions (Keskin Köşeli & Açık Tema) */}
+            <div className="lg:col-span-4 flex flex-col items-start lg:items-end justify-end gap-4">
               {/* Slide Counter & Arrows */}
-              <div className="flex items-center gap-4 backdrop-blur-md bg-black/35 border border-white/20 px-4 py-2.5 rounded-none shadow-2xl">
+              <div className="flex items-center gap-3.5 backdrop-blur-md bg-white/95 text-neutral-900 border border-neutral-200/80 px-4 py-2 rounded-none shadow-xl">
                 {heroCount > 1 && (
                   <button
                     type="button"
                     onClick={prevHeroSlide}
                     aria-label="Previous Slide"
-                    className="p-1 text-neutral-300 hover:text-white transition-colors hover:scale-110 active:scale-95"
+                    className="p-1 text-neutral-700 hover:text-black transition-transform hover:scale-110 active:scale-95"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        strokeWidth="1.5"
+                        strokeWidth="2"
                         d="M15 19l-7-7 7-7"
                       />
                     </svg>
                   </button>
                 )}
 
-                <div className="font-mono text-xs tracking-widest text-neutral-300">
-                  <span className="text-white font-semibold">
+                <div className="font-mono text-xs tracking-widest text-neutral-500">
+                  <span className="text-neutral-950 font-bold">
                     {String(currentSlide + 1).padStart(2, '0')}
                   </span>
                   <span className="opacity-40 mx-1.5">/</span>
-                  <span className="opacity-60">{String(heroCount).padStart(2, '0')}</span>
+                  <span>{String(heroCount).padStart(2, '0')}</span>
                 </div>
 
                 {heroCount > 1 && (
@@ -477,33 +477,33 @@ export function ProjectDetailPageV2() {
                     type="button"
                     onClick={nextHeroSlide}
                     aria-label="Next Slide"
-                    className="p-1 text-neutral-300 hover:text-white transition-colors hover:scale-110 active:scale-95"
+                    className="p-1 text-neutral-700 hover:text-black transition-transform hover:scale-110 active:scale-95"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        strokeWidth="1.5"
+                        strokeWidth="2"
                         d="M9 5l7 7-7 7"
                       />
                     </svg>
                   </button>
                 )}
 
-                <div className="w-[1px] h-4 bg-white/20" />
+                <div className="w-[1px] h-4 bg-neutral-300" />
 
                 {/* Fullscreen Trigger */}
                 <button
                   type="button"
                   onClick={() => openFullscreen(currentHeroMedia?.url || '')}
                   title={isTr ? 'Tam Ekranda Aç' : 'View Fullscreen'}
-                  className="p-1 text-neutral-300 hover:text-white transition-transform hover:scale-110 active:scale-95"
+                  className="p-1 text-neutral-700 hover:text-black transition-transform hover:scale-110 active:scale-95"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth="1.5"
+                      strokeWidth="1.8"
                       d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"
                     />
                   </svg>
@@ -514,10 +514,10 @@ export function ProjectDetailPageV2() {
               <button
                 type="button"
                 onClick={scrollToGallery}
-                className="group inline-flex items-center gap-2 text-xs font-mono tracking-widest uppercase text-neutral-400 hover:text-white transition-colors"
+                className="group inline-flex items-center gap-2 px-3.5 py-1.5 backdrop-blur-md bg-white/20 hover:bg-white/30 border border-white/40 text-xs font-mono tracking-widest uppercase text-white transition-all shadow-sm rounded-none"
               >
                 <span>{isTr ? 'Ayrıntıları İncele' : 'Explore Details'}</span>
-                <span className="p-1 rounded-none border border-white/20 group-hover:translate-y-1 transition-transform">
+                <span className="p-0.5 group-hover:translate-y-0.5 transition-transform">
                   <svg
                     className="w-3.5 h-3.5"
                     fill="none"
@@ -527,7 +527,7 @@ export function ProjectDetailPageV2() {
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth="1.5"
+                      strokeWidth="2"
                       d="M19 14l-7 7m0 0l-7-7m7 7V3"
                     />
                   </svg>
@@ -538,7 +538,7 @@ export function ProjectDetailPageV2() {
 
           {/* Hero Slider Micro Thumbnails Strip (Keskin Köşeli) */}
           {heroCount > 1 && (
-            <div className="mt-8 pt-6 pb-2 px-1 border-t border-white/10 hidden md:flex items-center gap-3 overflow-x-auto no-scrollbar">
+            <div className="mt-8 pt-5 pb-1 px-1 border-t border-white/20 hidden md:flex items-center gap-3 overflow-x-auto no-scrollbar">
               {heroMedia.map((m, idx) => {
                 const isActive = idx === currentSlide
                 return (
@@ -548,8 +548,8 @@ export function ProjectDetailPageV2() {
                     onClick={() => setCurrentSlide(idx)}
                     className={`relative flex-shrink-0 h-14 w-24 rounded-none overflow-hidden transition-all duration-200 ${
                       isActive
-                        ? 'border-2 border-white opacity-100 shadow-md'
-                        : 'border border-white/20 opacity-40 hover:opacity-80'
+                        ? 'ring-2 ring-white border-2 border-white opacity-100 shadow-xl scale-105'
+                        : 'border border-white/40 opacity-60 hover:opacity-100'
                     }`}
                   >
                     <OptimizedImage
@@ -566,40 +566,40 @@ export function ProjectDetailPageV2() {
         </div>
       </section>
 
-      {/* 2. ARCHITECTURAL METADATA & SPECS BAR (Keskin Köşeli & Geometrik) */}
-      <section className="border-y border-neutral-800 bg-[#121214]/95 backdrop-blur-md sticky top-0 z-30 shadow-xl">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 py-5">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-left">
-            <div className="space-y-1">
-              <span className="text-[11px] font-mono tracking-widest text-neutral-400 uppercase">
+      {/* 2. ARCHITECTURAL METADATA & SPECS BAR (Açık Tema & Keskin Köşeli) */}
+      <section className="border-y border-neutral-200 bg-white/95 backdrop-blur-md sticky top-0 z-30 shadow-sm transition-colors">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 py-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-left divide-neutral-200 md:divide-x">
+            <div className="space-y-1 md:pr-4">
+              <span className="text-[11px] font-mono tracking-widest text-neutral-500 uppercase">
                 {isTr ? 'Proje' : 'Project'}
               </span>
-              <p className="text-sm font-medium text-white truncate">{projectTitle}</p>
+              <p className="text-sm font-medium text-neutral-900 truncate">{projectTitle}</p>
             </div>
 
-            <div className="space-y-1">
-              <span className="text-[11px] font-mono tracking-widest text-neutral-400 uppercase">
+            <div className="space-y-1 md:px-4">
+              <span className="text-[11px] font-mono tracking-widest text-neutral-500 uppercase">
                 {isTr ? 'Dönem / Yıl' : 'Period / Year'}
               </span>
-              <p className="text-sm font-medium text-white">
+              <p className="text-sm font-medium text-neutral-900">
                 {project.date ? t(project.date) : '—'}
               </p>
             </div>
 
-            <div className="space-y-1">
-              <span className="text-[11px] font-mono tracking-widest text-neutral-400 uppercase">
+            <div className="space-y-1 md:px-4">
+              <span className="text-[11px] font-mono tracking-widest text-neutral-500 uppercase">
                 {isTr ? 'Medya Arşivi' : 'Media Archive'}
               </span>
-              <p className="text-sm font-medium text-white font-mono">
+              <p className="text-sm font-medium text-neutral-900 font-mono">
                 {allMedia.length} {isTr ? 'Özel Kare' : 'Frames'}
               </p>
             </div>
 
-            <div className="space-y-1">
-              <span className="text-[11px] font-mono tracking-widest text-neutral-400 uppercase">
+            <div className="space-y-1 md:pl-4">
+              <span className="text-[11px] font-mono tracking-widest text-neutral-500 uppercase">
                 {isTr ? 'Tasarım & Donatı' : 'Curated By'}
               </span>
-              <p className="text-sm font-medium text-white">Birim Architectural</p>
+              <p className="text-sm font-medium text-neutral-900">Birim Architectural</p>
             </div>
           </div>
         </div>
@@ -609,34 +609,34 @@ export function ProjectDetailPageV2() {
       {(project.excerpt || project.body) && (
         <section
           ref={galleryRef}
-          className="py-20 md:py-28 px-6 md:px-12 lg:px-16 max-w-6xl mx-auto"
+          className="py-20 md:py-28 px-6 md:px-12 lg:px-16 max-w-6xl mx-auto bg-white"
         >
           <ScrollReveal>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
               {/* Left Column */}
               <div className="lg:col-span-5 space-y-6">
-                <span className="inline-block text-xs font-mono tracking-widest uppercase text-neutral-400 border-b border-neutral-700 pb-2">
+                <span className="inline-block text-xs font-mono tracking-widest uppercase text-neutral-500 border-b border-neutral-200 pb-2">
                   {isTr ? 'KONSEPT & MİMARİ VİZYON' : 'CONCEPT & ARCHITECTURAL VISION'}
                 </span>
-                <h2 className="text-2xl md:text-3xl font-light leading-relaxed text-neutral-100 font-michroma">
+                <h2 className="text-2xl md:text-3xl font-light leading-relaxed text-neutral-900 font-michroma">
                   {isTr
                     ? 'Mekanın ruhuna dokunan, zanaat ve modern çizgilerin kusursuz buluşması.'
                     : 'A seamless dialogue between artisanal craftsmanship and contemporary spatial design.'}
                 </h2>
-                <div className="w-16 h-[2px] bg-neutral-600" />
+                <div className="w-16 h-[2px] bg-neutral-900" />
               </div>
 
               {/* Right Column (Keskin Köşeli Kutu) */}
-              <div className="lg:col-span-7 space-y-8 text-neutral-300 font-light text-base md:text-lg leading-relaxed">
+              <div className="lg:col-span-7 space-y-8 text-neutral-700 font-light text-base md:text-lg leading-relaxed">
                 {project.excerpt && (
-                  <div className="p-6 rounded-none bg-neutral-900/60 border border-neutral-800 text-neutral-200 leading-relaxed font-normal">
+                  <div className="p-6 md:p-8 rounded-none bg-neutral-50 border border-neutral-200 text-neutral-800 leading-relaxed font-normal shadow-sm">
                     {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     <PortableTextLite value={t(project.excerpt as never) as any} />
                   </div>
                 )}
 
                 {project.body && (
-                  <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-headings:font-michroma">
+                  <div className="prose max-w-none prose-neutral prose-p:text-neutral-700 prose-p:leading-relaxed prose-headings:font-michroma prose-headings:text-neutral-900 prose-strong:text-neutral-900 prose-a:text-neutral-900 underline-offset-4">
                     {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     <PortableTextLite value={t(project.body as never) as any} />
                   </div>
@@ -649,13 +649,13 @@ export function ProjectDetailPageV2() {
 
       {/* 4. INTERACTIVE SHOWCASE (Hotspots) */}
       {!isMobile && project?.interactiveShowcase && project.interactiveShowcase.length > 0 && (
-        <section className="py-16 bg-[#121215] border-y border-neutral-800">
+        <section className="py-16 bg-neutral-50 border-y border-neutral-200">
           <div className="max-w-7xl mx-auto px-6 md:px-12">
             <div className="mb-10 text-center space-y-2">
-              <span className="text-xs font-mono tracking-widest uppercase text-neutral-400">
+              <span className="text-xs font-mono tracking-widest uppercase text-neutral-500">
                 {isTr ? 'ÜRÜN ETKİLEŞİMİ' : 'FURNITURE DISCOVERY'}
               </span>
-              <h3 className="text-2xl md:text-3xl font-michroma font-light text-white">
+              <h3 className="text-2xl md:text-3xl font-michroma font-light text-neutral-900">
                 {project.interactiveShowcaseTitle
                   ? t(project.interactiveShowcaseTitle)
                   : isTr
@@ -673,7 +673,7 @@ export function ProjectDetailPageV2() {
 
       {/* 5. CONTENT BLOCKS */}
       {project.contentBlocks && project.contentBlocks.length > 0 && (
-        <section className="py-12 bg-[#0d0d0f]">
+        <section className="py-12 bg-white">
           <div className="max-w-7xl mx-auto px-6 md:px-12">
             <HomeContentBlocks
               blocks={project.contentBlocks}
@@ -686,17 +686,17 @@ export function ProjectDetailPageV2() {
 
       {/* 6. CURATED EDITORIAL GALLERY GRID (Keskin Köşeli) */}
       {galleryMedia.length > 0 && (
-        <section className="py-20 md:py-28 px-6 md:px-12 lg:px-16 max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 pb-6 border-b border-neutral-800 gap-4">
+        <section className="py-20 md:py-28 px-6 md:px-12 lg:px-16 max-w-7xl mx-auto bg-white">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 pb-6 border-b border-neutral-200 gap-4">
             <div>
-              <span className="text-xs font-mono tracking-widest uppercase text-neutral-400">
+              <span className="text-xs font-mono tracking-widest uppercase text-neutral-500">
                 {isTr ? 'GÖRSEL ARŞİV' : 'CURATED GALLERY'}
               </span>
-              <h3 className="text-2xl md:text-4xl font-light font-michroma text-white mt-1">
+              <h3 className="text-2xl md:text-4xl font-light font-michroma text-neutral-900 mt-1">
                 {isTr ? 'Detaylar ve Atmosfer' : 'Atmosphere & Details'}
               </h3>
             </div>
-            <p className="text-xs font-mono text-neutral-400">
+            <p className="text-xs font-mono text-neutral-500">
               {isTr
                 ? 'Görsellere tıklayarak tam ekranda keşfedin'
                 : 'Click images to view in full resolution'}
@@ -714,7 +714,7 @@ export function ProjectDetailPageV2() {
               return (
                 <ScrollReveal key={i} delay={(i % 4) * 100}>
                   <div
-                    className={`${colSpan} group relative rounded-none overflow-hidden bg-neutral-900 border border-neutral-800 hover:border-neutral-500 transition-all duration-500 cursor-pointer`}
+                    className={`${colSpan} group relative rounded-none overflow-hidden bg-neutral-100 border border-neutral-200 hover:border-neutral-900 transition-all duration-500 shadow-sm hover:shadow-md cursor-pointer`}
                     onClick={() => openFullscreen(m.url)}
                     role="button"
                     tabIndex={0}
@@ -750,8 +750,8 @@ export function ProjectDetailPageV2() {
                       )}
 
                       {/* Hover Overlay with expand icon (Keskin Köşeli) */}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <div className="p-3.5 rounded-none bg-white text-black shadow-2xl transform scale-75 group-hover:scale-100 transition-transform duration-300">
+                      <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <div className="p-3.5 rounded-none bg-white text-neutral-900 shadow-2xl transform scale-75 group-hover:scale-100 transition-transform duration-300">
                           <svg
                             className="w-5 h-5"
                             fill="none"
@@ -769,7 +769,7 @@ export function ProjectDetailPageV2() {
                       </div>
 
                       {/* Bottom Image Tag */}
-                      <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-none bg-black/80 text-[10px] font-mono tracking-widest text-neutral-300 opacity-0 group-hover:opacity-100 transition-opacity border border-white/10">
+                      <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-none bg-white/90 backdrop-blur-md text-[10px] font-mono tracking-widest text-neutral-900 opacity-0 group-hover:opacity-100 transition-opacity border border-neutral-200 shadow-sm">
                         FRAME {String(i + 1).padStart(2, '0')}
                       </div>
                     </div>
@@ -781,17 +781,17 @@ export function ProjectDetailPageV2() {
         </section>
       )}
 
-      {/* 7. CINEMATIC PREV / NEXT PROJECT TRANSITION STRIP (Keskin Köşeli) */}
-      <section className="border-t border-neutral-800 bg-[#09090b] py-16 px-6 md:px-12">
+      {/* 7. ARCHITECTURAL PREV / NEXT PROJECT TRANSITION STRIP (Keskin Köşeli) */}
+      <section className="border-t border-neutral-200 bg-neutral-50 py-16 px-6 md:px-12">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Prev Project Card */}
             {prevProject ? (
               <Link
                 to={`/projects/${prevProject.id}`}
-                className="group relative flex flex-col justify-between p-8 rounded-none bg-neutral-950 border border-neutral-800 hover:border-white/40 hover:bg-neutral-900 transition-all duration-300"
+                className="group relative flex flex-col justify-between p-8 rounded-none bg-white border border-neutral-200 hover:border-neutral-900 hover:shadow-lg transition-all duration-300"
               >
-                <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-neutral-400 group-hover:text-white uppercase transition-colors">
+                <div className="flex items-center gap-2 text-xs font-mono tracking-widest text-neutral-500 group-hover:text-neutral-900 uppercase transition-colors">
                   <svg
                     className="w-4 h-4 transition-transform group-hover:-translate-x-1"
                     fill="none"
@@ -808,7 +808,7 @@ export function ProjectDetailPageV2() {
                   <span>{isTr ? 'Önceki Proje' : 'Previous Project'}</span>
                 </div>
                 <div className="mt-6">
-                  <h4 className="text-xl md:text-2xl font-michroma font-light text-neutral-200 group-hover:text-white truncate">
+                  <h4 className="text-xl md:text-2xl font-michroma font-light text-neutral-900 group-hover:text-black truncate">
                     {t(prevProject.title)}
                   </h4>
                   {prevProject.date && (
@@ -824,9 +824,9 @@ export function ProjectDetailPageV2() {
             {nextProject ? (
               <Link
                 to={`/projects/${nextProject.id}`}
-                className="group relative flex flex-col justify-between p-8 rounded-none bg-neutral-950 border border-neutral-800 hover:border-white/40 hover:bg-neutral-900 transition-all duration-300 text-right"
+                className="group relative flex flex-col justify-between p-8 rounded-none bg-white border border-neutral-200 hover:border-neutral-900 hover:shadow-lg transition-all duration-300 text-right"
               >
-                <div className="flex items-center justify-end gap-2 text-xs font-mono tracking-widest text-neutral-400 group-hover:text-white uppercase transition-colors">
+                <div className="flex items-center justify-end gap-2 text-xs font-mono tracking-widest text-neutral-500 group-hover:text-neutral-900 uppercase transition-colors">
                   <span>{isTr ? 'Sonraki Proje' : 'Next Project'}</span>
                   <svg
                     className="w-4 h-4 transition-transform group-hover:translate-x-1"
@@ -843,7 +843,7 @@ export function ProjectDetailPageV2() {
                   </svg>
                 </div>
                 <div className="mt-6">
-                  <h4 className="text-xl md:text-2xl font-michroma font-light text-neutral-200 group-hover:text-white truncate">
+                  <h4 className="text-xl md:text-2xl font-michroma font-light text-neutral-900 group-hover:text-black truncate">
                     {t(nextProject.title)}
                   </h4>
                   {nextProject.date && (

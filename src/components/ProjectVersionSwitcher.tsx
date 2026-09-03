@@ -12,8 +12,8 @@ export function ProjectVersionSwitcher({activeVersion, onChange}: ProjectVersion
 
   const versions: {id: 'v1' | 'v2' | 'v3'; label: string; descTr: string; descEn: string}[] = [
     {id: 'v1', label: 'V1', descTr: 'Klasik', descEn: 'Classic'},
-    {id: 'v2', label: 'V2', descTr: 'Koyu', descEn: 'Dark'},
-    {id: 'v3', label: 'V3', descTr: 'Beyaz', descEn: 'White'},
+    {id: 'v2', label: 'V2', descTr: 'Editoryal', descEn: 'Editorial'},
+    {id: 'v3', label: 'V3', descTr: 'Dosya', descEn: 'Dossier'},
   ]
 
   return (
