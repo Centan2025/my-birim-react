@@ -536,8 +536,8 @@ export function AboutPageNew() {
                     key={idx}
                     className={`border transition-all duration-300 rounded-none overflow-hidden ${
                       isActive
-                        ? 'border-[var(--text-primary)] bg-[var(--bg-secondary)] shadow-sm'
-                        : 'border-neutral-500/20 hover:border-[var(--text-primary)]/40'
+                        ? 'border-[var(--text-primary)]/12 bg-[var(--bg-secondary)]'
+                        : 'border-neutral-500/20 hover:border-[var(--text-primary)]/10'
                     }`}
                   >
                     <button
@@ -629,8 +629,8 @@ export function AboutPageNew() {
                     onClick={() => setActiveEraIndex(idx)}
                     className={`p-4 lg:p-5 text-left border rounded-none transition-all duration-300 ${
                       activeEraIndex === idx || (activeEraIndex === -1 && idx === 0)
-                        ? 'border-[var(--text-primary)] bg-[var(--bg-secondary)] shadow-sm'
-                        : 'border-neutral-500/20 hover:border-[var(--text-primary)]/40'
+                        ? 'border-[var(--text-primary)]/12 bg-[var(--bg-secondary)]'
+                        : 'border-neutral-500/20 hover:border-[var(--text-primary)]/10'
                     }`}
                   >
                     <span className="font-outfit text-2xl lg:text-3xl xl:text-4xl font-light tracking-tight block text-[var(--text-primary)]">
