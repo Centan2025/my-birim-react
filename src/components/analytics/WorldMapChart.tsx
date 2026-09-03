@@ -94,17 +94,17 @@ function WorldMapChart({countries}: Props) {
       {/* Tooltip */}
       {tooltipContent && !isDragging && (
         <div
-          className="absolute z-50 pointer-events-none bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-xl px-3 py-2 shadow-2xl transform -translate-x-1/2 -translate-y-full"
+          className="absolute z-50 pointer-events-none bg-white/95 backdrop-blur-xl border border-slate-200 rounded-xl px-3 py-2 shadow-xl transform -translate-x-1/2 -translate-y-full text-slate-800"
           style={{left: tooltipPos.x, top: tooltipPos.y - 10}}
         >
-          <p className="text-xs text-white font-bold whitespace-nowrap">{tooltipContent}</p>
+          <p className="text-xs text-slate-900 font-bold whitespace-nowrap">{tooltipContent}</p>
         </div>
       )}
       {/* Zoom Controls */}
       <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
         <button
           onClick={handleZoomIn}
-          className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+          className="w-8 h-8 rounded-lg bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-colors"
           title="Yakınlaştır"
         >
           {' '}
@@ -112,7 +112,7 @@ function WorldMapChart({countries}: Props) {
         </button>
         <button
           onClick={handleZoomOut}
-          className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+          className="w-8 h-8 rounded-lg bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-colors"
           title="Uzaklaştır"
         >
           {' '}
@@ -122,23 +122,23 @@ function WorldMapChart({countries}: Props) {
           <>
             <button
               onClick={handleReset}
-              className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+              className="w-8 h-8 rounded-lg bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-colors"
               title="Sıfırla"
             >
               {' '}
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
             <div className="w-8 h-6 flex items-center justify-center">
-              <span className="text-[9px] text-white/60 font-bold">{zoom.toFixed(1)}x</span>
+              <span className="text-[9px] text-slate-600 font-bold">{zoom.toFixed(1)}x</span>
             </div>
           </>
         )}
       </div>
       {/* Drag hint */}
       {zoom > 1 && !isDragging && (
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 bg-white/10 backdrop-blur-md rounded-full px-3 py-1 border border-white/15">
-          <Move className="w-3 h-3 text-white/60" />
-          <span className="text-[10px] text-white/60">Sürükleyerek dolaşın</span>
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 bg-white/90 backdrop-blur-md rounded-full px-3 py-1 border border-slate-200 shadow-sm">
+          <Move className="w-3 h-3 text-slate-600" />
+          <span className="text-[10px] text-slate-600 font-medium">Sürükleyerek dolaşın</span>
         </div>
       )}
       <ComposableMap
@@ -152,10 +152,6 @@ function WorldMapChart({countries}: Props) {
       >
         {' '}
         <defs>
-          <radialGradient id="globe-glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.05" />
-            <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
-          </radialGradient>
           <filter id="marker-glow">
             <feGaussianBlur stdDeviation="3" result="glow" />
             <feMerge>
@@ -164,19 +160,19 @@ function WorldMapChart({countries}: Props) {
             </feMerge>
           </filter>
         </defs>
-        <rect width="800" height="500" fill="url(#globe-glow)" />
+        <rect width="800" height="500" fill="#f8fafc" />
         <Geographies geography={WORLD_GEO_URL}>
           {({geographies}) =>
             geographies.map(geo => (
               <Geography
                 key={geo.rsmKey}
                 geography={geo}
-                fill="rgba(148,163,184,0.12)"
-                stroke="rgba(148,163,184,0.2)"
-                strokeWidth={0.4}
+                fill="#e2e8f0"
+                stroke="#cbd5e1"
+                strokeWidth={0.5}
                 style={{
                   default: {outline: 'none'},
-                  hover: {fill: 'rgba(99,102,241,0.2)', outline: 'none'},
+                  hover: {fill: '#cbd5e1', outline: 'none'},
                   pressed: {outline: 'none'},
                 }}
               />

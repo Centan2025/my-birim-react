@@ -123,26 +123,26 @@ function TurkeyMapChart({turkishCities}: Props) {
       {/* Tooltip */}
       {tooltipData && !isDragging && (
         <div
-          className="absolute z-50 pointer-events-none bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-xl px-4 py-3 shadow-2xl transform -translate-x-1/2 -translate-y-full"
+          className="absolute z-50 pointer-events-none bg-white/95 backdrop-blur-xl border border-slate-200 rounded-xl px-4 py-3 shadow-xl transform -translate-x-1/2 -translate-y-full text-slate-800"
           style={{left: tooltipPos.x, top: tooltipPos.y - 10}}
         >
-          <p className="text-xs font-black text-white mb-1">{tooltipData.city}</p>
+          <p className="text-xs font-black text-slate-900 mb-1">{tooltipData.city}</p>
           <div className="flex items-center gap-3">
             <div>
-              <p className="text-[10px] text-slate-400">Kullanıcı</p>
-              <p className="text-sm font-bold text-indigo-400">
+              <p className="text-[10px] text-slate-400 font-medium">Kullanıcı</p>
+              <p className="text-sm font-bold text-indigo-600">
                 {tooltipData.users.toLocaleString('tr-TR')}
               </p>
             </div>
             <div>
-              <p className="text-[10px] text-slate-400">Oturum</p>
-              <p className="text-sm font-bold text-cyan-400">
+              <p className="text-[10px] text-slate-400 font-medium">Oturum</p>
+              <p className="text-sm font-bold text-cyan-600">
                 {tooltipData.sessions.toLocaleString('tr-TR')}
               </p>
             </div>
             <div>
-              <p className="text-[10px] text-slate-400">Sayfa Gör.</p>
-              <p className="text-sm font-bold text-pink-400">
+              <p className="text-[10px] text-slate-400 font-medium">Sayfa Gör.</p>
+              <p className="text-sm font-bold text-pink-600">
                 {tooltipData.pageViews.toLocaleString('tr-TR')}
               </p>
             </div>
@@ -150,8 +150,8 @@ function TurkeyMapChart({turkishCities}: Props) {
         </div>
       )}
       {/* Legend */}
-      <div className="absolute top-3 right-3 z-10 flex flex-col gap-1.5 bg-white/5 dark:bg-slate-900/60 backdrop-blur-md rounded-xl p-3 border border-white/10">
-        <p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase mb-1">
+      <div className="absolute top-3 right-3 z-10 flex flex-col gap-1.5 bg-white/90 backdrop-blur-md rounded-xl p-3 border border-slate-200 shadow-sm text-slate-700">
+        <p className="text-[9px] font-bold text-slate-500 tracking-widest uppercase mb-1">
           Yoğunluk
         </p>
         {[
@@ -162,7 +162,7 @@ function TurkeyMapChart({turkishCities}: Props) {
         ].map(l => (
           <div key={l.label} className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full" style={{backgroundColor: l.color}} />
-            <span className="text-[10px] text-slate-400">{l.label}</span>
+            <span className="text-[10px] text-slate-600 font-medium">{l.label}</span>
           </div>
         ))}
       </div>
@@ -170,7 +170,7 @@ function TurkeyMapChart({turkishCities}: Props) {
       <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
         <button
           onClick={handleZoomIn}
-          className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+          className="w-8 h-8 rounded-lg bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-colors"
           title="Yakınlaştır"
         >
           {' '}
@@ -178,7 +178,7 @@ function TurkeyMapChart({turkishCities}: Props) {
         </button>
         <button
           onClick={handleZoomOut}
-          className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+          className="w-8 h-8 rounded-lg bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-colors"
           title="Uzaklaştır"
         >
           {' '}
@@ -188,23 +188,23 @@ function TurkeyMapChart({turkishCities}: Props) {
           <>
             <button
               onClick={handleReset}
-              className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+              className="w-8 h-8 rounded-lg bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 hover:bg-slate-50 transition-colors"
               title="Sıfırla"
             >
               {' '}
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
             <div className="w-8 h-6 flex items-center justify-center">
-              <span className="text-[9px] text-white/60 font-bold">{zoom.toFixed(1)}x</span>
+              <span className="text-[9px] text-slate-600 font-bold">{zoom.toFixed(1)}x</span>
             </div>
           </>
         )}
       </div>
       {/* Drag hint */}
       {zoom > 1 && !isDragging && (
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 bg-white/10 backdrop-blur-md rounded-full px-3 py-1 border border-white/15">
-          <Move className="w-3 h-3 text-white/60" />
-          <span className="text-[10px] text-white/60">Sürükleyerek dolaşın</span>
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 bg-white/90 backdrop-blur-md rounded-full px-3 py-1 border border-slate-200 shadow-sm">
+          <Move className="w-3 h-3 text-slate-600" />
+          <span className="text-[10px] text-slate-600 font-medium">Sürükleyerek dolaşın</span>
         </div>
       )}
       <ComposableMap
@@ -218,35 +218,27 @@ function TurkeyMapChart({turkishCities}: Props) {
       >
         {' '}
         <defs>
-          <radialGradient id="tr-bg-glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.03" />
-            <stop offset="100%" stopColor="transparent" stopOpacity="0" />
-          </radialGradient>
           <filter id="city-glow">
-            <feGaussianBlur stdDeviation="4" result="glow" />
+            <feGaussianBlur stdDeviation="3" result="glow" />
             <feMerge>
               <feMergeNode in="glow" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
-          <linearGradient id="tr-land-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="rgba(99,102,241,0.15)" />
-            <stop offset="100%" stopColor="rgba(139,92,246,0.1)" />
-          </linearGradient>
         </defs>
-        <rect width="800" height="450" fill="url(#tr-bg-glow)" />
+        <rect width="800" height="450" fill="#f8fafc" />
         <Geographies geography={WORLD_GEO_URL}>
           {({geographies}) =>
             geographies.map(geo => (
               <Geography
                 key={geo.rsmKey}
                 geography={geo}
-                fill="url(#tr-land-grad)"
-                stroke="rgba(148,163,184,0.25)"
+                fill="#e2e8f0"
+                stroke="#cbd5e1"
                 strokeWidth={0.5}
                 style={{
                   default: {outline: 'none'},
-                  hover: {outline: 'none'},
+                  hover: {fill: '#cbd5e1', outline: 'none'},
                   pressed: {outline: 'none'},
                 }}
               />

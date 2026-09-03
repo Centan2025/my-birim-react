@@ -62,27 +62,27 @@ export default function AnalyticsPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black flex items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
         <motion.div
           initial={{opacity: 0, y: 20}}
           animate={{opacity: 1, y: 0}}
-          className="w-full max-w-md bg-slate-900/90 border border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur-xl text-center"
+          className="w-full max-w-md bg-white border border-slate-200/90 rounded-3xl p-8 shadow-xl text-center"
         >
-          <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 flex items-center justify-center mx-auto mb-6 shadow-inner">
+          <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center mx-auto mb-6 shadow-sm">
             <Lock className="w-7 h-7" />
           </div>
 
-          <h2 className="text-xl font-light text-white tracking-tight font-outfit">
+          <h2 className="text-xl font-medium text-slate-900 tracking-tight font-outfit">
             Yönetici Doğrulaması
           </h2>
-          <p className="text-xs text-slate-400 font-light mt-1.5 mb-6">
+          <p className="text-xs text-slate-500 font-light mt-1.5 mb-6">
             Site analitiği ve Google Analytics raporlarını görüntülemek için erişim PIN kodunuzu
             giriniz.
           </p>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="relative">
-              <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="password"
                 placeholder="Yönetici PIN / Parola"
@@ -91,11 +91,11 @@ export default function AnalyticsPage() {
                   setPinInput(e.target.value)
                   if (error) setError(false)
                 }}
-                className={`w-full bg-slate-950/80 border ${
+                className={`w-full bg-slate-50 border ${
                   error
                     ? 'border-rose-500 ring-1 ring-rose-500'
-                    : 'border-slate-700/80 focus:border-indigo-500'
-                } rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none transition`}
+                    : 'border-slate-200 focus:border-indigo-500 focus:bg-white'
+                } rounded-xl py-3 pl-11 pr-4 text-sm text-slate-800 placeholder-slate-400 focus:outline-none transition`}
               />
             </div>
 
@@ -103,7 +103,7 @@ export default function AnalyticsPage() {
               <motion.div
                 initial={{opacity: 0, y: -5}}
                 animate={{opacity: 1, y: 0}}
-                className="flex items-center justify-center gap-1.5 text-xs text-rose-400 font-light"
+                className="flex items-center justify-center gap-1.5 text-xs text-rose-600 font-light"
               >
                 <ShieldAlert className="w-3.5 h-3.5" />
                 <span>Geçersiz erişim şifresi. Lütfen tekrar deneyin.</span>
@@ -112,15 +112,15 @@ export default function AnalyticsPage() {
 
             <button
               type="submit"
-              className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Panele Giriş Yap</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-slate-800 text-[11px] text-slate-500 font-light">
-            Birim Mobilya San. ve Tic. A.Ş. &bull; Gizli Yönetim Paneli
+          <div className="mt-8 pt-6 border-t border-slate-100 text-[11px] text-slate-400 font-light">
+            Birim Mobilya San. ve Tic. A.Ş. &bull; Yönetim Paneli
           </div>
         </motion.div>
       </div>
@@ -129,7 +129,7 @@ export default function AnalyticsPage() {
 
   return (
     <div
-      className={`min-h-screen bg-slate-50 dark:bg-slate-950 ${
+      className={`min-h-screen bg-slate-50 text-slate-900 ${
         isStudioBypass
           ? 'pt-6 pb-8 px-4 sm:px-6 lg:px-8'
           : 'pt-24 pb-16 px-4 sm:px-6 md:px-8 lg:px-12'

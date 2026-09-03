@@ -121,13 +121,13 @@ interface CustomTooltipProps {
 function CustomTooltip({active, payload, label}: CustomTooltipProps) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-slate-900/95 text-white backdrop-blur-md border border-white/10 rounded-xl px-4 py-3 shadow-2xl text-xs">
-      <p className="font-semibold text-slate-300 mb-2">{label}</p>
+    <div className="bg-white/95 text-slate-800 backdrop-blur-md border border-slate-200 rounded-xl px-4 py-3 shadow-xl text-xs">
+      <p className="font-semibold text-slate-700 mb-2">{label}</p>
       {payload.map((p, i: number) => (
         <div key={i} className="flex items-center gap-2 mb-1">
           <span className="w-2 h-2 rounded-full" style={{backgroundColor: p.color}} />
-          <span className="text-slate-400">{p.name}:</span>
-          <span className="font-bold text-white">
+          <span className="text-slate-500 font-medium">{p.name}:</span>
+          <span className="font-bold text-slate-900">
             {typeof p.value === 'number' ? p.value.toLocaleString('tr-TR') : p.value}
           </span>
         </div>
@@ -474,23 +474,23 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       </div>
 
       {/* Realtime Live Pulse Bar */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 p-5 mb-8 text-white shadow-lg border border-indigo-900/30">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-50/60 via-white to-indigo-50/60 p-5 mb-8 text-slate-800 shadow-sm border border-slate-200/80">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="relative flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/40">
-              <span className="absolute w-3 h-3 rounded-full bg-emerald-400 animate-ping" />
-              <span className="relative w-2.5 h-2.5 rounded-full bg-emerald-400" />
+            <div className="relative flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-100 border border-emerald-300">
+              <span className="absolute w-3 h-3 rounded-full bg-emerald-500 animate-ping" />
+              <span className="relative w-2.5 h-2.5 rounded-full bg-emerald-600" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-xl sm:text-2xl font-bold font-outfit tracking-tight">
+                <h3 className="text-xl sm:text-2xl font-bold font-outfit tracking-tight text-slate-900">
                   {activeOnline} {activeOnline === 1 ? 'Kişi' : 'Kullanıcı'} Canlı
                 </h3>
-                <span className="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-300 rounded font-semibold uppercase tracking-wider">
+                <span className="px-2 py-0.5 text-[10px] bg-emerald-100 text-emerald-800 rounded font-semibold uppercase tracking-wider">
                   Realtime
                 </span>
               </div>
-              <p className="text-xs text-slate-400 font-light mt-0.5">
+              <p className="text-xs text-slate-500 font-light mt-0.5">
                 Şu anda sitede gezinen anlık ziyaretçi sayısı
               </p>
             </div>
@@ -498,11 +498,11 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
           {realtimeData?.activePages && realtimeData.activePages.length > 0 && (
             <div className="flex flex-wrap items-center gap-2 max-w-lg">
-              <span className="text-xs text-slate-400 font-medium mr-1">Aktif Sayfalar:</span>
+              <span className="text-xs text-slate-500 font-medium mr-1">Aktif Sayfalar:</span>
               {realtimeData.activePages.slice(0, 4).map((p, idx) => (
                 <span
                   key={idx}
-                  className="text-xs px-2.5 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-slate-200 truncate max-w-[200px]"
+                  className="text-xs px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 font-medium border border-slate-200/60 truncate max-w-[200px]"
                   title={p.page}
                 >
                   {p.page.replace(/^BIRIM\s*[-|]?\s*/i, '')} ({p.users})
@@ -626,28 +626,28 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           </div>
 
           {/* Interactive Maps Showcase on Overview */}
-          <div className="bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-2xl mb-8 text-white">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm mb-8 text-slate-800">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
                 <div className="flex items-center gap-2">
-                  <Globe className="w-5 h-5 text-indigo-400" />
-                  <h2 className="text-xl font-bold tracking-tight">
+                  <Globe className="w-5 h-5 text-indigo-600" />
+                  <h2 className="text-xl font-bold tracking-tight text-slate-900">
                     Etkileşimli Ziyaretçi Haritası
                   </h2>
                 </div>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   Kullanıcıların harita üzerindeki coğrafi yoğunluğu ve şehir dağılımı (Zoom & Pan
                   destekli)
                 </p>
               </div>
 
-              <div className="flex bg-slate-800 p-1 rounded-xl border border-slate-700">
+              <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
                 <button
                   onClick={() => setMapSubTab('turkey')}
                   className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition ${
                     mapSubTab === 'turkey'
-                      ? 'bg-indigo-600 text-white'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   Türkiye Haritası
@@ -656,8 +656,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                   onClick={() => setMapSubTab('world')}
                   className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition ${
                     mapSubTab === 'world'
-                      ? 'bg-indigo-600 text-white'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   Dünya Haritası
@@ -665,7 +665,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               </div>
             </div>
 
-            <div className="w-full bg-slate-950/70 rounded-2xl p-4 border border-slate-800/80 overflow-hidden">
+            <div className="w-full bg-slate-50/80 rounded-2xl p-4 border border-slate-200 overflow-hidden">
               {mapSubTab === 'turkey' ? (
                 <TurkeyMapChart turkishCities={turkishCitiesForMap} />
               ) : (
@@ -892,20 +892,20 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       {activeTab === 'realtime' && (
         <div className="space-y-8">
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-slate-900 rounded-3xl p-6 border border-slate-800 text-white shadow-xl flex flex-col justify-between">
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 text-slate-900 shadow-sm flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">
+                  <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">
                     Anlık Canlı
                   </span>
-                  <span className="w-3 h-3 rounded-full bg-emerald-400 animate-ping" />
+                  <span className="w-3 h-3 rounded-full bg-emerald-500 animate-ping" />
                 </div>
-                <p className="text-5xl font-black font-outfit text-emerald-400">{activeOnline}</p>
-                <p className="text-xs text-slate-400 mt-2">
+                <p className="text-5xl font-black font-outfit text-emerald-600">{activeOnline}</p>
+                <p className="text-xs text-slate-500 mt-2">
                   Şu anda sitede gezinen anlık ziyaretçi
                 </p>
               </div>
-              <div className="mt-6 pt-4 border-t border-slate-800 text-[11px] text-slate-500">
+              <div className="mt-6 pt-4 border-t border-slate-100 text-[11px] text-slate-400">
                 Her 20 saniyede bir otomatik yenilenir
               </div>
             </div>
@@ -927,7 +927,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                     <span className="font-medium text-slate-800 dark:text-slate-200 truncate max-w-md">
                       {p.page}
                     </span>
-                    <span className="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold">
+                    <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold">
                       {p.users} kullanıcı
                     </span>
                   </div>
@@ -975,42 +975,42 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       {/* TAB: GEOGRAPHY & FULL MAPS */}
       {activeTab === 'geography' && (
         <div className="space-y-8">
-          <div className="bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-2xl text-white">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm text-slate-800">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <div className="flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-rose-500" />
-                  <h2 className="text-xl font-bold tracking-tight">
+                  <h2 className="text-xl font-bold tracking-tight text-slate-900">
                     Türkiye Ziyaretçi Yoğunluğu Haritası
                   </h2>
                 </div>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   Şehirlere göre kullanıcı yoğunluk noktaları (Yakınlaştırma ve kaydırma destekli)
                 </p>
               </div>
             </div>
 
-            <div className="w-full bg-slate-950/70 rounded-2xl p-4 border border-slate-800/80 overflow-hidden">
+            <div className="w-full bg-slate-50/80 rounded-2xl p-4 border border-slate-200 overflow-hidden">
               <TurkeyMapChart turkishCities={turkishCitiesForMap} />
             </div>
           </div>
 
-          <div className="bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-2xl text-white">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm text-slate-800">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <Globe className="w-5 h-5 text-indigo-400" />
-                  <h2 className="text-xl font-bold tracking-tight">
+                  <Globe className="w-5 h-5 text-indigo-600" />
+                  <h2 className="text-xl font-bold tracking-tight text-slate-900">
                     Dünya Ziyaretçi Dağılımı Haritası
                   </h2>
                 </div>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   Uluslararası ziyaretçilerin ülke bazlı dağılımı
                 </p>
               </div>
             </div>
 
-            <div className="w-full bg-slate-950/70 rounded-2xl p-4 border border-slate-800/80 overflow-hidden">
+            <div className="w-full bg-slate-50/80 rounded-2xl p-4 border border-slate-200 overflow-hidden">
               <WorldMapChart countries={data?.countryData || []} />
             </div>
           </div>
