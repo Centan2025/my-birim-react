@@ -28,6 +28,20 @@ export default function AnalyticsPage() {
   }, [])
 
   useEffect(() => {
+    // Analytics sayfası her zaman açık tema (Light Mode) olarak görüntülenmeli
+    const htmlEl = document.documentElement
+    const wasDark = htmlEl.classList.contains('dark')
+    htmlEl.classList.remove('dark')
+    htmlEl.classList.add('light')
+    return () => {
+      if (wasDark) {
+        htmlEl.classList.add('dark')
+        htmlEl.classList.remove('light')
+      }
+    }
+  }, [])
+
+  useEffect(() => {
     // Check session or URL bypass parameters (e.g. from Sanity Studio)
     const params = new URLSearchParams(window.location.search)
     const bypass = params.get('bypass')
@@ -139,7 +153,7 @@ export default function AnalyticsPage() {
         <div className="flex justify-end mb-4">
           <button
             onClick={handleLogout}
-            className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition underline underline-offset-4 cursor-pointer"
+            className="text-xs text-slate-400 hover:text-slate-800 transition underline underline-offset-4 cursor-pointer"
           >
             Güvenli Çıkış Yap
           </button>

@@ -264,7 +264,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         <p className="text-sm text-slate-500 max-w-md mb-6">{error}</p>
         <button
           onClick={handleManualRefresh}
-          className="px-5 py-2.5 bg-slate-900 text-white text-xs uppercase tracking-wider rounded-lg hover:bg-slate-800 transition"
+          className="px-5 py-2.5 bg-slate-900 text-white text-xs uppercase tracking-wider rounded-lg hover transition"
         >
           Tekrar Dene
         </button>
@@ -281,54 +281,54 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       value: (overview?.activeUsers || 0).toLocaleString('tr-TR'),
       sub: 'Tekil kullanıcı',
       icon: Users,
-      color: 'text-indigo-600 dark:text-indigo-400',
-      bg: 'bg-indigo-50 dark:bg-indigo-950/40',
-      border: 'border-indigo-100 dark:border-indigo-900/40',
+      color: 'text-indigo-600',
+      bg: 'bg-indigo-50',
+      border: 'border-indigo-100',
     },
     {
       label: 'Toplam Oturum',
       value: (overview?.sessions || 0).toLocaleString('tr-TR'),
       sub: 'Ziyaret sayısı',
       icon: Compass,
-      color: 'text-cyan-600 dark:text-cyan-400',
-      bg: 'bg-cyan-50 dark:bg-cyan-950/40',
-      border: 'border-cyan-100 dark:border-cyan-900/40',
+      color: 'text-cyan-600',
+      bg: 'bg-cyan-50',
+      border: 'border-cyan-100',
     },
     {
       label: 'Sayfa Görüntüleme',
       value: (overview?.pageViews || 0).toLocaleString('tr-TR'),
       sub: 'Görüntülenen sayfa',
       icon: Eye,
-      color: 'text-emerald-600 dark:text-emerald-400',
-      bg: 'bg-emerald-50 dark:bg-emerald-950/40',
-      border: 'border-emerald-100 dark:border-emerald-900/40',
+      color: 'text-emerald-600',
+      bg: 'bg-emerald-50',
+      border: 'border-emerald-100',
     },
     {
       label: 'Hemen Çıkma Oranı',
       value: `%${((overview?.bounceRate || 0) * 100).toFixed(1)}`,
       sub: 'Tek sayfada ayrılan',
       icon: TrendingDown,
-      color: 'text-rose-600 dark:text-rose-400',
-      bg: 'bg-rose-50 dark:bg-rose-950/40',
-      border: 'border-rose-100 dark:border-rose-900/40',
+      color: 'text-rose-600',
+      bg: 'bg-rose-50',
+      border: 'border-rose-100',
     },
     {
       label: 'Ortalama Süre',
       value: formatDuration(overview?.avgSessionDuration || 0),
       sub: 'Oturum başına süre',
       icon: Clock,
-      color: 'text-amber-600 dark:text-amber-400',
-      bg: 'bg-amber-50 dark:bg-amber-950/40',
-      border: 'border-amber-100 dark:border-amber-900/40',
+      color: 'text-amber-600',
+      bg: 'bg-amber-50',
+      border: 'border-amber-100',
     },
     {
       label: 'Yeni Kullanıcılar',
       value: (overview?.newUsers || 0).toLocaleString('tr-TR'),
       sub: 'İlk kez gelen ziyaretçi',
       icon: Zap,
-      color: 'text-purple-600 dark:text-purple-400',
-      bg: 'bg-purple-50 dark:bg-purple-950/40',
-      border: 'border-purple-100 dark:border-purple-900/40',
+      color: 'text-purple-600',
+      bg: 'bg-purple-50',
+      border: 'border-purple-100',
     },
   ]
 
@@ -340,7 +340,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-light tracking-tight font-outfit">
+            <h1 className="text-2xl sm font-light tracking-tight font-outfit">
               Site Analitiği & Ziyaretçi Raporu
             </h1>
             {isEmbeddedInStudio && (
@@ -349,20 +349,20 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               </span>
             )}
           </div>
-          <p className="text-xs sm:text-sm text-slate-500 font-light mt-1">
+          <p className="text-xs sm text-slate-500 font-light mt-1">
             Google Analytics (GA4) mülküne bağlı gerçek zamanlı ve dönemsel trafik göstergeleri
           </p>
         </div>
 
         {/* Action Controls & Date Range */}
         <div className="flex items-center flex-wrap gap-2 w-full md:w-auto">
-          <div className="flex bg-slate-200/70 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-300/60 dark:border-slate-700/60">
+          <div className="flex bg-slate-200/70 p-1 rounded-xl border border-slate-300/60">
             <button
               onClick={() => setDateRange('7daysAgo')}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                 dateRange === '7daysAgo'
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-600 hover'
               }`}
             >
               Son 7 Gün
@@ -371,8 +371,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               onClick={() => setDateRange('30daysAgo')}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                 dateRange === '30daysAgo'
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-600 hover'
               }`}
             >
               Son 30 Gün
@@ -381,8 +381,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               onClick={() => setDateRange('90daysAgo')}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                 dateRange === '90daysAgo'
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-600 hover'
               }`}
             >
               Son 3 Ay
@@ -391,8 +391,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               onClick={() => setDateRange('365daysAgo')}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                 dateRange === '365daysAgo'
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-600 hover'
               }`}
             >
               Son 1 Yıl
@@ -403,7 +403,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             onClick={handleManualRefresh}
             disabled={refreshing}
             title="Verileri Yenile"
-            className="p-2 bg-slate-200/70 dark:bg-slate-800/80 hover:bg-slate-300 dark:hover:bg-slate-700 border border-slate-300/60 dark:border-slate-700/60 rounded-xl transition flex items-center justify-center text-slate-700 dark:text-slate-300"
+            className="p-2 bg-slate-200/70 hover border border-slate-300/60 rounded-xl transition flex items-center justify-center text-slate-700"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-indigo-600' : ''}`} />
           </button>
@@ -411,13 +411,11 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       </div>
 
       {/* Tabs Navigation */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-8 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-8 border-b border-slate-200">
         <button
           onClick={() => setActiveTab('overview')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-            activeTab === 'overview'
-              ? 'bg-slate-900 text-white dark:bg-indigo-600 shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+            activeTab === 'overview' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover'
           }`}
         >
           <Layers className="w-4 h-4" />
@@ -427,9 +425,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         <button
           onClick={() => setActiveTab('realtime')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-            activeTab === 'realtime'
-              ? 'bg-slate-900 text-white dark:bg-indigo-600 shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+            activeTab === 'realtime' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover'
           }`}
         >
           <Radio className="w-4 h-4 text-emerald-400" />
@@ -439,9 +435,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         <button
           onClick={() => setActiveTab('geography')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-            activeTab === 'geography'
-              ? 'bg-slate-900 text-white dark:bg-indigo-600 shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+            activeTab === 'geography' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover'
           }`}
         >
           <Globe className="w-4 h-4 text-indigo-400" />
@@ -451,9 +445,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         <button
           onClick={() => setActiveTab('pages')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-            activeTab === 'pages'
-              ? 'bg-slate-900 text-white dark:bg-indigo-600 shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+            activeTab === 'pages' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover'
           }`}
         >
           <FileText className="w-4 h-4 text-amber-400" />
@@ -463,9 +455,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         <button
           onClick={() => setActiveTab('sources')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-            activeTab === 'sources'
-              ? 'bg-slate-900 text-white dark:bg-indigo-600 shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+            activeTab === 'sources' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover'
           }`}
         >
           <Compass className="w-4 h-4 text-cyan-400" />
@@ -483,7 +473,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-xl sm:text-2xl font-bold font-outfit tracking-tight text-slate-900">
+                <h3 className="text-xl sm font-bold font-outfit tracking-tight text-slate-900">
                   {activeOnline} {activeOnline === 1 ? 'Kişi' : 'Kullanıcı'} Canlı
                 </h3>
                 <span className="px-2 py-0.5 text-[10px] bg-emerald-100 text-emerald-800 rounded font-semibold uppercase tracking-wider">
@@ -502,7 +492,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               {realtimeData.activePages.slice(0, 4).map((p, idx) => (
                 <span
                   key={idx}
-                  className="text-xs px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 font-medium border border-slate-200/60 truncate max-w-[200px]"
+                  className="text-xs px-2.5 py-1 bg-slate-100 hover rounded-lg text-slate-700 font-medium border border-slate-200/60 truncate max-w-[200px]"
                   title={p.page}
                 >
                   {p.page.replace(/^BIRIM\s*[-|]?\s*/i, '')} ({p.users})
@@ -523,7 +513,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               return (
                 <div
                   key={idx}
-                  className={`p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border ${kpi.border} shadow-sm flex flex-col justify-between transition-transform hover:-translate-y-0.5 duration-200`}
+                  className={`p-4 sm:p-5 rounded-2xl bg-white border ${kpi.border} shadow-sm flex flex-col justify-between transition-transform hover:-translate-y-0.5 duration-200`}
                 >
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider truncate">
@@ -534,7 +524,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                     </div>
                   </div>
                   <div>
-                    <p className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-outfit">
+                    <p className="text-xl sm font-bold tracking-tight text-slate-900 font-outfit">
                       {kpi.value}
                     </p>
                     <p className="text-[11px] text-slate-400 font-light mt-0.5">{kpi.sub}</p>
@@ -545,10 +535,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           </div>
 
           {/* Main Trends Area Chart */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm mb-8">
+          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
-                <h2 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-white">
+                <h2 className="text-lg font-semibold tracking-tight text-slate-900">
                   Ziyaretçi & Sayfa Görüntülenme Trendi
                 </h2>
                 <p className="text-xs text-slate-400 mt-0.5">
@@ -558,15 +548,15 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               <div className="flex items-center gap-4 text-xs">
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-indigo-600" />
-                  <span className="text-slate-600 dark:text-slate-300">Kullanıcılar</span>
+                  <span className="text-slate-600">Kullanıcılar</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-cyan-500" />
-                  <span className="text-slate-600 dark:text-slate-300">Oturumlar</span>
+                  <span className="text-slate-600">Oturumlar</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-emerald-500" />
-                  <span className="text-slate-600 dark:text-slate-300">Sayfa Gör.</span>
+                  <span className="text-slate-600">Sayfa Gör.</span>
                 </div>
               </div>
             </div>
@@ -647,7 +637,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                   className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition ${
                     mapSubTab === 'turkey'
                       ? 'bg-white text-slate-900 shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900'
+                      : 'text-slate-600 hover'
                   }`}
                 >
                   Türkiye Haritası
@@ -657,7 +647,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                   className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition ${
                     mapSubTab === 'world'
                       ? 'bg-white text-slate-900 shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900'
+                      : 'text-slate-600 hover'
                   }`}
                 >
                   Dünya Haritası
@@ -677,10 +667,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           {/* Grid Row 2: Top Pages Table & Traffic Channels */}
           <div className="grid lg:grid-cols-12 gap-8 mb-8">
             {/* Top Visited Pages & Products Table */}
-            <div className="lg:col-span-8 bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="lg:col-span-8 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
               <div className="flex items-center justify-between mb-5">
                 <div>
-                  <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+                  <h3 className="text-base font-semibold text-slate-900">
                     En Çok Ziyaret Edilen Sayfalar & Modeller
                   </h3>
                   <p className="text-xs text-slate-400 mt-0.5">
@@ -693,7 +683,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 uppercase tracking-wider text-[10px]">
+                    <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[10px]">
                       <th className="pb-3 font-semibold">Sayfa / Başlık</th>
                       <th className="pb-3 font-semibold text-right">Görüntüleme</th>
                       <th className="pb-3 font-semibold text-right">Tekil Ziyaretçi</th>
@@ -701,24 +691,21 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                       <th className="pb-3 font-semibold text-right">Hemen Çıkma</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                  <tbody className="divide-y divide-slate-100">
                     {(data?.topPages || []).slice(0, 10).map((page, idx) => (
-                      <tr
-                        key={idx}
-                        className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
-                      >
+                      <tr key={idx} className="hover transition-colors">
                         <td className="py-3 pr-4 max-w-[260px] truncate">
-                          <p className="font-medium text-slate-800 dark:text-slate-200 truncate">
+                          <p className="font-medium text-slate-800 truncate">
                             {page.pageTitle || page.pagePath}
                           </p>
                           <p className="text-[11px] text-slate-400 font-mono truncate">
                             {page.pagePath}
                           </p>
                         </td>
-                        <td className="py-3 text-right font-semibold text-slate-900 dark:text-slate-100">
+                        <td className="py-3 text-right font-semibold text-slate-900">
                           {page.pageViews.toLocaleString('tr-TR')}
                         </td>
-                        <td className="py-3 text-right text-slate-600 dark:text-slate-300">
+                        <td className="py-3 text-right text-slate-600">
                           {page.users.toLocaleString('tr-TR')}
                         </td>
                         <td className="py-3 text-right text-slate-500 font-mono">
@@ -737,10 +724,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             {/* Traffic Channels & Device Breakdown */}
             <div className="lg:col-span-4 space-y-8">
               {/* Traffic Sources */}
-              <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1">
-                  Trafik Kaynakları
-                </h3>
+              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                <h3 className="text-base font-semibold text-slate-900 mb-1">Trafik Kaynakları</h3>
                 <p className="text-xs text-slate-400 mb-5">Ziyaretçilerin geldiği kanallar</p>
 
                 <div className="space-y-3">
@@ -751,14 +736,12 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                     return (
                       <div key={idx} className="space-y-1">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="font-medium text-slate-700 dark:text-slate-300">
-                            {source.channel}
-                          </span>
+                          <span className="font-medium text-slate-700">{source.channel}</span>
                           <span className="text-slate-500 font-mono">
                             {source.sessions.toLocaleString('tr-TR')} ({percent}%)
                           </span>
                         </div>
-                        <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                        <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
                           <div
                             className="h-full rounded-full transition-all duration-500"
                             style={{width: `${Math.min(percent, 100)}%`, backgroundColor: color}}
@@ -771,10 +754,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               </div>
 
               {/* Device Breakdown */}
-              <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
-                <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1">
-                  Cihaz Dağılımı
-                </h3>
+              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                <h3 className="text-base font-semibold text-slate-900 mb-1">Cihaz Dağılımı</h3>
                 <p className="text-xs text-slate-400 mb-5">Masaüstü, mobil ve tablet oranları</p>
 
                 <div className="grid grid-cols-3 gap-3 text-center">
@@ -790,20 +771,20 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                     return (
                       <div
                         key={idx}
-                        className="p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40"
+                        className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50"
                       >
                         <Icon
                           className="w-5 h-5 mx-auto mb-2"
                           style={{color: DEVICE_COLORS[dev.device] || '#6366f1'}}
                         />
-                        <p className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-slate-700">
                           {dev.device === 'desktop'
                             ? 'Masaüstü'
                             : dev.device === 'mobile'
                               ? 'Mobil'
                               : 'Tablet'}
                         </p>
-                        <p className="text-base font-bold text-slate-900 dark:text-white font-outfit mt-1">
+                        <p className="text-base font-bold text-slate-900 font-outfit mt-1">
                           %{percent}
                         </p>
                         <p className="text-[10px] text-slate-400 font-mono mt-0.5">
@@ -820,10 +801,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           {/* Grid Row 3: Geography & Cities */}
           <div className="grid md:grid-cols-2 gap-8">
             {/* City Breakdown */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
               <div className="flex items-center gap-2 mb-1">
                 <MapPin className="w-4 h-4 text-rose-500" />
-                <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+                <h3 className="text-base font-semibold text-slate-900">
                   Şehirlere Göre Ziyaretçiler
                 </h3>
               </div>
@@ -833,15 +814,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 {(data?.cityData || []).slice(0, 8).map((city, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/40 transition text-xs"
+                    className="flex items-center justify-between p-2.5 rounded-xl hover transition text-xs"
                   >
                     <div className="flex items-center gap-2.5">
-                      <span className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-600 dark:text-slate-400 flex items-center justify-center">
+                      <span className="w-5 h-5 rounded-full bg-slate-100 text-[10px] font-bold text-slate-600 flex items-center justify-center">
                         {idx + 1}
                       </span>
-                      <span className="font-medium text-slate-700 dark:text-slate-200">
-                        {city.city}
-                      </span>
+                      <span className="font-medium text-slate-700">{city.city}</span>
                     </div>
                     <div className="flex items-center gap-4 text-slate-500">
                       <span>{city.users.toLocaleString('tr-TR')} kullanıcı</span>
@@ -853,10 +832,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             </div>
 
             {/* Country Breakdown */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
               <div className="flex items-center gap-2 mb-1">
                 <Globe className="w-4 h-4 text-indigo-500" />
-                <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+                <h3 className="text-base font-semibold text-slate-900">
                   Ülkelere Göre Ziyaretçiler
                 </h3>
               </div>
@@ -866,15 +845,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 {(data?.countryData || []).slice(0, 8).map((country, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/40 transition text-xs"
+                    className="flex items-center justify-between p-2.5 rounded-xl hover transition text-xs"
                   >
                     <div className="flex items-center gap-2.5">
-                      <span className="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-600 dark:text-slate-400 flex items-center justify-center">
+                      <span className="w-5 h-5 rounded-full bg-slate-100 text-[10px] font-bold text-slate-600 flex items-center justify-center">
                         {idx + 1}
                       </span>
-                      <span className="font-medium text-slate-700 dark:text-slate-200">
-                        {country.country}
-                      </span>
+                      <span className="font-medium text-slate-700">{country.country}</span>
                     </div>
                     <div className="flex items-center gap-4 text-slate-500">
                       <span>{country.users.toLocaleString('tr-TR')} kullanıcı</span>
@@ -910,8 +887,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               </div>
             </div>
 
-            <div className="md:col-span-2 bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
-              <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1">
+            <div className="md:col-span-2 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+              <h3 className="text-base font-semibold text-slate-900 mb-1">
                 Şu Anda Gezilen Sayfalar
               </h3>
               <p className="text-xs text-slate-400 mb-4">
@@ -922,11 +899,9 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 {(realtimeData?.activePages || []).map((p, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-xs"
+                    className="flex items-center justify-between p-3 rounded-xl bg-slate-50 text-xs"
                   >
-                    <span className="font-medium text-slate-800 dark:text-slate-200 truncate max-w-md">
-                      {p.page}
-                    </span>
+                    <span className="font-medium text-slate-800 truncate max-w-md">{p.page}</span>
                     <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold">
                       {p.users} kullanıcı
                     </span>
@@ -941,8 +916,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1">
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+            <h3 className="text-base font-semibold text-slate-900 mb-1">
               Canlı Ziyaretçi Konumları
             </h3>
             <p className="text-xs text-slate-400 mb-4">
@@ -953,18 +928,16 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               {(realtimeData?.activeCountries || []).map((c, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 text-xs"
+                  className="flex items-center justify-between p-3.5 rounded-xl border border-slate-100 bg-slate-50/50 text-xs"
                 >
                   <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-rose-500" />
                     <div>
-                      <p className="font-semibold text-slate-800 dark:text-slate-200">
-                        {c.city || c.country}
-                      </p>
+                      <p className="font-semibold text-slate-800">{c.city || c.country}</p>
                       <p className="text-[10px] text-slate-400">{c.country}</p>
                     </div>
                   </div>
-                  <span className="font-bold text-slate-900 dark:text-white">{c.users} Kişi</span>
+                  <span className="font-bold text-slate-900">{c.users} Kişi</span>
                 </div>
               ))}
             </div>
@@ -1016,19 +989,17 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
-              <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-4">
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+              <h3 className="text-base font-semibold text-slate-900 mb-4">
                 Şehirlere Göre Dağılım
               </h3>
               <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
                 {(data?.cityData || []).map((city, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/40 text-xs"
+                    className="flex items-center justify-between p-2.5 rounded-xl hover text-xs"
                   >
-                    <span className="font-medium text-slate-800 dark:text-slate-200">
-                      {city.city}
-                    </span>
+                    <span className="font-medium text-slate-800">{city.city}</span>
                     <div className="flex items-center gap-3 text-slate-500">
                       <span>{city.users.toLocaleString('tr-TR')} kullanıcı</span>
                       <span className="font-mono text-slate-400">({city.sessions} oturum)</span>
@@ -1038,19 +1009,15 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
-              <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-4">
-                Ülkelere Göre Dağılım
-              </h3>
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+              <h3 className="text-base font-semibold text-slate-900 mb-4">Ülkelere Göre Dağılım</h3>
               <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
                 {(data?.countryData || []).map((country, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/40 text-xs"
+                    className="flex items-center justify-between p-2.5 rounded-xl hover text-xs"
                   >
-                    <span className="font-medium text-slate-800 dark:text-slate-200">
-                      {country.country}
-                    </span>
+                    <span className="font-medium text-slate-800">{country.country}</span>
                     <div className="flex items-center gap-3 text-slate-500">
                       <span>{country.users.toLocaleString('tr-TR')} kullanıcı</span>
                       <span className="font-mono text-slate-400">({country.sessions} oturum)</span>
@@ -1065,10 +1032,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
       {/* TAB: PAGES & PRODUCTS */}
       {activeTab === 'pages' && (
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+              <h2 className="text-lg font-semibold text-slate-900">
                 Sayfalar & Mobilya Modelleri Raporu
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
@@ -1083,7 +1050,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 placeholder="Sayfa veya model ara..."
                 value={pageSearch}
                 onChange={e => setPageSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
               />
             </div>
           </div>
@@ -1091,7 +1058,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 uppercase tracking-wider text-[10px]">
+                <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider text-[10px]">
                   <th className="pb-3 font-semibold">Sayfa / Başlık</th>
                   <th className="pb-3 font-semibold text-right">Görüntüleme</th>
                   <th className="pb-3 font-semibold text-right">Tekil Ziyaretçi</th>
@@ -1099,14 +1066,11 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                   <th className="pb-3 font-semibold text-right">Hemen Çıkma</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+              <tbody className="divide-y divide-slate-100">
                 {filteredPages.map((page, idx) => (
-                  <tr
-                    key={idx}
-                    className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
-                  >
+                  <tr key={idx} className="hover transition-colors">
                     <td className="py-3.5 pr-4 max-w-[360px]">
-                      <p className="font-semibold text-slate-800 dark:text-slate-200 truncate">
+                      <p className="font-semibold text-slate-800 truncate">
                         {page.pageTitle || page.pagePath}
                       </p>
                       <a
@@ -1118,10 +1082,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                         {page.pagePath} <ExternalLink className="w-3 h-3 opacity-60" />
                       </a>
                     </td>
-                    <td className="py-3.5 text-right font-bold text-slate-900 dark:text-slate-100">
+                    <td className="py-3.5 text-right font-bold text-slate-900">
                       {page.pageViews.toLocaleString('tr-TR')}
                     </td>
-                    <td className="py-3.5 text-right text-slate-600 dark:text-slate-300">
+                    <td className="py-3.5 text-right text-slate-600">
                       {page.users.toLocaleString('tr-TR')}
                     </td>
                     <td className="py-3.5 text-right text-slate-500 font-mono">
@@ -1142,8 +1106,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       {activeTab === 'sources' && (
         <div className="space-y-8">
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
-              <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1">
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+              <h3 className="text-base font-semibold text-slate-900 mb-1">
                 Trafik Kanalları & Edinme
               </h3>
               <p className="text-xs text-slate-400 mb-6">
@@ -1158,14 +1122,12 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                   return (
                     <div key={idx} className="space-y-1.5">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="font-semibold text-slate-800 dark:text-slate-200">
-                          {source.channel}
-                        </span>
+                        <span className="font-semibold text-slate-800">{source.channel}</span>
                         <span className="text-slate-500 font-mono">
                           {source.sessions.toLocaleString('tr-TR')} oturum (%{percent})
                         </span>
                       </div>
-                      <div className="w-full h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                      <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden">
                         <div
                           className="h-full rounded-full transition-all duration-500"
                           style={{width: `${Math.min(percent, 100)}%`, backgroundColor: color}}
@@ -1177,23 +1139,19 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
-              <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1">
-                Tarayıcı Dağılımı
-              </h3>
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+              <h3 className="text-base font-semibold text-slate-900 mb-1">Tarayıcı Dağılımı</h3>
               <p className="text-xs text-slate-400 mb-6">En çok tercih edilen web tarayıcıları</p>
 
               <div className="space-y-3">
                 {(data?.browserData || []).map((b, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 text-xs"
+                    className="flex items-center justify-between p-3 rounded-xl bg-slate-50 text-xs"
                   >
-                    <span className="font-medium text-slate-800 dark:text-slate-200">
-                      {b.browser}
-                    </span>
+                    <span className="font-medium text-slate-800">{b.browser}</span>
                     <div className="flex items-center gap-3">
-                      <span className="font-bold text-slate-900 dark:text-white">
+                      <span className="font-bold text-slate-900">
                         {b.users.toLocaleString('tr-TR')} kullanıcı
                       </span>
                       <span className="text-slate-400 font-mono">({b.sessions} oturum)</span>
@@ -1204,10 +1162,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
-            <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-1">
-              Cihaz Kategorileri
-            </h3>
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+            <h3 className="text-base font-semibold text-slate-900 mb-1">Cihaz Kategorileri</h3>
             <p className="text-xs text-slate-400 mb-6">
               Masaüstü, mobil telefon ve tablet cihaz oranları
             </p>
@@ -1219,22 +1175,19 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 const Icon =
                   dev.device === 'mobile' ? Smartphone : dev.device === 'tablet' ? Tablet : Monitor
                 return (
-                  <div
-                    key={idx}
-                    className="p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40"
-                  >
+                  <div key={idx} className="p-6 rounded-2xl border border-slate-100 bg-slate-50/50">
                     <Icon
                       className="w-8 h-8 mx-auto mb-3"
                       style={{color: DEVICE_COLORS[dev.device] || '#6366f1'}}
                     />
-                    <h4 className="text-sm font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    <h4 className="text-sm font-semibold uppercase tracking-wider text-slate-700">
                       {dev.device === 'desktop'
                         ? 'Masaüstü'
                         : dev.device === 'mobile'
                           ? 'Mobil'
                           : 'Tablet'}
                     </h4>
-                    <p className="text-3xl font-black text-slate-900 dark:text-white font-outfit mt-2">
+                    <p className="text-3xl font-black text-slate-900 font-outfit mt-2">
                       %{percent}
                     </p>
                     <p className="text-xs text-slate-400 font-mono mt-1">
