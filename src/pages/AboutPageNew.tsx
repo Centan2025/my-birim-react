@@ -17,10 +17,10 @@ const containerClass =
   'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[80vw] mx-auto px-4 md:px-8 lg:px-0'
 
 const DEFAULT_IMAGES = {
-  hero: '/img/about/hero.jpg',
-  history: '/img/about/history.jpg',
-  identity: '/img/about/identity.jpg',
-  quality: '/img/about/quality.jpg',
+  hero: 'https://assets.birim.com/migration/about/hero-1788417284053.jpg',
+  history: 'https://assets.birim.com/migration/about/history-1788417454936.jpg',
+  identity: 'https://assets.birim.com/migration/about/identity-1788417450030.jpg',
+  quality: 'https://assets.birim.com/migration/about/quality-1788417453056.jpg',
 }
 
 const isBrokenUrl = (url?: string): boolean =>

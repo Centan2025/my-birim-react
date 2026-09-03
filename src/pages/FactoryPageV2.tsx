@@ -18,11 +18,11 @@ const containerClass =
   'w-full max-w-[95%] md:max-w-[92%] lg:max-w-[82vw] mx-auto px-4 md:px-8 lg:px-0'
 
 const DEFAULT_FACTORY_IMAGES = {
-  hero: '/img/about/quality.jpg',
-  wood: '/img/about/history.jpg',
-  metal: '/img/about/hero.jpg',
-  upholstery: '/img/about/identity.jpg',
-  finishing: '/img/about/quality.jpg',
+  hero: 'https://assets.birim.com/migration/about/quality-1788417453056.jpg',
+  wood: 'https://assets.birim.com/migration/about/history-1788417454936.jpg',
+  metal: 'https://assets.birim.com/migration/about/hero-1788417284053.jpg',
+  upholstery: 'https://assets.birim.com/migration/about/identity-1788417450030.jpg',
+  finishing: 'https://assets.birim.com/migration/about/quality-1788417453056.jpg',
 }
 
 interface DisciplineItem {
