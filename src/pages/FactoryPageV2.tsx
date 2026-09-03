@@ -677,8 +677,8 @@ export function FactoryPageV2() {
                       onClick={() => setActiveDisciplineIndex(idx)}
                       className={`text-left p-5 sm:p-6 transition-all duration-300 border cursor-pointer relative overflow-hidden focus:outline-none flex flex-col justify-start ${
                         isActive
-                          ? 'bg-[var(--bg-secondary)] border-[var(--text-primary)]/30 shadow-sm'
-                          : 'border-[var(--border-primary,#e5e7eb)]/50 hover:border-[var(--text-primary)]/20 bg-transparent'
+                          ? 'bg-[var(--bg-secondary)] border-[var(--text-primary)]/12'
+                          : 'border-[var(--border-primary,#e5e7eb)]/30 hover:border-[var(--text-primary)]/10 bg-transparent'
                       }`}
                     >
                       <h3 className="font-outfit text-base sm:text-lg md:text-xl font-medium text-[var(--text-primary)] tracking-tight leading-snug">
