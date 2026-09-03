@@ -229,11 +229,12 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     fetchData(dateRange)
   }, [dateRange, fetchData])
 
-  // Realtime polling every 25 seconds
+  // Realtime polling every 45 seconds (only when active tab is visible)
   useEffect(() => {
     const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return
       fetchRealtime()
-    }, 25000)
+    }, 45000)
     return () => clearInterval(interval)
   }, [fetchRealtime])
 
