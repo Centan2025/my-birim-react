@@ -1,5 +1,5 @@
 import {describe, it, expect, vi} from 'vitest'
-import {render, screen, waitFor} from '@testing-library/react'
+import {render, screen, waitFor, fireEvent} from '@testing-library/react'
 import {MemoryRouter, Routes, Route} from 'react-router-dom'
 import {HelmetProvider} from 'react-helmet-async'
 
@@ -12,6 +12,16 @@ import {I18nContext} from '../i18n'
 // Hooks'u mockla
 vi.mock('../hooks/useNews')
 vi.mock('../hooks/useSiteData')
+
+// FullscreenMediaViewer mock'u
+vi.mock('../components/FullscreenMediaViewer', () => ({
+  FullscreenMediaViewer: ({items, initialIndex, onClose}: any) => (
+    <div data-testid="fullscreen-media-viewer" data-initial-index={initialIndex}>
+      <button onClick={onClose}>Close Viewer</button>
+      <span>{items.length} items</span>
+    </div>
+  ),
+}))
 
 // Basit i18n mock'u
 vi.mock('../i18n', async importOriginal => {
@@ -136,5 +146,52 @@ describe('NewsDetailPage', () => {
       expect(parsed['@type']).toBe('Article')
       expect(parsed.headline).toBe('Haber Başlığı')
     })
+  })
+
+  it('opens FullscreenMediaViewer when news image is clicked', async () => {
+    vi.mocked(newsHooks.useNewsItem).mockReturnValue({
+      data: {
+        id: 'news-1',
+        title: {tr: 'Haber Başlığı'},
+        date: '2025-01-01T00:00:00.000Z',
+        content: {tr: 'Haber içeriği'},
+        mainImage: {url: 'https://example.com/news.jpg'},
+        media: [{type: 'image', url: 'https://example.com/gallery1.jpg'}],
+        isPublished: true,
+      },
+      isLoading: false,
+      isError: false,
+    } as unknown as ReturnType<typeof newsHooks.useNewsItem>)
+
+    vi.mocked(newsHooks.useNews).mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+    } as unknown as ReturnType<typeof newsHooks.useNews>)
+
+    vi.mocked(siteHooks.useSiteSettings).mockReturnValue({
+      data: {
+        logoUrl: 'https://example.com/logo.png',
+        imageBorderStyle: 'square',
+      },
+      isLoading: false,
+      isError: false,
+    } as unknown as ReturnType<typeof siteHooks.useSiteSettings>)
+
+    renderWithRouter('/news/news-1')
+
+    expect(screen.queryByTestId('fullscreen-media-viewer')).not.toBeInTheDocument()
+
+    const mainImg = screen.getByAltText('Haber Başlığı')
+    expect(mainImg).toBeInTheDocument()
+
+    fireEvent.click(mainImg.closest('div')!)
+
+    expect(screen.getByTestId('fullscreen-media-viewer')).toBeInTheDocument()
+    expect(screen.getByText('2 items')).toBeInTheDocument()
+
+    // Close viewer
+    fireEvent.click(screen.getByText('Close Viewer'))
+    expect(screen.queryByTestId('fullscreen-media-viewer')).not.toBeInTheDocument()
   })
 })

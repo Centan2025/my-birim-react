@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {useMemo, useEffect, useState, FC} from 'react'
 import {useParams, Link, useLocation} from 'react-router-dom'
-import {motion, AnimatePresence} from 'framer-motion'
+import {FullscreenMediaViewer, type MediaItem} from '../components/FullscreenMediaViewer'
 import type {NewsMedia} from '../types'
 import {OptimizedImage} from '../components/OptimizedImage'
 import {OptimizedVideo} from '../components/OptimizedVideo'
@@ -162,7 +162,13 @@ export function NewsDetailPage() {
   const {t, locale} = useTranslation()
 
   const [scrollProgress, setScrollProgress] = useState(0)
-  const [lightboxImage, setLightboxImage] = useState<string | null>(null)
+  const [fullscreenData, setFullscreenData] = useState<{
+    isOpen: boolean
+    initialIndex: number
+  }>({
+    isOpen: false,
+    initialIndex: 0,
+  })
   const [copiedLink, setCopiedLink] = useState(false)
 
   // Scroll Reading Progress Bar calculation
@@ -205,6 +211,41 @@ export function NewsDetailPage() {
       return true
     })
   }, [item?.media, mainImageUrl])
+
+  const allViewerMedia = useMemo<MediaItem[]>(() => {
+    const list: MediaItem[] = []
+
+    if (mainImageUrl) {
+      list.push({
+        type: 'image',
+        url: mainImageUrl,
+      })
+    }
+
+    additionalMedia.forEach(media => {
+      if (!media.url) return
+      list.push({
+        type: media.type || 'image',
+        url: media.url,
+      })
+    })
+
+    return list
+  }, [mainImageUrl, additionalMedia])
+
+  const openFullscreenViewer = (targetUrl?: string) => {
+    let index = 0
+    if (targetUrl && allViewerMedia.length > 0) {
+      const found = allViewerMedia.findIndex(m => m.url === targetUrl)
+      if (found !== -1) {
+        index = found
+      }
+    }
+    setFullscreenData({
+      isOpen: true,
+      initialIndex: index,
+    })
+  }
 
   useSEO({
     title: newsTitle ? `BIRIM - ${t('news') || 'Haberler'} - ${newsTitle}` : 'BIRIM - Haberler',
@@ -290,30 +331,14 @@ export function NewsDetailPage() {
         style={{width: `${scrollProgress}%`}}
       />
 
-      {/* Lightbox Image Modal */}
-      <AnimatePresence>
-        {lightboxImage && (
-          <motion.div
-            initial={{opacity: 0}}
-            animate={{opacity: 1}}
-            exit={{opacity: 0}}
-            onClick={() => setLightboxImage(null)}
-            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 md:p-10 cursor-zoom-out"
-          >
-            <img
-              src={lightboxImage}
-              alt="Fullscreen View"
-              className="max-w-full max-h-[90vh] object-contain shadow-2xl"
-            />
-            <button
-              onClick={() => setLightboxImage(null)}
-              className="absolute top-6 right-6 text-white text-2xl font-mono p-2 hover:opacity-75 transition-opacity"
-            >
-              ✕
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Fullscreen Media Viewer */}
+      {fullscreenData.isOpen && allViewerMedia.length > 0 && (
+        <FullscreenMediaViewer
+          items={allViewerMedia}
+          initialIndex={fullscreenData.initialIndex}
+          onClose={() => setFullscreenData(prev => ({...prev, isOpen: false}))}
+        />
+      )}
 
       {/* Breadcrumbs */}
       <div className="w-full relative z-20">
@@ -376,7 +401,7 @@ export function NewsDetailPage() {
               /* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
               <div
                 className="cursor-zoom-in overflow-hidden mb-8 border border-[var(--border-primary)]/40"
-                onClick={() => setLightboxImage(mainImageUrl)}
+                onClick={() => openFullscreenViewer(mainImageUrl)}
               >
                 <OptimizedImage
                   src={mainImageUrl || ''}
@@ -408,7 +433,7 @@ export function NewsDetailPage() {
               <MediaComponent
                 key={index}
                 media={media}
-                onImageClick={url => setLightboxImage(url)}
+                onImageClick={url => openFullscreenViewer(url)}
               />
             ))}
           </div>
