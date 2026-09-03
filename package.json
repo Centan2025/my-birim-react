@@ -29,7 +29,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.971.0",
     "@aws-sdk/s3-request-presigner": "^3.1091.0",
-    "@google/genai": "^1.28.0",
+    "@google/genai": "^1.52.0",
     "@sanity/client": "^6.29.1",
     "@sanity/image-url": "^1.2.0",
     "@sanity/webhook": "^4.0.4",
