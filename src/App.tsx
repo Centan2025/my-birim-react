@@ -29,9 +29,91 @@ const ComingSoonPage = lazy(() =>
 import Lenis from 'lenis'
 import 'lenis/dist/lenis.css'
 
+// Global in-memory cache to ensure bypass survives ANY in-app navigation
+// even if storage is restricted or cleared in Incognito / Private Browsing modes
+let inMemoryBypass: string | null = null
+
+function getBypassCookie(): string | null {
+  if (typeof document === 'undefined') return null
+  try {
+    const match = document.cookie.match(/(?:^|;\s*)maintenance_bypass=([^;]+)/)
+    return match && match[1] ? decodeURIComponent(match[1]) : null
+  } catch {
+    return null
+  }
+}
+
+function setBypassCookie(value: string) {
+  if (typeof document === 'undefined') return
+  try {
+    document.cookie = `maintenance_bypass=${encodeURIComponent(value)}; path=/; max-age=86400; SameSite=Lax`
+  } catch {
+    // ignore
+  }
+}
+
+function clearBypassCookie() {
+  if (typeof document === 'undefined') return
+  try {
+    document.cookie = `maintenance_bypass=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`
+  } catch {
+    // ignore
+  }
+}
+
+function getStoredBypass(): string | null {
+  if (inMemoryBypass) return inMemoryBypass
+  try {
+    const session = sessionStorage.getItem('maintenance_bypass')
+    if (session) return session
+  } catch {
+    // ignore
+  }
+  try {
+    const local = localStorage.getItem('maintenance_bypass')
+    if (local) return local
+  } catch {
+    // ignore
+  }
+  const cookie = getBypassCookie()
+  if (cookie) return cookie
+  return null
+}
+
+function persistBypass(value: string) {
+  inMemoryBypass = value
+  try {
+    sessionStorage.setItem('maintenance_bypass', value)
+  } catch {
+    // ignore
+  }
+  try {
+    localStorage.setItem('maintenance_bypass', value)
+  } catch {
+    // ignore
+  }
+  setBypassCookie(value)
+}
+
+function clearBypassStorage() {
+  inMemoryBypass = null
+  try {
+    sessionStorage.removeItem('maintenance_bypass')
+  } catch {
+    // ignore
+  }
+  try {
+    localStorage.removeItem('maintenance_bypass')
+  } catch {
+    // ignore
+  }
+  clearBypassCookie()
+}
+
 // Maintenance mode kontrolünü provider içinde yapmak için ayrı component
 const AppContent = () => {
-  const {pathname} = useLocation()
+  const location = useLocation()
+  const {pathname} = location
   const {reset: resetHeaderTheme} = useHeaderTheme()
 
   // Ultra-Soft & Butter-Smooth Lenis Momentum Scroll Integration for Desktop only
@@ -92,38 +174,46 @@ const AppContent = () => {
     ...(import.meta.env.DEV ? ['birim-dev-local'] : []),
   ]
 
-  const searchParams = new URLSearchParams(window.location.search)
-  const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '')
-  let bypassParam = searchParams.get('bypass') || hashParams.get('bypass')
+  const searchParams = new URLSearchParams(window.location.search || location.search)
+  let urlBypass = searchParams.get('bypass')
 
-  if (bypassParam === 'clear' || bypassParam === 'off' || bypassParam === 'false') {
-    try {
-      sessionStorage.removeItem('maintenance_bypass')
-      bypassParam = null
-    } catch {
-      // ignore
-    }
-  } else if (bypassParam && allowedBypassSecrets.includes(bypassParam)) {
-    try {
-      sessionStorage.setItem('maintenance_bypass', bypassParam)
-    } catch {
-      // ignore
-    }
-  } else {
-    try {
-      const stored = sessionStorage.getItem('maintenance_bypass')
-      if (stored) bypassParam = stored
-    } catch {
-      // ignore
+  if (!urlBypass && typeof window !== 'undefined' && window.location.hash) {
+    const hash = window.location.hash
+    const queryPart = hash.includes('?') ? hash.slice(hash.indexOf('?') + 1) : ''
+    if (queryPart) {
+      urlBypass = new URLSearchParams(queryPart).get('bypass')
     }
   }
 
-  const hasBypass = !!bypassParam && allowedBypassSecrets.includes(bypassParam)
+  let bypassParam: string | null = null
+
+  if (urlBypass) {
+    const normalized = urlBypass.trim()
+    if (normalized === 'clear' || normalized === 'off' || normalized === 'false') {
+      clearBypassStorage()
+      bypassParam = null
+    } else if (allowedBypassSecrets.some(s => s.toLowerCase() === normalized.toLowerCase())) {
+      persistBypass(normalized)
+      bypassParam = normalized
+    }
+  }
+
+  if (!bypassParam) {
+    const stored = getStoredBypass()
+    if (stored && allowedBypassSecrets.some(s => s.toLowerCase() === stored.trim().toLowerCase())) {
+      bypassParam = stored.trim()
+      inMemoryBypass = bypassParam
+    }
+  }
+
+  const hasBypass = !!bypassParam
   const isMaintenanceMode = isProduction && maintenanceModeEnabled && !hasBypass
 
   const debugInfo =
     typeof window !== 'undefined' &&
-    (window.location.search.includes('bypass') || window.location.hash.includes('bypass'))
+    (window.location.search.includes('bypass') ||
+      window.location.hash.includes('bypass') ||
+      hasBypass)
       ? {
           isProduction,
           maintenanceModeFromCMS,
@@ -197,7 +287,10 @@ function HashRedirector() {
     if (typeof window !== 'undefined' && window.location.hash) {
       const hash = window.location.hash
       if (hash.startsWith('#/')) {
-        const target = hash.slice(1) // '#/about' -> '/about'
+        const rawTarget = hash.slice(1) // '#/about?foo=bar' -> '/about?foo=bar'
+        const [targetPath, hashQuery] = rawTarget.split('?')
+        const query = window.location.search || (hashQuery ? `?${hashQuery}` : '')
+        const target = (targetPath || '/') + query
         navigate(target, {replace: true})
       }
     }
