@@ -263,4 +263,6 @@ export default {
   no_additional_images: 'No additional images available',
   no_technical_drawings: 'No technical drawings available',
   no_3d_models: 'No 3D models available',
+  show_more: 'Show More',
+  show_less: 'Show Less',
 }

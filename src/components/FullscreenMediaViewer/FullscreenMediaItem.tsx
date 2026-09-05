@@ -113,8 +113,6 @@ export const FullscreenMediaItem: React.FC<FullscreenMediaItemProps> = ({
             justifyContent: 'center',
             margin: 'auto',
             WebkitBackfaceVisibility: 'hidden',
-            objectFit: 'contain',
-            objectPosition: 'center',
           }}
           loading="eager"
           quality={100}

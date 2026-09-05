@@ -2,7 +2,7 @@ import React, {useRef, useState, useEffect} from 'react'
 import {motion} from 'framer-motion'
 import {OptimizedImage} from '../OptimizedImage'
 import {useTranslation} from '../../i18n'
-import type {LocalizedString} from '../../types'
+import type {LocalizedString, R2ImageMetadata} from '../../types'
 
 interface ProductThumbnailsProps {
   productName: LocalizedString
@@ -181,14 +181,42 @@ export const ProductThumbnails: React.FC<ProductThumbnailsProps> = ({
                         {m.type === 'image' ? (
                           <OptimizedImage
                             src={m.url}
+                            srcMobile={(m as Record<string, unknown>)['urlMobile'] as string}
+                            srcDesktop={(m as Record<string, unknown>)['urlDesktop'] as string}
                             alt={`${t(productName)} thumbnail ${idx + 1}`}
                             className={`w-full h-full object-cover ${imageBorderClass}`}
                             loading="lazy"
                             quality={75}
                             crop={m.crop}
                             hotspot={m.hotspot}
+                            cropDesktop={
+                              (m as Record<string, unknown>)[
+                                'cropDesktop'
+                              ] as R2ImageMetadata['crop']
+                            }
+                            hotspotDesktop={
+                              (m as Record<string, unknown>)[
+                                'hotspotDesktop'
+                              ] as R2ImageMetadata['hotspot']
+                            }
+                            cropMobile={
+                              (m as Record<string, unknown>)[
+                                'cropMobile'
+                              ] as R2ImageMetadata['crop']
+                            }
+                            hotspotMobile={
+                              (m as Record<string, unknown>)[
+                                'hotspotMobile'
+                              ] as R2ImageMetadata['hotspot']
+                            }
                             origWidth={(m as Record<string, unknown>)['origWidth'] as number}
                             origHeight={(m as Record<string, unknown>)['origHeight'] as number}
+                            origWidthMobile={
+                              (m as Record<string, unknown>)['origWidthMobile'] as number
+                            }
+                            origHeightMobile={
+                              (m as Record<string, unknown>)['origHeightMobile'] as number
+                            }
                             isMirrored={m.isMirrored}
                             isMirroredMobile={m.isMirroredMobile}
                             isMirroredDesktop={m.isMirroredDesktop}

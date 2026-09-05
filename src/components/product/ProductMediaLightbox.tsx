@@ -239,9 +239,15 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
                     </button>
 
                     {type === 'image' ? (
-                      currentItem.crop ? (
+                      currentItem.crop || currentItem.cropMobile ? (
                         <OptimizedImage
                           src={url}
+                          srcMobile={
+                            (currentItem as Record<string, unknown>)['urlMobile'] as string
+                          }
+                          srcDesktop={
+                            (currentItem as Record<string, unknown>)['urlDesktop'] as string
+                          }
                           alt={
                             title ? (typeof title === 'string' ? title : t(title)) : 'Enlarged view'
                           }

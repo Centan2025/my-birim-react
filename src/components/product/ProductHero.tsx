@@ -380,7 +380,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                         e.stopPropagation()
                         onPrev()
                       }}
-                      className="group pointer-events-auto flex h-8 w-8 items-center justify-center rounded-none border-[0.5px] border-white/80 bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
+                      className="group pointer-events-auto flex h-8 w-8 items-center justify-center rounded-none border border-white bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
                       style={arrowInLeft}
                       aria-label="Önceki görsel"
                     >
@@ -391,7 +391,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="0.8"
+                        strokeWidth="1.2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         className="h-5 w-5"
@@ -405,7 +405,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                         e.stopPropagation()
                         onNext()
                       }}
-                      className="group pointer-events-auto flex h-8 w-8 items-center justify-center rounded-none border-[0.5px] border-white/80 bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
+                      className="group pointer-events-auto flex h-8 w-8 items-center justify-center rounded-none border border-white bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
                       style={arrowInRight}
                       aria-label="Sonraki görsel"
                     >
@@ -416,7 +416,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="0.8"
+                        strokeWidth="1.2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         className="h-5 w-5"
@@ -432,7 +432,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     e.stopPropagation()
                     onOpenFullscreen()
                   }}
-                  className="group pointer-events-auto flex h-8 w-8 items-center justify-center rounded-none border-[0.5px] border-white/80 bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
+                  className="group pointer-events-auto flex h-8 w-8 items-center justify-center rounded-none border border-white bg-transparent text-white transition-all duration-300 active:scale-95 shadow-lg"
                   style={{
                     opacity: isFullscreenButtonVisible ? 1 : 0,
                     transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
@@ -452,7 +452,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="0.8"
+                    strokeWidth="1.2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     className="h-4 w-4"
@@ -480,7 +480,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     <button
                       type="button"
                       onClick={onPrev}
-                      className="group pointer-events-auto flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                      className="group pointer-events-auto flex h-14 w-14 items-center justify-center rounded-none border border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
                       style={arrowInLeft}
                       aria-label="Previous hero slide"
                     >
@@ -491,7 +491,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="0.4"
+                        strokeWidth="1"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         className="h-11 w-11 transition-transform duration-300 group-hover:-translate-x-1"
@@ -502,7 +502,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     <button
                       type="button"
                       onClick={onNext}
-                      className="group pointer-events-auto flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                      className="group pointer-events-auto flex h-14 w-14 items-center justify-center rounded-none border border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
                       style={arrowInRight}
                       aria-label="Next hero slide"
                     >
@@ -513,7 +513,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="0.4"
+                        strokeWidth="1"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         className="h-11 w-11 transition-transform duration-300 group-hover:translate-x-1"
@@ -529,7 +529,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     e.stopPropagation()
                     onOpenFullscreen()
                   }}
-                  className="group pointer-events-auto flex h-14 w-14 items-center justify-center rounded-none border-[0.5px] border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
+                  className="group pointer-events-auto flex h-14 w-14 items-center justify-center rounded-none border border-white bg-transparent text-white transition-all duration-300 hover:bg-white/10 active:scale-95 shadow-lg"
                   style={{
                     opacity: isFullscreenButtonVisible ? 1 : 0,
                     transform: isFullscreenButtonVisible ? 'scale(1)' : 'scale(0)',
@@ -549,7 +549,7 @@ export const ProductHero: React.FC<ProductHeroProps> = ({
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="0.4"
+                    strokeWidth="1"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     className="transition-transform duration-500 group-hover:scale-110 h-11 w-11 text-white"

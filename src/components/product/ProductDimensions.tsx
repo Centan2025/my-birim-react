@@ -53,6 +53,16 @@ export const ProductDimensions: React.FC<ProductDimensionsProps> = ({
                   className={`w-full h-40 object-contain group-hover:scale-[1.03] transition-transform duration-700 ease-in-out ${imageBorderClass}`}
                   loading="lazy"
                   quality={85}
+                  crop={(dimImg as Record<string, unknown>)['crop'] as any}
+                  hotspot={(dimImg as Record<string, unknown>)['hotspot'] as any}
+                  cropMobile={(dimImg as Record<string, unknown>)['cropMobile'] as any}
+                  hotspotMobile={(dimImg as Record<string, unknown>)['hotspotMobile'] as any}
+                  origWidth={(dimImg as Record<string, unknown>)['origWidth'] as number}
+                  origHeight={(dimImg as Record<string, unknown>)['origHeight'] as number}
+                  origWidthMobile={(dimImg as Record<string, unknown>)['origWidthMobile'] as number}
+                  origHeightMobile={
+                    (dimImg as Record<string, unknown>)['origHeightMobile'] as number
+                  }
                 />
               </button>
               {dimImg.title && (

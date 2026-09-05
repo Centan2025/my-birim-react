@@ -107,4 +107,33 @@ describe('OptimizedImage Mobile Crop & Metadata', () => {
     const desktopSrcSet = desktopSource?.getAttribute('srcset') || ''
     expect(desktopSrcSet).toContain('rect=0,160,1000,480')
   })
+
+  it('activates client crop on mobile when only cropMobile is cropped and desktop is full frame', () => {
+    const cropDesktop = {x: 0, y: 0, width: 1.0, height: 1.0}
+    const cropMobile = {x: 0.2891, y: 0, width: 0.4234, height: 1.0}
+    const hotspotMobile = {x: 0.3952, y: 0.5006}
+
+    const {container} = render(
+      <OptimizedImage
+        src="https://r2.dev/test.jpg"
+        alt="Mobile Crop Test"
+        crop={cropDesktop}
+        cropMobile={cropMobile}
+        hotspot={{x: 0.5, y: 0.5}}
+        hotspotMobile={hotspotMobile}
+        origWidth={2432}
+        origHeight={1368}
+        origWidthMobile={2432}
+        origHeightMobile={1368}
+      />
+    )
+
+    const cropWrapper = container.querySelector('.responsive-crop-wrapper')
+    expect(cropWrapper).toBeInTheDocument()
+
+    const styleAttr = cropWrapper?.getAttribute('style') || ''
+    expect(styleAttr).toContain('--obj-pos-mobile: 39.52% 50.06%')
+    expect(styleAttr).toContain('--crop-scale-x-mobile: 236.1833%')
+    expect(styleAttr).toContain('--crop-left-mobile: -68.2806%')
+  })
 })

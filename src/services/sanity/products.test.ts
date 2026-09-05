@@ -56,4 +56,68 @@ describe('sanity products service', () => {
     const product = await getProductById('p-123')
     expect(product?.id).toBe('p-123')
   })
+
+  it('getProductById maps mobile crop, hotspot and url correctly', async () => {
+    const {mapR2Metadata} = await import('./client')
+    vi.mocked(mapR2Metadata).mockImplementation((obj: unknown) => {
+      const o = obj as Record<string, unknown> | undefined
+      if (o?.['cropX'] !== undefined) {
+        return {
+          crop: {
+            x: Number(o['cropX']),
+            y: Number(o['cropY'] || 0),
+            width: Number(o['cropWidth']),
+            height: Number(o['cropHeight'] || 1),
+          },
+          hotspot: {
+            x: Number(o['hotspotX'] ?? 0.5),
+            y: Number(o['hotspotY'] ?? 0.5),
+          },
+          origWidth: 2432,
+          origHeight: 1368,
+        }
+      }
+      return {}
+    })
+
+    const mockData = {
+      id: 'sh0018-palm',
+      name: {tr: 'Palm'},
+      media: [
+        {
+          type: 'image',
+          isCover: true,
+          imageR2: {
+            url: 'https://r2.dev/palm.webp',
+            width: 2432,
+            height: 1368,
+          },
+          imageMobileR2: {
+            url: 'https://r2.dev/palm-mob.webp',
+            cropX: 0.2891,
+            cropY: 0,
+            cropWidth: 0.4234,
+            cropHeight: 1,
+            hotspotX: 0.3952,
+            hotspotY: 0.5006,
+          },
+        },
+      ],
+    }
+    vi.mocked(sanity.fetch).mockResolvedValue(mockData)
+
+    const product = await getProductById('sh0018-palm')
+    const mediaItem = product?.media?.[0] as Record<string, unknown> | undefined
+    expect(mediaItem?.['cropMobile']).toEqual({
+      x: 0.2891,
+      y: 0,
+      width: 0.4234,
+      height: 1,
+    })
+    expect(mediaItem?.['hotspotMobile']).toEqual({
+      x: 0.3952,
+      y: 0.5006,
+    })
+    expect(mediaItem?.['urlMobile']).toBe('http://image.url')
+  })
 })

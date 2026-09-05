@@ -276,11 +276,20 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           }
           .responsive-crop-inner img,
           .responsive-crop-inner picture img {
-            object-fit: cover !important;
+            object-fit: var(--img-object-fit-mobile, cover) !important;
             object-position: var(--obj-pos-mobile, var(--obj-pos-desktop, center)) !important;
           }
-          .responsive-crop-wrapper.has-aspect,
-          .responsive-crop-wrapper.is-contain-mobile:not(.is-cover) {
+          .responsive-crop-wrapper.is-contain-mobile {
+            height: 100% !important;
+            max-height: 100% !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            aspect-ratio: unset !important;
+          }
+          .responsive-crop-wrapper.has-aspect:not(.is-contain-mobile) {
             width: 100% !important;
             max-width: 100% !important;
             max-height: 100% !important;
@@ -292,7 +301,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
             align-self: center !important;
             aspect-ratio: var(--crop-aspect-mobile, var(--crop-aspect-desktop, auto)) !important;
           }
-          .responsive-crop-wrapper.is-cover {
+          .responsive-crop-wrapper.is-cover:not(.is-contain-mobile) {
             width: 100% !important;
             height: 100% !important;
             max-height: 100% !important;
@@ -619,21 +628,41 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     customStyle['--img-object-fit-desktop'] = 'cover'
   }
 
-  const hasCrop = !!(
-    activeCrop &&
-    activeCrop.width > 0 &&
-    activeCrop.height > 0 &&
-    (activeCrop.width < 0.999 ||
-      activeCrop.height < 0.999 ||
-      activeCrop.x > 0.001 ||
-      activeCrop.y > 0.001)
+  const hasCropDesktop = !!(
+    normalizedCropDesktop &&
+    normalizedCropDesktop.width > 0 &&
+    normalizedCropDesktop.height > 0 &&
+    (normalizedCropDesktop.width < 0.999 ||
+      normalizedCropDesktop.height < 0.999 ||
+      normalizedCropDesktop.x > 0.001 ||
+      normalizedCropDesktop.y > 0.001)
   )
+
+  const hasCropMobile = !!(
+    normalizedCropMobile &&
+    normalizedCropMobile.width > 0 &&
+    normalizedCropMobile.height > 0 &&
+    (normalizedCropMobile.width < 0.999 ||
+      normalizedCropMobile.height < 0.999 ||
+      normalizedCropMobile.x > 0.001 ||
+      normalizedCropMobile.y > 0.001)
+  )
+
+  const hasCrop = hasCropDesktop || hasCropMobile
 
   const useClientCrop = hasCrop
 
   const mapFocalCoord = (val: number): number => {
     return Math.min(100, Math.max(0, Math.round(val * 100)))
   }
+
+  const isCustomHotspot = (h?: {x?: number; y?: number}) =>
+    Boolean(
+      h &&
+        typeof h.x === 'number' &&
+        typeof h.y === 'number' &&
+        (Math.abs(h.x - 0.5) > 0.001 || Math.abs(h.y - 0.5) > 0.001)
+    )
 
   const activeHsDesktop = hotspotDesktop || hotspot
   if (
@@ -647,7 +676,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     customStyle['--obj-pos-desktop'] = `${posX} ${posY}`
     imgStyleRecord['--obj-pos-desktop'] = `${posX} ${posY}`
     imgStyle.objectPosition = `${posX} ${posY}`
-  } else if (normalizedCropDesktop) {
+  } else if (hasCropDesktop && normalizedCropDesktop) {
     const centerX = (normalizedCropDesktop.x + normalizedCropDesktop.width / 2) * 100
     const centerY = (normalizedCropDesktop.y + normalizedCropDesktop.height / 2) * 100
     const posX = `${centerX.toFixed(2)}%`
@@ -668,23 +697,38 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     }
   }
 
-  const activeHsMobile = hotspotMobile || hotspot
-  if (
-    activeHsMobile &&
-    typeof activeHsMobile.x === 'number' &&
-    typeof activeHsMobile.y === 'number'
-  ) {
-    const posX = `${mapFocalCoord(activeHsMobile.x)}%`
-    const posY = `${mapFocalCoord(activeHsMobile.y)}%`
+  if (isCustomHotspot(hotspotMobile)) {
+    const posX = `${mapFocalCoord(hotspotMobile!.x)}%`
+    const posY = `${mapFocalCoord(hotspotMobile!.y)}%`
     const imgStyleRecord = imgStyle as Record<string, string | number | undefined>
     customStyle['--obj-pos-mobile'] = `${posX} ${posY}`
     imgStyleRecord['--obj-pos-mobile'] = `${posX} ${posY}`
-  } else if (normalizedCropMobile) {
+  } else if (hasCropMobile && normalizedCropMobile) {
     const centerX = (normalizedCropMobile.x + normalizedCropMobile.width / 2) * 100
     const centerY = (normalizedCropMobile.y + normalizedCropMobile.height / 2) * 100
     const imgStyleRecord = imgStyle as Record<string, string | number | undefined>
     customStyle['--obj-pos-mobile'] = `${centerX.toFixed(2)}% ${centerY.toFixed(2)}%`
     imgStyleRecord['--obj-pos-mobile'] = `${centerX.toFixed(2)}% ${centerY.toFixed(2)}%`
+  } else if (
+    hotspotMobile &&
+    typeof hotspotMobile.x === 'number' &&
+    typeof hotspotMobile.y === 'number'
+  ) {
+    const posX = `${mapFocalCoord(hotspotMobile.x)}%`
+    const posY = `${mapFocalCoord(hotspotMobile.y)}%`
+    const imgStyleRecord = imgStyle as Record<string, string | number | undefined>
+    customStyle['--obj-pos-mobile'] = `${posX} ${posY}`
+    imgStyleRecord['--obj-pos-mobile'] = `${posX} ${posY}`
+  } else if (
+    activeHsDesktop &&
+    typeof activeHsDesktop.x === 'number' &&
+    typeof activeHsDesktop.y === 'number'
+  ) {
+    const posX = `${mapFocalCoord(activeHsDesktop.x)}%`
+    const posY = `${mapFocalCoord(activeHsDesktop.y)}%`
+    const imgStyleRecord = imgStyle as Record<string, string | number | undefined>
+    customStyle['--obj-pos-mobile'] = `${posX} ${posY}`
+    imgStyleRecord['--obj-pos-mobile'] = `${posX} ${posY}`
   }
 
   if (normalizedCropMobile) {
@@ -831,7 +875,6 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     const uniformScaleMob = Math.max(1, 1 / Math.min(cropWMob, cropHMob))
 
     const activeHsDesk = hotspotDesktop || hotspot
-    const activeHsMob = hotspotMobile || hotspot
 
     const focalXDesk = activeHsDesk
       ? activeHsDesk.x * 100
@@ -840,8 +883,24 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       ? activeHsDesk.y * 100
       : ((cropDesk?.y || 0) + cropHDesk / 2) * 100
 
-    const focalXMob = activeHsMob ? activeHsMob.x * 100 : ((cropMob?.x || 0) + cropWMob / 2) * 100
-    const focalYMob = activeHsMob ? activeHsMob.y * 100 : ((cropMob?.y || 0) + cropHMob / 2) * 100
+    const focalXMob = isCustomHotspot(hotspotMobile)
+      ? hotspotMobile!.x * 100
+      : hasCropMobile && cropMob
+        ? ((cropMob.x || 0) + cropWMob / 2) * 100
+        : hotspotMobile
+          ? hotspotMobile.x * 100
+          : activeHsDesk
+            ? activeHsDesk.x * 100
+            : 50
+    const focalYMob = isCustomHotspot(hotspotMobile)
+      ? hotspotMobile!.y * 100
+      : hasCropMobile && cropMob
+        ? ((cropMob.y || 0) + cropHMob / 2) * 100
+        : hotspotMobile
+          ? hotspotMobile.y * 100
+          : activeHsDesk
+            ? activeHsDesk.y * 100
+            : 50
 
     const cropStyle = {
       '--crop-aspect-desktop': `${aspectDesk.toFixed(4)}`,

@@ -272,39 +272,76 @@ const mapGroupedMaterials = (
 const extractMediaMetadata = (item: Record<string, unknown>): Record<string, unknown> => {
   const baseMeta = mapR2Metadata(item)
   const r2Meta = item?.['imageR2'] ? mapR2Metadata(item['imageR2'] as SanityImageLike) : {}
-  const desktopMeta = item?.['imageDesktopR2']
-    ? mapR2Metadata(item['imageDesktopR2'] as SanityImageLike)
-    : {}
-  const mobileMeta = item?.['imageMobileR2']
-    ? mapR2Metadata(item['imageMobileR2'] as SanityImageLike)
-    : {}
+  const desktopItem = item?.['imageDesktopR2'] || item?.['imageDesktop']
+  const desktopMeta = desktopItem ? mapR2Metadata(desktopItem as SanityImageLike) : {}
+  const mobileItem = item?.['imageMobileR2'] || item?.['imageMobile']
+  const mobileMeta = mobileItem ? mapR2Metadata(mobileItem as SanityImageLike) : {}
 
-  const crop = desktopMeta.crop || r2Meta.crop || baseMeta.crop
-  const cropDesktop = desktopMeta.crop || r2Meta.crop || baseMeta.crop
-  const cropMobile = mobileMeta.crop || baseMeta.cropMobile
+  const hasValidCrop = (c?: {x: number; y: number; width: number; height: number}) =>
+    Boolean(
+      c &&
+        typeof c.width === 'number' &&
+        typeof c.height === 'number' &&
+        (c.width < 0.999 || c.height < 0.999 || c.x > 0.001 || c.y > 0.001)
+    )
+
+  const isCustomHotspot = (h?: {x: number; y: number}) =>
+    Boolean(
+      h &&
+        typeof h.x === 'number' &&
+        typeof h.y === 'number' &&
+        (Math.abs(h.x - 0.5) > 0.001 || Math.abs(h.y - 0.5) > 0.001)
+    )
+
+  const crop =
+    (hasValidCrop(desktopMeta.crop) ? desktopMeta.crop : undefined) ||
+    (hasValidCrop(r2Meta.crop) ? r2Meta.crop : undefined) ||
+    (hasValidCrop(baseMeta.crop) ? baseMeta.crop : undefined) ||
+    desktopMeta.crop ||
+    r2Meta.crop ||
+    baseMeta.crop
+
+  const cropDesktop = crop
+
+  const cropMobile =
+    (hasValidCrop(mobileMeta.crop) ? mobileMeta.crop : undefined) ||
+    (hasValidCrop(baseMeta.cropMobile) ? baseMeta.cropMobile : undefined) ||
+    mobileMeta.crop ||
+    baseMeta.cropMobile
+
+  const hotspot =
+    (isCustomHotspot(desktopMeta.hotspot) ? desktopMeta.hotspot : undefined) ||
+    (isCustomHotspot(r2Meta.hotspot) ? r2Meta.hotspot : undefined) ||
+    (isCustomHotspot(baseMeta.hotspot) ? baseMeta.hotspot : undefined) ||
+    desktopMeta.hotspot ||
+    r2Meta.hotspot ||
+    baseMeta.hotspot
+
+  const hotspotMobile =
+    (isCustomHotspot(mobileMeta.hotspot) ? mobileMeta.hotspot : undefined) ||
+    (isCustomHotspot(baseMeta.hotspotMobile) ? baseMeta.hotspotMobile : undefined) ||
+    mobileMeta.hotspot ||
+    baseMeta.hotspotMobile ||
+    hotspot
+
+  const origWidth = desktopMeta.origWidth || r2Meta.origWidth || baseMeta.origWidth
+  const origHeight = desktopMeta.origHeight || r2Meta.origHeight || baseMeta.origHeight
 
   const result: Record<string, unknown> = {
-    origWidth: desktopMeta.origWidth || r2Meta.origWidth || baseMeta.origWidth,
-    origHeight: desktopMeta.origHeight || r2Meta.origHeight || baseMeta.origHeight,
-    hotspot: desktopMeta.hotspot || r2Meta.hotspot || baseMeta.hotspot,
+    origWidth,
+    origHeight,
+    hotspot,
   }
 
   if (crop) result['crop'] = crop
   if (cropDesktop) result['cropDesktop'] = cropDesktop
   if (cropMobile) result['cropMobile'] = cropMobile
+  if (hotspotMobile) result['hotspotMobile'] = hotspotMobile
 
-  if (mobileMeta.crop || baseMeta.cropMobile) {
-    result['cropMobile'] = mobileMeta.crop || baseMeta.cropMobile
-  }
-  if (mobileMeta.hotspot || baseMeta.hotspotMobile) {
-    result['hotspotMobile'] = mobileMeta.hotspot || baseMeta.hotspotMobile
-  }
-  if (mobileMeta.origWidth || baseMeta.origWidthMobile) {
-    result['origWidthMobile'] = mobileMeta.origWidth || baseMeta.origWidthMobile
-  }
-  if (mobileMeta.origHeight || baseMeta.origHeightMobile) {
-    result['origHeightMobile'] = mobileMeta.origHeight || baseMeta.origHeightMobile
-  }
+  const origWidthMobile = mobileMeta.origWidth || baseMeta.origWidthMobile || origWidth
+  const origHeightMobile = mobileMeta.origHeight || baseMeta.origHeightMobile || origHeight
+  if (origWidthMobile) result['origWidthMobile'] = origWidthMobile
+  if (origHeightMobile) result['origHeightMobile'] = origHeightMobile
 
   return result
 }
@@ -356,8 +393,8 @@ const mapProductMedia = (mediaArrRaw: unknown): unknown[] => {
         ...metadata,
       }
 
-      if (urlMobile && urlMobile !== url) result['urlMobile'] = urlMobile
-      if (urlDesktop && urlDesktop !== url) result['urlDesktop'] = urlDesktop
+      if (urlMobile) result['urlMobile'] = urlMobile
+      if (urlDesktop) result['urlDesktop'] = urlDesktop
       result['isCover'] = !!m['isCover']
       result['isMirrored'] = getIsMirrored(m['imageR2']) ?? getIsMirrored(m)
       result['isMirroredMobile'] = getIsMirrored(m['imageMobileR2'])
@@ -376,14 +413,21 @@ const mapDimensionImages = (dimImgs: unknown[] | undefined): unknown[] => {
         mapImage(row?.['imageR2'] as SanityImageLike) || rewriteR2Url(row?.['image'] as string)
       const imgMobile = (row?.['imageMobileR2'] as Record<string, string>)?.['url']
         ? mapImage(row?.['imageMobileR2'] as SanityImageLike)
-        : undefined
+        : (row?.['imageMobile'] as Record<string, string>)?.['url']
+          ? mapImage(row?.['imageMobile'] as SanityImageLike)
+          : undefined
       const imgDesktop = (row?.['imageDesktopR2'] as Record<string, string>)?.['url']
         ? mapImage(row?.['imageDesktopR2'] as SanityImageLike)
         : undefined
-      const result: Record<string, unknown> = {image, title: row?.['title']}
+      const metadata = extractMediaMetadata(row)
+      const result: Record<string, unknown> = {
+        image,
+        title: row?.['title'],
+        ...metadata,
+      }
 
-      if (imgMobile && imgMobile !== image) result['imageMobile'] = imgMobile
-      if (imgDesktop && imgDesktop !== image) result['imageDesktop'] = imgDesktop
+      if (imgMobile) result['imageMobile'] = imgMobile
+      if (imgDesktop) result['imageDesktop'] = imgDesktop
       return result
     })
     .filter((di: Record<string, unknown>) => !!di['image'])
@@ -406,7 +450,9 @@ const mapProductRow = (r: Record<string, unknown>): Product => {
         rewriteR2Url(coverItem['url'] as string)
       urlMobile = (coverItem['imageMobileR2'] as Record<string, string>)?.['url']
         ? mapImage(coverItem['imageMobileR2'] as SanityImageLike)
-        : undefined
+        : (coverItem['imageMobile'] as Record<string, string>)?.['url']
+          ? mapImage(coverItem['imageMobile'] as SanityImageLike)
+          : undefined
       urlDesktop = (coverItem['imageDesktopR2'] as Record<string, string>)?.['url']
         ? mapImage(coverItem['imageDesktopR2'] as SanityImageLike)
         : undefined
@@ -433,8 +479,8 @@ const mapProductRow = (r: Record<string, unknown>): Product => {
       isMirroredDesktop: getIsMirrored(coverItem['imageDesktopR2']),
       ...metadata,
     }
-    if (urlMobile && urlMobile !== url) mainImage['urlMobile'] = urlMobile
-    if (urlDesktop && urlDesktop !== url) mainImage['urlDesktop'] = urlDesktop
+    if (urlMobile) mainImage['urlMobile'] = urlMobile
+    if (urlDesktop) mainImage['urlDesktop'] = urlDesktop
   }
 
   return {

@@ -229,4 +229,6 @@ export default {
   no_additional_images: 'Ek görsel bulunmuyor',
   no_technical_drawings: 'Teknik çizim bulunmuyor',
   no_3d_models: '3D model bulunmuyor',
+  show_more: 'Daha Fazla Göster',
+  show_less: 'Daha Az Göster',
 }
