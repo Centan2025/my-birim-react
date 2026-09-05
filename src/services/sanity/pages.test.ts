@@ -205,4 +205,129 @@ describe('sanity pages service', () => {
     expect(block?.urlDesktop).toBe('https://example.com/desktop-only.webp')
     expect(block?.urlMobile).toBe('https://example.com/mobile-only.webp')
   })
+
+  it('getHomePageContent reflects explicit cropDesktop and hotspotDesktop from imageDesktopR2', async () => {
+    const {mapR2Metadata} = await import('./client')
+    vi.mocked(mapR2Metadata).mockImplementation((obj: unknown) => {
+      const o = obj as Record<string, unknown> | undefined
+      if (o?.['cropX'] !== undefined) {
+        return {
+          crop: {
+            x: Number(o['cropX']),
+            y: Number(o['cropY'] || 0),
+            width: Number(o['cropWidth']),
+            height: Number(o['cropHeight'] || 1),
+          },
+          hotspot: {
+            x: Number(o['hotspotX'] ?? 0.5),
+            y: Number(o['hotspotY'] ?? 0.5),
+          },
+          origWidth: Number(o['width'] || 2560),
+          origHeight: Number(o['height'] || 1440),
+        }
+      }
+      return {}
+    })
+
+    vi.mocked(sanity.fetch).mockResolvedValue({
+      heroMedia: [],
+      contentBlocks: [
+        {
+          mediaType: 'image',
+          imageDesktopR2: {
+            url: 'https://example.com/desktop.webp',
+            cropX: 0,
+            cropY: 0.05,
+            cropWidth: 1,
+            cropHeight: 0.9,
+            hotspotX: 0.3,
+            hotspotY: 0.7,
+            width: 2560,
+            height: 1440,
+          },
+        },
+      ],
+    })
+
+    const content = await getHomePageContent()
+    const block = content?.contentBlocks?.[0]
+    expect(block?.cropDesktop).toEqual({
+      x: 0,
+      y: 0.05,
+      width: 1,
+      height: 0.9,
+    })
+    expect(block?.hotspotDesktop).toEqual({
+      x: 0.3,
+      y: 0.7,
+    })
+  })
+
+  it('getHomePageContent reflects imageR2 crop on desktop when imageDesktopR2 has same URL without crop', async () => {
+    const {mapR2Metadata} = await import('./client')
+    vi.mocked(mapR2Metadata).mockImplementation((obj: unknown) => {
+      const o = obj as Record<string, unknown> | undefined
+      if (o?.['cropX'] !== undefined) {
+        return {
+          crop: {
+            x: Number(o['cropX']),
+            y: Number(o['cropY'] || 0),
+            width: Number(o['cropWidth']),
+            height: Number(o['cropHeight'] || 1),
+          },
+          hotspot: {
+            x: Number(o['hotspotX'] ?? 0.5),
+            y: Number(o['hotspotY'] ?? 0.5),
+          },
+          origWidth: Number(o['width'] || 4000),
+          origHeight: Number(o['height'] || 2000),
+        }
+      }
+      return {
+        hotspot: {x: 0.5, y: 0.5},
+        origWidth: Number(o?.['width'] || 4000),
+        origHeight: Number(o?.['height'] || 2000),
+      }
+    })
+
+    vi.mocked(sanity.fetch).mockResolvedValue({
+      heroMedia: [],
+      contentBlocks: [
+        {
+          mediaType: 'image',
+          imageR2: {
+            url: 'https://example.com/same.webp',
+            cropX: 0.0556,
+            cropY: 0,
+            cropWidth: 0.8889,
+            cropHeight: 1,
+            hotspotX: 0.4,
+            hotspotY: 0.6,
+            width: 4000,
+            height: 2000,
+          },
+          imageDesktopR2: {
+            url: 'https://example.com/same.webp',
+            hotspotX: 0.5,
+            hotspotY: 0.5,
+            width: 4000,
+            height: 2000,
+          },
+        },
+      ],
+    })
+
+    const content = await getHomePageContent()
+    const block = content?.contentBlocks?.[0]
+    expect(block?.cropDesktop).toEqual({
+      x: 0.0556,
+      y: 0,
+      width: 0.8889,
+      height: 1,
+    })
+    expect(block?.hotspotDesktop).toEqual({
+      x: 0.4,
+      y: 0.6,
+    })
+  })
 })

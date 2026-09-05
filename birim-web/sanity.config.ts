@@ -74,6 +74,7 @@ export default defineConfig({
           'category',
           'homePage',
           'aboutPage',
+          'aboutPageV2',
           'factoryPage',
           'contactPage',
         ]

@@ -56,7 +56,7 @@ const mapProductMedia = (row: unknown): Record<string, unknown>[] => {
 
 export const getAboutPageContent = async (): Promise<AboutPageContent> => {
   if (useSanity && sanity) {
-    const q = groq`*[_type in ["aboutPageV2", "aboutPage"] && !(_id in path("drafts.**"))] | order(_updatedAt desc)[0]{
+    const q = groq`*[_id == "aboutPageV2" || (_type == "aboutPageV2" && !(_id in path("drafts.**")))] | order((_id == "aboutPageV2") desc, _updatedAt desc)[0]{
             ...,
             heroImageR2,
             heroImageMobileR2,
@@ -613,6 +613,10 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
             typeof imageDesktopR2 === 'object' && imageDesktopR2 !== null
               ? (imageDesktopR2 as Record<string, unknown>)
               : undefined
+          const imageMobileR2Obj =
+            typeof imageMobileR2 === 'object' && imageMobileR2 !== null
+              ? (imageMobileR2 as Record<string, unknown>)
+              : undefined
 
           const isSameDesktopImage = Boolean(
             imageR2Obj &&
@@ -622,91 +626,109 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
               imageR2Obj['url'] === imageDesktopR2Obj['url']
           )
 
-          const hasImageR2Crop = Boolean(
-            imageR2Obj &&
-              ((imageR2Obj['cropWidth'] !== undefined && Number(imageR2Obj['cropWidth']) < 0.999) ||
-                (imageR2Obj['cropHeight'] !== undefined &&
-                  Number(imageR2Obj['cropHeight']) < 0.999) ||
-                (imageR2Obj['cropX'] !== undefined && Number(imageR2Obj['cropX']) > 0.001) ||
-                (imageR2Obj['cropY'] !== undefined && Number(imageR2Obj['cropY']) > 0.001) ||
-                imageR2Obj['crop'])
-          )
+          const baseMeta = mapR2Metadata(b)
+          const r2Meta = imageR2Obj ? mapR2Metadata(imageR2Obj) : {}
+          const deskMeta = imageDesktopR2Obj ? mapR2Metadata(imageDesktopR2Obj) : {}
+          const mobMeta = imageMobileR2Obj ? mapR2Metadata(imageMobileR2Obj) : {}
 
-          const desktopImgObj = {
-            ...(typeof b === 'object' && b !== null ? (b as Record<string, unknown>) : {}),
-            ...(imageR2Obj || {}),
-            ...(!isSameDesktopImage || !hasImageR2Crop ? imageDesktopR2Obj || {} : {}),
-            crop:
-              (isSameDesktopImage && hasImageR2Crop
-                ? (imageR2Obj?.['crop'] as Record<string, unknown> | undefined)
-                : undefined) ||
-              b['cropDesktop'] ||
-              b['crop'] ||
-              (imageR2 as Record<string, unknown> | undefined)?.['crop'],
-            hotspot:
-              (isSameDesktopImage && hasImageR2Crop
-                ? (imageR2Obj?.['hotspot'] as Record<string, unknown> | undefined)
-                : undefined) ||
-              b['hotspotDesktop'] ||
-              b['hotspot'] ||
-              (imageR2 as Record<string, unknown> | undefined)?.['hotspot'],
+          const hasValidCrop = (c?: {x: number; y: number; width: number; height: number}) =>
+            Boolean(
+              c &&
+                typeof c.width === 'number' &&
+                typeof c.height === 'number' &&
+                (c.width < 0.999 || c.height < 0.999 || c.x > 0.001 || c.y > 0.001)
+            )
+
+          const isCustomHotspot = (h?: {x: number; y: number}) =>
+            Boolean(
+              h &&
+                typeof h.x === 'number' &&
+                typeof h.y === 'number' &&
+                (Math.abs(h.x - 0.5) > 0.001 || Math.abs(h.y - 0.5) > 0.001)
+            )
+
+          // Desktop crop resolution:
+          // 1. If same image and imageR2 has a valid crop, use r2Meta.crop
+          // 2. If imageDesktopR2 has a valid crop, use deskMeta.crop
+          // 3. Fall back to r2Meta.crop, top-level cropDesktop, baseMeta.crop, top-level crop
+          let cropDesktop = undefined
+          if (isSameDesktopImage && hasValidCrop(r2Meta.crop)) {
+            cropDesktop = r2Meta.crop
+          } else if (hasValidCrop(deskMeta.crop)) {
+            cropDesktop = deskMeta.crop
+          } else if (hasValidCrop(r2Meta.crop)) {
+            cropDesktop = r2Meta.crop
+          } else if (b['cropDesktop']) {
+            cropDesktop =
+              mapR2Metadata({cropDesktop: b['cropDesktop'], crop: b['cropDesktop']}).crop ||
+              b['cropDesktop']
+          } else {
+            cropDesktop =
+              deskMeta.crop ||
+              r2Meta.crop ||
+              baseMeta.crop ||
+              (b['crop'] ? mapR2Metadata({crop: b['crop']}).crop : undefined)
           }
-          const metaDesktop = mapR2Metadata(desktopImgObj)
 
-          const mobileImgObj = {
-            ...(typeof imageMobileR2 === 'object' && imageMobileR2 !== null
-              ? (imageMobileR2 as Record<string, unknown>)
-              : {}),
-            crop:
-              b['cropMobile'] || (imageMobileR2 as Record<string, unknown> | undefined)?.['crop'],
-            hotspot:
-              b['hotspotMobile'] ||
-              (imageMobileR2 as Record<string, unknown> | undefined)?.['hotspot'],
+          let hotspotDesktop = undefined
+          if (
+            isSameDesktopImage &&
+            isCustomHotspot(r2Meta.hotspot) &&
+            !isCustomHotspot(deskMeta.hotspot)
+          ) {
+            hotspotDesktop = r2Meta.hotspot
+          } else if (isCustomHotspot(deskMeta.hotspot)) {
+            hotspotDesktop = deskMeta.hotspot
+          } else if (isCustomHotspot(r2Meta.hotspot)) {
+            hotspotDesktop = r2Meta.hotspot
+          } else if (b['hotspotDesktop']) {
+            hotspotDesktop = mapR2Metadata({hotspot: b['hotspotDesktop']}).hotspot
+          } else {
+            hotspotDesktop =
+              deskMeta.hotspot ||
+              r2Meta.hotspot ||
+              baseMeta.hotspot ||
+              (b['hotspot'] ? mapR2Metadata({hotspot: b['hotspot']}).hotspot : undefined)
           }
-          const metaMobile = mapR2Metadata(mobileImgObj)
-          const borderColor = (b['borderColor'] as Record<string, unknown>)?.['hex']
 
-          const crop =
-            metaDesktop.crop ||
-            (b['crop'] ? mapR2Metadata({crop: b['crop']}).crop : undefined) ||
-            (b['image'] ? mapR2Metadata(b['image']).crop : undefined)
+          const crop = cropDesktop || r2Meta.crop || deskMeta.crop || baseMeta.crop
+          const hotspot = hotspotDesktop || r2Meta.hotspot || deskMeta.hotspot || baseMeta.hotspot
 
-          const hotspot =
-            metaDesktop.hotspot ||
-            (b['hotspot'] ? mapR2Metadata({hotspot: b['hotspot']}).hotspot : undefined) ||
-            (b['image'] ? mapR2Metadata(b['image']).hotspot : undefined)
+          const origWidthDesktop =
+            deskMeta.origWidth ||
+            r2Meta.origWidth ||
+            baseMeta.origWidth ||
+            (b['origWidthDesktop'] as number) ||
+            (b['origWidth'] as number)
+          const origHeightDesktop =
+            deskMeta.origHeight ||
+            r2Meta.origHeight ||
+            baseMeta.origHeight ||
+            (b['origHeightDesktop'] as number) ||
+            (b['origHeight'] as number)
 
-          const origWidth = metaDesktop.origWidth || b['origWidth']
-          const origHeight = metaDesktop.origHeight || b['origHeight']
-
-          const cropDesktop =
-            metaDesktop.crop ||
-            (b['cropDesktop'] ? mapR2Metadata({crop: b['cropDesktop']}).crop : undefined) ||
-            crop
-
-          const hotspotDesktop =
-            metaDesktop.hotspot ||
-            (b['hotspotDesktop']
-              ? mapR2Metadata({hotspot: b['hotspotDesktop']}).hotspot
-              : undefined) ||
-            hotspot
-
-          const origWidthDesktop = metaDesktop.origWidth || b['origWidthDesktop'] || origWidth
-          const origHeightDesktop = metaDesktop.origHeight || b['origHeightDesktop'] || origHeight
+          const origWidth = origWidthDesktop
+          const origHeight = origHeightDesktop
 
           const cropMobile =
-            metaMobile.crop ||
-            (b['cropMobile'] ? mapR2Metadata({crop: b['cropMobile']}).crop : undefined)
+            (hasValidCrop(mobMeta.crop) ? mobMeta.crop : undefined) ||
+            (b['cropMobile'] ? mapR2Metadata({crop: b['cropMobile']}).crop : undefined) ||
+            mobMeta.crop
 
           const hotspotMobile =
-            metaMobile.hotspot ||
+            (isCustomHotspot(mobMeta.hotspot) ? mobMeta.hotspot : undefined) ||
             (b['hotspotMobile']
               ? mapR2Metadata({hotspot: b['hotspotMobile']}).hotspot
               : undefined) ||
+            mobMeta.hotspot ||
             hotspotDesktop
 
-          const origWidthMobile = metaMobile.origWidth || origWidthDesktop
-          const origHeightMobile = metaMobile.origHeight || origHeightDesktop
+          const origWidthMobile =
+            mobMeta.origWidth || (b['origWidthMobile'] as number) || origWidthDesktop
+          const origHeightMobile =
+            mobMeta.origHeight || (b['origHeightMobile'] as number) || origHeightDesktop
+
+          const borderColor = (b['borderColor'] as Record<string, unknown>)?.['hex']
 
           return {
             ...b,
@@ -792,6 +814,13 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
                       mapImage(pRec['imageDesktop'] as SanityImageLike) ||
                       (pRec['urlDesktop'] as string | undefined)
 
+                    const pCropDesktop = pRec['cropDesktop']
+                      ? mapR2Metadata({crop: pRec['cropDesktop']}).crop
+                      : pCrop
+                    const pHotspotDesktop = pRec['hotspotDesktop']
+                      ? mapR2Metadata({hotspot: pRec['hotspotDesktop']}).hotspot
+                      : pHotspot
+
                     return {
                       url: panelUrl,
                       urlMobile: pUrlMobile,
@@ -801,6 +830,10 @@ export const getHomePageContent = async (): Promise<HomePageContent> => {
                       hotspot: pHotspot,
                       origWidth: pOrigWidth,
                       origHeight: pOrigHeight,
+                      cropDesktop: pCropDesktop,
+                      hotspotDesktop: pHotspotDesktop,
+                      origWidthDesktop: pOrigWidth,
+                      origHeightDesktop: pOrigHeight,
                       cropMobile: pCropMobile,
                       hotspotMobile: pHotspotMobile,
                       origWidthMobile: pOrigWidthMobile,

@@ -196,10 +196,16 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         }
         @media (min-width: 1024px) {
           img.responsive-crop-pos,
-          picture.responsive-crop-pos img,
+          picture.responsive-crop-pos img {
+            object-fit: var(--img-object-fit-desktop, var(--img-object-fit, cover)) !important;
+            object-position: var(--obj-pos-desktop, center) !important;
+            clip-path: var(--clip-desktop, none) !important;
+            transform: var(--transform-desktop, scaleX(var(--is-mirrored-desktop, var(--is-mirrored-general, 1)))) !important;
+            transform-origin: var(--transform-origin-desktop, center) !important;
+          }
           .responsive-crop-inner img,
           .responsive-crop-inner picture img {
-            object-fit: var(--img-object-fit-desktop, var(--img-object-fit, cover)) !important;
+            object-fit: cover !important;
             object-position: var(--obj-pos-desktop, center) !important;
             clip-path: var(--clip-desktop, none) !important;
             transform: var(--transform-desktop, scaleX(var(--is-mirrored-desktop, var(--is-mirrored-general, 1)))) !important;
@@ -264,10 +270,13 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
         @media (max-width: 1023px) {
           img.responsive-crop-pos,
-          picture.responsive-crop-pos img,
+          picture.responsive-crop-pos img {
+            object-fit: var(--img-object-fit-mobile, var(--img-object-fit, cover)) !important;
+            object-position: var(--obj-pos-mobile, var(--obj-pos-desktop, center)) !important;
+          }
           .responsive-crop-inner img,
           .responsive-crop-inner picture img {
-            object-fit: var(--img-object-fit-mobile, var(--img-object-fit, cover)) !important;
+            object-fit: cover !important;
             object-position: var(--obj-pos-mobile, var(--obj-pos-desktop, center)) !important;
           }
           .responsive-crop-wrapper.has-aspect,
