@@ -592,6 +592,7 @@ export function AboutPageNew() {
                             </div>
                             <div className="relative aspect-[16/10] overflow-hidden rounded-none">
                               <OptimizedImage
+                                key={`${era.year}-${era.image}`}
                                 src={era.image}
                                 srcMobile={era.imageMobile || undefined}
                                 fallbackSrc={DEFAULT_IMAGES.history}
@@ -678,6 +679,7 @@ export function AboutPageNew() {
                         <div className="col-span-7">
                           <div className="relative aspect-[16/10] overflow-hidden rounded-none">
                             <OptimizedImage
+                              key={`${currentEra.year}-${currentEra.image}`}
                               src={currentEra.image}
                               srcMobile={currentEra.imageMobile || undefined}
                               fallbackSrc={DEFAULT_IMAGES.history}
@@ -755,6 +757,7 @@ export function AboutPageNew() {
               <div className="lg:col-span-7 order-2 lg:order-1">
                 <div className="relative aspect-[4/3] overflow-hidden rounded-none">
                   <OptimizedImage
+                    key={qualitySection.image}
                     src={qualitySection.image}
                     srcMobile={qualitySection.imageMobile || undefined}
                     fallbackSrc={DEFAULT_IMAGES.quality}

@@ -54,6 +54,7 @@ export function PreviewView({document}: PreviewViewProps) {
       path = '/'
       break
     case 'aboutPage':
+    case 'aboutPageV2':
       path = '/about'
       break
     case 'factoryPage':

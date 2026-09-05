@@ -336,6 +336,14 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
     const img = imgRef.current
     if (img && img.complete && img.naturalWidth > 0) {
       setIsLoaded(true)
+    } else if (safeSrc) {
+      const probe = new Image()
+      probe.src = safeSrc
+      if (probe.complete && probe.naturalWidth > 0) {
+        setIsLoaded(true)
+      } else {
+        setIsLoaded(false)
+      }
     } else {
       setIsLoaded(false)
     }
@@ -352,6 +360,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         loader.onload = () => {
           if (loader.naturalWidth > 0 && loader.naturalHeight > 0) {
             setNaturalDims({w: loader.naturalWidth, h: loader.naturalHeight})
+            setIsLoaded(true)
           }
         }
       }
@@ -362,7 +371,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   useEffect(() => {
     const checkDims = () => {
       const img = imgRef.current
-      if (img && img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
+      if (img && img.complete && img.naturalWidth > 0) {
         setIsLoaded(true)
         setNaturalDims(prev => {
           if (!prev || prev.w !== img.naturalWidth || prev.h !== img.naturalHeight) {
@@ -373,8 +382,15 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
       }
     }
     checkDims()
-    const timer = setTimeout(checkDims, 300)
-    return () => clearTimeout(timer)
+    const timer = setTimeout(checkDims, 150)
+    const fallbackTimer = setTimeout(() => {
+      // 500ms içinde hata almamışsa görünürlüğü garanti et (önbellek/geçiş kaynaklı opacity-0 takılmalarını önler)
+      setIsLoaded(true)
+    }, 500)
+    return () => {
+      clearTimeout(timer)
+      clearTimeout(fallbackTimer)
+    }
   }, [currentSrc, srcMobile, srcDesktop])
 
   // React henüz fetchPriority prop'unu DOM attribute olarak tanımıyor; uyarıyı

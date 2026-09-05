@@ -1578,7 +1578,9 @@ export default function MediaImportTool() {
       setProgress([...newProgress])
 
       try {
-        const aboutDoc = await client.fetch(`*[_type == "aboutPage"][0]{ _id }`)
+        const aboutDoc = await client.fetch(
+          `*[_id == "aboutPageV2" || _type == "aboutPageV2" || _type == "aboutPage"][0]{ _id }`,
+        )
         if (aboutDoc) {
           await updateAboutPageMedia(client, aboutDoc._id, data.aboutPage)
           item.status = 'success'
@@ -3827,54 +3829,124 @@ async function updateNewsItemMedia(client: any, newsId: string, news: any) {
  */
 async function updateAboutPageMedia(client: any, aboutId: string, aboutData: any) {
   const doc = await client.fetch(`*[_id == $aboutId][0]`, {aboutId})
+  if (!doc) return
 
   const updates: any = {}
   const unsetFields: string[] = []
   let hasChanges = false
 
   // Hero
-  if (aboutData.hero.length > 0) {
+  if (aboutData.hero && aboutData.hero.length > 0) {
     const file = aboutData.hero[0]
-    if (!doc.heroImageR2 || doc.heroImage) {
-      const r2Url = await uploadToR2(file, 'about/hero')
+    console.log(`   📸 Hakkımızda Hero R2'ye yükleniyor: ${file.name}`)
+    const r2Url = await uploadToR2(file, 'about/hero')
+    if (r2Url) {
+      updates.heroImageR2 = {
+        _type: 'r2Asset',
+        url: r2Url.url,
+        width: r2Url.width,
+        height: r2Url.height,
+        hasResponsiveSizes: r2Url.hasResponsiveSizes,
+      }
+      unsetFields.push('heroImage')
+      hasChanges = true
+    }
+  }
+
+  // History / Eras (Support aboutPageV2 eras array or fallback historySection)
+  if (aboutData.history && aboutData.history.length > 0) {
+    if (Array.isArray(doc.eras) && doc.eras.length > 0) {
+      const updatedEras = [...doc.eras]
+      for (let i = 0; i < aboutData.history.length; i++) {
+        const file = aboutData.history[i]
+        const targetEraIdx = i < updatedEras.length ? i : updatedEras.length - 1
+        console.log(
+          `   📸 Hakkımızda Tarihçe Dönem [${targetEraIdx}] R2'ye yükleniyor: ${file.name}`,
+        )
+        const r2Url = await uploadToR2(file, `about/eras-${targetEraIdx}`)
+        if (r2Url && updatedEras[targetEraIdx]) {
+          updatedEras[targetEraIdx] = {
+            ...updatedEras[targetEraIdx],
+            imageR2: {
+              _type: 'r2Asset',
+              url: r2Url.url,
+              width: r2Url.width,
+              height: r2Url.height,
+              hasResponsiveSizes: r2Url.hasResponsiveSizes,
+            },
+          }
+          hasChanges = true
+        }
+      }
+      if (hasChanges) {
+        updates.eras = updatedEras
+      }
+    } else {
+      const mainFile = aboutData.history[0]
+      console.log(`   📸 Hakkımızda historySection R2'ye yükleniyor: ${mainFile.name}`)
+      const r2Url = await uploadToR2(mainFile, 'about/historySection')
       if (r2Url) {
-        updates.heroImageR2 = {
+        updates['historySection.imageR2'] = {
           _type: 'r2Asset',
           url: r2Url.url,
           width: r2Url.width,
           height: r2Url.height,
           hasResponsiveSizes: r2Url.hasResponsiveSizes,
         }
-        unsetFields.push('heroImage')
+        unsetFields.push('historySection.image')
         hasChanges = true
       }
     }
   }
 
-  // Sections
+  // Sections (identitySection, qualitySection)
   const syncSection = async (sectionName: string, files: File[]) => {
-    const section = doc[sectionName] || {}
-    if (files.length > 0) {
+    if (files && files.length > 0) {
       const mainFile = files[0]
-      if (!section.imageR2 || section.image) {
-        console.log(`   📸 Hakkımızda ${sectionName} R2'ye yükleniyor: ${mainFile.name}`)
-        const r2Url = await uploadToR2(mainFile, `about/${sectionName}`)
-        if (r2Url) {
-          updates[`${sectionName}.imageR2`] = {
-            _type: 'r2Asset',
-            url: r2Url.url,
-            width: r2Url.width,
-            height: r2Url.height,
-            hasResponsiveSizes: r2Url.hasResponsiveSizes,
+      console.log(`   📸 Hakkımızda ${sectionName} R2'ye yükleniyor: ${mainFile.name}`)
+      const r2Url = await uploadToR2(mainFile, `about/${sectionName}`)
+      if (r2Url) {
+        updates[`${sectionName}.imageR2`] = {
+          _type: 'r2Asset',
+          url: r2Url.url,
+          width: r2Url.width,
+          height: r2Url.height,
+          hasResponsiveSizes: r2Url.hasResponsiveSizes,
+        }
+        unsetFields.push(`${sectionName}.image`)
+        hasChanges = true
+      }
+
+      // If more files provided, add them to media gallery
+      if (files.length > 1) {
+        const existingMedia = doc[sectionName]?.media || []
+        const newMediaItems: any[] = []
+        for (let i = 1; i < files.length; i++) {
+          const extraFile = files[i]
+          const extraUrl = await uploadToR2(extraFile, `about/${sectionName}-media`)
+          if (extraUrl) {
+            newMediaItems.push({
+              _key: `imported-${Date.now()}-${i}`,
+              _type: 'productPanelMediaItem',
+              type: 'image',
+              imageR2: {
+                _type: 'r2Asset',
+                url: extraUrl.url,
+                width: extraUrl.width,
+                height: extraUrl.height,
+                hasResponsiveSizes: extraUrl.hasResponsiveSizes,
+              },
+            })
           }
-          unsetFields.push(`${sectionName}.image`)
+        }
+        if (newMediaItems.length > 0) {
+          updates[`${sectionName}.media`] = [...existingMedia, ...newMediaItems]
           hasChanges = true
         }
       }
     }
   }
 
-  await syncSection('historySection', aboutData.history)
   await syncSection('identitySection', aboutData.identity)
   await syncSection('qualitySection', aboutData.quality)
 
