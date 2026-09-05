@@ -88,12 +88,12 @@ export function ProductMediaPanels({
       : 'Projeler'
 
   return (
-    <section className="mt-12">
+    <section className="mt-8 md:mt-10">
       <ScrollReveal delay={0} threshold={0.1}>
-        <h2 className="text-xl font-light text-gray-600 mb-6">{sectionTitle}</h2>
+        <h2 className="text-xl font-light text-gray-600 mb-3 md:mb-4">{sectionTitle}</h2>
       </ScrollReveal>
       <motion.div
-        className="grid grid-cols-1 md:grid-cols-3 gap-6"
+        className="grid grid-cols-1 md:grid-cols-3 gap-x-2 md:gap-x-2.5 gap-y-1 md:gap-y-1.5"
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
