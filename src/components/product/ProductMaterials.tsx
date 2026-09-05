@@ -112,7 +112,7 @@ const MaterialCard: React.FC<{
           loading="lazy"
           disableResizing={true}
           style={{
-            transform: 'scale(1.75)',
+            transform: 'scale(3.5)',
             transformOrigin: 'center center',
             imageRendering: 'auto',
           }}
