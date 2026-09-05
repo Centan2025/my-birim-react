@@ -168,8 +168,15 @@ export const rewriteR2Url = (url: string | undefined, _hasResponsiveSizes?: bool
       .replace(/^(https?:\/\/)?([^/]+\.workers\.dev)/i, activeDomain)
       .replace(/https?:\/\/[^/]+\.workers\.dev/gi, activeDomain)
   }
-  if (result.startsWith('http://assets.birim.com')) {
-    result = result.replace('http://assets.birim.com', 'https://assets.birim.com')
+  if (
+    result.startsWith('http://assets.birim.com') ||
+    result.startsWith('https://assets.birim.com')
+  ) {
+    if (activeDomain && !activeDomain.includes('assets.birim.com')) {
+      result = result.replace(/^https?:\/\/assets\.birim\.com/i, activeDomain)
+    } else {
+      result = result.replace('http://assets.birim.com', 'https://assets.birim.com')
+    }
   }
 
   // 2. Relatif yolları mutlak yap (lokal public görsellere /img/ dokunma)
