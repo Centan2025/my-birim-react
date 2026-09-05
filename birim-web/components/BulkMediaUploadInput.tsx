@@ -138,6 +138,43 @@ const isImageFile = (filename: string) => {
   return ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(ext)
 }
 
+// Dosyanın gerçekten WebP olup olmadığını dosya başlığından (Magic Bytes) kontrol eder
+async function isGenuineWebP(file: File | Blob): Promise<boolean> {
+  try {
+    const slice = file.slice(0, 12)
+    const buf = new Uint8Array(await slice.arrayBuffer())
+    return (
+      buf.length >= 12 &&
+      buf[0] === 0x52 &&
+      buf[1] === 0x49 &&
+      buf[2] === 0x46 &&
+      buf[3] === 0x46 &&
+      buf[8] === 0x57 &&
+      buf[9] === 0x45 &&
+      buf[10] === 0x42 &&
+      buf[11] === 0x50
+    )
+  } catch {
+    return false
+  }
+}
+
+function getImageDimensions(file: File | Blob): Promise<{width: number; height: number}> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file)
+    const img = new Image()
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      resolve({width: img.naturalWidth || img.width, height: img.naturalHeight || img.height})
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      resolve({width: 0, height: 0})
+    }
+    img.src = url
+  })
+}
+
 export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
   const {renderDefault, onChange, schemaType} = props
   const [isUploading, setIsUploading] = useState(false)
@@ -212,46 +249,51 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
                 {width: 400, suffix: '-400w', maxSizeMB: 0.2},
               ]
 
-              let dimensions = {width: 0, height: 0}
-              const isAlreadyWebP =
-                file.type === 'image/webp' || file.name.toLowerCase().endsWith('.webp')
+              const dimensions = await getImageDimensions(file)
+              const isAlreadyWebP = await isGenuineWebP(file)
               const isSmallFile = file.size < 1.5 * 1024 * 1024
 
               const sizePromises = sizes.map(async (size) => {
                 let blobToUpload: Blob | File = file
 
                 if (size.suffix === '') {
-                  if (isAlreadyWebP || isSmallFile) {
+                  if (isAlreadyWebP && isSmallFile) {
+                    // Zaten fiziksel olarak gerçek WebP ve boyutu uygun (<1.5MB): Baytlarına dokunmadan doğrudan yükle
                     blobToUpload = file
+                  } else if (isSmallFile) {
+                    // Boyut uygun (<1.5MB) ama WebP değil: Çözünürlüğü ve %100 kaliteyi koruyarak WebP'ye çevir
+                    try {
+                      const options = {
+                        maxSizeMB: Math.max(file.size / (1024 * 1024), 3.0),
+                        maxWidthOrHeight: Math.max(dimensions.width, dimensions.height) || 2560,
+                        useWebWorker: false,
+                        fileType: 'image/webp' as unknown as string,
+                        initialQuality: 1.0, // %100 kalite
+                      }
+                      blobToUpload = await imageCompression(file, options)
+                    } catch {
+                      blobToUpload = file
+                    }
                   } else {
+                    // Boyutu büyük (>1.5MB): WebP olsa dahi web standardına uygun optimize et (max 2560px, yüksek kalite)
                     try {
                       const options = {
                         maxSizeMB: size.maxSizeMB,
-                        maxWidthOrHeight: size.width,
+                        maxWidthOrHeight: Math.min(
+                          Math.max(dimensions.width, dimensions.height) || 2560,
+                          2560,
+                        ),
                         useWebWorker: false,
                         fileType: 'image/webp' as unknown as string,
-                        initialQuality: 0.92,
+                        initialQuality: 0.95,
                       }
                       blobToUpload = await imageCompression(file, options)
                     } catch {
                       blobToUpload = file
                     }
                   }
-
-                  try {
-                    const img = new Image()
-                    img.src = URL.createObjectURL(blobToUpload)
-                    await new Promise((resolve) => {
-                      img.onload = () => {
-                        dimensions = {width: img.width, height: img.height}
-                        resolve(null)
-                      }
-                      img.onerror = () => resolve(null)
-                    })
-                  } catch {
-                    /* ignore dimension error */
-                  }
                 } else {
+                  // Alt çözünürlükler (-1600w, -800w, -400w)
                   try {
                     const options = {
                       maxSizeMB: size.maxSizeMB,
@@ -267,11 +309,7 @@ export default function BulkMediaUploadInput(props: ArrayOfObjectsInputProps) {
                 }
 
                 const currentKey = size.suffix ? key.replace(/\.webp$/, `${size.suffix}.webp`) : key
-                const mime =
-                  size.suffix === '' && (isAlreadyWebP || isSmallFile)
-                    ? file.type || 'image/webp'
-                    : 'image/webp'
-                return uploadFileViaPresignedUrl(blobToUpload, currentKey, mime)
+                return uploadFileViaPresignedUrl(blobToUpload, currentKey, 'image/webp')
               })
 
               await Promise.all(sizePromises)

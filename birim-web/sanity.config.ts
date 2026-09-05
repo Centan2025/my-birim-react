@@ -45,6 +45,7 @@ import {schemaTypes} from './schemaTypes'
 import {deskStructure} from './deskStructure'
 import {excelImportTool} from './tools/excelImport'
 import {mediaImportTool} from './tools/mediaImport'
+import {mediaExportTool} from './tools/mediaExport'
 import {emailExportTool} from './tools/emailExport'
 import {colorInput} from '@sanity/color-input'
 import {CategoryProductsView} from './components/CategoryProductsView'
@@ -106,6 +107,7 @@ export default defineConfig({
     visionTool(),
     excelImportTool(),
     mediaImportTool(),
+    mediaExportTool(),
     emailExportTool(),
     colorInput(),
   ],

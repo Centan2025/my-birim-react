@@ -148,6 +148,27 @@ const getApiUrl = (path: string): string => {
   return `${base}${path}`
 }
 
+// Dosyanın gerçekten WebP olup olmadığını dosya başlığından (Magic Bytes) kontrol eder
+async function isGenuineWebP(file: File | Blob): Promise<boolean> {
+  try {
+    const slice = file.slice(0, 12)
+    const buf = new Uint8Array(await slice.arrayBuffer())
+    return (
+      buf.length >= 12 &&
+      buf[0] === 0x52 &&
+      buf[1] === 0x49 &&
+      buf[2] === 0x46 &&
+      buf[3] === 0x46 &&
+      buf[8] === 0x57 &&
+      buf[9] === 0x45 &&
+      buf[10] === 0x42 &&
+      buf[11] === 0x50
+    )
+  } catch {
+    return false
+  }
+}
+
 const fetchApiWithFallback = async (path: string, init?: RequestInit): Promise<Response> => {
   const isLocal =
     typeof window !== 'undefined' &&
@@ -268,19 +289,20 @@ const uploadToR2 = async (
       URL.revokeObjectURL(objectUrl)
 
       const sizes = [
-        {width: 2560, height: 1600, suffix: '', maxSizeMB: 2.5}, // Ana görsel (Max: 2560x1600)
-        {width: 1600, height: 1000, suffix: '-1600w', maxSizeMB: 1.2},
-        {width: 800, height: 500, suffix: '-800w', maxSizeMB: 0.5},
+        {width: 2560, height: 1600, suffix: '', maxSizeMB: 1.5}, // Ana görsel (Max: 2560x1600, 1.5MB)
+        {width: 1600, height: 1000, suffix: '-1600w', maxSizeMB: 0.8},
+        {width: 800, height: 500, suffix: '-800w', maxSizeMB: 0.4},
         {width: 400, height: 250, suffix: '-400w', maxSizeMB: 0.2},
       ]
 
-      const uploadPromises = sizes.map(async (size) => {
-        // KRİTİK: Eğer dosya zaten WebP ise, pikseline dokunmadan HAM olarak gönder (Byte-perfect copy).
-        const isAlreadyWebP = file.name.toLowerCase().endsWith('.webp')
+      const isAlreadyWebP = await isGenuineWebP(file)
+      const isSmallFile = file.size < 1.5 * 1024 * 1024
 
-        // Ana görsel (suffix === '') için eğer zaten WebP ise asla işleme sokma
+      const uploadPromises = sizes.map(async (size) => {
+        // KRİTİK: Eğer dosya zaten fiziksel olarak gerçek WebP VE boyutu <1.5MB ise, pikseline dokunmadan HAM olarak gönder (Byte-perfect copy).
         const isAlreadyOptimized =
           isAlreadyWebP &&
+          isSmallFile &&
           (size.suffix === '' ||
             (dimensions.width <= size.width && dimensions.height <= size.height))
 
@@ -290,21 +312,20 @@ const uploadToR2 = async (
           console.log(`   💎 Ham Veri Geçişi (${size.suffix || 'Orijinal'}): ${file.name} korundu.`)
           compressedBlob = file
           if (size.suffix === '') processedFile = file
-        } else if (file.size < 500 * 1024) {
-          // Küçük dosya ama WebP değilse veya alt varyasyon (800w/400w) ise:
-          // Çözünürlüğü hedef boyuta (size.width) getir, kaliteyi tavan yap.
+        } else if (file.size < 1.5 * 1024 * 1024) {
+          // Boyutu uygun (<1.5MB): Çözünürlüğü ve %100 kaliteyi koruyarak WebP'ye dönüştür
           console.log(
-            `   ⚡ Hızlı Dönüştürme (${size.suffix || 'Orijinal'}): ${file.name} (Kalite koruma + Boyutlandırma)`,
+            `   ⚡ %100 Kalite WebP Dönüştürme (${size.suffix || 'Orijinal'}): ${file.name}`,
           )
           const options = {
-            maxSizeMB: size.maxSizeMB,
+            maxSizeMB: Math.max(file.size / (1024 * 1024), 3.0),
             maxWidthOrHeight:
               size.suffix === ''
                 ? Math.max(dimensions.width, dimensions.height)
                 : Math.max(size.width, size.height),
             useWebWorker: true,
             fileType: 'image/webp' as any,
-            initialQuality: 0.99, // En üst düzey kalite
+            initialQuality: 1.0, // %100 kalite
           }
           compressedBlob = await compressImageChunk(file, options)
           if (size.suffix === '') processedFile = compressedBlob
