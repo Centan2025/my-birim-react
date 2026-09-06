@@ -366,27 +366,43 @@ async function uploadFileViaPresignedUrl(
   const folder = key.substring(0, lastSlash)
   const filename = key.substring(lastSlash + 1)
 
+  const studioToken =
+    (typeof process !== 'undefined' && process.env
+      ? process.env.SANITY_STUDIO_SANITY_TOKEN ||
+        process.env.SANITY_STUDIO_MEDIA_ADMIN_SECRET ||
+        process.env.SANITY_STUDIO_API_SECRET
+      : '') || ''
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  }
+  if (studioToken) {
+    headers['Authorization'] = `Bearer ${studioToken}`
+  }
+
   // 1. Get Presigned URL (local API server or current environment API first)
   let res: Response
   try {
     res = await fetch(getApiUrl('/api/media/presigned-url'), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
+      credentials: 'include',
       body: JSON.stringify({
         filename,
         contentType,
         folder,
       }),
     })
+    if (!res.ok && res.status !== 400 && res.status !== 413) {
+      // Fallback to production if local server returned 404/500
+      throw new Error(`Local API error ${res.status}`)
+    }
   } catch {
     try {
       res = await fetch('https://birim-web-antigravity.vercel.app/api/media/presigned-url', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
+        credentials: 'include',
         body: JSON.stringify({
           filename,
           contentType,

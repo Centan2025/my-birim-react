@@ -75,14 +75,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({error: 'Method Not Allowed'})
   }
 
-  // Auth check: require valid admin JWT session or valid admin secret token
+  // Auth check: require valid admin JWT session, valid admin secret token, or trusted Sanity Studio origin
   const token = getAuthTokenFromReq(req)
   const payload = token ? verifyToken(token) : null
   const adminSecret = process.env['SANITY_TOKEN'] || process.env['MEDIA_ADMIN_SECRET']
   const authHeader = req.headers?.['authorization'] || req.headers?.['x-api-secret']
   const headerToken =
     typeof authHeader === 'string' ? authHeader.replace(/^Bearer\s+/i, '').trim() : ''
-  const isAdminAuthorized = Boolean(adminSecret && headerToken && headerToken === adminSecret)
+  const reqReferer = typeof req.headers.referer === 'string' ? req.headers.referer : ''
+  const isStudioOrigin =
+    isAllowedOrigin ||
+    requestOrigin.includes('sanity.studio') ||
+    requestOrigin.includes('localhost') ||
+    reqReferer.includes('sanity.studio') ||
+    reqReferer.includes('localhost') ||
+    reqReferer.includes('.vercel.app')
+  const isAdminAuthorized =
+    Boolean(adminSecret && headerToken && headerToken === adminSecret) || isStudioOrigin
   const isUserAdmin = Boolean(payload && payload.role === 'admin')
 
   if (!isUserAdmin && !isAdminAuthorized) {

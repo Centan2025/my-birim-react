@@ -1114,6 +1114,68 @@ app.get('/api/analytics', async (req, res) => {
   }
 })
 
+// ─── /api/media/presigned-url ──────────────────────────────────────────────
+app.post(['/api/media/presigned-url', '/api/media'], async (req, res) => {
+  try {
+    const {filename, contentType, folder} = req.body || {}
+    if (!filename || !contentType) {
+      return res.status(400).json({error: 'filename ve contentType parametreleri gereklidir.'})
+    }
+
+    const R2_ACCOUNT_ID = (process.env.R2_ACCOUNT_ID || process.env.SANITY_STUDIO_R2_ACCOUNT_ID || '').trim()
+    const R2_ACCESS_KEY_ID = (process.env.R2_ACCESS_KEY_ID || process.env.SANITY_STUDIO_R2_ACCESS_KEY_ID || '').trim()
+    const R2_SECRET_ACCESS_KEY = (process.env.R2_SECRET_ACCESS_KEY || process.env.SANITY_STUDIO_R2_SECRET_ACCESS_KEY || '').trim()
+    const R2_BUCKET_NAME = (process.env.R2_BUCKET_NAME || process.env.SANITY_STUDIO_R2_BUCKET_NAME || 'birim-web').trim()
+    const R2_DOMAIN = (process.env.R2_DOMAIN || process.env.SANITY_STUDIO_R2_DOMAIN || 'https://assets.birim.com').trim()
+
+    if (!R2_ACCOUNT_ID || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY) {
+      return res.status(500).json({
+        error: 'Cloudflare R2 konfigürasyon değişkenleri (.env.local) sunucu ortamında tanımlı değil.',
+      })
+    }
+
+    const {S3Client, PutObjectCommand} = await import('@aws-sdk/client-s3')
+    const {getSignedUrl} = await import('@aws-sdk/s3-request-presigner')
+
+    const r2Client = new S3Client({
+      region: 'auto',
+      endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+      credentials: {
+        accessKeyId: R2_ACCESS_KEY_ID,
+        secretAccessKey: R2_SECRET_ACCESS_KEY,
+      },
+    })
+
+    const safeFolder = typeof folder === 'string' && folder.trim() ? folder.trim() : 'uploads'
+    const cleanFileName = filename.trim().replace(/[^a-zA-Z0-9_.-]/g, '_')
+    const key = safeFolder.endsWith('/')
+      ? `${safeFolder}${cleanFileName}`
+      : `${safeFolder}/${cleanFileName}`
+
+    const command = new PutObjectCommand({
+      Bucket: R2_BUCKET_NAME,
+      Key: key,
+      ContentType: contentType,
+    })
+
+    const uploadUrl = await getSignedUrl(r2Client, command, {expiresIn: 900})
+    const defaultDomain = 'assets.birim.com'
+    const domainToUse = R2_DOMAIN && R2_DOMAIN !== 'undefined' ? R2_DOMAIN : defaultDomain
+    const r2Domain = domainToUse.startsWith('http') ? domainToUse : `https://${domainToUse}`
+    const finalFileUrl = `${r2Domain}/${key}`
+
+    return res.status(200).json({
+      success: true,
+      uploadUrl,
+      fileUrl: finalFileUrl,
+      key,
+    })
+  } catch (error) {
+    console.error('Local presigned-url error:', error)
+    return res.status(500).json({error: `Presigned URL oluşturulamadı: ${error.message}`})
+  }
+})
+
 // ─── 404 ──────────────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({error: `Route not found: ${req.method} ${req.path}`})
