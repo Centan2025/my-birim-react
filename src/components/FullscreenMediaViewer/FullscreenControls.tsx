@@ -40,8 +40,8 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
         <button
           type="button"
           onClick={handleClose}
-          className={`group flex items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/60 active:scale-95 shadow-lg ${
-            isMobile ? 'h-11 w-11' : 'h-14 w-14'
+          className={`group flex items-center justify-center rounded-none border border-white/80 bg-black/60 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/80 active:scale-95 shadow-xl ${
+            isMobile ? 'h-12 w-12' : 'h-14 w-14'
           }`}
           style={{
             opacity: isClosing ? 0 : isButtonVisible ? 1 : 0,
@@ -59,10 +59,10 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="0.8"
+            strokeWidth={isMobile ? '1.5' : '1.0'}
             strokeLinecap="round"
             strokeLinejoin="round"
-            className={`${isMobile ? 'h-7 w-7' : 'h-7 w-7'} transition-transform duration-300 group-hover:rotate-90`}
+            className={`${isMobile ? 'h-7 w-7' : 'h-8 w-8'} text-white transition-transform duration-300 group-hover:rotate-90`}
           >
             <path d="M18 6L6 18M6 6l12 12" />
           </svg>
@@ -87,8 +87,8 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
           <button
             type="button"
             onClick={onPrev}
-            className={`group flex items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/60 active:scale-95 shadow-lg ${
-              isMobile ? 'h-11 w-11' : 'h-14 w-14'
+            className={`group flex items-center justify-center rounded-none border border-white/80 bg-black/60 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/80 active:scale-95 shadow-xl ${
+              isMobile ? 'h-12 w-12' : 'h-14 w-14'
             }`}
             aria-label="Previous"
           >
@@ -99,10 +99,10 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="0.4"
+              strokeWidth={isMobile ? '1.5' : '0.8'}
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={`${isMobile ? 'h-5 w-5' : 'h-11 w-11'} -ml-0.5 transition-transform duration-300 group-hover:-translate-x-1`}
+              className={`${isMobile ? 'h-7 w-7' : 'h-9 w-9'} text-white -ml-0.5 transition-transform duration-300 group-hover:-translate-x-1`}
             >
               <path d="M15 18l-6-6 6-6" />
             </svg>
@@ -112,8 +112,8 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
           <button
             type="button"
             onClick={onNext}
-            className={`group flex items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/60 active:scale-95 shadow-lg ${
-              isMobile ? 'h-11 w-11' : 'h-14 w-14'
+            className={`group flex items-center justify-center rounded-none border border-white/80 bg-black/60 text-white backdrop-blur-md transition-all duration-300 hover:bg-black/80 active:scale-95 shadow-xl ${
+              isMobile ? 'h-12 w-12' : 'h-14 w-14'
             }`}
             aria-label="Next"
           >
@@ -124,10 +124,10 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              strokeWidth="0.4"
+              strokeWidth={isMobile ? '1.5' : '0.8'}
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={`${isMobile ? 'h-5 w-5' : 'h-11 w-11'} ml-0.5 transition-transform duration-300 group-hover:translate-x-1`}
+              className={`${isMobile ? 'h-7 w-7' : 'h-9 w-9'} text-white ml-0.5 transition-transform duration-300 group-hover:translate-x-1`}
             >
               <path d="M9 18l6-6-6-6" />
             </svg>
@@ -140,7 +140,7 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
         <button
           type="button"
           onClick={handleScrollToTop}
-          className={`absolute bottom-6 right-6 flex h-11 w-11 items-center justify-center rounded-none border-[0.5px] border-white/60 bg-black/40 text-white backdrop-blur-md transition-all duration-300 z-30 shadow-lg ${
+          className={`absolute bottom-6 right-6 flex h-12 w-12 items-center justify-center rounded-none border border-white/80 bg-black/60 text-white backdrop-blur-md transition-all duration-300 z-30 shadow-xl ${
             showScrollToTop
               ? 'opacity-100 translate-y-0'
               : 'opacity-0 translate-y-4 pointer-events-none'
@@ -157,10 +157,10 @@ export const FullscreenControls: React.FC<FullscreenControlsProps> = ({
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="0.4"
+            strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="h-5 w-5 -mt-0.5"
+            className="h-7 w-7 text-white -mt-0.5"
           >
             <path d="m18 15-6-6-6 6" />
           </svg>

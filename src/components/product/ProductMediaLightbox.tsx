@@ -239,45 +239,31 @@ export const ProductMediaLightbox: React.FC<ProductMediaLightboxProps> = ({
                     </button>
 
                     {type === 'image' ? (
-                      currentItem.crop || currentItem.cropMobile ? (
-                        <OptimizedImage
-                          src={url}
-                          srcMobile={
-                            (currentItem as Record<string, unknown>)['urlMobile'] as string
-                          }
-                          srcDesktop={
-                            (currentItem as Record<string, unknown>)['urlDesktop'] as string
-                          }
-                          alt={
-                            title ? (typeof title === 'string' ? title : t(title)) : 'Enlarged view'
-                          }
-                          className="max-w-full max-h-[60vh] object-contain shadow-2xl select-none pointer-events-none"
-                          loading="eager"
-                          quality={95}
-                          crop={currentItem.crop}
-                          hotspot={currentItem.hotspot}
-                          origWidth={currentItem.origWidth as number}
-                          origHeight={currentItem.origHeight as number}
-                          cropMobile={currentItem.cropMobile}
-                          hotspotMobile={currentItem.hotspotMobile}
-                          origWidthMobile={currentItem.origWidthMobile as number}
-                          origHeightMobile={currentItem.origHeightMobile as number}
-                          placeholderColor="#111111"
-                          isMirrored={currentItem.isMirrored}
-                          isMirroredMobile={currentItem.isMirroredMobile}
-                          isMirroredDesktop={currentItem.isMirroredDesktop}
-                        />
-                      ) : (
-                        <img
-                          src={url}
-                          alt={
-                            title ? (typeof title === 'string' ? title : t(title)) : 'Enlarged view'
-                          }
-                          className="max-w-[85vw] max-h-[60vh] w-auto h-auto object-contain shadow-2xl rounded-sm block select-none pointer-events-none"
-                          loading="eager"
-                          draggable={false}
-                        />
-                      )
+                      <OptimizedImage
+                        src={url}
+                        srcMobile={(currentItem as Record<string, unknown>)['urlMobile'] as string}
+                        srcDesktop={
+                          (currentItem as Record<string, unknown>)['urlDesktop'] as string
+                        }
+                        alt={
+                          title ? (typeof title === 'string' ? title : t(title)) : 'Enlarged view'
+                        }
+                        className="max-w-full max-h-[60vh] object-contain max-md:object-contain max-lg:object-contain shadow-2xl select-none pointer-events-none"
+                        loading="eager"
+                        quality={95}
+                        crop={currentItem.crop}
+                        hotspot={currentItem.hotspot}
+                        cropMobile={currentItem.cropMobile}
+                        hotspotMobile={currentItem.hotspotMobile}
+                        origWidth={currentItem.origWidth as number}
+                        origHeight={currentItem.origHeight as number}
+                        origWidthMobile={currentItem.origWidthMobile as number}
+                        origHeightMobile={currentItem.origHeightMobile as number}
+                        placeholderColor="#111111"
+                        isMirrored={currentItem.isMirrored}
+                        isMirroredMobile={currentItem.isMirroredMobile}
+                        isMirroredDesktop={currentItem.isMirroredDesktop}
+                      />
                     ) : type === 'video' ? (
                       <OptimizedVideo
                         src={url}

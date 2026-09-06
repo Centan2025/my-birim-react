@@ -49,6 +49,14 @@ const apiFetch = async (
 }
 
 export const getCurrentSessionUser = async (): Promise<User | null> => {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    const storedToken = localStorage.getItem('birim_token')
+    const storedUser = localStorage.getItem('birim_user')
+    // Token veya saklanmış oturum yoksa gereksiz yere backend isteği atıp 503 loglamaya gerek yok
+    if (!storedToken && !storedUser) {
+      return null
+    }
+  }
   if (useSanity) {
     try {
       const data = await apiFetch('me', undefined, 'GET')
